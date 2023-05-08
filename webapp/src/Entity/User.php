@@ -411,11 +411,11 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\Type('string')]
     public function getType(): ?string
     {
-        // Types allowed by the CCS Specs Contest API in order of most permissions to least
-        // Either key=>value where key is the DOMjudge role and value is the API type or
-        // only value, where both the DOMjudge role and API type are the same
-        $allowedTypes = ['admin', 'api_writer' => 'admin', 'jury' => 'judge',
-                         'api_reader' => 'admin', 'api_writer' => 'admin', 'api_source_reader' => 'judge',
+        // Types allowed by the CCS Specs Contest API in order of most permissions to least.
+        // Either key=>value where key is the DOMjudge role and value is the API account type or
+        // only value, where both the DOMjudge role and API type are the same.
+        $allowedTypes = ['admin', 'api_writer' => 'admin', 'api_reader' => 'admin',
+                         'jury' => 'judge', 'api_source_reader' => 'judge',
                          'team'];
         foreach ($allowedTypes as $role => $allowedType) {
             if (is_numeric($role)) {
