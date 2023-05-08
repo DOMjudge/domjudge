@@ -41,4 +41,8 @@
     <rule ref="PSR2.Methods.FunctionCallSignature.SpaceBeforeCloseBracket">
         <severity>0</severity>
     </rule>
+    <!-- This wastes a lot of vertical space most of the time -->
+    <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.OneParamPerLine">
+        <severity>0</severity>
+    </rule>
 </ruleset>
