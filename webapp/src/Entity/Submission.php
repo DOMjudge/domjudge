@@ -91,7 +91,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
 
     #[ORM\Column(
         nullable: true,
-        options: ['comment' => 'If this submission was imported during shadowing but had an error while doing so, the error message.']
+        options: ['comment' => 'The error message for submissions which got an error during shadow importing.']
     )]
     #[OA\Property(nullable: true)]
     #[Serializer\Expose(if: "context.getAttribute('domjudge_service').checkrole('jury')")]
