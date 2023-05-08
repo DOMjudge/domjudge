@@ -55,7 +55,7 @@ EOF;
 id: practice
 formal_name: NWERC 2020 Practice Session
 name: practice
-activation_time: '2021-03-27T09:00:00+00:00'
+activate_time: '2021-03-27T09:00:00+00:00'
 start_time: '2021-03-27T09:00:00+00:00'
 end_time: '2021-03-27T11:00:00+00:00'
 duration: 2:00:00.000
@@ -244,9 +244,9 @@ EOF;
     /**
      * @dataProvider provideNewContest
      */
-    public function testActivationTimeContestYaml(
-        string $activationTime, string $startTime, ?string $deactivationTime,
-        bool $setActivation, bool $setDeactivation
+    public function testActivateTimeContestYaml(
+        string $activateTime, string $startTime, ?string $deactivateTime,
+        bool $setActivate, bool $setDeactivate
     ): void {
         $yaml = <<<EOF
 duration: 2:00:00
@@ -262,11 +262,11 @@ problems:
     id: anothereruption
 EOF;
 
-        if ($setActivation) {
-            $yaml = "activation_time: ".$activationTime."\n".$yaml;
+        if ($setActivate) {
+            $yaml = "activate_time: ".$activateTime."\n".$yaml;
         }
-        if ($setDeactivation) {
-            $yaml = "deactivation_time: ".$deactivationTime."\n".$yaml;
+        if ($setDeactivate) {
+            $yaml = "deactivate_time: ".$deactivateTime."\n".$yaml;
         }
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
         $tempYamlFile = tempnam(sys_get_temp_dir(), "/contest-yaml-");
@@ -278,16 +278,16 @@ EOF;
 
         $now = Utils::now();
         $nowTime = Utils::printtime($now, 'Y-m-d H:i:s');
-        $activation = Utils::toEpochFloat($activationTime);
+        $activate = Utils::toEpochFloat($activateTime);
         $start = Utils::toEpochFloat($startTime);
-        
+
         self::assertIsString($cid);
         self::assertSame('New Contest to check Activation', $this->getContest($cid)->getName());
         self::assertSame($start, $this->getContest($cid)->getStarttime());
 
-        if ($setActivation) {
-            self::assertSame($activationTime, Utils::printtime($this->getContest($cid)->getActivatetime(), 'Y-m-d H:i:s'));
-            self::assertSame($activation, $this->getContest($cid)->getActivatetime());
+        if ($setActivate) {
+            self::assertSame($activateTime, Utils::printtime($this->getContest($cid)->getActivatetime(), 'Y-m-d H:i:s'));
+            self::assertSame($activate, $this->getContest($cid)->getActivatetime());
         } else {
             // Contest uploaded starts in the past
             if (Utils::printtime(Utils::now(), 'Y-m-d H:i:s')>=$startTime) {
@@ -296,8 +296,8 @@ EOF;
                 self::assertTrue($this->getContest($cid)->getActivatetime() <= $now);
             }
         }
-        if ($deactivationTime) {
-            self::assertSame($deactivationTime, Utils::printtime($this->getContest($cid)->getDeactivatetime(), 'Y-m-d H:i:s'));
+        if ($deactivateTime) {
+            self::assertSame($deactivateTime, Utils::printtime($this->getContest($cid)->getDeactivatetime(), 'Y-m-d H:i:s'));
         } else {
             self::assertNull($this->getContest($cid)->getDeactivatetime());
         }

@@ -100,7 +100,7 @@ start_time: '{$year}-01-01T08:00:00+00:00'
 end_time: '{$year}-01-01T13:00:00+00:00'
 duration: '5:00:00.000'
 penalty_time: 20
-activation_time: '{$pastYear}-01-01T08:00:00+00:00'
+activate_time: '{$pastYear}-01-01T08:00:00+00:00'
 scoreboard_freeze_time: '{$year}-01-01T12:00:00+00:00'
 scoreboard_freeze_duration: '1:00:00'
 problems:
