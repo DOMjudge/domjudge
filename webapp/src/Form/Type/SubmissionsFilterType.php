@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Team;
+use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -67,6 +68,17 @@ class SubmissionsFilterType extends AbstractType
                 ->orderBy("tc.name"),
             "attr" => ["data-filter-field" => "category-id"],
         ]);
+        $builder->add("affiliation-id", EntityType::class, [
+            "multiple" => true,
+            "label" => "Filter on affiliation(s)",
+            "class" => TeamAffiliation::class,
+            "required" => false,
+            "choice_label" => "name",
+            "query_builder" => fn(EntityRepository $er) => $er
+                ->createQueryBuilder("ta")
+                ->orderBy("ta.name"),
+            "attr" => ["data-filter-field" => "affiliation-id"],
+        ]);
 
         $teamsQueryBuilder = $this->em
             ->createQueryBuilder()
@@ -103,10 +115,10 @@ class SubmissionsFilterType extends AbstractType
             "attr" => ["data-filter-field" => "team-id"],
         ]);
 
-        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
-        $verdicts = array_keys(include $verdictsConfig);
+        $verdicts = array_keys($this->dj->getVerdicts());
         $verdicts[] = "judging";
         $verdicts[] = "queued";
+        $verdicts[] = "import-error";
         $builder->add("result", ChoiceType::class, [
             "label" => "Filter on result(s)",
             "multiple" => true,

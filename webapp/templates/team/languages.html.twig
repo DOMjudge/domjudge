@@ -1,0 +1,32 @@
+{% extends "team/base.html.twig" %}
+
+{% block title %}Allowed Languages{% endblock %}
+
+{% block content %}
+    <h1 class="mt-4 text-center">Allowed Languages</h1>
+
+        <div class="container">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-2">
+    {% for lang in languages %}
+                <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">
+                            Language <code>{{ lang.langid }}</code>
+                        </h2>
+                    </div>
+                    {% if lang.compilerVersion and lang.compilerVersionCommand %}
+                        <pre class="output_text" style="background-color: rgba(0,121,54,.1);">$ {{ lang.compilerVersionCommand }}</pre>
+                        <pre class="output_text">{{ lang.compilerVersion }}</pre>
+                    {% endif %}
+                    {% if lang.runnerVersion and lang.runnerVersionCommand %}
+                        <pre class="output_text" style="background-color: rgba(0,121,54,.1);">$ {{ lang.runnerVersionCommand }}</pre>
+                        <pre class="output_text">{{ lang.runnerVersion }}</pre>
+                    {% endif %}
+
+                </div>
+                </div>
+    {% endfor %}
+            </div>
+        </div>
+{% endblock %}

@@ -105,11 +105,6 @@ class Judgehost
         return $this;
     }
 
-    public function removeJudgeTask(JudgeTask $judgeTask): void
-    {
-        $this->judgetasks->removeElement($judgeTask);
-    }
-
     public function getJudgeTasks(): Collection
     {
         return $this->judgetasks;

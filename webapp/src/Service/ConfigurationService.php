@@ -54,7 +54,17 @@ class ConfigurationService
             throw new InvalidArgumentException("Configuration variable '$name' not found.");
         }
 
-        return $this->getDbValues()[$name] ?? $spec['default_value'];
+        $value = $this->getDbValues()[$name] ?? $spec['default_value'];
+
+        if (isset($spec['enum_class'])) {
+            if (!class_exists($spec['enum_class'])) {
+                throw new InvalidArgumentException("Enum class '$spec[enum_class]' not found.");
+            }
+
+            return call_user_func($spec['enum_class'] . '::from', $value);
+        }
+
+        return $value;
     }
 
     /**
@@ -199,6 +209,7 @@ EOF;
                     break;
 
                 case 'string':
+                case 'enum':
                     $optionToSet->setValue($val);
                     break;
 
@@ -331,6 +342,18 @@ EOF;
                 if ($item['name'] === 'results_remap') {
                     $item['value_options'] = $item['key_options'];
                 }
+        }
+
+        if ($item['type'] === 'enum') {
+            $enumClass = $item['enum_class'];
+            $cases = call_user_func($enumClass . '::cases');
+            foreach ($cases as $case) {
+                if (method_exists($case, 'getConfigDescription')) {
+                    $item['options'][$case->value] = $case->getConfigDescription();
+                } else {
+                    $item['options'][$case->value] = $case->name;
+                }
+            }
         }
         return $item;
     }

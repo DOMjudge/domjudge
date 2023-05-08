@@ -54,7 +54,7 @@
         {# Display a list of teams by group. This is targeted for World Finals, but looks nice anyway #}
         {% for affiliationGroupRow in groupedAffiliations %}
             <br/><br/>
-            <div class="card-deck">
+            <div class="col-3">
                 {% for category, affiliations in affiliationGroupRow %}
                     <div class="card" style="font-family: Roboto, sans-serif;">
                         <div class="card-header">{{ category }}</div>
@@ -84,6 +84,12 @@
         {% endfor %}
     {% else %}
 
+        {% if show_balloon_public_message is defined and show_balloon_public_message %}
+            <div class="alert alert-warning" role="alert" style="font-size: 80%;">
+                You are seeing the public scoreboard, since you are a balloon runner.
+            </div>
+        {% endif %}
+
         {% if scoreboard.freezeData.showFrozen(false) %}
             <div class="alert alert-warning" role="alert" style="font-size: 80%;">
                 {% if jury %}
@@ -101,7 +107,7 @@
              filterValues.countries | length > 1 or
              filterValues.categories | length > 1) %}
 	<div class="dropdown">
-            <button class="btn btn-outline-secondary btn-sm m-2 dropdown-toggle" data-toggle="dropdown"
+            <button class="btn btn-outline-secondary btn-sm m-2 dropdown-toggle" data-bs-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false" id="filter-toggle">
                 <i class="fas fa-filter"></i>
                 {% if scoreFilter.filteredOn is empty %}
@@ -114,11 +120,11 @@
             <div class="dropdown-menu" aria-labelledby="filter-toggle">
                 <form method="get">
                     <div class="filterbox">
-                        <div class="form-row">
+                        <div class="row mb-3">
                         {% if filterValues.affiliations | length > 1 %}
-                            <div class="form-group">
+                            <div class="col">
                             <label for="scoreboard-filter-affil">Affiliations</label>
-                            <select id="scoreboard-filter-affil" class="form-control mr-2" multiple size="8" name="affiliations[]">
+                            <select id="scoreboard-filter-affil" class="form-control me-2" multiple size="8" name="affiliations[]">
                                 {% for affiliationId, affiliation in filterValues.affiliations %}
                                     <option {% if affiliationId in scoreFilter.affiliations %}selected{% endif %}
                                             value="{{ affiliationId }}">{{ affiliation }}</option>
@@ -127,9 +133,9 @@
                             </div>
                         {% endif %}
                         {% if filterValues.countries | length > 1 %}
-                            <div class="form-group">
+                            <div class="col">
                             <label for="scoreboard-filter-country">Countries</label>
-                            <select id="scoreboard-filter-country" class="form-control mr-2" multiple size="8" name="countries[]">
+                            <select id="scoreboard-filter-country" class="form-control me-2" multiple size="8" name="countries[]">
                                 {% for country in filterValues.countries %}
                                     <option {% if country in scoreFilter.countries %}selected{% endif %}
                                             value="{{ country }}">{{ alpha3_countries[country] }}</option>
@@ -138,9 +144,9 @@
                             </div>
                         {% endif %}
                         {% if filterValues.categories | length > 1 %}
-                            <div class="form-group">
+                            <div class="col">
                             <label for="scoreboard-filter-category">Categories</label>
-                            <select id="scoreboard-filter-category" class="form-control mr-2" multiple size="8" name="categories[]">
+                            <select id="scoreboard-filter-category" class="form-control me-2" multiple size="8" name="categories[]">
                                 {% for categoryId, category in filterValues.categories %}
                                     <option {% if categoryId in scoreFilter.categories %}selected{% endif %}
                                             value="{{ categoryId }}">{{ category }}</option>

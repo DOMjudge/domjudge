@@ -78,16 +78,16 @@
                         {{ testcase.md5sumInput }}
                     </td>
                     {% if allowEdit %}
-                        <td><div class="custom-file">
-                            <input type="file" class="custom-file-input" name="update_input[{{ testcase.rank }}]" id="update_input_{{testcase.rank}}">
-                            <label class="custom-file-label text-truncate text-muted" for="update_input_{{testcase.rank}}">new input file</label>
+                        <td><div class="input-group">
+                            <label class="form-control text-truncate" for="update_input_{{testcase.rank}}" id="update_input_label_{{testcase.rank}}">new input file</label>
+                            <input type="file" class="d-none custom-file-input" name="update_input[{{ testcase.rank }}]" id="update_input_{{testcase.rank}}">
                         </div></td>
                     {% endif %}
                     <td class="testdesc">
                         <span class="testcase-description">{{ testcase.description(true) | descriptionExpand }}</span>
                         {% if allowEdit %}
                             <textarea class="d-none form-control testcase-description-field" name="description[{{ testcase.rank }}]">{{ testcase.description(true) }}</textarea>
-                            <button type="button" class="float-right testcase-edit-description btn btn-secondary btn-sm">Edit</button>
+                            <button type="button" class="float-end testcase-edit-description btn btn-secondary btn-sm">Edit</button>
                         {% endif %}
                     </td>
                 </tr>
@@ -104,9 +104,9 @@
                         {{ testcase.md5sumOutput }}
                     </td>
                     {% if allowEdit %}
-                        <td><div class="custom-file">
-                            <input type="file" class="custom-file-input" name="update_output[{{ testcase.rank }}]" id="update_output_{{testcase.rank}}">
-                            <label class="custom-file-label text-truncate text-muted" for="update_output_{{testcase.rank}}">new output file</label>
+                        <td><div class="input-group">
+                            <label class="form-control text-truncate" for="update_output_{{testcase.rank}}" id="update_output_label_{{testcase.rank}}">new output file</label>
+                            <input type="file" class="d-none custom-file-input" name="update_output[{{ testcase.rank }}]" id="update_output_{{testcase.rank}}">
                         </div></td>
                     {% endif %}
                     <td class="testimage">
@@ -116,16 +116,16 @@
                             </a>
                             {% if allowEdit %}
                             &nbsp;
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" name="update_image[{{ testcase.rank }}]" id="update_image_{{testcase.rank}}">
-                                <label class="custom-file-label text-truncate text-muted" for="update_image_{{testcase.rank}}">replace image</label>
+                            <div class="input-group">
+                                <label class="form-control text-truncate" for="update_image_{{testcase.rank}}" id="update_imapge_label_{{testcase.rank}}">replace image</label>
+                                <input type="file" class="d-none custom-file-input" name="update_image[{{ testcase.rank }}]" id="update_image_{{testcase.rank}}" accept="image/*">
                             </div>
                             {% endif %}
                         {% else %}
                             {% if allowEdit %}
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" name="update_image[{{ testcase.rank }}]" id="update_image_{{testcase.rank}}">
-                                <label class="custom-file-label text-truncate text-muted" for="update_image_{{testcase.rank}}">add an image</label>
+                            <div class="input-group">
+                                <label class="form-control text-truncate" for="update_image_{{testcase.rank}}" id="update_imapge_label_{{testcase.rank}}">add an image</label>
+                                <input type="file" class="d-none custom-file-input" name="update_image[{{ testcase.rank }}]" id="update_image_{{testcase.rank}}" accept="image/*">
                             </div>
                             {% else %}
                             <span class="nodata">No image</span>
@@ -141,50 +141,45 @@
     {% if allowEdit %}
         <h2>Create new testcase</h2>
 
-        <div class="form-row">
-            <div class="form-group col-sm-4">
-                <div class="custom-file">
-                    <input type="file" class="custom-file-input" name="add_input" id="add_input">
-                    <label class="custom-file-label text-truncate text-muted" for="add_input">Input testdata</label>
+        <div class="row mb-2">
+            <label class="col-sm-2 col-form-label" for="add_input">Input testdata</label>
+            <div class="col-sm-4">
+                <input type="file" class="form-control" name="add_input" id="add_input">
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <label class="col-sm-2 col-form-label" for="add_output">Output testdata</label>
+            <div class="col-sm-4">
+                <input type="file" class="form-control" name="add_output" id="add_output">
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-4">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="add_sample" name="add_sample">
+                    <label class="form-check-label" for="add_sample">Sample testcase</label>
                 </div>
             </div>
         </div>
 
-        <div class="form-row">
-            <div class="form-group col-sm-4">
-                <div class="custom-file">
-                    <input type="file" class="custom-file-input" name="add_output" id="add_output">
-                    <label class="custom-file-label text-truncate text-muted" for="add_output">Output testdata</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group col-sm-4">
-                <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="add_sample" name="add_sample">
-                    <label class="custom-control-label" for="add_sample">Sample testcase</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group col-sm-4">
-                <label for="add_desc">Description</label>
+        <div class="row mb-2">
+            <label for="add_desc" class="col-sm-2 col-form-label">Description</label>
+            <div class="col-sm-4">
                 <textarea name="add_desc" id="add_desc" rows="5" class="form-control"></textarea>
             </div>
         </div>
 
-        <div class="form-row">
-            <div class="form-group col-sm-4">
-                <div class="custom-file">
-                    <input type="file" class="custom-file-input" name="add_image" id="add_image">
-                    <label class="custom-file-label text-truncate text-muted" for="add_image">Image</label>
-                </div>
+        <div class="row mb-2">
+            <label class="col-sm-2 col-form-label" for="add_image">Image</label>
+            <div class="col-sm-4">
+                <input type="file" class="form-control" accept="image/*" name="add_image" id="add_image">
             </div>
         </div>
 
-        <input type="submit" class="btn btn-primary" value="Submit all changes">
+        <input type="submit" class="btn btn-primary mt-3" value="Submit all changes">
     {% endif %}
 
     </form>
@@ -206,6 +201,10 @@
                     $descriptionInput.removeClass('d-none');
                     $button.text('Cancel');
                 }
+            });
+            $('.custom-file-input').change(function(e) {
+                let fileName = (e.target.files.length > 0) ? e.target.files[0].name : 'new file';
+                $(this).prev().text(fileName);
             });
         });
     </script>

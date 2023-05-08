@@ -86,7 +86,7 @@ class TeamController extends BaseController
 
         $table_fields = [
             'teamid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
-            'icpcid' => ['title' => 'ICPC ID', 'sort' => true,],
+            'label' => ['title' => 'label', 'sort' => true,],
             'effective_name' => ['title' => 'name', 'sort' => true,],
             'category' => ['title' => 'category', 'sort' => true,],
             'affiliation' => ['title' => 'affiliation', 'sort' => true,],
@@ -221,7 +221,6 @@ class TeamController extends BaseController
         return $this->render('jury/teams.html.twig', [
             'teams' => $teams_table,
             'table_fields' => $table_fields,
-            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 3 : 1,
         ]);
     }
 

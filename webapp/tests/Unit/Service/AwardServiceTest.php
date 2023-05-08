@@ -100,7 +100,7 @@ class AwardServiceTest extends KernelTestCase
         // H    | x  x  x  x
         // I    | x  x  x  x
         //
-        // THis means A is the overall winner, will get a gold medal and is the winner
+        // This means A is the overall winner, will get a gold medal and is the winner
         // of category A. It is also first to solve problem A.
         // B is second, so it also gets a gold medal. It is also first to solve problem B and C
         // C scored the exact same as B, so it also gets the same medals

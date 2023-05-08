@@ -22,7 +22,7 @@ class ImportExportControllerTest extends BaseTestCase
         foreach ($sections as $section) {
             self::assertSelectorExists(sprintf('h2:contains("%s")', $section));
         }
-        self::assertSelectorExists('small:contains(\'Create a "Web Services Token"\')');
+        self::assertSelectorExists('div.help-text:contains(\'Create a "Web Services Token"\')');
 
         // We've reached the end of the page.
         self::assertSelectorExists('li:contains("results.tsv")');
@@ -91,12 +91,17 @@ class ImportExportControllerTest extends BaseTestCase
     public function provideContestYamlContents(): Generator
     {
         $year = date('Y')+1;
+        $pastYear = date('Y');
         $yaml =<<<HEREDOC
+id: demo
 formal_name: 'Demo contest'
 name: demo
 start_time: '{$year}-01-01T08:00:00+00:00'
+end_time: '{$year}-01-01T13:00:00+00:00'
 duration: '5:00:00.000'
 penalty_time: 20
+activate_time: '{$pastYear}-01-01T08:00:00+00:00'
+scoreboard_freeze_time: '{$year}-01-01T12:00:00+00:00'
 scoreboard_freeze_duration: '1:00:00'
 problems:
     -

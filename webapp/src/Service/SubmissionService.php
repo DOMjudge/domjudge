@@ -76,8 +76,12 @@ class SubmissionService
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function getSubmissionList(array $contests, array $restrictions, int $limit = 0): array
-    {
+    public function getSubmissionList(
+        array $contests,
+        array $restrictions,
+        int $limit = 0,
+        bool $showShadowUnverified = false
+    ): array {
         if (empty($contests)) {
             return [[], []];
         }
@@ -224,7 +228,11 @@ class SubmissionService
 
         if (isset($restrictions['result'])) {
             if ($restrictions['result'] === 'judging') {
-                $queryBuilder->andWhere('j.result IS NULL OR j.endtime IS NULL');
+                $queryBuilder
+                    ->andWhere('s.importError IS NULL')
+                    ->andWhere('j.result IS NULL OR j.endtime IS NULL');
+            } elseif ($restrictions['result'] === 'import-error') {
+                $queryBuilder->andWhere('s.importError IS NOT NULL');
             } else {
                 $queryBuilder
                     ->andWhere('j.result = :result')
@@ -262,6 +270,10 @@ class SubmissionService
             'queued' => 'j.result IS NULL AND j.starttime IS NULL',
             'judging' => 'j.starttime IS NOT NULL AND j.endtime IS NULL'
         ];
+        if ($showShadowUnverified) {
+            $countQueryExtras['shadowUnverified'] = 'ej.verified = 0 AND ej.result IS NOT NULL AND (ej.result != j.result OR j.result IS NULL)';
+            unset($countQueryExtras['unverified']);
+        }
         foreach ($countQueryExtras as $count => $countQueryExtra) {
             $countQueryBuilder = (clone $queryBuilder)->select('COUNT(s.submitid) AS cnt');
             if (!empty($countQueryExtra)) {
@@ -347,7 +359,8 @@ class SubmissionService
         ?string $entryPoint = null,
         ?string $externalId = null,
         ?float $submitTime = null,
-        ?string &$message = null
+        ?string &$message = null,
+        bool $forceImportInvalid = false
     ): ?Submission {
         if (!$team instanceof Team) {
             $team = $this->em->getRepository(Team::class)->find($team);
@@ -388,12 +401,23 @@ class SubmissionService
             $submitTime = Utils::now();
         }
 
+        $importError = null;
+
         if (count($files) == 0) {
-            throw new BadRequestHttpException("No files specified.");
+            $message = "No files specified.";
+            if ($forceImportInvalid) {
+                $importError = $message;
+            } else {
+                throw new BadRequestHttpException($message);
+            }
         }
         if (count($files) > $this->config->get('sourcefiles_limit')) {
             $message = "Tried to submit more than the allowed number of source files.";
-            return null;
+            if ($forceImportInvalid) {
+                $importError = $message;
+            } else {
+                return null;
+            }
         }
 
         $filenames = [];
@@ -407,7 +431,11 @@ class SubmissionService
 
         if (count($files) != count($filenames)) {
             $message = "Duplicate filenames detected.";
-            return null;
+            if ($forceImportInvalid) {
+                $importError = $message;
+            } else {
+                return null;
+            }
         }
 
         $sourceSize = $this->config->get('sourcesize_limit');
@@ -429,7 +457,11 @@ class SubmissionService
 
         if ($language->getRequireEntryPoint() && empty($entryPoint)) {
             $message = sprintf("Entry point required for '%s' but none given.", $language->getLangid());
-            return null;
+            if ($forceImportInvalid) {
+                $importError = $message;
+            } else {
+                return null;
+            }
         }
 
         if ($this->dj->checkrole('jury') && $entryPoint == '__auto__') {
@@ -439,7 +471,11 @@ class SubmissionService
 
         if (!empty($entryPoint) && !preg_match(self::FILENAME_REGEX, $entryPoint)) {
             $message = sprintf("Entry point '%s' contains illegal characters.", $entryPoint);
-            return null;
+            if ($forceImportInvalid) {
+                $importError = $message;
+            } else {
+                return null;
+            }
         }
 
         if (!$this->dj->checkrole('jury') && !$team->getEnabled()) {
@@ -476,7 +512,11 @@ class SubmissionService
             }
             if (!preg_match(self::FILENAME_REGEX, $file->getClientOriginalName())) {
                 $message = sprintf("Illegal filename '%s'.", $file->getClientOriginalName());
-                return null;
+                if ($forceImportInvalid) {
+                    $importError = $message;
+                } else {
+                    return null;
+                }
             }
             $totalSize += $file->getSize();
 
@@ -501,12 +541,20 @@ class SubmissionService
                 "extensions for %s (allowed: %s)",
                 $language->getName(), implode(', ', $language->getExtensions())
             );
-            return null;
+            if ($forceImportInvalid) {
+                $importError = $message;
+            } else {
+                return null;
+            }
         }
 
         if ($totalSize > $sourceSize * 1024) {
             $message = sprintf("Submission file(s) are larger than %d kB.", $sourceSize);
-            return null;
+            if ($forceImportInvalid) {
+                $importError = $message;
+            } else {
+                return null;
+            }
         }
 
         $this->logger->info('Submission input verified');
@@ -545,7 +593,8 @@ class SubmissionService
             ->setSubmittime($submitTime)
             ->setOriginalSubmission($originalSubmission)
             ->setEntryPoint($entryPoint)
-            ->setExternalid($externalId);
+            ->setExternalid($externalId)
+            ->setImportError($importError);
 
         // Add expected results from source. We only do this for jury submissions
         // to prevent accidental auto-verification of team submissions.
@@ -564,19 +613,21 @@ class SubmissionService
             $this->em->persist($submissionFile);
         }
 
-        $judging = new Judging();
-        $judging
-            ->setContest($contest)
-            ->setSubmission($submission);
-        if ($juryMember !== null) {
-            $judging->setJuryMember($juryMember);
-        }
-        $this->em->persist($judging);
-        // This is so that we can use the submitid/judgingid below.
-        $this->em->flush();
+        if (!$importError) {
+            $judging = new Judging();
+            $judging
+                ->setContest($contest)
+                ->setSubmission($submission);
+            if ($juryMember !== null) {
+                $judging->setJuryMember($juryMember);
+            }
+            $this->em->persist($judging);
+            // This is so that we can use the submitid/judgingid below.
+            $this->em->flush();
 
-        $this->dj->maybeCreateJudgeTasks($judging,
-            $source === 'problem import' ? JudgeTask::PRIORITY_LOW : JudgeTask::PRIORITY_DEFAULT);
+            $this->dj->maybeCreateJudgeTasks($judging,
+                $source === 'problem import' ? JudgeTask::PRIORITY_LOW : JudgeTask::PRIORITY_DEFAULT);
+        }
 
         $this->em->wrapInTransaction(function () use ($contest, $submission) {
             $this->em->flush();
@@ -590,9 +641,9 @@ class SubmissionService
         /** @var Team $team */
         /** @var ContestProblem $problem */
         $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
-        $contest = $this->em->getRepository(Contest::class)->find($contest->getCid());
-        $team    = $this->em->getRepository(Team::class)->find($team->getTeamid());
-        $problem = $this->em->getRepository(ContestProblem::class)->find([
+        $contest    = $this->em->getRepository(Contest::class)->find($contest->getCid());
+        $team       = $this->em->getRepository(Team::class)->find($team->getTeamid());
+        $problem    = $this->em->getRepository(ContestProblem::class)->find([
             'problem' => $problem->getProblem(),
             'contest' => $problem->getContest(),
         ]);

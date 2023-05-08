@@ -97,7 +97,7 @@
         <ul class="nav nav-tabs source-tab-nav" role="tablist">
             {%- for idx, filename in filenames %}
                 <li class="nav-item">
-                    <a class="nav-link {% if (selected is null and loop.first) or selected == idx %}active{% endif %}" data-toggle="tab"
+                    <a class="nav-link {% if (selected is null and loop.first) or selected == idx %}active{% endif %}" data-bs-toggle="tab"
                        href="#source-{{ idx }}" role="tab"><code>{{ filename }}</code>{%  if (executableBits[idx]) %} <sub>x-bit</sub>{% endif %}</a>
                 </li>
             {%- endfor %}
@@ -123,7 +123,7 @@
                     {{ files[idx] | codeEditor(idx, null, is_granted('ROLE_ADMIN'), 'form_source' ~ idx, aceFilenames[idx]) }}
                     <script>
                         $(function () {
-                            $('#form_source{{ idx }}').closest('.form-group').hide();
+                            $('#form_source{{ idx }}').closest('div.mb-3').hide();
                         });
                     </script>
                 </div>

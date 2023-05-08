@@ -259,6 +259,11 @@
             default_value: true
             public: true
             description: Show submission and problem statistics on the team and public pages.
+        -   name: show_language_versions
+            type: bool
+            default_value: false
+            public: true
+            description: Show canonical compiler and runner version on the team pages.
 -   category: Authentication
     description: Options related to authentication.
     items:
@@ -286,14 +291,11 @@
             description: If set, enable teams and jury to send source code to this command. See admin manual for allowed arguments.
             docdescription: See :ref:`printing` for more information.
         -   name: event_feed_format
-            type: int
-            default_value: 1
+            type: enum
+            default_value: 2022-07
+            enum_class: App\Utils\EventFeedFormat
             public: false
             description: Format of the event feed to use. See [current draft](https://ccs-specs.icpc.io/draft/contest_api#event-feed) and [versions available](https://ccs-specs.icpc.io/).
-            options:
-                0: Legacy format in use until the `2020-03` version
-                1: New format in use since the `2022-07` version
-                # Note: there is also a `2021-11` version of the event feed, but this has never been used so we will not implement it
         -   name: data_source
             type: int
             default_value: 0
@@ -304,6 +306,13 @@
                 1: configuration data external
                 2: configuration and live data external
             docdescription: See :doc:`the chapter on running DOMjudge as a shadow system<shadow>` for more information.
+        -   name: external_judgement_types
+            type: array_keyval
+            key_placeholder: ID
+            value_placeholder: Name
+            default_value: []
+            public: true
+            description: List of additional judgement types as reported by the external CCS. All assumed to give a penalty.
         -   name: external_ccs_submission_url
             type: string
             default_value: ""
@@ -321,3 +330,8 @@
             default_value: 120
             public: false
             description: Time in seconds after an external contest source reader last checked in before showing its status as `critical`.
+        -   name: adminer_enabled
+            type: bool
+            default_value: false
+            public: false
+            description: Is the Adminer Database Editor enabled?

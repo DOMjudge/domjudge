@@ -29,17 +29,14 @@ final class Version20191031203138 extends AbstractMigration implements Container
 
     public function up(Schema $schema): void
     {
-        $em = $this->container->get('doctrine')->getManager();
-        /** @var Language $python2 */
-        $python2 = $em->getRepository(Language::class)->find('py2');
-        /** @var Language $python3 */
-        $python3 = $em->getRepository(Language::class)->find('py3');
-        if ($python2 === null ||
-            $python3 === null ||
-            $python2->getAllowSubmit() ||
-            $python3->getAllowSubmit() ||
-            $python2->getExtensions() !== ['py2', 'py'] ||
-            $python3->getExtensions() !== ['py3']) {
+        $python2 = $this->connection->fetchAssociative('SELECT * FROM language WHERE langid = :py2', ['py2' => 'py2']);
+        $python3 = $this->connection->fetchAssociative('SELECT * FROM language WHERE langid = :py3', ['py3' => 'py3']);
+        if ($python2 === false ||
+            $python3 === false ||
+            $python2['allow_submit'] ||
+            $python3['allow_submit'] ||
+            json_decode($python2['extensions'], true) !== ['py2', 'py'] ||
+            json_decode($python3['extensions'], true) !== ['py3']) {
             return;
         }
 
@@ -49,19 +46,15 @@ final class Version20191031203138 extends AbstractMigration implements Container
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $em = $this->container->get('doctrine')->getManager();
-        /** @var Language $python2 */
-        $python2 = $em->getRepository(Language::class)->find('py2');
-        /** @var Language $python3 */
-        $python3 = $em->getRepository(Language::class)->find('py3');
+        $python2 = $this->connection->fetchAssociative('SELECT * FROM language WHERE langid = :py2', ['py2' => 'py2']);
+        $python3 = $this->connection->fetchAssociative('SELECT * FROM language WHERE langid = :py3', ['py3' => 'py3']);
 
-        if ($python2 === null ||
-            $python3 === null ||
-            $python2->getAllowSubmit() ||
-            $python3->getAllowSubmit() ||
-            $python2->getExtensions() !== ['py2', 'py'] ||
-            $python3->getExtensions() !== ['py3']) {
+        if ($python2 === false ||
+            $python3 === false ||
+            $python2['allow_submit'] ||
+            $python3['allow_submit'] ||
+            json_decode($python2['extensions'], true) !== ['py2'] ||
+            json_decode($python3['extensions'], true) !== ['py3', 'py']) {
             return;
         }
 

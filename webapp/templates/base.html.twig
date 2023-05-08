@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset("css/bootstrap.min.css") }}">
     <link rel="stylesheet" href="{{ asset("css/fontawesome-all.min.css") }}">
     <script src="{{ asset("js/jquery.min.js") }}"></script>
+    <script src="{{ asset("js/jquery.debounce.min.js") }}"></script>
     <script src="{{ asset("js/bootstrap.bundle.min.js") }}"></script>
 
     <script src="{{ asset("js/domjudge.js") }}"></script>
@@ -44,17 +45,8 @@
     {% if app.request %}
         var domjudge_base_url = "{{ app.request.getBaseURL() }}";
     {% endif %}
+    var markdownPreviewUrl = "{{ path('markdown_preview') }}";
     $(function () {
-        $('body').on('change', '.custom-file-input', function () {
-            var files = this.files;
-            var fileNames = [];
-            for (var i = 0; i < files.length; i++) {
-                fileNames.push(files.item(i).name);
-            }
-            $(this).next('.custom-file-label').html(fileNames.join(", "));
-            $(this).next('.custom-file-label').removeClass('text-muted');
-        });
-
         /* toggle refresh if set */
         {% if refresh is defined and refresh %}
         $('#refresh-navitem').on('click', function () {

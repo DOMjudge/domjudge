@@ -360,7 +360,6 @@ class ContestController extends BaseController
             'upcoming_contest' => $upcomingContest,
             'contests_table' => $contests_table,
             'table_fields' => $table_fields,
-            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
         ]);
     }
 
@@ -402,7 +401,7 @@ class ContestController extends BaseController
         $problems = $this->em->createQueryBuilder()
             ->from(ContestProblem::class, 'cp')
             ->join('cp.problem', 'p')
-            ->select('cp', 'partial p.{probid,externalid,name,timelimit,memlimit}')
+            ->select('cp', 'partial p.{probid,externalid,name,timelimit,memlimit,problemtext_type}')
             ->andWhere('cp.contest = :contest')
             ->setParameter('contest', $contest)
             ->orderBy('cp.shortname')

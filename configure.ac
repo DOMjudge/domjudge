@@ -65,7 +65,7 @@ AC_ARG_WITH([domjudge-user], [AS_HELP_STRING([--with-domjudge-user=USER],
 [User that owns password files (default: current user).])], [], [])
 
 if test "x$with_domjudge_user" = x; then
-	user=m4_esyscmd([id -un])
+	user="$(id -un)"
 	# Check and warn if running as root (without explicitly setting it):
 	if test "x$user" = xroot; then
 		AC_MSG_ERROR([installing/running as root is STRONGLY DISCOURAGED, use --with-domjudge-user=root to override.])
@@ -115,6 +115,13 @@ if test "x$with_runuser" = x; then
 else
 	AC_SUBST(RUNUSER,$with_runuser)
 	AC_MSG_RESULT($RUNUSER)
+fi
+
+if test "x${DOMJUDGE_USER#"$RUNUSER"}" != "x$DOMJUDGE_USER" ; then
+	AC_MSG_ERROR([domjudge_user '$DOMJUDGE_USER' cannot match runuser '$RUNUSER'.])
+fi
+if test "x$RUNUSER" = "xroot" ; then
+	AC_MSG_ERROR([runuser cannot be root.])
 fi
 
 AC_MSG_CHECKING([rungroup])

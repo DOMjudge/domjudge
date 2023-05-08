@@ -87,7 +87,7 @@
 
     <h3>All available contests</h3>
 
-    {{ macros.table(contests_table, table_fields, num_actions) }}
+    {{ macros.table(contests_table, table_fields) }}
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>

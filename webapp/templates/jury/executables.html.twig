@@ -12,7 +12,7 @@
 
     <h1>Executables</h1>
 
-    {{ macros.table(executables, table_fields, num_actions, {'ordering': 'false'}) }}
+    {{ macros.table(executables, table_fields, {'ordering': 'false'}) }}
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>

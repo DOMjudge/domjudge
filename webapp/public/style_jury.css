@@ -70,6 +70,7 @@ a.collapse { color: black; text-decoration: none; }
 .diff-add        { color: green; }
 .diff-del        { color: red; }
 .diff-changed    { color: darkorange; }
+.diff-endline    { font-weight: bold; }
 .file-diff-table { width: auto; }
 .file-diff-table tr th { padding-right: 10px; }
 

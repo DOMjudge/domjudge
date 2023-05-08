@@ -169,22 +169,19 @@
     <h2 class="mt-4">Details</h2>
 
     <div class="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
-        <div class="btn-group btn-group-toggle btn-group-sm input-group-sm" data-toggle="buttons">
-            <div class="input-group-prepend">
-                <div class="input-group-text listtoggles">Show:</div>
-            </div>
+        <div class="btn-group btn-group-sm mb-3" role="group">
+            <span class="input-group-text listtoggles">Show:</span>
             {%- for idx, type in viewTypes %}
-
-                <label class="btn btn-secondary {% if idx == view %}active{% endif %}">
-                    <input type="radio" name="viewtype" autocomplete="off" value="{{ type }}"
-                           {% if idx == view %}checked{% endif %}> {{ type }}
-                </label>
+                <input type="radio" autocomplete="off" class="btn-check"
+                    name="viewtype" id="viewtype{{ idx }}" value="{{ type }}"
+                    {% if idx == view %}checked{% endif %}>
+                <label class="btn btn-secondary" for="viewtype{{ idx }}">{{ type }}</label>
             {%- endfor %}
-        </div>&nbsp;
+        </div>
         {% if rejudging.repeat %}
-            <div class="btn-group-toggle btn-group-sm" data-toggle="buttons">
-                <label class="btn btn-outline-secondary {% if showStatistics %}active{% endif %}">
-                    <input type="checkbox" id="statistics-toggle" {% if showStatistics %}checked{% endif %} autocomplete="off">
+            <div class="btn-group btn-group-sm" role="group">
+                <input type="checkbox" class="btn-check" id="statistics-toggle" {% if showStatistics %}checked{% endif %} autocomplete="off">
+                <label for="statistics-toggle" class="btn btn-outline-secondary">
                     <i class="fas fa-list-ol"></i> Statistics
                 </label>
             </div>
@@ -193,8 +190,8 @@
 
     <form action="{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid}) }}" method="get">
         <input type="hidden" name="view" value="{{ viewTypes[view] }}"/>
-        <div class="form-row">
-            <div class="form-group col-md-4">
+        <div class="row mb-3">
+            <div class="col-md-4">
                 <label for="oldverdict">Old verdict</label>
                 <select style="width: 100%" class="select2 form-control" name="oldverdict" id="oldverdict">
                     <option value="all" {% if oldverdict == 'all' %}selected{% endif %}>all</option>
@@ -206,7 +203,7 @@
 
                 </select>
             </div>
-            <div class="form-group col-md-4">
+            <div class="col-md-4">
                 <label for="newverdict">New verdict</label>
                 <select style="width: 100%" class="select2 form-control" name="newverdict" id="newverdict">
                     <option value="all" {% if newverdict == 'all' %}selected{% endif %}>all</option>
@@ -218,11 +215,11 @@
 
                 </select>
             </div>
-            <div class="form-group col-md-2">
+            <div class="col-md-2">
                 <label>&nbsp;</label>
                 <input class="btn btn-primary form-control" type="submit" value="Filter"/>
             </div>
-            <div class="form-group col-md-2">
+            <div class="col-md-2">
                 <label>&nbsp;</label>
                 <a href="{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: viewTypes[view]}) }}"
                    class="btn btn-secondary form-control">Clear</a>

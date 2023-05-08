@@ -16,6 +16,7 @@ use App\Utils\Utils;
 use Collator;
 use DateTime;
 use DateTimeImmutable;
+use DateTimeInterface;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -47,19 +48,34 @@ class ImportExportService
         // We expect contest.yaml and problemset.yaml combined into one file here.
 
         $data = [
+            'id' => $contest->getExternalid(),
             'formal_name' => $contest->getName(),
             'name' => $contest->getShortname(),
             'start_time' => Utils::absTime($contest->getStarttime(), true),
+            'end_time' => Utils::absTime($contest->getEndtime(), true),
             'duration' => Utils::relTime($contest->getContestTime((float)$contest->getEndtime())),
             'penalty_time' => $this->config->get('penalty_time'),
+            'activate_time' => Utils::absTime($contest->getActivatetime(), true),
         ];
         if ($warnMsg = $contest->getWarningMessage()) {
             $data['warning_message'] = $warnMsg;
         }
         if ($contest->getFreezetime() !== null) {
+            $data['scoreboard_freeze_time'] = Utils::absTime($contest->getFreezetime(), true);
             $data['scoreboard_freeze_duration'] = Utils::relTime(
                 $contest->getContestTime((float)$contest->getEndtime()) - $contest->getContestTime((float)$contest->getFreezetime()),
-                true);
+                true,
+            );
+            if ($contest->getUnfreezetime() !== null) {
+                $data['scoreboard_thaw_time'] = Utils::absTime($contest->getUnfreezetime(), true);
+            }
+        }
+        if ($contest->getFinalizetime() !== null) {
+            $data['finalize_time'] = Utils::absTime($contest->getFinalizetime(), true);
+        }
+
+        if ($contest->getDeactivatetime() !== null) {
+            $data['deactivate_time'] = Utils::absTime($contest->getDeactivatetime(), true);
         }
 
         if ($includeProblems) {
@@ -83,15 +99,55 @@ class ImportExportService
         return $data;
     }
 
-    public function importContestData($data, ?string &$message = null, string &$cid = null): bool
+    /**
+     * Finds the first set field from $fields in $data and parse it as a date.
+     *
+     * To verify that everything works as expected the $errorMessage needs to be checked
+     * for parsing errors.
+     */
+    protected function convertImportedTime(array $fields, array $data, ?string &$errorMessage = null): ?DateTimeImmutable
+    {
+        $timeValue = null;
+        $usedField = null;
+        foreach ($fields as $field) {
+            $timeValue = $data[$field] ?? null;
+            $usedField = $field;
+            // We need to check as the value for the key can be null
+            if ($timeValue) {
+                break;
+            }
+        }
+
+        if (is_string($timeValue)) {
+            $time = date_create_from_format(DateTime::ISO8601, $timeValue) ?:
+                // Make sure ISO 8601 but with the T replaced with a space also works.
+                date_create_from_format('Y-m-d H:i:sO', $timeValue);
+        } else {
+            /** @var DateTime $time */
+            $time = $timeValue;
+        }
+        // If/When parsing fails we get a false instead of a null
+        if ($time === false) {
+            $errorMessage = 'Can not parse '.$usedField;
+            return null;
+        } elseif ($time) {
+            $time = $time->setTimezone(new DateTimeZone(date_default_timezone_get()));
+        }
+        return $time instanceof DateTime ? DateTimeImmutable::createFromMutable($time) : $time;
+    }
+
+    public function importContestData($data, ?string &$errorMessage = null, string &$cid = null): bool
     {
         if (empty($data) || !is_array($data)) {
-            $message = 'Error parsing YAML file.';
+            $errorMessage = 'Error parsing YAML file.';
             return false;
         }
 
-        $requiredFields = [['start_time', 'start-time'], 'name', ['id', 'short-name'], 'duration'];
-        $missingFields  = [];
+        $activateTimeFields = ['activate_time', 'activation_time', 'activate-time', 'activation-time'];
+        $deactivateTimeFields = preg_filter('/^/', 'de', $activateTimeFields);
+        $startTimeFields = ['start_time', 'start-time'];
+        $requiredFields = [$startTimeFields, ['name', 'formal_name'], ['id', 'short_name', 'short-name'], 'duration'];
+        $missingFields = [];
         foreach ($requiredFields as $field) {
             if (is_array($field)) {
                 $present = false;
@@ -111,35 +167,36 @@ class ImportExportService
         }
 
         if (!empty($missingFields)) {
-            $message = sprintf('Missing fields: %s', implode(', ', $missingFields));
+            $errorMessage = sprintf('Missing fields: %s', implode(', ', $missingFields));
             return false;
         }
 
         $invalid_regex = str_replace(['/^[', '+$/'], ['/[^', '/'], DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX);
 
-        $starttimeValue = $data['start-time'] ?? $data['start_time'];
-
-        if (is_string($starttimeValue)) {
-            $starttime = date_create_from_format(DateTime::ATOM, $starttimeValue) ?:
-                // Make sure ISO 8601 but with the T replaced with a space also works.
-                date_create_from_format('Y-m-d H:i:sO', $starttimeValue);
-        } else {
-            /** @var DateTimeImmutable $starttimeValue */
-            $starttime = $starttimeValue;
-        }
-        if ($starttime === false) {
-            $message = 'Can not parse start time';
+        $startTime = $this->convertImportedTime($startTimeFields, $data, $errorMessage);
+        if ($errorMessage) {
             return false;
         }
 
-        $starttime = $starttime->setTimezone(new DateTimeZone(date_default_timezone_get()));
-        $activateTime = new DateTime();
-        if ($activateTime > $starttime) {
-            $activateTime = $starttime;
+        // Activate time is special, it can return non empty message for parsing error or null if no field was provided
+        $activateTime = $this->convertImportedTime($activateTimeFields, $data, $errorMessage);
+        if ($errorMessage) {
+            return false;
+        } elseif (!$activateTime) {
+            $activateTime = new DateTime();
+            if ($activateTime > $startTime) {
+                $activateTime = $startTime;
+            }
         }
+
+        $deactivateTime = $this->convertImportedTime($deactivateTimeFields, $data, $errorMessage);
+        if ($errorMessage) {
+            return false;
+        }
+
         $contest = new Contest();
         $contest
-            ->setName($data['name'])
+            ->setName($data['name'] ?? $data['formal_name'] )
             ->setShortname(preg_replace(
                                $invalid_regex,
                                '_',
@@ -147,9 +204,12 @@ class ImportExportService
                            ))
             ->setExternalid($contest->getShortname())
             ->setWarningMessage($data['warning-message'] ?? null)
-            ->setStarttimeString(date_format($starttime, 'Y-m-d H:i:s e'))
+            ->setStarttimeString(date_format($startTime, 'Y-m-d H:i:s e'))
             ->setActivatetimeString(date_format($activateTime, 'Y-m-d H:i:s e'))
             ->setEndtimeString(sprintf('+%s', $data['duration']));
+        if ($deactivateTime) {
+            $contest->setDeactivatetimeString(date_format($deactivateTime, 'Y-m-d H:i:s e'));
+        }
 
         // Get all visible categories. For now, we assume these are the ones getting awards
         $visibleCategories = $this->em->getRepository(TeamCategory::class)->findBy(['visible' => true]);
@@ -170,7 +230,7 @@ class ImportExportService
         if ($freezeDuration !== null) {
             $freezeDurationDiff = Utils::timeStringDiff($data['duration'], $freezeDuration);
             if (str_starts_with($freezeDurationDiff, '-')) {
-                $message = 'Freeze duration is longer than contest length';
+                $errorMessage = 'Freeze duration is longer than contest length';
                 return false;
             }
             $contest->setFreezetimeString(sprintf('+%s', $freezeDurationDiff));
@@ -186,7 +246,7 @@ class ImportExportService
                 $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
             }
 
-            $message = sprintf("Contest has errors:\n\n%s", implode("\n", $messages));
+            $errorMessage = sprintf("Contest has errors:\n\n%s", implode("\n", $messages));
             return false;
         }
 
@@ -769,6 +829,7 @@ class ImportExportService
                 'team' => [
                     'teamid' => $team['id'] ?? null,
                     'icpcid' => $team['icpc_id'] ?? null,
+                    'label' => $team['label'] ?? null,
                     'categoryid' => $team['group_ids'][0] ?? null,
                     'name' => @$team['name'],
                     'display_name' => @$team['display_name'],
@@ -891,7 +952,8 @@ class ImportExportService
                     $teamAffiliation = new TeamAffiliation();
                     $teamAffiliation
                         ->setExternalid($teamItem['team_affiliation']['externalid'])
-                        ->setName($teamItem['team_affiliation']['externalid'] . ' - auto-create during import');
+                        ->setName($teamItem['team_affiliation']['externalid'] . ' - auto-create during import')
+                        ->setShortname($teamItem['team_affiliation']['externalid'] . ' - auto-create during import');
                     $this->em->persist($teamAffiliation);
                     $this->dj->auditlog('team_affiliation',
                         $teamAffiliation->getAffilid(),

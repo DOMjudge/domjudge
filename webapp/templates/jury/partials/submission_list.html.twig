@@ -19,23 +19,27 @@
     <div class="alert alert-warning">No submissions</div>
 {% else %}
     <div>
-        <span class="badge badge-info">{{ submissionCounts.total }} submitted</span>
-        <span class="badge badge-success">{{ submissionCounts.correct }} correct</span>
+        <span class="badge text-bg-info">{{ submissionCounts.total }} submitted</span>
+        <span class="badge text-bg-success">{{ submissionCounts.correct }} correct</span>
 
-        {% if submissionCounts.unverified > 0 %}
-            <span class="badge badge-warning">{{ submissionCounts.unverified }} unverified</span>
+        {% if submissionCounts.unverified is defined and submissionCounts.unverified > 0 %}
+            <span class="badge text-bg-warning">{{ submissionCounts.unverified }} unverified</span>
+        {% endif %}
+
+        {% if submissionCounts.shadowUnverified is defined and submissionCounts.shadowUnverified > 0 %}
+            <span class="badge text-bg-warning">{{ submissionCounts.shadowUnverified }} shadow differences unverified</span>
         {% endif %}
 
         {% if submissionCounts.ignored > 0 %}
-            <span class="badge badge-dark">{{ submissionCounts.ignored }} ignored</span>
+            <span class="badge text-bg-dark">{{ submissionCounts.ignored }} ignored</span>
         {% endif %}
 
         {% if submissionCounts.judging > 0 %}
-            <span class="badge badge-primary">{{ submissionCounts.judging }} judging</span>
+            <span class="badge text-bg-primary">{{ submissionCounts.judging }} judging</span>
         {% endif %}
 
         {% if submissionCounts.queued > 0 %}
-            <span class="badge badge-danger">{{ submissionCounts.queued }} queued (from {{submissionCounts.perteam}} teams)</span>
+            <span class="badge text-bg-danger">{{ submissionCounts.queued }} queued (from {{submissionCounts.perteam}} teams)</span>
         {% endif %}
     </div>
 
@@ -91,6 +95,7 @@
                 data-problem-id="{{ submission.problem.probid }}"
                 data-team-id="{{ submission.team.teamid }}"
                 data-category-id="{{ submission.team.category.categoryid }}"
+                data-affiliation-id="{{ submission.team.affiliationId }}"
                 data-language-id="{{ submission.language.langid }}"
                 data-submission-id="{{ submission.submitid }}"
                 data-result="{{ submission | printValidJurySubmissionResult(false) }}">
@@ -262,7 +267,7 @@
                 </tr>
                 <tr>
                     <td colspan="3" class="inline-verify-form">
-                        {% if externalJudgement is not null %}
+                        {% if externalJudgement is not null and (not submission.judgings.first or submission.judgings.first.result != externalJudgement.result) %}
                             {% include 'jury/partials/verify_form.html.twig' with {
                                 label: 'Shadow difference verified',
                                 judging: externalJudgement,

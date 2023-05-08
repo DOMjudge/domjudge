@@ -75,11 +75,6 @@ class Role implements Stringable
         return $this;
     }
 
-    public function removeUser(User $user): void
-    {
-        $this->users->removeElement($user);
-    }
-
     public function getUsers(): Collection
     {
         return $this->users;

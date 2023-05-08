@@ -334,7 +334,7 @@ function fetch_executable_internal(
     if (!is_dir($execdir) || !file_exists($execdeploypath)) {
         system('rm -rf ' . dj_escapeshellarg($execdir) . ' ' . dj_escapeshellarg($execbuilddir));
         system('mkdir -p ' . dj_escapeshellarg($execbuilddir), $retval);
-        if ($retval!==0) {
+        if ($retval !== 0) {
             error("Could not create directory '$execbuilddir'");
         }
 
@@ -439,7 +439,7 @@ function fetch_executable_internal(
         if ($do_compile) {
             logmsg(LOG_DEBUG, "Building executable in $execdir, under 'build/'");
             system(LIBJUDGEDIR . '/build_executable.sh ' . dj_escapeshellarg($execdir), $retval);
-            if ($retval!==0) {
+            if ($retval !== 0) {
                 return [null, "Failed to build executable in $execdir.", "$execdir/build.log"];
             }
             chmod($execrunpath, 0755);
@@ -521,8 +521,7 @@ if (isset($options['verbose'])) {
             putenv('DEBUG=1');
         }
     } else {
-        echo "Invalid value for verbose, must be positive integer\n";
-        exit(1);
+        error("Invalid value for verbose, must be positive integer.");
     }
 }
 
@@ -534,8 +533,7 @@ if (isset($options['daemonid'])) {
 if ($runuser === posix_getpwuid(posix_geteuid())['name'] ||
     RUNGROUP === posix_getgrgid(posix_getegid())['name']
 ) {
-    echo "Do not run the judgedaemon as the runser or rungroup.\n";
-    exit(1);
+    error("Do not run the judgedaemon as the runser or rungroup.");
 }
 
 // Set static environment variables for passing path configuration
@@ -559,10 +557,25 @@ if (defined('SYSLOG') && SYSLOG) {
     putenv('DJ_SYSLOG=' . SYSLOG);
 }
 
+// The judgedaemon calls itself to send judging results back to the API
+// asynchronously. See the handling of the 'e' option below. The code here
+// should only be run during a normal judgedaemon start.
 if (empty($options['e'])) {
     if (!posix_getpwnam($runuser)) {
         error("runuser $runuser does not exist.");
     }
+
+    define('LOCKFILE', RUNDIR.'/judge.'.$myhost.'.lock');
+    if (($lockfile = fopen(LOCKFILE, 'c'))===false) {
+        error("cannot open lockfile '" . LOCKFILE . "' for writing");
+    }
+    if (!flock($lockfile, LOCK_EX | LOCK_NB)) {
+        error("cannot lock '" . LOCKFILE . "', is another judgedaemon already running?");
+    }
+    if (!ftruncate($lockfile, 0) || fwrite($lockfile, (string)getmypid())===false) {
+        error("cannot write PID to '" . LOCKFILE . "'");
+    }
+
     $output = [];
     exec("ps -u '$runuser' -o pid= -o comm=", $output, $retval);
     if (count($output) !== 0) {
@@ -659,6 +672,7 @@ while (true) {
     if ($exitsignalled) {
         logmsg(LOG_NOTICE, "Received signal, exiting.");
         close_curl_handles();
+        fclose($lockfile);
         exit;
     }
 
@@ -851,7 +865,7 @@ while (true) {
 
         // Either the file didn't exist or we deleted it above.
         if (!file_exists($success_file)) {
-            $oldworkdir = $workdir . '-old-' . getmypid() . '-' . strftime('%Y-%m-%d_%H:%M');
+            $oldworkdir = $workdir . '-old-' . getmypid() . '-' . date('Y-m-d_H:i');
             if (!rename($workdir, $oldworkdir)) {
                 error("Could not rename stale working directory to '$oldworkdir'.");
             }
@@ -918,6 +932,7 @@ while (true) {
     if ($exitsignalled) {
         logmsg(LOG_NOTICE, "Received signal, exiting.");
         close_curl_handles();
+        fclose($lockfile);
         exit;
     }
 
@@ -1053,6 +1068,46 @@ function compile(
         return true;
     }
 
+    // Verify compile and runner versions.
+    $judgeTaskId = $judgeTask['judgetaskid'];
+    $version_verification = dj_json_decode(request('judgehosts/get_version_commands/' . $judgeTaskId, 'GET'));
+    if (isset($version_verification['compiler_version_command']) || isset($version_verification['runner_version_command'])) {
+        logmsg(LOG_INFO, "  📋 Verifying versions.");
+        $versions = [];
+        $version_output_file = $workdir . '/version_check.out';
+        $args = 'hostname=' . urlencode($myhost);
+        foreach (['compiler', 'runner'] as $type) {
+            if (isset($version_verification[$type . '_version_command'])) {
+                $vcscript_content = $version_verification[$type . '_version_command'];
+                $vcscript = tempnam(TMPDIR, 'version_check-');
+                file_put_contents($vcscript, $vcscript_content);
+                chmod($vcscript, 0755);
+                $version_cmd = LIBJUDGEDIR . "/version_check.sh " .
+                    implode(' ', array_map('dj_escapeshellarg', [
+                        $vcscript,
+                        $workdir,
+                    ]));
+
+                if (file_exists($version_output_file)) {
+                    unlink($version_output_file);
+                }
+                system($version_cmd, $retval);
+                $versions[$type] = trim(file_get_contents($version_output_file));
+                if ($retval !== 0) {
+                    $versions[$type] =
+                        "Getting $type version failed with exit code $retval\n"
+                        . $versions[$type];
+                }
+            }
+            if (isset($versions[$type])) {
+                $args .= "&$type=" . urlencode(base64_encode($versions[$type]));
+            }
+        }
+
+        // TODO: Add actual check once implemented in the backend.
+        request('judgehosts/check_versions/' . $judgeTaskId, 'PUT', $args);
+    }
+
     // Get the source code from the DB and store in local file(s).
     $url = sprintf('judgehosts/get_files/source/%s', $judgeTask['submitid']);
     $sources = request($url, 'GET');
@@ -1186,7 +1241,7 @@ function compile(
     $url = sprintf('judgehosts/update-judging/%s/%s', urlencode($myhost), urlencode((string)$judgeTask['judgetaskid']));
     request($url, 'PUT', $args);
 
-    // compile error: our job here is done
+    // Compile error: our job here is done.
     if (! $compile_success) {
         return false;
     }

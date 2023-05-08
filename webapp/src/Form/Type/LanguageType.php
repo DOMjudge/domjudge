@@ -76,6 +76,14 @@ class LanguageType extends AbstractExternalIdEntityType
                 'No' => false,
             ],
         ]);
+        $builder->add('compilerVersionCommand', TextType::class, [
+            'label' => 'Compiler version command',
+            'required' => false,
+        ]);
+        $builder->add('runnerVersionCommand', TextType::class, [
+            'label' => 'Runner version command',
+            'required' => false,
+        ]);
         $builder->add('save', SubmitType::class);
 
         // Remove ID field when doing an edit.

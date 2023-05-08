@@ -11,7 +11,7 @@
                     General issue
                 {% endif %}
             </div>
-            <div class="col-sm text-muted text-right">{{ clarification.submittime | printtimeHover(clarification.contest) }}</div>
+            <div class="col-sm text-muted text-end">{{ clarification.submittime | printtimeHover(clarification.contest) }}</div>
         </div>
     </div>
     <div class="card-body">
@@ -37,8 +37,10 @@
             </div>
         </div>
 
+        <hr/>
+
         <div class="card-text">
-            <pre class="output-text bg-light p-3">{{ clarification.body|wrapUnquoted(78) }}</pre>
+            {{ clarification.body | markdown_to_html }}
         </div>
     </div>
 </div>

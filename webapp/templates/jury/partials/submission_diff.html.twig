@@ -23,7 +23,7 @@
     {%- for filePair in oldFileStats.changedfiles %}
 
         <li class="nav-item">
-            <a class="nav-link {% if loop.first %}active{% endif %}" data-toggle="tab"
+            <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
                href="#diff-{{ filePair.1.submitfileid }}" role="tab">{{ filePair.0.filename }}</a>
         </li>
     {%- endfor %}

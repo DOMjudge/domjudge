@@ -12,6 +12,7 @@ use App\Service\DOMJudgeService;
 use App\Service\RejudgingService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,7 +28,8 @@ class InternalErrorController extends BaseController
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
-        protected readonly RejudgingService $rejudgingService
+        protected readonly RejudgingService $rejudgingService,
+        protected readonly RequestStack $requestStack,
     ) {}
 
     #[Route(path: '', name: 'jury_internal_errors')]
@@ -161,7 +163,7 @@ class InternalErrorController extends BaseController
                 ob_flush();
                 flush();
             };
-            return $this->streamResponse(function () use ($request, $progressReporter, $internalError) {
+            return $this->streamResponse($this->requestStack, function () use ($request, $progressReporter, $internalError) {
                 $this->em->wrapInTransaction(function () use ($progressReporter, $internalError) {
                     $internalError->setStatus(InternalErrorStatusType::STATUS_RESOLVED);
                     $this->dj->setInternalError(

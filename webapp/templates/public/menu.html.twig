@@ -1,6 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
+  <div class="container-fluid">
     <a class="navbar-brand hidden-sm-down" href="{{ path('public_index') }}">DOMjudge</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menuDefault"
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuDefault"
             aria-controls="menuDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -8,13 +9,15 @@
     {% set current_route = app.request.attributes.get('_route') %}
 
     <div class="collapse navbar-collapse" id="menuDefault">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item {% if current_route in ['public_index', 'public_team'] %}active{% endif %}">
-                <a class="nav-link" href="{{ path('public_index') }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+                <a class="nav-link{% if current_route in ['public_index', 'public_team'] %} active{% endif %}"
+                    href="{{ path('public_index') }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
             </li>
-            <li class="nav-item {% if current_route == 'public_problems' %}active{% endif %}">
+            <li class="nav-item">
                 {% if is_granted('ROLE_JURY') or (current_public_contest is not null and current_public_contest.freezeData.started) %}
-                    <a class="nav-link" href="{{ path('public_problems') }}">
+                    <a class="nav-link{% if current_route == 'public_problems' %} active{% endif %}"
+                        href="{{ path('public_problems') }}">
                         <i class="fas fa-book-open"></i> Problemset
                     </a>
                 {% else %}
@@ -47,5 +50,6 @@
 
         {% include 'partials/menu_countdown.html.twig' with {contest: current_public_contest} %}
     </div>
+  </div>
 </nav>
 {% include 'partials/scoreboard_progress_bar.html.twig' with {margin: -9, contest: current_public_contest} %}

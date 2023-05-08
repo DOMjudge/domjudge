@@ -16,14 +16,14 @@
             {{ form_label(form.timeFactor) }}
             <div class="input-group">
                 {{ form_widget(form.timeFactor) }}
-                <div class="input-group-append">
-                    <div class="input-group-text">&times;</div>
-                </div>
+                <span class="input-group-text">&times;</span>
             </div>
         </div>
         {{ form_row(form.compileExecutable) }}
         {{ form_row(form.extensions) }}
         {{ form_row(form.filterCompilerFiles) }}
+        {{ form_row(form.compilerVersionCommand) }}
+        {{ form_row(form.runnerVersionCommand) }}
         {{ form_end(form) }}
     </div>
 </div>
@@ -58,7 +58,7 @@
         }
 
         function addDeleteLink($extensionDiv) {
-            var $removeFormButton = $('<button type="button" class="input-group-append btn btn-danger"><i class="fas fa-trash"></i></button>');
+            var $removeFormButton = $('<button type="button" class="btn btn-danger"><i class="fas fa-trash"></i></button>');
             var $inputGroup = $('<div class="input-group"></div>');
             var $formControl = $extensionDiv.find('.form-control');
             $inputGroup.append($formControl);

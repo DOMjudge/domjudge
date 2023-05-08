@@ -13,6 +13,7 @@ use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\TeamCategory;
+use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Service\AwardService;
 use App\Service\ConfigurationService;
@@ -68,6 +69,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printtimediff', $this->printtimediff(...)),
             new TwigFilter('printremainingminutes', $this->printremainingminutes(...)),
             new TwigFilter('printtime', $this->printtime(...)),
+            new TwigFilter('printHumanTimeDiff', $this->printHumanTimeDiff(...)),
             new TwigFilter('printtimeHover', $this->printtimeHover(...), ['is_safe' => ['html']]),
             new TwigFilter('printResult', $this->printResult(...), ['is_safe' => ['html']]),
             new TwigFilter('printValidJuryResult', $this->printValidJuryResult(...), ['is_safe' => ['html']]),
@@ -86,7 +88,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('lineCount', $this->lineCount(...)),
             new TwigFilter('base64', 'base64_encode'),
             new TwigFilter('base64_decode', 'base64_decode'),
-            new TwigFilter('parseRunDiff', $this->parseRunDiff(...), ['is_safe' => ['html']]),
             new TwigFilter('runDiff', $this->runDiff(...), ['is_safe' => ['html']]),
             new TwigFilter('interactiveLog', $this->interactiveLog(...), ['is_safe' => ['html']]),
             new TwigFilter('codeEditor', $this->codeEditor(...), ['is_safe' => ['html']]),
@@ -109,6 +110,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printWarningContent', $this->printWarningContent(...), ['is_safe' => ['html']]),
             new TwigFilter('entityIdBadge', $this->entityIdBadge(...), ['is_safe' => ['html']]),
             new TwigFilter('medalType', $this->awards->medalType(...)),
+            new TwigFilter('numTableActions', $this->numTableActions(...)),
         ];
     }
 
@@ -129,6 +131,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'current_public_contest'        => $this->dj->getCurrentContest(onlyPublic: true),
             'current_public_contests'       => $this->dj->getCurrentContests(onlyPublic: true),
             'have_printing'                 => $this->config->get('print_command'),
+            'show_languages_to_teams'       => $this->config->get('show_language_versions'),
             'refresh_flag'                  => $refresh_flag,
             'icat_url'                      => $this->config->get('icat_url'),
             'external_ccs_submission_url'   => $this->config->get('external_ccs_submission_url'),
@@ -206,6 +209,28 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             }
             return Utils::printtime($datetime, $format);
         }
+    }
+
+    public function printHumanTimeDiff(float|null $datetime): string
+    {
+        if ($datetime === null) {
+            return '';
+        }
+        $diff = Utils::now() - $datetime;
+
+        if ($diff < 120) {
+            return (int)($diff) . ' seconds ago';
+        }
+        $diff /= 60;
+        if ($diff < 120) {
+            return (int)($diff) . ' minutes ago';
+        }
+        $diff /= 60;
+        if ($diff < 48) {
+            return (int)($diff) . ' hours ago';
+        }
+        $diff /= 24;
+        return (int)($diff) . ' days ago';
     }
 
     /**
@@ -339,7 +364,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         // We use a direct SQL query here for performance reasons
         if ($showExternal) {
             /** @var ExternalJudgement|null $externalJudgement */
-            $externalJudgement   = $submission->getExternalJudgements()->first();
+            $externalJudgement   = $submission->getExternalJudgements()->first() ?: null;
             $externalJudgementId = $externalJudgement?->getExtjudgementid();
             $probId              = $submission->getProblem()->getProbid();
             $testcases           = $this->em->getConnection()->fetchAllAssociative(
@@ -395,7 +420,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 $title = sprintf('Run %d', $key + 1);
             }
 
-            $results .= sprintf('<span class="badge badge-%s badge-testcase" title="%s">%s</span>', $class, $title,
+            $results .= sprintf('<span class="badge text-bg-%s badge-testcase" title="%s">%s</span>', $class, $title,
                                 $text);
         }
 
@@ -454,7 +479,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 $titleElements[] = sprintf('runtime: %ss', $run->getRuntime());
                 $titleElements[] = sprintf('result: %s', $runResult);
             }
-            $icon    = sprintf('<span class="badge badge-%s badge-testcase">%s</span>', $class, $text);
+            $icon    = sprintf('<span class="badge text-bg-%s badge-testcase">%s</span>', $class, $text);
             $results .= sprintf('<a title="%s" href="#run-%d" %s>%s</a>',
                                 join(', ', $titleElements), $testcase->getRank(),
                                 $isCorrect ? 'onclick="display_correctruns(true);"' : '', $icon);
@@ -500,6 +525,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     public function printValidJurySubmissionResult(Submission $submission, bool $forDisplay = true): string
     {
+        if ($submission->isImportError()) {
+            $result = 'import-error';
+            return $forDisplay ? $this->printValidJuryResult($result) : $result;
+        }
+
         /** @var Judging|null $firstJudging */
         $firstJudging  = $submission->getJudgings()->first();
         $judgingResult = '';
@@ -669,41 +699,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return mb_substr_count($input, "\n");
     }
 
-    public function parseRunDiff(string $difftext): string
-    {
-        $line = strtok($difftext, "\n"); //first line
-        if ($line === false || sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1) {
-            return htmlspecialchars($difftext);
-        }
-        $return = $line . "\n";
-
-        // Add second line 'team ? reference'.
-        $line   = strtok("\n");
-        $return .= $line . "\n";
-
-        // We determine the line number width from the '_' characters and
-        // the separator position from the character '?' on the second line.
-        $linenowidth = mb_strrpos($line, '_') + 1;
-        $midloc      = mb_strpos($line, '?') - ($linenowidth + 1);
-
-        $line = strtok("\n");
-        while (mb_strlen($line) != 0) {
-            $linenostr = mb_substr($line, 0, $linenowidth);
-            $diffline  = mb_substr($line, $linenowidth + 1);
-            $mid       = mb_substr($diffline, $midloc - 1, 3);
-            $formdiffline = match ($mid) {
-                ' = ' => "<span class='correct'>" . htmlspecialchars($diffline) . "</span>",
-                ' ! ' => "<span class='differ'>" . htmlspecialchars($diffline) . "</span>",
-                ' $ ' => "<span class='endline'>" . htmlspecialchars($diffline) . "</span>",
-                ' > ', ' < ' => "<span class='extra'>" . htmlspecialchars($diffline) . "</span>",
-                default => htmlspecialchars($diffline),
-            };
-            $return = $return . $linenostr . " " . $formdiffline . "\n";
-            $line   = strtok("\n");
-        }
-        return $return;
-    }
-
     public function interactiveLog(string $log, bool $forTeam = false): string
     {
         $truncated  = '/\[output display truncated after \d* B\]$/';
@@ -863,12 +858,15 @@ JS;
         $return = '';
         while ($line !== false && strlen($line) != 0) {
             // Strip any additional DOS/MAC newline characters:
-            $line = trim($line, "\r\n");
+            $line = str_replace("\r", "↵", $line);
             $formdiffline = match (substr($line, 0, 1)) {
                 '-' => "<span class='diff-del'>" . htmlspecialchars($line) . "</span>",
                 '+' => "<span class='diff-add'>" . htmlspecialchars($line) . "</span>",
                 default => htmlspecialchars($line),
             };
+            if (str_contains($formdiffline, '#Warning: Strings contain different line endings')) {
+                $formdiffline = "<span class='diff-endline'>$formdiffline</span>";
+            }
             $return .= $formdiffline . "\n";
             $line   = strtok("\n");
         }
@@ -1156,10 +1154,25 @@ EOF;
         $primaryKeyColumn = $metadata->getIdentifierColumnNames()[0];
         $externalIdField = $this->eventLogService->externalIdFieldForEntity($entity);
 
-        return $this->twig->render('jury/entity_id_badge.html.twig', [
+        $data = [
             'idPrefix' => $idPrefix,
             'id' => $propertyAccessor->getValue($entity, $primaryKeyColumn),
             'externalId' => $externalIdField ? $propertyAccessor->getValue($entity, $externalIdField) : null,
-        ]);
+        ];
+
+        if ($entity instanceof Team) {
+            $data['label'] = $entity->getLabel();
+        }
+
+        return $this->twig->render('jury/entity_id_badge.html.twig', $data);
+    }
+
+    protected function numTableActions(array $tableData): int
+    {
+        $maxNumActions = 0;
+        foreach ($tableData as $item) {
+            $maxNumActions = max($maxNumActions, count($item['actions'] ?? []));
+        }
+        return $maxNumActions;
     }
 }

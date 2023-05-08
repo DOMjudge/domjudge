@@ -54,6 +54,11 @@ class TeamType extends AbstractExternalIdEntityType
                 )
             ]
         ]);
+        $builder->add('label', TextType::class, [
+            'label'       => 'Label',
+            'required'    => false,
+            'help'        => 'Optional label, for example the seat number.',
+        ]);
         $builder->add('displayName', TextType::class, [
             'label'    => 'Display name',
             'required' => false,

@@ -23,16 +23,16 @@
     {% endif %}
 
     <div class="mb-3">
-        <div class="btn-group-toggle" data-toggle="buttons">
-            <label class="btn btn-outline-secondary {% if hasFilters %}active{% endif %}">
-                <input type="checkbox" id="filter-toggle" {% if hasFilters %}checked{% endif %} autocomplete="off">
+        <div class="btn-group" role="group">
+            <input type="checkbox" class="btn-check" id="filter-toggle" {% if hasFilters %}checked{% endif %} autocomplete="off">
+            <label for="filter-toggle" class="btn btn-outline-secondary">
                 <i class="fas fa-filter"></i> Filter
             </label>
         </div>
         <div class="card mt-3{% if not hasFilters %} d-none{% endif %}" id="filter-card">
             <div class="card-body">
-                <div class="form-row">
-                    <div class="form-group col-sm-6">
+                <div class="row">
+                    <div class="col-sm-6">
                         <label for="affiliation-filter">Filter on affiliation(s)</label>
                         <select id="affiliation-filter" class="select2 form-control" multiple data-filter-field="affiliation-id"
                                 data-ajax-url="{{ path('jury_ajax_data', {datatype: 'affiliations', select2: true}) }}">

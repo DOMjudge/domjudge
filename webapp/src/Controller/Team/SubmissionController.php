@@ -95,6 +95,7 @@ class SubmissionController extends BaseController
         }
 
         $data = ['form' => $form->createView(), 'problem' => $problem];
+        $data['validFilenameRegex'] = SubmissionService::FILENAME_REGEX;
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('team/submit_modal.html.twig', $data);

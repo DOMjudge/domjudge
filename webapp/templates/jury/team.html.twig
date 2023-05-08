@@ -36,6 +36,16 @@
                     </td>
                 </tr>
                 <tr>
+                    <th>Label</th>
+                    <td>
+                        {% if team.label | length %}
+                            {{ team.label }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
                     <th>Name</th>
                     <td>{{ team.name }}</td>
                 </tr>

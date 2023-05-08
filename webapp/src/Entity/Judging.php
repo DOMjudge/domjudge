@@ -414,11 +414,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this;
     }
 
-    public function removeRun(JudgingRun $run): void
-    {
-        $this->runs->removeElement($run);
-    }
-
     public function getRuns(): Collection
     {
         return $this->runs;

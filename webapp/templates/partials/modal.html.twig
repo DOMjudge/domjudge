@@ -8,16 +8,14 @@
                 <h5 class="modal-title">
                     {% block title %}{% endblock %}
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 {% block content %}{% endblock %}
             </div>
             <div class="modal-footer">
                 {% block extraButton %}{% endblock %}
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     {% block closeButtonText %}Close{% endblock %}
                 </button>
                 {% if showModalSubmit|default(false) %}

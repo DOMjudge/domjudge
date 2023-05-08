@@ -1,6 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
     <a class="navbar-brand hidden-sm-down" href="{{ path('team_index') }}">DOMjudge</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menuDefault"
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuDefault"
             aria-controls="menuDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -8,30 +9,41 @@
     {% set current_route = app.request.attributes.get('_route') %}
 
     <div class="collapse navbar-collapse" id="menuDefault">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item {% if current_route in ['team_index', 'team_clarification', 'team_clarification_add', 'team_submission'] %}active{% endif %}">
-                <a class="nav-link" href="{{ path('team_index') }}"><i class="fas fa-home"></i> Home</a>
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+                <a class="nav-link{% if current_route in ['team_index', 'team_clarification', 'team_clarification_add', 'team_submission'] %} active{% endif %}"
+                    href="{{ path('team_index') }}"><i class="fas fa-home"></i> Home</a>
             </li>
-            <li class="nav-item {% if current_route == 'team_problems' %}active{% endif %}">
+            <li class="nav-item">
                 {% if current_team_contest is not null and (is_granted('ROLE_JURY') or current_team_contest.freezeData.started) %}
-                    <a class="nav-link" href="{{ path('team_problems') }}">
+                    <a class="nav-link{% if current_route == 'team_problems' %} active{% endif %}"
+                        href="{{ path('team_problems') }}">
                         <i class="fas fa-book-open"></i> Problemset
                     </a>
                 {% else %}
                     <a class="nav-link disabled"><i class="fas fa-book-open"></i> Problemset</a>
                 {% endif %}
             </li>
-            {% if have_printing %}
-                <li class="nav-item {% if current_route == 'team_print' %}active{% endif %}">
-                    <a class="nav-link" href="{{ path('team_print') }}"><i class="fas fa-file-alt"></i> Print</a>
+            {% if show_languages_to_teams %}
+                <li class="nav-item">
+                    <a class="nav-link{% if current_route == 'team_languages' %} active{% endif %}"
+                       href="{{ path('team_languages') }}"><i class="fas fa-language"></i> Languages</a>
                 </li>
             {% endif %}
-            <li class="nav-item {% if current_route in ['team_scoreboard', 'team_team'] %}active{% endif %}">
-                <a class="nav-link" href="{{ path('team_scoreboard') }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
+            {% if have_printing %}
+                <li class="nav-item">
+                    <a class="nav-link{% if current_route == 'team_print' %} active{% endif %}"
+                        href="{{ path('team_print') }}"><i class="fas fa-file-alt"></i> Print</a>
+                </li>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link{% if current_route in ['team_scoreboard', 'team_team'] %} active{% endif %}"
+                    href="{{ path('team_scoreboard') }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
             </li>
             {% if doc_links is not empty %}
-                <li class="nav-item {% if current_route in ['team_docs'] %}active{% endif %}">
-                    <a class="nav-link" href="{{ path('team_docs') }}"><i class="fas fa-file-alt"></i> Docs</a>
+                <li class="nav-item">
+                    <a class="nav-link{% if current_route in ['team_docs'] %} active{% endif %}"
+                        href="{{ path('team_docs') }}"><i class="fas fa-file-alt"></i> Docs</a>
                 </li>
             {% endif %}
 
@@ -42,15 +54,15 @@
             {% endif %}
         </ul>
 
-        <div id="submitbut">
+        <div class="ms-auto me-3">
             {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
-                <a class="nav-link justify-content-center" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit') }}">
+                <a class="nav-link" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit') }}">
                     <span class="btn btn-success btn-sm">
                         <i class="fas fa-cloud-upload-alt"></i> Submit
                     </span>
                 </a>
             {% else %}
-                <a class="nav-link justify-content-center">
+                <a class="nav-link">
                     <span class="btn btn-success btn-sm disabled">
                         <i class="fas fa-cloud-upload-alt"></i> Submit
                     </span>
@@ -68,5 +80,6 @@
 
         {% include 'partials/menu_countdown.html.twig' with {contest: current_team_contest} %}
     </div>
+  </div>
 </nav>
-{% include 'partials/scoreboard_progress_bar.html.twig' with {margin: -9, contest: current_team_contest} %}
+{% include 'partials/scoreboard_progress_bar.html.twig' with {margin: -16, contest: current_team_contest} %}

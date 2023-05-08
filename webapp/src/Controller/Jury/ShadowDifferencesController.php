@@ -56,13 +56,14 @@ class ShadowDifferencesController extends BaseController
         // Close the session, as this might take a while and we don't need the session below.
         $this->requestStack->getSession()->save();
 
-        $contest        = $this->dj->getCurrentContest();
-        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
-        $verdicts       = array_merge(['judging' => 'JU'], include $verdictsConfig);
+        $contest  = $this->dj->getCurrentContest();
+        $verdicts = array_merge(['judging' => 'JU'], $this->dj->getVerdicts(mergeExternal: true));
 
         if (!$contest) {
             return $this->render('jury/shadow_differences.html.twig');
         }
+
+        $verdicts['import-error'] = 'IE';
 
         $used         = [];
         $verdictTable = [];
@@ -111,6 +112,10 @@ class ShadowDifferencesController extends BaseController
                 $localResult = $localJudging->getResult();
             } else {
                 $localResult = 'judging';
+            }
+
+            if ($submission->isImportError()) {
+                $localResult = 'import-error';
             }
 
             if ($externalJudgement && $externalJudgement->getResult()) {
@@ -181,7 +186,8 @@ class ShadowDifferencesController extends BaseController
         [$submissions, $submissionCounts] = $this->submissions->getSubmissionList(
             $contests,
             $restrictions,
-            0
+            limit: 0,
+            showShadowUnverified: true
         );
 
         $data = [

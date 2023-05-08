@@ -315,11 +315,10 @@ class DOMJudgeService
                 ->select('r.rejudgingid, r.starttime, r.endtime')
                 ->from(Rejudging::class, 'r')
                 ->andWhere('r.endtime is null');
-            $curContest = $this->getCurrentContest();
-            if ($curContest !== null) {
+            if ($contest !== null) {
                 $rejudgings = $rejudgings->join('r.submissions', 's')
                     ->andWhere('s.contest = :contest')
-                    ->setParameter('contest', $curContest->getCid())
+                    ->setParameter('contest', $contest->getCid())
                     ->distinct();
             }
             $rejudgings = $rejudgings->getQuery()->getResult();
@@ -356,7 +355,7 @@ class DOMJudgeService
                     ->from(ExternalContestSource::class, 'ecs')
                     ->andWhere('ecs.contest = :contest')
                     ->andWhere('ecs.lastPollTime < :i OR ecs.lastPollTime is NULL')
-                    ->setParameter('contest', $this->getCurrentContest())
+                    ->setParameter('contest', $contest)
                     ->setParameter('i', time() - $this->config->get('external_contest_source_critical'))
                     ->getQuery()->getOneOrNullResult();
 
@@ -365,7 +364,7 @@ class DOMJudgeService
                                                      ->from(ExternalSourceWarning::class, 'w')
                                                      ->innerJoin('w.externalContestSource', 'ecs')
                                                      ->andWhere('ecs.contest = :contest')
-                                                     ->setParameter('contest', $this->getCurrentContest())
+                                                     ->setParameter('contest', $contest)
                                                      ->getQuery()
                                                      ->getSingleScalarResult();
             }
@@ -898,9 +897,12 @@ class DOMJudgeService
     /**
      * @throws NonUniqueResultException
      */
-    public function getTwigDataForProblemsAction(StatisticsService $statistics, ?int $teamId = null): array
-    {
-        $contest            = isset($teamId) ? $this->getCurrentContest($teamId) : $this->getCurrentContest(onlyPublic: true);
+    public function getTwigDataForProblemsAction(
+        StatisticsService $statistics,
+        ?int $teamId = null,
+        bool $forJury = false
+    ): array {
+        $contest            = isset($teamId) ? $this->getCurrentContest($teamId) : $this->getCurrentContest(onlyPublic: !$forJury);
         $showLimits         = (bool)$this->config->get('show_limits_on_team_page');
         $defaultMemoryLimit = (int)$this->config->get('memory_limit');
         $timeFactorDiffers  = false;
@@ -1079,6 +1081,10 @@ class DOMJudgeService
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
         $language   = $submission->getLanguage();
+
+        if ($submission->isImportError()) {
+            return;
+        }
 
         $evalOnDemand = false;
         // We have 2 cases, the problem picks the global value or the value is set.
@@ -1466,5 +1472,19 @@ class DOMJudgeService
                 'hash' => $compileExecutable->getHash(),
             ]
         );
+    }
+
+    public function getVerdicts(bool $mergeExternal = false): array
+    {
+        $verdictsConfig = $this->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdicts       = include $verdictsConfig;
+
+        if ($mergeExternal) {
+            foreach ($this->config->get('external_judgement_types') as $id => $name) {
+                $verdicts[$name] = $id;
+            }
+        }
+
+        return $verdicts;
     }
 }

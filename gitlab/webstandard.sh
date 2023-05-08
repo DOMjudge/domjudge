@@ -77,7 +77,8 @@ if [ "$TEST" = "w3cval" ]; then
     rm -rf localhost/domjudge/css/fontawesome-all.min.css*
     rm -rf localhost/domjudge/bundles/nelmioapidoc*
     rm -f localhost/domjudge/css/bootstrap.min.css*
-    rm -f localhost/domjudge/css/select2-bootstrap.min.css*
+    rm -f localhost/domjudge/css/select2-bootstrap*.css*
+    rm -f localhost/domjudge/css/dataTables*.css*
     rm -f localhost/domjudge/jury/config/check/phpinfo*
     section_end upstream_problems
 

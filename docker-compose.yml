@@ -23,10 +23,13 @@ services:
     hostname: domjudge-contributor
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-      - .:/domjudge:cached
+      - .:${PWD}:cached
       - /chroot
     links:
       - mariadb:mariadb
     ports:
       - 12345:80
     privileged: true
+    working_dir: ${PWD}
+    environment:
+      - PROJECT_DIR=${PWD}

@@ -267,17 +267,15 @@ abstract class JuryControllerTestCase extends BaseTestCase
                         $combinedValues[$id] = $field;
                     }
                 }
+                // For LanguageController the values for external identifier should follow internal
+                if (key_exists('langid', $element) && !key_exists('externalid', $element)) {
+                    $formFields[static::$addForm . 'externalid]'] = $element['langid'];
+                    $combinedValues['externalid'] = $element['langid'];
+                }
                 $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
                 $button = $this->client->getCrawler()->selectButton('Save');
                 $form = $button->form($formFields, 'POST');
                 $formName = str_replace('[', '', static::$addForm);
-                // Get the underlying object to inject elements not currently in the DOM.
-                $rawValues = $form->getPhpValues();
-                foreach ([static::$addEntities[0], $element] as $item) {
-                    if (key_exists(static::$addPlus, $item)) {
-                        $rawValues[$formName . static::$addPlus . ']'] = $item[static::$addPlus];
-                    }
-                }
                 // Set checkboxes
                 foreach ([static::$addEntities[0], $element] as $item) {
                     foreach ($item as $id => $field) {
@@ -291,7 +289,14 @@ abstract class JuryControllerTestCase extends BaseTestCase
                         }
                     }
                 }
-                $this->client->submit($form);
+                // Get the underlying object to inject elements not currently in the DOM.
+                $rawValues = $form->getPhpValues();
+                foreach ([static::$addEntities[0], $element] as $item) {
+                    if (key_exists(static::$addPlus, $item)) {
+                        $rawValues[$formName][static::$addPlus] = $item[static::$addPlus];
+                    }
+                }
+                $response = $this->client->request($form->getMethod(), $form->getUri(), $rawValues, $form->getPhpFiles());
                 $this->client->followRedirect();
                 foreach ($combinedValues as $key => $value) {
                     if (!is_array($value) && !in_array($key, static::$overviewNotShown)) {
@@ -327,6 +332,9 @@ abstract class JuryControllerTestCase extends BaseTestCase
      */
     public function testCheckEditEntityAdmin(string $identifier, array $formDataKeys, array $formDataValues): void
     {
+        if (static::$addPlus != '') {
+            static::markTestSkipped('Edit not implemented yet for ' . static::$shortTag . '.');
+        }
         $editLink = null;
         $formFields = [];
         $this->roles = ['admin'];
