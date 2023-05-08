@@ -276,13 +276,6 @@ abstract class JuryControllerTestCase extends BaseTestCase
                 $button = $this->client->getCrawler()->selectButton('Save');
                 $form = $button->form($formFields, 'POST');
                 $formName = str_replace('[', '', static::$addForm);
-                // Get the underlying object to inject elements not currently in the DOM.
-                $rawValues = $form->getPhpValues();
-                foreach ([static::$addEntities[0], $element] as $item) {
-                    if (key_exists(static::$addPlus, $item)) {
-                        $rawValues[$formName . static::$addPlus . ']'] = $item[static::$addPlus];
-                    }
-                }
                 // Set checkboxes
                 foreach ([static::$addEntities[0], $element] as $item) {
                     foreach ($item as $id => $field) {
@@ -294,6 +287,13 @@ abstract class JuryControllerTestCase extends BaseTestCase
                         } else {
                             $form[$formName][$id]->untick();
                         }
+                    }
+                }
+                // Get the underlying object to inject elements not currently in the DOM.
+                $rawValues = $form->getPhpValues();
+                foreach ([static::$addEntities[0], $element] as $item) {
+                    if (key_exists(static::$addPlus, $item)) {
+                        $rawValues[$formName][static::$addPlus] = $item[static::$addPlus];
                     }
                 }
                 $this->client->submit($form);
