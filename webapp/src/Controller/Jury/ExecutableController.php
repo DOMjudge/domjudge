@@ -217,6 +217,18 @@ class ExecutableController extends BaseController
                 $this->em->persist($executableFile);
                 $files[] = $executableFile;
             }
+            $offset = count($files);
+            foreach ($editorData['skippedBinary'] as $idx => $skippedBinaryData) {
+                $origExecutableFile = $this->em->getRepository(ExecutableFile::class)->find($skippedBinaryData['execfileid']);
+                $executableFile = new ExecutableFile();
+                $executableFile
+                    ->setRank($idx + $offset)
+                    ->setIsExecutable($origExecutableFile->isExecutable())
+                    ->setFilename($origExecutableFile->getFilename())
+                    ->setFileContent($origExecutableFile->getFileContent());
+                $this->em->persist($executableFile);
+                $files[] = $executableFile;
+            }
 
             $immutableExecutable = new ImmutableExecutable($files);
             $this->em->persist($immutableExecutable);
@@ -404,7 +416,10 @@ class ExecutableController extends BaseController
             $content = $file->getFileContent();
             $rank = $file->getRank();
             if (!mb_detect_encoding($content, null, true)) {
-                $skippedBinary[] = $filename;
+                $skippedBinary[] = [
+                    'filename' => $filename,
+                    'execfileid' => $file->getExecFileId(),
+                ];
                 continue; // Skip binary files.
             }
             $filenames[] = $filename;
