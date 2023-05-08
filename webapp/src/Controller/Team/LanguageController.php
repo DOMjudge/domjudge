@@ -24,7 +24,7 @@ class LanguageController extends BaseController
         protected readonly EntityManagerInterface $em
     ) {}
 
-    #[Route(path: '/', name: 'team_languages')]
+    #[Route(path: '', name: 'team_languages')]
     public function languagesAction(): Response
     {
         $languagesEnabled = $this->config->get('show_language_versions');
