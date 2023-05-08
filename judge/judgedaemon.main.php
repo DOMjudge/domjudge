@@ -1090,7 +1090,7 @@ function compile(
         }
 
         // TODO: Add actual check once implemented in the backend.
-        request(sprintf('judgehosts/check_versions/%s', $judgeTaskId), 'PUT', $args);
+        request('judgehosts/check_versions/' . $judgeTaskId, 'PUT', $args);
     }
 
     // Get the source code from the DB and store in local file(s).
