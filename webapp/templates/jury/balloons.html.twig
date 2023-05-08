@@ -81,87 +81,89 @@
 {% endblock %}
 
 {% block extrafooter %}
-    <script>
-        $(function () {
-            $('#filter-toggle').on('change', function () {
-                if ($(this).is(':checked')) {
-                    $('#filter-card').removeClass('d-none');
-                } else {
-                    $('#filter-card').addClass('d-none');
-                }
-            });
-
-            $('.select2').each(function () {
-                var $elem = $(this);
-                if(!$elem.data('ajax-url')) {
-                    return;
-                }
-                $elem.select2({
-                    minimumInputLength: 1,
-                    ajax: {
-                        url: $elem.data('ajax-url'),
-                        dataType: 'json',
-                        delay: 250
-                    }
-                })
-            });
-
-            $('#clear-filters').on('click', function () {
-                $('select[data-filter-field]').each(function () {
-                    var $filterField = $(this);
-                    if ($filterField.data('filter-field') == "category-id") {
-                        $filterField.val({{- defaultCategories|json_encode() -}}).trigger('change');
+    {% if current_contest is not null %}
+        <script>
+            $(function () {
+                $('#filter-toggle').on('change', function () {
+                    if ($(this).is(':checked')) {
+                        $('#filter-card').removeClass('d-none');
                     } else {
-                        $filterField.val([]).trigger('change');
-                    }
-                });
-            });
-
-            window.process_balloons_filter = function () {
-                var $trs = $('table.balloons-table > tbody tr');
-
-                var filters = [];
-
-                $('select[data-filter-field]').each(function () {
-                    var $filterField = $(this);
-                    if ($filterField.val().length) {
-                        filters.push({
-                            field: $filterField.data('filter-field'),
-                            values: $filterField.val()
-                        });
+                        $('#filter-card').addClass('d-none');
                     }
                 });
 
-                var balloons_filter = {};
-                for (var i = 0; i < filters.length; i++) {
-                    balloons_filter[filters[i].field] = filters[i].values;
-                }
+                $('.select2').each(function () {
+                    var $elem = $(this);
+                    if(!$elem.data('ajax-url')) {
+                        return;
+                    }
+                    $elem.select2({
+                        minimumInputLength: 1,
+                        ajax: {
+                            url: $elem.data('ajax-url'),
+                            dataType: 'json',
+                            delay: 250
+                        }
+                    })
+                });
 
-                setCookie('domjudge_balloonsfilter', JSON.stringify(balloons_filter));
+                $('#clear-filters').on('click', function () {
+                    $('select[data-filter-field]').each(function () {
+                        var $filterField = $(this);
+                        if ($filterField.data('filter-field') == "category-id") {
+                            $filterField.val({{- defaultCategories|json_encode() -}}).trigger('change');
+                        } else {
+                            $filterField.val([]).trigger('change');
+                        }
+                    });
+                });
 
-                if (filters.length === 0) {
-                    $trs.show();
-                } else {
-                    $trs
-                        .hide()
-                        .filter(function () {
-                            var $tr = $(this);
+                window.process_balloons_filter = function () {
+                    var $trs = $('table.balloons-table > tbody tr');
 
-                            for (var i = 0; i < filters.length; i++) {
-                                var value = "" + $tr.data(filters[i].field);
-                                if (filters[i].values.indexOf(value) === -1) {
-                                    return false;
+                    var filters = [];
+
+                    $('select[data-filter-field]').each(function () {
+                        var $filterField = $(this);
+                        if ($filterField.val().length) {
+                            filters.push({
+                                field: $filterField.data('filter-field'),
+                                values: $filterField.val()
+                            });
+                        }
+                    });
+
+                    var balloons_filter = {};
+                    for (var i = 0; i < filters.length; i++) {
+                        balloons_filter[filters[i].field] = filters[i].values;
+                    }
+
+                    setCookie('domjudge_balloonsfilter', JSON.stringify(balloons_filter));
+
+                    if (filters.length === 0) {
+                        $trs.show();
+                    } else {
+                        $trs
+                            .hide()
+                            .filter(function () {
+                                var $tr = $(this);
+
+                                for (var i = 0; i < filters.length; i++) {
+                                    var value = "" + $tr.data(filters[i].field);
+                                    if (filters[i].values.indexOf(value) === -1) {
+                                        return false;
+                                    }
                                 }
-                            }
 
-                            return true;
-                        })
-                        .show();
-                }
-            };
+                                return true;
+                            })
+                            .show();
+                    }
+                };
 
-            $('select[data-filter-field]').on('change', process_balloons_filter);
-            window.process_balloons_filter();
-        });
-    </script>
+                $('select[data-filter-field]').on('change', process_balloons_filter);
+                window.process_balloons_filter();
+            });
+        </script>
+    {% endif %}
 {% endblock %}
