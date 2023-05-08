@@ -129,7 +129,7 @@ class JudgingRunOutput
         return $this;
     }
 
-    public function getTeamMessage(): string
+    public function getTeamMessage(): ?string
     {
         return $this->team_message;
     }
