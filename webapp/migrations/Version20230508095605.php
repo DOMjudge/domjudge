@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20230507124955 extends AbstractMigration
+final class Version20230508095605 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,7 +20,7 @@ final class Version20230507124955 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE submission ADD import_error TINYINT(1) NOT NULL COMMENT \'Whether this submission was imported during shadowing but had an error while doing so.\'');
+        $this->addSql('ALTER TABLE submission ADD import_error VARCHAR(255) DEFAULT NULL COMMENT \'If this submission was imported during shadowing but had an error while doing so, the error message.\'');
     }
 
     public function down(Schema $schema): void

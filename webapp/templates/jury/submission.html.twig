@@ -87,7 +87,10 @@
     {% endif %}
 
     {% if submission.importError %}
-        <div class="alert alert-danger">This submission could not be imported into DOMjudge and thus will only show external data.</div>
+        <div class="alert alert-danger">
+            <div>This submission could not be imported into DOMjudge and thus will only show external data.</div>
+            <div>The error during import was: <code>{{ submission.importError }}</code></div>
+        </div>
     {% endif %}
 
     {% if not submission.contestProblem %}

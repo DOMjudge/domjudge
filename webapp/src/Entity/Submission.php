@@ -90,11 +90,13 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     private ?string $entry_point = null;
 
     #[ORM\Column(
-        nullable: false,
-        options: ['comment' => 'Whether this submission was imported during shadowing but had an error while doing so.']
+        nullable: true,
+        options: ['comment' => 'If this submission was imported during shadowing but had an error while doing so, the error message.']
     )]
+    #[OA\Property(nullable: true)]
+    #[Serializer\Expose(if: "context.getAttribute('domjudge_service').checkrole('jury')")]
     #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
-    private bool $importError = false;
+    private ?string $importError = null;
 
     #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
@@ -260,13 +262,13 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this->entry_point;
     }
 
-    public function setImportError(bool $importError): Submission
+    public function setImportError(?string $importError): Submission
     {
         $this->importError = $importError;
         return $this;
     }
 
-    public function isImportError(): bool
+    public function isImportError(): string
     {
         return $this->importError;
     }
