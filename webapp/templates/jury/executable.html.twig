@@ -82,8 +82,8 @@
         <div class="alert alert-warning">
             We exclude these files from editing since we could not detect their encoding (e.g. they are binary files):
             <ul>
-                {% for file in skippedBinary %}
-                    <li><code>{{ file }}</code></li>
+                {% for data in skippedBinary %}
+                    <li><code>{{ data.filename }}</code></li>
                 {% endfor %}
             </ul>
         </div>
