@@ -19,7 +19,7 @@ class Adminer extends \Adminer
         return ['domjudge'];
     }
 
-    function credentials(): array
+    public function credentials(): array
     {
         // Load credentials from <etcDir>/dbpasswords.secret
         $dbsecretsfile = $GLOBALS['etcDir'] . '/dbpasswords.secret';
@@ -35,22 +35,22 @@ class Adminer extends \Adminer
         return [$host, $user, $pass];
     }
 
-    function login($login, $password): bool
+    public function login($login, $password): bool
     {
         return true;
     }
 
-    function tableName($tableStatus): array|string
+    public function tableName($tableStatus): array|string
     {
         return h($tableStatus['Name']);
     }
 
-    function permanentLogin($create = false): string
+    public function permanentLogin($create = false): string
     {
         return 'domjudge';
     }
 
-    function loginForm()
+    public function loginForm()
     {
         echo "<input type='hidden' value='server' name='auth[driver]'/>";
         echo "<input type='hidden' value='domjudge' name='auth[db]'/>";
