@@ -296,7 +296,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
                         $rawValues[$formName][static::$addPlus] = $item[static::$addPlus];
                     }
                 }
-                $this->client->submit($form);
+                $response = $this->client->request($form->getMethod(), $form->getUri(), $rawValues, $form->getPhpFiles());
                 $this->client->followRedirect();
                 foreach ($combinedValues as $key => $value) {
                     if (!is_array($value) && !in_array($key, static::$overviewNotShown)) {
