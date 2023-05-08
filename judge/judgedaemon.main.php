@@ -1067,7 +1067,7 @@ function compile(
                 $vcscript = tempnam(TMPDIR, 'vcheck-');
                 file_put_contents($vcscript, $vcscript_content);
                 chmod($vcscript, 0755);
-                $compile_cmd = LIBJUDGEDIR . "/version_check.sh " .
+                $version_cmd = LIBJUDGEDIR . "/version_check.sh " .
                     implode(' ', array_map('dj_escapeshellarg', [
                         $vcscript,
                         $workdir,
