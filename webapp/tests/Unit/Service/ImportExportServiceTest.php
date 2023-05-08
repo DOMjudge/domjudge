@@ -669,7 +669,7 @@ EOF;
         unlink($fileName);
 
         self::assertNull($message);
-        self::assertEquals(2, $importCount);
+        self::assertEquals(count($expectedTeams), $importCount);
 
         /** @var EntityManagerInterface $em */
         $em = static::getContainer()->get(EntityManagerInterface::class);
