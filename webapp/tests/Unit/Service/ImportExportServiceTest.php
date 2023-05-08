@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Service;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
+use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Service\ConfigurationService;
@@ -893,6 +894,67 @@ EOF;
             self::assertEquals($data['visible'], $category->getVisible());
         }
     }
+
+    public function testImportOrganizationsJson()
+    {
+        // Example from the manual
+        $organizationsData = <<<EOF
+[{
+    "id": "INST-42",
+    "icpc_id": "42",
+    "name": "LU",
+    "formal_name": "Lund University",
+    "country": "SWE"
+}, {
+    "id": "INST-43",
+    "icpc_id": "43",
+    "name": "FAU",
+    "formal_name": "Friedrich-Alexander-University Erlangen-Nuremberg",
+    "country": "DEU"
+}]
+EOF;
+
+        $expectedOrganizations = [
+            [
+                'externalid' => 'INST-42',
+                'icpcid' => '42',
+                'shortname' => 'LU',
+                'name' => 'Lund University',
+                'country' => 'SWE',
+            ], [
+                'externalid' => 'INST-43',
+                'icpcid' => '43',
+                'shortname' => 'FAU',
+                'name' => 'Friedrich-Alexander-University Erlangen-Nuremberg',
+                'country' => 'DEU',
+            ],
+        ];
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'organizations-json');
+        file_put_contents($fileName, $organizationsData);
+        $file = new UploadedFile($fileName, 'organizations.json');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('organizations', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertNull($message);
+        self::assertEquals(count($expectedOrganizations), $importCount);
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        foreach ($expectedOrganizations as $data) {
+            $affiliation = $em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $data['externalid']]);
+            self::assertNotNull($affiliation, "Team affiliation $data[name] does not exist");
+            self::assertEquals($data['icpcid'] ?? null, $affiliation->getIcpcId());
+            self::assertEquals($data['shortname'], $affiliation->getShortname());
+            self::assertEquals($data['name'], $affiliation->getName());
+            self::assertEquals($data['country'], $affiliation->getCountry());
+        }
+    }
+
 
     protected function getContest($cid): Contest
     {
