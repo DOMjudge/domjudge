@@ -27,7 +27,7 @@ class LanguageController extends BaseController
     #[Route(path: '/', name: 'team_languages')]
     public function languagesAction(): Response
     {
-        $languagesEnabled = $this->config->get('show_canonical_versions');
+        $languagesEnabled = $this->config->get('show_language_versions');
         if (!$languagesEnabled) {
             throw new BadRequestHttpException("You are not allowed to view this page.");
         }

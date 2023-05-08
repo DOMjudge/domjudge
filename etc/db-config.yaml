@@ -39,7 +39,6 @@
             default_value: false
             public: true
             description: Is the scoreboard resolution measured in seconds instead of minutes?
-
 -   category: Judging
     description: Options related to how judging is performed.
     items:
@@ -260,7 +259,7 @@
             default_value: true
             public: true
             description: Show submission and problem statistics on the team and public pages.
-        -   name: show_canonical_versions
+        -   name: show_language_versions
             type: bool
             default_value: false
             public: true

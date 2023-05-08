@@ -46,6 +46,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -1198,7 +1199,7 @@ class JudgehostController extends AbstractFOSRestController
         $submission = $this->em->getRepository(Submission::class)
             ->findOneBy(['submitid' => $judgeTask->getSubmitid()]);
         if (!$submission) {
-            throw new BadRequestHttpException('Unknown submission with submitid ' . $judgeTask->getSubmitid());
+            throw new HttpException(500, 'Unknown submission with submitid ' . $judgeTask->getSubmitid());
         }
 
         /** @var Language $language */

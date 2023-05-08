@@ -5,13 +5,13 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Runner and compiler version commands per language.
+ * Runner and compiler versions per language.
  */
 #[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
-    'comment' => 'Runner and compiler version commands per language.',
+    'comment' => 'Runner and compiler versions per language.',
 ])]
 class Version
 {
