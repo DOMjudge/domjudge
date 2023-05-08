@@ -75,7 +75,7 @@ class BalloonController extends AbstractController
 
         // Load preselected filters
         $filters              = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_balloonsfilter') ?: '[]');
-        $have_filters         = $this->dj->getCookie('domjudge_balloonsfilter') != null;
+        $haveFilters          = $this->dj->getCookie('domjudge_balloonsfilter') != null;
         $filteredAffiliations = [];
         $filteredLocations    = [];
         $filteredCategories   = [];
@@ -99,7 +99,7 @@ class BalloonController extends AbstractController
                 ->getQuery()
                 ->getResult();
         }
-        if(!$have_filters) {
+        if(!$haveFilters) {
             /** @var TeamCategory[] $filteredCategories */
             $filteredCategories = $this->em->createQueryBuilder()
                 ->from(TeamCategory::class, 'c')
