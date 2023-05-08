@@ -57,7 +57,7 @@ class JudgingRunOutput
     #[ORM\Column(
         type: 'blobtext',
         nullable: true,
-        options: ['comment' => 'Judge message to team']
+        options: ['comment' => 'Judge message for the team']
     )]
     private ?string $team_message = null;
 

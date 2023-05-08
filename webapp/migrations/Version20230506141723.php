@@ -20,7 +20,7 @@ final class Version20230506141723 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE judging_run_output ADD team_message LONGBLOB DEFAULT NULL COMMENT \'Judge message to team(DC2Type:blobtext)\'');
+        $this->addSql('ALTER TABLE judging_run_output ADD team_message LONGBLOB DEFAULT NULL COMMENT \'Judge message for the team(DC2Type:blobtext)\'');
     }
 
     public function down(Schema $schema): void
