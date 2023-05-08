@@ -268,7 +268,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
-    public function isImportError(): string
+    public function isImportError(): ?string
     {
         return $this->importError;
     }
