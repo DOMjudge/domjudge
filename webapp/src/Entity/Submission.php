@@ -124,6 +124,10 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     #[Serializer\Exclude]
     private Collection $judgings;
 
+    #[ORM\OneToMany(mappedBy: 'submission', targetEntity: JudgeTask::class)]
+    #[Serializer\Exclude]
+    private Collection $judgetasks;
+
     #[ORM\OneToMany(mappedBy: 'submission', targetEntity: ExternalJudgement::class)]
     #[Serializer\Exclude]
     private Collection $external_judgements;

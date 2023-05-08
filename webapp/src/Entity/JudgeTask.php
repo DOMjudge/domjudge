@@ -68,12 +68,13 @@ class JudgeTask
     )]
     private ?string $uuid = null;
 
-    #[ORM\Column(
-        nullable: true,
-        options: ['comment' => 'Submission ID being judged', 'unsigned' => true]
-    )]
+
+    #[ORM\ManyToOne(inversedBy: 'judgetasks')]
+    #[ORM\JoinColumn(name: 'submitid', nullable: true, referencedColumnName: 'submitid', onDelete: 'CASCADE',
+        options: ['comment' => 'Submission ID being judged', 'unsigned' => true])
+    ]
     #[Serializer\Type('string')]
-    private ?int $submitid = null;
+    private Submission $submission;
 
     // Note that we rely on the fact here that files with an ID are immutable,
     // so clients are allowed to cache them on disk.
@@ -213,15 +214,15 @@ class JudgeTask
         return $this->uuid;
     }
 
-    public function setSubmitid(int $submitid): JudgeTask
+    public function setSubmission(?Submission $submission): JudgeTask
     {
-        $this->submitid = $submitid;
+        $this->submission = $submission;
         return $this;
     }
 
-    public function getSubmitid(): ?int
+    public function getSubmission(): ?Submission
     {
-        return $this->submitid;
+        return $this->submission;
     }
 
     public function setCompileScriptId(int $compile_script_id): JudgeTask
