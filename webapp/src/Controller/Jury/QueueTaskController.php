@@ -49,7 +49,7 @@ class QueueTaskController extends BaseController
         $tableFields = [
             'queuetaskid' => ['title' => 'ID'],
             'team.name' => ['title' => 'team'],
-            'jobid' => ['title' => 'job'],
+            'judging.judgingid' => ['title' => 'judgingid'],
             'priority' => ['title' => 'priority'],
             'teampriority' => ['title' => 'team priority'],
             'starttime' => ['title' => 'start time'],
@@ -72,7 +72,7 @@ class QueueTaskController extends BaseController
 
             // Add some links.
             $queueTaskData['team.name']['link'] = $this->generateUrl('jury_team', ['teamId' => $queueTask->getTeam()->getTeamid()]);
-            $queueTaskData['jobid']['link'] = $this->generateUrl('jury_submission_by_judging', ['jid' => $queueTask->getJudging()->getJudgingid()]);
+            $queueTaskData['judgingid']['link'] = $this->generateUrl('jury_submission_by_judging', ['jid' => $queueTask->getJudging()->getJudgingid()]);
 
             // Format start time.
             if (!empty($queueTaskData['starttime']['value'])) {
