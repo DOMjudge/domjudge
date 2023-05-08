@@ -20,6 +20,12 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="problem",
+ *     uniqueConstraints={
+ *          @ORM\UniqueConstraint(
+ *              name="externalid",
+ *              columns={"externalid"}
+ *          )
+ *     },
  *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Problems the teams can submit solutions for"},
  *     indexes={
  *         @ORM\Index(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
