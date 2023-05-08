@@ -106,7 +106,9 @@ Jury
 </div>
 </div>
 
-<div class="card-text"><pre class="output-text bg-light p-3">{{ clar.body|wrapUnquoted(78) }}</pre></div>
+<hr/>
+
+<div class="card-text">{{ clar.body | markdown_to_html }}</div>
 
 </div>
 </div>
