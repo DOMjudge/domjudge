@@ -24,14 +24,11 @@ use Symfony\Component\Validator\Constraints as Assert;
     'charset' => 'utf8mb4',
     'comment' => 'Problems the teams can submit solutions for',
 ])]
-#[ORM\Index(columns: ['externalid'], name: 'externalid', options: ['lengths' => [190]])]
+#[ORM\UniqueConstraint(columns: ['externalid'], name: 'externalid', options: ['lengths' => [190]])]
 #[ORM\Index(columns: ['special_run'], name: 'special_run')]
 #[ORM\Index(columns: ['special_compare'], name: 'special_compare')]
 #[ORM\HasLifecycleCallbacks]
-#[UniqueEntity(
-    fields: 'externalid',
-    message: 'A problem with the same `externalid` already exists - is this a duplicate?'
-)]
+#[UniqueEntity(fields: 'externalid')]
 class Problem extends BaseApiEntity
 {
     #[ORM\Id]
