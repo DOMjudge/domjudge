@@ -72,7 +72,7 @@ class QueueTaskController extends BaseController
 
             // Add some links.
             $queueTaskData['team.name']['link'] = $this->generateUrl('jury_team', ['teamId' => $queueTask->getTeam()->getTeamid()]);
-            $queueTaskData['jobid']['link'] = $this->generateUrl('jury_submission_by_judging', ['jid' => $queueTask->getJobId()]);
+            $queueTaskData['jobid']['link'] = $this->generateUrl('jury_submission_by_judging', ['jid' => $queueTask->getJudging()->getJudgingid()]);
 
             // Format start time.
             if (!empty($queueTaskData['starttime']['value'])) {
@@ -141,7 +141,7 @@ class QueueTaskController extends BaseController
             ->from(JudgeTask::class, 'jt')
             ->addOrderBy('jt.judgetaskid')
             ->andWhere('jt.jobid = :jobid')
-            ->setParameter('jobid', $queueTask->getJobId())
+            ->setParameter('jobid', $queueTask->getJudging()->getJudgingid())
             ->getQuery()->getResult();
 
         foreach ($judgeTasks as $judgeTask) {
@@ -170,7 +170,7 @@ class QueueTaskController extends BaseController
             ->innerJoin('jt.judging_runs', 'jr')
             ->addOrderBy('jt.judgetaskid')
             ->andWhere('jt.jobid = :jobid')
-            ->setParameter('jobid', $queueTask->getJobId())
+            ->setParameter('jobid', $queueTask->getJudging()->getJudgingid())
             ->getQuery()->getResult();
 
         $tableFields = [

@@ -156,30 +156,6 @@ class QueuetaskIntegrationTest extends KernelTestCase
         self::getContainer()->get('security.untracked_token_storage')->setToken($token);
     }
 
-    protected function tearDown(): void
-    {
-        // Preserve the data for inspection if a test failed.
-        if (!$this->hasFailed()) {
-            // We need to reload the data here as they might become detached in the eventlog function.
-            foreach ($this->teams as $team) {
-                $team = $this->em->getRepository(Team::class)->find($team->getTeamid());
-                $this->em->remove($team);
-            }
-            foreach ($this->problems as $problem) {
-                $problem = $this->em->getRepository(Problem::class)->find($problem->getProbid());
-                $this->em->remove($problem);
-            }
-            $contest = $this->em->getRepository(Contest::class)->find($this->contest);
-            $this->em->remove($contest);
-        }
-        $this->em->flush();
-
-        parent::tearDown();
-
-        $this->em->close();
-        $this->em = null; // avoid memory leaks
-    }
-
     private function submit($time, ?Team $team = null, ?Problem $problem = null, string $source = 'team page'): QueueTask
     {
         $contest = $this->em->getRepository(Contest::class)->find($this->contest->getCid());
@@ -196,7 +172,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
         $judging = $submission->getJudgings()->get(0);
         self::assertNotNull($judging);
 
-        $queuetask = $this->em->getRepository(QueueTask::class)->findOneBy(['jobid' => $judging->getJudgingid()]);
+        $queuetask = $this->em->getRepository(QueueTask::class)->findOneBy(['judging' => $judging]);
         self::assertNotNull($queuetask);
 
         return $queuetask;
