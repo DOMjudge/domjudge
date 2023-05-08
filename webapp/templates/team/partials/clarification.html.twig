@@ -37,8 +37,10 @@
             </div>
         </div>
 
+        <hr/>
+
         <div class="card-text">
-            <pre class="output-text bg-light p-3">{{ clarification.body|wrapUnquoted(78) }}</pre>
+            {{ clarification.body | markdown_to_html }}
         </div>
     </div>
 </div>
