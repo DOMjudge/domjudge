@@ -20,6 +20,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportProblemService;
+use App\Service\StatisticsService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,10 +28,9 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -38,6 +38,7 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Yaml;
 use ZipArchive;
 
@@ -138,7 +139,15 @@ class ProblemController extends BaseController
                         'probId' => $p->getProbid(),
                     ])
                 ];
-                $problemactions[] = [
+
+                $problemIsLocked = false;
+                foreach ($p->getContestProblems() as $contestProblem) {
+                    if ($contestProblem->getContest()->isLocked()) {
+                        $problemIsLocked = true;
+                    }
+                }
+
+                $deleteAction = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this problem',
                     'link' => $this->generateUrl('jury_problem_delete', [
@@ -146,6 +155,12 @@ class ProblemController extends BaseController
                     ]),
                     'ajaxModal' => true,
                 ];
+                if ($problemIsLocked) {
+                    $deleteAction['title'] .= ' - problem belongs to a locked contest';
+                    $deleteAction['disabled'] = true;
+                    unset($deleteAction['link']);
+                }
+                $problemactions[] = $deleteAction;
             }
 
             // Add formatted {mem,output}limit row data for the table.
@@ -180,10 +195,34 @@ class ProblemController extends BaseController
         $data = [
             'problems' => $problems_table,
             'table_fields' => $table_fields,
-            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 4 : 2,
         ];
 
         return $this->render('jury/problems.html.twig', $data);
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route(path: '/problemset', name: 'jury_problemset')]
+    public function problemsetAction(StatisticsService $stats): Response
+    {
+        return $this->render('jury/problemset.html.twig',
+            $this->dj->getTwigDataForProblemsAction($stats, forJury: true));
+    }
+
+    #[Route(path: '/{probId<\d+>}/samples.zip', name: 'jury_problem_sample_zip')]
+    public function sampleZipAction(int $probId): StreamedResponse
+    {
+        $contest = $this->dj->getCurrentContest();
+        /** @var ContestProblem $contestProblem */
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
+            'problem' => $probId,
+            'contest' => $contest,
+        ]);
+        if (!$contestProblem) {
+            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+        }
+        return $this->dj->getSamplesZipStreamedResponse($contestProblem);
     }
 
     /**

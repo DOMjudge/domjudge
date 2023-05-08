@@ -21,6 +21,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\Index(columns: ['affilid'], name: 'affilid')]
 #[ORM\Index(columns: ['categoryid'], name: 'categoryid')]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
+#[ORM\UniqueConstraint(name: 'label', columns: ['label'])]
 #[UniqueEntity(fields: 'externalid')]
 class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface, AssetEntityInterface
 {
@@ -49,6 +50,13 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[OA\Property(nullable: true)]
     #[Serializer\SerializedName('icpc_id')]
     protected ?string $icpcid = null;
+
+    #[ORM\Column(
+        nullable: true,
+        options: ['comment' => 'Team label, for example the seat number', 'collation' => 'utf8mb4_bin']
+    )]
+    #[OA\Property(nullable: true)]
+    protected ?string $label = null;
 
     #[ORM\Column(options: ['comment' => 'Team name', 'collation' => 'utf8mb4_bin'])]
     private string $name = '';
@@ -191,6 +199,17 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     public function getIcpcId(): ?string
     {
         return $this->icpcid;
+    }
+
+    public function setLabel(?string $label): Team
+    {
+        $this->label = $label;
+        return $this;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->label;
     }
 
     public function setName(string $name): Team
@@ -433,11 +452,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
-    public function removeUser(User $user): void
-    {
-        $this->users->removeElement($user);
-    }
-
     public function getUsers(): Collection
     {
         return $this->users;
@@ -447,11 +461,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     {
         $this->submissions[] = $submission;
         return $this;
-    }
-
-    public function removeSubmission(Submission $submission): void
-    {
-        $this->submissions->removeElement($submission);
     }
 
     public function getSubmissions(): Collection
@@ -465,11 +474,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
-    public function removeSentClarification(Clarification $sentClarification)
-    {
-        $this->sent_clarifications->removeElement($sentClarification);
-    }
-
     public function getSentClarifications(): Collection
     {
         return $this->sent_clarifications;
@@ -479,11 +483,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     {
         $this->received_clarifications[] = $receivedClarification;
         return $this;
-    }
-
-    public function removeReceivedClarification(Clarification $receivedClarification): void
-    {
-        $this->received_clarifications->removeElement($receivedClarification);
     }
 
     public function getReceivedClarifications(): Collection

@@ -97,7 +97,6 @@ class ExecutableController extends BaseController
         return $this->render('jury/executables.html.twig', [
             'executables' => $executables_table,
             'table_fields' => $table_fields,
-            'num_actions' => count($execactions),
             'form' => $form,
         ]);
     }

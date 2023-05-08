@@ -13,11 +13,13 @@ use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\JudgingRunOutput;
+use App\Entity\Language;
 use App\Entity\QueueTask;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\TestcaseContent;
+use App\Entity\Version;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -44,6 +46,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -1164,6 +1167,166 @@ class JudgehostController extends AbstractFOSRestController
             'compare', 'compile', 'debug', 'run' => $this->getExecutableFiles($id),
             default => throw new BadRequestHttpException('Unknown type requested.'),
         };
+    }
+
+    /**
+     * Get version commands for a given compile script.
+     */
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
+    #[Rest\Get('/get_version_commands/{judgetaskid<\d+>}')]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns optionally compiler and runner version commands.',
+        content: new OA\JsonContent(
+            required: [],
+            properties: [
+                new OA\Property(property: 'compiler_version_command', type: 'string', nullable: true),
+                new OA\Property(property: 'runner_version_command', type: 'string', nullable: true),
+            ],
+            type: 'object'
+        )
+    )]
+    public function getVersionCommands(string $judgetaskid): array
+    {
+        /** @var JudgeTask $judgeTask */
+        $judgeTask = $this->em->getRepository(JudgeTask::class)
+            ->findOneBy(['judgetaskid' => $judgetaskid]);
+        if (!$judgeTask) {
+            throw new BadRequestHttpException('Unknown judge task with id ' . $judgetaskid);
+        }
+
+        /** @var Submission $submission */
+        $submission = $this->em->getRepository(Submission::class)
+            ->findOneBy(['submitid' => $judgeTask->getSubmitid()]);
+        if (!$submission) {
+            throw new HttpException(500, 'Unknown submission with submitid ' . $judgeTask->getSubmitid());
+        }
+
+        /** @var Language $language */
+        $language = $submission->getLanguage();
+
+
+        $ret = [];
+        if (!empty($language->getCompilerVersionCommand())) {
+            $ret['compiler_version_command'] = $language->getCompilerVersionCommand();
+        }
+        if (!empty($language->getRunnerVersionCommand())) {
+            $ret['runner_version_command'] = $language->getRunnerVersionCommand();
+        }
+        return $ret;
+    }
+
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
+    #[Rest\Put('/check_versions/{judgetaskid}')]
+    #[OA\Response(
+        response: 200,
+        description: 'Updates internal versions, does not check them yet.',
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    required: ['hostname', 'compiler', 'runner'],
+                    properties: [
+                        new OA\Property(
+                            property: 'problem',
+                            description: 'Checking versions for the given hostname.',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'compiler',
+                            description: 'Reported compiler version.',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'runner',
+                            description: 'Reported runner version.',
+                            type: 'array',
+                            items: new OA\Items(type: 'string', format: 'binary')
+                        ),
+                    ]
+                )
+            ),
+        ]
+    )]
+    public function checkVersions(Request $request, string $judgetaskid)
+    {
+        /** @var JudgeTask $judgeTask */
+        $judgeTask = $this->em->getRepository(JudgeTask::class)
+            ->findOneBy(['judgetaskid' => $judgetaskid]);
+        if (!$judgeTask) {
+            throw new BadRequestHttpException('Unknown judge task with id ' . $judgetaskid);
+        }
+
+        /** @var Submission $submission */
+        $submission = $this->em->getRepository(Submission::class)
+            ->findOneBy(['submitid' => $judgeTask->getSubmitid()]);
+        if (!$submission) {
+            throw new BadRequestHttpException('Unknown submission with submitid ' . $judgeTask->getSubmitid());
+        }
+
+        /** @var Language $language */
+        $language = $submission->getLanguage();
+
+        $hostname = $request->request->get('hostname');
+        /** @var Judgehost $judgehost */
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
+        if (!$judgehost) {
+            throw new BadRequestHttpException(
+                'Register yourself first. You (' . $hostname . ') are not known to us yet.');
+        }
+
+        $reportedVersions = [];
+        if ($request->request->has('compiler')) {
+            $reportedVersions['compiler'] = base64_decode($request->request->get('compiler'));
+        }
+        if ($request->request->has('runner')) {
+            $reportedVersions['runner'] = base64_decode($request->request->get('runner'));
+        }
+        $this->em->wrapInTransaction(function () use (
+            $request,
+            $judgehost,
+            $reportedVersions,
+            $language
+        ) {
+            /** @var Version $version */
+            $version = $this->em->getRepository(Version::class)
+                ->findOneBy(['language' => $language, 'judgehost' => $judgehost]);
+
+            $newVersion = false;
+            if (!$version) {
+                $newVersion = true;
+                $version = new Version();
+                $version
+                    ->setLanguage($language)
+                    ->setJudgehost($judgehost);
+                $this->em->persist($version);
+            }
+            if (isset($reportedVersions['compiler'])) {
+                if ($version->getCompilerVersion() !== $reportedVersions['compiler']) {
+                    $version
+                        ->setCompilerVersion($reportedVersions['compiler'])
+                        ->setCompilerVersionCommand($language->getCompilerVersionCommand());
+                    $newVersion = true;
+                }
+            }
+            if (isset($reportedVersions['runner'])) {
+                if ($version->getRunnerVersion() !== $reportedVersions['runner']) {
+                    $version
+                        ->setRunnerVersion($reportedVersions['runner'])
+                        ->setRunnerVersionCommand($language->getRunnerVersionCommand());
+                    $newVersion = true;
+                }
+            }
+            if ($newVersion) {
+                $version->setLastChangedTime(Utils::now());
+                $this->em->flush();
+            }
+            // TODO: Optionally check version here against canonical version.
+        });
+        return [];
     }
 
     private function getSourceFiles(string $id): array

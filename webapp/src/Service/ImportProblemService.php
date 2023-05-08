@@ -318,6 +318,14 @@ class ImportProblemService
             }
         }
 
+        $this->em->persist($problem);
+        if ($contestProblem) {
+            $contestProblem->setProblem($problem);
+            $contestProblem->setContest($contest);
+            $this->em->persist($contestProblem);
+        }
+        $this->em->flush();
+
         // Load the current testcases to see if we need to delete, update or insert testcases.
         $existingTestcases = [];
         if ($problem->getProbid()) {
@@ -331,7 +339,7 @@ class ImportProblemService
                 ->getQuery()
                 ->getResult();
             foreach ($testcaseData as $testcase) {
-                $index                     = sprintf(
+                $index = sprintf(
                     '%s-%s-%s',
                     $testcase->getMd5sumInput(),
                     $testcase->getMd5sumOutput(),
@@ -378,11 +386,12 @@ class ImportProblemService
             asort($dataFiles);
 
             foreach ($dataFiles as $dataFile) {
-                $testInput  = $zip->getFromName(sprintf('data/%s/%s.in', $type, $dataFile));
-                $testOutput = $zip->getFromName(sprintf('data/%s/%s.ans', $type, $dataFile));
+                $baseFileName = sprintf('data/%s/%s', $type, $dataFile);
+                $testInput  = $zip->getFromName($baseFileName . '.in');
+                $testOutput = $zip->getFromName($baseFileName . '.ans');
                 $imageFile  = $imageType = $imageThumb = false;
                 foreach (['png', 'jpg', 'jpeg', 'gif'] as $imgExtension) {
-                    $imageFileName = sprintf('data/%s/%s.%s', $type, $dataFile, $imgExtension);
+                    $imageFileName = $baseFileName . '.' . $imgExtension;
                     if (($imageFile = $zip->getFromName($imageFileName)) !== false) {
                         $imageType = Utils::getImageType($imageFile, $errormsg);
                         if ($imageType === false) {
@@ -406,6 +415,13 @@ class ImportProblemService
                         }
                         break;
                     }
+                }
+
+                if (str_contains($testInput, "\r")) {
+                    $messages['warning'][] = "Testcase file '$baseFileName.in' contains Windows newlines.";
+                }
+                if (str_contains($testOutput, "\r")) {
+                    $messages['warning'][] = "Testcase file '$baseFileName.ans' contains Windows newlines.";
                 }
 
                 $md5in  = md5($testInput);
@@ -449,7 +465,7 @@ class ImportProblemService
                 $testcaseContent
                     ->setInput($testInput)
                     ->setOutput($testOutput);
-                if (($descriptionFile = $zip->getFromName(sprintf('data/%s/%s.desc', $type, $dataFile))) !== false) {
+                if (($descriptionFile = $zip->getFromName($baseFileName . '.desc')) !== false) {
                     $testcase->setDescription($descriptionFile);
                 }
                 if ($imageFile !== false) {
@@ -576,7 +592,6 @@ class ImportProblemService
                 count($removedAttachments), join(',', $removedAttachments));
         }
 
-        $this->em->persist($problem);
         $this->em->wrapInTransaction(function () use ($testcases, $startRank) {
             $this->em->flush();
             // Set actual ranks if needed.
@@ -589,12 +604,6 @@ class ImportProblemService
             }
             $this->em->flush();
         });
-        if ($contestProblem) {
-            $contestProblem->setProblem($problem);
-            $contestProblem->setContest($contest);
-            $this->em->persist($contestProblem);
-            $this->em->flush();
-        }
 
         $cid = $contest?->getCid();
         $probid = $problem->getProbid();
@@ -716,11 +725,19 @@ class ImportProblemService
                         $tempFiles[]     = $tempFileName;
                     }
                     if ($results === false || $results === null) {
-                        $results[] = $expectedResult;
+                        $results = [$expectedResult];
                     } elseif (!in_array($expectedResult, $results)) {
-                        $messages['info'][] = sprintf("Annotated result '%s' does not match directory for %s",
-                                              implode(', ', $results), $path);
+                        $messages['danger'][] = sprintf(
+                            "Annotated result '%s' does not match directory for %s",
+                            implode(', ', $results), $path
+                        );
                     } elseif (!empty($expectedResult)) {
+                        if (count($results) > 1) {
+                            $messages['warning'][] = sprintf(
+                                "Annotated results '%s' restricted to match directory for %s",
+                                implode(', ', $results), $path
+                            );
+                        }
                         $results = [$expectedResult];
                     }
                     $jury_team_id = $this->dj->getUser()->getTeam() ? $this->dj->getUser()->getTeam()->getTeamid() : null;
@@ -783,11 +800,11 @@ class ImportProblemService
                     join(', ', $successful_subs));
             }
             if (!empty($subs_with_unknown_lang)) {
-                $messages['warning'][] = sprintf("Could not add jury solution due to unknown language: %s",
+                $messages['warning'][] = sprintf("Could not add jury solution(s) due to unknown language: %s",
                     join(', ', $subs_with_unknown_lang));
             }
             if (!empty($too_large_subs)) {
-                $messages['warning'][] = sprintf("Could not add jury solution because they are too large: %s",
+                $messages['warning'][] = sprintf("Could not add jury solution(s) because they are too large: %s",
                     join(', ', $too_large_subs));
             }
         } else {
@@ -795,6 +812,20 @@ class ImportProblemService
         }
 
         $messages['info'][] = sprintf('Saved problem %d', $problem->getProbid());
+
+        // Only here disable problem submit to make sure the jury submissions
+        // do get added above.
+        if ($contestProblem) {
+            $this->em->flush();
+            $testcases = $problem->getTestcases()->toArray();
+            if (count(array_filter($testcases, function($t) { return !$t->getDeleted(); }))==0) {
+                $messages['danger'][] = 'No testcases present, disabling submitting for this problem';
+                $contestProblem->setAllowSubmit(false);
+            }
+        }
+
+        // Make sure we persisted all changes to DB
+        $this->em->flush();
 
         return $problem;
     }

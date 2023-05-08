@@ -415,6 +415,7 @@ function clarificationAppendAnswer() {
     var textbox = $('#bodytext');
     textbox.val(textbox.val().replace(/\n$/, "") + '\n' + selected);
     textbox.scrollTop(textbox[0].scrollHeight);
+    previewClarification($('#bodytext') , $('#messagepreview'));
 }
 
 function confirmLogout() {
@@ -762,6 +763,28 @@ function humanReadableBytes(bytes) {
         }
     }
     return Math.floor(bytes) + 'B';
+}
+
+function previewClarification($input, $previewDiv) {
+    var message = $input.val();
+    $.ajax({
+        url: markdownPreviewUrl,
+        method: 'POST',
+        data: {
+            message: message
+        }
+    }).done(function(data) {
+        $previewDiv.html(data.html);
+    });
+}
+
+function setupPreviewClarification($input, $previewDiv, previewInitial) {
+    if (previewInitial) {
+        previewClarification($input, $previewDiv);
+    }
+    $($input).on('keyup', $.debounce(function() {
+        previewClarification($input, $previewDiv);
+    }, 250));
 }
 
 $(function () {

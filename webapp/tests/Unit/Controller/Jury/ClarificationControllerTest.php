@@ -71,12 +71,11 @@ class ClarificationControllerTest extends BaseTestCase
 
         /** @var Clarification[] $clarifications */
         $clarifications = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Clarification::class)->findAll();
-        $count = count($clarifications);
-        $clarificationText = $this->getCurrentCrawler()->filter('pre')->extract(['_text']);
+        $clarificationText = $this->getCurrentCrawler()->filter('div.card-text')->extract(['_text']);
         self::assertEquals('What is 2+2?',
-                           $clarificationText[0]);
+                           trim($clarificationText[0]));
         self::assertEquals("You have a fast calculator in front of you.",
-                           $clarificationText[1]);
+                           trim($clarificationText[1]));
 
         $this->verifyLinkToURL('Example teamname',
                                'http://localhost/jury/teams/2');
@@ -104,7 +103,7 @@ class ClarificationControllerTest extends BaseTestCase
         $labels = $crawler->filter('label')->extract(['_text']);
         self::assertEquals('Send to:', $labels[0]);
         self::assertEquals('Subject:', $labels[1]);
-        self::assertEquals('Message:', $labels[2]);
+        self::assertEquals('message', $labels[2]);
 
         $this->client->submitForm('Send', [
             'sendto' => '',
@@ -117,7 +116,7 @@ class ClarificationControllerTest extends BaseTestCase
         self::assertSelectorTextContains('div.col-sm strong', 'All');
         self::assertSelectorTextContains('span.clarification-subject',
                                          'demo - Technical issue');
-        self::assertSelectorTextContains('pre.output-text',
+        self::assertSelectorTextContains('div.card-text',
                                          'This is a clarification');
     }
 }

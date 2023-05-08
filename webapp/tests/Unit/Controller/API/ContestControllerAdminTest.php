@@ -32,11 +32,11 @@ class ContestControllerAdminTest extends ContestControllerTest
     {
         $yaml = <<<EOF
 duration: 2:00:00
-name: NWERC 2020 Practice Session
-penalty-time: 20
-scoreboard-freeze-length: 30:00
-short-name: practice
-start-time: 2021-03-27 09:00:00+00:00
+formal_name: NWERC 2020 Practice Session
+penalty_time: 20
+scoreboard_freeze_duration: 30:00
+id: practice
+start_time: 2021-03-27 09:00:00+00:00
 problems:
 -   color: '#FE9DAF'
     letter: A
@@ -52,12 +52,16 @@ problems:
     short-name: cheating
 EOF;
         $expectedYaml = <<<EOF
-duration: 2:00:00.000
+id: practice
 formal_name: NWERC 2020 Practice Session
-penalty_time: 20
-scoreboard_freeze_duration: 0:30:00
 name: practice
+activate_time: '2021-03-27T09:00:00+00:00'
 start_time: '2021-03-27T09:00:00+00:00'
+end_time: '2021-03-27T11:00:00+00:00'
+duration: 2:00:00.000
+penalty_time: 20
+scoreboard_freeze_time: '2021-03-27T10:30:00+00:00'
+scoreboard_freeze_duration: 0:30:00
 EOF;
 
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
@@ -76,6 +80,8 @@ EOF;
         $expected = $this->parseSortYaml($expectedYaml);
         $actual = $this->parseSortYaml($exportContestYaml);
         self::assertSame($expected, $actual);
+        self::assertSame($this->getContest($cid)->getActivatetime(), $this->getContest($cid)->getStarttime());
+        self::assertNull($this->getContest($cid)->getDeactivatetime());
     }
 
     public function testAddJson(): void
@@ -233,5 +239,104 @@ EOF;
         yield [['id' => 1, 'scoreboard_thaw_time' => '+15 seconds', 'force' => true], 204, null, [DemoPostUnfreezeContestFixture::class], false, true];
         yield [['id' => 1, 'scoreboard_thaw_time' => '+15 seconds'], 204, null, [], false, true];
         yield [['id' => 1, 'scoreboard_thaw_time' => '-15 seconds'], 200, 'Demo contest', [], true, true];
+    }
+
+    /**
+     * @dataProvider provideNewContest
+     */
+    public function testActivateTimeContestYaml(
+        string $activateTime, string $startTime, ?string $deactivateTime,
+        bool $setActivate, bool $setDeactivate
+    ): void {
+        $yaml = <<<EOF
+duration: 2:00:00
+name: New Contest to check Activation
+penalty-time: 20
+scoreboard_freeze_duration: 30:00
+id: activation
+start_time: {$startTime}
+problems:
+-   color: '#FE9DAF'
+    letter: A
+    rgb: '#FE9DAF'
+    id: anothereruption
+EOF;
+
+        if ($setActivate) {
+            $yaml = "activate_time: ".$activateTime."\n".$yaml;
+        }
+        if ($setDeactivate) {
+            $yaml = "deactivate_time: ".$deactivateTime."\n".$yaml;
+        }
+        $url = $this->helperGetEndpointURL($this->apiEndpoint);
+        $tempYamlFile = tempnam(sys_get_temp_dir(), "/contest-yaml-");
+        file_put_contents($tempYamlFile, $yaml);
+        $yamlFile = new UploadedFile($tempYamlFile, 'contest.yaml');
+        $cid = $this->verifyApiJsonResponse('POST', $url, 200, $this->apiUser, [], ['yaml' => $yamlFile]);
+        self::assertIsString($cid);
+        unlink($tempYamlFile);
+
+        $now = Utils::now();
+        $nowTime = Utils::printtime($now, 'Y-m-d H:i:s');
+        $activate = Utils::toEpochFloat($activateTime);
+        $start = Utils::toEpochFloat($startTime);
+
+        self::assertIsString($cid);
+        self::assertSame('New Contest to check Activation', $this->getContest($cid)->getName());
+        self::assertSame($start, $this->getContest($cid)->getStarttime());
+
+        if ($setActivate) {
+            self::assertSame($activateTime, Utils::printtime($this->getContest($cid)->getActivatetime(), 'Y-m-d H:i:s'));
+            self::assertSame($activate, $this->getContest($cid)->getActivatetime());
+        } else {
+            // Contest uploaded starts in the past
+            if (Utils::printtime(Utils::now(), 'Y-m-d H:i:s')>=$startTime) {
+                self::assertSame($this->getContest($cid)->getActivatetime(), $this->getContest($cid)->getStarttime());
+            } else {
+                self::assertTrue($this->getContest($cid)->getActivatetime() <= $now);
+            }
+        }
+        if ($deactivateTime) {
+            self::assertSame($deactivateTime, Utils::printtime($this->getContest($cid)->getDeactivatetime(), 'Y-m-d H:i:s'));
+        } else {
+            self::assertNull($this->getContest($cid)->getDeactivatetime());
+        }
+    }
+
+    public function provideNewContest(): Generator
+    {
+        // Test Activation in past, present & future
+        yield [Utils::printtime(Utils::now()-14*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), null, True, False];
+        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), null, True, False];
+        yield [Utils::printtime(Utils::now()-1, 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), null, True, False];
+        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), null, True, False];
+        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), null, True, False];
+        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), null, True, False];
+        yield [Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), null, True, False];
+        yield [Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+14*24*60*60, 'Y-m-d H:i:s'), null, True, False];
+        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), null, True, False];
+        // Test Deactivation in past, present & future
+        yield [Utils::printtime(Utils::now()-14*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-14*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), False, True];
+        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-1, 'Y-m-d H:i:s'), False, True];
+        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), False, True];
+        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), False, True];
+        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), False, True];
+        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), False, True];
+        yield [Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), False, True];
+        yield [Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+14*24*60*60, 'Y-m-d H:i:s'), False, True];
+        // Only activate during the contest
+        foreach ([True, False] as $explicitSet) {
+            yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-(7*24-2)*60*60, 'Y-m-d H:i:s'), $explicitSet, True];
+            yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+2*60*60, 'Y-m-d H:i:s'), $explicitSet, True];
+            yield [Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+(7*24+2)*60*60, 'Y-m-d H:i:s'), $explicitSet, True];
+        }
+        // Pick hardcoded times
+        yield ["2000-01-01 10:10:10", "2000-01-01 10:10:10", "2002-01-01 10:10:10", False, True];
+        yield ["2000-01-01 10:10:10", "2001-01-01 10:10:10", null, True, False];
+        yield ["2077-01-01 10:10:10", "2099-01-01 10:10:10", null, True, False];
+        yield ["2077-01-01 10:10:10", "2099-01-01 10:10:10", "2100-01-01 10:10:10", True, True];
+        yield ["2000-01-01 10:10:10", "2000-01-01 10:10:10", null, False, False];
+        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), "2099-01-01 10:10:10", null, False, False];
+        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), "2077-01-01 10:10:10", "2099-01-01 10:10:10", False, True];
     }
 }

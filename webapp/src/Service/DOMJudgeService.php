@@ -897,9 +897,12 @@ class DOMJudgeService
     /**
      * @throws NonUniqueResultException
      */
-    public function getTwigDataForProblemsAction(StatisticsService $statistics, ?int $teamId = null): array
-    {
-        $contest            = isset($teamId) ? $this->getCurrentContest($teamId) : $this->getCurrentContest(onlyPublic: true);
+    public function getTwigDataForProblemsAction(
+        StatisticsService $statistics,
+        ?int $teamId = null,
+        bool $forJury = false
+    ): array {
+        $contest            = isset($teamId) ? $this->getCurrentContest($teamId) : $this->getCurrentContest(onlyPublic: !$forJury);
         $showLimits         = (bool)$this->config->get('show_limits_on_team_page');
         $defaultMemoryLimit = (int)$this->config->get('memory_limit');
         $timeFactorDiffers  = false;
@@ -1078,6 +1081,10 @@ class DOMJudgeService
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
         $language   = $submission->getLanguage();
+
+        if ($submission->isImportError()) {
+            return;
+        }
 
         $evalOnDemand = false;
         // We have 2 cases, the problem picks the global value or the value is set.
@@ -1465,5 +1472,19 @@ class DOMJudgeService
                 'hash' => $compileExecutable->getHash(),
             ]
         );
+    }
+
+    public function getVerdicts(bool $mergeExternal = false): array
+    {
+        $verdictsConfig = $this->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdicts       = include $verdictsConfig;
+
+        if ($mergeExternal) {
+            foreach ($this->config->get('external_judgement_types') as $id => $name) {
+                $verdicts[$name] = $id;
+            }
+        }
+
+        return $verdicts;
     }
 }

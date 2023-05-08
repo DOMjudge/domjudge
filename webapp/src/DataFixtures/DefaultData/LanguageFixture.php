@@ -23,30 +23,30 @@ class LanguageFixture extends AbstractDefaultDataFixture
     public function load(ObjectManager $manager): void
     {
         $data = [
-            // ID      external ID   name           extensions                 require  entry point   allow   allow   time   compile
-            //                                                             entry point  description   submit  judge   factor script
-            ['adb',    'ada',        'Ada',         ['adb', 'ads'],              false, null,         false,  true,   1,     'adb'],
-            ['awk',    'awk',        'AWK',         ['awk'],                     false, null,         false,  true,   1,     'awk'],
-            ['bash',   'bash',       'Bash shell',  ['bash'],                    false, 'Main file',  false,  true,   1,     'bash'],
-            ['c',      'c',          'C',           ['c'],                       false, null,         true,   true,   1,     'c'],
-            ['cpp',    'cpp',        'C++',         ['cpp', 'cc', 'cxx', 'c++'], false, null,         true,   true,   1,     'cpp'],
-            ['csharp', 'csharp',     'C#',          ['csharp', 'cs'],            false, null,         false,  true,   1,     'csharp'],
-            ['f95',    'f95',        'Fortran',     ['f95', 'f90'],              false, null,         false,  true,   1,     'f95'],
-            ['hs',     'haskell',    'Haskell',     ['hs', 'lhs'],               false, null,         false,  true,   1,     'hs'],
-            ['java',   'java',       'Java',        ['java'],                    false, 'Main class', true,   true,   1,     'java_javac_detect'],
-            ['js',     'javascript', 'JavaScript',  ['js'],                      false, 'Main file',  false,  true,   1,     'js'],
-            ['lua',    'lua',        'Lua',         ['lua'],                     false, null,         false,  true,   1,     'lua'],
-            ['kt',     'kotlin',     'Kotlin',      ['kt'],                      true,  'Main class', false,  true,   1,     'kt'],
-            ['pas',    'pascal',     'Pascal',      ['pas', 'p'],                false, 'Main file',  false,  true,   1,     'pas'],
-            ['pl',     'pl',         'Perl',        ['pl'],                      false, 'Main file',  false,  true,   1,     'pl'],
-            ['plg',    'prolog',     'Prolog',      ['plg'],                     false, 'Main file',  false,  true,   1,     'plg'],
-            ['py3',    'python3',    'Python 3',    ['py'],                      false, 'Main file',  true,   true,   1,     'py3'],
-            ['r',      'r',          'R',           ['R'],                       false, 'Main file',  false,  true,   1,     'r'],
-            ['rb',     'ruby',       'Ruby',        ['rb'],                      false, 'Main file',  false,  true,   1,     'rb'],
-            ['rs',     'rust',       'Rust',        ['rs'],                      false, null,         false,  true,   1,     'rs'],
-            ['scala',  'scala',      'Scala',       ['scala'],                   false, null,         false,  true,   1,     'scala'],
-            ['sh',     'sh',         'POSIX shell', ['sh'],                      false, 'Main file',  false,  true,   1,     'sh'],
-            ['swift',  'swift',      'Swift',       ['swift'],                   false, 'Main file',  false,  true,   1,     'swift'],
+            // ID      external ID   name           extensions                 require  entry point   allow   allow   time   compile              compiler version    runner version
+            //                                                             entry point  description   submit  judge   factor script               command             command
+            ['adb',    'ada',        'Ada',         ['adb', 'ads'],              false, null,         false,  true,   1,     'adb',               '',                 ''],
+            ['awk',    'awk',        'AWK',         ['awk'],                     false, null,         false,  true,   1,     'awk',               '',                 ''],
+            ['bash',   'bash',       'Bash shell',  ['bash'],                    false, 'Main file',  false,  true,   1,     'bash',              '',                 ''],
+            ['c',      'c',          'C',           ['c'],                       false, null,         true,   true,   1,     'c',                 'gcc --version',    ''],
+            ['cpp',    'cpp',        'C++',         ['cpp', 'cc', 'cxx', 'c++'], false, null,         true,   true,   1,     'cpp',               'g++ --version',    ''],
+            ['csharp', 'csharp',     'C#',          ['csharp', 'cs'],            false, null,         false,  true,   1,     'csharp',            '',                 ''],
+            ['f95',    'f95',        'Fortran',     ['f95', 'f90'],              false, null,         false,  true,   1,     'f95',               '',                 ''],
+            ['hs',     'haskell',    'Haskell',     ['hs', 'lhs'],               false, null,         false,  true,   1,     'hs',                '',                 ''],
+            ['java',   'java',       'Java',        ['java'],                    false, 'Main class', true,   true,   1,     'java_javac_detect', 'javac -version',   'java -version'],
+            ['js',     'javascript', 'JavaScript',  ['js'],                      false, 'Main file',  false,  true,   1,     'js',                '',                 ''],
+            ['lua',    'lua',        'Lua',         ['lua'],                     false, null,         false,  true,   1,     'lua',               'kotlinc -version', 'kotlin -version'],
+            ['kt',     'kotlin',     'Kotlin',      ['kt'],                      true,  'Main class', false,  true,   1,     'kt',                '',                 ''],
+            ['pas',    'pascal',     'Pascal',      ['pas', 'p'],                false, 'Main file',  false,  true,   1,     'pas',               '',                 ''],
+            ['pl',     'pl',         'Perl',        ['pl'],                      false, 'Main file',  false,  true,   1,     'pl',                '',                 ''],
+            ['plg',    'prolog',     'Prolog',      ['plg'],                     false, 'Main file',  false,  true,   1,     'plg',               '',                 ''],
+            ['py3',    'python3',    'Python 3',    ['py'],                      false, 'Main file',  true,   true,   1,     'py3',               'pypy3 --version', 'pypy3 --version'],
+            ['r',      'r',          'R',           ['R'],                       false, 'Main file',  false,  true,   1,     'r',                 '',                 ''],
+            ['rb',     'ruby',       'Ruby',        ['rb'],                      false, 'Main file',  false,  true,   1,     'rb',                '',                 ''],
+            ['rs',     'rust',       'Rust',        ['rs'],                      false, null,         false,  true,   1,     'rs',                '',                 ''],
+            ['scala',  'scala',      'Scala',       ['scala'],                   false, null,         false,  true,   1,     'scala',             '',                 ''],
+            ['sh',     'sh',         'POSIX shell', ['sh'],                      false, 'Main file',  false,  true,   1,     'sh',                '',                 ''],
+            ['swift',  'swift',      'Swift',       ['swift'],                   false, 'Main file',  false,  true,   1,     'swift',             '',                 ''],
         ];
 
         foreach ($data as $item) {
@@ -77,6 +77,12 @@ class LanguageFixture extends AbstractDefaultDataFixture
                     ->setAllowJudge($item[7])
                     ->setTimeFactor($item[8])
                     ->setCompileExecutable($executable);
+                if (!empty($item[10])) {
+                    $language->setCompilerVersionCommand($item[10]);
+                }
+                if (!empty($item[11])) {
+                    $language->setRunnerVersionCommand($item[11]);
+                }
                 $manager->persist($language);
             } else {
                 $this->logger->info('Language %s already exists, not created', [ $item[0] ]);

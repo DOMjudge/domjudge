@@ -73,13 +73,7 @@ class ClarificationController extends BaseController
                 $formData['subject'] = sprintf('%d-%s', $clarification->getContest()->getCid(), $clarification->getQueue());
             }
 
-            $message = '';
-            $text    = explode("\n", Utils::wrapUnquoted($clarification->getBody()), 75);
-            foreach ($text as $line) {
-                $message .= "> $line\n";
-            }
-
-            $formData['message'] = $message;
+            $formData['message'] = "> " . str_replace("\n", "\n> ", Utils::wrapUnquoted($clarification->getBody())) . "\n\n";
         }
         $form = $this->formFactory
             ->createBuilder(TeamClarificationType::class, $formData)

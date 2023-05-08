@@ -62,26 +62,35 @@
                 (ignored)
             {% endif %}
         </h1>
-        {% if is_granted('ROLE_ADMIN') %}
-            {% if submission.valid %}
-                {% set action = 'ignore' %}
-            {% else %}
-                {% set action = 'unignore' %}
+        {% if not submission.importError %}
+            {% if is_granted('ROLE_ADMIN') %}
+                {% if submission.valid %}
+                    {% set action = 'ignore' %}
+                {% else %}
+                    {% set action = 'unignore' %}
+                {% endif %}
+                <form action="{{ path('jury_submission_update_status', {'submitId': submission.submitid}) }}" method="post"
+                      style="display: inline; ">
+                    <input type="hidden" name="valid" value="{% if submission.valid %}0{% else %}1{% endif %}"/>
+                    <input type="submit" class="btn btn-outline-secondary btn-sm"
+                           value="{{ action | upper }} this submission"
+                           onclick="return confirm('Really {{ action }} submission s{{ submission.submitid }}?');"/>
+                </form>
             {% endif %}
-            <form action="{{ path('jury_submission_update_status', {'submitId': submission.submitid}) }}" method="post"
-                  style="display: inline; ">
-                <input type="hidden" name="valid" value="{% if submission.valid %}0{% else %}1{% endif %}"/>
-                <input type="submit" class="btn btn-outline-secondary btn-sm"
-                       value="{{ action | upper }} this submission"
-                       onclick="return confirm('Really {{ action }} submission s{{ submission.submitid }}?');"/>
-            </form>
-        {% endif %}
 
-        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'submission', id: submission.submitid} %}
+            {% include 'jury/partials/rejudge_form.html.twig' with {table: 'submission', id: submission.submitid} %}
+        {% endif %}
     </div>
 
     {% if not submission.valid %}
         <div class="alert alert-danger">This submission is not used during scoreboard calculations.</div>
+    {% endif %}
+
+    {% if submission.importError %}
+        <div class="alert alert-danger">
+            <div>This submission could not be imported into DOMjudge and thus will only show external data.</div>
+            <div>The error during import was: <code>{{ submission.importError }}</code></div>
+        </div>
     {% endif %}
 
     {% if not submission.contestProblem %}
@@ -184,7 +193,9 @@
         </div>
     {% endif %}
 
-    {% if externalJudgement is not null and externalJudgement.result is not empty and selectedJudging is not null and selectedJudging.result is not empty and externalJudgement.result != selectedJudging.result %}
+    {% if externalJudgement is not null and externalJudgement.result is not empty and (
+        (selectedJudging is not null and selectedJudging.result is not empty and externalJudgement.result != selectedJudging.result)
+        or submission.importError) %}
         <div class="alert alert-danger">
             <strong>Results differ!</strong>
             <hr>
@@ -197,7 +208,12 @@
                         {{ externalJudgement.result | printValidJuryResult }} by the external CCS
                     </a>
                 {% endif -%}
-                , but as {{ selectedJudging.result | printValidJuryResult }}
+                , but as
+                {% if submission.importError %}
+                    {{ 'import-error' | printValidJuryResult }}
+                {% else %}
+                    {{ selectedJudging.result | printValidJuryResult }}
+                {% endif %}
                 by DOMjudge.
             </p>
 
@@ -351,19 +367,21 @@
 
         <div class="mb-2">
             <div>
-                Result:
-                {% if selectedJudging is null or selectedJudging.result is empty %}
-                    {%- if selectedJudging and selectedJudging.started %}
-                        {{- '' | printValidJuryResult -}}
+                {% if not submission.importError %}
+                    Result:
+                    {% if selectedJudging is null or selectedJudging.result is empty %}
+                        {%- if selectedJudging and selectedJudging.started %}
+                            {{- '' | printValidJuryResult -}}
+                        {%- else %}
+                            {{- 'queued' | printValidJuryResult -}}
+                        {%- endif %}
                     {%- else %}
-                        {{- 'queued' | printValidJuryResult -}}
+                        {{- selectedJudging.result | printValidJuryResult -}}
                     {%- endif %}
-                {%- else %}
-                    {{- selectedJudging.result | printValidJuryResult -}}
-                {%- endif %}
-                {%- if submission.stillBusy -%}
-                    (&hellip;)
-                {%- endif -%}
+                    {%- if submission.stillBusy -%}
+                        (&hellip;)
+                    {%- endif -%}
+                {% endif %}
                 {%- if lastJudging is not null -%}
                     {% set lastSubmissionLink = path('jury_submission', {submitId: lastSubmission.submitid}) %}{#-
                 -#}<span class="lastresult">
@@ -371,7 +389,11 @@
                 -#}</span>
                 {%- endif -%}
                 {%- if externalJudgement is not null %}
-                    (external: {{ externalJudgement.result | printValidJuryResult }})
+                    {% if submission.importError %}
+                        External result: {{ externalJudgement.result | printValidJuryResult }}
+                    {% else %}
+                        (external: {{ externalJudgement.result | printValidJuryResult }})
+                    {% endif %}
                 {%- endif %}
                 {%- if selectedJudging is not null and judgehosts is not empty -%}
                     , Judgehost(s):
@@ -418,27 +440,29 @@
             {# Display testcase results #}
             {% if externalJudgement is not null or (selectedJudging is not null and selectedJudging.result != 'compiler-error') %}
                 <table>
-                    <tr>
-                        <td>testcase runs:</td>
-                        <td>
-                            {% if selectedJudging is null %}
-                                {% set judgingDone = false %}
-                            {% else %}
-                                {% set judgingDone = selectedJudging.endtime is not empty %}
-                            {% endif %}
-                            {{ runs | displayTestcaseResults(judgingDone) }}
-                            {% if selectedJudging is not null and runsOutstanding %}
-                                {% if selectedJudging.judgeCompletely %}
-                                    <i class="fas fa-balance-scale" title="remaining test cases requested to be judged"></i>
-                                {% elseif selectedJudging.result is not null %}
-                                    <form action="{{ path('jury_submission_request_remaining', {'judgingId': selectedJudging.judgingid}) }}" method="post"
-                                          style="display: inline; ">
-                                        <input type="submit" class="btn btn-outline-secondary btn-sm" value="judge remaining" />
-                                    </form>
+                    {% if not submission.importError %}
+                        <tr>
+                            <td>testcase runs:</td>
+                            <td>
+                                {% if selectedJudging is null %}
+                                    {% set judgingDone = false %}
+                                {% else %}
+                                    {% set judgingDone = selectedJudging.endtime is not empty %}
                                 {% endif %}
-                            {% endif %}
-                        </td>
-                    </tr>
+                                {{ runs | displayTestcaseResults(judgingDone) }}
+                                {% if selectedJudging is not null and runsOutstanding %}
+                                    {% if selectedJudging.judgeCompletely %}
+                                        <i class="fas fa-balance-scale" title="remaining test cases requested to be judged"></i>
+                                    {% elseif selectedJudging.result is not null %}
+                                        <form action="{{ path('jury_submission_request_remaining', {'judgingId': selectedJudging.judgingid}) }}" method="post"
+                                              style="display: inline; ">
+                                            <input type="submit" class="btn btn-outline-secondary btn-sm" value="judge remaining" />
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
                     {% if lastJudging is not null %}
                         <tr class="lasttcruns">
                             <td>
@@ -710,16 +734,14 @@
                                 {% if runsOutput[runIdx].output_diff is empty %}
                                     <p class="nodata">There was no validator output.</p>
                                 {% else %}
-                                    <pre class="output_text">
-{{ runsOutput[runIdx].output_diff | parseRunDiff }}</pre>
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_diff }}</pre>
                                 {% endif %}
                             {% else %}
                                 <h5>Diff output</h5>
                                 {% if runsOutput[runIdx].output_diff is empty %}
                                     <p class="nodata">There was no diff output.</p>
                                 {% else %}
-                                    <pre class="output_text">
-{{ runsOutput[runIdx].output_diff | parseRunDiff }}</pre>
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_diff }}</pre>
                                 {% endif %}
 
                                 {% if run.firstJudgingRun.runresult != 'correct' %}
@@ -739,8 +761,7 @@
                                 {% if runsOutput[runIdx].output_run is empty %}
                                     <p class="nodata">There was no program output.</p>
                                 {% else %}
-                                    <pre class="output_text">
-{{ runsOutput[runIdx].output_run | parseRunDiff }}</pre>
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_run }}</pre>
                                 {% endif %}
                             {% endif %}
 
@@ -748,14 +769,14 @@
                             {% if runsOutput[runIdx].output_error is empty %}
                                 <p class="nodata">There was no stderr output.</p>
                             {% else %}
-                                <pre class="output_text">{{ runsOutput[runIdx].output_error | parseRunDiff }}</pre>
+                                <pre class="output_text">{{ runsOutput[runIdx].output_error }}</pre>
                             {% endif %}
 
                             <h5>Judging system output (info/debug/errors)</h5>
                             {% if runsOutput[runIdx].output_system is empty %}
                                 <p class="nodata">There was no judging system output.</p>
                             {% else %}
-                                <pre class="output_text">{{ runsOutput[runIdx].output_system | parseRunDiff }}</pre>
+                                <pre class="output_text">{{ runsOutput[runIdx].output_system }}</pre>
                             {% endif %}
                         {% endif %}
                     {% endif %}

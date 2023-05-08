@@ -171,7 +171,7 @@ class ExternalJudgement
         return $this->starttime;
     }
 
-    public function setEndtime(string|float $endtime): ExternalJudgement
+    public function setEndtime(string|float|null $endtime): ExternalJudgement
     {
         $this->endtime = $endtime;
         return $this;
@@ -219,11 +219,6 @@ class ExternalJudgement
     {
         $this->external_runs[] = $externalRun;
         return $this;
-    }
-
-    public function removeExternalRun(ExternalRun $externalRun): void
-    {
-        $this->external_runs->removeElement($externalRun);
     }
 
     public function getExternalRuns(): Collection

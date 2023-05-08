@@ -279,11 +279,6 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this;
     }
 
-    public function removeReply(Clarification $reply)
-    {
-        $this->replies->removeElement($reply);
-    }
-
     public function getReplies(): Collection
     {
         return $this->replies;

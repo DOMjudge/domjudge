@@ -16,6 +16,7 @@
 ./webapp/templates/bundles
 ./webapp/var/cache
 ./webapp/migrations/Version20230122090005.php
+./webapp/resources/adminer.php
 FileSaver*
 bootstrap*
 d3.min*

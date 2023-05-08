@@ -17,6 +17,7 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
+use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Form\Type\SubmissionsFilterType;
@@ -109,10 +110,9 @@ class SubmissionController extends BaseController
             $this->submissionService->getSubmissionList($contests, $restrictions, $limit);
 
         // Load preselected filters
-        $filters          = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
+        $filters = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
 
-        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
-        $results = array_keys(include $verdictsConfig);
+        $results = array_keys($this->dj->getVerdicts());
         $results[] = 'judging';
         $results[] = 'queued';
 
@@ -141,6 +141,7 @@ class SubmissionController extends BaseController
         $filtersForForm['language-id'] = $this->em->getRepository(Language::class)->findBy(['langid' => $filtersForForm['language-id'] ?? []]);
         $filtersForForm['team-id']     = $this->em->getRepository(Team::class)->findBy(['teamid' => $filtersForForm['team-id'] ?? []]);
         $filtersForForm['category-id'] = $this->em->getRepository(TeamCategory::class)->findBy(['categoryid' => $filtersForForm['category-id'] ?? []]);
+        $filtersForForm['affiliation-id'] = $this->em->getRepository(TeamAffiliation::class)->findBy(['affilid' => $filtersForForm['affiliation-id'] ?? []]);
         $form = $this->createForm(SubmissionsFilterType::class, array_merge($filtersForForm, [
             "contests" => $contests,
         ]));
@@ -181,7 +182,7 @@ class SubmissionController extends BaseController
             ->join('s.problem', 'p')
             ->join('s.language', 'l')
             ->join('s.contest', 'c')
-            ->join('s.files', 'f')
+            ->leftJoin('s.files', 'f')
             ->leftJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1')
             ->leftJoin('s.contest_problem', 'cp')
             ->select('s', 't', 'p', 'l', 'c', 'partial f.{submitfileid, filename}', 'cp', 'ej')
@@ -209,9 +210,27 @@ class SubmissionController extends BaseController
             ->getQuery()
             ->getResult();
 
+        // These three arrays are indexed by judgingid
         /** @var Judging[] $judgings */
         $judgings    = array_map(fn($data) => $data[0], $judgingData);
         $maxRunTimes = array_map(fn($data) => $data['max_runtime'], $judgingData);
+        $timelimits  = [];
+
+        if ($judgings) {
+            $judgeTasks = $this->em->createQueryBuilder()
+                ->from(JudgeTask::class, 'jt', 'jt.jobid')
+                ->select('jt')
+                ->andWhere('jt.jobid IN (:jobIds)')
+                ->setParameter(
+                    'jobIds',
+                    array_map(static fn(Judging $judging) => $judging->getJudgingid(), $judgings)
+                )
+                ->getQuery()
+                ->getResult();
+            $timelimits = array_map(function (JudgeTask $task) {
+                return $this->dj->jsonDecode($task->getRunConfig())['time_limit'];
+            }, $judgeTasks);
+        }
 
         $selectedJudging = null;
         // Find the selected judging.
@@ -468,6 +487,7 @@ class SubmissionController extends BaseController
             'lastSubmission' => $lastSubmission,
             'judgings' => $judgings,
             'maxRunTimes' => $maxRunTimes,
+            'timelimits' => $timelimits,
             'selectedJudging' => $selectedJudging,
             'lastJudging' => $lastJudging,
             'runs' => $runs,

@@ -339,11 +339,6 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
-    public function removeTestcase(Testcase $testcase)
-    {
-        $this->testcases->removeElement($testcase);
-    }
-
     public function getTestcases(): Collection
     {
         return $this->testcases;
@@ -353,11 +348,6 @@ class Problem extends BaseApiEntity
     {
         $this->contest_problems[] = $contestProblem;
         return $this;
-    }
-
-    public function removeContestProblem(ContestProblem $contestProblem): void
-    {
-        $this->contest_problems->removeElement($contestProblem);
     }
 
     /**
@@ -374,11 +364,6 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
-    public function removeSubmission(Submission $submission): void
-    {
-        $this->submissions->removeElement($submission);
-    }
-
     public function getSubmissions(): Collection
     {
         return $this->submissions;
@@ -388,11 +373,6 @@ class Problem extends BaseApiEntity
     {
         $this->clarifications[] = $clarification;
         return $this;
-    }
-
-    public function removeClarification(Clarification $clarification): void
-    {
-        $this->clarifications->removeElement($clarification);
     }
 
     public function getClarifications(): Collection

@@ -40,6 +40,16 @@ class TeamVisitor implements EventSubscriberInterface
         /** @var Team $team */
         $team = $event->getObject();
 
+        // Use the API ID for label if we have no label set
+        if (($team->getLabel() ?? '') === '') {
+            $property = new StaticPropertyMetadata(
+                Team::class,
+                'label',
+                null
+            );
+            $visitor->visitProperty($property, $team->getApiId($this->eventLogService));
+        }
+
         // Check if the asset actually exists
         if (!($teamPhoto = $this->dj->assetPath((string)$team->getTeamid(), 'team', true))) {
             return;

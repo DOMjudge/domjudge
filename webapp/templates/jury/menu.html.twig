@@ -14,7 +14,7 @@
                 <li class="nav-item">
                     <a class="nav-link{% if current_route == 'jury_balloons' %} active{% endif %}" href="{{ path('jury_balloons') }}">
                         <i class="fas fa-map-marker-alt"></i> balloons
-                        <span class="badge bg-info" id="num-alerts-balloons"></span>
+                        <span class="badge text-bg-info" id="num-alerts-balloons"></span>
                     </a>
                 </li>
             {% endif %}
@@ -23,15 +23,15 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle{% if current_route starts with 'jury_judgehost' or current_route == 'jury_internal_errors' %} active{% endif %}" href="#" id="navbarDropdownJudgehosts" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-gavel"></i> judgehosts
-                        <span class="badge bg-warning" id="num-alerts-judgehosts"></span>
-                        <span class="badge bg-danger" id="num-alerts-internalerrors"></span>
+                        <span class="badge text-bg-warning" id="num-alerts-judgehosts"></span>
+                        <span class="badge text-bg-danger" id="num-alerts-internalerrors"></span>
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item {% if current_route starts with 'jury_judgehost' %}active{% endif %}" href="{{ path('jury_judgehosts') }}" id="menu_judgehosts">
-                            <i class="fas fa-server fa-fw"></i> judgehosts <span class="badge bg-warning" id="num-alerts-judgehosts-sub"></span>
+                            <i class="fas fa-server fa-fw"></i> judgehosts <span class="badge text-bg-warning" id="num-alerts-judgehosts-sub"></span>
                         </a>
                         <a class="dropdown-item dropdown-disabled {% if current_route == 'jury_internal_errors' %}active{% endif %}" href="{{ path('jury_internal_errors') }}" id="menu_internal_error">
-                            <i class="fas fa-bolt fa-fw"></i> internal error <span class="badge bg-danger" id="num-alerts-internalerrors-sub"></span>
+                            <i class="fas fa-bolt fa-fw"></i> internal error <span class="badge text-bg-danger" id="num-alerts-internalerrors-sub"></span>
                         </a>
                     </div>
                 </li>
@@ -39,7 +39,7 @@
 
             {% if is_granted('ROLE_CLARIFICATION_RW') %}
                 <li class="nav-item">
-                    <a class="nav-link{% if current_route starts with 'jury_clarification' %} active{% endif %}" href="{{ path('jury_clarifications') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications <span class="badge bg-info" id="num-alerts-clarifications"></span></a>
+                    <a class="nav-link{% if current_route starts with 'jury_clarification' %} active{% endif %}" href="{{ path('jury_clarifications') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications <span class="badge text-bg-info" id="num-alerts-clarifications"></span></a>
                 </li>
             {% endif %}
 
@@ -53,24 +53,24 @@
                         <a class="nav-link dropdown-toggle{% if current_route == 'jury_shadow_differences' or current_route starts with 'jury_external_contest' %} active{% endif %}"
                             href="#" id="navbarDropdownShadow" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="fas fa-copy"></i> shadowing
-                            <span class="badge bg-danger" id="num-alerts-shadowdifferences"></span>
-                            <span class="badge bg-warning" id="num-alerts-externalcontest"></span>
+                            <span class="badge text-bg-danger" id="num-alerts-shadowdifferences"></span>
+                            <span class="badge text-bg-warning" id="num-alerts-externalcontest"></span>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item {% if current_contest is null %}dropdown-disabled{% endif %} {% if current_route == 'jury_shadow_differences' %}active{% endif %}"
                                 {% if current_contest is not null %}href="{{ path('jury_shadow_differences') }}"{% endif %} id="menu_shadow_differences">
-                                <i class="fas fa-not-equal fa-fw"></i> shadow differences <span class="badge bg-danger" id="num-alerts-shadowdifferences-sub"></span>
+                                <i class="fas fa-not-equal fa-fw"></i> shadow differences <span class="badge text-bg-danger" id="num-alerts-shadowdifferences-sub"></span>
                             </a>
                             <a class="dropdown-item {% if current_contest is null %}dropdown-disabled{% endif %} {% if current_route starts with 'jury_external_contest' %}active{% endif %}"
                                 {% if current_contest is not null %}href="{{ path('jury_external_contest') }}"{% endif%} id="menu_external_contest">
-                                <i class="fas fa-laptop-code fa-fw"></i> external contest <span class="badge bg-warning" id="num-alerts-externalcontest-sub"></span>
+                                <i class="fas fa-laptop-code fa-fw"></i> external contest <span class="badge text-bg-warning" id="num-alerts-externalcontest-sub"></span>
                             </a>
                         </div>
                     </li>
                 {% endif %}
 
                 <li class="nav-item">
-                    <a class="nav-link{% if current_route == 'jury_rejudgings' %} active{% endif %}" href="{{ path('jury_rejudgings') }}" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings <span class="badge bg-info" id="num-alerts-rejudgings"></span></a>
+                    <a class="nav-link{% if current_route == 'jury_rejudgings' %} active{% endif %}" href="{{ path('jury_rejudgings') }}" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings <span class="badge text-bg-info" id="num-alerts-rejudgings"></span></a>
                 </li>
             {% endif %}
 

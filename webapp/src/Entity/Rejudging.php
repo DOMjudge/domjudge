@@ -175,11 +175,6 @@ class Rejudging
         return $this;
     }
 
-    public function removeJudging(Judging $judging)
-    {
-        $this->judgings->removeElement($judging);
-    }
-
     public function getJudgings(): Collection
     {
         return $this->judgings;
@@ -189,11 +184,6 @@ class Rejudging
     {
         $this->submissions[] = $submission;
         return $this;
-    }
-
-    public function removeSubmission(Submission $submission)
-    {
-        $this->submissions->removeElement($submission);
     }
 
     public function getSubmissions(): Collection

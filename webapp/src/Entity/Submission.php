@@ -89,6 +89,15 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     #[Serializer\Expose(if: "context.getAttribute('domjudge_service').checkrole('jury')")]
     private ?string $entry_point = null;
 
+    #[ORM\Column(
+        nullable: true,
+        options: ['comment' => 'The error message for submissions which got an error during shadow importing.']
+    )]
+    #[OA\Property(nullable: true)]
+    #[Serializer\Expose(if: "context.getAttribute('domjudge_service').checkrole('jury')")]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    private ?string $importError = null;
+
     #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
@@ -253,6 +262,17 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this->entry_point;
     }
 
+    public function setImportError(?string $importError): Submission
+    {
+        $this->importError = $importError;
+        return $this;
+    }
+
+    public function isImportError(): ?string
+    {
+        return $this->importError;
+    }
+
     public function setTeam(?Team $team = null): Submission
     {
         $this->team = $team;
@@ -298,11 +318,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
-    public function removeJudging(Judging $judging): void
-    {
-        $this->judgings->removeElement($judging);
-    }
-
     public function getJudgings(): Collection
     {
         return $this->judgings;
@@ -325,11 +340,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
-    public function removeFile(SubmissionFile $file): void
-    {
-        $this->files->removeElement($file);
-    }
-
     public function getFiles(): Collection
     {
         return $this->files;
@@ -339,11 +349,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     {
         $this->balloons[] = $balloon;
         return $this;
-    }
-
-    public function removeBalloon(Balloon $balloon): void
-    {
-        $this->balloons->removeElement($balloon);
     }
 
     public function getBalloons(): Collection
@@ -451,12 +456,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
-    public function removeResubmission(Submission $submission): Submission
-    {
-        $this->resubmissions->removeElement($submission);
-        return $this;
-    }
-
     /**
      * @return Collection|Submission[]
      */
@@ -497,11 +496,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     {
         $this->external_judgements[] = $externalJudgement;
         return $this;
-    }
-
-    public function removeExternalJudgement(ExternalJudgement $externalJudgement): void
-    {
-        $this->external_judgements->removeElement($externalJudgement);
     }
 
     public function getExternalJudgements(): Collection

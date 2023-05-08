@@ -66,6 +66,8 @@ a {
 .badge-testcase {
     width: 20px;
     margin-right: 1px;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .sol {
@@ -82,6 +84,16 @@ a {
 .prevsubmit     { color: #696969; }
 
 .output_text {
+    border-top: 1px dotted #C0C0C0;
+    border-bottom: 1px dotted #C0C0C0;
+    background-color: #FAFAFA;
+    margin: 0;
+    padding: 5px;
+    font-family: monospace;
+    white-space: pre;
+}
+
+.clarificationform pre {
     border-top: 1px dotted #C0C0C0;
     border-bottom: 1px dotted #C0C0C0;
     background-color: #FAFAFA;
@@ -391,7 +403,7 @@ tr.ignore td, td.ignore, span.ignore {
 }
 
 .problem-list h2,h3,h4 {
-    text-align: center;
+    text-align: center !important;
 }
 
 .problem-list h2 {
@@ -608,4 +620,10 @@ tr.ignore td, td.ignore, span.ignore {
 
 .tooltip .tooltip-inner {
     max-width: 500px;
+}
+
+blockquote {
+    border-left: darkgrey solid .2em;
+    padding-left: .5em;
+    color: darkgrey;
 }

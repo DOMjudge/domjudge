@@ -93,15 +93,25 @@
                 .datum(run_max_times)
                 .call(chart);
             var svgsize = chart.container.clientWidth || chart.container.parentNode.clientWidth;
-            var line = d3.select('#maxruntime svg')
+            var chartStart = chart.margin().left;
+            var chartEnd = +svgsize - chart.margin().right;
+            var chartWidth = chartEnd - chartStart;
+            var barWidth = chartWidth / {{ judgings | filter(judging => judging.result and judging.result != 'aborted') | length }};
+            {% for judging in judgings | filter(judging => judging.result and judging.result != 'aborted') %}
+            d3.select('#maxruntime svg')
                 .append('line')
                 .attr({
-                    x1: chart.margin().left,
-                    y1: chart.yAxis.scale()({{ timelimit }}) + chart.margin().top,
-                    x2: +svgsize - chart.margin().right,
-                    y2: chart.yAxis.scale()({{ timelimit }}) + chart.margin().top,
+                    x1: chartStart + {{ loop.index0 }} * barWidth,
+                    y1: chart.yAxis.scale()({{ timelimits[judging.judgingid] }}) + chart.margin().top,
+                    x2: chartStart + (1 + {{ loop.index0 }}) * barWidth,
+                    y2: chart.yAxis.scale()({{ timelimits[judging.judgingid] }}) + chart.margin().top,
                 })
-                .style("stroke", "#F00");
+                .style("stroke", "#F00")
+            {% if timelimits[judging.judgingid] != timelimit %}
+                .style("stroke-dasharray", "3 3")
+            {% endif %}
+                .style("stroke-width", "2px");
+            {% endfor %}
             nv.utils.windowResize(chart.update);
             return chart;
         });
@@ -142,7 +152,8 @@
                     x2: +svgsize - chart.margin().right,
                     y2: chart.yAxis.scale()({{ timelimit }}) + chart.margin().top,
                 })
-                .style("stroke", "#F00");
+                .style("stroke", "#F00")
+                .style("stroke-width", "2px");
             nv.utils.windowResize(chart.update);
             return chart;
         });
@@ -184,7 +195,8 @@
                     x2: +svgsize - chart.margin().right,
                     y2: chart.yAxis.scale()({{ timelimit }}) + chart.margin().top,
                 })
-                .style("stroke", "#F00");
+                .style("stroke", "#F00")
+                .style("stroke-width", "2px");
             nv.utils.windowResize(chart.update);
             return chart;
         });

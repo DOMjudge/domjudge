@@ -123,7 +123,7 @@
                     {{ files[idx] | codeEditor(idx, null, is_granted('ROLE_ADMIN'), 'form_source' ~ idx, aceFilenames[idx]) }}
                     <script>
                         $(function () {
-                            $('#form_source{{ idx }}').closest('.form-group').hide();
+                            $('#form_source{{ idx }}').closest('div.mb-3').hide();
                         });
                     </script>
                 </div>

@@ -25,6 +25,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -485,11 +486,17 @@ abstract class BaseController extends AbstractController
      *
      * The callback can use ob_flush(); flush(); to flush its output to the browser.
      */
-    protected function streamResponse(callable $callback): StreamedResponse
+    protected function streamResponse(RequestStack $requestStack, callable $callback): StreamedResponse
     {
-        $response         = new StreamedResponse();
+        // Keep the current request, since streamed response removes it from the request stack and
+        // we need it for sessions. See https://github.com/symfony/symfony/issues/46743.
+        $mainRequest = $requestStack->getMainRequest();
+        $response = new StreamedResponse();
         $response->headers->set('X-Accel-Buffering', 'no');
-        $response->setCallback($callback);
+        $response->setCallback(function () use ($requestStack, $callback, $mainRequest) {
+            $requestStack->push($mainRequest);
+            $callback();
+        });
         return $response;
     }
 
