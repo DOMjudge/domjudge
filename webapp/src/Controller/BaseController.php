@@ -223,7 +223,7 @@ abstract class BaseController extends AbstractController
                 // Its dependent tables do not form a tree (but something like a diamond shape),
                 // and there are multiple cascading removal paths from problem to its dependant
                 // tables.
-                // Since MySQL does not define the order of cascading deletes, we need to manually
+                // Since MySQL does not define the order of cascading deletes, we need to
                 // first manually delete judging_runs and then cascade via
                 // submission to all of judging, judgeTasks and queueTasks.
                 // See also https://github.com/DOMjudge/domjudge/issues/243 and associated commits.
