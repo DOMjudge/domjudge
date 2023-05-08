@@ -229,10 +229,10 @@ class SubmissionService
         if (isset($restrictions['result'])) {
             if ($restrictions['result'] === 'judging') {
                 $queryBuilder
-                    ->andWhere('s.importError = false')
+                    ->andWhere('s.importError IS NULL')
                     ->andWhere('j.result IS NULL OR j.endtime IS NULL');
             } elseif ($restrictions['result'] === 'import-error') {
-                $queryBuilder->andWhere('s.importError = true');
+                $queryBuilder->andWhere('s.importError IS NOT NULL');
             } else {
                 $queryBuilder
                     ->andWhere('j.result = :result')
@@ -401,20 +401,21 @@ class SubmissionService
             $submitTime = Utils::now();
         }
 
-        $importError = false;
+        $importError = null;
 
         if (count($files) == 0) {
+            $message = "No files specified.";
             if ($forceImportInvalid) {
-                $importError = true;
+                $importError = $message;
             } else {
-                throw new BadRequestHttpException("No files specified.");
+                throw new BadRequestHttpException($message);
             }
         }
         if (count($files) > $this->config->get('sourcefiles_limit')) {
+            $message = "Tried to submit more than the allowed number of source files.";
             if ($forceImportInvalid) {
-                $importError = true;
+                $importError = $message;
             } else {
-                $message = "Tried to submit more than the allowed number of source files.";
                 return null;
             }
         }
@@ -429,10 +430,10 @@ class SubmissionService
         }
 
         if (count($files) != count($filenames)) {
+            $message = "Duplicate filenames detected.";
             if ($forceImportInvalid) {
-                $importError = true;
+                $importError = $message;
             } else {
-                $message = "Duplicate filenames detected.";
                 return null;
             }
         }
@@ -455,10 +456,10 @@ class SubmissionService
         }
 
         if ($language->getRequireEntryPoint() && empty($entryPoint)) {
+            $message = sprintf("Entry point required for '%s' but none given.", $language->getLangid());
             if ($forceImportInvalid) {
-                $importError = true;
+                $importError = $message;
             } else {
-                $message = sprintf("Entry point required for '%s' but none given.", $language->getLangid());
                 return null;
             }
         }
@@ -469,10 +470,10 @@ class SubmissionService
         }
 
         if (!empty($entryPoint) && !preg_match(self::FILENAME_REGEX, $entryPoint)) {
+            $message = sprintf("Entry point '%s' contains illegal characters.", $entryPoint);
             if ($forceImportInvalid) {
-                $importError = true;
+                $importError = $message;
             } else {
-                $message = sprintf("Entry point '%s' contains illegal characters.", $entryPoint);
                 return null;
             }
         }
@@ -510,10 +511,10 @@ class SubmissionService
                 return null;
             }
             if (!preg_match(self::FILENAME_REGEX, $file->getClientOriginalName())) {
+                $message = sprintf("Illegal filename '%s'.", $file->getClientOriginalName());
                 if ($forceImportInvalid) {
-                    $importError = true;
+                    $importError = $message;
                 } else {
-                    $message = sprintf("Illegal filename '%s'.", $file->getClientOriginalName());
                     return null;
                 }
             }
@@ -535,23 +536,23 @@ class SubmissionService
         }
 
         if ($source !== 'shadowing' && $language->getFilterCompilerFiles() && $extensionMatchCount === 0) {
+            $message = sprintf(
+                "None of the submitted files match any of the allowed " .
+                "extensions for %s (allowed: %s)",
+                $language->getName(), implode(', ', $language->getExtensions())
+            );
             if ($forceImportInvalid) {
-                $importError = true;
+                $importError = $message;
             } else {
-                $message = sprintf(
-                    "None of the submitted files match any of the allowed " .
-                    "extensions for %s (allowed: %s)",
-                    $language->getName(), implode(', ', $language->getExtensions())
-                );
                 return null;
             }
         }
 
         if ($totalSize > $sourceSize * 1024) {
+            $message = sprintf("Submission file(s) are larger than %d kB.", $sourceSize);
             if ($forceImportInvalid) {
-                $importError = true;
+                $importError = $message;
             } else {
-                $message = sprintf("Submission file(s) are larger than %d kB.", $sourceSize);
                 return null;
             }
         }
