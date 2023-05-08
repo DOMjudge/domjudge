@@ -1059,7 +1059,7 @@ function compile(
     if (isset($version_verification['compiler_version_command']) || isset($version_verification['runner_version_command'])) {
         logmsg(LOG_INFO, "  📋 Verifying versions.");
         $versions = [];
-        $version_output_file = $workdir . '/vcheck.out';
+        $version_output_file = $workdir . '/version_check.out';
         $args = 'hostname=' . urlencode($myhost);
         foreach (['compiler', 'runner'] as $type) {
             if (isset($version_verification[$type . '_version_command'])) {
