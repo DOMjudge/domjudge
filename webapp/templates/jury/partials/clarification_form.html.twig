@@ -26,9 +26,25 @@
 </select>
 </div>
 
-<div class="mb-3">
-<label for="bodytext" class="form-label" >Message:</label>
-<textarea class="form-control" name="bodytext" id="bodytext" rows="8" cols="85" required>{{ clarform.quotedtext|default("") }}</textarea>
+<div class="list-group mb-3">
+    <div class="list-group-item">
+        <div class="flex-column">
+            <label for="bodytext" class="form-label text-muted d-flex justify-content-end"><small>message</small></label>
+        </div>
+        <textarea class="form-control" name="bodytext" id="bodytext"
+                  rows="8" cols="85"
+                  required>{{ clarform.quotedtext|default("") }}</textarea>
+    </div>
+    <div class="list-group-item">
+        <div class="mb-3">
+            <div class="flex-column">
+                <label for="bodytext" class="form-label text-muted d-flex justify-content-end"><small>message preview</small></label>
+            </div>
+            <div class="card">
+                <div class="card-body" id="messagepreview"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="row">

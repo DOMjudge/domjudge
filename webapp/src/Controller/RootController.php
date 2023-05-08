@@ -3,9 +3,14 @@
 namespace App\Controller;
 
 use App\Service\DOMJudgeService;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Twig\Extra\Markdown\MarkdownRuntime;
 
 #[Route(path: '')]
 class RootController extends BaseController
@@ -32,5 +37,18 @@ class RootController extends BaseController
             }
         }
         return $this->redirectToRoute('public_index');
+    }
+
+    #[Route(path: '/markdown-preview', name: 'markdown_preview', methods: ['POST'])]
+    public function markdownPreview(
+        Request $request,
+        #[Autowire(service: 'twig.runtime.markdown')]
+        MarkdownRuntime $markdownRuntime
+    ) {
+        $message = $request->request->get('message');
+        if ($message === null) {
+            throw new BadRequestHttpException('A message is required');
+        }
+        return new JsonResponse(['html' => $markdownRuntime->convert($message)]);
     }
 }
