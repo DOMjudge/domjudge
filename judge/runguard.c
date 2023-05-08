@@ -460,7 +460,7 @@ void check_remaining_procs()
 
     if ( !use_cgroup() ) return;
 
-    snprintf(path, 1023, "/sys/fs/cgroup/cpu%scgroup.procs", cgroupname);
+    snprintf(path, 1023, "/sys/fs/cgroup/cpuacct%scgroup.procs", cgroupname);
     FILE *file = fopen(path, "r");
     if (file == NULL) {
         error(errno, "opening cgroups file `%s'", path);
