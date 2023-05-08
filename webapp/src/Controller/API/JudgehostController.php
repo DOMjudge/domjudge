@@ -1221,24 +1221,34 @@ class JudgehostController extends AbstractFOSRestController
         response: 200,
         description: 'Updates internal versions, does not check them yet.',
     )]
-    #[OA\Parameter(
-        name: 'hostname',
-        description: 'Checking versions for the given hostname.',
-        in: 'query',
-        schema: new OA\Schema(type: 'string'),
+    #[OA\RequestBody(
         required: true,
-    )]
-    #[OA\Parameter(
-        name: 'compiler',
-        description: 'Reported compiler version',
-        in: 'query',
-        schema: new OA\Schema(type: 'string'),
-    )]
-    #[OA\Parameter(
-        name: 'runner',
-        description: 'Reported runner version',
-        in: 'query',
-        schema: new OA\Schema(type: 'string'),
+        content: [
+            new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    required: ['hostname', 'compiler', 'runner'],
+                    properties: [
+                        new OA\Property(
+                            property: 'problem',
+                            description: 'Checking versions for the given hostname.',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'compiler',
+                            description: 'Reported compiler version.',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'runner',
+                            description: 'Reported runner version.',
+                            type: 'array',
+                            items: new OA\Items(type: 'string', format: 'binary')
+                        ),
+                    ]
+                )
+            ),
+        ]
     )]
     public function checkVersions(Request $request, string $judgetaskid)
     {
