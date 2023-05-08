@@ -10,7 +10,7 @@ cleanexit ()
 {
 	trap - EXIT
 
-	chmod go= "$WORKDIR/vcheck" "$WORKDIR/vcheck-script"
+	chmod go= "$WORKDIR/version_check" "$WORKDIR/version_check-script"
 	logmsg $LOG_DEBUG "exiting, code = '$1'"
 	exit $1
 }
@@ -55,21 +55,21 @@ OLDDIR="$PWD"
 cd "$WORKDIR"
 
 # Make compile dir accessible and writable for RUNUSER:
-mkdir -p "$WORKDIR/vcheck"
-chmod a+rwx "$WORKDIR/vcheck"
+mkdir -p "$WORKDIR/version_check"
+chmod a+rwx "$WORKDIR/version_check"
 
 # Create files which are expected to exist: compiler output and runtime
-touch vcheck.out vcheck.meta
+touch version_check.out version_check.meta
 
 # Copy compile script into chroot
 # shellcheck disable=SC2174
-if [ -e "$WORKDIR/vcheck-script" ]; then
-    mv "$WORKDIR/vcheck-script" "$WORKDIR/vcheck-script-old"
+if [ -e "$WORKDIR/version_check-script" ]; then
+    mv "$WORKDIR/version_check-script" "$WORKDIR/version_check-script-old"
 fi
-mkdir -m 0777 -p "$WORKDIR/vcheck-script"
-cp -a "$VERSION_CHECK_SCRIPT" "$PWD/vcheck-script/"
+mkdir -m 0777 -p "$WORKDIR/version_check-script"
+cp -a "$VERSION_CHECK_SCRIPT" "$PWD/version_check-script/"
 
-cd "$WORKDIR/vcheck"
+cd "$WORKDIR/version_check"
 
 logmsg $LOG_INFO "starting version checking"
 
@@ -79,35 +79,35 @@ fi
 
 exitcode=0
 $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
-	-r "$PWD/.." -d "/vcheck" \
+	-r "$PWD/.." -d "/version_check" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT \
-	-M "$WORKDIR/vcheck.meta" $ENVIRONMENT_VARS -- \
-	"/vcheck-script/$(basename $VERSION_CHECK_SCRIPT)" >"$WORKDIR/vcheck.tmp" 2>&1 || \
+	-M "$WORKDIR/version_check.meta" $ENVIRONMENT_VARS -- \
+	"/version_check-script/$(basename $VERSION_CHECK_SCRIPT)" >"$WORKDIR/version_check.tmp" 2>&1 || \
 	exitcode=$?
 
 # Make sure that all files are owned by the current user/group, so
 # that we can delete the judging output tree without root access.
 # We also remove group RUNGROUP so that this can safely be shared
 # across multiple judgedaemons, and remove write permissions.
-$GAINROOT chown -R "$(id -un):" "$WORKDIR/vcheck"
-chmod -R go-w "$WORKDIR/vcheck"
+$GAINROOT chown -R "$(id -un):" "$WORKDIR/version_check"
+chmod -R go-w "$WORKDIR/version_check"
 
 cd "$WORKDIR"
 
-if [ $exitcode -ne 0 ] && [ ! -s vcheck.meta ]; then
-	echo "internal-error: runguard crashed" > vcheck.meta
-	echo "Runguard exited with code $exitcode and 'vcheck.meta' is empty, it likely crashed." >vcheck.out
-	echo "Version check output:" >>vcheck.out
-	cat vcheck.tmp >>vcheck.out
+if [ $exitcode -ne 0 ] && [ ! -s version_check.meta ]; then
+	echo "internal-error: runguard crashed" > version_check.meta
+	echo "Runguard exited with code $exitcode and 'version_check.meta' is empty, it likely crashed." >version_check.out
+	echo "Version check output:" >>version_check.out
+	cat version_check.tmp >>version_check.out
 	cleanexit ${E_INTERNAL_ERROR:-1}
 fi
 
 if [ $exitcode -ne 0 ]; then
-	echo "Version checking failed with exitcode $exitcode, version check output:" >vcheck.out
-	cat vcheck.tmp >>vcheck.out
+	echo "Version checking failed with exitcode $exitcode, version check output:" >version_check.out
+	cat version_check.tmp >>version_check.out
 	cleanexit ${E_COMPILER_ERROR:-1}
 fi
-cat vcheck.tmp >>vcheck.out
+cat version_check.tmp >>version_check.out
 
 logmsg $LOG_INFO "Version check successful"
 cleanexit 0

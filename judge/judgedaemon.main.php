@@ -1064,7 +1064,7 @@ function compile(
         foreach (['compiler', 'runner'] as $type) {
             if (isset($version_verification[$type . '_version_command'])) {
                 $vcscript_content = $version_verification[$type . '_version_command'];
-                $vcscript = tempnam(TMPDIR, 'vcheck-');
+                $vcscript = tempnam(TMPDIR, 'version_check-');
                 file_put_contents($vcscript, $vcscript_content);
                 chmod($vcscript, 0755);
                 $version_cmd = LIBJUDGEDIR . "/version_check.sh " .
@@ -1076,7 +1076,7 @@ function compile(
                 if (file_exists($version_output_file)) {
                     unlink($version_output_file);
                 }
-                system($compile_cmd, $retval);
+                system($version_cmd, $retval);
                 $versions[$type] = trim(file_get_contents($version_output_file));
                 if ($retval !== 0) {
                     $versions[$type] =
