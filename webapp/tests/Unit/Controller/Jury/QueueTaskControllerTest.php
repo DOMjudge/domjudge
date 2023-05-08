@@ -99,7 +99,7 @@ class QueueTaskControllerTest extends BaseTestCase
         $queueTask = $this->em->createQueryBuilder()
             ->select('qt')
             ->from(QueueTask::class, 'qt')
-            ->join(Judging::class, 'j', Join::WITH, 'j.judgingid = qt.jobid')
+            ->join(Judging::class, 'j', Join::WITH, 'j.judgingid = qt.judging')
             ->andWhere('j.submission = :submission')
             ->setParameter('submission', $submissions[1])
             ->getQuery()
@@ -207,7 +207,7 @@ class QueueTaskControllerTest extends BaseTestCase
         $queueTask = $this->em->createQueryBuilder()
             ->select('qt')
             ->from(QueueTask::class, 'qt')
-            ->join(Judging::class, 'j', Join::WITH, 'j.judgingid = qt.jobid')
+            ->join(Judging::class, 'j', Join::WITH, 'j.judgingid = qt.judging')
             ->andWhere('j.submission = :submission')
             ->setParameter('submission', $submission)
             ->getQuery()
@@ -222,7 +222,7 @@ class QueueTaskControllerTest extends BaseTestCase
 
         self::assertEquals($queueTask->getQueueTaskid(), $queueTaskId);
         self::assertEquals($submission->getTeam()->getName(), $teamName);
-        self::assertEquals($queueTask->getJobId(), $jobId);
+        self::assertEquals($queueTask->getJudging()->getJudgingid(), $jobId);
         self::assertEquals(QueueTaskController::PRIORITY_MAP[$queueTask->getPriority()], $priority);
         self::assertEquals($queueTask->getTeamPriority(), $teampriority);
         self::assertEquals('not started yet', $starttime);
@@ -235,7 +235,7 @@ class QueueTaskControllerTest extends BaseTestCase
         $queueTask = $this->em->createQueryBuilder()
             ->select('qt')
             ->from(QueueTask::class, 'qt')
-            ->join(Judging::class, 'j', Join::WITH, 'j.judgingid = qt.jobid')
+            ->join(Judging::class, 'j', Join::WITH, 'j.judgingid = qt.judging')
             ->andWhere('j.submission = :submission')
             ->setParameter('submission', $submission)
             ->getQuery()
@@ -278,7 +278,7 @@ class QueueTaskControllerTest extends BaseTestCase
             ->innerJoin('jt.judging_runs', 'jr')
             ->addOrderBy('jt.judgetaskid')
             ->andWhere('jt.jobid = :jobid')
-            ->setParameter('jobid', $queueTask->getJobId())
+            ->setParameter('jobid', $queueTask->getJudging()->getJudgingid())
             ->getQuery()->getResult();
 
         foreach ($tableBody->children() as $index => $child) {

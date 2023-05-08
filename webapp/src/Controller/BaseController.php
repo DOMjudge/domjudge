@@ -219,21 +219,37 @@ abstract class BaseController extends AbstractController
         // Now actually delete the entity.
         $entityManager->wrapInTransaction(function () use ($entityManager, $entity) {
             if ($entity instanceof Problem) {
-                // Deleting a problem is a special case: its dependent tables do not
-                // form a tree, and the deletion of judging_run can only cascade from
-                // judging, not from testcase. Since MySQL does not define the
-                // order of cascading deletes, we need to manually first cascade
-                // via submission -> judging -> judging_run.
+                // Deleting a problem is a special case:
+                // Its dependent tables do not form a tree (but something like a diamond shape),
+                // and there are multiple cascading removal paths from problem to its dependent
+                // tables.
+                // Since MySQL does not define the order of cascading deletes, we need to
+                // first manually delete judging_runs and then cascade via
+                // submission to all of judging, judgeTasks and queueTasks.
+                // See also https://github.com/DOMjudge/domjudge/issues/243 and associated commits.
+
+                // First delete judging_runs.
+                $entityManager->getConnection()->executeQuery(
+                    'DELETE jr FROM judging_run jr
+                         INNER JOIN judging j ON jr.judgingid = j.judgingid
+                         INNER JOIN submission s ON j.submitid = s.submitid
+                         WHERE s.probid = :probid',
+                    ['probid' => $entity->getProbid()]
+                );
+
+                // Then delete submissions which will cascade to judging, judgeTasks and queueTasks.
                 $entityManager->getConnection()->executeQuery(
                     'DELETE FROM submission WHERE probid = :probid',
                     ['probid' => $entity->getProbid()]
                 );
-                // Also delete internal errors that are "connected" to this problem.
+
+                // Lastly, delete internal errors that are "connected" to this problem.
                 $disabledJson = '{"kind":"problem","probid":' . $entity->getProbid() . '}';
                 $entityManager->getConnection()->executeQuery(
                     'DELETE FROM internal_error WHERE disabled = :disabled',
                     ['disabled' => $disabledJson]
                 );
+
                 $entityManager->clear();
                 $entity = $entityManager->getRepository(Problem::class)->find($entity->getProbid());
             }
@@ -528,7 +544,7 @@ abstract class BaseController extends AbstractController
                 $submission = $judging->getSubmission();
 
                 $queueTask = new QueueTask();
-                $queueTask->setJobId($judging->getJudgingid())
+                $queueTask->setJudging($judging)
                     ->setPriority(JudgeTask::PRIORITY_LOW)
                     ->setTeam($submission->getTeam())
                     ->setTeamPriority((int)$submission->getSubmittime())

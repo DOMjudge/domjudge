@@ -17,7 +17,7 @@ use JMS\Serializer\Annotation as Serializer;
     ]
 )]
 #[ORM\Index(columns: ['queuetaskid'], name: 'queuetaskid')]
-#[ORM\Index(columns: ['jobid'], name: 'jobid')]
+#[ORM\Index(columns: ['judgingid'], name: 'judgingid')]
 #[ORM\Index(columns: ['priority'], name: 'priority')]
 #[ORM\Index(columns: ['teampriority'], name: 'teampriority')]
 #[ORM\Index(columns: ['teamid'], name: 'teamid')]
@@ -29,12 +29,10 @@ class QueueTask
     #[ORM\Column(options: ['comment' => 'Queuetask ID', 'unsigned' => true])]
     private int $queuetaskid;
 
-    #[ORM\Column(
-        nullable: true,
-        options: ['comment' => 'All queuetasks with the same jobid belong together.', 'unsigned' => true]
-    )]
-    #[Serializer\Type('string')]
-    private ?int $jobid = null;
+    #[ORM\ManyToOne(inversedBy: 'queueTasks')]
+    #[ORM\JoinColumn(name: 'judgingid', referencedColumnName: 'judgingid', onDelete: 'CASCADE')]
+    #[Serializer\Exclude]
+    private Judging $judging;
 
     #[ORM\Column(options: [
         'comment' => 'Priority; negative means higher priority',
@@ -72,15 +70,15 @@ class QueueTask
         return $this->queuetaskid;
     }
 
-    public function setJobId($jobid): QueueTask
+    public function setJudging(Judging $judging): QueueTask
     {
-        $this->jobid = $jobid;
+        $this->judging = $judging;
         return $this;
     }
 
-    public function getJobId(): ?int
+    public function getJudging(): Judging
     {
-        return $this->jobid;
+        return $this->judging;
     }
 
     public function setPriority(int $priority): QueueTask

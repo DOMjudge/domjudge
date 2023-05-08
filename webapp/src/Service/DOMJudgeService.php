@@ -1194,7 +1194,7 @@ class DOMJudgeService
         $team = $submission->getTeam();
         $result = $this->em->createQueryBuilder()
             ->from(QueueTask::class, 'qt')
-            ->select('MAX(qt.teamPriority) AS max, COUNT(qt.jobid) AS count')
+            ->select('MAX(qt.teamPriority) AS max, COUNT(qt.judging) AS count')
             ->andWhere('qt.team = :team')
             ->andWhere('qt.priority = :priority')
             ->andWhere('qt.teamPriority >= :cutoffTeamPriority')
@@ -1222,7 +1222,7 @@ class DOMJudgeService
         //   but we want to judge submissions of this team in order, so we take the current max (X+120) and add 1.
         $teamPriority = (int)(max($result['max']+1, $submission->getSubmittime() + 60*$result['count']));
         $queueTask = new QueueTask();
-        $queueTask->setJobId($judging->getJudgingid())
+        $queueTask->setJudging($judging)
             ->setPriority($priority)
             ->setTeam($team)
             ->setTeamPriority($teamPriority)

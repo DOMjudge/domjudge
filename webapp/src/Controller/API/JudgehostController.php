@@ -1514,7 +1514,7 @@ class JudgehostController extends AbstractFOSRestController
             // Note: we are joining on queue tasks here since if there is no more queue task, there is also no more
             // work to be done. If we would not do this join, the getJudgetasks would try to delete the queue task,
             // which is both slow and results in spamming the auditlog
-            ->innerJoin(QueueTask::class, 'qt', Join::WITH, 'qt.jobid = jt.jobid')
+            ->innerJoin(QueueTask::class, 'qt', Join::WITH, 'qt.judging = jt.jobid')
             ->select('jt.jobid')
             ->andWhere('jt.judgehost = :judgehost')
             ->andWhere('jt.type = :type')
@@ -1536,7 +1536,8 @@ class JudgehostController extends AbstractFOSRestController
         $this->em->wrapInTransaction(function () use ($judgehost, $max_batchsize, &$judgetasks) {
             $jobid = $this->em->createQueryBuilder()
                 ->from(QueueTask::class, 'qt')
-                ->select('qt.jobid')
+                ->innerJoin('qt.judging', 'j')
+                ->select('j.judgingid')
                 ->andWhere('qt.startTime IS NULL')
                 ->addOrderBy('qt.priority')
                 ->addOrderBy('qt.teamPriority')
@@ -1549,7 +1550,7 @@ class JudgehostController extends AbstractFOSRestController
                 $this->em->createQueryBuilder()
                     ->update(QueueTask::class, 'qt')
                     ->set('qt.startTime', Utils::now())
-                    ->andWhere('qt.jobid = :jobid')
+                    ->andWhere('qt.judging = :jobid')
                     ->andWhere('qt.startTime IS NULL')
                     ->setParameter('jobid', $jobid)
                     ->getQuery()
@@ -1565,7 +1566,8 @@ class JudgehostController extends AbstractFOSRestController
             // but we have not contributed yet.
             $jobid = $this->em->createQueryBuilder()
                 ->from(QueueTask::class, 'qt')
-                ->select('qt.jobid')
+                ->innerJoin('qt.judging', 'j')
+                ->select('j.judgingid')
                 ->addOrderBy('qt.priority')
                 ->addOrderBy('qt.teamPriority')
                 ->setMaxResults(1)
@@ -1614,10 +1616,10 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         // Filter by submit_id.
-        $submit_id = $judgeTasks[0]->getSubmitid();
+        $submit_id = $judgeTasks[0]->getSubmission()->getSubmitid();
         $judgetaskids = [];
         foreach ($judgeTasks as $judgeTask) {
-            if ($judgeTask->getSubmitid() == $submit_id) {
+            if ($judgeTask->getSubmission()->getSubmitid() == $submit_id) {
                 $judgetaskids[] = $judgeTask->getJudgetaskid();
             }
         }
@@ -1717,7 +1719,7 @@ class JudgehostController extends AbstractFOSRestController
             // the queuetask here.
             $this->em->createQueryBuilder()
                 ->from(QueueTask::class, 'qt')
-                ->andWhere('qt.jobid = :jobid')
+                ->andWhere('qt.judging = :jobid')
                 ->setParameter('jobid', $jobId)
                 ->delete()
                 ->getQuery()
