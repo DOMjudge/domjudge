@@ -44,7 +44,13 @@ def parse_api_response(name: str, response: requests.Response):
         return None
 
     # We got a successful HTTP response. It worked. Return the full response
-    return json.loads(response.text)
+    try:
+        result = json.loads(response.text)
+    except json.decoder.JSONDecodeError as e:
+        print(response.text)
+        raise RuntimeError(f'Failed to JSON decode the response for API request {name}')
+
+    return result
 
 
 def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
