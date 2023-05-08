@@ -1177,15 +1177,12 @@ class JudgehostController extends AbstractFOSRestController
         response: 200,
         description: 'Returns optionally compiler and runner version commands.',
         content: new OA\JsonContent(
-            type: 'array',
-            items: new OA\Items(
-                properties: [
-                    new OA\Property(property: 'compiler_version_command', type: 'string', nullable: true),
-                    new OA\Property(property: 'runner_version_command', type: 'string', nullable: true),
-                ],
-                required: [],
-                type: 'object'
-            )
+            required: [],
+            properties: [
+                new OA\Property(property: 'compiler_version_command', type: 'string', nullable: true),
+                new OA\Property(property: 'runner_version_command', type: 'string', nullable: true),
+            ],
+            type: 'object'
         )
     )]
     public function getVersionCommands(string $judgetaskid): array
