@@ -11,7 +11,24 @@
             <div class="modal-body">
                 {{ form_row(form.recipient) }}
                 {{ form_row(form.subject) }}
-                {{ form_row(form.message) }}
+                <div class="list-group mb-3">
+                    <div class="list-group-item">
+                        <div class="flex-column">
+                            <label for="bodytext" class="form-label text-muted d-flex justify-content-end"><small>message</small></label>
+                        </div>
+                        {{ form_row(form.message) }}
+                    </div>
+                    <div class="list-group-item">
+                        <div class="mb-3">
+                            <div class="flex-column">
+                                <label for="bodytext" class="form-label text-muted d-flex justify-content-end"><small>message preview</small></label>
+                            </div>
+                            <div class="card">
+                                <div class="card-body" id="messagepreview">Start typing to see a preview of your message</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

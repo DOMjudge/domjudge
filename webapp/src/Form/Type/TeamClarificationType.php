@@ -49,6 +49,7 @@ class TeamClarificationType extends AbstractType
             'choices' => $subjects,
         ]);
         $builder->add('message', TextareaType::class, [
+            'label' => false,
             'attr' => [
                 'rows' => 5,
                 'cols' => 85,

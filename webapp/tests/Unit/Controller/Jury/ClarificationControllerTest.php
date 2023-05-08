@@ -103,7 +103,7 @@ class ClarificationControllerTest extends BaseTestCase
         $labels = $crawler->filter('label')->extract(['_text']);
         self::assertEquals('Send to:', $labels[0]);
         self::assertEquals('Subject:', $labels[1]);
-        self::assertEquals('Message:', $labels[2]);
+        self::assertEquals('message', $labels[2]);
 
         $this->client->submitForm('Send', [
             'sendto' => '',
