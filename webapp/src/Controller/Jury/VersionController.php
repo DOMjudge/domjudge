@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 namespace App\Controller\Jury;
+
 use App\Controller\BaseController;
 use App\Entity\Language;
 use App\Entity\Version;

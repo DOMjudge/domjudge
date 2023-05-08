@@ -818,7 +818,7 @@ class ImportProblemService
         if ($contestProblem) {
             $this->em->flush();
             $testcases = $problem->getTestcases()->toArray();
-            if (count(array_filter($testcases, function($t) { return !$t->getDeleted(); }))==0) {
+            if (count(array_filter($testcases, fn($t) => !$t->getDeleted())) == 0) {
                 $messages['danger'][] = 'No testcases present, disabling submitting for this problem';
                 $contestProblem->setAllowSubmit(false);
             }

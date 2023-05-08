@@ -30,16 +30,16 @@ class BalloonController extends AbstractController
     ) {}
 
     private function areDefault(array $filters, array $defaultCategories): bool {
-        if(isset($filters['affiliation-id'])) {
+        if (isset($filters['affiliation-id'])) {
             return false;
         }
-        if(isset($filters['location-str'])) {
+        if (isset($filters['location-str'])) {
             return false;
         }
-        if(!isset($filters['category-id'])) {
+        if (!isset($filters['category-id'])) {
             return false;
         }
-        if($filters['category-id'] == $defaultCategories) {
+        if ($filters['category-id'] == $defaultCategories) {
             return true;
         }
         return false;
@@ -99,7 +99,7 @@ class BalloonController extends AbstractController
                 ->getQuery()
                 ->getResult();
         }
-        if(!$haveFilters) {
+        if (!$haveFilters) {
             /** @var TeamCategory[] $filteredCategories */
             $filteredCategories = $this->em->createQueryBuilder()
                 ->from(TeamCategory::class, 'c')
@@ -171,5 +171,4 @@ class BalloonController extends AbstractController
 
         return $this->redirectToRoute("jury_balloons");
     }
-
 }
