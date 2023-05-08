@@ -23,15 +23,15 @@ class TeamAffiliationControllerTest extends JuryControllerTestCase
     protected static array   $addEntitiesShown         = ['shortname', 'name'];
     protected static array   $overviewNotShown         = ['country'];
     protected static array   $addEntities              = [['shortname' => 'short',
-                                                         'name'      => 'New Affil',
-                                                         'country'   => 'NLD',
-                                                         'internalcomments'  => 'Lorem ipsum dolor sit amet.'],
-                                                        ['shortname' => 'cl',
-                                                        'name' => 'Countryless',
-                                                        'country' => ''],
-                                                       ['shortname' => 'com',
-                                                        'name' => 'No comment',
-                                                        'internalcomments' => '']];
+                                                           'name'      => 'New Affil',
+                                                           'country'   => 'NLD',
+                                                           'internalcomments'  => 'Lorem ipsum dolor sit amet.'],
+                                                          ['shortname' => 'cl',
+                                                           'name' => 'Countryless',
+                                                           'country' => ''],
+                                                          ['shortname' => 'com',
+                                                           'name' => 'No comment',
+                                                           'internalcomments' => '']];
 
     public function testCheckAddEntityAdmin(): void
     {
