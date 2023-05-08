@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController as ARC;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -73,8 +74,17 @@ class JudgeTask
     #[ORM\JoinColumn(name: 'submitid', nullable: true, referencedColumnName: 'submitid', onDelete: 'CASCADE',
         options: ['comment' => 'Submission ID being judged', 'unsigned' => true])
     ]
-    #[Serializer\Type('string')]
+    #[Serializer\Exclude]
     private Submission $submission;
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('submitid')]
+    #[Serializer\Type('string')]
+    public function getSubmitid(): int
+    {
+        return $this->submission->getSubmitid();
+    }
+
 
     // Note that we rely on the fact here that files with an ID are immutable,
     // so clients are allowed to cache them on disk.

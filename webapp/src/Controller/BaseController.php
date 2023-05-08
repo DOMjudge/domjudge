@@ -225,7 +225,7 @@ abstract class BaseController extends AbstractController
                 // tables.
                 // Since MySQL does not define the order of cascading deletes, we need to manually
                 // first manually delete judging_runs and then cascade via
-                // submission -> judging -> judgeTasks.
+                // submission to all of judging, judgeTasks and queueTasks.
                 // See also https://github.com/DOMjudge/domjudge/issues/243 and associated commits.
 
                 // First delete judging_runs.
@@ -237,15 +237,7 @@ abstract class BaseController extends AbstractController
                     ['probid' => $entity->getProbid()]
                 );
 
-                // Then delete all outstanding queueTasks.
-                $entityManager->getConnection()->executeQuery(
-                    'DELETE qt FROM queuetask qt
-                         INNER JOIN submission s ON qt.jobid = s.submitid
-                         WHERE s.probid = :probid',
-                    ['probid' => $entity->getProbid()]
-                );
-
-                // Then delete submissions which will cascade to judging and judgeTasks.
+                // Then delete submissions which will cascade to judging, judgeTasks and queueTasks.
                 $entityManager->getConnection()->executeQuery(
                     'DELETE FROM submission WHERE probid = :probid',
                     ['probid' => $entity->getProbid()]
@@ -552,7 +544,7 @@ abstract class BaseController extends AbstractController
                 $submission = $judging->getSubmission();
 
                 $queueTask = new QueueTask();
-                $queueTask->setJobId($judging->getJudgingid())
+                $queueTask->setJudging($judging)
                     ->setPriority(JudgeTask::PRIORITY_LOW)
                     ->setTeam($submission->getTeam())
                     ->setTeamPriority((int)$submission->getSubmittime())
