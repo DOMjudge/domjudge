@@ -221,7 +221,7 @@ abstract class BaseController extends AbstractController
             if ($entity instanceof Problem) {
                 // Deleting a problem is a special case:
                 // Its dependent tables do not form a tree (but something like a diamond shape),
-                // and there are multiple cascading removal paths from problem to its dependant
+                // and there are multiple cascading removal paths from problem to its dependent
                 // tables.
                 // Since MySQL does not define the order of cascading deletes, we need to
                 // first manually delete judging_runs and then cascade via
