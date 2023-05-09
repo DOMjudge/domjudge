@@ -163,4 +163,26 @@ class OrganizationControllerTest extends BaseTestCase
         $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
         self::assertArrayNotHasKey('logo', $object);
     }
+
+    public function testNewAddedOrganization(): void
+    {
+        $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
+        $objectsBeforeTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
+
+        $newOrganizationPostData = ['shortname' => 'newOrg',
+                                    'icpc_id' => '9099',
+                                    'formal_name' => 'newOrgWithName',
+                                    'country' => 'NLD'];
+
+        $url = $this->helperGetEndpointURL('organizations');
+        $this->verifyApiJsonResponse('POST', $url, 201, 'admin', $newOrganizationPostData);
+
+        $objectsAfterTest  = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
+        $newItems = array_map('unserialize', array_diff(array_map('serialize', $objectsAfterTest), array_map('serialize', $objectsBeforeTest)));
+        self::assertEquals(1, count($newItems));
+        $listKey = array_keys($newItems)[0];
+        foreach ($newOrganizationPostData as $key => $value) {
+            self::assertEquals($newItems[$listKey][$key], $value);
+        }
+    }
 }

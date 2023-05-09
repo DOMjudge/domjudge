@@ -200,7 +200,7 @@ class ImportExportService
             ->setShortname(preg_replace(
                                $invalid_regex,
                                '_',
-                               $data['shortname'] ?? $data['short-name'] ?? $data['id']
+                               $data['short_name'] ?? $data['shortname'] ?? $data['short-name'] ?? $data['id']
                            ))
             ->setExternalid($contest->getShortname())
             ->setWarningMessage($data['warning-message'] ?? null)
@@ -695,7 +695,7 @@ class ImportExportService
         foreach ($data as $idx => $organization) {
             $organizationData[] = [
                 'externalid' => @$organization['id'],
-                'shortname' => @$organization['shortname'] ?? @$organization['name'],
+                'shortname' => @$organization['short_name'] ?? @$organization['short-name'] ?? @$organization['shortname'] ?? @$organization['name'],
                 'name' => @$organization['formal_name'] ?? @$organization['name'],
                 'country' => @$organization['country'],
                 'icpc_id' => $organization['icpc_id'] ?? null,
