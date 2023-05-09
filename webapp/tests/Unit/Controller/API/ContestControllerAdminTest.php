@@ -306,37 +306,37 @@ EOF;
     public function provideNewContest(): Generator
     {
         // Test Activation in past, present & future
-        yield [Utils::printtime(Utils::now()-14*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), null, True, False];
-        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), null, True, False];
-        yield [Utils::printtime(Utils::now()-1, 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), null, True, False];
-        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), null, True, False];
-        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), null, True, False];
-        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), null, True, False];
-        yield [Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), null, True, False];
-        yield [Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+14*24*60*60, 'Y-m-d H:i:s'), null, True, False];
-        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), null, True, False];
+        yield [Utils::printtime(Utils::now()-14*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), null, true, false];
+        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), null, true, false];
+        yield [Utils::printtime(Utils::now()-1, 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), null, true, false];
+        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), null, true, false];
+        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), null, true, false];
+        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), null, true, false];
+        yield [Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), null, true, false];
+        yield [Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+14*24*60*60, 'Y-m-d H:i:s'), null, true, false];
+        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), null, true, false];
         // Test Deactivation in past, present & future
-        yield [Utils::printtime(Utils::now()-14*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-14*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), False, True];
-        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-1, 'Y-m-d H:i:s'), False, True];
-        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), False, True];
-        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), False, True];
-        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), False, True];
-        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), False, True];
-        yield [Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), False, True];
-        yield [Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+14*24*60*60, 'Y-m-d H:i:s'), False, True];
+        yield [Utils::printtime(Utils::now()-14*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-14*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), false, true];
+        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-1, 'Y-m-d H:i:s'), false, true];
+        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), false, true];
+        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), false, true];
+        yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), false, true];
+        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), false, true];
+        yield [Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+1, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), false, true];
+        yield [Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+14*24*60*60, 'Y-m-d H:i:s'), false, true];
         // Only activate during the contest
-        foreach ([True, False] as $explicitSet) {
-            yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-(7*24-2)*60*60, 'Y-m-d H:i:s'), $explicitSet, True];
-            yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+2*60*60, 'Y-m-d H:i:s'), $explicitSet, True];
-            yield [Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+(7*24+2)*60*60, 'Y-m-d H:i:s'), $explicitSet, True];
+        foreach ([true, false] as $explicitSet) {
+            yield [Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-(7*24-2)*60*60, 'Y-m-d H:i:s'), $explicitSet, true];
+            yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+2*60*60, 'Y-m-d H:i:s'), $explicitSet, true];
+            yield [Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+7*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()+(7*24+2)*60*60, 'Y-m-d H:i:s'), $explicitSet, true];
         }
         // Pick hardcoded times
-        yield ["2000-01-01 10:10:10", "2000-01-01 10:10:10", "2002-01-01 10:10:10", False, True];
-        yield ["2000-01-01 10:10:10", "2001-01-01 10:10:10", null, True, False];
-        yield ["2077-01-01 10:10:10", "2099-01-01 10:10:10", null, True, False];
-        yield ["2077-01-01 10:10:10", "2099-01-01 10:10:10", "2100-01-01 10:10:10", True, True];
-        yield ["2000-01-01 10:10:10", "2000-01-01 10:10:10", null, False, False];
-        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), "2099-01-01 10:10:10", null, False, False];
-        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), "2077-01-01 10:10:10", "2099-01-01 10:10:10", False, True];
+        yield ["2000-01-01 10:10:10", "2000-01-01 10:10:10", "2002-01-01 10:10:10", false, true];
+        yield ["2000-01-01 10:10:10", "2001-01-01 10:10:10", null, true, false];
+        yield ["2077-01-01 10:10:10", "2099-01-01 10:10:10", null, true, false];
+        yield ["2077-01-01 10:10:10", "2099-01-01 10:10:10", "2100-01-01 10:10:10", true, true];
+        yield ["2000-01-01 10:10:10", "2000-01-01 10:10:10", null, false, false];
+        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), "2099-01-01 10:10:10", null, false, false];
+        yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), "2077-01-01 10:10:10", "2099-01-01 10:10:10", false, true];
     }
 }
