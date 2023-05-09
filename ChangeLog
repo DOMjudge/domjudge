@@ -6,6 +6,27 @@ Version 8.3.0DEV
  - Upgrade Symfony to 6.2 and upgrade other library dependencies.
  - Show link to problem text on jury problem overview and contest detail pages.
  - Add label to teams to be in sync with ICPC CCS spec.
+ - Add feedback/teammessage.txt for automated teamfeedback, see: #2016.
+ - Clarifications can now use markdown syntax.
+ - Upgrade Bootstrap to 5.2 and dependent components.
+ - Bug fixed to correctly select current user during configuration of installation.
+ - Properly fix removal of problem/submission data.
+ - Filter away balloons of jury members in balloon runner interface.
+ - Fix upgrade path for executables, see: #1826.
+ - Collect compiler and runner versions before compilation, useful to compare
+   judgehosts.
+ - Various improvements to shadow config used at ICPC World Finals.
+ - Show the historic timelimit which was used when judging the submission.
+ - Fixes to the documentation and import of problems with @EXPECTED_RESULTS@
+   tags.
+ - Allow filtering on affilition in submission page for jury for multisite
+   contests.
+ - Add preview of the contest problemset to the jury page before contest
+   start.
+ - Add optional Adminer for easy database access.
+ - Fix medal awards when skipping categories.
+ - Add direct button to public page for registering when enabled.
+ - Scale batch size of judge tasks dynamically.
 
 Version 8.2.0 - 6 March 2023
 ----------------------------
