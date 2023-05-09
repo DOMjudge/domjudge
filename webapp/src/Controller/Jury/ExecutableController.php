@@ -74,6 +74,13 @@ class ExecutableController extends BaseController
 
             if ($this->isGranted('ROLE_ADMIN')) {
                 $execactions[] = [
+                    'icon' => 'edit',
+                    'title' => 'edit this executable',
+                    'link' => $this->generateUrl('jury_executable', [
+                        'execId' => $e->getExecid(),
+                    ]),
+                ];
+                $execactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this executable',
                     'link' => $this->generateUrl('jury_executable_delete', [
