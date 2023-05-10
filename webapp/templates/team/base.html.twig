@@ -14,12 +14,6 @@
             $('body').on('submit', 'form[name=team_clarification]', function () {
                 return confirm("Send clarification request to Jury?");
             });
-
-            setupPreviewClarification($('#team_clarification_message') , $('#messagepreview'), false);
-
-            window.initModalClarificationPreview = function() {
-                setupPreviewClarification($('#team_clarification_message') , $('#messagepreview'), false);
-            };
         });
     </script>
 {% endblock %}

@@ -767,15 +767,17 @@ function humanReadableBytes(bytes) {
 
 function previewClarification($input, $previewDiv) {
     var message = $input.val();
-    $.ajax({
-        url: markdownPreviewUrl,
-        method: 'POST',
-        data: {
-            message: message
-        }
-    }).done(function(data) {
-        $previewDiv.html(data.html);
-    });
+    if (message) {
+        $.ajax({
+            url: markdownPreviewUrl,
+            method: 'POST',
+            data: {
+                message: message
+            }
+        }).done(function (data) {
+            $previewDiv.html(data.html);
+        });
+    }
 }
 
 function setupPreviewClarification($input, $previewDiv, previewInitial) {
