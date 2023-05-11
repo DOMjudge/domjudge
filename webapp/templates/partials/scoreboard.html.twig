@@ -54,30 +54,34 @@
         {# Display a list of teams by group. This is targeted for World Finals, but looks nice anyway #}
         {% for affiliationGroupRow in groupedAffiliations %}
             <br/><br/>
-            <div class="col-3">
+            <div class="row">
                 {% for category, affiliations in affiliationGroupRow %}
-                    <div class="card" style="font-family: Roboto, sans-serif;">
-                        <div class="card-header">{{ category }}</div>
-                        <div class="card-body">
-                            <ul class="list-group list-group-flush">
-                                {% for affiliation in affiliations %}
-                                    <li class="list-group-item">
-                                        {% set affiliationLogo = affiliation.id | assetPath('affiliation') %}
-                                        {% if affiliationLogo %}
-                                            <img loading="lazy" class="affiliation-logo"
-                                                 src="{{ asset(affiliationLogo) }}" alt="{{ affiliation.name }}"
-                                                 title="{{ affiliation.name }}">
-                                        {% endif %}
-                                        {{ affiliation.name }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
+                    <div class="col">
+                        <div class="card" style="font-family: Roboto, sans-serif;">
+                            <div class="card-header">{{ category }}</div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    {% for affiliation in affiliations %}
+                                        <li class="list-group-item">
+                                            {% set affiliationLogo = affiliation.id | assetPath('affiliation') %}
+                                            {% if affiliationLogo %}
+                                                <img loading="lazy" class="affiliation-logo"
+                                                     src="{{ asset(affiliationLogo) }}" alt="{{ affiliation.name }}"
+                                                     title="{{ affiliation.name }}">
+                                            {% endif %}
+                                            {{ affiliation.name }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 {% endfor %}
                 {% if affiliationGroupRow | length < 3 %}
                     {% for i in (affiliationGroupRow | length + 1)..3 %}
-                        <div class="card" style="border: none;"></div>
+                        <div class="col">
+                            <div class="card" style="border: none;"></div>
+                        </div>
                     {% endfor %}
                 {% endif %}
             </div>
