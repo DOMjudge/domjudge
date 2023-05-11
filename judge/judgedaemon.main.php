@@ -387,6 +387,7 @@ function fetch_executable_internal(
                 $buildscript = "#!/bin/sh\n\n";
                 $execlang = false;
                 $source = "";
+                $unescapedSource = "";
                 foreach ($langexts as $lang => $langext) {
                     if (($handle = opendir($execbuilddir)) === false) {
                         error("Could not open $execbuilddir");
@@ -395,7 +396,8 @@ function fetch_executable_internal(
                         $ext = pathinfo($file, PATHINFO_EXTENSION);
                         if (in_array($ext, $langext)) {
                             $execlang = $lang;
-                            $source = $file;
+                            $unescapedSource = $file;
+                            $source = dj_escapeshellarg($unescapedSource);
                             break;
                         }
                     }
@@ -409,22 +411,25 @@ function fetch_executable_internal(
                 }
                 switch ($execlang) {
                     case 'c':
-                        $buildscript .= "gcc -Wall -O2 -std=gnu11 '$source' -o run -lm\n";
+                        $buildscript .= "gcc -Wall -O2 -std=gnu11 $source -o run -lm\n";
                         break;
                     case 'cpp':
-                        $buildscript .= "g++ -Wall -O2 -std=gnu++17 '$source' -o run\n";
+                        $buildscript .= "g++ -Wall -O2 -std=gnu++17 $source -o run\n";
                         break;
                     case 'java':
-                        $source = basename($source, ".java");
-                        $buildscript .= "javac -cp ./ -d ./ '$source'.java\n";
+                        $buildscript .= "javac -cp ./ -d ./ $source\n";
                         $buildscript .= "echo '#!/bin/sh' > run\n";
                         // no main class detection here
-                        $buildscript .= "echo 'java -cp ./ '$source >> run\n";
+                        $buildscript .= "echo 'COMPARE_DIR=\$(dirname \"\$0\")' >> run\n";
+                        $mainClass = basename($unescapedSource, '.java');
+                        $buildscript .= "echo 'java -cp \"\$COMPARE_DIR\" $mainClass \"\$@\"' >> run\n";
+                        $buildscript .= "chmod +x run\n";
                         break;
                     case 'py':
                         $buildscript .= "echo '#!/bin/sh' > run\n";
                         // TODO: Check if it's 'python' or 'python3'
-                        $buildscript .= "echo 'python '$source >> run\n";
+                        $buildscript .= "echo 'python $source' \"\$@\" >> run\n";
+                        $buildscript .= "chmod +x run\n";
                         break;
                 }
                 if (file_put_contents($execbuildpath, $buildscript) === false) {
