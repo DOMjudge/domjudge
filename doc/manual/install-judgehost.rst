@@ -31,12 +31,12 @@ Software requirements
 For Debian::
 
   sudo apt install make pkg-config sudo debootstrap libcgroup-dev \
-        php-cli php-curl php-json php-xml php-zip lsof procps
+        php-cli php-curl php-json php-xml php-zip lsof procps gcc g++
 
 For Red Hat::
 
   sudo yum install make pkgconfig sudo libcgroup-devel lsof \
-        php-cli php-mbstring php-xml php-process procps-ng
+        php-cli php-mbstring php-xml php-process procps-ng gcc g++
 
 Removing apport
 ---------------

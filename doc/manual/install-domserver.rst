@@ -37,14 +37,14 @@ GNU/Linux, or one of its derivative distributions like Ubuntu::
 
   sudo apt install acl zip unzip mariadb-server apache2 \
         php php-fpm php-gd php-cli php-intl php-mbstring php-mysql \
-        php-curl php-json php-xml php-zip composer ntp
+        php-curl php-json php-xml php-zip composer ntp gcc g++
 
 The following command can be used on RedHat Enterprise Linux, and related
 distributions like CentOS and Fedora::
 
   sudo yum install acl zip unzip mariadb-server httpd \
         php-gd php-cli php-intl php-mbstring php-mysqlnd \
-        php-xml php-zip composer ntp
+        php-xml php-zip composer ntp gcc g++
 
 Installation
 ------------
