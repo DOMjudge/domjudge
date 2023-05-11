@@ -49,7 +49,7 @@ a {
     max-width: 800px;
 }
 
-.disabled, .dropdown-disabled {
+.disabled, .dropdown-disabled, .disabled td {
     color: silver !important;
 }
 
