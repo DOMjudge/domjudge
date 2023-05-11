@@ -74,6 +74,12 @@ DOMjudge uses a MySQL or MariaDB database server for information storage.
 Where this document talks about MySQL, it can be understood to also apply
 to MariaDB.
 
+For the install option (unless using bare-install) steps you need the
+python `yaml` module, for Debian GNU/Linux, or one of its derivative 
+distributions like Ubuntu::
+
+  sudo apt install python3-yaml
+
 Installation of the database is done with ``bin/dj_setup_database``.
 For this, you need an installed and configured MySQL server and
 administrator access to it. Run::
