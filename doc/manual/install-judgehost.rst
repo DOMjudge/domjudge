@@ -37,11 +37,14 @@ For Debian::
   sudo apt install make pkg-config sudo debootstrap libcgroup-dev \
         php-cli php-curl php-json php-xml php-zip lsof procps gcc g++
 
-For Fedora::
+For RHEL 7/Fedora [*]_::
 
   sudo yum install make pkgconfig sudo libcgroup-devel lsof \
         php-cli php-mbstring php-xml php-process procps-ng gcc g++
         glibc-static libstdc++-static
+
+.. [*] Building on RHEL8, RHEL9 (or the CentOS, Rockylinux & Almalinux versions)
+       requires packages which are currently not in the repositories.
 
 Removing apport
 ---------------
