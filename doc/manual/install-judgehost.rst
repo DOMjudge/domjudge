@@ -27,6 +27,8 @@ Software requirements
 * Debootstrap
 * PHP command line interface with the ``curl``, ``json``, ``xml``,
   ``zip`` extensions.
+* A C/C++ compiler, the instructions below suggest ``gcc``/``g++`` but something
+  else such as ``clang`` will also work.
 
 For Debian::
 
