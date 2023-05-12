@@ -40,7 +40,7 @@ GNU/Linux, or one of its derivative distributions like Ubuntu::
         php-curl php-json php-xml php-zip composer ntp
 
 The following command can be used on RedHat Enterprise Linux, and related
-distributions like CentOS and Fedora::
+distributions like CentOS (with EPEL) and Fedora::
 
   sudo yum install acl zip unzip mariadb-server httpd \
         php-gd php-cli php-intl php-mbstring php-mysqlnd \
