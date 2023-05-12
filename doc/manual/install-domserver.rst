@@ -37,14 +37,18 @@ GNU/Linux, or one of its derivative distributions like Ubuntu::
 
   sudo apt install acl zip unzip mariadb-server apache2 \
         php php-fpm php-gd php-cli php-intl php-mbstring php-mysql \
-        php-curl php-json php-xml php-zip composer ntp gcc g++
+        php-curl php-json php-xml php-zip composer ntp
 
 The following command can be used on RedHat Enterprise Linux, and related
 distributions like CentOS and Fedora::
 
   sudo yum install acl zip unzip mariadb-server httpd \
         php-gd php-cli php-intl php-mbstring php-mysqlnd \
-        php-xml php-zip composer ntp gcc g++
+        php-xml php-zip composer ntp
+
+Due to an `issue <https://github.com/DOMjudge/domjudge/issues/862>`_ in our
+configure script you should also install the software for the judgehost
+see :ref:`the judgehost software requirements <judgehost_software>`
 
 Installation
 ------------
