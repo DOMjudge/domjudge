@@ -20,6 +20,8 @@ System requirements
   The machines only need HTTP(S) access to the DOMserver.
 
 
+.. _judgehost_software:
+
 Software requirements
 `````````````````````
 
