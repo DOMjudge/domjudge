@@ -27,7 +27,7 @@
 .cached_vendor:
   extends: [.clean_ordering]
   cache:
-    key: libvendor-260522
+    key: libvendor-82
     paths:
       - lib/vendor/
 
