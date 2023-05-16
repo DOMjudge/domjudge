@@ -31,30 +31,42 @@ AC_SUBST(DOMJUDGE_VERSION, $PACKAGE_VERSION)
 AC_DEFINE_UNQUOTED(DOMJUDGE_VERSION, "$PACKAGE_VERSION",
 [DOMjudge version number (alias for PACKAGE_VERSION)])
 
-# Set default {C,CXX,LD}FLAGS. This might screw up portability, but
-# adds important security. Only set these flags when none are supplied
-# by the user.
-for flag in CFLAGS CXXFLAGS LDFLAGS ; do
-	AC_MSG_CHECKING([whether configure should try to set $flag])
-	if test x`eval echo '${'$flag'+set}'` = xset ; then res=no ; else res=yes ; fi
-	eval enable_${flag}_setting=$res
-	AC_MSG_RESULT($res)
-done
+AC_SUBST(DOMSERVER_BUILD_ENABLED,yes)
+AC_ARG_ENABLE([domserver-build],AS_HELP_STRING([--enable-domserver-build],
+[configure and build the domserver (default: yes).]),
+[if test "x$enableval" = xno ; then AC_SUBST(DOMSERVER_BUILD_ENABLED,no) fi])
 
-DEF_CXFLAGS="-g -O2"
-DEF_LDFLAGS=""
+AC_SUBST(JUDGEHOST_BUILD_ENABLED,yes)
+AC_ARG_ENABLE([judgehost-build],AS_HELP_STRING([--enable-judgehost-build],
+[configure and build the judgehost (default: yes).]),
+[if test "x$enableval" = xno ; then AC_SUBST(JUDGEHOST_BUILD_ENABLED,no) fi])
 
-AX_APPEND_COMPILE_FLAGS(-Wall,               DEF_CXFLAGS)
-AX_APPEND_COMPILE_FLAGS(-fstack-protector,   DEF_CXFLAGS)
-AX_APPEND_COMPILE_FLAGS(-fPIE,               DEF_CXFLAGS)
-AX_APPEND_COMPILE_FLAGS(-D_FORTIFY_SOURCE=2, DEF_CXFLAGS)
-AX_APPEND_LINK_FLAGS([-fPIE -pie],   DEF_LDFLAGS)
-AX_APPEND_LINK_FLAGS([-Wl,-z,relro], DEF_LDFLAGS)
-AX_APPEND_LINK_FLAGS([-Wl,-z,now],   DEF_LDFLAGS)
-
-test "x$enable_CFLAGS_setting"   = xyes && AC_SUBST(CFLAGS,   $DEF_CXFLAGS)
-test "x$enable_CXXFLAGS_setting" = xyes && AC_SUBST(CXXFLAGS, $DEF_CXFLAGS)
-test "x$enable_LDFLAGS_setting"  = xyes && AC_SUBST(LDFLAGS,  $DEF_LDFLAGS)
+if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
+	# Set default {C,CXX,LD}FLAGS. This might screw up portability, but
+	# adds important security. Only set these flags when none are supplied
+	# by the user.
+	for flag in CFLAGS CXXFLAGS LDFLAGS ; do
+		AC_MSG_CHECKING([whether configure should try to set $flag])
+		if test x`eval echo '${'$flag'+set}'` = xset ; then res=no ; else res=yes ; fi
+		eval enable_${flag}_setting=$res
+		AC_MSG_RESULT($res)
+	done
+	
+	DEF_CXFLAGS="-g -O2"
+	DEF_LDFLAGS=""
+	
+	AX_APPEND_COMPILE_FLAGS(-Wall,               DEF_CXFLAGS)
+	AX_APPEND_COMPILE_FLAGS(-fstack-protector,   DEF_CXFLAGS)
+	AX_APPEND_COMPILE_FLAGS(-fPIE,               DEF_CXFLAGS)
+	AX_APPEND_COMPILE_FLAGS(-D_FORTIFY_SOURCE=2, DEF_CXFLAGS)
+	AX_APPEND_LINK_FLAGS([-fPIE -pie],   DEF_LDFLAGS)
+	AX_APPEND_LINK_FLAGS([-Wl,-z,relro], DEF_LDFLAGS)
+	AX_APPEND_LINK_FLAGS([-Wl,-z,now],   DEF_LDFLAGS)
+	
+	test "x$enable_CFLAGS_setting"   = xyes && AC_SUBST(CFLAGS,   $DEF_CXFLAGS)
+	test "x$enable_CXXFLAGS_setting" = xyes && AC_SUBST(CXXFLAGS, $DEF_CXFLAGS)
+	test "x$enable_LDFLAGS_setting"  = xyes && AC_SUBST(LDFLAGS,  $DEF_LDFLAGS)
+fi
 
 # {{{ File ownership for e.g. password files.
 
@@ -78,73 +90,77 @@ else
 	AC_MSG_RESULT([$DOMJUDGE_USER])
 fi
 
-AC_MSG_CHECKING([webserver-group])
-AC_ARG_WITH([webserver-group], [AS_HELP_STRING([--with-webserver-group=GROUP],
-[Webserver group for password files (default: try to detect).])], [], [])
-
-if test "x$with_webserver_group" = x; then
-	# Try a number of group names and choose first one found
-	found=0
-	for g in www-data apache httpd nginx ; do
-		if getent group $g >/dev/null 2>&1 ; then
-		   found=1
-		   break
+if test "x$DOMSERVER_BUILD_ENABLED" = xyes; then
+	AC_MSG_CHECKING([webserver-group])
+	AC_ARG_WITH([webserver-group], [AS_HELP_STRING([--with-webserver-group=GROUP],
+	[Webserver group for password files (default: try to detect).])], [], [])
+	
+	if test "x$with_webserver_group" = x; then
+		# Try a number of group names and choose first one found
+		found=0
+		for g in www-data apache httpd nginx ; do
+			if getent group $g >/dev/null 2>&1 ; then
+			   found=1
+			   break
+			fi
+		done
+		if test $found -ne 0 ; then
+			AC_SUBST(WEBSERVER_GROUP,"$g")
+			AC_MSG_RESULT([$WEBSERVER_GROUP (detected)])
+		else
+			AC_MSG_ERROR([webserver group could not be detected, use --with-webserver-group=GROUP])
 		fi
-	done
-	if test $found -ne 0 ; then
-		AC_SUBST(WEBSERVER_GROUP,"$g")
-		AC_MSG_RESULT([$WEBSERVER_GROUP (detected)])
 	else
-		AC_MSG_ERROR([webserver group could not be detected, use --with-webserver-group=GROUP])
+		AC_SUBST(WEBSERVER_GROUP,$with_webserver_group)
+		AC_MSG_RESULT([$WEBSERVER_GROUP])
 	fi
-else
-	AC_SUBST(WEBSERVER_GROUP,$with_webserver_group)
-	AC_MSG_RESULT([$WEBSERVER_GROUP])
 fi
 
 # }}}
 
 # {{{ runguard
-AC_MSG_CHECKING([runuser])
-AC_ARG_WITH([runuser], [AS_HELP_STRING([--with-runuser=USER],
-[Prefix for unprivileged user(s) under which to run submissions (default: domjudge-run).])], [], [])
+if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
+	AC_MSG_CHECKING([runuser])
+	AC_ARG_WITH([runuser], [AS_HELP_STRING([--with-runuser=USER],
+	[Prefix for unprivileged user(s) under which to run submissions (default: domjudge-run).])], [], [])
 
-if test "x$with_runuser" = x; then
-	AC_SUBST(RUNUSER,"domjudge-run")
-	AC_MSG_RESULT($RUNUSER (default))
-else
-	AC_SUBST(RUNUSER,$with_runuser)
-	AC_MSG_RESULT($RUNUSER)
+	if test "x$with_runuser" = x; then
+		AC_SUBST(RUNUSER,"domjudge-run")
+		AC_MSG_RESULT($RUNUSER (default))
+	else
+		AC_SUBST(RUNUSER,$with_runuser)
+		AC_MSG_RESULT($RUNUSER)
+	fi
+
+	if test "x${DOMJUDGE_USER#"$RUNUSER"}" != "x$DOMJUDGE_USER" ; then
+		AC_MSG_ERROR([domjudge_user '$DOMJUDGE_USER' cannot match runuser '$RUNUSER'.])
+	fi
+	if test "x$RUNUSER" = "xroot" ; then
+		AC_MSG_ERROR([runuser cannot be root.])
+	fi
+
+	AC_MSG_CHECKING([rungroup])
+	AC_ARG_WITH([rungroup], [AS_HELP_STRING([--with-rungroup=GROUP],
+	[Unprivileged group under which to run submissions (default: same as runuser).])], [], [])
+
+	if test "x$with_rungroup" = x; then
+		AC_SUBST(RUNGROUP,"$RUNUSER")
+		AC_MSG_RESULT($RUNGROUP (default))
+	else
+		AC_SUBST(RUNGROUP,$with_rungroup)
+		AC_MSG_RESULT($RUNGROUP)
+	fi
+
+	# Check for using Linux cgroups for memory control
+	AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]), AC_MSG_ERROR([Linux cgroup library not found.]))
 fi
-
-if test "x${DOMJUDGE_USER#"$RUNUSER"}" != "x$DOMJUDGE_USER" ; then
-	AC_MSG_ERROR([domjudge_user '$DOMJUDGE_USER' cannot match runuser '$RUNUSER'.])
-fi
-if test "x$RUNUSER" = "xroot" ; then
-	AC_MSG_ERROR([runuser cannot be root.])
-fi
-
-AC_MSG_CHECKING([rungroup])
-AC_ARG_WITH([rungroup], [AS_HELP_STRING([--with-rungroup=GROUP],
-[Unprivileged group under which to run submissions (default: same as runuser).])], [], [])
-
-if test "x$with_rungroup" = x; then
-	AC_SUBST(RUNGROUP,"$RUNUSER")
-	AC_MSG_RESULT($RUNGROUP (default))
-else
-	AC_SUBST(RUNGROUP,$with_rungroup)
-	AC_MSG_RESULT($RUNGROUP)
-fi
-
-# Check for using Linux cgroups for memory control
-AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]), AC_MSG_ERROR([Linux cgroup library not found.]))
-
 # }}}
 
 # {{{ FHS directory structure
 
 # These are defaults that can still be overridden below!
 if test "x$FHS_ENABLED" = xyes ; then
+	if test "x$DOMSERVER_BUILD_ENABLED" = xyes; then
 	AC_SUBST(domserver_root,          '')
 	AC_SUBST(domserver_bindir,        $bindir)
 	AC_SUBST(domserver_etcdir,        $sysconfdir/${PACKAGE_TARNAME})
@@ -156,7 +172,9 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(domserver_rundir,        $localstatedir/run/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_tmpdir,        /tmp)
 	AC_SUBST(domserver_exampleprobdir,$datadir/${PACKAGE_TARNAME}/example_problems)
+	fi
 
+	if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 	AC_SUBST(judgehost_root,          '')
 	AC_SUBST(judgehost_bindir,        $bindir)
 	AC_SUBST(judgehost_etcdir,        $sysconfdir/${PACKAGE_TARNAME})
@@ -168,6 +186,7 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(judgehost_judgedir,      $localstatedir/lib/${PACKAGE_TARNAME}/judgings)
 	AC_SUBST(judgehost_chrootdir,     /chroot/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_cgroupdir,     /sys/fs/cgroup)
+	fi
 
 	AC_SUBST(domjudge_docdir,         $docdir)
 fi
@@ -185,11 +204,16 @@ AC_DEFUN([AX_PATH], [
 
 AX_WITH_COMMENT(2,[  ])
 AX_WITH_COMMENT(3,[Fine tuning of installation root paths when FHS is disabled (the default):])
+if test "x$DOMSERVER_BUILD_ENABLED" = xyes; then
 AX_PATH(domserver_root,         [$prefix/domserver])
+fi
+if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 AX_PATH(judgehost_root,         [$prefix/judgehost])
+fi
 AX_PATH(domjudge_docdir,        [$prefix/doc])
 AX_WITH_COMMENT(4,[    ])
 AX_WITH_COMMENT(5,[More fine tuning of all installation (sub)directories:])
+if test "x$DOMSERVER_BUILD_ENABLED" = xyes; then
 AX_PATH(domserver_bindir,       [$domserver_root/bin])
 AX_PATH(domserver_etcdir,       [$domserver_root/etc])
 AX_PATH(domserver_webappdir,    [$domserver_root/webapp])
@@ -200,6 +224,8 @@ AX_PATH(domserver_logdir,       [$domserver_root/log])
 AX_PATH(domserver_rundir,       [$domserver_root/run])
 AX_PATH(domserver_tmpdir,       [$domserver_root/tmp])
 AX_PATH(domserver_exampleprobdir, [$domserver_root/example_problems])
+fi
+if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 AX_WITH_COMMENT(6,[     ])
 AX_PATH(judgehost_bindir,       [$judgehost_root/bin])
 AX_PATH(judgehost_etcdir,       [$judgehost_root/etc])
@@ -211,6 +237,7 @@ AX_PATH(judgehost_tmpdir,       [$judgehost_root/tmp])
 AX_PATH(judgehost_judgedir,     [$judgehost_root/judgings])
 AX_PATH(judgehost_chrootdir,    [/chroot/${PACKAGE_TARNAME}])
 AX_PATH(judgehost_cgroupdir,    [/sys/fs/cgroup])
+fi
 AX_WITH_COMMENT(7,[      ])
 
 # }}}
@@ -250,10 +277,12 @@ fi
 AC_MSG_RESULT($BASEURL)
 
 # Checks for programs.
+if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CXXCPP
 AC_PROG_CPP
+fi
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
@@ -279,6 +308,7 @@ AC_DEFINE_UNQUOTED(_POSIX_C_SOURCE, 200809L, [Include POSIX.1-2008 base specific
 AC_DEFINE_UNQUOTED(_XOPEN_SOURCE, 500,       [Include SUSv2 (UNIX 98) extensions])
 
 # Checks for header files.
+if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([fcntl.h stdlib.h string.h sys/param.h sys/time.h syslog.h termios.h unistd.h magic.h libcgroup.h])
 
@@ -298,6 +328,7 @@ AC_FUNC_STRTOD
 AC_REPLACE_FUNCS([atexit dup2 getcwd gettimeofday memset mkdir realpath setenv \
                   socket strchr strdup strerror strncasecmp strrchr strstr strtol],
                  [],[AC_MSG_ERROR([required C function is missing.])])
+fi
 
 AC_CHECK_PROG(PHP_CHECK,php,yes)
 AS_IF([test x"$PHP_CHECK" != x"yes"],
@@ -318,15 +349,21 @@ echo ""
 echo "Summary:"
 echo " * project.............: $PACKAGE_NAME $PACKAGE_VERSION"
 echo " * prefix..............: $prefix"
+if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 echo " * CPPFLAGS............: $CPPFLAGS"
 echo " * CFLAGS..............: $CFLAGS"
 echo " * CXXFLAGS............: $CXXFLAGS"
 echo " * LDFLAGS.............: $LDFLAGS"
+fi
 echo ""
 echo " * default user........: $DOMJUDGE_USER"
+if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 echo " * runguard user.......: $RUNUSER"
 echo " * runguard group......: $RUNGROUP"
+fi
+if test "x$DOMSERVER_BUILD_ENABLED" = xyes; then
 echo " * webserver group.....: $WEBSERVER_GROUP"
+fi
 echo ""
 echo " * website base URL....: $BASEURL"
 echo ""
@@ -336,6 +373,7 @@ if test "x$DOC_BUILD_ENABLED" != xyes ; then
 else
    echo ""
 fi
+if test "x$DOMSERVER_BUILD_ENABLED" = xyes; then
 echo ""
 echo " * domserver...........: AX_VAR_EXPAND($domserver_root)"
 echo "    - bin..............: AX_VAR_EXPAND($domserver_bindir)"
@@ -348,6 +386,8 @@ echo "    - sql..............: AX_VAR_EXPAND($domserver_sqldir)"
 echo "    - tmp..............: AX_VAR_EXPAND($domserver_tmpdir)"
 echo "    - webapp...........: AX_VAR_EXPAND($domserver_webappdir)"
 echo "    - example_problems.: AX_VAR_EXPAND($domserver_exampleprobdir)"
+fi
+if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 echo ""
 echo " * judgehost...........: AX_VAR_EXPAND($judgehost_root)"
 echo "    - bin..............: AX_VAR_EXPAND($judgehost_bindir)"
@@ -360,6 +400,7 @@ echo "    - tmp..............: AX_VAR_EXPAND($judgehost_tmpdir)"
 echo "    - judge............: AX_VAR_EXPAND($judgehost_judgedir)"
 echo "    - chroot...........: AX_VAR_EXPAND($judgehost_chrootdir)"
 echo "    - cgroup...........: AX_VAR_EXPAND($judgehost_cgroupdir)"
+fi
 echo ""
 echo " * systemd unit files..: AX_VAR_EXPAND($systemd_unitdir)"
 echo ""

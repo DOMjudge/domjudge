@@ -420,3 +420,44 @@ compile_assertions_finished () {
   run run_configure --disable-doc-build
   assert_line " * documentation.......: /opt/domjudge/doc (disabled)"
 }
+
+@test "Build default (effective host does both domserver & judgehost)" {
+  setup
+  run run_configure
+  assert_line " * domserver...........: /opt/domjudge/domserver"
+  assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
+  assert_line " * judgehost...........: /opt/domjudge/judgehost"
+  assert_line " * runguard group......: domjudge-run"
+  run make domserver
+  assert_success
+  run make judgehost
+  assert_success
+}
+
+@test "Build domserver disabled" {
+  setup
+  run run_configure --disable-domserver-build
+  refute_line " * domserver...........: /opt/domjudge/domserver"
+  for group in www-data apache nginx; do
+    refute_line " * webserver group.....: $group"
+  done
+  assert_line " * judgehost...........: /opt/domjudge/judgehost"
+  assert_line " * runguard group......: domjudge-run"
+  run make domserver
+  assert_failure
+  run make judgehost
+  assert_success
+}
+
+@test "Build judgehost disabled" {
+  setup
+  run run_configure --disable-judgehost-build
+  assert_line " * domserver...........: /opt/domjudge/domserver"
+  assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
+  refute_line " * judgehost...........: /opt/domjudge/judgehost"
+  refute_line " * runguard group......: domjudge-run"
+  run make domserver
+  assert_success
+  run make judgehost
+  assert_failure
+}
