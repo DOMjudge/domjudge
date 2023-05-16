@@ -44,11 +44,25 @@ dist: distdocs
 endif
 
 # MAIN TARGETS
-domserver judgehost docs: paths.mk config
+domserver: domserver-configure paths.mk config
+judgehost: judgehost-configure paths.mk config
+docs: paths.mk config
 install-domserver: domserver composer-dump-autoload domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
 dist: configure composer-dependencies
+
+domserver-configure:
+ifneq "$(DOMSERVER_BUILD_ENABLED)" "yes"
+	@echo "The setup for domserver is not configured"
+	@exit 1
+endif
+
+judgehost-configure:
+ifneq "$(JUDGEHOST_BUILD_ENABLED)" "yes"
+	@echo "The setup for judgehost is not configured"
+	@exit 1
+endif
 
 # Install PHP dependencies
 composer-dependencies:
