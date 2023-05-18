@@ -609,7 +609,6 @@ class ImportProblemService
         $probid = $problem->getProbid();
         $this->eventLogService->log('problem', $problem->getProbid(), $problemIsNew ? 'create' : 'update', $cid);
 
-
         // Submit reference solutions.
         if ($contest === null) {
             $messages['warning'][] = 'No jury solutions added: problem is not linked to a contest (yet).';
