@@ -93,6 +93,24 @@ def import_images(entity: str, property: str, filename_regexes: List[str]):
         else:
             print(f'Skipping {entity} {property} import.')
 
+def import_contest_banner(cid: str):
+    """Import the contest banner"""
+
+    banners = ['banner.svg', 'banner.png', 'banner.jpg']
+
+    banner_file = None
+    for banner in banners:
+        if os.path.isfile(banner):
+            banner_file = banner
+            break
+
+    if banner_file:
+        if dj_utils.confirm('Import banner for contest?', False):
+            dj_utils.upload_file(f'contests/{cid}/banner', 'banner', banner_file)
+            print('Contest banner imported.')
+        else:
+            print('Skipping contest banner import.')
+
 if len(sys.argv) == 1:
     dj_utils.domjudge_webapp_folder_or_api_url = webappdir
 elif len(sys.argv) == 2:
@@ -131,6 +149,7 @@ else:
 
 if cid is not None:
     print(f' -> cid={cid}')
+    import_contest_banner(cid)
 
 # Problem import is also special: we need to upload each individual problem and detect what they are
 if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path.exists('problemset.yaml'):
