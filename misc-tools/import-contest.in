@@ -105,7 +105,7 @@ def import_contest_banner(cid: str):
             break
 
     if banner_file:
-        if dj_utils.confirm('Import banner for contest?', False):
+        if dj_utils.confirm(f'Import {banner_file} for contest?', False):
             dj_utils.upload_file(f'contests/{cid}/banner', 'banner', banner_file)
             print('Contest banner imported.')
         else:
