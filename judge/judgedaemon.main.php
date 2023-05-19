@@ -417,7 +417,7 @@ function fetch_executable_internal(
                         $buildscript .= "g++ -Wall -O2 -std=gnu++17 $source -o run\n";
                         break;
                     case 'java':
-                        $buildscript .= "javac -cp ./ -d ./ $source\n";
+                        $buildscript .= "javac -cp . -d . $source\n";
                         $buildscript .= "echo '#!/bin/sh' > run\n";
                         // no main class detection here
                         $buildscript .= "echo 'COMPARE_DIR=\$(dirname \"\$0\")' >> run\n";
