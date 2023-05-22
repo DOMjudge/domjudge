@@ -181,7 +181,7 @@ class UserController extends BaseController
         $restrictions = ['userid' => $user->getUserid()];
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
-            $this->dj->getCurrentContests(),
+            $this->dj->getCurrentContests(honorCookie: true),
             $restrictions
         );
 
@@ -189,7 +189,7 @@ class UserController extends BaseController
             'user' => $user,
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
-            'showContest' => count($this->dj->getCurrentContests()) > 1,
+            'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
             'showExternalResult' => $this->config->get('data_source') ===
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'refresh' => [

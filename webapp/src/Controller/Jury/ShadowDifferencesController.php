@@ -180,11 +180,9 @@ class ShadowDifferencesController extends BaseController
             $restrictions['result'] = $request->query->get('local');
         }
 
-        $contests = [$contest->getCid() => $contest];
-
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $this->submissions->getSubmissionList(
-            $contests,
+            $this->dj->getCurrentContests(honorCookie: true),
             $restrictions,
             limit: 0,
             showShadowUnverified: true
