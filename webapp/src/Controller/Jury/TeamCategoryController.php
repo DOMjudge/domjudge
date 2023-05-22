@@ -130,7 +130,7 @@ class TeamCategoryController extends BaseController
         $restrictions = ['categoryid' => $teamCategory->getCategoryid()];
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
-            $this->dj->getCurrentContests(),
+            $this->dj->getCurrentContests(honorCookie: true),
             $restrictions
         );
 
@@ -138,7 +138,7 @@ class TeamCategoryController extends BaseController
             'teamCategory' => $teamCategory,
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
-            'showContest' => count($this->dj->getCurrentContests()) > 1,
+            'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
             'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'refresh' => [

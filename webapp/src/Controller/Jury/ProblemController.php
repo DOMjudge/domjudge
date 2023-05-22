@@ -432,7 +432,7 @@ class ProblemController extends BaseController
         $restrictions = ['probid' => $problem->getProbid()];
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
-            $this->dj->getCurrentContests(),
+            $this->dj->getCurrentContests(honorCookie: true),
             $restrictions
         );
 
@@ -445,7 +445,7 @@ class ProblemController extends BaseController
             'defaultOutputLimit' => (int)$this->config->get('output_limit'),
             'defaultRunExecutable' => (string)$this->config->get('default_run'),
             'defaultCompareExecutable' => (string)$this->config->get('default_compare'),
-            'showContest' => count($this->dj->getCurrentContests()) > 1,
+            'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
             'showExternalResult' => $this->config->get('data_source') ===
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'lockedProblem' => $lockedProblem,
