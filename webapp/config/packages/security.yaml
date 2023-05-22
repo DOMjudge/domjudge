@@ -74,7 +74,7 @@ security:
                 target: /public
 
     access_control:
-        - { path: ^/$, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/$, roles: PUBLIC_ACCESS }
         - { path: ^/markdown-preview, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
