@@ -177,7 +177,7 @@ class LanguageController extends BaseController
         $restrictions = ['langid' => $language->getLangid()];
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
-            $this->dj->getCurrentContests(),
+            $this->dj->getCurrentContests(honorCookie: true),
             $restrictions
         );
 
@@ -185,7 +185,7 @@ class LanguageController extends BaseController
             'language' => $language,
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
-            'showContest' => count($this->dj->getCurrentContests()) > 1,
+            'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
             'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'refresh' => [

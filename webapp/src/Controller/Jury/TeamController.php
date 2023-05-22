@@ -288,13 +288,14 @@ class TeamController extends BaseController
         }
         $restrictions['teamid'] = $teamId;
         [$submissions, $submissionCounts] =
-            $submissionService->getSubmissionList($this->dj->getCurrentContests(), $restrictions);
+            $submissionService->getSubmissionList($this->dj->getCurrentContests(honorCookie: true), $restrictions);
 
         $data['restrictionText']    = $restrictionText;
         $data['submissions']        = $submissions;
         $data['submissionCounts']   = $submissionCounts;
         $data['showExternalResult'] = $this->config->get('data_source') ===
             DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
+        $data['showContest']        = count($this->dj->getCurrentContests(honorCookie: true)) > 1;
 
         if ($request->isXmlHttpRequest()) {
             $data['displayRank'] = true;

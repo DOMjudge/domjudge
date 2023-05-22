@@ -101,14 +101,26 @@ class DOMJudgeService
     /**
      * Return all the contests that are currently active indexed by contest ID.
      *
-     * @param int|null $onlyOfTeam Get only contests for the given team.
-     * @param bool     $alsofuture If true, also get future contests.
-     * @param bool     $onlyPublic If true, only get public contests. Only allowed when $onlyOfTeam is not specified.
+     * @param int|null $onlyOfTeam  Get only contests for the given team.
+     * @param bool     $alsofuture  If true, also get future contests.
+     * @param bool     $onlyPublic  If true, only get public contests. Only allowed when $onlyOfTeam is not specified.
+     * @param bool     $honorCookie If true, return the currently selected contest if selected by the contest cookie
      *
      * @return Contest[]
      */
-    public function getCurrentContests(?int $onlyOfTeam = null, bool $alsofuture = false, bool $onlyPublic = false): array
-    {
+    public function getCurrentContests(
+        ?int $onlyOfTeam = null,
+        bool $alsofuture = false,
+        bool $onlyPublic = false,
+        bool $honorCookie = false
+    ): array {
+        if ($honorCookie) {
+            $contest = $this->getCurrentContest(onlyOfTeam: $onlyOfTeam, onlyPublic: $onlyPublic);
+            if ($contest) {
+                return [$contest->getCid() => $contest];
+            }
+        }
+
         if ($onlyPublic && isset($onlyOfTeam)) {
             throw new InvalidArgumentException('Not allowed to specify a team and requesting public only.');
         }

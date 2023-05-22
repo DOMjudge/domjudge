@@ -332,7 +332,7 @@ class RejudgingController extends BaseController
 
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
-            $this->dj->getCurrentContests(),
+            $this->dj->getCurrentContests(honorCookie: true),
             $restrictions
         );
 
@@ -371,6 +371,7 @@ class RejudgingController extends BaseController
             'view' => $view,
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
+            'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
             'oldverdict' => $request->query->get('oldverdict', 'all'),
             'newverdict' => $request->query->get('newverdict', 'all'),
             'repetitions' => array_column($repetitions, 'rejudgingid'),
