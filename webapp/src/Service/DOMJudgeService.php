@@ -918,7 +918,7 @@ class DOMJudgeService
 
         $problems = [];
         $samples = [];
-        if ($contest && $contest->getFreezeData()->started()) {
+        if ($contest && ($forJury || $contest->getFreezeData()->started())) {
             $problems = $this->em->createQueryBuilder()
                 ->from(ContestProblem::class, 'cp')
                 ->join('cp.problem', 'p')
