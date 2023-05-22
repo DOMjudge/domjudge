@@ -422,13 +422,13 @@ function fetch_executable_internal(
                         // no main class detection here
                         $buildscript .= "echo 'COMPARE_DIR=\$(dirname \"\$0\")' >> run\n";
                         $mainClass = basename($unescapedSource, '.java');
-                        $buildscript .= "echo 'java -cp \"\$COMPARE_DIR\" $mainClass \"\$@\"' >> run\n";
+                        $buildscript .= "echo 'java -cp \"\$COMPARE_DIR\" $mainClass \"\\\$@\"' >> run\n";
                         $buildscript .= "chmod +x run\n";
                         break;
                     case 'py':
                         $buildscript .= "echo '#!/bin/sh' > run\n";
-                        // TODO: Check if it's 'python' or 'python3'
-                        $buildscript .= "echo 'python $source' \"\$@\" >> run\n";
+                        $buildscript .= "echo 'COMPARE_DIR=\$(dirname \"\$0\")' >> run\n";
+                        $buildscript .= "echo 'python3 \$COMPARE_DIR/$source' \"\\\$@\" >> run\n";
                         $buildscript .= "chmod +x run\n";
                         break;
                 }
