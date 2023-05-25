@@ -383,7 +383,7 @@ class ImportProblemService
                     }
                 }
             }
-            asort($dataFiles);
+            asort($dataFiles, SORT_STRING);
 
             foreach ($dataFiles as $dataFile) {
                 $baseFileName = sprintf('data/%s/%s', $type, $dataFile);
