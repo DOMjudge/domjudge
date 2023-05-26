@@ -402,7 +402,7 @@ tr.ignore td, td.ignore, span.ignore {
     border: 1px solid black;
 }
 
-.problem-list h2,h3,h4 {
+.problem-list h2, .problem-list h3, .problem-list h4 {
     text-align: center !important;
 }
 
