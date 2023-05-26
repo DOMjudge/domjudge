@@ -1,19 +1,11 @@
 {% if limitToTeamIds is null %}
     {% if showTeamSubmissions or jury %}
         <tr style="border-top: 2px solid black;">
-            {% set summaryColspan = 3 %}
+            {% set summaryColspan = 2 %}
             {% if showAffiliationLogos %}
                 {% set summaryColspan = summaryColspan + 1 %}
             {% endif %}
             <td class="scoresummary" title="Summary" colspan="{{ summaryColspan }}">Summary</td>
-            {% if scoreboard.showPoints %}
-                <td class="scorenc"></td>
-            {% else %}
-                <td title="total solved" class="scorenc">
-                    {{ scoreboard.summary.numberOfPoints(sortOrder) }}
-                </td>
-            {% endif %}
-            <td></td>
             {% for problem in scoreboard.problems %}
                 {% set summary = scoreboard.summary.problem(problem.probid) %}
                 <td style="text-align: left;">
