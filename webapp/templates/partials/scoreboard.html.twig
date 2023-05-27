@@ -53,10 +53,9 @@
     {% if scoreboard is null and not jury %}
         {# Display a list of teams by group. This is targeted for World Finals, but looks nice anyway #}
         {% for affiliationGroupRow in groupedAffiliations %}
-            <br/><br/>
             <div class="row">
                 {% for category, affiliations in affiliationGroupRow %}
-                    <div class="col">
+                    <div class="col-lg-4 col-sm-6 col-12 mt-4">
                         <div class="card" style="font-family: Roboto, sans-serif;">
                             <div class="card-header">{{ category }}</div>
                             <div class="card-body">
