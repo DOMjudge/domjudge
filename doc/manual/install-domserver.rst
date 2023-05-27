@@ -37,14 +37,14 @@ GNU/Linux, or one of its derivative distributions like Ubuntu::
 
   sudo apt install acl zip unzip mariadb-server apache2 \
         php php-fpm php-gd php-cli php-intl php-mbstring php-mysql \
-        php-curl php-json php-xml php-zip composer ntp
+        php-curl php-json php-xml php-zip composer ntp python3-yaml
 
 The following command can be used on RedHat Enterprise Linux, and related
 distributions like CentOS (with EPEL) and Fedora::
 
   sudo yum install acl zip unzip mariadb-server httpd \
         php-gd php-cli php-intl php-mbstring php-mysqlnd \
-        php-xml php-zip composer ntp
+        php-xml php-zip composer ntp python3-pyyaml
 
 Due to an `issue <https://github.com/DOMjudge/domjudge/issues/862>`_ in our
 configure script you should also install the software for the judgehost
@@ -77,12 +77,6 @@ Database configuration
 DOMjudge uses a MySQL or MariaDB database server for information storage.
 Where this document talks about MySQL, it can be understood to also apply
 to MariaDB.
-
-For the install option (unless using bare-install) steps you need the
-python `yaml` module, for Debian GNU/Linux, or one of its derivative 
-distributions like Ubuntu::
-
-  sudo apt install python3-yaml
 
 Installation of the database is done with ``bin/dj_setup_database``.
 For this, you need an installed and configured MySQL server and
