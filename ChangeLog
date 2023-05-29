@@ -1,5 +1,19 @@
 DOMjudge Programming Contest Judging System
 
+Version 8.2.1 - 29 May 2023
+---------------------------
+ - Set the default domjudge_user to the current user at configure time.
+ - Various bugfixes.
+ - Adhere to CLICS 2022-07 again.
+ - Prevent overwriting of local .netrc when installing examples.
+ - Fixed some w3c html violations.
+ - Clarify the need for cgroupv1 when chroot creating fails.
+ - Fix medal awards when skipping categories.
+ - Do not allow to delete problems from a locked contest in the UI.
+ - Disallow submitting to a problem when it does not have testcases at import.
+ - Fix handling of binary files when editing executables.
+ - Recalculate all immutable hashes since the algorithm changed in the past.
+
 Version 8.2.0 - 6 March 2023
 ----------------------------
  - Various bugfixes & UI improvements.
