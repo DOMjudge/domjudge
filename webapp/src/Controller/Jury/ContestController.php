@@ -947,9 +947,10 @@ class ContestController extends BaseController
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
-    #[Route(path: '/{contestId<\d+>}/public-scoreboard-data.zip', name: 'jury_public_scoreboard_data_zip')]
+    #[Route(path: '/{contestId<\d+>}/scoreboard-zip/{type<public|unfrozen>}/contest.zip', name: 'jury_scoreboard_data_zip')]
     public function publicScoreboardDataZipAction(
         int $contestId,
+        string $type,
         RequestStack $requestStack,
         Request $request,
         ScoreboardService $scoreboardService
@@ -959,21 +960,6 @@ class ContestController extends BaseController
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
-        return $this->dj->getScoreboardZip($request, $requestStack, $contest, $scoreboardService);
-    }
-
-    #[Route(path: '/{contestId<\d+>}/jury-scoreboard-data.zip', name: 'jury_scoreboard_data_zip')]
-    public function juryScoreboardDataZipAction(
-        int $contestId,
-        RequestStack $requestStack,
-        Request $request,
-        ScoreboardService $scoreboardService
-    ): Response {
-        /** @var Contest $contest */
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
-        if (!$contest) {
-            throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
-        }
-        return $this->dj->getScoreboardZip($request, $requestStack, $contest, $scoreboardService, true);
+        return $this->dj->getScoreboardZip($request, $requestStack, $contest, $scoreboardService, $type === 'unfrozen');
     }
 }

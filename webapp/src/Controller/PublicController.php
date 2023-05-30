@@ -74,7 +74,7 @@ class PublicController extends BaseController
         return $this->render('public/scoreboard.html.twig', $data, $response);
     }
 
-    #[Route(path: '/scoreboard-data.zip', name: 'public_scoreboard_data_zip')]
+    #[Route(path: '/scoreboard-zip/contest.zip', name: 'public_scoreboard_data_zip')]
     public function scoreboardDataZipAction(
         RequestStack $requestStack,
         Request $request
