@@ -50,8 +50,10 @@ class TeamVisitor implements EventSubscriberInterface
             $visitor->visitProperty($property, $team->getApiId($this->eventLogService));
         }
 
+        $id = $team->getApiId($this->eventLogService);
+
         // Check if the asset actually exists
-        if (!($teamPhoto = $this->dj->assetPath((string)$team->getTeamid(), 'team', true))) {
+        if (!($teamPhoto = $this->dj->assetPath($id, 'team', true))) {
             return;
         }
 
@@ -59,8 +61,6 @@ class TeamVisitor implements EventSubscriberInterface
         $extension = $parts[count($parts) - 1];
 
         $imageSize = Utils::getImageSize($teamPhoto);
-
-        $id = $team->getApiId($this->eventLogService);
 
         $route = $this->dj->apiRelativeUrl(
             'v4_team_photo',
