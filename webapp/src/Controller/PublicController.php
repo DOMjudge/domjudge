@@ -77,66 +77,10 @@ class PublicController extends BaseController
     #[Route(path: '/scoreboard-data.zip', name: 'public_scoreboard_data_zip')]
     public function scoreboardDataZipAction(
         RequestStack $requestStack,
-        #[Autowire('%kernel.project_dir%')]
-        string $projectDir,
-        #[Autowire('%domjudge.libvendordir%')]
-        string $vendorDir,
         Request $request
     ): Response {
         $contest = $this->getContestFromRequest($request) ?? $this->dj->getCurrentContest(onlyPublic: true);
-        $data    = $this->scoreboardService->getScoreboardTwigData(
-                $request, null, '', false, true, true, $contest
-            ) + ['hide_menu' => true, 'current_contest' => $contest];
-
-        $request = $requestStack->pop();
-        // Use reflection to change the basepath property of the request, so we can detect
-        // all requested and assets
-        $requestReflection = new ReflectionClass($request);
-        $basePathProperty  = $requestReflection->getProperty('basePath');
-        $basePathProperty->setAccessible(true);
-        $basePathProperty->setValue($request, '/CHANGE_ME');
-        $requestStack->push($request);
-
-        $contestPage = $this->renderView('public/scoreboard.html.twig', $data);
-
-        // Now get all assets that are used
-        $assetRegex = '|/CHANGE_ME/([/a-z0-9_\-\.]*)(\??[/a-z0-9_\-\.=]*)|i';
-        preg_match_all($assetRegex, $contestPage, $assetMatches);
-        $contestPage = preg_replace($assetRegex, '$1$2', $contestPage);
-
-        $zip = new ZipArchive();
-        if (!($tempFilename = tempnam($this->dj->getDomjudgeTmpDir(), "contest-"))) {
-            throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
-        }
-
-        $res = $zip->open($tempFilename, ZipArchive::OVERWRITE);
-        if ($res !== true) {
-            throw new ServiceUnavailableHttpException(null, 'Could not create temporary zip file.');
-        }
-        $zip->addFromString('index.html', $contestPage);
-
-        $publicPath = realpath(sprintf('%s/public/', $projectDir));
-        foreach ($assetMatches[1] as $file) {
-            $filepath = realpath($publicPath . '/' . $file);
-            if (!str_starts_with($filepath, $publicPath) &&
-                !str_starts_with($filepath, $vendorDir)
-            ) {
-                // Path outside of known good dirs: path traversal
-                continue;
-            }
-
-            $zip->addFile($filepath, $file);
-        }
-
-        // Also copy in the webfonts
-        $webfontsPath = $publicPath . '/webfonts/';
-        foreach (glob($webfontsPath . '*') as $fontFile) {
-            $fontName = basename($fontFile);
-            $zip->addFile($fontFile, 'webfonts/' . $fontName);
-        }
-        $zip->close();
-
-        return Utils::streamZipFile($tempFilename, 'contest.zip');
+        return $this->dj->getScoreboardZip($request, $requestStack, $contest, $this->scoreboardService);
     }
 
     /**

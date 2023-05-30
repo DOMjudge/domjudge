@@ -26,9 +26,11 @@ use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
+use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\FreezeData;
+use App\Utils\Scoreboard\Filter;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -37,6 +39,8 @@ use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use http\Exception\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use ReflectionClass;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -55,6 +59,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Twig\Environment;
 use ZipArchive;
 
 class DOMJudgeService
@@ -90,7 +95,12 @@ class DOMJudgeService
         protected readonly TokenStorageInterface $tokenStorage,
         protected readonly HttpKernelInterface $httpKernel,
         protected readonly ConfigurationService $config,
-        protected readonly RouterInterface $router
+        protected readonly RouterInterface $router,
+        protected readonly Environment $twig,
+        #[Autowire('%kernel.project_dir%')]
+        protected string $projectDir,
+        #[Autowire('%domjudge.libvendordir%')]
+        protected string $vendorDir,
     ) {}
 
     public function getEntityManager(): EntityManagerInterface
@@ -1499,4 +1509,74 @@ class DOMJudgeService
 
         return $verdicts;
     }
+
+    public function getScoreboardZip(
+        Request $request,
+        RequestStack $requestStack,
+        ?Contest $contest,
+        ScoreboardService $scoreboardService,
+        bool $forceUnfrozen = false
+    ) {
+        $data = $scoreboardService->getScoreboardTwigData(
+                request: $request,
+                response: null,
+                refreshUrl: '',
+                jury: false,
+                public: true,
+                static: true,
+                contest: $contest,
+                forceUnfrozen: $forceUnfrozen
+            ) + ['hide_menu' => true, 'current_contest' => $contest];
+
+        $request = $requestStack->pop();
+        // Use reflection to change the basepath property of the request, so we can detect
+        // all requested and assets
+        $requestReflection = new ReflectionClass($request);
+        $basePathProperty  = $requestReflection->getProperty('basePath');
+        $basePathProperty->setAccessible(true);
+        $basePathProperty->setValue($request, '/CHANGE_ME');
+        $requestStack->push($request);
+
+        $contestPage = $this->twig->render('public/scoreboard.html.twig', $data);
+
+        // Now get all assets that are used
+        $assetRegex = '|/CHANGE_ME/([/a-z0-9_\-\.]*)(\??[/a-z0-9_\-\.=]*)|i';
+        preg_match_all($assetRegex, $contestPage, $assetMatches);
+        $contestPage = preg_replace($assetRegex, '$1$2', $contestPage);
+
+        $zip = new ZipArchive();
+        if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "contest-"))) {
+            throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
+        }
+
+        $res = $zip->open($tempFilename, ZipArchive::OVERWRITE);
+        if ($res !== true) {
+            throw new ServiceUnavailableHttpException(null, 'Could not create temporary zip file.');
+        }
+        $zip->addFromString('index.html', $contestPage);
+
+        $publicPath = realpath(sprintf('%s/public/', $this->projectDir));
+        foreach ($assetMatches[1] as $file) {
+            $filepath = realpath($publicPath . '/' . $file);
+            if (!str_starts_with($filepath, $publicPath) &&
+                !str_starts_with($filepath, $this->vendorDir)
+            ) {
+                // Path outside of known good dirs: path traversal
+                continue;
+            }
+
+            $zip->addFile($filepath, $file);
+        }
+
+        // Also copy in the webfonts
+        $webfontsPath = $publicPath . '/webfonts/';
+        foreach (glob($webfontsPath . '*') as $fontFile) {
+            $fontName = basename($fontFile);
+            $zip->addFile($fontFile, 'webfonts/' . $fontName);
+        }
+        $zip->close();
+
+        return Utils::streamZipFile($tempFilename, 'contest.zip');
+    }
+
 }

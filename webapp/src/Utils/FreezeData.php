@@ -155,4 +155,15 @@ class FreezeData
         $duration = Utils::difftime((float)$this->contest->getStarttime(), (float)$this->contest->getEndtime());
         return (int)($passed * 100. / $duration);
     }
+
+    /**
+     * Force a specific cache key.
+     *
+     * Useful when one wants to render the final scoreboard before unfreezing, i.e. for a scoreboard ZIP.
+     */
+    public function setForceValue(string $cacheKey, bool $value): static
+    {
+        $this->cache[$cacheKey] = $value;
+        return $this;
+    }
 }
