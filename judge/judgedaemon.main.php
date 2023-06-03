@@ -263,7 +263,8 @@ function usage(): never
         "Start the judgedaemon.\n\n" .
         "  -n <id>           bind to CPU <id> and user " . RUNUSER . "-<id>\n" .
         "  --diskspace-error send internal error on low diskspace\n" .
-        "  -v                set verbosity to LEVEL (syslog levels)\n" .
+        "  -v <level>        set verbosity to <level>; these are syslog levels:\n" .
+        "                      default is LOG_INFO = 5, max is LOG_DEBUG = 7\n" .
         "  -h                display this help and exit\n" .
         "  -V                output version information and exit\n\n";
     exit;
