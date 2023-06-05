@@ -1578,5 +1578,4 @@ class DOMJudgeService
 
         return Utils::streamZipFile($tempFilename, 'contest.zip');
     }
-
 }
