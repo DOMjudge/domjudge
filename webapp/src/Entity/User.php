@@ -136,7 +136,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return null;
     }
 
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         $this->plainPassword = null;
     }
