@@ -25,7 +25,8 @@ class ImportExportControllerTest extends BaseTestCase
         self::assertSelectorExists('div.help-text:contains(\'Create a "Web Services Token"\')');
 
         // We've reached the end of the page.
-        self::assertSelectorExists('li:contains("results.tsv")');
+        self::assertSelectorExists('li:contains("wf_results.tsv")');
+        self::assertSelectorExists('li:contains("full_results.tsv")');
     }
 
     /**
@@ -149,10 +150,15 @@ HEREDOC;
         yield ['a:contains("teams.tsv")', 'teams	1
 2	exteam	3	Example teamname	Utrecht University	UU	NLD	utrecht
 '];
-        yield ['li:contains("results.tsv") a:contains("for sort order 0")', 'results	1
+        yield ['li:contains("wf_results.tsv") a:contains("for sort order 0")', 'results	1
 exteam	1	Gold Medal	0	0	0	Participants
 '];
-        yield ['li:contains("results.tsv") a:contains("for sort order 1")', 'results	1
+        yield ['li:contains("wf_results.tsv") a:contains("for sort order 1")', 'results	1
+'];
+        yield ['li:contains("full_results.tsv") a:contains("for sort order 0")', 'results	1
+exteam	1	Gold Medal	0	0	0	Participants
+'];
+        yield ['li:contains("full_results.tsv") a:contains("for sort order 1")', 'results	1
 '];
         yield ['a:contains("groups.tsv")', 'groups	1
 2	Self-Registered
@@ -178,13 +184,27 @@ exteam	1	Gold Medal	0	0	0	Participants
     }
 
     /**
-     * Test export of results.html.
+     * Test export of wf_results.html.
      */
-    public function testResultsHtmlExport(): void
+    public function testWfResultsHtmlExport(): void
     {
         $this->loadFixture(ClarificationFixture::class);
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
-        $link = $this->getCurrentCrawler()->filter('li:contains("results.html") a:contains("for sort order 0")')->link();
+        $link = $this->getCurrentCrawler()->filter('li:contains("wf_results.html") a:contains("for sort order 0")')->link();
+        $this->client->click($link);
+        self::assertSelectorExists('h1:contains("Results for Demo contest")');
+        self::assertSelectorExists('th:contains("Example teamname")');
+        self::assertSelectorExists('th:contains("A: Hello World")');
+    }
+
+    /**
+     * Test export of full_results.html.
+     */
+    public function testFullResultsHtmlExport(): void
+    {
+        $this->loadFixture(ClarificationFixture::class);
+        $this->verifyPageResponse('GET', '/jury/import-export', 200);
+        $link = $this->getCurrentCrawler()->filter('li:contains("full_results.html") a:contains("for sort order 0")')->link();
         $this->client->click($link);
         self::assertSelectorExists('h1:contains("Results for Demo contest")');
         self::assertSelectorExists('th:contains("Example teamname")');

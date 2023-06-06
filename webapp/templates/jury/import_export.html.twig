@@ -95,19 +95,30 @@
                 <h3>Export &lt;html&gt;</h3>
                     <ul>
                         <li>
-                            <code>results.html</code>:
+                            <code>wf_results.html</code>:
                             <ul>
                                 {% for sort_order, names in sort_orders %}
                                     <li>
-                                        <a href="{{ path('jury_html_export', {'type': 'results', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
+                                        <a href="{{ path('jury_html_export', {'type': 'wf_results', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
                                         ({{ names | join(', ') }})
                                     </li>
                                 {% endfor %}
                             </ul>
                         </li>
-                    <li>
-                        <a href="{{ path('jury_html_export', {'type': 'clarifications'}) }}" target="_blank"><code>clarifications.html</code></a>
-                    </li>
+                        <li>
+                            <code>full_results.html</code>:
+                            <ul>
+                                {% for sort_order, names in sort_orders %}
+                                    <li>
+                                        <a href="{{ path('jury_html_export', {'type': 'full_results', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
+                                        ({{ names | join(', ') }})
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="{{ path('jury_html_export', {'type': 'clarifications'}) }}" target="_blank"><code>clarifications.html</code></a>
+                        </li>
                     </ul>
             </div>
         </div>
@@ -120,14 +131,25 @@
                 <h3>Export tab-separated</h3>
                     <ul>
                         <li>
-                            <code>results.tsv</code>:
+                            <code>wf_results.tsv</code>:
                             <ul>
                             {% for sort_order, names in sort_orders %}
                                 <li>
-                                    <a href="{{ path('jury_tsv_export', {'type': 'results', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
+                                    <a href="{{ path('jury_tsv_export', {'type': 'wf_results', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
                                     ({{ names | join(', ') }})
                                  </li>
                             {% endfor %}
+                            </ul>
+                        </li>
+                        <li>
+                            <code>full_results.tsv</code>:
+                            <ul>
+                                {% for sort_order, names in sort_orders %}
+                                    <li>
+                                        <a href="{{ path('jury_tsv_export', {'type': 'full_results', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
+                                        ({{ names | join(', ') }})
+                                    </li>
+                                {% endfor %}
                             </ul>
                         </li>
                     </ul>
