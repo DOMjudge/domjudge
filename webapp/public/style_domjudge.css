@@ -391,10 +391,13 @@ tr.ignore td, td.ignore, span.ignore {
 }
 
 .banner {
-    width: 98%;
+    max-width: 98%;
+    max-height: 12ex;
     height: auto;
     display: block;
     margin-bottom: 2rem;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #teampicture {
