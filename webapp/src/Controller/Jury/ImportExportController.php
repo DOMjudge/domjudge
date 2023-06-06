@@ -277,10 +277,11 @@ class ImportExportController extends BaseController
         ]);
     }
 
-    #[Route(path: '/export/{type<groups|teams|results>}.tsv', name: 'jury_tsv_export')]
+    #[Route(path: '/export/{type<groups|teams|wf_results|full_results>}.tsv', name: 'jury_tsv_export')]
     public function exportTsvAction(Request $request, string $type): Response
     {
         $data    = [];
+        $tsvType = $type;
         try {
             switch ($type) {
                 case 'groups':
@@ -289,9 +290,15 @@ class ImportExportController extends BaseController
                 case 'teams':
                     $data = $this->importExportService->getTeamData();
                     break;
-                case 'results':
+                case 'wf_results':
                     $sortOrder = $request->query->getInt('sort_order');
                     $data      = $this->importExportService->getResultsData($sortOrder);
+                    $tsvType   = 'results';
+                    break;
+                case 'full_results':
+                    $sortOrder = $request->query->getInt('sort_order');
+                    $data      = $this->importExportService->getResultsData($sortOrder, full: true);
+                    $tsvType   = 'results';
                     break;
             }
         } catch (BadRequestHttpException $e) {
@@ -300,9 +307,9 @@ class ImportExportController extends BaseController
         }
 
         $response = new StreamedResponse();
-        $response->setCallback(function () use ($type, $data) {
+        $response->setCallback(function () use ($tsvType, $data) {
             $version = 1;
-            echo sprintf("%s\t%s\n", $type, $version);
+            echo sprintf("%s\t%s\n", $tsvType, $version);
             foreach ($data as $row) {
                 // Utils::toTsvFields handles escaping of reserved characters.
                 echo implode("\t", array_map(fn($field) => Utils::toTsvField((string)$field), $row)) . "\n";
@@ -315,13 +322,15 @@ class ImportExportController extends BaseController
         return $response;
     }
 
-    #[Route(path: '/export/{type<results|clarifications>}.html', name: 'jury_html_export')]
+    #[Route(path: '/export/{type<wf_results|full_results|clarifications>}.html', name: 'jury_html_export')]
     public function exportHtmlAction(Request $request, string $type): Response
     {
         try {
             switch ($type) {
-                case 'results':
+                case 'wf_results':
                     return $this->getResultsHtml($request);
+                case 'full_results':
+                    return $this->getResultsHtml($request, full: true);
                 case 'clarifications':
                     return $this->getClarificationsHtml();
                 default:
@@ -334,7 +343,7 @@ class ImportExportController extends BaseController
         }
     }
 
-    protected function getResultsHtml(Request $request): Response
+    protected function getResultsHtml(Request $request, bool $full = false): Response
     {
         /** @var TeamCategory[] $categories */
         $categories  = $this->em->createQueryBuilder()
@@ -371,7 +380,7 @@ class ImportExportController extends BaseController
 
         $sortOrder = $request->query->getInt('sort_order');
 
-        foreach ($this->importExportService->getResultsData($sortOrder) as $row) {
+        foreach ($this->importExportService->getResultsData($sortOrder, full: $full) as $row) {
             $team = $teamNames[$row[0]];
 
             if ($row[6] !== '') {

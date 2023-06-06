@@ -372,7 +372,7 @@ class ImportExportService
     /**
      * Get results data for the given sortorder.
      */
-    public function getResultsData(int $sortOrder): array
+    public function getResultsData(int $sortOrder, bool $full = false): array
     {
         // We'll here assume that the requested file will be of the current contest,
         // as all our scoreboard interfaces do:
@@ -450,11 +450,13 @@ class ImportExportService
             } elseif ($rank <= ($contest->getGoldMedals() ?? 4) + ($contest->getSilverMedals() ?? 4) + ($contest->getBronzeMedals() ?? 4) + $contest->getB()) {
                 $awardString = 'Bronze Medal';
             } elseif ($numPoints >= $median) {
-                // Teams with equally solved number of problems get the same rank.
-                if (!isset($ranks[$numPoints])) {
-                    $ranks[$numPoints] = $rank;
+                // Teams with equally solved number of problems get the same rank unless $full is true.
+                if (!$full) {
+                    if (!isset($ranks[$numPoints])) {
+                        $ranks[$numPoints] = $rank;
+                    }
+                    $rank = $ranks[$numPoints];
                 }
-                $rank        = $ranks[$numPoints];
                 $awardString = 'Ranked';
             } else {
                 $awardString = 'Honorable';
