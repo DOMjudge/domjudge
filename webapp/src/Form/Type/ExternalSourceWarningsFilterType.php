@@ -15,7 +15,7 @@ class ExternalSourceWarningsFilterType extends AbstractType
     {
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $endPoints = array_keys($this->eventLog->apiEndpoints);
         sort($endPoints);
