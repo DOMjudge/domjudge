@@ -15,6 +15,7 @@ use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -273,11 +274,14 @@ class UserController extends BaseController
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/add', name: 'jury_user_add')]
-    public function addAction(Request $request): Response
-    {
+    public function addAction(
+        Request $request,
+        #[MapQueryParameter]
+        ?int $team = null,
+    ): Response {
         $user = new User();
-        if ($request->query->has('team')) {
-            $user->setTeam($this->em->getRepository(Team::class)->find($request->query->get('team')));
+        if ($team) {
+            $user->setTeam($this->em->getRepository(Team::class)->find($team));
         }
 
         $form = $this->createForm(UserType::class, $user);

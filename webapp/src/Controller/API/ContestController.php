@@ -24,6 +24,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -527,14 +528,25 @@ class ContestController extends AbstractRestController
         string $cid,
         #[Autowire(service: 'jms_serializer.metadata_factory')]
         MetadataFactoryInterface $metadataFactory,
-        KernelInterface $kernel
+        KernelInterface $kernel,
+        #[MapQueryParameter(name: 'since_token')]
+        ?string $sinceToken = null,
+        #[MapQueryParameter(name: 'since_id')]
+        ?string $sinceId = null,
+        #[MapQueryParameter]
+        ?string $types = null,
+        #[MapQueryParameter]
+        bool $strict = false,
+        #[MapQueryParameter]
+        bool $stream = true,
     ): Response {
         $contest = $this->getContestWithId($request, $cid);
         // Make sure this script doesn't hit the PHP maximum execution timeout.
         set_time_limit(0);
 
-        if ($request->query->has('since_token') || $request->query->has('since_id')) {
-            $since_id = (int)$request->query->get('since_token', $request->query->get('since_id'));
+        if ($sinceToken !== null | $sinceId !== null) {
+            // This parameter is a string in the spec, but we want an integer
+            $since_id = (int)($sinceToken ?? $sinceId);
             $event    = $this->em->getRepository(Event::class)->findOneBy([
                 'eventid' => $since_id,
                 'contest' => $contest,
@@ -556,15 +568,13 @@ class ContestController extends AbstractRestController
         $response = new StreamedResponse();
         $response->headers->set('X-Accel-Buffering', 'no');
         $response->headers->set('Content-Type', 'application/x-ndjson');
-        $response->setCallback(function () use ($format, $cid, $contest, $request, $since_id, $metadataFactory, $kernel) {
+        $response->setCallback(function () use ($format, $cid, $contest, $request, $since_id, $types, $strict, $stream, $metadataFactory, $kernel) {
             $lastUpdate = 0;
             $lastIdSent = $since_id;
             $typeFilter = false;
-            if ($request->query->has('types')) {
-                $typeFilter = explode(',', $request->query->get('types'));
+            if ($types) {
+                $typeFilter = explode(',', $types);
             }
-            $strict     = $request->query->getBoolean('strict', false);
-            $stream     = $request->query->getBoolean('stream', true);
             $canViewAll = $this->isGranted('ROLE_API_READER');
 
             // Keep track of the last send state event; we may have the same

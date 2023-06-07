@@ -46,6 +46,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
@@ -90,16 +91,18 @@ class JudgehostController extends AbstractFOSRestController
         in: 'query',
         schema: new OA\Schema(type: 'string')
     )]
-    public function getJudgehostsAction(Request $request): array
-    {
+    public function getJudgehostsAction(
+        #[MapQueryParameter]
+        ?string $hostname = null
+    ): array {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')
             ->select('j');
 
-        if ($request->query->has('hostname')) {
+        if ($hostname) {
             $queryBuilder
                 ->andWhere('j.hostname = :hostname')
-                ->setParameter('hostname', $request->query->get('hostname'));
+                ->setParameter('hostname', $hostname);
         }
 
         return $queryBuilder->getQuery()->getResult();

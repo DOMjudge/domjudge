@@ -28,6 +28,7 @@ use Collator;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -278,8 +279,11 @@ class ImportExportController extends BaseController
     }
 
     #[Route(path: '/export/{type<groups|teams|wf_results|full_results>}.tsv', name: 'jury_tsv_export')]
-    public function exportTsvAction(Request $request, string $type): Response
-    {
+    public function exportTsvAction(
+        string $type,
+        #[MapQueryParameter(name: 'sort_order')]
+        ?int $sortOrder,
+    ): Response {
         $data    = [];
         $tsvType = $type;
         try {
@@ -291,14 +295,12 @@ class ImportExportController extends BaseController
                     $data = $this->importExportService->getTeamData();
                     break;
                 case 'wf_results':
-                    $sortOrder = $request->query->getInt('sort_order');
-                    $data      = $this->importExportService->getResultsData($sortOrder);
-                    $tsvType   = 'results';
+                    $data    = $this->importExportService->getResultsData($sortOrder);
+                    $tsvType = 'results';
                     break;
                 case 'full_results':
-                    $sortOrder = $request->query->getInt('sort_order');
-                    $data      = $this->importExportService->getResultsData($sortOrder, full: true);
-                    $tsvType   = 'results';
+                    $data    = $this->importExportService->getResultsData($sortOrder, full: true);
+                    $tsvType = 'results';
                     break;
             }
         } catch (BadRequestHttpException $e) {

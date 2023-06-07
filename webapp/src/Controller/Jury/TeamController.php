@@ -16,6 +16,7 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -229,7 +230,9 @@ class TeamController extends BaseController
         Request $request,
         int $teamId,
         ScoreboardService $scoreboardService,
-        SubmissionService $submissionService
+        SubmissionService $submissionService,
+        #[MapQueryParameter]
+        ?int $cid = null,
     ): Response {
         /** @var Team $team */
         $team = $this->em->getRepository(Team::class)->find($teamId);
@@ -251,10 +254,8 @@ class TeamController extends BaseController
         ];
 
         $currentContest = $this->dj->getCurrentContest();
-        if ($request->query->has('cid')
-            && isset($this->dj->getCurrentContests()[$request->query->get('cid')])
-        ) {
-            $currentContest = $this->dj->getCurrentContests()[$request->query->get('cid')];
+        if ($cid !== null && isset($this->dj->getCurrentContests()[$cid])) {
+            $currentContest = $this->dj->getCurrentContests()[$cid];
         }
 
         if ($currentContest) {

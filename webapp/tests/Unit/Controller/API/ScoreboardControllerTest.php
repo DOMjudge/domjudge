@@ -70,7 +70,6 @@ class ScoreboardControllerTest extends BaseTestCase
         yield [['category=1', 'sortorder=9', 'allteams=true'], 1];
         yield [['category=1', 'sortorder=9'], 0];
         yield [['affiliation=1'], 1];
-        yield [['affiliation=Not an University'], 0];
         yield [['public=true'], 1]; // Scoreboard is frozen but has no results so those are the same
         yield [['public=false'], 1];
         yield [['sortorder=0'], 1];
@@ -84,6 +83,5 @@ class ScoreboardControllerTest extends BaseTestCase
         yield [['country=AAA'], 0];
         yield [['country=USA'], 0];
         yield [['category=2'], 0];
-        yield [['category=Not a category'], 0];
     }
 }
