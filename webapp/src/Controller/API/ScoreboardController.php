@@ -18,6 +18,7 @@ use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 
 #[Rest\Route('/contests/{cid}/scoreboard')]
 #[OA\Tag(name: 'Scoreboard')]
@@ -85,26 +86,38 @@ class ScoreboardController extends AbstractRestController
         in: 'query',
         schema: new OA\Schema(type: 'integer')
     )]
-    public function getScoreboardAction(Request $request): array
-    {
+    public function getScoreboardAction(
+        Request $request,
+        #[MapQueryParameter]
+        ?int $category = null,
+        #[MapQueryParameter]
+        ?string $country = null,
+        #[MapQueryParameter]
+        ?int $affiliation = null,
+        #[MapQueryParameter(name: 'allteams')]
+        bool $allTeams = false,
+        #[MapQueryParameter(name: 'public')]
+        ?bool $publicInRequest = null,
+        #[MapQueryParameter]
+        ?int $sortorder = null,
+        #[MapQueryParameter]
+        bool $strict = false,
+    ): array {
         $filter = new Filter();
-        if ($request->query->has('category')) {
-            $filter->categories = [ $request->query->get('category') ];
+        if ($category) {
+            $filter->categories = [$category];
         }
-        if ($request->query->has('country')) {
-            $filter->countries = [ $request->query->get('country') ];
+        if ($country) {
+            $filter->countries = [$country];
         }
-        if ($request->query->has('affiliation')) {
-            $filter->affiliations = [ $request->query->get('affiliation') ];
+        if ($affiliation) {
+            $filter->affiliations = [$affiliation];
         }
-        $allTeams = $request->query->getBoolean('allteams', false);
         $public   = !$this->dj->checkrole('api_reader');
-        if ($this->dj->checkrole('api_reader') && $request->query->has('public')) {
-            $public = $request->query->getBoolean('public');
+        if ($this->dj->checkrole('api_reader') && $publicInRequest !== null) {
+            $public = $publicInRequest;
         }
-        if ($request->query->has('sortorder')) {
-            $sortorder = $request->query->getInt('sortorder');
-        } else {
+        if ($sortorder === null) {
             // Get the lowest available sortorder.
             $queryBuilder = $this->em->createQueryBuilder()
                 ->from(TeamCategory::class, 'c')
@@ -140,7 +153,7 @@ class ScoreboardController extends AbstractRestController
                 'state' => $contest->getState(),
                 'rows' => [],
             ];
-            if (!$request->query->getBoolean('strict')) {
+            if (!$strict) {
                 $results['event_id'] = (string)$event->getEventid();
             }
         }
@@ -198,7 +211,7 @@ class ScoreboardController extends AbstractRestController
 
             usort($row['problems'], fn($a, $b) => $a['label'] <=> $b['label']);
 
-            if ($request->query->getBoolean('strict')) {
+            if ($strict) {
                 foreach ($row['problems'] as $key => $data) {
                     unset($row['problems'][$key]['label']);
                     unset($row['problems'][$key]['first_to_solve']);

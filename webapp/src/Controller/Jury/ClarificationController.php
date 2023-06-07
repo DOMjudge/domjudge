@@ -14,6 +14,7 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,8 +34,12 @@ class ClarificationController extends AbstractController
     ) {}
 
     #[Route(path: '', name: 'jury_clarifications')]
-    public function indexAction(Request $request): Response
-    {
+    public function indexAction(
+        #[MapQueryParameter(name: 'filter')]
+        ?string $currentFilter = null,
+        #[MapQueryParameter(name: 'queue')]
+        string $currentQueue = 'all',
+    ): Response {
         $categories = $this->config->get('clar_categories');
         $contestIds = array_keys($this->dj->getCurrentContests());
         // cid -1 will never happen, but otherwise the array is empty and that is not supported.
@@ -42,13 +47,10 @@ class ClarificationController extends AbstractController
             $contestIds = [-1];
         }
 
-        $currentFilter = $request->query->get('filter');
         if ($currentFilter === 'all') {
             $currentFilter = null;
         }
 
-        // Load the current queue, default to "all".
-        $currentQueue = $request->query->has('queue') ? $request->query->get('queue') : "all";
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Clarification::class, 'clar')
             ->leftJoin('clar.problem', 'p')
@@ -258,14 +260,16 @@ class ClarificationController extends AbstractController
     }
 
     #[Route(path: '/send', methods: ['GET'], name: 'jury_clarification_new')]
-    public function composeClarificationAction(Request $request): Response
-    {
+    public function composeClarificationAction(
+        #[MapQueryParameter]
+        ?string $teamto = null
+    ): Response {
         // TODO: Use a proper Symfony form for this.
 
         $data = $this->getClarificationFormData();
 
-        if ($toteam = $request->query->get('teamto')) {
-            $data['toteam'] = $toteam;
+        if ($teamto !== null) {
+            $data['toteam'] = $teamto;
         }
 
         return $this->render('jury/clarification_new.html.twig', ['clarform' => $data]);

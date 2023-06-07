@@ -24,6 +24,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -189,7 +190,15 @@ class RejudgingController extends BaseController
     public function viewAction(
         Request $request,
         SubmissionService $submissionService,
-        int $rejudgingId
+        int $rejudgingId,
+        #[MapQueryParameter(name: 'view')]
+        ?string $viewFromRequest = null,
+        #[MapQueryParameter]
+        string $oldverdict = 'all',
+        #[MapQueryParameter]
+        string $newverdict = 'all',
+        #[MapQueryParameter(name: 'show_statistics')]
+        ?bool $showStatistics = null,
     ): Response {
         // Close the session, as this might take a while and we don't need the session below.
         $this->requestStack->getSession()->save();
@@ -306,8 +315,8 @@ class RejudgingController extends BaseController
             $defaultView = 'all';
         }
         $view = array_search($defaultView, $viewTypes);
-        if ($request->query->has('view')) {
-            $index = array_search($request->query->get('view'), $viewTypes);
+        if ($viewFromRequest) {
+            $index = array_search($viewFromRequest, $viewTypes);
             if ($index !== false) {
                 $view = $index;
             }
@@ -323,11 +332,11 @@ class RejudgingController extends BaseController
         if ($viewTypes[$view] == 'diff') {
             $restrictions['rejudgingdiff'] = 1;
         }
-        if ($request->query->get('oldverdict', 'all') !== 'all') {
-            $restrictions['old_result'] = $request->query->get('oldverdict');
+        if ($oldverdict !== 'all') {
+            $restrictions['old_result'] = $oldverdict;
         }
-        if ($request->query->get('newverdict', 'all') !== 'all') {
-            $restrictions['result'] = $request->query->get('newverdict');
+        if ($newverdict !== 'all') {
+            $restrictions['result'] = $newverdict;
         }
 
         /** @var Submission[] $submissions */
@@ -349,12 +358,7 @@ class RejudgingController extends BaseController
 
         // Only load the statistics if desired. The query is quite long and can result in much data, so only have it run
         // when needed or when we don't have a lot of data to load.
-        $statisticsExplicitlyToggled = $request->query->has("show_statistics");
-        if ($statisticsExplicitlyToggled) {
-            $showStatistics = filter_var($request->query->get("show_statistics"), FILTER_VALIDATE_BOOL);
-        } else {
-            $showStatistics = $onlyAHandfulOfSubmissions;
-        }
+        $showStatistics = $showStatistics ?? $onlyAHandfulOfSubmissions;
         if ($showStatistics && count($repetitions) > 0) {
             $stats = $this->getStats($rejudging);
         } else {
@@ -372,8 +376,8 @@ class RejudgingController extends BaseController
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
-            'oldverdict' => $request->query->get('oldverdict', 'all'),
-            'newverdict' => $request->query->get('newverdict', 'all'),
+            'oldverdict' => $oldverdict,
+            'newverdict' => $newverdict,
             'repetitions' => array_column($repetitions, 'rejudgingid'),
             'showStatistics' => $showStatistics,
             'showExternalResult' => $this->config->get('data_source') ==

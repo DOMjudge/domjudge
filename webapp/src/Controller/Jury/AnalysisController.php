@@ -10,6 +10,7 @@ use App\Service\DOMJudgeService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,8 +28,10 @@ class AnalysisController extends AbstractController
     ) {}
 
     #[Route(path: '', name: 'analysis_index')]
-    public function indexAction(Request $request): Response
-    {
+    public function indexAction(
+        #[MapQueryParameter]
+        ?string $view = null
+    ): Response {
         $em = $this->em;
         $contest = $this->dj->getCurrentContest();
 
@@ -39,7 +42,7 @@ class AnalysisController extends AbstractController
         }
 
         $filterKeys = array_keys(StatisticsService::FILTERS);
-        $view = $request->query->get('view') ?: reset($filterKeys);
+        $view = $view ?: reset($filterKeys);
 
         $problems = $this->stats->getContestProblems($contest);
         $teams = $this->stats->getTeams($contest, $view);
@@ -95,8 +98,11 @@ class AnalysisController extends AbstractController
     }
 
     #[Route(path: '/problem/{probid}', name: 'analysis_problem')]
-    public function problemAction(Request $request, Problem $problem): Response
-    {
+    public function problemAction(
+        Problem $problem,
+        #[MapQueryParameter]
+        ?string $view = null
+    ): Response {
         $contest = $this->dj->getCurrentContest();
 
         if ($contest === null) {
@@ -106,7 +112,7 @@ class AnalysisController extends AbstractController
         }
 
         $filterKeys = array_keys(StatisticsService::FILTERS);
-        $view = $request->query->get('view') ?: reset($filterKeys);
+        $view = $view ?: reset($filterKeys);
 
         return $this->render('jury/analysis/problem.html.twig',
             $this->stats->getProblemStats($contest, $problem, $view)

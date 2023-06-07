@@ -12,6 +12,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -173,8 +174,12 @@ class ExecutableController extends BaseController
     }
 
     #[Route(path: '/{execId}', name: 'jury_executable')]
-    public function viewAction(Request $request, string $execId): Response
-    {
+    public function viewAction(
+        Request $request,
+        string $execId,
+        #[MapQueryParameter]
+        ?int $index = null
+    ): Response {
         /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
@@ -276,7 +281,7 @@ class ExecutableController extends BaseController
         return $this->render('jury/executable.html.twig', array_merge($editorData, [
             'form' => $form->createView(),
             'uploadForm' => $uploadForm->createView(),
-            'selected' => $request->query->get('index'),
+            'selected' => $index,
             'executable' => $executable,
             'default_compare' => (string)$this->config->get('default_compare'),
             'default_run' => (string)$this->config->get('default_run'),

@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
@@ -38,10 +39,14 @@ class PublicController extends BaseController
     ) {}
 
     #[Route(path: '', name: 'public_index')]
-    public function scoreboardAction(Request $request): Response
-    {
+    public function scoreboardAction(
+        Request $request,
+        #[MapQueryParameter(name: 'contest')]
+        ?string $contestId = null,
+        #[MapQueryParameter]
+        ?bool $static = false,
+    ): Response {
         $response   = new Response();
-        $static     = $request->query->getBoolean('static');
         $refreshUrl = $this->generateUrl('public_index');
         $contest    = $this->dj->getCurrentContest(onlyPublic: true);
 
@@ -50,7 +55,7 @@ class PublicController extends BaseController
                 'static' => 1,
             ];
 
-            if ($requestedContest = $this->getContestFromRequest($request)) {
+            if ($requestedContest = $this->getContestFromRequest($contestId)) {
                 $contest                  = $requestedContest;
                 $refreshParams['contest'] = $contest->getCid();
             }
@@ -77,20 +82,22 @@ class PublicController extends BaseController
     #[Route(path: '/scoreboard-zip/contest.zip', name: 'public_scoreboard_data_zip')]
     public function scoreboardDataZipAction(
         RequestStack $requestStack,
-        Request $request
+        Request $request,
+        #[MapQueryParameter(name: 'contest')]
+        ?string $contestId = null
     ): Response {
-        $contest = $this->getContestFromRequest($request) ?? $this->dj->getCurrentContest(onlyPublic: true);
+        $contest = $this->getContestFromRequest($contestId) ?? $this->dj->getCurrentContest(onlyPublic: true);
         return $this->dj->getScoreboardZip($request, $requestStack, $contest, $this->scoreboardService);
     }
 
     /**
      * Get the contest from the request, if any
      */
-    protected function getContestFromRequest(Request $request): ?Contest
+    protected function getContestFromRequest(?string $contestId = null): ?Contest
     {
         $contest = null;
         // For static scoreboards, allow to pass a contest= param.
-        if ($contestId = $request->query->get('contest')) {
+        if ($contestId) {
             if ($contestId === 'auto') {
                 // Automatically detect the contest that is activated the latest.
                 $activateTime = null;

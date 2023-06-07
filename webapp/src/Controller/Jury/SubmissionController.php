@@ -35,6 +35,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -64,8 +65,11 @@ class SubmissionController extends BaseController
     ) {}
 
     #[Route(path: '', name: 'jury_submissions')]
-    public function indexAction(Request $request): Response
-    {
+    public function indexAction(
+        Request $request,
+        #[MapQueryParameter(name: 'view')]
+        ?string $viewFromRequest = null,
+    ): Response {
         $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'all'];
         $view      = 0;
         if (($submissionViewCookie = $this->dj->getCookie('domjudge_submissionview')) &&
@@ -73,8 +77,8 @@ class SubmissionController extends BaseController
             $view = $submissionViewCookie;
         }
 
-        if ($request->query->has('view')) {
-            $index = array_search($request->query->get('view'), $viewTypes);
+        if ($viewFromRequest) {
+            $index = array_search($viewFromRequest, $viewTypes);
             if ($index !== false) {
                 $view = $index;
             }
@@ -154,12 +158,15 @@ class SubmissionController extends BaseController
      * @throws NonUniqueResultException
      */
     #[Route(path: '/{submitId<\d+>}', name: 'jury_submission')]
-    public function viewAction(Request $request, int $submitId): Response
-    {
-        $judgingId   = $request->query->get('jid');
-        $rejudgingId = $request->query->get('rejudgingid');
-
-        if (isset($judgingId) && isset($rejudgingId)) {
+    public function viewAction(
+        Request $request,
+        int $submitId,
+        #[MapQueryParameter(name: 'jid')]
+        ?int $judgingId = null,
+        #[MapQueryParameter(name: 'rejudgingid')]
+        ?int $rejudgingId = null,
+    ): Response {
+        if (isset($judgingId, $rejudgingId)) {
             throw new BadRequestHttpException("You cannot specify jid and rejudgingid at the same time.");
         }
 
@@ -676,22 +683,25 @@ class SubmissionController extends BaseController
      * @throws NonUniqueResultException
      */
     #[Route(path: '/{submission}/source', name: 'jury_submission_source')]
-    public function sourceAction(Request $request, Submission $submission): Response
-    {
-        if ($request->query->has('fetch')) {
+    public function sourceAction(
+        Submission $submission,
+        #[MapQueryParameter]
+        ?int $fetch = null
+    ): Response {
+        if ($fetch !== null) {
             /** @var SubmissionFile $file */
             $file = $this->em->createQueryBuilder()
                 ->from(SubmissionFile::class, 'file')
                 ->select('file')
                 ->andWhere('file.ranknumber = :ranknumber')
                 ->andWhere('file.submission = :submission')
-                ->setParameter('ranknumber', $request->query->get('fetch'))
+                ->setParameter('ranknumber', $fetch)
                 ->setParameter('submission', $submission)
                 ->getQuery()
                 ->getOneOrNullResult();
             if (!$file) {
                 throw new NotFoundHttpException(sprintf('No submission file found with rank %s',
-                                                        $request->query->get('fetch')));
+                                                        $fetch));
             }
             // Download requested
             $response = new Response();
@@ -790,7 +800,7 @@ class SubmissionController extends BaseController
     }
 
     #[Route(path: '/{submission}/edit-source', name: 'jury_submission_edit_source')]
-    public function editSourceAction(Request $request, Submission $submission): Response
+    public function editSourceAction(Request $request, Submission $submission, #[MapQueryParameter] ?int $rank = null): Response
     {
         if (!$this->dj->getUser()->getTeam() || !$this->dj->checkrole('team')) {
             $this->addFlash('danger', 'You cannot re-submit code without being a team.');
@@ -905,7 +915,7 @@ class SubmissionController extends BaseController
             'submission' => $submission,
             'files' => $files,
             'form' => $form,
-            'selected' => $request->query->get('ranknumber'),
+            'selected' => $rank,
         ]);
     }
 

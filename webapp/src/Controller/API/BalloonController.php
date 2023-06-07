@@ -11,6 +11,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Attributes as OA;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER') or is_granted('ROLE_BALLOON')"))]
@@ -43,11 +44,15 @@ class BalloonController extends AbstractRestController
         in: 'query',
         schema: new OA\Schema(type: 'boolean')
     )]
-    public function listAction(Request $request, BalloonService $balloonService): array
-    {
+    public function listAction(
+        Request $request,
+        BalloonService $balloonService,
+        #[MapQueryParameter]
+        bool $todo = false
+    ): array {
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
-        return array_column($balloonService->collectBalloonTable($contest, $request->query->getBoolean('todo')), 'data');
+        return array_column($balloonService->collectBalloonTable($contest, $todo), 'data');
     }
 
     /**

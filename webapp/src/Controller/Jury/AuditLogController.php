@@ -11,6 +11,7 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,12 +30,14 @@ class AuditLogController extends AbstractController
     ) {}
 
     #[Route(path: '', name: 'jury_auditlog')]
-    public function indexAction(Request $request): Response
-    {
+    public function indexAction(
+        #[MapQueryParameter]
+        bool $showAll = false,
+        #[MapQueryParameter]
+        int $page = 1,
+    ): Response {
         $timeFormat = (string)$this->config->get('time_format');
 
-        $showAll = $request->query->get('showAll', false);
-        $page = $request->query->get('page', 1);
         $limit = 1000;
 
         $em = $this->em;

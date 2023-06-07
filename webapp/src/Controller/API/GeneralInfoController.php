@@ -19,6 +19,7 @@ use InvalidArgumentException;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -119,10 +120,10 @@ class GeneralInfoController extends AbstractFOSRestController
             type: 'object'
         )
     )]
-    public function getInfoAction(Request $request): array
-    {
-        $strict = $request->query->getBoolean('strict', false);
-
+    public function getInfoAction(
+        #[MapQueryParameter]
+        bool $strict = false
+    ): array {
         $result = [
             'version' => self::CCS_SPEC_API_VERSION,
             'version_url' => self::CCS_SPEC_API_URL,
@@ -213,10 +214,11 @@ class GeneralInfoController extends AbstractFOSRestController
         required: false,
         schema: new OA\Schema(type: 'string')
     )]
-    public function getDatabaseConfigurationAction(Request $request): array
-    {
+    public function getDatabaseConfigurationAction(
+        #[MapQueryParameter]
+        ?string $name = null
+    ): array {
         $onlypublic = !($this->dj->checkrole('jury') || $this->dj->checkrole('judgehost'));
-        $name       = $request->query->get('name');
 
         if ($name) {
             try {
