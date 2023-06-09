@@ -75,14 +75,14 @@ class JudgeTask
         options: ['comment' => 'Submission ID being judged', 'unsigned' => true])
     ]
     #[Serializer\Exclude]
-    private Submission $submission;
+    private ?Submission $submission = null;
 
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('submitid')]
     #[Serializer\Type('string')]
-    public function getSubmitid(): int
+    public function getSubmitid(): ?int
     {
-        return $this->submission->getSubmitid();
+        return $this->submission?->getSubmitid();
     }
 
 

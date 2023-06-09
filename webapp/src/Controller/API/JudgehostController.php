@@ -1616,10 +1616,10 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         // Filter by submit_id.
-        $submit_id = $judgeTasks[0]->getSubmission()->getSubmitid();
+        $submit_id = $judgeTasks[0]->getSubmission()?->getSubmitid();
         $judgetaskids = [];
         foreach ($judgeTasks as $judgeTask) {
-            if ($judgeTask->getSubmission()->getSubmitid() == $submit_id) {
+            if ($judgeTask->getSubmission()?->getSubmitid() == $submit_id) {
                 $judgetaskids[] = $judgeTask->getJudgetaskid();
             }
         }
