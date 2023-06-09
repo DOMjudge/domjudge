@@ -819,6 +819,11 @@ class ImportProblemService
             $this->em->flush();
             $testcases = $problem->getTestcases()->toArray();
             if (count(array_filter($testcases, fn($t) => !$t->getDeleted())) == 0) {
+                // We need to reload the contest problem after the call(s) to the eventLogService.
+                $contestProblem = $this->em->getRepository(ContestProblem::class)->findOneBy([
+                    'contest' => $contest,
+                    'problem' => $problem,
+                ]);
                 $messages['danger'][] = 'No testcases present, disabling submitting for this problem';
                 $contestProblem->setAllowSubmit(false);
             }
