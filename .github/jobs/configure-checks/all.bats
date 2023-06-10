@@ -68,9 +68,11 @@ compiler_assertions () {
     assert_line "checking whether $1 accepts -g... yes"
     assert_line "checking for $1 option to accept ISO C89... none needed"
     assert_line "checking whether $1 accepts -g... (cached) yes"
-    assert_line "checking whether $2 accepts -g... yes"
-    assert_line "checking how to run the C++ preprocessor... $2 -E"
-    assert_line "checking how to run the C preprocessor... $1 -E"
+    if [ -n "$2" ]; then
+        assert_line "checking whether $2 accepts -g... yes"
+        assert_line "checking how to run the C preprocessor... $1 -E"
+        assert_line "checking how to run the C++ preprocessor... $2 -E"
+    fi
 }
 
 compile_assertions_finished () {
