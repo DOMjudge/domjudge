@@ -877,6 +877,10 @@ class ScoreboardService
              ],
              'static' => $static,
         ];
+        if ($static && $contest && $contest->getFreezeData()->showFinal()) {
+            unset($data['refresh']);
+            $data['refreshstop'] = true;
+        }
 
         if ($contest) {
             if ($request && $response) {

@@ -26,7 +26,7 @@
         initFavouriteTeams();
         pinScoreheader();
 
-        {% if static %}
+        {% if static and refresh is defined %}
         function disableRefreshOnModal() {
             $('.modal')
                 .on('show.bs.modal', function () {
@@ -51,12 +51,12 @@
 
                 initFavouriteTeams();
                 pinScoreheader();
-                {% if static %}
+                {% if static and refresh is defined %}
                 disableRefreshOnModal();
                 {% endif %}
             };
 
-            {% if static %}
+            {% if static and refresh is defined %}
             disableRefreshOnModal();
             {% endif %}
         });
