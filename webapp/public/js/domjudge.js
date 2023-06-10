@@ -322,7 +322,7 @@ function initFavouriteTeams()
                 found = true;
                 heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
                 toAdd[cntFound] = scoreboard[j].cloneNode(true);
-                if (rank === "") {
+                if (rank.trim().length === 0) {
                     // make rank explicit in case of tie
                     getRank(toAdd[cntFound]).innerHTML += lastRank;
                 }
