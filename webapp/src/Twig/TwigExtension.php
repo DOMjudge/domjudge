@@ -317,7 +317,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 $icon = 'check';
                 break;
             default:
-                return 'unknown';
+                return $status;
         }
         return sprintf('<i class="fas fa-%s-circle" aria-hidden="true"></i><span class="sr-only">%s</span>', $icon,
                        $status);
