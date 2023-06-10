@@ -889,6 +889,9 @@ class ScoreboardService
              ],
              'static' => $static,
         ];
+        if ($static && $contest && $contest->getFreezeData()->showFinal()) {
+            $data['refresh']['after'] = null;
+        }
 
         if ($contest) {
             if ($request && $response) {
