@@ -40,12 +40,10 @@ class InternalErrorController extends BaseController
             ->from(InternalError::class, 'e')
             ->leftJoin('e.judging', 'j')
             ->select('e')
-            ->orderBy('e.status')
-            ->addOrderBy('e.errorid')
             ->getQuery()->getResult();
 
         $table_fields = [
-            'errorid' => ['title' => 'ID'],
+            'errorid' => ['title' => 'ID', 'default_sort' => true, 'default_sort_order' => 'desc'],
             'judging.judgingid' => ['title' => 'jid'],
             'description' => ['title' => 'description'],
             'time' => ['title' => 'time'],
