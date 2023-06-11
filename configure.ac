@@ -222,6 +222,7 @@ AC_ARG_WITH([systemdsystemunitdir],
      [AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files])],,
      [with_systemdsystemunitdir=auto])
 AS_IF([test "x$with_systemdsystemunitdir" = "xyes" -o "x$with_systemdsystemunitdir" = "xauto"], [
+     AS_IF([test "x$PKG_CONFIG" = "x"],AC_MSG_ERROR([systemd support requested but no pkg-config available to query systemd package]))
      def_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)
 
      AS_IF([test "x$def_systemdsystemunitdir" = "x"],
