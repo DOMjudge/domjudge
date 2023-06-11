@@ -817,6 +817,8 @@ class ImportProblemService
         // do get added above.
         if ($contestProblem) {
             $this->em->flush();
+            // We need to reload the problem after the call(s) to the eventLogService.
+            $problem = $this->em->getRepository(Problem::class)->find($problem->getProbid());
             $testcases = $problem->getTestcases()->toArray();
             if (count(array_filter($testcases, fn($t) => !$t->getDeleted())) == 0) {
                 // We need to reload the contest problem after the call(s) to the eventLogService.
