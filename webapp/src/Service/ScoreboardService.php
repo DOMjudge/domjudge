@@ -878,7 +878,8 @@ class ScoreboardService
         bool $public,
         bool $static,
         ?Contest $contest = null,
-        ?Scoreboard $scoreboard = null
+        ?Scoreboard $scoreboard = null,
+        bool $forceUnfrozen = false,
     ): array {
         $data = [
             'refresh' => [
@@ -897,6 +898,13 @@ class ScoreboardService
             }
             if ($scoreboard === null) {
                 $scoreboard = $this->getScoreboard($contest, $jury, $scoreFilter);
+            }
+
+            if ($forceUnfrozen) {
+                $scoreboard->getFreezeData()
+                    ->setForceValue(FreezeData::KEY_SHOW_FROZEN, false)
+                    ->setForceValue(FreezeData::KEY_SHOW_FINAL, true)
+                    ->setForceValue(FreezeData::KEY_FINALIZED, true);
             }
 
             $data['contest']              = $contest;

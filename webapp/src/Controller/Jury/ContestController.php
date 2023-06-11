@@ -24,6 +24,7 @@ use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Service\ScoreboardService;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,6 +32,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -943,5 +945,21 @@ class ContestController extends BaseController
             $this->addFlash('danger', 'Contest has been unlocked, modifications are possible again.');
         }
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
+    }
+
+    #[Route(path: '/{contestId<\d+>}/scoreboard-zip/{type<public|unfrozen>}/contest.zip', name: 'jury_scoreboard_data_zip')]
+    public function publicScoreboardDataZipAction(
+        int $contestId,
+        string $type,
+        RequestStack $requestStack,
+        Request $request,
+        ScoreboardService $scoreboardService
+    ): Response {
+        /** @var Contest $contest */
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
+        }
+        return $this->dj->getScoreboardZip($request, $requestStack, $contest, $scoreboardService, $type === 'unfrozen');
     }
 }

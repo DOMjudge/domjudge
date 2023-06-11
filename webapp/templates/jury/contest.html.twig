@@ -193,9 +193,17 @@
                     </td>
                 </tr>
                 <tr>
-                    <th>Static scoreboard ZIP</th>
+                    <th>Public static scoreboard ZIP</th>
                     <td>
-                        <a class="btn btn-sm btn-secondary" href="{{ path('public_scoreboard_data_zip', {contest: contest.cid}) }}">
+                        <a class="btn btn-sm btn-secondary" href="{{ path('jury_scoreboard_data_zip', {contestId: contest.cid, type: 'public'}) }}">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Jury (unfrozen) static scoreboard ZIP</th>
+                    <td>
+                        <a class="btn btn-sm btn-secondary" href="{{ path('jury_scoreboard_data_zip', {contestId: contest.cid, type: 'unfrozen'}) }}">
                             <i class="fas fa-download"></i> Download
                         </a>
                     </td>
