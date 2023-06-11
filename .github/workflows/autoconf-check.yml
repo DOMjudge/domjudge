@@ -1,0 +1,40 @@
+name: Check autoconf
+on:
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+
+jobs:
+  debian-family:
+    strategy:
+      matrix:
+        version: [jammy, focal, rolling]
+        os: [ubuntu]
+        releaseBranch:
+          - ${{ contains(github.ref, 'main') }}
+        exclude:
+          - releaseBranch: false
+        include:
+          - os: debian
+            version: testing
+          - os: debian
+            version: stable
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.os }}:${{ matrix.version }}
+    steps:
+      - name: Install everything for configure and testing
+        run: apt-get update; apt-get install pkg-config make bats autoconf git -y; apt-get full-upgrade -y
+      - uses: actions/checkout@v3
+      - name: Build the configure file
+        run: make configure
+      - name: Install extra assert statements for bots
+        run: cp submit/assert.bash .github/jobs/configure-checks/
+      - name: Run the configure tests for this usecase
+        run: test_path="/__w/domjudge/domjudge" bats .github/jobs/configure-checks/all.bats
+
