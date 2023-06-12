@@ -39,6 +39,11 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
     options: [new Serializer\Type('string')]
 )]
 #[Serializer\VirtualProperty(
+    name: 'scoreboard_type',
+    exp: '"pass-fail"',
+    options: [new Serializer\Type('string')]
+)]
+#[Serializer\VirtualProperty(
     name: 'penaltyTime',
     exp: '0',
     options: [new Serializer\Type('int')]
