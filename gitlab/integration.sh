@@ -108,13 +108,15 @@ fi
 section_end judgehost
 
 section_start more_setup "Remaining setup (e.g. starting judgedaemon)"
-# download domjudge-scripts for API check
+
+# Download yajsv and ccs-specs for API check.
 cd $HOME
-composer -n require justinrainbow/json-schema
+curl -o yajsv https://github.com/neilpa/yajsv/releases/download/v1.4.1/yajsv.linux.amd64
+chmod a+x yajsv
 echo -e "\033[0m"
-PATH=${PATH}:${HOME}/vendor/bin
-git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
-CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
+git clone https://github.com/icpc/ccs-specs.git
+( cd ccs-specs && git reset --hard $CCS_SPECS_PINNED_SHA1 )
+CHECK_API="${HOME}/ccs-specs/check-api.sh -j ${HOME}/yajsv"
 
 # Recreate domjudge-run-0 user with random UID to prevent clashes with
 # existing users in the host and other CI jobs, which can lead to
