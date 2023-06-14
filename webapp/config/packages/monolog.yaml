@@ -2,7 +2,6 @@ monolog:
     # Set up logger for the event feed importer.
     # key, to make sure the logs don't also appear there.
     channels:
-        - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
         - event-feed-importer
     handlers:
         event-feed-importer:
@@ -68,7 +67,3 @@ when@prod:
                 type: console
                 process_psr_3_messages: false
                 channels: ["!event", "!doctrine"]
-            deprecation:
-                type: stream
-                channels: [deprecation]
-                path: php://stderr
