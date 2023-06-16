@@ -34,6 +34,11 @@ class PublicController extends BaseController
         protected readonly EntityManagerInterface $em
     ) {}
 
+    #[Route(path: '', name: 'public_index')]
+    public function homepageAction(): Response {
+        return $this->render('public/homepage.html.twig');
+    }
+
     #[Route(path: '/scoreboard', name: 'public_scoreboard')]
     public function scoreboardAction(
         Request $request,
