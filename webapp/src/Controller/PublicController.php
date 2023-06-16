@@ -38,7 +38,7 @@ class PublicController extends BaseController
         protected readonly EntityManagerInterface $em
     ) {}
 
-    #[Route(path: '', name: 'public_index')]
+    #[Route(path: '', name: 'public_scoreboard')]
     public function scoreboardAction(
         Request $request,
         #[MapQueryParameter(name: 'contest')]
@@ -47,7 +47,7 @@ class PublicController extends BaseController
         ?bool $static = false,
     ): Response {
         $response   = new Response();
-        $refreshUrl = $this->generateUrl('public_index');
+        $refreshUrl = $this->generateUrl('public_scoreboard');
         $contest    = $this->dj->getCurrentContest(onlyPublic: true);
 
         if ($static) {
@@ -134,7 +134,7 @@ class PublicController extends BaseController
         if ($this->isLocalReferer($router, $request)) {
             $response = new RedirectResponse($request->headers->get('referer'));
         } else {
-            $response = $this->redirectToRoute('public_index');
+            $response = $this->redirectToRoute('public_scoreboard');
         }
         return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
                                                  $response);

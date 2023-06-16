@@ -11,8 +11,8 @@
     <div class="collapse navbar-collapse" id="menuDefault">
         <ul class="navbar-nav me-auto">
             <li class="nav-item">
-                <a class="nav-link{% if current_route in ['public_index', 'public_team'] %} active{% endif %}"
-                    href="{{ path('public_index') }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
+                <a class="nav-link{% if current_route in ['public_scoreboard', 'public_team'] %} active{% endif %}"
+                    href="{{ path('public_scoreboard') }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
             </li>
             <li class="nav-item">
                 {% if is_granted('ROLE_JURY') or (current_public_contest is not null and current_public_contest.freezeData.started) %}

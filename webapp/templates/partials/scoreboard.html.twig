@@ -96,7 +96,7 @@
         {% if scoreboard.freezeData.showFrozen(false) %}
             <div class="alert alert-warning" role="alert" style="font-size: 80%;">
                 {% if jury %}
-                    <a href="{{ path('public_index') }}">The public scoreboard</a>
+                    <a href="{{ path('public_scoreboard') }}">The public scoreboard</a>
                     was frozen with {{ current_contest.minutesRemaining }} minutes remaining
                 {% else %}
                     The scoreboard was frozen with {{ current_contest.minutesRemaining }} minutes remaining - solutions
