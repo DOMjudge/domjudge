@@ -248,8 +248,9 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test that admin can add a new entity for this controller.
+     * @dataProvider provideAddCorrectEntities
      */
-    public function testCheckAddEntityAdmin(): void
+    public function testCheckAddEntityAdmin(array $element, array $expected): void
     {
         $this->roles = ['admin'];
         $this->logOut();
@@ -257,77 +258,61 @@ abstract class JuryControllerTestCase extends BaseTestCase
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         if (static::$add !== '') {
             self::assertSelectorExists('a:contains(' . $this->addButton . ')');
-            foreach (static::$addEntities as $element) {
-                $combinedValues = [];
-                $formFields = [];
-                // First fill with default values, the 0th item of the array
-                // Overwrite with data to test with.
-                foreach ([static::$addEntities[0], $element] as $item) {
-                    foreach ($item as $id => $field) {
-                        // Skip elements which we cannot set yet.
-                        // We can not set checkboxes directly.
-                        // We can not set the fields set by JS directly.
-                        if (is_bool($field) || $id === static::$addPlus) {
-                            continue;
-                        }
-                        $formId = str_replace('.', '][', $id);
-                        $formFields[static::$addForm . $formId . "]"] = $field;
-                        $combinedValues[$id] = $field;
-                    }
+            foreach ($element as $id => $field) {
+                // Skip elements which we cannot set yet.
+                // We can not set checkboxes directly.
+                // We can not set the fields set by JS directly.
+                if (is_bool($field) || $id === static::$addPlus) {
+                    continue;
                 }
+                $formId = str_replace('.', '][', $id);
+                $formFields[static::$addForm . $formId . "]"] = $field;
                 // For LanguageController the values for external identifier should follow internal
                 if (key_exists('langid', $element) && !key_exists('externalid', $element)) {
                     $formFields[static::$addForm . 'externalid]'] = $element['langid'];
-                    $combinedValues['externalid'] = $element['langid'];
                 }
-                $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
-                $button = $this->client->getCrawler()->selectButton('Save');
-                $form = $button->form($formFields, 'POST');
-                $formName = str_replace('[', '', static::$addForm);
+            }
+            $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
+            $button = $this->client->getCrawler()->selectButton('Save');
+            $form = $button->form($formFields, 'POST');
+            $formName = str_replace('[', '', static::$addForm);
+            foreach ($element as $id => $field) {
                 // Set checkboxes
-                foreach ([static::$addEntities[0], $element] as $item) {
-                    foreach ($item as $id => $field) {
-                        if (!is_bool($field)) {
-                            continue;
-                        }
-                        if ($field) {
-                            $form[$formName][$id]->tick();
-                        } else {
-                            $form[$formName][$id]->untick();
-                        }
-                    }
+                if (!is_bool($field)) {
+                    continue;
                 }
-                // Get the underlying object to inject elements not currently in the DOM.
-                $rawValues = $form->getPhpValues();
-                foreach ([static::$addEntities[0], $element] as $item) {
-                    if (key_exists(static::$addPlus, $item)) {
-                        $rawValues[$formName][static::$addPlus] = $item[static::$addPlus];
-                    }
+                if ($field) {
+                    $form[$formName][$id]->tick();
+                } else {
+                    $form[$formName][$id]->untick();
                 }
-                $response = $this->client->request($form->getMethod(), $form->getUri(), $rawValues, $form->getPhpFiles());
-                $this->client->followRedirect();
-                foreach ($combinedValues as $key => $value) {
-                    if (!is_array($value) && !in_array($key, static::$overviewNotShown)) {
-                        self::assertSelectorExists('body:contains("' . $value . '")');
-                    }
+            }
+            // Get the underlying object to inject elements not currently in the DOM.
+            $rawValues = $form->getPhpValues();
+            if (key_exists(static::$addPlus, $element)) {
+                $rawValues[$formName][static::$addPlus] = $element[static::$addPlus];
+            }
+            $response = $this->client->request($form->getMethod(), $form->getUri(), $rawValues, $form->getPhpFiles());
+            $this->client->followRedirect();
+            foreach ($element as $key => $value) {
+                if (!is_array($value) && !in_array($key, static::$overviewNotShown)) {
+                    self::assertSelectorExists('body:contains("' . $value . '")');
                 }
             }
             $this->verifyPageResponse('GET', static::$baseUrl, 200);
-            foreach (static::$addEntities as $element) {
-                foreach ($element as $id => $value) {
-                    if (is_array($value)) {
-                        if (in_array($id, static::$addEntitiesCount)) {
-                            self::assertSelectorExists('body:contains("' . count($value) . '")');
-                        } else {
-                            foreach ($value as $value2) {
-                                if (is_array($value2)) {
-                                    $this->helperCheckExistence((string)$id, $value2, $element);
-                                }
+            foreach ($expected as $id => $value) {
+                if (is_array($value)) {
+                    if (in_array($id, static::$addEntitiesCount)) {
+                        self::assertSelectorExists('body:contains("' . count($value) . '")');
+                    } else {
+                        foreach ($value as $value2) {
+                            if (is_array($value2)) {
+                                $this->helperCheckExistence((string)$id, $value2, $element);
                             }
                         }
-                    } else {
-                        $this->helperCheckExistence($id, $value, $element);
                     }
+                } else {
+                    $this->helperCheckExistence($id, $value, $element);
                 }
             }
         }
@@ -394,10 +379,25 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
-    /**
-     * @param array<string, mixed> $element
-     * @return array<int, array<int, mixed>>
-     */
+    public function provideAddCorrectEntities(): Generator
+    {
+        foreach (static::$addEntities as $element) {
+            $combinedValues = [];
+            // First fill with default values, the 0th item of the array
+            // Overwrite with data to test with.
+            foreach ([static::$addEntities[0], $element] as $item) {
+                foreach ($item as $id => $field) {
+                    $combinedValues[$id] = $field;
+                }
+            }
+            // For LanguageController the values for external identifier should follow internal
+            if (key_exists('langid', $element) && !key_exists('externalid', $element)) {
+                $combinedValues['externalid'] = $element['langid'];
+            }
+            yield [$combinedValues, $element];
+        }
+    }
+
     public function helperProvideMergeEditEntity(array $element): array
     {
         $formdataKeys = [];

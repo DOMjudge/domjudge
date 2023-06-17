@@ -48,16 +48,18 @@ class ProblemControllerTest extends JuryControllerTestCase
                                                 ['name' => 'Args',
                                                  'specialCompareArgs' => 'args']];
 
-    public function testCheckAddEntityAdmin(): void
+    /**
+     * Test that admin can add a new entity for this controller.
+     * @dataProvider provideAddCorrectEntities
+     */
+    public function testCheckAddEntityAdmin(array $entity, array $expected): void
     {
         // Add external IDs when needed.
         if (!$this->dataSourceIsLocal()) {
-            foreach (static::$addEntities as &$entity) {
-                $entity['externalid'] = md5(json_encode($entity, JSON_THROW_ON_ERROR));
-            }
-            unset($entity);
+            $entity['externalid'] = md5(json_encode($entity, JSON_THROW_ON_ERROR));
+            $expected['externalid'] = md5(json_encode($entity, JSON_THROW_ON_ERROR));
         }
-        parent::testCheckAddEntityAdmin();
+        parent::testCheckAddEntityAdmin($entity, $expected);
     }
 
     public function testDeleteExtraEntity(): void
