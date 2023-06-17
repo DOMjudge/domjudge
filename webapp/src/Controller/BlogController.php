@@ -11,6 +11,13 @@ use Symfony\Component\Routing\Annotation\Route;
 class BlogController extends BaseController
 {
     /**
+     * @Route("", name="public_blog_list")
+     */
+    public function blogListAction(): Response {
+        return $this->render('public/blog_list.html.twig');
+    }
+
+    /**
      * @Route("/{id}", name="public_blog_post")
      */
     public function blogPostAction(int $id): Response {
