@@ -178,16 +178,18 @@ class ContestControllerTest extends JuryControllerTestCase
                                                                                   'color' => 'yellow',
                                                                                   'lazyEvalResults' => '1']]]];
 
-    public function testCheckAddEntityAdmin(): void
+    /**
+     * Test that admin can add a new entity for this controller.
+     * @dataProvider provideAddCorrectEntities
+     */
+    public function testCheckAddEntityAdmin(array $entity, array $expected): void
     {
         // Add external ID's when needed.
         if (!$this->dataSourceIsLocal()) {
-            foreach (static::$addEntities as &$entity) {
-                $entity['externalid'] = $entity['shortname'];
-            }
-            unset($entity);
+            $entity['externalid'] = $entity['shortname'];
+            $expected['externalid'] = $entity['shortname'];
         }
-        parent::testCheckAddEntityAdmin();
+        parent::testCheckAddEntityAdmin($entity, $expected);
     }
 
     public function testUnlockJudgeTasks(): void
