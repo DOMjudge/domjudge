@@ -29,6 +29,14 @@
                 {% endif %}
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link"
+                   target="_blank"
+                   href="https://github.com/delta-cs/seminar-archive">
+                    <i class="fa-solid fa-box-archive"></i> Archive
+                </a>
+            </li>
+
             {% if is_granted('ROLE_TEAM') %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('team_index') }}">
