@@ -56,6 +56,14 @@
             {% endif %}
         </ul>
 
+        {% if team is defined and team.unreadClarifications|length > 0 %}
+            <a class="nav-link" href="{{ path('team_clarification', {clarId: team.unreadClarifications[0].clarid}) }}">
+                <span class="btn btn-warning btn-sm">
+                    <i class="fa-regular fa-envelope"></i> An unread message!
+                </span>
+            </a>
+        {% endif %}
+
         <div class="ml-auto me-3">
             <a class="nav-link d-none" id="notify_enable">
                 <span class="btn btn-warning btn-sm">
