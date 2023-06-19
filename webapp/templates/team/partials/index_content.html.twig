@@ -27,9 +27,9 @@
             {% include 'team/partials/submission_list.html.twig' %}
         </div>
         <div class="col">
-            <h1 class="teamoverview">Clarifications</h1>
+            <h1 class="teamoverview">Messages</h1>
             {% if clarifications is empty %}
-                <p class="nodata">No clarifications.</p>
+                <p class="nodata">No messages.</p>
             {% else %}
                 {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarifications} %}
             {% endif %}
