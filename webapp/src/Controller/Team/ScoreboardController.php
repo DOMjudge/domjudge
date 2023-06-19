@@ -45,6 +45,7 @@ class ScoreboardController extends BaseController
             $request, $response, $refreshUrl, false, false, false, $contest
         );
         $data['myTeamId'] = $user->getTeam()->getTeamid();
+        $data['team'] = $user->getTeam();
 
         if ($request->isXmlHttpRequest()) {
             $data['current_contest'] = $contest;
