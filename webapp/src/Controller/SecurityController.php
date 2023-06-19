@@ -123,7 +123,11 @@ class SecurityController extends AbstractController
                 $user->setName($user->getUsername());
             }
 
-            $teamName = $registration_form->get('teamName')->getData();
+            if ($this->config->get('allow_custom_team_name_registration')) {
+                $teamName = $registration_form->get('teamName')->getData();
+            } else {
+                $teamName = $user->getUsername();
+            }
 
             if ($selfRegistrationCategoriesCount === 1) {
                 $teamCategory = $em->getRepository(TeamCategory::class)->findOneBy(['allow_self_registration' => 1]);

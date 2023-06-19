@@ -24,3 +24,7 @@ services:
     ports:
       - 12345:80
     privileged: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      PHP_IDE_CONFIG: "serverName=domserver"

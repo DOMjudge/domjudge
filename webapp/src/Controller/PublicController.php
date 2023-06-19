@@ -49,8 +49,17 @@ class PublicController extends BaseController
         $this->em                = $em;
     }
 
+
     /**
      * @Route("", name="public_index")
+     */
+    public function homepageAction(Request $request): Response
+    {
+
+    }
+
+    /**
+     * @Route("/secreboard", name="public_scoreboard")
      */
     public function scoreboardAction(Request $request): Response
     {

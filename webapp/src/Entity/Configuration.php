@@ -22,7 +22,7 @@ class Configuration
     private int $configid;
 
     /**
-     * @ORM\Column(type="string", name="name", length=32, options={"comment"="Name of the configuration variable"}, nullable=false)
+     * @ORM\Column(type="string", name="name", length=64, options={"comment"="Name of the configuration variable"}, nullable=false)
      */
     private string $name;
 
