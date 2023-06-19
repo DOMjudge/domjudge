@@ -57,11 +57,22 @@
         </ul>
 
         {% if team is defined and team.unreadClarifications|length > 0 %}
-            <a class="nav-link" href="{{ path('team_clarification', {clarId: team.unreadClarifications[0].clarid}) }}">
-                <span class="btn btn-warning btn-sm">
-                    <i class="fa-regular fa-envelope"></i> An unread message!
-                </span>
-            </a>
+            <div class="nav-link dropdown">
+                <button class="btn btn-warning btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Unread messages
+                    <span class="badge text-bg-secondary">{{ team.unreadClarifications|length }}</span>
+                </button>
+                <ul class="dropdown-menu">
+                    {% for clarification in team.unreadClarifications %}
+                        <li>
+                            <a class="dropdown-item" href="{{ path('team_clarification', {clarId: clarification.clarid}) }}">
+                                {{ clarification.summary }}
+                            </a>
+                        </li>
+                    {% endfor %}
+
+                </ul>
+            </div>
         {% endif %}
 
         <div class="ml-auto me-3">
