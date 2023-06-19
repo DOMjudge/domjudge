@@ -54,7 +54,15 @@
             {% endif %}
         </ul>
 
-        <div class="ms-auto me-3">
+        <div class="ms-auto me-3 d-flex gap-3">
+            {% if team is defined and team.unreadClarifications|length > 0 %}
+                <a class="nav-link" href="{{ path('team_clarification', {clarId: team.unreadClarifications[0].clarid}) }}">
+                    <span class="btn btn-warning btn-sm">
+                        <i class="fa-regular fa-envelope"></i> An unread message!
+                    </span>
+                </a>
+            {% endif %}
+
             {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
                 <a class="nav-link" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit') }}">
                     <span class="btn btn-success btn-sm">
