@@ -340,6 +340,21 @@
             default_value: false
             public: false
             description: Enable to skip the login page when using IP authentication.
+        -   name: allow_create_affiliation_during_registration
+            type: bool
+            default_value: false
+            public: true
+            description: Allow creation of a new affiliation during self-registration?
+        -   name: allow_registration_without_affiliation
+            type: bool
+            default_value: false
+            public: true
+            description: Allow self-registration without selecting an affiliation?
+        -   name: allow_custom_team_name_registration
+            type: bool
+            default_value: false
+            public: true
+            description: Allow specifying a custom team name during self-registration?
 -   category: External systems
     description: Miscellaneous configuration options.
     items:
