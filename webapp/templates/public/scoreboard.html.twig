@@ -2,6 +2,8 @@
 
 {% block title %}Scoreboard {{ contest.shortname | default('') }} - {{ parent() }}{% endblock %}
 {% block content %}
+    {% include 'partials/scoreboard_progress_bar.html.twig' with {margin: -9, contest: current_public_contest} %}
+
     {% if contest is defined %}
         {% set contestId = contest.cid %}
         {% if showExternalId(contest) %}
