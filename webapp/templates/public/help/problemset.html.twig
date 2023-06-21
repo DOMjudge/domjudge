@@ -1,0 +1,18 @@
+{% extends 'public/help/base.html.twig' %}
+
+{% set id = 'Problemset' %}
+
+{% block header %}
+    Zadání
+{% endblock %}
+
+{% block body %}
+    <p>
+        Zádání úloh naleznete na stránce Problemset:
+    </p>
+    <img src="{{ asset('images/help/problemset.png') }}" alt="Zadání" class="mb-3 rounded-3 img-fluid" style="max-height: 400px">
+    <p>
+        Kliknutím na tlačítko “text” zobrazíte pdf zadání příslušné úlohy.
+        Vzorové vstupy, kterými můžete své řešení zkusit, získáte stažením “samples”.
+    </p>
+{% endblock %}

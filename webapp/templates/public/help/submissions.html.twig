@@ -1,0 +1,28 @@
+{% extends 'public/help/base.html.twig' %}
+
+{% set id = 'Submissions' %}
+
+{% block header %}
+    Odevzdání
+{% endblock %}
+
+{% block body %}
+    <p>
+        Své řešení odevzdávejte pomocí zeleného tlačítka buď v navigačním menu, nebo u dané úlohy na stránce Problemset.
+    </p>
+    <img src="{{ asset('images/help/submit.png') }}" alt="Odevzdání" class="mb-3 rounded-3 img-fluid"
+         style="max-height: 400px">
+    <p>
+        Řešení se odešle k automatické kontrole. Výsledky kontrol můžete sledovat na žebříčku (Scoreboard) nebo na Home
+        v sekci Submissions. Modrá znamená probíhající kontrolu, zelená správné řešení, červená nesprávné.
+    </p>
+    <img src="{{ asset('images/help/submissions.png') }}" alt="Výsledky odevzdání" class="mb-3 rounded-3 img-fluid"
+         style="max-height: 400px">
+    <p>
+        Vězte, že vzorové vstupy <span class="fw-bold">neobsahují</span> všechny testy, kterými řešení musí projít. Zčervená-li váš pokus, neznamená
+        to, že byl celý špatně! Jen třeba neprošel určitým případem. Po rozkliknutí neúspěšného výsledku uvidíte pod
+        “Diff output” rozdíl očekávané odpovědi a výstupu vašeho programu. Z něj lze často vyčíst, na čem řešení
+        selhává.
+    </p>
+    <img src="{{ asset('images/help/diff-output.png') }}" alt="Výsledky odevzdání" class="mb-3 rounded-3 img-fluid"
+{% endblock %}

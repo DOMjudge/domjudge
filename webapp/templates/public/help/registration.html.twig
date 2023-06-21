@@ -1,0 +1,19 @@
+{% extends 'public/help/base.html.twig' %}
+
+{% set id = 'Registration' %}
+
+{% block header %}
+    Registrace
+{% endblock %}
+
+{% block body %}
+    <p>
+        Pro účast v semináři je nutné se nejprve <a href="/register">zaregistrovat</a>.
+        Povinnou položkou je výběr školy.
+        Pokud se vaše škola ještě nenachází v seznamu, přepněte na “Add new school” a vytvořte ji.
+    </p>
+    <img src="{{ asset('images/help/register.png') }}" alt="Registrace" class="mb-3 rounded-3 img-fluid" style="max-height: 400px">
+    <p>
+        Následně se svými údaji <a href="/login">přihlaste</a>.
+    </p>
+{% endblock %}
