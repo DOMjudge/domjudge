@@ -1,18 +1,15 @@
 {% extends "public/base.html.twig" %}
 
 {% block content %}
-<div class="container">
-    <h1 class="text-center">Pomoc</h1>
-
-    <p>
-        Na této stránce najdete informace o tom, jak se pohybovat na webu a jak soutěžit.
-    </p>
-
-    <h2>Pro účastníky</h2>
-
-    <div class="accordion">
-        {% include 'public/help/registration.html.twig' %}
-        {% include 'public/help/problemset.html.twig' %}
-        {% include 'public/help/submissions.html.twig' %}
+    <div class="container">
+        <h1 class="text-center">Pomoc</h1>
+        <p>
+            Na této stránce najdete informace o tom, jak se pohybovat na webu a jak soutěžit.
+        </p>
+        <div class="accordion">
+            {% include 'public/help/registration.html.twig' %}
+            {% include 'public/help/problemset.html.twig' %}
+            {% include 'public/help/submissions.html.twig' %}
+        </div>
     </div>
-    {% endblock %}
+{% endblock %}
