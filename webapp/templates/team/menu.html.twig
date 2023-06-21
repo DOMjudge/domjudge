@@ -56,6 +56,8 @@
             {% endif %}
         </ul>
 
+        {% include 'partials/help_button.html.twig' %}
+
         {% if team is defined and team.unreadClarifications|length > 0 %}
             <div class="nav-link dropdown">
                 <button class="btn btn-warning btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
