@@ -1,0 +1,25 @@
+{% extends 'public/help/base.html.twig' %}
+
+{% set id = 'Visitors' %}
+
+{% block header %}
+    Pro návštěvníky
+{% endblock %}
+
+{% block body %}
+    <p>
+        Web je rozdělen do stránek:
+    </p>
+    <ul>
+        <li>news: články a zajímavosti z průběhu semináře,</li>
+        <li>scoreboard: žebříček účastníků a jejich postup úlohami,</li>
+        <li>problemset: aktuální sada úloh,</li>
+        <li>archive: odkaz na zdrojový kód všech úloh z minulosti.</li>
+    </ul>
+    <p>
+        Vpravo nahoře je vidět zbývající čas na nynější sadu a také lze přepínat mezi výukovými a soutěžními úlohami
+        (ovlivňuje stránky Scoreboard a Problemset).
+    </p>
+    <img src="{{ asset('images/help/contests.png') }}" alt="Přepínání soutěže" class="mb-3 rounded-3 img-fluid"
+         style="max-height: 400px">
+{% endblock %}
