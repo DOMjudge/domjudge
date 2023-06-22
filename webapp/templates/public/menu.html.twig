@@ -56,6 +56,12 @@
 
         {% include 'partials/menu_help_button.html.twig' %}
 
+        {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+            <a class="btn btn-info btn-sm justify-content-center" href="{{ path('register') }}">
+                <i class="fa-solid fa-user-plus"></i> Register
+            </a>
+        {% endif %}
+
         {% include 'partials/menu_login_logout_button.html.twig' %}
 
         <ul class="navbar-nav">
