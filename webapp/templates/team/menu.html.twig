@@ -59,20 +59,18 @@
         {% include 'partials/menu_help_button.html.twig' %}
 
         {% if team is defined and team.unreadClarifications|length > 0 %}
-            <div class="dropdown me-3">
-                <button class="btn btn-warning btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class="dropdown">
+                <button class="btn btn-warning btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                     Unread messages
-                    <span class="badge text-bg-secondary">{{ team.unreadClarifications|length }}</span>
+                    <span class="badge badge-secondary">{{ team.unreadClarifications|length }}</span>
                 </button>
-                <ul class="dropdown-menu">
+                <div class="dropdown-menu">
                     {% for clarification in team.unreadClarifications %}
-                        <li>
-                            <a class="dropdown-item" href="{{ path('team_clarification', {clarId: clarification.clarid}) }}">
-                                {{ clarification.summary }}
-                            </a>
-                        </li>
+                        <a class="dropdown-item" href="{{ path('team_clarification', {clarId: clarification.clarid}) }}">
+                            {{ clarification.summary }}
+                        </a>
                     {% endfor %}
-                </ul>
+                </div>
             </div>
         {% endif %}
 
