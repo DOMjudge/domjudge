@@ -68,7 +68,7 @@
                 </button>
                 <div class="dropdown-menu overflow-auto" style="max-height: 30rem">
                     {% for clarification in team.unreadClarifications %}
-                        <div style="width: 18rem" class="">
+                        <div style="width: 18rem">
                             <a class="dropdown-item py-2" href="{{ path('team_clarification', {clarId: clarification.clarid}) }}">
                                 <p class="mb-1 text-right"><span class="text-muted">{{ clarification.submittime|round|date('d. m. H:i')  }}</span></p>
                                 <p class="card-text text-wrap">{{ clarification.summary }}</p>
