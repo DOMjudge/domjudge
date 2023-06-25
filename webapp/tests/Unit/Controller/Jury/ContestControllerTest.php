@@ -92,7 +92,7 @@ class ContestControllerTest extends JuryControllerTestCase
                                                            'endtimeString'        => '2021-07-17 16:11:00 Europe/Amsterdam',
                                                            'unfreezetimeString'   => '',
                                                            'deactivatetimeString' => ''],
-                                                           ['shortname'            => 'dirfreeze',
+                                                           ['shortname'           => 'dirfreeze',
                                                            'name'                 => 'Direct freeze minimal',
                                                            'activatetimeString'   => '2021-07-17 16:07:59 Europe/Amsterdam',
                                                            'starttimeString'      => '2021-07-17 16:08:00 Europe/Amsterdam',
