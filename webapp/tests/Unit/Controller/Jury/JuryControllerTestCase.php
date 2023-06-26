@@ -246,6 +246,45 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
+    protected function helperSubmitFields(array $element) {
+        self::assertSelectorExists('a:contains(' . $this->addButton . ')');
+        foreach ($element as $id => $field) {
+            // Skip elements which we cannot set yet.
+            // We can not set checkboxes directly.
+            // We can not set the fields set by JS directly.
+            if (is_bool($field) || $id === static::$addPlus) {
+                continue;
+            }
+            $formId = str_replace('.', '][', $id);
+            $formFields[static::$addForm . $formId . "]"] = $field;
+            // For LanguageController the values for external identifier should follow internal
+            if (key_exists('langid', $element) && !key_exists('externalid', $element)) {
+                $formFields[static::$addForm . 'externalid]'] = $element['langid'];
+            }
+        }
+        $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
+        $button = $this->client->getCrawler()->selectButton('Save');
+        $form = $button->form($formFields, 'POST');
+        $formName = str_replace('[', '', static::$addForm);
+        foreach ($element as $id => $field) {
+            // Set checkboxes
+            if (!is_bool($field)) {
+                continue;
+            }
+            if ($field) {
+                $form[$formName][$id]->tick();
+            } else {
+                $form[$formName][$id]->untick();
+            }
+        }
+        // Get the underlying object to inject elements not currently in the DOM.
+        $rawValues = $form->getPhpValues();
+        if (key_exists(static::$addPlus, $element)) {
+            $rawValues[$formName][static::$addPlus] = $element[static::$addPlus];
+        }
+        return $this->client->request($form->getMethod(), $form->getUri(), $rawValues, $form->getPhpFiles());
+    }
+
     /**
      * Test that admin can add a new entity for this controller.
      * @param array<string, string|array<string, bool>> $element
@@ -259,32 +298,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
         $this->logIn();
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         if (static::$add !== '') {
-            self::assertSelectorExists('a:contains(' . $this->addButton . ')');
-            $formFields = [];
-            foreach ($element as $id => $field) {
-                // Skip elements which we cannot set yet.
-                // We can not set checkboxes directly.
-                // We can not set the fields set by JS directly.
-                if ($id === static::$addPlus) {
-                    continue;
-                }
-                $formId = str_replace('.', '][', $id);
-                $formFields[static::$addForm . $formId . "]"] = $field;
-                // For LanguageController the values for external identifier should follow internal
-                if (key_exists('langid', $element) && !key_exists('externalid', $element)) {
-                    $formFields[static::$addForm . 'externalid]'] = $element['langid'];
-                }
-            }
-            $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
-            $button = $this->client->getCrawler()->selectButton('Save');
-            $form = $button->form($formFields, 'POST');
-            $formName = str_replace('[', '', static::$addForm);
-            // Get the underlying object to inject elements not currently in the DOM.
-            $rawValues = $form->getPhpValues();
-            if (key_exists(static::$addPlus, $element)) {
-                $rawValues[$formName][static::$addPlus] = $element[static::$addPlus];
-            }
-            $response = $this->client->request($form->getMethod(), $form->getUri(), $rawValues, $form->getPhpFiles());
+            $response = $this->helperSubmitFields($element);
             $this->client->followRedirect();
             foreach ($element as $key => $value) {
                 if (!is_array($value) && !in_array($key, static::$overviewNotShown)) {
