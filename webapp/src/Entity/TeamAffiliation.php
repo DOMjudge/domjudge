@@ -56,10 +56,12 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     protected ?string $icpcid = null;
 
     #[ORM\Column(length: 32, options: ['comment' => 'Short descriptive name'])]
+    #[Assert\NotBlank]
     #[Serializer\SerializedName('name')]
     private string $shortname;
 
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]
+    #[Assert\NotBlank]
     #[Serializer\SerializedName('formal_name')]
     private string $name;
 
@@ -135,10 +137,10 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
         return $this->icpcid;
     }
 
-    public function setShortname(string $shortname): TeamAffiliation
+    public function setShortname(?string $shortname): TeamAffiliation
     {
         // Truncate shortname here to make the import more robust. TODO: is this the right place/behavior?
-        $this->shortname = mb_substr($shortname, 0, 32);
+        $this->shortname = mb_substr(strval($shortname), 0, 32);
         return $this;
     }
 
@@ -147,9 +149,9 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
         return $this->shortname;
     }
 
-    public function setName(string $name): TeamAffiliation
+    public function setName(?string $name): TeamAffiliation
     {
-        $this->name = $name;
+        $this->name = strval($name);
         return $this;
     }
 
