@@ -23,15 +23,31 @@ class TeamAffiliationControllerTest extends JuryControllerTestCase
     protected static array   $addEntitiesShown         = ['shortname', 'name'];
     protected static array   $overviewNotShown         = ['country'];
     protected static array   $addEntities              = [['shortname' => 'short',
-                                                           'name'      => 'New Affil',
-                                                           'country'   => 'NLD',
-                                                           'internalcomments'  => 'Lorem ipsum dolor sit amet.'],
+                                                           'name' => 'New Affil',
+                                                           'country' => 'NLD',
+                                                           'internalcomments'=> 'Lorem ipsum dolor sit amet.',
+                                                           'icpcid' => ''],
                                                           ['shortname' => 'cl',
                                                            'name' => 'Countryless',
                                                            'country' => ''],
                                                           ['shortname' => 'com',
                                                            'name' => 'No comment',
-                                                           'internalcomments' => '']];
+                                                           'internalcomments' => ''],
+                                                          ['name' => 'External set',
+                                                           'externalid' => 'ext12-._'],
+                                                          ['name' => 'icpc (string)',
+                                                           'icpcid' => 'one'],
+                                                          ['name' => 'icpc (number)',
+                                                           'icpcid' => '15'],
+                                                          ['name' => 'icpc (alpnum-_)',
+                                                           'icpcid' => '-_1aZ'],
+                                                          ['name' => 'Special chars 😀',
+                                                           'shortname' => 'yes😀']];
+
+    protected static array   $addEntitiesFailure       = ['This value should not be blank.' => [['externalid' => ''],
+                                                                                                ['shortname' => ''],
+                                                                                                ['name' => '']],
+                                                          'Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => '()']]];
 
     protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {
@@ -42,8 +58,11 @@ class TeamAffiliationControllerTest extends JuryControllerTestCase
             unset($entity['country']);
             unset($expected['country']);
         }
-        // Add external ID's when needed
-        if (!$this->dataSourceIsLocal()) {
+        // Remove/Add external ID's when needed
+        if ($this->dataSourceIsLocal()) {
+            unset($entity['externalid']);
+            unset($expected['externalid']);
+        } else {
             $entity['externalid'] = $entity['shortname'];
             $expected['externalid'] = $entity['shortname'];
         }
