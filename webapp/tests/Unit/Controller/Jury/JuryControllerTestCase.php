@@ -47,6 +47,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
     protected static array $addEntities               = [];
     protected static array $addEntitiesCount          = [];
     protected static array $addEntitiesShown          = [];
+    protected static array $addEntitiesFailure        = [];
     protected static ?string $defaultEditEntityName   = null;
     protected static array $specialFieldOnlyUpdate    = [];
     protected static array $editEntitiesSkipFields    = [];
@@ -332,9 +333,9 @@ abstract class JuryControllerTestCase extends BaseTestCase
     /**
      * Test that admin can add edit an entity for this controller.
      *
-     * @dataProvider provideEditEntities
+     * @dataProvider provideEditCorrectEntities
      */
-    public function testCheckEditEntityAdmin(string $identifier, array $formDataKeys, array $formDataValues): void
+    public function testCheckEditEntityAdminCorrect(array $formDataKeys, array $formDataValues): void
     {
         if (static::$addPlus != '') {
             static::markTestSkipped('Edit not implemented yet for ' . static::$shortTag . '.');
@@ -352,7 +353,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
             $crawler = $this->getCurrentCrawler();
             /** @var DOMElement $node */
             foreach ($crawler->filter('a') as $node) {
-                if (str_contains($node->nodeValue, $identifier)) {
+                if (str_contains($node->nodeValue, static::$defaultEditEntityName)) {
                     $singlePageLink = $node->getAttribute('href');
                 }
             }
@@ -385,22 +386,45 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
-    public function provideEditEntities(): Generator
+    public function helperProvideMergeEditEntity(array $element): array
     {
-        foreach (static::$addEntities as $row) {
-            $formdataKeys = [];
-            $formdataValues = [];
-            foreach (static::$addEntities[0] as $key => $value) {
-                if (!in_array($key, static::$editEntitiesSkipFields)) {
-                    $formdataKeys[] = $key;
-                    // There are some special fields like passwords which we only update when set.
-                    if (in_array($key, static::$specialFieldOnlyUpdate)) {
-                        $value = '';
-                    }
-                    $formdataValues[] = $row[$key] ?? $value;
+        $formdataKeys = [];
+        $formdataValues = [];
+        foreach (static::$addEntities[0] as $key => $value) {
+            if (!in_array($key, static::$editEntitiesSkipFields)) {
+                $formdataKeys[] = $key;
+                // There are some special fields like passwords which we only update when set.
+                if (in_array($key, static::$specialFieldOnlyUpdate)) {
+                    $value = '';
                 }
+                $formdataValues[] = $element[$key] ?? $value;
             }
-            yield [static::$defaultEditEntityName, $formdataKeys, $formdataValues];
+        }
+        return [$formdataKeys, $formdataValues];
+    }
+
+    public function provideEditCorrectEntities(): Generator
+    {
+        foreach (static::$addEntities as $element) {
+            [$formdataKeys, $formdataValues] = $this->helperProvideMergeEditEntity($element);
+            yield [$formdataKeys, $formdataValues];
+        }
+    }
+
+    public function provideEditFailureEntities(): Generator
+    {
+        /* The first key in the array:
+           [$message => [[$offending_key => $offending_value, $other_key => $other_values...]]]
+           is expected to have the offending value, when this is defined in $editEntitiesSkipFields
+           we skip this */
+        foreach (static::$addEntitiesFailure as $message => $entityList) {
+            foreach ($entityList as $element) {
+                if (in_array(array_key_first($element), static::$editEntitiesSkipFields)) {
+                    continue;
+                }
+                [$formdataKeys, $formdataValues] = $this->helperProvideMergeEditEntity($element);
+                yield [$formdataKeys, $formdataValues, $message];
+            }
         }
     }
 
