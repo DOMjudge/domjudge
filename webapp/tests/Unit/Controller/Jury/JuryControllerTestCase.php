@@ -393,21 +393,23 @@ abstract class JuryControllerTestCase extends BaseTestCase
     public function provideAddCorrectEntities(): Generator
     {
         foreach (static::$addEntities as $element) {
-            $combinedValues = [];
-            // First fill with default values, the 0th item of the array
-            // Overwrite with data to test with.
-            foreach ([static::$addEntities[0], $element] as $item) {
-                foreach ($item as $id => $field) {
-                    $combinedValues[$id] = $field;
-                }
-            }
-            // For LanguageController the values for external identifier should follow internal
-            if (key_exists('langid', $element) && !key_exists('externalid', $element)) {
-                $combinedValues['externalid'] = $element['langid'];
-            }
+            [$combinedValues, $element] = $this->helperProvideMergeAddEntity($element);
             [$combinedValues, $element] = $this->helperProvideTranslateAddEntity($combinedValues, $element);
             yield [$combinedValues, $element];
         }
+    }
+
+    protected function helperProvideMergeAddEntity(array $overWriteValues): array
+    {
+        $combinedValues = [];
+        // First fill with default values, the 0th item of the array
+        // Overwrite with data to test with.
+        foreach ([static::$addEntities[0], $overWriteValues] as $item) {
+            foreach ($item as $id => $field) {
+                $combinedValues[$id] = $field;
+            }
+        }
+        return [$combinedValues, $overWriteValues];
     }
 
     /**
