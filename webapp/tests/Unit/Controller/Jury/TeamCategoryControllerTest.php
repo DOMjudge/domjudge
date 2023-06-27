@@ -19,18 +19,50 @@ class TeamCategoryControllerTest extends JuryControllerTestCase
     protected static string  $addForm                  = 'team_category[';
     protected static array   $addEntitiesShown         = ['name', 'sortorder'];
     protected static array   $addEntities              = [['name'                    => 'New Category',
-                                                          'sortorder'               => '1',
-                                                          'color'                   => '#123456',
-                                                          'visible'                 => '1',
-                                                          'allow_self_registration' => '0'],
-                                                         ['name' => 'Secondary',
-                                                          'sortorder' => '2'],
-                                                         ['name' => 'Colorless',
-                                                          'color' => ''],
-                                                         ['name' => 'NameColor',
-                                                          'color' => 'yellow'],
-                                                         ['name' => 'Visible',
-                                                          'visible' => '1'],
-                                                         ['name' => 'SelfRegistered',
-                                                          'allow_self_registration' => '1']];
+                                                           'sortorder'               => '1',
+                                                           'color'                   => '#123456',
+                                                           'visible'                 => '1',
+                                                           'allow_self_registration' => '0',
+                                                           'icpcid'                  => ''],
+                                                          ['name' => 'Secondary',
+                                                           'sortorder' => '2'],
+                                                          ['name' => 'NonNegative',
+                                                           'sortorder' => '0'],
+                                                          ['name' => 'Large',
+                                                           'sortorder' => '128'],
+                                                          ['name' => 'Colorless',
+                                                           'color' => ''],
+                                                          ['name' => 'FutureColor',
+                                                           'color' => 'UnknownColor'],
+                                                          ['name' => 'NameColor',
+                                                           'color' => 'yellow'],
+                                                          ['name' => 'Invisible',
+                                                           'visible' => '0'],
+                                                          ['name' => 'SelfRegistered',
+                                                           'allow_self_registration' => '1'],
+                                                          ['name' => 'ICPCid known (string)',
+                                                           'icpcid' => 'eleven'],
+                                                          ['name' => 'ICPCid known (number)',
+                                                           'icpcid' => '11'],
+                                                          ['name' => 'ICPCid known (alphanum-_)',
+                                                           'icpcid' => '_123ABC-abc'],
+                                                          ['name' => 'External set',
+                                                           'externalid' => 'ext10-._'],
+                                                          ['name' => 'Name with 😁']];
+    protected static array   $addEntitiesFailure       = ['Only non-negative sortorders are supported' => [['sortorder' => '-10']],
+                                                          'Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => 'yes|']],
+                                                          'Only letters, numbers, dashes and underscores are allowed.' => [['icpcid' => '|violation', 'name' => 'ICPCid violation-1'],
+                                                                                                                           ['icpcid' => '()violation', 'name' => 'ICPCid violation-2']],
+                                                          'This value should not be blank.' => [['name' => ''],
+                                                                                                ['externalid' => '']]];
+
+    protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
+    {
+        // Remove external ID's when we're local
+        if ($this->dataSourceIsLocal()) {
+            unset($entity['externalid']);
+            unset($expected['externalid']);
+        }
+        return [$entity, $expected];
+    }
 }
