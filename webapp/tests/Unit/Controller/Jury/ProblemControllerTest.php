@@ -33,20 +33,36 @@ class ProblemControllerTest extends JuryControllerTestCase
     protected static string $addForm          = 'problem[';
     protected static array  $addEntitiesShown = ['name'];
     protected static array  $addEntities      = [['name'               => 'Problem',
-                                                 'timelimit'          => '1',
-                                                 'memlimit'           => '1073741824',
-                                                 'outputlimit'        => '1073741824',
-                                                 'problemtextFile'    => '',
-                                                 'runExecutable'      => 'boolfind_cmp',
-                                                 'compareExecutable'  => '',
-                                                 'combinedRunCompare' => true,
-                                                 'specialCompareArgs' => ''],
-                                                ['name' => 'Long time',
-                                                 'timelimit' => '3600'],
-                                                ['name' => 'Default limits',
-                                                 'memlimit' => '', 'outputlimit' => ''],
-                                                ['name' => 'Args',
-                                                 'specialCompareArgs' => 'args']];
+                                                  'timelimit'          => '1',
+                                                  'memlimit'           => '1073741824',
+                                                  'outputlimit'        => '1073741824',
+                                                  'problemtextFile'    => '',
+                                                  'runExecutable'      => 'boolfind_cmp',
+                                                  'compareExecutable'  => '',
+                                                  'combinedRunCompare' => true,
+                                                  'specialCompareArgs' => ''],
+                                                 ['name'               => '🙃 Unicode in name'],
+                                                 ['name'               => 'Long time',
+                                                  'timelimit'          => '3600'],
+                                                 ['name'               => 'Default limits',
+                                                  'memlimit'           => '',
+                                                  'outputlimit'        => ''],
+                                                 ['name'               => 'Args',
+                                                  'specialCompareArgs' => 'args'],
+                                                 ['name'               => 'Args with Unicode',
+                                                  'specialCompareArgs' => '🙃 #Should not happen'],
+                                                 ['name'               => 'Split Run/Compare',
+                                                  'combinedRunCompare' => false],
+                                                 ['externalid'         => '._-3xternal1']];
+    protected static array  $addEntitiesFailure = ['This value should not be blank.' => [['name' => '']],
+                                                   'Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => 'limited_special_chars!']],
+                                                   // This is a placeholder on the Add/Edit page
+                                                   'leave empty for default' => [['memlimit' => 'zero'],
+                                                                                 ['timelimit' => 'zero'],
+                                                                                 ['outputlimit' => 'zero'],
+                                                                                 ['memlimit' => '-1'],
+                                                                                 ['timelimit' => '-1'],
+                                                                                 ['outputlimit' => '-1']]];
 
     public function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {
@@ -54,6 +70,9 @@ class ProblemControllerTest extends JuryControllerTestCase
         if (!$this->dataSourceIsLocal()) {
             $entity['externalid'] = md5(json_encode($entity, JSON_THROW_ON_ERROR));
             $expected['externalid'] = md5(json_encode($entity, JSON_THROW_ON_ERROR));
+        } else {
+            unset($entity['externalid']);
+            unset($expected['externalid']);
         }
         return [$entity, $expected];
     }
