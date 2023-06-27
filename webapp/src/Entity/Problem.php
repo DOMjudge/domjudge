@@ -185,9 +185,9 @@ class Problem extends BaseApiEntity
         return $this->externalid;
     }
 
-    public function setName(string $name): Problem
+    public function setName(?string $name): Problem
     {
-        $this->name = $name;
+        $this->name = strval($name);
         return $this;
     }
 
