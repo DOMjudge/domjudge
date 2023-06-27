@@ -55,7 +55,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
     protected static ?string $defaultEditEntityName   = null;
     protected static array $specialFieldOnlyUpdate    = [];
     protected static array $editEntitiesSkipFields    = [];
-    protected static array $overviewNotShown          = [];
+    protected static array $overviewSingleNotShown    = [];
+    protected static array $overviewGeneralNotShown   = [];
 
     protected function setUp(): void
     {
@@ -306,12 +307,15 @@ abstract class JuryControllerTestCase extends BaseTestCase
             $response = $this->helperSubmitFields($element);
             $this->client->followRedirect();
             foreach ($element as $key => $value) {
-                if (!is_array($value) && !in_array($key, static::$overviewNotShown)) {
+                if (!is_array($value) && !in_array($key, static::$overviewSingleNotShown)) {
                     self::assertSelectorExists('body:contains("' . $value . '")');
                 }
             }
             $this->verifyPageResponse('GET', static::$baseUrl, 200);
             foreach ($expected as $id => $value) {
+                if (in_array($id, static::$overviewGeneralNotShown)) {
+                    continue;
+                }
                 if (is_array($value)) {
                     if (in_array($id, static::$addEntitiesCount)) {
                         self::assertSelectorExists('body:contains("' . count($value) . '")');
