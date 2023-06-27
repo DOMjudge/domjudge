@@ -17,6 +17,7 @@
             <div class="input-group">
                 {{ form_widget(form.timeFactor) }}
                 <span class="input-group-text">&times;</span>
+                {{ form_errors(form.timeFactor) }}
             </div>
         </div>
         {{ form_row(form.compileExecutable) }}

@@ -84,7 +84,7 @@ class Language extends BaseApiEntity
         'default' => 1,
     ]
     )]
-    #[Assert\GreaterThan(0)]
+    #[Assert\Positive]
     #[Assert\NotBlank]
     #[Serializer\Type('double')]
     #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
@@ -269,9 +269,9 @@ class Language extends BaseApiEntity
         return $this->externalid;
     }
 
-    public function setName(string $name): Language
+    public function setName(?string $name): Language
     {
-        $this->name = $name;
+        $this->name = strval($name);
         return $this;
     }
 
