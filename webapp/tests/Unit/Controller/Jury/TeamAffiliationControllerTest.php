@@ -33,23 +33,20 @@ class TeamAffiliationControllerTest extends JuryControllerTestCase
                                                            'name' => 'No comment',
                                                            'internalcomments' => '']];
 
-    /**
-     * Test that admin can add a new entity for this controller.
-     * @dataProvider provideAddCorrectEntities
-     */
-    public function testCheckAddEntityAdmin(array $entity, array $expected): void
+    protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {
         $config = static::getContainer()->get(ConfigurationService::class);
         $showFlags = $config->get('show_flags');
         // Remove setting country when we don't show it.
         if (!$showFlags) {
             unset($entity['country']);
+            unset($expected['country']);
         }
         // Add external ID's when needed
         if (!$this->dataSourceIsLocal()) {
             $entity['externalid'] = $entity['shortname'];
             $expected['externalid'] = $entity['shortname'];
         }
-        parent::testCheckAddEntityAdmin($entity, $expected);
+        return [$entity, $expected];
     }
 }

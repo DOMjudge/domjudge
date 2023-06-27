@@ -405,8 +405,14 @@ abstract class JuryControllerTestCase extends BaseTestCase
             if (key_exists('langid', $element) && !key_exists('externalid', $element)) {
                 $combinedValues['externalid'] = $element['langid'];
             }
+            [$combinedValues, $element] = $this->helperProvideTranslateAddEntity($combinedValues, $element);
             yield [$combinedValues, $element];
         }
+    }
+
+    protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
+    {
+        return [$entity, $expected];
     }
 
     /**

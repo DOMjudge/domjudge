@@ -58,6 +58,20 @@ class LanguagesControllerTest extends JuryControllerTestCase
                                                           ['langid' => 'nofilt',
                                                            'filterCompilerFiles' => '0']];
 
+    public function helperProvideTranslateAddEntity(array $entity, array $expected): array
+    {
+        // For LanguageController the values for external identifier should follow internal
+        if (key_exists('langid', $entity)) {
+            if (!key_exists('externalid', $entity)) {
+                $entity['externalid'] = $entity['langid'];
+            }
+            if (!key_exists('externalid', $expected)) {
+                $expected['externalid'] = $entity['langid'];
+            }
+        }
+        return [$entity, $expected];
+    }
+
     public function testUnlockJudgeTasksFormEdit(): void
     {
         // First, check that adding a submission creates a queue task and 4 judge tasks (1 sample, 3 secret cases).
