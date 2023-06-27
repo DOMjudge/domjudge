@@ -20,7 +20,7 @@ class UserControllerTest extends JuryControllerTestCase
     protected static array   $DOM_elements             = ['h1' => ['Users']];
     protected static string  $addForm                  = 'user[';
     protected static array   $addEntitiesShown         = ['name', 'username', 'email'];
-    protected static array   $overviewNotShown         = ['plainPassword'];
+    protected static array   $overviewSingleNotShown   = ['plainPassword'];
     protected static array   $addEntities              = [['username'      => 'un',
                                                            'name'          => 'Alice',
                                                            'email'         => 'alice@example.org',

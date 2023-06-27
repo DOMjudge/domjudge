@@ -59,6 +59,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     protected ?string $label = null;
 
     #[ORM\Column(options: ['comment' => 'Team name', 'collation' => 'utf8mb4_bin'])]
+    #[Assert\NotBlank]
     private string $name = '';
 
     #[ORM\Column(
@@ -230,9 +231,9 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this->label;
     }
 
-    public function setName(string $name): Team
+    public function setName(?string $name): Team
     {
-        $this->name = $name;
+        $this->name = strval($name);
         return $this;
     }
 
