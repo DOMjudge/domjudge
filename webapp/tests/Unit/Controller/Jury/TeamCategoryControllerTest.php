@@ -18,7 +18,7 @@ class TeamCategoryControllerTest extends JuryControllerTestCase
     protected static array   $DOM_elements             = ['h1' => ['Categories']];
     protected static string  $addForm                  = 'team_category[';
     protected static array   $addEntitiesShown         = ['name', 'sortorder'];
-    protected static array  $addEntities               = [['name'                    => 'New Category',
+    protected static array   $addEntities              = [['name'                    => 'New Category',
                                                           'sortorder'               => '1',
                                                           'color'                   => '#123456',
                                                           'visible'                 => '1',
