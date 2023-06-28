@@ -310,7 +310,7 @@ class DOMJudgeService
             return $unreadClarifications;
         }
         foreach ($clarifications as $clar) {
-            if ($clar->getContest() === $contest) {
+            if ($clar->getContest()->getCid() === $contest->getCid()) {
                 $unreadClarifications[] = [
                     'clarid' => $clar->getClarid(),
                     'body' => $clar->getBody(),
