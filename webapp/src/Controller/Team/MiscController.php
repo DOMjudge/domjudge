@@ -19,9 +19,11 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
+
 
 #[IsGranted('ROLE_TEAM')]
 #[IsGranted(
@@ -127,6 +129,12 @@ class MiscController extends BaseController
         }
 
         return $this->render('team/index.html.twig', $data);
+    }
+
+    #[Route(path: '/updates', methods: ['GET'], name: 'team_ajax_updates')]
+    public function updatesUnreadNotification(): JsonResponse
+    {
+        return $this->json($this->dj->getUnreadClarifications());
     }
 
     #[Route(path: '/change-contest/{contestId<-?\d+>}', name: 'team_change_contest')]

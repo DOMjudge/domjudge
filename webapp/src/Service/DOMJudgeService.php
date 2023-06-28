@@ -299,6 +299,21 @@ class DOMJudgeService
         return $response;
     }
 
+    public function getUnreadClarifications(): array
+    {
+        $user           = $this->getUser();
+        $team           = $user->getTeam();
+        $clarifications = $team->getUnreadClarifications();
+        $unreadClarifications = [];
+        foreach ($clarifications as $clar) {
+            $unreadClarifications[] = [
+                'clarid' => $clar->getClarid(),
+                'body' => $clar->getBody(),
+            ];
+        }
+        return $unreadClarifications;
+    }
+
     public function getUpdates(): array
     {
         $contest = $this->getCurrentContest();
