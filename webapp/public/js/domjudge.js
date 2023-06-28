@@ -44,8 +44,6 @@ function enableNotifications()
             return true;
         });
     }
-
-    
 }
 
 function disableNotifications()
@@ -67,8 +65,8 @@ function disableNotifications()
 // client has already received to display each notification only once.
 function sendNotification(title, options = {})
 {
-    
     if ( getCookie('domjudge_notify')!=1 ) return;
+    
     // Check if we already sent this notification:
     var senttags = localStorage.getItem('domjudge_notifications_sent');
     if ( senttags===null || senttags==='' ) {

@@ -24,7 +24,6 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 
-
 #[IsGranted('ROLE_TEAM')]
 #[IsGranted(
     new Expression('user.getTeam() !== null'),
