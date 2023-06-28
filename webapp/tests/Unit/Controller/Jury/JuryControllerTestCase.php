@@ -409,6 +409,52 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
+    /**
+     * Test that admin can edit an entity for this controller but receives an error when providing wrong data.
+     *
+     * @dataProvider provideEditFailureEntities
+     */
+    public function testCheckEditEntityAdminFailure(array $formDataKeys, array $formDataValues, string $message): void
+    {
+        if (static::$addPlus != '') {
+            static::markTestSkipped('Edit not implemented yet for ' . static::$shortTag . '.');
+        }
+        $editLink = null;
+        $formFields = [];
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+        $this->loadFixtures(static::$deleteFixtures);
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        if (static::$edit !== '') {
+            $singlePageLink = null;
+            $this->client->followRedirects(true);
+            $crawler = $this->getCurrentCrawler();
+            foreach ($crawler->filter('a') as $node) {
+                if (str_contains($node->nodeValue, static::$defaultEditEntityName)) {
+                    $singlePageLink = $node->getAttribute('href');
+                }
+            }
+            $this->verifyPageResponse('GET', $singlePageLink, 200);
+            $crawler = $this->getCurrentCrawler();
+            foreach ($crawler->filter('a') as $node) {
+                if (str_contains($node->nodeValue, 'Edit')) {
+                    $editLink = $node->getAttribute('href');
+                }
+            }
+            $this->verifyPageResponse('GET', $editLink, 200);
+            $crawler = $this->getCurrentCrawler();
+            foreach ($formDataKeys as $id => $key) {
+                $formFields[static::$addForm . $key . "]"] = $formDataValues[$id];
+            }
+            $button = $this->client->getCrawler()->selectButton('Save');
+            $form = $button->form($formFields, 'POST');
+            $this->client->submit($form);
+            self::assertNotEquals(500, $this->client->getResponse()->getStatusCode());
+            self::assertSelectorExists('body:contains("'.$message.'")');
+        }
+    }
+
     public function provideAddCorrectEntities(): Generator
     {
         foreach (static::$addEntities as $element) {
