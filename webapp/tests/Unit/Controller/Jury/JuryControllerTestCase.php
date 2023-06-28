@@ -330,6 +330,24 @@ abstract class JuryControllerTestCase extends BaseTestCase
     }
 
     /**
+     * Test failures when the admin provides wrong data.
+     * @dataProvider provideAddFailureEntities
+     */
+    public function testCheckAddEntityAdminFailure(array $element, string $message): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+        $this->client->followRedirects(true);
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        if (static::$add !== '') {
+            $this->helperSubmitFields($element);
+            self::assertNotEquals(500, $this->client->getResponse()->getStatusCode());
+            self::assertSelectorExists('body:contains("'.$message.'")');
+        }
+    }
+
+    /**
      * Test that admin can add edit an entity for this controller.
      *
      * @param array<int, string> $formDataKeys
@@ -396,6 +414,20 @@ abstract class JuryControllerTestCase extends BaseTestCase
             [$combinedValues, $element] = $this->helperProvideMergeAddEntity($element);
             [$combinedValues, $element] = $this->helperProvideTranslateAddEntity($combinedValues, $element);
             yield [$combinedValues, $element];
+        }
+    }
+
+    public function provideAddFailureEntities(): Generator
+    {
+        foreach (static::$addEntitiesFailure as $message => $elementList) {
+            foreach($elementList as $element) {
+                if (key_exists('externalid', $element) && $this->dataSourceIsLocal()) {
+                    continue;
+                }
+                [$entity, $expected] = $this->helperProvideMergeAddEntity($element);
+                [$entity, $dropped] = $this->helperProvideTranslateAddEntity($entity, $expected);
+                yield [$entity, $message];
+            }
         }
     }
 
