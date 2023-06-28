@@ -426,12 +426,11 @@ function processAjaxResponse(jqXHR, data) {
     if (jqXHR.getResponseHeader('X-Login-Page')) {
         window.location = jqXHR.getResponseHeader('X-Login-Page');
     } else {
-        var newCurrentContest = parseInt(jqXHR.getResponseHeader('X-Current-Contest'));
-        var dataCurrentContest = $('[data-current-contest]').data('current-contest');
-        var currentContest = parseInt(dataCurrentContest);
+        var newCurrentContest = jqXHR.getResponseHeader('X-Current-Contest');
+        var dataCurrentContest = $('[data-current-contest]').data('current-contest').toString();
 
         // If the contest ID changed from another tab, reload or whole page
-        if (dataCurrentContest !== undefined && newCurrentContest !== currentContest) {
+        if (dataCurrentContest !== undefined && newCurrentContest !== dataCurrentContest) {
             window.location.reload();
             return;
         }
