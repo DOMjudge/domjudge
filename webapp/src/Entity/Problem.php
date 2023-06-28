@@ -48,6 +48,7 @@ class Problem extends BaseApiEntity
     protected ?string $externalid = null;
 
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]
+    #[Assert\NotBlank]
     private string $name;
 
     #[ORM\Column(options: [
