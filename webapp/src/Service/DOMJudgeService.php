@@ -304,12 +304,18 @@ class DOMJudgeService
         $user           = $this->getUser();
         $team           = $user->getTeam();
         $clarifications = $team->getUnreadClarifications();
+        $contest        = $this->getCurrentContest($team->getTeamId());
         $unreadClarifications = [];
+        if ($contest === null) {
+            return $unreadClarifications;
+        }
         foreach ($clarifications as $clar) {
-            $unreadClarifications[] = [
-                'clarid' => $clar->getClarid(),
-                'body' => $clar->getBody(),
-            ];
+            if ($clar->getContest() === $contest) {
+                $unreadClarifications[] = [
+                    'clarid' => $clar->getClarid(),
+                    'body' => $clar->getBody(),
+                ];
+            }
         }
         return $unreadClarifications;
     }
