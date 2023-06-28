@@ -65,8 +65,6 @@ function disableNotifications()
 // client has already received to display each notification only once.
 function sendNotification(title, options = {})
 {
-    if ( getCookie('domjudge_notify')!=1 ) return;
-    
     // Check if we already sent this notification:
     var senttags = localStorage.getItem('domjudge_notifications_sent');
     if ( senttags===null || senttags==='' ) {
@@ -83,12 +81,14 @@ function sendNotification(title, options = {})
     }
     options['icon'] = domjudge_base_url + '/apple-touch-icon.png';
 
-    var not = new Notification(title, options);
-
-    if ( link!==null ) {
-        not.onclick = function() { 
-            window.location.href = link;
-        };
+    // Only actually send notification when enabled
+    if ( getCookie('domjudge_notify')==1 ) {
+        var not = new Notification(title, options);
+        if ( link!==null ) {
+            not.onclick = function() { 
+                window.location.href = link;
+            };
+        }
     }
 
     if ( options.tag ) {
@@ -534,12 +534,13 @@ function updateClarifications()
         if (jqXHR.getResponseHeader('X-Login-Page')) {
             window.location = jqXHR.getResponseHeader('X-Login-Page');
         } else {
-            let num = json.length;
+            let data = json['unread_clarifications'];
+            let num = data.length;
             for (let i = 0; i < num; i++) {
                 sendNotification('New clarification',
-                 {'tag': 'clar_' + json[i].clarid,
-                        'link': domjudge_base_url + '/team/clarifications/'+json[i].clarid,
-                        'body': json[i].body });
+                 {'tag': 'clar_' + data[i].clarid,
+                        'link': domjudge_base_url + '/team/clarifications/'+data[i].clarid,
+                        'body': data[i].body });
             }
         }
     })
