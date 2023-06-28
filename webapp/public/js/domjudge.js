@@ -17,7 +17,14 @@ function enableNotifications()
               'Re-enable notification permission in the browser and retry.');
         return false;
     }
-
+    if ( Notification.permission==='granted' ) {
+        setCookie('domjudge_notify', 1);
+        sendNotification('DOMjudge notifications enabled.');
+        $("#notify_disable").removeClass('d-none');
+        $("#notify_disable").show();
+        $("#notify_enable").hide();
+        return true;
+    }
     if ( Notification.permission!=='granted' ) {
         Notification.requestPermission(function (permission) {
             // Safari and Chrome don't support the static 'permission'
@@ -29,15 +36,16 @@ function enableNotifications()
                 alert('Browser denied permission to send desktop notifications.');
                 return false;
             }
+            setCookie('domjudge_notify', 1);
+            sendNotification('DOMjudge notifications enabled.');
+            $("#notify_disable").removeClass('d-none');
+            $("#notify_disable").show();
+            $("#notify_enable").hide();
+            return true;
         });
     }
 
-    setCookie('domjudge_notify', 1);
-    sendNotification('DOMjudge notifications enabled.');
-    $("#notify_disable").removeClass('d-none');
-    $("#notify_disable").show();
-    $("#notify_enable").hide();
-    return true;
+    
 }
 
 function disableNotifications()
@@ -59,8 +67,8 @@ function disableNotifications()
 // client has already received to display each notification only once.
 function sendNotification(title, options = {})
 {
+    
     if ( getCookie('domjudge_notify')!=1 ) return;
-
     // Check if we already sent this notification:
     var senttags = localStorage.getItem('domjudge_notifications_sent');
     if ( senttags===null || senttags==='' ) {
@@ -80,7 +88,9 @@ function sendNotification(title, options = {})
     var not = new Notification(title, options);
 
     if ( link!==null ) {
-        not.onclick = function() { window.open(link); };
+        not.onclick = function() { 
+            window.location.href = link;
+        };
     }
 
     if ( options.tag ) {
@@ -515,6 +525,26 @@ function toggleRefresh($url, $after, usingAjax) {
     var text = refreshEnabled ? 'Disable refresh' : 'Enable refresh';
     $('#refresh-toggle').val(text);
     $('#refresh-toggle').text(text);
+}
+
+function updateClarifications()
+{
+    $.ajax({
+        url: $('#menuDefault').data('update-url'),
+        cache: false
+    }).done(function(json, status, jqXHR) {
+        if (jqXHR.getResponseHeader('X-Login-Page')) {
+            window.location = jqXHR.getResponseHeader('X-Login-Page');
+        } else {
+            let num = json.length;
+            for (let i = 0; i < num; i++) {
+                sendNotification('New clarification',
+                 {'tag': 'clar_' + json[i].clarid,
+                        'link': domjudge_base_url + '/team/clarifications/'+json[i].clarid,
+                        'body': json[i].body });
+            }
+        }
+    })
 }
 
 function updateMenuAlerts()

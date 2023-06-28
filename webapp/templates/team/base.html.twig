@@ -14,6 +14,17 @@
             $('body').on('submit', 'form[name=team_clarification]', function () {
                 return confirm("Send clarification request to Jury?");
             });
+
+            /* Show the notification options if the browser supports it */
+            if ('Notification' in window) {
+                $('#notify_enable').click(enableNotifications);
+                if (getCookie('domjudge_notify') != 1) {
+                    $('#notify_enable').removeClass('d-none');
+                }
+            }
+            updateClarifications();
+            setInterval(updateClarifications, 20000);
         });
+
     </script>
 {% endblock %}

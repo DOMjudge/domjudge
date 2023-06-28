@@ -7,8 +7,7 @@
     </button>
 
     {% set current_route = app.request.attributes.get('_route') %}
-
-    <div class="collapse navbar-collapse" id="menuDefault">
+    <div class="collapse navbar-collapse" id="menuDefault" data-update-url="{{ path('team_ajax_updates') }}">
         <ul class="navbar-nav me-auto">
             <li class="nav-item">
                 <a class="nav-link{% if current_route in ['team_index', 'team_clarification', 'team_clarification_add', 'team_submission'] %} active{% endif %}"
@@ -53,8 +52,14 @@
                 </li>
             {% endif %}
         </ul>
-
-        <div class="ms-auto me-3">
+        <div class="ml-auto me-3">
+            <a class="nav-link d-none" id="notify_enable">
+                <span class="btn btn-warning btn-sm">
+                    <i class="fas fa-bell fa-fw"></i> Enable Notification
+                </span>
+            </a>
+        </div>
+        <div class="ml-auto me-3">
             {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
                 <a class="nav-link" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit') }}">
                     <span class="btn btn-success btn-sm">
