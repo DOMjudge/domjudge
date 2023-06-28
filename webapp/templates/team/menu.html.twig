@@ -7,6 +7,7 @@
     </button>
 
     {% set current_route = app.request.attributes.get('_route') %}
+
     <div class="collapse navbar-collapse" id="menuDefault" data-update-url="{{ path('team_ajax_updates') }}">
         <ul class="navbar-nav me-auto">
             <li class="nav-item">
@@ -52,6 +53,7 @@
                 </li>
             {% endif %}
         </ul>
+        
         <div class="ml-auto me-3">
             <a class="nav-link d-none" id="notify_enable">
                 <span class="btn btn-warning btn-sm">
