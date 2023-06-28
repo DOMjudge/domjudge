@@ -83,7 +83,7 @@ function sendNotification(title, options = {})
         not.onclick = function() { window.open(link); };
     }
 
-    if ( options.tag!==null ) {
+    if ( options.tag ) {
         senttags.push(options.tag);
         localStorage.setItem('domjudge_notifications_sent',senttags.join(','));
     }
