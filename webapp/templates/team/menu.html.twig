@@ -53,19 +53,19 @@
                 </li>
             {% endif %}
         </ul>
-        
+
         <div class="ml-auto me-3">
             <a class="nav-link d-none" id="notify_enable">
                 <span class="btn btn-warning btn-sm">
-                    <i class="fas fa-bell fa-fw"></i> Enable Notification
+                    <i class="fas fa-bell fa-fw"></i> Enable Notifications
                 </span>
             </a>
             <a class="nav-link d-none" id="notify_disable">
                 <span class="btn btn-secondary btn-sm">
-                    <i class="fas fa-bell-slash fa-fw"></i> Disable Notification
+                    <i class="fas fa-bell-slash fa-fw"></i> Disable Notifications
                 </span>
             </a>
-            
+
         </div>
         <div class="ml-auto me-3">
             {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
