@@ -549,6 +549,9 @@ abstract class JuryControllerTestCase extends BaseTestCase
                 if (in_array(array_key_first($element), static::$editEntitiesSkipFields)) {
                     continue;
                 }
+                if (key_exists('externalid', $element) && $this->dataSourceIsLocal()) {
+                    continue;
+                }
                 [$formdataKeys, $formdataValues] = $this->helperProvideMergeEditEntity($element);
                 yield [$formdataKeys, $formdataValues, $message];
             }
