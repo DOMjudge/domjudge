@@ -486,6 +486,35 @@ class ContestController extends BaseController
 
         $form = $this->createForm(ContestType::class, $contest);
 
+        // If we are submitting problems, we need to do some reindexing:
+        // Problems that already existed on the contest should use the same index as before.
+        // Any problems not present yet should use a new index.
+        // This makes sure that problems are updated and not deleted + inserted, which breaks if
+        // you use the same shortname for the problem because of the unique index on (cid, shortname)
+        // and the fact that Doctrine first does inserts and then deletes.
+        if ($contestData = $request->request->all('contest')) {
+            if ($problems = $contestData['problems'] ?? null) {
+                $existingProblemIndices = [];
+                foreach ($contest->getProblems() as $index => $problem) {
+                    $existingProblemIndices[$problem->getProbId()] = $index;
+                }
+                $indexForNew = $contest->getProblems()->count();
+                $newProblems = [];
+                foreach ($problems as $problem) {
+                    if (isset($existingProblemIndices[$problem['problem']])) {
+                        $newProblems[$existingProblemIndices[$problem['problem']]] = $problem;
+                    } else {
+                        $newProblems[$indexForNew] = $problem;
+                        $indexForNew++;
+                    }
+                }
+
+                $contestData['problems'] = $newProblems;
+
+                $request->request->set('contest', $contestData);
+            }
+        }
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
