@@ -51,7 +51,6 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     private string $username = '';
 
     #[ORM\Column(options: ['comment' => 'Name'])]
-    #[Assert\NotBlank]
     #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private string $name = '';
 
