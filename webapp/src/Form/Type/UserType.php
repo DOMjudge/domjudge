@@ -43,6 +43,7 @@ class UserType extends AbstractExternalIdEntityType
         $builder->add('name', TextType::class, [
             'label' => 'Full name',
             'required' => false,
+            'help' => 'Optional full name for the user.',
         ]);
         $builder->add('email', EmailType::class, [
             'required' => false,
