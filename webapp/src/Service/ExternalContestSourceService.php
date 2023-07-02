@@ -558,7 +558,6 @@ class ExternalContestSourceService
 
     /**
      * Import the given event.
-     * @param string[]
      * @throws DBALException
      * @throws NonUniqueResultException
      * @throws TransportExceptionInterface
@@ -692,12 +691,12 @@ class ExternalContestSourceService
             preg_match($reltimeRegex, $freeze, $freezeData);
             $freezeNegative       = ($freezeData[1] === '-');
             $freezeHourModifier   = $freezeNegative ? -1 : 1;
-            $freezeInSeconds      = $freezeHourModifier * $freezeData[2] * 3600
-                                    + 60 * $freezeData[3]
+            $freezeInSeconds      = $freezeHourModifier * (int)$freezeData[2] * 3600
+                                    + 60 * (int)$freezeData[3]
                                     + (double)sprintf('%d.%03d', $freezeData[4], $freezeData[5]);
             $durationHourModifier = $durationNegative ? -1 : 1;
-            $durationInSeconds    = $durationHourModifier * $durationData[2] * 3600
-                                    + 60 * $durationData[3]
+            $durationInSeconds    = $durationHourModifier * (int)$durationData[2] * 3600
+                                    + 60 * (int)$durationData[3]
                                     + (double)sprintf('%d.%03d', $durationData[4], $durationData[5]);
             $freezeStartSeconds   = $durationInSeconds - $freezeInSeconds;
             $freezeHour           = floor($freezeStartSeconds / 3600);
