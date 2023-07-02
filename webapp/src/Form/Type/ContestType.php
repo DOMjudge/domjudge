@@ -32,10 +32,12 @@ class ContestType extends AbstractExternalIdEntityType
     {
         $this->addExternalIdField($builder, Contest::class);
         $builder->add('shortname', TextType::class, [
-            'help' => 'Contest name as shown in the top right.'
+            'help' => 'Contest name as shown in the top right.',
+            'empty_data' => ''
         ]);
         $builder->add('name', TextType::class, [
-            'help' => 'Contest name in full as shown on the scoreboard.'
+            'help' => 'Contest name in full as shown on the scoreboard.',
+            'empty_data' => ''
         ]);
         $builder->add('activatetimeString', TextType::class, [
             'label' => 'Activate time',
