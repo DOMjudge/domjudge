@@ -12,6 +12,7 @@ use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use App\Utils\EventFeedFormat;
 use App\Utils\Utils;
+use BadMethodCallException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -718,6 +719,8 @@ class ContestController extends AbstractRestController
                                 'data'  => $data,
                             ];
                             break;
+                        default:
+                            throw new BadMethodCallException(sprintf('Invalid event feed format %s', $format));
                     }
 
                     if (!$strict) {
