@@ -429,6 +429,7 @@ class CheckConfigService
         $desc = '';
         foreach ($contesterrors as $cid => $errors) {
             $desc .= "Contest: c$cid: " .
+                /* @phpstan-ignore-next-line */
                     (count($errors) == 0 ? 'no errors' : (string)$errors) ."\n" .$cperrors[$cid];
         }
 
@@ -552,6 +553,7 @@ class CheckConfigService
         foreach ($problemerrors as $probid => $errors) {
             $desc .= "Problem p$probid: ";
             if (count($errors) > 0 || !empty($moreproblemerrors[$probid])) {
+                /* @phpstan-ignore-next-line */
                 $desc .= (string)$errors . " " .
                     $moreproblemerrors[$probid] . "\n";
             } else {
@@ -602,6 +604,7 @@ class CheckConfigService
         foreach ($languageerrors as $langid => $errors) {
             $desc .= "Language $langid: ";
             if (count($errors) > 0 || !empty($morelanguageerrors[$langid])) {
+                /* @phpstan-ignore-next-line */
                 $desc .= (string)$errors . " " .
                     $morelanguageerrors[$langid] . "\n";
             } else {
