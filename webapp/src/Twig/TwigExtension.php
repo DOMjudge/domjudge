@@ -6,6 +6,7 @@ use App\Entity\BaseApiEntity;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\ExternalJudgement;
+use App\Entity\ExternalRun;
 use App\Entity\ExternalSourceWarning;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
@@ -442,7 +443,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $class     = $submissionDone ? 'secondary' : 'primary';
             $text      = '?';
             $isCorrect = false;
-            /** @var JudgingRun $run */
+            /** @var JudgingRun|ExternalRun $run */
             $run = $isExternal ? $testcase->getFirstExternalRun() : $testcase->getFirstJudgingRun();
             if ($isExternal) {
                 $runResult = $run?->getResult();

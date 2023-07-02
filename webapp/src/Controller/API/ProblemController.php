@@ -88,7 +88,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         }
 
         /** @var UploadedFile $file */
-        if (!$file = $request->files->get('data')) {
+        $file = $request->files->get('data');
+        if (!$file) {
             throw new BadRequestHttpException("Data field is missing.");
         }
         // Note: we read the JSON as YAML, since any JSON is also YAML and this allows us

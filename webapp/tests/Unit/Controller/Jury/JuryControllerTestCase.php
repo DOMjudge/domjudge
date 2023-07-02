@@ -11,6 +11,7 @@ use App\Service\SubmissionService;
 use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use DOMElement;
 use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -183,6 +184,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
                 continue;
             }
             $singlePageLink = null;
+            /** @var DOMElement $node */
             foreach ($crawler->filter('a') as $node) {
                 if (str_contains($node->nodeValue, $identifier)) {
                     $singlePageLink = $node->getAttribute('href');
@@ -348,6 +350,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
             $singlePageLink = null;
             $this->client->followRedirects(true);
             $crawler = $this->getCurrentCrawler();
+            /** @var \DOMElement $node */
             foreach ($crawler->filter('a') as $node) {
                 if (str_contains($node->nodeValue, $identifier)) {
                     $singlePageLink = $node->getAttribute('href');
@@ -355,6 +358,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
             }
             $this->verifyPageResponse('GET', $singlePageLink, 200);
             $crawler = $this->getCurrentCrawler();
+            /** @var \DOMElement $node */
             foreach ($crawler->filter('a') as $node) {
                 if (str_contains($node->nodeValue, 'Edit')) {
                     $editLink = $node->getAttribute('href');

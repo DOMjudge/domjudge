@@ -28,6 +28,7 @@ use Collator;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Form\SubmitButton;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -110,7 +111,9 @@ class ImportExportController extends BaseController
         if ($icpcCmsForm->isSubmitted() && $icpcCmsForm->isValid()) {
             $contestId   = $icpcCmsForm->get('contest_id')->getData();
             $accessToken = $icpcCmsForm->get('access_token')->getData();
-            if ($icpcCmsForm->get('fetch_teams')->isClicked()) {
+            /** @var SubmitButton $fetchTeams */
+            $fetchTeams = $icpcCmsForm->get('fetch_teams');
+            if ($fetchTeams->isClicked()) {
                 if ($this->icpcCmsService->importTeams($accessToken, $contestId, $message)) {
                     $this->addFlash('success', 'Teams successfully imported');
                 } else {

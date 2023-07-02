@@ -233,9 +233,9 @@ class RejudgingController extends BaseController
         }
 
         /** @var Judging[] $originalVerdicts */
-        /** @var Judging[] $newVerdicts */
         $originalVerdicts = [];
-        $newVerdicts      = [];
+        /** @var Judging[] $newVerdicts */
+        $newVerdicts = [];
 
         $this->em->wrapInTransaction(function () use ($rejudging, &$originalVerdicts, &$newVerdicts) {
             $expr             = $this->em->getExpressionBuilder();

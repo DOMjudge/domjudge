@@ -589,10 +589,10 @@ class DOMJudgeService
                     /** @var Language $language */
                     $language->setAllowJudge($enabled);
                 }
+                /** @var Problem $problem */
                 foreach ($this->getProblemsForExecutable($executable) as $problem) {
-                    /** @var Problem $problem */
+                    /** @var ContestProblem $contestProblem */
                     foreach ($problem->getContestProblems() as $contestProblem) {
-                        /** @var ContestProblem $contestProblem */
                         $contestProblem->setAllowJudge($enabled);
                     }
                 }

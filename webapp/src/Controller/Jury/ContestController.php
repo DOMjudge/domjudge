@@ -714,10 +714,10 @@ class ContestController extends BaseController
             'hidden'  => false,
         ]);
         $cnt = 0;
+        /** @var Judgehost $judgehost */
         foreach ($judgehosts as $judgehost) {
-            /** @var Judgehost $judgehost */
+            /** @var ContestProblem $contestProblem */
             foreach ($contest->getProblems() as $contestProblem) {
-                /** @var ContestProblem $contestProblem */
                 if (!$contestProblem->getAllowJudge() || !$contestProblem->getAllowSubmit()) {
                     continue;
                 }

@@ -72,12 +72,12 @@ class ClarificationController extends AbstractController
                 ->setParameter('queue', $currentQueue);
         }
 
-        /**
-         * @var Clarification[] $newClarifications
-         * @var Clarification[] $oldClarifications
-         * @var Clarification[] $generalClarifications
-         */
-        $newClarifications = $oldClarifications = $generalClarifications = [];
+        /** @var Clarification[] $newClarifications */
+        $newClarifications = [];
+        /** @var Clarification[] $oldClarifications */
+        $oldClarifications = [];
+        /** @var Clarification[] $generalClarifications */
+        $generalClarifications = [];
         $wheres            = [
             'new' => 'clar.sender IS NOT NULL AND clar.answered = 0',
             'old' => 'clar.sender IS NOT NULL AND clar.answered != 0',

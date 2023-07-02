@@ -21,9 +21,6 @@ class JudgeTaskType extends Type
         self::PREFETCH,
     ];
 
-    /**
-     * @return mixed
-     */
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         $statuses = implode(', ', array_map(
