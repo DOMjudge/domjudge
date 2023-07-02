@@ -1,0 +1,7 @@
+parameters:
+    level: 3
+    paths:
+        - webapp/src
+        - webapp/tests
+    excludePaths:
+        - webapp/src/Utils/Adminer.php

@@ -107,6 +107,7 @@
 	"require-dev": {
 		"ext-dom": "*",
 		"dama/doctrine-test-bundle": "^7.0",
+		"phpstan/phpstan": "^1.10",
 		"squizlabs/php_codesniffer": "*",
 		"symfony/debug-bundle": "6.3.*",
 		"symfony/maker-bundle": "^1.42",
