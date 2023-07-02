@@ -61,6 +61,20 @@ abstract class BaseTestCase extends BaseBaseTestCase
     }
 
     /**
+     * Get the contest ID of the demo contest based on the data source setting.
+     *
+     * @return string
+     */
+    protected function getDemoContestId(): string
+    {
+        if ($this->dataSourceIsLocal()) {
+            return (string)$this->demoContest->getCid();
+        }
+
+        return $this->demoContest->getExternalid();
+    }
+
+    /**
      * Verify the given API URL produces the given status code and return the body.
      *
      * @param string      $method   The HTTP method to use.

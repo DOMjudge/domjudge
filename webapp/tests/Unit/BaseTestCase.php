@@ -256,20 +256,6 @@ abstract class BaseTestCase extends WebTestCase
     }
 
     /**
-     * Get the contest ID of the demo contest based on the data source setting.
-     *
-     * @return string
-     */
-    protected function getDemoContestId(): string
-    {
-        if ($this->dataSourceIsLocal()) {
-            return (string)$this->demoContest->getCid();
-        }
-
-        return $this->demoContest->getExternalid();
-    }
-
-    /**
      * Resolve the entity ID for the given class if not running in local mode.
      */
     protected function resolveEntityId(string $class, ?string $id): ?string
