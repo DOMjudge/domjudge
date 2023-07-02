@@ -281,7 +281,7 @@ class ClarificationController extends AbstractController
         /** @var Clarification $clarification */
         $clarification = $this->em->getReference(Clarification::class, $clarId);
         if (!$clarification) {
-            throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
+            throw new NotFoundHttpException(sprintf('Clarification with ID %d not found', $clarId));
         }
 
         if ($request->request->getBoolean('claimed')) {
@@ -301,7 +301,7 @@ class ClarificationController extends AbstractController
         /** @var Clarification $clarification */
         $clarification = $this->em->getReference(Clarification::class, $clarId);
         if (!$clarification) {
-            throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
+            throw new NotFoundHttpException(sprintf('Clarification with ID %d not found', $clarId));
         }
 
         $answered = $request->request->getBoolean('answered');
@@ -321,7 +321,7 @@ class ClarificationController extends AbstractController
         /** @var Clarification $clarification */
         $clarification = $this->em->getReference(Clarification::class, $clarId);
         if (!$clarification) {
-            throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
+            throw new NotFoundHttpException(sprintf('Clarification with ID %d not found', $clarId));
         }
 
         $subject = $request->request->get('subject');
@@ -350,7 +350,7 @@ class ClarificationController extends AbstractController
         /** @var Clarification $clarification */
         $clarification = $this->em->getReference(Clarification::class, $clarId);
         if (!$clarification) {
-            throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
+            throw new NotFoundHttpException(sprintf('Clarification with ID %d not found', $clarId));
         }
 
         $queue = $request->request->get('queue');
