@@ -418,7 +418,7 @@ class ScoreboardService
                 'cid' => $contest->getCid(),
                 'probid' => $problem->getProbid(),
                 'teamSortOrder' => $team->getCategory()->getSortorder(),
-                'submitTime' => $absSubmitTime,
+                'submitTime' => $absSubmitTime ?? null,
                 'correctResult' => Judging::RESULT_CORRECT,
             ];
 
