@@ -318,6 +318,7 @@ class UserController extends BaseController
 
             $changes = [];
             foreach ($users as $user) {
+                $role = null;
                 $doit = false;
                 $roles = $user->getRoleList();
 
