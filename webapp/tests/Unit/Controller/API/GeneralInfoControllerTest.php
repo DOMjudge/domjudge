@@ -17,7 +17,7 @@ class GeneralInfoControllerTest extends BaseTestCase
     {
         $response = $this->verifyApiJsonResponse('GET', "/version", 200);
 
-        $expected = ['api_version' => static::API_VERSION];
+        $expected = ['api_version' => self::API_VERSION];
 
         static::assertEquals($expected, $response);
     }

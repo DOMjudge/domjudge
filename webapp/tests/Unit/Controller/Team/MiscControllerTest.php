@@ -82,7 +82,7 @@ class MiscControllerTest extends BaseTestCase
      */
     public function testPrintingEnabledTeamMenu(): void
     {
-        $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
+        $this->withChangedConfiguration('print_command', self::PRINT_COMMAND,
             function () {
                 $this->verifyPageResponse('GET', '/team', 200);
                 $this->assertSelectorExists('a:contains("Print")');
@@ -94,7 +94,7 @@ class MiscControllerTest extends BaseTestCase
      */
     public function testPrintingEnabledSubmitForm(): void
     {
-        $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
+        $this->withChangedConfiguration('print_command', self::PRINT_COMMAND,
             function () {
                 $this->client->request('GET', '/team/print');
 
