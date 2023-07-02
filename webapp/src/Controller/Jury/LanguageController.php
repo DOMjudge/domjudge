@@ -46,7 +46,7 @@ class LanguageController extends BaseController
             ->orderBy('lang.name', 'ASC')
             ->getQuery()->getResult();
         $table_fields = [
-            'langid' => ['title' => 'ID/ext', 'sort' => true],
+            'langid' => ['title' => 'ID', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true, 'default_sort' => true],
             'entrypoint' => ['title' => 'entry point', 'sort' => true],
             'allowjudge' => ['title' => 'allow judge', 'sort' => true],
