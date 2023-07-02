@@ -322,6 +322,7 @@ class ContestController extends AbstractRestController
         #[OA\PathParameter(description: 'The ID of the contest to change the start time for')]
         string $cid
     ): Response {
+        $response = new Response('', Response::HTTP_NO_CONTENT);
         $contest  = $this->getContestWithId($request, $cid);
         $now      = (int)Utils::now();
         $changed  = false;
@@ -349,7 +350,6 @@ class ContestController extends AbstractRestController
 
             if ($request->request->get('start_time') === null) {
                 $contest->setStarttimeEnabled(false);
-                $response = new Response('', Response::HTTP_NO_CONTENT);
                 $this->em->flush();
                 $changed = true;
             } else {
@@ -366,7 +366,6 @@ class ContestController extends AbstractRestController
                 $contest->setStarttimeEnabled(true);
                 $contest->setStarttime($new_start_time);
                 $contest->setStarttimeString($newStartTimeString);
-                $response = new Response('', Response::HTTP_NO_CONTENT);
                 $this->em->flush();
                 $changed = true;
             }
@@ -396,7 +395,6 @@ class ContestController extends AbstractRestController
             $contest->setUnfreezetimeString($newUnfreezeTimeString);
             $this->em->flush();
             $changed = true;
-            $response = new Response('', Response::HTTP_NO_CONTENT);
             if ($returnContest) {
                 $response = $this->renderData($request, $contest);
             }
