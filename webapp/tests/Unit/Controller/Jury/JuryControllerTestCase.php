@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  */
 abstract class JuryControllerTestCase extends BaseTestCase
 {
+    protected static string $baseUrl                  = '';
     protected array $roles                            = ['admin'];
     protected string $addButton                       = '';
     protected string $editButton                      = ' Edit';
@@ -44,6 +45,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
     protected static ?array $deleteExtra              = null;
     protected static array $addEntities               = [];
     protected static array $addEntitiesCount          = [];
+    protected static array $addEntitiesShown          = [];
     protected static ?string $defaultEditEntityName   = null;
     protected static array $specialFieldOnlyUpdate    = [];
     protected static array $editEntitiesSkipFields    = [];
