@@ -408,7 +408,6 @@ class ExternalContestSourceService
                 &$shouldStop
             ) use (
                 $eventsToSkip,
-                $file,
                 &$skipEventsUpTo,
                 $progressReporter
             ) {

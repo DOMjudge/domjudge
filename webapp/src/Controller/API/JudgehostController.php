@@ -379,7 +379,6 @@ class JudgehostController extends AbstractFOSRestController
                 }
             } else {
                 $this->em->wrapInTransaction(function () use (
-                    $request,
                     $judgehost,
                     $judging,
                     $query,
@@ -1301,7 +1300,6 @@ class JudgehostController extends AbstractFOSRestController
             $reportedVersions['runner'] = base64_decode($request->request->get('runner'));
         }
         $this->em->wrapInTransaction(function () use (
-            $request,
             $judgehost,
             $reportedVersions,
             $language

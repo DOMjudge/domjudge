@@ -51,7 +51,6 @@ class ProblemControllerTest extends BaseTestCase
             function () use (
                 $problemTexts,
                 $descriptions,
-                $problems,
                 $withLimits,
                 $letters
             ) {
