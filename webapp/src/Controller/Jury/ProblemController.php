@@ -728,7 +728,7 @@ class ProblemController extends BaseController
             'testcases' => $testcases,
             'testcaseData' => $testcaseData,
             'extensionMapping' => Testcase::EXTENSION_MAPPING,
-            'allowEdit' => $this->isGranted('ROLE_ADMIN') && empty($lockedContest),
+            'allowEdit' => $this->isGranted('ROLE_ADMIN') && empty($lockedContests),
         ];
 
         return $this->render('jury/problem_testcases.html.twig', $data);
