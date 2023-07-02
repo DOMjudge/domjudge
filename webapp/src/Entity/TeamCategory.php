@@ -152,7 +152,7 @@ class TeamCategory extends BaseApiEntity implements Stringable
 
     public function setName(?string $name): TeamCategory
     {
-        $this->name = strval($name);
+        $this->name = (string)$name;
         return $this;
     }
 

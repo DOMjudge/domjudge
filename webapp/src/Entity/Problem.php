@@ -187,7 +187,7 @@ class Problem extends BaseApiEntity
 
     public function setName(?string $name): Problem
     {
-        $this->name = strval($name);
+        $this->name = (string)$name;
         return $this;
     }
 

@@ -271,7 +271,7 @@ class Language extends BaseApiEntity
 
     public function setName(?string $name): Language
     {
-        $this->name = strval($name);
+        $this->name = (string)$name;
         return $this;
     }
 
