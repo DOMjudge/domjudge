@@ -282,7 +282,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
      */
     public function provideRoleAccessData(): Generator
     {
-        extract($this->getLoops());
+        ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs] = $this->getLoops();
         foreach ($riskyURLs as $skip) {
             foreach ($dataSources as $str_data_source) {
                 $data_source = (int)$str_data_source;
@@ -307,7 +307,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
      **/
     public function provideRoleAccessOtherRoles(): Generator
     {
-        extract($this->getLoops());
+        ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs] = $this->getLoops();
         foreach ($riskyURLs as $skip) {
             foreach ($dataSources as $str_data_source) {
                 $data_source = (int)$str_data_source;
@@ -323,7 +323,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
 
     public function provideNoContestScenario(): Generator
     {
-        extract($this->getLoops());
+        ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs] = $this->getLoops();
         foreach ($riskyURLs as $skip) {
             foreach ($dataSources as $str_data_source) {
                 $data_source = (int)$str_data_source;
