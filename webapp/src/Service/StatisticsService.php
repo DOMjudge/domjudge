@@ -276,7 +276,7 @@ class StatisticsService
             }
         }
         usort($submissions, static fn(Submission $a, Submission $b) => $a->getSubmitTime() <=> $b->getSubmitTime());
-        usort($problems, static fn(Judging $a, Judging $b) => $a->getName() <=> $b->getName());
+        usort($problems, static fn(Problem $a, Problem $b) => $a->getName() <=> $b->getName());
         usort($judgings, static fn(Judging $a, Judging $b) => $a->getJudgingid() <=> $b->getJudgingid());
 
         $misc = [];
