@@ -85,11 +85,13 @@ class ExternalContestSourceService
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLog,
         protected readonly SubmissionService $submissionService,
-        protected readonly ScoreboardService $scoreboardService
+        protected readonly ScoreboardService $scoreboardService,
+        #[Autowire('%domjudge.version%')]
+        string $domjudgeVersion
     ) {
         $clientOptions = [
             'headers' => [
-                'User-Agent' => 'DOMjudge/' . DOMJUDGE_VERSION,
+                'User-Agent' => 'DOMjudge/' . $domjudgeVersion,
             ],
         ];
         $this->httpClient = $httpClient->withOptions($clientOptions);
