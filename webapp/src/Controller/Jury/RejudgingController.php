@@ -904,7 +904,7 @@ class RejudgingController extends BaseController
                 'count' => count($submissions[$submitid]),
                 'verdict' => (
                     !array_key_exists($submitid, $submissions_to_result)
-                        ? join(', ', $results)
+                        ? implode(', ', $results ?? [])
                         : $submissions_to_result[$submitid]
                 )
             ];
