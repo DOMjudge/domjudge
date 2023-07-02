@@ -16,6 +16,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Link;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use ZipArchive;
 
@@ -221,6 +222,7 @@ abstract class BaseTestCase extends WebTestCase
         $message = var_export($response, true);
         self::assertEquals($status, $response->getStatusCode(), $message . "\nURI = $uri");
         if ($responseUrl !== null) {
+            self::assertInstanceOf(RedirectResponse::class, $response);
             self::assertEquals($responseUrl, $response->getTargetUrl(), $message);
         }
     }
