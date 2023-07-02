@@ -1436,7 +1436,7 @@ class ExternalContestSourceService
                         }
                     }
 
-                    if ($submissionDownloadSucceeded) {
+                    if (isset($response, $ziphandler) && $submissionDownloadSucceeded) {
                         foreach ($this->httpClient->stream($response) as $chunk) {
                             fwrite($ziphandler, $chunk->getContent());
                         }
