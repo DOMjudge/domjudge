@@ -23,7 +23,9 @@ class LanguageType extends AbstractExternalIdEntityType
         $builder->add('langid', TextType::class, [
             'label' => 'Language ID',
         ]);
-        $builder->add('name', TextType::class);
+        $builder->add('name', TextType::class, [
+            'empty_data' => ''
+        ]);
         $builder->add('requireEntryPoint', ChoiceType::class, [
             'expanded' => true,
             'choices' => [

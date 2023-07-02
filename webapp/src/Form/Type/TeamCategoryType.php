@@ -29,7 +29,7 @@ class TeamCategoryType extends AbstractExternalIdEntityType
                 )
             ]
         ]);
-        $builder->add('name');
+        $builder->add('name', null, ['empty_data' => '']);
         $builder->add('sortorder', IntegerType::class);
         $builder->add('color', TextType::class, [
             'required' => false,

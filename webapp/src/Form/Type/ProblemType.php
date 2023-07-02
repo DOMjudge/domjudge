@@ -22,7 +22,9 @@ class ProblemType extends AbstractExternalIdEntityType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $this->addExternalIdField($builder, Problem::class);
-        $builder->add('name', TextType::class);
+        $builder->add('name', TextType::class, [
+            'empty_data' => ''
+        ]);
         $builder->add('timelimit', NumberType::class);
         $builder->add('memlimit', IntegerType::class, [
             'required' => false,

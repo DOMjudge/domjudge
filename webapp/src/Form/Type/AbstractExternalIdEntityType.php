@@ -28,6 +28,7 @@ class AbstractExternalIdEntityType extends AbstractType
             $builder->add('externalid', TextType::class, [
                 'label' => 'External ID',
                 'required' => false,
+                'empty_data' => '',
                 'constraints' => [
                     new Regex(
                         [

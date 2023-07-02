@@ -39,11 +39,14 @@ class UserType extends AbstractExternalIdEntityType
             static fn(Team $a, Team $b) => $a->getEffectiveName() <=> $b->getEffectiveName()
         );
 
-        $builder->add('username', TextType::class);
+        $builder->add('username', TextType::class, [
+            'empty_data' => ''
+        ]);
         $builder->add('name', TextType::class, [
             'label' => 'Full name',
             'required' => false,
             'help' => 'Optional full name for the user.',
+            'empty_data' => ''
         ]);
         $builder->add('email', EmailType::class, [
             'required' => false,

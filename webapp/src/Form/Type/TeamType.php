@@ -40,6 +40,7 @@ class TeamType extends AbstractExternalIdEntityType
         $this->addExternalIdField($builder, Team::class);
         $builder->add('name', TextType::class, [
             'label' => 'Team name',
+            'empty_data' => ''
         ]);
         $builder->add('icpcid', TextType::class, [
             'label'       => 'ICPC ID',
@@ -135,6 +136,7 @@ class TeamType extends AbstractExternalIdEntityType
         $builder->add('newUsername', TextType::class, [
             'label'    => 'Username',
             'required' => true,
+            'empty_data' => ''
         ]);
 
         $builder->add('save', SubmitType::class);

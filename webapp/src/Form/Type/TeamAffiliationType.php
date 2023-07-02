@@ -51,8 +51,8 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
                 )
             ]
         ]);
-        $builder->add('shortname');
-        $builder->add('name');
+        $builder->add('shortname', null, ['empty_data' => '']);
+        $builder->add('name', null, ['empty_data' => '']);
         if ($this->configuration->get('show_flags')) {
             $builder->add('country', ChoiceType::class, [
                 'required' => false,
