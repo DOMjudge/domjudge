@@ -672,21 +672,8 @@ class ScoreboardService
         }
 
         // Drop all teams and problems that do not exist in the contest.
-        if (!empty($problems)) {
-            $problemIds = array_map(fn(Problem $problem) => $problem->getProbid(), $problems);
-        } else {
-            // problemId -1 will never happen, but otherwise the array is
-            // empty and that is not supported.
-            $problemIds = [-1];
-        }
-
-        if (!empty($teams)) {
-            $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $teams);
-        } else {
-            // teamId -1 will never happen, but otherwise the array is empty
-            // and that is not supported.
-            $teamIds = [-1];
-        }
+        $problemIds = array_map(fn(Problem $problem) => $problem->getProbid(), $problems);
+        $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $teams);
 
         $params = [
             'cid' => $contest->getCid(),
