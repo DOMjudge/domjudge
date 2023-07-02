@@ -46,6 +46,8 @@ use ZipArchive;
 #[Route(path: '/jury/problems')]
 class ProblemController extends BaseController
 {
+    use JudgeRemainingTrait;
+
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,

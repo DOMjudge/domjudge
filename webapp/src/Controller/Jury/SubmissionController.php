@@ -35,8 +35,6 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -46,16 +44,20 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
 #[Route(path: '/jury/submissions')]
 class SubmissionController extends BaseController
 {
+    use JudgeRemainingTrait;
+
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
