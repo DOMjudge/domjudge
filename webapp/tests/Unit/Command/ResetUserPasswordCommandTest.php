@@ -28,7 +28,9 @@ class ResetUserPasswordCommandTest extends BaseTestCase
         $this->app = new Application(self::$kernel);
         /** @var LazyCommand $command */
         $command = $this->app->find(static::$commandName);
-        $this->command = $command->getCommand();
+        /** @var ResetUserPasswordCommand $resetCommand */
+        $resetCommand = $command->getCommand();
+        $this->command = $resetCommand;
         $this->commandTester = new CommandTester($this->command);
     }
 
