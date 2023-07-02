@@ -52,6 +52,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
      * @var array<string, array<int, mixed[]>>
      */
     protected static array $addEntitiesFailure        = [];
+    protected static array $addEntitiesNonLocal       = [];
+    protected static array $addEntitiesFailureNonLocal = [];
     protected static ?string $defaultEditEntityName   = null;
     protected static array $specialFieldOnlyUpdate    = [];
     protected static array $editEntitiesSkipFields    = [];
@@ -471,7 +473,11 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     public function provideAddCorrectEntities(): Generator
     {
-        foreach (static::$addEntities as $element) {
+        $entities = static::$addEntities;
+        if (!$this->dataSourceIsLocal()) {
+            $entities = array_merge($entities, static::$addEntitiesNonLocal);
+        }
+        foreach ($entities as $element) {
             [$combinedValues, $element] = $this->helperProvideMergeAddEntity($element);
             [$combinedValues, $element] = $this->helperProvideTranslateAddEntity($combinedValues, $element);
             yield [$combinedValues, $element];
@@ -480,11 +486,12 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     public function provideAddFailureEntities(): Generator
     {
-        foreach (static::$addEntitiesFailure as $message => $elementList) {
+        $entities = static::$addEntitiesFailure;
+        if (!$this->dataSourceIsLocal()) {
+            $entities = array_merge($entities, static::$addEntitiesFailureNonLocal);
+        }
+        foreach ($entities as $message => $elementList) {
             foreach($elementList as $element) {
-                if (key_exists('externalid', $element) && $this->dataSourceIsLocal()) {
-                    continue;
-                }
                 [$entity, $expected] = $this->helperProvideMergeAddEntity($element);
                 [$entity, $dropped] = $this->helperProvideTranslateAddEntity($entity, $expected);
                 yield [$entity, $message];

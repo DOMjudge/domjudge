@@ -33,8 +33,6 @@ class TeamAffiliationControllerTest extends JuryControllerTestCase
                                                           ['shortname' => 'com',
                                                            'name' => 'No comment',
                                                            'internalcomments' => ''],
-                                                          ['name' => 'External set',
-                                                           'externalid' => 'ext12-._'],
                                                           ['name' => 'icpc (string)',
                                                            'icpcid' => 'one'],
                                                           ['name' => 'icpc (number)',
@@ -43,11 +41,14 @@ class TeamAffiliationControllerTest extends JuryControllerTestCase
                                                            'icpcid' => '-_1aZ'],
                                                           ['name' => 'Special chars 😀',
                                                            'shortname' => 'yes😀']];
-
+    protected static array   $addEntitiesNonLocal      = [['name' => 'External set', 'externalid' => 'ext12-._']];
     protected static array   $addEntitiesFailure       = ['This value should not be blank.' => [['externalid' => ''],
                                                                                                 ['shortname' => ''],
                                                                                                 ['name' => '']],
-                                                          'Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => '()']]];
+                                                          'Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => '()']],
+                                                          'Only letters, numbers, dashes and underscores are allowed.' => [['icpcid' => '()viol'],
+                                                                                                                           ['icpcid' => '|viol']]];
+    protected static array $addEntitiesFailureNonLocal = ['Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => '()']]];
 
     protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {
