@@ -120,6 +120,7 @@ class MiscController extends BaseController
             $data['clarificationRequests'] = $clarificationRequests;
             $data['categories']            = $this->config->get('clar_categories');
             $data['allowDownload']         = (bool)$this->config->get('allow_team_submission_download');
+            $data['showTooLateResult']     = $this->config->get('show_too_late_result');
         }
 
         if ($request->isXmlHttpRequest()) {

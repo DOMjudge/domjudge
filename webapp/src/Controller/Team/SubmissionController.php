@@ -111,12 +111,13 @@ class SubmissionController extends BaseController
     public function viewAction(Request $request, int $submitId): Response
     {
         $verificationRequired = (bool)$this->config->get('verification_required');
-        $showCompile      = $this->config->get('show_compile');
-        $showSampleOutput = $this->config->get('show_sample_output');
-        $allowDownload    = (bool)$this->config->get('allow_team_submission_download');
-        $user             = $this->dj->getUser();
-        $team             = $user->getTeam();
-        $contest          = $this->dj->getCurrentContest($team->getTeamid());
+        $showCompile          = $this->config->get('show_compile');
+        $showSampleOutput     = $this->config->get('show_sample_output');
+        $allowDownload        = (bool)$this->config->get('allow_team_submission_download');
+        $showTooLateResult    = $this->config->get('show_too_late_result');
+        $user                 = $this->dj->getUser();
+        $team                 = $user->getTeam();
+        $contest              = $this->dj->getCurrentContest($team->getTeamid());
         /** @var Judging|null $judging */
         $judging = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
@@ -192,6 +193,7 @@ class SubmissionController extends BaseController
             'allowDownload' => $allowDownload,
             'showSampleOutput' => $showSampleOutput,
             'runs' => $runs,
+            'showTooLateResult' => $showTooLateResult,
         ];
         if ($actuallyShowCompile) {
             $data['size'] = 'xl';
