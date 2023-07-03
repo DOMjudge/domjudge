@@ -42,7 +42,7 @@ class ContestProblem
     ])]
     #[Assert\NotBlank]
     #[Serializer\SerializedName('label')]
-    private string $shortname = '';
+    private string $shortname;
 
     #[ORM\Column(options: [
             'comment' => 'Number of points earned by solving this problem',
@@ -110,9 +110,9 @@ class ContestProblem
         return $this->getProblem()->getProbid();
     }
 
-    public function setShortname(?string $shortname): ContestProblem
+    public function setShortname(string $shortname): ContestProblem
     {
-        $this->shortname = $shortname ?: '';
+        $this->shortname = $shortname;
         return $this;
     }
 

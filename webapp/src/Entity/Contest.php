@@ -416,9 +416,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->externalid;
     }
 
-    public function setName(?string $name): Contest
+    public function setName(string $name): Contest
     {
-        $this->name = (string)$name;
+        $this->name = $name;
         return $this;
     }
 
@@ -427,9 +427,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->name;
     }
 
-    public function setShortname(?string $shortname): Contest
+    public function setShortname(string $shortname): Contest
     {
-        $this->shortname = (string)$shortname;
+        $this->shortname = $shortname;
         return $this;
     }
 
