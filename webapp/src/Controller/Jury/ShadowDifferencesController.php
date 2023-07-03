@@ -69,10 +69,6 @@ class ShadowDifferencesController extends BaseController
         $contest  = $this->dj->getCurrentContest();
         $verdicts = array_merge(['judging' => 'JU'], $this->dj->getVerdicts(mergeExternal: true));
 
-        if (!$contest) {
-            return $this->render('jury/shadow_differences.html.twig');
-        }
-
         $verdicts['import-error'] = 'IE';
 
         $used         = [];
