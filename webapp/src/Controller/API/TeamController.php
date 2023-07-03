@@ -126,7 +126,7 @@ class TeamController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function photoAction(Request $request, string $id): Response
     {
-        /** @var Team $team */
+        /** @var Team|null $team */
         $team = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $id)
@@ -156,7 +156,7 @@ class TeamController extends AbstractRestController
     public function deletePhotoAction(Request $request, string $id): Response
     {
         $contestId = null;
-        /** @var Team $team */
+        /** @var Team|null $team */
         $team = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $id)
@@ -208,7 +208,7 @@ class TeamController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function setPhotoAction(Request $request, string $id, ValidatorInterface $validator): Response
     {
-        /** @var Team $team */
+        /** @var Team|null $team */
         $team = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $id)
@@ -219,7 +219,7 @@ class TeamController extends AbstractRestController
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
         }
 
-        /** @var UploadedFile $photo */
+        /** @var UploadedFile|null $photo */
         $photo = $request->files->get('photo');
 
         if (!$photo) {

@@ -216,7 +216,6 @@ class ProblemController extends BaseController
     public function sampleZipAction(int $probId): StreamedResponse
     {
         $contest = $this->dj->getCurrentContest();
-        /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
             'problem' => $probId,
             'contest' => $contest,
@@ -378,7 +377,6 @@ class ProblemController extends BaseController
     #[Route(path: '/{probId<\d+>}', name: 'jury_problem')]
     public function viewAction(Request $request, SubmissionService $submissionService, int $probId): Response
     {
-        /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
@@ -470,7 +468,6 @@ class ProblemController extends BaseController
     #[Route(path: '/{probId<\d+>}/text', name: 'jury_problem_text')]
     public function viewTextAction(int $probId): StreamedResponse
     {
-        /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
@@ -482,7 +479,6 @@ class ProblemController extends BaseController
     #[Route(path: '/{probId<\d+>}/testcases', name: 'jury_problem_testcases')]
     public function testcasesAction(Request $request, int $probId): Response
     {
-        /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
@@ -738,7 +734,6 @@ class ProblemController extends BaseController
     #[Route(path: '/{probId<\d+>}/testcases/{rank<\d+>}/move/{direction<up|down>}', name: 'jury_problem_testcase_move')]
     public function moveTestcaseAction(int $probId, int $rank, string $direction): Response
     {
-        /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
@@ -812,7 +807,7 @@ class ProblemController extends BaseController
     #[Route(path: '/{probId<\d+>}/testcases/{rank<\d+>}/fetch/{type<input|output|image>}', name: 'jury_problem_testcase_fetch')]
     public function fetchTestcaseAction(int $probId, int $rank, string $type): Response
     {
-        /** @var Testcase $testcase */
+        /** @var Testcase|null $testcase */
         $testcase = $this->em->createQueryBuilder()
             ->from(Testcase::class, 'tc')
             ->join('tc.content', 'tcc')
@@ -866,7 +861,6 @@ class ProblemController extends BaseController
     #[Route(path: '/{probId<\d+>}/edit', name: 'jury_problem_edit')]
     public function editAction(Request $request, int $probId): Response
     {
-        /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
@@ -949,7 +943,6 @@ class ProblemController extends BaseController
     #[Route(path: '/{probId<\d+>}/delete', name: 'jury_problem_delete')]
     public function deleteAction(Request $request, int $probId): Response
     {
-        /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
@@ -970,7 +963,6 @@ class ProblemController extends BaseController
     #[Route(path: '/attachments/{attachmentId<\d+>}', name: 'jury_attachment_fetch')]
     public function fetchAttachmentAction(int $attachmentId): StreamedResponse
     {
-        /** @var ProblemAttachment $attachment */
         $attachment = $this->em->getRepository(ProblemAttachment::class)->find($attachmentId);
         if (!$attachment) {
             throw new NotFoundHttpException(sprintf('Attachment with ID %s not found',
@@ -984,7 +976,6 @@ class ProblemController extends BaseController
     #[Route(path: '/attachments/{attachmentId<\d+>}/delete', name: 'jury_attachment_delete')]
     public function deleteAttachmentAction(Request $request, int $attachmentId): Response
     {
-        /** @var ProblemAttachment $attachment */
         $attachment = $this->em->getRepository(ProblemAttachment::class)->find($attachmentId);
         if (!$attachment) {
             throw new NotFoundHttpException(sprintf('Attachment with ID %s not found', $attachmentId));
@@ -1009,7 +1000,6 @@ class ProblemController extends BaseController
     #[Route(path: '/{testcaseId<\d+>}/delete_testcase', name: 'jury_testcase_delete')]
     public function deleteTestcaseAction(Request $request, int $testcaseId): Response
     {
-        /** @var Testcase $testcase */
         $testcase = $this->em->getRepository(Testcase::class)->find($testcaseId);
         if (!$testcase) {
             throw new NotFoundHttpException(sprintf('Testcase with ID %s not found', $testcaseId));
@@ -1088,7 +1078,6 @@ class ProblemController extends BaseController
     #[Route(path: '/{probId<\d+>}/request-remaining', name: 'jury_problem_request_remaining')]
     public function requestRemainingRunsWholeProblemAction(string $probId): RedirectResponse
     {
-        /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));

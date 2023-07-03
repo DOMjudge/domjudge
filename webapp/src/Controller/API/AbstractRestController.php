@@ -198,7 +198,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
             ->andWhere(sprintf('c.%s = :cid', $this->getContestIdField()))
             ->setParameter('cid', $request->attributes->get('cid'));
 
-        /** @var Contest $contest */
+        /** @var Contest|null $contest */
         $contest = $qb->getQuery()->getOneOrNullResult();
 
         if ($contest === null) {

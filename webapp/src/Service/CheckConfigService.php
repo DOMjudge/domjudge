@@ -247,7 +247,6 @@ class CheckConfigService
         $res = 'O';
         $desc = 'Password for "admin" has been changed from the default.';
 
-        /** @var User $user */
         $user = $this->em->getRepository(User::class)->findOneBy(['username' => 'admin']);
         if ($user && password_verify('admin', $user->getPassword())) {
             $res = 'E';

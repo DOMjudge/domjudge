@@ -70,10 +70,10 @@ class UserController extends AbstractRestController
     #[OA\Response(response: 200, description: 'Returns a (currently meaningless) status message.')]
     public function addGroupsAction(Request $request): string
     {
-        /** @var UploadedFile $tsvFile */
-        $tsvFile = $request->files->get('tsv') ?: [];
-        /** @var UploadedFile $jsonFile */
-        $jsonFile = $request->files->get('json') ?: [];
+        /** @var UploadedFile|null $tsvFile */
+        $tsvFile = $request->files->get('tsv');
+        /** @var UploadedFile|null $jsonFile */
+        $jsonFile = $request->files->get('json');
         if ((!$tsvFile && !$jsonFile) || ($tsvFile && $jsonFile)) {
             throw new BadRequestHttpException('Supply exactly one of \'json\' or \'tsv\'');
         }
@@ -113,7 +113,7 @@ class UserController extends AbstractRestController
     public function addOrganizationsAction(Request $request): string
     {
         $message = null;
-        /** @var UploadedFile $jsonFile */
+        /** @var UploadedFile|null $jsonFile */
         $jsonFile = $request->files->get('json');
         if ($jsonFile &&
             ($result = $this->importExportService->importJson('organizations', $jsonFile, $message)) &&
@@ -156,10 +156,10 @@ class UserController extends AbstractRestController
     #[OA\Response(response: 200, description: 'Returns a (currently meaningless) status message.')]
     public function addTeamsAction(Request $request): string
     {
-        /** @var UploadedFile $tsvFile */
-        $tsvFile = $request->files->get('tsv') ?: [];
-        /** @var UploadedFile $jsonFile */
-        $jsonFile = $request->files->get('json') ?: [];
+        /** @var UploadedFile|null $tsvFile */
+        $tsvFile = $request->files->get('tsv');
+        /** @var UploadedFile|null $jsonFile */
+        $jsonFile = $request->files->get('json');
         if ((!$tsvFile && !$jsonFile) || ($tsvFile && $jsonFile)) {
             throw new BadRequestHttpException('Supply exactly one of \'json\' or \'tsv\'');
         }
@@ -211,12 +211,12 @@ class UserController extends AbstractRestController
     #[OA\Response(ref: '#/components/responses/PostAccountResponse', response: 200)]
     public function addAccountsAction(Request $request): string
     {
-        /** @var UploadedFile $tsvFile */
-        $tsvFile = $request->files->get('tsv') ?: [];
-        /** @var UploadedFile $jsonFile */
-        $jsonFile = $request->files->get('json') ?: [];
-        /** @var UploadedFile $yamlFile */
-        $yamlFile      = $request->files->get('yaml') ?: [];
+        /** @var UploadedFile|null $tsvFile */
+        $tsvFile = $request->files->get('tsv');
+        /** @var UploadedFile|null $jsonFile */
+        $jsonFile = $request->files->get('json');
+        /** @var UploadedFile|null $yamlFile */
+        $yamlFile      = $request->files->get('yaml');
         $providedFiles = array_filter([$tsvFile, $jsonFile, $yamlFile]);
         if (count($providedFiles) !== 1) {
             throw new BadRequestHttpException('Supply exactly one of \'json\', \'yaml\' or \'tsv\'');
@@ -334,7 +334,7 @@ class UserController extends AbstractRestController
             ->setEnabled($request->request->getBoolean('enabled', true));
 
         if ($request->request->get('team_id')) {
-            /** @var Team $team */
+            /** @var Team|null $team */
             $team = $this->em->createQueryBuilder()
                 ->from(Team::class, 't')
                 ->select('t')

@@ -252,9 +252,6 @@ class DOMJudgeService
         if (!$this->requestStack->getCurrentRequest()) {
             return null;
         }
-        if (!$this->requestStack->getCurrentRequest()->cookies) {
-            return null;
-        }
         return $this->requestStack->getCurrentRequest()->cookies->get($cookieName);
     }
 
@@ -878,7 +875,7 @@ class DOMJudgeService
      */
     public function getAttachmentStreamedResponse(ContestProblem $contestProblem, int $attachmentId): StreamedResponse
     {
-        /** @var ProblemAttachment $attachment */
+        /** @var ProblemAttachment|null $attachment */
         $attachment = $this->em->createQueryBuilder()
             ->from(ProblemAttachment::class, 'a')
             ->join('a.problem', 'p')
@@ -1276,7 +1273,6 @@ class DOMJudgeService
 
     public function getImmutableCompareExecutable(ContestProblem $problem): ImmutableExecutable
     {
-        /** @var Executable $executable */
         $executable = $problem
             ->getProblem()
             ->getCompareExecutable();
@@ -1293,7 +1289,6 @@ class DOMJudgeService
 
     public function getImmutableRunExecutable(ContestProblem $problem): ImmutableExecutable
     {
-        /** @var Executable $executable */
         $executable = $problem
             ->getProblem()
             ->getRunExecutable();
@@ -1438,7 +1433,7 @@ class DOMJudgeService
                 ->setParameter('cid', $contest->getCid());
         }
 
-        /** @var Team $team */
+        /** @var Team|null $team */
         $team = $queryBuilder->getQuery()->getOneOrNullResult();
 
         if (!$team) {

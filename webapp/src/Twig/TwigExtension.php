@@ -242,9 +242,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      */
     public function printtimeHover(string|float $datetime, ?Contest $contest = null): string
     {
-        if ($datetime === null) {
-            $datetime = Utils::now();
-        }
         return '<span title="' .
                Utils::printtime($datetime, 'Y-m-d H:i:s (T)') . '">' .
                $this->printtime($datetime, null, $contest) .
@@ -443,7 +440,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $class     = $submissionDone ? 'secondary' : 'primary';
             $text      = '?';
             $isCorrect = false;
-            /** @var JudgingRun|ExternalRun $run */
+            /** @var JudgingRun|ExternalRun|null $run */
             $run = $isExternal ? $testcase->getFirstExternalRun() : $testcase->getFirstJudgingRun();
             if ($isExternal) {
                 $runResult = $run?->getResult();

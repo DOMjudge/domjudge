@@ -604,9 +604,6 @@ EOF;
                 if (isset($data['team']['members'])) {
                     self::assertEquals($data['team']['members'], $team->getPublicDescription());
                 }
-                if (isset($data['team']['description'])) {
-                    self::assertEquals($data['team']['description'], $team->getPublicDescription());
-                }
             } else {
                 self::assertNull($user->getTeam());
             }
@@ -948,7 +945,7 @@ EOF;
         foreach ($expectedOrganizations as $data) {
             $affiliation = $em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $data['externalid']]);
             self::assertNotNull($affiliation, "Team affiliation $data[name] does not exist");
-            self::assertEquals($data['icpcid'] ?? null, $affiliation->getIcpcId());
+            self::assertEquals($data['icpcid'], $affiliation->getIcpcId());
             self::assertEquals($data['shortname'], $affiliation->getShortname());
             self::assertEquals($data['name'], $affiliation->getName());
             self::assertEquals($data['country'], $affiliation->getCountry());

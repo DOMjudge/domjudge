@@ -123,7 +123,6 @@ class TeamCategoryController extends BaseController
     #[Route(path: '/{categoryId<\d+>}', name: 'jury_team_category')]
     public function viewAction(Request $request, SubmissionService $submissionService, int $categoryId): Response
     {
-        /** @var TeamCategory $teamCategory */
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$teamCategory) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
@@ -163,7 +162,6 @@ class TeamCategoryController extends BaseController
     #[Route(path: '/{categoryId<\d+>}/edit', name: 'jury_team_category_edit')]
     public function editAction(Request $request, int $categoryId): Response
     {
-        /** @var TeamCategory $teamCategory */
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$teamCategory) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
@@ -206,7 +204,6 @@ class TeamCategoryController extends BaseController
     #[Route(path: '/{categoryId<\d+>}/delete', name: 'jury_team_category_delete')]
     public function deleteAction(Request $request, int $categoryId): Response
     {
-        /** @var TeamCategory $teamCategory */
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$teamCategory) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
@@ -240,7 +237,6 @@ class TeamCategoryController extends BaseController
     #[Route(path: '/{categoryId<\d+>}/request-remaining', name: 'jury_team_category_request_remaining')]
     public function requestRemainingRunsWholeTeamCategoryAction(string $categoryId): RedirectResponse
     {
-        /** @var TeamCategory $category */
         $category = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$category) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));

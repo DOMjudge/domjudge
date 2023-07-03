@@ -90,10 +90,10 @@ class ContestController extends AbstractRestController
     #[OA\Response(response: 200, description: 'Returns the API ID of the added contest.')]
     public function addContestAction(Request $request): string
     {
-        /** @var UploadedFile $yamlFile */
-        $yamlFile = $request->files->get('yaml') ?: [];
-        /** @var UploadedFile $jsonFile */
-        $jsonFile = $request->files->get('json') ?: [];
+        /** @var UploadedFile|null $yamlFile */
+        $yamlFile = $request->files->get('yaml');
+        /** @var UploadedFile|null $jsonFile */
+        $jsonFile = $request->files->get('json');
         if ((!$yamlFile && !$jsonFile) || ($yamlFile && $jsonFile)) {
             throw new BadRequestHttpException('Supply exactly one of \'json\' or \'yaml\'');
         }
@@ -179,7 +179,7 @@ class ContestController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     public function bannerAction(Request $request, string $cid): Response
     {
-        /** @var Contest $contest */
+        /** @var Contest|null $contest */
         $contest = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $cid)
@@ -245,10 +245,9 @@ class ContestController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     public function setBannerAction(Request $request, string $cid, ValidatorInterface $validator): Response
     {
-        /** @var Contest $contest */
         $contest = $this->getContestAndCheckIfLocked($request, $cid);
 
-        /** @var UploadedFile $banner */
+        /** @var UploadedFile|null $banner */
         $banner = $request->files->get('banner');
         if (!$banner) {
             return new JsonResponse(['title' => 'Validation failed', 'errors' => ['Please supply a banner']], Response::HTTP_BAD_REQUEST);
@@ -850,7 +849,7 @@ class ContestController extends AbstractRestController
     /** To be used when contest data is modified. */
     private function getContestAndCheckIfLocked(Request $request, string $cid): Contest
     {
-        /** @var Contest $contest */
+        /** @var Contest|null $contest */
         $contest = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $cid)

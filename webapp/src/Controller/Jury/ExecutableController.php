@@ -180,7 +180,6 @@ class ExecutableController extends BaseController
         #[MapQueryParameter]
         ?int $index = null
     ): Response {
-        /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
@@ -292,7 +291,6 @@ class ExecutableController extends BaseController
     #[Route(path: '/{execId}/download', name: 'jury_executable_download')]
     public function downloadAction(string $execId): Response
     {
-        /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
@@ -308,7 +306,6 @@ class ExecutableController extends BaseController
     #[Route(path: '/{execId}/delete/{rankToDelete}', name: 'jury_executable_delete_single')]
     public function deleteSingleAction(Request $request, string $execId, int $rankToDelete): Response
     {
-        /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found.', $execId));
@@ -375,7 +372,6 @@ class ExecutableController extends BaseController
     #[Route(path: '/{execId}/download/{rank}', name: 'jury_executable_download_single')]
     public function downloadSingleAction(string $execId, int $rank): Response
     {
-        /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found.', $execId));
@@ -396,7 +392,6 @@ class ExecutableController extends BaseController
     #[Route(path: '/{execId}/delete', name: 'jury_executable_delete')]
     public function deleteAction(Request $request, string $execId): Response
     {
-        /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));

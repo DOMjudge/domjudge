@@ -123,7 +123,7 @@ class ClarificationController extends AbstractRestController
 
         if ($problemId = $request->request->get('problem_id')) {
             // Load the problem
-            /** @var ContestProblem $problem */
+            /** @var ContestProblem|null $problem */
             $problem = $this->em->createQueryBuilder()
                 ->from(ContestProblem::class, 'cp')
                 ->join('cp.problem', 'p')
@@ -148,7 +148,7 @@ class ClarificationController extends AbstractRestController
 
         if ($replyToId = $request->request->get('reply_to_id')) {
             // Load the clarification.
-            /** @var Clarification $replyTo */
+            /** @var Clarification|null $replyTo */
             $replyTo = $this->em->createQueryBuilder()
                 ->from(Clarification::class, 'c')
                 ->select('c')

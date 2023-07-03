@@ -166,7 +166,6 @@ abstract class BaseTestCase extends WebTestCase
     protected function setupUser(): User
     {
         $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
-        /** @var User $user */
         $user = $em->getRepository(User::class)->findOneBy(['username' => 'demo']);
         if ($user === null) {
             throw new Exception("No user 'demo' found, are you using the correct database?");

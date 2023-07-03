@@ -994,6 +994,7 @@ class ScoreboardService
         $contestProblems = $queryBuilder->getQuery()->getResult();
         $contestProblemsIndexed = [];
         foreach ($contestProblems as $cp) {
+            /** @var Problem|int $p */
             $p = $cp->getProblem();
             // Doctrine has a bug with eagerly loaded second level hydration
             // when the object is already loaded. In that case it might happen

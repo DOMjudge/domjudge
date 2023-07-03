@@ -87,7 +87,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
         }
 
-        /** @var UploadedFile $file */
+        /** @var UploadedFile|null $file */
         $file = $request->files->get('data');
         if (!$file) {
             throw new BadRequestHttpException("Data field is missing.");

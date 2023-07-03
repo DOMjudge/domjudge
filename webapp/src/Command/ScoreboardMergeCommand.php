@@ -213,7 +213,7 @@ class ScoreboardMergeCommand extends Command
                 ->request('GET', $path . '/scoreboard?public=1')
                 ->toArray();
 
-            if ($contest->getStarttimeString() === null) {
+            if (!$contest->getStarttimeString()) {
                 $state = $scoreboardData['state'];
                 $contest
                     ->setStarttimeString($state['started'])

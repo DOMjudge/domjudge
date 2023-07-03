@@ -148,36 +148,36 @@ class MiscControllerTest extends BaseTestCase
 
         // TODO: Enable again when unit tests are rewritten
         $this->markTestSkipped('Needs to be rewritten to handle different DB states.');
-        // Verify we are on the demo contest.
-        self::assertSelectorTextContains('.card-header span', 'Demo contest');
-
-        if ($withReferrer) {
-            // Now click the change contest menu item.
-            $link = $crawler->filter('a.dropdown-item:contains("switch")')->link();
-
-            $this->client->click($link);
-        } else {
-            // Make sure to clear the history, so we do not have a referrer.
-            $this->client->getHistory()->clear();
-            $this->client->request('GET', '/team/change-contest/' . $contest->getCid());
-        }
-
-        $this->client->followRedirect();
-
-        // Check that we are still on the scoreboard.
-        if ($withReferrer) {
-            self::assertEquals('http://localhost/team/scoreboard',
-                               $this->client->getRequest()->getUri());
-        } else {
-            self::assertEquals('http://localhost/team',
-                               $this->client->getRequest()->getUri());
-
-            // Go to the scoreboard again.
-            $this->client->request('GET', '/team/scoreboard');
-        }
-
-        // And check that the contest has changed.
-        self::assertSelectorTextContains('.card-header span', 'Test contest for switching');
+//        // Verify we are on the demo contest.
+//        self::assertSelectorTextContains('.card-header span', 'Demo contest');
+//
+//        if ($withReferrer) {
+//            // Now click the change contest menu item.
+//            $link = $crawler->filter('a.dropdown-item:contains("switch")')->link();
+//
+//            $this->client->click($link);
+//        } else {
+//            // Make sure to clear the history, so we do not have a referrer.
+//            $this->client->getHistory()->clear();
+//            $this->client->request('GET', '/team/change-contest/' . $contest->getCid());
+//        }
+//
+//        $this->client->followRedirect();
+//
+//        // Check that we are still on the scoreboard.
+//        if ($withReferrer) {
+//            self::assertEquals('http://localhost/team/scoreboard',
+//                               $this->client->getRequest()->getUri());
+//        } else {
+//            self::assertEquals('http://localhost/team',
+//                               $this->client->getRequest()->getUri());
+//
+//            // Go to the scoreboard again.
+//            $this->client->request('GET', '/team/scoreboard');
+//        }
+//
+//        // And check that the contest has changed.
+//        self::assertSelectorTextContains('.card-header span', 'Test contest for switching');
     }
 
     public function withReferrerProvider(): Generator

@@ -84,7 +84,7 @@ class CallApiActionCommand extends Command
             }
         } else {
             // Find an admin user as we need one to make sure we can read all events.
-            /** @var User $user */
+            /** @var User|null $user */
             $user = $this->em->createQueryBuilder()
                 ->from(User::class, 'u')
                 ->select('u')

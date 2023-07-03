@@ -113,7 +113,7 @@ class OrganizationController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function logoAction(Request $request, string $id): Response
     {
-        /** @var TeamAffiliation $teamAffiliation */
+        /** @var TeamAffiliation|null $teamAffiliation */
         $teamAffiliation = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $id)
@@ -144,7 +144,7 @@ class OrganizationController extends AbstractRestController
     public function deleteLogoAction(Request $request, string $id): Response
     {
         $contestId = null;
-        /** @var TeamAffiliation $teamAffiliation */
+        /** @var TeamAffiliation|null $teamAffiliation */
         $teamAffiliation = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $id)
@@ -196,7 +196,7 @@ class OrganizationController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function setLogoAction(Request $request, string $id, ValidatorInterface $validator): Response
     {
-        /** @var TeamAffiliation $teamAffiliation */
+        /** @var TeamAffiliation|null $teamAffiliation */
         $teamAffiliation = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $id)
@@ -207,7 +207,7 @@ class OrganizationController extends AbstractRestController
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
         }
 
-        /** @var UploadedFile $logo */
+        /** @var UploadedFile|null $logo */
         $logo = $request->files->get('logo');
 
         if (!$logo) {

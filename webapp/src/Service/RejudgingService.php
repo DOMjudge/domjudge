@@ -96,15 +96,13 @@ class RejudgingService
                 $judging,
                 $rejudging
             ) {
-                if ($rejudging) {
-                    $this->em->getConnection()->executeStatement(
-                        'UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid AND rejudgingid IS NULL',
-                        [
-                            'rejudgingid' => $rejudging->getRejudgingid(),
-                            'submitid' => $judging->getSubmissionId(),
-                        ]
-                    );
-                }
+                $this->em->getConnection()->executeStatement(
+                    'UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid AND rejudgingid IS NULL',
+                    [
+                        'rejudgingid' => $rejudging->getRejudgingid(),
+                        'submitid' => $judging->getSubmissionId(),
+                    ]
+                );
 
                 if ($singleJudging) {
                     $teamid = $judging->getSubmission()->getTeamId();

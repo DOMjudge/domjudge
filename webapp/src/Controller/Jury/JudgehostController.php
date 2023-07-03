@@ -188,7 +188,7 @@ class JudgehostController extends BaseController
     #[Route(path: '/{judgehostid}', methods: ['GET'], name: 'jury_judgehost')]
     public function viewAction(Request $request, int $judgehostid): Response
     {
-        /** @var Judgehost $judgehost */
+        /** @var Judgehost|null $judgehost */
         $judgehost = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')
             ->select('j')

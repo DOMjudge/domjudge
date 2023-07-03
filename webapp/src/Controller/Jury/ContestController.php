@@ -78,7 +78,6 @@ class ContestController extends BaseController
             if (!$this->isGranted('ROLE_ADMIN')) {
                 throw new AccessDeniedHttpException();
             }
-            /** @var Contest $contest */
             $contest = $em->getRepository(Contest::class)->find($request->request->get('contest'));
             if (!$contest) {
                 throw new NotFoundHttpException('Contest not found');
@@ -370,7 +369,6 @@ class ContestController extends BaseController
     #[Route(path: '/{contestId<\d+>}', name: 'jury_contest')]
     public function viewAction(Request $request, int $contestId): Response
     {
-        /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
@@ -424,7 +422,6 @@ class ContestController extends BaseController
     #[Route(path: '/{contestId}/toggle-submit', name: 'jury_contest_toggle_submit')]
     public function toggleSubmitAction(Request $request, string $contestId): Response
     {
-        /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
@@ -441,13 +438,11 @@ class ContestController extends BaseController
     #[Route(path: '/{contestId<\d+>}/remove-interval/{intervalId}', name: 'jury_contest_remove_interval', methods: ['POST'])]
     public function removeIntervalAction(int $contestId, int $intervalId): RedirectResponse
     {
-        /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
 
-        /** @var RemovedInterval $removedInterval */
         $removedInterval = $this->em->getRepository(RemovedInterval::class)->find($intervalId);
         if (!$removedInterval) {
             throw new NotFoundHttpException(
@@ -475,7 +470,6 @@ class ContestController extends BaseController
     #[Route(path: '/{contestId<\d+>}/edit', name: 'jury_contest_edit')]
     public function editAction(Request $request, int $contestId): Response
     {
-        /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
@@ -610,7 +604,6 @@ class ContestController extends BaseController
     #[Route(path: '/{contestId<\d+>}/delete', name: 'jury_contest_delete')]
     public function deleteAction(Request $request, int $contestId): Response
     {
-        /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
@@ -629,7 +622,6 @@ class ContestController extends BaseController
     #[Route(path: '/{contestId<\d+>}/problems/{probId<\d+>}/delete', name: 'jury_contest_problem_delete')]
     public function deleteProblemAction(Request $request, int $contestId, int $probId): Response
     {
-        /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
             'contest' => $contestId,
             'problem' => $probId
@@ -704,7 +696,6 @@ class ContestController extends BaseController
     #[Route(path: '/{contestId<\d+>}/prefetch', name: 'jury_contest_prefetch')]
     public function prefetchAction(Request $request, int $contestId): Response
     {
-        /** @var Contest $contest */
         $contest  = $this->em->getRepository(Contest::class)->find($contestId);
         if ($contest === null) {
             throw new BadRequestHttpException("Contest with cid=$contestId not found.");
@@ -853,7 +844,6 @@ class ContestController extends BaseController
     #[Route(path: '/{contestId<\d+>}/request-remaining', name: 'jury_contest_request_remaining')]
     public function requestRemainingRunsWholeContestAction(int $contestId): RedirectResponse
     {
-        /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
@@ -879,7 +869,6 @@ class ContestController extends BaseController
     #[Route(path: '/{contestId<\d+>}/problems/{probId<\d+>}/request-remaining', name: 'jury_contest_problem_request_remaining')]
     public function requestRemainingRunsContestProblemAction(int $contestId, int $probId): RedirectResponse
     {
-        /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
             'contest' => $contestId,
             'problem' => $probId
@@ -949,7 +938,6 @@ class ContestController extends BaseController
     #[Route(path: '/{contestId<\d+>}/samples.zip', name: 'jury_contest_samples_data_zip')]
     public function samplesDataZipAction(Request $request, int $contestId): Response
     {
-        /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
@@ -960,7 +948,6 @@ class ContestController extends BaseController
 
     private function doLock(int $contestId, bool $locked): Response
     {
-        /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found.', $contestId));
@@ -986,7 +973,6 @@ class ContestController extends BaseController
         Request $request,
         ScoreboardService $scoreboardService
     ): Response {
-        /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));

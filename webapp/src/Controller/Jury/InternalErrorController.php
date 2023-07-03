@@ -87,7 +87,6 @@ class InternalErrorController extends BaseController
     #[Route(path: '/{errorId<\d+>}', methods: ['GET'], name: 'jury_internal_error')]
     public function viewAction(int $errorId): Response
     {
-        /** @var InternalError $internalError */
         $internalError = $this->em->getRepository(InternalError::class)->find($errorId);
         if (!$internalError) {
             throw new NotFoundHttpException(sprintf('Internal Error with ID %s not found', $errorId));

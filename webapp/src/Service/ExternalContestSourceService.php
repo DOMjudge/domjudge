@@ -477,6 +477,7 @@ class ExternalContestSourceService
             $event      = $this->dj->jsonDecode($line);
             $shouldStop = false;
             $callback($event, $line, $shouldStop);
+            /** @phpstan-ignore-next-line The callable can modify $shouldStop but currently we can't indicate this */
             if ($shouldStop) {
                 return;
             }
@@ -815,7 +816,6 @@ class ExternalContestSourceService
         }
 
         $extId = $data['id'];
-        /** @var Language $language */
         $language = $this->em
             ->getRepository(Language::class)
             ->findOneBy(['externalid' => $extId]);
@@ -955,7 +955,6 @@ class ExternalContestSourceService
         $problemId = $data['id'];
 
         // First, load the problem.
-        /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
         if (!$problem) {
             $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_ENTITY_NOT_FOUND);
@@ -963,7 +962,6 @@ class ExternalContestSourceService
         }
 
         // Now find the contest problem.
-        /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em
             ->getRepository(ContestProblem::class)
             ->find([
@@ -1114,7 +1112,6 @@ class ExternalContestSourceService
         }
 
         // First, load the clarification
-        /** @var Clarification $clarification */
         $clarification = $this->em
             ->getRepository(Clarification::class)
             ->findOneBy([
@@ -1133,7 +1130,6 @@ class ExternalContestSourceService
         $fromTeamId = $data['from_team_id'] ?? null;
         $fromTeam   = null;
         if ($fromTeamId !== null) {
-            /** @var Team $fromTeam */
             $fromTeam = $this->em
                 ->getRepository(Team::class)
                 ->findOneBy(['externalid' => $fromTeamId]);
@@ -1146,7 +1142,6 @@ class ExternalContestSourceService
         $toTeamId = $data['to_team_id'] ?? null;
         $toTeam   = null;
         if ($toTeamId !== null) {
-            /** @var Team $toTeam */
             $toTeam = $this->em
                 ->getRepository(Team::class)
                 ->findOneBy(['externalid' => $toTeamId]);
@@ -1159,7 +1154,6 @@ class ExternalContestSourceService
         $inReplyToId = $data['reply_to_id'] ?? null;
         $inReplyTo   = null;
         if ($inReplyToId !== null) {
-            /** @var Clarification $inReplyTo */
             $inReplyTo = $this->em
                 ->getRepository(Clarification::class)
                 ->findOneBy([
@@ -1175,7 +1169,6 @@ class ExternalContestSourceService
         $problemId = $data['problem_id'] ?? null;
         $problem   = null;
         if ($problemId !== null) {
-            /** @var Problem $problem */
             $problem = $this->em
                 ->getRepository(Problem::class)
                 ->findOneBy(['externalid' => $problemId]);
@@ -1254,7 +1247,6 @@ class ExternalContestSourceService
         }
 
         // First, load the submission
-        /** @var Submission $submission */
         $submission = $this->em
             ->getRepository(Submission::class)
             ->findOneBy([
@@ -1263,7 +1255,6 @@ class ExternalContestSourceService
                         ]);
 
         $languageId = $data['language_id'];
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->findOneBy(['externalid' => $languageId]);
         if (!$language) {
             $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_DEPENDENCY_MISSING, [
@@ -1277,7 +1268,6 @@ class ExternalContestSourceService
         $this->removeWarning($entityType, $data['id'], ExternalSourceWarning::TYPE_DEPENDENCY_MISSING);
 
         $problemId = $data['problem_id'];
-        /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
         if (!$problem) {
             $this->addPendingEvent('problem', $problemId, $operation, $entityType, $eventId, $data);
@@ -1285,10 +1275,9 @@ class ExternalContestSourceService
         }
 
         // Find the contest problem.
-        /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em
             ->getRepository(ContestProblem::class)
-            ->find([
+            ->findOneBy([
                        'contest' => $this->getSourceContest(),
                        'problem' => $problem,
                    ]);
@@ -1303,7 +1292,6 @@ class ExternalContestSourceService
         }
 
         $teamId = $data['team_id'];
-        /** @var Team $team */
         $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
         if (!$team) {
             $this->addPendingEvent('team', $teamId, $operation, $entityType, $eventId, $data);
@@ -1561,7 +1549,6 @@ class ExternalContestSourceService
         }
 
         // First, load the external judgement.
-        /** @var ExternalJudgement $judgement */
         $judgement = $this->em
             ->getRepository(ExternalJudgement::class)
             ->findOneBy([
@@ -1579,7 +1566,6 @@ class ExternalContestSourceService
 
         // Now check if we have all dependent data.
         $submissionId = $data['submission_id'] ?? null;
-        /** @var Submission $submission */
         $submission = $this->em
             ->getRepository(Submission::class)
             ->findOneBy([
@@ -1682,7 +1668,6 @@ class ExternalContestSourceService
         }
 
         // First, load the external run.
-        /** @var ExternalRun $run */
         $run     = $this->em
             ->getRepository(ExternalRun::class)
             ->findOneBy([
@@ -1700,7 +1685,6 @@ class ExternalContestSourceService
 
         // Now check if we have all dependent data.
         $judgementId = $data['judgement_id'] ?? null;
-        /** @var ExternalJudgement $externalJudgement */
         $externalJudgement = $this->em
             ->getRepository(ExternalJudgement::class)
             ->findOneBy([
@@ -1792,7 +1776,6 @@ class ExternalContestSourceService
             $entityType,
             $data['id']
         );
-        /** @var ExternalSourceWarning|null $warning */
         $warning = $this->em
             ->getRepository(ExternalSourceWarning::class)
             ->findOneBy([

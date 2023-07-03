@@ -286,7 +286,7 @@ class SubmissionController extends AbstractRestController
         }
 
         // Load the problem.
-        /** @var ContestProblem $problem */
+        /** @var ContestProblem|null $problem */
         $problem = $this->em->createQueryBuilder()
             ->from(ContestProblem::class, 'cp')
             ->join('cp.problem', 'p')
@@ -307,7 +307,7 @@ class SubmissionController extends AbstractRestController
         }
 
         // Load the language.
-        /** @var Language $language */
+        /** @var Language|null $language */
         $language = $this->em->createQueryBuilder()
             ->from(Language::class, 'lang')
             ->select('lang')

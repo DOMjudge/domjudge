@@ -203,7 +203,7 @@ class RejudgingController extends BaseController
         // Close the session, as this might take a while and we don't need the session below.
         $this->requestStack->getSession()->save();
 
-        /** @var Rejudging $rejudging */
+        /** @var Rejudging|null $rejudging */
         $rejudging = $this->em->createQueryBuilder()
             ->from(Rejudging::class, 'r')
             ->leftJoin('r.start_user', 's')

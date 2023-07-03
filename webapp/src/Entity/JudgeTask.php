@@ -70,7 +70,7 @@ class JudgeTask
     private ?string $uuid = null;
 
 
-    #[ORM\ManyToOne(inversedBy: 'judgetasks')]
+    #[ORM\ManyToOne()]
     #[ORM\JoinColumn(name: 'submitid', nullable: true, referencedColumnName: 'submitid', onDelete: 'CASCADE',
         options: ['comment' => 'Submission ID being judged', 'unsigned' => true])
     ]

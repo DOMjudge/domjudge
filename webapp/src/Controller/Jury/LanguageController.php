@@ -170,7 +170,6 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}', name: 'jury_language')]
     public function viewAction(Request $request, SubmissionService $submissionService, string $langId): Response
     {
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
@@ -209,7 +208,6 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/toggle-submit', name: 'jury_language_toggle_submit')]
     public function toggleSubmitAction(Request $request, string $langId): Response
     {
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
@@ -226,7 +224,6 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/toggle-judge', name: 'jury_language_toggle_judge')]
     public function toggleJudgeAction(Request $request, string $langId): Response
     {
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
@@ -249,7 +246,6 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/edit', name: 'jury_language_edit')]
     public function editAction(Request $request, string $langId): Response
     {
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
@@ -282,7 +278,6 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/delete', name: 'jury_language_delete')]
     public function deleteAction(Request $request, string $langId): Response
     {
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
@@ -296,7 +291,6 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/request-remaining', name: 'jury_language_request_remaining')]
     public function requestRemainingRunsWholeLanguageAction(string $langId): RedirectResponse
     {
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));

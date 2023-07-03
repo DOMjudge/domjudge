@@ -366,7 +366,7 @@ class SubmissionController extends BaseController
                     }
                 }
                 $cnt++;
-                /** @var JudgingRun $firstJudgingRun */
+                /** @var JudgingRun|null $firstJudgingRun */
                 $firstJudgingRun = $runResult[0]->getFirstJudgingRun();
                 if ($firstJudgingRun !== null && $firstJudgingRun->getRunresult() === null) {
                     $runsOutstanding = true;
@@ -559,7 +559,6 @@ class SubmissionController extends BaseController
     public function requestFullDebug(Request $request, Judging $jid): RedirectResponse
     {
         $submission = $jid->getSubmission();
-        /** @var Executable $defaultFullDebugExecutable */
         $defaultFullDebugExecutable = $this->em
             ->getRepository(Executable::class)
             ->findOneBy(['execid' => $this->config->get('default_full_debug')]);
@@ -691,7 +690,7 @@ class SubmissionController extends BaseController
         ?int $fetch = null
     ): Response {
         if ($fetch !== null) {
-            /** @var SubmissionFile $file */
+            /** @var SubmissionFile|null $file */
             $file = $this->em->createQueryBuilder()
                 ->from(SubmissionFile::class, 'file')
                 ->select('file')
@@ -927,7 +926,6 @@ class SubmissionController extends BaseController
     #[Route(path: '/{judgingId<\d+>}/request-remaining', name: 'jury_submission_request_remaining', methods: ['POST'])]
     public function requestRemainingRuns(Request $request, int $judgingId): RedirectResponse
     {
-        /** @var Judging $judging */
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ($judging === null) {
             throw new BadRequestHttpException("Unknown judging with '$judgingId' requested.");

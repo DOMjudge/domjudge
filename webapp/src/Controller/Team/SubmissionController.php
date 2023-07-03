@@ -117,7 +117,7 @@ class SubmissionController extends BaseController
         $user             = $this->dj->getUser();
         $team             = $user->getTeam();
         $contest          = $this->dj->getCurrentContest($team->getTeamid());
-        /** @var Judging $judging */
+        /** @var Judging|null $judging */
         $judging = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
@@ -217,7 +217,7 @@ class SubmissionController extends BaseController
 
         $user = $this->dj->getUser();
         $team = $user->getTeam();
-        /** @var Submission $submission */
+        /** @var Submission|null $submission */
         $submission = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->join('s.files', 'f')

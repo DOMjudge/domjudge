@@ -254,7 +254,7 @@ class StatisticsService
                 continue;
             }
             if ($j->getResult()) {
-                static::setOrIncrement($results, $j->getResult() ?? 'pending');
+                static::setOrIncrement($results, $j->getResult());
             }
         }
         // Sort the judgings by runtime.

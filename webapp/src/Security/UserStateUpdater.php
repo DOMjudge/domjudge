@@ -25,7 +25,7 @@ class UserStateUpdater implements EventSubscriberInterface
 
     public function updateUserState(AuthenticationSuccessEvent $event): void
     {
-        if ($event->getAuthenticationToken() && ($user = $event->getAuthenticationToken()->getUser()) && $user instanceof User) {
+        if (($user = $event->getAuthenticationToken()->getUser()) && $user instanceof User) {
             $firewallName = 'main';
             if (method_exists($event->getAuthenticationToken(), 'getFirewallName')) {
                 $firewallName = $event->getAuthenticationToken()->getFirewallName();

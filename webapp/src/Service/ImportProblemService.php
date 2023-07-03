@@ -740,7 +740,7 @@ class ImportProblemService
                         }
                         $results = [$expectedResult];
                     }
-                    $jury_team_id = $this->dj->getUser()->getTeam() ? $this->dj->getUser()->getTeam()->getTeamid() : null;
+                    $jury_team_id = $this->dj->getUser()->getTeam()->getTeamid();
                     $jury_user = $this->dj->getUser();
                     if (isset($submission_details[$path]['team'])) {
                         /** @var Team|null $json_team */

@@ -130,6 +130,12 @@ class Language extends BaseApiEntity
     #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Compiler version command'])]
     private ?string $compilerVersionCommand = null;
 
+    public function setVersions(Collection $versions): Language
+    {
+        $this->versions = $versions;
+        return $this;
+    }
+
     public function getVersions()
     {
         return $this->versions;

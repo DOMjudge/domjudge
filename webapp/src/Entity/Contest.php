@@ -86,7 +86,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         options: ['comment' => 'Time contest becomes visible in team/public views', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float $activatetime;
+    private string|float|null $activatetime;
 
     #[ORM\Column(
         type: 'decimal',
@@ -121,7 +121,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         options: ['comment' => 'Time after which no more submissions are accepted', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float $endtime;
+    private string|float|null $endtime;
 
     #[ORM\Column(
         type: 'decimal',
@@ -1176,7 +1176,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
                         ->addViolation();
                 }
             }
-            if ($this->medal_categories === null || $this->medal_categories->isEmpty()) {
+            if ($this->medal_categories->isEmpty()) {
                 $context
                     ->buildViolation('This field is required when \'Process medals\' is set.')
                     ->atPath('medalCategories')
