@@ -204,8 +204,6 @@ class Language extends BaseApiEntity
             if (!empty($this->getCompilerVersion())) {
                 $ret['version'] = $this->getCompilerVersion();
             }
-        } else {
-            return null;
         }
         return $ret;
     }
