@@ -341,7 +341,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
         $lazyEvalResults = null;
         if ($request->request->has('lazy_eval_results')) {
-            $lazyEvalResults = $request->request->getBoolean('lazy_eval_results');
+            $lazyEvalResults = (int)$request->request->getBoolean('lazy_eval_results');
         }
 
         $contestProblem = (new ContestProblem())
