@@ -15,7 +15,6 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
@@ -35,8 +34,7 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
         private readonly EntityManagerInterface $em,
         private readonly ConfigurationService $config,
         private readonly RouterInterface $router,
-        private readonly RequestStack $requestStack,
-        private readonly UserProviderInterface $userProvider
+        private readonly RequestStack $requestStack
     ) {}
 
     public function supports(Request $request): bool
