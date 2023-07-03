@@ -616,7 +616,7 @@ class RejudgingController extends BaseController
 
                 $skipped = [];
                 $res     = $this->rejudgingService->createRejudging(
-                    $reason, (int)$data['priority'], $judgings, false, (int)$data['repeat'] ?? 1, null, $skipped, $progressReporter);
+                    $reason, (int)$data['priority'], $judgings, false, (int)($data['repeat'] ?? 1), null, $skipped, $progressReporter);
                 $this->generateFlashMessagesForSkippedJudgings($skipped);
 
                 if ($res === null) {
