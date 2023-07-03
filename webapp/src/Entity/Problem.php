@@ -244,7 +244,7 @@ class Problem extends BaseApiEntity
     }
 
     /**
-     * @param resource|string $problemtext
+     * @param resource|string|null $problemtext
      */
     public function setProblemtext($problemtext): Problem
     {
