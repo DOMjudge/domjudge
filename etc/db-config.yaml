@@ -215,6 +215,11 @@
             default_value: false
             public: true
             description: Should teams be able to view a diff of their and the reference output on sample testcases?
+        -   name: show_too_late_result
+            type: bool
+            default_value: false
+            public: true
+            description: Show results of TOO-LATE submissions in team interface?
         -   name: show_balloons_postfreeze
             type: bool
             default_value: false

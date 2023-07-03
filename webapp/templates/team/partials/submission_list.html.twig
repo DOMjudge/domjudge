@@ -22,7 +22,7 @@
         <tbody>
         {%- for submission in submissions %}
             {% set link = null %}
-            {% if submission.submittime < current_team_contest.endtime and submission.result and submission.judgings.first is not empty and submission.judgings.first.result is not empty and (not verificationRequired or submission.judgings.first.verified) %}
+            {% if (submission.submittime < current_team_contest.endtime or showTooLateResult) and submission.result and submission.judgings.first is not empty and submission.judgings.first.result is not empty and (not verificationRequired or submission.judgings.first.verified) %}
                 {% set link = path('team_submission', {submitId: submission.submitid}) %}
             {% endif %}
 
@@ -52,13 +52,19 @@
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>
                         {%- if submission.submittime > submission.contest.endtime %}
-                            {{ 'too-late' | printResult }}
-                        {%- elseif submission.judgings.first is empty or submission.judgings.first.result is empty %}
-                            {{- '' | printResult -}}
-                        {%- elseif verificationRequired and not submission.judgings.first.verified %}
-                            {{- '' | printResult -}}
-                        {%- else %}
-                            {{- submission.judgings.first.result | printResult -}}
+                            {{ 'too-late' | printResult }} 
+                        {%- endif %}
+                        {%- if submission.submittime <= submission.contest.endtime or showTooLateResult %}
+                            {%- if submission.submittime > submission.contest.endtime %}
+                                /
+                            {% endif %}
+                            {%- if submission.judgings.first is empty or submission.judgings.first.result is empty %}
+                                {{- '' | printResult -}}
+                            {%- elseif verificationRequired and not submission.judgings.first.verified %}
+                                {{- '' | printResult -}}
+                            {%- else %}
+                                {{- submission.judgings.first.result | printResult -}}
+                            {%- endif %}
                         {%- endif %}
                     </a>
                 </td>

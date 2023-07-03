@@ -1,4 +1,4 @@
-{% if judging is empty or judging.submission.submittime >= current_team_contest.endtime or (verificationRequired and not judging.verified) %}
+{% if judging is empty or (not showTooLateResult and judging.submission.submittime >= current_team_contest.endtime) or (verificationRequired and not judging.verified) %}
     <div class="alert alert-danger">Submission not found for this team or not judged yet.</div>
 {% else %}
     <div class="container">
