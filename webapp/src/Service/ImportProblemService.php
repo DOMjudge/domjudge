@@ -539,7 +539,7 @@ class ImportProblemService
             $name = basename($filename);
 
             $fileParts = explode('.', $name);
-            if (count($fileParts) > 0) {
+            if (count($fileParts) > 1) {
                 $type = $fileParts[count($fileParts) - 1];
             } else {
                 $type = 'txt';
