@@ -927,7 +927,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
                 static fn(
                     RemovedInterval $a,
                     RemovedInterval $b
-                ) => Utils::difftime((float)$a->getStarttime(), (float)$b->getStarttime())
+                ) => (int)Utils::difftime((float)$a->getStarttime(), (float)$b->getStarttime())
             );
             foreach ($removedIntervals as $removedInterval) {
                 if (Utils::difftime((float)$removedInterval->getStarttime(), (float)$absoluteTime) <= 0) {
