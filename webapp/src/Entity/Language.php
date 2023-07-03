@@ -269,9 +269,9 @@ class Language extends BaseApiEntity
         return $this->externalid;
     }
 
-    public function setName(?string $name): Language
+    public function setName(string $name): Language
     {
-        $this->name = (string)$name;
+        $this->name = $name;
         return $this;
     }
 
