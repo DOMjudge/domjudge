@@ -243,11 +243,11 @@ AX_WITH_COMMENT(8,[       ])
 
 if test "x$with_baseurl" != x; then
 	AC_SUBST(BASEURL,$with_baseurl)
-	AC_MSG_RESULT($BASEURL)
 else
 	AC_SUBST(BASEURL,'https://example.com/domjudge/')
 	AC_SUBST(BASEURL_UNCONFIGURED,1)
 fi
+AC_MSG_RESULT($BASEURL)
 
 # Checks for programs.
 AC_PROG_CXX
