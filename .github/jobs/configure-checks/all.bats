@@ -48,6 +48,7 @@ compiler_assertions () {
     run run_configure
     # Depending on where we run this we might runas wrong user or lack libraries
     # so we can't expect either success or failure.
+    assert_line "checking baseurl... https://example.com/domjudge/"
     assert_line "checking whether configure should try to set CFLAGS... yes"
     assert_line "checking whether configure should try to set CXXFLAGS... yes"
     assert_line "checking whether configure should try to set LDFLAGS... yes"
@@ -96,7 +97,7 @@ compile_assertions_finished () {
     repo-install g++ libcgroup-dev
     compiler_assertions gcc g++
     assert_line "checking for gcc... gcc"
-    assert_line "checking baseurl... checking for g++... g++"
+    assert_line "checking for g++... g++"
     compile_assertions_finished
 }
 
@@ -114,7 +115,7 @@ compile_assertions_finished () {
     compiler_assertions cc c++
     assert_line "checking for gcc... no"
     assert_line "checking for cc... cc"
-    assert_line "checking baseurl... checking for g++... no"
+    assert_line "checking for g++... no"
     assert_line "checking for c++... c++"
     compile_assertions_finished
 }
@@ -298,12 +299,14 @@ compile_assertions_finished () {
 @test "Default URL not set, docs mention" {
   setup
   run run_configure
+  assert_line "checking baseurl... https://example.com/domjudge/"
   assert_line "Warning: base URL is unconfigured; generating team documentation will"
   assert_line "not work out of the box!"
   assert_line "Rerun configure with option '--with-baseurl=BASEURL' to correct this."
   assert_line " * website base URL....: https://example.com/domjudge/"
   assert_line " * documentation.......: /opt/domjudge/doc"
   run run_configure "--with-baseurl=https://contest.example.org"
+  assert_line "checking baseurl... https://contest.example.org"
   refute_line "Warning: base URL is unconfigured; generating team documentation will"
   refute_line "not work out of the box!"
   refute_line "Rerun configure with option '--with-baseurl=BASEURL' to correct this."
