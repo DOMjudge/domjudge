@@ -47,7 +47,7 @@ repo-remove () {
 compiler_assertions () {
     run run_configure
     # Depending on where we run this we might runas wrong user or lack libraries
-    # assert_success
+    # so we can't expect either success or failure.
     assert_line "checking whether configure should try to set CFLAGS... yes"
     assert_line "checking whether configure should try to set CXXFLAGS... yes"
     assert_line "checking whether configure should try to set LDFLAGS... yes"
