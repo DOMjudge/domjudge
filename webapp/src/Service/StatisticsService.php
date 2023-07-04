@@ -492,7 +492,7 @@ class StatisticsService
         };
     }
 
-    protected static function setOrIncrement(array &$array, $index): void
+    protected static function setOrIncrement(array &$array, int|string $index): void
     {
         if (!array_key_exists($index, $array)) {
             $array[$index] = 0;

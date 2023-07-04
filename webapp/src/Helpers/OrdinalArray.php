@@ -12,10 +12,7 @@ class OrdinalArray
     /** @var OrdinalItem[] */
     protected array $items;
 
-    /**
-     * @param array|Traversable $items
-     */
-    public function __construct($items)
+    public function __construct(Traversable|array $items)
     {
         $this->items = [];
         $ordinal     = 0;

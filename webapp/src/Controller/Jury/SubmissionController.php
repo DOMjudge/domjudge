@@ -1170,7 +1170,7 @@ class SubmissionController extends BaseController
         return $this->redirectToRoute('jury_submission', ['submitId' => $submitId]);
     }
 
-    private function maybeGetErrors(string $type, string $expectedConfigString, string $observedConfigString, array &$allErrors)
+    private function maybeGetErrors(string $type, string $expectedConfigString, string $observedConfigString, array &$allErrors): void
     {
         $expectedConfig = $this->dj->jsonDecode($expectedConfigString);
         $observedConfig = $this->dj->jsonDecode($observedConfigString);

@@ -1251,7 +1251,7 @@ class JudgehostController extends AbstractFOSRestController
             ),
         ]
     )]
-    public function checkVersions(Request $request, string $judgetaskid)
+    public function checkVersions(Request $request, string $judgetaskid): array
     {
         $judgeTask = $this->em->getRepository(JudgeTask::class)
             ->findOneBy(['judgetaskid' => $judgetaskid]);

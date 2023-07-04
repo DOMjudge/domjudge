@@ -55,7 +55,7 @@ class DOMJudgeBasicAuthenticator extends AbstractAuthenticator
         return new Passport(new UserBadge($request->headers->get('php-auth-user')), new PasswordCredentials($request->headers->get('php-auth-pw')));
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $firewallName): ?Response
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         // On success, let the request continue.
         return null;

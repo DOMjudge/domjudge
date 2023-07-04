@@ -63,12 +63,16 @@ class Rejudging
     private ?User $finish_user = null;
 
     /**
+     * @var Collection<int, Judging>
+     *
      * One rejudging has many judgings.
      */
     #[ORM\OneToMany(mappedBy: 'rejudging', targetEntity: Judging::class)]
     private Collection $judgings;
 
     /**
+     * @var Collection<int, Submission>
+     *
      * One rejudging has many submissions.
      */
     #[ORM\OneToMany(mappedBy: 'rejudging', targetEntity: Submission::class)]
@@ -175,6 +179,9 @@ class Rejudging
         return $this;
     }
 
+    /**
+     * @return Collection<int, Judging>
+     */
     public function getJudgings(): Collection
     {
         return $this->judgings;
@@ -186,6 +193,9 @@ class Rejudging
         return $this;
     }
 
+    /**
+     * @return Collection<int, Submission>
+     */
     public function getSubmissions(): Collection
     {
         return $this->submissions;

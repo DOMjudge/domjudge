@@ -18,6 +18,7 @@ use App\Utils\Utils;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -98,7 +99,7 @@ abstract class BaseController extends AbstractController
         EventLogService $eventLogService,
         DOMJudgeService $DOMJudgeService,
         object $entity,
-        $id,
+        mixed $id,
         bool $isNewEntity
     ): void {
         $auditLogType = Utils::tableForEntity($entity);
@@ -170,7 +171,7 @@ abstract class BaseController extends AbstractController
      * Handle the actual removal of an entity and the dependencies in the database.
      */
     protected function commitDeleteEntity(
-        $entity,
+        object $entity,
         DOMJudgeService $DOMJudgeService,
         EntityManagerInterface $entityManager,
         array $primaryKeyData,
@@ -279,6 +280,7 @@ abstract class BaseController extends AbstractController
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $inflector        = InflectorFactory::create()->build();
         $readableType     = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
+        /** @phpstan-ignore-next-line  */
         $metadata         = $entityManager->getClassMetadata($entities[0]::class);
         $primaryKeyData   = [];
         $messages         = [];

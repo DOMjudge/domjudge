@@ -87,6 +87,9 @@ class ContestProblem
     #[Serializer\Inline]
     private ?Problem $problem = null;
 
+    /**
+     * @var Collection<int, Submission>
+     */
     #[ORM\OneToMany(mappedBy: 'contest_problem', targetEntity: Submission::class)]
     #[Serializer\Exclude]
     private Collection $submissions;
@@ -205,6 +208,9 @@ class ContestProblem
         return $this;
     }
 
+    /**
+     * @return Collection<int, Submission>
+     */
     public function getSubmissions(): Collection
     {
         return $this->submissions;

@@ -69,7 +69,7 @@ class DOMJudgeXHeadersAuthenticator extends AbstractAuthenticator implements Aut
         return new Passport(new UserBadge($username), new PasswordCredentials($password));
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $firewallName): ?Response
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         // On success, redirect to the last page or the homepage if it was a user triggered action.
         if ($request->attributes->get('_route') === 'login'

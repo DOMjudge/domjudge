@@ -115,7 +115,7 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
         return new SelfValidatingPassport(new UserBadge($user->getUsername()));
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $firewallName): ?Response
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         // On success, redirect to the last page or the homepage if it was a user triggered action.
         if ($request->attributes->get('_route') === 'login'

@@ -336,7 +336,7 @@ class JuryMiscController extends BaseController
         #[Autowire('%domjudge.etcdir%')] string $etcDir,
         #[Autowire('%kernel.project_dir%')] string $projectDir,
         ConfigurationService $config
-    ) {
+    ): Response {
         if (!$config->get('adminer_enabled')) {
             throw new NotFoundHttpException();
         }

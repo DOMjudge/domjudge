@@ -150,7 +150,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * @param string[] $roleBaseURL The URL of the current roles.
      * @param string[] $roles The tested roles.
      */
-    protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages, $skip): array
+    protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages, string $skip): array
     {
         $this->roles = $roles;
         $this->logOut();
@@ -260,7 +260,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * Test that pages depending on an active contest do not crash on the server.
      * @dataProvider provideNoContestScenario
      */
-    public function testNoContestAccess(string $roleBaseURL, array $baseRoles, int $dataSource, $skip): void
+    public function testNoContestAccess(string $roleBaseURL, array $baseRoles, int $dataSource, string $skip): void
     {
         $this->setupDataSource($dataSource);
         $this->roles = $baseRoles;

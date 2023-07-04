@@ -129,18 +129,30 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     #[Serializer\Exclude]
     private ContestProblem $contest_problem;
 
+    /**
+     * @var Collection<int, Judging>
+     */
     #[ORM\OneToMany(mappedBy: 'submission', targetEntity: Judging::class)]
     #[Serializer\Exclude]
     private Collection $judgings;
 
+    /**
+     * @var Collection<int, ExternalJudgement>
+     */
     #[ORM\OneToMany(mappedBy: 'submission', targetEntity: ExternalJudgement::class)]
     #[Serializer\Exclude]
     private Collection $external_judgements;
 
+    /**
+     * @var Collection<int, SubmissionFile>
+     */
     #[ORM\OneToMany(mappedBy: 'submission', targetEntity: SubmissionFile::class)]
     #[Serializer\Exclude]
     private Collection $files;
 
+    /**
+     * @var Collection<int, Balloon>
+     */
     #[ORM\OneToMany(mappedBy: 'submission', targetEntity: Balloon::class)]
     #[Serializer\Exclude]
     private Collection $balloons;
@@ -158,6 +170,9 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     #[Serializer\Exclude]
     private ?Submission $originalSubmission = null;
 
+    /**
+     * @var Collection<int, Submission>
+     */
     #[ORM\OneToMany(mappedBy: 'originalSubmission', targetEntity: Submission::class)]
     #[Serializer\Exclude]
     private Collection $resubmissions;
@@ -318,6 +333,9 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
+    /**
+     * @return Collection<int, Judging>
+     */
     public function getJudgings(): Collection
     {
         return $this->judgings;
@@ -340,6 +358,9 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
+    /**
+     * @return Collection<int, SubmissionFile>
+     */
     public function getFiles(): Collection
     {
         return $this->files;
@@ -351,6 +372,9 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
+    /**
+     * @return Collection<int, Balloon>
+     */
     public function getBalloons(): Collection
     {
         return $this->balloons;
@@ -457,7 +481,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     }
 
     /**
-     * @return Collection|Submission[]
+     * @return Collection<int, Submission>
      */
     public function getResubmissions(): Collection
     {
@@ -498,6 +522,9 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
+    /**
+     * @return Collection<int, ExternalJudgement>
+     */
     public function getExternalJudgements(): Collection
     {
         return $this->external_judgements;

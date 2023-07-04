@@ -139,27 +139,45 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[Serializer\Exclude]
     private ?TeamCategory $category = null;
 
+    /**
+     * @var Collection<int, Contest>
+     */
     #[ORM\ManyToMany(targetEntity: Contest::class, mappedBy: 'teams')]
     #[Serializer\Exclude]
     private Collection $contests;
 
+    /**
+     * @var Collection<int, User>
+     */
     #[ORM\OneToMany(mappedBy: 'team', targetEntity: User::class, cascade: ['persist'])]
     #[Assert\Valid]
     #[Serializer\Exclude]
     private Collection $users;
 
+    /**
+     * @var Collection<int, Submission>
+     */
     #[ORM\OneToMany(mappedBy: 'team', targetEntity: Submission::class)]
     #[Serializer\Exclude]
     private Collection $submissions;
 
+    /**
+     * @var Collection<int, Clarification>
+     */
     #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Clarification::class)]
     #[Serializer\Exclude]
     private Collection $sent_clarifications;
 
+    /**
+     * @var Collection<int, Clarification>
+     */
     #[ORM\OneToMany(mappedBy: 'recipient', targetEntity: Clarification::class)]
     #[Serializer\Exclude]
     private Collection $received_clarifications;
 
+    /**
+     * @var Collection<int, Clarification>
+     */
     #[ORM\ManyToMany(targetEntity: Clarification::class)]
     #[ORM\JoinTable(name: 'team_unread')]
     #[ORM\JoinColumn(name: 'teamid', referencedColumnName: 'teamid', onDelete: 'CASCADE')]
@@ -440,6 +458,9 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         $contest->removeTeam($this);
     }
 
+    /**
+     * @return Collection<int, Contest>
+     */
     public function getContests(): Collection
     {
         return $this->contests;
@@ -452,6 +473,9 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     public function getUsers(): Collection
     {
         return $this->users;
@@ -463,6 +487,9 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
+    /**
+     * @return Collection<int, Submission>
+     */
     public function getSubmissions(): Collection
     {
         return $this->submissions;
@@ -474,6 +501,9 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
+    /**
+     * @return Collection<int, Clarification>
+     */
     public function getSentClarifications(): Collection
     {
         return $this->sent_clarifications;
@@ -485,6 +515,9 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
+    /**
+     * @return Collection<int, Clarification>
+     */
     public function getReceivedClarifications(): Collection
     {
         return $this->received_clarifications;
@@ -501,6 +534,9 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         $this->unread_clarifications->removeElement($unreadClarification);
     }
 
+    /**
+     * @return Collection<int, Clarification>
+     */
     public function getUnreadClarifications(): Collection
     {
         return $this->unread_clarifications;

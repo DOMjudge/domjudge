@@ -97,7 +97,7 @@ class ExternalContestSourceService
         $this->httpClient = $httpClient->withOptions($clientOptions);
     }
 
-    public function setSource(ExternalContestSource $source)
+    public function setSource(ExternalContestSource $source): void
     {
         $this->source = $source;
     }
@@ -1752,7 +1752,7 @@ class ExternalContestSourceService
         $this->em->flush();
     }
 
-    protected function processPendingEvents(string $type, $id): void
+    protected function processPendingEvents(string $type, string|int $id): void
     {
         // Process pending events.
         if (isset($this->pendingEvents[$type][$id])) {
@@ -1767,7 +1767,7 @@ class ExternalContestSourceService
         }
     }
 
-    protected function addPendingEvent(string $type, $id, string $operation, string $entityType, ?string $eventId, array $data): void
+    protected function addPendingEvent(string $type, string|int $id, string $operation, string $entityType, ?string $eventId, array $data): void
     {
         // First, check if we already have pending events for this event.
         // We do this by loading the warnings with the correct hash.

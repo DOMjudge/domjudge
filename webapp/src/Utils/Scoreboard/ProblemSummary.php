@@ -24,7 +24,7 @@ class ProblemSummary
         int $numSubmissions,
         int $numSubmissionsPending,
         int $numSubmissionsCorrect
-    ) {
+    ): void {
         if (!isset($this->numSubmissions[$sortorder])) {
             $this->numSubmissions[$sortorder] = 0;
         }
@@ -50,7 +50,7 @@ class ProblemSummary
         return null;
     }
 
-    public function updateBestTime(int $sortorder, string|float $bestTime)
+    public function updateBestTime(int $sortorder, string|float $bestTime): void
     {
         $this->bestTimes[$sortorder] = $bestTime;
     }
@@ -66,7 +66,7 @@ class ProblemSummary
     /**
      * update fastest runtime if given time is a new record for this problem/sortorder
      */
-    public function updateBestRuntime(int $sortorder, int $runtime)
+    public function updateBestRuntime(int $sortorder, int $runtime): void
     {
         if ($runtime < $this->getBestRuntime($sortorder)) {
             $this->bestRuntimes[$sortorder] = $runtime;

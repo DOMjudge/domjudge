@@ -788,6 +788,9 @@ class CheckConfigService
         return $result;
     }
 
+    /**
+     * @param class-string $class
+     */
     protected function checkExternalIdentifiers(string $class, string $externalIdField): array
     {
         $this->stopwatch->start(__FUNCTION__);

@@ -226,7 +226,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
-    public function helperCheckExistence(string $id, $value, array $element): void
+    public function helperCheckExistence(string $id, mixed $value, array $element): void
     {
         if (in_array($id, static::$addEntitiesShown)) {
             $tmpValue = $element[$id];

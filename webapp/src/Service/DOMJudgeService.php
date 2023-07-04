@@ -483,12 +483,12 @@ class DOMJudgeService
      */
     public function auditlog(
         string $datatype,
-        $dataid,
+        mixed $dataid,
         string $action,
-        $extraInfo = null,
-        $forceUsername = null,
+        mixed $extraInfo = null,
+        ?string $forceUsername = null,
         string|int|null $cid = null
-    ) {
+    ): void {
         if (!empty($forceUsername)) {
             $user = $forceUsername;
         } else {
@@ -543,7 +543,7 @@ class DOMJudgeService
     /**
      * Dis- or re-enable what caused an internal error.
      */
-    public function setInternalError(array $disabled, ?Contest $contest, ?bool $enabled)
+    public function setInternalError(array $disabled, ?Contest $contest, ?bool $enabled): void
     {
         switch ($disabled['kind']) {
             case 'problem':
@@ -1443,7 +1443,7 @@ class DOMJudgeService
         return $team;
     }
 
-    public function parseMetadata($raw_metadata): array
+    public function parseMetadata(string $raw_metadata): array
     {
         // TODO: Reduce duplication with judgedaemon code.
         $contents = explode("\n", $raw_metadata);
@@ -1532,7 +1532,7 @@ class DOMJudgeService
         ?Contest $contest,
         ScoreboardService $scoreboardService,
         bool $forceUnfrozen = false
-    ) {
+    ): StreamedResponse {
         $data = $scoreboardService->getScoreboardTwigData(
                 request: $request,
                 response: null,

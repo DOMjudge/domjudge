@@ -23,6 +23,9 @@ class ConfigurationServiceTest extends KernelTestCase
      */
     private ?EntityManagerInterface $em;
 
+    /**
+     * @var ObjectRepository<Configuration>&MockObject
+     */
     private ObjectRepository&MockObject $configRepository;
 
     private InvocationMocker $emGetRepositoryExpects;
@@ -135,7 +138,7 @@ class ConfigurationServiceTest extends KernelTestCase
     public function testConfigFromDatabase(
         string $itemName,
         mixed $dbValue,
-        $expectedValue = null
+        mixed $expectedValue = null
     ): void {
         $config = new Configuration();
         $config
@@ -164,7 +167,7 @@ class ConfigurationServiceTest extends KernelTestCase
     public function testConfigFromDatabaseAll(
         string $itemName,
         mixed $dbValue,
-        $expectedValue = null
+        mixed $expectedValue = null
     ): void {
         $config = new Configuration();
         $config

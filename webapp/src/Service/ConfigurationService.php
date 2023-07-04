@@ -149,7 +149,7 @@ EOF;
         array $dataToSet,
         EventLogService $eventLog,
         DOMJudgeService $dj
-    ) {
+    ): void {
         $specs = $this->getConfigSpecification();
         foreach ($specs as &$spec) {
             $spec = $this->addOptions($spec);

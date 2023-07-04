@@ -38,12 +38,21 @@ class Executable
     #[ORM\JoinColumn(name: 'immutable_execid', referencedColumnName: 'immutable_execid')]
     private ImmutableExecutable $immutableExecutable;
 
+    /**
+     * @var Collection<int, Language>
+     */
     #[ORM\OneToMany(mappedBy: 'compile_executable', targetEntity: Language::class)]
     private Collection $languages;
 
+    /**
+     * @var Collection<int, Problem>
+     */
     #[ORM\OneToMany(mappedBy: 'compare_executable', targetEntity: Problem::class)]
     private Collection $problems_compare;
 
+    /**
+     * @var Collection<int, Problem>
+     */
     #[ORM\OneToMany(mappedBy: 'run_executable', targetEntity: Problem::class)]
     private Collection $problems_run;
 
@@ -98,6 +107,9 @@ class Executable
         return $this;
     }
 
+    /**
+     * @return Collection<int, Language>
+     */
     public function getLanguages(): Collection
     {
         return $this->languages;
@@ -109,6 +121,9 @@ class Executable
         return $this;
     }
 
+    /**
+     * @return Collection<int, Problem>
+     */
     public function getProblemsCompare(): Collection
     {
         return $this->problems_compare;
@@ -120,6 +135,9 @@ class Executable
         return $this;
     }
 
+    /**
+     * @return Collection<int, Problem>
+     */
     public function getProblemsRun(): Collection
     {
         return $this->problems_run;

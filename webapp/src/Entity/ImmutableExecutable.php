@@ -33,6 +33,9 @@ class ImmutableExecutable
     #[Serializer\Exclude]
     private ?User $user = null;
 
+    /**
+     * @var Collection<int, ExecutableFile>|null
+     */
     #[ORM\OneToMany(mappedBy: 'immutableExecutable', targetEntity: ExecutableFile::class)]
     #[ORM\OrderBy(['filename' => 'ASC'])]
     #[Serializer\Exclude]
@@ -64,7 +67,7 @@ class ImmutableExecutable
         return $this->user;
     }
 
-    protected function updateHash()
+    protected function updateHash(): void
     {
         if ($this->files === null) {
             $this->hash = null;
@@ -82,6 +85,9 @@ class ImmutableExecutable
         );
     }
 
+    /**
+     * @return Collection<int, ExecutableFile>
+     */
     public function getFiles(): Collection
     {
         return $this->files;

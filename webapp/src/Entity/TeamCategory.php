@@ -84,14 +84,23 @@ class TeamCategory extends BaseApiEntity implements Stringable
     #[Serializer\Exclude]
     private bool $allow_self_registration = false;
 
+    /**
+     * @var Collection<int, Team>
+     */
     #[ORM\OneToMany(mappedBy: 'category', targetEntity: Team::class)]
     #[Serializer\Exclude]
     private Collection $teams;
 
+    /**
+     * @var Collection<int, Contest>
+     */
     #[ORM\ManyToMany(targetEntity: Contest::class, mappedBy: 'team_categories')]
     #[Serializer\Exclude]
     private Collection $contests;
 
+    /**
+     * @var Collection<int, Contest>
+     */
     #[ORM\ManyToMany(targetEntity: Contest::class, mappedBy: 'medal_categories')]
     #[Serializer\Exclude]
     private Collection $contests_for_medals;
@@ -207,13 +216,16 @@ class TeamCategory extends BaseApiEntity implements Stringable
         return $this;
     }
 
+    /**
+     * @return Collection<int, Team>
+     */
     public function getTeams(): Collection
     {
         return $this->teams;
     }
 
     /**
-     * @return Collection|Contest[]
+     * @return Collection<int, Contest>
      */
     public function getContests(): Collection
     {
@@ -231,7 +243,7 @@ class TeamCategory extends BaseApiEntity implements Stringable
     }
 
     /**
-     * @return Collection|Contest[]
+     * @return Collection<int, Contest>
      */
     public function getContestsForMedals(): Collection
     {

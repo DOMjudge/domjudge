@@ -92,7 +92,7 @@ class OrganizationControllerTest extends BaseTestCase
     /**
      * @dataProvider provideSingle
      */
-    public function testSingle($id, array $expectedProperties): void
+    public function testSingle(int|string $id, array $expectedProperties): void
     {
         // Remove country and country flag if not enabled.
         $showFlags = static::getContainer()->get(ConfigurationService::class)->get('show_flags');
@@ -182,7 +182,7 @@ class OrganizationControllerTest extends BaseTestCase
             $url = $this->helperGetEndpointURL($apiEndpoint).'?country='.$country;
 
             $objects = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
-    
+
             static::assertIsArray($objects);
             foreach ($this->expectedObjects as $expectedObjectId => $expectedObject) {
                 $filteredAway = true;
@@ -192,7 +192,7 @@ class OrganizationControllerTest extends BaseTestCase
                 foreach ($this->entityReferences as $field => $class) {
                     $expectedObject[$field] = $this->resolveEntityId($class, $expectedObject[$field]);
                 }
-    
+
                 $expectedObjectId = $this->resolveReference($expectedObjectId);
                 if ($this->objectClassForExternalId !== null) {
                     $expectedObjectId = $this->resolveEntityId($this->objectClassForExternalId, (string)$expectedObjectId);

@@ -136,7 +136,7 @@ class ImportExportService
         return $time instanceof DateTime ? DateTimeImmutable::createFromMutable($time) : $time;
     }
 
-    public function importContestData($data, ?string &$errorMessage = null, string &$cid = null): bool
+    public function importContestData(mixed $data, ?string &$errorMessage = null, string &$cid = null): bool
     {
         if (empty($data) || !is_array($data)) {
             $errorMessage = 'Error parsing YAML file.';
@@ -278,7 +278,7 @@ class ImportExportService
         return true;
     }
 
-    public function importProblemsData(Contest $contest, $problems, array &$ids = null): bool
+    public function importProblemsData(Contest $contest, array $problems, array &$ids = null): bool
     {
         // For problemset.yaml the root key is called `problems`, so handle that case
         if (isset($problems['problems'])) {

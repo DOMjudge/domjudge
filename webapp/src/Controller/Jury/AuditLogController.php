@@ -110,7 +110,7 @@ class AuditLogController extends AbstractController
         ]);
     }
 
-    private function generateDatatypeUrl(string $type, $id): ?string
+    private function generateDatatypeUrl(string $type, int|string|null $id): ?string
     {
         switch ($type) {
             case 'balloon':

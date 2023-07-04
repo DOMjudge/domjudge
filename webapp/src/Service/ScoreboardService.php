@@ -119,7 +119,7 @@ class ScoreboardService
         ?RankCache $rankCache = null,
         ?FreezeData $freezeData = null,
         bool $jury = false
-    ) {
+    ): int {
         if ($freezeData === null) {
             $freezeData = new FreezeData($contest);
         }

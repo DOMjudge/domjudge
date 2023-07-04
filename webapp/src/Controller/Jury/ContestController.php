@@ -539,8 +539,16 @@ class ContestController extends BaseController
             // overcomplicate this function.
             // Note that getSnapshot() returns the data as retrieved from the
             // database.
-            $getDeletedEntities = function (Collection $collection, string $idMethod) {
-                /** @var PersistentCollection $collection */
+            /**
+             * @param Collection<T> $collection
+             *
+             * @return array<T>
+             * @template T
+             */
+            $getDeletedEntities = function (Collection $collection, string $idMethod): array {
+                if (!$collection instanceof PersistentCollection) {
+                    return [];
+                }
                 $deletedEntities = [];
                 foreach ($collection->getSnapshot() as $oldEntity) {
                     $oldId = call_user_func([$oldEntity, $idMethod]);

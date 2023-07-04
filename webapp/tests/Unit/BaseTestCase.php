@@ -87,7 +87,7 @@ abstract class BaseTestCase extends WebTestCase
     /**
      * Resolve any references in the given ID.
      */
-    protected function resolveReference($id)
+    protected function resolveReference(int|string $id): int|string
     {
         // If the object ID contains a :, it is a reference to a fixture item, so get it.
         if (is_string($id) && str_contains($id, ':')) {

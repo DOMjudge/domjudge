@@ -652,7 +652,7 @@ class UtilsTest extends TestCase
      * test image thumbnail creation
      * @dataProvider provideImagesToThumb
      */
-    public function testGetImageThumb($imageLocation, $mime) : void
+    public function testGetImageThumb(string $imageLocation, string $mime) : void
     {
         $logo = __DIR__ . $imageLocation;
         $image = file_get_contents($logo);

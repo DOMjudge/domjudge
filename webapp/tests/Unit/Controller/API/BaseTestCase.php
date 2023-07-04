@@ -308,7 +308,7 @@ abstract class BaseTestCase extends BaseBaseTestCase
      *
      * @dataProvider provideSingle
      */
-    public function testSingle($id, array $expectedProperties): void
+    public function testSingle(int|string $id, array $expectedProperties): void
     {
         foreach ($this->entityReferences as $field => $class) {
             $expectedProperties[$field] = $this->resolveEntityId($class, $expectedProperties[$field]);

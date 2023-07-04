@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\BaseApiEntity;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -54,6 +55,17 @@ class EventLogService implements ContainerAwareInterface
     // TODO: Add a way to specify when to use external ID using some (DB)
     // config instead of hardcoding it here. Also relates to
     // AbstractRestController::getIdField.
+    /**
+     * @var array<string, array{
+     *     'type': string,
+     *     'entity'?: class-string,
+     *     'url'?: string|null,
+     *     'use-external-id'?: bool,
+     *     'always-use-external-id'?: bool,
+     *     'skip-in-event-feed'?: bool,
+     *     'tables'?: string[]
+     * }>
+     */
     public array $apiEndpoints = [
         'contests' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
@@ -206,9 +218,9 @@ class EventLogService implements ContainerAwareInterface
         string $action,
         ?int $contestId = null,
         ?string $json = null,
-        $ids = null,
+        mixed $ids = null,
         bool $checkEvents = true
-    ) {
+    ): void {
         // Sanitize and check input
         if (!is_array($dataIds)) {
             $dataIds = [$dataIds];
@@ -950,6 +962,7 @@ class EventLogService implements ContainerAwareInterface
         if ($field = $this->externalIdFieldForEntity($entity)) {
             return $field;
         }
+        /** @var class-string<BaseApiEntity> $class */
         $class    = is_object($entity) ? $entity::class : $entity;
         $metadata = $this->em->getClassMetadata($class);
         try {

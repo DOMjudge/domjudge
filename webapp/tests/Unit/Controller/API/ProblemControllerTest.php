@@ -111,7 +111,7 @@ class ProblemControllerTest extends BaseTestCase
      *
      * @dataProvider provideSingle
      */
-    public function testStatement($id): void
+    public function testStatement(int|string $id): void
     {
         $id = $this->resolveReference($id);
         if (($apiEndpoint = $this->apiEndpoint) === null) {
