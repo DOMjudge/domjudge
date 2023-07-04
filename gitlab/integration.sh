@@ -70,6 +70,7 @@ cp etc/initial_admin_password.secret "$GITLABARTIFACTS/"
 section_end setup
 
 section_start submit_client "Test submit client"
+cd ${DIR}/example_problems; make create-python-from-bash
 cd ${DIR}/submit
 make check-full
 section_end submit_client
