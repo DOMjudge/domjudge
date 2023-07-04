@@ -185,9 +185,9 @@ class OrganizationControllerTest extends BaseTestCase
     
             static::assertIsArray($objects);
             foreach ($this->expectedObjects as $expectedObjectId => $expectedObject) {
-                $filteredAway = True;
+                $filteredAway = true;
                 if ($expectedObject['country'] === $country) {
-                    $filteredAway = False;
+                    $filteredAway = false;
                 }
                 foreach ($this->entityReferences as $field => $class) {
                     $expectedObject[$field] = $this->resolveEntityId($class, $expectedObject[$field]);
