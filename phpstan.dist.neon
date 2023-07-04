@@ -1,9 +1,10 @@
 parameters:
-    level: 5
+    level: 6
     paths:
         - webapp/src
         - webapp/tests
     excludePaths:
         - webapp/src/Utils/Adminer.php
 includes:
+    - phpstan-baseline.neon
     - lib/vendor/phpstan/phpstan-doctrine/extension.neon

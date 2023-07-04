@@ -1,0 +1,2066 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\AbstractRestController\\:\\:listActionHelper\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/AbstractRestController.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$objects has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/AbstractRestController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\AccessController\\:\\:getStatusAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/AccessController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\AwardsController\\:\\:getAwardsData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/AwardsController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\AwardsController\\:\\:listAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/AwardsController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\AwardsController\\:\\:singleAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/AwardsController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\BalloonController\\:\\:listAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/BalloonController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\ContestController\\:\\:getContestStateAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/ContestController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\ContestController\\:\\:getStatusAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/ContestController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:addProblemAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/GeneralInfoController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:getDatabaseConfigurationAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/GeneralInfoController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:getInfoAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/GeneralInfoController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:getStatusAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/GeneralInfoController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:getVersionAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/GeneralInfoController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:updateConfigurationAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/GeneralInfoController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:checkVersions\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:createJudgehostAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getExecutableFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getFilesAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getJudgeTasksAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getJudgehostsAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getJudgetasks\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getSourceFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getTestcaseFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getVersionCommands\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:serializeJudgeTasks\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:updateJudgeHostAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$judgings has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgementTypeController\\:\\:getJudgementTypes\\(\\) has parameter \\$filteredOn with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgementTypeController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgementTypeController\\:\\:getJudgementTypes\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgementTypeController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgementTypeController\\:\\:listAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgementTypeController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\JudgementTypeController\\:\\:singleAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgementTypeController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\ProblemController\\:\\:addProblemAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/ProblemController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\ProblemController\\:\\:addProblemsAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/ProblemController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\ProblemController\\:\\:transformObject\\(\\) has parameter \\$object with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/ProblemController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\ScoreboardController\\:\\:getScoreboardAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/ScoreboardController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\SubmissionController\\:\\:getSubmissionSourceCodeAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/SubmissionController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:buildDeleteTree\\(\\) has parameter \\$entities with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:buildDeleteTree\\(\\) has parameter \\$relations with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:buildDeleteTree\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:commitDeleteEntity\\(\\) has parameter \\$primaryKeyData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:deleteEntities\\(\\) has parameter \\$entities with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:getDatabaseRelations\\(\\) has parameter \\$files with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:getDatabaseRelations\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:getDependentEntities\\(\\) has parameter \\$relations with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:getDependentEntities\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$delayedJudgings has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/AnalysisController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\BalloonController\\:\\:areDefault\\(\\) has parameter \\$defaultCategories with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/BalloonController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\BalloonController\\:\\:areDefault\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/BalloonController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\ClarificationController\\:\\:getClarificationFormData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ClarificationController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\ContestController\\:\\:judgeRemaining\\(\\) has parameter \\$judgings with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ContestController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\ExecutableController\\:\\:dataForEditor\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ExecutableController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\LanguageController\\:\\:judgeRemaining\\(\\) has parameter \\$judgings with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/LanguageController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\ProblemController\\:\\:addTestcasesToZip\\(\\) has parameter \\$testcases with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ProblemController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\ProblemController\\:\\:judgeRemaining\\(\\) has parameter \\$judgings with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ProblemController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\RejudgingController\\:\\:generateFlashMessagesForSkippedJudgings\\(\\) has parameter \\$skipped with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/RejudgingController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\RejudgingController\\:\\:getStats\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/RejudgingController.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$judgings has no value type specified in iterable type array\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/RejudgingController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\SubmissionController\\:\\:determineFileChanged\\(\\) has parameter \\$files with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\SubmissionController\\:\\:determineFileChanged\\(\\) has parameter \\$oldFiles with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\SubmissionController\\:\\:determineFileChanged\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\SubmissionController\\:\\:judgeRemaining\\(\\) has parameter \\$judgings with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\SubmissionController\\:\\:maybeGetErrors\\(\\) has parameter \\$allErrors with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\TeamCategoryController\\:\\:judgeRemaining\\(\\) has parameter \\$judgings with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/TeamCategoryController.php
+
+		-
+			message: "#^Method App\\\\DataFixtures\\\\Test\\\\RejudgingStatesFixture\\:\\:rejudgingStages\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/DataFixtures/Test/RejudgingStatesFixture.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Clarification\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Clarification.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Contest\\:\\:getDataForJuryInterface\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Contest.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Contest\\:\\:getState\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Contest.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\ExternalRelationshipEntityInterface\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/ExternalRelationshipEntityInterface.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\ExternalSourceWarning\\:\\:getContent\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/ExternalSourceWarning.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\ExternalSourceWarning\\:\\:setContent\\(\\) has parameter \\$content with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/ExternalSourceWarning.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\ExternalSourceWarning\\:\\:\\$content type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/ExternalSourceWarning.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\InternalError\\:\\:getDisabled\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/InternalError.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\InternalError\\:\\:setDisabled\\(\\) has parameter \\$disabled with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/InternalError.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\InternalError\\:\\:\\$disabled type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/InternalError.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Judging\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Judging.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Judging\\:\\:getJudgehosts\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Judging.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Language\\:\\:getExtensions\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Language.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Language\\:\\:setExtensions\\(\\) has parameter \\$extensions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Language.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Submission\\:\\:getExpectedResults\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Submission.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Submission\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Submission.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Submission\\:\\:setExpectedResults\\(\\) has parameter \\$expectedResults with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Submission.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Submission\\:\\:\\$expected_results type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Submission.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Team\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Team.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Team\\:\\:getGroupIds\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/Team.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\User\\:\\:__unserialize\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/User.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\User\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/User.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\User\\:\\:getRoleList\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/User.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\User\\:\\:getUserRoles\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Entity/User.php
+
+		-
+			message: "#^Method App\\\\FosRestBundle\\\\FlattenExceptionHandler\\:\\:convertToArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/FosRestBundle/FlattenExceptionHandler.php
+
+		-
+			message: "#^Method App\\\\FosRestBundle\\\\FlattenExceptionHandler\\:\\:getSubscribingMethods\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/FosRestBundle/FlattenExceptionHandler.php
+
+		-
+			message: "#^Method App\\\\FosRestBundle\\\\FlattenExceptionHandler\\:\\:serializeToJson\\(\\) has parameter \\$type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/FosRestBundle/FlattenExceptionHandler.php
+
+		-
+			message: "#^Method App\\\\FosRestBundle\\\\FlattenExceptionHandler\\:\\:serializeToJson\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/FosRestBundle/FlattenExceptionHandler.php
+
+		-
+			message: "#^Method App\\\\Helpers\\\\OrdinalArray\\:\\:__construct\\(\\) has parameter \\$items with no value type specified in iterable type Traversable\\.$#"
+			count: 1
+			path: webapp/src/Helpers/OrdinalArray.php
+
+		-
+			message: "#^Method App\\\\Helpers\\\\OrdinalArray\\:\\:__construct\\(\\) has parameter \\$items with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Helpers/OrdinalArray.php
+
+		-
+			message: "#^Method App\\\\Helpers\\\\OrdinalArray\\:\\:__construct\\(\\) has parameter \\$items with no value type specified in iterable type array\\|Traversable\\.$#"
+			count: 1
+			path: webapp/src/Helpers/OrdinalArray.php
+
+		-
+			message: "#^Method App\\\\Serializer\\\\ContestProblemVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Serializer/ContestProblemVisitor.php
+
+		-
+			message: "#^Method App\\\\Serializer\\\\ContestVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Serializer/ContestVisitor.php
+
+		-
+			message: "#^Method App\\\\Serializer\\\\SetExternalIdVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Serializer/SetExternalIdVisitor.php
+
+		-
+			message: "#^Method App\\\\Serializer\\\\SubmissionVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Serializer/SubmissionVisitor.php
+
+		-
+			message: "#^Method App\\\\Serializer\\\\TeamAffiliationVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Serializer/TeamAffiliationVisitor.php
+
+		-
+			message: "#^Method App\\\\Serializer\\\\TeamVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Serializer/TeamVisitor.php
+
+		-
+			message: "#^Method App\\\\Service\\\\AwardService\\:\\:getAwards\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/AwardService.php
+
+		-
+			message: "#^Property App\\\\Service\\\\AwardService\\:\\:\\$awardCache type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/AwardService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\BalloonService\\:\\:collectBalloonTable\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/BalloonService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkAdminPass\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkAffiliations\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkAllExternalIdentifiers\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkContestActive\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkContestBanners\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkContestsValidate\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkDebugDisabled\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkDefaultCompareRunExist\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkExternalIdentifiers\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkHashTime\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkLanguagesValidate\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkMysqlSettings\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkPhpExtensions\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkPhpSettings\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkPhpVersion\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkProblemsValidate\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkScriptFilesizevsMemoryLimit\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkSelfRegistration\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkTeamDuplicateNames\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkTeamPhotos\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkTmpdirWritable\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:runAll\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$tcs_size has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:addOptions\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:addOptions\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:all\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:findExecutableOptions\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:getConfigSpecification\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:getDbValues\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:saveChanges\\(\\) has parameter \\$dataToSet with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Property App\\\\Service\\\\ConfigurationService\\:\\:\\$dbConfigCache type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:apiRelativeUrl\\(\\) has parameter \\$params with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getAssetFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getContestStats\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getDocLinks\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getProblemsForExecutable\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getTwigDataForProblemsAction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getUnreadClarifications\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getUpdates\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getVerdicts\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:internalApiRequest\\(\\) has parameter \\$queryOrPostData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:parseMetadata\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:printFile\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:setInternalError\\(\\) has parameter \\$disabled with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\EventLogService\\:\\:getExternalIds\\(\\) has parameter \\$ids with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/EventLogService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\EventLogService\\:\\:getExternalIds\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/EventLogService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\EventLogService\\:\\:hasAllDependentObjectEvents\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/EventLogService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\EventLogService\\:\\:insertEvent\\(\\) has parameter \\$content with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/EventLogService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\EventLogService\\:\\:insertEvents\\(\\) has parameter \\$contents with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/EventLogService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\EventLogService\\:\\:insertEvents\\(\\) has parameter \\$endpointIds with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/EventLogService.php
+
+		-
+			message: "#^Property App\\\\Service\\\\EventLogService\\:\\:\\$entityToEndpoint type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/EventLogService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:addOrUpdateWarning\\(\\) has parameter \\$content with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:addPendingEvent\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:compareOrCreateValues\\(\\) has parameter \\$extraDiff with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:compareOrCreateValues\\(\\) has parameter \\$values with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:getEventFeedFormat\\(\\) has parameter \\$event with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:import\\(\\) has parameter \\$eventsToSkip with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importClarification\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importEvent\\(\\) has parameter \\$event with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importEvent\\(\\) has parameter \\$eventsToSKip with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importFromCcsApi\\(\\) has parameter \\$eventsToSkip with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importFromContestArchive\\(\\) has parameter \\$eventsToSkip with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importJudgement\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importJudgementType\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importRun\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importSubmission\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:validateAndUpdateContest\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:validateAndUpdateGroup\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:validateAndUpdateOrganization\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:validateAndUpdateProblem\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:validateAndUpdateTeam\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:validateLanguage\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:warningIfUnsupported\\(\\) has parameter \\$supportedActions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Property App\\\\Service\\\\ExternalContestSourceService\\:\\:\\$cachedApiInfoData type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Property App\\\\Service\\\\ExternalContestSourceService\\:\\:\\$cachedContestData type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Property App\\\\Service\\\\ExternalContestSourceService\\:\\:\\$pendingEvents type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Property App\\\\Service\\\\ExternalContestSourceService\\:\\:\\$verdicts type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:convertImportedTime\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:convertImportedTime\\(\\) has parameter \\$fields with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:getContestYamlData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:getDjRoles\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:getGroupData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:getResultsData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:getTeamData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importAccountData\\(\\) has parameter \\$accountData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importAccountsJson\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importAccountsTsv\\(\\) has parameter \\$content with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importGroupData\\(\\) has parameter \\$groupData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importGroupsJson\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importGroupsTsv\\(\\) has parameter \\$content with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importOrganizationData\\(\\) has parameter \\$organizationData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importOrganizationsJson\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importProblemsData\\(\\) has parameter \\$ids with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importProblemsData\\(\\) has parameter \\$problems with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importTeamData\\(\\) has parameter \\$teamData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importTeamsJson\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:importTeamsTsv\\(\\) has parameter \\$content with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportProblemService\\:\\:importProblemFromRequest\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportProblemService\\:\\:importZippedProblem\\(\\) has parameter \\$messages with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportProblemService\\:\\:searchAndAddValidator\\(\\) has parameter \\$messages with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\RejudgingService\\:\\:calculateTodo\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/RejudgingService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\RejudgingService\\:\\:createRejudging\\(\\) has parameter \\$judgings with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/RejudgingService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\RejudgingService\\:\\:createRejudging\\(\\) has parameter \\$skipped with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/RejudgingService.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$submissions has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/RejudgingService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ScoreboardService\\:\\:getFilterValues\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ScoreboardService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ScoreboardService\\:\\:getGroupedAffiliations\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ScoreboardService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ScoreboardService\\:\\:getScoreboardTwigData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/ScoreboardService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\StatisticsService\\:\\:getGroupedProblemsStats\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/StatisticsService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\StatisticsService\\:\\:getMiscContestStatistics\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/StatisticsService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\StatisticsService\\:\\:getProblemStats\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/StatisticsService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\StatisticsService\\:\\:getTeamNumSubmissions\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/StatisticsService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\StatisticsService\\:\\:getTeamStats\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/StatisticsService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\StatisticsService\\:\\:setOrIncrement\\(\\) has parameter \\$array with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/StatisticsService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getExpectedResults\\(\\) has parameter \\$resultsRemap with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/SubmissionService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getExpectedResults\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/SubmissionService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getFinalResult\\(\\) has parameter \\$resultsPrio with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/SubmissionService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getSourceFilename\\(\\) has parameter \\$fileData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/SubmissionService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getSubmissionList\\(\\) has parameter \\$contests with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/SubmissionService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getSubmissionList\\(\\) has parameter \\$restrictions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/SubmissionService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getSubmissionList\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Service/SubmissionService.php
+
+		-
+			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:customAssetFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:displayTestcaseResults\\(\\) has parameter \\$testcases with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:getCommonPrefix\\(\\) has parameter \\$strings with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:numTableActions\\(\\) has parameter \\$tableData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:printHosts\\(\\) has parameter \\$hostnames with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:runDiff\\(\\) has parameter \\$runOutput with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Method App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\:\\:getUsedCategories\\(\\) has parameter \\$limitToTeamIds with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Utils/Scoreboard/Scoreboard.php
+
+		-
+			message: "#^Method App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\:\\:hasCategoryColors\\(\\) has parameter \\$limitToTeamIds with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Utils/Scoreboard/Scoreboard.php
+
+		-
+			message: "#^Method App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\:\\:isBestInCategory\\(\\) has parameter \\$limitToTeamIds with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Utils/Scoreboard/Scoreboard.php
+
+		-
+			message: "#^Property App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\:\\:\\$bestInCategoryData type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Utils/Scoreboard/Scoreboard.php
+
+		-
+			message: "#^Method App\\\\Utils\\\\Scoreboard\\\\Summary\\:\\:__construct\\(\\) has parameter \\$problems with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Utils/Scoreboard/Summary.php
+
+		-
+			message: "#^Method App\\\\Utils\\\\Utils\\:\\:computeLcsDiff\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Method App\\\\Utils\\\\Utils\\:\\:getImageSize\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Method App\\\\Utils\\\\Utils\\:\\:parseHexColor\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Method App\\\\Utils\\\\Utils\\:\\:parseTsvLine\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Method App\\\\Utils\\\\Utils\\:\\:reindex\\(\\) has parameter \\$array with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Method App\\\\Utils\\\\Utils\\:\\:reindex\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Method App\\\\Utils\\\\Utils\\:\\:rgbToHex\\(\\) has parameter \\$color with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\E2E\\\\Controller\\\\ControllerRolesTraversalTest\\:\\:getAllPages\\(\\) has parameter \\$urlsToCheck with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\E2E\\\\Controller\\\\ControllerRolesTraversalTest\\:\\:getAllPages\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\E2E\\\\Controller\\\\ControllerRolesTraversalTest\\:\\:getLoops\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\E2E\\\\Controller\\\\ControllerRolesTraversalTest\\:\\:getPagesRoles\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\E2E\\\\Controller\\\\ControllerRolesTraversalTest\\:\\:roleCombinations\\(\\) has parameter \\$possible_roles with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\E2E\\\\Controller\\\\ControllerRolesTraversalTest\\:\\:roleCombinations\\(\\) has parameter \\$start_roles with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\E2E\\\\Controller\\\\ControllerRolesTraversalTest\\:\\:roleCombinations\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\E2E\\\\Controller\\\\ControllerRolesTraversalTest\\:\\:testNoContestAccess\\(\\) has parameter \\$baseRoles with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\E2E\\\\Controller\\\\ControllerRolesTraversalTest\\:\\:verifyAccess\\(\\) has parameter \\$combinations with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\E2E\\\\Controller\\\\ControllerRolesTraversalTest\\:\\:\\$fullstrings type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\E2E\\\\Controller\\\\ControllerRolesTraversalTest\\:\\:\\$riskyURLs type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\E2E\\\\Controller\\\\ControllerRolesTraversalTest\\:\\:\\$substrings type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\BaseTestCase\\:\\:getDatasourceLoops\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\BaseTestCase\\:\\:loadFixtures\\(\\) has parameter \\$fixtures with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\BaseTestCase\\:\\:unzipString\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\BaseTestCase\\:\\:\\$dataSources type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\AccountBaseTestCase\\:\\:helperVerifyApiUsers\\(\\) has parameter \\$newUserPostData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/AccountBaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\AccountBaseTestCase\\:\\:helperVerifyApiUsers\\(\\) has parameter \\$objectsBeforeTest with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/AccountBaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\AccountBaseTestCase\\:\\:helperVerifyApiUsers\\(\\) has parameter \\$overwritten with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/AccountBaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\AccountBaseTestCase\\:\\:testCreateUser\\(\\) has parameter \\$newUserPostData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/AccountBaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\AccountBaseTestCase\\:\\:testCreateUser\\(\\) has parameter \\$overwritten with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/AccountBaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\AccountBaseTestCase\\:\\:testCreateUserFileImport\\(\\) has parameter \\$newUserPostData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/AccountBaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\AccountBaseTestCase\\:\\:testCreateUserFileImport\\(\\) has parameter \\$overwritten with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/AccountBaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\AccountControllerTest\\:\\:testCurrentAccount\\(\\) has parameter \\$expectedData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/AccountControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\AccountControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/AccountControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\AwardsControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/AwardsControllerTest.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$response has no value type specified in iterable type array\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Controller/API/BalloonsControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\BaseTestCase\\:\\:testSingle\\(\\) has parameter \\$expectedProperties with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/BaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\BaseTestCase\\:\\:verifyApiJsonResponse\\(\\) has parameter \\$files with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/BaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\BaseTestCase\\:\\:verifyApiResponse\\(\\) has parameter \\$files with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/BaseTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\BaseTestCase\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/BaseTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\BaseTestCase\\:\\:\\$rootEndpoints type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/BaseTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\ClarificationControllerTest\\:\\:testAddInvalidData\\(\\) has parameter \\$dataToSend with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ClarificationControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\ClarificationControllerTest\\:\\:testAddSuccess\\(\\) has parameter \\$dataToSend with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ClarificationControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\ClarificationControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ClarificationControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\ContestControllerAdminTest\\:\\:parseSortYaml\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ContestControllerAdminTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\ContestControllerAdminTest\\:\\:testChangeTimes\\(\\) has parameter \\$body with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ContestControllerAdminTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\ContestControllerAdminTest\\:\\:testChangeTimes\\(\\) has parameter \\$extraFixtures with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ContestControllerAdminTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\ContestControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ContestControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\ExecutableControllerTest\\:\\:base64unzip\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ExecutableControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\GeneralInfoControllerTest\\:\\:testUserEndpoint\\(\\) has parameter \\$roles with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/GeneralInfoControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\GroupControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/GroupControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\GroupControllerTest\\:\\:\\$newGroupPostData type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/GroupControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\JudgehostControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/JudgehostControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\JudgementTypesControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/JudgementTypesControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\LanguageControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/LanguageControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\OrganizationControllerTest\\:\\:testSingle\\(\\) has parameter \\$expectedProperties with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/OrganizationControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\OrganizationControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/OrganizationControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\ProblemControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ProblemControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\ScoreboardControllerTest\\:\\:testFilteredScoreboard\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ScoreboardControllerTest.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$scoreboardRows has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ScoreboardControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\SubmissionControllerTest\\:\\:base64ZipWithFiles\\(\\) has parameter \\$files with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\SubmissionControllerTest\\:\\:testAddInvalidData\\(\\) has parameter \\$dataToSend with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\SubmissionControllerTest\\:\\:testAddSuccess\\(\\) has parameter \\$dataToSend with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\SubmissionControllerTest\\:\\:testAddSuccess\\(\\) has parameter \\$expectedFiles with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\SubmissionControllerTest\\:\\:testAddSuccess\\(\\) has parameter \\$filesToSend with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\SubmissionControllerTest\\:\\:testAddSuccess\\(\\) has parameter \\$zipFiles with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\SubmissionControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\TeamControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/TeamControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\UserControllerTest\\:\\:\\$expectedObjects type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/UserControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ContestControllerTest\\:\\:\\$DOM_elements type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ContestControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ContestControllerTest\\:\\:\\$addEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ContestControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ContestControllerTest\\:\\:\\$addEntitiesShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ContestControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ContestControllerTest\\:\\:\\$deleteEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ContestControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ContestControllerTest\\:\\:\\$deleteExtra type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ContestControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ContestControllerTest\\:\\:\\$exampleEntries type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ContestControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ExecutableControllerTest\\:\\:\\$DOM_elements type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ExecutableControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ExecutableControllerTest\\:\\:\\$addEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ExecutableControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ExecutableControllerTest\\:\\:\\$addEntitiesShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ExecutableControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ExecutableControllerTest\\:\\:\\$deleteEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ExecutableControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ExecutableControllerTest\\:\\:\\$exampleEntries type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ExecutableControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JudgehostControllerTest\\:\\:\\$DOM_elements type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JudgehostControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JudgehostControllerTest\\:\\:\\$deleteEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JudgehostControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JudgehostControllerTest\\:\\:\\$deleteFixtures type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JudgehostControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JudgehostControllerTest\\:\\:\\$exampleEntries type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JudgehostControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:helperCheckExistence\\(\\) has parameter \\$element with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:testCheckEditEntityAdmin\\(\\) has parameter \\$formDataKeys with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:testCheckEditEntityAdmin\\(\\) has parameter \\$formDataValues with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:testPageOverview\\(\\) has parameter \\$elements with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$item has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$DOM_elements type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$addEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$addEntitiesCount type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$addEntitiesShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$deleteEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$deleteExtra type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$deleteFixtures type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$editEntitiesSkipFields type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$exampleEntries type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$overviewNotShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$rolesDisallowed type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$rolesView type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryControllerTestCase\\:\\:\\$specialFieldOnlyUpdate type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryMiscControllerTest\\:\\:testBalloonScoreboard\\(\\) has parameter \\$fixtures with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryMiscControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryMiscControllerTest\\:\\:testJuryAjax\\(\\) has parameter \\$finalObject with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryMiscControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\JuryMiscControllerTest\\:\\:testJuryAjax\\(\\) has parameter \\$newRoles with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryMiscControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\LanguagesControllerTest\\:\\:\\$DOM_elements type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/LanguagesControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\LanguagesControllerTest\\:\\:\\$addEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/LanguagesControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\LanguagesControllerTest\\:\\:\\$addEntitiesShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/LanguagesControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\LanguagesControllerTest\\:\\:\\$deleteEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/LanguagesControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\LanguagesControllerTest\\:\\:\\$exampleEntries type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/LanguagesControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ProblemControllerTest\\:\\:\\$DOM_elements type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ProblemControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ProblemControllerTest\\:\\:\\$addEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ProblemControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ProblemControllerTest\\:\\:\\$addEntitiesShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ProblemControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ProblemControllerTest\\:\\:\\$deleteEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ProblemControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ProblemControllerTest\\:\\:\\$deleteExtra type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ProblemControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\ProblemControllerTest\\:\\:\\$exampleEntries type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/ProblemControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\RejudgingControllerTest\\:\\:testRejudgingCounterMenu\\(\\) has parameter \\$hidden with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/RejudgingControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\RejudgingControllerTest\\:\\:testRejudgingCounterMenu\\(\\) has parameter \\$shown with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/RejudgingControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\RejudgingControllerTest\\:\\:testRejudgingCurrentContest\\(\\) has parameter \\$hidden with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/RejudgingControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\RejudgingControllerTest\\:\\:testRejudgingCurrentContest\\(\\) has parameter \\$shown with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/RejudgingControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\RejudgingControllerTest\\:\\:testStartPage\\(\\) has parameter \\$roles with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/RejudgingControllerTest.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$rejudgings has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/RejudgingControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\SubmissionControllerTest\\:\\:testIndexViewFilter\\(\\) has parameter \\$fixtures with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/SubmissionControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamAffiliationControllerTest\\:\\:\\$DOM_elements type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamAffiliationControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamAffiliationControllerTest\\:\\:\\$addEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamAffiliationControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamAffiliationControllerTest\\:\\:\\$addEntitiesShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamAffiliationControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamAffiliationControllerTest\\:\\:\\$deleteEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamAffiliationControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamAffiliationControllerTest\\:\\:\\$deleteFixtures type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamAffiliationControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamAffiliationControllerTest\\:\\:\\$exampleEntries type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamAffiliationControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamAffiliationControllerTest\\:\\:\\$overviewNotShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamAffiliationControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamCategoryControllerTest\\:\\:\\$DOM_elements type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamCategoryControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamCategoryControllerTest\\:\\:\\$addEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamCategoryControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamCategoryControllerTest\\:\\:\\$addEntitiesShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamCategoryControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamCategoryControllerTest\\:\\:\\$deleteEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamCategoryControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamCategoryControllerTest\\:\\:\\$exampleEntries type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamCategoryControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamControllerTest\\:\\:\\$DOM_elements type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamControllerTest\\:\\:\\$addEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamControllerTest\\:\\:\\$addEntitiesCount type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamControllerTest\\:\\:\\$addEntitiesShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamControllerTest\\:\\:\\$deleteEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamControllerTest\\:\\:\\$editEntitiesSkipFields type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamControllerTest\\:\\:\\$exampleEntries type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\TeamControllerTest\\:\\:\\$overviewNotShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\UserControllerTest\\:\\:\\$DOM_elements type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/UserControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\UserControllerTest\\:\\:\\$addEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/UserControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\UserControllerTest\\:\\:\\$addEntitiesShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/UserControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\UserControllerTest\\:\\:\\$deleteEntities type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/UserControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\UserControllerTest\\:\\:\\$editEntitiesSkipFields type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/UserControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\UserControllerTest\\:\\:\\$exampleEntries type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/UserControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\UserControllerTest\\:\\:\\$overviewNotShown type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/UserControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\UserControllerTest\\:\\:\\$specialFieldOnlyUpdate type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/UserControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:setupSelfRegisterForm\\(\\) has parameter \\$fixtures with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:setupSelfRegisterForm\\(\\) has parameter \\$inputs with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:setupSelfRegisterForm\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:testSelfRegister\\(\\) has parameter \\$fixtures with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:testSelfRegister\\(\\) has parameter \\$inputs with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:testSelfRegisterDuplicateValue\\(\\) has parameter \\$fixtures with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:testSelfRegisterDuplicateValue\\(\\) has parameter \\$inputs with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:testSelfRegisterMissingField\\(\\) has parameter \\$fixtures with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:testSelfRegisterMissingField\\(\\) has parameter \\$inputs with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:testSelfRegisterNonExistingValues\\(\\) has parameter \\$fixtures with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:testSelfRegisterNonExistingValues\\(\\) has parameter \\$inputs with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:testSelfRegisterWrongPassword\\(\\) has parameter \\$fixtures with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:testSelfRegisterWrongPassword\\(\\) has parameter \\$inputs with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:\\$duplicateFields type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:\\$formFields type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\PublicControllerTest\\:\\:\\$requiredFields type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Integration\\\\QueuetaskIntegrationTest\\:\\:\\$configValues type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/QueuetaskIntegrationTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Integration\\\\ScoreboardIntegrationTest\\:\\:assertFTSMatch\\(\\) has parameter \\$expected_fts with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/ScoreboardIntegrationTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Integration\\\\ScoreboardIntegrationTest\\:\\:assertScoresMatch\\(\\) has parameter \\$expected_scores with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/ScoreboardIntegrationTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Integration\\\\ScoreboardIntegrationTest\\:\\:\\$configValues type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/ScoreboardIntegrationTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Service\\\\AwardServiceTest\\:\\:getAward\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/AwardServiceTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Service\\\\ConfigurationServiceTest\\:\\:findItem\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ConfigurationServiceTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Service\\\\ConfigurationServiceTest\\:\\:testAddOptionsExecutables\\(\\) has parameter \\$expected with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ConfigurationServiceTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Service\\\\ConfigurationServiceTest\\:\\:\\$dbConfig type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ConfigurationServiceTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Service\\\\ImportExportServiceTest\\:\\:testImportContestDataSuccess\\(\\) has parameter \\$expectedProblems with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ImportExportServiceTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Service\\\\ImportExportServiceTest\\:\\:testImportProblemsDataSuccess\\(\\) has parameter \\$expectedProblems with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ImportExportServiceTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Service\\\\SubmissionServiceTest\\:\\:testGetFinalResult\\(\\) has parameter \\$resultsPrio with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/SubmissionServiceTest.php
+
+		-
+			message: "#^Method App\\\\Tests\\\\Unit\\\\Service\\\\SubmissionServiceTest\\:\\:testGetFinalResult\\(\\) has parameter \\$runresults with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/SubmissionServiceTest.php
