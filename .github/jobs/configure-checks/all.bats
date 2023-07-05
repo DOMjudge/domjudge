@@ -4,6 +4,11 @@ load 'assert'
 
 u="domjudge-bats-user"
 
+if [ -z ${test_path+x} ]; then
+    test_path="/domjudge"
+    # Used in the CI
+fi
+
 setup_user() {
     id -u $u || useradd $u >/dev/null
     chown -R $u:$u ./
@@ -39,7 +44,7 @@ repo-remove () {
     assert_line "checking for gcc... no"
     assert_line "checking for cc... no"
     assert_line "checking for cl.exe... no"
-    assert_line "configure: error: in \`/domjudge':"
+    assert_line "configure: error: in \`${test_path}':"
     assert_line 'configure: error: no acceptable C compiler found in $PATH'
     assert_line "See \`config.log' for more details"
 }
