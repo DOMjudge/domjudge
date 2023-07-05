@@ -350,7 +350,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
             $singlePageLink = null;
             $this->client->followRedirects(true);
             $crawler = $this->getCurrentCrawler();
-            /** @var \DOMElement $node */
+            /** @var DOMElement $node */
             foreach ($crawler->filter('a') as $node) {
                 if (str_contains($node->nodeValue, $identifier)) {
                     $singlePageLink = $node->getAttribute('href');
@@ -358,7 +358,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
             }
             $this->verifyPageResponse('GET', $singlePageLink, 200);
             $crawler = $this->getCurrentCrawler();
-            /** @var \DOMElement $node */
+            /** @var DOMElement $node */
             foreach ($crawler->filter('a') as $node) {
                 if (str_contains($node->nodeValue, 'Edit')) {
                     $editLink = $node->getAttribute('href');
