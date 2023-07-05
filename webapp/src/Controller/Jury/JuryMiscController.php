@@ -232,14 +232,14 @@ class JuryMiscController extends BaseController
     {
         /** @var Submission[] $submissions */
         $submissions = [];
-        if ($contests = $this->dj->getCurrentContests()) {
+        if ($contest = $this->dj->getCurrentContest()) {
             $submissions = $this->em->createQueryBuilder()
                 ->from(Submission::class, 's')
                 ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
                 ->select('s', 'j')
-                ->andWhere('s.contest IN (:contests)')
+                ->andWhere('s.contest = :contest')
                 ->andWhere('j.result IS NOT NULL')
-                ->setParameter('contests', $contests)
+                ->setParameter('contest', $contest)
                 ->getQuery()
                 ->getResult();
         }
