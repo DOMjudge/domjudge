@@ -22,6 +22,10 @@ class RejudgingService
     final public const ACTION_APPLY = 'apply';
     final public const ACTION_CANCEL = 'cancel';
 
+    // When we are applying a rejudging we will update the scoreboard at the end. We will use the
+    // last 5% of the progress bar to do this.
+    final protected const APPLY_PROGRESS_WITH_SCOREBOARD_UPDATE = 95;
+
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
@@ -311,10 +315,11 @@ class RejudgingService
             }
 
             if ($progressReporter) {
-                $log       .= $firstItem ? '' : ', ';
-                $log       .= 's' . $submission['submitid'];
-                $firstItem = false;
-                $progress  = (int)round($index / count($submissions) * ($action === self::ACTION_APPLY ? 95 : 100));
+                $log         .= $firstItem ? '' : ', ';
+                $log         .= 's' . $submission['submitid'];
+                $firstItem   = false;
+                $maxProgress = ($action === self::ACTION_APPLY ? static::APPLY_PROGRESS_WITH_SCOREBOARD_UPDATE : 100);
+                $progress    = (int)round($index / count($submissions) * $maxProgress);
                 $progressReporter($progress, $log);
             }
         }
@@ -322,7 +327,7 @@ class RejudgingService
         if (!empty($scoreboardRowsToUpdate)) {
             if ($progressReporter) {
                 $log .= ', updating scoreboard cache';
-                $progressReporter(95, $log);
+                $progressReporter(static::APPLY_PROGRESS_WITH_SCOREBOARD_UPDATE, $log);
             }
 
             // Now update the scoreboard
