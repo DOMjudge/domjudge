@@ -418,7 +418,8 @@ class ScoreboardService
                 'cid' => $contest->getCid(),
                 'probid' => $problem->getProbid(),
                 'teamSortOrder' => $team->getCategory()->getSortorder(),
-                'submitTime' => $absSubmitTime ?? null,
+                /** @phpstan-ignore-next-line $absSubmitTime is always set when $correctJury is true */
+                'submitTime' => $absSubmitTime,
                 'correctResult' => Judging::RESULT_CORRECT,
             ];
 
