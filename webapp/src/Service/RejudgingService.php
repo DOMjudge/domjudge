@@ -223,11 +223,13 @@ class RejudgingService
         $firstItem = true;
         $index     = 0;
         $log       = '';
+
+        $scoreboardRowsToUpdate = [];
         foreach ($submissions as $submission) {
             $index++;
 
             if ($action === self::ACTION_APPLY) {
-                $this->em->wrapInTransaction(function () use ($submission, $rejudgingId) {
+                $this->em->wrapInTransaction(function () use ($submission, $rejudgingId, &$scoreboardRowsToUpdate) {
                     // First invalidate old judging, may be different from prevjudgingid!
                     $this->em->getConnection()->executeQuery(
                         'UPDATE judging SET valid=0 WHERE submitid = :submitid',
@@ -247,10 +249,14 @@ class RejudgingService
                     );
 
                     // Update caches.
-                    $contest = $this->em->getRepository(Contest::class)->find($submission['cid']);
-                    $team    = $this->em->getRepository(Team::class)->find($submission['teamid']);
-                    $problem = $this->em->getRepository(Problem::class)->find($submission['probid']);
-                    $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+                    $rowIndex = $submission['cid'] . '-' . $submission['teamid'] . '-' . $submission['probid'];
+                    if (!isset($scoreboardRowsToUpdate[$rowIndex])) {
+                        $scoreboardRowsToUpdate[$rowIndex] = [
+                            'cid' => $submission['cid'],
+                            'teamid' => $submission['teamid'],
+                            'probid' => $submission['probid'],
+                        ];
+                    }
 
                     // Update event log.
                     $this->eventLogService->log('judging', $submission['judgingid'],
@@ -308,10 +314,28 @@ class RejudgingService
                 $log       .= $firstItem ? '' : ', ';
                 $log       .= 's' . $submission['submitid'];
                 $firstItem = false;
-                $progress  = (int)round($index / count($submissions) * 100);
+                $progress  = (int)round($index / count($submissions) * ($action === self::ACTION_APPLY ? 95 : 100));
                 $progressReporter($progress, $log);
             }
         }
+
+        if (!empty($scoreboardRowsToUpdate)) {
+            if ($progressReporter) {
+                $log .= ', updating scoreboard cache';
+                $progressReporter(95, $log);
+            }
+
+            // Now update the scoreboard
+            foreach ($scoreboardRowsToUpdate as $item) {
+                ['cid' => $cid, 'teamid' => $teamid, 'probid' => $probid] = $item;
+                $contest = $this->em->getRepository(Contest::class)->find($cid);
+                $team = $this->em->getRepository(Team::class)->find($teamid);
+                $problem = $this->em->getRepository(Problem::class)->find($probid);
+                $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+            }
+        }
+
+        $progressReporter(100, $log);
 
         // Update the rejudging itself.
         /** @var Rejudging $rejudging */
