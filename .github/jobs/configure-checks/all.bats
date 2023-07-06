@@ -62,7 +62,7 @@ compiler_assertions () {
     assert_line "checking for suffix of executables... "
     assert_line "checking whether we are cross compiling... no"
     assert_line "checking for suffix of object files... o"
-    assert_line "checking whether we are using the GNU C compiler... yes"
+    assert_regex "checking whether .*GNU C.*\.\.\. yes"
     assert_line "checking whether C compiler accepts -Wall... yes"
     assert_line "checking whether C compiler accepts -fstack-protector... yes"
     assert_line "checking whether C compiler accepts -fPIE... yes"
@@ -72,7 +72,7 @@ compiler_assertions () {
     assert_line "checking whether the linker accepts -Wl,-z,relro... yes"
     assert_line "checking whether the linker accepts -Wl,-z,now... yes"
     assert_line "checking whether $1 accepts -g... yes"
-    assert_line "checking for $1 option to accept ISO C89... none needed"
+    assert_regex "^checking for $1 option to (enable C11 features|accept ISO C89)\.\.\. none needed$"
     assert_line "checking whether $1 accepts -g... (cached) yes"
     if [ -n "$2" ]; then
         assert_line "checking whether $2 accepts -g... yes"
