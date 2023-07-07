@@ -264,37 +264,42 @@ class JuryMiscController extends BaseController
             /** @var string[] $expectedResults */
             $expectedResults = $submission->getExpectedResults();
             $submissionId    = $submission->getSubmitid();
+            $submissionFiles = $submission->getFiles();
 
+            $result = mb_strtoupper($judging->getResult());
+            $entry = ['files' => $submissionFiles, 'actual' => $result, 'expected' => $expectedResults, 'contestProblem' => $submission->getContestProblem()];
             if (!empty($expectedResults) && !$judging->getVerified()) {
                 $numChecked++;
-                $result = mb_strtoupper($judging->getResult());
                 if (!in_array($result, $expectedResults)) {
-                    $submissionFiles = $submission->getFiles();
-                    $unexpected[$submissionId] = ['files' => $submissionFiles, 'actual' => $result, 'expected' => $expectedResults];
+                    $unexpected[$submissionId] = $entry;
                 } elseif (count($expectedResults) > 1) {
                     if ($verifyMultiple) {
                         // Judging result is as expected, set judging to verified.
                         $judging
                             ->setVerified(true)
                             ->setJuryMember($verifier);
-                        $multiple[$submissionId] = ['actual' => $result, 'expected' => $expectedResults, 'verified' => true];
+                        $entry['verified'] = true;
                     } else {
-                        $multiple[$submissionId] = ['actual' => $result, 'expected' => $expectedResults, 'verified' => false];
+                        $entry['verified'] = false;
                     }
+                    $multiple[$submissionId] = $entry;
                 } else {
                     // Judging result is as expected, set judging to verified.
                     $judging
                         ->setVerified(true)
                         ->setJuryMember($verifier);
-                    $verified[$submissionId] = ['actual' => $result, 'expected' => $expectedResults, 'verified' => true];
+                    $entry['verified'] = true;
+                    $verified[$submissionId] = $entry;
                 }
             } else {
                 $numUnchecked++;
 
                 if (empty($expectedResults)) {
-                    $nomatch[$submissionId] = [];
+                    $entry['verified'] = false;
+                    $nomatch[$submissionId] = $entry;
                 } else {
-                    $earlier[$submissionId] = [];
+                    $entry['verified'] = true;
+                    $earlier[$submissionId] = $entry;
                 }
             }
         }
