@@ -55,17 +55,7 @@ class EventLogService implements ContainerAwareInterface
     // TODO: Add a way to specify when to use external ID using some (DB)
     // config instead of hardcoding it here. Also relates to
     // AbstractRestController::getIdField.
-    /**
-     * @var array<string, array{
-     *     'type': string,
-     *     'entity'?: class-string,
-     *     'url'?: string|null,
-     *     'use-external-id'?: bool,
-     *     'always-use-external-id'?: bool,
-     *     'skip-in-event-feed'?: bool,
-     *     'tables'?: string[]
-     * }>
-     */
+    /** @var mixed[] */
     public array $apiEndpoints = [
         'contests' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
@@ -851,6 +841,7 @@ class EventLogService implements ContainerAwareInterface
             return $ids;
         }
 
+        /** @var class-string<BaseApiEntity> $entity */
         $entity = $endpointData[self::KEY_ENTITY];
         if (!$entity) {
             throw new BadMethodCallException(sprintf('No entity defined for type \'%s\'', $type));
