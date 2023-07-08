@@ -74,7 +74,7 @@ class ICPCCmsService
 
         $json = $response->toArray();
 
-        if ($json === null) {
+        if (!$json) {
             $message = sprintf('Error retrieving API data. API gave us: %s', $response->getContent());
             return false;
         }
@@ -103,7 +103,6 @@ class ICPCCmsService
                  * FIXME: team members are behind a different API call and not important for now
                  */
 
-                /** @var Team $team */
                 $team = $this->em->getRepository(Team::class)->findOneBy(['icpcid' => $teamData['teamId']]);
                 // Note: teams are not deleted but disabled depending on their status
                 $enabled = $teamData['status'] === 'ACCEPTED';

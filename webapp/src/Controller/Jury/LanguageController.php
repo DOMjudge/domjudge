@@ -14,7 +14,6 @@ use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,11 +21,14 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
 #[Route(path: '/jury/languages')]
 class LanguageController extends BaseController
 {
+    use JudgeRemainingTrait;
+
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
@@ -168,7 +170,6 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}', name: 'jury_language')]
     public function viewAction(Request $request, SubmissionService $submissionService, string $langId): Response
     {
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
@@ -207,7 +208,6 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/toggle-submit', name: 'jury_language_toggle_submit')]
     public function toggleSubmitAction(Request $request, string $langId): Response
     {
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
@@ -224,7 +224,6 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/toggle-judge', name: 'jury_language_toggle_judge')]
     public function toggleJudgeAction(Request $request, string $langId): Response
     {
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
@@ -247,7 +246,6 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/edit', name: 'jury_language_edit')]
     public function editAction(Request $request, string $langId): Response
     {
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
@@ -280,7 +278,6 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/delete', name: 'jury_language_delete')]
     public function deleteAction(Request $request, string $langId): Response
     {
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
@@ -294,7 +291,6 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/request-remaining', name: 'jury_language_request_remaining')]
     public function requestRemainingRunsWholeLanguageAction(string $langId): RedirectResponse
     {
-        /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));

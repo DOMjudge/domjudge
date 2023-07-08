@@ -134,7 +134,6 @@ class TeamAffiliationController extends BaseController
     #[Route(path: '/{affilId<\d+>}', name: 'jury_team_affiliation')]
     public function viewAction(Request $request, ScoreboardService $scoreboardService, int $affilId): Response
     {
-        /** @var TeamAffiliation $teamAffiliation */
         $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
         if (!$teamAffiliation) {
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
@@ -174,7 +173,6 @@ class TeamAffiliationController extends BaseController
     #[Route(path: '/{affilId<\d+>}/edit', name: 'jury_team_affiliation_edit')]
     public function editAction(Request $request, int $affilId): Response
     {
-        /** @var TeamAffiliation $teamAffiliation */
         $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
         if (!$teamAffiliation) {
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
@@ -201,7 +199,6 @@ class TeamAffiliationController extends BaseController
     #[Route(path: '/{affilId<\d+>}/delete', name: 'jury_team_affiliation_delete')]
     public function deleteAction(Request $request, int $affilId): Response
     {
-        /** @var TeamAffiliation $teamAffiliation */
         $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
         if (!$teamAffiliation) {
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));

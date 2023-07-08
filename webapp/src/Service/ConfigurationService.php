@@ -149,7 +149,7 @@ EOF;
         array $dataToSet,
         EventLogService $eventLog,
         DOMJudgeService $dj
-    ) {
+    ): void {
         $specs = $this->getConfigSpecification();
         foreach ($specs as &$spec) {
             $spec = $this->addOptions($spec);
@@ -346,6 +346,7 @@ EOF;
 
         if ($item['type'] === 'enum') {
             $enumClass = $item['enum_class'];
+            /** @var \BackedEnum[] $cases */
             $cases = call_user_func($enumClass . '::cases');
             foreach ($cases as $case) {
                 if (method_exists($case, 'getConfigDescription')) {

@@ -6,6 +6,7 @@ use App\Entity\BaseApiEntity;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\ExternalJudgement;
+use App\Entity\ExternalRun;
 use App\Entity\ExternalSourceWarning;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
@@ -241,9 +242,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      */
     public function printtimeHover(string|float $datetime, ?Contest $contest = null): string
     {
-        if ($datetime === null) {
-            $datetime = Utils::now();
-        }
         return '<span title="' .
                Utils::printtime($datetime, 'Y-m-d H:i:s (T)') . '">' .
                $this->printtime($datetime, null, $contest) .
@@ -442,7 +440,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $class     = $submissionDone ? 'secondary' : 'primary';
             $text      = '?';
             $isCorrect = false;
-            /** @var JudgingRun $run */
+            /** @var JudgingRun|ExternalRun|null $run */
             $run = $isExternal ? $testcase->getFirstExternalRun() : $testcase->getFirstJudgingRun();
             if ($isExternal) {
                 $runResult = $run?->getResult();
@@ -589,6 +587,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Prints the first file (and potentially the number of additional files).
+     *
+     * @param Collection<int, SubmissionFile> $files
      */
     public function printFiles(Collection $files): string
     {
@@ -853,9 +853,9 @@ JS;
                            sprintf($editor, $code, $editable ? 'false' : 'true', $mode, $extraForEdit));
     }
 
-    protected function parseSourceDiff($difftext): string
+    protected function parseSourceDiff(string $difftext): string
     {
-        $line   = strtok((string)$difftext, "\n"); // first line
+        $line   = strtok($difftext, "\n"); // first line
         $return = '';
         while ($line !== false && strlen($line) != 0) {
             // Strip any additional DOS/MAC newline characters:

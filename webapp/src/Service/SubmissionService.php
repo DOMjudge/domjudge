@@ -297,7 +297,7 @@ class SubmissionService
      * judging runs. Runs can be NULL if not run yet. A return value of
      * NULL means that a final result cannot be determined yet; this may
      * only occur when not all testcases have been run yet.
-     * @param string[] $runresults
+     * @param array<string|null> $runresults
      */
     public static function getFinalResult(array $runresults, array $resultsPrio): ?string
     {
@@ -655,7 +655,7 @@ class SubmissionService
                                            $language->getLangid(), $problem->getProblem()->getProbid()));
 
         $this->dj->auditlog('submission', $submission->getSubmitid(), 'added',
-            'via ' . $source ?? 'unknown', null, $contest->getCid());
+            'via ' . ($source ?? 'unknown'), null, $contest->getCid());
 
         if (Utils::difftime((float)$contest->getEndtime(), $submitTime) <= 0) {
             $this->logger->info(

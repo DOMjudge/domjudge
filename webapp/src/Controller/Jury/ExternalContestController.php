@@ -36,7 +36,7 @@ class ExternalContestController extends BaseController
     #[Route(path: '/', name: 'jury_external_contest')]
     public function indexAction(Request $request): Response
     {
-        /** @var ExternalContestSource $externalContestSource */
+        /** @var ExternalContestSource|null $externalContestSource */
         $externalContestSource = $this->em->createQueryBuilder()
             ->from(ExternalContestSource::class, 'ecs')
             ->select('ecs')

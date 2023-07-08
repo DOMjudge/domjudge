@@ -66,6 +66,9 @@ class InternalError
     #[ORM\JoinColumn(name: 'judgingid', referencedColumnName: 'judgingid', onDelete: 'SET NULL')]
     private ?Judging $judging = null;
 
+    /**
+     * @var Collection<int, Judging>
+     */
     #[ORM\OneToMany(mappedBy: 'internalError', targetEntity: Judging::class)]
     #[Serializer\Exclude]
     private Collection $affectedJudgings;
@@ -163,6 +166,9 @@ class InternalError
         return $this->judging;
     }
 
+    /**
+     * @return Collection<int, Judging>
+     */
     public function getAffectedJudgings(): Collection
     {
         return $this->affectedJudgings;

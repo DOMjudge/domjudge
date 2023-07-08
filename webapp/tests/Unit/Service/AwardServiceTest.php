@@ -253,7 +253,7 @@ class AwardServiceTest extends KernelTestCase
     /**
      * @dataProvider provideMedalType
      */
-    public function testMedalType(int $teamIndex, ?string $expectedMedalType)
+    public function testMedalType(int $teamIndex, ?string $expectedMedalType): void
     {
         $awardsService = $this->getAwardService();
         $team = $this->scoreboard->getTeams()[$teamIndex];

@@ -95,7 +95,6 @@ class VersionController extends BaseController
     #[Route(path: '/{versionId<\d+>}/promote_compiler', name: 'jury_compiler_promote')]
     public function promoteCompilerAction(int $versionId): Response
     {
-        /** @var Version $version */
         $version = $this->em->getRepository(Version::class)->find($versionId);
         if (!$version) {
             throw new NotFoundHttpException(sprintf('Version with ID %s not found', $versionId));
@@ -114,7 +113,6 @@ class VersionController extends BaseController
     #[Route(path: '/{versionId<\d+>}/promote_runner', name: 'jury_runner_promote')]
     public function promoteRunnerAction(int $versionId): Response
     {
-        /** @var Version $version */
         $version = $this->em->getRepository(Version::class)->find($versionId);
         if (!$version) {
             throw new NotFoundHttpException(sprintf('Version with ID %s not found', $versionId));

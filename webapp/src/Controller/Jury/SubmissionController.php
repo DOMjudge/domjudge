@@ -35,8 +35,6 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -46,16 +44,20 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
 #[Route(path: '/jury/submissions')]
 class SubmissionController extends BaseController
 {
+    use JudgeRemainingTrait;
+
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
@@ -364,7 +366,7 @@ class SubmissionController extends BaseController
                     }
                 }
                 $cnt++;
-                /** @var JudgingRun $firstJudgingRun */
+                /** @var JudgingRun|null $firstJudgingRun */
                 $firstJudgingRun = $runResult[0]->getFirstJudgingRun();
                 if ($firstJudgingRun !== null && $firstJudgingRun->getRunresult() === null) {
                     $runsOutstanding = true;
@@ -557,7 +559,6 @@ class SubmissionController extends BaseController
     public function requestFullDebug(Request $request, Judging $jid): RedirectResponse
     {
         $submission = $jid->getSubmission();
-        /** @var Executable $defaultFullDebugExecutable */
         $defaultFullDebugExecutable = $this->em
             ->getRepository(Executable::class)
             ->findOneBy(['execid' => $this->config->get('default_full_debug')]);
@@ -689,7 +690,7 @@ class SubmissionController extends BaseController
         ?int $fetch = null
     ): Response {
         if ($fetch !== null) {
-            /** @var SubmissionFile $file */
+            /** @var SubmissionFile|null $file */
             $file = $this->em->createQueryBuilder()
                 ->from(SubmissionFile::class, 'file')
                 ->select('file')
@@ -925,7 +926,6 @@ class SubmissionController extends BaseController
     #[Route(path: '/{judgingId<\d+>}/request-remaining', name: 'jury_submission_request_remaining', methods: ['POST'])]
     public function requestRemainingRuns(Request $request, int $judgingId): RedirectResponse
     {
-        /** @var Judging $judging */
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ($judging === null) {
             throw new BadRequestHttpException("Unknown judging with '$judgingId' requested.");
@@ -1055,7 +1055,7 @@ class SubmissionController extends BaseController
     ): RedirectResponse {
         /** @var ExternalJudgement $judgement */
         $judgement  = $this->em->getRepository(ExternalJudgement::class)->find($extjudgementid);
-        $this->em->wrapInTransaction(function () use ($eventLogService, $request, $judgement) {
+        $this->em->wrapInTransaction(function () use ($request, $judgement) {
             $verified = $request->request->getBoolean('verified');
             $comment  = $request->request->get('comment');
             $judgement
@@ -1170,7 +1170,7 @@ class SubmissionController extends BaseController
         return $this->redirectToRoute('jury_submission', ['submitId' => $submitId]);
     }
 
-    private function maybeGetErrors(string $type, string $expectedConfigString, string $observedConfigString, array &$allErrors)
+    private function maybeGetErrors(string $type, string $expectedConfigString, string $observedConfigString, array &$allErrors): void
     {
         $expectedConfig = $this->dj->jsonDecode($expectedConfigString);
         $observedConfig = $this->dj->jsonDecode($observedConfigString);

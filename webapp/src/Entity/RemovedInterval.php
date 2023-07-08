@@ -134,7 +134,7 @@ class RemovedInterval
     }
 
     #[Assert\Callback]
-    public function validate(ExecutionContextInterface $context)
+    public function validate(ExecutionContextInterface $context): void
     {
         // Update all contest timing, taking into account all removed intervals
         $this->getContest()->setStarttimeString($this->getContest()->getStarttimeString());

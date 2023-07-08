@@ -147,10 +147,10 @@ class ControllerRolesTraversalTest extends BaseTestCase
 
     /**
      * Finds all the pages reachable with $roles on URL $roleBaseURL with optionally traversing all links.
-     * @var string[] $roleBaseURL The URL of the current roles.
-     * @var string[] $roles The tested roles.
+     * @param string[] $roleBaseURL The URL of the current roles.
+     * @param string[] $roles The tested roles.
      */
-    protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages, $skip): array
+    protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages, string $skip): array
     {
         $this->roles = $roles;
         $this->logOut();
@@ -172,7 +172,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * (Sub)Test that having the role(s) gives access to all visible pages.
      * This test should detect mistakes where a page is disallowed when the user has a
      * specific role instead of allowing when the correct role is there.
-     * @var string[] $roleURLs
+     * @param string[] $roleURLs
      */
     protected function verifyAccess(array $combinations, array $roleURLs, string $skip): void
     {
@@ -192,10 +192,10 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * Test that having the team role for example is enough to view pages of that role.
      * This test should detect mistakes where a page is disabled when the user has a
      * certain role instead of allowing when the correct role is there.
-     * @var string   $roleBaseURL The base URL of the role.
-     * @var string[] $baseRoles The default role of the user.
-     * @var string[] $optionalRoles The roles which should not restrict the viewable pages.
-     * @var int      $dataSource Put the installation in this dataSource mode.
+     * @param string   $roleBaseURL The base URL of the role.
+     * @param string[] $baseRoles The default role of the user.
+     * @param string[] $optionalRoles The roles which should not restrict the viewable pages.
+     * @param int      $dataSource Put the installation in this dataSource mode.
      * @dataProvider provideRoleAccessData
      */
     public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages, int $dataSource, string $skip): void
@@ -228,10 +228,10 @@ class ControllerRolesTraversalTest extends BaseTestCase
 
     /**
      * Test that having for example the jury role does not allow access to the pages of other roles.
-     * @var string   $roleBaseURL The base URL of the role.
-     * @var string[] $roleOthersBaseURL The base URLs of the other roles.
-     * @var string[] $roles The tested roles.
-     * @var string[] $rolesOther The other roles.
+     * @param string   $roleBaseURL The base URL of the role.
+     * @param string[] $roleOthersBaseURL The base URLs of the other roles.
+     * @param string[] $roles The tested roles.
+     * @param string[] $rolesOther The other roles.
      * @dataProvider provideRoleAccessOtherRoles
      */
     public function testRoleAccessOtherRoles(
@@ -260,7 +260,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * Test that pages depending on an active contest do not crash on the server.
      * @dataProvider provideNoContestScenario
      */
-    public function testNoContestAccess(string $roleBaseURL, array $baseRoles, int $dataSource, $skip): void
+    public function testNoContestAccess(string $roleBaseURL, array $baseRoles, int $dataSource, string $skip): void
     {
         $this->setupDataSource($dataSource);
         $this->roles = $baseRoles;
@@ -282,7 +282,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
      */
     public function provideRoleAccessData(): Generator
     {
-        extract($this->getLoops());
+        ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs] = $this->getLoops();
         foreach ($riskyURLs as $skip) {
             foreach ($dataSources as $str_data_source) {
                 $data_source = (int)$str_data_source;
@@ -307,7 +307,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
      **/
     public function provideRoleAccessOtherRoles(): Generator
     {
-        extract($this->getLoops());
+        ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs] = $this->getLoops();
         foreach ($riskyURLs as $skip) {
             foreach ($dataSources as $str_data_source) {
                 $data_source = (int)$str_data_source;
@@ -323,7 +323,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
 
     public function provideNoContestScenario(): Generator
     {
-        extract($this->getLoops());
+        ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs] = $this->getLoops();
         foreach ($riskyURLs as $skip) {
             foreach ($dataSources as $str_data_source) {
                 $data_source = (int)$str_data_source;

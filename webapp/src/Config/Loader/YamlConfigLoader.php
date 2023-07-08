@@ -15,12 +15,12 @@ class YamlConfigLoader extends FileLoader
     /**
      * @return mixed
      */
-    public function load(mixed $resource, $type = null)
+    public function load(mixed $resource, string $type = null)
     {
         return Yaml::parse(file_get_contents($resource));
     }
 
-    public function supports($resource, $type = null): bool
+    public function supports($resource, string $type = null): bool
     {
         return is_string($resource) &&
             pathinfo($resource, PATHINFO_EXTENSION) === 'yaml';

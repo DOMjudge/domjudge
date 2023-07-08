@@ -61,6 +61,20 @@ abstract class BaseTestCase extends BaseBaseTestCase
     }
 
     /**
+     * Get the contest ID of the demo contest based on the data source setting.
+     *
+     * @return string
+     */
+    protected function getDemoContestId(): string
+    {
+        if ($this->dataSourceIsLocal()) {
+            return (string)$this->demoContest->getCid();
+        }
+
+        return $this->demoContest->getExternalid();
+    }
+
+    /**
      * Verify the given API URL produces the given status code and return the body.
      *
      * @param string      $method   The HTTP method to use.
@@ -294,7 +308,7 @@ abstract class BaseTestCase extends BaseBaseTestCase
      *
      * @dataProvider provideSingle
      */
-    public function testSingle($id, array $expectedProperties): void
+    public function testSingle(int|string $id, array $expectedProperties): void
     {
         foreach ($this->entityReferences as $field => $class) {
             $expectedProperties[$field] = $this->resolveEntityId($class, $expectedProperties[$field]);

@@ -12,6 +12,7 @@ use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use App\Utils\EventFeedFormat;
 use App\Utils\Utils;
+use BadMethodCallException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -89,10 +90,10 @@ class ContestController extends AbstractRestController
     #[OA\Response(response: 200, description: 'Returns the API ID of the added contest.')]
     public function addContestAction(Request $request): string
     {
-        /** @var UploadedFile $yamlFile */
-        $yamlFile = $request->files->get('yaml') ?: [];
-        /** @var UploadedFile $jsonFile */
-        $jsonFile = $request->files->get('json') ?: [];
+        /** @var UploadedFile|null $yamlFile */
+        $yamlFile = $request->files->get('yaml');
+        /** @var UploadedFile|null $jsonFile */
+        $jsonFile = $request->files->get('json');
         if ((!$yamlFile && !$jsonFile) || ($yamlFile && $jsonFile)) {
             throw new BadRequestHttpException('Supply exactly one of \'json\' or \'yaml\'');
         }
@@ -178,7 +179,7 @@ class ContestController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     public function bannerAction(Request $request, string $cid): Response
     {
-        /** @var Contest $contest */
+        /** @var Contest|null $contest */
         $contest = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $cid)
@@ -244,10 +245,9 @@ class ContestController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     public function setBannerAction(Request $request, string $cid, ValidatorInterface $validator): Response
     {
-        /** @var Contest $contest */
         $contest = $this->getContestAndCheckIfLocked($request, $cid);
 
-        /** @var UploadedFile $banner */
+        /** @var UploadedFile|null $banner */
         $banner = $request->files->get('banner');
         if (!$banner) {
             return new JsonResponse(['title' => 'Validation failed', 'errors' => ['Please supply a banner']], Response::HTTP_BAD_REQUEST);
@@ -322,6 +322,7 @@ class ContestController extends AbstractRestController
         #[OA\PathParameter(description: 'The ID of the contest to change the start time for')]
         string $cid
     ): Response {
+        $response = new Response('', Response::HTTP_NO_CONTENT);
         $contest  = $this->getContestWithId($request, $cid);
         $now      = (int)Utils::now();
         $changed  = false;
@@ -349,7 +350,6 @@ class ContestController extends AbstractRestController
 
             if ($request->request->get('start_time') === null) {
                 $contest->setStarttimeEnabled(false);
-                $response = new Response('', Response::HTTP_NO_CONTENT);
                 $this->em->flush();
                 $changed = true;
             } else {
@@ -366,7 +366,6 @@ class ContestController extends AbstractRestController
                 $contest->setStarttimeEnabled(true);
                 $contest->setStarttime($new_start_time);
                 $contest->setStarttimeString($newStartTimeString);
-                $response = new Response('', Response::HTTP_NO_CONTENT);
                 $this->em->flush();
                 $changed = true;
             }
@@ -396,7 +395,6 @@ class ContestController extends AbstractRestController
             $contest->setUnfreezetimeString($newUnfreezeTimeString);
             $this->em->flush();
             $changed = true;
-            $response = new Response('', Response::HTTP_NO_CONTENT);
             if ($returnContest) {
                 $response = $this->renderData($request, $contest);
             }
@@ -720,6 +718,8 @@ class ContestController extends AbstractRestController
                                 'data'  => $data,
                             ];
                             break;
+                        default:
+                            throw new BadMethodCallException(sprintf('Invalid event feed format %s', $format));
                     }
 
                     if (!$strict) {
@@ -849,7 +849,7 @@ class ContestController extends AbstractRestController
     /** To be used when contest data is modified. */
     private function getContestAndCheckIfLocked(Request $request, string $cid): Contest
     {
-        /** @var Contest $contest */
+        /** @var Contest|null $contest */
         $contest = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $cid)

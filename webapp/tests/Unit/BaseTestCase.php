@@ -16,6 +16,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Link;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use ZipArchive;
 
@@ -86,7 +87,7 @@ abstract class BaseTestCase extends WebTestCase
     /**
      * Resolve any references in the given ID.
      */
-    protected function resolveReference($id)
+    protected function resolveReference(int|string $id): int|string
     {
         // If the object ID contains a :, it is a reference to a fixture item, so get it.
         if (is_string($id) && str_contains($id, ':')) {
@@ -165,7 +166,6 @@ abstract class BaseTestCase extends WebTestCase
     protected function setupUser(): User
     {
         $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
-        /** @var User $user */
         $user = $em->getRepository(User::class)->findOneBy(['username' => 'demo']);
         if ($user === null) {
             throw new Exception("No user 'demo' found, are you using the correct database?");
@@ -221,6 +221,7 @@ abstract class BaseTestCase extends WebTestCase
         $message = var_export($response, true);
         self::assertEquals($status, $response->getStatusCode(), $message . "\nURI = $uri");
         if ($responseUrl !== null) {
+            self::assertInstanceOf(RedirectResponse::class, $response);
             self::assertEquals($responseUrl, $response->getTargetUrl(), $message);
         }
     }
@@ -253,20 +254,6 @@ abstract class BaseTestCase extends WebTestCase
         $config = self::getContainer()->get(ConfigurationService::class);
         $dataSource = $config->get('data_source');
         return $dataSource === DOMJudgeService::DATA_SOURCE_LOCAL;
-    }
-
-    /**
-     * Get the contest ID of the demo contest based on the data source setting.
-     *
-     * @return string
-     */
-    protected function getDemoContestId(): string
-    {
-        if ($this->dataSourceIsLocal()) {
-            return (string)$this->demoContest->getCid();
-        }
-
-        return $this->demoContest->getExternalid();
     }
 
     /**

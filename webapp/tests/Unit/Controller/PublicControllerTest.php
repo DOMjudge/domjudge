@@ -247,7 +247,7 @@ class PublicControllerTest extends BaseTestCase
         $fixtures = [EnableSelfregisterFixture::class, SelfRegisteredUserFixture::class];
         $category = '';
         foreach (static::$duplicateFields as $field => $value) {
-            extract($value);
+            ['input' => $input, 'error' => $error] = $value;
             $newInputs = $inputs;
             $newInputs[$field] = $input;
             if (str_contains($field, 'affiliation')) {

@@ -44,7 +44,7 @@ class RootController extends BaseController
         Request $request,
         #[Autowire(service: 'twig.runtime.markdown')]
         MarkdownRuntime $markdownRuntime
-    ) {
+    ): JsonResponse {
         $message = $request->request->get('message');
         if ($message === null) {
             throw new BadRequestHttpException('A message is required');

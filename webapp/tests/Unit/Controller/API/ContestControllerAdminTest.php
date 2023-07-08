@@ -109,7 +109,7 @@ EOF;
         self::assertSame('NWERC 2018 - Testing', $this->getContest($cid)->getName());
     }
 
-    protected function getContest($cid): Contest
+    protected function getContest(int|string $cid): Contest
     {
         // First clear the entity manager to have all data.
         static::getContainer()->get(EntityManagerInterface::class)->clear();

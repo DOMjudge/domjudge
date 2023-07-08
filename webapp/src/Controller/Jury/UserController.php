@@ -173,7 +173,6 @@ class UserController extends BaseController
     #[Route(path: '/{userId<\d+>}', name: 'jury_user')]
     public function viewAction(int $userId, SubmissionService $submissionService): Response
     {
-        /** @var User $user */
         $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
@@ -219,7 +218,6 @@ class UserController extends BaseController
     #[Route(path: '/{userId<\d+>}/edit', name: 'jury_user_edit')]
     public function editAction(Request $request, int $userId): Response
     {
-        /** @var User $user */
         $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
@@ -262,7 +260,6 @@ class UserController extends BaseController
     #[Route(path: '/{userId<\d+>}/delete', name: 'jury_user_delete')]
     public function deleteAction(Request $request, int $userId): Response
     {
-        /** @var User $user */
         $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
@@ -318,6 +315,7 @@ class UserController extends BaseController
 
             $changes = [];
             foreach ($users as $user) {
+                $role = null;
                 $doit = false;
                 $roles = $user->getRoleList();
 

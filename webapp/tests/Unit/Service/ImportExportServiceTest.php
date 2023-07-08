@@ -28,7 +28,7 @@ class ImportExportServiceTest extends KernelTestCase
     /**
      * @dataProvider provideImportContestDataErrors
      */
-    public function testImportContestDataErrors($data, string $expectedMessage): void
+    public function testImportContestDataErrors(mixed $data, string $expectedMessage): void
     {
         /** @var ImportExportService $importExportService */
         $importExportService = static::getContainer()->get(ImportExportService::class);
@@ -95,7 +95,7 @@ class ImportExportServiceTest extends KernelTestCase
     /**
      * @dataProvider provideImportContestDataSuccess
      */
-    public function testImportContestDataSuccess($data, string $expectedShortName, array $expectedProblems = []): void
+    public function testImportContestDataSuccess(mixed $data, string $expectedShortName, array $expectedProblems = []): void
     {
         /** @var ImportExportService $importExportService */
         $importExportService = static::getContainer()->get(ImportExportService::class);
@@ -195,7 +195,7 @@ class ImportExportServiceTest extends KernelTestCase
     /**
      * @dataProvider provideImportProblemsDataSuccess
      */
-    public function testImportProblemsDataSuccess($data, array $expectedProblems): void
+    public function testImportProblemsDataSuccess(mixed $data, array $expectedProblems): void
     {
         // First create a new contest by import it
         $contestData = [
@@ -604,9 +604,6 @@ EOF;
                 if (isset($data['team']['members'])) {
                     self::assertEquals($data['team']['members'], $team->getPublicDescription());
                 }
-                if (isset($data['team']['description'])) {
-                    self::assertEquals($data['team']['description'], $team->getPublicDescription());
-                }
             } else {
                 self::assertNull($user->getTeam());
             }
@@ -619,7 +616,7 @@ EOF;
         }
     }
 
-    public function testImportTeamsTsv()
+    public function testImportTeamsTsv(): void
     {
         // Example from the manual, but we have changed the ID's to not mix them with fixtures
         $teamsData = <<<EOF
@@ -690,7 +687,7 @@ EOF;
         }
     }
 
-    public function testImportTeamsJson()
+    public function testImportTeamsJson(): void
     {
         // Example from the manual, but we have changed the ID's to not mix them with fixtures and
         // we explicitly use a different label for the first team and no label for the second
@@ -787,7 +784,7 @@ EOF;
         }
     }
 
-    public function testImportGroupsTsv()
+    public function testImportGroupsTsv(): void
     {
         // Example from the manual
         $groupsData = <<<EOF
@@ -836,7 +833,7 @@ EOF;
         }
     }
 
-    public function testImportGroupsJson()
+    public function testImportGroupsJson(): void
     {
         // Example from the manual
         $groupsData = <<<EOF
@@ -895,7 +892,7 @@ EOF;
         }
     }
 
-    public function testImportOrganizationsJson()
+    public function testImportOrganizationsJson(): void
     {
         // Example from the manual
         $organizationsData = <<<EOF
@@ -948,7 +945,7 @@ EOF;
         foreach ($expectedOrganizations as $data) {
             $affiliation = $em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $data['externalid']]);
             self::assertNotNull($affiliation, "Team affiliation $data[name] does not exist");
-            self::assertEquals($data['icpcid'] ?? null, $affiliation->getIcpcId());
+            self::assertEquals($data['icpcid'], $affiliation->getIcpcId());
             self::assertEquals($data['shortname'], $affiliation->getShortname());
             self::assertEquals($data['name'], $affiliation->getName());
             self::assertEquals($data['country'], $affiliation->getCountry());
@@ -956,7 +953,7 @@ EOF;
     }
 
 
-    protected function getContest($cid): Contest
+    protected function getContest(int|string $cid): Contest
     {
         // First clear the entity manager to have all data.
         static::getContainer()->get(EntityManagerInterface::class)->clear();

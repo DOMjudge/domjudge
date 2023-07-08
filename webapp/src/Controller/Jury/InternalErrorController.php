@@ -87,7 +87,6 @@ class InternalErrorController extends BaseController
     #[Route(path: '/{errorId<\d+>}', methods: ['GET'], name: 'jury_internal_error')]
     public function viewAction(int $errorId): Response
     {
-        /** @var InternalError $internalError */
         $internalError = $this->em->getRepository(InternalError::class)->find($errorId);
         if (!$internalError) {
             throw new NotFoundHttpException(sprintf('Internal Error with ID %s not found', $errorId));
@@ -161,7 +160,7 @@ class InternalErrorController extends BaseController
                 ob_flush();
                 flush();
             };
-            return $this->streamResponse($this->requestStack, function () use ($request, $progressReporter, $internalError) {
+            return $this->streamResponse($this->requestStack, function () use ($progressReporter, $internalError) {
                 $this->em->wrapInTransaction(function () use ($progressReporter, $internalError) {
                     $internalError->setStatus(InternalErrorStatusType::STATUS_RESOLVED);
                     $this->dj->setInternalError(

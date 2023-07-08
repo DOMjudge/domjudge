@@ -115,14 +115,23 @@ class Problem extends BaseApiEntity
     #[Serializer\Exclude]
     private ?string $problemtext_type = null;
 
+    /**
+     * @var Collection<int, Submission>
+     */
     #[ORM\OneToMany(mappedBy: 'problem', targetEntity: Submission::class)]
     #[Serializer\Exclude]
     private Collection $submissions;
 
+    /**
+     * @var Collection<int, Clarification>
+     */
     #[ORM\OneToMany(mappedBy: 'problem', targetEntity: Clarification::class)]
     #[Serializer\Exclude]
     private Collection $clarifications;
 
+    /**
+     * @var Collection<int, ContestProblem>
+     */
     #[ORM\OneToMany(mappedBy: 'problem', targetEntity: ContestProblem::class)]
     #[Serializer\Exclude]
     private Collection $contest_problems;
@@ -137,11 +146,17 @@ class Problem extends BaseApiEntity
     #[Serializer\Exclude]
     private ?Executable $run_executable = null;
 
+    /**
+     * @var Collection<int, Testcase>
+     */
     #[ORM\OneToMany(mappedBy: 'problem', targetEntity: Testcase::class)]
     #[ORM\OrderBy(['ranknumber' => 'ASC'])]
     #[Serializer\Exclude]
     private Collection $testcases;
 
+    /**
+     * @var Collection<int, ProblemAttachment>
+     */
     #[ORM\OneToMany(mappedBy: 'problem', targetEntity: ProblemAttachment::class, orphanRemoval: true)]
     #[ORM\OrderBy(['name' => 'ASC'])]
     #[Serializer\Exclude]
@@ -244,7 +259,7 @@ class Problem extends BaseApiEntity
     }
 
     /**
-     * @param resource|string $problemtext
+     * @param resource|string|null $problemtext
      */
     public function setProblemtext($problemtext): Problem
     {
@@ -336,6 +351,9 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
+    /**
+     * @return Collection<int, Testcase>
+     */
     public function getTestcases(): Collection
     {
         return $this->testcases;
@@ -348,9 +366,9 @@ class Problem extends BaseApiEntity
     }
 
     /**
-     * @return Collection|ContestProblem[]
+     * @return Collection<int, ContestProblem>
      */
-    public function getContestProblems(): Collection|array
+    public function getContestProblems(): Collection
     {
         return $this->contest_problems;
     }
@@ -361,6 +379,9 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
+    /**
+     * @return Collection<int, Submission>
+     */
     public function getSubmissions(): Collection
     {
         return $this->submissions;
@@ -372,6 +393,9 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
+    /**
+     * @return Collection<int, Clarification>
+     */
     public function getClarifications(): Collection
     {
         return $this->clarifications;
@@ -401,7 +425,7 @@ class Problem extends BaseApiEntity
     }
 
     /**
-     * @return Collection|ProblemAttachment[]
+     * @return Collection<int, ProblemAttachment>
      */
     public function getAttachments(): Collection
     {

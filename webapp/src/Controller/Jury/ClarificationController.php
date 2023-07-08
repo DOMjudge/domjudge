@@ -72,12 +72,12 @@ class ClarificationController extends AbstractController
                 ->setParameter('queue', $currentQueue);
         }
 
-        /**
-         * @var Clarification[] $newClarifications
-         * @var Clarification[] $oldClarifications
-         * @var Clarification[] $generalClarifications
-         */
-        $newClarifications = $oldClarifications = $generalClarifications = [];
+        /** @var Clarification[] $newClarifications */
+        $newClarifications = [];
+        /** @var Clarification[] $oldClarifications */
+        $oldClarifications = [];
+        /** @var Clarification[] $generalClarifications */
+        $generalClarifications = [];
         $wheres            = [
             'new' => 'clar.sender IS NOT NULL AND clar.answered = 0',
             'old' => 'clar.sender IS NOT NULL AND clar.answered != 0',
@@ -119,7 +119,6 @@ class ClarificationController extends AbstractController
     #[Route(path: '/{id<\d+>}', name: 'jury_clarification')]
     public function viewAction(int $id): Response
     {
-        /** @var Clarification $clarification */
         $clarification = $this->em->getRepository(Clarification::class)->find($id);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %s not found', $id));
@@ -137,7 +136,7 @@ class ClarificationController extends AbstractController
             $clarification = $inReplyTo;
         }
         $clarlist = [$clarification];
-        $replies = $clarification->getReplies() ?? [];
+        $replies = $clarification->getReplies();
         foreach ($replies as $clar_reply) {
             $clarlist[] = $clar_reply;
         }
@@ -278,10 +277,9 @@ class ClarificationController extends AbstractController
     #[Route(path: '/{clarId<\d+>}/claim', name: 'jury_clarification_claim')]
     public function toggleClaimAction(Request $request, int $clarId): Response
     {
-        /** @var Clarification $clarification */
         $clarification = $this->em->getReference(Clarification::class, $clarId);
         if (!$clarification) {
-            throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
+            throw new NotFoundHttpException(sprintf('Clarification with ID %d not found', $clarId));
         }
 
         if ($request->request->getBoolean('claimed')) {
@@ -298,10 +296,9 @@ class ClarificationController extends AbstractController
     #[Route(path: '/{clarId<\d+>}/set-answered', name: 'jury_clarification_set_answered')]
     public function toggleAnsweredAction(Request $request, int $clarId): Response
     {
-        /** @var Clarification $clarification */
         $clarification = $this->em->getReference(Clarification::class, $clarId);
         if (!$clarification) {
-            throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
+            throw new NotFoundHttpException(sprintf('Clarification with ID %d not found', $clarId));
         }
 
         $answered = $request->request->getBoolean('answered');
@@ -318,10 +315,9 @@ class ClarificationController extends AbstractController
     #[Route(path: '/{clarId<\d+>}/change-subject', name: 'jury_clarification_change_subject')]
     public function changeSubjectAction(Request $request, int $clarId): Response
     {
-        /** @var Clarification $clarification */
         $clarification = $this->em->getReference(Clarification::class, $clarId);
         if (!$clarification) {
-            throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
+            throw new NotFoundHttpException(sprintf('Clarification with ID %d not found', $clarId));
         }
 
         $subject = $request->request->get('subject');
@@ -347,10 +343,9 @@ class ClarificationController extends AbstractController
     #[Route(path: '/{clarId<\d+>}/change-queue', name: 'jury_clarification_change_queue')]
     public function changeQueueAction(Request $request, int $clarId): Response
     {
-        /** @var Clarification $clarification */
         $clarification = $this->em->getReference(Clarification::class, $clarId);
         if (!$clarification) {
-            throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
+            throw new NotFoundHttpException(sprintf('Clarification with ID %d not found', $clarId));
         }
 
         $queue = $request->request->get('queue');

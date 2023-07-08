@@ -224,7 +224,6 @@ class JudgehostController extends AbstractFOSRestController
             throw new BadRequestHttpException('Argument \'enabled\' is mandatory');
         }
 
-        /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if ($judgehost) {
             $judgehost->setEnabled($request->request->getBoolean('enabled'));
@@ -281,13 +280,11 @@ class JudgehostController extends AbstractFOSRestController
         #[OA\PathParameter(description: 'The ID of the judgetask to update')]
         int $judgetaskid
     ): void {
-        /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
         }
 
-        /** @var JudgingRun $judgingRun */
         $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgetaskid]);
         $query = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
@@ -301,7 +298,7 @@ class JudgehostController extends AbstractFOSRestController
             ->setMaxResults(1)
             ->getQuery();
 
-        /** @var Judging $judging */
+        /** @var Judging|null $judging */
         $judging = $query->getOneOrNullResult();
         if (!$judging) {
             throw new BadRequestHttpException("We don't know this judging with judgetaskid ID $judgetaskid.");
@@ -379,7 +376,6 @@ class JudgehostController extends AbstractFOSRestController
                 }
             } else {
                 $this->em->wrapInTransaction(function () use (
-                    $request,
                     $judgehost,
                     $judging,
                     $query,
@@ -475,7 +471,6 @@ class JudgehostController extends AbstractFOSRestController
         #[OA\PathParameter(description: 'The ID of the judgetask to add')]
         int $judgeTaskId
     ): void {
-        /** @var JudgeTask $judgeTask */
         $judgeTask = $this->em->getRepository(JudgeTask::class)->find($judgeTaskId);
         if ($judgeTask === null) {
             throw new BadRequestHttpException(
@@ -501,7 +496,6 @@ class JudgehostController extends AbstractFOSRestController
             }
         }
 
-        /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
@@ -525,7 +519,6 @@ class JudgehostController extends AbstractFOSRestController
                 ->setFilename($tempFilename);
             $this->em->persist($debug_package);
         } else {
-            /** @var JudgingRun $judgingRun */
             $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
                 [
                     'judging' => $judgeTask->getJobId(),
@@ -640,7 +633,6 @@ class JudgehostController extends AbstractFOSRestController
         $teamMessage  = $request->request->get('team_message');
         $metadata     = $request->request->get('metadata');
 
-        /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
@@ -743,7 +735,6 @@ class JudgehostController extends AbstractFOSRestController
 
             // Since these are the immutable executables, we need to map it to the mutable one first to make linking and
             // re-enabling possible.
-            /** @var Executable $executable */
             $executable = $this->em->getRepository(Executable::class)
                 ->findOneBy(['immutableExecutable' => $disabled[$field_name]]);
             if (!$executable) {
@@ -768,7 +759,7 @@ class JudgehostController extends AbstractFOSRestController
             ->setParameter('status', 'open')
             ->setMaxResults(1);
 
-        /** @var InternalError $error */
+        /** @var InternalError|null $error */
         $error = $queryBuilder->getQuery()->getOneOrNullResult();
 
         if ($error) {
@@ -803,7 +794,7 @@ class JudgehostController extends AbstractFOSRestController
                         'id' => $disabled_id,
                     ]
                 )->fetchFirstColumn();
-                $judgings = $em->getRepository(Judging::class)->findByJudgingid($judgingids);
+                $judgings = $em->getRepository(Judging::class)->findBy(['judgingid' => $judgingids]);
                 foreach ($judgings as $judging) {
                     /** @var Judging $judging */
                     $judging->setInternalError($error);
@@ -844,7 +835,6 @@ class JudgehostController extends AbstractFOSRestController
      */
     protected function giveBackJudging(int $judgingId, ?Judgehost $judgehost): void
     {
-        /** @var Judging $judging */
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ($judging) {
             $this->em->wrapInTransaction(function () use ($judging, $judgehost) {
@@ -935,7 +925,6 @@ class JudgehostController extends AbstractFOSRestController
             $teamMessage,
             $metadata
         ) {
-            /** @var JudgingRun $judgingRun */
             $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
                 ['judgetaskid' => $judgeTaskId]);
             if ($judgingRun === null) {
@@ -1203,23 +1192,19 @@ class JudgehostController extends AbstractFOSRestController
     )]
     public function getVersionCommands(string $judgetaskid): array
     {
-        /** @var JudgeTask $judgeTask */
         $judgeTask = $this->em->getRepository(JudgeTask::class)
             ->findOneBy(['judgetaskid' => $judgetaskid]);
         if (!$judgeTask) {
             throw new BadRequestHttpException('Unknown judge task with id ' . $judgetaskid);
         }
 
-        /** @var Submission $submission */
         $submission = $this->em->getRepository(Submission::class)
             ->findOneBy(['submitid' => $judgeTask->getSubmitid()]);
         if (!$submission) {
             throw new HttpException(500, 'Unknown submission with submitid ' . $judgeTask->getSubmitid());
         }
 
-        /** @var Language $language */
         $language = $submission->getLanguage();
-
 
         $ret = [];
         if (!empty($language->getCompilerVersionCommand())) {
@@ -1266,27 +1251,23 @@ class JudgehostController extends AbstractFOSRestController
             ),
         ]
     )]
-    public function checkVersions(Request $request, string $judgetaskid)
+    public function checkVersions(Request $request, string $judgetaskid): array
     {
-        /** @var JudgeTask $judgeTask */
         $judgeTask = $this->em->getRepository(JudgeTask::class)
             ->findOneBy(['judgetaskid' => $judgetaskid]);
         if (!$judgeTask) {
             throw new BadRequestHttpException('Unknown judge task with id ' . $judgetaskid);
         }
 
-        /** @var Submission $submission */
         $submission = $this->em->getRepository(Submission::class)
             ->findOneBy(['submitid' => $judgeTask->getSubmitid()]);
         if (!$submission) {
             throw new BadRequestHttpException('Unknown submission with submitid ' . $judgeTask->getSubmitid());
         }
 
-        /** @var Language $language */
         $language = $submission->getLanguage();
 
         $hostname = $request->request->get('hostname');
-        /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
             throw new BadRequestHttpException(
@@ -1301,12 +1282,10 @@ class JudgehostController extends AbstractFOSRestController
             $reportedVersions['runner'] = base64_decode($request->request->get('runner'));
         }
         $this->em->wrapInTransaction(function () use (
-            $request,
             $judgehost,
             $reportedVersions,
             $language
         ) {
-            /** @var Version $version */
             $version = $this->em->getRepository(Version::class)
                 ->findOneBy(['language' => $language, 'judgehost' => $judgehost]);
 
@@ -1434,7 +1413,6 @@ class JudgehostController extends AbstractFOSRestController
         }
         $hostname = $request->request->get('hostname');
 
-        /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
             throw new BadRequestHttpException(

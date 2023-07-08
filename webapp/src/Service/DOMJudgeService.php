@@ -252,9 +252,6 @@ class DOMJudgeService
         if (!$this->requestStack->getCurrentRequest()) {
             return null;
         }
-        if (!$this->requestStack->getCurrentRequest()->cookies) {
-            return null;
-        }
         return $this->requestStack->getCurrentRequest()->cookies->get($cookieName);
     }
 
@@ -486,12 +483,12 @@ class DOMJudgeService
      */
     public function auditlog(
         string $datatype,
-        $dataid,
+        mixed $dataid,
         string $action,
-        $extraInfo = null,
-        $forceUsername = null,
+        mixed $extraInfo = null,
+        ?string $forceUsername = null,
         string|int|null $cid = null
-    ) {
+    ): void {
         if (!empty($forceUsername)) {
             $user = $forceUsername;
         } else {
@@ -546,7 +543,7 @@ class DOMJudgeService
     /**
      * Dis- or re-enable what caused an internal error.
      */
-    public function setInternalError(array $disabled, ?Contest $contest, ?bool $enabled)
+    public function setInternalError(array $disabled, ?Contest $contest, ?bool $enabled): void
     {
         switch ($disabled['kind']) {
             case 'problem':
@@ -589,10 +586,10 @@ class DOMJudgeService
                     /** @var Language $language */
                     $language->setAllowJudge($enabled);
                 }
+                /** @var Problem $problem */
                 foreach ($this->getProblemsForExecutable($executable) as $problem) {
-                    /** @var Problem $problem */
+                    /** @var ContestProblem $contestProblem */
                     foreach ($problem->getContestProblems() as $contestProblem) {
-                        /** @var ContestProblem $contestProblem */
                         $contestProblem->setAllowJudge($enabled);
                     }
                 }
@@ -878,7 +875,7 @@ class DOMJudgeService
      */
     public function getAttachmentStreamedResponse(ContestProblem $contestProblem, int $attachmentId): StreamedResponse
     {
-        /** @var ProblemAttachment $attachment */
+        /** @var ProblemAttachment|null $attachment */
         $attachment = $this->em->createQueryBuilder()
             ->from(ProblemAttachment::class, 'a')
             ->join('a.problem', 'p')
@@ -1276,7 +1273,6 @@ class DOMJudgeService
 
     public function getImmutableCompareExecutable(ContestProblem $problem): ImmutableExecutable
     {
-        /** @var Executable $executable */
         $executable = $problem
             ->getProblem()
             ->getCompareExecutable();
@@ -1293,7 +1289,6 @@ class DOMJudgeService
 
     public function getImmutableRunExecutable(ContestProblem $problem): ImmutableExecutable
     {
-        /** @var Executable $executable */
         $executable = $problem
             ->getProblem()
             ->getRunExecutable();
@@ -1438,7 +1433,7 @@ class DOMJudgeService
                 ->setParameter('cid', $contest->getCid());
         }
 
-        /** @var Team $team */
+        /** @var Team|null $team */
         $team = $queryBuilder->getQuery()->getOneOrNullResult();
 
         if (!$team) {
@@ -1448,7 +1443,7 @@ class DOMJudgeService
         return $team;
     }
 
-    public function parseMetadata($raw_metadata): array
+    public function parseMetadata(string $raw_metadata): array
     {
         // TODO: Reduce duplication with judgedaemon code.
         $contents = explode("\n", $raw_metadata);
@@ -1537,7 +1532,7 @@ class DOMJudgeService
         ?Contest $contest,
         ScoreboardService $scoreboardService,
         bool $forceUnfrozen = false
-    ) {
+    ): StreamedResponse {
         $data = $scoreboardService->getScoreboardTwigData(
                 request: $request,
                 response: null,

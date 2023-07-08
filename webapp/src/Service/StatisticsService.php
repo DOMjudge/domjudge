@@ -254,7 +254,7 @@ class StatisticsService
                 continue;
             }
             if ($j->getResult()) {
-                static::setOrIncrement($results, $j->getResult() ?? 'pending');
+                static::setOrIncrement($results, $j->getResult());
             }
         }
         // Sort the judgings by runtime.
@@ -276,7 +276,7 @@ class StatisticsService
             }
         }
         usort($submissions, static fn(Submission $a, Submission $b) => $a->getSubmitTime() <=> $b->getSubmitTime());
-        usort($problems, static fn(Judging $a, Judging $b) => $a->getName() <=> $b->getName());
+        usort($problems, static fn(Problem $a, Problem $b) => $a->getName() <=> $b->getName());
         usort($judgings, static fn(Judging $a, Judging $b) => $a->getJudgingid() <=> $b->getJudgingid());
 
         $misc = [];
@@ -492,7 +492,7 @@ class StatisticsService
         };
     }
 
-    protected static function setOrIncrement(array &$array, $index): void
+    protected static function setOrIncrement(array &$array, int|string $index): void
     {
         if (!array_key_exists($index, $array)) {
             $array[$index] = 0;

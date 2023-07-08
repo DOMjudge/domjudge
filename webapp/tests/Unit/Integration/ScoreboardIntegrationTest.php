@@ -16,6 +16,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
+use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Scoreboard\TeamScore;
@@ -170,7 +171,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->em = null; // avoid memory leaks
     }
 
-    public function testScoreboardsEmpty()
+    public function testScoreboardsEmpty(): void
     {
         $this->recalcScoreCaches();
 
@@ -186,7 +187,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
-    public function testScoreboardsNoFreeze()
+    public function testScoreboardsNoFreeze(): void
     {
         $this->contest->setFreezetimeString(null);
         $this->createDefaultSubmissions();
@@ -210,7 +211,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
-    public function testScoreboardJuryFreeze()
+    public function testScoreboardJuryFreeze(): void
     {
         $this->createDefaultSubmissions();
         // Scoreboard cache is recalculated below for each freeze time.
@@ -237,7 +238,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
-    public function testScoreboardPublicFreeze()
+    public function testScoreboardPublicFreeze(): void
     {
         $this->contest->setFreezetimeString('+1:10:00');
         $this->createDefaultSubmissions();
@@ -259,7 +260,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->assertFTSMatch($expected_fts, $scoreboard);
     }
 
-    public function testScoreboardReproducible()
+    public function testScoreboardReproducible(): void
     {
         $this->createDefaultSubmissions();
 
@@ -273,7 +274,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->assertEquals($first, $second, 'Repeated scoreboard is equal');
     }
 
-    public function testTeamScoreboardFreezeFTS()
+    public function testTeamScoreboardFreezeFTS(): void
     {
         $this->contest->setFreezetimeString('+1:10:00');
         $this->createDefaultSubmissions();
@@ -293,7 +294,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->assertFTSMatch($expected_fts, $scoreboard);
     }
 
-    public function testOneSingleFTS()
+    public function testOneSingleFTS(): void
     {
         $lang = $this->em->getRepository(Language::class)->find('c');
 
@@ -326,7 +327,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
-    public function testFTSwithVerificationRequired()
+    public function testFTSwithVerificationRequired(): void
     {
         $lang = $this->em->getRepository(Language::class)->find('c');
 
@@ -362,7 +363,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
-    public function testFTSwithQueuedRejudging()
+    public function testFTSwithQueuedRejudging(): void
     {
         $lang = $this->em->getRepository(Language::class)->find('c');
 
@@ -388,7 +389,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
-    protected function assertScoresMatch($expected_scores, $scoreboard)
+    protected function assertScoresMatch(array $expected_scores, Scoreboard $scoreboard): void
     {
         $scores = $scoreboard->getScores();
 
@@ -405,7 +406,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
-    protected function assertFTSMatch($expected_fts, $scoreboard)
+    protected function assertFTSMatch(array $expected_fts, Scoreboard $scoreboard): void
     {
         $matrix = $scoreboard->getMatrix();
         $teams = [];
@@ -436,13 +437,13 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
-    protected function recalcScoreCaches()
+    protected function recalcScoreCaches(): void
     {
         $this->em->flush();
         $this->ss->refreshCache($this->contest);
     }
 
-    protected function createDefaultSubmissions()
+    protected function createDefaultSubmissions(): void
     {
         $lang = $this->em->getRepository(Language::class)->find('cpp');
 
@@ -469,7 +470,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         Problem $problem,
         Team $team,
         float $contest_time_seconds,
-        $verdict,
+        ?string $verdict,
         bool $verified = false
     ): Submission {
         $cp = $this->em->getRepository(ContestProblem::class)->find(
@@ -509,12 +510,12 @@ class ScoreboardIntegrationTest extends KernelTestCase
         return $submission;
     }
 
-    public function setConfig(string $name, $value)
+    public function setConfig(string $name, mixed $value): void
     {
         $this->configValues[$name] = $value;
     }
 
-    public function getConfig(string $name)
+    public function getConfig(string $name): mixed
     {
         if (!array_key_exists($name, $this->configValues)) {
             throw new Exception("No configuration value set for '$name'");

@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class Utils
 {
-    /** @var array Mapping from HTML colors to hex values */
+    /** @var array<string, string> Mapping from HTML colors to hex values */
     final public const HTML_COLORS = [
         "black" => "#000000",
         "silver" => "#C0C0C0",
@@ -177,7 +177,7 @@ class Utils
      * Prints the absolute time as yyyy-mm-ddThh:mm:ss(.uuu)?[+-]zz(:mm)?
      * (with millis if $floored is false).
      */
-    public static function absTime($epoch, bool $floored = false): ?string
+    public static function absTime(mixed $epoch, bool $floored = false): ?string
     {
         if ($epoch === null) {
             return null;
@@ -799,9 +799,8 @@ class Utils
 
     /**
      * Return the table name for the given entity.
-     * @param $entity
      */
-    public static function tableForEntity($entity): string
+    public static function tableForEntity(object $entity): string
     {
         $class        = $entity::class;
         $parts        = explode('\\', $class);

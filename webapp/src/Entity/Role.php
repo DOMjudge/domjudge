@@ -29,6 +29,9 @@ class Role implements Stringable
     #[ORM\Column(options: ['comment' => 'Description for the web interface'])]
     private string $description;
 
+    /**
+     * @var Collection<int, User>
+     */
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'user_roles')]
     private Collection $users;
 
@@ -75,6 +78,9 @@ class Role implements Stringable
         return $this;
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     public function getUsers(): Collection
     {
         return $this->users;

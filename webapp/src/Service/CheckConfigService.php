@@ -247,7 +247,6 @@ class CheckConfigService
         $res = 'O';
         $desc = 'Password for "admin" has been changed from the default.';
 
-        /** @var User $user */
         $user = $this->em->getRepository(User::class)->findOneBy(['username' => 'admin']);
         if ($user && password_verify('admin', $user->getPassword())) {
             $res = 'E';
@@ -429,6 +428,7 @@ class CheckConfigService
         $desc = '';
         foreach ($contesterrors as $cid => $errors) {
             $desc .= "Contest: c$cid: " .
+                /* @phpstan-ignore-next-line */
                     (count($errors) == 0 ? 'no errors' : (string)$errors) ."\n" .$cperrors[$cid];
         }
 
@@ -502,7 +502,7 @@ class CheckConfigService
                     $moreproblemerrors[$probid] .= sprintf("Special compare script %s not found for p%s\n", $special_compare->getExecid(), $probid);
                 } elseif ($exec->getType() !== "compare") {
                     $result = 'E';
-                    $moreproblemerrors[$probid] .= sprintf("Special compare script %s exists but is of wrong type (%s instead of compare) for p%s\n", $special_compare, $exec->getType(), $probid);
+                    $moreproblemerrors[$probid] .= sprintf("Special compare script %s exists but is of wrong type (%s instead of compare) for p%s\n", $special_compare->getExecid(), $exec->getType(), $probid);
                 }
             }
             if ($special_run = $problem->getRunExecutable()) {
@@ -512,7 +512,7 @@ class CheckConfigService
                     $moreproblemerrors[$probid] .= sprintf("Special run script %s not found for p%s\n", $special_run->getExecid(), $probid);
                 } elseif ($exec->getType() !== "run") {
                     $result = 'E';
-                    $moreproblemerrors[$probid] .= sprintf("Special run script %s exists but is of wrong type (%s instead of run) for p%s\n", $special_run, $exec->getType(), $probid);
+                    $moreproblemerrors[$probid] .= sprintf("Special run script %s exists but is of wrong type (%s instead of run) for p%s\n", $special_run->getExecid(), $exec->getType(), $probid);
                 }
             }
 
@@ -552,6 +552,7 @@ class CheckConfigService
         foreach ($problemerrors as $probid => $errors) {
             $desc .= "Problem p$probid: ";
             if (count($errors) > 0 || !empty($moreproblemerrors[$probid])) {
+                /* @phpstan-ignore-next-line */
                 $desc .= (string)$errors . " " .
                     $moreproblemerrors[$probid] . "\n";
             } else {
@@ -602,6 +603,7 @@ class CheckConfigService
         foreach ($languageerrors as $langid => $errors) {
             $desc .= "Language $langid: ";
             if (count($errors) > 0 || !empty($morelanguageerrors[$langid])) {
+                /* @phpstan-ignore-next-line */
                 $desc .= (string)$errors . " " .
                     $morelanguageerrors[$langid] . "\n";
             } else {
@@ -786,6 +788,9 @@ class CheckConfigService
         return $result;
     }
 
+    /**
+     * @param class-string $class
+     */
     protected function checkExternalIdentifiers(string $class, string $externalIdField): array
     {
         $this->stopwatch->start(__FUNCTION__);

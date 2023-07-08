@@ -98,6 +98,9 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     #[Serializer\Exclude]
     private ?Clarification $in_reply_to = null;
 
+    /**
+     * @var Collection<int, Clarification>
+     */
     #[ORM\OneToMany(mappedBy: 'in_reply_to', targetEntity: Clarification::class)]
     #[Serializer\Exclude]
     private Collection $replies;
@@ -279,6 +282,9 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this;
     }
 
+    /**
+     * @return Collection<int, Clarification>
+     */
     public function getReplies(): Collection
     {
         return $this->replies;

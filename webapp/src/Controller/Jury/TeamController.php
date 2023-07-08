@@ -234,7 +234,6 @@ class TeamController extends BaseController
         #[MapQueryParameter]
         ?int $cid = null,
     ): Response {
-        /** @var Team $team */
         $team = $this->em->getRepository(Team::class)->find($teamId);
         if (!$team) {
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
@@ -311,7 +310,6 @@ class TeamController extends BaseController
     #[Route(path: '/{teamId<\d+>}/edit', name: 'jury_team_edit')]
     public function editAction(Request $request, int $teamId): Response
     {
-        /** @var Team $team */
         $team = $this->em->getRepository(Team::class)->find($teamId);
         if (!$team) {
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
@@ -338,7 +336,6 @@ class TeamController extends BaseController
     #[Route(path: '/{teamId<\d+>}/delete', name: 'jury_team_delete')]
     public function deleteAction(Request $request, int $teamId): Response
     {
-        /** @var Team $team */
         $team = $this->em->getRepository(Team::class)->find($teamId);
         if (!$team) {
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));

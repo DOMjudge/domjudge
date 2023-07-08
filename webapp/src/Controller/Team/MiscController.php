@@ -164,7 +164,7 @@ class MiscController extends BaseController
             /** @var UploadedFile $file */
             $file             = $data['code'];
             $realfile         = $file->getRealPath();
-            $originalfilename = $file->getClientOriginalName() ?? '';
+            $originalfilename = $file->getClientOriginalName();
 
             $langid   = $data['langid'];
             $username = $this->getUser()->getUserIdentifier();

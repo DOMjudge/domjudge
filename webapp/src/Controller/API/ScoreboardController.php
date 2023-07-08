@@ -133,7 +133,7 @@ class ScoreboardController extends AbstractRestController
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
 
         // Get the event for this scoreboard.
-        /** @var Event $event */
+        /** @var Event|null $event */
         $event = $this->em->createQueryBuilder()
             ->from(Event::class, 'e')
             ->select('e')

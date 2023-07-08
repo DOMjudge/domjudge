@@ -86,7 +86,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         options: ['comment' => 'Time contest becomes visible in team/public views', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float $activatetime;
+    private string|float|null $activatetime;
 
     #[ORM\Column(
         type: 'decimal',
@@ -121,7 +121,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         options: ['comment' => 'Time after which no more submissions are accepted', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float $endtime;
+    private string|float|null $endtime;
 
     #[ORM\Column(
         type: 'decimal',
@@ -165,6 +165,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private ?bool $medalsEnabled = false;
 
+    /**
+     * @var Collection<int, TeamCategory>
+     */
     #[ORM\ManyToMany(targetEntity: TeamCategory::class, inversedBy: 'contests_for_medals')]
     #[ORM\JoinTable(name: 'contestteamcategoryformedals')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
@@ -313,6 +316,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private bool $isLocked = false;
 
+    /**
+     * @var Collection<int, Team>
+     */
     #[ORM\ManyToMany(targetEntity: Team::class, inversedBy: 'contests')]
     #[ORM\JoinTable(name: 'contestteam')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
@@ -320,6 +326,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private Collection $teams;
 
+    /**
+     * @var Collection<int, TeamCategory>
+     */
     #[ORM\ManyToMany(targetEntity: TeamCategory::class, inversedBy: 'contests')]
     #[ORM\JoinTable(name: 'contestteamcategory')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
@@ -327,14 +336,23 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private Collection $team_categories;
 
+    /**
+     * @var Collection<int, Clarification>
+     */
     #[ORM\OneToMany(mappedBy: 'contest', targetEntity: Clarification::class)]
     #[Serializer\Exclude]
     private Collection $clarifications;
 
+    /**
+     * @var Collection<int, Submission>
+     */
     #[ORM\OneToMany(mappedBy: 'contest', targetEntity: Submission::class)]
     #[Serializer\Exclude]
     private Collection $submissions;
 
+    /**
+     * @var Collection<int, ContestProblem>
+     */
     #[ORM\OneToMany(
         mappedBy: 'contest',
         targetEntity: ContestProblem::class,
@@ -346,15 +364,24 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private Collection $problems;
 
+    /**
+     * @var Collection<int, InternalError>
+     */
     #[ORM\OneToMany(mappedBy: 'contest', targetEntity: InternalError::class)]
     #[Serializer\Exclude]
     private Collection $internal_errors;
 
+    /**
+     * @var Collection<int, RemovedInterval>
+     */
     #[ORM\OneToMany(mappedBy: 'contest', targetEntity: RemovedInterval::class)]
     #[Assert\Valid]
     #[Serializer\Exclude]
     private Collection $removedIntervals;
 
+    /**
+     * @var Collection<int, ExternalContestSource>
+     */
     #[ORM\OneToMany(mappedBy: 'contest', targetEntity: ExternalContestSource::class)]
     #[Assert\Valid]
     #[Serializer\Exclude]
@@ -511,7 +538,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->b;
     }
 
-    public function setB(?int $b)
+    public function setB(?int $b): void
     {
         $this->b = $b;
     }
@@ -709,7 +736,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     }
 
     /**
-     * @return Collection|TeamCategory[]
+     * @return Collection<int, TeamCategory>
      */
     public function getMedalCategories(): Collection
     {
@@ -811,6 +838,14 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this;
     }
 
+    public function removeTeam(Team $team): void
+    {
+        $this->teams->removeElement($team);
+    }
+
+    /**
+     * @return Collection<int, Team>
+     */
     public function getTeams(): Collection
     {
         return $this->teams;
@@ -827,6 +862,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         $this->problems->removeElement($problem);
     }
 
+    /**
+     * @return Collection<int, ContestProblem>
+     */
     public function getProblems(): Collection
     {
         return $this->problems;
@@ -838,6 +876,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this;
     }
 
+    /**
+     * @return Collection<int, Clarification>
+     */
     public function getClarifications(): Collection
     {
         return $this->clarifications;
@@ -849,6 +890,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this;
     }
 
+    /**
+     * @return Collection<int, Submission>
+     */
     public function getSubmissions(): Collection
     {
         return $this->submissions;
@@ -860,6 +904,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this;
     }
 
+    /**
+     * @return Collection<int, InternalError>
+     */
     public function getInternalErrors(): Collection
     {
         return $this->internal_errors;
@@ -922,7 +969,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
                 static fn(
                     RemovedInterval $a,
                     RemovedInterval $b
-                ) => Utils::difftime((float)$a->getStarttime(), (float)$b->getStarttime())
+                ) => (int)Utils::difftime((float)$a->getStarttime(), (float)$b->getStarttime())
             );
             foreach ($removedIntervals as $removedInterval) {
                 if (Utils::difftime((float)$removedInterval->getStarttime(), (float)$absoluteTime) <= 0) {
@@ -953,6 +1000,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         $this->removedIntervals->removeElement($removedInterval);
     }
 
+    /**
+     * @return Collection<int, RemovedInterval>
+     */
     public function getRemovedIntervals(): Collection
     {
         return $this->removedIntervals;
@@ -1171,7 +1221,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
                         ->addViolation();
                 }
             }
-            if ($this->medal_categories === null || $this->medal_categories->isEmpty()) {
+            if ($this->medal_categories->isEmpty()) {
                 $context
                     ->buildViolation('This field is required when \'Process medals\' is set.')
                     ->atPath('medalCategories')
@@ -1241,7 +1291,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     }
 
     /**
-     * @return Collection|TeamCategory[]
+     * @return Collection<int, TeamCategory>
      */
     public function getTeamCategories(): Collection
     {
@@ -1258,7 +1308,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     }
 
     /**
-     * @return Collection|ExternalContestSource[]
+     * @return Collection<int, ExternalContestSource>
      */
     public function getExternalContestSources(): Collection
     {

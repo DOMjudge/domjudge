@@ -92,6 +92,9 @@ class ExternalJudgement
     #[ORM\JoinColumn(name: 'submitid', referencedColumnName: 'submitid', onDelete: 'CASCADE')]
     private Submission $submission;
 
+    /**
+     * @var Collection<int, ExternalRun>
+     */
     #[ORM\OneToMany(mappedBy: 'external_judgement', targetEntity: ExternalRun::class)]
     private Collection $external_runs;
 
@@ -221,6 +224,9 @@ class ExternalJudgement
         return $this;
     }
 
+    /**
+     * @return Collection<int, ExternalRun>
+     */
     public function getExternalRuns(): Collection
     {
         return $this->external_runs;

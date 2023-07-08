@@ -156,7 +156,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
         self::getContainer()->get('security.untracked_token_storage')->setToken($token);
     }
 
-    private function submit($time, ?Team $team = null, ?Problem $problem = null, string $source = 'team page'): QueueTask
+    private function submit(?float $time, ?Team $team = null, ?Problem $problem = null, string $source = 'team page'): QueueTask
     {
         $contest = $this->em->getRepository(Contest::class)->find($this->contest->getCid());
         $team ??= $this->teams[0];
@@ -335,12 +335,12 @@ class QueuetaskIntegrationTest extends KernelTestCase
         self::assertEquals(JudgeTask::PRIORITY_LOW, $problem_import->getPriority());
     }
 
-    public function setConfig(string $name, $value): void
+    public function setConfig(string $name, mixed $value): void
     {
         $this->configValues[$name] = $value;
     }
 
-    public function getConfig(string $name)
+    public function getConfig(string $name): mixed
     {
         if (!array_key_exists($name, $this->configValues)) {
             throw new \Exception("No configuration value set for '$name'");

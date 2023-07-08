@@ -79,7 +79,7 @@ class JudgingRunOutput
         return $this->run;
     }
 
-    public function setOutputRun($outputRun): JudgingRunOutput
+    public function setOutputRun(?string $outputRun): JudgingRunOutput
     {
         $this->output_run = $outputRun;
         return $this;
@@ -139,7 +139,7 @@ class JudgingRunOutput
         return $this->metadata;
     }
 
-    public function setMetadata($metadata): self
+    public function setMetadata(?string $metadata): self
     {
         $this->metadata = $metadata;
         return $this;

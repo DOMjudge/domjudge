@@ -301,7 +301,7 @@ class QueueTaskControllerTest extends BaseTestCase
 
     public function provideLazyDataSource(): Generator
     {
-        extract($this->getDatasourceLoops());
+        ['dataSources' => $dataSources] = $this->getDatasourceLoops();
         foreach ($dataSources as $str_data_source) {
             $dataSource = (int)$str_data_source;
             foreach ([DOMJudgeService::EVAL_DEMAND,

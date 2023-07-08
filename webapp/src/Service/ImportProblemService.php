@@ -539,7 +539,7 @@ class ImportProblemService
             $name = basename($filename);
 
             $fileParts = explode('.', $name);
-            if (count($fileParts) > 0) {
+            if (count($fileParts) > 1) {
                 $type = $fileParts[count($fileParts) - 1];
             } else {
                 $type = 'txt';
@@ -740,7 +740,7 @@ class ImportProblemService
                         }
                         $results = [$expectedResult];
                     }
-                    $jury_team_id = $this->dj->getUser()->getTeam() ? $this->dj->getUser()->getTeam()->getTeamid() : null;
+                    $jury_team_id = $this->dj->getUser()->getTeam()->getTeamid();
                     $jury_user = $this->dj->getUser();
                     if (isset($submission_details[$path]['team'])) {
                         /** @var Team|null $json_team */
@@ -898,7 +898,7 @@ class ImportProblemService
         ];
     }
 
-    private function searchAndAddValidator(ZipArchive $zip, ?array &$messages, $externalId, $validationMode, ?Problem $problem): void
+    private function searchAndAddValidator(ZipArchive $zip, ?array &$messages, string $externalId, string $validationMode, ?Problem $problem): void
     {
         $validatorFiles = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {

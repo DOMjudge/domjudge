@@ -15,19 +15,21 @@ use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
 #[Route(path: '/jury/categories')]
 class TeamCategoryController extends BaseController
 {
+    use JudgeRemainingTrait;
+
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
@@ -121,7 +123,6 @@ class TeamCategoryController extends BaseController
     #[Route(path: '/{categoryId<\d+>}', name: 'jury_team_category')]
     public function viewAction(Request $request, SubmissionService $submissionService, int $categoryId): Response
     {
-        /** @var TeamCategory $teamCategory */
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$teamCategory) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
@@ -161,7 +162,6 @@ class TeamCategoryController extends BaseController
     #[Route(path: '/{categoryId<\d+>}/edit', name: 'jury_team_category_edit')]
     public function editAction(Request $request, int $categoryId): Response
     {
-        /** @var TeamCategory $teamCategory */
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$teamCategory) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
@@ -204,7 +204,6 @@ class TeamCategoryController extends BaseController
     #[Route(path: '/{categoryId<\d+>}/delete', name: 'jury_team_category_delete')]
     public function deleteAction(Request $request, int $categoryId): Response
     {
-        /** @var TeamCategory $teamCategory */
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$teamCategory) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
@@ -238,7 +237,6 @@ class TeamCategoryController extends BaseController
     #[Route(path: '/{categoryId<\d+>}/request-remaining', name: 'jury_team_category_request_remaining')]
     public function requestRemainingRunsWholeTeamCategoryAction(string $categoryId): RedirectResponse
     {
-        /** @var TeamCategory $category */
         $category = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$category) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));

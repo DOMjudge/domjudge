@@ -224,7 +224,6 @@ class PublicController extends BaseController
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
-        /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
             'problem' => $probId,
             'contest' => $contest,

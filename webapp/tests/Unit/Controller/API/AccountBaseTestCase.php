@@ -115,7 +115,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
             }
             foreach ($accountCombinations as $combination) {
                 $newUpload = array_merge($defaultData, $combination[0]);
-                yield [$newUpload, $combination[1] ?? null];
+                yield [$newUpload, $combination[1]];
             }
         }
     }
@@ -131,7 +131,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
         $tempFile = tempnam(sys_get_temp_dir(), "/accounts-upload-test-");
         file_put_contents($tempFile, $newUsersFile);
         $tempUploadFile = new UploadedFile($tempFile, 'accounts.'.$type);
-        
+
         $result = $this->verifyApiJsonResponse('POST', $usersURL, 200, 'admin', null, [$type => $tempUploadFile]);
 
         self::assertEquals($result, "1 new account(s) successfully added.");

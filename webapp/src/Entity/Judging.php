@@ -144,10 +144,16 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     #[Serializer\Exclude]
     private ?Judging $original_judging = null;
 
+    /**
+     * @var Collection<int, JudgingRun>
+     */
     #[ORM\OneToMany(mappedBy: 'judging', targetEntity: JudgingRun::class)]
     #[Serializer\Exclude]
     private Collection $runs;
 
+    /**
+     * @var Collection<int, DebugPackage>
+     */
     #[ORM\OneToMany(mappedBy: 'judging', targetEntity: DebugPackage::class)]
     #[Serializer\Exclude]
     private Collection $debug_packages;
@@ -414,6 +420,9 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this;
     }
 
+    /**
+     * @return Collection<int, JudgingRun>
+     */
     public function getRuns(): Collection
     {
         return $this->runs;
@@ -483,6 +492,9 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $hostnames;
     }
 
+    /**
+     * @return Collection<int, DebugPackage>
+     */
     public function getDebugPackages(): Collection
     {
         return $this->debug_packages;
@@ -493,7 +505,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this->compile_metadata;
     }
 
-    public function setCompileMetadata($compile_metadata): self
+    public function setCompileMetadata(?string $compile_metadata): self
     {
         $this->compile_metadata = $compile_metadata;
         return $this;

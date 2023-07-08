@@ -11,6 +11,7 @@ use App\Service\SubmissionService;
 use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use DOMElement;
 use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -21,6 +22,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  */
 abstract class JuryControllerTestCase extends BaseTestCase
 {
+    protected static string $baseUrl                  = '';
     protected array $roles                            = ['admin'];
     protected string $addButton                       = '';
     protected string $editButton                      = ' Edit';
@@ -44,6 +46,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
     protected static ?array $deleteExtra              = null;
     protected static array $addEntities               = [];
     protected static array $addEntitiesCount          = [];
+    protected static array $addEntitiesShown          = [];
     protected static ?string $defaultEditEntityName   = null;
     protected static array $specialFieldOnlyUpdate    = [];
     protected static array $editEntitiesSkipFields    = [];
@@ -181,6 +184,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
                 continue;
             }
             $singlePageLink = null;
+            /** @var DOMElement $node */
             foreach ($crawler->filter('a') as $node) {
                 if (str_contains($node->nodeValue, $identifier)) {
                     $singlePageLink = $node->getAttribute('href');
@@ -222,7 +226,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
-    public function helperCheckExistence(string $id, $value, array $element): void
+    public function helperCheckExistence(string $id, mixed $value, array $element): void
     {
         if (in_array($id, static::$addEntitiesShown)) {
             $tmpValue = $element[$id];
@@ -346,6 +350,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
             $singlePageLink = null;
             $this->client->followRedirects(true);
             $crawler = $this->getCurrentCrawler();
+            /** @var DOMElement $node */
             foreach ($crawler->filter('a') as $node) {
                 if (str_contains($node->nodeValue, $identifier)) {
                     $singlePageLink = $node->getAttribute('href');
@@ -353,6 +358,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
             }
             $this->verifyPageResponse('GET', $singlePageLink, 200);
             $crawler = $this->getCurrentCrawler();
+            /** @var DOMElement $node */
             foreach ($crawler->filter('a') as $node) {
                 if (str_contains($node->nodeValue, 'Edit')) {
                     $editLink = $node->getAttribute('href');

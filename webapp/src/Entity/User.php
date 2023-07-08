@@ -119,6 +119,9 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\Exclude]
     private ?Team $team = null;
 
+    /**
+     * @var Collection<int, Role>
+     */
     #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: 'users')]
     #[ORM\JoinTable(name: 'userrole')]
     #[ORM\JoinColumn(name: 'userid', referencedColumnName: 'userid', onDelete: 'CASCADE')]
@@ -127,6 +130,9 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\Exclude]
     private Collection $user_roles;
 
+    /**
+     * @var Collection<int, Submission>
+     */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Submission::class)]
     #[Serializer\Exclude]
     private Collection $submissions;
@@ -448,6 +454,9 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this;
     }
 
+    /**
+     * @return Collection<int, Submission>
+     */
     public function getSubmissions(): Collection
     {
         return $this->submissions;

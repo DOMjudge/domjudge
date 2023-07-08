@@ -53,6 +53,9 @@ class ExternalContestSource
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     private Contest $contest;
 
+    /**
+     * @var Collection<int, ExternalSourceWarning>
+     */
     #[ORM\OneToMany(mappedBy: 'externalContestSource', targetEntity: ExternalSourceWarning::class)]
     private Collection $warnings;
 
@@ -149,7 +152,7 @@ class ExternalContestSource
     }
 
     /**
-     * @return Collection|ExternalSourceWarning[]
+     * @return Collection<int, ExternalSourceWarning>
      */
     public function getExternalSourceWarnings(): Collection
     {

@@ -123,7 +123,7 @@ class ImportExportService
                 // Make sure ISO 8601 but with the T replaced with a space also works.
                 date_create_from_format('Y-m-d H:i:sO', $timeValue);
         } else {
-            /** @var DateTime $time */
+            /** @var DateTime|DateTimeImmutable $time */
             $time = $timeValue;
         }
         // If/When parsing fails we get a false instead of a null
@@ -136,7 +136,7 @@ class ImportExportService
         return $time instanceof DateTime ? DateTimeImmutable::createFromMutable($time) : $time;
     }
 
-    public function importContestData($data, ?string &$errorMessage = null, string &$cid = null): bool
+    public function importContestData(mixed $data, ?string &$errorMessage = null, string &$cid = null): bool
     {
         if (empty($data) || !is_array($data)) {
             $errorMessage = 'Error parsing YAML file.';
@@ -278,7 +278,7 @@ class ImportExportService
         return true;
     }
 
-    public function importProblemsData(Contest $contest, $problems, array &$ids = null): bool
+    public function importProblemsData(Contest $contest, array $problems, array &$ids = null): bool
     {
         // For problemset.yaml the root key is called `problems`, so handle that case
         if (isset($problems['problems'])) {
@@ -443,11 +443,11 @@ class ImportExportService
 
             $rank      = $teamScore->rank;
             $numPoints = $teamScore->numPoints;
-            if ($rank <= ($contest->getGoldMedals() ?? 4)) {
+            if ($rank <= $contest->getGoldMedals()) {
                 $awardString = 'Gold Medal';
-            } elseif ($rank <= ($contest->getGoldMedals() ?? 4) + ($contest->getSilverMedals() ?? 4)) {
+            } elseif ($rank <= $contest->getGoldMedals() + $contest->getSilverMedals()) {
                 $awardString = 'Silver Medal';
-            } elseif ($rank <= ($contest->getGoldMedals() ?? 4) + ($contest->getSilverMedals() ?? 4) + ($contest->getBronzeMedals() ?? 4) + $contest->getB()) {
+            } elseif ($rank <= $contest->getGoldMedals() + $contest->getSilverMedals() + $contest->getBronzeMedals() + $contest->getB()) {
                 $awardString = 'Bronze Medal';
             } elseif ($numPoints >= $median) {
                 // Teams with equally solved number of problems get the same rank unless $full is true.

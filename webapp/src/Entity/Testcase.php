@@ -86,15 +86,23 @@ class Testcase
     #[Serializer\Exclude]
     private bool $deleted = false;
 
+    /**
+     * @var Collection<int, JudgingRun>
+     */
     #[ORM\OneToMany(mappedBy: 'testcase', targetEntity: JudgingRun::class)]
     #[Serializer\Exclude]
     private Collection $judging_runs;
 
+    /**
+     * @var Collection<int, ExternalRun>>
+     */
     #[ORM\OneToMany(mappedBy: 'testcase', targetEntity: ExternalRun::class)]
     #[Serializer\Exclude]
     private Collection $external_runs;
 
     /**
+     * @var Collection<int, TestcaseContent>
+     *
      * We use a OneToMany instead of a OneToOne here, because otherwise this
      * relation will always be loaded. See the commit message of commit
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation.
@@ -226,6 +234,9 @@ class Testcase
         return $this;
     }
 
+    /**
+     * @return Collection<int, JudgingRun>
+     */
     public function getJudgingRuns(): Collection
     {
         return $this->judging_runs;
@@ -282,6 +293,9 @@ class Testcase
         return $this;
     }
 
+    /**
+     * @return Collection<int, ExternalRun>
+     */
     public function getExternalRuns(): Collection
     {
         return $this->external_runs;

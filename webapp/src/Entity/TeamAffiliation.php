@@ -89,6 +89,9 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private ?string $internalComments = null;
 
+    /**
+     * @var Collection<int, Team>
+     */
     #[ORM\OneToMany(mappedBy: 'affiliation', targetEntity: Team::class)]
     #[Serializer\Exclude]
     private Collection $teams;
@@ -210,6 +213,9 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
         return $this;
     }
 
+    /**
+     * @return Collection<int, Team>
+     */
     public function getTeams(): Collection
     {
         return $this->teams;

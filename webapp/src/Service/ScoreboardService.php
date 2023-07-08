@@ -119,7 +119,7 @@ class ScoreboardService
         ?RankCache $rankCache = null,
         ?FreezeData $freezeData = null,
         bool $jury = false
-    ) {
+    ): int {
         if ($freezeData === null) {
             $freezeData = new FreezeData($contest);
         }
@@ -418,6 +418,7 @@ class ScoreboardService
                 'cid' => $contest->getCid(),
                 'probid' => $problem->getProbid(),
                 'teamSortOrder' => $team->getCategory()->getSortorder(),
+                /** @phpstan-ignore-next-line $absSubmitTime is always set when $correctJury is true */
                 'submitTime' => $absSubmitTime,
                 'correctResult' => Judging::RESULT_CORRECT,
             ];
@@ -672,21 +673,8 @@ class ScoreboardService
         }
 
         // Drop all teams and problems that do not exist in the contest.
-        if (!empty($problems)) {
-            $problemIds = array_map(fn(Problem $problem) => $problem->getProbid(), $problems);
-        } else {
-            // problemId -1 will never happen, but otherwise the array is
-            // empty and that is not supported.
-            $problemIds = [-1];
-        }
-
-        if (!empty($teams)) {
-            $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $teams);
-        } else {
-            // teamId -1 will never happen, but otherwise the array is empty
-            // and that is not supported.
-            $teamIds = [-1];
-        }
+        $problemIds = array_map(fn(Problem $problem) => $problem->getProbid(), $problems);
+        $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $teams);
 
         $params = [
             'cid' => $contest->getCid(),
@@ -1007,6 +995,7 @@ class ScoreboardService
         $contestProblems = $queryBuilder->getQuery()->getResult();
         $contestProblemsIndexed = [];
         foreach ($contestProblems as $cp) {
+            /** @var Problem|int $p */
             $p = $cp->getProblem();
             // Doctrine has a bug with eagerly loaded second level hydration
             // when the object is already loaded. In that case it might happen

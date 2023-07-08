@@ -11,7 +11,7 @@ class AddCurrentContestListener
 {
     public function __construct(protected readonly DOMJudgeService $dj) {}
 
-    public function __invoke(ResponseEvent $event)
+    public function __invoke(ResponseEvent $event): void
     {
         $event->getResponse()->headers->set('X-Current-Contest', $this->dj->getCurrentContestCookie());
     }

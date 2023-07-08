@@ -203,7 +203,7 @@ class RejudgingController extends BaseController
         // Close the session, as this might take a while and we don't need the session below.
         $this->requestStack->getSession()->save();
 
-        /** @var Rejudging $rejudging */
+        /** @var Rejudging|null $rejudging */
         $rejudging = $this->em->createQueryBuilder()
             ->from(Rejudging::class, 'r')
             ->leftJoin('r.start_user', 's')
@@ -233,9 +233,9 @@ class RejudgingController extends BaseController
         }
 
         /** @var Judging[] $originalVerdicts */
-        /** @var Judging[] $newVerdicts */
         $originalVerdicts = [];
-        $newVerdicts      = [];
+        /** @var Judging[] $newVerdicts */
+        $newVerdicts = [];
 
         $this->em->wrapInTransaction(function () use ($rejudging, &$originalVerdicts, &$newVerdicts) {
             $expr             = $this->em->getExpressionBuilder();
@@ -616,7 +616,7 @@ class RejudgingController extends BaseController
 
                 $skipped = [];
                 $res     = $this->rejudgingService->createRejudging(
-                    $reason, (int)$data['priority'], $judgings, false, (int)$data['repeat'] ?? 1, null, $skipped, $progressReporter);
+                    $reason, (int)$data['priority'], $judgings, false, (int)($data['repeat'] ?? 1), null, $skipped, $progressReporter);
                 $this->generateFlashMessagesForSkippedJudgings($skipped);
 
                 if ($res === null) {
@@ -904,7 +904,7 @@ class RejudgingController extends BaseController
                 'count' => count($submissions[$submitid]),
                 'verdict' => (
                     !array_key_exists($submitid, $submissions_to_result)
-                        ? join(', ', $results)
+                        ? implode(', ', $results ?? [])
                         : $submissions_to_result[$submitid]
                 )
             ];

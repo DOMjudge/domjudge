@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\BaseApiEntity;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -54,6 +55,7 @@ class EventLogService implements ContainerAwareInterface
     // TODO: Add a way to specify when to use external ID using some (DB)
     // config instead of hardcoding it here. Also relates to
     // AbstractRestController::getIdField.
+    /** @var mixed[] */
     public array $apiEndpoints = [
         'contests' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
@@ -206,9 +208,9 @@ class EventLogService implements ContainerAwareInterface
         string $action,
         ?int $contestId = null,
         ?string $json = null,
-        $ids = null,
+        mixed $ids = null,
         bool $checkEvents = true
-    ) {
+    ): void {
         // Sanitize and check input
         if (!is_array($dataIds)) {
             $dataIds = [$dataIds];
@@ -287,7 +289,7 @@ class EventLogService implements ContainerAwareInterface
             $ids = [$ids];
         }
 
-        $idsCombined = $ids === null ? null : (is_array($ids) ? $this->dj->jsonEncode($ids) : $ids);
+        $idsCombined = $this->dj->jsonEncode($ids);
 
         // State is a special case, as it works without an ID
         if ($type !== 'state' && count(array_filter($ids)) !== count($dataIds)) {
@@ -839,6 +841,7 @@ class EventLogService implements ContainerAwareInterface
             return $ids;
         }
 
+        /** @var class-string<BaseApiEntity> $entity */
         $entity = $endpointData[self::KEY_ENTITY];
         if (!$entity) {
             throw new BadMethodCallException(sprintf('No entity defined for type \'%s\'', $type));
@@ -950,6 +953,7 @@ class EventLogService implements ContainerAwareInterface
         if ($field = $this->externalIdFieldForEntity($entity)) {
             return $field;
         }
+        /** @var class-string<BaseApiEntity> $class */
         $class    = is_object($entity) ? $entity::class : $entity;
         $metadata = $this->em->getClassMetadata($class);
         try {

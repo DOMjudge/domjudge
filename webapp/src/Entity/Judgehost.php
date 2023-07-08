@@ -44,6 +44,9 @@ class Judgehost
     #[OA\Property(nullable: true)]
     private string|float|null $polltime = null;
 
+    /**
+     * @var Collection<int, JudgeTask>
+     */
     #[ORM\OneToMany(mappedBy: 'judgehost', targetEntity: JudgeTask::class)]
     #[Serializer\Exclude]
     private Collection $judgetasks;
@@ -105,6 +108,9 @@ class Judgehost
         return $this;
     }
 
+    /**
+     * @return Collection<int, JudgeTask>
+     */
     public function getJudgeTasks(): Collection
     {
         return $this->judgetasks;

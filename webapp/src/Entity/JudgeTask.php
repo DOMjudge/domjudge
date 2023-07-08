@@ -70,7 +70,7 @@ class JudgeTask
     private ?string $uuid = null;
 
 
-    #[ORM\ManyToOne(inversedBy: 'judgetasks')]
+    #[ORM\ManyToOne()]
     #[ORM\JoinColumn(name: 'submitid', nullable: true, referencedColumnName: 'submitid', onDelete: 'CASCADE',
         options: ['comment' => 'Submission ID being judged', 'unsigned' => true])
     ]
@@ -155,6 +155,9 @@ class JudgeTask
     #[Serializer\Exclude]
     private string|float|null $starttime = null;
 
+    /**
+     * @var Collection<int, JudgingRun>
+     */
     #[ORM\OneToMany(mappedBy: 'judgetask', targetEntity: JudgingRun::class)]
     #[Serializer\Exclude]
     private Collection $judging_runs;
@@ -202,7 +205,7 @@ class JudgeTask
         return $this->priority;
     }
 
-    public function setJobId($jobid): JudgeTask
+    public function setJobId(?int $jobid): JudgeTask
     {
         $this->jobid = $jobid;
         return $this;
@@ -360,6 +363,9 @@ class JudgeTask
         return $this;
     }
 
+    /**
+     * @return Collection<int, JudgingRun>
+     */
     public function getJudgingRuns(): Collection
     {
         return $this->judging_runs;
