@@ -207,6 +207,10 @@ class ContestControllerTest extends JuryControllerTestCase
                                                                                   'allowJudge' => '1',
                                                                                   'color' => '#000000',
                                                                                   'lazyEvalResults' => '0']]]];
+
+    /**
+     * @param array<string, array<int, array<string, string|mixed[]>>> $addEntitiesFailure
+     */
     protected static array $addEntitiesFailure         = ['Contest should not have multiple timezones.' => [['shortname' => 'tz',
                                                                                                              'name' => 'Timezones',
                                                                                                              'activatetimeString' => '1990-07-17 16:00:00 Africa/Douala',
