@@ -49,7 +49,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
     protected static array $addEntitiesCount          = [];
     protected static array $addEntitiesShown          = [];
     /**
-     * @var array<string, array<int, mixed[]>>
+     * @var array<string, array<int, mixed[]>> $addEntitiesFailure
      */
     protected static array $addEntitiesFailure        = [];
     /**
