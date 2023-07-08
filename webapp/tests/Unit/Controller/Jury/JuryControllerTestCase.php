@@ -382,6 +382,9 @@ abstract class JuryControllerTestCase extends BaseTestCase
             $this->verifyPageResponse('GET', $singlePageLink, 200);
             foreach ($formDataValues as $id => $element) {
                 if (in_array($formDataKeys[$id], static::$addEntitiesShown)) {
+                    /**
+                     * @var string $element
+                     */
                     self::assertSelectorExists('body:contains("' . $element . '")');
                 }
             }
