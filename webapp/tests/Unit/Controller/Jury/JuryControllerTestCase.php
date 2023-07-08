@@ -47,6 +47,9 @@ abstract class JuryControllerTestCase extends BaseTestCase
     protected static array $addEntities               = [];
     protected static array $addEntitiesCount          = [];
     protected static array $addEntitiesShown          = [];
+    /**
+     * @var array<string, array<int, mixed[]>>
+     */
     protected static array $addEntitiesFailure        = [];
     protected static ?string $defaultEditEntityName   = null;
     protected static array $specialFieldOnlyUpdate    = [];
@@ -333,6 +336,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
     /**
      * Test that admin can add edit an entity for this controller.
      *
+     * @param array<int, string> $formDataKeys
+     * @param array<int, mixed[]> $formDataValues
      * @dataProvider provideEditCorrectEntities
      */
     public function testCheckEditEntityAdminCorrect(array $formDataKeys, array $formDataValues): void
@@ -386,6 +391,10 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
+    /**
+     * @param array<string, mixed> $element
+     * @return array<int, array<int, mixed>>
+     */
     public function helperProvideMergeEditEntity(array $element): array
     {
         $formdataKeys = [];
