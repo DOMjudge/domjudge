@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use DOMElement;
 use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\DomCrawler\Crawler;
 
 /**
  * This abstract class will have the default functionality tested for Jury pages.
@@ -246,8 +247,12 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
-    protected function helperSubmitFields(array $element) {
+    /**
+     * @param array<string, string|bool|array<string, bool>> $element
+     */
+    protected function helperSubmitFields(array $element): Crawler {
         self::assertSelectorExists('a:contains(' . $this->addButton . ')');
+        $formFields = [];
         foreach ($element as $id => $field) {
             // Skip elements which we cannot set yet.
             // We can not set checkboxes directly.
