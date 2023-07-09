@@ -410,6 +410,11 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
+    /**
+     * @param array<string, string|bool|array<string, bool>> $entity
+     * @param array<string, string|bool|array<string, bool>> $expected
+     * @return array<int, array<string, string|bool|array<string, bool>>>
+     */
     protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {
         return [$entity, $expected];
