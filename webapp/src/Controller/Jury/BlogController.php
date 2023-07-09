@@ -68,7 +68,7 @@ class BlogController extends BaseController
         }
 
         try {
-            $fileName = $request->getUriForPath($this->saveImage($imageFile));
+            $fileName = $this->saveImage($imageFile);
         } catch (FileException $e) {
             return new JsonResponse(
                 ['success' => 0, 'error' => 'Error uploading the image.'],
