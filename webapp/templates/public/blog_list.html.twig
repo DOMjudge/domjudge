@@ -1,72 +1,26 @@
 {% extends "public/base.html.twig" %}
 
-{% block title %}Blog{% endblock %}
+{% block title %}News{% endblock %}
 {% block content %}
     <div class="container">
         <h1>News</h1>
-        <div class="d-flex flex-column align-items-center align-items-lg-start flex-lg-row">
-            <a href="/public/blog/1"><img src="{{ asset('images/placeholder.png') }}" alt="placeholder"></a>
-            <div class="flex-grow-1 mt-3 ml-lg-3">
-                <h2><a class="text-body" href="/public/blog/1">Začátek našeho programátorského dobrodružství!</a></h2>
-                <p class="text-muted">Jiří Formánek - 21. 9. 2023</p>
-                <p>
-                    Vítejte v našem korespondenčním semináři z programování! První týden byl plný vzrušení a nových
-                    poznatků. Naši účastníci se seznámili s programovacím jazykem Python a získali základní povědomí o
-                    datových typech, podmínkách a smyčkách. Zajímavé úkoly a projekty jim umožnily uplatnit své nově
-                    nabyté dovednosti.
-                </p>
-                <a href="/public/blog/1" class="btn btn-primary">Číst dál</a>
-            </div>
-        </div>
-        <hr>
-        <div class="d-flex flex-column align-items-center align-items-lg-start flex-lg-row">
-            <a href="/public/blog/1"><img src="{{ asset('images/placeholder.png') }}" alt="placeholder"></a>
-            <div class="flex-grow-1 mt-3 ml-lg-3">
-                <h2><a class="text-body" href="/public/blog/1">Prozkoumejme svět algoritmů</a></h2>
-                <p class="text-muted">Jiří Formánek - 21. 9. 2023</p>
-                <p>
-                    Ve druhém týdnu našeho korespondenčního semináře jsme se ponořili do fascinujícího světa algoritmů.
-                    Účastníci se naučili základní algoritmické koncepty, jako je hledání a řazení, a měli možnost
-                    vytvořit vlastní algoritmy pro řešení různých problémů. Diskuze a spolupráce mezi účastníky přinesly
-                    zajímavé nápady a perspektivy.
-                </p>
-                <a href="/public/blog/1" class="btn btn-primary">Číst dál</a>
-            </div>
-        </div>
-        <hr>
-        <div class="d-flex flex-column align-items-center align-items-lg-start flex-lg-row">
-            <a href="/public/blog/1"><img src="{{ asset('images/placeholder.png') }}" alt="placeholder">
-                <div class="flex-grow-1 mt-3 ml-lg-3">
-                    <h2><a class="text-body" href="/public/blog/1/1">Zajímavosti o programovacím jazyku Java</a></h2>
-                    <p class="text-muted">Jiří Formánek - 21. 9. 2023</p>
-                    <p>
-                        Ve třetím týdnu našeho semináře jsme se zaměřili na programovací jazyk Java. Účastníci se
-                        seznámili
-                        s jeho syntaxí a vlastnostmi, a také se dozvěděli o objektově orientovaném programování. Naučili
-                        se
-                        vytvářet třídy, objekty a metody v Javě a zkoušeli si je aplikovat na praktických úlohách. Java
-                        je
-                        mocný jazyk s širokou škálou využití, a naši účastníci objevili jeho potenciál.
-                    </p>
-                    <a href="/public/blog/1" class="btn btn-primary">Číst dál</a>
+        {% for post in posts %}
+            {% set link = path('public_blog_post', { 'slug':post.slug }) %}
+            <div class="d-flex flex-column align-items-start align-items-md-start flex-md-row">
+                <a href="{{ link }}" class="align-self-center align-self-md-start blog-post-thumbnail">
+                    <img src="{{ asset('images/blog/' ~ post.thumbnailFileName) }}"
+                         alt="{{ post.title }}"
+                         class="blog-post-thumbnail">
+                </a>
+                <div class="flex-grow-1 mt-1 ml-md-4">
+                    <h2><a class="text-body"
+                           href="{{ link }}">{{ post.title }}</a></h2>
+                    <p class="text-muted">{{ post.author }} - {{ post.publishtime|round|date }}</p>
+                    <p>{{ post.subtitle }}</p>
+                    <a href="{{ link }}" class="btn btn-primary">Číst dál</a>
                 </div>
-        </div>
-        <hr>
-        <div class="d-flex flex-column align-items-center align-items-lg-start flex-lg-row">
-            <img src="{{ asset('images/placeholder.png') }}" alt="placeholder">
-            <div class="flex-grow-1 mt-3 ml-lg-3">
-                <h2><a class="text-body" href="/public/blog/1">Naše cesta k programátorskému úspěchu</a></h2>
-                <p class="text-muted">Jiří Formánek - 21. 9. 2023</p>
-                <p>
-                    Poslední týden korespondenčního semináře z programování byl plný rozmanitých témat a závěrečných
-                    projektů. Účastníci získali další znalosti o programování a zdokonalili své dovednosti v různých
-                    jazycích. Vytvořili složité algoritmy, implementovali pokročilé datové struktury a pracovali na
-                    rozsáhlých projektech. Každý z nich ukázal obdivuhodný pokrok od začátku semináře. Shrnutím semináře
-                    jsme si připomněli, jak daleko jsme se dostali a jakou cestu jsme absolvovali ke svému
-                    programátorskému úspěchu.
-                </p>
-                <a href="/public/blog/1" class="btn btn-primary">Číst dál</a>
             </div>
-        </div>
+            <hr>
+        {% endfor %}
     </div>
 {% endblock %}

@@ -2,3 +2,15 @@
     max-width: 100%;
     height: auto;
 }
+
+.blog-post-thumbnail {
+    width: 100%;
+    aspect-ratio: 3/2;
+    object-fit: cover;
+}
+
+@media (min-width: 768px) {
+    .blog-post-thumbnail {
+        width: 360px;
+    }
+}
