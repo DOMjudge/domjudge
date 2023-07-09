@@ -11,6 +11,7 @@ parameters:
     # Enable this to support removing time intervals from the contest.
     # This code is rarely tested and we discourage using it.
     removed_intervals: false
+    image_directory: '%kernel.project_dir%/public/images/blog'
 
 services:
     # default configuration for services in *this* file
