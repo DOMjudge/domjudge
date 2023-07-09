@@ -52,7 +52,13 @@ abstract class JuryControllerTestCase extends BaseTestCase
      * @var array<string, array<int, mixed[]>>
      */
     protected static array $addEntitiesFailure        = [];
+    /**
+     * @var array<int, array<string, string>> $addEntitiesNonLocal
+     */
     protected static array $addEntitiesNonLocal       = [];
+    /**
+     * @var array<string, array<int, array<string, string>>> $addEntitiesFailureNonLocal
+     */
     protected static array $addEntitiesFailureNonLocal = [];
     protected static ?string $defaultEditEntityName   = null;
     protected static array $specialFieldOnlyUpdate    = [];
