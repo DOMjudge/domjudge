@@ -260,11 +260,12 @@ abstract class JuryControllerTestCase extends BaseTestCase
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         if (static::$add !== '') {
             self::assertSelectorExists('a:contains(' . $this->addButton . ')');
+            $formFields = [];
             foreach ($element as $id => $field) {
                 // Skip elements which we cannot set yet.
                 // We can not set checkboxes directly.
                 // We can not set the fields set by JS directly.
-                if (is_bool($field) || $id === static::$addPlus) {
+                if ($id === static::$addPlus) {
                     continue;
                 }
                 $formId = str_replace('.', '][', $id);
@@ -278,17 +279,6 @@ abstract class JuryControllerTestCase extends BaseTestCase
             $button = $this->client->getCrawler()->selectButton('Save');
             $form = $button->form($formFields, 'POST');
             $formName = str_replace('[', '', static::$addForm);
-            foreach ($element as $id => $field) {
-                // Set checkboxes
-                if (!is_bool($field)) {
-                    continue;
-                }
-                if ($field) {
-                    $form[$formName][$id]->tick();
-                } else {
-                    $form[$formName][$id]->untick();
-                }
-            }
             // Get the underlying object to inject elements not currently in the DOM.
             $rawValues = $form->getPhpValues();
             if (key_exists(static::$addPlus, $element)) {
