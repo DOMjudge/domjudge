@@ -248,6 +248,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test that admin can add a new entity for this controller.
+     * @param array<string, string|array<string, bool>> $element
+     * @param array<string, string|mixed[]> $expected
      * @dataProvider provideAddCorrectEntities
      */
     public function testCheckAddEntityAdmin(array $element, array $expected): void
@@ -398,6 +400,10 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
+    /**
+     * @param array<string, mixed> $element
+     * @return array<int, array<int, mixed>>
+     */
     public function helperProvideMergeEditEntity(array $element): array
     {
         $formdataKeys = [];
