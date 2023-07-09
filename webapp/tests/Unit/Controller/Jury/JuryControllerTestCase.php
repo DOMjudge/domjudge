@@ -331,6 +331,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test failures when the admin provides wrong data.
+     * @param array<string, string|array<string, bool>> $element
      * @dataProvider provideAddFailureEntities
      */
     public function testCheckAddEntityAdminFailure(array $element, string $message): void
