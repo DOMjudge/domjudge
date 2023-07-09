@@ -399,6 +399,10 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
+    /**
+     * @param array<string, string|bool|array<string, bool>> $overWriteValues
+     * @return array<int, array<string, string|bool|array<string, bool>>>
+     */
     protected function helperProvideMergeAddEntity(array $overWriteValues): array
     {
         $combinedValues = [];
