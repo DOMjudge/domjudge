@@ -1,0 +1,94 @@
+{% extends "jury/base.html.twig" %}
+
+{% block title %}Send a blog post - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+    <style>
+        .ce-block__content,
+        .ce-toolbar__content {
+            max-width: unset;
+        }
+    </style>
+    <div class="container">
+        <h1>Send a blog post</h1>
+        <form action="{{ path('jury_blog_post_send') }}" method="post" id="form" class="d-flex flex-column" enctype="multipart/form-data">
+            <label>
+                Title
+                <input type="text" name="title" maxlength="511" class="form-control" required>
+            </label>
+
+            <label>
+                Subtitle
+                <textarea name="subtitle" class="form-control" required></textarea>
+            </label>
+
+            <div class="custom-file">
+                <input name="thumbnail" type="file" class="custom-file-input" id="input-thumbnail" required>
+                <label class="custom-file-label" for="input-thumbnail">Thumbnail</label>
+            </div>
+
+            <label>
+                Author
+                <input type="text" name="author" maxlength="255" class="form-control">
+            </label>
+
+            <label>Text</label>
+            <div class="card">
+                <div class="card-body">
+                    <div id="editorjs">
+
+                    </div>
+                </div>
+            </div>
+
+            <input type="hidden" name="body" id="input-body">
+
+            <button type="submit" class="btn btn-primary align-self-start mt-3">Send</button>
+        </form>
+    </div>
+
+    {% if data is defined %}
+        {{ data|raw }}
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+    <script>
+        const editor = new EditorJS({
+            tools: {
+                header: {
+                    class: Header,
+                    inlineToolbar: true
+                },
+                list: {
+                    class: List,
+                    inlineToolbar: true
+                },
+                image: {
+                    class: ImageTool,
+                    config: {
+                        endpoints: {
+                            byFile: '/jury/blog/send/image-upload',
+                            byUrl: 'http://localhost:8008/fetchUrl',
+                        }
+                    },
+                    inlineToolbar: true
+                }
+            },
+        })
+
+        document.getElementById("form").onsubmit = function (event) {
+            event.preventDefault();
+            editor.save().then((outputData) => {
+                document.getElementById("input-body").value = JSON.stringify(outputData);
+                document.getElementById("form").submit();
+            });
+        }
+    </script>
+{% endblock %}
