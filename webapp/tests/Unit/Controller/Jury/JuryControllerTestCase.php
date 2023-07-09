@@ -412,6 +412,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
     /**
      * Test that admin can edit an entity for this controller but receives an error when providing wrong data.
      *
+     * @param array<int, string> $formDataKeys
+     * @param array<int, mixed> $formDataValues
      * @dataProvider provideEditFailureEntities
      */
     public function testCheckEditEntityAdminFailure(array $formDataKeys, array $formDataValues, string $message): void
@@ -430,6 +432,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
             $singlePageLink = null;
             $this->client->followRedirects(true);
             $crawler = $this->getCurrentCrawler();
+            /** @var DOMElement $node */
             foreach ($crawler->filter('a') as $node) {
                 if (str_contains($node->nodeValue, static::$defaultEditEntityName)) {
                     $singlePageLink = $node->getAttribute('href');
@@ -437,6 +440,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
             }
             $this->verifyPageResponse('GET', $singlePageLink, 200);
             $crawler = $this->getCurrentCrawler();
+            /** @var DOMElement $node */
             foreach ($crawler->filter('a') as $node) {
                 if (str_contains($node->nodeValue, 'Edit')) {
                     $editLink = $node->getAttribute('href');
