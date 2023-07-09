@@ -55,7 +55,13 @@ abstract class JuryControllerTestCase extends BaseTestCase
     protected static ?string $defaultEditEntityName   = null;
     protected static array $specialFieldOnlyUpdate    = [];
     protected static array $editEntitiesSkipFields    = [];
+    /**
+     * @var array<int, string> $overviewSingleNotShown
+     */
     protected static array $overviewSingleNotShown    = [];
+    /**
+     * @var array<int, string> $overviewGeneralNotShown
+     */
     protected static array $overviewGeneralNotShown   = [];
 
     protected function setUp(): void
