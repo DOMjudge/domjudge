@@ -52,9 +52,11 @@ class BlogController extends BaseController
     /**
      * @Route("", name="public_blog_list")
      */
-    public function blogListAction(): Response
+    public function listAction(): Response
     {
-        return $this->render('public/blog_list.html.twig');
+        $blogPosts = $this->em->getRepository(BlogPost::class)->findAll();
+
+        return $this->render('public/blog_list.html.twig', ["posts" => $blogPosts]);
     }
 
     /**
