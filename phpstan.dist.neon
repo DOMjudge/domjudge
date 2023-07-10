@@ -5,6 +5,19 @@ parameters:
         - webapp/tests
     excludePaths:
         - webapp/src/Utils/Adminer.php
+    ignoreErrors:
+        -
+            message: '#Method .* return type has no value type specified in iterable type array#'
+            path: webapp/tests
+        -
+            message: '#Method .* has parameter .* with no value type specified in iterable type array#'
+            path: webapp/tests
+        -
+            message: '#Property .* type has no value type specified in iterable type array#'
+            path: webapp/tests
+        -
+            message: '#PHPDoc tag @var for variable .* has no value type specified in iterable type array#'
+            path: webapp/tests
 includes:
     - phpstan-baseline.neon
     - lib/vendor/phpstan/phpstan-doctrine/extension.neon
