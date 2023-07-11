@@ -74,8 +74,7 @@
                     class: ImageTool,
                     config: {
                         endpoints: {
-                            byFile: '/jury/blog/send/image-upload',
-                            byUrl: 'http://localhost:8008/fetchUrl',
+                            byFile: '{{ path('jury_blog_image_upload') }}',
                         }
                     },
                     inlineToolbar: true
