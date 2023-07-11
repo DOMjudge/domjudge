@@ -97,6 +97,11 @@ class BlogController extends BaseController
         $blogPost->setPublishtime(Utils::now());
 
         $slug = strtolower($this->slugger->slug($blogPost->getTitle())->toString());
+
+        if ($this->em->getRepository(BlogPost::class)->findOneBy(['slug' => $slug])) {
+            $slug .= '-' . uniqid();
+        }
+
         $blogPost->setSlug($slug);
 
         $thumbnailFileName = $this->saveImage(
