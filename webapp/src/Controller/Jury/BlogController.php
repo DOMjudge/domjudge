@@ -9,8 +9,6 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use EditorJS\EditorJS;
-use EditorJS\EditorJSException;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -68,7 +66,7 @@ class BlogController extends BaseController
         }
 
         try {
-            $fileName = $this->saveImage($imageFile);
+            $fileName = $this->saveImage($imageFile, 'blog/in-article');
         } catch (FileException $e) {
             return new JsonResponse(
                 ['success' => 0, 'error' => 'Error uploading the image.'],
@@ -101,7 +99,10 @@ class BlogController extends BaseController
         $slug = strtolower($this->slugger->slug($blogPost->getTitle())->toString());
         $blogPost->setSlug($slug);
 
-        $thumbnailFileName = $this->saveImage($request->files->get('thumbnail'));
+        $thumbnailFileName = $this->saveImage(
+            $request->files->get('thumbnail'),
+            'blog/thumbnails'
+        );
         $blogPost->setThumbnailFileName($thumbnailFileName);
 
         $this->em->persist($blogPost);
@@ -114,16 +115,15 @@ class BlogController extends BaseController
         return $this->redirectToRoute('public_blog_post', ['slug' => $blogPost->getSlug()]);
     }
 
-    private function saveImage(UploadedFile $file): string
+    private function saveImage(UploadedFile $file, string $directory): string
     {
         $fileName = md5(uniqid()) . '.' . $file->guessExtension();
 
         $file->move(
-        // ok?
-            $this->getParameter('image_directory'),
+            join('/', [$this->getParameter('image_directory'), $directory]),
             $fileName
         );
 
-        return $fileName;
+        return join('/', [$directory, $fileName]);
     }
 }
