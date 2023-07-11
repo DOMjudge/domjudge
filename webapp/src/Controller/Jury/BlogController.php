@@ -22,6 +22,10 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
  */
 class BlogController extends BaseController
 {
+    private const EDITORJS_IMAGE_BASE_URL = '/media/images/';
+    private const THUMBNAILS_DIRECTORY = 'blog/thumbnails';
+    private const IN_ARTICLE_IMAGES_DIRECTORY = 'blog/thumbnails';
+
     protected EntityManagerInterface $em;
     protected DOMJudgeService $dj;
     protected ConfigurationService $config;
@@ -66,7 +70,7 @@ class BlogController extends BaseController
         }
 
         try {
-            $fileName = $this->saveImage($imageFile, 'blog/in-article');
+            $fileName = $this->saveImage($imageFile, self::IN_ARTICLE_IMAGES_DIRECTORY);
         } catch (FileException $e) {
             return new JsonResponse(
                 ['success' => 0, 'error' => 'Error uploading the image.'],
@@ -77,8 +81,7 @@ class BlogController extends BaseController
         return new JsonResponse([
             'success' => 1,
             'file' => [
-                // use a dynamic path
-                'url' => '/media/images/' . $fileName,
+                'url' => self::EDITORJS_IMAGE_BASE_URL . $fileName,
             ]
         ]);
     }
@@ -106,7 +109,7 @@ class BlogController extends BaseController
 
         $thumbnailFileName = $this->saveImage(
             $request->files->get('thumbnail'),
-            'blog/thumbnails'
+            self::THUMBNAILS_DIRECTORY
         );
         $blogPost->setThumbnailFileName($thumbnailFileName);
 
