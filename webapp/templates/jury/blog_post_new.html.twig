@@ -55,10 +55,11 @@
         {{ data|raw }}
     {% endif %}
 
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+    <script src="{{ asset('js/editorjs/editorjs.js') }}"></script>
+    <script src="{{ asset('js/editorjs/header.js') }}"></script>
+    <script src="{{ asset('js/editorjs/list.js') }}"></script>
+    <script src="{{ asset('js/editorjs/image.js') }}"></script>
+
     <script>
         const editor = new EditorJS({
             tools: {
