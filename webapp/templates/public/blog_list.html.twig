@@ -8,7 +8,7 @@
             {% set link = path('public_blog_post', { 'slug':post.slug }) %}
             <div class="d-flex flex-column align-items-start align-items-md-start flex-md-row">
                 <a href="{{ link }}" class="align-self-center align-self-md-start blog-post-thumbnail">
-                    <img src="{{ asset('images/blog/' ~ post.thumbnailFileName) }}"
+                    <img src="{{ asset('media/images/' ~ post.thumbnailFileName) }}"
                          alt="{{ post.title }}"
                          class="blog-post-thumbnail">
                 </a>

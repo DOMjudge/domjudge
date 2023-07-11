@@ -78,7 +78,7 @@ class BlogController extends BaseController
             'success' => 1,
             'file' => [
                 // use a dynamic path
-                'url' => '/images/blog/' . $fileName,
+                'url' => '/media/images/' . $fileName,
             ]
         ]);
     }
