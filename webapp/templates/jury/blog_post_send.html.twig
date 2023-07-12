@@ -1,6 +1,6 @@
 {% extends "jury/base.html.twig" %}
 
-{% block title %}Send a blog post - {{ parent() }}{% endblock %}
+{% block title %}{{ action|capitalize }} a blog post - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -14,7 +14,7 @@
         }
     </style>
     <div class="container">
-        <h1>Send a blog post</h1>
+        <h1>{{ action|capitalize }} a blog post</h1>
 
         {{ form_start(form) }}
 

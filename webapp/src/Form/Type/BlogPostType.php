@@ -29,7 +29,7 @@ class BlogPostType extends AbstractType
         $builder->add('author', TextType::class, [
             'required' => false
         ]);
-        $builder->add('thumbnail_file_name', FileType::class, ['label' => 'Thumbnail']);
+        $builder->add('thumbnail_file_name', FileType::class, ['label' => 'Thumbnail', 'data_class' => null]);
         $builder->add('body', HiddenType::class);
 
         $builder->add('send', SubmitType::class);

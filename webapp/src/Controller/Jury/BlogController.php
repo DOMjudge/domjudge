@@ -81,10 +81,18 @@ class BlogController extends BaseController
 
     /**
      * @Route("/send", methods={"GET", "POST"}, name="jury_blog_post_send")
+     * @Route("/edit/{id}", methods={"GET", "POST"}, name="jury_blog_post_edit")
      */
-    public function sendBlogPostAction(Request $request): Response
+    public function sendBlogPostAction(Request $request, ?int $id = null): Response
     {
-        $blogPost = new BlogPost();
+        if ($id) {
+            $blogPost = $this->em->getRepository(BlogPost::class)->find($id);
+            if (!$blogPost) {
+                throw $this->createNotFoundException('No blog post found for id ' . $id);
+            }
+        } else {
+            $blogPost = new BlogPost();
+        }
 
         $form = $this->createForm(BlogPostType::class, $blogPost);
 
@@ -117,7 +125,10 @@ class BlogController extends BaseController
             return $this->redirectToRoute('public_blog_post', ['slug' => $blogPost->getSlug()]);
         }
 
-        return $this->renderForm('jury/blog_post_new.html.twig', ['form' => $form]);
+        return $this->renderForm('jury/blog_post_send.html.twig', [
+            'form' => $form,
+            'action' => $id ? 'edit' : 'send'
+        ]);
     }
 
     private function saveImage(UploadedFile $file, string $directory): string
