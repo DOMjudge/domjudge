@@ -25,6 +25,7 @@ use Setono\EditorJS\Renderer\Renderer;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @Route("/public/blog")
@@ -35,6 +36,8 @@ class BlogController extends BaseController
     protected DOMJudgeService $dj;
     protected ConfigurationService $config;
     protected EventLogService $eventLogService;
+
+    private const POSTS_PER_PAGE = 10;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -52,11 +55,28 @@ class BlogController extends BaseController
     /**
      * @Route("", name="public_blog_list")
      */
-    public function listAction(): Response
+    public function listAction(Request $request): Response
     {
-        $blogPosts = $this->em->getRepository(BlogPost::class)->findAll();
+        $blogPosts = $this->em->getRepository(BlogPost::class)
+            ->createQueryBuilder('bp')
+            ->orderBy('bp.publishtime', 'DESC')
+            ->getQuery()
+            ->getResult();
 
-        return $this->render('public/blog_list.html.twig', ["posts" => $blogPosts]);
+        $totalPosts = count($blogPosts);
+        $totalPages = ceil($totalPosts / self::POSTS_PER_PAGE);
+
+        $page = (int)min($request->query->getInt('page', 1), $totalPages);
+        $page = (int)max($page, 1);
+
+        $start = ($page - 1) * self::POSTS_PER_PAGE;
+        $posts = array_slice($blogPosts, $start, self::POSTS_PER_PAGE);
+
+        return $this->render('public/blog_list.html.twig', [
+            'posts' => $posts,
+            'page' => $page,
+            'totalPages' => $totalPages,
+        ]);
     }
 
     /**
