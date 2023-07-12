@@ -56,6 +56,74 @@ class BlogController extends BaseController
     }
 
     /**
+     * @Route("", methods={"GET"}, name="jury_blog")
+     */
+    public function indexAction(): Response
+    {
+        /** @var BlogPost[] $blogPosts */
+        $blogPosts = $this->em->getRepository(BlogPost::class)->findAll();
+
+        $table_fields = [
+            'title' => ['title' => 'title', 'sort' => true],
+            'author' => ['title' => 'author', 'sort' => true],
+            'publishtime' => ['title' => 'publish time', 'sort' => true,
+                'default_sort' => true],
+        ];
+
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $blogPostsTable = [];
+        foreach ($blogPosts as $b) {
+            /** @var BlogPost $b */
+            $blogPostData = [];
+            $blogPostActions = [];
+
+            // Get whatever fields we can from the user object itself.
+            foreach ($table_fields as $k => $v) {
+                if ($propertyAccessor->isReadable($b, $k)) {
+                    $value = $propertyAccessor->getValue($b, $k);
+
+                    if ($k == 'publishtime') {
+                        $value = gmdate('Y-m-d H:i:s', (int)$value);
+                    }
+
+                    $blogPostData[$k] = ['value' => $value];
+                }
+            }
+
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $blogPostActions[] = [
+                    'icon' => 'edit',
+                    'title' => 'edit this blog post',
+                    'link' => $this->generateUrl('jury_blog_post_edit', [
+                        'id' => $b->getBlogpostid(),
+                    ])
+                ];
+                $blogPostActions[] = [
+                    'icon' => 'trash-alt',
+                    'title' => 'delete this blog post',
+                    'link' => $this->generateUrl('jury_blog_post_delete', [
+                        'id' => $b->getBlogpostid(),
+                    ]),
+                    'ajaxModal' => true,
+                ];
+            }
+
+            // Save this to our list of rows.
+            $blogPostsTable[] = [
+                'data' => $blogPostData,
+                'actions' => $blogPostActions,
+                'link' => $this->generateUrl('jury_blog_post_edit', ['id' => $b->getBlogpostid()]),
+            ];
+        }
+
+        return $this->render('jury/blog.html.twig', [
+            'blog_posts' => $blogPostsTable,
+            'table_fields' => $table_fields,
+            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+        ]);
+    }
+
+    /**
      * @Route("/send/image-upload", methods={"POST"}, name="jury_blog_image_upload")
      */
     public function uploadPostImageAction(Request $request): JsonResponse

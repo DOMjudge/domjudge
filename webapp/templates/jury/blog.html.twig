@@ -1,0 +1,21 @@
+{% extends "jury/base.html.twig" %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Blog posts - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+    <h1>Blog posts</h1>
+
+    {{ macros.table(blog_posts, table_fields, num_actions) }}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <p>
+            {{ button(path('jury_blog_post_send'), 'Send a new blog post', 'primary', 'pencil') }}
+        </p>
+    {% endif %}
+{% endblock %}
