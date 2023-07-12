@@ -49,7 +49,7 @@ class BlogController extends BaseController
     /**
      * @Route("/send", methods={"GET"}, name="jury_blog_post_new")
      */
-    public function composeClarificationAction(): Response
+    public function composeBlogPostAction(): Response
     {
         return $this->render('jury/blog_post_new.html.twig');
     }
@@ -89,7 +89,7 @@ class BlogController extends BaseController
     /**
      * @Route("/send", methods={"POST"}, name="jury_blog_post_send")
      */
-    public function sendAction(Request $request): Response
+    public function sendBlogPostAction(Request $request): Response
     {
         $blogPost = new BlogPost();
 
