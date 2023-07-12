@@ -101,7 +101,9 @@ class BlogController extends BaseController
             /** @var BlogPost $blogPost */
             $blogPost = $form->getData();
 
-            $blogPost->setPublishtime(Utils::now());
+            if (!$id) {
+                $blogPost->setPublishtime(Utils::now());
+            }
 
             $slug = strtolower($this->slugger->slug($blogPost->getTitle())->toString());
             if ($this->em->getRepository(BlogPost::class)->findOneBy(['slug' => $slug])) {
