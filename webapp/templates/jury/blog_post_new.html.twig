@@ -15,40 +15,26 @@
     </style>
     <div class="container">
         <h1>Send a blog post</h1>
-        <form action="{{ path('jury_blog_post_send') }}" method="post" id="form" class="d-flex flex-column" enctype="multipart/form-data">
-            <label>
-                Title
-                <input type="text" name="title" maxlength="511" class="form-control" required>
-            </label>
 
-            <label>
-                Subtitle
-                <textarea name="subtitle" class="form-control" required></textarea>
-            </label>
+        {{ form_start(form) }}
 
-            <div class="custom-file mb-2">
-                <input name="thumbnail" type="file" class="custom-file-input" id="input-thumbnail" required>
-                <label class="custom-file-label" for="input-thumbnail">Thumbnail</label>
-            </div>
+        {{ form_row(form.title) }}
+        {{ form_row(form.subtitle) }}
+        {{ form_row(form.thumbnail_file_name) }}
+        {{ form_row(form.author) }}
 
-            <label>
-                Author
-                <input type="text" name="author" maxlength="255" class="form-control">
-            </label>
+        <label>Text</label>
+        <div class="card mb-3">
+            <div class="card-body">
+                <div id="editorjs">
 
-            <label>Text</label>
-            <div class="card">
-                <div class="card-body">
-                    <div id="editorjs">
-
-                    </div>
                 </div>
             </div>
+        </div>
 
-            <input type="hidden" name="body" id="input-body">
+        {{ form_row(form.send) }}
 
-            <button type="submit" class="btn btn-primary align-self-start mt-3">Send</button>
-        </form>
+        {{ form_end(form) }}
     </div>
 
     {% if data is defined %}
@@ -83,11 +69,15 @@
             },
         })
 
-        document.getElementById("form").onsubmit = function (event) {
+        const form = document.getElementsByName("blog_post")[0];
+        const inputBody = document.getElementById("blog_post_body");
+
+        form.onsubmit = function (event) {
             event.preventDefault();
+
             editor.save().then((outputData) => {
-                document.getElementById("input-body").value = JSON.stringify(outputData);
-                document.getElementById("form").submit();
+                inputBody.value = JSON.stringify(outputData);
+                form.submit();
             });
         }
     </script>

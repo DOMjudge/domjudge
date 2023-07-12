@@ -4,6 +4,7 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Entity\BlogPost;
+use App\Form\Type\BlogPostType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -47,14 +48,6 @@ class BlogController extends BaseController
     }
 
     /**
-     * @Route("/send", methods={"GET"}, name="jury_blog_post_new")
-     */
-    public function composeBlogPostAction(): Response
-    {
-        return $this->render('jury/blog_post_new.html.twig');
-    }
-
-    /**
      * @Route("/send/image-upload", methods={"POST"}, name="jury_blog_image_upload")
      */
     public function uploadPostImageAction(Request $request): JsonResponse
@@ -87,40 +80,44 @@ class BlogController extends BaseController
     }
 
     /**
-     * @Route("/send", methods={"POST"}, name="jury_blog_post_send")
+     * @Route("/send", methods={"GET", "POST"}, name="jury_blog_post_send")
      */
     public function sendBlogPostAction(Request $request): Response
     {
         $blogPost = new BlogPost();
 
-        $blogPost->setAuthor($request->request->get('author'));
-        $blogPost->setTitle($request->request->get('title'));
-        $blogPost->setSubtitle($request->request->get('subtitle'));
-        $blogPost->setBody($request->request->get('body'));
-        $blogPost->setPublishtime(Utils::now());
+        $form = $this->createForm(BlogPostType::class, $blogPost);
 
-        $slug = strtolower($this->slugger->slug($blogPost->getTitle())->toString());
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var BlogPost $blogPost */
+            $blogPost = $form->getData();
 
-        if ($this->em->getRepository(BlogPost::class)->findOneBy(['slug' => $slug])) {
-            $slug .= '-' . uniqid();
+            $blogPost->setPublishtime(Utils::now());
+
+            $slug = strtolower($this->slugger->slug($blogPost->getTitle())->toString());
+            if ($this->em->getRepository(BlogPost::class)->findOneBy(['slug' => $slug])) {
+                $slug .= '-' . uniqid();
+            }
+            $blogPost->setSlug($slug);
+
+            $thumbnailFileName = $this->saveImage(
+                $form['thumbnail_file_name']->getData(),
+                self::THUMBNAILS_DIRECTORY
+            );
+            $blogPost->setThumbnailFileName($thumbnailFileName);
+
+            $this->em->persist($blogPost);
+            $this->em->flush();
+
+            $blogpostId = $blogPost->getBlogpostid();
+            $this->dj->auditlog('blog_post', $blogpostId, 'added');
+            $this->eventLogService->log('blog_post', $blogpostId, 'create');
+
+            return $this->redirectToRoute('public_blog_post', ['slug' => $blogPost->getSlug()]);
         }
 
-        $blogPost->setSlug($slug);
-
-        $thumbnailFileName = $this->saveImage(
-            $request->files->get('thumbnail'),
-            self::THUMBNAILS_DIRECTORY
-        );
-        $blogPost->setThumbnailFileName($thumbnailFileName);
-
-        $this->em->persist($blogPost);
-        $this->em->flush();
-
-        $blogpostId = $blogPost->getBlogpostid();
-        $this->dj->auditlog('blog_post', $blogpostId, 'added');
-        $this->eventLogService->log('blog_post', $blogpostId, 'create');
-
-        return $this->redirectToRoute('public_blog_post', ['slug' => $blogPost->getSlug()]);
+        return $this->renderForm('jury/blog_post_new.html.twig', ['form' => $form]);
     }
 
     private function saveImage(UploadedFile $file, string $directory): string
