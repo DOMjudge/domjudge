@@ -93,7 +93,7 @@ class ContestControllerTest extends JuryControllerTestCase
                                                            'endtimeString'        => '2021-07-17 16:11:00 Europe/Amsterdam',
                                                            'unfreezetimeString'   => '',
                                                            'deactivatetimeString' => ''],
-                                                           ['shortname'           => 'dirfreeze',
+                                                          ['shortname'           => 'dirfreeze',
                                                            'name'                 => 'Direct freeze minimal',
                                                            'activatetimeString'   => '2021-07-17 16:07:59 Europe/Amsterdam',
                                                            'starttimeString'      => '2021-07-17 16:08:00 Europe/Amsterdam',
@@ -207,15 +207,12 @@ class ContestControllerTest extends JuryControllerTestCase
                                                                                   'allowJudge' => '1',
                                                                                   'color' => '#000000',
                                                                                   'lazyEvalResults' => '0']]]];
-
-
     protected static array $addEntitiesFailure         = ['Contest should not have multiple timezones.' => [['shortname' => 'tz',
                                                                                                              'name' => 'Timezones',
                                                                                                              'activatetimeString' => '1990-07-17 16:00:00 Africa/Douala',
                                                                                                              'starttimeString' => '1990-07-17 16:00:00 Etc/GMT+2',
                                                                                                              'freezetimeString' => '1990-07-17 16:00:00 America/Paramaribo']],
                                                           'This value should not be blank.' => [['shortname' => '', 'name' => 'Empty'],
-                                                                                                ['externalid' => '', 'name' => 'Empty externalid'],
                                                                                                 ['name' => '', 'shortname' => 'empty_name'],
                                                                                                 ['problems' => ['0' => ['problem' => '2',
                                                                                                                         'shortname' => '',
@@ -225,6 +222,8 @@ class ContestControllerTest extends JuryControllerTestCase
                                                                                                                         'color' => '#000000',
                                                                                                                         'lazyEvalResults' => '0']], 'name' => 'Problem shortname empty']],
                                                           'Only alphanumeric characters and ._- are allowed' => [['shortname' => '"quoted"']]];
+
+    protected static array $addEntitiesFailureNonLocal = ['This value should not be blank.' => [['externalid' => '', 'name' => 'Empty externalid']]];
 
     protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {

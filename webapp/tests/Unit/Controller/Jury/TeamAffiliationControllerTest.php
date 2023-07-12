@@ -42,13 +42,12 @@ class TeamAffiliationControllerTest extends JuryControllerTestCase
                                                           ['name' => 'Special chars 😀',
                                                            'shortname' => 'yes😀']];
     protected static array   $addEntitiesNonLocal      = [['name' => 'External set', 'externalid' => 'ext12-._']];
-    protected static array   $addEntitiesFailure       = ['This value should not be blank.' => [['externalid' => ''],
-                                                                                                ['shortname' => ''],
+    protected static array   $addEntitiesFailure       = ['This value should not be blank.' => [['shortname' => ''],
                                                                                                 ['name' => '']],
-                                                          'Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => '()']],
                                                           'Only letters, numbers, dashes and underscores are allowed.' => [['icpcid' => '()viol'],
                                                                                                                            ['icpcid' => '|viol']]];
-    protected static array $addEntitiesFailureNonLocal = ['Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => '()']]];
+    protected static array $addEntitiesFailureNonLocal = ['This value should not be blank.' => [['externalid' => '']],
+                                                          'Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => '()']]];
 
     protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {
