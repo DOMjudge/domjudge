@@ -117,8 +117,8 @@ class BlogController extends BaseController
         $this->em->flush();
 
         $blogpostId = $blogPost->getBlogpostid();
-        $this->dj->auditlog('clarification', $blogpostId, 'added');
-        $this->eventLogService->log('clarification', $blogpostId, 'create');
+        $this->dj->auditlog('blog_post', $blogpostId, 'added');
+        $this->eventLogService->log('blog_post', $blogpostId, 'create');
 
         return $this->redirectToRoute('public_blog_post', ['slug' => $blogPost->getSlug()]);
     }
