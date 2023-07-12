@@ -157,7 +157,7 @@ class BlogController extends BaseController
 
     /**
      * @Route("/send", methods={"GET", "POST"}, name="jury_blog_post_send")
-     * @Route("/{id}/edit", methods={"GET", "POST"}, name="jury_blog_post_edit")
+     * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="jury_blog_post_edit")
      */
     public function sendBlogPostAction(Request $request, ?int $id = null): Response
     {
@@ -210,7 +210,7 @@ class BlogController extends BaseController
     }
 
     /**
-     * @Route("/{id}/delete", name="jury_blog_post_delete")
+     * @Route("/{id<\d+>}/delete", name="jury_blog_post_delete")
      */
     public function deleteBlogPostAction(Request $request, int $id): Response
     {
