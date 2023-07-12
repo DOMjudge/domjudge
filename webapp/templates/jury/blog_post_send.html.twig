@@ -47,6 +47,11 @@
     <script src="{{ asset('js/editorjs/image.js') }}"></script>
 
     <script>
+        const form = document.getElementsByName("blog_post")[0];
+        const inputBody = document.getElementById("blog_post_body");
+
+        const data = inputBody.value === "" ? null : JSON.parse(inputBody.value);
+
         const editor = new EditorJS({
             tools: {
                 header: {
@@ -67,10 +72,8 @@
                     inlineToolbar: true
                 }
             },
+            data: data,
         })
-
-        const form = document.getElementsByName("blog_post")[0];
-        const inputBody = document.getElementById("blog_post_body");
 
         form.onsubmit = function (event) {
             event.preventDefault();
