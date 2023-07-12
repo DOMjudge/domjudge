@@ -50,11 +50,11 @@ class TeamCategoryControllerTest extends JuryControllerTestCase
                                                            'externalid' => 'ext10-._'],
                                                           ['name' => 'Name with 😁']];
     protected static array   $addEntitiesFailure       = ['Only non-negative sortorders are supported' => [['sortorder' => '-10']],
-                                                          'Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => 'yes|']],
                                                           'Only letters, numbers, dashes and underscores are allowed.' => [['icpcid' => '|violation', 'name' => 'ICPCid violation-1'],
                                                                                                                            ['icpcid' => '()violation', 'name' => 'ICPCid violation-2']],
-                                                          'This value should not be blank.' => [['name' => ''],
-                                                                                                ['externalid' => '']]];
+                                                          'This value should not be blank.' => [['name' => '']]];
+    protected static array   $addEntitiesFailureNonLocal = ['Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => 'yes|']],
+                                                            'This value should not be blank.' => [['externalid' => '']]];
 
     protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {
