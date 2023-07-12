@@ -81,7 +81,7 @@ class BlogPost extends BaseApiEntity
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private ?string $thumbnail_file_name;
+    private string $thumbnail_file_name;
 
     /**
      * @ORM\Column(type="text", length=4294967295, name="body",
