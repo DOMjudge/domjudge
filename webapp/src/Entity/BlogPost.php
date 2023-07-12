@@ -176,4 +176,9 @@ class BlogPost extends BaseApiEntity
     {
         return $this->body;
     }
+
+    public function getShortDescription(): string
+    {
+        return $this->title;
+    }
 }

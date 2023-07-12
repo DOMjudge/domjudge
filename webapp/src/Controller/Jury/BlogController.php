@@ -4,6 +4,8 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Entity\BlogPost;
+use App\Entity\Role;
+use App\Entity\User;
 use App\Form\Type\BlogPostType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -15,6 +17,9 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
@@ -30,12 +35,14 @@ class BlogController extends BaseController
     protected EntityManagerInterface $em;
     protected DOMJudgeService $dj;
     protected ConfigurationService $config;
+    protected KernelInterface $kernel;
     protected EventLogService $eventLogService;
     private AsciiSlugger $slugger;
 
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService        $dj,
+        KernelInterface        $kernel,
         ConfigurationService   $config,
         EventLogService        $eventLogService
     )
@@ -43,6 +50,7 @@ class BlogController extends BaseController
         $this->em = $em;
         $this->dj = $dj;
         $this->config = $config;
+        $this->kernel = $kernel;
         $this->eventLogService = $eventLogService;
         $this->slugger = new AsciiSlugger();
     }
@@ -81,7 +89,7 @@ class BlogController extends BaseController
 
     /**
      * @Route("/send", methods={"GET", "POST"}, name="jury_blog_post_send")
-     * @Route("/edit/{id}", methods={"GET", "POST"}, name="jury_blog_post_edit")
+     * @Route("/{id}/edit", methods={"GET", "POST"}, name="jury_blog_post_edit")
      */
     public function sendBlogPostAction(Request $request, ?int $id = null): Response
     {
@@ -131,6 +139,21 @@ class BlogController extends BaseController
             'form' => $form,
             'action' => $id ? 'edit' : 'send'
         ]);
+    }
+
+    /**
+     * @Route("/{id}/delete", name="jury_blog_post_delete")
+     */
+    public function deleteBlogPostAction(Request $request, int $id): Response
+    {
+        /** @var BlogPost $blogPost */
+        $blogPost = $this->em->getRepository(BlogPost::class)->find($id);
+        if (!$blogPost) {
+            throw new NotFoundHttpException(sprintf('Blog post with ID %s not found', $id));
+        }
+
+        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+            [$blogPost], $this->generateUrl('jury_blog'));
     }
 
     private function saveImage(UploadedFile $file, string $directory): string
