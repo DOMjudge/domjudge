@@ -225,6 +225,20 @@ class ContestControllerTest extends JuryControllerTestCase
                                                                                                                         'allowJudge' => '1',
                                                                                                                         'color' => '#000000',
                                                                                                                         'lazyEvalResults' => '0']], 'name' => 'Problem shortname empty']],
+                                                          'Unknown problem provided' => [['problems' => ['0' => ['problem' => '',
+                                                                                                                 'shortname' => 'empty_problem',
+                                                                                                                 'points' => '3',
+                                                                                                                 'allowSubmit' => '1',
+                                                                                                                 'allowJudge' => '1',
+                                                                                                                 'color' => '#000000',
+                                                                                                                 'lazyEvalResults' => '0']], 'name' => 'No problem provided']],
+                                                          'The selected choice is invalid.' => [['problems' => ['0' => ['problem' => '404',
+                                                                                                                        'shortname' => 'unknown_problem',
+                                                                                                                        'points' => '3',
+                                                                                                                        'allowSubmit' => '1',
+                                                                                                                        'allowJudge' => '1',
+                                                                                                                        'color' => '#000000',
+                                                                                                                        'lazyEvalResults' => '0']], 'name' => 'No known problem']],
                                                           'Only alphanumeric characters and ._- are allowed' => [['shortname' => '"quoted"']]];
 
     protected static array $addEntitiesFailureNonLocal = ['This value should not be blank.' => [['externalid' => '', 'name' => 'Empty externalid']]];
