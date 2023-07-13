@@ -1236,14 +1236,22 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
                 ->filter(fn(ContestProblem $otherProblem) => $otherProblem !== $problem)
                 ->map(fn(ContestProblem $problem) => $problem->getProblem()->getProbid())
                 ->toArray();
-            $problemId       = $problem->getProblem()->getProbid();
+            $existingProblem = $problem->getProblem();
+            if (!$existingProblem) {
+                $context
+                    ->buildViolation('Unknown problem provided')
+                    ->atPath(sprintf('problems[%d].problem', $idx))
+                    ->addViolation();
+                // Fail here as the next checks assume the problem to exist. 
+                return;
+            }
+            $problemId = $existingProblem->getProbid();
             if (in_array($problemId, $otherProblemIds)) {
                 $context
                     ->buildViolation('Each problem can only be added to a contest once')
                     ->atPath(sprintf('problems[%d].problem', $idx))
                     ->addViolation();
             }
-
             // Check if the problem shortname is unique.
             $otherShortNames = $this->problems
                 ->filter(fn(ContestProblem $otherProblem) => $otherProblem !== $problem)
