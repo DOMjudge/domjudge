@@ -323,6 +323,11 @@
             default_value: true
             public: true
             description: If disabled, no ranking information is shown to contestants.
+        -   name: blog_posts_per_page
+            type: int
+            default_value: 10
+            public: true
+            description: Maximum number of public blog posts on a single page.
 -   category: Authentication
     description: Options related to authentication.
     items:

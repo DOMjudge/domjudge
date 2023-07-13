@@ -37,7 +37,7 @@ class BlogController extends BaseController
     protected ConfigurationService $config;
     protected EventLogService $eventLogService;
 
-    private const POSTS_PER_PAGE = 10;
+    private int $postsPerPage;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -50,6 +50,8 @@ class BlogController extends BaseController
         $this->dj = $dj;
         $this->config = $config;
         $this->eventLogService = $eventLogService;
+
+        $this->postsPerPage = $this->config->get('blog_posts_per_page');
     }
 
     /**
@@ -64,13 +66,13 @@ class BlogController extends BaseController
             ->getResult();
 
         $totalPosts = count($blogPosts);
-        $totalPages = ceil($totalPosts / self::POSTS_PER_PAGE);
+        $totalPages = ceil($totalPosts / $this->postsPerPage);
 
         $page = (int)min($request->query->getInt('page', 1), $totalPages);
         $page = (int)max($page, 1);
 
-        $start = ($page - 1) * self::POSTS_PER_PAGE;
-        $posts = array_slice($blogPosts, $start, self::POSTS_PER_PAGE);
+        $start = ($page - 1) * $this->postsPerPage;
+        $posts = array_slice($blogPosts, $start, $this->postsPerPage);
 
         return $this->render('public/blog_list.html.twig', [
             'posts' => $posts,
