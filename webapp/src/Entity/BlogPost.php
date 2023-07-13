@@ -143,6 +143,11 @@ class BlogPost extends BaseApiEntity
         $this->publishtime = $publishtime;
     }
 
+    public function isPublished(): bool
+    {
+        return $this->publishtime < new DateTime();
+    }
+
     public function getSubtitle(): string
     {
         return $this->subtitle;

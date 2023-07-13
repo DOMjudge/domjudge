@@ -98,7 +98,7 @@ class BlogController extends BaseController
         /** @var BlogPost $blogPost */
         $blogPost = $this->em->getRepository(BlogPost::class)->findOneBy(['slug' => $slug]);
 
-        if (!$blogPost || $blogPost->getPublishtime() > new DateTime()) {
+        if (!$blogPost || !$blogPost->isPublished()) {
             throw new NotFoundHttpException(sprintf('Blog post with slug %s not found', $slug));
         }
 
