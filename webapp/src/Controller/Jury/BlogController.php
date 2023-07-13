@@ -68,6 +68,7 @@ class BlogController extends BaseController
             'author' => ['title' => 'author', 'sort' => true],
             'publishtime' => ['title' => 'publish time', 'sort' => true,
                 'default_sort' => true],
+            'ispublished' => ['title' => 'published', 'sort' => true],
         ];
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
@@ -82,8 +83,14 @@ class BlogController extends BaseController
                 if ($propertyAccessor->isReadable($b, $k)) {
                     $value = $propertyAccessor->getValue($b, $k);
 
-                    if ($k == 'publishtime') {
-                        $value = $value->format('Y-m-d H:i:s');
+                    switch ($k) {
+                        case 'ispublished':
+                            $value = $value ? 'yes' : 'no';
+                            break;
+
+                        case 'publishtime':
+                            $value = $value->format('Y-m-d H:i:s');
+                            break;
                     }
 
                     $blogPostData[$k] = ['value' => $value];
