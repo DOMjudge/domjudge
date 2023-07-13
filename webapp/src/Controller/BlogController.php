@@ -62,6 +62,7 @@ class BlogController extends BaseController
         $totalPosts = $this->em->getRepository(BlogPost::class)
             ->createQueryBuilder('bp')
             ->select('count(bp.blogpostid)')
+            ->where('bp.publishtime <= :now')
             ->getQuery()
             ->setParameter('now', Utils::now())
             ->getSingleScalarResult();
@@ -74,6 +75,7 @@ class BlogController extends BaseController
         $blogPosts = $this->em->getRepository(BlogPost::class)
             ->createQueryBuilder('bp')
             ->orderBy('bp.publishtime', 'DESC')
+            ->where('bp.publishtime <= :now')
             ->setFirstResult(($page - 1) * $this->postsPerPage)
             ->setMaxResults($this->postsPerPage)
             ->getQuery()
