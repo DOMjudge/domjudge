@@ -78,9 +78,6 @@ class UserControllerTest extends JuryControllerTestCase
                                                            'user_roles' => ['7' => true]],
                                                           ['username' => 'singlerole-8', 'name' => 'Single Role-8',
                                                            'user_roles' => ['8' => true]]];
-    /**
-     * @param array<string, mixed[]> $addEntitiesFailure
-     */
     protected static array   $addEntitiesFailure       = ['Only alphanumeric characters and _-@. are allowed' => [['username' => '|user', 'name' => 'StartWith'],
                                                                                                                   ['username' => 'user|', 'name' => 'EndWith'],
                                                                                                                   ['username' => 'us er', 'name' => 'SpaceUsage'],

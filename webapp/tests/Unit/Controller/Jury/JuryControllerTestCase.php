@@ -48,28 +48,13 @@ abstract class JuryControllerTestCase extends BaseTestCase
     protected static array $addEntities               = [];
     protected static array $addEntitiesCount          = [];
     protected static array $addEntitiesShown          = [];
-    /**
-     * @var array<string, array<int, mixed[]>> $addEntitiesFailure
-     */
     protected static array $addEntitiesFailure        = [];
-    /**
-     * @var array<int, array<string, string>> $addEntitiesNonLocal
-     */
     protected static array $addEntitiesNonLocal       = [];
-    /**
-     * @var array<string, array<int, array<string, string>>> $addEntitiesFailureNonLocal
-     */
     protected static array $addEntitiesFailureNonLocal = [];
     protected static ?string $defaultEditEntityName   = null;
     protected static array $specialFieldOnlyUpdate    = [];
     protected static array $editEntitiesSkipFields    = [];
-    /**
-     * @var array<int, string> $overviewSingleNotShown
-     */
     protected static array $overviewSingleNotShown    = [];
-    /**
-     * @var array<int, string> $overviewGeneralNotShown
-     */
     protected static array $overviewGeneralNotShown   = [];
 
     protected function setUp(): void
@@ -307,8 +292,6 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test that admin can add a new entity for this controller.
-     * @param array<string, string|array<string, bool>> $element
-     * @param array<string, string|mixed[]> $expected
      * @dataProvider provideAddCorrectEntities
      */
     public function testCheckAddEntityAdmin(array $element, array $expected): void
@@ -349,7 +332,6 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test failures when the admin provides wrong data.
-     * @param array<string, string|array<string, bool>> $element
      * @dataProvider provideAddFailureEntities
      */
     public function testCheckAddEntityAdminFailure(array $element, string $message): void
@@ -369,8 +351,6 @@ abstract class JuryControllerTestCase extends BaseTestCase
     /**
      * Test that admin can add edit an entity for this controller.
      *
-     * @param array<int, string> $formDataKeys
-     * @param array<int, mixed[]> $formDataValues
      * @dataProvider provideEditCorrectEntities
      */
     public function testCheckEditEntityAdminCorrect(array $formDataKeys, array $formDataValues): void
@@ -415,9 +395,6 @@ abstract class JuryControllerTestCase extends BaseTestCase
             $this->verifyPageResponse('GET', $singlePageLink, 200);
             foreach ($formDataValues as $id => $element) {
                 if (in_array($formDataKeys[$id], static::$addEntitiesShown)) {
-                    /**
-                     * @var string $element
-                     */
                     self::assertSelectorExists('body:contains("' . $element . '")');
                 }
             }
@@ -430,8 +407,6 @@ abstract class JuryControllerTestCase extends BaseTestCase
     /**
      * Test that admin can edit an entity for this controller but receives an error when providing wrong data.
      *
-     * @param array<int, string> $formDataKeys
-     * @param array<int, mixed> $formDataValues
      * @dataProvider provideEditFailureEntities
      */
     public function testCheckEditEntityAdminFailure(array $formDataKeys, array $formDataValues, string $message): void
@@ -497,7 +472,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
             $entities = array_merge($entities, static::$addEntitiesFailureNonLocal);
         }
         foreach ($entities as $message => $elementList) {
-            foreach($elementList as $element) {
+            foreach ($elementList as $element) {
                 [$entity, $expected] = $this->helperProvideMergeAddEntity($element);
                 [$entity, $dropped] = $this->helperProvideTranslateAddEntity($entity, $expected);
                 yield [$entity, $message];
@@ -505,10 +480,6 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
-    /**
-     * @param array<string, string|bool|array<string, bool>> $overWriteValues
-     * @return array<int, array<string, string|bool|array<string, bool>>>
-     */
     protected function helperProvideMergeAddEntity(array $overWriteValues): array
     {
         $combinedValues = [];
@@ -522,20 +493,11 @@ abstract class JuryControllerTestCase extends BaseTestCase
         return [$combinedValues, $overWriteValues];
     }
 
-    /**
-     * @param array<string, string|bool|array<string, bool>> $entity
-     * @param array<string, string|bool|array<string, bool>> $expected
-     * @return array<int, array<string, string|bool|array<string, bool>>>
-     */
     protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {
         return [$entity, $expected];
     }
 
-    /**
-     * @param array<string, mixed> $element
-     * @return array<int, array<int, mixed>>
-     */
     public function helperProvideMergeEditEntity(array $element): array
     {
         $formdataKeys = [];

@@ -1242,7 +1242,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
                     ->buildViolation('Unknown problem provided')
                     ->atPath(sprintf('problems[%d].problem', $idx))
                     ->addViolation();
-                // Fail here as the next checks assume the problem to exist. 
+                // Fail here as the next checks assume the problem to exist.
                 return;
             }
             $problemId = $existingProblem->getProbid();
@@ -1252,6 +1252,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
                     ->atPath(sprintf('problems[%d].problem', $idx))
                     ->addViolation();
             }
+
             // Check if the problem shortname is unique.
             $otherShortNames = $this->problems
                 ->filter(fn(ContestProblem $otherProblem) => $otherProblem !== $problem)
