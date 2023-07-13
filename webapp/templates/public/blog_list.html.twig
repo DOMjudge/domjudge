@@ -16,7 +16,7 @@
                     <h2><a class="text-body"
                            href="{{ link }}">{{ post.title }}</a></h2>
                     <p class="text-muted">
-                        {% if post.author %}{{ post.author }} - {% endif %}{{ post.publishtime|round|date }}
+                        {% if post.author %}{{ post.author }} - {% endif %}{{ post.publishtime|date }}
                     </p>
                     <p>{{ post.subtitle }}</p>
                     <a href="{{ link }}" class="btn btn-primary">Číst dál</a>

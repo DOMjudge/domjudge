@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
@@ -45,11 +46,10 @@ class BlogPost extends BaseApiEntity
     private string $slug;
 
     /**
-     * @var double|string
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="publishtime", options={"comment"="Time sent", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="datetime", name="publishtime", options={"comment"="Time sent", "unsigned"=true}, nullable=false)
      * @Serializer\Exclude()
      */
-    private $publishtime;
+    private DateTime $publishtime;
 
     /**
      * @ORM\Column(type="string", name="author", length=255,
@@ -91,6 +91,11 @@ class BlogPost extends BaseApiEntity
      */
     private string $body;
 
+    public function __construct()
+    {
+        $this->publishtime = new DateTime();
+    }
+
     public function getSlug(): string
     {
         return $this->slug;
@@ -122,17 +127,20 @@ class BlogPost extends BaseApiEntity
         return $this->blogpostid;
     }
 
-    /** @param string|float $publishtime */
-    public function setPublishtime($publishtime): BlogPost
-    {
-        $this->publishtime = $publishtime;
-        return $this;
-    }
-
-    /** @return string|float */
-    public function getPublishtime()
+    /**
+     * @return DateTime
+     */
+    public function getPublishtime(): DateTime
     {
         return $this->publishtime;
+    }
+
+    /**
+     * @param DateTime $publishtime
+     */
+    public function setPublishtime(DateTime $publishtime): void
+    {
+        $this->publishtime = $publishtime;
     }
 
     public function getSubtitle(): string

@@ -5,7 +5,7 @@
     <div class="container">
         <h1>{{ title }}</h1>
         <h4 class="text-left text-muted">{{ subtitle }}</h4>
-        <p>{{ publishTime|round|date }}</p>
+        <p>{{ publishTime|date }}</p>
 
         <div>
             {{ body|raw }}

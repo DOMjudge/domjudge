@@ -83,7 +83,7 @@ class BlogController extends BaseController
                     $value = $propertyAccessor->getValue($b, $k);
 
                     if ($k == 'publishtime') {
-                        $value = gmdate('Y-m-d H:i:s', (int)$value);
+                        $value = $value->format('Y-m-d H:i:s');
                     }
 
                     $blogPostData[$k] = ['value' => $value];
@@ -176,10 +176,6 @@ class BlogController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var BlogPost $blogPost */
             $blogPost = $form->getData();
-
-            if (!$id) {
-                $blogPost->setPublishtime(Utils::now());
-            }
 
             $slug = strtolower($this->slugger->slug($blogPost->getTitle())->toString());
             if ($this->em->getRepository(BlogPost::class)->findOneBy(['slug' => $slug])) {

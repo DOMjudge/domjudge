@@ -9,6 +9,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Setono\EditorJS\Parser\BlockParser\HeaderBlockParser;
 use Setono\EditorJS\Parser\BlockParser\ImageBlockParser;
@@ -64,7 +65,7 @@ class BlogController extends BaseController
             ->select('count(bp.blogpostid)')
             ->where('bp.publishtime <= :now')
             ->getQuery()
-            ->setParameter('now', Utils::now())
+            ->setParameter('now', new DateTime())
             ->getSingleScalarResult();
 
         $totalPages = ceil($totalPosts / $this->postsPerPage);
@@ -79,7 +80,7 @@ class BlogController extends BaseController
             ->setFirstResult(($page - 1) * $this->postsPerPage)
             ->setMaxResults($this->postsPerPage)
             ->getQuery()
-            ->setParameter('now', Utils::now())
+            ->setParameter('now', new DateTime())
             ->getResult();
 
         return $this->render('public/blog_list.html.twig', [

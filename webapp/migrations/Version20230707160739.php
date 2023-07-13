@@ -23,7 +23,7 @@ final class Version20230707160739 extends AbstractMigration
 CREATE TABLE `blog_post` (
     `blogpostid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
     `slug` varchar(255) NOT NULL COMMENT 'Unique slug',
-    `publishtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time sent',
+    `publishtime` datetime NOT NULL COMMENT 'Time sent',
     `author` varchar(255) DEFAULT NULL COMMENT 'Name of the post author',
     `title` varchar(511) NOT NULL COMMENT 'Blog post title',
     `subtitle` longtext NOT NULL COMMENT 'Blog post subtitle',
