@@ -59,23 +59,29 @@ class BlogController extends BaseController
      */
     public function listAction(Request $request): Response
     {
-        $blogPosts = $this->em->getRepository(BlogPost::class)
+        $totalPosts = $this->em->getRepository(BlogPost::class)
             ->createQueryBuilder('bp')
-            ->orderBy('bp.publishtime', 'DESC')
+            ->select('count(bp.blogpostid)')
             ->getQuery()
-            ->getResult();
+            ->setParameter('now', Utils::now())
+            ->getSingleScalarResult();
 
-        $totalPosts = count($blogPosts);
         $totalPages = ceil($totalPosts / $this->postsPerPage);
 
         $page = (int)min($request->query->getInt('page', 1), $totalPages);
         $page = (int)max($page, 1);
 
-        $start = ($page - 1) * $this->postsPerPage;
-        $posts = array_slice($blogPosts, $start, $this->postsPerPage);
+        $blogPosts = $this->em->getRepository(BlogPost::class)
+            ->createQueryBuilder('bp')
+            ->orderBy('bp.publishtime', 'DESC')
+            ->setFirstResult(($page - 1) * $this->postsPerPage)
+            ->setMaxResults($this->postsPerPage)
+            ->getQuery()
+            ->setParameter('now', Utils::now())
+            ->getResult();
 
         return $this->render('public/blog_list.html.twig', [
-            'posts' => $posts,
+            'posts' => $blogPosts,
             'page' => $page,
             'totalPages' => $totalPages,
         ]);
