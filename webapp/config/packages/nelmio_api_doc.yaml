@@ -9,6 +9,10 @@ nelmio_api_doc:
             title: DOMjudge
             description: DOMjudge API v4
             version: "%domjudge.version%"
+            contact:
+                name: DOMjudge development team (not the administrator of this instance)
+                email: development@domjudge.org
+                url: https://github.com/DOMjudge/domjudge/issues/new/choose
         security:
             - basicAuth: []
         components:
