@@ -1406,6 +1406,28 @@ class JudgehostController extends AbstractFOSRestController
      */
     #[IsGranted(new Expression("is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Post('/fetch-work')]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the workarray.',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(
+                new OA\Schema(ref: new Model(type: JudgeTask::class)),
+            )
+        )
+    )]
+    #[OA\Parameter(
+        name: 'hostname',
+        description: 'Hostname of the judgehost requesting work.',
+        in: 'query',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name: 'max_batchsize',
+        description: 'Maximum number of tasks to return.',
+        in: 'query',
+        schema: new OA\Schema(type: 'integer')
+    )]
     public function getJudgeTasksAction(Request $request): array
     {
         if (!$request->request->has('hostname')) {
