@@ -1,5 +1,10 @@
 nelmio_api_doc:
     documentation:
+        servers:
+            - url: "%domjudge.baseurl%api"
+              description: API used at this contest
+            - url: https://www.domjudge.org/demoweb/api
+              description: New API in development
         info:
             title: DOMjudge
             description: DOMjudge API v4
