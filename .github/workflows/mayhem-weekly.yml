@@ -21,3 +21,5 @@ jobs:
     with:
       version: "${{ matrix.target }}"
       duration: "${{ matrix.version }}"
+    secrets:
+      MAPI_TOKEN: ${{ secrets.MAPI_TOKEN }}

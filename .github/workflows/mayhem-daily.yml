@@ -10,3 +10,5 @@ jobs:
     with:
       version: "admin"
       duration: "auto"
+    secrets:
+      MAPI_TOKEN: ${{ secrets.MAPI_TOKEN }}

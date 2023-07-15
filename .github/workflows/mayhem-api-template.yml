@@ -9,6 +9,9 @@ on:
       duration:
         required: true
         type: string
+    secrets:
+      MAPI_TOKEN:
+        required: true
 
 jobs:
   mayhem:
