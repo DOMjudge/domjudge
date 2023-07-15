@@ -25,6 +25,9 @@ jobs:
           - os: debian
             version: stable
     runs-on: ubuntu-latest
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      TZ: Etc/UTC
     container:
       image: ${{ matrix.os }}:${{ matrix.version }}
     steps:
