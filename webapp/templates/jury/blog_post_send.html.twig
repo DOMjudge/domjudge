@@ -44,9 +44,13 @@
     {% endif %}
 
     <script src="{{ asset('js/editorjs/editorjs.js') }}"></script>
+    <script src="{{ asset('js/editorjs/underline.js') }}"></script>
     <script src="{{ asset('js/editorjs/header.js') }}"></script>
     <script src="{{ asset('js/editorjs/list.js') }}"></script>
     <script src="{{ asset('js/editorjs/image.js') }}"></script>
+    <script src="{{ asset('js/editorjs/inline-code.js') }}"></script>
+    <script src="{{ asset('js/editorjs/code.js') }}"></script>
+    <script src="{{ asset('js/editorjs/table.js') }}"></script>
 
     <script>
         const form = document.getElementsByName("blog_post")[0];
@@ -64,6 +68,7 @@
                     class: List,
                     inlineToolbar: true
                 },
+                underline: Underline,
                 image: {
                     class: ImageTool,
                     config: {
@@ -72,7 +77,10 @@
                         }
                     },
                     inlineToolbar: true
-                }
+                },
+                inlineCode: InlineCode,
+                code: CodeTool,
+                table: Table,
             },
             data: data,
         })
