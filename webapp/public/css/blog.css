@@ -1,3 +1,7 @@
+.container-image {
+    margin-bottom: 1rem;
+}
+
 .container-image > .image > img {
     max-width: 100%;
     height: auto;
