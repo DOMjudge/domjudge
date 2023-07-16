@@ -11,17 +11,21 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Setono\EditorJS\Parser\BlockParser\CodeBlockParser;
 use Setono\EditorJS\Parser\BlockParser\HeaderBlockParser;
 use Setono\EditorJS\Parser\BlockParser\ImageBlockParser;
 use Setono\EditorJS\Parser\BlockParser\ListBlockParser;
 use Setono\EditorJS\Parser\BlockParser\ParagraphBlockParser;
+use Setono\EditorJS\Parser\BlockParser\TableBlockParser;
 use Setono\EditorJS\Parser\Parser;
+use Setono\EditorJS\Renderer\BlockRenderer\CodeBlockRenderer;
 use Setono\EditorJS\Renderer\BlockRenderer\DelimiterBlockRenderer;
 use Setono\EditorJS\Renderer\BlockRenderer\HeaderBlockRenderer;
 use Setono\EditorJS\Renderer\BlockRenderer\ImageBlockRenderer;
 use Setono\EditorJS\Renderer\BlockRenderer\ListBlockRenderer;
 use Setono\EditorJS\Renderer\BlockRenderer\ParagraphBlockRenderer;
 use Setono\EditorJS\Renderer\BlockRenderer\RawBlockRenderer;
+use Setono\EditorJS\Renderer\BlockRenderer\TableBlockRenderer;
 use Setono\EditorJS\Renderer\Renderer;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -107,15 +111,17 @@ class BlogController extends BaseController
         $parser->addBlockParser(new HeaderBlockParser());
         $parser->addBlockParser(new ListBlockParser());
         $parser->addBlockParser(new ImageBlockParser());
+        $parser->addBlockParser(new CodeBlockParser());
+        $parser->addBlockParser(new TableBlockParser());
         $parserResult = $parser->parse($blogPost->getBody());
 
         $renderer = new Renderer();
-        $renderer->addBlockRenderer(new DelimiterBlockRenderer());
-        $renderer->addBlockRenderer(new HeaderBlockRenderer());
-        $renderer->addBlockRenderer(new ImageBlockRenderer());
-        $renderer->addBlockRenderer(new ListBlockRenderer());
         $renderer->addBlockRenderer(new ParagraphBlockRenderer());
-        $renderer->addBlockRenderer(new RawBlockRenderer());
+        $renderer->addBlockRenderer(new HeaderBlockRenderer());
+        $renderer->addBlockRenderer(new ListBlockRenderer());
+        $renderer->addBlockRenderer(new ImageBlockRenderer());
+        $renderer->addBlockRenderer(new CodeBlockRenderer());
+        $renderer->addBlockRenderer(new TableBlockRenderer());
 
         $body = $renderer->render($parserResult);
 
