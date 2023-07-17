@@ -177,7 +177,9 @@ class BlogController extends BaseController
             $blogPost = new BlogPost();
         }
 
-        $form = $this->createForm(BlogPostType::class, $blogPost);
+        $form = $this->createForm(BlogPostType::class, $blogPost, [
+            'thumbnail_required' => !$id,
+        ]);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -190,11 +192,13 @@ class BlogController extends BaseController
             }
             $blogPost->setSlug($slug);
 
-            $thumbnailFileName = $this->saveImage(
-                $form['thumbnail_file_name']->getData(),
-                self::THUMBNAILS_DIRECTORY
-            );
-            $blogPost->setThumbnailFileName($thumbnailFileName);
+            if ($form['thumbnail']->getData()) {
+                $thumbnailFileName = $this->saveImage(
+                    $form['thumbnail']->getData(),
+                    self::THUMBNAILS_DIRECTORY
+                );
+                $blogPost->setThumbnailFileName($thumbnailFileName);
+            }
 
             $this->em->persist($blogPost);
             $this->em->flush();

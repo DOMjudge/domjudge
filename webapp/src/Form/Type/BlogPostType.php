@@ -33,7 +33,10 @@ class BlogPostType extends AbstractType
         $builder->add('author', TextType::class, [
             'required' => false
         ]);
-        $builder->add('thumbnail_file_name', FileType::class, ['label' => 'Thumbnail', 'data_class' => null]);
+        $builder->add('thumbnail', FileType::class, [
+            'label' => 'Thumbnail',
+            'mapped' => false,
+            'required' => $options['thumbnail_required']]);
         $builder->add('body', HiddenType::class);
         $builder->add('publishtime', DateTimeType::class, ['label' => 'Publish time']);
 
@@ -42,6 +45,8 @@ class BlogPostType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => BlogPost::class]);
+        $resolver->setDefaults(['data_class' => BlogPost::class, 'thumbnail_required' => false]);
+
+        $resolver->setAllowedTypes('thumbnail_required', 'bool');
     }
 }
