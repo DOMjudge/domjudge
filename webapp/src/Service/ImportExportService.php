@@ -1006,6 +1006,12 @@ class ImportExportService
                 $message = 'ID not in CLICS format';
                 return -1;
             }
+
+            if (!$teamItem['team']['name']) {
+                $message = 'Name for team required';
+                return -1;
+            }
+
             $team->setExternalid($teamItem['team']['teamid']);
             unset($teamItem['team']['teamid']);
 
