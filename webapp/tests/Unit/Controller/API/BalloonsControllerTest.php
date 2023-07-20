@@ -60,6 +60,7 @@ class BalloonsControllerTest extends BaseTestCase
         /** @var array $response */
         $response = $this->verifyApiJsonResponse('GET', $url, 200, 'balloonuser');
         self::assertEquals(count($response), 1);
+        $this->verifyApiJsonResponse('POST', $postUrl, 204, 'balloonuser');
     }
 
     /**
