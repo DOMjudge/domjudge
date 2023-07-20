@@ -63,6 +63,30 @@ class BalloonsControllerTest extends BaseTestCase
         $this->verifyApiJsonResponse('POST', $postUrl, 204, 'balloonuser');
     }
 
+    public function testMarkInvalidBalloonAsDone(): void
+    {
+        $balloonId = 404999;
+        $contestId = $this->getUnitContestId();
+        $postUrl = "/contests/$contestId/balloons/$balloonId/done";
+        $this->verifyApiJsonResponse('POST', $postUrl, 404, 'admin');
+    }
+
+    public function testMarkAsDoneWrongContest(): void
+    {
+        // BalloonIDs are global so they can be marked done against other contests.
+        $expectedBalloon = ['team'=>'t2: Example teamname', 'problem'=>'U', 'awards'=>'first in contest'];
+        $contestId = $this->getUnitContestId();
+        $url = "/contests/$contestId/balloons?todo=1";
+        $this->loadFixtures([BalloonCorrectSubmissionFixture::class,BalloonUserFixture::class]);
+        /** @var array $response */
+        $response = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
+        $balloonId = $response[0]['balloonid'];
+        $postUrl = "/contests/424242/balloons/$balloonId/done";
+        $this->verifyApiJsonResponse('POST', $postUrl, 204, 'balloonuser');
+        $response = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
+        self::assertEquals(0, count($response));
+    }
+
     /**
      * @dataProvider provideUnprivilegedUsers
      */
