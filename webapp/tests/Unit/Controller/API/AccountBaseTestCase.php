@@ -12,6 +12,31 @@ abstract class AccountBaseTestCase extends BaseTestCase
 
     protected array $expectedAbsent = ['4242', 'nonexistent'];
 
+    protected static array $defaultDataUserAdd = [
+        'username' => 'newStaff', 'name' => 'newUserWithName', 'password' => 'xkcd-password-style-password'
+    ];
+
+    protected static array $accountAddCombinationsWithFile = [
+        [['username' => 'newTeam-001', 'type' => 'team'], ['roles' => ['team']]],
+        [['username' => 'newTeam-001', 'type' => 'admin'], ['roles' => ['admin']]],
+        [['type' => 'admin'], ['roles' => ['admin']]],
+        [['type' => 'judge'], ['roles' => ['jury']]],
+        [['type' => 'jury'], ['type' => 'judge', 'roles' => ['jury']]],
+        [['type' => 'api_writer'], ['type' => 'admin', 'roles' => ['api_writer']]],
+        [['type' => 'api_reader'], ['type' => 'admin', 'roles' => ['api_reader']]],
+        [['type' => 'api_source_reader'], ['type' => 'judge', 'roles' => ['api_source_reader']]],
+        [['type' => 'balloon'], ['roles' => ['balloon'], 'type' => null]],
+        [['type' => 'clarification_rw'], ['roles' => ['clarification_rw'], 'type' => null]],
+        [['type' => 'cds'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
+        [['username' => 'cds', 'type' => 'admin'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
+        [['username' => 'cds', 'type' => 'jury'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
+    ];
+
+    protected static array $accountAddCombinationsWithoutFile = [
+        [['username' => 'cds', 'roles' => ['admin']], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
+        [['username' => 'another_judgehost', 'roles' => ['judgehost']], ['type' => null]],
+    ];
+
     public function helperVerifyApiUsers(string $myURL, array $objectsBeforeTest, array $newUserPostData, ?array $overwritten = null): void
     {
         $objectsAfterTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
@@ -75,29 +100,10 @@ abstract class AccountBaseTestCase extends BaseTestCase
 
     public function provideNewAccount(): Generator
     {
-        $defaultData = ['username' => 'newStaff', 'name' => 'newUserWithName', 'password' => 'xkcd-password-style-password'];
-        $accountCombinationsWithFile = [
-            [['username' => 'newTeam-001', 'type' => 'team'], ['roles' => ['team']]],
-            [['username' => 'newTeam-001', 'type' => 'admin'], ['roles' => ['admin']]],
-            [['type' => 'admin'], ['roles' => ['admin']]],
-            [['type' => 'judge'], ['roles' => ['jury']]],
-            [['type' => 'jury'], ['type' => 'judge', 'roles' => ['jury']]],
-            [['type' => 'api_writer'], ['type' => 'admin', 'roles' => ['api_writer']]],
-            [['type' => 'api_reader'], ['type' => 'admin', 'roles' => ['api_reader']]],
-            [['type' => 'api_source_reader'], ['type' => 'judge', 'roles' => ['api_source_reader']]],
-            [['type' => 'balloon'], ['roles' => ['balloon'], 'type' => null]],
-            [['type' => 'clarification_rw'], ['roles' => ['clarification_rw'], 'type' => null]],
-            [['type' => 'cds'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
-            [['username' => 'cds', 'type' => 'admin'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
-            [['username' => 'cds', 'type' => 'jury'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
-        ];
-        $specialCasesWithFile = [];
-        $accountCombinationsWithFile = array_merge($accountCombinationsWithFile, $specialCasesWithFile);
-        $accountCombinationsWithoutFile = [
-            [['username' => 'cds', 'roles' => ['admin']], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
-            [['username' => 'another_judgehost', 'roles' => ['judgehost']], ['type' => null]],
-        ];
-        foreach ($accountCombinationsWithFile as $templateAccount) {
+        $defaultData = static::$defaultDataUserAdd;
+        $accountCombinationsWithFile = static::$accountAddCombinationsWithFile;
+        $accountCombinationsWithoutFile = static::$accountAddCombinationsWithoutFile;
+        foreach (static::$accountAddCombinationsWithFile as $templateAccount) {
             $result = array_merge($templateAccount[1], $templateAccount[0]);
             $expectation = $templateAccount[1];
             if (array_key_exists('type', $templateAccount[0])) {
@@ -109,7 +115,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
             }
             $accountCombinationsWithoutFile[] = [$result, $expectation];
         }
-        foreach ([$accountCombinationsWithFile, $accountCombinationsWithoutFile] as $ind => $accountCombinations) {
+        foreach ([static::$accountAddCombinationsWithFile, $accountCombinationsWithoutFile] as $ind => $accountCombinations) {
             if ($ind === 1) {
                 $defaultData['skipImportFile'] = true;
             }
