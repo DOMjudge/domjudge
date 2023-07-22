@@ -37,6 +37,8 @@ abstract class AccountBaseTestCase extends BaseTestCase
         [['username' => 'another_judgehost', 'roles' => ['judgehost']], ['type' => null]],
     ];
 
+    protected static array $optionalAddKeys = ['id', 'name', 'password'];
+
     public function helperVerifyApiUsers(string $myURL, array $objectsBeforeTest, array $newUserPostData, ?array $overwritten = null): void
     {
         $objectsAfterTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
@@ -145,6 +147,28 @@ abstract class AccountBaseTestCase extends BaseTestCase
         unlink($tempFile);
     }
 
+    /**
+     * @dataProvider provideNewAccountFileMissingField
+     */
+    public function testCreateUserFileImportMissingField(string $newUsersFile, string $type, array $newUserPostData, string $errorMessage, ?array $overwritten = null, int $statusCode = 400): void
+    {
+        $usersURL = $this->helperGetEndpointURL('users').'/accounts';
+        $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
+        $objectsBeforeTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
+        $tempFile = tempnam(sys_get_temp_dir(), "/accounts-upload-test-");
+        file_put_contents($tempFile, $newUsersFile);
+        $tempUploadFile = new UploadedFile($tempFile, 'accounts.'.$type);
+
+        $result = $this->verifyApiJsonResponse('POST', $usersURL, $statusCode, 'admin', null, [$type => $tempUploadFile]);
+
+        $res = $result;
+        if ($statusCode !== 200) {
+            $res = $result['message'];
+        }
+        self::assertEquals($errorMessage, $res);
+        unlink($tempFile);
+    }
+
     public function provideNewAccountFile(): Generator
     {
         foreach ($this->provideNewAccount() as $index => $testUser) {
@@ -202,6 +226,47 @@ EOF;
             yield [$file, 'json', $testUser, $overwritten];
             $file = "[{id: \t$user,\tusername: $user, name:     $name,password: $pass, type: $role   }]";
             yield [$file, 'json', $testUser, $overwritten];
+        }
+    }
+
+    public function provideNewAccountFileMissingField(): Generator
+    {
+        foreach ($this->provideNewAccount() as $index => $testUser) {
+            if (isset($testUser[0]['skipImportFile'])) {
+                // Not all properties which we can set via the API account endpoint can also
+                // be imported via the API file import.
+                continue;
+            }
+            $overwritten = $testUser[1] ?? null;
+            $testUser = $testUser[0];
+            $user = $testUser['username'];
+            $name = $testUser['name'];
+            $pass = $testUser['password'];
+            $role = $testUser['type'];
+            $tempData = ['id' => $user,  'username' => $user, 'name' => $name, 'password' => $pass, 'type' => $role];
+            // Handle TSV file
+            $fileVersions = ['accounts', 'File_Version'];
+            foreach ($fileVersions as $fileVersion) {
+                $file = $fileVersion."\t1";
+                // The only field we can 'forget' is the password due to how the file is interpret.
+                $file .= "\n$role\t$name\t$user\n";
+                yield [$file, 'tsv', $testUser, 'Error while adding accounts: Not enough values on line 2', $overwritten];
+            }
+            foreach (array_keys($tempData) as $skipThisKey) {
+                $newMissingData = $tempData;
+                unset($newMissingData[$skipThisKey]);
+                $statusCode = 400;
+                $message = "Error while adding accounts: Missing key: '" . $skipThisKey . "' for block: 0.";
+                if (in_array($skipThisKey, static::$optionalAddKeys)) {
+                    $statusCode = 200;
+                    $message = '1 new account(s) successfully added.';
+                }
+                yield [Yaml::dump([$newMissingData]), 'yaml', $testUser, $message, $overwritten, $statusCode];
+                yield [json_encode([$newMissingData]), 'json', $testUser, $message, $overwritten, $statusCode];
+            }
+            /* We only return the data for 1 user,
+               we run the loop to make sure 'skipImportFile' is not encountered on the first user. */
+            break;
         }
     }
 
