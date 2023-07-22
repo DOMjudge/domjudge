@@ -305,4 +305,37 @@ EOF;
             self::assertEquals(true, $found);
         }
     }
+
+    /**
+     * @dataProvider provideNewAccountFileNoPassword
+     */
+    public function testUserCreatedWithFileLogonNoPassword(string $newUsersFile, string $type): void
+    {
+        $tempFile = tempnam(sys_get_temp_dir(), "/accounts-upload-test-");
+        file_put_contents($tempFile, $newUsersFile);
+        $tempUploadFile = new UploadedFile($tempFile, 'accounts.'.$type);
+        $usersURL = $this->helperGetEndpointURL('users').'/accounts';
+        $result = $this->verifyApiJsonResponse('POST', $usersURL, 200, 'admin', null, [$type => $tempUploadFile]);
+        self::assertEquals($result, "1 new account(s) successfully added.");
+
+        // The user has no password so should not be able to login.
+        $url = $this->helperGetEndpointURL('account');
+        $this->verifyApiJsonResponse('GET', $url, 401, 'userUploadedViaAPI', null, [], '');
+        $this->verifyApiJsonResponse('GET', $url, 401, 'userUploadedViaAPI', null, [], null);
+        unlink($tempFile);
+    }
+
+    public function provideNewAccountFileNoPassword(): Generator
+    {
+        // We don't properly handle the case where the password is not provided.
+        // But we skip this test for TSV as its deprecated and it does not allow to provide the IP
+        // which would be the alternative where not setting a password would make sense.
+        // External authentication system usage is not considered.
+        $userData = static::$defaultDataUserAdd;
+        unset($userData['password']);
+        $userData['type'] = 'admin';
+        $userData['id'] = $userData['username'];
+        yield [Yaml::dump([$userData], 1), 'yaml'];
+        yield [json_encode([$userData]), 'json'];
+    }
 }
