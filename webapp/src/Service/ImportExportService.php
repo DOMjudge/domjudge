@@ -868,6 +868,12 @@ class ImportExportService
         $juryCategory = $this->getOrCreateJuryCategory();
         $accountData = [];
         foreach ($data as $idx => $account) {
+            foreach (['username', 'type'] as $required) {
+                if (!key_exists($required, $account)) {
+                    $message = sprintf("Missing key: '%s' for block: %d.", $required, $idx);
+                    return -1;
+                }
+            }
             $juryTeam = null;
             $roles    = [];
             $type     = $account['type'];
@@ -1160,6 +1166,10 @@ class ImportExportService
         foreach ($content as $line) {
             $lineNr++;
             $line = Utils::parseTsvLine(trim($line));
+            if (count($line) <= 3) {
+                $message = sprintf('Not enough values on line %d', $lineNr);
+                return -1;
+            }
 
             $team  = $juryTeam = null;
             $roles = [];
