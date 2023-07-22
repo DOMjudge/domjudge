@@ -151,28 +151,6 @@ abstract class AccountBaseTestCase extends BaseTestCase
         unlink($tempFile);
     }
 
-    /**
-     * @dataProvider provideNewAccountFileMissingField
-     */
-    public function testCreateUserFileImportMissingField(string $newUsersFile, string $type, array $newUserPostData, string $errorMessage, ?array $overwritten = null, int $statusCode = 400): void
-    {
-        $usersURL = $this->helperGetEndpointURL('users').'/accounts';
-        $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
-        $objectsBeforeTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
-        $tempFile = tempnam(sys_get_temp_dir(), "/accounts-upload-test-");
-        file_put_contents($tempFile, $newUsersFile);
-        $tempUploadFile = new UploadedFile($tempFile, 'accounts.'.$type);
-
-        $result = $this->verifyApiJsonResponse('POST', $usersURL, $statusCode, 'admin', null, [$type => $tempUploadFile]);
-
-        $res = $result;
-        if ($statusCode !== 200) {
-            $res = $result['message'];
-        }
-        self::assertEquals($errorMessage, $res);
-        unlink($tempFile);
-    }
-
     public function provideNewAccountFile(): Generator
     {
         foreach ($this->provideNewAccount() as $index => $testUser) {
@@ -238,6 +216,28 @@ EOF;
             $file = "[{id: \t$user,\tusername: $user, name:     $name,password: $pass, type: $role   }]";
             yield [$file, 'json', $testUser, $overwritten];
         }
+    }
+
+    /**
+     * @dataProvider provideNewAccountFileMissingField
+     */
+    public function testCreateUserFileImportMissingField(string $newUsersFile, string $type, array $newUserPostData, string $errorMessage, ?array $overwritten = null, int $statusCode = 400): void
+    {
+        $usersURL = $this->helperGetEndpointURL('users').'/accounts';
+        $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
+        $objectsBeforeTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
+        $tempFile = tempnam(sys_get_temp_dir(), "/accounts-upload-test-");
+        file_put_contents($tempFile, $newUsersFile);
+        $tempUploadFile = new UploadedFile($tempFile, 'accounts.'.$type);
+
+        $result = $this->verifyApiJsonResponse('POST', $usersURL, $statusCode, 'admin', null, [$type => $tempUploadFile]);
+
+        $res = $result;
+        if ($statusCode !== 200) {
+            $res = $result['message'];
+        }
+        self::assertEquals($errorMessage, $res);
+        unlink($tempFile);
     }
 
     public function provideNewAccountFileMissingField(): Generator
