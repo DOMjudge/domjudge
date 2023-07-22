@@ -144,6 +144,8 @@ abstract class AccountBaseTestCase extends BaseTestCase
 
         self::assertEquals($result, "1 new account(s) successfully added.");
         $this->helperVerifyApiUsers($myURL, $objectsBeforeTest, $newUserPostData, $overwritten);
+        $url = $this->helperGetEndpointURL('account');
+        $this->verifyApiJsonResponse('GET', $url, 200, $newUserPostData['username'], null, [], $newUserPostData['password']);
         unlink($tempFile);
     }
 
