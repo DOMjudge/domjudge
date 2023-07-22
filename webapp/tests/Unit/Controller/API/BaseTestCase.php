@@ -106,10 +106,6 @@ abstract class BaseTestCase extends BaseBaseTestCase
             );
             $server['PHP_AUTH_USER'] = 'admin';
             $server['PHP_AUTH_PW'] = trim(file_get_contents($adminPasswordFile));
-        } elseif ($user === 'demo') {
-            // Team user
-            $server['PHP_AUTH_USER'] = 'demo';
-            $server['PHP_AUTH_PW'] = 'demo';
         } else {
             $server['PHP_AUTH_USER'] = $user;
             $server['PHP_AUTH_PW'] = $user;
