@@ -125,15 +125,19 @@ class Language extends BaseApiEntity
     private Collection $versions;
 
     #[ORM\Column(type: 'blobtext', nullable: true, options: ['comment' => 'Compiler version'])]
+    #[Serializer\Exclude]
     private ?string $compilerVersion = null;
 
     #[ORM\Column(type: 'blobtext', nullable: true, options: ['comment' => 'Runner version'])]
+    #[Serializer\Exclude]
     private ?string $runnerVersion = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Runner version command'])]
+    #[Serializer\Exclude]
     private ?string $runnerVersionCommand = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Compiler version command'])]
+    #[Serializer\Exclude]
     private ?string $compilerVersionCommand = null;
 
     /**
@@ -205,6 +209,36 @@ class Language extends BaseApiEntity
     public function getCompileExecutableHash(): ?string
     {
         return $this->compile_executable?->getImmutableExecutable()->getHash();
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('compiler')]
+    #[Serializer\Exclude(if:'object.getCompilerVersionCommand() == ""')]
+    public function getCompilerData(): ?array
+    {
+        $ret = [];
+        if (!empty($this->getCompilerVersionCommand())) {
+            $ret['version_command'] = $this->getCompilerVersionCommand();
+            if (!empty($this->getCompilerVersion())) {
+                $ret['version'] = $this->getCompilerVersion();
+            }
+        }
+        return $ret;
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('runner')]
+    #[Serializer\Exclude(if:'object.getRunnerVersionCommand() == ""')]
+    public function getRunnerData(): ?array
+    {
+        $ret = [];
+        if (!empty($this->getRunnerVersionCommand())) {
+            $ret['version_command'] = $this->getRunnerVersionCommand();
+            if (!empty($this->getRunnerVersion())) {
+                $ret['version'] = $this->getRunnerVersion();
+            }
+        }
+        return $ret;
     }
 
     public function setLangid(string $langid): Language
