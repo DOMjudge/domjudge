@@ -218,6 +218,20 @@ EOF;
         }
     }
 
+    public function testCreateUserNoPassword(): void
+    {
+        $newUserPostData = static::$defaultDataUserAdd;
+        unset($newUserPostData['password']);
+        $usersURL = $this->helperGetEndpointURL('users');
+        $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
+        $objectsBeforeTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
+        $this->verifyApiJsonResponse('POST', $usersURL, 201, 'admin', $newUserPostData);
+        $objectsAfterTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
+        $url = $this->helperGetEndpointURL('account');
+        $this->verifyApiJsonResponse('GET', $url, 401, $newUserPostData['username'], null, [], null);
+        $this->verifyApiJsonResponse('GET', $url, 401, $newUserPostData['username'], null, [], '');
+    }
+
     /**
      * @dataProvider provideNewAccountFileMissingField
      */
