@@ -93,7 +93,8 @@ abstract class BaseTestCase extends BaseBaseTestCase
         ?string $user = null,
         mixed $jsonData = null,
         array $files = [],
-        bool $attachment = false
+        bool $attachment = false,
+        ?string $password = 'unset_password_for_test'
     ) {
         $server = ['CONTENT_TYPE' => 'application/json'];
         // The API doesn't use cookie based logins, so we need to set a username/password.
@@ -108,7 +109,7 @@ abstract class BaseTestCase extends BaseBaseTestCase
             $server['PHP_AUTH_PW'] = trim(file_get_contents($adminPasswordFile));
         } else {
             $server['PHP_AUTH_USER'] = $user;
-            $server['PHP_AUTH_PW'] = $user;
+            $server['PHP_AUTH_PW'] = ($password === 'unset_password_for_test') ? $user : $password;
         }
         $this->client->request($method, '/api' . $apiUri, [], $files, $server, $jsonData ? json_encode($jsonData, JSON_THROW_ON_ERROR) : null);
         $response = $this->client->getResponse();
@@ -138,9 +139,10 @@ abstract class BaseTestCase extends BaseBaseTestCase
         int $status,
         ?string $user = null,
         mixed $jsonData = null,
-        array $files = []
+        array $files = [],
+        ?string $password = 'unset_password_for_test'
     ) {
-        $response = $this->verifyApiResponse($method, $apiUri, $status, $user, $jsonData, $files);
+        $response = $this->verifyApiResponse($method, $apiUri, $status, $user, $jsonData, $files, false, $password);
         try {
             return json_decode($response, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException) {
