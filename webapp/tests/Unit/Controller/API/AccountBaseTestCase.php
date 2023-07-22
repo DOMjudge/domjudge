@@ -98,6 +98,8 @@ abstract class AccountBaseTestCase extends BaseTestCase
         $this->verifyApiJsonResponse('POST', $usersURL, 201, 'admin', $newUserPostData);
         $objectsAfterTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
         $this->helperVerifyApiUsers($myURL, $objectsBeforeTest, $newUserPostData, $overwritten);
+        $url = $this->helperGetEndpointURL('account');
+        $this->verifyApiJsonResponse('GET', $url, 200, $newUserPostData['username'], null, [], $newUserPostData['password']);
     }
 
     public function provideNewAccount(): Generator
