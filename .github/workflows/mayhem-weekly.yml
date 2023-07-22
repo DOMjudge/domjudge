@@ -19,7 +19,7 @@ jobs:
             duration: "10m"
     uses: ./.github/workflows/mayhem-api-template.yml
     with:
-      version: "${{ matrix.target }}"
-      duration: "${{ matrix.version }}"
+      version: "${{ matrix.version }}"
+      duration: "${{ matrix.duration }}"
     secrets:
       MAPI_TOKEN: ${{ secrets.MAPI_TOKEN }}
