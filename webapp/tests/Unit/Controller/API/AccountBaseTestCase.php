@@ -190,9 +190,16 @@ abstract class AccountBaseTestCase extends BaseTestCase
                 $fileVersions[] = 'File_Version';
             }
             foreach ($fileVersions as $fileVersion) {
-                $file = $fileVersion."\t1";
-                $file .= "\n$role\t$name\t$user\t$pass";
-                yield [$file, 'tsv', $testUser, $overwritten];
+                foreach (["\r\n", "\n"] as $lineEnding) {
+                    foreach([true, false] as $fileEnding) {
+                        $file = $fileVersion . "\t1";
+                        $file .= "{$lineEnding}{$role}\t$name\t$user\t$pass";
+                        if ($fileEnding) {
+                            $file .= "$lineEnding";
+                        }
+                        yield [$file, 'tsv', $testUser, $overwritten];
+                    }
+                }
             }
             // Handle YAML file
             $file = <<<EOF
