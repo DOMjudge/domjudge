@@ -211,6 +211,9 @@ class Language extends BaseApiEntity
         return $this->compile_executable?->getImmutableExecutable()->getHash();
     }
 
+    /**
+     * @return array<string, string|null>
+     */
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('compiler')]
     #[Serializer\Exclude(if:'object.getCompilerVersionCommand() == ""')]
@@ -226,6 +229,9 @@ class Language extends BaseApiEntity
         return $ret;
     }
 
+    /**
+     * @return array<string, string|null>
+     */
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('runner')]
     #[Serializer\Exclude(if:'object.getRunnerVersionCommand() == ""')]
