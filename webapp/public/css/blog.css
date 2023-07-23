@@ -7,14 +7,14 @@
     height: auto;
 }
 
-.blog-post-thumbnail {
+.blog-post-list-thumbnail, .blog-post-homepage-thumbnail {
     width: 100%;
     aspect-ratio: 3/2;
     object-fit: cover;
 }
 
 @media (min-width: 768px) {
-    .blog-post-thumbnail {
+    .blog-post-list-thumbnail {
         width: 360px;
     }
 }
