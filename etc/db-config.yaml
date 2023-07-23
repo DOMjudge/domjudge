@@ -328,6 +328,11 @@
             default_value: 10
             public: true
             description: Maximum number of public blog posts on a single page.
+        -   name: homepage_blog_post_count
+            type: int
+            default_value: 2
+            public: true
+            description: Number of blog posts displayed on the homepage.
 -   category: Authentication
     description: Options related to authentication.
     items:
