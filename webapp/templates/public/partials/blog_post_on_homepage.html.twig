@@ -1,0 +1,17 @@
+{% set link = path('public_blog_post', { 'slug':post.slug }) %}
+<div class="col d-flex flex-column align-items-start align-items-md-start mb-4">
+    <a href="{{ link }}" class="align-self-center align-self-md-start blog-post-homepage-thumbnail">
+        <img src="{{ asset('media/images/' ~ post.thumbnailFileName) }}"
+             alt="{{ post.title }}"
+             class="blog-post-homepage-thumbnail">
+    </a>
+    <div class="flex-grow-1 mt-2">
+        <h2><a class="text-body"
+               href="{{ link }}">{{ post.title }}</a></h2>
+        <p class="text-muted">
+            {% if post.author %}{{ post.author }} - {% endif %}{{ post.publishtime|date }}
+        </p>
+        <p>{{ post.subtitle }}</p>
+        <a href="{{ link }}" class="btn btn-primary">Číst dál</a>
+    </div>
+</div>

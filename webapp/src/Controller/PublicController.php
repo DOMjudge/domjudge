@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\BlogPost;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
@@ -10,6 +11,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use App\Service\StatisticsService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -36,7 +38,19 @@ class PublicController extends BaseController
 
     #[Route(path: '', name: 'public_index')]
     public function homepageAction(): Response {
-        return $this->render('public/homepage.html.twig');
+        /** @var BlogPost[] $blogPosts */
+        $blogPosts = $this->em->getRepository(BlogPost::class)
+            ->createQueryBuilder('bp')
+            ->where('bp.publishtime <= :now')
+            ->orderBy('bp.publishtime', 'DESC')
+            ->setMaxResults($this->config->get('homepage_blog_post_count', ))
+            ->getQuery()
+            ->setParameter('now', new DateTime())
+            ->getResult();
+
+        return $this->render('public/homepage.html.twig', [
+            'blogPosts' => $blogPosts,
+        ]);
     }
 
     #[Route(path: '/scoreboard', name: 'public_scoreboard')]
