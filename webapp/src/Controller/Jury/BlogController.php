@@ -208,6 +208,10 @@ class BlogController extends BaseController
             $this->dj->auditlog('blog_post', $blogpostId, 'added');
             $this->eventLogService->log('blog_post', $blogpostId, 'create');
 
+            if (!$blogPost->isPublished()) {
+                return $this->redirectToRoute('jury_blog');
+            }
+
             return $this->redirectToRoute('public_blog_post', ['slug' => $blogPost->getSlug()]);
         }
 
