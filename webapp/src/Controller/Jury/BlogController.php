@@ -187,7 +187,8 @@ class BlogController extends BaseController
             $blogPost = $form->getData();
 
             $slug = strtolower($this->slugger->slug($blogPost->getTitle())->toString());
-            if (!$id && $this->em->getRepository(BlogPost::class)->findOneBy(['slug' => $slug])) {
+            $duplicate = $this->em->getRepository(BlogPost::class)->findOneBy(['slug' => $slug]);
+            if ($duplicate && $duplicate->getBlogpostid() != $blogPost->getBlogpostid()) {
                 $slug .= '-' . uniqid();
             }
             $blogPost->setSlug($slug);
