@@ -1,4 +1,4 @@
-name: Check autoconf
+name: Check autoconf (Other distros)
 on:
   push:
     branches:
@@ -10,29 +10,17 @@ on:
       - '[0-9]+.[0-9]+'
 
 jobs:
-  debian-family:
+  redhat-family:
     strategy:
       matrix:
-        version: [jammy, focal, rolling]
-        os: [ubuntu]
-        releaseBranch:
-          - ${{ contains(github.ref, 'main') }}
-        exclude:
-          - releaseBranch: false
-        include:
-          - os: debian
-            version: testing
-          - os: debian
-            version: stable
+        version: [latest]
+        os: [fedora]
     runs-on: ubuntu-latest
-    env:
-      DEBIAN_FRONTEND: noninteractive
-      TZ: Etc/UTC
     container:
       image: ${{ matrix.os }}:${{ matrix.version }}
     steps:
       - name: Install git so we get the .github directory
-        run: apt-get update; apt-get install -y git
+        run: dnf install -y git
       - uses: actions/checkout@v3
       - name: Setup image and run bats tests
         run: .github/jobs/configure-checks/setup_configure_image.sh
