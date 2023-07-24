@@ -5,7 +5,7 @@
     <div class="container">
         <h1>News</h1>
         {% for post in posts %}
-            {% include 'public/partials/blog_post_in_list.html.twig' %}
+            {% include 'public/partials/blog_post_in_list.html.twig' with {'post': post} %}
             <hr>
         {% endfor %}
 
