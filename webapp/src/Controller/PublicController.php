@@ -43,7 +43,7 @@ class PublicController extends BaseController
             ->createQueryBuilder('bp')
             ->where('bp.publishtime <= :now')
             ->orderBy('bp.publishtime', 'DESC')
-            ->setMaxResults($this->config->get('homepage_blog_post_count', ))
+            ->setMaxResults($this->config->get('homepage_blog_post_count'))
             ->getQuery()
             ->setParameter('now', new DateTime())
             ->getResult();
