@@ -4,13 +4,28 @@ load 'assert'
 
 u="domjudge-bats-user"
 
+distro_id=$(grep "^ID=" /etc/os-release)
+
+cmd="apt-get"
+if [ "$distro_id" = "ID=fedora" ]; then
+    cmd=dnf
+fi
+
+translate () {
+    args="$@"
+    if [ "$distro_id" = "ID=fedora" ]; then
+        args=${args/libcgroup-dev/libcgroup-devel}
+    fi
+    echo "$args"
+}
+
 if [ -z ${test_path+x} ]; then
     test_path="/domjudge"
     # Used in the CI
 fi
 
 setup_user() {
-    id -u $u || useradd $u >/dev/null
+    id -u $u || (useradd $u ; groupadd $u || true )>/dev/null
     chown -R $u:$u ./
 }
 
@@ -19,6 +34,9 @@ setup() {
     for shared_file in config.log confdefs.h conftest.err; do
         chmod a+rw $shared_file || true
     done
+    if [ "$distro_id" = "ID=fedora" ]; then
+        repo-install httpd
+    fi
     repo-install gcc g++ libcgroup-dev
 }
 
@@ -27,10 +45,15 @@ run_configure () {
 }
 
 repo-install () {
-    apt-get install $@ -y >/dev/null
+    args=$(translate $@)
+    ${cmd} install $args -y >/dev/null
 }
 repo-remove () {
-    apt-get remove $@ -y >/dev/null; apt-get autoremove -y 2>/dev/null
+    args=$(translate $@)
+    ${cmd} remove $args -y #>/dev/null
+    if [ "$distro_id" != "ID=fedora" ]; then
+        apt-get autoremove -y 2>/dev/null
+    fi
 }
 
 @test "Default empty configure" {
@@ -115,6 +138,10 @@ compile_assertions_finished () {
 }
 
 @test "Install C/C++ compilers (Clang as alternative)" {
+    if [ "$distro_id" = "ID=fedora" ]; then
+        # Fedora has gcc as dependency for clang
+        skip
+    fi
     repo-remove gcc g++
     repo-install clang libcgroup-dev
     compiler_assertions cc c++
@@ -132,6 +159,52 @@ compile_assertions_finished () {
    assert_line "$discourage_root"
    run su root -c "./configure --with-domjudge-user=root"
    refute_line "$discourage_root"
+}
+
+@test "Check for missing webserver group" {
+    if [ "$distro_id" != "ID=fedora" ]; then
+        # Debian/Ubuntu start with a www-data group
+        skip
+    fi
+    repo-remove httpd nginx
+    for www_group in nginx apache; do
+        userdel ${www_group} || true
+        groupdel ${www_group} || true
+    done
+    run ./configure --with-domjudge-user=$u
+    assert_line "checking webserver-group... configure: error: webserver group could not be detected, use --with-webserver-group=GROUP"
+}
+
+@test "Check for newly added webserver group (Apache)" {
+    if [ "$distro_id" != "ID=fedora" ]; then
+        # Debian/Ubuntu start with a www-data group
+        skip
+    fi
+    repo-remove httpd nginx
+    for www_group in nginx apache; do
+        userdel ${www_group} || true
+        groupdel ${www_group} || true
+    done
+    repo-install httpd
+    run ./configure --with-domjudge-user=$u
+    assert_line "checking webserver-group... apache (detected)"
+    assert_line " * webserver group.....: apache"
+}
+
+@test "Check for newly added webserver group (Nginx)" {
+    if [ "$distro_id" != "ID=fedora" ]; then
+        # Debian/Ubuntu start with a www-data group
+        skip
+    fi
+    repo-remove httpd nginx
+    for www_group in nginx apache; do
+        userdel ${www_group} || true
+        groupdel ${www_group} || true
+    done
+    repo-install nginx
+    run ./configure --with-domjudge-user=$u
+    assert_line "checking webserver-group... nginx (detected)"
+    assert_line " * webserver group.....: nginx"
 }
 
 @test "Run as normal user" {
@@ -324,12 +397,14 @@ compile_assertions_finished () {
   assert_line " * default user........: domjudge-bats-user"
   assert_line " * runguard user.......: domjudge-run"
   assert_line " * runguard group......: domjudge-run"
-  assert_line " * webserver group.....: www-data"
+  assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
   run run_configure "--with-domjudge-user=other_user --with-webserver-group=other_group --with-runuser=other-domjudge-run --with-rungroup=other-run-group"
   refute_line " * default user........: domjudge-bats-user"
   refute_line " * runguard user.......: domjudge-run"
   refute_line " * runguard group......: domjudge-run"
-  refute_line " * webserver group.....: www-data"
+  for group in www-data apache nginx; do
+    refute_line " * webserver group.....: $group"
+  done
   assert_line " * default user........: other_user"
   assert_line " * runguard user.......: other-domjudge-run"
   assert_line " * runguard group......: other-run-group"
@@ -345,4 +420,3 @@ compile_assertions_finished () {
   run run_configure --disable-doc-build
   assert_line " * documentation.......: /opt/domjudge/doc (disabled)"
 }
-
