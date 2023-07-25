@@ -60,17 +60,21 @@
             {% include 'partials/menu_help_button.html.twig' %}
         </div>
 
-        {% if team is defined and team.unreadClarifications|length > 0 %}
+        {% if unreadClarifications is defined and unreadClarifications|length > 0 %}
             <div class="dropdown mb-2 mb-xl-0 mr-3">
-                <button class="btn btn-warning btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                <button class="btn btn-warning btn-sm dropdown-toggle" type="button" data-toggle="dropdown"
+                        aria-expanded="false">
                     Unread messages
-                    <span class="badge badge-secondary">{{ team.unreadClarifications|length }}</span>
+                    <span class="badge badge-secondary">{{ unreadClarifications|length }}</span>
                 </button>
                 <div class="dropdown-menu overflow-auto" style="max-height: 30rem">
-                    {% for clarification in team.unreadClarifications %}
+                    {% for clarification in unreadClarifications %}
                         <div style="width: 18rem">
-                            <a class="dropdown-item py-2" href="{{ path('team_clarification', {clarId: clarification.clarid}) }}">
-                                <p class="mb-1 text-right"><span class="text-muted">{{ clarification.submittime|round|date('d. m. H:i')  }}</span></p>
+                            <a class="dropdown-item py-2"
+                               href="{{ path('team_clarification', {clarId: clarification.clarid}) }}">
+                                <p class="mb-1 text-right"><span
+                                        class="text-muted">{{ clarification.submittime|round|date('d. m. H:i') }}</span>
+                                </p>
                                 <p class="card-text text-wrap">{{ clarification.summary }}</p>
                             </a>
                             <hr class="m-0">
@@ -95,7 +99,8 @@
         </div>
         <div class="ml-auto me-3">
             {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
-                <a class="nav-link" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit') }}">
+                <a class="nav-link" data-ajax-modal data-ajax-modal-after="initSubmitModal"
+                   href="{{ path('team_submit') }}">
                     <span class="btn btn-success btn-sm mr-3 mb-2 mb-xl-0">
                         <i class="fas fa-cloud-upload-alt"></i> Submit
                     </span>
