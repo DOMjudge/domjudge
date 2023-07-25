@@ -48,7 +48,7 @@ class ScoreboardController extends BaseController
         $data['myTeamId'] = $user->getTeam()->getTeamid();
 
         $data['unreadClarifications'] = $user->getTeam()->getUnreadClarifications()->filter(
-            fn(Clarification $c) => $c->getContest()->getCid() === $this->dj->getCurrentContest($user->getTeam()->getTeamid())->getCid()
+            fn(Clarification $c) => $user->getTeam()->canViewClarification($c)
         );
 
         if ($request->isXmlHttpRequest()) {
