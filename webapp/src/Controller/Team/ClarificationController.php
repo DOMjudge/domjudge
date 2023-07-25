@@ -112,7 +112,7 @@ class ClarificationController extends BaseController
         $data = [
             'clarification' => $clarification,
             'unreadClarifications' => $user->getTeam()->getUnreadClarifications()->filter(
-                fn(Clarification $c) => $team->canViewClarification($c)
+                fn(Clarification $c) => $c->getContest()->getCid() === $this->dj->getCurrentContest($user->getTeam()->getTeamid())->getCid()
             ),
             'team' => $team,
             'categories' => $categories,
