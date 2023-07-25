@@ -130,6 +130,9 @@ class MiscController extends BaseController
 
             $data['clarifications']        = $clarifications;
             $data['clarificationRequests'] = $clarificationRequests;
+            $data['unreadClarifications'] = $team->getUnreadClarifications()->filter(
+                fn(Clarification $c) => $c->getContest()->getCid() === $contest->getCid()
+            );
             $data['categories']            = $this->config->get('clar_categories');
             $data['allowDownload']         = (bool)$this->config->get('allow_team_submission_download');
             $data['showTooLateResult']     = $this->config->get('show_too_late_result');

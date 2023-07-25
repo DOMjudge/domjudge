@@ -3,6 +3,7 @@
 namespace App\Controller\Team;
 
 use App\Controller\BaseController;
+use App\Entity\Clarification;
 use App\Entity\Team;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -45,7 +46,10 @@ class ScoreboardController extends BaseController
             $request, $response, $refreshUrl, false, false, false, $contest
         );
         $data['myTeamId'] = $user->getTeam()->getTeamid();
-        $data['team'] = $user->getTeam();
+
+        $data['unreadClarifications'] = $user->getTeam()->getUnreadClarifications()->filter(
+            fn(Clarification $c) => $c->getContest()->getCid() === $this->dj->getCurrentContest($user->getTeam()->getTeamid())->getCid()
+        );
 
         if ($request->isXmlHttpRequest()) {
             $data['current_contest'] = $contest;
