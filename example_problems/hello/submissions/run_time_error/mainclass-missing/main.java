@@ -5,7 +5,7 @@
  * might be specified during submission; then this source would result
  * in a run-error.
  *
- * @EXPECTED_RESULTS@: COMPILER-ERROR
+ * @EXPECTED_RESULTS@: RUN-ERROR
  */
 
 import java.io.*;

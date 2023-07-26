@@ -59,17 +59,12 @@ if [ -z "$MAINCLASS" ]; then
 	CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
 	            | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
 	MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $CLASSNAMES)
-	EXITCODE=$?
 
 	# Report the entry point, so it can be saved, e.g. for later replay:
 	echo "Info: detected entry_point: $MAINCLASS"
-
-	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 else
 	# Check if entry point is valid
 	java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $MAINCLASS > /dev/null
-	EXITCODE=$?
-	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 fi
 
 # Write executing script:
