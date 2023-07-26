@@ -488,7 +488,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     public function printResult(?string $result, bool $valid = true, bool $jury = false): string
     {
-        $result = strtolower($result);
+        $result = strtolower($result ?? '');
         switch ($result) {
             case 'too-late':
                 $style = 'sol_queued';
