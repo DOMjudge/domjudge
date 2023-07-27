@@ -95,7 +95,7 @@ if test "x$with_webserver_group" = x; then
 		AC_SUBST(WEBSERVER_GROUP,"$g")
 		AC_MSG_RESULT([$WEBSERVER_GROUP (detected)])
 	else
-		AC_MSG_ERROR([webserver group could not be detected, use --with-webserver-group=GROUP)])
+		AC_MSG_ERROR([webserver group could not be detected, use --with-webserver-group=GROUP])
 	fi
 else
 	AC_SUBST(WEBSERVER_GROUP,$with_webserver_group)
