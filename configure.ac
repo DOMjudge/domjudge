@@ -85,7 +85,7 @@ AC_ARG_WITH([webserver-group], [AS_HELP_STRING([--with-webserver-group=GROUP],
 if test "x$with_webserver_group" = x; then
 	# Try a number of group names and choose first one found
 	found=0
-	for g in www-data apache httpd ; do
+	for g in www-data apache httpd nginx ; do
 		if getent group $g >/dev/null 2>&1 ; then
 		   found=1
 		   break
