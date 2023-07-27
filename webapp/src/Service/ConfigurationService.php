@@ -238,6 +238,7 @@ EOF;
 
                 case 'string':
                 case 'enum':
+                case 'textarea':
                     $optionToSet->setValue($val);
                     break;
 

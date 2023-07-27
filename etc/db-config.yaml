@@ -333,6 +333,11 @@
             default_value: 2
             public: true
             description: Number of blog posts displayed on the homepage.
+        -   name: welcome_message_body
+            type: textarea
+            default_value: "asd"
+            public: true
+            description: The body of the welcome message shown to teams after first visiting a contest.
 -   category: Authentication
     description: Options related to authentication.
     items:

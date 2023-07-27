@@ -100,6 +100,9 @@
                                                        name="config_{{ option.name }}" id="config_{{ option.name }}"
                                                        value="{{ option.value }}">
                                             {% endif %}
+                                        {% elseif option.type == 'textarea' %}
+                                            <textarea class="form-control form-control-sm" style="width:30em;"
+                                                   name="config_{{ option.name }}" id="config_{{ option.name }}">{{ option.value }}</textarea>
                                         {% elseif option.type == 'array_keyval' %}
                                             <br/>
                                             <div data-collection>
