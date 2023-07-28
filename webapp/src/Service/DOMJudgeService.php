@@ -754,6 +754,10 @@ class DOMJudgeService
      */
     public function getSamplesZipContent(ContestProblem $contestProblem): string
     {
+        if ($contestProblem->getProblem()->getCombinedRunCompare()) {
+            throw new NotFoundHttpException(sprintf('Problem p%d has no downloadable samples', $contestProblem->getProbid()));
+        }
+
         $zip = new ZipArchive();
         if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "export-"))) {
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
@@ -964,7 +968,7 @@ class DOMJudgeService
                 ->join('cp.problem', 'p')
                 ->leftJoin('p.testcases', 'tc')
                 ->leftJoin('p.attachments', 'a')
-                ->select('partial p.{probid,name,externalid,problemtext_type,timelimit,memlimit}', 'cp', 'a')
+                ->select('partial p.{probid,name,externalid,problemtext_type,timelimit,memlimit,combined_run_compare}', 'cp', 'a')
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')
                 ->setParameter('contest', $contest)
@@ -976,7 +980,6 @@ class DOMJudgeService
                 ->from(ContestProblem::class, 'cp')
                 ->join('cp.problem', 'p')
                 ->leftJoin('p.testcases', 'tc')
-                ->leftJoin('p.attachments', 'a')
                 ->select('p.probid', 'SUM(tc.sample) AS numsamples')
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')

@@ -147,4 +147,40 @@ class ProblemControllerTest extends BaseTestCase
         // Does not contain more than these 4 files.
         self::assertCount(4, $content);
     }
+
+    /**
+     * Test that the problems page does not show sample data for interactive problems.
+     */
+    public function testInteractiveSamples(): void
+    {
+        // First, enable a sample for the interactive boolfind problem.
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        /** @var Problem $problem */
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => 'boolfind']);
+
+        /** @var Testcase $sample */
+        $sample = $problem->getTestcases()->get(0);
+        $sample->setSample(true);
+        $em->flush();
+
+        $this->logIn();
+
+        $crawler = $this->client->request('GET', '/team/problems');
+
+        // Get the card bodies.
+        $cardBodies = $crawler->filter('.card-body');
+
+        // The last card should not have any samples.
+        self::assertSame(0,
+            $cardBodies->eq(2)->filter('.list-group .list-group-item')->count());
+
+        // Check the link to download all samples.
+        $link = $cardBodies->eq(2)->filter('a')->eq(1);
+        self::assertNotSame('samples', $link->text(null, true));
+
+        // Download the sample and make sure the contents are correct.
+        $this->client->request('GET', '/team/'.$problem->getProbid().'/samples.zip');
+        $response = $this->client->getResponse();
+        self::assertEquals(404, $response->getStatusCode());
+    }
 }
