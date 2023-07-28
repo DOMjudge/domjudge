@@ -16,6 +16,9 @@
             {% for problem in problems %}
                 <div class="col">
                                 {% set numsamples = samples[problem.probid] %}
+                                {% if problem.problem.combinedRunCompare %}
+                                    {% set numsamples = 0 %}
+                                {% endif %}
                                 <div class="card">
                                     <div class="card-body">
                                         <h2 class="card-title">
