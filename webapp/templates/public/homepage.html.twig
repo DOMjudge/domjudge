@@ -1,5 +1,10 @@
 {% extends "public/base.html.twig" %}
 
+{% block extrahead %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset("css/blog.css") }}">
+{% endblock %}
+
 {% block title %}Korespondenční seminář{% endblock %}
 {% block content %}
     <div class="container">

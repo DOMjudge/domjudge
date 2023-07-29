@@ -1,5 +1,10 @@
 {% extends "public/base.html.twig" %}
 
+{% block extrahead %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset("css/help.css") }}">
+{% endblock %}
+
 {% block content %}
     <div class="container">
         <h1 class="text-center">Nápověda</h1>
