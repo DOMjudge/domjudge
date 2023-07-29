@@ -67,7 +67,7 @@
             </div>
         </div>
 
-        <div class="row d-flex flex-column flex-lg-row">
+        <div class="row row-cols-1 row-cols-lg-2">
             {% for post in blogPosts %}
                 {% include 'public/partials/blog_post_on_homepage.html.twig' with {'post': post} %}
             {% endfor %}
