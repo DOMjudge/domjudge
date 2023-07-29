@@ -162,8 +162,8 @@ struct process_t {
   // The 0-based index of this process. The 0-th process is the main process.
   size_t index;
 
-  fd_t stdout = -1; // FD of where the stdout is redirected to.
-  fd_t stdin = -1;  // FD of where the stdin is coming from.
+  fd_t stdout_fd = -1; // FD of where the stdout is redirected to.
+  fd_t stdin_fd = -1;  // FD of where the stdin is coming from.
 
   // If the proxy is active (i.e. -o is provided), these are the file
   // descriptors for its communication.
@@ -231,7 +231,7 @@ struct process_t {
 
   // Fork and exec the child process, redirecting its standard I/O.
   void spawn() {
-    fd_t stdio[3] = {stdin, stdout, FDREDIR_NONE};
+    fd_t stdio[3] = {stdin_fd, stdout_fd, FDREDIR_NONE};
 
     vector<const char *> argv(args.size());
     for (size_t i = 0; i < args.size(); i++) {
@@ -244,8 +244,8 @@ struct process_t {
     logmsg(LOG_DEBUG, "started #%ld, pid %d", index, pid);
     // Do not leak these file descriptors, otherwise we cannot detect if the
     // process has closed stdout.
-    close(stdin);
-    close(stdout);
+    close(stdin_fd);
+    close(stdout_fd);
   }
 
   // Function called when the process exits.
@@ -641,7 +641,7 @@ struct state_t {
         tie(read_end, write_end) = make_pipe();
         logmsg(LOG_DEBUG, "setting up pipe #%ld (fd %d) -> proxy (fd %d)", i,
                write_end, read_end);
-        process.stdout = write_end;
+        process.stdout_fd = write_end;
         process.process_to_proxy = read_end;
         set_non_blocking(process.process_to_proxy);
 
@@ -649,14 +649,14 @@ struct state_t {
         logmsg(LOG_DEBUG, "setting up pipe proxy (fd %d) -> #%ld (fd %d)",
                write_end, j, read_end);
         other.proxy_to_process = write_end;
-        other.stdin = read_end;
+        other.stdin_fd = read_end;
       } else {
         // No proxy: direct communication.
         tie(read_end, write_end) = make_pipe();
         logmsg(LOG_DEBUG, "setting up pipe #%ld (fd %d) -> #%ld (fd %d)", i,
                write_end, j, read_end);
-        process.stdout = write_end;
-        other.stdin = read_end;
+        process.stdout_fd = write_end;
+        other.stdin_fd = read_end;
       }
     }
   }
