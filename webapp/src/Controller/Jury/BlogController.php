@@ -168,7 +168,9 @@ class BlogController extends BaseController
      */
     public function sendBlogPostAction(Request $request, ?int $id = null): Response
     {
-        if ($id) {
+        $editing = $id !== null;
+
+        if ($editing) {
             $blogPost = $this->em->getRepository(BlogPost::class)->find($id);
             if (!$blogPost) {
                 throw $this->createNotFoundException('No blog post found for id ' . $id);
@@ -178,7 +180,7 @@ class BlogController extends BaseController
         }
 
         $form = $this->createForm(BlogPostType::class, $blogPost, [
-            'thumbnail_required' => !$id,
+            'thumbnail_required' => !$editing,
         ]);
 
         $form->handleRequest($request);
@@ -188,10 +190,12 @@ class BlogController extends BaseController
 
             $slug = strtolower($this->slugger->slug($blogPost->getTitle())->toString());
             $duplicate = $this->em->getRepository(BlogPost::class)->findOneBy(['slug' => $slug]);
-            if ($duplicate && $duplicate->getBlogpostid() != $blogPost->getBlogpostid()) {
-                $slug .= '-' . uniqid();
+            if (!$editing) {
+                if ($duplicate) {
+                    $slug .= '-' . uniqid();
+                }
+                $blogPost->setSlug($slug);
             }
-            $blogPost->setSlug($slug);
 
             if ($form['thumbnail']->getData()) {
                 $thumbnailFileName = $this->saveImage(
@@ -217,7 +221,7 @@ class BlogController extends BaseController
 
         return $this->renderForm('jury/blog_post_send.html.twig', [
             'form' => $form,
-            'action' => $id ? 'edit' : 'send'
+            'action' => $editing ? 'edit' : 'send'
         ]);
     }
 
