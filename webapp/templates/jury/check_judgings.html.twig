@@ -31,7 +31,7 @@
     {% macro verifyResults(id, header, results, collapse) %}
         {% if results is not empty %}
             <h2><a class="collapse-link" href="javascript:collapse('#detail{{ id }}')">{{ header }}</a></h2>
-            <table id="detail{{ id }}" class="{% if collapse | default(false) %}d-none{% endif %} data-table table table-hover table-striped table-sm submissions-table">
+            <table id="detail{{ id }}" class="{% if collapse | default(false) %}d-none{% endif %} data-table table table-hover table-striped table-sm submissions-table table-full-clickable-cell">
                 <tr>
                     <th></th><th>problem</th><th>file(s)</th>
                     <th>actual</th>
