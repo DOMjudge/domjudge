@@ -60,7 +60,6 @@
     <script src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
     <style>
         .data-table td a:not(.showlink), .data-table td a:hover:not(.showlink) {
-            display: block;
             text-decoration: none;
             color: inherit;
         }
@@ -88,7 +87,7 @@
 {% macro table(data, fields, options) %}
 
     <div class="table-wrapper">
-        <table class="data-table table table-sm table-striped" style="width:auto">
+        <table class="data-table table table-sm table-striped table-full-clickable-cell" style="width:auto">
             <thead class="">
             <tr>
                 {%- set num_actions = data | numTableActions %}

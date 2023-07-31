@@ -43,7 +43,7 @@
         {% endif %}
     </div>
 
-    <table class="data-table table table-hover table{% if showExternalResult and showExternalTestcases %}-3{% endif %}-striped table-sm submissions-table">
+    <table class="data-table table table-hover table{% if showExternalResult and showExternalTestcases %}-3{% endif %}-striped table-sm submissions-table table-full-clickable-cell">
         <thead class="thead-light">
         <tr>
             {% if showExternalResult and showExternalTestcases %}
@@ -69,8 +69,8 @@
                 <th scope="col">external result</th>
             {% endif %}
             {% if not showExternalResult or not showExternalTestcases %}
-                <th scope="col">verified</th>
-                <th scope="col">by</th>
+                <th scope="col" class="table-button-head-left">verified</th>
+                <th scope="col" class="table-button-head-right">by</th>
             {% endif %}
             {%- if rejudging is defined %}
 
@@ -78,7 +78,7 @@
             {%- endif %}
             {%- if showTestcases is defined and showTestcases %}
 
-                <th scope="col" class="not-sortable not-searchable">test results</th>
+                <th scope="col" class="not-sortable not-searchable table-button-head-right-right">test results</th>
             {%- endif %}
 
         </tr>
@@ -219,7 +219,7 @@
                 {%- endif %}
                 {%- if showTestcases is defined and showTestcases %}
 
-                    <td class="testcase-results{{ tdExtraClass }}">
+                    <td class="testcase-results{{ tdExtraClass }} table-button-head-right-right">
                         {{- submission | testcaseResults -}}
                     </td>
                 {%- endif %}
