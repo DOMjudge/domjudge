@@ -12,6 +12,8 @@ parameters:
     # This code is rarely tested and we discourage using it.
     removed_intervals: false
     image_directory: '%kernel.project_dir%/public/media/images'
+    # The actions for which to add the CID to the URL.
+    contest_id_url_actions: ['scoreboardAction', 'problemsAction']
 
 services:
     # default configuration for services in *this* file
@@ -28,3 +30,7 @@ services:
             - '../src/Entity'
             - '../src/Migrations'
             - '../src/Kernel.php'
+
+    App\EventSubscriber\ContestIdSubscriber:
+        arguments:
+            $contestIdUrlActions: '%contest_id_url_actions%'
