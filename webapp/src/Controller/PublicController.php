@@ -14,6 +14,7 @@ use App\Service\StatisticsService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use GuzzleHttp\Psr7\Uri;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -154,7 +155,8 @@ class PublicController extends BaseController
     public function changeContestAction(Request $request, RouterInterface $router, int $contestId): Response
     {
         if ($this->isLocalReferer($router, $request)) {
-            $response = new RedirectResponse($request->headers->get('referer'));
+            $uri = new Uri($request->headers->get('referer'));
+            $response = new RedirectResponse((string)$uri->withQuery(''));
         } else {
             $response = $this->redirectToRoute('public_scoreboard');
         }

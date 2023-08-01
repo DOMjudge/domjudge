@@ -18,6 +18,7 @@ use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use GuzzleHttp\Psr7\Uri;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -163,7 +164,8 @@ class MiscController extends BaseController
         }
 
         if ($this->isLocalReferer($router, $request)) {
-            $response = new RedirectResponse($request->headers->get('referer'));
+            $uri = new Uri($request->headers->get('referer'));
+            $response = new RedirectResponse((string)$uri->withQuery(''));
         } else {
             $response = $this->redirectToRoute('team_index');
         }
