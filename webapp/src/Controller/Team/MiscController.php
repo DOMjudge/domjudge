@@ -62,8 +62,6 @@ class MiscController extends BaseController
         $teamId  = $team->getTeamid();
         $contest = $this->dj->getCurrentContest($teamId);
 
-        $this->checkForSendingWelcomeMessage($contest->getCid());
-
         $data = [
             'team' => $team,
             'contest' => $contest,
@@ -75,6 +73,8 @@ class MiscController extends BaseController
             'maxWidth' => $this->config->get('team_column_width'),
         ];
         if ($contest) {
+            $this->checkForSendingWelcomeMessage($contest->getCid());
+
             $scoreboard = $this->scoreboardService
                 ->getTeamScoreboard($contest, $teamId, false);
             $data = array_merge(
@@ -158,7 +158,9 @@ class MiscController extends BaseController
     #[Route(path: '/change-contest/{contestId<-?\d+>}', name: 'team_change_contest')]
     public function changeContestAction(Request $request, RouterInterface $router, int $contestId): Response
     {
-        $this->checkForSendingWelcomeMessage($contestId);
+        if ($contestId != -1) {
+            $this->checkForSendingWelcomeMessage($contestId);
+        }
 
         if ($this->isLocalReferer($router, $request)) {
             $response = new RedirectResponse($request->headers->get('referer'));
