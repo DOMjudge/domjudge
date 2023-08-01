@@ -221,14 +221,13 @@ EOF;
     public function testCreateUserNoPassword(): void
     {
         $newUserPostData = static::$defaultDataUserAdd;
+        $newUserPostData['roles'] = ['team'];
         unset($newUserPostData['password']);
         $usersURL = $this->helperGetEndpointURL('users');
         $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
         $objectsBeforeTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
-        $response = $this->verifyApiJsonResponse('POST', $usersURL, 400, 'admin', $newUserPostData);
-        self::assertEquals("Argument 'password' is mandatory", $response['message']);
-        $objectsAfterTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
-        self::assertEquals($objectsAfterTest, $objectsBeforeTest);
+        $response = $this->verifyApiJsonResponse('POST', $usersURL, 201, 'admin', $newUserPostData);
+        $this->helperVerifyApiUsers($myURL, $objectsBeforeTest, $newUserPostData);
         $url = $this->helperGetEndpointURL('account');
         $this->verifyApiJsonResponse('GET', $url, 401, $newUserPostData['username'], null, [], null);
         $this->verifyApiJsonResponse('GET', $url, 401, $newUserPostData['username'], null, [], '');

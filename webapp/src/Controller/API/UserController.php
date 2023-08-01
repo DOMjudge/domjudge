@@ -309,7 +309,6 @@ class UserController extends AbstractRestController
         $required = [
             'username',
             'name',
-            'password',
             'roles',
         ];
 
