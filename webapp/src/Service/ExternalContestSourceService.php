@@ -1989,7 +1989,7 @@ class ExternalContestSourceService
     {
         return match ($this->getApiVersion()) {
             '2020-03', '2021-11' => EventFeedFormat::Format_2020_03,
-            '2022-07' => EventFeedFormat::Format_2022_07,
+            '2022-07', '2023-06' => EventFeedFormat::Format_2022_07,
             default => isset($event['op']) ? EventFeedFormat::Format_2020_03 : EventFeedFormat::Format_2022_07,
         };
     }
