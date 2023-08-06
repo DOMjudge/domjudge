@@ -92,6 +92,9 @@ class ExternalContestSource
 
     public function setSource(string $source): ExternalContestSource
     {
+        if (str_ends_with($source, '/')) {
+            $source = substr($source, 0, -1);
+        }
         $this->source = $source;
         return $this;
     }
