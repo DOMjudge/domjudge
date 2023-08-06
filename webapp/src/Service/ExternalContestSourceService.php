@@ -93,6 +93,8 @@ class ExternalContestSourceService
             'headers' => [
                 'User-Agent' => 'DOMjudge/' . $domjudgeVersion,
             ],
+            'verify_peer' => false,
+            'verify_host' => false,
         ];
         $this->httpClient = $httpClient->withOptions($clientOptions);
     }
