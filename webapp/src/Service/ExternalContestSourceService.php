@@ -52,6 +52,7 @@ class ExternalContestSourceService
     protected ?string $loadingError = null;
     protected bool $shouldStopReading = false;
     protected array $verdicts = [];
+    protected ?string $basePath = null;
 
     /**
      * This array will hold all events that are waiting on a dependent event
@@ -506,6 +507,7 @@ class ExternalContestSourceService
                         $clientOptions = [
                             'base_uri' => $matches[1],
                         ];
+                        $this->basePath = $matches[1];
                         if ($this->source->getUsername()) {
                             $auth = [$this->source->getUsername()];
                             if (is_string($this->source->getPassword() ?? null)) {
