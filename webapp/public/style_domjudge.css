@@ -20,7 +20,6 @@ body {
     color: var(--text-color);
     background-color: var(--background-color);
     font-family: Roboto, sans-serif;
-    padding-bottom: 4em;
     padding-top: 4.5rem;
 }
 
