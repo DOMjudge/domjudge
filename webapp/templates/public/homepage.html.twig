@@ -3,76 +3,85 @@
 {% block extrahead %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset("css/blog.css") }}">
+    <link rel="stylesheet" href="{{ asset("css/homepage.css") }}">
 {% endblock %}
 
 {% block title %}Korespondenční seminář{% endblock %}
-{% block content %}
-    <div class="container">
-        <h1 class="text-center">Korespondenční seminář z programování</h1>
-        <h3 class="text-center">DELTA - Střední škola informatiky a ekonomie</h3>
-        <p>
-            Naše interaktivní online prostředí vám umožní prozkoumat svět programování z pohodlí vašeho domova. Bez
-            ohledu na to, zda jste začátečníkem nebo pokročilým programátorem, tento seminář vám poskytne přístup k
-            odborným znalostem a praktickým dovednostem, které vás posunou na další úroveň.
-        </p>
-        <hr>
-
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mb-4">
-            <div class="col mb-3 mb-xl-0">
-                <div class="card h-100">
-                    <h5 class="card-header">Komplexní kurikulum</h5>
-                    <div class="card-body">
-                        <p class="card-text">
-                            Naše kurzy pokrývají širokou škálu programovacích jazyků, konceptů a technologií. Nezáleží
-                            na
-                            tom, jestli se chcete naučit základy nebo pokročilé techniky, u nás najdete vše.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col mb-3 mb-xl-0">
-                <div class="card h-100">
-                    <h5 class="card-header">Flexibilita a individualizace</h5>
-                    <div class="card-body">
-                        <p class="card-text">
-                            Korespondenční formát semináře vám umožní studovat ve vašem vlastním tempu. Můžete si
-                            přizpůsobit časový plán a způsob učení svým potřebám. K dispozici jsou také online
-                            materiály,
-                            příručky a přednášky, které vám poskytnou podporu a přehled o studijním materiálu.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col mb-3 mb-xl-0">
-                <div class="card h-100">
-                    <h5 class="card-header">Praktické cvičení</h5>
-                    <div class="card-body">
-                        <p class="card-text">
-                            Chceme, abyste získali nejen teoretické znalosti, ale také praktické dovednosti. Proto vám
-                            nabízíme různé programovací projekty a cvičení, které vám umožní uplatnit své nově nabyté
-                            znalosti a rozvíjet svou kreativitu.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col mb-3 mb-xl-0">
-                <div class="card h-100">
-                    <h5 class="card-header">Komunita a podpora</h5>
-                    <div class="card-body">
-                        <p class="card-text">
-                            Kromě učebních materiálů a projektů se můžete připojit k naší aktivní komunitě programátorů.
-                            Zde
-                            můžete sdílet své zkušenosti, ptát se na otázky a diskutovat s ostatními účastníky. Naši
-                            instruktoři jsou připraveni vám poskytnout odpovědi a radit vám na vaší programovací cestě.
-                        </p>
-                    </div>
-                </div>
+{% block body %}
+    <div class="hp-cover">
+        <div class="hp-logo-bar hp-cover-overlay">
+            <div class="container">
+                <img src="{{ asset("images/hacker/logo-white.svg") }}" alt="Pardubický hacker - logo">
             </div>
         </div>
 
-        <div class="row row-cols-1 row-cols-lg-2">
+        <div class="w-100 d-flex align-content-center justify-content-center container">
+            <div class="hp-cover-headline text-left text-md-center">
+                <p>
+                    Jsi žákem <b>základní školy</b> a baví tě <b>programovat</b>?
+                    <span class="d-inline-block">S programováním</span> začínáš a chceš se naučit něco dalšího, nebo jsi profík a změříš síly s těmi
+                    nejlepšími?
+                </p>
+                <p>
+                    Pardubický hacker - programování pro ZŠ přináší <b>soutěžní</b> i <b>studijní</b> část. Programovat
+                    můžeš v
+                    jazycích
+                    <b>Python</b>, <b>Java</b>, <b>JavaScript</b>, <b>C</b>, <b>C++</b> nebo <b>C#</b>.
+                </p>
+            </div>
+        </div>
+
+        <div class="hp-cover-details hp-cover-overlay">
+            <div class="d-flex flex-column flex-md-row container">
+                <div class="hp-cover-details-segment hp-cover-details-segment-larger">
+                    <h2>Soutěž</h2>
+                    <p>
+                        Každý měsíc na tě budou čekat 3 soutěžní úlohy. Systém on-line vyhodnotí, zda jsi úlohu vyřešil
+                        správně. Kdo
+                        vyřeší úlohy nejdříve a na co nejméně pokusů, získá nejvíce bodů. Body za jednotlivé úlohy se
+                        sčítají.
+                    </p>
+                    <p>
+                        Soutěž sestává ze dvou semestrů - zimního a letního. Každý semestr obsahuje on-line kola a
+                        prezenční
+                        finále,
+                        které se koná v Pardubicích. Zimní semestr sestává ze 3 on-line kol: říjen, listopad, prosinec a
+                        finále
+                        proběhne v lednu. Letní semestr sestává ze 4 on-line kol: únor, březen, duben, květen a finále
+                        proběhne v
+                        červnu. Zapojit se můžeš i v průběhu roku.
+                    </p>
+
+                    <a class="btn btn-lg btn-primary" href="{{ path('register') }}">
+                        Přihlásit se
+                    </a>
+                </div>
+
+                <div class="hp-cover-details-segment">
+                    <h2>On-line kurz</h2>
+                    <p>
+                        Každý měsíc vysvětlujeme některou z partií programování a přinášíme příklady na její procvičení.
+                        Snažíme se
+                        připravovat takové příklady, které budou pro tebe zajímavé i když už programovat umíš. Správnost
+                        svého
+                        řešení si můžeš vyzkoušet on-line.
+                    </p>
+
+                    <a class="btn btn-lg btn-primary" href="https://github.com/delta-cs/seminar">
+                        Začít studovat
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <div class="d-flex flex-row align-items-center">
+            <h2 class="mr-3">Novinky</h2>
+            <a class="btn btn-sm btn-info" href="{{ path('public_blog_list') }}">Číst všechny</a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3">
             {% for post in blogPosts %}
                 {% include 'public/partials/blog_post_on_homepage.html.twig' with {'post': post} %}
             {% endfor %}
