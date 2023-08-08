@@ -1,0 +1,65 @@
+h3, h4, h5, h6 {
+    text-align: left;
+}
+
+.hp-cover {
+    margin-top: -15px;
+
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("/images/hacker/homepage-cover.jpg") no-repeat;
+    background-size: cover;
+    background-position: center;
+
+    color: white;
+}
+
+.hp-logo-bar > .container > img {
+    max-width: 300px;
+}
+
+.hp-cover-headline {
+    max-width: 800px !important;
+    margin: 80px 0;
+
+    font-size: 1.8em;
+    text-shadow: black 0 4px 2px;
+}
+
+.hp-cover-details {
+
+}
+
+.hp-cover-details > .d-flex {
+    gap: 30px !important;
+}
+
+.hp-cover-details-segment {
+    flex-basis: 0;
+    flex-grow: 1;
+}
+
+.hp-cover-details-segment-larger {
+    flex-grow: 2;
+}
+
+.hp-cover-overlay {
+    background-color: rgba(0, 0, 0, 0.25);
+    padding: 15px 0 !important;
+}
+
+.container {
+    @media (min-width: 1320px) {
+        max-width: 1320px;
+    }
+
+    @media (min-width: 1500px) {
+        max-width: 1500px;
+    }
+
+    @media (min-width: 1680px) {
+        max-width: 1680px;
+    }
+
+    @media (min-width: 1860px) {
+        max-width: 1860px;
+    }
+}
