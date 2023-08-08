@@ -1,0 +1,64 @@
+{% extends "public/base.html.twig" %}
+
+{% block extrahead %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset("css/homepage.css") }}">
+{% endblock %}
+
+{% block body %}
+    <div class="hp-logo-bar hp-cover-overlay mb-3" style="margin-top: -15px">
+        <div class="container">
+            <img src="{{ asset("images/hacker/logo-white.svg") }}" alt="Pardubický hacker - logo">
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Kdo za Pardubickým hackerem stojí?</h2>
+        <div class="d-flex flex-column flex-md-row mb-4">
+            <p class="mr-md-3">
+                Za Pardubickým hackerem stojí komunita absolventů, studentů a učitelů soukromé školy
+                <a href="https://delta-skola.cz/">DELTA - Střední škola informatiky a ekonomie, Pardubice</a>. DELTA se
+                zaměřuje na výuku programování od roku 2004. Od svých začátků úzce spolupracuje s největší českou
+                softwarovou společností Unicorn, jejíž zaměstnanci na škole přímo učí. Její odborný pedagogický sbor se
+                skládá ze zástupců SW firem, vysokoškolských pedagogů a nadšených "normálních" učitelů. Škola
+                provozuje <a href="https://www.delta-skola.cz/talentovy-program-delta-topgun">talentový program DELTA
+                    TopGun</a> pro žáky, kteří přicházejí ze ZŠ s pokročilými programátorskými dovednostmi. V posledních
+                6ti letech obsadili studenti školy v celostátním kole Středoškolské odborné činnosti v oboru Informatika
+                3x první místo a 2x byli druzí. Škola DELTA je také známá aktivní komunitou svých absolventů a studentů,
+                která se školou často spolupracuje na společných projektech.
+            </p>
+            <img class="align-self-center" style="max-height: 150px" src="{{ asset('images/hacker/school-logo.png') }}" alt="Logo DELTY">
+        </div>
+
+        <img class="img-fluid mb-3" src="{{ asset('images/hacker/soc.png') }}" alt="Výsledky DELTY v SOČ">
+
+        <h2>Kontakty</h2>
+        <p>
+            <b>Matouš Volf, "Ruce projektu"</b>,
+            <a href="mailto:volfma@delta-studenti.cz">volfma@delta-studenti.cz</a>:
+            Matouš je aktuálně student 3. ročníku. Vytváří kompletní vzdělávací obsah celého Pardubického hackera -
+            všechny příklady, automatizované testy, učební texty a odkazy na další studijní materiály. Spolupracuje na
+            technologickém vývoji webového portálu.
+        </p>
+        <p>
+            <b>Bc. Luboš Zápotočný, "Technologický mozek projektu"</b>,
+            <a href="mailto:zapotocnylubos@gmail.com">zapotocnylubos@gmail.com</a>:
+            Luboš aktuálně studuje 5. ročník FIT ČVUT a je absolventem školy DELTA. Je také jedním z lektorů a mentorů
+            talentového programu DELTA TopGun. Je zodpovědný za použité technologie Pardubického hackera a vede po
+            technické i didaktické stránce Matouše.
+        </p>
+        <p>
+            <b>Ing. Jiří Formánek, "Ideolog a sponzor projektu"</b>,
+            <a href="mailto:jiri.formanek@delta-skola.cz">jiri.formanek@delta-skola.cz</a>:
+            Je ředitelem školy DELTA. Pardubického hackera vymyslel, rozdal úkoly a stará se o shánění peněz na
+            realizaci celého projektu.
+        </p>
+        <h2>
+            Projekt finančně podporují
+        </h2>
+        <p>
+            <b>Ministerstvo školství mládeže a tělovýchovy, ČR</b> v rámci dotačního programu Podpora nadaných žáků
+            základních a středních škol v roce 2023,<br><b>Národní pedagogický institut, ČR</b> v rámci DIGIakcí.
+        </p>
+    </div>
+{% endblock %}

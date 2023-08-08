@@ -54,6 +54,11 @@ class PublicController extends BaseController
         ]);
     }
 
+    #[Route(path: '/authors', name: 'public_authors')]
+    public function authorsAction(): Response {
+        return $this->render('public/authors.html.twig');
+    }
+
     #[Route(path: '/scoreboard', name: 'public_scoreboard')]
     public function scoreboardAction(
         Request $request,
