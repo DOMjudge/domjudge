@@ -40,10 +40,6 @@ h3, h4, h5, h6 {
     text-shadow: black 0 4px 3px;
 }
 
-.hp-cover-details {
-
-}
-
 .hp-cover-details > .d-flex {
     gap: 30px !important;
 }
@@ -59,7 +55,11 @@ h3, h4, h5, h6 {
 
 .hp-cover-overlay {
     background-color: rgba(0, 0, 0, 0.5);
-    padding: 15px 0 !important;
+    padding: 15px 0;
+}
+
+.hp-cover-details {
+    padding: 25px 0;
 }
 
 .container {
