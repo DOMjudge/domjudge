@@ -5,9 +5,13 @@ h3, h4, h5, h6 {
 .hp-cover {
     margin-top: -15px;
 
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("/images/hacker/homepage-cover.jpg") no-repeat;
+    background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), url("/images/hacker/homepage-cover.png") no-repeat;
     background-size: cover;
-    background-position: center;
+    background-position: top;
+
+    @media (min-width: 1740px) {
+        background-position: top -50px center;
+    }
 
     color: white;
 }
@@ -17,11 +21,23 @@ h3, h4, h5, h6 {
 }
 
 .hp-cover-headline {
-    max-width: 800px !important;
+    max-width: 600px !important;
     margin: 80px 0;
 
-    font-size: 1.8em;
-    text-shadow: black 0 4px 2px;
+    @media (min-width: 992px) {
+        margin-right: 100px;
+    }
+
+    @media (min-width: 1200px) {
+        margin-right: 200px;
+    }
+
+    @media (min-width: 1560px) {
+        margin-right: 300px;
+    }
+
+    font-size: 1.5em;
+    text-shadow: black 0 4px 3px;
 }
 
 .hp-cover-details {
@@ -42,24 +58,20 @@ h3, h4, h5, h6 {
 }
 
 .hp-cover-overlay {
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: rgba(0, 0, 0, 0.5);
     padding: 15px 0 !important;
 }
 
 .container {
-    @media (min-width: 1320px) {
+    @media (min-width: 1380px) {
         max-width: 1320px;
     }
 
-    @media (min-width: 1500px) {
+    @media (min-width: 1560px) {
         max-width: 1500px;
     }
 
-    @media (min-width: 1680px) {
+    @media (min-width: 1740px) {
         max-width: 1680px;
-    }
-
-    @media (min-width: 1860px) {
-        max-width: 1860px;
     }
 }
