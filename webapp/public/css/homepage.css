@@ -9,10 +9,6 @@ h3, h4, h5, h6 {
     background-size: cover;
     background-position: top;
 
-    @media (min-width: 1740px) {
-        background-position: top -50px center;
-    }
-
     color: white;
 }
 
@@ -23,18 +19,6 @@ h3, h4, h5, h6 {
 .hp-cover-headline {
     max-width: 600px !important;
     margin: 80px 0;
-
-    @media (min-width: 992px) {
-        margin-right: 100px;
-    }
-
-    @media (min-width: 1200px) {
-        margin-right: 200px;
-    }
-
-    @media (min-width: 1560px) {
-        margin-right: 300px;
-    }
 
     font-size: 1.5em;
     text-shadow: black 0 4px 3px;
@@ -62,16 +46,40 @@ h3, h4, h5, h6 {
     padding: 25px 0;
 }
 
-.container {
-    @media (min-width: 1380px) {
+@media (min-width: 992px) {
+    .hp-cover-headline {
+        margin-right: 100px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .hp-cover-headline {
+        margin-right: 200px;
+    }
+}
+
+@media (min-width: 1380px) {
+    .container {
         max-width: 1320px;
     }
+}
 
-    @media (min-width: 1560px) {
+@media (min-width: 1560px) {
+    .container {
         max-width: 1500px;
     }
 
-    @media (min-width: 1740px) {
+    .hp-cover-headline {
+        margin-right: 300px;
+    }
+}
+
+@media (min-width: 1740px) {
+    .container {
         max-width: 1680px;
+    }
+
+    .hp-cover {
+        background-position: top -50px center;
     }
 }
