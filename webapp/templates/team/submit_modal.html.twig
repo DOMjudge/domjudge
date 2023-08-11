@@ -25,11 +25,7 @@
                     <div class="alert d-none" id="files_selected"></div>
                     {{ form_row(form.problem) }}
                     {{ form_row(form.language) }}
-                    <div class="form-group" data-entry-point>
-                        {{ form_label(form.entry_point) }}
-                        {{ form_widget(form.entry_point) }}
-                        {{ form_help(form.entry_point) }}
-                    </div>
+                    {{ form_row(form.entry_point) }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

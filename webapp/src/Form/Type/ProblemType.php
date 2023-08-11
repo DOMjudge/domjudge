@@ -25,14 +25,18 @@ class ProblemType extends AbstractExternalIdEntityType
         $builder->add('name', TextType::class, [
             'empty_data' => ''
         ]);
-        $builder->add('timelimit', NumberType::class);
+        $builder->add('timelimit', NumberType::class, [
+            'input_group_after' => 'sec',
+        ]);
         $builder->add('memlimit', IntegerType::class, [
             'required' => false,
             'help' => 'leave empty for default',
+            'input_group_after' => 'kB',
         ]);
         $builder->add('outputlimit', IntegerType::class, [
             'required' => false,
             'help' => 'leave empty for default',
+            'input_group_after' => 'kB',
         ]);
         $builder->add('problemtextFile', FileType::class, [
             'label' => 'Problem text',

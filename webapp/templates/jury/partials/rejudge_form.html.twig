@@ -72,19 +72,19 @@
                         <input type="hidden" name="repeat" id="repeat" value="1">
                         <input type="hidden" name="reason" id="reason" value="">
                     {% else %}
-                    <div class="form-check">
+                    <div class="form-check mb-3">
                         <label class="form-check-label" for="auto_apply">Automatically apply judging(s) when ready</label>
                         <input type="checkbox" class="form-check-input" id="auto_apply" name="auto_apply">
                     </div>
-                    <div id="rejudge-repeat" class="form-group">
+                    <div id="rejudge-repeat" class="mb-3">
                         <label for="repeat">Number of times to repeat this rejudging</label>
                         <input type="number" class="form-control" name="repeat" id="repeat" value="1" min="1" max="999" step="1">
                     </div>
-                    <div id="rejudge-reason" class="form-group">
+                    <div id="rejudge-reason" class="mb-3">
                         <label for="reason">Reason</label>
                         <input type="text" class="form-control" name="reason" id="reason" maxlength="255">
                     </div>
-                    <div id="rejudge-priority" class="form-group">
+                    <div id="rejudge-priority" class="mb-3">
                         <label for="priority">Priority</label>
                         <select class="form-control" name="priority" id="priority">
                             <option value="low">low</option>
