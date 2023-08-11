@@ -315,7 +315,7 @@
             type: bool
             default_value: false
             public: false
-            description: Whether to allow untrusted SSL certificates when reading from external contest sources.
+            description: Whether to allow untrusted TLS certificates when reading from external contest sources.
         -   name: external_judgement_types
             type: array_keyval
             key_placeholder: ID
