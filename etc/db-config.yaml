@@ -311,6 +311,11 @@
                 1: configuration data external
                 2: configuration and live data external
             docdescription: See :doc:`the chapter on running DOMjudge as a shadow system<shadow>` for more information.
+        -   name: external_contest_sources_allow_untrusted_certificates
+            type: bool
+            default_value: false
+            public: false
+            description: Whether to allow untrusted SSL certificates when reading from external contest sources.
         -   name: external_judgement_types
             type: array_keyval
             key_placeholder: ID
