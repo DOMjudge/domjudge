@@ -34,10 +34,10 @@
 
             if ($affiliationRadios.length) {
                 $affiliationRadios.on('change', function () {
-                    var $affiliationNameGroup = $('#user_registration_affiliationName').closest('.form-group');
-                    var $affiliationShortNameGroup = $('#user_registration_affiliationShortName').closest('.form-group');
-                    var $affiliationCountryGroup = $('#user_registration_affiliationCountry').closest('.form-group');
-                    var $existingAffiliationGroup = $('#user_registration_existingAffiliation').closest('.form-group');
+                    var $affiliationNameGroup = $('#user_registration_affiliationName').closest('div');
+                    var $affiliationShortNameGroup = $('#user_registration_affiliationShortName').closest('div');
+                    var $affiliationCountryGroup = $('#user_registration_affiliationCountry').closest('div');
+                    var $existingAffiliationGroup = $('#user_registration_existingAffiliation').closest('div');
                     var value = $affiliationRadios.filter(':checked').val();
 
                     switch (value) {
@@ -55,6 +55,7 @@
                             break;
                         case 'existing':
                             $affiliationNameGroup.hide();
+                            $affiliationShortNameGroup.hide();
                             $affiliationCountryGroup.hide();
                             $existingAffiliationGroup.show();
                             break;
