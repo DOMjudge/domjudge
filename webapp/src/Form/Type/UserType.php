@@ -2,6 +2,7 @@
 
 namespace App\Form\Type;
 
+use App\Controller\Jury\UserController;
 use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
@@ -50,6 +51,9 @@ class UserType extends AbstractExternalIdEntityType
         ]);
         $builder->add('email', EmailType::class, [
             'required' => false,
+            'attr' => [
+                'autocomplete' => 'user-email',
+            ],
         ]);
         $builder->add('plainPassword', PasswordType::class, [
             'required' => false,
@@ -97,6 +101,10 @@ class UserType extends AbstractExternalIdEntityType
                 'required' => false,
                 'label' => 'Password',
                 'help' => sprintf('Currently %s - fill to change. Any current login session of the user will be terminated.', $set),
+                'attr' => [
+                    'autocomplete' => 'new-password',
+                    'minlength' => UserController::MIN_PASSWORD_LENGTH,
+                ],
             ]);
         });
     }

@@ -67,6 +67,7 @@ class SubmitProblemType extends AbstractType
             'label' => 'Entry point',
             'required' => false,
             'help' => 'The entry point for your code.',
+            'row_attr' => ['data-entry-point' => ''],
             'constraints' => [
                 new Callback(function ($value, ExecutionContextInterface $context) {
                     /** @var Form $form */

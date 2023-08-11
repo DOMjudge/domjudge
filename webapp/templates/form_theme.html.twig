@@ -25,3 +25,18 @@
     <button type="{{ type|default('button') }}" {{ block('button_attributes') }}>{{ iconHtml|raw }}{{ label|trans({}, translation_domain) }}</button>
 {%- endblock button_widget %}
 
+{% block form_widget_simple %}
+    {% if input_group_before is defined or input_group_after is defined %}
+        <div class="input-group">
+    {% endif %}
+    {% if input_group_before is defined %}
+        <span class="input-group-text">{{ input_group_before | raw }}</span>
+    {% endif %}
+    {{- parent() -}}
+    {% if input_group_after is defined %}
+        <span class="input-group-text">{{ input_group_after | raw }}</span>
+    {% endif %}
+    {% if input_group_before is defined or input_group_after is defined %}
+        </div>
+    {% endif %}
+{% endblock %}

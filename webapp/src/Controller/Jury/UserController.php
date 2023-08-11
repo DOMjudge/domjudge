@@ -32,7 +32,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 #[Route(path: '/jury/users')]
 class UserController extends BaseController
 {
-    protected const MIN_PASSWORD_LENGTH = 10;
+    public const MIN_PASSWORD_LENGTH = 10;
 
     public function __construct(
         protected readonly EntityManagerInterface $em,

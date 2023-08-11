@@ -50,7 +50,9 @@ class LanguageType extends AbstractExternalIdEntityType
                 'No' => false,
             ],
         ]);
-        $builder->add('timeFactor', TextType::class);
+        $builder->add('timeFactor', TextType::class, [
+            'input_group_after' => '&times;',
+        ]);
         $builder->add('compileExecutable', EntityType::class, [
             'label' => 'Compile script',
             'class' => Executable::class,

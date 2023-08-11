@@ -39,16 +39,16 @@
                     data: data,
                     success: function (html) {
                         var $newProblems = $(html).find('#rejudging_problems');
-                        $newProblems.closest('.form-group').find('.invalid-feedback').remove();
-                        $('#rejudging_problems').closest('.form-group').replaceWith(
-                            $newProblems.closest('.form-group')
+                        $newProblems.closest('div').find('.invalid-feedback').remove();
+                        $('#rejudging_problems').closest('div').replaceWith(
+                            $newProblems.closest('div')
                         );
                         $newProblems.select2();
 
                         var $newTeams = $(html).find('#rejudging_teams');
-                        $newTeams.closest('.form-group').find('.invalid-feedback').remove();
-                        $('#rejudging_teams').closest('.form-group').replaceWith(
-                            $newTeams.closest('.form-group')
+                        $newTeams.closest('div').find('.invalid-feedback').remove();
+                        $('#rejudging_teams').closest('div').replaceWith(
+                            $newTeams.closest('div')
                         );
                         $newTeams.select2();
                     }
