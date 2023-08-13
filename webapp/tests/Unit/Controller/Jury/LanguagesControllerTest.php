@@ -70,6 +70,11 @@ class LanguagesControllerTest extends JuryControllerTestCase
                                                            'filterCompilerFiles' => '0'],
                                                           ['langid' => 'compVers',
                                                            'compilerVersionCommand' => 'unit -V'],
+                                                          ['langid' => 'runCompileCommand',
+                                                           'compilerCommand' => 'runc',
+                                                           'compilerCommandArgs' => '-a -b -c {files}',
+                                                           'runnerCommand' => 'run',
+                                                           'runnerCommandArgs' => '-g "$MAIN" {files}'],
                                                           ['langid' => 'runVers',
                                                            'runnerVersionCommand' => 'run -x |yes|tr "\n" "\`true\`"']];
     protected static array   $addEntitiesFailure       = ['Only alphanumeric characters and ._- are allowed' => [['langid' => '§$#`"'],
