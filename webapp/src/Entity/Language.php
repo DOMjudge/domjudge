@@ -132,13 +132,13 @@ class Language extends BaseApiEntity
     #[Serializer\Exclude]
     private ?string $runnerVersion = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Runner version command'])]
-    #[Serializer\Exclude]
-    private ?string $runnerVersionCommand = null;
-
     #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Compiler version command'])]
     #[Serializer\Exclude]
     private ?string $compilerVersionCommand = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Runner version command'])]
+    #[Serializer\Exclude]
+    private ?string $runnerVersionCommand = null;
 
     /**
      * @param Collection<int, Version> $versions
@@ -179,17 +179,6 @@ class Language extends BaseApiEntity
         return $this;
     }
 
-    public function getRunnerVersionCommand(): ?string
-    {
-        return $this->runnerVersionCommand;
-    }
-
-    public function setRunnerVersionCommand(?string $runnerVersionCommand): Language
-    {
-        $this->runnerVersionCommand = $runnerVersionCommand;
-        return $this;
-    }
-
     public function getCompilerVersionCommand(): ?string
     {
         return $this->compilerVersionCommand;
@@ -198,6 +187,17 @@ class Language extends BaseApiEntity
     public function setCompilerVersionCommand(?string $compilerVersionCommand): Language
     {
         $this->compilerVersionCommand = $compilerVersionCommand;
+        return $this;
+    }
+
+    public function getRunnerVersionCommand(): ?string
+    {
+        return $this->runnerVersionCommand;
+    }
+
+    public function setRunnerVersionCommand(?string $runnerVersionCommand): Language
+    {
+        $this->runnerVersionCommand = $runnerVersionCommand;
         return $this;
     }
 
