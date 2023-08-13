@@ -124,6 +124,22 @@ class Language extends BaseApiEntity
     #[Serializer\Exclude]
     private Collection $versions;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Compiler command'])]
+    #[Serializer\Exclude]
+    private ?string $compilerCommand = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Runner command'])]
+    #[Serializer\Exclude]
+    private ?string $runnerCommand = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Compiler command arguments'])]
+    #[Serializer\Exclude]
+    private ?string $compilerCommandArgs = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Runner command arguments'])]
+    #[Serializer\Exclude]
+    private ?string $runnerCommandArgs = null;
+
     #[ORM\Column(type: 'blobtext', nullable: true, options: ['comment' => 'Compiler version'])]
     #[Serializer\Exclude]
     private ?string $compilerVersion = null;
