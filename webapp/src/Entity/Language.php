@@ -217,7 +217,7 @@ class Language extends BaseApiEntity
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('compiler')]
     #[Serializer\Exclude(if:'object.getCompilerVersionCommand() == ""')]
-    public function getCompilerData(): ?array
+    public function getCompilerData(): array
     {
         $ret = [];
         if (!empty($this->getCompilerVersionCommand())) {
@@ -235,7 +235,7 @@ class Language extends BaseApiEntity
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('runner')]
     #[Serializer\Exclude(if:'object.getRunnerVersionCommand() == ""')]
-    public function getRunnerData(): ?array
+    public function getRunnerData(): array
     {
         $ret = [];
         if (!empty($this->getRunnerVersionCommand())) {
