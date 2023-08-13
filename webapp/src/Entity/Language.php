@@ -173,6 +173,50 @@ class Language extends BaseApiEntity
         return $this->versions;
     }
 
+    public function getCompilerCommand(): ?string
+    {
+        return $this->compilerCommand;
+    }
+
+    public function setCompilerCommand(?string $compilerCommand): Language
+    {
+        $this->compilerCommand = $compilerCommand;
+        return $this;
+    }
+
+    public function getRunnerCommand(): ?string
+    {
+        return $this->runnerCommand;
+    }
+
+    public function setRunnerCommand(?string $runnerCommand): Language
+    {
+        $this->runnerCommand = $runnerCommand;
+        return $this;
+    }
+
+    public function getCompilerCommandArgs(): ?string
+    {
+        return $this->compilerCommandArgs;
+    }
+
+    public function setCompilerCommandArgs(?string $compilerCommandArgs): Language
+    {
+        $this->compilerCommandArgs = $compilerCommandArgs;
+        return $this;
+    }
+
+    public function getRunnerCommandArgs(): ?string
+    {
+        return $this->runnerCommandArgs;
+    }
+
+    public function setRunnerCommandArgs(?string $runnerCommandArgs): Language
+    {
+        $this->runnerCommandArgs = $runnerCommandArgs;
+        return $this;
+    }
+
     public function getCompilerVersion(): ?string
     {
         return $this->compilerVersion;
@@ -232,10 +276,16 @@ class Language extends BaseApiEntity
      */
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('compiler')]
-    #[Serializer\Exclude(if:'object.getCompilerVersionCommand() == ""')]
+    #[Serializer\Exclude(if:'object.getCompilerVersionCommand() == "" && object.getCompilerCommand() == ""')]
     public function getCompilerData(): array
     {
         $ret = [];
+        if (!empty($this->getCompilerCommand())) {
+            $ret['command'] = $this->getCompilerCommand();
+            if (!empty($this->getCompilerCommandArgs())) {
+                $ret['args'] = $this->getCompilerCommandArgs();
+            }
+        }
         if (!empty($this->getCompilerVersionCommand())) {
             $ret['version_command'] = $this->getCompilerVersionCommand();
             if (!empty($this->getCompilerVersion())) {
@@ -250,10 +300,16 @@ class Language extends BaseApiEntity
      */
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('runner')]
-    #[Serializer\Exclude(if:'object.getRunnerVersionCommand() == ""')]
+    #[Serializer\Exclude(if:'object.getRunnerVersionCommand() == "" && object.getRunnerCommand() == ""')]
     public function getRunnerData(): array
     {
         $ret = [];
+        if (!empty($this->getRunnerCommand())) {
+            $ret['command'] = $this->getRunnerCommand();
+            if (!empty($this->getRunnerCommandArgs())) {
+                $ret['args'] = $this->getRunnerCommandArgs();
+            }
+        }
         if (!empty($this->getRunnerVersionCommand())) {
             $ret['version_command'] = $this->getRunnerVersionCommand();
             if (!empty($this->getRunnerVersion())) {
