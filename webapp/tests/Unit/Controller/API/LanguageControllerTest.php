@@ -17,12 +17,15 @@ class LanguageControllerTest extends BaseTestCase
             'entry_point_required' => false,
             'entry_point_name'     => null,
             'extensions'           => ['cpp', 'cc', 'cxx', 'c++'],
+            'compiler'             => ['version_command' => 'g++ --version']
         ],
         'java' => [
             'name'                 => 'Java',
             'entry_point_required' => true,
             'entry_point_name'     => 'Main class',
             'extensions'           => ['java'],
+            'compiler'             => ['version_command' => 'javac -version'],
+            'runner'               => ['version_command' => 'java -version'],
         ],
     ];
 
