@@ -78,6 +78,40 @@
                     </td>
                 </tr>
                     <tr>
+                        <th>Compiler command</th>
+                        <td>
+                            {% if language.compilerCommand %}
+                                <pre class="output_text" style="white-space:normal">
+                                    $ {{ language.compilerCommand }}
+                                    {% if language.compilerCommandArgs %}
+                                        {{ language.compilerCommandArgs }}
+                                    {% else %}
+                                        <p class="nodata">(No command arguments specified.)</p>
+                                    {% endif %}
+                                </pre>
+                            {% else %}
+                                <p class="nodata">No command specified.</p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Runner command</th>
+                        <td>
+                            {%- if language.runnerCommand -%}
+                                <pre class="output_text" style="white-space:normal">
+                                    $ {{ language.runnerCommand }}
+                                    {% if language.runnerCommandArgs %}
+                                        {{ language.runnerCommandArgs }}
+                                    {% else %}
+                                        <p class="nodata">(No command arguments specified.)</p>
+                                    {% endif %}
+                                </pre>
+                            {% else %}
+                                <p class="nodata">No command specified.</p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
                         <th>Compiler version</th>
                         <td>
                             {% if language.compilerVersionCommand %}
