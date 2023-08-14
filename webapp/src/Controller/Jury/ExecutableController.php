@@ -332,7 +332,7 @@ class ExecutableController extends BaseController
                 'isError' => false,
                 'showModalSubmit' => true,
                 'modalUrl' => $request->getRequestUri(),
-                'redirectUrl' => $this->generateUrl('jury_executable_edit_files', ['execId' => $execId]),
+                'redirectUrl' => $this->generateUrl('jury_executable', ['execId' => $execId]),
             ];
             if ($request->isXmlHttpRequest()) {
                 return $this->render('jury/delete_modal.html.twig', $data);
@@ -361,7 +361,7 @@ class ExecutableController extends BaseController
             $this->em->persist($immutableExecutable);
             $executable->setImmutableExecutable($immutableExecutable);
             $this->em->flush();
-            $redirectUrl = $this->generateUrl('jury_executable_edit_files', ['execId' => $execId]);
+            $redirectUrl = $this->generateUrl('jury_executable', ['execId' => $execId]);
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse(['url' => $redirectUrl]);
             }
