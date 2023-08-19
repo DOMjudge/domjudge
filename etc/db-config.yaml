@@ -433,3 +433,8 @@
             default_value: false
             public: false
             description: Is the Adminer Database Editor enabled?
+        -   name: google_analytics_tracking_id
+            type: string
+            default_value: ""
+            public: false
+            description: The tracking ID for Google Analytics.
