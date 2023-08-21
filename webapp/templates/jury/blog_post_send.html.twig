@@ -25,7 +25,8 @@
             <div class="flex-grow-1">
                 {{ form_row(form.thumbnail) }}
             </div>
-            <button type="button" class="btn btn-outline-secondary mb-3 ml-2" data-toggle="modal" data-target="#thumbnailInfoModal">
+            <button type="button" class="btn btn-outline-secondary mb-3 ml-2" data-toggle="modal"
+                    data-target="#thumbnailInfoModal">
                 <i class="fa-solid fa-circle-info"></i>
             </button>
         </div>
@@ -40,14 +41,19 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <p>Thumbnails always occupy a space with the aspect ratio of 3:2. If you upload an image with the same ratio, it fills the entire area:</p>
-                        <img class="img-fluid" src="{{ asset('images/help-jury/blog-thumbnail-3-to-2.png') }}" alt="a 3:2 thumbnail">
+                        <p>Thumbnails always occupy a space with the aspect ratio of 3:2. If you upload an image with
+                            the same ratio, it fills the entire area:</p>
+                        <img class="img-fluid" src="{{ asset('images/help-jury/blog-thumbnail-3-to-2.png') }}"
+                             alt="a 3:2 thumbnail">
 
-                        <p>Thumbnails are always fully visible and centered. If they're wide, white space gets added above and below:</p>
-                        <img class="img-fluid" src="{{ asset('images/help-jury/blog-thumbnail-wide.png') }}" alt="a wide thumbnail">
+                        <p>Thumbnails are always fully visible and centered. If they're wide, white space gets added
+                            above and below:</p>
+                        <img class="img-fluid" src="{{ asset('images/help-jury/blog-thumbnail-wide.png') }}"
+                             alt="a wide thumbnail">
 
                         <p>If narrow, space is added to the sides:</p>
-                        <img class="img-fluid" src="{{ asset('images/help-jury/blog-thumbnail-narrow.png') }}" alt="a narrow thumbnail">
+                        <img class="img-fluid" src="{{ asset('images/help-jury/blog-thumbnail-narrow.png') }}"
+                             alt="a narrow thumbnail">
                     </div>
                 </div>
             </div>
