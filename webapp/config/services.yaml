@@ -34,3 +34,11 @@ services:
     App\EventSubscriber\ContestIdSubscriber:
         arguments:
             $contestIdUrlActions: '%contest_id_url_actions%'
+
+    App\EventListener\AddContentSecurityPolicyListener:
+        arguments:
+            $cspConfig:
+                defaultSrc: "'self'"
+                styleSrc: "'self' 'unsafe-inline'"
+                scriptSrc: "'self' 'unsafe-inline'"
+                imgSrc: "'self' data:"
