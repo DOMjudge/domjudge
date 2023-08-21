@@ -10,7 +10,7 @@
 .blog-post-list-thumbnail, .blog-post-homepage-thumbnail {
     width: 100%;
     aspect-ratio: 3/2;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 @media (min-width: 768px) {
