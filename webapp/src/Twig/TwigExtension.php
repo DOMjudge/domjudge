@@ -157,7 +157,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'doc_links'                     => $this->dj->getDocLinks(),
             'allow_registration'            => $selfRegistrationCategoriesCount !== 0,
             'enable_ranking'                => $this->config->get('enable_ranking'),
-            'google_analytics_tracking_id'  => $this->config->get('google_analytics_tracking_id'),
+            'google_analytics_tracking_id'  => $this->authorizationChecker->isGranted('ROLE_ADMIN') ?
+                '' : $this->config->get('google_analytics_tracking_id'),
         ];
     }
 
