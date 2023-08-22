@@ -5,6 +5,8 @@
 
 {% block extrahead %}
     {{ parent() }}
+
+    {% include 'partials/google_analytics_script.html.twig' %}
     {{ macros.select2_extrahead() }}
     <link rel="stylesheet" href="{{ asset('style_login.css') }}">
 {% endblock %}

@@ -1,5 +1,11 @@
 {% extends "base.html.twig" %}
 
+{% block extrahead %}
+    {{ parent() }}
+
+    {% include 'partials/google_analytics_script.html.twig' %}
+{% endblock %}
+
 {% block title %}{{ title|default('DOMjudge') }}{% endblock %}
 
 {% block menu %}
