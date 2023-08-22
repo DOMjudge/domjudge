@@ -26,6 +26,18 @@
     {% for file in customAssetFiles('css') %}
         <link rel="stylesheet" href="{{ asset('css/custom/' ~ file) }}">
     {% endfor %}
+
+    {% if google_analytics_tracking_id != '' %}
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_analytics_tracking_id }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', '{{ google_analytics_tracking_id }}');
+        </script>
+    {% endif %}
 </head>
 <body{% if static is defined and static %} class="static"{% endif%}>
 {% block menu %}{% endblock %}
