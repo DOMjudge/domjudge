@@ -251,13 +251,10 @@ class RejudgingService
                     );
 
                     // Update caches.
-                    $rowIndex = $submission['cid'] . '-' . $submission['teamid'] . '-' . $submission['probid'];
-                    if (!isset($scoreboardRowsToUpdate[$rowIndex])) {
-                        $scoreboardRowsToUpdate[$rowIndex] = [
-                            'cid' => $submission['cid'],
-                            'teamid' => $submission['teamid'],
-                            'probid' => $submission['probid'],
-                        ];
+                    $cid = $submission['cid'];
+                    $probid = $submission['probid'];
+                    if (!isset($scoreboardRowsToUpdate[$cid][$probid])) {
+                        $scoreboardRowsToUpdate[$cid][$probid] = true;
                     }
 
                     // Update event log.
@@ -329,16 +326,35 @@ class RejudgingService
             }
 
             // Now update the scoreboard
-            foreach ($scoreboardRowsToUpdate as $item) {
-                ['cid' => $cid, 'teamid' => $teamid, 'probid' => $probid] = $item;
+            foreach ($scoreboardRowsToUpdate as $cid => $probids) {
                 $contest = $this->em->getRepository(Contest::class)->find($cid);
-                $team = $this->em->getRepository(Team::class)->find($teamid);
-                $problem = $this->em->getRepository(Problem::class)->find($probid);
-                $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+                $queryBuilder = $this->em->createQueryBuilder()
+                    ->from(Team::class, 't')
+                    ->select('t')
+                    ->orderBy('t.teamid');
+                if (!$contest->isOpenToAllTeams()) {
+                    $queryBuilder
+                        ->leftJoin('t.contests', 'c')
+                        ->join('t.category', 'cat')
+                        ->leftJoin('cat.contests', 'cc')
+                        ->andWhere('c.cid = :cid OR cc.cid = :cid')
+                        ->setParameter('cid', $contest->getCid());
+                }
+                /** @var Team[] $teams */
+                $teams = $queryBuilder->getQuery()->getResult();
+                foreach ($teams as $team) {
+                    foreach ($probids as $probid) {
+                        $problem = $this->em->getRepository(Problem::class)->find($probid);
+                        $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+                    }
+                    $this->scoreboardService->updateRankCache($contest, $team);
+                }
             }
         }
 
-        $progressReporter(100, $log);
+        if ($progressReporter !== null) {
+            $progressReporter(100, $log);
+        }
 
         // Update the rejudging itself.
         /** @var Rejudging $rejudging */
