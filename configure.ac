@@ -217,7 +217,7 @@ AX_WITH_COMMENT(7,[      ])
 
 # {{{ Directory for systemd unit files
 
-PKG_PROG_PKG_CONFIG
+PKG_PROG_PKG_CONFIG()
 AC_ARG_WITH([systemdsystemunitdir],
      [AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files])],,
      [with_systemdsystemunitdir=auto])
