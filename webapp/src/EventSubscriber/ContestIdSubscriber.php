@@ -45,37 +45,51 @@ class ContestIdSubscriber implements EventSubscriberInterface
 
     public function onKernelResponse(ResponseEvent $event)
     {
-        if (!$event->getRequest()->attributes->get('check_cid_query')) {
+        $request = $event->getRequest();
+        $requestUri = new Uri($request->getRequestUri());
+
+        if (!$request->attributes->get('check_cid_query')) {
             return;
         }
 
-        $cid = (int)$event->getRequest()->query->get('cid');
-        $currentContest = $this->dj->getCurrentContest();
+        $queryParameters = [];
+        if (!empty($requestUri->getQuery())) {
+            parse_str($requestUri->getQuery(), $existingQueryParameters);
+            $queryParameters = array_merge($existingQueryParameters, $queryParameters);
+        }
+
+        $cid = (int)$request->query->get('cid');
+
+        $teamId = $this->dj->getUser() ? $this->dj->getUser()->getTeamId() : -1;
+        $currentContest = $this->dj->getCurrentContest($teamId);
 
         if (!$cid) {
             if (!$currentContest) {
                 return;
             }
 
-            $requestUri = new Uri($event->getRequest()->getRequestUri());
-
-            $queryParameters = ['cid' => $currentContest->getCid()];
-            if (!empty($requestUri->getQuery())) {
-                parse_str($requestUri->getQuery(), $existingQueryParameters);
-                $queryParameters = array_merge($existingQueryParameters, $queryParameters);
-            }
+            $queryParameters['cid'] = $currentContest->getCid();
             $responseUri = $requestUri->withQuery(http_build_query($queryParameters));
 
             $event->setResponse(new RedirectResponse((string)$responseUri));
             return;
         }
 
-        if (!$currentContest || $cid != $currentContest->getCid()) {
-            if (!$this->dj->getContest($cid)) {
-                return;
-            }
+        if (!$this->dj->getContest($cid) ||
+            ($currentContest && $currentContest->getCid() != $request->cookies->get('domjudge_cid'))) {
+            $queryParameters['cid'] = $currentContest->getCid();
+            $responseUri = $requestUri->withQuery(http_build_query($queryParameters));
 
-            $response = new RedirectResponse($event->getRequest()->getRequestUri());
+            $response = new RedirectResponse((string)$responseUri);
+
+            $response->headers->setCookie(new Cookie('domjudge_cid', (string)$currentContest->getCid()));
+
+            $event->setResponse($response);
+            return;
+        }
+
+        if (!$currentContest || $cid != $currentContest->getCid()) {
+            $response = new RedirectResponse($request->getRequestUri());
             $response->headers->setCookie(new Cookie('domjudge_cid', (string)$cid));
 
             $event->setResponse($response);
