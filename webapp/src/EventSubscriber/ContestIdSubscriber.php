@@ -63,11 +63,11 @@ class ContestIdSubscriber implements EventSubscriberInterface
         $teamId = $this->dj->getUser() ? $this->dj->getUser()->getTeamId() : -1;
         $currentContest = $this->dj->getCurrentContest($teamId);
 
-        if (!$cid) {
-            if (!$currentContest) {
-                return;
-            }
+        if (!$currentContest) {
+            return;
+        }
 
+        if (!$cid) {
             $queryParameters['cid'] = $currentContest->getCid();
             $responseUri = $requestUri->withQuery(http_build_query($queryParameters));
 
@@ -76,7 +76,8 @@ class ContestIdSubscriber implements EventSubscriberInterface
         }
 
         if (!$this->dj->getContest($cid) ||
-            ($currentContest && $currentContest->getCid() != $request->cookies->get('domjudge_cid'))) {
+            $currentContest->getCid() != $request->cookies->get('domjudge_cid')) {
+
             $queryParameters['cid'] = $currentContest->getCid();
             $responseUri = $requestUri->withQuery(http_build_query($queryParameters));
 
@@ -88,7 +89,7 @@ class ContestIdSubscriber implements EventSubscriberInterface
             return;
         }
 
-        if (!$currentContest || $cid != $currentContest->getCid()) {
+        if ($cid != $currentContest->getCid()) {
             $response = new RedirectResponse($request->getRequestUri());
             $response->headers->setCookie(new Cookie('domjudge_cid', (string)$cid));
 
