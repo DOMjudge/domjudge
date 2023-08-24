@@ -57,10 +57,16 @@ class ContestIdSubscriber implements EventSubscriberInterface
                 return;
             }
 
-            $uri = new Uri($event->getRequest()->getRequestUri());
-            $uri = UriNormalizer::normalize($uri->withQuery('cid=' . $currentContest->getCid()));
+            $requestUri = new Uri($event->getRequest()->getRequestUri());
 
-            $event->setResponse(new RedirectResponse((string)$uri));
+            $queryParameters = ['cid' => $currentContest->getCid()];
+            if (!empty($requestUri->getQuery())) {
+                parse_str($requestUri->getQuery(), $existingQueryParameters);
+                $queryParameters = array_merge($existingQueryParameters, $queryParameters);
+            }
+            $responseUri = $requestUri->withQuery(http_build_query($queryParameters));
+
+            $event->setResponse(new RedirectResponse((string)$responseUri));
             return;
         }
 
