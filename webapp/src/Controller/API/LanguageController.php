@@ -65,7 +65,7 @@ class LanguageController extends AbstractRestController
     }
 
     /**
-     * Get the given language for this contest.
+     * Update the executable of a language.
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_ADMIN')]
