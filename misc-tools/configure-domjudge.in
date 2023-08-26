@@ -97,6 +97,17 @@ if os.path.exists('config.json'):
 else:
     print('Need a "config.json" to update general DOMjudge configuration.')
 
+
+if os.path.exists('executables'):
+    executables = []
+    for file in os.listdir('executables'):
+        if file.endswith(".zip"):
+            executables.append(file[:-4])
+    if executables and dj_utils.confirm('Upload language executables (found: ' + ','.join(executables) + ')?', False):
+        for langid in executables:
+            dj_utils.upload_file(f'languages/{langid}/executable', 'executable', f'executables/{langid}.zip')
+
+
 if os.path.exists('languages.json'):
     print('Comparing DOMjudge\'s language configuration:')
     with open('languages.json') as langConfigFile:
