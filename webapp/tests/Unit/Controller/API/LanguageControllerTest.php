@@ -33,7 +33,7 @@ class LanguageControllerTest extends BaseTestCase
         EnableJavaEntrypointFixture::class,
     ];
 
-    public function testUpdateExecutable() {
+    public function testUpdateExecutable(): void {
         // First test the before state.
         $response = $this->verifyApiJsonResponse('GET', '/languages/java', 200, 'admin');
         $before_hash = 'fd73586c70ec910b9dff6f474bf85704';
