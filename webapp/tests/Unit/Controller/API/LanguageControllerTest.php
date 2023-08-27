@@ -34,10 +34,9 @@ class LanguageControllerTest extends BaseTestCase
     ];
 
     public function testUpdateExecutable(): void {
-        // First test the before state.
+        // First retrieve the before state.
         $response = $this->verifyApiJsonResponse('GET', '/languages/java', 200, 'admin');
-        $before_hash = 'fd73586c70ec910b9dff6f474bf85704';
-        static::assertEquals($before_hash, $response['compile_executable_hash']);
+        $before_hash = $response['compile_executable_hash'];
 
         // Create a ZIP file from some dummy content.
         $files = [
@@ -64,5 +63,8 @@ class LanguageControllerTest extends BaseTestCase
         $response = $this->verifyApiJsonResponse('GET', '/languages/java', 200, 'admin');
         $after_hash = '1be13faf2603b19c8bf5a398155a6d3b';
         static::assertEquals($after_hash, $response['compile_executable_hash']);
+
+        // Make sure it has changed.
+        static::assertNotEquals($before_hash, $after_hash);
     }
 }
