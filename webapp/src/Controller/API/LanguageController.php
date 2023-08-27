@@ -2,6 +2,8 @@
 
 namespace App\Controller\API;
 
+use App\Entity\ExecutableFile;
+use App\Entity\ImmutableExecutable;
 use App\Entity\Language;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
@@ -10,6 +12,9 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use ZipArchive;
 
 #[Rest\Route('/')]
 #[OA\Tag(name: 'Languages')]
@@ -57,6 +62,64 @@ class LanguageController extends AbstractRestController
     public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);
+    }
+
+    /**
+     * Update the executable of a language.
+     * @throws NonUniqueResultException
+     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Rest\Post('languages/{id}/executable')]
+    #[OA\Response(
+        response: 200,
+        description: 'Update the executable for a given language.',
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
+    public function updateExecutableActions(Request $request, string $id): void
+    {
+        $language = $this->em->getRepository(Language::class)->find($id);
+        if (!$language) {
+            throw new BadRequestHttpException("Unknown language '$id'.");
+        }
+        $file = $request->files->get('executable');
+        if (empty($file)) {
+            throw new BadRequestHttpException('executable file missing');
+        }
+        $zip = $this->dj->openZipFile($file->getRealPath());
+
+        $files = [];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $filename = $zip->getNameIndex($i);
+
+            $content = $zip->getFromName($filename);
+            if (empty($content)) {
+                // Empty file or directory, ignore.
+                continue;
+            }
+            $idx = count($files);
+            $isExecutable = false;
+            $opsys = $attr = 0;
+            if ($zip->getExternalAttributesIndex($i, $opsys, $attr)
+                && $opsys==ZipArchive::OPSYS_UNIX) {
+                $attr = ($attr >> 16) & 0777;
+                $isExecutable = ($attr & 0o100) == 0o100;
+            }
+            $executableFile = new ExecutableFile();
+            $executableFile
+                ->setRank($idx)
+                ->setIsExecutable($isExecutable)
+                ->setFilename($filename)
+                ->setFileContent($content);
+            $this->em->persist($executableFile);
+            $files[] = $executableFile;
+        }
+
+        $immutableExecutable = new ImmutableExecutable($files);
+        $this->em->persist($immutableExecutable);
+
+        $language->getCompileExecutable()->setImmutableExecutable($immutableExecutable);
+        $this->em->flush();
+        $this->dj->auditlog('executable', $language->getLangid(), 'updated');
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder
