@@ -385,6 +385,13 @@ function fetch_executable_internal(
                     'java' => ['java'],
                     'py' => ['py'],
                 ];
+                $domserver_languages = dj_json_decode(request('languages', 'GET'));
+                foreach ($domserver_languages as $language) {
+                    $id = $language['id'];
+                    if (key_exists($id, $langexts)) {
+                        $langexts[$id] = $language['extensions'];
+                    }
+                }
                 $buildscript = "#!/bin/sh\n\n";
                 $execlang = false;
                 $source = "";
