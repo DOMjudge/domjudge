@@ -85,7 +85,7 @@ function sendNotification(title, options = {})
     if ( getCookie('domjudge_notify')==1 ) {
         var not = new Notification(title, options);
         if ( link!==null ) {
-            not.onclick = function() { 
+            not.onclick = function() {
                 window.location.href = link;
             };
         }
@@ -435,10 +435,14 @@ function processAjaxResponse(jqXHR, data) {
         window.location = jqXHR.getResponseHeader('X-Login-Page');
     } else {
         var newCurrentContest = jqXHR.getResponseHeader('X-Current-Contest');
-        var dataCurrentContest = $('[data-current-contest]').data('current-contest').toString();
+        var dataCurrentContest = $('[data-current-contest]').data('current-contest');
+        var refreshStop = $('[data-ajax-refresh-stop]').data('ajax-refresh-stop');
 
-        // If the contest ID changed from another tab, reload or whole page
-        if (dataCurrentContest !== undefined && newCurrentContest !== dataCurrentContest) {
+        // Reload the whole page if
+        // - we were signaled to stop refreshing, or
+        // - if the contest ID changed from another tab.
+        if ((refreshStop !== undefined && refreshStop.toString() === "1")
+            || (dataCurrentContest !== undefined && newCurrentContest !== dataCurrentContest.toString())) {
             window.location.reload();
             return;
         }
