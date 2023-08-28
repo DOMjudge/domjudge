@@ -436,12 +436,13 @@ function processAjaxResponse(jqXHR, data) {
     } else {
         var newCurrentContest = jqXHR.getResponseHeader('X-Current-Contest');
         var dataCurrentContest = $('[data-current-contest]').data('current-contest');
-        var refreshStop = $('[data-ajax-refresh-stop]');
+        var refreshStop = $('[data-ajax-refresh-stop]').data('ajax-refresh-stop');
 
         // Reload the whole page if
         // - we were signaled to stop refreshing, or
         // - if the contest ID changed from another tab.
-        if ("0" in refreshStop || (dataCurrentContest !== undefined && newCurrentContest !== dataCurrentContest.toString())) {
+        if ((refreshStop !== undefined && refreshStop.toString() === "1")
+            || (dataCurrentContest !== undefined && newCurrentContest !== dataCurrentContest.toString())) {
             window.location.reload();
             return;
         }
