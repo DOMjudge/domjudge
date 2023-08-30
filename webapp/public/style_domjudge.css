@@ -630,3 +630,8 @@ blockquote {
     padding-left: .5em;
     color: darkgrey;
 }
+
+.category-best {
+    margin-right: 2em;
+    font-weight: normal;
+}
