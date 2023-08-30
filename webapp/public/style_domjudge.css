@@ -612,6 +612,18 @@ tr.ignore td, td.ignore, span.ignore {
     background-color: #05264c;
 }
 
+.scoreboard .problem-summary {
+    text-align: left;
+}
+
+.scoreboard .summaryline {
+    border-top: 2px solid black;
+}
+
+.summaryline .problem-summary-title {
+    font-size:90%;
+}
+
 .select_readonly {
     background-color: #e9ecef !important;
     opacity: 1;
@@ -649,4 +661,23 @@ blockquote {
 
 .right {
     text-align: right;
+
+/* Disable the sticky footer on mobile */
+@media only screen and (min-width: 600px) {
+    .scoreheader th {
+	z-index: 100;
+    }
+
+    .summaryline td {
+        position: sticky;
+        bottom: 0;
+        box-shadow: 0 -1px 0 0 black,
+                    0  1px 0 0 black;
+        background: var(--background-color);
+    }
+
+    tbody.scoreboard-sortorder-body {
+        position: relative;
+        z-index: 50;
+    }
 }
