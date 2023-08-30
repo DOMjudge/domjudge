@@ -327,6 +327,7 @@ function fetch_executable_internal(
         $execid,
         $hash
     ]);
+    global $langexts;
     $execdeploypath  = $execdir . '/.deployed';
     $execbuilddir    = $execdir . '/build';
     $execbuildpath   = $execbuilddir . '/build';
@@ -379,12 +380,6 @@ function fetch_executable_internal(
                 $do_compile = false;
             } else {
                 // detect lang and write build file
-                $langexts = [
-                    'c' => ['c'],
-                    'cpp' => ['cpp', 'C', 'cc'],
-                    'java' => ['java'],
-                    'py' => ['py'],
-                ];
                 $buildscript = "#!/bin/sh\n\n";
                 $execlang = false;
                 $source = "";
@@ -641,6 +636,21 @@ foreach ($endpoints as $id => $endpoint) {
 
 // Populate the DOMjudge configuration initially
 djconfig_refresh();
+
+// Prepopulate default language extensions, afterwards update based on domserver config
+$langexts = [
+    'c' => ['c'],
+    'cpp' => ['cpp', 'C', 'cc'],
+    'java' => ['java'],
+    'py' => ['py'],
+];
+$domserver_languages = dj_json_decode(request('languages', 'GET'));
+foreach ($domserver_languages as $language) {
+    $id = $language['id'];
+    if (key_exists($id, $langexts)) {
+        $langexts[$id] = $language['extensions'];
+    }
+}
 
 // Constantly check API for unjudged submissions
 $endpointIDs = array_keys($endpoints);
