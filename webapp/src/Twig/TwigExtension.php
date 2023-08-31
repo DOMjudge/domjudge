@@ -68,7 +68,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     {
         return [
             new TwigFilter('printtimediff', $this->printtimediff(...)),
-            new TwigFilter('printremainingminutes', $this->printremainingminutes(...)),
+            new TwigFilter('printelapsedminutes', $this->printelapsedminutes(...)),
             new TwigFilter('printtime', $this->printtime(...)),
             new TwigFilter('printHumanTimeDiff', $this->printHumanTimeDiff(...)),
             new TwigFilter('printtimeHover', $this->printtimeHover(...), ['is_safe' => ['html']]),
@@ -162,15 +162,15 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return Utils::printtimediff($start, $end);
     }
 
-    public function printremainingminutes(float $start, float $end): string
+    public function printelapsedminutes(float $start, float $end): string
     {
-        $minutesRemaining = floor(($end - $start)/60);
-        if ($minutesRemaining < 1) {
-            return 'less than 1 minute to go';
-        } elseif ($minutesRemaining == 1) {
-            return '1 minute to go';
+        $minutesElapsed = floor(($end - $start)/60);
+        if ($minutesElapsed < 1) {
+            return 'started less than 1 minute ago';
+        } elseif ($minutesElapsed == 1) {
+            return 'started 1 minute ago';
         } else {
-            return $minutesRemaining . ' minutes to go';
+            return 'started' . $minutesElapsed . ' minutes ago';
         }
     }
 
