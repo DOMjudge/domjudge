@@ -33,7 +33,7 @@
                     contest over, waiting for results
                 {% elseif static %}
                     {% set now = 'now'|date('U') %}
-                    {{ now | printremainingminutes(current_contest.endtime) }}
+                    {{ current_contest.starttime | printelapsedminutes(now) }}
                 {% else %}
                     {% if current_contest.freezeData.started %}
                         started:
