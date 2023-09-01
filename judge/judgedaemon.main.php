@@ -405,26 +405,38 @@ function fetch_executable_internal(
                 if ($execlang === false) {
                     return [null, "executable must either provide an executable file named 'build' or a C/C++/Java or Python file.", null];
                 }
+                // Gather compiler & arguments
+                $language_config = dj_json_decode(request('languages/' . $execlang, 'GET'));
                 switch ($execlang) {
                     case 'c':
-                        $buildscript .= "gcc -Wall -O2 -std=gnu11 $source -o run -lm\n";
+                        $compiler = $language_config['compiler']['command'] ?? 'gcc';
+                        $flags = $language_config['compiler']['args'] ?? '-Wall -O2 -std=gnu11';
+                        $buildscript .= "$compiler $flags $source -o run -lm\n";
                         break;
                     case 'cpp':
-                        $buildscript .= "g++ -Wall -O2 -std=gnu++17 $source -o run\n";
+                        $compiler = $language_config['compiler']['command'] ?? 'g++';
+                        $flags = $language_config['compiler']['args'] ?? '-Wall -O2 -std=gnu++17';
+                        $buildscript .= "$compiler $flags $source -o run\n";
                         break;
                     case 'java':
-                        $buildscript .= "javac -cp . -d . $source\n";
+                        $compiler = $language_config['compiler']['command'] ?? 'javac';
+                        $flags = $language_config['compiler']['args'] ?? '';
+                        $runner = $language_config['runner']['command'] ?? 'java';
+                        $runner_flags = $language_config['runner']['args'] ?? '';
+                        $buildscript .= "$compiler $flags -cp . -d . $source\n";
                         $buildscript .= "echo '#!/bin/sh' > run\n";
                         // no main class detection here
                         $buildscript .= "echo 'COMPARE_DIR=\$(dirname \"\$0\")' >> run\n";
                         $mainClass = basename($unescapedSource, '.java');
-                        $buildscript .= "echo 'java -cp \"\$COMPARE_DIR\" $mainClass \"\\\$@\"' >> run\n";
+                        $buildscript .= "echo '$runner $runner_flags -cp \"\$COMPARE_DIR\" $mainClass \"\\\$@\"' >> run\n";
                         $buildscript .= "chmod +x run\n";
                         break;
                     case 'py':
+                        $runner = $language_config['runner']['command'] ?? 'pypy3';
+                        $flags = $language_config['runner']['args'] ?? '';
                         $buildscript .= "echo '#!/bin/sh' > run\n";
                         $buildscript .= "echo 'COMPARE_DIR=\$(dirname \"\$0\")' >> run\n";
-                        $buildscript .= "echo 'python3 \$COMPARE_DIR/$source' \"\\\$@\" >> run\n";
+                        $buildscript .= "echo '$runner $flags \$COMPARE_DIR/$source' \"\\\$@\" >> run\n";
                         $buildscript .= "chmod +x run\n";
                         break;
                 }
