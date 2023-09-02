@@ -230,10 +230,12 @@ class SubmissionController extends BaseController
                 ->from(JudgeTask::class, 'jt', 'jt.jobid')
                 ->select('jt')
                 ->andWhere('jt.jobid IN (:jobIds)')
+                ->andWhere('jt.type = :type')
                 ->setParameter(
                     'jobIds',
                     array_map(static fn(Judging $judging) => $judging->getJudgingid(), $judgings)
                 )
+                ->setParameter('type', JudgeTaskType::JUDGING_RUN)
                 ->getQuery()
                 ->getResult();
             $timelimits = array_map(function (JudgeTask $task) {
