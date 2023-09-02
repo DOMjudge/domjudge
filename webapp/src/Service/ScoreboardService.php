@@ -953,7 +953,7 @@ class ScoreboardService
             $queryBuilder->andWhere('tc.visible = 1');
             if ($show_filter === self::SHOW_TEAM_AFTER_LOGIN) {
                 $queryBuilder
-                    ->join('t.users', 'u', Join::WITH, 'u.last_login IS NOT NULL');
+                    ->join('t.users', 'u', Join::WITH, 'u.last_login IS NOT NULL OR u.last_api_login IS NOT NULL');
             } elseif ($show_filter === self::SHOW_TEAM_AFTER_SUBMIT) {
                 $queryBuilder
                     ->join('t.submissions', 's', Join::WITH, 's.contest = :cid')
