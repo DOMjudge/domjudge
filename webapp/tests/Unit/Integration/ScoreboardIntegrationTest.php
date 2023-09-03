@@ -65,11 +65,12 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
         // Default configuration values:
         $this->configValues = [
-            'verification_required' => false,
-            'compile_penalty'       => false,
-            'penalty_time'          => 20,
-            'score_in_seconds'      => false,
-            'data_source'           => 0,
+            'verification_required'    => false,
+            'compile_penalty'          => false,
+            'penalty_time'             => 20,
+            'score_in_seconds'         => false,
+            'data_source'              => 0,
+            'show_teams_on_scoreboard' => 0,
         ];
 
         $this->config = $this->createMock(ConfigurationService::class);

@@ -32,6 +32,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ScoreboardService
 {
+    final public const SHOW_TEAM_ALWAYS = 0;
+    final public const SHOW_TEAM_AFTER_LOGIN = 1;
+    final public const SHOW_TEAM_AFTER_SUBMIT = 2;
+
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
@@ -944,8 +948,17 @@ class ScoreboardService
                 ->setParameter('cid', $contest->getCid());
         }
 
+        $show_filter = $this->config->get('show_teams_on_scoreboard');
         if (!$jury) {
             $queryBuilder->andWhere('tc.visible = 1');
+            if ($show_filter === self::SHOW_TEAM_AFTER_LOGIN) {
+                $queryBuilder
+                    ->join('t.users', 'u', Join::WITH, 'u.last_login IS NOT NULL OR u.last_api_login IS NOT NULL');
+            } elseif ($show_filter === self::SHOW_TEAM_AFTER_SUBMIT) {
+                $queryBuilder
+                    ->join('t.submissions', 's', Join::WITH, 's.contest = :cid')
+                    ->setParameter('cid', $contest->getCid());
+                }
         }
 
         if ($filter) {
