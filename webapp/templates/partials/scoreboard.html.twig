@@ -140,8 +140,10 @@
                             <label for="scoreboard-filter-country">Countries</label>
                             <select id="scoreboard-filter-country" class="form-control me-2" multiple size="8" name="countries[]">
                                 {% for country in filterValues.countries %}
-                                    <option {% if country in scoreFilter.countries %}selected{% endif %}
-                                            value="{{ country }}">{{ alpha3_countries[country] }}</option>
+                                    {% if country is not empty %}
+                                        <option {% if country in scoreFilter.countries %}selected{% endif %}
+                                                value="{{ country }}">{{ alpha3_countries[country] }}</option>
+                                    {% endif %}
                                 {% endfor %}
                             </select>
                             </div>
