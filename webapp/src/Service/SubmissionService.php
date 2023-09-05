@@ -149,6 +149,14 @@ class SubmissionService
                 $queryBuilder->andWhere('j.result IS NULL OR j.endtime IS NULL');
             }
         }
+        if (isset($restrictions['judging'])) {
+            dump($restrictions);
+            if ($restrictions['judging']) {
+                $queryBuilder->andWhere('j.starttime IS NOT NULL AND j.result IS NULL');
+            } else {
+                $queryBuilder->andWhere('j.starttime IS NULL OR j.result IS NOT NULL');
+            }
+        }
 
         if (isset($restrictions['externally_judged'])) {
             if ($restrictions['externally_judged']) {

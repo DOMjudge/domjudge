@@ -72,7 +72,7 @@ class SubmissionController extends BaseController
         #[MapQueryParameter(name: 'view')]
         ?string $viewFromRequest = null,
     ): Response {
-        $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'all'];
+        $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'judging', 4 => 'all'];
         $view      = 0;
         if (($submissionViewCookie = $this->dj->getCookie('domjudge_submissionview')) &&
             isset($viewTypes[$submissionViewCookie])) {
@@ -100,6 +100,9 @@ class SubmissionController extends BaseController
         }
         if ($viewTypes[$view] == 'unjudged') {
             $restrictions['judged'] = 0;
+        }
+        if ($viewTypes[$view] == 'judging') {
+            $restrictions['judging'] = 1;
         }
 
         $contests = $this->dj->getCurrentContests();
