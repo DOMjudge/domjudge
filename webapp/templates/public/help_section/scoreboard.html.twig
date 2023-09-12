@@ -1,0 +1,21 @@
+{% extends 'public/help_section/base.html.twig' %}
+
+{% set id = 'Scoreboard' %}
+
+{% block header %}
+    Výsledková tabulka
+{% endblock %}
+
+{% block body %}
+    <p>
+        Výsledky své a ostatních účastníků najdete na stránce Scoreboard. Skóre při vyřešení úlohy se rovná počtu minut
+        uběhlých od začátku soutěže. Za každý neúspěšný pokus se přičítá penaltový čas. Výsledky jsou tedy řazeny podle
+        počtu vyřešených úloh sestupně a poté podle skóre vzestupně.
+    </p>
+    <p>
+        Řádky tabulky označují účastníky a sloupce úlohy. Jednotlivé buňky obsahují skóre účastníka v dané úloze (bez
+        penalty) a pod ním počet pokusů. Barva značí stav hodnocení - vizte legendu v levém dolním rohu. Ve sloupci
+        "score" se nachází počet vyřešených úloh a celkové skóre i s penaltou.
+    </p>
+    <img src="{{ asset('images/help/scoreboard.png') }}" alt="Zadání" class="mb-3 rounded-3 img-fluid help-img">
+{% endblock %}
