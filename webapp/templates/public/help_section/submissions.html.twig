@@ -18,6 +18,35 @@
     </p>
     <img src="{{ asset('images/help/submissions.png') }}" alt="Výsledky odevzdání"
          class="mb-3 rounded-3 img-fluid help-img">
+    <p>Chybová hláška může nabýt následujících hodnot:</p>
+    <ul>
+        <li>
+            COMPILER-ERROR: Při kompilaci vašeho programu došlo k chybě. Jak si prohlédnout přesnou chybu je ukázáno
+            níže.
+        </li>
+        <li>
+            TIMELIMIT: Program běžel déle, než je maximální povolený čas pro tuto úlohu, proto byl přerušen. To může
+            znamenat, že váš program visí ve smyčce nebo že vaše řešení není dostatečně efektivní.
+        </li>
+        <li>
+            RUN-ERROR: Během provádění vašeho programu došlo k chybě. To může mít různé příčiny, například dělení nulou,
+            indexování pole za jeho hranicemi, pokus o použít více paměti, než je limit apod.
+        </li>
+        <li>
+            NO-OUTPUT: Program nevytvořil žádný výstup.
+        </li>
+        <li>
+            OUTPUT-LIMIT: Váš program vygeneroval více výstupu, než je povolený limit.
+        </li>
+        <li>
+            WRONG-ANSWER: Odpověď vašeho řešení byla nesprávná. To se může stát jednoduše chybou ve vašem řešení.
+            Zároveň však musí výstup přesně odpovídat formě uvedené v zadání.
+        </li>
+        <li>
+            TOO-LATE: Své řešení jste neodeslali včas před ukončením soutěže. Je uloženo, ale nebude již zpracováno.
+        </li>
+    </ul>
+
     <p>
         Vězte, že vzorové vstupy <span class="font-weight-bold">neobsahují</span> všechny testy, kterými řešení musí
         projít.
@@ -28,4 +57,8 @@
 
     <img src="{{ asset('images/help/diff-output.png') }}" alt="Výsledky odevzdání"
          class="mb-3 rounded-3 img-fluid help-img">
+
+    <p>
+        Na obrázku je vidět případ, kdy měl program vypsat <code>up</code> a nesprávně vypsal <code>down</code>.
+    </p>
 {% endblock %}
