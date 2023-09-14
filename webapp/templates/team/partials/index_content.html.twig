@@ -42,8 +42,15 @@
             {% endif %}
 
             <div class="m-1">
-                <a href="{{ path('team_clarification_add') }}" class="btn btn-secondary btn-sm" data-ajax-modal data-ajax-modal-after="initModalClarificationPreviewAdd">
-                    request clarification
+                <hr>
+
+                <p>
+                    Tato sekce slouží ke komunikaci v případě komplikací, nejasností nebo dotazů. Vizte sekci Komunikace
+                    v <a href="{{ path('public_help') }}">nápovědě</a>. Napište nám:
+                </p>
+
+                <a href="{{ path('team_clarification_add') }}" class="btn btn-primary" data-ajax-modal data-ajax-modal-after="initModalClarificationPreviewAdd">
+                    <i class="fa-solid fa-hand"></i> Request clarification
                 </a>
             </div>
         </div>
