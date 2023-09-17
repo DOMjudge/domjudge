@@ -20,6 +20,13 @@
         </p>
     {% endif %}
 
+
+    <h1>Enabled executables</h1>
+    {{ macros.table(executables_enabled, table_fields, {'ordering': 'false'}) }}
+
+    <h1>Disabled executables</h1>
+    {{ macros.table(executables_disabled, table_fields, {'ordering': 'false'}) }}
+
     {% for type, val in executables2 %}
         <h1>{{ type }} executables</h1>
         {{ macros.table(val, table_fields, {'ordering': 'false'}) }}

@@ -45,6 +45,8 @@ class ExecutableController extends BaseController
     public function indexAction(Request $request): Response
     {
         $executables_tables = [];
+        $executables_tables_enabled = [];
+        $executables_tables_disabled = [];
         $data = [];
         $form = $this->createForm(ExecutableUploadType::class, $data);
         $form->handleRequest($request);
@@ -114,11 +116,32 @@ class ExecutableController extends BaseController
                 'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
                 'cssclass' => count($e->getLanguages()) || count($e->getProblemsCompare()) || count($e->getProblemsRun()) ? '' : 'disabled',
             ];
+
+            if (count($e->getLanguages()) ||
+                count($e->getProblemsCompare()) || 
+                count($e->getProblemsRun())
+            ) {
+                $executables_tables_enabled[] = [
+                    'data' => $execdata,
+                    'actions' => $execactions,
+                    'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
+                    'cssclass' => count($e->getLanguages()) || count($e->getProblemsCompare()) || count($e->getProblemsRun()) ? '' : 'disabled',
+                ];
+            } else {
+                $executables_tables_disabled[] = [
+                    'data' => $execdata,
+                    'actions' => $execactions,
+                    'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
+                    'cssclass' => count($e->getLanguages()) || count($e->getProblemsCompare()) || count($e->getProblemsRun()) ? '' : 'disabled',
+                ];
+            }
         }
 
         return $this->render('jury/executables.html.twig', [
             'executables' => $executables_table,
             'executables2' => $executables_tables,
+            'executables_enabled' => $executables_tables_enabled,
+            'executables_disabled' => $executables_tables_disabled,
             'table_fields' => $table_fields,
             'form' => $form,
         ]);
