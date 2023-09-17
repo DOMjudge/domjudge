@@ -12,6 +12,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use InvalidArgumentException as PHPInvalidArgumentException;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
@@ -42,6 +43,8 @@ class ExecutableController extends BaseController
     #[Route(path: '', name: 'jury_executables')]
     public function indexAction(Request $request): Response
     {
+        $executables_tables_used = [];
+        $executables_tables_unused = [];
         $data = [];
         $form = $this->createForm(ExecutableUploadType::class, $data);
         $form->handleRequest($request);
@@ -64,6 +67,15 @@ class ExecutableController extends BaseController
 
         $propertyAccessor  = PropertyAccess::createPropertyAccessor();
         $executables_table = [];
+        $configScripts = [];
+        foreach (['compare', 'run', 'full_debug'] as $config_script) {
+            try {
+                $configScripts[] = (string)$this->config->get('default_' . $config_script);
+            } catch (PHPInvalidArgumentException $e) {
+                // If not found this is an older database, as we only use this for visual changes ignore this error;
+            }
+        }
+
         foreach ($executables as $e) {
             $execdata    = [];
             $execactions = [];
@@ -115,16 +127,27 @@ class ExecutableController extends BaseController
                 'link' => $this->generateUrl('jury_executable_download', ['execId' => $e->getExecid()])
             ];
 
-            $executables_table[]            = [
-                'data' => $execdata,
-                'actions' => $execactions,
-                'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
-            ];
+            if ($e->checkUsed($configScripts)) {
+                $executables_tables_used[] = [
+                    'data' => $execdata,
+                    'actions' => $execactions,
+                    'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
+                ];
+            } else {
+                $executables_tables_unused[] = [
+                    'data' => $execdata,
+                    'actions' => $execactions,
+                    'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
+                    'cssclass' => 'disabled',
+                ];
+            }
         }
         // This is replaced with the icon.
         unset($table_fields['type']);
+
         return $this->render('jury/executables.html.twig', [
-            'executables' => $executables_table,
+            'executables_used' => $executables_tables_used,
+            'executables_unused' => $executables_tables_unused,
             'table_fields' => $table_fields,
             'form' => $form,
         ]);
