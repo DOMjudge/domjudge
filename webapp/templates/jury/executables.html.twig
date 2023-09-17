@@ -20,4 +20,9 @@
         </p>
     {% endif %}
 
+    {% for type, val in executables2 %}
+        <h1>{{ type }} executables</h1>
+        {{ macros.table(val, table_fields, {'ordering': 'false'}) }}
+    {% endfor %}
+
 {% endblock %}

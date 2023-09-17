@@ -42,6 +42,7 @@ class ExecutableController extends BaseController
     #[Route(path: '', name: 'jury_executables')]
     public function indexAction(Request $request): Response
     {
+        $executables_tables = [];
         $data = [];
         $form = $this->createForm(ExecutableUploadType::class, $data);
         $form->handleRequest($request);
@@ -72,6 +73,7 @@ class ExecutableController extends BaseController
                     $execdata[$k] = ['value' => $propertyAccessor->getValue($e, $k)];
                 }
             }
+            $execType = $execdata['type']['value'];
             $execdata['execid']['cssclass'] = 'execid';
 
             if ($this->isGranted('ROLE_ADMIN')) {
@@ -97,14 +99,22 @@ class ExecutableController extends BaseController
                 'link' => $this->generateUrl('jury_executable_download', ['execId' => $e->getExecid()])
             ];
 
-            $executables_table[]            = [
+            $executables_tables[$execType][] = [
+                'data' => $execdata,
+                'actions' => $execactions,
+                'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
+            ];
+            $executables_table[] = [
                 'data' => $execdata,
                 'actions' => $execactions,
                 'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
             ];
         }
+        dump($executables_tables);
+
         return $this->render('jury/executables.html.twig', [
             'executables' => $executables_table,
+            'executables2' => $executables_tables,
             'table_fields' => $table_fields,
             'form' => $form,
         ]);
