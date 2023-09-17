@@ -56,6 +56,7 @@ class ExecutableController extends BaseController
             ->getQuery()->getResult();
         $executables      = array_column($executables, 'executable', 'execid');
         $table_fields     = [
+            'icon' => ['title' => 'type', 'sort' => false],
             'execid' => ['title' => 'ID', 'sort' => true,],
             'type' => ['title' => 'type', 'sort' => true,],
             'description' => ['title' => 'description', 'sort' => true,],
@@ -73,6 +74,23 @@ class ExecutableController extends BaseController
                 }
             }
             $execdata['execid']['cssclass'] = 'execid';
+            $type = $execdata['type']['value'];
+            switch ($type) {
+                case 'compare':
+                    $execdata['icon']['icon'] = 'code-compare';
+                    break;
+                case 'compile':
+                    $execdata['icon']['icon'] = 'language';
+                    break;
+                case 'debug':
+                    $execdata['icon']['icon'] = 'bug';
+                    break;
+                case 'run':
+                    $execdata['icon']['icon'] = 'person-running';
+                    break;
+                default:
+                    $execdata['icon']['icon'] = 'question';
+            }
 
             if ($this->isGranted('ROLE_ADMIN')) {
                 $execactions[] = [
@@ -103,6 +121,8 @@ class ExecutableController extends BaseController
                 'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
             ];
         }
+        // This is replaced with the icon.
+        unset($table_fields['type']);
         return $this->render('jury/executables.html.twig', [
             'executables' => $executables_table,
             'table_fields' => $table_fields,
