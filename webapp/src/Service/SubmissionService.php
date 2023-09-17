@@ -150,7 +150,6 @@ class SubmissionService
             }
         }
         if (isset($restrictions['judging'])) {
-            dump($restrictions);
             if ($restrictions['judging']) {
                 $queryBuilder->andWhere('j.starttime IS NOT NULL AND j.result IS NULL');
             } else {
