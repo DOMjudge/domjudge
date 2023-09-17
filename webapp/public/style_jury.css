@@ -197,3 +197,8 @@ table.submissions-table {
 .devmode-icon {
     color: white;
 }
+
+.execid {
+    font-family: monospace;
+}
+

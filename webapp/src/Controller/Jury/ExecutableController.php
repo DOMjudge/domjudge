@@ -72,6 +72,7 @@ class ExecutableController extends BaseController
                     $execdata[$k] = ['value' => $propertyAccessor->getValue($e, $k)];
                 }
             }
+            $execdata['execid']['cssclass'] = 'execid';
 
             if ($this->isGranted('ROLE_ADMIN')) {
                 $execactions[] = [
