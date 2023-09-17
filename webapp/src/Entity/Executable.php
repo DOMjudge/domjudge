@@ -195,6 +195,11 @@ class Executable
         if (count($this->problems_compare) || count($this->problems_run)) {
             return true;
         }
+        foreach ($this->languages as $lang) {
+            if ($lang->getAllowSubmit()) {
+                return true;
+            }
+        }
         return false;
     }
 }
