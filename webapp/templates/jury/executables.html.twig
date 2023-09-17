@@ -10,7 +10,7 @@
 
 {% block content %}
 
-    <h1>Executables</h1>
+    {#<h1>Executables</h1>
 
     {{ macros.table(executables, table_fields, {'ordering': 'false'}) }}
 
@@ -18,7 +18,7 @@
         <p>
             {{ button(path('jury_executable_add'), 'Add new executable', 'primary', 'plus') }}
         </p>
-    {% endif %}
+    {% endif %} #}
 
 
     <h1>Enabled executables</h1>
@@ -27,9 +27,9 @@
     <h1>Disabled executables</h1>
     {{ macros.table(executables_disabled, table_fields, {'ordering': 'false'}) }}
 
-    {% for type, val in executables2 %}
+    {#{% for type, val in executables2 %}
         <h1>{{ type }} executables</h1>
         {{ macros.table(val, table_fields, {'ordering': 'false'}) }}
-    {% endfor %}
+    {% endfor %}#}
 
 {% endblock %}

@@ -41,6 +41,23 @@ class ExecutableController extends BaseController
         protected readonly EventLogService $eventLogService
     ) {}
 
+    private function checkDisabled(Executable $e): bool
+    {
+        if (in_array($e->getExecid(), ['compare', 'run', 'full_debug'])) {
+            return true;
+        }
+        if (count($e->getProblemsCompare()) || count($e->getProblemsRun())) {
+            return true;
+        }
+        foreach ($e->getLanguages() as $lang) {
+            dump($lang);
+            if ($lang->getAllowSubmit()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     #[Route(path: '', name: 'jury_executables')]
     public function indexAction(Request $request): Response
     {
@@ -54,14 +71,16 @@ class ExecutableController extends BaseController
         $em = $this->em;
         /** @var Executable[] $executables */
         $executables      = $em->createQueryBuilder()
-            ->select('e as executable, e.execid as execid, l.langid')
+            //->select('e as executable, e.execid as execid, l.langid')
+            ->select('e as executable, e.execid as execid')
             ->from(Executable::class, 'e')
-            ->leftJoin(Language::class, 'l', Join::WITH, 'l.compile_executable = e.execid')
+            //->leftJoin(Language::class, 'l', Join::WITH, 'l.compile_executable = e.execid')
             ->addOrderBy('e.type', 'ASC')
             ->addOrderBy('e.execid', 'ASC')
             ->getQuery()->getResult();
         $executables      = array_column($executables, 'executable', 'execid');
         $table_fields     = [
+            'icon' => ['title' => 'type', 'sort' => true],
             'execid' => ['title' => 'ID', 'sort' => true,],
             'type' => ['title' => 'type', 'sort' => true,],
             'description' => ['title' => 'description', 'sort' => true,],
@@ -80,6 +99,23 @@ class ExecutableController extends BaseController
             }
             $execType = $execdata['type']['value'];
             $execdata['execid']['cssclass'] = 'execid';
+            $type = $execdata['type']['value'];
+            switch ($type) {
+                case 'compare':
+                    $execdata['icon']['icon'] = 'code-compare';
+                    break;
+                case 'compile':
+                    $execdata['icon']['icon'] = 'down-left-and-up-right-to-center';
+                    break;
+                case 'debug':
+                    $execdata['icon']['icon'] = 'bug';
+                    break;
+                case 'run':
+                    $execdata['icon']['icon'] = 'person-running';
+                    break;
+                default:
+                    $execdata['icon']['icon'] = 'question';
+            }
 
             if ($this->isGranted('ROLE_ADMIN')) {
                 $execactions[] = [
@@ -117,22 +153,18 @@ class ExecutableController extends BaseController
                 'cssclass' => count($e->getLanguages()) || count($e->getProblemsCompare()) || count($e->getProblemsRun()) ? '' : 'disabled',
             ];
 
-            if (count($e->getLanguages()) ||
-                count($e->getProblemsCompare()) || 
-                count($e->getProblemsRun())
-            ) {
+            if ($this->checkDisabled($e)) {
                 $executables_tables_enabled[] = [
                     'data' => $execdata,
                     'actions' => $execactions,
                     'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
-                    'cssclass' => count($e->getLanguages()) || count($e->getProblemsCompare()) || count($e->getProblemsRun()) ? '' : 'disabled',
                 ];
             } else {
                 $executables_tables_disabled[] = [
                     'data' => $execdata,
                     'actions' => $execactions,
                     'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
-                    'cssclass' => count($e->getLanguages()) || count($e->getProblemsCompare()) || count($e->getProblemsRun()) ? '' : 'disabled',
+                    'cssclass' => 'disabled',
                 ];
             }
         }
