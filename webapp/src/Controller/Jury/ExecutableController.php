@@ -58,7 +58,6 @@ class ExecutableController extends BaseController
             ->addOrderBy('e.type', 'ASC')
             ->addOrderBy('e.execid', 'ASC')
             ->getQuery()->getResult();
-        dump($executables);            
         $executables      = array_column($executables, 'executable', 'execid');
         $table_fields     = [
             'execid' => ['title' => 'ID', 'sort' => true,],
@@ -103,10 +102,6 @@ class ExecutableController extends BaseController
                 'link' => $this->generateUrl('jury_executable_download', ['execId' => $e->getExecid()])
             ];
 
-            //dump((bool)count($e->getLanguages()));
-            dump((bool)count($e->getProblemsCompare()));
-            dump((bool)count($e->getProblemsRun()));
-
             $executables_tables[$execType][] = [
                 'data' => $execdata,
                 'actions' => $execactions,
@@ -120,8 +115,6 @@ class ExecutableController extends BaseController
                 'cssclass' => count($e->getLanguages()) || count($e->getProblemsCompare()) || count($e->getProblemsRun()) ? '' : 'disabled',
             ];
         }
-        //dump($executables_tables);
-        //dump($executables_table);
 
         return $this->render('jury/executables.html.twig', [
             'executables' => $executables_table,
