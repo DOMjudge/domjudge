@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\Entity\ContestProblem;
 use App\Entity\Executable;
 use App\Entity\ExecutableFile;
 use App\Entity\ImmutableExecutable;
@@ -62,6 +63,7 @@ class ExecutableController extends BaseController
             'icon' => ['title' => 'type', 'sort' => false],
             'execid' => ['title' => 'ID', 'sort' => true,],
             'type' => ['title' => 'type', 'sort' => true,],
+            'badges' => ['title' => 'problems', 'sort' => false],
             'description' => ['title' => 'description', 'sort' => true,],
         ];
 
@@ -76,7 +78,46 @@ class ExecutableController extends BaseController
             }
         }
 
+        $contestProblemsWithExecutables = [];
+        $executablesWithContestProblems = [];
+        if ($this->dj->getCurrentContest()) {
+            $contestProblemsWithExecutables = $em->createQueryBuilder()
+                ->select('cp', 'p', 'ecomp')
+                ->from(ContestProblem::class, 'cp')
+                ->where('cp.contest = :contest')
+                ->setParameter('contest', $this->dj->getCurrentContest())
+                ->join('cp.problem', 'p')
+                ->leftJoin('p.compare_executable', 'ecomp')
+                ->leftJoin('p.run_executable', 'erun')
+                ->andWhere('ecomp IS NOT NULL OR erun IS NOT NULL')
+                ->getQuery()->getResult();
+            $executablesWithContestProblems = $em->createQueryBuilder()
+                ->select('e')
+                ->from(Executable::class, 'e')
+                ->leftJoin('e.problems_compare', 'pcomp')
+                ->leftJoin('e.problems_run', 'prun')
+                ->where('pcomp IS NOT NULL OR prun IS NOT NULL')
+                ->leftJoin('pcomp.contest_problems', 'cpcomp')
+                ->leftJoin('prun.contest_problems', 'cprun')
+                ->andWhere('cprun.contest = :contest OR cpcomp.contest = :contest')
+                ->setParameter('contest', $this->dj->getCurrentContest())
+                ->getQuery()->getResult();
+        }
+
         foreach ($executables as $e) {
+            $badges = [];
+            if (in_array($e, $executablesWithContestProblems)) {
+                foreach (array_merge($e->getProblemsRun()->toArray(), $e->getProblemsCompare()->toArray()) as $execProblem) {
+                    $execContestProblems = $execProblem->getContestProblems();
+                    foreach($contestProblemsWithExecutables as $cp) {
+                        if ($execContestProblems->contains($cp)) {
+                            $badges[] = $cp;
+                        }
+                    }
+                }
+            }
+            sort($badges);
+
             $execdata    = [];
             $execactions = [];
             // Get whatever fields we can from the team object itself.
@@ -103,6 +144,7 @@ class ExecutableController extends BaseController
                 default:
                     $execdata['icon']['icon'] = 'question';
             }
+            $execdata['badges']['value'] = $badges;
 
             if ($this->isGranted('ROLE_ADMIN')) {
                 $execactions[] = [
