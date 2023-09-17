@@ -67,11 +67,6 @@ class ExecutableController extends BaseController
         $form = $this->createForm(ExecutableUploadType::class, $data);
         $form->handleRequest($request);
 
-        /*$badges = [];
-        foreach ($this->dj->getCurrentContest()->getProblems() as $problem) {
-            dump($problem);
-        }*/
-
         $em = $this->em;
         /** @var Executable[] $executables */
         $executables      = $em->createQueryBuilder()
@@ -96,10 +91,9 @@ class ExecutableController extends BaseController
         foreach ($executables as $e) {
             $badges = [];
             foreach ($e->getProblemsCompare() as $p) {
-                foreach ($this->dj->getCurrentContest()->getProblems() as $contestProblem) {
-                    if ($contestProblem->getProblem() === $p) {
-                        $badges[] = ['color' => $contestProblem->getColor(), 'label' => $contestProblem->getShortName()];
-                        dump($contestProblem);
+                foreach ($this->dj->getCurrentContest()->getProblems() as $cp) {
+                    if ($cp->getProblem() === $p) {
+                        $badges[] = $cp;
                     }
                 }
             }
@@ -107,16 +101,9 @@ class ExecutableController extends BaseController
                 foreach ($this->dj->getCurrentContest()->getProblems() as $cp) {
                     if ($cp->getProblem() === $p) {
                         $badges[] = $cp;
-                        //['color' => $cp->getColor(), 'label' => $cp->getShortName()];
-                        dump($cp);
                     }
                 }
             }
-            if ($badges) {
-                dump($badges);
-            }
-            //dump($e->getProblemsCompare());
-            //dump($e->getProblemsRun());
             $execdata    = [];
             $execactions = [];
             // Get whatever fields we can from the team object itself.
@@ -196,7 +183,6 @@ class ExecutableController extends BaseController
                     'cssclass' => 'disabled',
                 ];
             }
-            dump($execdata);
         }
 
         return $this->render('jury/executables.html.twig', [
