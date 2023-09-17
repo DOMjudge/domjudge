@@ -4,6 +4,7 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Entity\Executable;
+use App\Entity\Language;
 use App\Entity\ExecutableFile;
 use App\Entity\ImmutableExecutable;
 use App\Form\Type\ExecutableUploadType;
@@ -12,6 +13,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
@@ -50,11 +52,13 @@ class ExecutableController extends BaseController
         $em = $this->em;
         /** @var Executable[] $executables */
         $executables      = $em->createQueryBuilder()
-            ->select('e as executable, e.execid as execid')
+            ->select('e as executable, e.execid as execid, l.langid')
             ->from(Executable::class, 'e')
+            ->leftJoin(Language::class, 'l', Join::WITH, 'l.compile_executable = e.execid')
             ->addOrderBy('e.type', 'ASC')
             ->addOrderBy('e.execid', 'ASC')
             ->getQuery()->getResult();
+        dump($executables);            
         $executables      = array_column($executables, 'executable', 'execid');
         $table_fields     = [
             'execid' => ['title' => 'ID', 'sort' => true,],
@@ -99,18 +103,25 @@ class ExecutableController extends BaseController
                 'link' => $this->generateUrl('jury_executable_download', ['execId' => $e->getExecid()])
             ];
 
+            //dump((bool)count($e->getLanguages()));
+            dump((bool)count($e->getProblemsCompare()));
+            dump((bool)count($e->getProblemsRun()));
+
             $executables_tables[$execType][] = [
                 'data' => $execdata,
                 'actions' => $execactions,
                 'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
+                'cssclass' => count($e->getLanguages()) || count($e->getProblemsCompare()) || count($e->getProblemsRun()) ? '' : 'disabled',
             ];
             $executables_table[] = [
                 'data' => $execdata,
                 'actions' => $execactions,
                 'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
+                'cssclass' => count($e->getLanguages()) || count($e->getProblemsCompare()) || count($e->getProblemsRun()) ? '' : 'disabled',
             ];
         }
-        dump($executables_tables);
+        //dump($executables_tables);
+        //dump($executables_table);
 
         return $this->render('jury/executables.html.twig', [
             'executables' => $executables_table,
