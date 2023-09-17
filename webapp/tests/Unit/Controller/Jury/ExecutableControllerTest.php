@@ -17,7 +17,7 @@ class ExecutableControllerTest extends JuryControllerTestCase
     protected static string  $deleteEntityIdentifier   = 'description';
     protected static string  $getIDFunc                = 'getExecid';
     protected static string  $className                = Executable::class;
-    protected static array   $DOM_elements             = ['h1' => ['Executables']];
+    protected static array   $DOM_elements             = ['h1' => ['Used executables', 'Unused executables']];
     protected static string  $addForm                  = 'executable_upload[';
     protected static array   $addEntitiesShown         = ['type'];
     protected static array   $addEntities              = [];

@@ -10,9 +10,11 @@
 
 {% block content %}
 
-    <h1>Executables</h1>
+    <h1>Used executables</h1>
+    {{ macros.table(executables_used, table_fields, {'ordering': 'false'}) }}
 
-    {{ macros.table(executables, table_fields, {'ordering': 'false'}) }}
+    <h1>Unused executables</h1>
+    {{ macros.table(executables_unused, table_fields, {'ordering': 'false'}) }}
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>

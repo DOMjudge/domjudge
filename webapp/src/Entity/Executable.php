@@ -181,4 +181,20 @@ class Executable
         unlink($tempzipFile);
         return $zipFileContents;
     }
+
+    /**
+     * @param string[] $configScripts
+     */
+    public function checkUsed(array $configScripts): bool
+    {
+        foreach ($configScripts as $config_script) {
+            if ($this->execid === $config_script) {
+                return true;
+            }
+        }
+        if (count($this->problems_compare) || count($this->problems_run)) {
+            return true;
+        }
+        return false;
+    }
 }
