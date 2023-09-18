@@ -19,7 +19,7 @@ services:
     volumes:
       - /var/lib/mysql
   domjudge:
-    image: docker.io/domjudge/domjudge-contributor
+    image: deltacs/seminar-domjudge-contributor:8.3.0
     hostname: domjudge-contributor
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
