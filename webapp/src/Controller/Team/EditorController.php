@@ -244,14 +244,11 @@ class EditorController extends BaseController
                 ]);
             }
 
-            return $this->redirectToRoute('team_editor', [
-                'probId' => $problem->getProbid(),
-                'langId' => $language->getLangid()
-            ]);
+            $submission = $submittedSubmission;
         }
 
         return $this->render('team/team_editor.html.twig', array_merge(
-            $this->getScoreboardData($request, $submission, $contest),
+            $this->getStatusData($request, $submission, $contest),
             [
                 'language' => $language,
                 'problem' => $problem,
@@ -277,19 +274,19 @@ class EditorController extends BaseController
         $team = $this->dj->getUser()->getTeam();
         $contest = $this->dj->getCurrentContest($team->getTeamid());
 
-        $data = $this->getScoreboardData($request, $submission, $contest);
+        $data = $this->getStatusData($request, $submission, $contest);
 
         if (!$request->isXmlHttpRequest()) {
             $this->logger->error('Unintended status usage (not xhr request)');
             throw new HttpException(500, 'Something went wrong fetching last submission status');
         }
 
-        return $this->render('partials/scoreboard_table.html.twig', $data);
+        return $this->render('team/partials/team_editor_status.html.twig', $data);
     }
 
-    public function getScoreboardData(Request $request, Submission $submission, Contest $contest): array
+    public function getStatusData(Request $request, Submission $submission, Contest $contest): array
     {
-        return $this->em->contains($submission) ? array_merge(
+        return ($this->em->contains($submission) && $submission->getValid()) ? array_merge(
             $this->scoreboardService->getScoreboardTwigData(
                 $request, null, '', true, false, true, $contest
             ),
@@ -304,8 +301,17 @@ class EditorController extends BaseController
                 'limitToTeams' => [$this->dj->getUser()->getTeam()],
                 'limitToProblems' => [$submission->getProblem()],
                 'displayRank' => true
-            ]
+            ],
+            $this->getSubmissionsData($submission)
         ) : [];
+    }
+
+    public function getSubmissionsData(Submission $submission): array {
+        return [
+            'submissions' => [$submission],
+            'allowDownload' => (bool)$this->config->get('allow_team_submission_download'),
+            'verificationRequired' => (bool)$this->config->get('verification_required')
+        ];
     }
 
     protected function getLatestSubmission(Team $team, Problem $problem, Language $language, Contest $contest): ?Submission
@@ -326,7 +332,7 @@ class EditorController extends BaseController
             ->setParameter('langid', $language->getLangid())
             ->andWhere('c.cid = :cid')
             ->setParameter('cid', $contest->getCid())
-            ->orderBy('s.submittime')
+            ->orderBy('s.submittime', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
