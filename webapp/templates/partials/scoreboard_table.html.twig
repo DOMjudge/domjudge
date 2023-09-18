@@ -7,6 +7,15 @@
         {% set limitToTeamIds = limitToTeamIds | merge([team.teamid]) %}
     {% endfor %}
 {% endif %}
+{% if limitToProblems is not defined %}
+    {% set limitToProblems = null %}
+    {% set limitToProblemsIds = null %}
+{% else %}
+    {% set limitToProblemsIds = [] %}
+    {% for team in limitToProblems %}
+        {% set limitToProblemsIds = limitToProblemsIds | merge([team.probid]) %}
+    {% endfor %}
+{% endif %}
 {% if showLegends is not defined %}
     {% set showLegends = false %}
 {% endif %}
@@ -17,7 +26,7 @@
 {% set usedCategories = scoreboard.usedCategories(limitToTeamIds) %}
 {% set hasDifferentCategoryColors = scoreboard.categoryColors(limitToTeamIds) %}
 {% set scores = scoreboard.scores | filter(score => limitToTeams is null or score.team.teamid in limitToTeamIds) %}
-{% set problems = scoreboard.problems %}
+{% set problems = scoreboard.problems | filter(problem => limitToProblems is null or problem.probid in limitToProblemsIds) %}
 {% set medalsEnabled = contest.medalsEnabled %}
 
 {% if maxWidth > 0 %}

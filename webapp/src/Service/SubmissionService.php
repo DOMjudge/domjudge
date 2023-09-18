@@ -356,7 +356,8 @@ class SubmissionService
         ?string $externalId = null,
         ?float $submitTime = null,
         ?string &$message = null,
-        bool $forceImportInvalid = false
+        bool $forceImportInvalid = false,
+        ?bool $ignoreSubmission = false
     ): ?Submission {
         if (!$team instanceof Team) {
             $team = $this->em->getRepository(Team::class)->find($team);
@@ -591,7 +592,8 @@ class SubmissionService
             ->setOriginalSubmission($originalSubmission)
             ->setEntryPoint($entryPoint)
             ->setExternalid($externalId)
-            ->setImportError($importError);
+            ->setImportError($importError)
+            ->setValid(!$ignoreSubmission);
 
         // Add expected results from source. We only do this for jury submissions
         // to prevent accidental auto-verification of team submissions.

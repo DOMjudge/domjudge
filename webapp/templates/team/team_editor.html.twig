@@ -1,0 +1,71 @@
+{% extends 'team/base.html.twig' %}
+
+{% block title %}Editor ({{ language.name }}) for {{ problem.name }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    <script src="{{ asset('js/ace/ace.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+
+    {{ form_start(form) }}
+
+    <ul class="nav justify-content-end my-2">
+        <li class="nav-item my-1 mr-2">
+            {{ form_widget(form.save) }}
+        </li>
+        <li class="nav-item my-1">
+            {{ form_widget(form.submit) }}
+        </li>
+    </ul>
+
+    <ul class="nav nav-tabs source-tab-nav">
+        {%- for file in files %}
+            <li class="nav-item">
+                <a class="nav-link {% if (selected is null and loop.first) or selected == file.rank %}active{% endif %}"
+                   data-toggle="tab" href="#source-{{ file.rank }}" role="tab">{{ file.filename }}</a>
+            </li>
+        {%- endfor %}
+    </ul>
+
+    <div class="tab-content source-tab">
+        {%- for idx, file in files %}
+            <div class="tab-pane fade {% if (selected is null and loop.first) or selected == file.rank %}show active{% endif %}"
+                 id="source-{{ file.rank }}" role="tabpanel">
+                {{ file.sourcecode | codeEditor(idx, submission.language.aceLanguage, true, 'form_source' ~ file.rank) }}
+                <script>
+                    $(function () {
+                        $('#form_source{{ file.rank }}').closest('.form-group').hide();
+                    });
+                </script>
+            </div>
+        {%- endfor %}
+    </div>
+
+    {{ form_end(form) }}
+
+    {% if scoreboard is defined %}
+    <div data-ajax-refresh-target data-ajax-refresh-after="initializeScoreboard" class="mt-3">
+        {% include 'partials/scoreboard_table.html.twig' with {jury: false, public: true} %}
+    </div>
+    {% endif %}
+
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        var scoreboardUrl = '{{ refresh.url ?? null }}';
+
+        $(function () {
+            window.initializeScoreboard = function () {
+                var $newProgress = $('[data-ajax-refresh-target] > .d-none > [data-progress-bar]');
+                if ($newProgress.length) {
+                    var $oldProgress = $('body > [data-progress-bar]');
+                    $oldProgress.html($newProgress.children());
+                    $newProgress.parent().remove();
+                }
+            };
+        });
+    </script>
+{% endblock %}
