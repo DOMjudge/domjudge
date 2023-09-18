@@ -195,6 +195,7 @@
                 <thead class="thead-light">
                 <tr>
                     <th>Name</th>
+                    <th>Type</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -209,7 +210,8 @@
                     {% for attachment in problem.attachments %}
                         <tr>
                             <td>{{ attachment.name }}</td>
-                            <td>
+                            <td>{{ attachment.type }}</td>
+                            <td style="white-space: nowrap;">
                                 <a href="{{ path('jury_attachment_fetch', {'attachmentId': attachment.attachmentid}) }}"
                                    class="btn btn-sm btn-primary">
                                     <i class="fas fa-download"></i>
@@ -233,6 +235,10 @@
                             {{ form_widget(problemAttachmentForm.content) }}
                         </td>
                         <td>
+                            {{ form_errors(problemAttachmentForm.language) }}
+                            {{ form_widget(problemAttachmentForm.language) }}
+                        </td>
+                        <td class="align-middle text-center">
                             {{ form_widget(problemAttachmentForm.add) }}
                         </td>
                     </tr>
