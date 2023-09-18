@@ -72,6 +72,7 @@
 		"ircmaxell/password-compat": "*",
 		"jms/serializer-bundle": "^5.2",
 		"league/commonmark": "^2.3",
+		"liip/imagine-bundle": "^2.11",
 		"mbostock/d3": "^3.5",
 		"nelmio/api-doc-bundle": "^4.11",
 		"nelmio/cors-bundle": "^2.4",
