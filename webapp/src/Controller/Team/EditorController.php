@@ -113,14 +113,7 @@ class EditorController extends BaseController
         $files = [];
 
         if ($submission) {
-            $files = $this->em->createQueryBuilder()
-                ->from(SubmissionFile::class, 'file')
-                ->select('file')
-                ->andWhere('file.submission = :submission')
-                ->setParameter('submission', $submission)
-                ->orderBy('file.ranknumber')
-                ->getQuery()
-                ->getResult();
+            $files = $submission->getFiles();
         } else {
             $submission = (new Submission())
                 ->setTeam($team)
@@ -244,7 +237,10 @@ class EditorController extends BaseController
                 ]);
             }
 
-            $submission = $submittedSubmission;
+            return $this->redirectToRoute('team_editor', [
+                'probId' => $problem->getProbid(),
+                'langId' => $language->getLangid()
+            ]);
         }
 
         return $this->render('team/team_editor.html.twig', array_merge(
