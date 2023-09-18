@@ -6,7 +6,7 @@
 
 services:
   mariadb:
-    image: docker.io/mariadb
+    image: docker.io/mariadb:11.1.2
     environment:
       - MYSQL_ROOT_PASSWORD=domjudge
       - MYSQL_USER=domjudge
