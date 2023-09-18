@@ -1350,10 +1350,6 @@ function judge(array $judgeTask): bool
     }
 
     // do the actual test-run
-    $hardtimelimit = $run_config['time_limit'] +
-                     overshoot_time($run_config['time_limit'], $overshoot);
-
-
     $combined_run_compare = $compare_config['combined_run_compare'];
     [$run_runpath, $error] = fetch_executable(
         $workdirpath,
@@ -1381,6 +1377,16 @@ function judge(array $judgeTask): bool
         if (isset($error)) {
             return false;
         }
+    }
+
+    $hardtimelimit = $run_config['time_limit'] +
+                     overshoot_time($run_config['time_limit'], $overshoot);
+    if ($combined_run_compare) {
+        // This accounts for wall time spent in the validator. We may likely
+        // want to make this configurable in the future. The current factor is
+        // under the assumption that the validator has to do approximately the
+        // same amount of work wall-time wise as the submission.
+        $hardtimelimit *= 2;
     }
 
     // While we already set those above to likely the same values from the
