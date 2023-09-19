@@ -26,7 +26,7 @@ security:
 
         # disables authentication for assets and the profiler, adapt it according to your needs
         dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            pattern: ^/(_(profiler|wdt)|css|images|media|js)/
             security: false
 
         # SEE NOTE ABOVE IF CHANGING ANYTHING IN THIS SECTION
