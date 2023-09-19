@@ -1,7 +1,7 @@
 {% set link = path('public_blog_post', { 'slug':post.slug }) %}
 <div class="col d-flex flex-column align-items-start align-items-md-start mb-4">
     <a href="{{ link }}" class="align-self-center align-self-md-start blog-post-homepage-thumbnail">
-        <img src="{{ asset('media/images/' ~ post.thumbnailFileName) }}"
+        <img src="{{ asset('media/images/' ~ post.thumbnailFileName) | imagine_filter('cache') }}"
              alt="{{ post.title }}"
              class="blog-post-homepage-thumbnail">
     </a>
