@@ -327,6 +327,7 @@ class RejudgingService
 
             // Now update the scoreboard
             foreach ($scoreboardRowsToUpdate as $cid => $probids) {
+                $probids = array_keys($probids);
                 $contest = $this->em->getRepository(Contest::class)->find($cid);
                 $queryBuilder = $this->em->createQueryBuilder()
                     ->from(Team::class, 't')
