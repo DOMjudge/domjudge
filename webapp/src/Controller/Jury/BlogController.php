@@ -28,7 +28,7 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
  */
 class BlogController extends BaseController
 {
-    private const EDITORJS_IMAGE_BASE_URL = '/media/images/';
+    private const EDITORJS_IMAGE_BASE_URL = '/media/cache/resolve/cache/media/images/';
     private const THUMBNAILS_DIRECTORY = 'blog/thumbnails';
     private const IN_ARTICLE_IMAGES_DIRECTORY = 'blog/in-article';
 
