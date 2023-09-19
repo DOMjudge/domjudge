@@ -5,7 +5,7 @@ h3, h4, h5, h6 {
 .hp-cover {
     margin-top: -15px;
 
-    background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), url("/images/hacker/homepage-cover.png") no-repeat;
+    background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), url("/images/hacker/homepage-cover.webp") no-repeat;
     background-size: cover;
     background-position: top;
 
