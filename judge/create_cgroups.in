@@ -9,7 +9,7 @@
 JUDGEHOSTUSER=@DOMJUDGE_USER@
 CGROUPBASE=@judgehost_cgroupdir@
 
-print_cgroup_instruction () {
+cgroup_error_and_usage () {
     echo "$1" >&2
     echo "To fix this, please make the following changes:
     1. In /etc/default/grub, add 'cgroup_enable=memory swapaccount=1' to GRUB_CMDLINE_LINUX_DEFAULT.
@@ -24,14 +24,14 @@ for i in cpuset memory; do
     mkdir -p $CGROUPBASE/$i
     if [ ! -d $CGROUPBASE/$i/ ]; then
         if ! mount -t cgroup -o$i $i $CGROUPBASE/$i/; then
-            print_cgroup_instruction "Error: Can not mount $i cgroup. Probably cgroup support is missing from running kernel. Unable to continue."
+            cgroup_error_and_usage "Error: Can not mount $i cgroup. Probably cgroup support is missing from running kernel. Unable to continue."
         fi
     fi
     mkdir -p $CGROUPBASE/$i/domjudge
 done
 
 if [ ! -f $CGROUPBASE/memory/memory.limit_in_bytes ] || [ ! -f $CGROUPBASE/memory/memory.memsw.limit_in_bytes ]; then
-    print_cgroup_instruction "Error: cgroup support missing memory features in running kernel. Unable to continue."
+    cgroup_error_and_usage "Error: cgroup support missing memory features in running kernel. Unable to continue."
 fi
 
 chown -R $JUDGEHOSTUSER $CGROUPBASE/*/domjudge
