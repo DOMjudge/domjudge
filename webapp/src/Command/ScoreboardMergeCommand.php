@@ -89,8 +89,28 @@ class ScoreboardMergeCommand extends Command
                 'Alternating URL location of the scoreboard to merge and a comma separated list of group_ids to include.' . PHP_EOL .
                 'If an URL and it requires authentication, use username:password@ in the URL' . PHP_EOL .
                 'URL should have the form https://<domain>/api/v4/contests/<contestid>/ for DOMjudge or point to any ICPC Contest API compatible contest' . PHP_EOL .
-                'Only the /teams, /organizations, /problems and /scoreboard endpoint are used, so manually putting files in those locations can work as well.'
+                'Only the /teams, /organizations, /problems and /scoreboard endpoint are used, so manually putting files in those locations can work as well.' . PHP_EOL .
+                'Alternatively, you can mount local files directly in the container: add "- /path/to/scoreboards:/scoreboards" to "docker-compose.yml" and use "/scoreboards/eindhoven" as path.'
             );
+    }
+
+    /**
+     * url: "https://judge.gehack.nl/api/v4" or "/path/to/file"
+     * endpoint: "/teams"
+     * args: "?public=1" (ignored for files)
+     * @return array<mixed>
+     */
+    protected function getEndpoint(
+        string $url,
+        string $endpoint,
+        string $args = ''
+    ): array {
+        if (str_starts_with($url, 'http')) {
+            return $this->client
+                ->request('GET', $url . $endpoint . $args)
+                ->toArray();
+        }
+        return json_decode(file_get_contents($url . $endpoint . '.json'), true);
     }
 
     /**
@@ -109,7 +129,7 @@ class ScoreboardMergeCommand extends Command
         $teams = [];
         $nextTeamId = 0;
         $problems = [];
-        $problemIdMap = [];
+        $problemNameToIdMap = [];
         $scoreCache = [];
         $affiliations = [];
         $firstSolve = [];
@@ -137,13 +157,7 @@ class ScoreboardMergeCommand extends Command
             $site['path'] = $siteArguments[$i];
             # Some simple validation to make sure we're actually parsing group ids.
             $groupsString = $siteArguments[$i + 1];
-            if (!preg_match('/^\d+(,\d+)*$/', $groupsString)) {
-                $style->error('Argument does not look like a comma separated list of group ids: ' . $groupsString);
-                return Command::FAILURE;
-            }
-            $site['group_ids'] = array_map(
-                'intval', explode(',', $groupsString)
-            );
+            $site['group_ids'] = explode(',', $groupsString);
             $sites[] = $site;
         }
 
@@ -154,12 +168,9 @@ class ScoreboardMergeCommand extends Command
                 $path = substr($path, 0, strlen($path) - 1);
             }
 
-            $teamData = $this->client
-                ->request('GET', $path . '/teams')->toArray();
-            $organizationData = $this->client
-                ->request('GET', $path . '/organizations')->toArray();
-            $problemData = $this->client
-                ->request('GET', $path . '/problems')->toArray();
+            $teamData = $this->getEndpoint($path, '/teams');
+            $organizationData = $this->getEndpoint($path, '/organizations');
+            $problemData = $this->getEndpoint($path, '/problems');
             $organizationMap = [];
             foreach ($organizationData as $organization) {
                 $organizationMap[$organization['id']] = $organization;
@@ -186,6 +197,7 @@ class ScoreboardMergeCommand extends Command
 
                 $teamObj = (new Team())
                     ->setName($team['name'])
+                    ->setDisplayName($team['display_name'] ?? $team['name'])
                     ->setEnabled(true);
                 if ($team['organization_id'] !== null &&
                     isset($organizationMap[$team['organization_id']])) {
@@ -209,19 +221,23 @@ class ScoreboardMergeCommand extends Command
                 $teamIdMap[$oldid] = $newid;
             }
 
-            $scoreboardData = $this->client
-                ->request('GET', $path . '/scoreboard?public=1')
-                ->toArray();
+            $scoreboardData = $this->getEndpoint(
+                $path,
+                '/scoreboard',
+                '?public=1'
+            );
 
             if (!$contest->getStarttimeString()) {
                 $state = $scoreboardData['state'];
+                $endtime = $state['ended'] ?? $state['started'];
+                // While the contest is running, simply use the start time for everything.
                 $contest
                     ->setStarttimeString($state['started'])
-                    ->setEndtimeString($state['ended'])
-                    ->setFreezetimeString($state['ended'])
-                    ->setUnfreezetimeString($state['ended'])
-                    ->setFinalizetime($state['ended'])
-                    ->setDeactivatetimeString($state['ended'])
+                    ->setEndtimeString($endtime)
+                    ->setFreezetimeString($endtime)
+                    ->setUnfreezetimeString($endtime)
+                    ->setFinalizetime($endtime)
+                    ->setDeactivatetimeString($endtime)
                     ->updateTimes();
             }
             $freezeData = new FreezeData($contest);
@@ -235,21 +251,26 @@ class ScoreboardMergeCommand extends Command
                 }
                 $team = $teams[$teamIdMap[$row['team_id']]];
                 foreach ($row['problems'] as $problem) {
+                    // Problems are keyed by name, as that seems to be more consistent.
+                    // Some sites occasionally mix up short_name and id.
                     $problemId = $problem['problem_id'];
-                    $label = $problemMap[$problemId]['label'];
-                    if (!array_key_exists($label, $problemIdMap)) {
+                    $baseProblem = $problemMap[$problemId];
+                    $label = $baseProblem['label'];
+                    $name = $baseProblem['name'];
+                    if (!array_key_exists($name, $problemNameToIdMap)) {
                         $id = count($problems);
                         $problemObj = (new Problem())
                             ->setProbid($id)
-                            ->setName($label);
+                            ->setName($name);
                         $contestProblemObj = (new ContestProblem())
                             ->setProblem($problemObj)
+                            ->setColor($baseProblem['color'])
                             ->setShortName($label);
                         $problems[$id] = $contestProblemObj;
-                        $problemIdMap[$label] = $id;
-                        $firstSolve[$label] = null;
+                        $problemNameToIdMap[$name] = $id;
+                        $firstSolve[$name] = null;
                     } else {
-                        $id = $problemIdMap[$label];
+                        $id = $problemNameToIdMap[$name];
                     }
                     $scoreCacheObj = (new scoreCache())
                         ->setProblem($problems[$id]->getProblem())
@@ -259,8 +280,11 @@ class ScoreboardMergeCommand extends Command
                         $scoreCacheObj
                             ->setSolveTimePublic($problem['time'] * 60)
                             ->setSolveTimeRestricted($problem['time'] * 60);
-                        if ($firstSolve[$label] === null or $problem['time'] * 60 < $firstSolve[$label]) {
-                            $firstSolve[$label] = $problem['time'] * 60;
+                        if (
+                            $firstSolve[$name] === null or
+                            $problem['time'] * 60 < $firstSolve[$name]
+                        ) {
+                            $firstSolve[$name] = $problem['time'] * 60;
                         }
                     }
                     $scoreCacheObj
@@ -297,7 +321,7 @@ class ScoreboardMergeCommand extends Command
             null, null, '', false, true, true, $contest, $scoreboard
         );
         $data['hide_menu'] = true;
-        $data['current_public_contest'] = $contest;
+        $data['current_contest'] = $contest;
 
         $output = $this->twig->render('public/scoreboard.html.twig', $data);
         // What files to add to the ZIP file
