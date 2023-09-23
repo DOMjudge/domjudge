@@ -7,7 +7,9 @@
         {% if showExternalId(contest) %}
             {% set contestId = contest.externalid %}
         {% endif %}
-        {% set bannerImage = contestId | assetPath('contest') %}
+        {% if contestId %}
+            {% set bannerImage = contestId | assetPath('contest') %}
+        {% endif %}
     {% endif %}
     {% if bannerImage is not defined or not bannerImage %}
         {% set bannerImage = globalBannerAssetPath() %}
