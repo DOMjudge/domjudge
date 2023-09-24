@@ -1428,8 +1428,23 @@ int main(int argc, char **argv)
 		} else {
 			exitcode = WEXITSTATUS(status);
 		}
+		verbose("child exited with exit code %d", exitcode);
 
-        check_remaining_procs();
+		if ( use_walltime ) {
+			/* Disarm timer we set previously so if any of the
+			 * clean-up steps below are slow we are not mistaking
+			 * this for a wall-time timeout. */
+			itimer.it_interval.tv_sec  = 0;
+			itimer.it_interval.tv_usec = 0;
+			itimer.it_value.tv_sec  = 0;
+			itimer.it_value.tv_usec = 0;
+
+			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
+				error(errno,"disarming timer");
+			}
+		}
+
+		check_remaining_procs();
 
 		double cputime = -1;
 		output_cgroup_stats(&cputime);
