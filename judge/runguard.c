@@ -780,7 +780,7 @@ void setrestrictions()
 	setlim(STACK);
 
 	if ( filesize!=RLIM_INFINITY ) {
-		verbose("setting filesize limit to %d bytes",(int)filesize);
+		verbose("setting filesize limit to %lu bytes",filesize);
 		lim.rlim_cur = lim.rlim_max = filesize;
 		setlim(FSIZE);
 	}
