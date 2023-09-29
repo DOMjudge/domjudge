@@ -200,14 +200,15 @@ class ImportExportService
             return false;
         }
 
-        $contest = new Contest();
+        $newShortNameAndExternalId = preg_replace(
+                $invalid_regex,
+                '_',
+                $data['short_name'] ?? $data['shortname'] ?? $data['short-name'] ?? $data['id']
+            );
+        $contest = $this->em->getRepository(Contest::class)->findOneBy(['externalid' => $newShortNameAndExternalId]) ?: new Contest();
         $contest
             ->setName($data['name'] ?? $data['formal_name'] )
-            ->setShortname(preg_replace(
-                               $invalid_regex,
-                               '_',
-                               $data['short_name'] ?? $data['shortname'] ?? $data['short-name'] ?? $data['id']
-                           ))
+            ->setShortname($newShortNameAndExternalId)
             ->setExternalid($contest->getShortname())
             ->setWarningMessage($data['warning_message'] ?? $data['warning-message'] ?? null)
             ->setStarttimeString(date_format($startTime, 'Y-m-d H:i:s e'))
