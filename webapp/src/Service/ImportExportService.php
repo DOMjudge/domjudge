@@ -877,6 +877,15 @@ class ImportExportService
             $juryTeam = null;
             $roles    = [];
             $type     = $account['type'];
+            $username = $account['username'];
+
+            $icpcRegexChars = "[a-zA-Z0-9@._-]";
+            $icpcRegex = "/^" . $icpcRegexChars . "+$/";
+            if (!preg_match($icpcRegex, $username)) {
+                $message = sprintf('Username "%s" should be non empty and only contain: %s', $username, $icpcRegexChars);
+                return -1;
+            }
+
             // Special case for the World Finals, if the username is CDS we limit the access.
             // The user can see what every admin can see, but can not log in via the UI.
             if (isset($account['username']) && $account['username'] === 'cds') {
@@ -909,7 +918,7 @@ class ImportExportService
                 'user' => [
                     'name'           => $account['name'] ?? null,
                     'externalid'     => $account['id'] ?? $account['username'],
-                    'username'       => $account['username'],
+                    'username'       => $username,
                     'plain_password' => $account['password'] ?? null,
                     'teamid'         => $account['team_id'] ?? null,
                     'user_roles'     => $roles,
