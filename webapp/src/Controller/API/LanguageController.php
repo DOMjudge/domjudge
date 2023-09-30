@@ -10,6 +10,7 @@ use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -120,6 +121,84 @@ class LanguageController extends AbstractRestController
         $language->getCompileExecutable()->setImmutableExecutable($immutableExecutable);
         $this->em->flush();
         $this->dj->auditlog('executable', $language->getLangid(), 'updated');
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Rest\Post('languages')]
+    #[OA\Response(
+        response: 200,
+        description: 'Configure all specified languages.',
+    )]
+    public function configureLanguagesAction(Request $request): Response
+    {
+        /** @var UploadedFile|null $jsonFile */
+        $jsonFile = $request->files->get('json');
+        if (!$jsonFile) {
+            throw new BadRequestHttpException('No JSON file supplied.');
+        }
+        $newLanguages = $this->dj->jsonDecode(file_get_contents($jsonFile->getRealPath()));
+
+        // Disable submission for all current languages, we will enable it for all new languages below.
+        $curLanguages = $this->em->getRepository(Language::class)->findAll();
+        foreach ($curLanguages as $language) {
+            /** @var Language $language */
+            $language->setAllowSubmit(false);
+        }
+
+        $idField = $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid';
+        foreach ($newLanguages as $language) {
+            /** @var Language $language */
+            $lang_id = $language['id'];
+            $lang = $this->em->getRepository(Language::class)->findOneBy(
+                [$idField => $lang_id]
+            );
+            if (!$lang) {
+                continue;
+            }
+            $lang->setAllowSubmit(true);
+            if (isset($language['name'])) {
+                $lang->setName($language['name']);
+            }
+            if (isset($language['allow_submit'])) {
+                $lang->setAllowSubmit($language['allow_submit']);
+            }
+            if (isset($language['allow_judge'])) {
+                $lang->setAllowJudge($language['allow_judge']);
+            }
+            if (isset($language['entry_point_required'])) {
+                $lang->setRequireEntryPoint($language['entry_point_required']);
+            }
+            if (isset($language['entry_point_name'])) {
+                $lang->setEntryPointDescription($language['entry_point_name']);
+            }
+            if (isset($language['extensions'])) {
+                $lang->setExtensions($language['extensions']);
+            }
+            if (isset($language['filter_compiler_files'])) {
+                $lang->setFilterCompilerFiles($language['filter_compiler_files']);
+            }
+            if (isset($language['time_factor'])) {
+                $lang->setTimeFactor($language['time_factor']);
+            }
+            if (isset($language['compiler'])) {
+                if (isset($language['compiler']['version_command'])) {
+                    $lang->setCompilerVersionCommand($language['compiler']['version_command']);
+                }
+                if (isset($language['compiler']['version'])) {
+                    $lang->setCompilerVersion($language['compiler']['version']);
+                }
+            }
+            if (isset($language['runner'])) {
+                if (isset($language['runner']['version_command'])) {
+                    $lang->setRunnerVersionCommand($language['runner']['version_command']);
+                }
+                if (isset($language['runner']['version'])) {
+                    $lang->setRunnerVersion($language['runner']['version']);
+                }
+            }
+        }
+        $this->em->flush();
+        return parent::performListAction($request);
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder
