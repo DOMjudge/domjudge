@@ -153,9 +153,13 @@ class LanguageController extends AbstractRestController
                 [$idField => $lang_id]
             );
             if (!$lang) {
+                // TODO: Decide how to handle this case, either erroring out or creating a new language.
                 continue;
             }
+
+            // We disallowed submission for all languages above, so we need to enable it for the given languages.
             $lang->setAllowSubmit(true);
+
             if (isset($language['name'])) {
                 $lang->setName($language['name']);
             }
@@ -198,6 +202,7 @@ class LanguageController extends AbstractRestController
             }
         }
         $this->em->flush();
+
         return parent::performListAction($request);
     }
 
