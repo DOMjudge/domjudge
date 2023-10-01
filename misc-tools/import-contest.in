@@ -154,9 +154,10 @@ if cid is not None:
 # Problem import is also special: we need to upload each individual problem and detect what they are
 if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path.exists('problemset.yaml'):
     if dj_utils.confirm('Import problems?', True):
-        # Check if our user is linked to a team
+        # Check if our user is linked to a team.
         user_data = dj_utils.do_api_request('user')
-        if not 'team' in user_data and not dj_utils.confirm('No team associated with your account. Jury submissions won\'t be imported. Really continue?', False):
+        has_team_linked = 'team' in user_data and user_data['team'] and 'roles' in user_data and 'team' in user_data['roles']
+        if not has_team_linked and not dj_utils.confirm('No team associated with your account. Jury submissions won\'t be imported. Really continue?', False):
             exit(2)
 
         print('Importing problems.')
