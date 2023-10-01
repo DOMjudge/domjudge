@@ -1504,16 +1504,6 @@ class ExternalContestSourceService
                 $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
                     'message' => 'Cannot add submission: ' . $message,
                 ]);
-                // Clean up the temporary submission files.
-                foreach ($filesToSubmit as $file) {
-                    unlink($file->getRealPath());
-                }
-                if (isset($zip)) {
-                    $zip->close();
-                }
-                if ($shouldUnlink) {
-                    unlink($zipFile);
-                }
                 return;
             }
 
