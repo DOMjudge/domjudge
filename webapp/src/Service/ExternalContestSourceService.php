@@ -1436,86 +1436,86 @@ class ExternalContestSourceService
                         fclose($ziphandler);
                     }
                 }
+            }
 
-                if ($submissionDownloadSucceeded) {
-                    // Open the ZIP file.
-                    $zip = new ZipArchive();
-                    $zip->open($zipFile);
+            if ($submissionDownloadSucceeded) {
+                // Open the ZIP file.
+                $zip = new ZipArchive();
+                $zip->open($zipFile);
 
-                    // Determine the files to submit.
-                    /** @var UploadedFile[] $filesToSubmit */
-                    $filesToSubmit = [];
-                    for ($zipFileIdx = 0; $zipFileIdx < $zip->numFiles; $zipFileIdx++) {
-                        $filename = $zip->getNameIndex($zipFileIdx);
-                        $content = $zip->getFromName($filename);
+                // Determine the files to submit.
+                /** @var UploadedFile[] $filesToSubmit */
+                $filesToSubmit = [];
+                for ($zipFileIdx = 0; $zipFileIdx < $zip->numFiles; $zipFileIdx++) {
+                    $filename = $zip->getNameIndex($zipFileIdx);
+                    $content = $zip->getFromName($filename);
 
-                        if (!($tmpSubmissionFile = tempnam($tmpdir, "submission_source_"))) {
-                            $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
-                                'message' => 'Cannot create temporary file to extract ZIP contents for file ' . $filename,
-                            ]);
-                            $submissionDownloadSucceeded = false;
-                            continue;
-                        }
-                        file_put_contents($tmpSubmissionFile, $content);
-                        $filesToSubmit[] = new UploadedFile(
-                            $tmpSubmissionFile, $filename,
-                            null, null, true
-                        );
+                    if (!($tmpSubmissionFile = tempnam($tmpdir, "submission_source_"))) {
+                        $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
+                            'message' => 'Cannot create temporary file to extract ZIP contents for file ' . $filename,
+                        ]);
+                        $submissionDownloadSucceeded = false;
+                        continue;
                     }
-                } else {
-                    $filesToSubmit = [];
+                    file_put_contents($tmpSubmissionFile, $content);
+                    $filesToSubmit[] = new UploadedFile(
+                        $tmpSubmissionFile, $filename,
+                        null, null, true
+                    );
                 }
+            } else {
+                $filesToSubmit = [];
+            }
 
-                // If the language requires an entry point but we do not have one, use automatic entry point detection.
-                if ($language->getRequireEntryPoint() && $entryPoint === null) {
-                    $entryPoint = '__auto__';
+            // If the language requires an entry point but we do not have one, use automatic entry point detection.
+            if ($language->getRequireEntryPoint() && $entryPoint === null) {
+                $entryPoint = '__auto__';
+            }
+
+            // Submit the solution
+            $contest    = $this->em->getRepository(Contest::class)->find($this->getSourceContestId());
+            $submission = $this->submissionService->submitSolution(
+                team: $team,
+                user: null,
+                problem: $contestProblem,
+                contest: $contest,
+                language: $language,
+                files: $filesToSubmit,
+                source: 'shadowing',
+                entryPoint: $entryPoint,
+                externalId: $submissionId,
+                submitTime: $submitTime,
+                message: $message,
+                forceImportInvalid: !$submissionDownloadSucceeded
+            );
+            if (!$submission) {
+                $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
+                    'message' => 'Cannot add submission: ' . $message,
+                ]);
+                // Clean up the temporary submission files.
+                foreach ($filesToSubmit as $file) {
+                    unlink($file->getRealPath());
                 }
-
-                // Submit the solution
-                $contest    = $this->em->getRepository(Contest::class)->find($this->getSourceContestId());
-                $submission = $this->submissionService->submitSolution(
-                    team: $team,
-                    user: null,
-                    problem: $contestProblem,
-                    contest: $contest,
-                    language: $language,
-                    files: $filesToSubmit,
-                    source: 'shadowing',
-                    entryPoint: $entryPoint,
-                    externalId: $submissionId,
-                    submitTime: $submitTime,
-                    message: $message,
-                    forceImportInvalid: !$submissionDownloadSucceeded
-                );
-                if (!$submission) {
-                    $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
-                        'message' => 'Cannot add submission: ' . $message,
-                    ]);
-                    // Clean up the temporary submission files.
-                    foreach ($filesToSubmit as $file) {
-                        unlink($file->getRealPath());
-                    }
-                    if (isset($zip)) {
-                        $zip->close();
-                    }
-                    if ($shouldUnlink) {
-                        unlink($zipFile);
-                    }
-                    return;
-                }
-
-                // Clean up the ZIP.
                 if (isset($zip)) {
                     $zip->close();
                 }
                 if ($shouldUnlink) {
                     unlink($zipFile);
                 }
+                return;
+            }
 
-                // Clean up the temporary submission files.
-                foreach ($filesToSubmit as $file) {
-                    unlink($file->getRealPath());
-                }
+            // Clean up the ZIP.
+            if (isset($zip)) {
+                $zip->close();
+            }
+            if ($shouldUnlink) {
+                unlink($zipFile);
+            }
+
+            // Clean up the temporary submission files.
+            foreach ($filesToSubmit as $file) {
+                unlink($file->getRealPath());
             }
         }
 
