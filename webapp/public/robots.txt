@@ -3,3 +3,4 @@
 
 User-agent: *
 Disallow: /public/*/attachment/*
+Disallow: /public/team/*
