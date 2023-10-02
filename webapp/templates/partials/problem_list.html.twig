@@ -42,6 +42,18 @@
                                     {% set numsamples = 0 %}
                                 {% endif %}
                                 <div class="card">
+                                    {% if teamScoreboard is defined and current_team is not null %}
+                                        {% set matrixItem = teamScoreboard.matrix[current_team.teamid][problem.probid] %}
+                                        {% if matrixItem.isCorrect %}
+                                            <div class="card-header bg-success text-white font-weight-bold">
+                                                Solved
+                                            </div>
+                                        {% else %}
+                                            <div class="card-header">
+                                                &nbsp;
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
                                     <div class="card-body">
                                         <h2 class="card-title">
                                             {{ problem | problemBadge }}

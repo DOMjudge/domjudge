@@ -621,6 +621,7 @@ tr.ignore td, td.ignore, span.ignore {
     --badge-padding-x: 0.5em;
     font-size: 1em;
     min-width: 2em;
+    white-space: normal;
 }
 
 .tooltip .tooltip-inner {
