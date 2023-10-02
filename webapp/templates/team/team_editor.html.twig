@@ -19,15 +19,58 @@
         .data-table tr:hover {
             background: #ffffcc !important;
         }
+
+        @media only screen and (min-width: 768px) {
+            #problemText .modal-dialog {
+                max-width: 90vw;
+            }
+        }
     </style>
     <script src="{{ asset('js/ace/ace.js') }}"></script>
 {% endblock %}
 
 {% block content %}
 
+    <!-- problem text modal -->
+    <div class="modal fade" id="problemText" tabindex="-1" role="dialog" aria-labelledby="problemTextModal" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <a class="btn btn-outline-secondary" href="{{ path('team_problem_text', {'probId': problem.probid}) }}" download>
+                        <i class="fa-solid fa-download"></i>
+                    </a>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <iframe src="{{ path('team_problem_text', {'probId': problem.probid}) }}"
+                            style="width:100%;height:80vh;border: none;"
+                            allowfullscreen
+                    ></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{ form_start(form) }}
 
-    <ul class="nav justify-content-end my-2">
+    <ul class="nav mt-3 mb-2">
+        <!-- Left side buttons -->
+        <li class="nav-item">
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    data-toggle="modal"
+                    data-target="#problemText">
+                <i class="fas fa-file-{{ problem.problemtextType }}"></i>
+                Specification
+            </button>
+        </li>
+
+        <!-- Spacer to push the right buttons to the end -->
+        <li class="nav-item ml-auto"></li>
+
+        <!-- Right side buttons -->
         <li class="nav-item my-1 mr-2">
             {{ form_widget(form.save) }}
         </li>
