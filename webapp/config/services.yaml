@@ -13,6 +13,7 @@ parameters:
     removed_intervals: false
     image_directory: '%kernel.project_dir%/public/media/images'
     # The actions for which to add the CID to the URL.
+    # Attention: this will apply across all controllers containing handlers named this way
     contest_id_url_actions: ['scoreboardAction', 'problemsAction']
 
 services:

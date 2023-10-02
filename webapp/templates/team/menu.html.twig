@@ -17,7 +17,7 @@
             <li class="nav-item">
                 {% if current_team_contest is not null and (is_granted('ROLE_JURY') or current_team_contest.freezeData.started) %}
                     <a class="nav-link{% if current_route == 'team_problems' %} active{% endif %}"
-                        href="{{ path('team_problems') }}">
+                        href="{{ path('team_problems', {'cid': current_team_contest.cid}) }}">
                         <i class="fas fa-book-open"></i> Problemset
                     </a>
                 {% else %}
@@ -39,7 +39,7 @@
             {% if enable_ranking %}
                 <li class="nav-item">
                     <a class="nav-link{% if current_route in ['team_scoreboard', 'team_team'] %} active{% endif %}"
-                        href="{{ path('team_scoreboard') }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
+                        href="{{ path('team_scoreboard', {'cid': current_team_contest.cid}) }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
                 </li>
             {% endif %}
             {% if doc_links is not empty %}
