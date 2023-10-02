@@ -209,8 +209,8 @@ class BlogController extends BaseController
             $this->em->flush();
 
             $blogpostId = $blogPost->getBlogpostid();
-            $this->dj->auditlog('blog_post', $blogpostId, 'added');
-            $this->eventLogService->log('blog_post', $blogpostId, 'create');
+            $this->dj->auditlog('blog_post', $blogpostId, $editing ? 'edited' : 'added');
+            $this->eventLogService->log('blog_post', $blogpostId, $editing ? 'edited' : 'added');
 
             if (!$blogPost->isPublished()) {
                 return $this->redirectToRoute('jury_blog');
