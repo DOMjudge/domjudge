@@ -18,12 +18,12 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link{% if current_route in ['public_scoreboard', 'public_team'] %} active{% endif %}"
-                    href="{{ path('public_scoreboard') }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
+                    href="{{ path('public_scoreboard', {'cid': current_public_contest.cid}) }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
             </li>
             <li class="nav-item">
                 {% if is_granted('ROLE_JURY') or (current_public_contest is not null and current_public_contest.freezeData.started) %}
                     <a class="nav-link{% if current_route == 'public_problems' %} active{% endif %}"
-                        href="{{ path('public_problems') }}">
+                        href="{{ path('public_problems', {'cid': current_public_contest.cid}) }}">
                         <i class="fas fa-book-open"></i> Problemset
                     </a>
                 {% else %}
