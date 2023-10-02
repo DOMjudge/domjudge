@@ -37,7 +37,7 @@ class PublicController extends BaseController
         protected readonly EntityManagerInterface $em
     ) {}
 
-    #[Route(path: '', name: 'public_index')]
+    #[Route(path: '')]
     public function homepageAction(): Response {
         /** @var BlogPost[] $blogPosts */
         $blogPosts = $this->em->getRepository(BlogPost::class)

@@ -8,6 +8,7 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -21,7 +22,8 @@ class RootController extends BaseController
     }
 
     #[Route(path: '', name: 'root')]
-    public function redirectAction(AuthorizationCheckerInterface $authorizationChecker): RedirectResponse
+    #[Route(path: '', name: 'public_index')]
+    public function redirectAction(AuthorizationCheckerInterface $authorizationChecker): Response
     {
         if ($authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
             if ($this->dj->checkrole('jury')) {
@@ -37,7 +39,7 @@ class RootController extends BaseController
                 return $this->redirectToRoute('jury_clarifications');
             }
         }
-        return $this->redirectToRoute('public_index');
+        return $this->forward(PublicController::class . '::homepageAction');
     }
 
     #[Route(path: '/markdown-preview', name: 'markdown_preview', methods: ['POST'])]

@@ -71,7 +71,7 @@ security:
 
             logout:
                 path:   logout
-                target: /public
+                target: public_index
 
     access_control:
         - { path: ^/$, roles: PUBLIC_ACCESS }
