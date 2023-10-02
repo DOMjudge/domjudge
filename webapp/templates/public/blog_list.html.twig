@@ -17,7 +17,13 @@
         <nav>
             <ul class="pagination justify-content-center">
                 <li class="page-item{% if page < 2 %} disabled{% endif %}">
-                    <a class="page-link" href="{{ path('public_blog_list', {'page': page - 1}) }}">Previous</a>
+                    <a class="page-link"
+                        {% if page >= 2 %}
+                            href="{{ path('public_blog_list', {'page': page - 1}) }}"
+                        {% else %}
+                            href="#"
+                        {% endif %}
+                    >Previous</a>
                 </li>
 
                 {% if page >= 2 %}
@@ -39,7 +45,13 @@
                 {% endif %}
 
                 <li class="page-item {% if page >= totalPages %} disabled{% endif %}">
-                    <a class="page-link" href="{{ path('public_blog_list', {'page': page + 1}) }}">Next</a>
+                    <a class="page-link"
+                       {% if page < totalPages %}
+                           href="{{ path('public_blog_list', {'page': page + 1}) }}"
+                       {% else %}
+                           href="#"
+                       {% endif %}
+                    >Next</a>
                 </li>
             </ul>
         </nav>
