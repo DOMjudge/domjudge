@@ -4,3 +4,5 @@
 User-agent: *
 Disallow: /public/*/attachment/*
 Disallow: /public/team/*
+Disallow: /public/problems/*/text
+Disallow: /public/*/samples.zip
