@@ -27,7 +27,7 @@
         <link rel="stylesheet" href="{{ asset('css/custom/' ~ file) }}">
     {% endfor %}
 
-    {% if google_analytics_tracking_id != '' %}
+    {% if google_analytics_tracking_id is not empty %}
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_analytics_tracking_id }}"></script>
         <script>
