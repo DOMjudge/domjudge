@@ -27,7 +27,8 @@
                 3x první místo a 2x byli druzí. Škola DELTA je také známá aktivní komunitou svých absolventů a studentů,
                 která se školou často spolupracuje na společných projektech.
             </p>
-            <img class="align-self-center" style="max-height: 150px" src="{{ asset('images/hacker/school-logo.webp') }}" alt="Logo DELTY">
+            <img class="align-self-center" style="max-height: 150px" src="{{ asset('images/hacker/school-logo.webp') }}"
+                 alt="Logo DELTY">
         </div>
 
         <img class="img-fluid mb-3" src="{{ asset('images/hacker/soc.webp') }}" alt="Výsledky DELTY v SOČ">
@@ -53,6 +54,14 @@
             Je ředitelem školy DELTA. Pardubického hackera vymyslel, rozdal úkoly a stará se o shánění peněz na
             realizaci celého projektu.
         </p>
+        {% if discord_invite_url != "" %}
+            <p class="mt-3">
+                Pro účely komunikace s účastníky soutěže jsme založili také
+                <a target="_blank" href="{{ discord_invite_url }}">Discord server</a>. Tam mohou soutěžící
+                polokládat otázky. Ty jsou viditelné pro všechny členy, kteří se mohou setkat s podobným problémem.
+            </p>
+        {% endif %}
+
         <h2>
             Projekt finančně podporují
         </h2>
