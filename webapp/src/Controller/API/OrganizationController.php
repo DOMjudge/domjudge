@@ -100,7 +100,7 @@ class OrganizationController extends AbstractRestController
      * Get the logo for the given organization.
      */
     #[Rest\Get('contests/{cid}/organizations/{id}/logo', name: 'organization_logo')]
-    #[Rest\Get('organizations/{id}/logo')]
+    #[Rest\Get('organizations/{id}/logo', name: 'no_contest_organization_logo')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given organization logo in PNG, JPG or SVG format',

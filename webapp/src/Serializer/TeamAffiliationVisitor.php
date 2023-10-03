@@ -84,13 +84,17 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
             $parts     = explode('.', $affiliationLogo);
             $extension = $parts[count($parts) - 1];
 
-            $route = $this->dj->apiRelativeUrl(
-                'v4_organization_logo',
-                [
-                    'cid' => $this->requestStack->getCurrentRequest()->attributes->get('cid'),
-                    'id'  => $id,
-                ]
-            );
+            if ($cid = $this->requestStack->getCurrentRequest()->attributes->get('cid')) {
+                $route = $this->dj->apiRelativeUrl(
+                    'v4_organization_logo',
+                    [
+                        'cid' => $cid,
+                        'id'  => $id,
+                    ]
+                );
+            } else {
+                $route = $this->dj->apiRelativeUrl('v4_no_contest_organization_logo', ['id' => $id]);
+            }
             $property = new StaticPropertyMetadata(
                 TeamAffiliation::class,
                 'logo',

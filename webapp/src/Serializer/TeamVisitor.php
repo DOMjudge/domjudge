@@ -62,13 +62,17 @@ class TeamVisitor implements EventSubscriberInterface
 
         $imageSize = Utils::getImageSize($teamPhoto);
 
-        $route = $this->dj->apiRelativeUrl(
-            'v4_team_photo',
-            [
-                'cid' => $this->requestStack->getCurrentRequest()->attributes->get('cid'),
-                'id'  => $id,
-            ]
-        );
+        if ($cid = $this->requestStack->getCurrentRequest()->attributes->get('cid')) {
+            $route = $this->dj->apiRelativeUrl(
+                'v4_team_photo',
+                [
+                    'cid' => $cid,
+                    'id'  => $id,
+                ]
+            );
+        } else {
+            $route = $this->dj->apiRelativeUrl('v4_no_contest_team_photo', ['id' => $id,]);
+        }
         $property = new StaticPropertyMetadata(
             Team::class,
             'photo',
