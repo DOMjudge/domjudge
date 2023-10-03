@@ -68,7 +68,10 @@ def import_images(entity: str, property: str, filename_regexes: List[str]):
     if not os.path.isdir(entity):
         return
     images_per_entity = {}
-    for entity_id in listdir(entity):
+    with open(f'{entity}.json') as entityFile:
+        entities = json.load(entityFile)
+    entity_ids = [entity['id'] for entity in entities]
+    for entity_id in entity_ids:
         entity_dir = f'{entity}/{entity_id}'
         if not os.path.isdir(entity_dir):
             continue
