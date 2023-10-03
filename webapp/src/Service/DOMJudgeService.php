@@ -654,7 +654,13 @@ class DOMJudgeService
             return null;
         }
 
-        return $this->jsonDecode($response->getContent());
+        $content = $response->getContent();
+
+        if ($content === '') {
+            return null;
+        }
+
+        return $this->jsonDecode($content);
     }
 
     public function getDomjudgeEtcDir(): string
