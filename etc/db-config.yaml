@@ -438,3 +438,8 @@
             default_value: ""
             public: false
             description: The tracking ID for Google Analytics.
+        -   name: discord_invite_url
+            type: string
+            default_value: ""
+            public: true
+            description: The invite link to the contest Discord server.
