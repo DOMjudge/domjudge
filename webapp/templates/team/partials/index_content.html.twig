@@ -49,13 +49,20 @@
                     <a href="{{ path('public_help') }}">nápovědě</a>.
                 </p>
 
-                <p>
+                <p class="mb-2">
                     V případě komplikací, nejasností nebo dotazů nás můžete kontaktovat pomocí tlačítka níže.
                 </p>
 
                 <a href="{{ path('team_clarification_add') }}" class="btn btn-primary" data-ajax-modal data-ajax-modal-after="initModalClarificationPreviewAdd">
                     <i class="fa-solid fa-hand"></i> Request clarification
                 </a>
+
+                {% if discord_invite_url != "" %}
+                    <p class="mt-3">
+                        Případně můžete zavítat na náš <a target="_blank" href="{{ discord_invite_url }}">Discord</a>
+                        a položit dotaz tam.
+                    </p>
+                {% endif %}
             </div>
         </div>
     </div>
