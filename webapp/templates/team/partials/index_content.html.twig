@@ -57,7 +57,7 @@
                     <i class="fa-solid fa-hand"></i> Request clarification
                 </a>
 
-                {% if discord_invite_url != "" %}
+                {% if discord_invite_url is not empty %}
                     <p class="mt-3">
                         Případně můžete zavítat na náš <a target="_blank" href="{{ discord_invite_url }}">Discord</a>
                         a položit dotaz tam.

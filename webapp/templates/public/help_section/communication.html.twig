@@ -26,8 +26,8 @@
     <p>
         Do stejné sekce vám dorazí i odpověď.
     </p>
-    
-    {% if discord_invite_url != "" %}
+
+    {% if discord_invite_url is not empty %}
         <p>
             Případně můžete zavítat na náš <a target="_blank" href="{{ discord_invite_url }}">Discord</a>
             a položit dotaz tam.
