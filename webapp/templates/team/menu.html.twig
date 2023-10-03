@@ -57,6 +57,16 @@
                 </a>
             </li>
 
+            {% if discord_invite_url != "" %}
+                <li class="nav-item">
+                    <a class="nav-link"
+                       target="_blank"
+                       href="{{ discord_invite_url }}">
+                        <i class="fa-brands fa-discord"></i>
+                    </a>
+                </li>
+            {% endif %}
+
             {% if is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('jury_index') }}"><i class="fas fa-arrow-right"></i> Jury</a>
