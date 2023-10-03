@@ -113,7 +113,7 @@ class TeamController extends AbstractRestController
      * Get the photo for the given team.
      */
     #[Rest\Get('contests/{cid}/teams/{id}/photo', name: 'team_photo')]
-    #[Rest\Get('teams/{id}/photo')]
+    #[Rest\Get('teams/{id}/photo', name: 'no_contest_team_photo')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given team photo in PNG, JPG or SVG format',
