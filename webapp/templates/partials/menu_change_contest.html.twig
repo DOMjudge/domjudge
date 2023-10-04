@@ -1,17 +1,35 @@
-<li class="nav-item dropdown">
+<li class="nav-item dropdown" style="padding-left: 10px;">
     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownContests" role="button" data-bs-toggle="dropdown"
        aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-trophy"></i> {{ contest.shortname|default('no contest') }}
+        <i class="fas fa-trophy"></i>
     </a>
-    <div class="dropdown-menu scrollable-menu" aria-labelledby="navbarDropdown" data-current-contest="{{ current_contest_id }}">
-        <a class="dropdown-item disabled" href="#">Change Contest</a>
+    <div class="dropdown-menu dropdown-menu-right scrollable-menu" aria-labelledby="navbarDropdown" data-current-contest="{{ current_contest_id }}">
         {% if show_no_contest and contest is not empty %}
             <a class="dropdown-item" href="{{ path(change_path, {'contestId': -1}) }}">no contest</a>
             <div class="dropdown-divider"></div>
         {% endif %}
-        {% for c in contests | filter(c => c != contest) %}
-            <a class="dropdown-item"
-               href="{{ path(change_path, {'contestId': c.cid}) }}">{{ c.shortname }}</a>
-        {% endfor %}
+
+        {% set active_contests = contests | filter(c => not c.getState().finalized) %}
+        {% set finalized_contests = contests | filter(c => c.getState().finalized) %}
+
+        {% if active_contests is not empty %}
+            <span class="dropdown-header px-3 text-center">Active Contests</span>
+            {% for c in active_contests %}
+                <a class="dropdown-item {{ c == contest ? "active" : "" }}"
+                   href="{{ c == contest ? '#' : path(change_path, {'contestId': c.cid}) }}">
+                    {{ c.shortname }}
+                </a>
+            {% endfor %}
+        {% endif %}
+
+        {% if finalized_contests is not empty %}
+            <span class="dropdown-header px-3 text-center">Finalized Contests</span>
+            {% for c in finalized_contests %}
+                <a class="dropdown-item {{ c == contest ? "active" : "" }}"
+                   href="{{ c == contest ? '#' : path(change_path, {'contestId': c.cid}) }}">
+                    {{ c.shortname }}
+                </a>
+            {% endfor %}
+        {% endif %}
     </div>
 </li>
