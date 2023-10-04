@@ -1,17 +1,17 @@
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-    <a class="btn btn-info btn-sm me-2" href="{{ path('logout') }}"
+    <a class="dropdown-item" href="{{ path('logout') }}"
     {% if confirmLogout is defined %}
         onclick="return confirmLogout();"
     {% endif %}>
-        <i class="fas fa-sign-out-alt"></i> Logout
+        <i class="fas fa-sign-out-alt fa-fw"></i> Logout
     </a>
 {% else %}
     {% if allow_registration %}
-        <a class="btn btn-info btn-sm justify-content-center me-2" href="{{ path('register') }}">
-            <i class="fas fa-user-plus"></i> Register
+        <a class="dropdown-item" href="{{ path('register') }}">
+            <i class="fas fa-user-plus fa-fw"></i> Register
         </a>
     {% endif %}
-    <a class="btn btn-info btn-sm me-2" href="{{ path('login') }}">
-        <i class="fas fa-sign-in-alt"></i> Login
+    <a class="dropdown-item" href="{{ path('login') }}">
+        <i class="fas fa-sign-in-alt fa-fw"></i> Login
     </a>
 {% endif %}

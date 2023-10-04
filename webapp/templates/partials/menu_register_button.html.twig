@@ -1,0 +1,5 @@
+{% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+    <a class="dropdown-item" href="{{ path('register') }}">
+        <i class="fa-solid fa-user-plus fa-fw"></i> Register
+    </a>
+{% endif %}
