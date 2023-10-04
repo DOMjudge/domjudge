@@ -37,6 +37,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\Index(columns: ['cid', 'enabled'], name: 'cid')]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[ORM\UniqueConstraint(name: 'shortname', columns: ['shortname'], options: ['lengths' => [190]])]
+#[ORM\UniqueConstraint(name: 'ranknumber_unique', columns: ['ranknumber'])]
 #[ORM\HasLifecycleCallbacks]
 #[Serializer\VirtualProperty(
     name: 'formalName',
@@ -330,6 +331,17 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     )]
     #[Serializer\Exclude]
     private ?string $contestProblemsetType = null;
+
+    #[ORM\Column(
+        type: 'integer',
+        name: '`ranknumber`',
+        options: [
+            'comment' => 'Determines order of the contests',
+            'unsigned' => true
+        ],
+        nullable: false
+    )]
+    private int $ranknumber;
 
     /**
      * @var Collection<int, Team>
@@ -873,6 +885,17 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     {
         $this->isLocked = $isLocked;
         return $this;
+    }
+
+    public function setRank(int $rank): Contest
+    {
+        $this->ranknumber = $rank;
+        return $this;
+    }
+
+    public function getRank(): int
+    {
+        return $this->ranknumber;
     }
 
     public function addTeam(Team $team): Contest

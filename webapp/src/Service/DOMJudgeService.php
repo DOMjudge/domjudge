@@ -149,7 +149,8 @@ class DOMJudgeService
         $qb->andWhere('c.enabled = 1')
             ->andWhere('c.deactivatetime IS NULL OR c.deactivatetime > :now')
             ->setParameter('now', $now)
-            ->orderBy('c.activatetime');
+            ->orderBy('c.ranknumber')
+            ->addOrderBy('c.activatetime');
 
         if (!$alsofuture) {
             $qb->andWhere('c.activatetime <= :now');

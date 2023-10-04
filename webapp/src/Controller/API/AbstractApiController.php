@@ -43,6 +43,7 @@ abstract class AbstractApiController extends AbstractFOSRestController
             ->from(Contest::class, 'c')
             ->select('c')
             ->andWhere('c.enabled = 1')
+            ->orderBy('c.ranknumber')
             ->orderBy('c.activatetime');
 
         if ($onlyActive || !$this->dj->checkrole('api_reader')) {

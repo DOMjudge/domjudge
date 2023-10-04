@@ -75,17 +75,18 @@ class ContestController extends BaseController
         $contests = $em->createQueryBuilder()
             ->select('c')
             ->from(Contest::class, 'c')
-            ->orderBy('c.starttime', 'DESC')
+            ->orderBy('c.ranknumber')
             ->groupBy('c.cid')
             ->getQuery()->getResult();
 
         $table_fields = [
+            'rank'         => ['title' => 'rank', 'sort' => true,
+                'default_sort' => true, 'default_sort_order' => 'asc'],
             'cid'          => ['title' => 'CID', 'sort' => true],
             'shortname'    => ['title' => 'shortname', 'sort' => true],
             'name'         => ['title' => 'name', 'sort' => true],
             'activatetime' => ['title' => 'activate', 'sort' => true],
-            'starttime'    => ['title' => 'start', 'sort' => true,
-                               'default_sort' => true, 'default_sort_order' => 'desc'],
+            'starttime'    => ['title' => 'start', 'sort' => true],
             'endtime'      => ['title' => 'end', 'sort' => true],
         ];
 
@@ -168,6 +169,22 @@ class ContestController extends BaseController
                     $contestactions[] = [];
                     $contestactions[] = [];
                 } else {
+                    $contestactions[] = [
+                        'icon' => 'caret-up',
+                        'title' => 'move up this contest',
+                        'link' => $this->generateUrl('jury_contest_move', [
+                            'contestId' => $contest->getCid(),
+                            'direction' => 'up'
+                        ])
+                    ];
+                    $contestactions[] = [
+                        'icon' => 'caret-down',
+                        'title' => 'move down this contest',
+                        'link' => $this->generateUrl('jury_contest_move', [
+                            'contestId' => $contest->getCid(),
+                            'direction' => 'down'
+                        ])
+                    ];
                     $contestactions[] = [
                         'icon' => 'edit',
                         'title' => 'edit this contest',
@@ -295,7 +312,7 @@ class ContestController extends BaseController
             ->andWhere('c.activatetime > :now')
             ->andWhere('c.enabled = 1')
             ->setParameter('now', Utils::now())
-            ->orderBy('c.activatetime')
+            ->orderBy('c.ranknumber')
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
@@ -595,8 +612,25 @@ class ContestController extends BaseController
             return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+        $oldRank = $contest->getRank();
+        $response = $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
                                      [$contest], $this->generateUrl('jury_contests'));
+
+        if (!$request->isMethod('POST')) {
+            return $response;
+        }
+
+        $this->em->clear();
+        /** @var Contest[] $contests */
+        $contests = $this->em->getRepository(Contest::class)->findBy([], ['ranknumber' => 'ASC']);
+        foreach ($contests as $contest) {
+            if ($contest->getRank() > $oldRank) {
+                $contest->setRank($contest->getRank() - 1);
+            }
+        }
+        $this->em->flush();
+
+        return $response;
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -642,6 +676,9 @@ class ContestController extends BaseController
             }
 
             $this->em->wrapInTransaction(function () use ($contest) {
+                $contestsCount = $this->em->getRepository(Contest::class)->count([]);
+                $contest->setRank($contestsCount + 1);
+
                 // A little 'hack': we need to first persist and save the
                 // contest, before we can persist and save the problem,
                 // because we need a contest ID.
@@ -1066,5 +1103,67 @@ class ContestController extends BaseController
         }
 
         return $contest->getContestProblemsetStreamedResponse();
+    }
+
+    #[Route(
+        '/{contestId<\d+>}/move/{direction<up|down>}',
+        name: 'jury_contest_move'
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function moveContestAction(int $contestId, string $direction): Response
+    {
+        /** @var Contest $contest */
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
+        }
+
+        /** @var Contest[] $contests */
+        $contests = $this->em->createQueryBuilder()
+            ->from(Contest::class, 'c')
+            ->select('c')
+            ->orderBy('c.ranknumber')
+            ->getQuery()
+            ->getResult();
+
+        // First find contest to switch with.
+        /** @var Contest|null $last */
+        $last = null;
+        /** @var Contest|null $other */
+        $other = null;
+        /** @var Contest|null $current */
+        $current = $contest;
+
+        $numContests = count($contests);
+
+        foreach ($contests as $currentContest) {
+            if ($currentContest->getCid() === $contestId && $direction === 'up') {
+                $other = $last;
+                break;
+            }
+            if ($last !== null && $contestId === $last->getCid() && $direction === 'down') {
+                $other = $currentContest;
+                break;
+            }
+            $last = $currentContest;
+        }
+
+        if ($other !== null) {
+            // (rank) is a unique key, so we must switch via a temporary rank, and use a transaction.
+            $this->em->wrapInTransaction(function () use ($current, $other, $numContests) {
+                $otherRank = $other->getRank();
+                $currentRank = $current->getRank();
+                $other->setRank($numContests + 1);
+                $current->setRank($numContests + 2);
+                $this->em->flush();
+                $current->setRank($otherRank);
+                $other->setRank($currentRank);
+            });
+
+            $this->dj->auditlog('contest', $contestId, 'switch rank',
+                sprintf("%d <=> %d", $current->getRank(), $other->getRank()));
+        }
+
+        return $this->redirect($this->generateUrl('jury_contests'));
     }
 }
