@@ -1079,7 +1079,7 @@ function compile(
 ): bool {
     global $myhost, $EXITCODES;
 
-    // Re-use compilation if it already exists.
+    // Reuse compilation if it already exists.
     if (file_exists("$workdir/compile.success")) {
         return true;
     }

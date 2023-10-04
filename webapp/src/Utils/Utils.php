@@ -335,7 +335,7 @@ class Utils
     }
 
     /**
-     * Comvert an RGB component to its hex value.
+     * Convert an RGB component to its hex value.
      */
     public static function componentToHex(int $component): string
     {
