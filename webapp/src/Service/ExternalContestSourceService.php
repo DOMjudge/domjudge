@@ -308,11 +308,14 @@ class ExternalContestSourceService
                 $fullUrl .= '&since_token=' . $this->getLastReadEventId();
             }
             $response = $this->httpClient->request('GET', $fullUrl, ['buffer' => false]);
-            if ($response->getStatusCode() !== 200) {
+            $statusCode = $response->getStatusCode();
+            $this->source->setLastHTTPCode($statusCode);
+            $this->em->flush();
+            if ($statusCode !== 200) {
                 $this->logger->warning(
                     'Received non-200 response code %d, waiting for five seconds ' .
                     'and trying again. Press ^C to quit.',
-                    [$response->getStatusCode()]
+                    [$statusCode]
                 );
                 sleep(5);
                 continue;
