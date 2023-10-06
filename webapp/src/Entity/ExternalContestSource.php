@@ -49,6 +49,13 @@ class ExternalContestSource
     )]
     private ?float $lastPollTime = null;
 
+    #[ORM\Column(
+        type: 'smallint',
+        nullable: true,
+        options: ['comment' => 'Last HTTP code received by event feed reader', 'unsigned' => true]
+    )]
+    public ?int $lastHTTPCode = null;
+
     #[ORM\ManyToOne(inversedBy: 'externalContestSources')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     private Contest $contest;
@@ -174,6 +181,17 @@ class ExternalContestSource
     public function getShortDescription(): string
     {
         return $this->getSource();
+    }
+
+    public function setLastHTTPCode(?int $lastHTTPCode): ExternalContestSource
+    {
+        $this->lastHTTPCode = $lastHTTPCode;
+        return $this;
+    }
+
+    public function getLastHTTPCode(): ?int
+    {
+        return $this->lastHTTPCode;
     }
 
     #[Assert\Callback]

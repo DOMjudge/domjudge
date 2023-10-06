@@ -394,7 +394,7 @@ class DOMJudgeService
                     ->select('ecs.extsourceid', 'ecs.lastPollTime')
                     ->from(ExternalContestSource::class, 'ecs')
                     ->andWhere('ecs.contest = :contest')
-                    ->andWhere('ecs.lastPollTime < :i OR ecs.lastPollTime is NULL')
+                    ->andWhere('ecs.lastPollTime < :i OR ecs.lastPollTime is NULL OR ecs.lastHTTPCode != 200')
                     ->setParameter('contest', $contest)
                     ->setParameter('i', time() - $this->config->get('external_contest_source_critical'))
                     ->getQuery()->getOneOrNullResult();
