@@ -214,8 +214,8 @@ if [ "$DISTRO" = 'Ubuntu' ]; then
 
     # Which debootstrap package to install on non-Ubuntu systems:
     # This is only used when the default distro changed from Debian to
-    # Ubuntu. The version below corresponds to Ubuntu 20.04 Focal.
-    DEBOOTDEB="debootstrap_1.0.118ubuntu1_all.deb"
+    # Ubuntu. The version below corresponds to Ubuntu 22.04 Jammy.
+    DEBOOTDEB="debootstrap_1.0.126+nmu1_all.deb"
 
     # The Debian mirror/proxy below can be passed as environment
     # variables; if none are given the following defaults are used.
