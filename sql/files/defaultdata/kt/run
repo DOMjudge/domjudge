@@ -19,7 +19,7 @@ COMPILESCRIPTDIR="$(dirname "$0")"
 # Note that you then also might want to fix this in the compiler and runner version commands.
 # For example
 # KOTLIN_DIR=/usr/lib/kotlinc/bin
-KOTLIN_DIR="$(dirname "$(command -v kotlinc)")"
+KOTLIN_DIR="$(dirname "$(realpath "$(command -v kotlinc)")")"
 
 # Stack size in the JVM in KB. Note that this will be deducted from
 # the total memory made available for the heap.
