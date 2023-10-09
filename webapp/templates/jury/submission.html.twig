@@ -42,6 +42,26 @@
         </div>
     {% endif %}
 
+    {% if selectedJudging is not null and selectedJudging.result is not empty %}
+        {% if selectedJudging.result|upper not in submission.expectedResults %}
+            <div class="alert alert-danger">
+                Actual result is {{ selectedJudging.result | printValidJuryResult }} while the expected result is one of:
+                {% for expectedResult in submission.expectedResults %}
+                    {{ expectedResult | printValidJuryResult }}
+                    {% if not loop.last %}or{% endif %}
+                {% endfor %}.
+            </div>
+        {% elseif submission.expectedResults|length > 1 %}
+            <div class="alert alert-warning">
+                Actual result is {{ selectedJudging.result | printValidJuryResult }} while the expected result is one of:
+                {% for expectedResult in submission.expectedResults %}
+                    {{ expectedResult | printValidJuryResult }}
+                    {% if not loop.last %}or{% endif %}
+                {% endfor %}.
+            </div>
+        {% endif %}
+    {% endif %}
+
     <div class="mb-3">
         <h1 style="display: inline;">
             Submission {{ submission.submitid }}
