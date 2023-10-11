@@ -53,7 +53,7 @@
             </div>
         {% elseif submission.expectedResults|length > 1 %}
             <div class="alert alert-warning">
-                Actual result is {{ selectedJudging.result | printValidJuryResult }} while the expected result is one of:
+                Actual result {{ selectedJudging.result | printValidJuryResult }} matches one of multiple expected results:
                 {% for expectedResult in submission.expectedResults %}
                     {{ expectedResult | printValidJuryResult }}
                     {% if not loop.last %}or{% endif %}
