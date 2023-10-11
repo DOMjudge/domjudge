@@ -45,7 +45,7 @@
     {% if selectedJudging is not null and selectedJudging.result is not empty %}
         {% if selectedJudging.result|upper not in submission.expectedResults %}
             <div class="alert alert-danger">
-                Actual result is {{ selectedJudging.result | printValidJuryResult }} while the expected result is one of:
+                Actual result {{ selectedJudging.result | printValidJuryResult }} does NOT match expected result(s):
                 {% for expectedResult in submission.expectedResults %}
                     {{ expectedResult | printValidJuryResult }}
                     {% if not loop.last %}or{% endif %}
