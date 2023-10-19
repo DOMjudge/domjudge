@@ -10,6 +10,7 @@ BINDIR="@domserver_bindir@"
 ETCDIR="@domserver_etcdir@"
 WEBAPPDIR="@domserver_webappdir@"
 EXAMPLEPROBDIR="@domserver_exampleprobdir@"
+DATABASEDUMPDIR="@domserver_databasedumpdir@"
 
 PASSWDFILE="$ETCDIR/dbpasswords.secret"
 
@@ -22,7 +23,7 @@ verbose()
 
 usage() {
 	cat <<EOF
-Usage: $0 [option]... <command>
+Usage: $0 [option]... <command> [argument]
 
 Commands:
   status           check database installation status
@@ -34,6 +35,7 @@ Commands:
   install-examples install examples only
   install-loadtest configure for load testing. WARNING: CREATES A LOT OF EXTRA ITEMS!
   upgrade          upgrade MySQL database schema to current version
+  dump [filename]  backup the current database to file (without .sql.gz suffix)
 
 Options:
   -u <user>  connect to MySQL with DB admin <user>
@@ -48,8 +50,7 @@ not have to pass any of the options above.
 EOF
 }
 
-# Wrapper around mysql command to allow setting options, user, etc.
-mysql()
+mysql_options()
 {
 	local user pass
 
@@ -68,7 +69,13 @@ mysql()
 	fi
 
 	[ -z "$USE_SOCKET" ] && port="-P$DBPORT"
-	command mysql $user ${pass:+"$pass"} -h "$DBHOST" ${port:+"$port"} --silent --skip-column-names "$@"
+	echo $user ${pass:+"$pass"} -h "$DBHOST" ${port:+"$port"}
+}
+
+# Wrapper around mysql command to allow setting options, user, etc.
+mysql()
+{
+	command mysql $(mysql_options) --silent --skip-column-names "$@"
 }
 
 # Quick shell hack to get a key from an INI file.
@@ -234,6 +241,10 @@ install_examples()
 	( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
 }
 
+create_database_dump () {
+	sudo mysqldump $(mysql_options) --opt --skip-lock-tables domjudge | pv | gzip > "$DATABASEDUMPDIR/${1}.sql.gz"
+}
+
 ### Script starts here ###
 
 # Parse command-line options:
@@ -352,6 +363,27 @@ upgrade)
 	symfony_console doctrine:migrations:migrate -n
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
 	verbose "DOMjudge database upgrade completed."
+	;;
+
+dump)
+	read_dbpasswords
+	DUMPNAME="$2"
+	if [ -z "$DUMPNAME" ]; then
+		usage
+		exit 1
+	fi
+
+	if [ -f "${DATABASEDUMPDIR}/${DUMPNAME}.sql.gz" ]; then
+		while true; do
+			read -p "Overwrite existing database dump (y/N)? " yn
+			case $yn in
+				[Yy]* ) break ;;
+				''|[Nn]* ) exit 0;;
+			esac
+		done
+	fi
+	create_database_dump $DUMPNAME
+	exit 0
 	;;
 
 *)
