@@ -210,6 +210,7 @@ inplace-conf-common: dist
 	            --with-domserver_tmpdir=$(CURDIR)/output/tmp \
 	            --with-judgehost_tmpdir=$(CURDIR)/output/tmp \
 	            --with-judgehost_judgedir=$(CURDIR)/output/judgings \
+	            --with-domserver_databasedumpdir=$(CURDIR)/output/db-dumps \
 	            --with-baseurl='http://localhost/domjudge/' \
 	            CFLAGS='$(MAINT_CXFLAGS) -std=c11' \
 	            CXXFLAGS='$(MAINT_CXFLAGS) -std=c++11' \
