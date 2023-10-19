@@ -36,6 +36,7 @@ Commands:
   install-loadtest configure for load testing. WARNING: CREATES A LOT OF EXTRA ITEMS!
   upgrade          upgrade MySQL database schema to current version
   dump [filename]  backup the current database to file (without .sql.gz suffix)
+  load [filename]  load a backup from file (without .sql.gz suffix), REMOVES ALL PREVIOUS DATA!
 
 Options:
   -u <user>  connect to MySQL with DB admin <user>
@@ -241,6 +242,19 @@ install_examples()
 	( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
 }
 
+uninstall_helper()
+{
+	read_dbpasswords
+	remove_db_users
+}
+
+create_db_users_helper()
+{
+	read_dbpasswords
+	create_db_users
+	verbose "Created empty database and users."
+}
+
 create_database_dump () {
 	sudo mysqldump $(mysql_options) --opt --skip-lock-tables domjudge | pv | gzip > "$DATABASEDUMPDIR/${1}.sql.gz"
 }
@@ -301,8 +315,7 @@ genpass)
 	;;
 
 uninstall)
-	read_dbpasswords
-	remove_db_users
+	uninstall_helper
 	;;
 
 install-examples)
@@ -321,9 +334,7 @@ install-loadtest)
 	;;
 
 create-db-users)
-	read_dbpasswords
-	create_db_users
-	verbose "Created empty database and users."
+	create_db_users_helper
 	;;
 
 bare-install|install)
@@ -384,6 +395,41 @@ dump)
 	fi
 	create_database_dump $DUMPNAME
 	exit 0
+	;;
+
+load)
+	choice=""
+	DUMPNAME="$2"
+	if [ -z "$DUMPNAME" ]; then
+		set -- $(ls $DATABASEDUMPDIR)
+		ind=0
+		while true; do
+			read -p "Which database should be loaded? " db
+			ind=0
+			for i in $@; do
+				if [ "$ind" = "$db" ]; then
+					choice="$i"
+					break
+				fi
+				: $((ind+=1))
+			done
+			if [ -n "$choice" ]; then
+				break
+			fi
+		done
+	else
+		choice="${DUMPNAME}.sql.gz"
+	fi
+	FILE="$DATABASEDUMPDIR/${choice}"
+
+	if [ ! -f "${FILE}" ]; then
+		echo "Error: file ${FILE} not found."
+		exit 1
+	fi
+
+	uninstall_helper
+	create_db_users_helper
+	pv "${FILE}" | gunzip | mysql domjudge
 	;;
 
 *)
