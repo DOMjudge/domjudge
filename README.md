@@ -6,7 +6,7 @@ DOMjudge
 [![Coverity Scan Status](https://img.shields.io/coverity/scan/671.svg)](https://scan.coverity.com/projects/domjudge)
 [![LGTM alerts](https://img.shields.io/lgtm/alerts/g/DOMjudge/domjudge.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/DOMjudge/domjudge/alerts/)
 
-This is the Programming Contest Jury System "DOMjudge" version 8.2.1
+This is the Programming Contest Jury System "DOMjudge" version 8.2.2
 
 DOMjudge is a system for running a programming contest, like the
 ICPC regional and world championship programming contests.
