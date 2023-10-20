@@ -1,5 +1,10 @@
 DOMjudge Programming Contest Judging System
 
+Version 8.2.2 - 20 October 2023
+-------------------------------
+ - Bugfix to prevent errors when running a bare-install or deleting all
+   contests.
+
 Version 8.2.1 - 29 May 2023
 ---------------------------
  - Set the default domjudge_user to the current user at configure time.
