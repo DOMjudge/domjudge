@@ -72,7 +72,13 @@
                 {% if affectedText is not null %}
                     <tr>
                         <th>Affected {{ internalError.disabled.kind }}</th>
-                        <td><a href="{{ affectedLink }}">{{ affectedText }}</a></td>
+                        <td>
+                            {% if affectedLink %}
+                                <a href="{{ affectedLink }}">{{ affectedText }}</a>
+                            {% else %}
+                                {{ affectedText }}
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endif %}
                 <tr>
