@@ -42,13 +42,13 @@ GNU/Linux, or one of its derivative distributions like Ubuntu::
 The following command can be used on RedHat Enterprise Linux, and related
 distributions like CentOS (with EPEL) and Fedora::
 
-  sudo yum install make libcgroup-devel acl zip unzip mariadb-server httpd \
+  sudo yum install libcgroup-devel make acl zip unzip mariadb-server httpd \
         php-gd php-cli php-intl php-mbstring php-mysqlnd \
         php-xml php-zip composer ntp python3-pyyaml
 
-Due to an `issue <https://github.com/DOMjudge/domjudge/issues/862>`_ in our
-configure script you should also install the software for the judgehost
-see :ref:`the judgehost software requirements <judgehost_software>`
+The packages `libcgroup-dev` and `make` are
+:ref:`judgehost software requirements <judgehost_software>`, but also
+needed here due to `issue 862 <https://github.com/DOMjudge/domjudge/issues/862>`.
 
 Installation
 ------------
