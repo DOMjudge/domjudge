@@ -329,6 +329,7 @@ class UserController extends AbstractRestController
             ->setName($request->request->get('name'))
             ->setEmail($request->request->get('email'))
             ->setIpAddress($request->request->get('ip'))
+            ->SetExternalid($request->request->get('id'))
             ->setPlainPassword($request->request->get('password'))
             ->setEnabled($request->request->getBoolean('enabled', true));
 
