@@ -170,7 +170,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         } elseif ($minutesElapsed == 1) {
             return 'started 1 minute ago';
         } else {
-            return 'started' . $minutesElapsed . ' minutes ago';
+            return 'started ' . $minutesElapsed . ' minutes ago';
         }
     }
 
