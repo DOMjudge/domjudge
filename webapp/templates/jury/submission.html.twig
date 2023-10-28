@@ -42,8 +42,8 @@
         </div>
     {% endif %}
 
-    {% if selectedJudging is not null and selectedJudging.result is not empty %}
-        {% if submission.expectedResults and selectedJudging.result|upper not in submission.expectedResults %}
+    {% if selectedJudging is not null and selectedJudging.result is not empty and submission.expectedResults %}
+        {% if selectedJudging.result|upper not in submission.expectedResults %}
             <div class="alert alert-danger">
                 Actual result {{ selectedJudging.result | printValidJuryResult }} does NOT match expected result(s):
                 {% for expectedResult in submission.expectedResults %}
