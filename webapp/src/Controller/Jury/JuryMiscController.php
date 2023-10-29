@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Controller\API\GeneralInfoController as GI;
 use App\Controller\BaseController;
 use App\Entity\Contest;
 use App\Entity\Judging;
@@ -45,6 +46,7 @@ class JuryMiscController extends BaseController
     {
         return $this->render('jury/index.html.twig', [
             'adminer_enabled' => $config->get('adminer_enabled'),
+            'CCS_SPEC_API_URL' => GI::CCS_SPEC_API_URL,
         ]);
     }
 
