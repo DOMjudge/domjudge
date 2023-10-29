@@ -310,6 +310,11 @@ if [ -n "$WORKDIR" ] && [ -d "$WORKDIR" ]; then
     rm -rf "$WORKDIR"
 fi
 
+# Add indication to interactive shell that the user is in the chroot
+for bashrc in "root/.bashrc" "etc/bash.bashrc"; do
+	echo 'PS1=(chroot)$PS1' >> "$CHROOTDIR/$bashrc"
+done
+
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
 cp /etc/ssl/certs/ca-certificates.crt "$CHROOTDIR/etc/ssl/certs/" || true
