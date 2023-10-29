@@ -21,6 +21,19 @@ trap cleanup EXIT
 # Default directory where the chroot tree lives:
 CHROOTDIR="@judgehost_chrootdir@"
 
+# Gather which dirs will be mounted during judgement.
+# (optional lib64 only needed for amd64 architecture)
+SUBDIRMOUNTS="etc usr lib bin"
+if [ "$(uname -m)" = "x86_64" ]; then
+    SUBDIRMOUNTS="$SUBDIRMOUNTS lib64"
+fi
+
+CONCAT_SUBDIRMOUNTS=""
+for subdir in $SUBDIRMOUNTS
+do
+    CONCAT_SUBDIRMOUNTS="${SUBDIRMOUNTS:+${CONCAT_SUBDIRMOUNTS}, }${subdir}"
+done
+
 usage()
 {
     cat <<EOF
@@ -43,6 +56,9 @@ If you want to install local packages, make sure to first copy those
 into the chroot tree, and then e.g. run:
 
   sudo dj_run_chroot "dpkg -i /path/inside/chroot/package_x.y.z_amd64.deb"
+
+Beware that only [$CONCAT_SUBDIRMOUNTS] are mounted inside the chroot!
+For the current list see the chroot-start-stop.sh in case of issues.
 
 EOF
 }
@@ -93,9 +109,9 @@ mount --bind /dev/pts "$CHROOTDIR/dev/pts"
 # Prevent perl locale warnings in the chroot:
 export LC_ALL=C
 
-[ -n "$INTERACTIVE" ] && echo "Entering chroot in '$CHROOTDIR'."
-
 if [ -n "$INTERACTIVE" ]; then
+    echo "Entering chroot in '$CHROOTDIR'."
+    echo "Only [$CONCAT_SUBDIRMOUNTS] will be mounted during judgement. See chroot-start-stop.sh for the current list."
     chroot "$CHROOTDIR"
 else
     chroot "$CHROOTDIR" /bin/sh -c "$*"
