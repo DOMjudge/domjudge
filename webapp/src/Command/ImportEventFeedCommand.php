@@ -51,7 +51,7 @@ class ImportEventFeedCommand extends Command
         $this
             ->setHelp(
                 'Import contest data from an event feed following the Contest API specification:' . PHP_EOL .
-                'https://ccs-specs.icpc.io/2021-11/contest_api' . PHP_EOL . PHP_EOL .
+                'https://ccs-specs.icpc.io/2023-06/contest_api or any version starting from "2021-11"' . PHP_EOL . PHP_EOL .
                 'Note the following assumptions and caveats:' . PHP_EOL .
                 '- Configuration data will only be verified.' . PHP_EOL .
                 '- Team members will not be imported.' . PHP_EOL .
