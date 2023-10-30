@@ -81,7 +81,7 @@ class TeamCategory extends BaseApiEntity implements Stringable
         'comment' => 'Are self-registered teams allowed to choose this category?',
         'default' => 0,
     ])]
-    #[Serializer\Exclude]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private bool $allow_self_registration = false;
 
     /**

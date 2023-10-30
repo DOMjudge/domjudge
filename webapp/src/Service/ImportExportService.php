@@ -595,7 +595,8 @@ class ImportExportService
             $line = Utils::parseTsvLine(trim($line));
             $groupData[] = [
                 'categoryid' => @$line[0],
-                'name' => @$line[1]
+                'name' => @$line[1],
+                'allow_self_registration' => false,
             ];
         }
 
@@ -618,6 +619,7 @@ class ImportExportService
                 'visible' => !($group['hidden'] ?? false),
                 'sortorder' => @$group['sortorder'],
                 'color' => @$group['color'],
+                'allow_self_registration' => $group['allow_self_registration'] ?? false,
             ];
         }
 
@@ -661,6 +663,7 @@ class ImportExportService
                 ->setSortorder($groupItem['sortorder'] ?? 0)
                 ->setColor($groupItem['color'] ?? null)
                 ->setIcpcid($groupItem['icpc_id'] ?? null);
+            $teamCategory->setAllowSelfRegistration($groupItem['allow_self_registration']);
             $this->em->flush();
             $this->dj->auditlog('team_category', $teamCategory->getCategoryid(), 'replaced',
                                              'imported from tsv / json');
