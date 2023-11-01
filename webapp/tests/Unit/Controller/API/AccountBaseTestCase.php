@@ -173,7 +173,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
             }
             foreach ($fileVersions as $fileVersion) {
                 foreach (["\r\n", "\n"] as $lineEnding) {
-                    foreach([true, false] as $fileEnding) {
+                    foreach ([true, false] as $fileEnding) {
                         $file = $fileVersion . "\t1";
                         $file .= "{$lineEnding}{$role}\t$name\t$user\t$pass";
                         if ($fileEnding) {
