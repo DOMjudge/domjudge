@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7fa4cf427c9c7329992f27c097b81977",
+    "content-hash": "557d0fd86cb6f5aa0b32ea6b4e3a4215",
     "packages": [
         {
             "name": "apalfrey/select2-bootstrap-5-theme",
@@ -171,45 +171,44 @@
         },
         {
             "name": "components/flag-icon-css",
-            "version": "3.5.0",
+            "version": "v6.11.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/lipis/flag-icon-css.git",
-                "reference": "5141384c57972b0b08fc3bb67bea297321fbd799"
+                "url": "https://github.com/lipis/flag-icons.git",
+                "reference": "1708ad86b8385c548dec10ae89ff83046b5ea11b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lipis/flag-icon-css/zipball/5141384c57972b0b08fc3bb67bea297321fbd799",
-                "reference": "5141384c57972b0b08fc3bb67bea297321fbd799",
+                "url": "https://api.github.com/repos/lipis/flag-icons/zipball/1708ad86b8385c548dec10ae89ff83046b5ea11b",
+                "reference": "1708ad86b8385c548dec10ae89ff83046b5ea11b",
                 "shasum": ""
             },
-            "type": "component",
-            "extra": {
-                "component": {
-                    "name": "flag-icon-css",
-                    "files": [
-                        "less/**",
-                        "css/**",
-                        "flags/**"
-                    ]
-                }
-            },
+            "type": "library",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "authors": [
                 {
-                    "name": "Panayiotis Lipiridis (Lipis)",
-                    "email": "lipiridis@gmail.com"
+                    "name": "Panayiotis Lipiridis",
+                    "email": "lipiridis@gmail.com",
+                    "role": "Lead"
                 }
             ],
-            "description": "CSS for vector based country flags",
+            "description": "A curated collection of all country flags in SVG — plus the CSS for easier integration.",
+            "homepage": "https://flagicons.lipis.dev",
+            "keywords": [
+                "country",
+                "country-flags",
+                "css",
+                "icon-css",
+                "svg"
+            ],
             "support": {
-                "issues": "https://github.com/lipis/flag-icon-css/issues",
-                "source": "https://github.com/lipis/flag-icon-css/tree/3.5.0"
+                "issues": "https://github.com/lipis/flag-icons/issues",
+                "source": "https://github.com/lipis/flag-icons/tree/v6.11.2"
             },
-            "time": "2020-06-10T11:53:19+00:00"
+            "time": "2023-10-26T18:36:40+00:00"
         },
         {
             "name": "components/jquery",
@@ -1989,10 +1988,10 @@
         },
         {
             "name": "fortawesome/font-awesome",
-            "version": "6.4.0",
+            "version": "6.4.2",
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/FortAwesome/Font-Awesome/releases/download/6.4.0/fontawesome-free-6.4.0-web.zip"
+                "url": "https://github.com/FortAwesome/Font-Awesome/releases/download/6.4.2/fontawesome-free-6.4.2-web.zip"
             },
             "type": "library"
         },
