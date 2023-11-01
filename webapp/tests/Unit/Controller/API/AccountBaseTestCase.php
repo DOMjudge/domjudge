@@ -353,6 +353,6 @@ EOF;
         $userData['type'] = 'admin';
         $userData['id'] = $userData['username'];
         yield [Yaml::dump([$userData], 1), 'yaml'];
-        yield [json_encode([$userData]), 'json'];
+        yield [json_encode([$userData], JSON_THROW_ON_ERROR), 'json'];
     }
 }
