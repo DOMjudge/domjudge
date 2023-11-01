@@ -57,7 +57,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
             self::assertEquals(1, count($newItems));
         }
         $listKey = array_keys($newItems)[0];
-        $newUserPostData = array_merge($newUserPostData, (array)$overwritten);
+        $newUserPostData = [...$newUserPostData, ...(array)$overwritten];
         foreach ($newUserPostData as $key => $expectedValue) {
             if ($key !== 'password') {
                 // For security we don't output the password in the API

@@ -115,7 +115,7 @@ class JuryMiscControllerTest extends BaseTestCase
             $this->verifyPageResponse('HEAD', '/public/problems/'.$id.'/text', $statusCode);
         }
         $this->verifyPageResponse('GET', '/public/problems', 200);
-        if (in_array($contestStage, array_merge(['preStart'], $nonActiveStages)) || !$public) {
+        if (in_array($contestStage, ['preStart', ...$nonActiveStages]) || !$public) {
             self::assertSelectorExists('body:contains("No problem texts available at this point.")');
         } else {
             self::assertSelectorNotExists('body:contains("No problem texts available at this point.")');

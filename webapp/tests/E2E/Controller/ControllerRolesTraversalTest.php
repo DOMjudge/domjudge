@@ -53,7 +53,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
 
         foreach ($possible_roles as $element) {
             foreach ($results as $combination) {
-                $results[] = array_merge([$element], $combination);
+                $results[] = [$element, ...$combination];
             }
         }
         return $results;
@@ -137,7 +137,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
                     continue;
                 }
                 if (!$this->urlExcluded($url, $skip)) {
-                    $urlsToCheck = array_unique(array_merge($urlsToCheck, $this->crawlPageGetLinks($url, 200, $skip)));
+                    $urlsToCheck = array_unique([...$urlsToCheck, ...$this->crawlPageGetLinks($url, 200, $skip)]);
                 }
                 $done[] = $url;
             }
