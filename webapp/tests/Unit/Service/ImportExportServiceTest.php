@@ -542,27 +542,24 @@ EOF;
             ],
         ];
         if ($forTsv) {
-            $expectedUsers = array_merge($expectedUsers, [
-                [
-                    'roles' => ['team'],
-                    'name' => 'Team 2 user a',
-                    'username' => 'team02a',
-                    'password' => 'password3',
-                    'ip' => '5.6.7.8',
-                    'team' => [
-                        'id' => 2,
-                    ],
+            $expectedUsers = [...$expectedUsers, [
+                'roles' => ['team'],
+                'name' => 'Team 2 user a',
+                'username' => 'team02a',
+                'password' => 'password3',
+                'ip' => '5.6.7.8',
+                'team' => [
+                    'id' => 2,
                 ],
-                [
-                    'roles' => ['team'],
-                    'name' => 'Team 2 user b',
-                    'username' => 'team02b',
-                    'password' => 'password4',
-                    'team' => [
-                        'id' => 2,
-                    ],
+            ], [
+                'roles' => ['team'],
+                'name' => 'Team 2 user b',
+                'username' => 'team02b',
+                'password' => 'password4',
+                'team' => [
+                    'id' => 2,
                 ],
-            ]);
+            ]];
         }
         $unexpectedUsers = ['analyst1', 'analyst2'];
 

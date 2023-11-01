@@ -220,7 +220,7 @@ class PublicControllerTest extends BaseTestCase
                 yield[['username'=>'newinstsamecountry', 'name'=>'CompetingDutchTeam', 'teamName'=>'SupperT3@m','affiliation'=>'new','affiliationName'=>'Vrije Universiteit',
                        'affiliationShortName'=>'vu','affiliationCountry'=>'NLD'],'demo', $fixtures, $category];
                 if (count($fixtures)===1) {
-                    yield[['username'=>'reusevaluesofexistinguser', 'name'=>'selfregistered user for example team','email'=>'electronic@mail.tld','teamName'=>'EasyEnough','affiliation'=>'none'],'demo', array_merge($fixtures, [SelfRegisteredUserFixture::class]),''];
+                    yield[['username'=>'reusevaluesofexistinguser', 'name'=>'selfregistered user for example team','email'=>'electronic@mail.tld','teamName'=>'EasyEnough','affiliation'=>'none'],'demo', [...$fixtures, SelfRegisteredUserFixture::class],''];
                 }
             }
         }

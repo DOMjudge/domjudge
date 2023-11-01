@@ -456,7 +456,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
     {
         $entities = static::$addEntities;
         if (!$this->dataSourceIsLocal()) {
-            $entities = array_merge($entities, static::$addEntitiesNonLocal);
+            $entities = [...$entities, ...static::$addEntitiesNonLocal];
         }
         foreach ($entities as $element) {
             [$combinedValues, $element] = $this->helperProvideMergeAddEntity($element);
@@ -469,7 +469,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
     {
         $entities = static::$addEntitiesFailure;
         if (!$this->dataSourceIsLocal()) {
-            $entities = array_merge($entities, static::$addEntitiesFailureNonLocal);
+            $entities = [...$entities, ...static::$addEntitiesFailureNonLocal];
         }
         foreach ($entities as $message => $elementList) {
             foreach ($elementList as $element) {

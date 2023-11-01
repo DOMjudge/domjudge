@@ -295,7 +295,7 @@ abstract class BaseTestCase extends BaseBaseTestCase
             fn($id) => $this->resolveReference($id),
             array_keys($this->expectedObjects)
         );
-        $ids = array_merge($expectedObjectIds, $this->expectedAbsent);
+        $ids = [...$expectedObjectIds, ...$this->expectedAbsent];
         $url = $this->helperGetEndpointURL($apiEndpoint);
         $response = $this->verifyApiJsonResponse('GET', $url . "?" . http_build_query(['ids' => $ids]), 404, $this->apiUser);
         static::assertEquals('One or more objects not found', $response['message']);
