@@ -148,8 +148,6 @@ latex_elements = {
 \definecolor{noteBgColor}{rgb}{1,0,1}
 
 \definecolor{sphinxnoteBgColor}{RGB}{221,233,239}
-\renewenvironment{sphinxnote}[1]
-{\begin{sphinxheavybox}\sphinxstrong{#1} }{\end{sphinxheavybox}}
 
 \usepackage{fancyhdr}
 \pagestyle{fancy}
