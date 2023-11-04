@@ -48,6 +48,17 @@ On Debian 11 (Bullseye) and above, instead install::
     python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig python3-yaml \
     latexmk texlive-latex-recommended texlive-latex-extra tex-gyre
 
+On Debian 12 (Bullseye) and derived versions, install::
+
+  sudo apt install autoconf automake bats \
+    fontconfig python3-yaml latexmk texlive-latex-recommended \
+    texlive-latex-extra tex-gyre python3-venv
+
+and create a virtual environment to install these packages currently failing in the
+default repositories::
+
+  pip3 install sphinx sphinx-rtd-theme rst2pdf
+
 When this software is present, bootstrapping can be done by running
 ``make dist``, which creates the ``configure`` script,
 downloads and installs the PHP dependencies via composer and
