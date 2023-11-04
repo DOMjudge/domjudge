@@ -207,7 +207,8 @@ table.submissions-table {
     padding: 0;
 }
 
-.table-full-clickable-cell tbody tr td:not(.testcase-results) a:not(.btn-sm), .table-full-clickable-cell tbody tr td:not(.testcase-results) a:hover:not(.btn-sm) {
+.table-full-clickable-cell tbody tr td:not(.testcase-results) a:not(.btn-sm),
+.table-full-clickable-cell tbody tr td:not(.testcase-results) a:hover:not(.btn-sm) {
     display: table;
 }
 
