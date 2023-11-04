@@ -103,7 +103,7 @@ class AuditLogController extends AbstractController
         return $this->render('jury/auditlog.html.twig', [
             'auditlog' => $auditlog_table,
             'table_fields' => $table_fields,
-            'table_options' => ['ordering' => 'false', 'searching' => 'false'],
+            'table_options' => ['ordering' => 'false', 'searching' => 'false', 'full_clickable' => false],
             'maxPages' => $maxPages,
             'thisPage' => $thisPage,
             'showAll' => $showAll,
