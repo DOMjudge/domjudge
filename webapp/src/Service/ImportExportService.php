@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Configuration;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\ExternalContestSource;
 use App\Entity\Problem;
 use App\Entity\Role;
 use App\Entity\Team;
@@ -251,6 +252,22 @@ class ImportExportService
         }
 
         $this->em->persist($contest);
+
+        $shadow = $data['shadow'] ?? null;
+        if ($shadow) {
+            $externalSource = $this->em->getRepository(ExternalContestSource::class)->findOneBy(['contest' => $contest]) ?: new ExternalContestSource();
+            $externalSource->setContest($contest);
+            foreach ($shadow as $field => $value) {
+                // Overwrite the existing value if the property is defined in the data: $externalSource-setSource($data['shadow']['source'])
+                $fieldFunc = 'set'.ucwords($field);
+                $fieldArgs = [$value];
+                if (method_exists($externalSource, $fieldFunc)) {
+                    $externalSource->$fieldFunc(...$fieldArgs);
+                }
+            }
+            $this->em->persist($externalSource);
+        }
+
         $this->em->flush();
 
         $penaltyTime = $data['penalty_time'] ?? $data['penalty-time'] ?? $data['penalty'] ?? null;
