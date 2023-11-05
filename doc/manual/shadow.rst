@@ -54,6 +54,20 @@ In the DOMjudge admin interface, go to the *External Contest Sources* page and
 create an external contest source. Select the contest to import into and enter
 the source you want to import from.
 
+Another alternative is to use these DOMjudge only keys in the `contest.yaml`::
+
+  shadow:
+    type: contest-api
+    source: http(s)://url_to_external_system/api/contests/<contest_id>
+    username: user_in_external_system
+    password: password_for_user
+
+or::
+
+  shadow:
+    type: contest-archive
+    source: /path/on/domjudge/filestem/to/clics/compliant/archive
+
 Running the event feed import command
 -------------------------------------
 
