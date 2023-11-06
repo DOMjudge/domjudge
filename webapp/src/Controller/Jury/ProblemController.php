@@ -247,7 +247,7 @@ class ProblemController extends BaseController
             ->getOneOrNullResult();
 
         /** @var ContestProblem|null $contestProblem */
-        $contestProblem = $problem->getContestProblems()->first();
+        $contestProblem = $problem->getContestProblems()->first() ?: null;
 
         // Build up INI data.
         $iniData = [
