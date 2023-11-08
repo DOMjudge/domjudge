@@ -15,9 +15,11 @@ use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
+use App\Entity\TestcaseGroup;
 use App\Form\Type\ProblemAttachmentType;
 use App\Form\Type\ProblemType;
 use App\Form\Type\ProblemUploadType;
+use App\Form\Type\TestcaseGroupType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -588,6 +590,14 @@ class ProblemController extends BaseController
                 if ($newDescription !== $testcase->getDescription(true)) {
                     $testcase->setDescription($newDescription);
                     $messages[] = sprintf('Updated description of testcase %d ', $rank);
+                }
+
+                $newGroupId = intval($request->request->get('group')[$rank]);
+                $oldGroupId = $testcase->getTestcaseGroup() === null ? -1 : $testcase->getTestcaseGroup()->getTestcasegroupid();
+                if ($oldGroupId !== $newGroupId) {
+                    $newGroup = $newGroupId === -1 ? null : $this->em->getRepository(TestcaseGroup::class)->find($newGroupId);
+                    $testcase->setTestcaseGroup($newGroup);
+                    $messages[] = sprintf('Updated group of testcase %d ', $rank);
                 }
 
                 foreach (['input', 'output', 'image'] as $type) {
