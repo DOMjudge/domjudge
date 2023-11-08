@@ -145,6 +145,13 @@ class Problem extends BaseApiEntity
     #[Serializer\Exclude]
     private Collection $testcases;
 
+    #[ORM\OneToMany(
+        targetEntity: TestcaseGroup::class,
+        mappedBy: 'problem'
+    )]
+    #[Serializer\Exclude]
+    private Collection $testcase_groups;
+
     /**
      * @var Collection<int, ProblemStatementContent>
      *
@@ -499,5 +506,18 @@ class Problem extends BaseApiEntity
     public function getStatementForApi(): array
     {
         return array_filter([$this->statementForApi]);
+    }
+
+    /**
+     * @return TestcaseGroup[]|Collection
+     */
+    public function getTestcaseGroups(): Collection
+    {
+        return $this->testcase_groups;
+    }
+
+    public function setTestcaseGroups(Collection $testcase_groups): void
+    {
+        $this->testcase_groups = $testcase_groups;
     }
 }
