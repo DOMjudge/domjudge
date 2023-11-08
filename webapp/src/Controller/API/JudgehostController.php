@@ -24,6 +24,7 @@ use App\Service\BalloonService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Service\PointsScoreService;
 use App\Service\RejudgingService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
@@ -986,15 +987,15 @@ class JudgehostController extends AbstractFOSRestController
         $runs = $this->em->createQueryBuilder()
             ->from(JudgeTask::class, 'jt')
             ->leftJoin(JudgingRun::class, 'jr', Join::WITH, 'jt.testcase_id = jr.testcase AND jr.judging = :judgingid')
-            ->select('jr.runresult')
+            ->select('jr')
             ->andWhere('jt.jobid = :judgingid')
             ->andWhere('jr.judging = :judgingid')
             ->andWhere('jt.testcase_id = jr.testcase')
             ->orderBy('jt.judgetaskid')
             ->setParameter('judgingid', $judging->getJudgingid())
             ->getQuery()
-            ->getArrayResult();
-        $runresults = array_column($runs, 'runresult');
+            ->getResult();
+        $runresults = array_map(fn($run) => $run->getRunresult(), $runs);
 
         $oldResult = $judging->getResult();
 
@@ -1008,6 +1009,11 @@ class JudgehostController extends AbstractFOSRestController
             }
 
             $judging->setResult($result);
+
+            if ($lazyEval === DOMJudgeService::EVAL_FULL) {
+                $pointsScored = PointsScoreService::getScoredPoints($judging, $runs, $judging->getSubmission()->getContestProblem(), $this->dj);
+                $judging->setPointsScored($pointsScored);
+            }
 
             $hasNullResults = false;
             foreach ($runresults as $runresult) {
