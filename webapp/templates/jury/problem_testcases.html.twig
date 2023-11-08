@@ -28,6 +28,7 @@
                     <th></th>
                 {% endif %}
                 <th class="testrank">#</th>
+                <th>judgehost dir</th>
                 <th class="testsample">sample</th>
                 <th>download</th>
                 <th>size</th>
@@ -62,6 +63,7 @@
                                title="Move testcase down"><i class="fas fa-arrow-down"></i></a>
                         {% endif %}
                     </td>
+                    <td rowspan="2">{{ "%05d"|format(testcase.testcaseid) }}</td>
                     <td rowspan="2" class="testsample">
                         <input type="checkbox" name="sample[{{ testcase.rank }}]" value="sample"
                                {% if testcase.sample %}checked{% endif %} />
