@@ -22,9 +22,11 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
  * @Route("/jury/blog")
+ * @IsGranted("ROLE_JURY")
  */
 class BlogController extends BaseController
 {
@@ -132,6 +134,7 @@ class BlogController extends BaseController
 
     /**
      * @Route("/send/image-upload", methods={"POST"}, name="jury_blog_image_upload")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function uploadPostImageAction(Request $request): JsonResponse
     {
@@ -165,6 +168,7 @@ class BlogController extends BaseController
     /**
      * @Route("/send", methods={"GET", "POST"}, name="jury_blog_post_send")
      * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="jury_blog_post_edit")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function sendBlogPostAction(Request $request, ?int $id = null): Response
     {
@@ -227,6 +231,7 @@ class BlogController extends BaseController
 
     /**
      * @Route("/{id<\d+>}/delete", name="jury_blog_post_delete")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function deleteBlogPostAction(Request $request, int $id): Response
     {
