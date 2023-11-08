@@ -36,6 +36,7 @@
                     <th>upload new</th>
                 {% endif %}
                 <th>description / image</th>
+                <th>group</th>
             </tr>
             </thead>
             <tbody>
@@ -89,6 +90,17 @@
                             <textarea class="d-none form-control testcase-description-field" name="description[{{ testcase.rank }}]">{{ testcase.description(true) }}</textarea>
                             <button type="button" class="float-end testcase-edit-description btn btn-secondary btn-sm">Edit</button>
                         {% endif %}
+                    </td>
+                    <td rowspan="2">
+                        <select name="group[{{ testcase.rank }}]" class="form-control">
+                            <option value="-1">none</option>
+                            {% for group in problem.testcaseGroups %}
+                                <option value="{{ group.testcaseGroupid }}"
+                                    {% if testcase.testcaseGroup is not null and testcase.testcaseGroup.testcasegroupid == group.testcasegroupid %}selected{% endif %}>
+                                    {{ group.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </td>
                 </tr>
                 <tr>

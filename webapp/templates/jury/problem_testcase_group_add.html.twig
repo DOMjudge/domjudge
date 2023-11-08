@@ -1,0 +1,17 @@
+{% extends "jury/base.html.twig" %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Add testcase group - {{ parent() }}{% endblock %}
+
+{% block content %}
+
+    <h1>{% if editing %}
+            Edit testcase group in
+        {% else %}
+            Add testcase group to
+        {% endif %}
+        problem p{{ problem.probid }} - {{ problem.name }}</h1>
+
+    {{ form(form) }}
+
+{% endblock %}

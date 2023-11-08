@@ -42,6 +42,21 @@
                     </td>
                 </tr>
                 <tr>
+                    <th>Testcase groups</th>
+                    <td>
+                        {% if problem.testcasegroups is empty %}
+                            <em>no testcase groups</em>
+                        {% else %}
+                            {{ problem.testcasegroups.count }}
+                        {% endif %}
+                        <a href="{{ path('jury_problem_testcase_groups', {'probId': problem.probid}) }}">details
+                            {%- if is_granted('ROLE_ADMIN') and not lockedProblem -%}
+                                / edit
+                            {% endif %}
+                        </a>
+                    </td>
+                </tr>
+                <tr>
                     <th>Timelimit</th>
                     <td>{{ problem.timelimit }} sec</td>
                 </tr>
