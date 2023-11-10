@@ -855,7 +855,7 @@ class ImportExportService
                     'categoryid' => $team['group_ids'][0] ?? null,
                     'name' => @$team['name'],
                     'display_name' => @$team['display_name'],
-                    'publicdescription' => @$team['members'],
+                    'publicdescription' => $team['public_description'] ?? @$team['members'],
                     'room' => @$team['room'],
                 ],
                 'team_affiliation' => [
