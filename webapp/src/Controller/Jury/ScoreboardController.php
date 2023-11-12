@@ -28,6 +28,7 @@ class ScoreboardController extends AbstractController
         $data       = $this->scoreboardService->getScoreboardTwigData(
             $request, $response, $refreshUrl, $this->isGranted('ROLE_JURY'), false, false, $contest
         );
+        $data['scroll_width'] = true;
 
         if ($request->isXmlHttpRequest()) {
             $data['current_contest'] = $contest;

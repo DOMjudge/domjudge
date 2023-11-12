@@ -72,6 +72,7 @@ class PublicController extends BaseController
         }
 
         $data['current_contest'] = $contest;
+        $data['scroll_width'] = true;
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('partials/scoreboard.html.twig', $data, $response);
