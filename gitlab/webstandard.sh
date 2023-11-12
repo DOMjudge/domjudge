@@ -80,6 +80,7 @@ if [ "$TEST" = "w3cval" ]; then
     rm -f localhost/domjudge/css/select2-bootstrap*.css*
     rm -f localhost/domjudge/css/dataTables*.css*
     rm -f localhost/domjudge/jury/config/check/phpinfo*
+    sed -i 's/:root {/:root {--bs-gutter-x: 0em;/g' input.txt // We need any value to calculate with
     section_end upstream_problems
 
     section_start_collap test_suite "Install testsuite"
