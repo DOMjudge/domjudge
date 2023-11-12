@@ -15,7 +15,9 @@
         {% set bannerImage = globalBannerAssetPath() %}
     {% endif %}
     {% if bannerImage %}
-        <img class="banner" src="{{ asset(bannerImage) }}" alt="Banner">
+        <div class="banner-fixed">
+            <img class="banner" src="{{ asset(bannerImage) }}" alt="Banner">
+        </div>
     {% endif %}
 
     <div data-ajax-refresh-target data-ajax-refresh-after="initializeScoreboard" class="mt-3">
