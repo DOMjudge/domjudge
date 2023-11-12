@@ -316,7 +316,7 @@
 
     {# only print legend when there's more than one category #}
     {% if limitToTeamIds is null and usedCategories | length > 1 and hasDifferentCategoryColors %}
-        <table id="categ_legend" class="scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
+        <table id="categ_legend" class="scoreboard scorelegend card-contest-frozen-info {% if jury %}scoreboard_jury{% endif %}">
             <thead>
             <tr>
                 <th scope="col">
@@ -350,6 +350,7 @@
         {% else %}
             {% set cellColors = {first: 'Solved first', correct: 'Solved', incorrect: 'Tried, incorrect', pending: 'Tried, pending', neutral: 'Untried'} %}
         {% endif %}
+        <div class="card-contest-frozen-info">
         <table id="cell_legend" class="scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
             <thead>
             <tr>
@@ -366,10 +367,11 @@
             {% endfor %}
             </tbody>
         </table>
+        </div>
     {% endif %}
 
     {% if medalsEnabled %}
-        <table class="scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
+        <table class="scoreboard scorelegend card-contest-frozen-info {% if jury %}scoreboard_jury{% endif %}">
             <thead>
             <tr>
                 <th scope="col">Medals {% if not scoreboard.freezeData.showFinal %}(tentative){% endif %}</th>
