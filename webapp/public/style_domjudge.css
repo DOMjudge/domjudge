@@ -651,3 +651,9 @@ blockquote {
     width: calc(100vw - var(--bs-gutter-x) * 1.75);
     left: calc(var(--bs-gutter-x) * .5);
 }
+
+.card-contest-frozen-info {
+    position: sticky;
+    width: calc(100vw - var(--bs-gutter-x) * 1.75);
+    left: calc(var(--bs-gutter-x) * .5);
+}

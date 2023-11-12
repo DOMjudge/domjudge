@@ -17,7 +17,7 @@
         </div>
     {% endif %}
 
-    <div class="card" {% if refreshstop is defined %}data-ajax-refresh-stop="1"{% endif %}>
+    <div class="card card-contest-frozen-info" {% if refreshstop is defined %}data-ajax-refresh-stop="1"{% endif %}>
         <div class="card-header" style="font-family: Roboto, sans-serif; display: flex;">
             <span style="font-weight: bold;">{{ current_contest.name }}</span>
             <span id="contesttimer" style="color: DimGray; margin-left: auto;">
@@ -94,7 +94,7 @@
         {% endif %}
 
         {% if scoreboard.freezeData.showFrozen(false) %}
-            <div class="alert alert-warning" role="alert" style="font-size: 80%;">
+            <div class="alert alert-warning card-contest-frozen-info" role="alert" style="font-size: 80%;">
                 {% if jury %}
                     <a href="{{ path('public_index') }}">The public scoreboard</a>
                     was frozen with {{ current_contest.minutesRemaining }} minutes remaining
