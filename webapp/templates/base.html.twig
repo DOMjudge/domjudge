@@ -54,7 +54,7 @@
         });
         {% endif %}
         /* Enable page refresh if set if wanted by the page, and wanted by the user */
-        {% if refresh is defined and refresh and refresh_flag %}
+        {% if refresh is defined and refresh and refresh_flag and false %}
         enableRefresh('{{ refresh.url | raw }}', {{ refresh.after }}, {{ refresh.ajax | default(0) }});
         {% endif %}
 
