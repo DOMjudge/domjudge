@@ -9,10 +9,12 @@ The flow of an incoming submission is as follows.
    checks, or accepted and stored as a *submission*.
 #. The first available *judgehost* compiles, runs and checks
    the submission. The outcome and outputs are stored as a
-   *judging* of this submission. Note that judgehosts may be
-   restricted to certain contests, languages and problems, so that it can be
-   the case that a judgehost is available, but not judging an available
-   submission.
+   *judging* of this submission. If parallel judging is enabled,
+   multiple judgehosts may pick up and work on the same submission
+   (if there is no queue of pending submissions).
+#. To avoid starving other teams from judgehost resources,
+   submissions from teams that submit while they have other submissions
+   in the judge queue will get lower priority than a submission from a team that has no earlier submission being judged yet.
 #. If verification is not required, the result is automatically
    recorded and the team can view the result and the scoreboard is
    updated (unless after the scoreboard freeze). A judge can
