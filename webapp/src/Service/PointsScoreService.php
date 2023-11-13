@@ -2,33 +2,11 @@
 
 namespace App\Service;
 
-use App\Entity\Contest;
 use App\Entity\ContestProblem;
-use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
-use App\Entity\Language;
-use App\Entity\Problem;
-use App\Entity\Submission;
-use App\Entity\SubmissionFile;
-use App\Entity\Team;
-use App\Entity\User;
-use App\Utils\FreezeData;
-use App\Utils\Utils;
-use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\Query\Expr\Join;
-use InvalidArgumentException;
-use PHPUnit\Exception;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
-use ZipArchive;
 
 /**
  * Class SubmissionService
