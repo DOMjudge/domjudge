@@ -657,3 +657,8 @@ blockquote {
     width: calc(100vw - var(--bs-gutter-x) * 1.75);
     left: calc(var(--bs-gutter-x) * .5);
 }
+
+.progress-bar {
+    position: sticky;
+    left: 0;
+}
