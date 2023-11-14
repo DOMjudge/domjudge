@@ -1,9 +1,7 @@
 {% if contest and contest.freezeData.started and not contest.freezeData.stopped %}
     {% set percentage = contest.freezeData.progress %}
-    <div style="background-color: limegreen; position: fixed; width: 100%; border: 1px solid red; height: 10px; margin-top: 0px;">
-    <div class="progress" style="position: fixed; width: 100%; margin-top:19px; height: 10px; z-index: 1050" data-progress-bar>
+    <div class="progress" style="margin-top:{{ margin|default(0) }}px; height: 10px;" data-progress-bar>
         <div class="progress-bar" role="progressbar" style="width: {{ percentage }}%;"
              aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
     </div>
 {% endif %}
