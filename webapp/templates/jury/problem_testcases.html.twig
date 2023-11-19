@@ -94,12 +94,26 @@
                     <td rowspan="2">
                         <select name="group[{{ testcase.rank }}]" class="form-control">
                             <option value="-1">none</option>
-                            {% for group in problem.testcaseGroups %}
-                                <option value="{{ group.testcaseGroupid }}"
-                                    {% if testcase.testcaseGroup is not null and testcase.testcaseGroup.testcasegroupid == group.testcasegroupid %}selected{% endif %}>
-                                    {{ group.name }}
-                                </option>
-                            {% endfor %}
+                            {% if problem.testcaseGroups|length > 0 %}
+                                <optgroup label="problem groups">
+                                    {% for group in problem.testcaseGroups %}
+                                        <option value="{{ group.testcaseGroupid }}"
+                                                {% if testcase.testcaseGroup is not null and testcase.testcaseGroup.testcasegroupid == group.testcasegroupid %}selected{% endif %}>
+                                            {{ group.name }}
+                                        </option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endif %}
+                            {% if emptyTestcaseGroups|length > 0 %}
+                                <optgroup label="empty groups">
+                                    {% for group in emptyTestcaseGroups %}
+                                        <option value="{{ group.testcaseGroupid }}"
+                                                {% if testcase.testcaseGroup is not null and testcase.testcaseGroup.testcasegroupid == group.testcasegroupid %}selected{% endif %}>
+                                            {{ group.name }}
+                                        </option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endif %}
                         </select>
                     </td>
                 </tr>

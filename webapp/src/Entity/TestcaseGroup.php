@@ -29,13 +29,6 @@ class TestcaseGroup
     private int $testcasegroupid;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Problem", inversedBy="testcase_groups")
-     * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
-     * @Serializer\Exclude()
-     */
-    private ?Problem $problem;
-
-    /**
      * @ORM\Column(type="float", name="points_percentage",
      *     options={"comment"="Percentage of problem points this group is worth", "default"="0", "unsigned"=true},
      *     nullable=false)
@@ -65,16 +58,6 @@ class TestcaseGroup
     public function setTestcasegroupid(int $testcasegroupid): void
     {
         $this->testcasegroupid = $testcasegroupid;
-    }
-
-    public function getProblem(): ?Problem
-    {
-        return $this->problem;
-    }
-
-    public function setProblem(?Problem $problem): void
-    {
-        $this->problem = $problem;
     }
 
     public function getPointsPercentage(): float

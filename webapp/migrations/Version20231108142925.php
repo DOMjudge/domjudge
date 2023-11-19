@@ -19,22 +19,20 @@ final class Version20231108142925 extends AbstractMigration
         $this->addSql(<<<SQL
         CREATE TABLE `testcase_group` (
             `testcasegroupid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-            `probid` int(4) unsigned NOT NULL COMMENT 'Corresponding problem ID',
             `points_percentage` float unsigned NOT NULL DEFAULT '0' COMMENT 'Percentage of problem points this group is worth',
             `name` varchar(255) DEFAULT NULL COMMENT 'Which part of the problem this group tests',
-            PRIMARY KEY (`testcasegroupid`),
-            KEY `probid` (`probid`),
-            CONSTRAINT `testcase_group_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
+            PRIMARY KEY (`testcasegroupid`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores testcase groups per problem'
         SQL
         );
 
+        // FIXME NOT NULL
         $this->addSql(<<<SQL
         ALTER TABLE `testcase` ADD COLUMN `testcasegroupid` int(4) unsigned DEFAULT NULL COMMENT 'Testcase group ID' AFTER `probid`
         SQL
         );
         $this->addSql(<<<SQL
-        ALTER TABLE `testcase` ADD CONSTRAINT `testcase_ibfk_2` FOREIGN KEY (`testcasegroupid`) REFERENCES `testcase_group` (`testcasegroupid`) ON DELETE CASCADE
+        ALTER TABLE `testcase` ADD CONSTRAINT `testcase_ibfk_2` FOREIGN KEY (`testcasegroupid`) REFERENCES `testcase_group` (`testcasegroupid`)
         SQL
         );
 

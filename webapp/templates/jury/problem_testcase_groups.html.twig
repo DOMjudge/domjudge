@@ -10,18 +10,22 @@
 
 {% block content %}
 
-<h1>Testcase groups for p{{ problem.probid }} - {{ problem.name }}</h1>
+    <h1>Testcase groups for p{{ problem.probid }} - {{ problem.name }}</h1>
 
-<div class="mb-2">
-    <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">Back to problem p{{ problem.probid }}</a>
-</div>
+    <div class="mb-2">
+        <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">Back to problem p{{ problem.probid }}</a>
+    </div>
 
-{{ macros.table(testcaseGroups, tableFields, numActions) }}
+    <h1>Problem groups</h1>
+    {{ macros.table(testcaseGroups, tableFields, numActions) }}
 
-{% if is_granted('ROLE_ADMIN') %}
-    <p>
-        {{ button(path('jury_problem_testcase_group_add', {'probId': problem.probid}), 'Add new testcase group', 'primary', 'plus') }}
-    </p>
-{% endif %}
+    <h1>Empty groups</h1>
+    {{ macros.table(emptyTestcaseGroups, tableFields, numActions) }}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <p>
+            {{ button(path('jury_problem_testcase_group_add', {'probId': problem.probid}), 'Add new testcase group', 'primary', 'plus') }}
+        </p>
+    {% endif %}
 
 {% endblock %}

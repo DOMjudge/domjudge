@@ -25,6 +25,7 @@ use App\Service\EventLogService;
 use App\Service\ImportProblemService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -36,6 +37,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -98,7 +100,12 @@ class ProblemTestcaseGroupController extends BaseController
         }
         $problemIsLocked = !empty($lockedContests);
 
-        $testcaseGroups = $this->em->getRepository(TestcaseGroup::class)->findBy(['problem' => $problem]);
+        if ($problemIsLocked) {
+            $this->addFlash('warning',
+                'Problem belongs to locked contest ('
+                . join($lockedContests)
+                . ', disallowing editing.');
+        }
 
         $tableFields = [
             'testcasegroupid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
@@ -106,6 +113,48 @@ class ProblemTestcaseGroupController extends BaseController
             'points_percentage' => ['title' => '% of points', 'sort' => true],
         ];
 
+        $testcaseGroupsTable = $this->generateTestcaseGroupsTable(
+            $problem->getTestcaseGroups(),
+            $tableFields,
+            false,
+            $problemIsLocked,
+            $problem->getProbid()
+        );
+
+        $emptyTestcaseGroups = $this->em->createQueryBuilder()
+            ->select('tg')
+            ->from(TestcaseGroup::class, 'tg')
+            ->leftJoin(Testcase::class, 'tc', Join::WITH, 'tc.testcase_group = tg')
+            ->where('tc.testcase_group IS NULL')
+            ->getQuery()
+            ->getResult();
+
+        $emptyTestcaseGroupsTable = $this->generateTestcaseGroupsTable(
+            $emptyTestcaseGroups,
+            $tableFields,
+            true,
+            $problemIsLocked,
+            $problem->getProbid()
+        );
+
+        $data = [
+            'problem' => $problem,
+            'testcaseGroups' => $testcaseGroupsTable,
+            'emptyTestcaseGroups' => $emptyTestcaseGroupsTable,
+            'tableFields' => $tableFields,
+            'numActions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+            'allowEdit' => $this->isGranted('ROLE_ADMIN') && empty($lockedContest),
+        ];
+
+        return $this->render('jury/problem_testcase_groups.html.twig', $data);
+    }
+
+    private function generateTestcaseGroupsTable($testcaseGroups,
+                                                 array $tableFields,
+                                                 bool  $allowDeletion,
+                                                 bool  $problemIsLocked,
+                                                 int   $problemId): array
+    {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $testcaseGroupsTable = [];
         foreach ($testcaseGroups as $tgp) {
@@ -124,26 +173,28 @@ class ProblemTestcaseGroupController extends BaseController
                     'icon' => 'edit',
                     'title' => 'edit this testcase group',
                     'link' => $this->generateUrl('jury_problem_testcase_group_edit', [
-                        'probId' => $problem->getProbid(),
+                        'probId' => $problemId,
                         'testcaseGroupId' => $tgp->getTestcasegroupid(),
                     ]),
                 ];
 
-                $deleteAction = [
-                    'icon' => 'trash-alt',
-                    'title' => 'delete this testcase group',
-                    'link' => $this->generateUrl('jury_problem_testcase_group_delete', [
-                        'probId' => $problem->getProbid(),
-                        'testcaseGroupId' => $tgp->getTestcasegroupid(),
-                    ]),
-                    'ajaxModal' => true,
-                ];
-                if ($problemIsLocked) {
-                    $deleteAction['title'] .= ' - problem belongs to a locked contest';
-                    $deleteAction['disabled'] = true;
-                    unset($deleteAction['link']);
+                if ($allowDeletion) {
+                    $deleteAction = [
+                        'icon' => 'trash-alt',
+                        'title' => 'delete this testcase group',
+                        'link' => $this->generateUrl('jury_problem_testcase_group_delete', [
+                            'probId' => $problemId,
+                            'testcaseGroupId' => $tgp->getTestcasegroupid(),
+                        ]),
+                        'ajaxModal' => true,
+                    ];
+                    if ($problemIsLocked) {
+                        $deleteAction['title'] .= ' - problem belongs to a locked contest';
+                        $deleteAction['disabled'] = true;
+                        unset($deleteAction['link']);
+                    }
+                    $testCaseGroupActions[] = $deleteAction;
                 }
-                $testCaseGroupActions[] = $deleteAction;
             }
 
             // Save this to our list of rows
@@ -151,29 +202,13 @@ class ProblemTestcaseGroupController extends BaseController
                 'data' => $testcaseGroupData,
                 'actions' => $testCaseGroupActions,
                 'link' => $this->generateUrl('jury_problem_testcase_group_edit', [
-                    'probId' => $problem->getProbid(),
+                    'probId' => $problemId,
                     'testcaseGroupId' => $tgp->getTestcasegroupid(),
                 ]),
             ];
         }
 
-        if ($problemIsLocked) {
-            $this->addFlash('warning',
-                'Problem belongs to locked contest ('
-                . join($lockedContests)
-                . ', disallowing editing.');
-        }
-
-        $data = [
-            'problem' => $problem,
-            'testcaseGroups' => $testcaseGroupsTable,
-            'tableFields' => $tableFields,
-            'numActions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
-//            'addForm' => $this->createForm(TestcaseGroupType::class)->createView(),
-            'allowEdit' => $this->isGranted('ROLE_ADMIN') && empty($lockedContest),
-        ];
-
-        return $this->render('jury/problem_testcase_groups.html.twig', $data);
+        return $testcaseGroupsTable;
     }
 
     /**
@@ -182,22 +217,13 @@ class ProblemTestcaseGroupController extends BaseController
      */
     public function deleteAction(Request $request, int $probId, int $testcaseGroupId): Response
     {
-        $problem = $this->em->getRepository(Problem::class)->find($probId);
-        if (!$problem) {
-            throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
-        }
-
-        foreach ($problem->getContestProblems() as $contestProblem) {
-            /** @var ContestProblem $contestProblem */
-            if ($contestProblem->getContest()->isLocked()) {
-                $this->addFlash('danger', 'Cannot delete problem, it belongs to locked contest c' . $contestProblem->getContest()->getCid());
-                return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
-            }
-        }
-
-        $testcaseGroup = $problem->getTestcaseGroups()->filter(fn(TestcaseGroup $tgp) => $tgp->getTestcasegroupid() === $testcaseGroupId)->first();
+        $testcaseGroup = $this->em->getRepository(TestcaseGroup::class)->find($testcaseGroupId);
         if (!$testcaseGroup) {
-            throw new NotFoundHttpException(sprintf('Testcase group with ID %s not found in problem %s', $testcaseGroupId, $probId));
+            throw new NotFoundHttpException(sprintf('Testcase group with ID %s not found', $testcaseGroupId));
+        }
+
+        if (!$testcaseGroup->getTestcases()->isEmpty()) {
+            throw new BadRequestHttpException(sprintf('Testcase group with ID %s is not empty and so cannot be deleted', $testcaseGroupId));
         }
 
         return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
@@ -228,13 +254,12 @@ class ProblemTestcaseGroupController extends BaseController
         }
 
         if ($editing) {
-            $testcaseGroup = $problem->getTestcaseGroups()->filter(fn(TestcaseGroup $tgp) => $tgp->getTestcasegroupid() === $testcaseGroupId)->first();
+            $testcaseGroup = $this->em->getRepository(TestcaseGroup::class)->find($testcaseGroupId);
             if (!$testcaseGroup) {
                 throw new NotFoundHttpException(sprintf('Testcase group with ID %s not found in problem %s', $testcaseGroupId, $probId));
             }
         } else {
             $testcaseGroup = new TestcaseGroup();
-            $testcaseGroup->setProblem($problem);
         }
 
         $form = $this->createForm(TestcaseGroupType::class, $testcaseGroup);

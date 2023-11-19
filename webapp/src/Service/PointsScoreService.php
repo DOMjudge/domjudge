@@ -43,30 +43,36 @@ class PointsScoreService
      */
     public static function getScoredPoints(Judging         $judging,
                                            array           $judgingRuns,
-                                           ContestProblem  $contestProblem,
-                                           DOMJudgeService $dj): float
+                                           ContestProblem  $contestProblem): float
     {
         if ($judging->getResult() === 'correct') {
             return $contestProblem->getPoints();
         }
 
+
+        $groupRuns = [];
+
+        foreach ($judgingRuns as $judgingRun) {
+            $group = $judgingRun->getTestcase()->getTestcaseGroup();
+            if (!isset($groupRuns[$group->getTestcasegroupid()])) {
+                $groupRuns[$group->getTestcasegroupid()] = [$judgingRun];
+            } else {
+                $groupRuns[$group->getTestcasegroupid()][] = $judgingRun;
+            }
+        }
+
         $pointsScored = 0;
 
-        foreach ($contestProblem->getProblem()->getTestcaseGroups() as $testcaseGroup) {
-            foreach ($judgingRuns as $judgingRun) {
-                $runGroup = $judgingRun->getTestcase()->getTestcaseGroup();
+        foreach ($groupRuns as $runs) {
+            /** @var JudgingRun[] $runs */
+            $group = $runs[0]->getTestcase()->getTestcaseGroup();
 
-                if ($runGroup === null) {
-                    continue;
-                }
-
-                if ($runGroup->getTestcasegroupid() === $testcaseGroup->getTestcasegroupid()
-                    && $judgingRun->getRunresult() !== "correct") {
-                    continue (2);
-                }
+            $correctRuns = array_reduce($runs, fn($carry, $run) => $run->getRunresult() == 'correct' ? $carry + 1 : $carry, 0);
+            if ($correctRuns < count($group->getTestcases())) {
+                continue;
             }
 
-            $pointsScored += $testcaseGroup->getPointsPercentage() * $contestProblem->getPoints();
+            $pointsScored += $group->getPointsPercentage() * $contestProblem->getPoints();
         }
 
         return $pointsScored;

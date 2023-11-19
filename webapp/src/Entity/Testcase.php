@@ -118,7 +118,7 @@ class Testcase
 
     /**
      * @ORM\ManyToOne(targetEntity="TestcaseGroup", inversedBy="testcases")
-     * @ORM\JoinColumn(name="testcasegroupid", referencedColumnName="testcasegroupid", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="testcasegroupid", referencedColumnName="testcasegroupid")
      * @Serializer\Exclude()
      */
     private ?TestcaseGroup $testcase_group;

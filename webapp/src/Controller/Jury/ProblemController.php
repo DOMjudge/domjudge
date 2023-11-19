@@ -789,8 +789,18 @@ class ProblemController extends BaseController
                 . join($lockedContests)
                 . ', disallowing editing.');
         }
+
+        $emptyTestcaseGroups = $this->em->createQueryBuilder()
+            ->select('tg')
+            ->from(TestcaseGroup::class, 'tg')
+            ->leftJoin(Testcase::class, 'tc', Join::WITH, 'tc.testcase_group = tg')
+            ->where('tc.testcase_group IS NULL')
+            ->getQuery()
+            ->getResult();
+
         $data = [
             'problem' => $problem,
+            'emptyTestcaseGroups' => $emptyTestcaseGroups,
             'testcases' => $testcases,
             'testcaseData' => $testcaseData,
             'extensionMapping' => Testcase::EXTENSION_MAPPING,
