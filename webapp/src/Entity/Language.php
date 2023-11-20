@@ -53,6 +53,12 @@ class Language extends BaseApiEntity
         options: ['comment' => 'List of recognized extensions (JSON encoded)']
     )]
     #[Assert\NotBlank]
+    #[Assert\All([
+        new Assert\Regex([
+            'pattern' => '/^[^.]/',
+            'message' => 'The extension should not start with a dot.'
+        ])
+    ])]
     #[Serializer\Type('array<string>')]
     private array $extensions = [];
 
