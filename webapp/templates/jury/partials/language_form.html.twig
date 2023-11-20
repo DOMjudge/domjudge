@@ -18,7 +18,7 @@
             addExtension($extensionsHolder, $addExtensionButton);
         });
 
-        $extensionsHolder.find('div').each(function() {
+        $extensionsHolder.find('div:not(.invalid-feedback)').each(function() {
             addDeleteLink($(this));
         });
 
@@ -37,8 +37,10 @@
             var $removeFormButton = $('<button type="button" class="btn btn-danger"><i class="fas fa-trash"></i></button>');
             var $inputGroup = $('<div class="input-group"></div>');
             var $formControl = $extensionDiv.find('.form-control');
+            var $feedbackBlock = $extensionDiv.find('.invalid-feedback');
             $inputGroup.append($formControl);
             $inputGroup.append($removeFormButton);
+            $inputGroup.append($feedbackBlock);
             $extensionDiv.html($inputGroup);
 
             $removeFormButton.on('click', function(e) {
