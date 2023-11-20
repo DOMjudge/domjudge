@@ -225,8 +225,9 @@ AS_IF([test "x$with_systemdsystemunitdir" = "xyes" -o "x$with_systemdsystemunitd
      AS_IF([test "x$PKG_CONFIG" = "x"],AC_MSG_ERROR([systemd support requested but no pkg-config available to query systemd package]))
      def_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)
 
+     # TODO: This seems to fail when systemd is not installed so pkg-config can't find the variable, we don't error out there
      AS_IF([test "x$def_systemdsystemunitdir" = "x"],
-   [AS_IF([test "x$with_systemdsystemunitdir" = "xyes"],
+   [AS_IF([test "x$with_systemdsystemunitdir" = "xyes" -o "x$with_systemdsystemunitdir" = "xauto"],
     [AC_MSG_ERROR([systemd support requested but pkg-config unable to query systemd package])])
     with_systemdsystemunitdir=no],
    [with_systemdsystemunitdir="$def_systemdsystemunitdir"])])
