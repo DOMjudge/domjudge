@@ -107,6 +107,12 @@ class ProblemTestcaseGroupController extends BaseController
                 . ', disallowing editing.');
         }
 
+        $pointsPercentageSum = array_reduce($problem->getTestcaseGroups()->toArray(),
+            fn($carry, $group) => $carry + $group->getPointsPercentage(), 0);
+        if (abs($pointsPercentageSum - 1) > 0.001) {
+            $this->addFlash('warning', "The problem's groups point percentages sum to $pointsPercentageSum, not 1.");
+        }
+
         $tableFields = [
             'testcasegroupid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
             'name' => ['title' => 'name', 'sort' => true],
