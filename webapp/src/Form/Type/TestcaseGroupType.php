@@ -24,7 +24,7 @@ class TestcaseGroupType extends AbstractExternalIdEntityType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('name', TextType::class);
-        $builder->add('points_percentage', NumberType::class, ['help' => 'from 0 to 1', 'constraints' => [
+        $builder->add('points_percentage', NumberType::class, ['help' => 'between 0 and 1', 'constraints' => [
             new Range(['min' => 0, 'max' => 1]),
         ]]);
 
