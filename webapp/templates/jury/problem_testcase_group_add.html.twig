@@ -5,12 +5,13 @@
 
 {% block content %}
 
-    <h1>{% if editing %}
-            Edit testcase group in
+    <h1>
+        {% if editing %}
+            Edit a testcase group
         {% else %}
-            Add testcase group to
+            Add a testcase group
         {% endif %}
-        problem p{{ problem.probid }} - {{ problem.name }}</h1>
+    </h1>
 
     {{ form(form) }}
 
