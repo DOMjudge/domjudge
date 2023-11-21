@@ -118,10 +118,10 @@ class Testcase
 
     /**
      * @ORM\ManyToOne(targetEntity="TestcaseGroup", inversedBy="testcases")
-     * @ORM\JoinColumn(name="testcasegroupid", referencedColumnName="testcasegroupid")
+     * @ORM\JoinColumn(name="testcasegroupid", referencedColumnName="testcasegroupid", nullable=false)
      * @Serializer\Exclude()
      */
-    private ?TestcaseGroup $testcase_group;
+    private TestcaseGroup $testcase_group;
 
     public function __construct()
     {
@@ -322,8 +322,9 @@ class Testcase
         return $this->testcase_group;
     }
 
-    public function setTestcaseGroup(?TestcaseGroup $testcase_group): void
+    public function setTestcaseGroup(?TestcaseGroup $testcase_group): Testcase
     {
         $this->testcase_group = $testcase_group;
+        return $this;
     }
 }

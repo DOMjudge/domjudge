@@ -691,10 +691,26 @@ class ProblemController extends BaseController
             if ($inputOrOutputSpecified && $allOk) {
                 $newTestcase        = new Testcase();
                 $newTestcaseContent = new TestcaseContent();
+
+                $testcaseGroupId = intval($request->request->get('add_group'));
+                if ($testcaseGroupId === -1) {
+                    $testcaseGroup = new TestcaseGroup();
+                    $testcaseGroup->setName('default');
+                    $testcaseGroup->setPointsPercentage(1);
+                    $this->em->persist($testcaseGroup);
+                }
+                else {
+                    $testcaseGroup = $this->em->getRepository(TestcaseGroup::class)->find($testcaseGroupId);
+                    if (!$testcaseGroup) {
+                        throw new NotFoundHttpException(sprintf('Testcase group with ID %s not found', $probId));
+                    }
+                }
+
                 $newTestcase
                     ->setContent($newTestcaseContent)
                     ->setRank($maxrank)
                     ->setProblem($problem)
+                    ->setTestcaseGroup($testcaseGroup)
                     ->setDescription($request->request->get('add_desc'))
                     ->setSample($request->request->has('add_sample'));
                 foreach (['input', 'output'] as $type) {
