@@ -26,14 +26,36 @@ final class Version20231108142925 extends AbstractMigration
         SQL
         );
 
-        // FIXME NOT NULL
         $this->addSql(<<<SQL
         ALTER TABLE `testcase` ADD COLUMN `testcasegroupid` int(4) unsigned DEFAULT NULL COMMENT 'Testcase group ID' AFTER `probid`
         SQL
         );
-        $this->addSql(<<<SQL
-        ALTER TABLE `testcase` ADD CONSTRAINT `testcase_ibfk_2` FOREIGN KEY (`testcasegroupid`) REFERENCES `testcase_group` (`testcasegroupid`)
+
+        $problems = $this->connection->fetchAllAssociative(<<<SQL
+        SELECT DISTINCT p.`probid` FROM `problem` p
+        JOIN `testcase` t ON p.`probid` = t.`probid`
         SQL
+        );
+
+        foreach ($problems as $problem) {
+            $this->addSql(<<<SQL
+            INSERT INTO `testcase_group` (`points_percentage`, `name`)
+            VALUES (1, 'default')
+            SQL
+            );
+
+            $this->addSql(<<<SQL
+            UPDATE `testcase` SET `testcasegroupid` = LAST_INSERT_ID()
+            WHERE `probid` = :problemId
+            SQL, [
+                'problemId' => $problem['probid']
+            ]);
+        }
+
+        $this->addSql(<<<SQL
+            ALTER TABLE `testcase` MODIFY `testcasegroupid` int(4) unsigned,
+            ADD CONSTRAINT `testcase_ibfk` FOREIGN KEY (`testcasegroupid`) REFERENCES `testcase_group` (`testcasegroupid`);
+            SQL
         );
 
         $this->addSql(<<<SQL
@@ -45,7 +67,7 @@ final class Version20231108142925 extends AbstractMigration
     public function down(Schema $schema): void
     {
         $this->addSql(<<<SQL
-        ALTER TABLE `testcase` DROP CONSTRAINT `testcase_ibfk_2`
+        ALTER TABLE `testcase` DROP CONSTRAINT `testcase_ibfk`
         SQL
         );
 
