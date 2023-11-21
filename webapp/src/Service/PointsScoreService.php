@@ -67,7 +67,8 @@ class PointsScoreService
             /** @var JudgingRun[] $runs */
             $group = $runs[0]->getTestcase()->getTestcaseGroup();
 
-            $correctRuns = array_reduce($runs, fn($carry, $run) => $run->getRunresult() == 'correct' ? $carry + 1 : $carry, 0);
+            $correctRuns = array_reduce($runs,
+                fn($carry, $run) => $run->getRunresult() == 'correct' ? $carry + 1 : $carry, 0);
             if ($correctRuns < count($group->getTestcases())) {
                 continue;
             }
