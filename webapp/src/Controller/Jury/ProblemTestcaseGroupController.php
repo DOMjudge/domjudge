@@ -151,9 +151,9 @@ class ProblemTestcaseGroupController extends BaseController
 
     private function generateTestcaseGroupsTable($testcaseGroups,
                                                  array $tableFields,
-                                                 bool  $allowDeletion,
-                                                 bool  $problemIsLocked,
-                                                 int   $problemId): array
+                                                 bool $allowDeletion,
+                                                 bool $problemIsLocked,
+                                                 int $problemId): array
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $testcaseGroupsTable = [];
@@ -276,7 +276,6 @@ class ProblemTestcaseGroupController extends BaseController
 
         return $this->render('jury/problem_testcase_group_add.html.twig', [
             'editing' => $editing,
-            'problem' => $problem,
             'form' => $form->createView(),
         ]);
     }
