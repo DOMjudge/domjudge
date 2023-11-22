@@ -196,7 +196,7 @@ class ImportExportService
             }
         }
 
-        $deactivateTime = $this->convertImportedTime($deactivateTimeFields, $data, $errorMessage);
+        $deactivateTime = $this->convertImportedTime($deactivateTimeFields, $data, $errorMessage, contest: $contest);
         if ($errorMessage) {
             return false;
         }
