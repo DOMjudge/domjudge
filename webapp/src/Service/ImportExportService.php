@@ -181,8 +181,12 @@ class ImportExportService
             return false;
         }
 
+        $contest = new Contest();
+        $contest
+            ->setStarttimeString(date_format($startTime, 'Y-m-d H:i:s e'));
+
         // Activate time is special, it can return non empty message for parsing error or null if no field was provided
-        $activateTime = $this->convertImportedTime($activateTimeFields, $data, $errorMessage);
+        $activateTime = $this->convertImportedTime($activateTimeFields, $data, $errorMessage, contest: $contest);
         if ($errorMessage) {
             return false;
         } elseif (!$activateTime) {
@@ -197,7 +201,6 @@ class ImportExportService
             return false;
         }
 
-        $contest = new Contest();
         $contest
             ->setName($data['name'] ?? $data['formal_name'] )
             ->setShortname(preg_replace(
@@ -207,7 +210,6 @@ class ImportExportService
                            ))
             ->setExternalid($contest->getShortname())
             ->setWarningMessage($data['warning-message'] ?? null)
-            ->setStarttimeString(date_format($startTime, 'Y-m-d H:i:s e'))
             ->setActivatetimeString(date_format($activateTime, 'Y-m-d H:i:s e'))
             ->setEndtimeString(sprintf('+%s', $data['duration']));
         if ($deactivateTime) {
