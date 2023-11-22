@@ -564,6 +564,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     {
         $this->starttimeString = $starttimeString;
 
+        $this->starttime = $this->getAbsoluteTime($starttimeString);
         $this->setActivatetimeString($this->getActivatetimeString());
         $this->setFreezetimeString($this->getFreezetimeString());
         $this->setEndtimeString($this->getEndtimeString());
