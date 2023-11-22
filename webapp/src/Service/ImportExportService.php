@@ -122,7 +122,7 @@ class ImportExportService
 
         if (is_string($timeValue)) {
             if ($contest) {
-                $timeValue = $contest->getAbsoluteTime($timeValue);
+                $timeValue = Utils::abstime($contest->getAbsoluteTime($timeValue));
             }
             $time = new DateTime($timeValue);
         } else {
