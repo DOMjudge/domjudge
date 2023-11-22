@@ -124,6 +124,7 @@ class ImportExportService
             if ($contest) {
                 $timeValue = Utils::abstime($contest->getAbsoluteTime($timeValue));
             }
+            /** @var DateTime|bool $time */
             $time = new DateTime($timeValue);
         } else {
             /** @var DateTime|DateTimeImmutable $time */
