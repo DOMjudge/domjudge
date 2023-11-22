@@ -106,8 +106,9 @@ class ImportExportService
      * To verify that everything works as expected the $errorMessage needs to be checked
      * for parsing errors.
      */
-    protected function convertImportedTime(array $fields, array $data, ?string &$errorMessage = null): ?DateTimeImmutable
-    {
+    protected function convertImportedTime(
+        array $fields, array $data, ?string &$errorMessage = null, ?Contest $contest = null
+    ): ?DateTimeImmutable {
         $timeValue = null;
         $usedField = null;
         foreach ($fields as $field) {
@@ -120,9 +121,10 @@ class ImportExportService
         }
 
         if (is_string($timeValue)) {
-            $time = date_create_from_format(DateTime::ISO8601, $timeValue) ?:
-                // Make sure ISO 8601 but with the T replaced with a space also works.
-                date_create_from_format('Y-m-d H:i:sO', $timeValue);
+            if ($contest) {
+                $timeValue = $contest->getAbsoluteTime($timeValue);
+            }
+            $time = new DateTime($timeValue);
         } else {
             /** @var DateTime|DateTimeImmutable $time */
             $time = $timeValue;
