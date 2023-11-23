@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Controller\API\ContestController;
 use App\Entity\BaseApiEntity;
 use App\Entity\Clarification;
 use App\Entity\Contest;
