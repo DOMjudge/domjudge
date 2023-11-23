@@ -55,9 +55,6 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
             ];
 
             foreach ($countryFlagSizes as $size => $viewBoxSize) {
-                $alpha3code = strtoupper($affiliation->getCountry());
-                $alpha2code = strtolower(Countries::getAlpha2Code($alpha3code));
-                $flagFile   = sprintf('%s/public/flags/%s/%s.svg', $this->dj->getDomjudgeWebappDir(), $size, $alpha2code);
                 $route      = $this->dj->apiRelativeUrl(
                     'v4_app_api_generalinfo_countryflag', ['countryCode' => $affiliation->getCountry(), 'size' => $size]
                 );

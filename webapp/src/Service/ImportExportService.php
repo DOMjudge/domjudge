@@ -574,8 +574,8 @@ class ImportExportService
             // Check if we can parse it as YAML
             try {
                 $data = Yaml::parse($content, Yaml::PARSE_DATETIME);
-            } catch (ParseException $e) {
-                $message = "File contents is not valid JSON or YAML: " . $e->getMessage();
+            } catch (ParseException $parseException) {
+                $message = "File contents is not valid JSON or YAML: " . $parseException->getMessage();
                 return -1;
             }
         }
@@ -606,9 +606,7 @@ class ImportExportService
     protected function importGroupsTsv(array $content, ?string &$message = null): int
     {
         $groupData = [];
-        $l         = 1;
         foreach ($content as $line) {
-            $l++;
             $line = Utils::parseTsvLine(trim($line));
             $groupData[] = [
                 'categoryid' => @$line[0],
@@ -628,7 +626,7 @@ class ImportExportService
     public function importGroupsJson(array $data, ?string &$message = null, ?array &$saved = null): int
     {
         $groupData = [];
-        foreach ($data as $idx => $group) {
+        foreach ($data as $group) {
             $groupData[] = [
                 'categoryid' => @$group['id'],
                 'icpc_id' => @$group['icpc_id'],
@@ -714,7 +712,7 @@ class ImportExportService
     public function importOrganizationsJson(array $data, ?string &$message = null, ?array &$saved = null): int
     {
         $organizationData = [];
-        foreach ($data as $idx => $organization) {
+        foreach ($data as $organization) {
             $organizationData[] = [
                 'externalid' => @$organization['id'],
                 'shortname' => @$organization['short_name'] ?? @$organization['short-name'] ?? @$organization['shortname'] ?? @$organization['name'],
@@ -791,9 +789,7 @@ class ImportExportService
     protected function importTeamsTsv(array $content, ?string &$message = null): int
     {
         $teamData = [];
-        $l        = 1;
         foreach ($content as $line) {
-            $l++;
             $line = Utils::parseTsvLine(trim($line));
 
             // teams.tsv contains data pertaining both to affiliations and teams.
@@ -846,7 +842,7 @@ class ImportExportService
     public function importTeamsJson(array $data, ?string &$message = null, ?array &$saved = null): int
     {
         $teamData = [];
-        foreach ($data as $idx => $team) {
+        foreach ($data as $team) {
             $teamData[] = [
                 'team' => [
                     'teamid' => $team['id'] ?? null,
@@ -1015,8 +1011,6 @@ class ImportExportService
             }
             $teamItem['team']['category'] = $teamCategory;
             unset($teamItem['team']['categoryid']);
-
-            $metadata = $this->em->getClassMetaData(Team::class);
 
             // Determine if we need to set the team ID manually or automatically
             if (empty($teamItem['team']['teamid'])) {

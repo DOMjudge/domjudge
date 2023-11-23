@@ -29,7 +29,7 @@ class RejudgingStatesFixture extends AbstractTestDataFixture
     {
         /** @var User $user */
         $user = $manager->getRepository(User::class)->findOneBy(['username' => 'admin']);
-        foreach (static::rejudgingStages() as $index => $rejudgingStage) {
+        foreach (static::rejudgingStages() as $rejudgingStage) {
             $rejudging = (new Rejudging())
                 ->setStarttime(Utils::toEpochFloat('2019-01-01 07:07:07'))
                 ->setStartUser($user)
