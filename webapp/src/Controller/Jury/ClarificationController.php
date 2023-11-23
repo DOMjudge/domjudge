@@ -352,7 +352,13 @@ class ClarificationController extends AbstractController
         if ($queue === "") {
             $queue = null;
         }
-        $clarification->setQueue($queue);
+
+        // Either this is the first in a thread (of 1 or more) or this 2nd or more.
+        $curClarification = $clarification->getInReplyTo() ?? $clarification;
+        foreach ($curClarification->getReplies() as $reply) {
+            $reply->setQueue($queue);
+        }
+        $curClarification->setQueue($queue);
         $this->em->flush();
 
         if ($request->isXmlHttpRequest()) {
