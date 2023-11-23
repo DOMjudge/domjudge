@@ -269,7 +269,7 @@ class ImportProblemService
                 $yamlProblemProperties = [];
                 if (isset($yamlData['name'])) {
                     if (is_array($yamlData['name'])) {
-                        foreach ($yamlData['name'] as $lang => $name) {
+                        foreach ($yamlData['name'] as $name) {
                             // TODO: select a specific instead of the first language.
                             $yamlProblemProperties['name'] = $name;
                             break;
@@ -389,7 +389,7 @@ class ImportProblemService
                 $baseFileName = sprintf('data/%s/%s', $type, $dataFile);
                 $testInput  = $zip->getFromName($baseFileName . '.in');
                 $testOutput = $zip->getFromName($baseFileName . '.ans');
-                $imageFile  = $imageType = $imageThumb = false;
+                $imageType = $imageThumb = false;
                 foreach (['png', 'jpg', 'jpeg', 'gif'] as $imgExtension) {
                     $imageFileName = $baseFileName . '.' . $imgExtension;
                     if (($imageFile = $zip->getFromName($imageFileName)) !== false) {

@@ -323,7 +323,7 @@ class JudgehostController extends BaseController
         $time_crit = $this->config->get('judgehost_critical');
         $critical_threshold = $now - $time_crit;
 
-        $ret = $this->em->createQuery(
+        $this->em->createQuery(
             'UPDATE App\Entity\Judgehost j set j.enabled = false, j.hidden = true WHERE j.polltime IS NULL OR j.polltime < :threshold')
             ->setParameter('threshold', $critical_threshold)
             ->execute();

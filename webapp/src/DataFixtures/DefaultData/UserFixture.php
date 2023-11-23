@@ -23,7 +23,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
 
     public function load(ObjectManager $manager): void
     {
-        if (!($adminUser = $manager->getRepository(User::class)->findOneBy(['username' => 'admin']))) {
+        if (!$manager->getRepository(User::class)->findOneBy(['username' => 'admin'])) {
             $adminPasswordFile = sprintf(
                 '%s/%s',
                 $this->dj->getDomjudgeEtcDir(),
@@ -53,7 +53,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
             $this->logger->info('User admin already exists, not created');
         }
 
-        if (!($judgehostUser = $manager->getRepository(User::class)->findOneBy(['username' => 'judgehost']))) {
+        if (!$manager->getRepository(User::class)->findOneBy(['username' => 'judgehost'])) {
             $judgehostUser = new User();
             $judgehostUser
                 ->setExternalid('judgehost')

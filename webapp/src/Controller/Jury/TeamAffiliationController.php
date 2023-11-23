@@ -70,8 +70,6 @@ class TeamAffiliationController extends BaseController
                 array_slice($table_fields, 1, null, true);
         }
 
-        $webDir = realpath(sprintf('%s/public', $projectDir));
-
         $propertyAccessor        = PropertyAccess::createPropertyAccessor();
         $team_affiliations_table = [];
         foreach ($teamAffiliations as $teamAffiliationData) {

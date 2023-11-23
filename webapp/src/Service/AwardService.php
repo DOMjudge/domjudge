@@ -104,7 +104,7 @@ class AwardService
         foreach ($medal_winners as $metal => $team_ids) {
             $type = $metal . '-medal';
             $result = [
-                'id' => $metal . '-medal',
+                'id' => $type,
                 'citation' => ucfirst($metal) . ' medal winner',
                 'team_ids' => $team_ids
             ];

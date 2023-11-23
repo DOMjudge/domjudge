@@ -68,7 +68,6 @@ class ExecutableController extends BaseController
         ];
 
         $propertyAccessor  = PropertyAccess::createPropertyAccessor();
-        $executables_table = [];
         $configScripts = [];
         foreach (['compare', 'run', 'full_debug'] as $config_script) {
             try {

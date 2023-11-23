@@ -569,7 +569,7 @@ class SubmissionService
         // SQL transaction time below.
         if ($this->dj->checkrole('jury')) {
             $results = null;
-            foreach ($files as $rank => $file) {
+            foreach ($files as $file) {
                 $fileResult = self::getExpectedResults(file_get_contents($file->getRealPath()),
                     $this->config->get('results_remap'));
                 if ($fileResult === false) {
