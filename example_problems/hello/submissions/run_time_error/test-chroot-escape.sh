@@ -5,10 +5,10 @@
 # @EXPECTED_RESULTS@: RUN_TIME_ERROR
 
 ischroot
-if [ ischroot ]; then
+if ischroot; then
     # We expect to be in the jail
     chroot /proc/1/root
-    if [ ischroot ]; then
+    if ischroot; then
         # We expect to still be in the jail
         exit 1
     else
