@@ -217,8 +217,7 @@ class SubmissionController extends BaseController
             ->setParameter('contest', $submission->getContest())
             ->setParameter('submission', $submission)
             ->groupBy('j.judgingid')
-            ->orderBy('j.starttime')
-            ->addOrderBy('j.judgingid')
+            ->orderBy('j.judgingid')
             ->getQuery()
             ->getResult();
 
