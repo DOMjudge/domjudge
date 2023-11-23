@@ -85,9 +85,9 @@ cleanup_judgings() {
         [ -d "$d" ] || continue
         cd "$d"
         echo "  in $d:"
-        find . -maxdepth 1 -type d -regex '\./[0-9]+' | while IFS= read -r contest; do
-            echo "    removing judging data for contest $contest"
-            rm -rf "${contest:?}/"
+        find . -maxdepth 1 -type d -regex '\./[0-9]+' | while IFS= read -r submission; do
+            echo "    removing judging data for submission s${submission#./}"
+            rm -rf "${submission:?}/"
         done
         cd - >/dev/null
     done
