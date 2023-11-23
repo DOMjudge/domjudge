@@ -187,10 +187,8 @@ class Executable
      */
     public function checkUsed(array $configScripts): bool
     {
-        foreach ($configScripts as $config_script) {
-            if ($this->execid === $config_script) {
-                return true;
-            }
+        if (in_array($this->execid, $configScripts, true)) {
+            return true;
         }
         if (count($this->problems_compare) || count($this->problems_run)) {
             return true;
