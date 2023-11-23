@@ -32,13 +32,14 @@
         'output-limit':   'black',
     } %}
     function create_chart(data, maxY) {
-        var tickStep = 1;
+        var tickStep = Math.floor(maxY/5);
         if (maxY <= 2) {
             tickStep = 0.2;
         } else if (maxY <= 5) {
             tickStep = 0.5;
         }
         maxY += tickStep;
+        maxY = Math.floor(maxY/tickStep) * tickStep;
         var chart = nv.models.multiBarChart()
             .x(function (d) {
                 return d.label
@@ -58,7 +59,12 @@
         }
         chart.yAxis
             .tickValues(tickValues)
-            .axisLabel('Runtime (in s)');
+            .axisLabel('Runtime');
+        if (tickStep >= 1) {
+            chart.yAxis.tickFormat(function(d) { return d3.format(',f')(d) + 's' });
+        } else {
+            chart.yAxis.tickFormat(function(d) { return d3.format(',.1f')(d) + 's' });
+        }
         return chart;
     }
 
