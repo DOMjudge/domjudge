@@ -530,9 +530,7 @@ class SubmissionService
             if ($source !== 'shadowing' && $language->getFilterCompilerFiles()) {
                 $matchesExtension = false;
                 foreach ($language->getExtensions() as $extension) {
-                    $extensionWithDot = '.' . $extension;
-                    $extensionLength = strlen($extensionWithDot);
-                    if (substr($file->getClientOriginalName(), -$extensionLength) === $extensionWithDot) {
+                    if (str_ends_with($file->getClientOriginalName(), '.' . $extension)) {
                         $matchesExtension = true;
                         break;
                     }
