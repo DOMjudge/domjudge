@@ -285,7 +285,9 @@ class ImportProblemService
                 if (isset($yamlData['validation'])
                     && ($yamlData['validation'] == 'custom' ||
                         $yamlData['validation'] == 'custom interactive')) {
-                    $this->searchAndAddValidator($zip, $messages, $externalId, $yamlData['validation'], $problem);
+                    if (!$this->searchAndAddValidator($zip, $messages, $externalId, $yamlData['validation'], $problem)) {
+                        return null;
+                    }
                 }
 
                 if (isset($yamlData['limits'])) {
@@ -898,7 +900,7 @@ class ImportProblemService
         ];
     }
 
-    private function searchAndAddValidator(ZipArchive $zip, ?array &$messages, string $externalId, string $validationMode, ?Problem $problem): void
+    private function searchAndAddValidator(ZipArchive $zip, ?array &$messages, string $externalId, string $validationMode, ?Problem $problem): bool
     {
         $validatorFiles = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
@@ -910,6 +912,7 @@ class ImportProblemService
         }
         if (sizeof($validatorFiles) == 0) {
             $messages['danger'][] = 'Custom validator specified but not found.';
+            return false;
         } else {
             // File(s) have to share common directory.
             $validatorDir = mb_substr($validatorFiles[0], 0, mb_strrpos($validatorFiles[0], '/')) . '/';
@@ -923,7 +926,8 @@ class ImportProblemService
                 }
             }
             if (!$sameDir) {
-                $messages['warning'][] = 'Found multiple custom output validators.';
+                $messages['danger'][] = 'Found multiple custom output validators.';
+                return false;
             } else {
                 $tmpzipfiledir = exec("mktemp -d --tmpdir=" .
                     $this->dj->getDomjudgeTmpDir(),
@@ -992,5 +996,6 @@ class ImportProblemService
                 $messages['info'][] = "Added output validator '$outputValidatorName'.";
             }
         }
+        return true;
     }
 }
