@@ -24,7 +24,7 @@ class VersionController extends BaseController
         $languages = $this->em->createQueryBuilder()
             ->select('l', 'v', 'jh')
             ->from(Language::class, 'l')
-            ->leftJoin('l.versions', 'v')
+            ->leftJoin('l.versions', 'v', 'WITH', 'v.active = 1')
             ->leftJoin('v.judgehost', 'jh')
             ->andWhere('l.allowSubmit = 1')
             ->getQuery()->getResult();
