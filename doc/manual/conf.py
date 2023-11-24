@@ -187,8 +187,6 @@ latex_toplevel_sectioning = 'section'
 latex_documents = [
     (master_doc, 'DOMjudge.tex', 'DOMjudge Documentation',
      'DOMjudge Team', 'manual'),
-    ('team', 'domjudge-team-manual.tex', 'DOMjudge Team Manual',
-     'DOMjudge Team', 'manual'),
 ]
 
 
@@ -236,12 +234,8 @@ epub_exclude_files = ['search.html']
 
 # Options specifically for the Team manual PDF
 
-pdf_documents = [
-    ('team', u'domjudge-team-manual', u'DOMjudge Team Manual', u'The DOMjudge Developers'),
-]
-
 pdf_compressed = True
-pdf_stylesheets = ['sphinx','kerning','a4','sphinx-team']
+pdf_stylesheets = ['sphinx','kerning','a4']
 
 pdf_use_coverpage = False
 

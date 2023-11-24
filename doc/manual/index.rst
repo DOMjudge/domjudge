@@ -22,7 +22,6 @@ Appendices
 
 .. toctree::
    quick-install
-   team
    problem-format
    shadow
    configuration-reference
