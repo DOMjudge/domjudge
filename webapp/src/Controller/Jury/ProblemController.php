@@ -62,7 +62,7 @@ class ProblemController extends BaseController
     public function indexAction(): Response
     {
         $problems = $this->em->createQueryBuilder()
-            ->select('partial p.{probid,externalid,name,timelimit,memlimit,outputlimit,problemtext_type}', 'COUNT(tc.testcaseid) AS testdatacount')
+            ->select('p', 'COUNT(tc.testcaseid) AS testdatacount')
             ->from(Problem::class, 'p')
             ->leftJoin('p.testcases', 'tc')
             ->orderBy('p.probid', 'ASC')
@@ -239,7 +239,8 @@ class ProblemController extends BaseController
         $problem = $this->em->createQueryBuilder()
             ->from(Problem::class, 'p')
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
-            ->select('p', 'cp')
+            ->leftJoin('p.problemTextContent', 'content')
+            ->select('p', 'cp', 'content')
             ->andWhere('p.probid = :problemId')
             ->setParameter('problemId', $problemId)
             ->setParameter('contest', $this->dj->getCurrentContest())
@@ -295,7 +296,7 @@ class ProblemController extends BaseController
 
         if (!empty($problem->getProblemtext())) {
             $zip->addFromString('problem.' . $problem->getProblemtextType(),
-                                stream_get_contents($problem->getProblemtext()));
+                $problem->getProblemtext());
         }
 
         foreach ([true, false] as $isSample) {

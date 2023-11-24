@@ -242,7 +242,7 @@ class ClarificationController extends AbstractController
         /** @var ContestProblem[] $contestproblems */
         $contestproblems = $this->em->createQueryBuilder()
             ->from(ContestProblem::class, 'cp')
-            ->select('cp, partial p.{probid,externalid,name}')
+            ->select('cp, p')
             ->innerJoin('cp.problem', 'p')
             ->where('cp.contest IN (:contests)')
             ->setParameter('contests', $contests)
