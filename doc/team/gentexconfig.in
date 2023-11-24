@@ -22,6 +22,11 @@ $config = '@domserver_etcdir@/domserver-static.php';
 // substitution.
 if (is_readable($config)) {
     require($config);
+} else {
+    define(
+        'DOMJUDGE_VERSION',
+           `grep -E 'DOMjudge.* version' ../../README.md | sed -n '1s/.*version //p' | tr -d '\n'`
+    );
 }
 
 // FIXME: we need to read some of these variables from the MySQL DB.
