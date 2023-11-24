@@ -8,7 +8,7 @@
 
 set -e
 
-SOURCES="team-manual.tex team-manual-??.tex"
+SOURCE=team-manual.tex
 PREAMBLE=team-manual-preamble.tex
 
 NRUNS=3
@@ -42,16 +42,13 @@ fi
 # Run LaTeX:
 # shellcheck disable=SC2059
 {
-for f in $SOURCES ; do
-	# Skip non-existing files due to unexpanded globbing:
-	[ -f "$f" ] || continue
-	[ "$QUIET" ] || printf "Running $NRUNS passes of '%s'..." "$LATEX $LATEXFLAGS $f"
+	[ "$QUIET" ] || printf "Running $NRUNS passes of '%s'..." "$LATEX $LATEXFLAGS $SOURCE"
 	run=1
 	while [ "$run" -le "$NRUNS" ]; do
 		# shellcheck disable=SC2086
-		if ! ( cat "$TEXCONFIG" ; echo \\"input{$f}" ) | \
-			$LATEX $LATEXFLAGS -jobname "${f%.tex}" -output-directory "$OUTPUTDIR" >/dev/null ; then
-			printf "\\nTeX-ing failed in run $run, see '%s' for details.\\n" "${f%tex}log$"
+		if ! ( cat "$TEXCONFIG" ; echo \\"input{$SOURCE}" ) | \
+			$LATEX $LATEXFLAGS -jobname "${SOURCE%.tex}" -output-directory "$OUTPUTDIR" >/dev/null ; then
+			printf "\\nTeX-ing failed in run $run, see '%s' for details.\\n" "${SOURCE%tex}log"
 			exit 1
 		else
 			[ "$QUIET" ] || printf " $run"
@@ -59,7 +56,6 @@ for f in $SOURCES ; do
 		run=$((run+1))
 	done
 	[ "$QUIET" ] || printf "\\n" ;
-done
 } # end shellcheck disable
 
 rm -f "$TEXCONFIG"

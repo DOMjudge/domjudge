@@ -19,33 +19,20 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
 $config = '@domserver_etcdir@/domserver-static.php';
 
 // This script might be run before or after autoconf variable
-// substitution, so we try to read the config from all possible
-// places:
+// substitution.
 if (is_readable($config)) {
     require($config);
-    require(ETCDIR . '/domserver-config.php');
-    @include(ETCDIR . '/judgehost-config.php');
-} else {
-    @include('../../etc/domserver-config.php');
-    @include('../../etc/judgehost-config.php');
-    define(
-        'DOMJUDGE_VERSION',
-           `grep -E 'DOMjudge.* version' ../../README.md | sed -n '1s/.*version //p' | tr -d '\n'`
-    );
 }
 
 // FIXME: we need to read some of these variables from the MySQL DB.
-$configvars = array(
+$configvars = [
     'BASEURL'                   => 'https://example.com/domjudge/',
     'DOMJUDGE_VERSION'          => 'unknown',
     'SOURCESIZE'                => 256,
     'COMPILETIME'               => 30,
-    'MEMLIMIT'                  => 524288,
-    'FILELIMIT'                 => 4096,
     'PROCLIMIT'                 => 15,
-    'USERSUBMITDIR'             => '.domjudge',
     'SUBMITCLIENT_ENABLED'      => 'yes',
-    );
+    ];
 
 foreach ($configvars as $var => $default) {
     $value = defined($var) ? constant($var) : $default;

@@ -16,7 +16,7 @@ endif
 
 install-docs:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domjudge_docdir)/team \
-		gentexconfig genteammanuals
+		gentexconfig genteammanual
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/team \
 		team-manual.tex team-manual.pdf
 	$(INSTALL_DATA) -T README $(DESTDIR)$(domjudge_docdir)/README.teammanual
@@ -25,8 +25,8 @@ gentexconfig: gentexconfig.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 
 # 'genteammanual' (re-)generates all versions even if only one is not up-to-date.
-$(MANUALSPDF): %pdf: %tex team-manual-preamble.tex $(TOPDIR)/etc/domserver-config.php
-	./genteammanuals
+$(MANUALSPDF): %pdf: %tex team-manual-preamble.tex
+	./genteammanual
 
 # Cleanup LaTeX logs, etc. after generating documentation for distribution.
 distdocs-l:
@@ -34,7 +34,7 @@ distdocs-l:
 
 clean-l:
 	-rm -f $(addprefix team-manual.,aux log out)
-	-rm -rf _minted-team-manual*
+	-rm -rf _minted-team-manual
 
 distclean-l:
 	-rm -f gentexconfig
