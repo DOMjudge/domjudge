@@ -1,0 +1,82 @@
+\documentclass[11pt,a4paper,twoside]{article}
+
+\usepackage[hmargin=2.7cm,vmargin=3cm]{geometry}
+\usepackage{moreverb}
+\usepackage{minted}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{expdlist}
+\usepackage{svn}
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{color}
+\usepackage[colorlinks=true,urlcolor=blue,linkcolor=blue]{hyperref}
+\usepackage{ifthen}
+
+\pagestyle{fancy}
+\renewcommand{\sectionmark}[1]{\markboth{\thesection.\ #1}{}}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Begin new paragraphs without indentation but vertical space.
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.5ex plus 0.5ex minus 0.2ex}
+
+% Setup framebox margin and frame rule size.
+\setlength{\fboxsep}{0pt}
+\setlength{\fboxrule}{0.6pt}
+\setminted{frame=single,framesep=1ex}
+
+\newcommand{\DOMjudge}{\textsc{DOM}judge }
+
+% Display commands, arguments, etc. in texttt font and don't break those.
+\newcommand{\cmd}[1]{\mbox{\texttt{#1}}}
+
+% Only show text if the submitclient is configured
+\newcommand{\ifcmdsubmit}[1]{\ifthenelse{\equal{\SUBMITCLIENTENABLED}{yes}}{#1}{}}
+
+% Our titlepage, should be called at start of team manual document
+% Argument list:
+% #1 - DOMjudge version
+% #2 - Document revision
+% #3 - Last modified date
+% #4 - Generated date
+% Also define the following words for language overrides:
+\newcommand{\versionrevison}{Version/revision}
+\newcommand{\lastmodified}{Last modified}
+\newcommand{\generated}{Generated}
+\makeatletter
+\newcommand{\titlestuff}[4]{%
+
+  \thispagestyle{plain}
+  \vspace*{-2cm}
+  \parbox[t]{\linewidth}{%
+    \begin{wrapfigure}[1]{r}{2cm}
+      \vspace*{-1cm}\hfill
+      \includegraphics[height=4cm]{../logos/DOMjudgelogo.pdf}
+    \end{wrapfigure}
+    {\fontfamily{phv}\fontseries{b}\fontsize{26pt}{28pt}\selectfont \@title \par}
+  }
+  \vskip 2cm
+
+  % Setup fancy headers/footers (here because we need SVN stuff defined)
+  \def\setupfancystuff{%
+    \fancyhead{}
+    \fancyfoot{}
+    \fancyfoot[RO,LE]{\thepage}
+    \fancyfoot[LO,RE]{%
+      \color[gray]{0.5}\vspace{-0.3cm}
+        \DOMjudge team manual -- \generated: #4 \\
+    }
+  }
+
+  % First for fancy page style:
+  \setupfancystuff
+  \fancyhead[RO,LE]{\slshape \firstleftmark}
+
+  % No headers for plain page style (titlepage):
+  \fancypagestyle{plain}{%
+    \setupfancystuff
+    \renewcommand{\headrulewidth}{0pt}
+  }
+}
+\makeatother

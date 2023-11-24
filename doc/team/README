@@ -1,0 +1,13 @@
+DOMjudge team manual
+--------------------
+
+The manual for teams automatically incorporates DOMjudge configuration
+items. Therefore it is not pre-built, but should be built after you
+have configured your system, so teams get the correct information. The
+manual can be generated with the 'genteammanuals' command located
+under the 'team' subdirectory. Pass the output directory as argument.
+
+As many things are configurable, we advise to redact the manual to your
+specific situation, e.g. by removing unused/disabled features, before
+distributing them to the teams. See section 2.16 of the admin-manual for
+instructions on rebuilding the team documentation.
