@@ -15,7 +15,7 @@ class ClarificationTest extends TestCase
 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
 tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.';
         $clarification->setBody($text);
-        $this->assertEquals('Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod …',
+        static::assertEquals('Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod …',
             $clarification->getSummary());
     }
 
@@ -24,7 +24,7 @@ tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.';
         $clarification = new Clarification();
         $text = 'Is this a quick question?';
         $clarification->setBody($text);
-        $this->assertEquals($text . ' ', $clarification->getSummary());
+        static::assertEquals($text . ' ', $clarification->getSummary());
     }
 
     public function testIgnoreQuotedText(): void
@@ -35,7 +35,7 @@ tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.';
 
 You bet.';
         $clarification->setBody($text);
-        $this->assertEquals('You bet. ', $clarification->getSummary());
+        static::assertEquals('You bet. ', $clarification->getSummary());
     }
 
     public function testMergeNewlines(): void
@@ -52,7 +52,7 @@ seventh line,
 eighth line,
 and so on.';
         $clarification->setBody($text);
-        $this->assertEquals('First line, second line, third line, fourth line, fifth line, sixth line, sevent…',
+        static::assertEquals('First line, second line, third line, fourth line, fifth line, sixth line, sevent…',
             $clarification->getSummary());
     }
 }

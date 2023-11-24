@@ -59,14 +59,14 @@ class ClarificationControllerTest extends BaseTestCase
         $apiEndpoint = $this->apiEndpoint;
         $clarificationFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint", 200);
 
-        $this->assertCount(1, $clarificationFromApi);
-        $this->assertEquals("Lunch is served", $clarificationFromApi[0]['text']);
-        $this->assertEquals("2018-02-11T21:53:20.000+00:00", $clarificationFromApi[0]['time']);
-        $this->assertArrayNotHasKey('answered', $clarificationFromApi[0]);
+        static::assertCount(1, $clarificationFromApi);
+        static::assertEquals("Lunch is served", $clarificationFromApi[0]['text']);
+        static::assertEquals("2018-02-11T21:53:20.000+00:00", $clarificationFromApi[0]['time']);
+        static::assertArrayNotHasKey('answered', $clarificationFromApi[0]);
 
         // Show that when filtering this does not show up as its not bound to a problem
         $clarificationFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint?problem=1", 200);
-        $this->assertCount(0, $clarificationFromApi);
+        static::assertCount(0, $clarificationFromApi);
     }
 
     public function testTeamOnlyGeneralAndRelatedToTeam(): void
@@ -85,24 +85,24 @@ class ClarificationControllerTest extends BaseTestCase
                 $mistakJudgingId = 2;
             }
             $clarificationFromApi = $this->verifyApiJsonResponse('GET', $clarificationApi.$postfix, 200, 'demo');
-            $this->assertCount($expectedNumber, $clarificationFromApi);
+            static::assertCount($expectedNumber, $clarificationFromApi);
 
-            $this->assertEquals("2", $clarificationFromApi[0]['from_team_id']);
-            $this->assertEquals("Is it necessary to read the problem statement carefully?", $clarificationFromApi[0]['text']);
-            $this->assertArrayNotHasKey('answered', $clarificationFromApi[0]);
+            static::assertEquals("2", $clarificationFromApi[0]['from_team_id']);
+            static::assertEquals("Is it necessary to read the problem statement carefully?", $clarificationFromApi[0]['text']);
+            static::assertArrayNotHasKey('answered', $clarificationFromApi[0]);
 
             if (!$problemId) {
-                $this->assertNull($clarificationFromApi[1]['to_team_id']);
-                $this->assertEquals("Lunch is served", $clarificationFromApi[1]['text']);
-                $this->assertArrayNotHasKey('answered', $clarificationFromApi[1]);
+                static::assertNull($clarificationFromApi[1]['to_team_id']);
+                static::assertEquals("Lunch is served", $clarificationFromApi[1]['text']);
+                static::assertArrayNotHasKey('answered', $clarificationFromApi[1]);
             }
 
-            $this->assertEquals("2", $clarificationFromApi[$mistakJudgingId]['to_team_id']);
-            $this->assertEquals("There was a mistake in judging this problem. Please try again", $clarificationFromApi[$mistakJudgingId]['text']);
-            $this->assertArrayNotHasKey('answered', $clarificationFromApi[$mistakJudgingId]);
+            static::assertEquals("2", $clarificationFromApi[$mistakJudgingId]['to_team_id']);
+            static::assertEquals("There was a mistake in judging this problem. Please try again", $clarificationFromApi[$mistakJudgingId]['text']);
+            static::assertArrayNotHasKey('answered', $clarificationFromApi[$mistakJudgingId]);
         }
         $clarificationFromApi = $this->verifyApiJsonResponse('GET', $clarificationApi."?problem=9999", 200, 'demo');
-        $this->assertCount(0, $clarificationFromApi);
+        static::assertCount(0, $clarificationFromApi);
     }
 
     /**

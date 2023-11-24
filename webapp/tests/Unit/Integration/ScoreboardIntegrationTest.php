@@ -183,8 +183,8 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
         foreach ([ false, true ] as $jury) {
             $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
-            $this->assertScoresMatch($expected_scores, $scoreboard);
-            $this->assertFTSMatch([], $scoreboard);
+            static::assertScoresMatch($expected_scores, $scoreboard);
+            static::assertFTSMatch([], $scoreboard);
         }
     }
 
@@ -207,8 +207,8 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
         foreach ([ false, true ] as $jury) {
             $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
-            $this->assertScoresMatch($expected_scores, $scoreboard);
-            $this->assertFTSMatch($expected_fts, $scoreboard);
+            static::assertScoresMatch($expected_scores, $scoreboard);
+            static::assertFTSMatch($expected_fts, $scoreboard);
         }
     }
 
@@ -234,8 +234,8 @@ class ScoreboardIntegrationTest extends KernelTestCase
             $this->recalcScoreCaches();
 
             $scoreboard = $this->ss->getScoreboard($this->contest, true);
-            $this->assertScoresMatch($expected_scores, $scoreboard);
-            $this->assertFTSMatch($expected_fts, $scoreboard);
+            static::assertScoresMatch($expected_scores, $scoreboard);
+            static::assertFTSMatch($expected_fts, $scoreboard);
         }
     }
 
@@ -257,8 +257,8 @@ class ScoreboardIntegrationTest extends KernelTestCase
         ];
 
         $scoreboard = $this->ss->getScoreboard($this->contest, false);
-        $this->assertScoresMatch($expected_scores, $scoreboard);
-        $this->assertFTSMatch($expected_fts, $scoreboard);
+        static::assertScoresMatch($expected_scores, $scoreboard);
+        static::assertFTSMatch($expected_fts, $scoreboard);
     }
 
     public function testScoreboardReproducible(): void
@@ -272,7 +272,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $second = $this->ss->getScoreboard($this->contest, false);
 
         # Using assertSame would be better, but doesn't work with objects.
-        $this->assertEquals($first, $second, 'Repeated scoreboard is equal');
+        static::assertEquals($first, $second, 'Repeated scoreboard is equal');
     }
 
     public function testTeamScoreboardFreezeFTS(): void
@@ -291,8 +291,8 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
         $scoreboard = $this->ss->getTeamScoreboard($this->contest, $team->getTeamid(), false);
 
-        $this->assertInstanceOf(SingleTeamScoreboard::class, $scoreboard);
-        $this->assertFTSMatch($expected_fts, $scoreboard);
+        static::assertInstanceOf(SingleTeamScoreboard::class, $scoreboard);
+        static::assertFTSMatch($expected_fts, $scoreboard);
     }
 
     public function testOneSingleFTS(): void
@@ -323,7 +323,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
                 $this->recalcScoreCaches();
 
                 $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
-                $this->assertFTSMatch($expected_fts, $scoreboard);
+                static::assertFTSMatch($expected_fts, $scoreboard);
             }
         }
     }
@@ -359,7 +359,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
                 $this->recalcScoreCaches();
 
                 $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
-                $this->assertFTSMatch($expected_fts, $scoreboard);
+                static::assertFTSMatch($expected_fts, $scoreboard);
             }
         }
     }
@@ -386,7 +386,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
         foreach ([ false, true ] as $jury) {
             $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
-            $this->assertFTSMatch($expected_fts, $scoreboard);
+            static::assertFTSMatch($expected_fts, $scoreboard);
         }
     }
 
@@ -399,11 +399,11 @@ class ScoreboardIntegrationTest extends KernelTestCase
             $name = $team->getEffectiveName();
 
             $score = $scores[$team->getTeamid()];
-            $this->assertInstanceOf(TeamScore::class, $score);
+            static::assertInstanceOf(TeamScore::class, $score);
 
-            $this->assertEquals($row['rank'], $score->rank, "Rank for '$name'");
-            $this->assertEquals($row['solved'], $score->numPoints, "# solved for '$name'");
-            $this->assertEquals($row['time'], $score->totalTime, "Total time for '$name'");
+            static::assertEquals($row['rank'], $score->rank, "Rank for '$name'");
+            static::assertEquals($row['solved'], $score->numPoints, "# solved for '$name'");
+            static::assertEquals($row['time'], $score->totalTime, "Total time for '$name'");
         }
     }
 
@@ -429,10 +429,10 @@ class ScoreboardIntegrationTest extends KernelTestCase
             foreach ($row as $probid => $item) {
                 $probname = $probs[$probid]->getShortname();
 
-                $this->assertInstanceOf(ScoreboardMatrixItem::class, $item);
+                static::assertInstanceOf(ScoreboardMatrixItem::class, $item);
 
                 $expected = (@$fts_probid2teamid[$probid] === $teamid);
-                $this->assertEquals($expected, $item->isFirst,
+                static::assertEquals($expected, $item->isFirst,
                                     "Check FTS matches for team $teamname, problem $probname");
             }
         }
