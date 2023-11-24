@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
@@ -58,6 +60,18 @@ class Version
     ])]
     #[Serializer\Exclude]
     private bool $active = true;
+
+    /**
+     * @var Collection<int, JudgeTask>
+     */
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: JudgeTask::class)]
+    #[Serializer\Exclude]
+    private Collection $judgeTasks;
+
+    public function __construct()
+    {
+        $this->judgeTasks = new ArrayCollection();
+    }
 
     public function getVersionid(): ?int
     {

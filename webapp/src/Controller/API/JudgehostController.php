@@ -1284,27 +1284,29 @@ class JudgehostController extends AbstractFOSRestController
         $this->em->wrapInTransaction(function () use (
             $judgehost,
             $reportedVersions,
-            $language
+            $language,
+            $judgeTask
         ) {
             $activeVersion = $this->em->getRepository(Version::class)
                 ->findOneBy(['language' => $language, 'judgehost' => $judgehost, 'active' => true]);
 
-            $newVersion = false;
+            $isNewVersion = false;
             if (!$activeVersion) {
-                $newVersion = true;
+                $isNewVersion = true;
             } else {
                 $reportedCompilerVersion = $reportedVersions['compiler'] ?? null;
                 if ($activeVersion->getCompilerVersion() !== $reportedCompilerVersion) {
-                    $newVersion = true;
+                    $isNewVersion = true;
                 }
                 $reportedRunnerVersion = $reportedVersions['runner'] ?? null;
                 if ($activeVersion->getRunnerVersion() !== $reportedRunnerVersion) {
-                    $newVersion = true;
+                    $isNewVersion = true;
                 }
             }
-            if ($newVersion) {
+            if ($isNewVersion) {
                 if ($activeVersion) {
                     $activeVersion->setActive(false);
+                    $this->em->flush();
                 }
                 $activeVersion = new Version();
                 $activeVersion
@@ -1326,6 +1328,9 @@ class JudgehostController extends AbstractFOSRestController
                 $this->em->persist($activeVersion);
                 $this->em->flush();
             }
+
+            $judgeTask->setVersion($activeVersion);
+
             // TODO: Optionally check version here against canonical version.
         });
         return [];

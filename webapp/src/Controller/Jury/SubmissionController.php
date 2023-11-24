@@ -517,6 +517,7 @@ class SubmissionController extends BaseController
             'claimWarning' => $claimWarning,
             'combinedRunCompare' => $submission->getProblem()->getCombinedRunCompare(),
             'requestedOutputCount' => $requestedOutputCount,
+            'version_warnings' => [],
         ];
 
         if ($selectedJudging === null) {
@@ -527,21 +528,43 @@ class SubmissionController extends BaseController
             ];
         } else {
             $contestProblem = $submission->getContestProblem();
-            /** @var JudgeTask $judgeTask */
-            $judgeTask = $this->em->getRepository(JudgeTask::class)->findOneBy(['jobid' => $selectedJudging->getJudgingid()]);
-            if ($judgeTask !== null) {
+            /** @var JudgeTask[] $judgeTasks */
+            $judgeTasks = $this->em->getRepository(JudgeTask::class)->findBy(['jobid' => $selectedJudging->getJudgingid()]);
+            $unique_compiler_versions = [];
+            $unique_runner_versions = [];
+            $sampleJudgeTask = null;
+            foreach ($judgeTasks as $judgeTask) {
+                $sampleJudgeTask = $judgeTask;
+                $version = $judgeTask->getVersion();
+                if (!$version) {
+                    continue;
+                }
+                if ($version->getCompilerVersion()) {
+                    $unique_compiler_versions[$version->getCompilerVersion()] = true;
+                }
+                if ($version->getRunnerVersion()) {
+                    $unique_runner_versions[$version->getRunnerVersion()] = true;
+                }
+            }
+            if (count($unique_compiler_versions) > 1) {
+                $twigData['version_warnings']['compiler'] = array_keys($unique_compiler_versions);
+            }
+            if (count($unique_runner_versions) > 1) {
+                $twigData['version_warnings']['runner'] = array_keys($unique_runner_versions);
+            }
+            if ($sampleJudgeTask !== null) {
                 $errors = [];
                 $this->maybeGetErrors('Compile config',
                     $this->dj->getCompileConfig($submission),
-                    $judgeTask->getCompileConfig(),
+                    $sampleJudgeTask->getCompileConfig(),
                     $errors);
                 $this->maybeGetErrors('Run config',
                     $this->dj->getRunConfig($contestProblem, $submission),
-                    $judgeTask->getRunConfig(),
+                    $sampleJudgeTask->getRunConfig(),
                     $errors);
                 $this->maybeGetErrors('Compare config',
                     $this->dj->getCompareConfig($contestProblem),
-                    $judgeTask->getCompareConfig(),
+                    $sampleJudgeTask->getCompareConfig(),
                     $errors);
                 if (!empty($errors)) {
                     if ($selectedJudging->getValid()) {
