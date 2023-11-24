@@ -144,12 +144,15 @@ EOF;
      * Save the changes from the given request.
      *
      * @throws NonUniqueResultException
+     * @param array<string, Configuration>|null $options
+     * @return array<string,string> Error per item
      */
     public function saveChanges(
         array $dataToSet,
         EventLogService $eventLog,
-        DOMJudgeService $dj
-    ): void {
+        DOMJudgeService $dj,
+        ?array &$options = null
+    ): array {
         $specs = $this->getConfigSpecification();
         foreach ($specs as &$spec) {
             $spec = $this->addOptions($spec);
@@ -157,12 +160,13 @@ EOF;
         unset($spec);
 
         /** @var Configuration[] $options */
-        $options = $this->em->createQueryBuilder()
+        $options = $options ?? $this->em->createQueryBuilder()
             ->from(Configuration::class, 'c', 'c.name')
             ->select('c')
             ->getQuery()
             ->getResult();
 
+        $errors = [];
         $logUnverifiedJudgings = false;
         foreach ($specs as $specName => $spec) {
             $oldValue = $spec['default_value'];
@@ -174,6 +178,7 @@ EOF;
                 $optionToSet = new Configuration();
                 $optionToSet->setName($specName);
                 $optionIsNew = true;
+                $options[$specName] = $optionToSet;
             }
             if (!array_key_exists($specName, $dataToSet)) {
                 if ($spec['type'] == 'bool') {
@@ -190,6 +195,13 @@ EOF;
             } else {
                 $val = $dataToSet[$specName];
             }
+
+            if (isset($spec['regex'])) {
+                if (preg_match($spec['regex'], (string)$val) === 0) {
+                    $errors[$specName] = $spec['error_message'] ?? 'This is not a valid value';
+                }
+            }
+
             if ($specName == 'verification_required' &&
                 $oldValue && !$val) {
                 // If toggled off, we have to send events for all judgings
@@ -239,22 +251,28 @@ EOF;
                         [ $specName, $spec['type'] ]
                     );
             }
-            if ($optionToSet->getValue() != $oldValue) {
-                $valJson = $dj->jsonEncode($optionToSet->getValue());
-                $dj->auditlog('configuration', $specName, 'updated', $valJson);
-                if ($optionIsNew) {
-                    $this->em->persist($optionToSet);
+            if (!isset($errors[$specName])) {
+                if ($optionToSet->getValue() != $oldValue) {
+                    $valJson = $dj->jsonEncode($optionToSet->getValue());
+                    $dj->auditlog('configuration', $specName, 'updated', $valJson);
+                    if ($optionIsNew) {
+                        $this->em->persist($optionToSet);
+                    }
                 }
             }
         }
 
-        $this->em->flush();
+        if (empty($errors)) {
+            $this->em->flush();
+        }
 
         if ($logUnverifiedJudgings) {
             $this->logUnverifiedJudgings($eventLog);
         }
 
         $this->dbConfigCache = null;
+
+        return $errors;
     }
 
     /**

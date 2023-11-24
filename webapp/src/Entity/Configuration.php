@@ -27,7 +27,7 @@ class Configuration
         type: 'json',
         options: ['comment' => 'Content of the configuration variable (JSON encoded)'])
     ]
-    private mixed $value;
+    private mixed $value = null;
 
     public function getConfigid(): int
     {
