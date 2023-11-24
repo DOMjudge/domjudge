@@ -839,7 +839,8 @@ class DOMJudgeService
             ->innerJoin('c.problems', 'cp')
             ->innerJoin('cp.problem', 'p')
             ->leftJoin('p.attachments', 'a')
-            ->select('c', 'cp', 'p', 'a')
+            ->leftJoin('p.problemTextContent', 'content')
+            ->select('c', 'cp', 'p', 'a', 'content')
             ->andWhere('c.cid = :cid')
             ->setParameter('cid', $contest->getCid())
             ->getQuery()
@@ -861,7 +862,7 @@ class DOMJudgeService
 
             if ($problem->getProblem()->getProblemtextType()) {
                 $filename    = sprintf('%s/statement.%s', $problem->getShortname(), $problem->getProblem()->getProblemtextType());
-                $zip->addFromString($filename, stream_get_contents($problem->getProblem()->getProblemtext()));
+                $zip->addFromString($filename, $problem->getProblem()->getProblemtext());
             }
 
             /** @var ProblemAttachment $attachment */
@@ -972,7 +973,7 @@ class DOMJudgeService
                 ->join('cp.problem', 'p')
                 ->leftJoin('p.testcases', 'tc')
                 ->leftJoin('p.attachments', 'a')
-                ->select('partial p.{probid,name,externalid,problemtext_type,timelimit,memlimit,combined_run_compare}', 'cp', 'a')
+                ->select('p', 'cp', 'a')
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')
                 ->setParameter('contest', $contest)

@@ -19,7 +19,7 @@ class ProblemControllerTest extends BaseTestCase
      */
     public function testIndex(bool $withLimits): void
     {
-        $problems     = [
+        $problems = [
             'hello',
             'fltcmp',
             'boolfind',
@@ -35,16 +35,16 @@ class ProblemControllerTest extends BaseTestCase
             'C',
         ];
         /** @var EntityManagerInterface $em */
-        $em               = self::getContainer()->get(EntityManagerInterface::class);
+        $em = self::getContainer()->get(EntityManagerInterface::class);
         $problemTextsData = $em->createQueryBuilder()
             ->from(Problem::class, 'p')
-            ->select('p.externalid, p.problemtext')
+            ->leftJoin('p.problemTextContent', 'c')
+            ->select('p.externalid, c.content')
             ->getQuery()
             ->getResult();
-        $problemTexts     = [];
+        $problemTexts = [];
         foreach ($problemTextsData as $data) {
-            $problemTexts[array_search($data['externalid'], $problems)] =
-                stream_get_contents($data['problemtext']);
+            $problemTexts[array_search($data['externalid'], $problems)] = $data['content'];
         }
 
         $this->withChangedConfiguration('show_limits_on_team_page', $withLimits,
@@ -109,7 +109,7 @@ class ProblemControllerTest extends BaseTestCase
         /** @var Testcase[] $samples */
         $samples = [
             1 => $problem->getTestcases()->get(0),
-            2 => $problem->getTestcases()->get(2)
+            2 => $problem->getTestcases()->get(2),
         ];
         $samples[1]->setSample(true);
         $samples[2]->setSample(true);
@@ -124,16 +124,16 @@ class ProblemControllerTest extends BaseTestCase
 
         // The first and last card should not have any samples.
         self::assertSame(0,
-                         $cardBodies->eq(0)->filter('.list-group .list-group-item')->count());
+            $cardBodies->eq(0)->filter('.list-group .list-group-item')->count());
         self::assertSame(0,
-                         $cardBodies->eq(2)->filter('.list-group .list-group-item')->count());
+            $cardBodies->eq(2)->filter('.list-group .list-group-item')->count());
 
         // Check the link to download all samples.
         $link = $cardBodies->eq(1)->filter('a')->eq(1);
         self::assertSame('samples', $link->text(null, true));
         self::assertSame(sprintf('/team/%d/samples.zip',
-                                 $problem->getProbid()),
-                         $link->attr('href'));
+            $problem->getProbid()),
+            $link->attr('href'));
 
         // Download the sample and make sure the contents are correct.
         $this->client->click($link->link());
@@ -179,7 +179,7 @@ class ProblemControllerTest extends BaseTestCase
         self::assertNotSame('samples', $link->text(null, true));
 
         // Download the sample and make sure the contents are correct.
-        $this->client->request('GET', '/team/'.$problem->getProbid().'/samples.zip');
+        $this->client->request('GET', '/team/' . $problem->getProbid() . '/samples.zip');
         $response = $this->client->getResponse();
         self::assertEquals(404, $response->getStatusCode());
     }

@@ -232,7 +232,7 @@ class StatisticsService
         //   - The submission was made by a team in a visible category
         /** @var Judging[] $judgings */
         $judgings = $this->em->createQueryBuilder()
-            ->select('j, jr', 's', 'team', 'partial p.{timelimit,name,probid}')
+            ->select('j, jr', 's', 'team', 'p')
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
             ->join('s.problem', 'p')

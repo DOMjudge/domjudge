@@ -414,7 +414,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     public function statementAction(Request $request, string $id): Response
     {
         $queryBuilder = $this->getQueryBuilder($request)
-            ->addSelect('partial p.{probid,problemtext}')
+            ->leftJoin('p.problemTextContent', 'content')
+            ->addSelect('content')
             ->setParameter('id', $id)
             ->andWhere(sprintf('%s = :id', $this->getIdField()));
 
@@ -448,7 +449,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->from(ContestProblem::class, 'cp')
             ->join('cp.problem', 'p')
             ->leftJoin('p.testcases', 'tc')
-            ->select('cp, partial p.{probid,externalid,name,timelimit,memlimit,problemtext_type}, COUNT(tc.testcaseid) AS testdatacount')
+            ->select('cp, p, COUNT(tc.testcaseid) AS testdatacount')
             ->andWhere('cp.contest = :cid')
             ->andWhere('cp.allowSubmit = 1')
             ->setParameter('cid', $contestId)
