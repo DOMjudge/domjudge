@@ -25,8 +25,12 @@
 </style>
 <script>
 $(function() {
-    $(".clickable-row").click(function() {
-        window.location = $(this).data("href");
+    $(".clickable-row").click(function(e) {
+        if (e.ctrlKey) {
+            window.open($(this).data("href"), '_blank');
+        } else {
+            window.location = $(this).data("href");
+        }
     });
     $('[data-bs-toggle="popover"]').popover({
       trigger: 'hover',
