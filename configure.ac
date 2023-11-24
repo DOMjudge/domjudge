@@ -259,15 +259,13 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_MKDIR_P
 
-# Check option to build documentation. This option is provided to
-# allow disabling it.
 AC_ARG_ENABLE(doc-build,AS_HELP_STRING([--enable-doc-build],
-[enable building documentation (default: yes).]))
+[enable building documentation (default: no).]))
 
-if test "x$enable_doc_build" = "xno"; then
-	AC_SUBST(DOC_BUILD_ENABLED,[no])
-else
+if test "x$enable_doc_build" = "xyes"; then
 	AC_SUBST(DOC_BUILD_ENABLED,[yes])
+else
+	AC_SUBST(DOC_BUILD_ENABLED,[no])
 fi
 
 # See 'man feature_test_macros' under Linux:
@@ -330,12 +328,7 @@ echo " * webserver group.....: $WEBSERVER_GROUP"
 echo ""
 echo " * website base URL....: $BASEURL"
 echo ""
-echo -n " * documentation.......: AX_VAR_EXPAND($domjudge_docdir)"
-if test "x$DOC_BUILD_ENABLED" != xyes ; then
-   echo " (disabled)"
-else
-   echo ""
-fi
+echo " * documentation.......: AX_VAR_EXPAND($domjudge_docdir)"
 echo ""
 echo " * domserver...........: AX_VAR_EXPAND($domserver_root)"
 echo "    - bin..............: AX_VAR_EXPAND($domserver_bindir)"
