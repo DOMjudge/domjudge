@@ -17,7 +17,7 @@
   height: 100%;
 }
 
-/* Don't show x-axis ticks/ticklines for max runtimes chart*/
+/* Don't show x-axis ticks/ticklines for max runtimes chart. */
 #maxruntime .nv-x.nv-axis .tick {
   display: none;
 }
@@ -25,7 +25,7 @@
 {% endblock %}
 
 {% block content %}
-      <h1>Problem {{ problem.probid }}: {{ problem.name }}</h1>
+      <h1>Problem {{ problem.probid }}: <span style="font-size: 60%;">{{ contest_problem | problemBadge }}</span> {{ problem.name }}</h1>
         {% include 'jury/partials/analysis_filter.html.twig' %}
      </div>
     <div class="col-lg-3 col-sm-6 mt-3">

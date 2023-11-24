@@ -138,7 +138,7 @@ $(function() {
               {% set id=p.probid %}
               <tr class='clickable-row' data-href="{{path('analysis_problem', {'probid': id, 'view': view}) }}">
                 <th scope="row">{{ id }}</th>
-                <td>{{ p.shortname ~ " - " ~ p.problem.name }}</td>
+                <td>{{ p | problemBadge }} {{ p.problem.name }}</td>
                 <td>{{ p.problem.timelimit }}</td>
                 <td>{{ p.problem.memlimit|default('default') }}</td>
                 <td>{{ misc.problem_num_testcases[id] }}</td>

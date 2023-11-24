@@ -355,8 +355,14 @@ class StatisticsService
             $results) ? ($results['correct'] / count($judgings)) * 100.0 : 0;
         $misc['teams_correct_percentage'] = count($teamsAttempted) > 0 ? (count($teamsCorrect) / count($teamsAttempted)) * 100.0 : 0;
 
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->findOneBy([
+            'contest' => $contest,
+            'problem' => $problem,
+        ]);
+
         return [
             'contest' => $contest,
+            'contest_problem' => $contestProblem,
             'problem' => $problem,
             'timelimit' => $problem->getTimelimit(),
             'submissions' => $submissions,
