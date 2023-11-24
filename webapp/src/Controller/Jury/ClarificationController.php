@@ -353,7 +353,9 @@ class ClarificationController extends AbstractController
             $queue = null;
         }
 
-        // Either this is the first in a thread (of 1 or more) or this 2nd or more.
+        // Find the original clarification if this is a reply, and then update
+        // the queue of the original clarification and all replies.
+        // Replies are not threaded, so no recursive search is needed.
         $curClarification = $clarification->getInReplyTo() ?? $clarification;
         foreach ($curClarification->getReplies() as $reply) {
             $reply->setQueue($queue);
