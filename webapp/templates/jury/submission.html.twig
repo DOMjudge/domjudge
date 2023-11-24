@@ -62,6 +62,23 @@
         {% endif %}
     {% endif %}
 
+    {% if version_warnings is not null and version_warnings is not empty %}
+        {% for type, versions in version_warnings %}
+            <div class="alert alert-warning">
+                <p>
+                    This judging did not use the same {{ type}} version for all testcases.
+                    This may lead to unexpected results. Versions used:
+                </p>
+                <p>
+                    {% for version in versions %}
+                            <pre class="output_text">{{ version }}</pre>
+                            {% if not loop.last %}<hr />{% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="mb-3">
         <h1 style="display: inline;">
             Submission {{ submission.submitid }}

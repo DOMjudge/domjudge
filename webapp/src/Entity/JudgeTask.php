@@ -161,6 +161,11 @@ class JudgeTask
     #[Serializer\Exclude]
     private Collection $judging_runs;
 
+    #[ORM\ManyToOne(inversedBy: 'judgetasks')]
+    #[ORM\JoinColumn(name: 'versionid', referencedColumnName: 'versionid', onDelete: 'SET NULL')]
+    #[Serializer\Exclude]
+    private ?Version $version = null;
+
     public function __construct()
     {
         $this->judging_runs  = new ArrayCollection();
@@ -378,5 +383,16 @@ class JudgeTask
     public function getFirstJudgingRun(): ?JudgingRun
     {
         return $this->judging_runs->first() ?: null;
+    }
+
+    public function setVersion(Version $version): JudgeTask
+    {
+        $this->version = $version;
+        return $this;
+    }
+
+    public function getVersion(): ?Version
+    {
+        return $this->version;
     }
 }
