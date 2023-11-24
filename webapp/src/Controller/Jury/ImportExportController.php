@@ -164,7 +164,7 @@ class ImportExportController extends BaseController
                     $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip',
                         $clientName);
                 } else {
-                    $this->addFlash('danger', implode("\n", $allMessages));
+                    $this->postMessages($allMessages);
                     return $this->redirectToRoute('jury_problems');
                 }
             } catch (Exception $e) {
@@ -174,12 +174,7 @@ class ImportExportController extends BaseController
                     $zip->close();
                 }
             }
-
-            foreach (['info', 'warning', 'danger'] as $type) {
-                if (!empty($allMessages[$type])) {
-                    $this->addFlash($type, implode("\n", $allMessages[$type]));
-                }
-            }
+            $this->postMessages($allMessages);
 
             if ($newProblem !== null) {
                 return $this->redirectToRoute('jury_problem', ['probId' => $newProblem->getProbid()]);
@@ -560,5 +555,17 @@ class ImportExportController extends BaseController
             'contest' => $contest,
             'problems' => $contestProblems,
         ]);
+    }
+
+    /**
+     * @param array<string, string[]> $allMessages
+     */
+    private function postMessages(array $allMessages): void
+    {
+        foreach (['info', 'warning', 'danger'] as $type) {
+            if (!empty($allMessages[$type])) {
+                $this->addFlash($type, implode("\n", $allMessages[$type]));
+            }
+        }
     }
 }

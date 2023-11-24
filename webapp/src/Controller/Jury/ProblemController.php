@@ -922,12 +922,7 @@ class ProblemController extends BaseController
                     $zip->close();
                 }
             }
-
-            foreach (['info', 'warning', 'danger'] as $type) {
-                if (!empty($messages[$type])) {
-                    $this->addFlash($type, implode("\n", $messages[$type]));
-                }
-            }
+            $this->postMessages($messages);
 
             return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
         }
@@ -1101,5 +1096,17 @@ class ProblemController extends BaseController
                           ->getResult();
         $this->judgeRemaining($judgings);
         return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
+    }
+
+    /**
+     * @param array<string, string[]> $allMessages
+     */
+    private function postMessages(array $allMessages): void
+    {
+        foreach (['info', 'warning', 'danger'] as $type) {
+            if (!empty($allMessages[$type])) {
+                $this->addFlash($type, implode("\n", $allMessages[$type]));
+            }
+        }
     }
 }
