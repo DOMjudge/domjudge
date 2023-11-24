@@ -9,9 +9,6 @@
 <script src="{{asset('js/nv.d3.min.js')}}"></script>
 <script src="{{asset('js/FileSaver.min.js')}}"></script>
 <style>
-.clickable-row:hover {
-  cursor: pointer;
-}
 .card-body.tablecard{
   overflow-y: auto;
   height: 500px;
@@ -22,22 +19,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+table tr a {
+    color: inherit;
+}
 </style>
-<script>
-$(function() {
-    $(".clickable-row").click(function(e) {
-        if (e.ctrlKey) {
-            window.open($(this).data("href"), '_blank');
-        } else {
-            window.location = $(this).data("href");
-        }
-    });
-    $('[data-bs-toggle="popover"]').popover({
-      trigger: 'hover',
-      html: true
-    })
-})
-</script>
 {% endblock %}
 
 {% block content %}
@@ -121,7 +107,7 @@ $(function() {
           Problems
         </div>
         <div class="card-body tablecard">
-          <table class="table table-sm table-striped table-hover">
+          <table class="table table-sm table-striped table-hover table-full-clickable-cell">
             <thead>
               <tr>
                 <th scope="col">ID</th>
@@ -136,14 +122,15 @@ $(function() {
             <tbody>
             {% for p in problems %}
               {% set id=p.probid %}
-              <tr class='clickable-row' data-href="{{path('analysis_problem', {'probid': id, 'view': view}) }}">
-                <th scope="row">{{ id }}</th>
-                <td>{{ p | problemBadge }} {{ p.problem.name }}</td>
-                <td>{{ p.problem.timelimit }}</td>
-                <td>{{ p.problem.memlimit|default('default') }}</td>
-                <td>{{ misc.problem_num_testcases[id] }}</td>
-                <td>{{ misc.problem_attempts[id]|default(0) }} / {{ misc.problem_solutions[id]|default(0) }}</td>
-                <td>{{ misc.problem_stats.teams_attempted[id]|default([])|length }} / {{ misc.problem_stats.teams_solved[id]|default([])|length }}</td>
+              <tr>
+                {% set link = path('analysis_problem', {'probid': id, 'view': view}) %}
+                <td scope="row"><a href="{{path('analysis_problem', {'probid': id, 'view': view}) }}">{{ id }}</a></td>
+                <td><a href="{{ link }}">{{ p | problemBadge }} {{ p.problem.name }}</a></td>
+                <td><a href="{{ link }}">{{ p.problem.timelimit }}</a></td>
+                <td><a href="{{ link }}">{{ p.problem.memlimit|default('default') }}</a></td>
+                <td><a href="{{ link }}">{{ misc.problem_num_testcases[id] }}</a></td>
+                <td><a href="{{ link }}">{{ misc.problem_attempts[id]|default(0) }} / {{ misc.problem_solutions[id]|default(0) }}</a></td>
+                <td><a href="{{ link }}">{{ misc.problem_stats.teams_attempted[id]|default([])|length }} / {{ misc.problem_stats.teams_solved[id]|default([])|length }}</a></td>
               </tr>
             {% endfor %}
             </tbody>
@@ -157,7 +144,7 @@ $(function() {
           Teams
         </div>
         <div class="card-body tablecard">
-          <table class="table table-sm table-striped table-hover">
+          <table class="table table-sm table-striped table-hover table-full-clickable-cell">
             <thead>
               <tr>
                 <th scope="col">ID</th>
@@ -171,13 +158,14 @@ $(function() {
             <tbody>
             {% for t in teams %}
               {% set id=t.teamid %}
-              <tr class="clickable-row" data-href="{{ path('analysis_team', {'teamid':id}) }}">
-                <th scope="row" style="text-align: right;">{{ t | entityIdBadge('t') }}</th>
-                <td>{% if t.affiliation %}{{ t.affiliation.name }}{% else %}-{% endif %}</td>
-                <td class="truncate" style="max-width: 200px">{{ t.effectiveName }}</td>
-                <td>{{ misc.team_stats[id].total_submitted }} / {{ misc.team_stats[id].total_accepted }}</td>
-                <td>{{ misc.team_stats[id].problems_submitted|length }} / {{ misc.team_stats[id].problems_accepted|length }}</td>
-                <td>{{ misc.team_stats[id].misery_index|number_format(0) }}</td>
+              <tr>
+                {% set link = path('analysis_team', {'teamid':id}) %}
+                <td scope="row" style="text-align: right;"><a href="{{ link }}">{{ t | entityIdBadge('t') }}</a></td>
+                <td><a href="{{ link }}">{% if t.affiliation %}{{ t.affiliation.name }}{% else %}-{% endif %}</a></td>
+                <td class="truncate" style="max-width: 200px"><a href="{{ link }}">{{ t.effectiveName }}</a></td>
+                <td><a href="{{ link }}">{{ misc.team_stats[id].total_submitted }} / {{ misc.team_stats[id].total_accepted }}</a></td>
+                <td><a href="{{ link }}">{{ misc.team_stats[id].problems_submitted|length }} / {{ misc.team_stats[id].problems_accepted|length }}</a></td>
+                <td><a href="{{ link }}">{{ misc.team_stats[id].misery_index|number_format(0) }}</a></td>
               </tr>
             {% endfor %}
             </tbody>
@@ -194,7 +182,7 @@ $(function() {
               </div>
               <div class="card-body tablecard">
                   {% if delayed_judgings.data|length > 0 %}
-                      <table class="table table-sm table-striped table-hover">
+                      <table class="table table-sm table-striped table-hover table-full-clickable-cell">
                           <thead>
                           <tr>
                               <th scope="col">submit ID</th>
@@ -207,12 +195,13 @@ $(function() {
                           <tbody>
                           {% for j in delayed_judgings.data %}
                               {% set id=j.submitid %}
-                              <tr class='clickable-row' data-href="{{path('jury_submission', {'submitId': id}) }}">
-                                  <th scope="row">{{ id }}</th>
-                                  <td>{{ j.judgingid }}</td>
-                                  <td>{{ j.submittime | printtime }}</td>
-                                  <td>{{ j.num_judgings }}</td>
-                                  <td>{{ j.timediff | number_format(2) }}s</td>
+                              <tr>
+                                  {% set link = path('jury_submission', {'submitId': id}) %}
+                                  <td scope="row"><a href="{{ link }}">{{ id }}</a></td>
+                                  <td><a href="{{ link }}">{{ j.judgingid }}</a></td>
+                                  <td><a href="{{ link }}">{{ j.submittime | printtime }}</a></td>
+                                  <td><a href="{{ link }}">{{ j.num_judgings }}</a></td>
+                                  <td><a href="{{ link }}">{{ j.timediff | number_format(2) }}s</a></td>
                               </tr>
                           {% endfor %}
                           </tbody>
