@@ -52,6 +52,13 @@ class Version
     #[Serializer\Exclude]
     private string|float|null $lastChangedTime = null;
 
+    #[ORM\Column(options: [
+        'comment' => 'True if this version is active for this judgehost/language combination.',
+        'default' => 1,
+    ])]
+    #[Serializer\Exclude]
+    private bool $active = true;
+
     public function getVersionid(): ?int
     {
         return $this->versionid;
@@ -131,6 +138,17 @@ class Version
     public function setLastChangedTime(float|string|null $lastChangedTime): Version
     {
         $this->lastChangedTime = $lastChangedTime;
+        return $this;
+    }
+
+    public function getActive(): bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(bool $active): Version
+    {
+        $this->active = $active;
         return $this;
     }
 }

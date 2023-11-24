@@ -1286,36 +1286,44 @@ class JudgehostController extends AbstractFOSRestController
             $reportedVersions,
             $language
         ) {
-            $version = $this->em->getRepository(Version::class)
-                ->findOneBy(['language' => $language, 'judgehost' => $judgehost]);
+            $activeVersion = $this->em->getRepository(Version::class)
+                ->findOneBy(['language' => $language, 'judgehost' => $judgehost, 'active' => true]);
 
             $newVersion = false;
-            if (!$version) {
+            if (!$activeVersion) {
                 $newVersion = true;
-                $version = new Version();
-                $version
-                    ->setLanguage($language)
-                    ->setJudgehost($judgehost);
-                $this->em->persist($version);
-            }
-            if (isset($reportedVersions['compiler'])) {
-                if ($version->getCompilerVersion() !== $reportedVersions['compiler']) {
-                    $version
-                        ->setCompilerVersion($reportedVersions['compiler'])
-                        ->setCompilerVersionCommand($language->getCompilerVersionCommand());
+            } else {
+                $reportedCompilerVersion = $reportedVersions['compiler'] ?? null;
+                if ($activeVersion->getCompilerVersion() !== $reportedCompilerVersion) {
                     $newVersion = true;
                 }
-            }
-            if (isset($reportedVersions['runner'])) {
-                if ($version->getRunnerVersion() !== $reportedVersions['runner']) {
-                    $version
-                        ->setRunnerVersion($reportedVersions['runner'])
-                        ->setRunnerVersionCommand($language->getRunnerVersionCommand());
+                $reportedRunnerVersion = $reportedVersions['runner'] ?? null;
+                if ($activeVersion->getRunnerVersion() !== $reportedRunnerVersion) {
                     $newVersion = true;
                 }
             }
             if ($newVersion) {
-                $version->setLastChangedTime(Utils::now());
+                if ($activeVersion) {
+                    $activeVersion->setActive(false);
+                }
+                $activeVersion = new Version();
+                $activeVersion
+                    ->setLanguage($language)
+                    ->setJudgehost($judgehost)
+                    ->setActive(true)
+                ;
+                if (isset($reportedVersions['compiler'])) {
+                    $activeVersion
+                        ->setCompilerVersion($reportedVersions['compiler'])
+                        ->setCompilerVersionCommand($language->getCompilerVersionCommand());
+                }
+                if (isset($reportedVersions['runner'])) {
+                    $activeVersion
+                        ->setRunnerVersion($reportedVersions['runner'])
+                        ->setRunnerVersionCommand($language->getRunnerVersionCommand());
+                }
+                $activeVersion->setLastChangedTime(Utils::now());
+                $this->em->persist($activeVersion);
                 $this->em->flush();
             }
             // TODO: Optionally check version here against canonical version.
