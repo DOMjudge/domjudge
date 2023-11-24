@@ -21,14 +21,14 @@
         <ul class="nav nav-pills nav-fill" id="configtablist" role="tablist">
             {% for category in options %}
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link {{ (category.name == 'Scoring') ? 'active' : '' }}" id="{{ category.name|replace({' ': ''}) }}-tab" data-bs-toggle="tab" href="#{{ category.name|replace({' ': ''}) }}" role="tab">{{ category.name }}</a>
+                    <a class="nav-link {{ (category.name == activeCategory) ? 'active' : '' }}" id="{{ category.name|replace({' ': ''}) }}-tab" data-bs-toggle="tab" href="#{{ category.name|replace({' ': ''}) }}" role="tab">{{ category.name }}</a>
                 </li>
             {% endfor %}
         </ul>
 
         <div class="tab-content mb-2" id="configtab">
         {% for category in options %}
-            <div class="tab-pane fade {{ (category.name == 'Scoring') ? 'show active' : '' }}" id="{{ category.name|replace({' ': ''}) }}" role="tabpanel" aria-labelledby="{{ category.name|replace({' ': ''}) }}-tab">
+            <div class="tab-pane fade {{ (category.name == activeCategory) ? 'show active' : '' }}" id="{{ category.name|replace({' ': ''}) }}" role="tabpanel" aria-labelledby="{{ category.name|replace({' ': ''}) }}-tab">
                 <div class="card">
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
@@ -49,7 +49,7 @@
                                             <br/>
                                         {% elseif option.type == 'int' %}
                                             {% if option.options is not null %}
-                                                <select class="form-control form-control-sm form-select form-select-sm"
+                                                <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                        style="margin-left:5px;width:15em;text-align:right;display:inline-block;"
                                                        name="config_{{ option.name }}" id="config_{{ option.name }}">
                                                     {% for value, label in option.options %}
@@ -57,7 +57,7 @@
                                                     {% endfor %}
                                                 </select>
                                             {% else %}
-                                                <input class="form-control form-control-sm"
+                                                <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                        style="margin-left:5px;width:7em;text-align:right;display:inline-block;"
                                                        type="number"
                                                        name="config_{{ option.name }}" id="config_{{ option.name }}"
@@ -66,7 +66,7 @@
                                             <br/>
                                         {% elseif option.type == 'string' or option.type == 'enum' %}
                                             {% if option.options is not null %}
-                                                <select class="form-control form-control-sm form-select form-select-sm"
+                                                <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                         style="width:30em;display: block;"
                                                         name="config_{{ option.name }}" id="config_{{ option.name }}">
                                                     {% for value, label in option.options %}
@@ -74,7 +74,7 @@
                                                     {% endfor %}
                                                 </select>
                                             {% else %}
-                                                <input class="form-control form-control-sm" style="width:30em;" type="text"
+                                                <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}" style="width:30em;" type="text"
                                                        name="config_{{ option.name }}" id="config_{{ option.name }}"
                                                        value="{{ option.value }}">
                                             {% endif %}
@@ -85,7 +85,7 @@
                                                 {% for key,val in option.value %}
                                                     <div data-collection-item class="mb-2">
                                                         {% if option.key_options is not null %}
-                                                            <select class="form-control form-control-sm form-select form-select-sm"
+                                                            <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                                     style="width:10em;text-align:right;display:inline-block;"
                                                                     name="config_{{ option.name }}[{{ counter }}][key]">
                                                                 {% for value, label in option.key_options %}
@@ -93,7 +93,7 @@
                                                                 {% endfor %}
                                                             </select>
                                                         {% else %}
-                                                            <input class="form-control form-control-sm"
+                                                            <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                                    style="width:10em;text-align:right;display:inline-block;" type="text"
                                                                    value="{{ key }}"
                                                                    placeholder="{{ option.key_placeholder }}"
@@ -101,7 +101,7 @@
                                                                    id="config_{{ option.name }}_{{ counter }}__key_">
                                                         {% endif %}
                                                         {% if option.value_options is not null %}
-                                                            <select class="form-control form-control-sm form-select form-select-sm"
+                                                            <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                                     style="width:30em;display:inline-block;"
                                                                     name="config_{{ option.name }}[{{ counter }}][val]">
                                                                 {% for value, label in option.value_options %}
@@ -109,7 +109,7 @@
                                                                 {% endfor %}
                                                             </select>
                                                         {% else %}
-                                                            <input class="form-control form-control-sm"
+                                                            <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                                    style="width:30em;display:inline-block;" type="text"
                                                                    value="{{ val }}"
                                                                    placeholder="{{ option.value_placeholder }}"
@@ -122,7 +122,7 @@
                                                 <script type="text/template" data-index="{{ counter }}">
                                                     <div data-collection-item class="mb-2">
                                                         {% if option.key_options is not null %}
-                                                            <select class="form-control form-control-sm form-select form-select-sm"
+                                                            <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                                     style="width:10em;text-align:right;display:inline-block;"
                                                                     name="config_{{ option.name }}[__idx__][key]">
                                                                 {% for value, label in option.key_options %}
@@ -130,14 +130,14 @@
                                                                 {% endfor %}
                                                             </select>
                                                         {% else %}
-                                                            <input class="form-control form-control-sm"
+                                                            <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                                    style="width:10em;text-align:right;display:inline-block;" type="text"
                                                                    placeholder="{{ option.key_placeholder }}"
                                                                    name="config_{{ option.name }}[__idx__][key]"
                                                                    id="config_{{ option.name }}___idx____key_">
                                                         {% endif %}
                                                         {% if option.value_options is not null %}
-                                                            <select class="form-control form-control-sm form-select form-select-sm"
+                                                            <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                                     style="width:30em;display:inline-block;"
                                                                     name="config_{{ option.name }}[__idx__][val]">
                                                                 {% for value, label in option.value_options %}
@@ -145,7 +145,7 @@
                                                                 {% endfor %}
                                                             </select>
                                                         {% else %}
-                                                            <input class="form-control form-control-sm"
+                                                            <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                                    style="width:30em;display:inline-block;" type="text"
                                                                    placeholder="{{ option.value_placeholder }}"
                                                                    name="config_{{ option.name }}[__idx__][val]"
@@ -158,7 +158,7 @@
                                         {% elseif option.type == 'array_val' %}
                                             <br/>
                                                 {% if option.options is not null %}
-                                                    <select class="form-control form-control-sm form-select form-select-sm"
+                                                    <select class="form-control form-control-sm form-select form-select-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                             style="width:30em;display:inline-block;"
                                                             multiple
                                                             name="config_{{ option.name }}[]"
@@ -172,7 +172,7 @@
                                                         {% set counter = 0 %}
                                                         {% for val in option.value %}
                                                             <div data-collection-item class="mb-2">
-                                                                <input class="form-control form-control-sm"
+                                                                <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                                        style="width:30em;display:inline-block;" type="text"
                                                                        value="{{ val }}"
                                                                        name="config_{{ option.name }}[{{ counter }}]"
@@ -182,7 +182,7 @@
                                                         {% endfor %}
                                                         <script type="text/template" data-index="{{ counter }}">
                                                             <div data-collection-item class="mb-2">
-                                                                <input class="form-control form-control-sm"
+                                                                <input class="form-control form-control-sm {% if errors[option.name] is defined %}is-invalid{% endif %}"
                                                                        style="width:30em;display:inline-block;" type="text"
                                                                        name="config_{{ option.name }}[__idx__]"
                                                                        id="config_{{ option.name }}___idx___">
@@ -190,6 +190,11 @@
                                                         </script>
                                                     </div>
                                                 {% endif %}
+                                        {% endif %}
+                                        {% if errors[option.name] is defined %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ errors[option.name] }}
+                                            </div>
                                         {% endif %}
                                         <div class="small text-muted">{{ option.description | markdown_to_html }}</div>
                                     </div>

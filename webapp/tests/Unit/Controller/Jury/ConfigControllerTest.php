@@ -45,11 +45,28 @@ class ConfigControllerTest extends BaseTestCase
     public function testChangedPenaltyTime(): void
     {
         $this->withChangedConfiguration('penalty_time', "30",
-            function () {
+            function ($errors) {
+                static::assertEmpty($errors);
                 $this->verifyPageResponse('GET', '/jury/config', 200);
                 $crawler = $this->getCurrentCrawler();
                 $minutes = $crawler->filter('input#config_penalty_time')->extract(['value']);
                 static::assertEquals("30", $minutes[0]);
+            });
+    }
+
+    /**
+     * Test that an invalid penalty time produces an error
+     */
+    public function testChangedPenaltyTimeInvalid(): void
+    {
+        $this->withChangedConfiguration('penalty_time', "-1",
+            function ($errors) {
+                static::assertEquals(['penalty_time' => 'A non-negative number is required.'], $errors);
+                $this->verifyPageResponse('GET', '/jury/config', 200);
+                $crawler = $this->getCurrentCrawler();
+                $minutes = $crawler->filter('input#config_penalty_time')->extract(['value']);
+                // test that it is still 20, i.e. it didn't change
+                static::assertEquals("20", $minutes[0]);
             });
     }
 }

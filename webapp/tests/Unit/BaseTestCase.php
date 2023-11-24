@@ -199,10 +199,10 @@ abstract class BaseTestCase extends WebTestCase
         $dataToSet = [$configKey => $configValue];
 
         // Save the changes.
-        $config->saveChanges($dataToSet, $eventLog, $dj);
+        $errors = $config->saveChanges($dataToSet, $eventLog, $dj);
 
-        // Call the callback.
-        $callback();
+        // Call the callback with the errors.
+        $callback($errors);
     }
 
     protected function verifyPageResponse(

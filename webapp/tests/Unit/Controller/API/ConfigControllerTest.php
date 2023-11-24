@@ -102,6 +102,35 @@ class ConfigControllerTest extends BaseTestCase
     }
 
     /**
+     * Test that changing a config variable via the API to an invalid value produces the correct error.
+     *
+     * @dataProvider configChangeAPIInvalidProvider
+     */
+    public function testConfigChangeAPIInvalid(
+        string $property,
+        mixed $currentValue,
+        mixed $newValue,
+        string $errorMessage
+    ): void {
+        $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200, 'admin');
+
+        static::assertIsArray($response);
+        static::assertEquals($currentValue, $response[$property]);
+
+        $proposedChange = [$property => $newValue];
+        $response = $this->verifyApiJsonResponse('PUT', $this->endpoint, 400, 'admin', $proposedChange);
+
+        static::assertEquals(['errors' => [$property => $errorMessage]], $response);
+    }
+
+    public function configChangeAPIInvalidProvider(): Generator
+    {
+        yield ['penalty_time', 20, -1, 'A non-negative number is required.'];
+        yield ['memory_limit', 2097152, -1, 'A positive number is required.'];
+        yield ['memory_limit', 2097152, 0, 'A positive number is required.'];
+    }
+
+    /**
      * Test that invalid data is not accepted.
      */
     public function testConfigChangeAPIInvalidDataIsRejected(): void

@@ -43,9 +43,6 @@ class ConfigController extends AbstractController
             ->getQuery()
             ->getResult();
         if ($request->getMethod() == 'POST' && $request->request->has('save')) {
-            $this->addFlash('scoreboard_refresh', 'After changing specific ' .
-                            'settings, you might need to refresh the scoreboard.');
-
             $data = [];
             foreach ($request->request->all() as $key => $value) {
                 if (str_starts_with($key, 'config_')) {
@@ -65,8 +62,17 @@ class ConfigController extends AbstractController
                     }
                 }
             }
-            $this->config->saveChanges($data, $eventLogService, $this->dj);
-            return $this->redirectToRoute('jury_config');
+            $errors = $this->config->saveChanges($data, $eventLogService, $this->dj, $options);
+
+            if (empty($errors)) {
+                $this->addFlash('scoreboard_refresh', 'After changing specific ' .
+                    'settings, you might need to refresh the scoreboard.');
+
+                return $this->redirectToRoute('jury_config');
+            } else {
+                $this->addFlash('danger', 'Some errors occurred while saving configuration, ' .
+                    'please check the data you entered.');
+            }
         }
 
         $categories = [];
@@ -76,11 +82,15 @@ class ConfigController extends AbstractController
             }
         }
         $allData = [];
+        $activeCategory = null;
         foreach ($categories as $category) {
             $data = [];
             foreach ($specs as $specName => $spec) {
                 if ($spec['category'] !== $category) {
                     continue;
+                }
+                if (isset($errors[$specName]) && $activeCategory === null) {
+                    $activeCategory = $category;
                 }
                 $data[] = [
                     'name' => $specName,
@@ -103,6 +113,8 @@ class ConfigController extends AbstractController
         }
         return $this->render('jury/config.html.twig', [
             'options' => $allData,
+            'errors' => $errors ?? [],
+            'activeCategory' => $activeCategory ?? 'Scoring',
         ]);
     }
 

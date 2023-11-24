@@ -248,6 +248,18 @@ class GeneralInfoController extends AbstractFOSRestController
         description: 'The full configuration after change',
         content: new OA\JsonContent(type: 'object')
     )]
+    #[OA\Response(
+        response: 400,
+        description: 'An error occurred while saving the configuration',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'errors',
+                    type: 'object'
+                )
+            ]
+        )
+    )]
     #[OA\RequestBody(
         required: true,
         content: [
@@ -255,9 +267,12 @@ class GeneralInfoController extends AbstractFOSRestController
             new OA\MediaType(mediaType: 'application/json'),
         ]
     )]
-    public function updateConfigurationAction(Request $request): array
+    public function updateConfigurationAction(Request $request): JsonResponse|array
     {
-        $this->config->saveChanges($request->request->all(), $this->eventLogService, $this->dj);
+        $errors = $this->config->saveChanges($request->request->all(), $this->eventLogService, $this->dj);
+        if (!empty($errors)) {
+            return new JsonResponse(['errors' => $errors], 400);
+        }
         return $this->config->all(false);
     }
 
