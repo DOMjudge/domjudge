@@ -49,7 +49,7 @@ class ConfigControllerTest extends BaseTestCase
                 $this->verifyPageResponse('GET', '/jury/config', 200);
                 $crawler = $this->getCurrentCrawler();
                 $minutes = $crawler->filter('input#config_penalty_time')->extract(['value']);
-                $this->assertEquals("30", $minutes[0]);
+                static::assertEquals("30", $minutes[0]);
             });
     }
 }

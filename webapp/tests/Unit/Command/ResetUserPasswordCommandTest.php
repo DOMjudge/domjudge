@@ -58,7 +58,7 @@ class ResetUserPasswordCommandTest extends BaseTestCase
 
         // the output of the command in the console
         $output = $this->commandTester->getDisplay();
-        $this->assertStringContainsString('[OK] New password for '.$user.' is', $output);
+        static::assertStringContainsString('[OK] New password for '.$user.' is', $output);
         $newPassword = explode(' ', $output)[$passwordPosition];
         $this->apiRequest($defaultPassword, 401);
         $this->apiRequest($newPassword, 200);
@@ -95,7 +95,7 @@ class ResetUserPasswordCommandTest extends BaseTestCase
             'Command should fail with missing parameters.'
         );
         $output = $this->commandTester->getDisplay();
-        $this->assertStringContainsString('[ERROR] Can not find user with username '.$user, $output);
+        static::assertStringContainsString('[ERROR] Can not find user with username '.$user, $output);
     }
 
     public function testMissingUserParameter(): void
@@ -106,7 +106,7 @@ class ResetUserPasswordCommandTest extends BaseTestCase
         } catch (RuntimeException $e) {
             $output = $e->getMessage();
         }
-        $this->assertStringContainsString('Not enough arguments (missing: "username").', $output);
+        static::assertStringContainsString('Not enough arguments (missing: "username").', $output);
     }
 
     public function testNonUsedParameter(): void
@@ -118,7 +118,7 @@ class ResetUserPasswordCommandTest extends BaseTestCase
         } catch (InvalidArgumentException $e) {
             $output = $e->getMessage();
         }
-        $this->assertStringContainsString('The "Username" argument does not exist.', $output);
+        static::assertStringContainsString('The "Username" argument does not exist.', $output);
     }
 
     public function testGetHelp(): void
@@ -134,7 +134,7 @@ class ResetUserPasswordCommandTest extends BaseTestCase
                   'Options:',
                   'Display help for the given command. When no command is given display help for the list command'];
         foreach ($check as $message) {
-            $this->assertStringContainsString($message, $output);
+            static::assertStringContainsString($message, $output);
         }
     }
 }

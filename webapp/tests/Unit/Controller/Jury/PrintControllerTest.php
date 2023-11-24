@@ -37,7 +37,7 @@ class PrintControllerTest extends BaseTestCase
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
             function () {
                 $this->verifyPageResponse('GET', '/jury', 200);
-                $this->assertSelectorExists('a:contains("Print")');
+                static::assertSelectorExists('a:contains("Print")');
             });
     }
 
@@ -58,12 +58,12 @@ class PrintControllerTest extends BaseTestCase
                     'print[langid]' => 'csharp',
                 ]);
 
-                $this->assertSelectorTextContains('div.alert.alert-success',
+                static::assertSelectorTextContains('div.alert.alert-success',
                     'File has been printed');
 
                 $text = trim($crawler->filter('pre')->text(null, false));
-                $this->assertStringStartsWith('csharp', $text);
-                $this->assertStringEndsWith(
+                static::assertStringStartsWith('csharp', $text);
+                static::assertStringEndsWith(
                     trim(file_get_contents($testFile)), $text);
             });
     }

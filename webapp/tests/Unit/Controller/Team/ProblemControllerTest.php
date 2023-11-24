@@ -57,27 +57,27 @@ class ProblemControllerTest extends BaseTestCase
                 $crawler = $this->client->request('GET', '/team/problems');
 
                 // Check that the correct menu item is selected.
-                $this->assertSelectorTextContains('.nav-item .nav-link.active',
+                static::assertSelectorTextContains('.nav-item .nav-link.active',
                     'Problemset');
 
                 // Get the card bodies and verify we have exactly three of them.
                 $cardBodies = $crawler->filter('.card-body');
-                $this->assertSame(3, $cardBodies->count());
+                static::assertSame(3, $cardBodies->count());
 
                 for ($i = 0; $i < 3; $i++) {
                     $card = $cardBodies->eq($i);
-                    $this->assertSame($letters[$i],
+                    static::assertSame($letters[$i],
                         $card->filter('.card-title')->text(null, true));
-                    $this->assertSame($descriptions[$i],
+                    static::assertSame($descriptions[$i],
                         $card->filter('h3.card-subtitle')->text(null, true));
 
                     if ($withLimits) {
-                        $this->assertSame(
+                        static::assertSame(
                             'Limits: 5 seconds / 2 GB',
                             $card->filter('h4.card-subtitle')->text(null, true)
                         );
                     } else {
-                        $this->assertSame(0,
+                        static::assertSame(0,
                             $card->filter('h4.card-subtitle')->count());
                     }
 
@@ -85,7 +85,7 @@ class ProblemControllerTest extends BaseTestCase
                     $problemTextLink = $card->selectLink('text');
                     $this->client->click($problemTextLink->link());
 
-                    $this->assertSame($problemTexts[$i], $this->client->getInternalResponse()->getContent());
+                    static::assertSame($problemTexts[$i], $this->client->getInternalResponse()->getContent());
                 }
             });
     }
