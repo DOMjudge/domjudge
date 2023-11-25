@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\Entity\Contest;
+use App\Entity\Team;
 use App\Service\BalloonService;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
@@ -52,7 +53,14 @@ class BalloonController extends AbstractRestController
     ): array {
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
-        return array_column($balloonService->collectBalloonTable($contest, $todo), 'data');
+        $balloonsData = $balloonService->collectBalloonTable($contest, $todo);
+        foreach ($balloonsData as &$b) {
+            /** @var Team $team */
+            $team = $b['data']['team'];
+            $b['data']['team'] = "t" . $team->getTeamid() . ": " . $team->getEffectiveName();
+        }
+        unset($b);
+        return array_column($balloonsData, 'data');
     }
 
     /**
