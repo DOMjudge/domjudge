@@ -41,10 +41,14 @@ class ClarificationController extends AbstractController
         string $currentQueue = 'all',
     ): Response {
         $categories = $this->config->get('clar_categories');
-        $contestIds = array_keys($this->dj->getCurrentContests());
-        // cid -1 will never happen, but otherwise the array is empty and that is not supported.
-        if (empty($contestIds)) {
-            $contestIds = [-1];
+        if ($contest = $this->dj->getCurrentContest()) {
+            $contestIds = [$contest->getCid()];
+        } else {
+            $contestIds = array_keys($this->dj->getCurrentContests());
+            // cid -1 will never happen, but otherwise the array is empty and that is not supported.
+            if (empty($contestIds)) {
+                $contestIds = [-1];
+            }
         }
 
         if ($currentFilter === 'all') {
@@ -226,7 +230,13 @@ class ClarificationController extends AbstractController
         $subject_options = [];
 
         $categories = $this->config->get('clar_categories');
-        $contests = $this->dj->getCurrentContests();
+        $contest = $this->dj->getCurrentContest();
+        $hasCurrentContest = $contest !== null;
+        if ($hasCurrentContest) {
+            $contests = [$contest->getCid() => $contest];
+        } else {
+            $contests = $this->dj->getCurrentContests();
+        }
 
         /** @var ContestProblem[] $contestproblems */
         $contestproblems = $this->em->createQueryBuilder()
@@ -240,8 +250,12 @@ class ClarificationController extends AbstractController
 
         foreach ($contests as $cid => $cdata) {
             $cshort = $cdata->getShortName();
+            $namePrefix = '';
+            if (!$hasCurrentContest) {
+                $namePrefix = $cshort . ' - ';
+            }
             foreach ($categories as $name => $desc) {
-                $subject_options[$cshort]["$cid-$name"] = "$cshort - $desc";
+                $subject_options[$cshort]["$cid-$name"] = "$namePrefix $desc";
             }
 
             foreach ($contestproblems as $cp) {
@@ -249,7 +263,7 @@ class ClarificationController extends AbstractController
                     continue;
                 }
                 $subject_options[$cshort]["$cid-" . $cp->getProbid()] =
-                    $cshort . ' - ' .$cp->getShortname() . ': ' . $cp->getProblem()->getName();
+                    $namePrefix . $cp->getShortname() . ': ' . $cp->getProblem()->getName();
             }
         }
 

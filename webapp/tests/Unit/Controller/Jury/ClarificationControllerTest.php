@@ -115,7 +115,7 @@ class ClarificationControllerTest extends BaseTestCase
 
         self::assertSelectorTextContains('div.col-sm strong', 'All');
         self::assertSelectorTextContains('span.clarification-subject',
-                                         'demo - Technical issue');
+                                         'Technical issue');
         self::assertSelectorTextContains('div.card-text',
                                          'This is a clarification');
     }

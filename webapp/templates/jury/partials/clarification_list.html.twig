@@ -6,7 +6,7 @@
         {% if showExternalId %}
             <th scope="col">external ID</th>
         {% endif %}
-        {%- if current_contests | length > 1 %}
+        {%- if current_contest is null and current_contests | length > 1 %}
             <th scope="col">contest</th>
         {%- endif %}
 
@@ -31,7 +31,7 @@
             {% if showExternalId %}
                 <td><a href="{{ link }}">{{ clarification.externalid }}</a></td>
             {% endif %}
-            {%- if current_contests | length > 1 %}
+            {%- if current_contest is null and current_contests | length > 1 %}
                 <td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>
             {%- endif %}
 
