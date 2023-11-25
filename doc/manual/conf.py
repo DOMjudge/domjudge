@@ -52,7 +52,6 @@ else:
 extensions = [
     'sphinx.ext.ifconfig',
 #   'sphinx_rtd_theme',
-    'rst2pdf.pdfbuilder',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -187,8 +186,6 @@ latex_toplevel_sectioning = 'section'
 latex_documents = [
     (master_doc, 'DOMjudge.tex', 'DOMjudge Documentation',
      'DOMjudge Team', 'manual'),
-    ('team', 'domjudge-team-manual.tex', 'DOMjudge Team Manual',
-     'DOMjudge Team', 'manual'),
 ]
 
 
@@ -233,21 +230,3 @@ epub_exclude_files = ['search.html']
 
 
 # -- Extension configuration -------------------------------------------------
-
-# Options specifically for the Team manual PDF
-
-pdf_documents = [
-    ('team', u'domjudge-team-manual', u'DOMjudge Team Manual', u'The DOMjudge Developers'),
-]
-
-pdf_compressed = True
-pdf_stylesheets = ['sphinx','kerning','a4','sphinx-team']
-
-pdf_use_coverpage = False
-
-# This is of string type, not bool. See: https://github.com/rst2pdf/rst2pdf/pull/846
-pdf_use_toc = ''
-
-# This is needed to avoid a bug in rst2pdf << 0.94 (Debian buster has 0.93)
-# See: https://github.com/rst2pdf/rst2pdf/issues/678
-pdf_invariant = False

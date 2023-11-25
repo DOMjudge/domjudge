@@ -8,7 +8,6 @@ $MYDIR/syntax-check
 
 make configure
 ./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=root
-make install-docs
 make clean
 
 cd doc/manual/

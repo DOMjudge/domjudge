@@ -1,0 +1,61 @@
+#!/bin/sh
+#
+# Script to generate team manual including actual configuration
+# settings.
+#
+# Part of the DOMjudge Programming Contest Jury System and licensed
+# under the GNU GPL. See README and COPYING for details.
+
+set -e
+
+SOURCE=team-manual.tex
+PREAMBLE=team-manual-preamble.tex
+
+NRUNS=3
+
+OUTPUTDIR=.
+[ -n "$1" ] && OUTPUTDIR="$1"
+
+if [ ! -f "$PREAMBLE" ]; then
+	echo "File '$PREAMBLE' not found; are you running"
+	echo "this script from the team manual directory?"
+	exit 1
+fi
+
+if [ ! -d "$OUTPUTDIR" ] || [ ! -w "$OUTPUTDIR" ]; then
+	echo "Output directory '$OUTPUTDIR' not found or not writable."
+	exit 1
+fi
+
+# Set LaTeX command and flags if not given:
+[ -z "$LATEX" ] && LATEX=pdflatex
+[ -z "$LATEXFLAGS" ] && LATEXFLAGS='--interaction=errorstopmode --shell-escape'
+
+TEXCONFIG=$(mktemp --tmpdir domjudge-texconfig.XXXXXX)
+
+if [ -x "gentexconfig" ]; then
+	./gentexconfig    > "$TEXCONFIG"
+else
+	./gentexconfig.in > "$TEXCONFIG"
+fi
+
+# Run LaTeX:
+# shellcheck disable=SC2059
+{
+	[ "$QUIET" ] || printf "Running $NRUNS passes of '%s'..." "$LATEX $LATEXFLAGS $SOURCE"
+	run=1
+	while [ "$run" -le "$NRUNS" ]; do
+		# shellcheck disable=SC2086
+		if ! ( cat "$TEXCONFIG" ; echo \\"input{$SOURCE}" ) | \
+			$LATEX $LATEXFLAGS -jobname "${SOURCE%.tex}" -output-directory "$OUTPUTDIR" >/dev/null ; then
+			printf "\\nTeX-ing failed in run $run, see '%s' for details.\\n" "${SOURCE%tex}log"
+			exit 1
+		else
+			[ "$QUIET" ] || printf " $run"
+		fi
+		run=$((run+1))
+	done
+	[ "$QUIET" ] || printf "\\n" ;
+} # end shellcheck disable
+
+rm -f "$TEXCONFIG"

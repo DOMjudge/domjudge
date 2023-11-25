@@ -39,19 +39,21 @@ already listed under
 :ref:`judgehost <judgehost_requirements>` and
 :ref:`submit client <submit_client_requirements>` requirements)::
 
-  sudo apt install autoconf automake bats \
-    python-sphinx python-sphinx-rtd-theme rst2pdf fontconfig python3-yaml latexmk
-
-On Debian 11 (Bullseye) and above, instead install::
-
-  sudo apt install autoconf automake bats \
-    python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig python3-yaml \
-    latexmk texlive-latex-recommended texlive-latex-extra tex-gyre
+  sudo apt install autoconf automake
 
 When this software is present, bootstrapping can be done by running
 ``make dist``, which creates the ``configure`` script,
-downloads and installs the PHP dependencies via composer and
-generates documentation from RST/LaTeX sources.
+downloads and installs the PHP dependencies via composer.
+
+Rebuilding the documentation
+----------------------------
+
+Should you wish to rebuild the DOMjudge manual, you need the
+following software installed::
+
+  sudo apt install python3-sphinx python3-yaml
+
+Then run ``make docs`` to rebuild them.
 
 Maintainer mode installation
 ----------------------------
