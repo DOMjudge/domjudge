@@ -59,6 +59,10 @@
                     {% if not loop.last %}or{% endif %}
                 {% endfor %}.
             </div>
+        {% else %}
+            <div class="alert alert-success">
+                Actual result matches the expected result ({{ selectedJudging.result | printValidJuryResult }}).
+            </div>
         {% endif %}
     {% endif %}
 
