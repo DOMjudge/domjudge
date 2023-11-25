@@ -6,13 +6,11 @@ include $(TOPDIR)/Makefile.global
 MANUALSTEX=team-manual.tex
 MANUALSPDF=$(MANUALSTEX:%tex=%pdf)
 
-ifeq ($(BUILD_DOCS),yes)
 docs: gentexconfig $(MANUALSPDF)
 
 # For distdocs we cannot generate gentexconfig, since paths.mk is not
 # yet available:
 distdocs: $(MANUALSPDF)
-endif
 
 install-docs:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domjudge_docdir)/team \

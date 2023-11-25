@@ -18,7 +18,6 @@ $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
 
 config: $(SUBST_CONFIGS)
 
-ifeq ($(BUILD_DOCS),yes)
 docs: config
 # KLUDGE: call make instead of a dependency so that the html target
 # will run after config from inside the doc target.
@@ -30,7 +29,6 @@ distdocs:
 # Run make clean here to get a cleaner tarball and make sure
 # that make distclean returns to the original tarball state.
 	$(MAKE) clean
-endif
 
 install-docs: docs
 	$(call install_tree,$(DESTDIR)$(domjudge_docdir)/manual,build/html)
