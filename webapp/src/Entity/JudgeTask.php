@@ -161,7 +161,7 @@ class JudgeTask
     #[Serializer\Exclude]
     private Collection $judging_runs;
 
-    #[ORM\ManyToOne(inversedBy: 'judgetasks')]
+    #[ORM\ManyToOne(inversedBy: 'judgeTasks')]
     #[ORM\JoinColumn(name: 'versionid', referencedColumnName: 'versionid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Version $version = null;
