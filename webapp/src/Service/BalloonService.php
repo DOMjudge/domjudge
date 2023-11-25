@@ -92,7 +92,7 @@ class BalloonService
 
         $query = $em->createQueryBuilder()
             ->select('b', 's.submittime', 'p.probid',
-                't.teamid', 't.name AS teamname', 't.room',
+                't.teamid', 's', 't', 't.room',
                 'c.categoryid AS categoryid', 'c.name AS catname',
                 'co.cid', 'co.shortname',
                 'cp.shortname AS probshortname', 'cp.color',
@@ -157,7 +157,7 @@ class BalloonService
             $balloondata['time'] = $stime;
             $balloondata['problem'] = $balloonsData['probshortname'];
             $balloondata['contestproblem'] = $balloon->getSubmission()->getContestProblem();
-            $balloondata['team'] = "t" . $balloonsData['teamid'] . ": " . $balloonsData['teamname'];
+            $balloondata['team'] = $balloon->getSubmission()->getTeam();
             $balloondata['teamid'] = $balloonsData['teamid'];
             $balloondata['location'] = $balloonsData['room'];
             $balloondata['affiliation'] = $balloonsData['affilshort'];

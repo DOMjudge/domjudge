@@ -92,7 +92,7 @@ class BalloonController extends AbstractController
         if (isset($filters['location-str'])) {
             /** @var Team[] $filteredLocations */
             $filteredLocations = $this->em->createQueryBuilder()
-                ->from(Team::class, 'a')
+                ->from(Team::class, 'a', 'a.room')
                 ->select('a')
                 ->where('a.room IN (:rooms)')
                 ->setParameter('rooms', $filters['location-str'])
