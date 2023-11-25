@@ -1066,16 +1066,14 @@ EOF;
         }
         $metadata = $this->dj->parseMetadata($metadata);
         return '<span style="display:inline; margin-left: 5px;">'
-            . '<i class="fas fa-stopwatch" title="runtime"></i>'
-            . $metadata['cpu-time'] . 's'
-            . ' CPU, '
-            . $metadata['wall-time'] . 's'
-            . ' wall time, '
-            . '<i class="fas fa-memory" title="RAM"></i>'
-            . Utils::printsize((int)($metadata['memory-bytes']))
-            . ', '
-            . '<i class="fas fa-exitcode" title="runtime"></i>'
-            . 'exit-code: ' . $metadata['exitcode'];
+            . '<i class="fas fa-stopwatch" title="runtime"></i> '
+            . $metadata['cpu-time'] . 's CPU, '
+            . $metadata['wall-time'] . 's wall, '
+            . '<i class="fas fa-memory" title="RAM"></i> '
+            . Utils::printsize((int)($metadata['memory-bytes'])) . ', '
+            . '<i class="far fa-question-circle" title="exit-status"></i> '
+            . 'exit-code: ' . $metadata['exitcode']
+            . (($metadata['signal'] ?? -1) > 0 ? ' signal: ' . $metadata['signal'] : '');
     }
 
     public function printWarningContent(ExternalSourceWarning $warning): string

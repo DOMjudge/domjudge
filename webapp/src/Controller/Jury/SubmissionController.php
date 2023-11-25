@@ -377,15 +377,8 @@ class SubmissionController extends BaseController
                 }
                 $runs[] = $runResult[0];
                 unset($runResult[0]);
-                if (empty($runResult['metadata'])) {
-                    $runResult['cpu_time'] = $firstJudgingRun === null ? 'n/a' : $firstJudgingRun->getRuntime();
-                } else {
+                if (!empty($runResult['metadata'])) {
                     $metadata = $this->dj->parseMetadata($runResult['metadata']);
-                    $runResult['cpu_time'] = $metadata['cpu-time'];
-                    $runResult['wall_time'] = $metadata['wall-time'];
-                    $runResult['memory'] = Utils::printsize((int)$metadata['memory-bytes'], 2);
-                    $runResult['exitcode'] = $metadata['exitcode'];
-                    $runResult['signal'] = $metadata['signal'] ?? -1;
                     $runResult['output_limit'] = $metadata['output-truncated'];
                 }
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
