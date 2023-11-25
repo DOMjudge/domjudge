@@ -35,7 +35,10 @@
                 <td>{{ balloon.data.balloonid }}</td>
                 <td data-order="{{ balloon.data.time }}">{{ balloon.data.time | printtime }}</td>
                 <td>{{ balloon.data.contestproblem | problemBadge }}</td>
-                <td>{{ balloon.data.team | u.truncate(teamname_max_length, '…') }}</td>
+                <td>
+                    {{ balloon.data.team | entityIdBadge('t') }}
+                    {{ balloon.data.team.effectiveName | u.truncate(teamname_max_length, '…') }}
+                </td>
                 <td>{{ balloon.data.affiliation }}</td>
                 <td>{{ balloon.data.location }}</td>
                 <td>{{ balloon.data.category }}</td>
