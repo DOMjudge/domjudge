@@ -13,18 +13,19 @@
 </select>
 </div>
 
-<div class="mb-3">
-<label for="subject" class="form-label">Subject:</label>
-<select name="problem" id="subject" class="form-select">
-{% for contest,subject in clarform.subjects %}
-<optgroup label="{{ contest }}">
-{% for id,descr in subject %}
-<option value="{{id}}"{% if clarform.onsubject is defined and clarform.onsubject == id %} selected{% endif %}>{{descr}}</option>
-{% endfor %}
-</optgroup>
-{% endfor %}
-</select>
-</div>
+    <div class="mb-3">
+        <label for="subject" class="form-label">Subject:</label>
+        <select name="problem" id="subject" class="form-select">
+            {% for contest,subject in clarform.subjects %}
+                {% if current_contest is null %}<optgroup label="{{ contest }}">{% endif %}
+                {% for id,descr in subject %}
+                    <option
+                        value="{{ id }}"{% if clarform.onsubject is defined and clarform.onsubject == id %} selected{% endif %}>{{ descr }}</option>
+                {% endfor %}
+                {% if current_contest is null %}</optgroup>{% endif %}
+            {% endfor %}
+        </select>
+    </div>
 
 <div class="list-group mb-3">
     <div class="list-group-item">
