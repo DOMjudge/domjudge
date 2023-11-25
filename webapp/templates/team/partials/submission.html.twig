@@ -134,14 +134,6 @@
                                 <p class="nodata">There was no program output.</p>
                             {% endif %}
 
-                            <h6 class="mt-3">Diff output</h6>
-                            {% if run.output_diff is not empty %}
-                                <pre class="output_text">
-{{ run.output_diff }}</pre>
-                            {% else %}
-                                <p class="nodata">There was no diff output.</p>
-                            {% endif %}
-
                             {% if run.team_message is not empty %}
                                 <h6 class="mt-3">Judge message</h6>
                                 <pre class="output_text">
