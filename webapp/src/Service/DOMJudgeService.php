@@ -713,7 +713,7 @@ class DOMJudgeService
      * @param string|null $language Langid of the programming language this file is in
      * @param string      $username Username of the print job submitter
      * @param string|null $teamname Teamname of the team this user belongs to, if any
-     * @param int|null    $teamid   Teamid of the team this user belongs to, if any
+     * @param string|null $teamid   Teamid of the team this user belongs to, if any
      * @param string|null $location Room/place of the team, if any.
      */
     public function printFile(
@@ -722,7 +722,7 @@ class DOMJudgeService
         ?string $language,
         string $username,
         ?string $teamname = null,
-        ?int $teamid = null,
+        ?string $teamid = null,
         ?string $location = null
     ): array {
         $printCommand = $this->config->get('print_command');
@@ -736,7 +736,7 @@ class DOMJudgeService
             '[language]' => escapeshellarg($language),
             '[username]' => escapeshellarg($username),
             '[teamname]' => escapeshellarg($teamname ?? ''),
-            '[teamid]' => escapeshellarg((string)($teamid ?? '')),
+            '[teamid]' => escapeshellarg($teamid ?? ''),
             '[location]' => escapeshellarg($location ?? ''),
         ];
 

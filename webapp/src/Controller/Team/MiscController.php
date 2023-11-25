@@ -8,12 +8,14 @@ use App\Entity\Language;
 use App\Form\Type\PrintType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -37,7 +39,8 @@ class MiscController extends BaseController
         protected readonly ConfigurationService $config,
         protected readonly EntityManagerInterface $em,
         protected readonly ScoreboardService $scoreboardService,
-        protected readonly SubmissionService $submissionService
+        protected readonly SubmissionService $submissionService,
+        protected readonly EventLogService $eventLogService
     ) {}
 
     /**
@@ -170,9 +173,18 @@ class MiscController extends BaseController
             $langid   = $data['langid'];
             $username = $this->getUser()->getUserIdentifier();
 
+            $propertyAccessor = PropertyAccess::createPropertyAccessor();
             $team = $this->dj->getUser()->getTeam();
+            $externalIdField = $this->eventLogService->externalIdFieldForEntity($team);
+            if ($team->getLabel()) {
+                $teamId = $team->getLabel();
+            } elseif ($externalIdField && ($externalId = $propertyAccessor->getValue($team, $externalIdField))) {
+                $teamId = $externalId;
+            } else {
+                $teamId = (string)$team->getTeamid();
+            }
             $ret  = $this->dj->printFile($realfile, $originalfilename, $langid,
-                $username, $team->getEffectiveName(), $team->getTeamid(), $team->getRoom());
+                $username, $team->getEffectiveName(), $teamId, $team->getRoom());
 
             return $this->render('team/print_result.html.twig', [
                 'success' => $ret[0],
