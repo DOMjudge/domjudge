@@ -24,7 +24,7 @@
 <div class="card m-3 bg-light">
   <div class="card-body">
   <h5 class="card-title">Installation locations</h5>
-  <table>
+  <table class="w-100">
   <tr><td>Base url (use in submit client):</td><td><kbd>{{ url('root') }}</kbd></td></tr>
   <tr><td>API url (use in <kbd>restapi.secret</kbd>):</td><td><kbd>{{ url('current_api_root') | trim('/', 'right') }}</kbd></td></tr>
   <tr><td colspan="2">&nbsp;</td></tr>
@@ -36,6 +36,37 @@
   <tr><td>DOMjudge console binary:</td><td><kbd>{{ dir.project }}/webapp/bin/console</kbd></td></tr>
   <tr><td>Log directory:</td><td><kbd>{{ dir.log }}</kbd></td></tr>
   </table>
+
+      {% if logFilesWithSize is not empty %}
+          <h5 class="card-title mt-3">Log files</h5>
+          <table class="w-100">
+              <thead>
+              <tr>
+                  <th>File</th>
+                  <th>Size</th>
+                  <th>Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for logFile, size in logFilesWithSize %}
+                  <tr>
+                      <td><kbd>{{ logFile }}</kbd></td>
+                      <td>{{ size }}</td>
+                      <td>
+                          <a href="{{ path('jury_tail_log', {'logFile': logFile}) }}" class="btn btn-outline-secondary btn-sm">
+                              <i class="fas fa-terminal"></i>
+                              Get last 200 lines
+                          </a>
+                          <a href="{{ path('jury_download_log', {'logFile': logFile}) }}" class="btn btn-outline-secondary btn-sm">
+                              <i class="fas fa-download"></i>
+                              Download
+                          </a>
+                      </td>
+                  </tr>
+              {% endfor %}
+              </tbody>
+          </table>
+      {% endif %}
   </div>
 </div>
 

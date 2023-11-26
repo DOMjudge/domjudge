@@ -2,14 +2,17 @@
 
 namespace App\Controller\Jury;
 
+use App\Controller\API\AbstractRestController;
 use App\Entity\Configuration;
 use App\Service\CheckConfigService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -127,13 +130,45 @@ class ConfigController extends AbstractController
     ): Response {
         $results = $this->checkConfigService->runAll();
         $stopwatch = $this->checkConfigService->getStopwatch();
+        $logFiles = glob($logsDir . '/*.log');
+        $logFilesWithSize = [];
+        foreach ($logFiles as $logFile) {
+            $logFilesWithSize[str_replace($logsDir . '/', '', $logFile)] = Utils::printsize(filesize($logFile));
+        }
         return $this->render('jury/config_check.html.twig', [
             'results' => $results,
             'stopwatch' => $stopwatch,
             'dir' => [
-                    'project' => dirname($projectDir),
-                    'log' => $logsDir,
-                ],
+                'project' => dirname($projectDir),
+                'log' => $logsDir,
+            ],
+            'logFilesWithSize' => $logFilesWithSize,
         ]);
+    }
+
+    #[Route(path: '/tail-log/{logFile<[a-z0-9-]+\.log>}', name: 'jury_tail_log')]
+    public function tailLogAction(
+        string $logFile,
+        #[Autowire('%kernel.logs_dir%')]
+        string $logsDir
+    ): Response {
+        $fullFile = "$logsDir/$logFile";
+        $command = sprintf('tail -n200 %s', escapeshellarg($fullFile));
+        exec($command, $lines);
+        return $this->render('jury/tail_log.html.twig', [
+            'logFile' => $logFile,
+            'contents' => implode("\n", $lines),
+        ]);
+    }
+
+    #[Route(path: '/download-log/{logFile<[a-z0-9-]+\.log>}', name: 'jury_download_log')]
+    public function downloadLogAction(
+        Request $request,
+        string $logFile,
+        #[Autowire('%kernel.logs_dir%')]
+        string $logsDir
+    ): BinaryFileResponse {
+        $fullFile = "$logsDir/$logFile";
+        return AbstractRestController::sendBinaryFileResponse($request, $fullFile, true);
     }
 }

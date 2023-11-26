@@ -283,8 +283,11 @@ abstract class AbstractRestController extends AbstractFOSRestController
     /**
      * Send a binary file response, sending a 304 if it did not modify since last requested.
      */
-    public static function sendBinaryFileResponse(Request $request, string $fileName): BinaryFileResponse
-    {
+    public static function sendBinaryFileResponse(
+        Request $request,
+        string $fileName,
+        bool $download = false
+    ): BinaryFileResponse {
         // Note: we set auto-etag to true to automatically send the ETag based on the file contents.
         // ETags can be used to determine whether the file changed and if it didn't change, the response will
         // be a 304 Not Modified.
@@ -296,6 +299,9 @@ abstract class AbstractRestController extends AbstractFOSRestController
             $contentType = 'image/svg+xml';
         }
         $response->headers->set('Content-Type', $contentType);
+        if ($download) {
+            $response->headers->set('Content-Disposition', 'attachment');
+        }
 
         // Check if we need to send a 304 Not Modified and if so, send it.
         // This is done both on the
