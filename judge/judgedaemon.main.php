@@ -1476,8 +1476,9 @@ function judge(array $judgeTask): bool
         $ret = (bool)$needsMoreWork;
     }
 
+    $walltime = $metadata['wall-time'] ?? '?';
     logmsg(LOG_INFO, ' ' . ($result === 'correct' ? " \033[0;32m✔\033[0m" : " \033[1;31m✗\033[0m")
-        . '  ...done in ' . $runtime . 's, result: ' . $result);
+        . '  ...done in ' . $walltime . 's (CPU: ' . $runtime . 's), result: ' . $result);
 
     // done!
     return $ret;
