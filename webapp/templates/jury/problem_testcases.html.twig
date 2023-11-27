@@ -28,7 +28,6 @@
                     <th></th>
                 {% endif %}
                 <th class="testrank">#</th>
-                <th>judgehost dir</th>
                 <th class="testsample">sample</th>
                 <th>download</th>
                 <th>size</th>
@@ -36,6 +35,7 @@
                 {% if allowEdit %}
                     <th>upload new</th>
                 {% endif %}
+                <th>location on judgehost</th>
                 <th>description / image</th>
             </tr>
             </thead>
@@ -63,7 +63,6 @@
                                title="Move testcase down"><i class="fas fa-arrow-down"></i></a>
                         {% endif %}
                     </td>
-                    <td rowspan="2">{{ "%05d"|format(testcase.testcaseid) }}</td>
                     <td rowspan="2" class="testsample">
                         <input type="checkbox" name="sample[{{ testcase.rank }}]" value="sample"
                                {% if testcase.sample %}checked{% endif %} />
@@ -85,6 +84,11 @@
                             <input type="file" class="d-none custom-file-input" name="update_input[{{ testcase.rank }}]" id="update_input_{{testcase.rank}}">
                         </div></td>
                     {% endif %}
+                    <td rowspan="2">
+                        <span title="{{ judgingsdir['full'] }}{{ testcase.testcaseid }}">
+                            {{ judgingsdir['short'] }}{{ testcase.testcaseid }}
+                        </span>
+                    </td>
                     <td class="testdesc">
                         <span class="testcase-description">{{ testcase.description(true) | descriptionExpand }}</span>
                         {% if allowEdit %}

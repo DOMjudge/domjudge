@@ -12,3 +12,5 @@ parameters:
     domjudge.rundir: @domserver_rundir@
     domjudge.tmpdir: @domserver_tmpdir@
     domjudge.baseurl: @BASEURL@
+    judgehost.judgings: @judgehost_judgedir@
+    domjudge.installpref: @prefix@

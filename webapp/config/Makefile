@@ -11,7 +11,7 @@ OBJECTS =
 build: $(TARGETS)
 
 $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
-	$(substconfigvars)
+	echo $(substconfigvars)
 
 domserver: $(SUBST_FILES)
 

@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Judgehost;
 use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
@@ -41,6 +42,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Yaml;
 use ZipArchive;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 #[IsGranted('ROLE_JURY')]
 #[Route(path: '/jury/problems')]
@@ -477,8 +479,14 @@ class ProblemController extends BaseController
     }
 
     #[Route(path: '/{probId<\d+>}/testcases', name: 'jury_problem_testcases')]
-    public function testcasesAction(Request $request, int $probId): Response
-    {
+    public function testcasesAction(
+        Request $request,
+        int $probId,
+        #[Autowire('%judgehost.judgings%')]
+        string $judgingsDir,
+        #[Autowire('%domjudge.installpref%')]
+        string $installPrefix
+    ): Response {
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
@@ -719,12 +727,22 @@ class ProblemController extends BaseController
                 . join($lockedContests)
                 . ', disallowing editing.');
         }
+        $judgehosts = $this->em->createQueryBuilder()
+            ->from(Judgehost::class, 'j')
+            ->select('j')
+            ->andWhere('j.hidden = 0')
+            ->getQuery()->getResult();
+        $judgehost = $judgehosts[0]->getHostname() ?? 'example-judgehost';
         $data = [
             'problem' => $problem,
             'testcases' => $testcases,
             'testcaseData' => $testcaseData,
             'extensionMapping' => Testcase::EXTENSION_MAPPING,
             'allowEdit' => $this->isGranted('ROLE_ADMIN') && empty($lockedContests),
+            'judgingsdir' => [
+                'full' => $judgingsDir . '/' . $judgehost . '/endpoint-default/testcase/',
+                'short'=> str_replace($installPrefix, '', $judgingsDir) . '/' . $judgehost . '/endpoint-default/testcase/'
+            ],
         ];
 
         return $this->render('jury/problem_testcases.html.twig', $data);
