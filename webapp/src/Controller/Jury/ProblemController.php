@@ -33,7 +33,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -478,18 +477,8 @@ class ProblemController extends BaseController
     }
 
     #[Route(path: '/{probId<\d+>}/testcases', name: 'jury_problem_testcases')]
-    public function testcasesAction(
-        Request $request,
-        int $probId,
-        #[MapQueryParameter(name: 'testcase')]
-        ?int $testcaseFromRequest = null,
-    ): Response {
-        if ($testcaseFromRequest) {
-            $tc = $this->em->getRepository(Testcase::class)->find($testcaseFromRequest);
-            if ($tc) {
-                return $this->redirectToRoute('jury_problem_testcases', ['probId' => $tc->getProblem()->getProbId()]);
-            }
-        }
+    public function testcasesAction(Request $request, int $probId): Response
+    {
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
