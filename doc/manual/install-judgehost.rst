@@ -39,8 +39,8 @@ For Debian::
 
 For RHEL 7/Fedora [*]_::
 
-  sudo yum install make pkgconfig sudo libcgroup-devel lsof \
-        php-cli php-mbstring php-xml php-process procps-ng gcc g++
+  sudo dnf install make pkgconfig sudo libcgroup-devel lsof \
+        php-cli php-mbstring php-xml php-process procps-ng gcc g++ \
         glibc-static libstdc++-static
 
 .. [*] Building on RHEL8, RHEL9 (or the CentOS, Rockylinux & Almalinux versions)
