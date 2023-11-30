@@ -1198,7 +1198,9 @@ int main(int argc, char **argv)
 
 	cgroup_create();
 
-	unshare(CLONE_FILES|CLONE_FS|CLONE_NEWIPC|CLONE_NEWNET|CLONE_NEWNS|CLONE_NEWUTS|CLONE_SYSVSEM);
+	if ( unshare(CLONE_FILES|CLONE_FS|CLONE_NEWIPC|CLONE_NEWNET|CLONE_NEWNS|CLONE_NEWUTS|CLONE_SYSVSEM)!=0 ) {
+		error(errno, "calling unshare");
+	}
 
 	/* Check if any Linux Out-Of-Memory killer adjustments have to
 	 * be made. The oom_adj or oom_score_adj is inherited by child
