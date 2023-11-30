@@ -41,6 +41,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
             ['pl',     'pl',         'Perl',        ['pl'],                      false, 'Main file',  false,  true,   1,     'pl',                '',                 ''],
             ['plg',    'prolog',     'Prolog',      ['plg'],                     false, 'Main file',  false,  true,   1,     'plg',               '',                 ''],
             ['py3',    'python3',    'Python 3',    ['py'],                      false, 'Main file',  true,   true,   1,     'py3',               'pypy3 --version', 'pypy3 --version'],
+            ['ocaml',  'ocaml',      'OCaml',       ['ml'],                      false, null       ,  false,  true,   1,     'ocaml',             'ocamlopt --version', ''],
             ['r',      'r',          'R',           ['R'],                       false, 'Main file',  false,  true,   1,     'r',                 '',                 ''],
             ['rb',     'ruby',       'Ruby',        ['rb'],                      false, 'Main file',  false,  true,   1,     'rb',                '',                 ''],
             ['rs',     'rust',       'Rust',        ['rs'],                      false, null,         false,  true,   1,     'rs',                '',                 ''],

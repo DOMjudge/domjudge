@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# OCaml compile wrapper-script for 'compile.sh'.
+
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+
+# Compilation needs to store intermediate files, `/tmp` is not writable
+export TMPDIR="."
+
+# Enable some libraries;
+# unix system calls, regular expressions and string processing & multi arrays
+# See: https://v2.ocaml.org/releases/5.1/api/index.html
+# Consider also setting for faster executables:
+# -match-context-rows 100
+# -unsafe
+# As example of extra libraries see the config of SWERC24:
+#ocamlopt unix.cmxa str.cmxa bigarray.cmxa -o "$DEST" "$@" -ccopt -pipe
+ocamlopt -o "$DEST" "$@" -ccopt -pipe
+
+exit $?
