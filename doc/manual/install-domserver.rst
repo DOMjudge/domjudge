@@ -39,14 +39,16 @@ GNU/Linux, or one of its derivative distributions like Ubuntu::
         php php-fpm php-gd php-cli php-intl php-mbstring php-mysql \
         php-curl php-json php-xml php-zip composer ntp python3-yaml
 
-The following command can be used on RedHat Enterprise Linux, and related
-distributions like CentOS (with EPEL) and Fedora::
+The following command can be used on Fedora, and related distributions like
+Red Hat Enterprise Linux and Rocky Linux (before V9)::
 
-  sudo yum install libcgroup-devel make acl zip unzip mariadb-server httpd \
-        php-gd php-cli php-intl php-mbstring php-mysqlnd \
-        php-xml php-zip composer ntp python3-pyyaml
+  sudo dnf install libcgroup-devel make acl zip unzip mariadb-server httpd \
+        php-gd php-cli php-intl php-mbstring php-mysqlnd php-fpm \
+        php-xml php-zip composer chronyd python3-pyyaml
 
-The packages `libcgroup-dev` and `make` are
+`nginx` can be used as an alternate web server.
+
+The packages `libcgroup-dev` (`libcgroup-devel` on Fedora) and `make` are
 :ref:`judgehost software requirements <judgehost_software>`, but also
 needed here due to `issue 862 <https://github.com/DOMjudge/domjudge/issues/862>`.
 
@@ -126,7 +128,7 @@ settings. Reload the web server for changes to take effect.
 
 An nginx webserver configuration snippet is also provided in
 ``etc/nginx-conf``.  You still need ``htpasswd`` from ``apache2-utils``
-though. To use this configuration, perform the following steps
+though. To use this configuration, perform the following steps::
 
 .. parsed-literal::
 
@@ -136,6 +138,17 @@ though. To use this configuration, perform the following steps
   # /etc/php/\ |phpversion|/fpm/pool.d/domjudge.conf to your needs
   service php\ |phpversion|-fpm reload
   service nginx reload
+
+On Fedora, use the following nginx configuration steps::
+
+.. parsed-literal::
+
+  ln -s <DOMSERVER_INSTALL_PATH>/etc/nginx-conf /etc/nginx/conf.d/nginx-conf.conf
+  ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php-fpm.d/domjudge-fpm.conf
+  # Edit the files <DOMSERVER_INSTALL_PATH>/etc/nginx-conf and
+  # <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf to your needs
+  systemctl restart php-fpm.service
+  systemctl restart nginx.service
 
 The judgehosts connect to DOMjudge via the DOMjudge API so need
 to be able to access at least this part of the web interface.
