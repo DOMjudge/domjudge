@@ -201,16 +201,17 @@ class JuryMiscControllerTest extends BaseTestCase
                                                                      9 => ['id' => 'js', 'text' => 'JavaScript (js)'],
                                                                      10 => ['id' => 'kt', 'text' => 'Kotlin (kt)'],
                                                                      11 => ['id' => 'lua', 'text' => 'Lua (lua)'],
-                                                                     12 => ['id' => 'pas', 'text' => 'Pascal (pas)'],
-                                                                     13 => ['id' => 'pl', 'text' => 'Perl (pl)'],
-                                                                     14 => ['id' => 'sh', 'text' => 'POSIX shell (sh)'],
-                                                                     15 => ['id' => 'plg', 'text' => 'Prolog (plg)'],
-                                                                     16 => ['id' => 'py3', 'text' => 'Python 3 (py3)'],
-                                                                     17 => ['id' => 'r', 'text' => 'R (r)'],
-                                                                     18 => ['id' => 'rb', 'text' => 'Ruby (rb)'],
-                                                                     19 => ['id' => 'rs', 'text' => 'Rust (rs)'],
-                                                                     20 => ['id' => 'scala', 'text' => 'Scala (scala)'],
-                                                                     21 => ['id' => 'swift', 'text' => 'Swift (swift)']]]];
+                                                                     12 => ['id' => 'ocaml', 'text' => 'OCaml (ocaml)'],
+                                                                     13 => ['id' => 'pas', 'text' => 'Pascal (pas)'],
+                                                                     14 => ['id' => 'pl', 'text' => 'Perl (pl)'],
+                                                                     15 => ['id' => 'sh', 'text' => 'POSIX shell (sh)'],
+                                                                     16 => ['id' => 'plg', 'text' => 'Prolog (plg)'],
+                                                                     17 => ['id' => 'py3', 'text' => 'Python 3 (py3)'],
+                                                                     18 => ['id' => 'r', 'text' => 'R (r)'],
+                                                                     19 => ['id' => 'rb', 'text' => 'Ruby (rb)'],
+                                                                     20 => ['id' => 'rs', 'text' => 'Rust (rs)'],
+                                                                     21 => ['id' => 'scala', 'text' => 'Scala (scala)'],
+                                                                     22 => ['id' => 'swift', 'text' => 'Swift (swift)']]]];
                 yield ['contests', $status, [$role], ['results' => [0 => ['id' => 1, 'text' => 'Demo contest (demo - c1)']
                                                                    ]]];
             }
