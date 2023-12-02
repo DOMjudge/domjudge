@@ -18,9 +18,10 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install composer php php-fpm php-gd \
+          sudo apt install -y composer php php-fpm php-gd \
                php-cli php-intl php-mbstring php-mysql \
                php-curl php-json php-xml php-zip
+          composer install --no-dev --no-scripts
       - name: 'Qodana Scan (PHP)'
         uses: JetBrains/qodana-action@v2023.2
         env:
