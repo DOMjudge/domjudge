@@ -2,6 +2,8 @@
 
 namespace App\DataFixtures\DefaultData;
 
+use App\Entity\Role;
+use App\Entity\Team;
 use App\Entity\User;
 use App\Service\DOMJudgeService;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -41,12 +43,12 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
                 ->setUsername('admin')
                 ->setName('Administrator')
                 ->setPassword($this->passwordHasher->hashPassword($adminUser, trim($adminpasswordContents)))
-                ->addUserRole($this->getReference(RoleFixture::ADMIN_REFERENCE));
+                ->addUserRole($this->getReference(RoleFixture::ADMIN_REFERENCE, Role::class));
             if ($this->debug) {
-                $domjudgeTeam = $this->getReference(TeamFixture::DOMJUDGE_REFERENCE);
+                $domjudgeTeam = $this->getReference(TeamFixture::DOMJUDGE_REFERENCE, Team::class);
                 $adminUser
                     ->setTeam($domjudgeTeam)
-                    ->addUserRole($this->getReference(RoleFixture::TEAM_REFERENCE));
+                    ->addUserRole($this->getReference(RoleFixture::TEAM_REFERENCE, Role::class));
             }
             $manager->persist($adminUser);
         } else {
@@ -60,7 +62,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
                 ->setUsername('judgehost')
                 ->setName('User for judgedaemons')
                 ->setPassword($this->passwordHasher->hashPassword($judgehostUser, $this->getRestapiPassword()))
-                ->addUserRole($this->getReference(RoleFixture::JUDGEHOST_REFERENCE));
+                ->addUserRole($this->getReference(RoleFixture::JUDGEHOST_REFERENCE, Role::class));
             $manager->persist($judgehostUser);
         } else {
             $this->logger->info('User judgehost already exists, not created');

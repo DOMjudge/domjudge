@@ -1,10 +1,18 @@
 #!/usr/bin/env php
 <?php
 
+if (!ini_get('date.timezone')) {
+    ini_set('date.timezone', 'UTC');
+}
+
 if (is_file(dirname(__DIR__, 2) . '/lib/vendor/phpunit/phpunit/phpunit')) {
-    define('PHPUNIT_COMPOSER_INSTALL', dirname(__DIR__, 2) . '/lib/vendor/autoload.php');
-    require PHPUNIT_COMPOSER_INSTALL;
-    PHPUnit\TextUI\Command::main();
+    if (PHP_VERSION_ID >= 80000) {
+        require dirname(__DIR__, 2) . '/lib/vendor/phpunit/phpunit/phpunit';
+    } else {
+        define('PHPUNIT_COMPOSER_INSTALL', dirname(__DIR__, 2) . '/lib/vendor/autoload.php');
+        require PHPUNIT_COMPOSER_INSTALL;
+        PHPUnit\TextUI\Command::main();
+    }
 } else {
     if (!is_file(dirname(__DIR__,
             2) . '/lib/vendor/symfony/phpunit-bridge/bin/simple-phpunit.php')) {

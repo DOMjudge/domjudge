@@ -4,6 +4,7 @@ framework:
     esi: false
     fragments: false
     http_method_override: true
+    annotations: true
     handle_all_throwables: true
 
     # Enables session support. Note that the session will ONLY be started if you read or write from it.

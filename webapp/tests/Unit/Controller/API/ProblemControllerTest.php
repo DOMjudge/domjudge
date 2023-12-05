@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\DummyProblemFixture;
+use App\Entity\Problem;
 
 class ProblemControllerTest extends BaseTestCase
 {
@@ -11,6 +12,7 @@ class ProblemControllerTest extends BaseTestCase
      */
 
     protected ?string $apiEndpoint = 'problems';
+    protected ?string $entityClass = Problem::class;
 
     protected array $expectedObjects = [
         3 => [

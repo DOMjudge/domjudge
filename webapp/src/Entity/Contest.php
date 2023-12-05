@@ -614,11 +614,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->unfreezetimeString;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("scoreboard_thaw_time")
-     * @Serializer\Type("DateTime")
-     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName("scoreboard_thaw_time")]
+    #[Serializer\Type("DateTime")]
     public function getUnfreezeTimeObject(): ?DateTime
     {
         return $this->getUnfreezetime() ? new DateTime(Utils::absTime($this->getUnfreezetime())) : null;

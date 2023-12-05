@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Controller\Jury;
 use App\DataFixtures\Test\AddProblemAttachmentFixture;
 use App\Entity\Contest;
 use App\Entity\Problem;
+use App\Entity\ProblemAttachment;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -80,7 +81,7 @@ class ProblemControllerTest extends JuryControllerTestCase
     public function testDeleteExtraEntity(): void
     {
         $this->loadFixture(AddProblemAttachmentFixture::class);
-        $attachmentId = $this->resolveReference(AddProblemAttachmentFixture::class . ':attachment');
+        $attachmentId = $this->resolveReference(AddProblemAttachmentFixture::class . ':attachment', ProblemAttachment::class);
         static::$deleteExtra['deleteurl'] = "/jury/problems/attachments/$attachmentId/delete";
         parent::testDeleteExtraEntity();
     }

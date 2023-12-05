@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class OrganizationControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'organizations';
+    protected ?string $entityClass = TeamAffiliation::class;
 
     protected array $expectedObjects = [
         '1'                                     => [

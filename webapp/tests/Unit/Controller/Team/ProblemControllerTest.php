@@ -37,7 +37,7 @@ class ProblemControllerTest extends BaseTestCase
         /** @var EntityManagerInterface $em */
         $em               = self::getContainer()->get(EntityManagerInterface::class);
         $problemTextsData = $em->createQueryBuilder()
-            ->from('App:Problem', 'p')
+            ->from(Problem::class, 'p')
             ->select('p.externalid, p.problemtext')
             ->getQuery()
             ->getResult();
