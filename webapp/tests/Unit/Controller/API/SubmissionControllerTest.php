@@ -10,6 +10,7 @@ use App\DataFixtures\Test\SampleSubmissionsFixture;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
+use App\Entity\User;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
@@ -21,6 +22,7 @@ class SubmissionControllerTest extends BaseTestCase
     protected ?string $apiEndpoint = 'submissions';
 
     protected ?string $apiUser = 'admin';
+    protected ?string $entityClass = Submission::class;
 
     protected array $expectedObjects = [
         SampleSubmissionsFixture::class . ':0' => [
@@ -71,7 +73,7 @@ class SubmissionControllerTest extends BaseTestCase
             $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem_id']);
         }
         if (isset($dataToSend['user_id'])) {
-            $dataToSend['user_id'] = $this->resolveReference($dataToSend['user_id']);
+            $dataToSend['user_id'] = $this->resolveReference($dataToSend['user_id'], User::class);
         }
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -259,7 +261,7 @@ class SubmissionControllerTest extends BaseTestCase
             $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem_id']);
         }
         if (isset($dataToSend['user_id'])) {
-            $dataToSend['user_id'] = $this->resolveReference($dataToSend['user_id']);
+            $dataToSend['user_id'] = $this->resolveReference($dataToSend['user_id'], User::class);
         }
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;

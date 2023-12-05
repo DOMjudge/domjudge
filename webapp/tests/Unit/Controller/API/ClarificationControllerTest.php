@@ -17,6 +17,8 @@ class ClarificationControllerTest extends BaseTestCase
 
     protected static array $fixtures = [ClarificationFixture::class];
 
+    protected ?string $entityClass = Clarification::class;
+
     protected array $expectedObjects = [
         ClarificationFixture::class . ':0' => [
             "problem_id"   => "1",

@@ -22,17 +22,13 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * This class is used to log events in the events table.
  */
-class EventLogService implements ContainerAwareInterface
+class EventLogService
 {
-    use ContainerAwareTrait;
-
     // Keys used in below config:
     final public const KEY_TYPE = 'type';
     final public const KEY_URL = 'url';
@@ -675,7 +671,7 @@ class EventLogService implements ContainerAwareInterface
                 // Get a partial reference to the contest,
                 // because calling internalApiRequest above will clear the entity manager.
                 /** @var Contest $contest */
-                $contest = $this->em->getPartialReference(Contest::class, $contest->getCid());
+                $contest = $this->em->getReference(Contest::class, $contest->getCid());
 
                 if ($data === null) {
                     throw new Exception(sprintf("EventLogService::initializeStaticEvents no response data for endpoint '%s'.",
