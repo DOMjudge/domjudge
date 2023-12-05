@@ -10,6 +10,9 @@ jobs:
   Scan-Build:
     runs-on: ubuntu-latest
     steps:
+    - name: Disable due to new merge queue
+      run: exit 0
+
     - uses: actions/checkout@v3
 
     - name: Perform Scan
