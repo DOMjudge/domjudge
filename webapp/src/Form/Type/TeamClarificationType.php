@@ -50,6 +50,7 @@ class TeamClarificationType extends AbstractType
         ]);
         $builder->add('message', TextareaType::class, [
             'label' => false,
+            'sanitize_html' => true,
             'attr' => [
                 'rows' => 5,
                 'cols' => 85,

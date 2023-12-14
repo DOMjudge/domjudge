@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Service\DOMJudgeService;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,12 +44,13 @@ class RootController extends BaseController
     public function markdownPreview(
         Request $request,
         #[Autowire(service: 'twig.runtime.markdown')]
-        MarkdownRuntime $markdownRuntime
+        MarkdownRuntime $markdownRuntime,
+        HtmlSanitizerInterface $htmlSanitizer
     ): JsonResponse {
         $message = $request->request->get('message');
         if ($message === null) {
             throw new BadRequestHttpException('A message is required');
         }
-        return new JsonResponse(['html' => $markdownRuntime->convert($message)]);
+        return new JsonResponse(['html' => $markdownRuntime->convert($htmlSanitizer->sanitize($message))]);
     }
 }

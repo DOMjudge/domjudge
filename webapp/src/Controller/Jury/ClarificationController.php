@@ -14,6 +14,7 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -384,7 +385,7 @@ class ClarificationController extends AbstractController
     }
 
     #[Route(path: '/send', methods: ['POST'], name: 'jury_clarification_send')]
-    public function sendAction(Request $request): Response
+    public function sendAction(Request $request, HtmlSanitizerInterface $htmlSanitizer): Response
     {
         $clarification = new Clarification();
 
@@ -436,7 +437,7 @@ class ClarificationController extends AbstractController
 
         $clarification->setJuryMember($this->getUser()->getUserIdentifier());
         $clarification->setAnswered(true);
-        $clarification->setBody($request->request->get('bodytext'));
+        $clarification->setBody($htmlSanitizer->sanitize($request->request->get('bodytext')));
         $clarification->setSubmittime(Utils::now());
 
         $this->em->persist($clarification);

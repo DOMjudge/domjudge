@@ -84,6 +84,7 @@
 		"symfony/flex": "^2",
 		"symfony/form": "6.3.*",
 		"symfony/framework-bundle": "6.3.*",
+		"symfony/html-sanitizer": "6.3.*",
 		"symfony/http-client": "6.3.*",
 		"symfony/intl": "6.3.*",
 		"symfony/mime": "6.3.*",
