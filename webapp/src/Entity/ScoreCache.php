@@ -94,6 +94,12 @@ class ScoreCache
     ])]
     private bool $is_first_to_solve = false;
 
+    #[ORM\Column(options: [
+        'comment' => 'Is this potentially the first solution to this problem?',
+        'default' => 0,
+    ])]
+    private bool $is_potential_first_to_solve = false;
+
     #[ORM\Id]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
@@ -228,6 +234,17 @@ class ScoreCache
     public function getIsFirstToSolve() : bool
     {
         return $this->is_first_to_solve;
+    }
+
+    public function setIsPotentialFirstToSolve(bool $isPotentialFirstToSolve): ScoreCache
+    {
+        $this->is_potential_first_to_solve = $isPotentialFirstToSolve;
+        return $this;
+    }
+
+    public function getIsPotentialFirstToSolve() : bool
+    {
+        return $this->is_potential_first_to_solve;
     }
 
     public function setContest(?Contest $contest = null): ScoreCache
