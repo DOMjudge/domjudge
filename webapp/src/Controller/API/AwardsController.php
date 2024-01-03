@@ -60,6 +60,7 @@ class AwardsController extends AbstractRestController
     /**
      * Get the specific award for this contest.
      *
+     * @return array<array<string, array<int>|string>>
      * @throws Exception
      */
     #[Rest\Get('/{id}')]

@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method App\\\\Controller\\\\API\\\\AwardsController\\:\\:singleAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/AwardsController.php
-
-		-
 			message: "#^Method App\\\\Controller\\\\API\\\\BalloonController\\:\\:listAction\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/BalloonController.php
