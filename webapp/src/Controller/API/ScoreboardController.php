@@ -42,6 +42,8 @@ class ScoreboardController extends AbstractRestController
 
     /**
      * Get the scoreboard for this contest.
+     *
+     * @return array<string, string|array<string|int, string|array<string, int|string|array<string|int, array<string, int|string|bool>>>>>
      * @throws NonUniqueResultException
      */
     #[Rest\Get('')]

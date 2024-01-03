@@ -101,11 +101,6 @@ parameters:
 			path: webapp/src/Controller/API/ProblemController.php
 
 		-
-			message: "#^Method App\\\\Controller\\\\API\\\\ScoreboardController\\:\\:getScoreboardAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/ScoreboardController.php
-
-		-
 			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:buildDeleteTree\\(\\) has parameter \\$entities with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/BaseController.php
