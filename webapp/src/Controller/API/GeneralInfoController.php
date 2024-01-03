@@ -366,6 +366,8 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Add a problem without linking it to a contest.
+     *
+     * @return array<string, int|string[]>
      */
     #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post('/problems')]
