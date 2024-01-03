@@ -437,6 +437,8 @@ class ContestController extends AbstractRestController
 
     /**
      * Get the current contest state
+     *
+     * @return array<string, string|null>
      * @throws NonUniqueResultException
      */
     #[Rest\Get('/{cid}/state')]
