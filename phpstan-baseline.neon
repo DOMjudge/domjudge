@@ -1,16 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method App\\\\Controller\\\\API\\\\AwardsController\\:\\:getAwardsData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/AwardsController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\AwardsController\\:\\:listAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/AwardsController.php
-
-		-
 			message: "#^Method App\\\\Controller\\\\API\\\\AwardsController\\:\\:singleAction\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/AwardsController.php
@@ -494,11 +484,6 @@ parameters:
 			message: "#^Method App\\\\Serializer\\\\TeamVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Serializer/TeamVisitor.php
-
-		-
-			message: "#^Method App\\\\Service\\\\AwardService\\:\\:getAwards\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/AwardService.php
 
 		-
 			message: "#^Property App\\\\Service\\\\AwardService\\:\\:\\$awardCache type has no value type specified in iterable type array\\.$#"

@@ -114,6 +114,9 @@ class AwardService
         $this->awardCache[$contest->getCid()] = $results;
     }
 
+    /**
+     * @return array<array<string,string|int[]>>|null
+     */
     public function getAwards(Contest $contest, Scoreboard $scoreboard, string $requestedType = null): ?array
     {
         if (!isset($this->awardCache[$contest->getCid()])) {

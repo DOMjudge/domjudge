@@ -40,6 +40,7 @@ class AwardsController extends AbstractRestController
     /**
      * Get all the awards standings for this contest.
      *
+     * @return array<array<string,string|int[]>>|null
      * @throws Exception
      */
     #[Rest\Get('')]
@@ -81,6 +82,8 @@ class AwardsController extends AbstractRestController
 
     /**
      * Get the awards data for the given request and optional award ID.
+     *
+     * @return array<array<string,string|int[]>>|null
      */
     protected function getAwardsData(Request $request, string $requestedType = null): ?array
     {
