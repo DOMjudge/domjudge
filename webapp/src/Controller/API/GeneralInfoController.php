@@ -54,6 +54,8 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Get the current API version
+     *
+     * @return array<string, int>
      */
     #[Rest\Get('/version')]
     #[OA\Response(
@@ -71,6 +73,8 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Get information about the API and DOMjudge
+     *
+     * @return array<string, string|array<string, string>>
      */
     #[Rest\Get('/info')]
     #[Rest\Get('', name: 'api_root')]
@@ -143,6 +147,8 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Get general status information
+     *
+     * @return array<array<string, int|string>>
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
@@ -241,6 +247,8 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Update configuration variables.
+     *
+     * @return array<string, string>
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_ADMIN')]

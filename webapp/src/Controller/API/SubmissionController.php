@@ -499,6 +499,8 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Get the source code of all the files for the given submission.
+     *
+     * @return array<array<string, string>>
      * @throws NonUniqueResultException
      */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]

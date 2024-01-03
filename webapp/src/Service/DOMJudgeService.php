@@ -905,6 +905,7 @@ class DOMJudgeService
     }
 
     /**
+     * @return array<string, int>
      * @throws NoResultException
      * @throws NonUniqueResultException
      */

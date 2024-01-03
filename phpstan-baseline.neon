@@ -1,26 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:getInfoAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/GeneralInfoController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:getStatusAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/GeneralInfoController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:getVersionAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/GeneralInfoController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:updateConfigurationAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/GeneralInfoController.php
-
-		-
 			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:checkVersions\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/JudgehostController.php
@@ -124,11 +104,6 @@ parameters:
 			message: "#^Method App\\\\Controller\\\\API\\\\ScoreboardController\\:\\:getScoreboardAction\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/ScoreboardController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\SubmissionController\\:\\:getSubmissionSourceCodeAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/SubmissionController.php
 
 		-
 			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:buildDeleteTree\\(\\) has parameter \\$entities with no value type specified in iterable type array\\.$#"
@@ -627,11 +602,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getAssetFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/DOMJudgeService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getContestStats\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/DOMJudgeService.php
 
