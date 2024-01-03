@@ -267,7 +267,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
             }
         }
 
-        /** @var array $objects */
+        /** @var Object[] $objects */
         $objects = $queryBuilder
             ->getQuery()
             ->getResult();
