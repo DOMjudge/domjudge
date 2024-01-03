@@ -200,6 +200,8 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Get configuration variables.
+     *
+     * @return array<string, string>
      */
     #[Rest\Get('/config')]
     #[OA\Response(
