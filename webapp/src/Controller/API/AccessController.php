@@ -24,6 +24,7 @@ class AccessController extends AbstractRestController
     /**
      * Get access information
      *
+     * @return array<string, array<int, array<string, array<int, string>|string>|string>>
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
