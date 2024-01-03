@@ -230,6 +230,8 @@ abstract class AbstractRestController extends AbstractFOSRestController
 
     /**
      * @throws NonUniqueResultException
+     *
+     * @return Object[]
      */
     protected function listActionHelper(Request $request): array
     {
