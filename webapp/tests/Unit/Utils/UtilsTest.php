@@ -943,4 +943,26 @@ part.";
         $doubled = static fn($item) => $item * 2;
         self::assertEquals($expectedOutput, Utils::reindex($input, $doubled));
     }
+
+    /**
+     * Test that reindexing an array works on arrays with key=>value
+     */
+    public function testReindexKeyValue(): void
+    {
+        $input = ['a' => 10, 'b' => 5];
+        $expectedOutput = [101030 => 10, 5515 => 5];
+        $tripled = static fn($item) => strval($item) . strval($item) . strval($item * 3);
+        self::assertEquals($expectedOutput, Utils::reindex($input, $tripled));
+    }
+
+    /**
+     * Test that reindexing an array works on arrays with key=>value and string values
+     */
+    public function testReindexKeyValueString(): void
+    {
+        $input = ['a' => 'A', 'b' => 'B'];
+        $expectedOutput = ['AA' => 'A', 'BB' => 'B'];
+        $stringDouble = static fn($item) => strval($item) . strval($item);
+        self::assertEquals($expectedOutput, Utils::reindex($input, $stringDouble));
+    }
 }
