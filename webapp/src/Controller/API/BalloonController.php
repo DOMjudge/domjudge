@@ -28,6 +28,7 @@ class BalloonController extends AbstractRestController
     /**
      * Get all the balloons for this contest.
      *
+     * @return array<int, int|string>
      * @throws NonUniqueResultException
      */
     #[Rest\Get('')]
