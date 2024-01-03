@@ -759,6 +759,8 @@ class ContestController extends AbstractRestController
 
     /**
      * Get general status information.
+     *
+     * @return array<string, int>
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
