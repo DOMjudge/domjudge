@@ -22,6 +22,7 @@ class Scoreboard
 
     /** @var TeamScore[] */
     protected array $scores = [];
+    /** @var int[]|null */
     protected ?array $bestInCategoryData = null;
 
     /**
@@ -334,6 +335,8 @@ class Scoreboard
 
     /**
      * Return the used team categories for this scoreboard.
+     *
+     * @param int[] $limitToTeamIds
      * @return TeamCategory[]
      */
     public function getUsedCategories(?array $limitToTeamIds = null): array
@@ -357,6 +360,8 @@ class Scoreboard
 
     /**
      * Return whether this scoreboard has multiple category colors.
+     *
+     * @param int[] $limitToTeamIds
      */
     public function hasCategoryColors(?array $limitToTeamIds = null): bool
     {
@@ -381,6 +386,8 @@ class Scoreboard
 
     /**
      * Determine whether this team is the best in the given category
+     *
+     * @param int[] $limitToTeamIds
      */
     public function isBestInCategory(Team $team, ?array $limitToTeamIds = null): bool
     {

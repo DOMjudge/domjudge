@@ -1069,28 +1069,3 @@ parameters:
 			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:runDiff\\(\\) has parameter \\$runOutput with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Twig/TwigExtension.php
-
-		-
-			message: "#^Method App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\:\\:getUsedCategories\\(\\) has parameter \\$limitToTeamIds with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Utils/Scoreboard/Scoreboard.php
-
-		-
-			message: "#^Method App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\:\\:hasCategoryColors\\(\\) has parameter \\$limitToTeamIds with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Utils/Scoreboard/Scoreboard.php
-
-		-
-			message: "#^Method App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\:\\:isBestInCategory\\(\\) has parameter \\$limitToTeamIds with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Utils/Scoreboard/Scoreboard.php
-
-		-
-			message: "#^Property App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\:\\:\\$bestInCategoryData type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Utils/Scoreboard/Scoreboard.php
-
-		-
-			message: "#^Method App\\\\Utils\\\\Scoreboard\\\\Summary\\:\\:__construct\\(\\) has parameter \\$problems with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Utils/Scoreboard/Summary.php

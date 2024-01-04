@@ -2,6 +2,8 @@
 
 namespace App\Utils\Scoreboard;
 
+use App\Entity\ContestProblem;
+
 class Summary
 {
     /** @var int[] */
@@ -16,6 +18,9 @@ class Summary
     /** @var ProblemSummary[] */
     protected array $problems = [];
 
+    /**
+     * @param ContestProblem[] $problems
+     */
     public function __construct(array $problems)
     {
         foreach (array_keys($problems) as $problemId) {
