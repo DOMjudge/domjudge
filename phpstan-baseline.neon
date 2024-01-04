@@ -1179,38 +1179,3 @@ parameters:
 			message: "#^Method App\\\\Utils\\\\Scoreboard\\\\Summary\\:\\:__construct\\(\\) has parameter \\$problems with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Utils/Scoreboard/Summary.php
-
-		-
-			message: "#^Method App\\\\Utils\\\\Utils\\:\\:computeLcsDiff\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Utils/Utils.php
-
-		-
-			message: "#^Method App\\\\Utils\\\\Utils\\:\\:getImageSize\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Utils/Utils.php
-
-		-
-			message: "#^Method App\\\\Utils\\\\Utils\\:\\:parseHexColor\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Utils/Utils.php
-
-		-
-			message: "#^Method App\\\\Utils\\\\Utils\\:\\:parseTsvLine\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Utils/Utils.php
-
-		-
-			message: "#^Method App\\\\Utils\\\\Utils\\:\\:reindex\\(\\) has parameter \\$array with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Utils/Utils.php
-
-		-
-			message: "#^Method App\\\\Utils\\\\Utils\\:\\:reindex\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Utils/Utils.php
-
-		-
-			message: "#^Method App\\\\Utils\\\\Utils\\:\\:rgbToHex\\(\\) has parameter \\$color with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Utils/Utils.php

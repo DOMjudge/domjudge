@@ -321,6 +321,8 @@ class Utils
 
     /**
      * Parse a hex color into it's three RGB values.
+     *
+     * @return array{int, int, int}
      */
     public static function parseHexColor(string $hex): array
     {
@@ -345,6 +347,8 @@ class Utils
 
     /**
      * Convert an RGB triple into a CSS hex color.
+     *
+     * @param array{int, int, int} $color
      */
     public static function rgbToHex(array $color): string
     {
@@ -506,6 +510,8 @@ class Utils
 
     /**
      * Compute the LCS diff of two lines.
+     *
+     * @return array{bool, string}
      */
     public static function computeLcsDiff(string $line1, string $line2): array
     {
@@ -686,6 +692,8 @@ class Utils
      * This method supports PNG, JPG, BMP, GIF and SVG files.
      *
      * Returns an array with three items: the width, height and ratio between width and height.
+     *
+     * @return array{int, int, float}
      */
     public static function getImageSize(string $filename): array
     {
@@ -857,6 +865,8 @@ class Utils
 
     /**
      * Split a line from a Tab Separated Values file into fields.
+     *
+     * @return string[]
      */
     public static function parseTsvLine(string $line): array
     {
@@ -865,6 +875,13 @@ class Utils
 
     /**
      * Reindex the given array by applying the callback to each item.
+     *
+     * @template TKey of array-key
+     * @template UKey of array-key
+     * @template V
+     * @param array<TKey, V> $array
+     * @param callable(V, TKey): UKey $callback
+     * @return array<UKey, V>
      */
     public static function reindex(array $array, callable $callback): array
     {
