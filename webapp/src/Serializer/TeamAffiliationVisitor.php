@@ -24,6 +24,9 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
         protected readonly RequestStack $requestStack
     ) {}
 
+    /**
+     * @return array<array{event: string, class: string, format: string, method: string}>
+     */
     public static function getSubscribedEvents(): array
     {
         return [

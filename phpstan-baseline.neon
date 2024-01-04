@@ -391,36 +391,6 @@ parameters:
 			path: webapp/src/Helpers/OrdinalArray.php
 
 		-
-			message: "#^Method App\\\\Serializer\\\\ContestProblemVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Serializer/ContestProblemVisitor.php
-
-		-
-			message: "#^Method App\\\\Serializer\\\\ContestVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Serializer/ContestVisitor.php
-
-		-
-			message: "#^Method App\\\\Serializer\\\\SetExternalIdVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Serializer/SetExternalIdVisitor.php
-
-		-
-			message: "#^Method App\\\\Serializer\\\\SubmissionVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Serializer/SubmissionVisitor.php
-
-		-
-			message: "#^Method App\\\\Serializer\\\\TeamAffiliationVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Serializer/TeamAffiliationVisitor.php
-
-		-
-			message: "#^Method App\\\\Serializer\\\\TeamVisitor\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Serializer/TeamVisitor.php
-
-		-
 			message: "#^Method App\\\\Service\\\\AwardService\\:\\:getAwards\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/AwardService.php
