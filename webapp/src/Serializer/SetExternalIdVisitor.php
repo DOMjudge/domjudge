@@ -19,6 +19,9 @@ class SetExternalIdVisitor implements EventSubscriberInterface
     {
     }
 
+    /**
+     * @return array<array{event: string, format: string, method: string}>
+     */
     public static function getSubscribedEvents(): array
     {
         return [

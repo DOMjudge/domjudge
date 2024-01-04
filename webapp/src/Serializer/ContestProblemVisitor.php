@@ -19,6 +19,9 @@ class ContestProblemVisitor implements EventSubscriberInterface
         protected readonly EventLogService $eventLogService
     ) {}
 
+    /**
+     * @return array<array{event: string, class: string, format: string, method: string}>
+     */
     public static function getSubscribedEvents(): array
     {
         return [
