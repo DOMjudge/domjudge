@@ -366,16 +366,6 @@ parameters:
 			path: webapp/src/Entity/User.php
 
 		-
-			message: "#^Method App\\\\FosRestBundle\\\\FlattenExceptionHandler\\:\\:convertToArray\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/FosRestBundle/FlattenExceptionHandler.php
-
-		-
-			message: "#^Method App\\\\FosRestBundle\\\\FlattenExceptionHandler\\:\\:getSubscribingMethods\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/FosRestBundle/FlattenExceptionHandler.php
-
-		-
 			message: "#^Method App\\\\FosRestBundle\\\\FlattenExceptionHandler\\:\\:serializeToJson\\(\\) has parameter \\$type with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/FosRestBundle/FlattenExceptionHandler.php
