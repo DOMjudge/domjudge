@@ -72,6 +72,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     #[Serializer\Exclude]
     private bool $valid = true;
 
+    /** @var string[]|null $expected_results */
     #[ORM\Column(
         type: 'json',
         length: AbstractMySQLPlatform::LENGTH_LIMIT_TINYTEXT,
@@ -255,12 +256,18 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this->valid;
     }
 
+    /**
+     * @param string[] $expectedResults
+     */
     public function setExpectedResults(array $expectedResults): Submission
     {
         $this->expected_results = $expectedResults;
         return $this;
     }
 
+    /**
+     * @return string[]
+     */
     public function getExpectedResults(): ?array
     {
         return $this->expected_results;

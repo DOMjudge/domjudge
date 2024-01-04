@@ -335,6 +335,9 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      *
      * This method should return an array with as keys the JSON field names and as values the actual entity
      * objects that the SetExternalIdVisitor should check for applicable external ID's
+     *
+     * @return array{from_team_id: Team|null, to_team_id: Team|null,
+     *               problem_id: Problem|null, reply_to_id: Clarification|null}
      */
     public function getExternalRelationships(): array
     {

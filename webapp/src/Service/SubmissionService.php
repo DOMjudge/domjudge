@@ -675,7 +675,7 @@ class SubmissionService
 
     /**
      * Checks given source file for expected results string
-     * @return array|false|null Array of expected results if found, false when multiple matches are found, or null otherwise.
+     * @return string[]|false|null Array of expected results if found, false when multiple matches are found, or null otherwise.
      */
     public static function getExpectedResults(string $source, array $resultsRemap): array|false|null
     {

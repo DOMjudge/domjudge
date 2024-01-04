@@ -326,21 +326,6 @@ parameters:
 			path: webapp/src/DataFixtures/Test/RejudgingStatesFixture.php
 
 		-
-			message: "#^Method App\\\\Entity\\\\Clarification\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Clarification.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\Contest\\:\\:getDataForJuryInterface\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Contest.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\Contest\\:\\:getState\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Contest.php
-
-		-
 			message: "#^Method App\\\\Entity\\\\ExternalRelationshipEntityInterface\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Entity/ExternalRelationshipEntityInterface.php
@@ -361,57 +346,12 @@ parameters:
 			path: webapp/src/Entity/ExternalSourceWarning.php
 
 		-
-			message: "#^Method App\\\\Entity\\\\InternalError\\:\\:getDisabled\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/InternalError.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\InternalError\\:\\:setDisabled\\(\\) has parameter \\$disabled with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/InternalError.php
-
-		-
-			message: "#^Property App\\\\Entity\\\\InternalError\\:\\:\\$disabled type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/InternalError.php
-
-		-
 			message: "#^Method App\\\\Entity\\\\Judging\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Entity/Judging.php
 
 		-
-			message: "#^Method App\\\\Entity\\\\Judging\\:\\:getJudgehosts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Judging.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\Language\\:\\:getExtensions\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Language.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\Language\\:\\:setExtensions\\(\\) has parameter \\$extensions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Language.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\Submission\\:\\:getExpectedResults\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Submission.php
-
-		-
 			message: "#^Method App\\\\Entity\\\\Submission\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Submission.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\Submission\\:\\:setExpectedResults\\(\\) has parameter \\$expectedResults with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Submission.php
-
-		-
-			message: "#^Property App\\\\Entity\\\\Submission\\:\\:\\$expected_results type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Entity/Submission.php
 
@@ -421,27 +361,7 @@ parameters:
 			path: webapp/src/Entity/Team.php
 
 		-
-			message: "#^Method App\\\\Entity\\\\Team\\:\\:getGroupIds\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Team.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\User\\:\\:__unserialize\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/User.php
-
-		-
 			message: "#^Method App\\\\Entity\\\\User\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/User.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\User\\:\\:getRoleList\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/User.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\User\\:\\:getUserRoles\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Entity/User.php
 
@@ -1092,11 +1012,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getExpectedResults\\(\\) has parameter \\$resultsRemap with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/SubmissionService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getExpectedResults\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/SubmissionService.php
 
