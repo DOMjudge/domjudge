@@ -566,11 +566,6 @@ parameters:
 			path: webapp/src/Service/DOMJudgeService.php
 
 		-
-			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getAssetFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/DOMJudgeService.php
-
-		-
 			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getContestStats\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/DOMJudgeService.php
@@ -999,33 +994,3 @@ parameters:
 			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getSubmissionList\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/SubmissionService.php
-
-		-
-			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:customAssetFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Twig/TwigExtension.php
-
-		-
-			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:displayTestcaseResults\\(\\) has parameter \\$testcases with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Twig/TwigExtension.php
-
-		-
-			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:getCommonPrefix\\(\\) has parameter \\$strings with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Twig/TwigExtension.php
-
-		-
-			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:numTableActions\\(\\) has parameter \\$tableData with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Twig/TwigExtension.php
-
-		-
-			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:printHosts\\(\\) has parameter \\$hostnames with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Twig/TwigExtension.php
-
-		-
-			message: "#^Method App\\\\Twig\\\\TwigExtension\\:\\:runDiff\\(\\) has parameter \\$runOutput with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Twig/TwigExtension.php
