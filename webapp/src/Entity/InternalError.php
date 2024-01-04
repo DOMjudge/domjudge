@@ -45,6 +45,9 @@ class InternalError
     )]
     private string|float $time;
 
+    /**
+     * @var array{kind: string, hostname?: string, execid?: string, probid: string, langid: string}
+     */
     #[ORM\Column(
         type: 'json',
         length: AbstractMySQLPlatform::LENGTH_LIMIT_TEXT,
@@ -122,12 +125,18 @@ class InternalError
         return $this->time;
     }
 
+    /**
+     * @param array{kind: string, hostname?: string, execid?: string, probid?: string, langid?: string} $disabled
+     */
     public function setDisabled(array $disabled): InternalError
     {
         $this->disabled = $disabled;
         return $this;
     }
 
+    /**
+     * @return array{kind: string, hostname?: string, execid?: string, probid?: string, langid?: string}
+     */
     public function getDisabled(): array
     {
         return $this->disabled;

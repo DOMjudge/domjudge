@@ -157,6 +157,9 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         ];
     }
 
+    /**
+     * @param array{int|null, string|null, string|null} $data
+     */
     public function __unserialize(array $data): void
     {
         [
@@ -387,6 +390,9 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         $this->user_roles->removeElement($role);
     }
 
+    /**
+     * @return Role[]
+     */
     public function getUserRoles(): array
     {
         return $this->user_roles->toArray();
@@ -394,6 +400,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
 
     /**
      * Get the roles of this user as an array of strings
+     *
+     * @return array<string>
      */
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('roles')]

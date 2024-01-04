@@ -543,6 +543,9 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this->unread_clarifications;
     }
 
+    /**
+     * @return array{int}|array{}
+     */
     #[Serializer\VirtualProperty]
     #[Serializer\Type('array<string>')]
     public function getGroupIds(): array

@@ -1022,6 +1022,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $contestTime;
     }
 
+    /**
+     * @return array<string, array{icon: string|null, label: string, time: string, show_button: bool}>
+     */
     public function getDataForJuryInterface(): array
     {
         $now         = Utils::now();
@@ -1109,7 +1112,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $result;
     }
 
-    public function getState(): ?array
+    /**
+     * @return array<string, string|null>
+     */
+    public function getState(): array
     {
         $time_or_null             = function ($time, $extra_cond = true) {
             if (!$extra_cond || $time === null || Utils::now() < $time) {

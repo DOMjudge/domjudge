@@ -291,12 +291,18 @@ class Language extends BaseApiEntity
         return $this->getName();
     }
 
+    /**
+     * @param string[] $extensions
+     */
     public function setExtensions(array $extensions): Language
     {
         $this->extensions = $extensions;
         return $this;
     }
 
+    /**
+     * @return string[]
+     */
     public function getExtensions(): array
     {
         return $this->extensions;
