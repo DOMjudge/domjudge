@@ -1338,6 +1338,8 @@ class DOMJudgeService
 
     /**
      * Get asset files in the given directory with the given extension
+     *
+     * @return string[]
      */
     public function getAssetFiles(string $path): array
     {

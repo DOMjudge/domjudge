@@ -426,9 +426,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     }
 
     // TODO: this function shares a lot with the above one, unify them?
+    /**
+     * @param Testcase[] $testcases
+     */
     public function displayTestcaseResults(array $testcases, bool $submissionDone, bool $isExternal = false): string
     {
-        /** @var Testcase[] $testcases */
         $results = '';
         $lastTypeSample = true;
         foreach ($testcases as $testcase) {
@@ -627,6 +629,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Extract the longest common prefix of all the provided strings.
+     *
+     * @param string[] $strings
      */
     private function getCommonPrefix(array $strings): string
     {
@@ -650,6 +654,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Formats a list of given hostnames, extracting a common prefix and suffix.
+     *
+     * @param string[] $hostnames
      */
     public function printHosts(array $hostnames): string
     {
@@ -754,6 +760,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return $header . $body . "</table>" . $truncation;
     }
 
+    /**
+     * @param array{output_run: string, output_reference: string} $runOutput
+     */
     public function runDiff(array $runOutput): string
     {
         // TODO: can be improved using diffposition.txt
@@ -896,6 +905,9 @@ JS;
         return $res;
     }
 
+    /**
+     * @return string[]
+     */
     public function customAssetFiles(string $type): array
     {
         if (in_array($type, ['css', 'js'])) {
@@ -1166,6 +1178,13 @@ EOF;
         return $this->twig->render('jury/entity_id_badge.html.twig', $data);
     }
 
+    /**
+     * @param array<array{data: array<string, array{value: string, sortvalue?: string, title?: string, cssclass?: string}>,
+     *                    link: string,
+     *                    actions?: array{icon: string, title: string, link: string, ajaxModal?: bool},
+     *                    cssclass?: string
+     *        }> $tableData
+     */
     protected function numTableActions(array $tableData): int
     {
         $maxNumActions = 0;
