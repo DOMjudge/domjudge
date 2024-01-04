@@ -22,6 +22,9 @@ class FlattenExceptionHandler implements SubscribingHandlerInterface
         private readonly bool $debug
     ) {}
 
+    /**
+     * @return array<array{direction: int, format: string, type: string, method: string}>
+     */
     public static function getSubscribingMethods(): array
     {
         return [
@@ -44,6 +47,9 @@ class FlattenExceptionHandler implements SubscribingHandlerInterface
             $type);
     }
 
+    /**
+     * @return array{code: int, message: string}
+     */
     private function convertToArray(
         FlattenException $exception,
         Context $context
