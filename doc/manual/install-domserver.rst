@@ -63,9 +63,9 @@ taken than simply running ``./configure && make && make install``.
 
 After installing the required software as described above, run configure.
 In this example to install DOMjudge in the directory ``domjudge`` under
-your home directory::
+`/opt`::
 
-  ./configure --prefix=$HOME/domjudge
+  ./configure --prefix=/opt/domjudge
   make domserver
   sudo make install-domserver
 
