@@ -54,10 +54,9 @@ These instructions assume a release `tarball <https://www.domjudge.org/download>
 for instructions to build from git sources.
 
 After installing the software listed above, run configure. In this
-example to install DOMjudge in the directory ``domjudge`` under your
-home directory::
+example to install DOMjudge in the directory ``domjudge`` under `/opt`::
 
-  ./configure --prefix=$HOME/domjudge
+  ./configure --prefix=/opt/domjudge
   make judgehost
   sudo make install-judgehost
 
