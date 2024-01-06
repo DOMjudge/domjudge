@@ -90,7 +90,7 @@ bool equal_case_insensitive(std::string a, std::string b)
 /* Test two floating-point numbers for equality, accounting for +/-INF, NaN, and precision.
  * Float `jval` is considered the reference value for relative error.
  */
-void compare_float(std::string judge, std::string team, flt jval, flt tval, flt float_abs_tol, flt float_rel_tol, std::string extra_msg) {
+void compare_float(const std::string &judge, const std::string &team, flt jval, flt tval, flt float_abs_tol, flt float_rel_tol, const std::string &extra_msg) {
 	/* Finite values are compared with some tolerance */
 	if (std::isfinite(tval) && std::isfinite(jval)) {
 		flt absdiff = fabsl(tval-jval);

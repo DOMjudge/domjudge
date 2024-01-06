@@ -912,7 +912,7 @@ int main(int argc, char **argv) {
   }
 
   // The exit status should match the one of the first command.
-  auto main_process = state.main_process();
+  auto &main_process = state.main_process();
   int exit_code = main_process.exit_code();
   if (exit_code != -1) {
     return exit_code;
