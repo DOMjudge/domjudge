@@ -1,4 +1,5 @@
 webstandard_check_role:
+  image: domjudge/gitlabci:2.1
   only:
     - main
     - /^[0-9].[0-9]$/
@@ -29,6 +30,7 @@ webstandard_check_role:
       - w3csvgpublic.json
 
 webstandard_check_role_PR:
+  image: domjudge/gitlabci:2.1
   extends: [.short_job,.mariadb_job]
   parallel:
     matrix:

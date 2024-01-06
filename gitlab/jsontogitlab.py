@@ -16,7 +16,7 @@ def sec_end(job):
     print('section_end:{}:{}'.format(int(time.time()),cleanHash(job)+'\r\033[0K'))
 
 with open(sys.argv[1],'r') as f:
-    data = json.load(f, encoding='utf-8')
+    data = json.load(f)
     for message in data['messages']:
         mtyp = message['type'].encode('utf-8', 'ignore')
         murl = message['url'].encode('utf-8', 'ignore')
