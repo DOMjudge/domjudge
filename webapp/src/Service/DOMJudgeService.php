@@ -1521,6 +1521,9 @@ class DOMJudgeService
         );
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getVerdicts(bool $mergeExternal = false): array
     {
         $verdictsConfig = $this->getDomjudgeEtcDir() . '/verdicts.php';

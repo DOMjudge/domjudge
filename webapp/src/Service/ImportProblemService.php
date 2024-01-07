@@ -45,6 +45,8 @@ class ImportProblemService
 
     /**
      * Import a zipped problem.
+     *
+     * @param array<string, string[]> $messages
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -839,6 +841,9 @@ class ImportProblemService
         return $problem;
     }
 
+    /**
+     * @return array{problem_id: string, messages: array<string, string[]>}
+     */
     public function importProblemFromRequest(Request $request, ?int $contestId = null): array
     {
         $file = $request->files->get('zip');
@@ -900,6 +905,9 @@ class ImportProblemService
         ];
     }
 
+    /**
+     * @param array{danger: string[], info: string[]} $messages
+     */
     private function searchAndAddValidator(ZipArchive $zip, ?array &$messages, string $externalId, string $validationMode, ?Problem $problem): bool
     {
         $validatorFiles = [];

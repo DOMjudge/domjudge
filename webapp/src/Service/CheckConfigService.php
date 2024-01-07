@@ -39,6 +39,9 @@ class CheckConfigService
         $this->stopwatch       = new Stopwatch();
     }
 
+    /**
+     * @return array<string, array<string, array{caption: string, result: string, desc: string, escape?: bool}>>
+     */
     public function runAll(): array
     {
         $results = [];
@@ -104,6 +107,9 @@ class CheckConfigService
         return $results;
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkPhpVersion(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -116,6 +122,9 @@ class CheckConfigService
                 'desc' => sprintf('You have PHP version %s. The minimum required is %s', $my, $req)];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkPhpExtensions(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -136,6 +145,9 @@ class CheckConfigService
                 'desc' => $remark];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkPhpSettings(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -182,6 +194,9 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkMysqlSettings(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -241,6 +256,9 @@ class CheckConfigService
                 'desc' => $desc ?: 'MySQL settings are all ok'];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkAdminPass(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -259,6 +277,9 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkDefaultCompareRunExist(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -282,6 +303,9 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkScriptFilesizevsMemoryLimit(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -302,6 +326,9 @@ class CheckConfigService
             ];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkDebugDisabled(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -317,6 +344,9 @@ class CheckConfigService
                 'desc' => 'Debugging disabled.'];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkTmpdirWritable(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -348,6 +378,9 @@ class CheckConfigService
         return $randomString;
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkHashTime(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -380,6 +413,9 @@ class CheckConfigService
             'desc' => sprintf('Hashing cost is reasonable (Did %d hashes).', $counter)];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkContestActive(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -400,6 +436,9 @@ class CheckConfigService
                     ))];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkContestsValidate(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -439,6 +478,9 @@ class CheckConfigService
                     ($desc ?: 'No problems found.')];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkContestBanners(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -477,6 +519,9 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkProblemsValidate(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -522,7 +567,7 @@ class CheckConfigService
                 $moreproblemerrors[$probid] .= sprintf("problem-specific memory limit %s is larger than global script filesize limit (%s).\n", $memlimit, $script_filesize_limit);
             }
 
-            /** @var array $tcs_size */
+            /** @var Testcase[] $tcs_size */
             $tcs_size = $this->em->createQueryBuilder()
                 ->select('tc.testcaseid', 'tc.ranknumber', 'length(tcc.output) as output_size' )
                 ->from(Testcase::class, 'tc')
@@ -567,6 +612,9 @@ class CheckConfigService
                     ($desc ?: 'No problems with problems found.')];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkLanguagesValidate(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -618,6 +666,9 @@ class CheckConfigService
                     ($desc ?: 'No languages with problems found.')];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkTeamPhotos(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -644,6 +695,9 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkAffiliations(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -701,6 +755,9 @@ class CheckConfigService
             'desc' => $desc];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkTeamDuplicateNames(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -727,6 +784,9 @@ class CheckConfigService
             'desc' => $desc];
     }
 
+    /**
+     * @return array{caption: string, result: string, desc: string}
+     */
     public function checkSelfRegistration(): array
     {
         $this->stopwatch->start(__FUNCTION__);
@@ -790,6 +850,7 @@ class CheckConfigService
 
     /**
      * @param class-string $class
+     * @return array{caption: string, result: string, desc: string, escape: bool}
      */
     protected function checkExternalIdentifiers(string $class, string $externalIdField): array
     {

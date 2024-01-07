@@ -1129,7 +1129,7 @@ class JudgehostController extends AbstractFOSRestController
                     $this->em->flush();
 
                     $skipped = [];
-                    /** @var array[] $judgings */
+                    /** @var Judging[] $judgings */
                     $judgings = $this->em->createQueryBuilder()
                         ->from(Judging::class, 'j')
                         ->leftJoin('j.submission', 's')

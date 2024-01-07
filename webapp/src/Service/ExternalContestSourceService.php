@@ -50,6 +50,7 @@ class ExternalContestSourceService
     protected ?array $cachedApiInfoData = null;
     protected ?string $loadingError = null;
     protected bool $shouldStopReading = false;
+    /** @var array<string, string> $verdicts */
     protected array $verdicts = [];
     protected ?string $basePath = null;
 
@@ -1929,6 +1930,7 @@ class ExternalContestSourceService
     }
 
     /**
+     * @param string[] $supportedActions
      * @return bool True iff supported
      */
     protected function warningIfUnsupported(string $operation, ?string $eventId, string $entityType, ?string $entityId, array $supportedActions): bool

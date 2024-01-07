@@ -535,6 +535,8 @@ class StatisticsService
 
     /**
      * Get the number of submissions per team.
+     *
+     * @return int[]
      */
     protected function getTeamNumSubmissions(Contest $contest, string $filter): array
     {

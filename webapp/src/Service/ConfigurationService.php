@@ -20,6 +20,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 #[Autoconfigure(public: true)]
 class ConfigurationService
 {
+    /** @var array<string, array<string, string>> $dbConfigCache */
     protected ?array $dbConfigCache = null;
 
     public function __construct(
@@ -70,6 +71,7 @@ class ConfigurationService
     /**
      * Get all the configuration values, indexed by name.
      *
+     * @return array<string, bool|int|array<string, string>|string>
      * @throws InvalidArgumentException
      */
     public function all(bool $onlyIfPublic = false): array
@@ -100,6 +102,13 @@ class ConfigurationService
 
     /**
      * Get all configuration specifications.
+     *
+     * @return array<string, array{name: string, type: string, public: bool,
+     *               description: string, category: string, default_value: mixed|mixed[],
+     *               regex?: string, key_placeholder?: string, value_placeholder?: string,
+     *               error_message?: string, docdescription?: string, enum_class?: string,
+     *               options?: array<int|string, string>, key_options?: array<string, string>,
+     *               value_options?: array<string, string>}>
      */
     public function getConfigSpecification(): array
     {
@@ -145,6 +154,7 @@ EOF;
      *
      * @throws NonUniqueResultException
      * @param array<string, Configuration>|null $options
+     * @param array<string, string|array<int|string, string>> $dataToSet
      * @return array<string,string> Error per item
      */
     public function saveChanges(
@@ -302,6 +312,8 @@ EOF;
 
     /**
      * Get the configuration values from the database.
+     *
+     * @return array<string, array<string, string>>
      */
     protected function getDbValues(): array
     {
@@ -320,6 +332,7 @@ EOF;
      * Find list of options for configuration parameters that specify a known executable.
      *
      * @param string $type Any of "compare", "compile", "run"
+     * @return array<string, string>
      */
     private function findExecutableOptions(string $type): array
     {
@@ -336,6 +349,18 @@ EOF;
      *
      * This method is used to add predefined options that need to be loaded
      * from the database to certain items.
+     *
+     * @param array{name: string, type: string, default_value: bool, public: bool,
+     *              description: string, category: string, default_value: bool|int,
+     *              regex?: string, key_placeholder: string, value_placeholder: string,
+     *              error_message?: string, docdescription?: string, enum_class?: string,
+     *              options?: array<string>} $item
+     * @return array{name: string, type: string, default_value: bool, public: bool,
+     *               description: string, category: string, default_value: bool|int|bool,
+     *               regex?: string, key_placeholder: string, value_placeholder: string,
+     *               error_message?: string, docdescription?: string, enum_class?: string,
+     *               options?: array<int|string, string>, key_options?: array<string, string>,
+     *               value_options?: array<string, string>}
      */
     public function addOptions(array $item): array
     {

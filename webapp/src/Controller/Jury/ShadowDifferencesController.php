@@ -165,19 +165,19 @@ class ShadowDifferencesController extends BaseController
 
         $restrictions = ['with_external_id' => true];
         if ($viewTypes[$view] == 'unjudged local') {
-            $restrictions['judged'] = 0;
+            $restrictions['judged'] = false;
         }
         if ($viewTypes[$view] == 'unjudged external') {
-            $restrictions['externally_judged'] = 0;
+            $restrictions['externally_judged'] = false;
         }
         if ($viewTypes[$view] == 'diff') {
-            $restrictions['external_diff'] = 1;
+            $restrictions['external_diff'] = true;
         }
         if ($verificationViewTypes[$verificationView] == 'unverified') {
-            $restrictions['externally_verified'] = 0;
+            $restrictions['externally_verified'] = false;
         }
         if ($verificationViewTypes[$verificationView] == 'verified') {
-            $restrictions['externally_verified'] = 1;
+            $restrictions['externally_verified'] = true;
         }
         if ($external !== 'all') {
             $restrictions['external_result'] = $external;

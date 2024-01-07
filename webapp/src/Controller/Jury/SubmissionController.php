@@ -96,13 +96,13 @@ class SubmissionController extends BaseController
 
         $restrictions = [];
         if ($viewTypes[$view] == 'unverified') {
-            $restrictions['verified'] = 0;
+            $restrictions['verified'] = false;
         }
         if ($viewTypes[$view] == 'unjudged') {
-            $restrictions['judged'] = 0;
+            $restrictions['judged'] = false;
         }
         if ($viewTypes[$view] == 'judging') {
-            $restrictions['judging'] = 1;
+            $restrictions['judging'] = true;
         }
 
         $contests = $this->dj->getCurrentContests();
