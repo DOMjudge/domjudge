@@ -324,13 +324,13 @@ class RejudgingController extends BaseController
 
         $restrictions = ['rejudgingid' => $rejudgingId];
         if ($viewTypes[$view] == 'unverified') {
-            $restrictions['verified'] = 0;
+            $restrictions['verified'] = false;
         }
         if ($viewTypes[$view] == 'unjudged') {
-            $restrictions['judged'] = 0;
+            $restrictions['judged'] = false;
         }
         if ($viewTypes[$view] == 'diff') {
-            $restrictions['rejudgingdiff'] = 1;
+            $restrictions['rejudgingdiff'] = true;
         }
         if ($oldverdict !== 'all') {
             $restrictions['old_result'] = $oldverdict;
@@ -604,7 +604,7 @@ class RejudgingController extends BaseController
                     }
                 }
 
-                /** @var array[] $judgings */
+                /** @var Judging[] $judgings */
                 $judgings = $queryBuilder
                     ->getQuery()
                     ->getResult();
@@ -733,7 +733,7 @@ class RejudgingController extends BaseController
                     ->setParameter('correct', 'correct');
             }
 
-            /** @var array[] $judgings */
+            /** @var Judging[] $judgings */
             $judgings = $queryBuilder
                 ->getQuery()
                 ->getResult();

@@ -285,6 +285,7 @@ class TeamController extends BaseController
                 $restrictionTexts[] = sprintf('%s %s', $restrictionKeyText, $value);
             }
             $restrictionText = implode(', ', $restrictionTexts);
+            /** @var array{probid?: int, langid?: string, judgehost?: string, ...} $restrictions */
         }
         $restrictions['teamid'] = $teamId;
         [$submissions, $submissionCounts] =

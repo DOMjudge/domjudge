@@ -799,6 +799,8 @@ class ScoreboardService
 
     /**
      * Get values to display in the scoreboard filter.
+     *
+     * @return array{affiliations: string[], countries: string[], categories: string[]}
      */
     public function getFilterValues(Contest $contest, bool $jury): array
     {
@@ -958,7 +960,7 @@ class ScoreboardService
                 $queryBuilder
                     ->join('t.submissions', 's', Join::WITH, 's.contest = :cid')
                     ->setParameter('cid', $contest->getCid());
-                }
+            }
         }
 
         if ($filter) {

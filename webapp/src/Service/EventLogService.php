@@ -825,6 +825,9 @@ class EventLogService
 
     /**
      * Convert the given internal ID's into external ID's usable by the API
+     *
+     * @param array<string|int> $ids
+     * @return array<string>
      */
     protected function getExternalIds(string $type, array $ids): array
     {

@@ -38,9 +38,9 @@ class RejudgingService
      * Create a new rejudging.
      *
      * @param string          $reason           Reason for this rejudging
-     * @param array           $judgings         List of judgings to rejudging
+     * @param Judging[]       $judgings         List of judgings to rejudging
      * @param bool            $autoApply        Whether the judgings should be automatically applied.
-     * @param array          &$skipped          Returns list of judgings not included.
+     * @param Judging[]      &$skipped          Returns list of judgings not included.
      * @param callable|null   $progressReporter If set, report progress using this callback. Will get two values:
      *                                          - the progress as an integer
      *                                          - the log to display
@@ -83,7 +83,6 @@ class RejudgingService
         $first = true;
         foreach ($judgings as $judging) {
             $index++;
-            /** @var Judging $judging */
             if ($judging->getSubmission()->getRejudging() !== null) {
                 // The submission is already part of another rejudging, record and skip it.
                 $skipped[] = $judging;
@@ -189,7 +188,7 @@ class RejudgingService
         }
 
         // Get all submissions that we should consider.
-        /** @var array $submissions */
+        /** @var Submission[] $submissions */
         $submissions = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->leftJoin('s.judgings', 'j', 'WITH', 'j.rejudging = :rejudging')
@@ -373,6 +372,7 @@ class RejudgingService
     }
 
     /**
+     * @return array{todo: int, done: int}
      * @throws NoResultException
      * @throws NonUniqueResultException
      */

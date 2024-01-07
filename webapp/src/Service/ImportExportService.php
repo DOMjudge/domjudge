@@ -104,6 +104,9 @@ class ImportExportService
      *
      * To verify that everything works as expected the $errorMessage needs to be checked
      * for parsing errors.
+     *
+     * @param array<string> $fields
+     * @param array<string, string|DateTime|DateTimeImmutable> $data
      */
     protected function convertImportedTime(array $fields, array $data, ?string &$errorMessage = null): ?DateTimeImmutable
     {

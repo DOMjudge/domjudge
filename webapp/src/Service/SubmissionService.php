@@ -61,6 +61,9 @@ class SubmissionService
      *             If false, only return unverified or unjudged submissions.
      * - judged: If true, only return judged submissions.
      *           If false, only return unjudged submissions.
+     * - judging: If true, only return submissions currently being judged
+     *            If false, only return submssions which are already judged or still
+     *                      need to be judged
      * - rejudgingdiff: If true, only return judgings that differ from their
      *                  original result in final verdict. Vice versa if false.
      * - teamid: ID of a team to filter on
@@ -70,9 +73,31 @@ class SubmissionService
      * - judgehost: hostname of a judgehost to filter on
      * - old_result: result of old judging to filter on
      * - result: result of current judging to filter on
+     * - userid: filter on specific user
+     * - visible: If true, only return submissions from visible teams
+     * When shadowing another system these keys can also be used:
+     * - external_diff: If true, only return results with a difference with an
+     *                  external system.
+     *                  If false, only return results without a difference with an
+     *                  external system.
+     * - external_result: result in the external system
+     * - externally_judged: If true, only return externally judged submissions.
+     *                      If false, only return externally unjudged submissions.
+     * - externally_verified: If true, only return verified submissions.
+     *                        If false, only return unverified or unjudged submissions.
+     * - with_external_id: If true, only return submissions with an external ID.
      *
-     * @return array An array with two elements: the first one is the list of
-     *               submissions and the second one is an array with counts.
+     * @param Contest[] $contests
+     * @param array{rejudgingid?: int, verified?: bool, judged?: bool, judging?: bool,
+     *              rejudgingdiff?: bool, teamid?: int, categoryid?: int,
+     *              probid?: string|int|null, langid?: string, judgehost?: string, old_result?: string,
+     *              result?: string, userid?: int, visible?: bool, external_diff?: bool,
+     *              external_result?: string, externally_judged?: bool,
+     *              externally_verified?: bool, with_external_id?: true} $restrictions
+     *
+     * @return array{Submission[], array<string, int>} array An array with
+     *           two elements: the first one is the list of submissions
+     *           and the second one is an array with counts.
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
@@ -305,6 +330,7 @@ class SubmissionService
      * NULL means that a final result cannot be determined yet; this may
      * only occur when not all testcases have been run yet.
      * @param array<string|null> $runresults
+     * @param array<string, int> $resultsPrio
      */
     public static function getFinalResult(array $runresults, array $resultsPrio): ?string
     {
@@ -675,6 +701,8 @@ class SubmissionService
 
     /**
      * Checks given source file for expected results string
+     *
+     * @param array<string, string> $resultsRemap
      * @return string[]|false|null Array of expected results if found, false when multiple matches are found, or null otherwise.
      */
     public static function getExpectedResults(string $source, array $resultsRemap): array|false|null
@@ -734,6 +762,8 @@ class SubmissionService
     /**
      * Compute the filename of a given submission. $fileData must be an array
      * that contains the data from submission and submission_file.
+     *
+     * @param array<string, string> $fileData
      */
     public function getSourceFilename(array $fileData): string
     {

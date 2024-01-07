@@ -136,11 +136,6 @@ parameters:
 			path: webapp/src/Controller/API/JudgehostController.php
 
 		-
-			message: "#^PHPDoc tag @var for variable \\$judgings has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgehostController.php
-
-		-
 			message: "#^Method App\\\\Controller\\\\API\\\\JudgementTypeController\\:\\:getJudgementTypes\\(\\) has parameter \\$filteredOn with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/JudgementTypeController.php
@@ -286,11 +281,6 @@ parameters:
 			path: webapp/src/Controller/Jury/RejudgingController.php
 
 		-
-			message: "#^PHPDoc tag @var for variable \\$judgings has no value type specified in iterable type array\\.$#"
-			count: 2
-			path: webapp/src/Controller/Jury/RejudgingController.php
-
-		-
 			message: "#^Method App\\\\Controller\\\\Jury\\\\SubmissionController\\:\\:determineFileChanged\\(\\) has parameter \\$files with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/Jury/SubmissionController.php
@@ -406,159 +396,9 @@ parameters:
 			path: webapp/src/Service/BalloonService.php
 
 		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkAdminPass\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkAffiliations\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
 			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkAllExternalIdentifiers\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkContestActive\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkContestBanners\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkContestsValidate\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkDebugDisabled\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkDefaultCompareRunExist\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkExternalIdentifiers\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkHashTime\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkLanguagesValidate\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkMysqlSettings\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkPhpExtensions\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkPhpSettings\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkPhpVersion\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkProblemsValidate\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkScriptFilesizevsMemoryLimit\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkSelfRegistration\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkTeamDuplicateNames\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkTeamPhotos\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:checkTmpdirWritable\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CheckConfigService\\:\\:runAll\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^PHPDoc tag @var for variable \\$tcs_size has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/CheckConfigService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:addOptions\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ConfigurationService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:addOptions\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ConfigurationService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:all\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ConfigurationService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:findExecutableOptions\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ConfigurationService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:getConfigSpecification\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ConfigurationService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:getDbValues\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ConfigurationService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ConfigurationService\\:\\:saveChanges\\(\\) has parameter \\$dataToSet with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ConfigurationService.php
-
-		-
-			message: "#^Property App\\\\Service\\\\ConfigurationService\\:\\:\\$dbConfigCache type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ConfigurationService.php
 
 		-
 			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:apiRelativeUrl\\(\\) has parameter \\$params with no value type specified in iterable type array\\.$#"
@@ -596,11 +436,6 @@ parameters:
 			path: webapp/src/Service/DOMJudgeService.php
 
 		-
-			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getVerdicts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/DOMJudgeService.php
-
-		-
 			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:internalApiRequest\\(\\) has parameter \\$queryOrPostData with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/DOMJudgeService.php
@@ -619,16 +454,6 @@ parameters:
 			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:setInternalError\\(\\) has parameter \\$disabled with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/DOMJudgeService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\EventLogService\\:\\:getExternalIds\\(\\) has parameter \\$ids with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/EventLogService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\EventLogService\\:\\:getExternalIds\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/EventLogService.php
 
 		-
 			message: "#^Method App\\\\Service\\\\EventLogService\\:\\:hasAllDependentObjectEvents\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
@@ -761,11 +586,6 @@ parameters:
 			path: webapp/src/Service/ExternalContestSourceService.php
 
 		-
-			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:warningIfUnsupported\\(\\) has parameter \\$supportedActions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ExternalContestSourceService.php
-
-		-
 			message: "#^Property App\\\\Service\\\\ExternalContestSourceService\\:\\:\\$cachedApiInfoData type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/ExternalContestSourceService.php
@@ -779,21 +599,6 @@ parameters:
 			message: "#^Property App\\\\Service\\\\ExternalContestSourceService\\:\\:\\$pendingEvents type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/ExternalContestSourceService.php
-
-		-
-			message: "#^Property App\\\\Service\\\\ExternalContestSourceService\\:\\:\\$verdicts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ExternalContestSourceService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:convertImportedTime\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ImportExportService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:convertImportedTime\\(\\) has parameter \\$fields with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ImportExportService.php
 
 		-
 			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:getContestYamlData\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -886,46 +691,6 @@ parameters:
 			path: webapp/src/Service/ImportExportService.php
 
 		-
-			message: "#^Method App\\\\Service\\\\ImportProblemService\\:\\:importProblemFromRequest\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ImportProblemService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ImportProblemService\\:\\:importZippedProblem\\(\\) has parameter \\$messages with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ImportProblemService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ImportProblemService\\:\\:searchAndAddValidator\\(\\) has parameter \\$messages with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ImportProblemService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\RejudgingService\\:\\:calculateTodo\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/RejudgingService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\RejudgingService\\:\\:createRejudging\\(\\) has parameter \\$judgings with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/RejudgingService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\RejudgingService\\:\\:createRejudging\\(\\) has parameter \\$skipped with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/RejudgingService.php
-
-		-
-			message: "#^PHPDoc tag @var for variable \\$submissions has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/RejudgingService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ScoreboardService\\:\\:getFilterValues\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ScoreboardService.php
-
-		-
 			message: "#^Method App\\\\Service\\\\ScoreboardService\\:\\:getGroupedAffiliations\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/ScoreboardService.php
@@ -951,11 +716,6 @@ parameters:
 			path: webapp/src/Service/StatisticsService.php
 
 		-
-			message: "#^Method App\\\\Service\\\\StatisticsService\\:\\:getTeamNumSubmissions\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/StatisticsService.php
-
-		-
 			message: "#^Method App\\\\Service\\\\StatisticsService\\:\\:getTeamStats\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/StatisticsService.php
@@ -964,33 +724,3 @@ parameters:
 			message: "#^Method App\\\\Service\\\\StatisticsService\\:\\:setOrIncrement\\(\\) has parameter \\$array with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/StatisticsService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getExpectedResults\\(\\) has parameter \\$resultsRemap with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/SubmissionService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getFinalResult\\(\\) has parameter \\$resultsPrio with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/SubmissionService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getSourceFilename\\(\\) has parameter \\$fileData with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/SubmissionService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getSubmissionList\\(\\) has parameter \\$contests with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/SubmissionService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getSubmissionList\\(\\) has parameter \\$restrictions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/SubmissionService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getSubmissionList\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/SubmissionService.php
