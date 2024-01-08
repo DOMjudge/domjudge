@@ -4,7 +4,7 @@
  * have compiler pragmas to force linking, but Clang does, so the
  * workaround below may make this work.
  *
- * @EXPECTED_RESULTS@: COMPILER-ERROR
+ * @EXPECTED_RESULTS@: COMPILER-ERROR,WRONG-ANSWER
  */
 
 #include <stdio.h>
