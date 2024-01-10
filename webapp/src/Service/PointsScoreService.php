@@ -41,14 +41,30 @@ class PointsScoreService
     /**
      * @param JudgingRun[] $judgingRuns
      */
-    public static function getScoredPoints(Judging         $judging,
-                                           array           $judgingRuns,
-                                           ContestProblem  $contestProblem): float
+    public function getScoredPoints(Judging $judging,
+                                    array   $judgingRuns): float
     {
+        $contestProblem = $judging->getSubmission()->getContestProblem();
+
         if ($judging->getResult() === 'correct') {
             return $contestProblem->getPoints();
         }
 
+        $lazyEval = $this->config->get('lazy_eval_results');
+        $problemLazy = $judging->getSubmission()->getContestProblem()->getLazyEvalResults();
+        if (isset($problemLazy)) {
+            $lazyEval = $problemLazy;
+        }
+
+        $partialScoring = $this->config->get('lazy_eval_results');
+        $problemPartialScoring = $judging->getSubmission()->getContestProblem()->getLazyEvalResults();
+        if (isset($problemPartialScoring)) {
+            $partialScoring = $problemPartialScoring;
+        }
+
+        if (!$partialScoring || $lazyEval === DOMJudgeService::EVAL_FULL) {
+            return 0;
+        }
 
         $groupRuns = [];
 

@@ -373,6 +373,7 @@
                         <th>Allow<br>judge</th>
                         <th>Color</th>
                         <th>Lazy eval</th>
+                        <th>Partial points scoring</th>
                         <th></th>
                         <th></th>
                         <th></th>
@@ -404,6 +405,11 @@
                             <td>
                                 <a href="{{ link }}">
                                     {{ problem.lazyEvalResults | printLazyMode }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ link }}">
+                                    {{ problem.partialPointsScoring | printPartialPointsScoringMode }}
                                 </a>
                             </td>
                             <td>

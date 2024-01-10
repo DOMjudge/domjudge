@@ -67,6 +67,7 @@
         <th>{{ form.problems.vars.prototype.allowJudge.vars.label }}</th>
         <th>{{ form.problems.vars.prototype.color.vars.label }}</th>
         <th>{{ form.problems.vars.prototype.lazyEvalResults.vars.label }}</th>
+        <th>{{ form.problems.vars.prototype.partialPointsScoring.vars.label }}</th>
         <th></th>
     </tr>
     </thead>
@@ -102,6 +103,10 @@
                 {{ form_widget(problem.lazyEvalResults) }}
             </td>
             <td>
+                {{ form_errors(problem.partialPointsScoring) }}
+                {{ form_widget(problem.partialPointsScoring) }}
+            </td>
+            <td>
                 <button type="button" data-delete class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>
             </td>
         </tr>
@@ -109,7 +114,7 @@
     </tbody>
     <tfoot>
     <tr>
-        <td colspan="7"></td>
+        <td colspan="8"></td>
         <td>
             <button type="button" data-add class="btn btn-success"><i class="fas fa-plus"></i></button>
         </td>

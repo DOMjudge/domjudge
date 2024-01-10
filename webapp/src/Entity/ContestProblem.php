@@ -78,6 +78,17 @@ class ContestProblem extends BaseApiEntity
     #[Serializer\Exclude]
     private int $lazyEvalResults = 0;
 
+    #[ORM\Column(
+        type: 'boolean',
+        name: 'partial_points_scoring',
+        options: [
+            'comment' => 'Whether to score this problem partially; if set this overrides the global configuration setting',
+            'unsigned' => true
+        ],
+        nullable: true
+    )]
+    private ?bool $partialPointsScoring = true;
+
     #[ORM\Id]
     #[ORM\ManyToOne(inversedBy: 'problems')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
@@ -213,6 +224,16 @@ class ContestProblem extends BaseApiEntity
             return true;
         }
         return false;
+    }
+
+    public function setPartialPointsScoring(?bool $partialPointsScoring): void
+    {
+        $this->partialPointsScoring = $partialPointsScoring;
+    }
+
+    public function getPartialPointsScoring(): ?bool
+    {
+        return $this->partialPointsScoring;
     }
 
     public function setContest(?Contest $contest = null): ContestProblem

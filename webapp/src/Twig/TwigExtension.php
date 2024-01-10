@@ -114,6 +114,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('entityIdBadge', $this->entityIdBadge(...), ['is_safe' => ['html']]),
             new TwigFilter('medalType', $this->awards->medalType(...)),
             new TwigFilter('numTableActions', $this->numTableActions(...)),
+            new TwigFilter('printPartialPointsScoringMode', $this->printPartialPointsScoringMode(...)),
         ];
     }
 
@@ -276,6 +277,16 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             default:
                 return "Unknown mode $val";
         }
+    }
+
+    public static function printPartialPointsScoringMode(?bool $val): string
+    {
+        if ($val === null){
+            return "-";
+        } else if ($val) {
+            return "Yes";
+        }
+        return "No";
     }
 
     public static function printYesNo(bool $val): string

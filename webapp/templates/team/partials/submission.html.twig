@@ -37,6 +37,16 @@
             {% endif %}
         </div>
 
+        {% if judging.pointsScored is not null %}
+            <div>
+                <div class="p-2">
+                    You scored {{ judging.pointsScored }} out of {{ judging.submission.contestProblem.points }} points.
+                    <progress class="progress" max="{{ judging.submission.contestProblem.points }}"
+                              value="{{ judging.pointsScored }}"></progress>
+                </div>
+            </div>
+        {% endif %}
+
         {% if judging.result != 'compiler-error' %}
             <div class="d-flex flex-row">
                 <div class="p-2">

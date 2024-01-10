@@ -64,6 +64,14 @@ class ContestProblemType extends AbstractType
                 'On demand' => DJS::EVAL_DEMAND,
             ],
         ]);
+        $builder->add('partialPointsScoring', ChoiceType::class, [
+            'label' => 'Partial points scoring',
+            'choices' => [
+                'Default' => null,
+                'Yes' => true,
+                'No' => false,
+            ],
+        ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -59,8 +59,12 @@ final class Version20231108142925 extends AbstractMigration
         );
 
         $this->addSql(<<<SQL
-        ALTER TABLE `judging` ADD COLUMN `points_scored` float unsigned DEFAULT NULL COMMENT 'Points scored in this judging' AFTER `result`
         ALTER TABLE `judging` ADD COLUMN `points_scored` float unsigned NOT NULL DEFAULT 0 COMMENT 'Points scored in this judging' AFTER `result`
+        SQL
+        );
+
+        $this->addSql(<<<SQL
+        ALTER TABLE `contestproblem` ADD COLUMN `partial_points_scoring` tinyint(1) unsigned DEFAULT NULL COMMENT 'Whether to score this problem partially; if set this overrides the global configuration setting' AFTER `lazy_eval_results`
         SQL
         );
     }
@@ -84,6 +88,11 @@ final class Version20231108142925 extends AbstractMigration
 
         $this->addSql(<<<SQL
         ALTER TABLE `judging` DROP COLUMN `points_scored`
+        SQL
+        );
+
+        $this->addSql(<<<SQL
+        ALTER TABLE `contestproblem` DROP COLUMN `partial_points_scoring`
         SQL
         );
     }
