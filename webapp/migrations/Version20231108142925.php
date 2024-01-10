@@ -60,6 +60,7 @@ final class Version20231108142925 extends AbstractMigration
 
         $this->addSql(<<<SQL
         ALTER TABLE `judging` ADD COLUMN `points_scored` float unsigned DEFAULT NULL COMMENT 'Points scored in this judging' AFTER `result`
+        ALTER TABLE `judging` ADD COLUMN `points_scored` float unsigned NOT NULL DEFAULT 0 COMMENT 'Points scored in this judging' AFTER `result`
         SQL
         );
     }

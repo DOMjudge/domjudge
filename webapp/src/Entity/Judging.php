@@ -69,9 +69,10 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         name: 'points_scored',
         options: [
             'comment' => 'Points scored in this judging',
-            'default' => null,
+            'default' => 0,
             'unsigned' => true
-        ]
+        ],
+        nullable: false
     )]
     #[Serializer\Exclude]
     private ?float $points_scored;
