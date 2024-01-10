@@ -14,6 +14,7 @@
             {% if contest.getRuntimeAsScoreTiebreaker() %}
                 <th scope="col">runtime</th>
             {% endif %}
+            <th scope="col">points</th>
             {% if allowDownload %}
                 <th scope="col"></th>
             {% endif %}
@@ -52,7 +53,7 @@
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>
                         {%- if submission.submittime > submission.contest.endtime %}
-                            {{ 'too-late' | printResult }} 
+                            {{ 'too-late' | printResult }}
                         {%- endif %}
                         {%- if submission.submittime <= submission.contest.endtime or showTooLateResult %}
                             {%- if submission.submittime > submission.contest.endtime %}
@@ -79,6 +80,11 @@
                     </a>
                 </td>
         {% endif %}
+                <td>
+                    <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>
+                        {{ submission.judgings.first.pointsScored }}/{{ submission.contestProblem.points }}
+                    </a>
+                </td>
         {% if allowDownload %}
                 <td>
                     <a title="Download submission ZIP" aria-label="download submission zip" class="btn btn-light" href="{{ path('team_submission_download', {'submitId': submission.submitid}) }}">
