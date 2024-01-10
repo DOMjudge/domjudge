@@ -37,16 +37,6 @@
             {% endif %}
         </div>
 
-        {% if judging.pointsScored is not null %}
-            <div>
-                <div class="p-2">
-                    You scored {{ judging.pointsScored }} out of {{ judging.submission.contestProblem.points }} points.
-                    <progress class="progress" max="{{ judging.submission.contestProblem.points }}"
-                              value="{{ judging.pointsScored }}"></progress>
-                </div>
-            </div>
-        {% endif %}
-
         {% if judging.result != 'compiler-error' %}
             <div class="d-flex flex-row">
                 <div class="p-2">
@@ -57,6 +47,20 @@
                         Max. Runtime: <b>{{ "%0.3f s" | format(judging.getMaxRuntime()) }}</b>
                     </div>
                 {% endif %}
+            </div>
+        {% endif %}
+
+        {% if judging.pointsScored is not null %}
+            <div>
+                <div class="p-2">
+                    You scored {{ judging.pointsScored }} out of {{ judging.submission.contestProblem.points }} points.
+                    <div class="progress" style="width: 300px">
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: {{ judging.pointsScored * 100 / judging.submission.contestProblem.points }}%"
+                             aria-valuenow="{{ judging.pointsScored }}" aria-valuemin="0"
+                             aria-valuemax="{{ judging.submission.contestProblem.points }}"></div>
+                    </div>
+                </div>
             </div>
         {% endif %}
 
