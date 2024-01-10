@@ -56,13 +56,13 @@ class PointsScoreService
             $lazyEval = $problemLazy;
         }
 
-        $partialScoring = $this->config->get('lazy_eval_results');
-        $problemPartialScoring = $judging->getSubmission()->getContestProblem()->getLazyEvalResults();
+        $partialScoring = $this->config->get('partial_points_scoring');
+        $problemPartialScoring = $judging->getSubmission()->getContestProblem()->getPartialPointsScoring();
         if (isset($problemPartialScoring)) {
             $partialScoring = $problemPartialScoring;
         }
 
-        if (!$partialScoring || $lazyEval === DOMJudgeService::EVAL_FULL) {
+        if (!$partialScoring || $lazyEval !== DOMJudgeService::EVAL_FULL) {
             return 0;
         }
 
