@@ -68,6 +68,7 @@
             {% else %}
                 <th scope="col">{%- if rejudging is defined %}new {% endif %}result</th>
             {% endif %}
+            <th scope="col">points</th>
             {% if showExternalResult and not showExternalTestcases %}
                 <th scope="col">external result</th>
             {% endif %}
@@ -155,6 +156,11 @@
                             ⇝
                         {% endif %}
                         {{ submission | printValidJurySubmissionResult }}
+                    </a>
+                </td>
+                <td class="{{ tdExtraClass }}">
+                    <a href="{{ link }}">
+                        {{ submission.judgings.first.pointsScored }}/{{ submission.contestProblem.points }}
                     </a>
                 </td>
                 {% if showExternalResult and not showExternalTestcases %}
