@@ -249,7 +249,7 @@ class GeneralInfoController extends AbstractFOSRestController
         content: new OA\JsonContent(type: 'object')
     )]
     #[OA\Response(
-        response: 400,
+        response: 422,
         description: 'An error occurred while saving the configuration',
         content: new OA\JsonContent(
             properties: [
@@ -271,7 +271,7 @@ class GeneralInfoController extends AbstractFOSRestController
     {
         $errors = $this->config->saveChanges($request->request->all(), $this->eventLogService, $this->dj);
         if (!empty($errors)) {
-            return new JsonResponse(['errors' => $errors], 400);
+            return new JsonResponse(['errors' => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         return $this->config->all(false);
     }
