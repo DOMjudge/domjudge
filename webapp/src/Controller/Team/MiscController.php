@@ -184,7 +184,7 @@ class MiscController extends BaseController
                 $teamId = (string)$team->getTeamid();
             }
             $ret  = $this->dj->printFile($realfile, $originalfilename, $langid,
-                $username, $team->getEffectiveName(), $teamId, $team->getRoom());
+                $username, $team->getEffectiveName(), $teamId, $team->getLocation());
 
             return $this->render('team/print_result.html.twig', [
                 'success' => $ret[0],

@@ -18,7 +18,7 @@ class TeamControllerTest extends JuryControllerTestCase
     protected static string  $className                = Team::class;
     protected static array   $DOM_elements             = ['h1' => ['Teams']];
     protected static string  $addForm                  = 'team[';
-    protected static array   $addEntitiesShown         = ['icpcid', 'label', 'displayName', 'room'];
+    protected static array   $addEntitiesShown         = ['icpcid', 'label', 'displayName', 'location'];
     protected static array   $overviewSingleNotShown   = ['addUserForTeam'];
     protected static array   $overviewGeneralNotShown  = ['icpcid'];
     protected static array   $addEntitiesCount         = ['contests'];
@@ -27,7 +27,7 @@ class TeamControllerTest extends JuryControllerTestCase
                                                            'category' => '3',
                                                            'publicdescription' => 'Some members',
                                                            'penalty' => '0',
-                                                           'room' => 'The first room',
+                                                           'location' => 'The first room',
                                                            'internalcomments' => 'This is a team without a user',
                                                            'contests' => [],
                                                            'enabled' => '1',
@@ -38,7 +38,7 @@ class TeamControllerTest extends JuryControllerTestCase
                                                            'category' => '1',
                                                            'publicdescription' => 'More members',
                                                            'penalty' => '20',
-                                                           'room' => 'Another room',
+                                                           'location' => 'Another room',
                                                            'internalcomments' => 'This is a team with a user',
                                                            'enabled' => '1',
                                                            'addUserForTeam' => Team::CREATE_NEW_USER,
@@ -57,9 +57,9 @@ class TeamControllerTest extends JuryControllerTestCase
                                                           ['name' => 'no_members',
                                                            'publicdescription' => '',
                                                            'displayName' => 'Team without members'],
-                                                          ['name' => 'no_room',
-                                                           'room' => '',
-                                                           'displayName' => 'Team without a room'],
+                                                          ['name' => 'no_location',
+                                                           'location' => '',
+                                                           'displayName' => 'Team without a location'],
                                                           ['name' => 'no_comments',
                                                            'internalcomments' => '',
                                                            'displayName' => 'Team without comments'],

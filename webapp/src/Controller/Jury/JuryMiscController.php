@@ -83,15 +83,15 @@ class JuryMiscController extends BaseController
             }, $affiliations);
         } elseif ($datatype === 'locations') {
             $locations = $qb->from(Team::class, 'a')
-                ->select('DISTINCT a.room')
-                ->where($qb->expr()->like('a.room', '?1'))
-                ->orderBy('a.room', 'ASC')
+                ->select('DISTINCT a.location')
+                ->where($qb->expr()->like('a.location', '?1'))
+                ->orderBy('a.location', 'ASC')
                 ->getQuery()->setParameter(1, '%' . $q . '%')
                 ->getResult();
 
             $results = array_map(fn(array $location) => [
-                'id' => $location['room'],
-                'text' => $location['room']
+                'id' => $location['location'],
+                'text' => $location['location']
             ], $locations);
         } elseif (!$this->isGranted('ROLE_JURY')) {
             throw new AccessDeniedHttpException('Permission denied');

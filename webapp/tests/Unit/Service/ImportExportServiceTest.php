@@ -675,7 +675,7 @@ EOF;
             self::assertEquals($data['icpcid'], $team->getIcpcId());
             self::assertEquals($data['label'], $team->getLabel());
             self::assertEquals($data['name'], $team->getName());
-            self::assertNull($team->getRoom());
+            self::assertNull($team->getLocation());
             self::assertEquals($data['category']['externalid'], $team->getCategory()->getExternalid());
             self::assertEquals($data['affiliation']['externalid'], $team->getAffiliation()->getExternalid());
             self::assertEquals($data['affiliation']['shortname'], $team->getAffiliation()->getShortname());
@@ -697,7 +697,7 @@ EOF;
     "group_ids": ["24"],
     "name": "¡i¡i¡",
     "organization_id": "INST-42",
-    "room": "AUD 10"
+    "location": "AUD 10"
 }, {
     "id": "12",
     "icpc_id": "447837",
@@ -720,7 +720,7 @@ EOF;
                 'icpcid' => '447047',
                 'label' => 'team1',
                 'name' => '¡i¡i¡',
-                'room' => 'AUD 10',
+                'location' => 'AUD 10',
                 'category' => [
                     'externalid' => '24',
                 ],
@@ -732,7 +732,7 @@ EOF;
                 'icpcid' => '447837',
                 'label' => null,
                 'name' => 'Pleading not FAUlty',
-                'room' => null,
+                'location' => null,
                 'category' => [
                     'externalid' => '25',
                 ],
@@ -744,7 +744,7 @@ EOF;
                 'icpcid' => '123456',
                 'label' => '0',
                 'name' => 'Team with label 0',
-                'room' => null,
+                'location' => null,
                 'category' => [
                     'externalid' => '26',
                 ],
@@ -774,7 +774,7 @@ EOF;
             self::assertNotNull($team, "Team $data[name] does not exist");
             self::assertEquals($data['icpcid'], $team->getIcpcId());
             self::assertEquals($data['label'], $team->getLabel());
-            self::assertEquals($data['room'], $team->getRoom());
+            self::assertEquals($data['location'], $team->getLocation());
             self::assertEquals($data['name'], $team->getName());
             self::assertEquals($data['category']['externalid'], $team->getCategory()->getExternalid());
             self::assertEquals($data['affiliation']['externalid'], $team->getAffiliation()->getExternalid());

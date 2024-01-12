@@ -93,7 +93,7 @@ class TeamController extends BaseController
             'affiliation' => ['title' => 'affiliation', 'sort' => true,],
             'num_contests' => ['title' => '# contests', 'sort' => true,],
             'ip_address' => ['title' => 'last IP', 'sort' => true,],
-            'room' => ['title' => 'room', 'sort' => true,],
+            'location' => ['title' => 'location', 'sort' => true,],
             'status' => ['title' => '', 'sort' => false,],
             'stats' => ['title' => 'stats', 'sort' => true,],
         ];

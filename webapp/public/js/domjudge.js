@@ -658,7 +658,7 @@ function updateMenuBalloons(data)
         $("#num-alerts-balloons").html(num);
         $("#num-alerts-balloons").show();
         for (var i=0; i<num; i++) {
-            var text = (data[i].room !== null) ? data[i].room+': ' : '';
+            var text = (data[i].location !== null) ? data[i].location+': ' : '';
             text += data[i].pname + ' ' + data[i].name;
             sendNotification('New balloon:',
                  {'tag': 'ball_' + data[i].baloonid,

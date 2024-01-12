@@ -410,7 +410,7 @@ class DOMJudgeService
 
         if ($this->checkrole('balloon')) {
             $balloonsQuery = $this->em->createQueryBuilder()
-            ->select('b.balloonid', 't.name', 't.room', 'p.name AS pname')
+            ->select('b.balloonid', 't.name', 't.location', 'p.name AS pname')
             ->from(Balloon::class, 'b')
             ->leftJoin('b.submission', 's')
             ->leftJoin('s.problem', 'p')
@@ -714,7 +714,7 @@ class DOMJudgeService
      * @param string      $username Username of the print job submitter
      * @param string|null $teamname Teamname of the team this user belongs to, if any
      * @param string|null $teamid   Teamid of the team this user belongs to, if any
-     * @param string|null $location Room/place of the team, if any.
+     * @param string|null $location Location of the team, if any.
      */
     public function printFile(
         string $filename,
