@@ -115,7 +115,7 @@ class ICPCCmsService
                         ->setEnabled($enabled)
                         ->setInternalComments('Status: ' . $teamData['status'])
                         ->setIcpcid($teamData['teamId'])
-                        ->setRoom($siteName);
+                        ->setLocation($siteName);
                     $this->em->persist($team);
                     $this->em->flush();
                     $username = sprintf("team%04d", $team->getTeamid());
@@ -137,7 +137,7 @@ class ICPCCmsService
                         ->setEnabled($enabled)
                         ->setInternalComments('Status: ' . $teamData['status'])
                         ->setIcpcid($teamData['teamId'])
-                        ->setRoom($siteName);
+                        ->setLocation($siteName);
 
                     $user = $this->em->getRepository(User::class)->findOneBy(['username' => $username]);
                     $user?->setName($teamData['teamName']);

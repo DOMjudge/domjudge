@@ -87,8 +87,9 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     private ?string $publicDescription = null;
 
     #[ORM\Column(nullable: true, options: ['comment' => 'Physical location of team'])]
-    #[Serializer\Exclude]
-    private ?string $room = null;
+    #[OA\Property(nullable: true)]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    private ?string $location = null;
 
     #[ORM\Column(
         name: 'internalcomments',
@@ -285,15 +286,15 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this->publicDescription;
     }
 
-    public function setRoom(?string $room): Team
+    public function setLocation(?string $location): Team
     {
-        $this->room = $room;
+        $this->location = $location;
         return $this;
     }
 
-    public function getRoom(): ?string
+    public function getLocation(): ?string
     {
-        return $this->room;
+        return $this->location;
     }
 
     public function setInternalComments(?string $comments): Team

@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\AddLocationToTeamFixture;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -21,8 +22,11 @@ class TeamControllerTest extends BaseTestCase
             'display_name'    => null,
             'members'         => null,
             'photo'           => null,
+            'location'        => 'Utrecht',
         ],
     ];
+
+    protected static array $fixtures = [AddLocationToTeamFixture::class];
 
     protected array $expectedAbsent = ['4242', 'nonexistent'];
 

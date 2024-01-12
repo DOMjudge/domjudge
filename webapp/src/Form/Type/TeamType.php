@@ -82,7 +82,7 @@ class TeamType extends AbstractExternalIdEntityType
         $builder->add('penalty', IntegerType::class, [
             'label' => 'Penalty time',
         ]);
-        $builder->add('room', TextType::class, [
+        $builder->add('location', TextType::class, [
             'label'    => 'Location',
             'required' => false,
         ]);

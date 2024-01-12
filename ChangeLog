@@ -27,6 +27,7 @@ Version 8.3.0DEV
  - Fix medal awards when skipping categories.
  - Add direct button to public page for registering when enabled.
  - Scale batch size of judge tasks dynamically.
+ - Rename room to location for teams.
 
 Version 8.2.0 - 6 March 2023
 ----------------------------
