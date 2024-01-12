@@ -2,6 +2,7 @@
 
 namespace App\Serializer;
 
+use App\DataTransferObject\FileWithName;
 use App\Entity\ContestProblem;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -26,36 +27,20 @@ class ContestProblemVisitor implements EventSubscriberInterface
     {
         return [
             [
-                'event' => Events::POST_SERIALIZE,
+                'event' => Events::PRE_SERIALIZE,
                 'class' => ContestProblem::class,
                 'format' => 'json',
-                'method' => 'onPostSerialize'
+                'method' => 'onPreSerialize'
             ],
         ];
     }
 
-    public function onPostSerialize(ObjectEvent $event): void
+    public function onPreSerialize(ObjectEvent $event): void
     {
         /** @var JsonSerializationVisitor $visitor */
         $visitor = $event->getVisitor();
         /** @var ContestProblem $contestProblem */
         $contestProblem = $event->getObject();
-        if ($contestProblem->getColor() && ($hex = Utils::convertToHex($contestProblem->getColor()))) {
-            $property = new StaticPropertyMetadata(
-                ContestProblem::class,
-                'rgb',
-                null
-            );
-            $visitor->visitProperty($property, $hex);
-        }
-        if ($contestProblem->getColor() && ($color = Utils::convertToColor($contestProblem->getColor()))) {
-            $property = new StaticPropertyMetadata(
-                ContestProblem::class,
-                'color',
-                null
-            );
-            $visitor->visitProperty($property, $color);
-        }
 
         // Problem statement
         if ($contestProblem->getProblem()->getProblemtextType() === 'pdf') {
@@ -66,18 +51,13 @@ class ContestProblemVisitor implements EventSubscriberInterface
                     'id'  => $contestProblem->getApiId($this->eventLogService),
                 ]
             );
-            $property = new StaticPropertyMetadata(
-                ContestProblem::class,
-                'statement',
-                null
-            );
-            $visitor->visitProperty($property, [
-                [
-                    'href'     => $route,
-                    'mime'     => 'application/pdf',
-                    'filename' => $contestProblem->getShortname() . '.pdf',
-                ]
-            ]);
+            $contestProblem->getProblem()->setStatementForApi(new FileWithName(
+                $route,
+                'application/pdf',
+                $contestProblem->getShortname() . '.pdf'
+            ));
+        } else {
+            $contestProblem->getProblem()->setStatementForApi();
         }
     }
 }

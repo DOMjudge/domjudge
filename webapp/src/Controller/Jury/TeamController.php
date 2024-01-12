@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Contest;
 use App\Entity\Role;
 use App\Entity\Team;
@@ -270,24 +271,24 @@ class TeamController extends BaseController
             $data['limitToTeams'] = [$team];
         }
 
-        $restrictions    = [];
+        $restrictions = new SubmissionRestriction();
         $restrictionText = null;
         if ($request->query->has('restrict')) {
-            $restrictions     = $request->query->all('restrict');
+            $restrictionsFromQuery = $request->query->all('restrict');
             $restrictionTexts = [];
-            foreach ($restrictions as $key => $value) {
+            foreach ($restrictionsFromQuery as $key => $value) {
                 $restrictionKeyText = match ($key) {
-                    'probid' => 'problem',
-                    'langid' => 'language',
+                    'problemId' => 'problem',
+                    'languageId' => 'language',
                     'judgehost' => 'judgehost',
                     default => throw new BadRequestHttpException(sprintf('Restriction on %s not allowed.', $key)),
                 };
+                $restrictions->$key = is_numeric($value) ? (int)$value : $value;
                 $restrictionTexts[] = sprintf('%s %s', $restrictionKeyText, $value);
             }
             $restrictionText = implode(', ', $restrictionTexts);
-            /** @var array{probid?: int, langid?: string, judgehost?: string, ...} $restrictions */
         }
-        $restrictions['teamid'] = $teamId;
+        $restrictions->teamId = $teamId;
         [$submissions, $submissionCounts] =
             $submissionService->getSubmissionList($this->dj->getCurrentContests(honorCookie: true), $restrictions);
 

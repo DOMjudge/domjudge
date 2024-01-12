@@ -2,6 +2,7 @@
 
 namespace App\Serializer;
 
+use App\DataTransferObject\ImageFile;
 use App\Entity\Team;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -28,10 +29,16 @@ class TeamVisitor implements EventSubscriberInterface
     {
         return [
             [
-                'event'  => Events::POST_SERIALIZE,
-                'class'  => Team::class,
+                'event' => Events::POST_SERIALIZE,
+                'class' => Team::class,
                 'format' => 'json',
-                'method' => 'onPostSerialize'
+                'method' => 'onPostSerialize',
+            ],
+            [
+                'event' => Events::PRE_SERIALIZE,
+                'class' => Team::class,
+                'format' => 'json',
+                'method' => 'onPreSerialize',
             ],
         ];
     }
@@ -52,15 +59,22 @@ class TeamVisitor implements EventSubscriberInterface
             );
             $visitor->visitProperty($property, $team->getApiId($this->eventLogService));
         }
+    }
+
+    public function onPreSerialize(ObjectEvent $event): void
+    {
+        /** @var Team $team */
+        $team = $event->getObject();
 
         $id = $team->getApiId($this->eventLogService);
 
         // Check if the asset actually exists
         if (!($teamPhoto = $this->dj->assetPath($id, 'team', true))) {
+            $team->setPhotoForApi();
             return;
         }
 
-        $parts     = explode('.', $teamPhoto);
+        $parts = explode('.', $teamPhoto);
         $extension = $parts[count($parts) - 1];
 
         $imageSize = Utils::getImageSize($teamPhoto);
@@ -70,25 +84,18 @@ class TeamVisitor implements EventSubscriberInterface
                 'v4_team_photo',
                 [
                     'cid' => $cid,
-                    'id'  => $id,
+                    'id' => $id,
                 ]
             );
         } else {
-            $route = $this->dj->apiRelativeUrl('v4_no_contest_team_photo', ['id' => $id,]);
+            $route = $this->dj->apiRelativeUrl('v4_no_contest_team_photo', ['id' => $id]);
         }
-        $property = new StaticPropertyMetadata(
-            Team::class,
-            'photo',
-            null
-        );
-        $visitor->visitProperty($property, [
-            [
-                'href'     => $route,
-                'mime'     => mime_content_type($teamPhoto),
-                'width'    => $imageSize[0],
-                'height'   => $imageSize[1],
-                'filename' => 'photo.' . $extension
-            ]
-        ]);
+        $team->setPhotoForApi(new ImageFile(
+            href: $route,
+            mime: mime_content_type($teamPhoto),
+            filename: 'photo.' . $extension,
+            width: $imageSize[0],
+            height: $imageSize[1]
+        ));
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Serializer;
 
+use App\DataTransferObject\BaseFile;
+use App\DataTransferObject\FileWithName;
 use App\Entity\Submission;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -27,21 +29,19 @@ class SubmissionVisitor implements EventSubscriberInterface
     {
         return [
             [
-                'event' => Events::POST_SERIALIZE,
+                'event' => Events::PRE_SERIALIZE,
                 'class' => Submission::class,
                 'format' => 'json',
-                'method' => 'onPostSerialize'
+                'method' => 'onPreSerialize',
             ],
         ];
     }
 
-    public function onPostSerialize(ObjectEvent $event): void
+    public function onPreSerialize(ObjectEvent $event): void
     {
+        /** @var Submission $submission */
+        $submission = $event->getObject();
         if ($this->dj->checkrole('api_source_reader')) {
-            /** @var JsonSerializationVisitor $visitor */
-            $visitor = $event->getVisitor();
-            /** @var Submission $submission */
-            $submission = $event->getObject();
             $route = $this->dj->apiRelativeUrl(
                 'v4_submission_files',
                 [
@@ -54,13 +54,13 @@ class SubmissionVisitor implements EventSubscriberInterface
                 'files',
                 null
             );
-            $visitor->visitProperty($property, [
-                [
-                    'href'     => $route,
-                    'mime'     => 'application/zip',
-                    'filename' => 'submission.zip',
-                ]
-            ]);
+            $submission->setFileForApi(new FileWithName(
+                href: $route,
+                mime: 'application/zip',
+                filename: 'submission.zip',
+            ));
+        } else {
+            $submission->setFileForApi();
         }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\DataTransferObject\ConfigCheckItem;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
 use App\Entity\Language;
@@ -40,7 +41,7 @@ class CheckConfigService
     }
 
     /**
-     * @return array<string, array<string, array{caption: string, result: string, desc: string, escape?: bool}>>
+     * @return array<string, array<string, ConfigCheckItem>>
      */
     public function runAll(): array
     {
@@ -107,25 +108,21 @@ class CheckConfigService
         return $results;
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkPhpVersion(): array
+    public function checkPhpVersion(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $my = PHP_VERSION;
         $req = '8.1.0';
         $result = version_compare($my, $req, '>=');
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'PHP version',
-                'result' => ($result ? 'O' : 'E'),
-                'desc' => sprintf('You have PHP version %s. The minimum required is %s', $my, $req)];
+        return new ConfigCheckItem(
+            caption: 'PHP version',
+            result: ($result ? 'O' : 'E'),
+            desc: sprintf('You have PHP version %s. The minimum required is %s', $my, $req)
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkPhpExtensions(): array
+    public function checkPhpExtensions(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $required = ['json', 'mbstring', 'mysqli', 'zip', 'gd', 'intl'];
@@ -140,15 +137,14 @@ class CheckConfigService
         $remark = ($remark ?: 'All required and recommended extensions present.');
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'PHP extensions',
-                'result' => $state,
-                'desc' => $remark];
+        return new ConfigCheckItem(
+            caption: 'PHP extensions',
+            result: $state,
+            desc: $remark
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkPhpSettings(): array
+    public function checkPhpSettings(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $sourcefiles_limit = $this->config->get('sourcefiles_limit');
@@ -189,15 +185,14 @@ class CheckConfigService
         }
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'PHP settings',
-                'result' => $result,
-                'desc' => $desc];
+        return new ConfigCheckItem(
+            caption: 'PHP settings',
+            result: $result,
+            desc: $desc
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkMysqlSettings(): array
+    public function checkMysqlSettings(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $r = $this->em->getConnection()->fetchAllAssociative(
@@ -251,15 +246,14 @@ class CheckConfigService
         }
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'MySQL settings',
-                'result' => $result,
-                'desc' => $desc ?: 'MySQL settings are all ok'];
+        return new ConfigCheckItem(
+            caption: 'MySQL settings',
+            result: $result,
+            desc: $desc ?: 'MySQL settings are all ok'
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkAdminPass(): array
+    public function checkAdminPass(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $res = 'O';
@@ -272,15 +266,14 @@ class CheckConfigService
         }
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Non-default admin password',
-                'result' => $res,
-                'desc' => $desc];
+        return new ConfigCheckItem(
+            caption: 'Non-default admin password',
+            result: $res,
+            desc: $desc
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkDefaultCompareRunExist(): array
+    public function checkDefaultCompareRunExist(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $res = 'O';
@@ -298,15 +291,14 @@ class CheckConfigService
         }
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Default compare and run scripts exist',
-                'result' => $res,
-                'desc' => $desc];
+        return new ConfigCheckItem(
+            caption: 'Default compare and run scripts exist',
+            result: $res,
+            desc: $desc
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkScriptFilesizevsMemoryLimit(): array
+    public function checkScriptFilesizevsMemoryLimit(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         if ($this->config->get('script_filesize_limit') <=
@@ -316,55 +308,58 @@ class CheckConfigService
              $result = 'O';
         }
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Compile file size vs. memory limit',
-                'result' => $result,
-                'desc' => 'If the script filesize limit is lower than the memory limit, then ' .
-                'compilation of sources that statically allocate memory may fail. We ' .
-                'recommend to include a margin to be on the safe side. The current ' .
-                '"script_filesize_limit" = ' . $this->config->get('script_filesize_limit') . ' ' .
-                'while "memory_limit" = ' . $this->config->get('memory_limit') . '.'
-            ];
+        return new ConfigCheckItem(
+            caption: 'Compile file size vs. memory limit',
+            result: $result,
+            desc: 'If the script filesize limit is lower than the memory limit, then ' .
+            'compilation of sources that statically allocate memory may fail. We ' .
+            'recommend to include a margin to be on the safe side. The current ' .
+            '"script_filesize_limit" = ' . $this->config->get('script_filesize_limit') . ' ' .
+            'while "memory_limit" = ' . $this->config->get('memory_limit') . '.'
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkDebugDisabled(): array
+    public function checkDebugDisabled(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         if ($this->debug) {
             $this->stopwatch->stop(__FUNCTION__);
-            return ['caption' => 'Debugging',
-                'result' => 'W',
-                'desc' => "Debugging enabled.\nShould not be enabled on live systems."];
+            return new ConfigCheckItem(
+                caption: 'Debugging',
+                result: 'W',
+                desc: "Debugging enabled.\nShould not be enabled on live systems."
+            );
         }
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Debugging',
-                'result' => 'O',
-                'desc' => 'Debugging disabled.'];
+        return new ConfigCheckItem(
+            caption: 'Debugging',
+            result: 'O',
+            desc: 'Debugging disabled.'
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkTmpdirWritable(): array
+    public function checkTmpdirWritable(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $tmpdir = $this->dj->getDomjudgeTmpDir();
         if (is_writable($tmpdir)) {
             $this->stopwatch->stop(__FUNCTION__);
-            return ['caption' => 'TMPDIR writable',
-                    'result' => 'O',
-                    'desc' => sprintf('TMPDIR (%s) can be used to store temporary ' .
-                         'files for submission diffs and edits.',
-                         $tmpdir)];
+            return new ConfigCheckItem(
+                caption: 'TMPDIR writable',
+                result: 'O',
+                desc: sprintf('TMPDIR (%s) can be used to store temporary ' .
+                    'files for submission diffs and edits.',
+                    $tmpdir)
+            );
         }
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'TMPDIR writable',
-                'result' => 'W',
-                'desc' => sprintf('TMPDIR (%s) is not writable by the webserver; ' .
-                 'Showing diffs and editing of submissions may not work.',
-                 $tmpdir)];
+        return new ConfigCheckItem(
+            caption: 'TMPDIR writable',
+            result: 'W',
+            desc: sprintf('TMPDIR (%s) is not writable by the webserver; ' .
+                'Showing diffs and editing of submissions may not work.',
+                $tmpdir)
+        );
     }
 
     private function randomString(int $length): string
@@ -378,10 +373,7 @@ class CheckConfigService
         return $randomString;
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkHashTime(): array
+    public function checkHashTime(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $tmp_user = new User();
@@ -397,49 +389,53 @@ class CheckConfigService
 
         if ($counter>300) {
             $this->stopwatch->stop(__FUNCTION__);
-            return ['caption' => 'User password hashing',
-                'result' => 'W',
-                'desc' => sprintf('Hashing is too simple for small sized contests (Did %d hashes).', $counter)];
+            return new ConfigCheckItem(
+                caption: 'User password hashing',
+                result: 'W',
+                desc: sprintf('Hashing is too simple for small sized contests (Did %d hashes).', $counter)
+            );
         }
         if ($counter<100) {
             $this->stopwatch->stop(__FUNCTION__);
-            return ['caption' => 'User password hashing',
-                'result' => 'W',
-                'desc' => sprintf('Hashing is too expensive for medium sized contests (%d done).', $counter)];
+            return new ConfigCheckItem(
+                caption: 'User password hashing',
+                result: 'W',
+                desc: sprintf('Hashing is too expensive for medium sized contests (%d done).', $counter)
+            );
         }
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'User password hashing',
-            'result' => 'O',
-            'desc' => sprintf('Hashing cost is reasonable (Did %d hashes).', $counter)];
+        return new ConfigCheckItem(
+            caption: 'User password hashing',
+            result: 'O',
+            desc: sprintf('Hashing cost is reasonable (Did %d hashes).', $counter)
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkContestActive(): array
+    public function checkContestActive(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $contests = $this->dj->getCurrentContests();
         if (empty($contests)) {
             $this->stopwatch->stop(__FUNCTION__);
-            return ['caption' => 'Active contests',
-                    'result' => 'E',
-                    'desc' => 'No currently active contests found. System will not function.'];
+            return new ConfigCheckItem(
+                caption: 'Active contests',
+                result: 'E',
+                desc: 'No currently active contests found. System will not function.'
+            );
         }
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Active contests',
-                'result' => 'O',
-                'desc' => 'Currently active contests: ' .
-                    implode(', ', array_map(
-                        fn($contest) => 'c' . $contest->getCid() . ' (' . $contest->getShortname() . ')',
-                        $contests
-                    ))];
+        return new ConfigCheckItem(
+            caption: 'Active contests',
+            result: 'O',
+            desc: 'Currently active contests: ' .
+                implode(', ', array_map(
+                    fn($contest) => 'c' . $contest->getCid() . ' (' . $contest->getShortname() . ')',
+                    $contests
+                ))
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkContestsValidate(): array
+    public function checkContestsValidate(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         // Fetch all active and future contests.
@@ -472,16 +468,15 @@ class CheckConfigService
         }
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Contests validation',
-            'result' => $result,
-            'desc' => "Validated all active and future contests:\n\n" .
-                    ($desc ?: 'No problems found.')];
+        return new ConfigCheckItem(
+            caption: 'Contests validation',
+            result: $result,
+            desc: "Validated all active and future contests:\n\n" .
+                ($desc ?: 'No problems found.')
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkContestBanners(): array
+    public function checkContestBanners(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         // Fetch all active and future contests.
@@ -514,15 +509,14 @@ class CheckConfigService
         $desc = $desc ?: 'Everything OK';
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Contest banners',
-                'result' => $result,
-                'desc' => $desc];
+        return new ConfigCheckItem(
+            caption: 'Contest banners',
+            result: $result,
+            desc: $desc
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkProblemsValidate(): array
+    public function checkProblemsValidate(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $problems = $this->em->getRepository(Problem::class)->findAll();
@@ -606,16 +600,15 @@ class CheckConfigService
         }
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Problems validation',
-            'result' => $result,
-            'desc' => "Validated all problems:\n\n" .
-                    ($desc ?: 'No problems with problems found.')];
+        return new ConfigCheckItem(
+            caption: 'Problems validation',
+            result: $result,
+            desc: "Validated all problems:\n\n" .
+                ($desc ?: 'No problems with problems found.')
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkLanguagesValidate(): array
+    public function checkLanguagesValidate(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $languages = $this->em->getRepository(Language::class)->findAll();
@@ -660,16 +653,15 @@ class CheckConfigService
         }
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Languages validation',
-            'result' => $result,
-            'desc' => "Validated all languages:\n\n" .
-                    ($desc ?: 'No languages with problems found.')];
+        return new ConfigCheckItem(
+            caption: 'Languages validation',
+            result: $result,
+            desc: "Validated all languages:\n\n" .
+                ($desc ?: 'No languages with problems found.')
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkTeamPhotos(): array
+    public function checkTeamPhotos(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         /** @var Team[] $teams */
@@ -690,24 +682,25 @@ class CheckConfigService
         $desc = $desc ?: 'Everything OK';
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Team photos',
-                'result' => $result,
-                'desc' => $desc];
+        return new ConfigCheckItem(
+            caption: 'Team photos',
+            result: $result,
+            desc: $desc
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkAffiliations(): array
+    public function checkAffiliations(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $show_logos = $this->config->get('show_affiliation_logos');
 
         if (!$show_logos) {
             $this->stopwatch->stop(__FUNCTION__);
-            return ['caption' => 'Team affiliations',
-                'result' => 'O',
-                'desc' => 'Affiliations display disabled, skipping checks'];
+            return new ConfigCheckItem(
+                caption: 'Team affiliations',
+                result: 'O',
+                desc: 'Affiliations display disabled, skipping checks'
+            );
         }
 
         /** @var TeamAffiliation[] $affils */
@@ -750,15 +743,14 @@ class CheckConfigService
         $desc = $desc ?: 'Everything OK';
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Team affiliations',
-            'result' => $result,
-            'desc' => $desc];
+        return new ConfigCheckItem(
+            caption: 'Team affiliations',
+            result: $result,
+            desc: $desc
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkTeamDuplicateNames(): array
+    public function checkTeamDuplicateNames(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $teams = $this->em->getRepository(Team::class)->findAll();
@@ -779,15 +771,14 @@ class CheckConfigService
         $desc = $desc ?: 'Every team name is unique';
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Team name uniqueness',
-            'result' => $result,
-            'desc' => $desc];
+        return new ConfigCheckItem(
+            caption: 'Team name uniqueness',
+            result: $result,
+            desc: $desc
+        );
     }
 
-    /**
-     * @return array{caption: string, result: string, desc: string}
-     */
-    public function checkSelfRegistration(): array
+    public function checkSelfRegistration(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $result = 'O';
@@ -814,13 +805,15 @@ class CheckConfigService
         }
 
         $this->stopwatch->stop(__FUNCTION__);
-        return ['caption' => 'Self-registration',
-            'result' => $result,
-            'desc' => $desc];
+        return new ConfigCheckItem(
+            caption: 'Self-registration',
+            result: $result,
+            desc: $desc
+        );
     }
 
     /**
-     * @return array<string, array{caption: string, result: string, desc: string, escape: bool}>
+     * @return ConfigCheckItem[]
      */
     public function checkAllExternalIdentifiers(): array
     {
@@ -853,9 +846,8 @@ class CheckConfigService
 
     /**
      * @param class-string $class
-     * @return array{caption: string, result: string, desc: string, escape: bool}
      */
-    protected function checkExternalIdentifiers(string $class, string $externalIdField): array
+    protected function checkExternalIdentifiers(string $class, string $externalIdField): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $parts      = explode('\\', $class);
@@ -903,12 +895,12 @@ class CheckConfigService
         }
 
         $this->stopwatch->stop(__FUNCTION__);
-        return [
-            'caption' => ucfirst($inflector->pluralize(str_replace('_', ' ', $inflector->tableize($entityType)))),
-            'result' => $result,
-            'desc' => $description,
-            'escape' => false,
-        ];
+        return new ConfigCheckItem(
+            caption: ucfirst($inflector->pluralize(str_replace('_', ' ', $inflector->tableize($entityType)))),
+            result: $result,
+            desc: $description,
+            escape: false
+        );
     }
 
     public function getStopwatch(): Stopwatch

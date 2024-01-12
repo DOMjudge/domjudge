@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\JudgeTask;
@@ -55,45 +56,7 @@ class SubmissionService
      * Get a list of submissions that can be displayed in the interface using
      * the submission_list partial.
      *
-     * Restrictions can contain the following keys;
-     * - rejudgingid: ID of a rejudging to filter on
-     * - verified: If true, only return verified submissions.
-     *             If false, only return unverified or unjudged submissions.
-     * - judged: If true, only return judged submissions.
-     *           If false, only return unjudged submissions.
-     * - judging: If true, only return submissions currently being judged
-     *            If false, only return submssions which are already judged or still
-     *                      need to be judged
-     * - rejudgingdiff: If true, only return judgings that differ from their
-     *                  original result in final verdict. Vice versa if false.
-     * - teamid: ID of a team to filter on
-     * - categoryid: ID of a team category to filter on
-     * - probid: ID of a problem to filter on
-     * - langid: ID of a language to filter on
-     * - judgehost: hostname of a judgehost to filter on
-     * - old_result: result of old judging to filter on
-     * - result: result of current judging to filter on
-     * - userid: filter on specific user
-     * - visible: If true, only return submissions from visible teams
-     * When shadowing another system these keys can also be used:
-     * - external_diff: If true, only return results with a difference with an
-     *                  external system.
-     *                  If false, only return results without a difference with an
-     *                  external system.
-     * - external_result: result in the external system
-     * - externally_judged: If true, only return externally judged submissions.
-     *                      If false, only return externally unjudged submissions.
-     * - externally_verified: If true, only return verified submissions.
-     *                        If false, only return unverified or unjudged submissions.
-     * - with_external_id: If true, only return submissions with an external ID.
-     *
      * @param Contest[] $contests
-     * @param array{rejudgingid?: int, verified?: bool, judged?: bool, judging?: bool,
-     *              rejudgingdiff?: bool, teamid?: int, categoryid?: int,
-     *              probid?: string|int|null, langid?: string, judgehost?: string, old_result?: string,
-     *              result?: string, userid?: int, visible?: bool, external_diff?: bool,
-     *              external_result?: string, externally_judged?: bool,
-     *              externally_verified?: bool, with_external_id?: true} $restrictions
      *
      * @return array{Submission[], array<string, int>} array An array with
      *           two elements: the first one is the list of submissions
@@ -103,7 +66,7 @@ class SubmissionService
      */
     public function getSubmissionList(
         array $contests,
-        array $restrictions,
+        SubmissionRestriction $restrictions,
         int $limit = 0,
         bool $showShadowUnverified = false
     ): array {
@@ -125,11 +88,11 @@ class SubmissionService
             $queryBuilder->setMaxResults($limit);
         }
 
-        if ($restrictions['with_external_id'] ?? false) {
+        if ($restrictions->withExternalId ?? false) {
             $queryBuilder->andWhere('s.externalid IS NOT NULL');
         }
 
-        if (isset($restrictions['rejudgingid'])) {
+        if (isset($restrictions->rejudgingId)) {
             $queryBuilder
                 ->leftJoin('s.judgings', 'j', Join::WITH, 'j.rejudging = :rejudgingid')
                 ->leftJoin(Judging::class, 'jold', Join::WITH,
@@ -138,20 +101,20 @@ class SubmissionService
                     'j.original_judging = jold2.judgingid')
                 ->addSelect('COALESCE(jold.result, jold2.result) AS oldresult')
                 ->andWhere('s.rejudging = :rejudgingid OR j.rejudging = :rejudgingid')
-                ->setParameter('rejudgingid', $restrictions['rejudgingid']);
+                ->setParameter('rejudgingid', $restrictions->rejudgingId);
 
-            if (isset($restrictions['rejudgingdiff'])) {
-                if ($restrictions['rejudgingdiff']) {
+            if (isset($restrictions->rejudgingDifference)) {
+                if ($restrictions->rejudgingDifference) {
                     $queryBuilder->andWhere('j.result != COALESCE(jold.result, jold2.result)');
                 } else {
                     $queryBuilder->andWhere('j.result = COALESCE(jold.result, jold2.result)');
                 }
             }
 
-            if (isset($restrictions['old_result'])) {
+            if (isset($restrictions->oldResult)) {
                 $queryBuilder
                     ->andWhere('COALESCE(jold.result, jold2.result) = :oldresult')
-                    ->setParameter('oldresult', $restrictions['old_result']);
+                    ->setParameter('oldresult', $restrictions->oldResult);
             }
         } else {
             $queryBuilder->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1');
@@ -159,55 +122,55 @@ class SubmissionService
 
         $queryBuilder->leftJoin('j.rejudging', 'r');
 
-        if (isset($restrictions['verified'])) {
-            if ($restrictions['verified']) {
+        if (isset($restrictions->verified)) {
+            if ($restrictions->verified) {
                 $queryBuilder->andWhere('j.verified = 1');
             } else {
                 $queryBuilder->andWhere('j.verified = 0 OR j.verified IS NULL');
             }
         }
 
-        if (isset($restrictions['judged'])) {
-            if ($restrictions['judged']) {
+        if (isset($restrictions->judged)) {
+            if ($restrictions->judged) {
                 $queryBuilder->andWhere('j.result IS NOT NULL');
             } else {
                 $queryBuilder->andWhere('j.result IS NULL OR j.endtime IS NULL');
             }
         }
-        if (isset($restrictions['judging'])) {
-            if ($restrictions['judging']) {
+        if (isset($restrictions->judging)) {
+            if ($restrictions->judging) {
                 $queryBuilder->andWhere('j.starttime IS NOT NULL AND j.result IS NULL');
             } else {
                 $queryBuilder->andWhere('j.starttime IS NULL OR j.result IS NOT NULL');
             }
         }
 
-        if (isset($restrictions['externally_judged'])) {
-            if ($restrictions['externally_judged']) {
+        if (isset($restrictions->externallyJudged)) {
+            if ($restrictions->externallyJudged) {
                 $queryBuilder->andWhere('ej.result IS NOT NULL');
             } else {
                 $queryBuilder->andWhere('ej.result IS NULL OR ej.endtime IS NULL');
             }
         }
 
-        if (isset($restrictions['externally_verified'])) {
-            if ($restrictions['externally_verified']) {
+        if (isset($restrictions->externallyVerified)) {
+            if ($restrictions->externallyVerified) {
                 $queryBuilder->andWhere('ej.verified = true');
             } else {
                 $queryBuilder->andWhere('ej.verified = false');
             }
         }
 
-        if (isset($restrictions['external_diff'])) {
-            if ($restrictions['external_diff']) {
+        if (isset($restrictions->externalDifference)) {
+            if ($restrictions->externalDifference) {
                 $queryBuilder->andWhere('j.result != ej.result');
             } else {
                 $queryBuilder->andWhere('j.result = ej.result');
             }
         }
 
-        if (isset($restrictions['external_result'])) {
-            if ($restrictions['external_result'] === 'judging') {
+        if (isset($restrictions->externalResult)) {
+            if ($restrictions->externalResult === 'judging') {
                 $queryBuilder->andWhere('ej.result IS NULL or ej.endtime IS NULL');
             } else {
                 $queryBuilder
@@ -216,59 +179,59 @@ class SubmissionService
             }
         }
 
-        if (isset($restrictions['teamid'])) {
+        if (isset($restrictions->teamId)) {
             $queryBuilder
                 ->andWhere('s.team = :teamid')
-                ->setParameter('teamid', $restrictions['teamid']);
+                ->setParameter('teamid', $restrictions->teamId);
         }
 
-        if (isset($restrictions['userid'])) {
+        if (isset($restrictions->userId)) {
             $queryBuilder
                 ->andWhere('s.user = :userid')
-                ->setParameter('userid', $restrictions['userid']);
+                ->setParameter('userid', $restrictions->userId);
         }
 
-        if (isset($restrictions['categoryid'])) {
+        if (isset($restrictions->categoryId)) {
             $queryBuilder
                 ->andWhere('t.category = :categoryid')
-                ->setParameter('categoryid', $restrictions['categoryid']);
+                ->setParameter('categoryid', $restrictions->categoryId);
         }
 
-        if (isset($restrictions['visible'])) {
+        if (isset($restrictions->visible)) {
             $queryBuilder
                 ->innerJoin('t.category', 'cat')
                 ->andWhere('cat.visible = true');
         }
 
-        if (isset($restrictions['probid'])) {
+        if (isset($restrictions->problemId)) {
             $queryBuilder
                 ->andWhere('s.problem = :probid')
-                ->setParameter('probid', $restrictions['probid']);
+                ->setParameter('probid', $restrictions->problemId);
         }
 
-        if (isset($restrictions['langid'])) {
+        if (isset($restrictions->languageId)) {
             $queryBuilder
                 ->andWhere('s.language = :langid')
-                ->setParameter('langid', $restrictions['langid']);
+                ->setParameter('langid', $restrictions->languageId);
         }
 
-        if (isset($restrictions['judgehost'])) {
+        if (isset($restrictions->judgehost)) {
             $queryBuilder
                 ->andWhere('s.judgehost = :judgehost')
-                ->setParameter('judgehost', $restrictions['judgehost']);
+                ->setParameter('judgehost', $restrictions->judgehost);
         }
 
-        if (isset($restrictions['result'])) {
-            if ($restrictions['result'] === 'judging') {
+        if (isset($restrictions->result)) {
+            if ($restrictions->result === 'judging') {
                 $queryBuilder
                     ->andWhere('s.importError IS NULL')
                     ->andWhere('j.result IS NULL OR j.endtime IS NULL');
-            } elseif ($restrictions['result'] === 'import-error') {
+            } elseif ($restrictions->result === 'import-error') {
                 $queryBuilder->andWhere('s.importError IS NOT NULL');
             } else {
                 $queryBuilder
                     ->andWhere('j.result = :result')
-                    ->setParameter('result', $restrictions['result']);
+                    ->setParameter('result', $restrictions->result);
             }
         }
 
@@ -281,7 +244,7 @@ class SubmissionService
         }
 
         $submissions = $queryBuilder->getQuery()->getResult();
-        if (isset($restrictions['rejudgingid'])) {
+        if (isset($restrictions->rejudgingId)) {
             // Doctrine will return an array for each item. At index '0' will
             // be the submission and at index 'oldresult' will be the old
             // result. Remap this.

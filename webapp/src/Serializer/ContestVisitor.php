@@ -2,6 +2,7 @@
 
 namespace App\Serializer;
 
+use App\DataTransferObject\ImageFile;
 use App\Entity\Contest;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -10,7 +11,6 @@ use App\Utils\Utils;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
-use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
 class ContestVisitor implements EventSubscriberInterface
@@ -28,18 +28,16 @@ class ContestVisitor implements EventSubscriberInterface
     {
         return [
             [
-                'event'  => Events::POST_SERIALIZE,
-                'class'  => Contest::class,
+                'event' => Events::PRE_SERIALIZE,
+                'class' => Contest::class,
                 'format' => 'json',
-                'method' => 'onPostSerialize'
+                'method' => 'onPreSerialize',
             ],
         ];
     }
 
-    public function onPostSerialize(ObjectEvent $event): void
+    public function onPreSerialize(ObjectEvent $event): void
     {
-        /** @var JsonSerializationVisitor $visitor */
-        $visitor = $event->getVisitor();
         /** @var Contest $contest */
         $contest = $event->getObject();
 
@@ -48,33 +46,28 @@ class ContestVisitor implements EventSubscriberInterface
             'penalty_time',
             null
         );
-        $visitor->visitProperty($property, (int)$this->config->get('penalty_time'));
+        $contest->setPenaltyTimeForApi((int)$this->config->get('penalty_time'));
 
         $id = $contest->getApiId($this->eventLogService);
 
         // Banner
         if ($banner = $this->dj->assetPath($id, 'contest', true)) {
             $imageSize = Utils::getImageSize($banner);
-            $parts     = explode('.', $banner);
+            $parts = explode('.', $banner);
             $extension = $parts[count($parts) - 1];
 
             $route = $this->dj->apiRelativeUrl(
                 'v4_contest_banner', ['cid' => $id]
             );
-            $property = new StaticPropertyMetadata(
-                Contest::class,
-                'banner',
-                null
-            );
-            $visitor->visitProperty($property, [
-                [
-                    'href'     => $route,
-                    'mime'     => mime_content_type($banner),
-                    'width'    => $imageSize[0],
-                    'height'   => $imageSize[1],
-                    'filename' => 'banner.' . $extension,
-                ]
-            ]);
+            $contest->setBannerForApi(new ImageFile(
+                href: $route,
+                mime: mime_content_type($banner),
+                filename: 'banner.' . $extension,
+                width: $imageSize[0],
+                height: $imageSize[1],
+            ));
+        } else {
+            $contest->setBannerForApi();
         }
     }
 }

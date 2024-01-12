@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\DataTransferObject\SubmissionRestriction;
 use App\Service\ConfigurationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -163,34 +164,33 @@ class ShadowDifferencesController extends BaseController
             }
         }
 
-        $restrictions = ['with_external_id' => true];
+        $restrictions = new SubmissionRestriction(withExternalId: true);
         if ($viewTypes[$view] == 'unjudged local') {
-            $restrictions['judged'] = false;
+            $restrictions->judged = false;
         }
         if ($viewTypes[$view] == 'unjudged external') {
-            $restrictions['externally_judged'] = false;
+            $restrictions->externallyJudged = false;
         }
         if ($viewTypes[$view] == 'diff') {
-            $restrictions['external_diff'] = true;
+            $restrictions->externalDifference = true;
         }
         if ($verificationViewTypes[$verificationView] == 'unverified') {
-            $restrictions['externally_verified'] = false;
+            $restrictions->externallyVerified = false;
         }
         if ($verificationViewTypes[$verificationView] == 'verified') {
-            $restrictions['externally_verified'] = true;
+            $restrictions->externallyVerified = true;
         }
         if ($external !== 'all') {
-            $restrictions['external_result'] = $external;
+            $restrictions->externalResult = $external;
         }
         if ($local !== 'all') {
-            $restrictions['result'] = $local;
+            $restrictions->result = $local;
         }
 
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $this->submissions->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
             $restrictions,
-            limit: 0,
             showShadowUnverified: true
         );
 

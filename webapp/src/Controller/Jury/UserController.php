@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Role;
 use App\Entity\Submission;
 use App\Entity\Team;
@@ -178,11 +179,10 @@ class UserController extends BaseController
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
 
-        $restrictions = ['userid' => $user->getUserid()];
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
-            $restrictions
+            new SubmissionRestriction(userId: $user->getUserid()),
         );
 
         return $this->render('jury/user.html.twig', [

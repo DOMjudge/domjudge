@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
+use App\DataTransferObject\ContestState;
+use App\DataTransferObject\ImageFile;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
 use App\Validator\Constraints\Identifier;
@@ -42,11 +44,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
     name: 'scoreboard_type',
     exp: '"pass-fail"',
     options: [new Serializer\Type('string')]
-)]
-#[Serializer\VirtualProperty(
-    name: 'penalty_time',
-    exp: '0',
-    options: [new Serializer\Type('int')]
 )]
 #[UniqueEntity(fields: 'shortname')]
 #[UniqueEntity(fields: 'externalid')]
@@ -386,6 +383,14 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Assert\Valid]
     #[Serializer\Exclude]
     private Collection $externalContestSources;
+
+    #[Serializer\SerializedName('penalty_time')]
+    private ?int $penaltyTimeForApi = null;
+
+    // This field gets filled by the contest visitor with a data transfer
+    // object that represents the banner
+    #[Serializer\Exclude]
+    private ?ImageFile $bannerForApi = null;
 
     public function __construct()
     {
@@ -1113,9 +1118,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     }
 
     /**
-     * @return array<string, string|null>
+     * @return ContestState
      */
-    public function getState(): array
+    public function getState(): ContestState
     {
         $time_or_null             = function ($time, $extra_cond = true) {
             if (!$extra_cond || $time === null || Utils::now() < $time) {
@@ -1123,23 +1128,29 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             }
             return Utils::absTime($time);
         };
-        $result                   = [];
-        $result['started']        = $time_or_null($this->getStarttime());
-        $result['ended']          = $time_or_null($this->getEndtime(), $result['started'] !== null);
-        $result['frozen']         = $time_or_null($this->getFreezetime(), $result['started'] !== null);
-        $result['thawed']         = $time_or_null($this->getUnfreezetime(), $result['frozen'] !== null);
-        $result['finalized']      = $time_or_null($this->getFinalizetime(), $result['ended'] !== null);
-        $result['end_of_updates'] = null;
-        if ($result['finalized'] !== null &&
-            ($result['thawed'] !== null || $result['frozen'] === null)) {
-            if ($result['thawed'] !== null &&
+        $started        = $time_or_null($this->getStarttime());
+        $ended          = $time_or_null($this->getEndtime(), $started !== null);
+        $frozen         = $time_or_null($this->getFreezetime(), $started !== null);
+        $thawed         = $time_or_null($this->getUnfreezetime(), $frozen !== null);
+        $finalized      = $time_or_null($this->getFinalizetime(), $ended !== null);
+        $endOfUpdates = null;
+        if ($finalized !== null &&
+            ($thawed !== null || $frozen === null)) {
+            if ($thawed !== null &&
                 $this->getFreezetime() > $this->getFinalizetime()) {
-                $result['end_of_updates'] = $result['thawed'];
+                $endOfUpdates = $thawed;
             } else {
-                $result['end_of_updates'] = $result['finalized'];
+                $endOfUpdates = $finalized;
             }
         }
-        return $result;
+        return new ContestState(
+            started: $started,
+            ended: $ended,
+            frozen: $frozen,
+            thawed: $thawed,
+            finalized: $finalized,
+            endOfUpdates: $endOfUpdates
+        );
     }
 
     public function getMinutesRemaining(): int
@@ -1378,5 +1389,34 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             'banner' => $this->isClearBanner(),
             default => null,
         };
+    }
+
+    public function setPenaltyTimeForApi(?int $penaltyTimeForApi): Contest
+    {
+        $this->penaltyTimeForApi = $penaltyTimeForApi;
+        return $this;
+    }
+
+    public function getPenaltyTimeForApi(): ?int
+    {
+        return $this->penaltyTimeForApi;
+    }
+
+    public function setBannerForApi(?ImageFile $bannerForApi = null): Contest
+    {
+        $this->bannerForApi = $bannerForApi;
+        return $this;
+    }
+
+    /**
+     * @return ImageFile[]
+     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('banner')]
+    #[Serializer\Type('array<App\DataTransferObject\ImageFile>')]
+    #[Serializer\Exclude(if: 'object.getBannerForApi() === []')]
+    public function getBannerForApi(): array
+    {
+        return array_filter([$this->bannerForApi]);
     }
 }

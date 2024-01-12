@@ -34,7 +34,7 @@ final class Version20200111104415 extends AbstractMigration implements Container
         $allConfig     = $configService->all();
 
         foreach ($allConfig as $name => $value) {
-            if ($value == ($specs[$name]['default_value'] ?? null)) {
+            if ($value == ($specs[$name]->default_value ?? null)) {
                 $this->addSql(
                     'DELETE FROM configuration WHERE name = :name',
                     ['name' => $name]

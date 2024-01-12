@@ -144,9 +144,9 @@ EOF;
             [
                 'href'     => "contests/$id/banner",
                 'mime'     => 'image/svg+xml',
+                'filename' => 'banner.svg',
                 'width'    => 510,
                 'height'   => 1122,
-                'filename' => 'banner.svg',
             ],
         ];
         self::assertSame($bannerConfig, $object['banner']);

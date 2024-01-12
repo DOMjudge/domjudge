@@ -11,62 +11,12 @@ parameters:
 			path: webapp/src/Controller/API/AbstractRestController.php
 
 		-
-			message: "#^Method App\\\\Controller\\\\API\\\\AccessController\\:\\:getStatusAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/AccessController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\AwardsController\\:\\:getAwardsData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/AwardsController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\AwardsController\\:\\:listAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/AwardsController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\AwardsController\\:\\:singleAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/AwardsController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\BalloonController\\:\\:listAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/BalloonController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\ContestController\\:\\:getContestStateAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/ContestController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\ContestController\\:\\:getStatusAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/ContestController.php
-
-		-
 			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:addProblemAction\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/GeneralInfoController.php
 
 		-
 			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:getDatabaseConfigurationAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/GeneralInfoController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:getInfoAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/GeneralInfoController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:getStatusAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/GeneralInfoController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:getVersionAction\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/GeneralInfoController.php
 
@@ -86,47 +36,7 @@ parameters:
 			path: webapp/src/Controller/API/JudgehostController.php
 
 		-
-			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getExecutableFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgehostController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getFilesAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgehostController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getJudgeTasksAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgehostController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getJudgehostsAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgehostController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getJudgetasks\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgehostController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getSourceFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgehostController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getTestcaseFiles\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgehostController.php
-
-		-
 			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getVersionCommands\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgehostController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:serializeJudgeTasks\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/JudgehostController.php
 
@@ -134,26 +44,6 @@ parameters:
 			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:updateJudgeHostAction\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/JudgehostController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\JudgementTypeController\\:\\:getJudgementTypes\\(\\) has parameter \\$filteredOn with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgementTypeController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\JudgementTypeController\\:\\:getJudgementTypes\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgementTypeController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\JudgementTypeController\\:\\:listAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgementTypeController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\JudgementTypeController\\:\\:singleAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/JudgementTypeController.php
 
 		-
 			message: "#^Method App\\\\Controller\\\\API\\\\ProblemController\\:\\:addProblemAction\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -169,17 +59,6 @@ parameters:
 			message: "#^Method App\\\\Controller\\\\API\\\\ProblemController\\:\\:transformObject\\(\\) has parameter \\$object with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/ProblemController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\ScoreboardController\\:\\:getScoreboardAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/ScoreboardController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\SubmissionController\\:\\:getSubmissionSourceCodeAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/SubmissionController.php
-
 		-
 			message: "#^Method App\\\\FosRestBundle\\\\FlattenExceptionHandler\\:\\:serializeToJson\\(\\) has parameter \\$type with no value type specified in iterable type array\\.$#"
 			count: 1
@@ -191,21 +70,7 @@ parameters:
 			path: webapp/src/FosRestBundle/FlattenExceptionHandler.php
 
 		-
-			message: "#^Method App\\\\Helpers\\\\OrdinalArray\\:\\:__construct\\(\\) has parameter \\$items with no value type specified in iterable type Traversable\\.$#"
-			count: 1
-			path: webapp/src/Helpers/OrdinalArray.php
 
-		-
-			message: "#^Method App\\\\Helpers\\\\OrdinalArray\\:\\:__construct\\(\\) has parameter \\$items with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Helpers/OrdinalArray.php
-
-		-
-			message: "#^Method App\\\\Helpers\\\\OrdinalArray\\:\\:__construct\\(\\) has parameter \\$items with no value type specified in iterable type array\\|Traversable\\.$#"
-			count: 1
-			path: webapp/src/Helpers/OrdinalArray.php
-
-		-
 			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:addOrUpdateWarning\\(\\) has parameter \\$content with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/ExternalContestSourceService.php

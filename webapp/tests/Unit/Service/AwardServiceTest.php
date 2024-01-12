@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Service;
 
+use App\DataTransferObject\Award;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
@@ -181,17 +182,17 @@ class AwardServiceTest extends KernelTestCase
         return new AwardService($eventLogService);
     }
 
-    protected function getAward(string $label): ?array
+    protected function getAward(string $label): ?Award
     {
-        return $this->getAwardService()->getAwards($this->contest, $this->scoreboard, $label);
+        return $this->getAwardService()->getAward($this->contest, $this->scoreboard, $label);
     }
 
     public function testWinner(): void
     {
         $winner = $this->getAward('winner');
         static::assertNotNull($winner);
-        static::assertEquals('Contest winner', $winner['citation']);
-        static::assertEquals(['team_A'], $winner['team_ids']);
+        static::assertEquals('Contest winner', $winner->citation);
+        static::assertEquals(['team_A'], $winner->teamIds);
     }
 
     public function testMedals(): void
@@ -207,8 +208,8 @@ class AwardServiceTest extends KernelTestCase
                 static::assertNull($medalAward);
             } else {
                 static::assertNotNull($medalAward);
-                static::assertEquals(ucfirst($medal) . ' medal winner', $medalAward['citation']);
-                static::assertEquals($teams, $medalAward['team_ids']);
+                static::assertEquals(ucfirst($medal) . ' medal winner', $medalAward->citation);
+                static::assertEquals($teams, $medalAward->teamIds);
             }
         }
     }
@@ -217,20 +218,20 @@ class AwardServiceTest extends KernelTestCase
     {
         $groupAWinner = $this->getAward('group-winner-cat_A');
         static::assertNotNull($groupAWinner);
-        static::assertEquals('Winner(s) of group Category A', $groupAWinner['citation']);
-        static::assertEquals(['team_A'], $groupAWinner['team_ids']);
+        static::assertEquals('Winner(s) of group Category A', $groupAWinner->citation);
+        static::assertEquals(['team_A'], $groupAWinner->teamIds);
 
         $a = $this->getAwardService()->getAwards($this->contest, $this->scoreboard);
         $groupBWinner = $this->getAward('group-winner-cat_B');
         static::assertNotNull($groupBWinner);
-        static::assertEquals('Winner(s) of group Category B', $groupBWinner['citation']);
-        static::assertEquals(['team_D'], $groupBWinner['team_ids']);
+        static::assertEquals('Winner(s) of group Category B', $groupBWinner->citation);
+        static::assertEquals(['team_D'], $groupBWinner->teamIds);
 
         $a = $this->getAwardService()->getAwards($this->contest, $this->scoreboard);
         $groupBWinner = $this->getAward('group-winner-cat_C');
         static::assertNotNull($groupBWinner);
-        static::assertEquals('Winner(s) of group Category C', $groupBWinner['citation']);
-        static::assertEquals(['team_G'], $groupBWinner['team_ids']);
+        static::assertEquals('Winner(s) of group Category C', $groupBWinner->citation);
+        static::assertEquals(['team_G'], $groupBWinner->teamIds);
     }
 
     public function testFirstToSolve(): void
@@ -244,9 +245,9 @@ class AwardServiceTest extends KernelTestCase
         foreach ($fts as $problem => $teams) {
             $firstToSolve = $this->getAward('first-to-solve-problem_' . $problem);
             static::assertNotNull($firstToSolve);
-            static::assertEquals('First to solve problem ' . $problem, $firstToSolve['citation']);
+            static::assertEquals('First to solve problem ' . $problem, $firstToSolve->citation);
             $teamIds = array_map(static fn(string $team) => 'team_' . $team, $teams);
-            static::assertEquals($teamIds, $firstToSolve['team_ids']);
+            static::assertEquals($teamIds, $firstToSolve->teamIds);
         }
     }
 

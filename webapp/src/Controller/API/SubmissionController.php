@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\SourceCode;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Language;
@@ -62,12 +63,7 @@ class SubmissionController extends AbstractRestController
         description: 'Returns all the submissions for this contest',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(
-                allOf: [
-                    new OA\Schema(ref: new Model(type: Submission::class)),
-                    new OA\Schema(ref: '#/components/schemas/Files'),
-                ]
-            )
+            items: new OA\Items(ref: new Model(type: Submission::class))
         )
     )]
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
@@ -91,12 +87,7 @@ class SubmissionController extends AbstractRestController
     #[OA\Response(
         response: 200,
         description: 'Returns the given submission for this contest',
-        content: new OA\JsonContent(
-            allOf: [
-                new OA\Schema(ref: new Model(type: Submission::class)),
-                new OA\Schema(ref: '#/components/schemas/Files'),
-            ]
-        )
+        content: new OA\JsonContent(ref: new Model(type: Submission::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
@@ -208,12 +199,7 @@ class SubmissionController extends AbstractRestController
     #[OA\Response(
         response: 200,
         description: 'When submitting was successful',
-        content: new OA\JsonContent(
-            allOf: [
-                new OA\Schema(ref: new Model(type: Submission::class)),
-                new OA\Schema(ref: '#/components/schemas/Files'),
-            ]
-        )
+        content: new OA\JsonContent(ref: new Model(type: Submission::class))
     )]
     public function addSubmissionAction(Request $request, ?string $id): Response
     {
@@ -500,13 +486,14 @@ class SubmissionController extends AbstractRestController
     /**
      * Get the source code of all the files for the given submission.
      * @throws NonUniqueResultException
+     * @return SourceCode[]
      */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Get('contests/{cid}/submissions/{id}/source-code')]
     #[OA\Response(
         response: 200,
         description: 'The files for the submission',
-        content: new OA\JsonContent(ref: '#/components/schemas/SourceCodeList')
+        content: new OA\JsonContent(ref: new Model(type: SourceCode::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function getSubmissionSourceCodeAction(Request $request, string $id): array
@@ -530,12 +517,12 @@ class SubmissionController extends AbstractRestController
 
         $result = [];
         foreach ($files as $file) {
-            $result[]   = [
-                'id' => (string)$file->getSubmitfileid(),
-                'submission_id' => (string)$file->getSubmission()->getSubmitid(),
-                'filename' => $file->getFilename(),
-                'source' => base64_encode($file->getSourcecode()),
-            ];
+            $result[] = new SourceCode(
+                id: (string)$file->getSubmitfileid(),
+                submissionId: (string)$file->getSubmission()->getSubmitid(),
+                filename: $file->getFilename(),
+                source: base64_encode($file->getSourcecode()),
+            );
         }
         return $result;
     }

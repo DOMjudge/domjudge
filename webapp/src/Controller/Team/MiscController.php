@@ -3,6 +3,7 @@
 namespace App\Controller\Team;
 
 use App\Controller\BaseController;
+use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Clarification;
 use App\Entity\Language;
 use App\Form\Type\PrintType;
@@ -82,8 +83,7 @@ class MiscController extends BaseController
             $this->em->clear();
             $data['submissions'] = $this->submissionService->getSubmissionList(
                 [$contest->getCid() => $contest],
-                ['teamid' => $teamId],
-                0
+                new SubmissionRestriction(teamId: $teamId)
             )[0];
 
             /** @var Clarification[] $clarifications */

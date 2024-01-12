@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\DataTransferObject\ImageFile;
 use App\Validator\Constraints\Country;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -97,6 +98,22 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     #[ORM\OneToMany(mappedBy: 'affiliation', targetEntity: Team::class)]
     #[Serializer\Exclude]
     private Collection $teams;
+
+    /**
+     * This field gets filled by the team affiliation visitor with a data transfer
+     * object that represents the country flag
+     *
+     * @var ImageFile[]
+     */
+    #[Serializer\SerializedName('country_flag')]
+    #[Serializer\Type('array<App\DataTransferObject\ImageFile>')]
+    #[Serializer\Exclude(if: 'object.getCountryFlagForApi() === []')]
+    private array $countryFlagsForApi = [];
+
+    // This field gets filled by the team affiliation visitor with a data transfer
+    // object that represents the logo
+    #[Serializer\Exclude]
+    private ?ImageFile $logoForApi = null;
 
     public function __construct()
     {
@@ -242,5 +259,42 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
             'logo' => $this->isClearLogo(),
             default => null,
         };
+    }
+
+    /**
+     * @param ImageFile[] $countryFlagsForApi
+     *
+     * @return $this
+     */
+    public function setCountryFlagForApi(array $countryFlagsForApi = []): TeamAffiliation
+    {
+        $this->countryFlagsForApi = $countryFlagsForApi;
+        return $this;
+    }
+
+    /**
+     * @return ImageFile[]
+     */
+    public function getCountryFlagForApi(): array
+    {
+        return $this->countryFlagsForApi;
+    }
+
+    public function setLogoForApi(?ImageFile $logoForApi = null): TeamAffiliation
+    {
+        $this->logoForApi = $logoForApi;
+        return $this;
+    }
+
+    /**
+     * @return ImageFile[]
+     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('logo')]
+    #[Serializer\Type('array<App\DataTransferObject\ImageFile>')]
+    #[Serializer\Exclude(if: 'object.getLogoForApi() === []')]
+    public function getLogoForApi(): array
+    {
+        return array_filter([$this->logoForApi]);
     }
 }

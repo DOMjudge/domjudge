@@ -80,8 +80,8 @@ class ConfigController extends AbstractController
 
         $categories = [];
         foreach ($specs as $spec) {
-            if (!in_array($spec['category'], $categories)) {
-                $categories[] = $spec['category'];
+            if (!in_array($spec->category, $categories)) {
+                $categories[] = $spec->category;
             }
         }
         $allData = [];
@@ -89,7 +89,7 @@ class ConfigController extends AbstractController
         foreach ($categories as $category) {
             $data = [];
             foreach ($specs as $specName => $spec) {
-                if ($spec['category'] !== $category) {
+                if ($spec->category !== $category) {
                     continue;
                 }
                 if (isset($errors[$specName]) && $activeCategory === null) {
@@ -97,16 +97,16 @@ class ConfigController extends AbstractController
                 }
                 $data[] = [
                     'name' => $specName,
-                    'type' => $spec['type'],
+                    'type' => $spec->type,
                     'value' => isset($options[$specName]) ?
                         $options[$specName]->getValue() :
-                        $spec['default_value'],
-                    'description' => $spec['description'],
-                    'options' => $spec['options'] ?? null,
-                    'key_options' => $spec['key_options'] ?? null,
-                    'value_options' => $spec['value_options'] ?? null,
-                    'key_placeholder' => $spec['key_placeholder'] ?? '',
-                    'value_placeholder' => $spec['value_placeholder'] ?? '',
+                        $spec->defaultValue,
+                    'description' => $spec->description,
+                    'options' => $spec->options,
+                    'key_options' => $spec->keyOptions,
+                    'value_options' => $spec->valueOptions,
+                    'key_placeholder' => $spec->keyPlaceholder ?? '',
+                    'value_placeholder' => $spec->valuePlaceholder ?? '',
                 ];
             }
             $allData[] = [

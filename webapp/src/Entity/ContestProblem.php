@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use JMS\Serializer\Metadata\StaticPropertyMetadata;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -168,6 +169,28 @@ class ContestProblem
     public function getColor(): ?string
     {
         return $this->color;
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('rgb')]
+    public function getApiRgb(): ?string
+    {
+        if (!$this->getColor()) {
+            return null;
+        }
+
+        return Utils::convertToHex($this->getColor());
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('color')]
+    public function getApiColor(): ?string
+    {
+        if (!$this->getColor()) {
+            return null;
+        }
+
+        return Utils::convertToColor($this->getColor());
     }
 
     public function setLazyEvalResults(?int $lazyEvalResults): ContestProblem
