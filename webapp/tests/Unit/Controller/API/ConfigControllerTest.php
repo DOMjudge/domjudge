@@ -118,7 +118,7 @@ class ConfigControllerTest extends BaseTestCase
         static::assertEquals($currentValue, $response[$property]);
 
         $proposedChange = [$property => $newValue];
-        $response = $this->verifyApiJsonResponse('PUT', $this->endpoint, 400, 'admin', $proposedChange);
+        $response = $this->verifyApiJsonResponse('PUT', $this->endpoint, 422, 'admin', $proposedChange);
 
         static::assertEquals(['errors' => [$property => $errorMessage]], $response);
     }
