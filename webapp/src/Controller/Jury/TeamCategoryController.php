@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Judging;
 use App\Entity\Submission;
 use App\Entity\Team;
@@ -128,11 +129,10 @@ class TeamCategoryController extends BaseController
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
 
-        $restrictions = ['categoryid' => $teamCategory->getCategoryid()];
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
-            $restrictions
+            new SubmissionRestriction(categoryId: $teamCategory->getCategoryid())
         );
 
         $data = [

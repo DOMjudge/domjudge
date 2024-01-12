@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
+use App\DataTransferObject\FileWithName;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -183,6 +184,11 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      */
     #[Serializer\Exclude]
     private ?string $old_result = null;
+
+    // This field gets filled by the submission visitor with a data transfer
+    // object that represents the submission file
+    #[Serializer\Exclude]
+    private ?FileWithName $fileForApi = null;
 
     public function getResult(): ?string
     {
@@ -537,5 +543,22 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     public function getExternalJudgements(): Collection
     {
         return $this->external_judgements;
+    }
+
+    public function setFileForApi(?FileWithName $fileForApi = null): Submission
+    {
+        $this->fileForApi = $fileForApi;
+        return $this;
+    }
+
+    /**
+     * @return FileWithName[]
+     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('files')]
+    #[Serializer\Type('array<App\DataTransferObject\FileWithName>')]
+    public function getFileForApi(): array
+    {
+        return array_filter([$this->fileForApi]);
     }
 }

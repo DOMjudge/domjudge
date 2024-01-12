@@ -2,13 +2,14 @@
 
 namespace App\Service;
 
+use App\DataTransferObject\Award;
 use App\Entity\Contest;
 use App\Entity\Team;
 use App\Utils\Scoreboard\Scoreboard;
 
 class AwardService
 {
-    /** @var array<array{id: string, citation: string, team_ids: string[]}> $awardCache */
+    /** @var array<int, Award[]> */
     protected array $awardCache = [];
 
     public function __construct(protected readonly EventLogService $eventLogService)
@@ -38,21 +39,19 @@ class AwardService
         $results = [];
         foreach ($group_winners as $id => $team_ids) {
             $type = 'group-winner-' . $id;
-            $result = [
-                'id' => $type,
-                'citation' => 'Winner(s) of group ' . $groups[$id],
-                'team_ids' => $team_ids
-            ];
-            $results[] = $result;
+            $results[] = new Award(
+                id: $type,
+                citation: 'Winner(s) of group ' . $groups[$id],
+                teamIds: $team_ids
+            );
         }
         foreach ($problem_winners as $id => $team_ids) {
             $type = 'first-to-solve-' . $id;
-            $result = [
-                'id' => $type,
-                'citation' => 'First to solve problem ' . $problem_shortname[$id],
-                'team_ids' => $team_ids
-            ];
-            $results[] = $result;
+            $results[] = new Award(
+                id: $type,
+                citation: 'First to solve problem ' . $problem_shortname[$id],
+                teamIds: $team_ids
+            );
         }
         $overall_winners = $medal_winners = [];
 
@@ -95,41 +94,44 @@ class AwardService
         }
         if (count($overall_winners) > 0) {
             $type = 'winner';
-            $result = [
-                'id' => $type,
-                'citation' => 'Contest winner',
-                'team_ids' => $overall_winners
-            ];
-            $results[] = $result;
+            $results[] = new Award(
+                id: $type,
+                citation: 'Contest winner',
+                teamIds: $overall_winners
+            );
         }
         foreach ($medal_winners as $metal => $team_ids) {
             $type = $metal . '-medal';
-            $result = [
-                'id' => $type,
-                'citation' => ucfirst($metal) . ' medal winner',
-                'team_ids' => $team_ids
-            ];
-            $results[] = $result;
+            $results[] = new Award(
+                id: $type,
+                citation: ucfirst($metal) . ' medal winner',
+                teamIds: $team_ids
+            );
         }
 
         $this->awardCache[$contest->getCid()] = $results;
     }
 
     /**
-     * @return array<array{id: string, citation: string, team_ids: string[]}>|array{id: string, citation: string, team_ids: string[]}|null
+     * @return Award[]
      */
-    public function getAwards(Contest $contest, Scoreboard $scoreboard, string $requestedType = null): ?array
+    public function getAwards(Contest $contest, Scoreboard $scoreboard): array
     {
         if (!isset($this->awardCache[$contest->getCid()])) {
             $this->loadAwards($contest, $scoreboard);
         }
 
-        if ($requestedType === null) {
-            return $this->awardCache[$contest->getCid()];
+        return $this->awardCache[$contest->getCid()];
+    }
+
+    public function getAward(Contest $contest, Scoreboard $scoreboard, string $requestedType): ?Award
+    {
+        if (!isset($this->awardCache[$contest->getCid()])) {
+            $this->loadAwards($contest, $scoreboard);
         }
 
         foreach ($this->awardCache[$contest->getCid()] as $award) {
-            if ($award['id'] == $requestedType) {
+            if ($award->id == $requestedType) {
                 return $award;
             }
         }
@@ -146,11 +148,11 @@ class AwardService
         $awards = $this->awardCache[$contest->getCid()];
         $awardsById = [];
         foreach ($awards as $award) {
-            $awardsById[$award['id']] = $award;
+            $awardsById[$award->id] = $award;
         }
         $medalNames = ['gold-medal', 'silver-medal', 'bronze-medal'];
         foreach ($medalNames as $medalName) {
-            if (in_array($teamid, $awardsById[$medalName]['team_ids'] ?? [])) {
+            if (in_array($teamid, $awardsById[$medalName]->teamIds ?? [])) {
                 return $medalName;
             }
         }

@@ -2,8 +2,8 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\JudgingRunWrapper;
 use App\Entity\JudgingRun;
-use App\Helpers\JudgingRunWrapper;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -57,12 +57,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
         description: 'Returns all the runs for this contest',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(
-                allOf: [
-                    new OA\Schema(ref: new Model(type: JudgingRun::class)),
-                    new OA\Schema(ref: '#/components/schemas/RunExtraFields'),
-                ]
-            )
+            items: new OA\Items(ref: new Model(type: JudgingRunWrapper::class))
         )
     )]
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
@@ -104,12 +99,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
     #[OA\Response(
         response: 200,
         description: 'Returns the given run for this contest',
-        content: new OA\JsonContent(
-            allOf: [
-                new OA\Schema(ref: new Model(type: JudgingRun::class)),
-                new OA\Schema(ref: '#/components/schemas/RunExtraFields'),
-            ]
-        )
+        content: new OA\JsonContent(ref: new Model(type: JudgingRunWrapper::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response

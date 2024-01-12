@@ -54,12 +54,7 @@ class OrganizationController extends AbstractRestController
         description: 'Returns all the organizations for this contest',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(
-                allOf: [
-                    new OA\Schema(ref: new Model(type: TeamAffiliation::class)),
-                    new OA\Schema(ref: '#/components/schemas/Logo'),
-                ]
-            )
+            items: new OA\Items(ref: new Model(type: TeamAffiliation::class))
         )
     )]
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
@@ -83,12 +78,7 @@ class OrganizationController extends AbstractRestController
     #[OA\Response(
         response: 200,
         description: 'Returns the given organization for this contest',
-        content: new OA\JsonContent(
-            allOf: [
-                new OA\Schema(ref: new Model(type: TeamAffiliation::class)),
-                new OA\Schema(ref: '#/components/schemas/Logo'),
-            ]
-        )
+        content: new OA\JsonContent(ref: new Model(type: TeamAffiliation::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response

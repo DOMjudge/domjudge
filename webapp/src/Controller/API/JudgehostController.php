@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\JudgehostFile;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Contest;
 use App\Entity\DebugPackage;
@@ -73,6 +74,8 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Get judgehosts.
+     *
+     * @return Judgehost[]
      */
     #[IsGranted('ROLE_JURY')]
     #[Rest\Get('')]
@@ -1152,13 +1155,14 @@ class JudgehostController extends AbstractFOSRestController
     /**
      * Get files for a given type and id.
      * @throws NonUniqueResultException
+     * @return JudgehostFile[]
      */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Get('/get_files/{type}/{id<\d+>}')]
     #[OA\Response(
         response: 200,
         description: 'The files for the submission, testcase or script.',
-        content: new OA\JsonContent(ref: '#/components/schemas/SourceCodeList')
+        content: new OA\JsonContent(ref: new Model(type: JudgehostFile::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function getFilesAction(
@@ -1336,6 +1340,9 @@ class JudgehostController extends AbstractFOSRestController
         return [];
     }
 
+    /**
+     * @return JudgehostFile[]
+     */
     private function getSourceFiles(string $id): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
@@ -1354,14 +1361,17 @@ class JudgehostController extends AbstractFOSRestController
 
         $result = [];
         foreach ($files as $file) {
-            $result[]   = [
-                'filename' => $file->getFilename(),
-                'content' => base64_encode($file->getSourcecode()),
-            ];
+            $result[]   = new JudgehostFile(
+                filename: $file->getFilename(),
+                content: base64_encode($file->getSourcecode()),
+            );
         }
         return $result;
     }
 
+    /**
+     * @return JudgehostFile[]
+     */
     private function getExecutableFiles(string $id): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
@@ -1380,15 +1390,18 @@ class JudgehostController extends AbstractFOSRestController
 
         $result = [];
         foreach ($files as $file) {
-            $result[]   = [
-                'filename' => $file->getFilename(),
-                'content' => base64_encode($file->getFileContent()),
-                'is_executable' => $file->isExecutable(),
-            ];
+            $result[] = new JudgehostFile(
+                filename: $file->getFilename(),
+                content: base64_encode($file->getFileContent()),
+                isExecutable: $file->isExecutable(),
+            );
         }
         return $result;
     }
 
+    /**
+     * @return JudgehostFile[]
+     */
     private function getTestcaseFiles(string $id): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
@@ -1406,16 +1419,18 @@ class JudgehostController extends AbstractFOSRestController
 
         $result = [];
         foreach (['input', 'output'] as $k) {
-            $result[] = [
-                'filename' => $k,
-                'content' => base64_encode($inout[$k]),
-            ];
+            $result[]   = new JudgehostFile(
+                filename: $k,
+                content: base64_encode($inout[$k]),
+            );
         }
         return $result;
     }
 
     /**
      * Fetch work tasks.
+     *
+     * @return JudgeTask[]
      */
     #[IsGranted(new Expression("is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Post('/fetch-work')]
@@ -1623,6 +1638,7 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * @param JudgeTask[] $judgeTasks
+     * @return JudgeTask[]
      * @throws Exception
      */
     private function serializeJudgeTasks(array $judgeTasks, Judgehost $judgehost): array
@@ -1708,6 +1724,9 @@ class JudgehostController extends AbstractFOSRestController
         return $partialJudgeTasks;
     }
 
+    /**
+     * @return JudgeTask[]|null
+     */
     private function getJudgetasks(string|int|null $jobId, int $max_batchsize, Judgehost $judgehost): ?array
     {
         if ($jobId === null) {

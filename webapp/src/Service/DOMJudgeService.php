@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\DataTransferObject\ContestStatus;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\AssetEntityInterface;
 use App\Entity\AuditLog;
@@ -930,19 +931,17 @@ class DOMJudgeService
     /**
      * @throws NoResultException
      * @throws NonUniqueResultException
-     * @return array<string, int>
      */
-    public function getContestStats(Contest $contest): array
+    public function getContestStats(Contest $contest): ContestStatus
     {
-        $stats = [];
-        $stats['num_submissions'] = (int)$this->em
+        $numSubmissions = (int)$this->em
             ->createQuery(
                 'SELECT COUNT(s)
                 FROM App\Entity\Submission s
                 WHERE s.contest = :cid')
             ->setParameter('cid', $contest->getCid())
             ->getSingleScalarResult();
-        $stats['num_queued'] = (int)$this->em
+        $numQueued = (int)$this->em
             ->createQuery(
                 'SELECT COUNT(s)
                 FROM App\Entity\Submission s
@@ -952,7 +951,7 @@ class DOMJudgeService
                 AND s.valid = 1')
             ->setParameter('cid', $contest->getCid())
             ->getSingleScalarResult();
-        $stats['num_judging'] = (int)$this->em
+        $numJudging = (int)$this->em
             ->createQuery(
                 'SELECT COUNT(s)
                 FROM App\Entity\Submission s
@@ -963,7 +962,7 @@ class DOMJudgeService
                 AND s.valid = 1')
             ->setParameter('cid', $contest->getCid())
             ->getSingleScalarResult();
-        return $stats;
+        return new ContestStatus($numSubmissions, $numQueued, $numJudging);
     }
 
     /**

@@ -2,11 +2,14 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\Access;
+use App\DataTransferObject\AccessEndpoint;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,37 +29,17 @@ class AccessController extends AbstractRestController
      *
      * @throws NoResultException
      * @throws NonUniqueResultException
+     *
+     * @return Access
      */
     #[IsGranted('ROLE_API_READER')]
     #[Rest\Get('')]
     #[OA\Response(
         response: 200,
         description: 'Access information for the given contest',
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(
-                    property: 'capabilities',
-                    type: 'array',
-                    items: new OA\Items(type: 'string')
-                ),
-                new OA\Property(
-                    property: 'endpoints',
-                    type: 'array',
-                    items: new OA\Items(
-                        properties: [
-                            new OA\Property(property: 'type', type: 'string'),
-                            new OA\Property(
-                                property: 'properties',
-                                type: 'array',
-                                items: new OA\Items(type: 'string')
-                            )
-                        ],
-                        type: 'object'))
-            ],
-            type: 'object'
-        )
+        content: new OA\JsonContent(ref: new Model(type: Access::class))
     )]
-    public function getStatusAction(Request $request): array
+    public function getStatusAction(Request $request): Access
     {
         // Get the contest ID to make sure the contest exists
         $this->getContestId($request);
@@ -109,12 +92,12 @@ class AccessController extends AbstractRestController
             $capabilities[] = 'admin_clar';
         }
 
-        return [
-            'capabilities' => $capabilities,
-            'endpoints'    => [
-                [
-                    'type'       => 'contest',
-                    'properties' => [
+        return new Access(
+            capabilities: $capabilities,
+            endpoints: [
+                new AccessEndpoint(
+                    type: 'contest',
+                    properties: [
                         'id',
                         'name',
                         'formal_name',
@@ -123,19 +106,19 @@ class AccessController extends AbstractRestController
                         'scoreboard_freeze_duration',
                         'penalty_time',
                     ],
-                ],
-                [
-                    'type'       => 'judgement-types',
-                    'properties' => [
+                ),
+                new AccessEndpoint(
+                    type: 'judgement-types',
+                    properties: [
                         'id',
                         'name',
                         'penalty',
                         'solved',
                     ],
-                ],
-                [
-                    'type'       => 'languages',
-                    'properties' => [
+                ),
+                new AccessEndpoint(
+                    type: 'languages',
+                    properties: [
                         'id',
                         'name',
                         'entry_point_required',
@@ -145,10 +128,10 @@ class AccessController extends AbstractRestController
 //                        'compiler.command',
 //                        'runner.command',
                     ],
-                ],
-                [
-                    'type'       => 'problems',
-                    'properties' => [
+                ),
+                new AccessEndpoint(
+                    type: 'problems',
+                    properties: [
                         'id',
                         'label',
                         'name',
@@ -159,23 +142,23 @@ class AccessController extends AbstractRestController
                         'test_data_count',
                         'statement',
                     ],
-                ],
-                [
-                    'type'       => 'groups',
-                    'properties' => [
+                ),
+                new AccessEndpoint(
+                    type: 'groups',
+                    properties: [
                         'id',
                         'icpc_id',
                         'name',
                         'hidden',
                     ],
-                ],
-                [
-                    'type'       => 'organizations',
-                    'properties' => $organizationProperties,
-                ],
-                [
-                    'type'       => 'teams',
-                    'properties' => [
+                ),
+                new AccessEndpoint(
+                    type: 'organizations',
+                    properties: $organizationProperties,
+                ),
+                new AccessEndpoint(
+                    type: 'teams',
+                    properties: [
                         'id',
                         'icpc_id',
                         'name',
@@ -183,10 +166,10 @@ class AccessController extends AbstractRestController
                         'organization_id',
                         'group_ids',
                     ]
-                ],
-                [
-                    'type'       => 'state',
-                    'properties' => [
+                ),
+                new AccessEndpoint(
+                    type: 'state',
+                    properties: [
                         'started',
                         'frozen',
                         'ended',
@@ -194,14 +177,14 @@ class AccessController extends AbstractRestController
                         'finalized',
                         'end_of_updates',
                     ],
-                ],
-                [
-                    'type'       => 'submissions',
-                    'properties' => $submissionsProperties,
-                    ],
-                [
-                    'type'       => 'judgements',
-                    'properties' => [
+                ),
+                new AccessEndpoint(
+                    type: 'submissions',
+                    properties: $submissionsProperties,
+                ),
+                new AccessEndpoint(
+                    type: 'judgements',
+                    properties: [
                         'id',
                         'submission_id',
                         'judgement_type_id',
@@ -211,10 +194,10 @@ class AccessController extends AbstractRestController
                         'end_contest_time',
                         'max_run_time',
                     ],
-                ],
-                [
-                    'type'       => 'runs',
-                    'properties' => [
+                ),
+                new AccessEndpoint(
+                    type: 'runs',
+                    properties: [
                         'id',
                         'judgement_id',
                         'ordinal',
@@ -223,17 +206,17 @@ class AccessController extends AbstractRestController
                         'contest_time',
                         'run_time',
                     ],
-                ],
-                [
-                    'type'       => 'awards',
-                    'properties' => [
+                ),
+                new AccessEndpoint(
+                    type: 'awards',
+                    properties: [
                         'id',
                         'citation',
                         'team_ids',
                     ],
-                ],
+                ),
             ],
-        ];
+        );
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder

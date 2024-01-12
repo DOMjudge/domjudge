@@ -2,6 +2,8 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\ContestState;
+use App\DataTransferObject\ContestStatus;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
@@ -122,12 +124,7 @@ class ContestController extends AbstractRestController
         description: 'Returns all contests visible to the user (all contests for privileged users, active contests otherwise)',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(
-                allOf: [
-                    new OA\Schema(ref: new Model(type: Contest::class)),
-                    new OA\Schema(ref: '#/components/schemas/Banner'),
-                ]
-            )
+            items: new OA\Items(ref: new Model(type: Contest::class))
         )
     )]
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
@@ -150,12 +147,7 @@ class ContestController extends AbstractRestController
     #[OA\Response(
         response: 200,
         description: 'Returns the given contest',
-        content: new OA\JsonContent(
-            allOf: [
-                new OA\Schema(ref: new Model(type: Contest::class)),
-                new OA\Schema(ref: '#/components/schemas/Banner'),
-            ]
-        )
+        content: new OA\JsonContent(ref: new Model(type: Contest::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     public function singleAction(Request $request, string $cid): Response
@@ -312,10 +304,7 @@ class ContestController extends AbstractRestController
     #[OA\Response(
         response: 200,
         description: 'Contest start time changed successfully',
-        content: new OA\JsonContent(allOf: [
-            new OA\Schema(ref: new Model(type: Contest::class)),
-            new OA\Schema(ref: '#/components/schemas/Banner'),
-        ])
+        content: new OA\JsonContent(ref: new Model(type: Contest::class))
     )]
     public function changeStartTimeAction(
         Request $request,
@@ -444,9 +433,9 @@ class ContestController extends AbstractRestController
     #[OA\Response(
         response: 200,
         description: 'The contest state',
-        content: new OA\JsonContent(ref: '#/components/schemas/ContestState')
+        content: new OA\JsonContent(ref: new Model(type: ContestState::class))
     )]
-    public function getContestStateAction(Request $request, string $cid): ?array
+    public function getContestStateAction(Request $request, string $cid): ContestState
     {
         $contest         = $this->getContestWithId($request, $cid);
         $inactiveAllowed = $this->isGranted('ROLE_API_READER');
@@ -766,25 +755,9 @@ class ContestController extends AbstractRestController
     #[OA\Response(
         response: 200,
         description: 'General status information for the given contest',
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(
-                    property: 'num_submissions',
-                    type: 'integer'
-                ),
-                new OA\Property(
-                    property: 'num_queued',
-                    type: 'integer'
-                ),
-                new OA\Property(
-                    property: 'num_judging',
-                    type: 'integer'
-                ),
-            ],
-            type: 'object'
-        )
+        content: new OA\JsonContent(ref: new Model(type: ContestStatus::class))
     )]
-    public function getStatusAction(Request $request, string $cid): array
+    public function getStatusAction(Request $request, string $cid): ContestStatus
     {
         return $this->dj->getContestStats($this->getContestWithId($request, $cid));
     }

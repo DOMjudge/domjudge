@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Submission;
 use App\Service\DOMJudgeService;
 use App\Service\SubmissionService;
@@ -100,7 +101,10 @@ class MetricsController extends AbstractFOSRestController
 
             // Get submissions stats for the contest.
             /** @var Submission[] $submissions */
-            [$submissions, $submissionCounts] = $this->submissionService->getSubmissionList([$contest->getCid() => $contest], ['visible' => true], 0);
+            [$submissions, $submissionCounts] = $this->submissionService->getSubmissionList(
+                [$contest->getCid() => $contest],
+                new SubmissionRestriction(visible: true)
+            );
             foreach ($submissionCounts as $kind => $count) {
                 $m['submissions_' . $kind]->set((int)$count, $labels);
             }

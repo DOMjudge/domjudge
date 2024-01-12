@@ -270,7 +270,7 @@
 
                     {% set link = null %}
                     {% if jury %}
-                        {% set restrict = {probid: problem.probid} %}
+                        {% set restrict = {problemId: problem.probid} %}
                         {% set link = path('jury_team', {teamId: score.team.teamid, restrict: restrict}) %}
                     {% endif %}
 

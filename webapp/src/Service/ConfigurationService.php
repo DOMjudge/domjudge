@@ -3,9 +3,11 @@
 namespace App\Service;
 
 use App\Config\Loader\YamlConfigLoader;
+use App\DataTransferObject\ConfigurationSpecification;
 use App\Entity\Configuration;
 use App\Entity\Executable;
 use App\Entity\Judging;
+use BackedEnum;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use InvalidArgumentException;
@@ -51,18 +53,18 @@ class ConfigurationService
     {
         $spec = $this->getConfigSpecification()[$name] ?? null;
 
-        if (!isset($spec) || ($onlyIfPublic && !$spec['public'])) {
+        if (!isset($spec) || ($onlyIfPublic && !$spec->public)) {
             throw new InvalidArgumentException("Configuration variable '$name' not found.");
         }
 
-        $value = $this->getDbValues()[$name] ?? $spec['default_value'];
+        $value = $this->getDbValues()[$name] ?? $spec->defaultValue;
 
-        if (isset($spec['enum_class'])) {
-            if (!class_exists($spec['enum_class'])) {
-                throw new InvalidArgumentException("Enum class '$spec[enum_class]' not found.");
+        if (isset($spec->enumClass)) {
+            if (!class_exists($spec->enumClass)) {
+                throw new InvalidArgumentException("Enum class '$spec->enumClass' not found.");
             }
 
-            return call_user_func($spec['enum_class'] . '::from', $value);
+            return call_user_func($spec->enumClass . '::from', $value);
         }
 
         return $value;
@@ -79,8 +81,8 @@ class ConfigurationService
         $specs  = $this->getConfigSpecification();
         $result = [];
         foreach ($specs as $name => $spec) {
-            if ($spec['public'] || !$onlyIfPublic) {
-                $result[$name] = $spec['default_value'];
+            if ($spec->public || !$onlyIfPublic) {
+                $result[$name] = $spec->defaultValue;
             }
         }
 
@@ -103,12 +105,7 @@ class ConfigurationService
     /**
      * Get all configuration specifications.
      *
-     * @return array<string, array{name: string, type: string, public: bool,
-     *               description: string, category: string, default_value: mixed|mixed[],
-     *               regex?: string, key_placeholder?: string, value_placeholder?: string,
-     *               error_message?: string, docdescription?: string, enum_class?: string,
-     *               options?: array<int|string, string>, key_options?: array<string, string>,
-     *               value_options?: array<string, string>}>
+     * @return ConfigurationSpecification[]
      */
     public function getConfigSpecification(): array
     {
@@ -146,7 +143,10 @@ EOF;
                 // @codeCoverageIgnoreEnd
             });
 
-        return require $cacheFile;
+        return array_map(
+            fn(array $item) => ConfigurationSpecification::fromArray($item),
+            require $cacheFile
+        );
     }
 
     /**
@@ -179,7 +179,7 @@ EOF;
         $errors = [];
         $logUnverifiedJudgings = false;
         foreach ($specs as $specName => $spec) {
-            $oldValue = $spec['default_value'];
+            $oldValue = $spec->defaultValue;
             if (isset($options[$specName])) {
                 $optionToSet = $options[$specName];
                 $oldValue = $optionToSet->getValue();
@@ -191,11 +191,11 @@ EOF;
                 $options[$specName] = $optionToSet;
             }
             if (!array_key_exists($specName, $dataToSet)) {
-                if ($spec['type'] == 'bool') {
+                if ($spec->type == 'bool') {
                     // Special-case bool, since checkboxes don't return a
                     // value when unset.
                     $val = false;
-                } elseif ($spec['type'] == 'array_val' && isset($spec['options'])) {
+                } elseif ($spec->type == 'array_val' && isset($spec->options)) {
                     // Special-case array_val with options, since multiselects
                     // don't return a value when unset.
                     $val = [];
@@ -206,9 +206,9 @@ EOF;
                 $val = $dataToSet[$specName];
             }
 
-            if (isset($spec['regex'])) {
-                if (preg_match($spec['regex'], (string)$val) === 0) {
-                    $errors[$specName] = $spec['error_message'] ?? 'This is not a valid value';
+            if (isset($spec->regex)) {
+                if (preg_match($spec->regex, (string)$val) === 0) {
+                    $errors[$specName] = $spec->errorMessage ?? 'This is not a valid value';
                 }
             }
 
@@ -221,7 +221,7 @@ EOF;
                 // since it will invalidate Doctrine entities.
                 $logUnverifiedJudgings = true;
             }
-            switch ($spec['type']) {
+            switch ($spec->type) {
                 case 'bool':
                     $optionToSet->setValue((bool)$val);
                     break;
@@ -258,7 +258,7 @@ EOF;
                 default:
                     $this->logger->warning(
                         "configuration option '%s' has unknown type '%s'",
-                        [ $specName, $spec['type'] ]
+                        [ $specName, $spec->type ]
                     );
             }
             if (!isset($errors[$specName])) {
@@ -349,53 +349,41 @@ EOF;
      *
      * This method is used to add predefined options that need to be loaded
      * from the database to certain items.
-     *
-     * @param array{name: string, type: string, default_value: bool, public: bool,
-     *              description: string, category: string, default_value: bool|int,
-     *              regex?: string, key_placeholder: string, value_placeholder: string,
-     *              error_message?: string, docdescription?: string, enum_class?: string,
-     *              options?: array<string>} $item
-     * @return array{name: string, type: string, default_value: bool, public: bool,
-     *               description: string, category: string, default_value: bool|int|bool,
-     *               regex?: string, key_placeholder: string, value_placeholder: string,
-     *               error_message?: string, docdescription?: string, enum_class?: string,
-     *               options?: array<int|string, string>, key_options?: array<string, string>,
-     *               value_options?: array<string, string>}
      */
-    public function addOptions(array $item): array
+    public function addOptions(ConfigurationSpecification $item): ConfigurationSpecification
     {
-        switch ($item['name']) {
+        switch ($item->name) {
             case 'default_compare':
-                $item['options'] = $this->findExecutableOptions('compare');
+                $item->options = $this->findExecutableOptions('compare');
                 break;
             case 'default_run':
-                $item['options'] = $this->findExecutableOptions('run');
+                $item->options = $this->findExecutableOptions('run');
                 break;
             case 'default_full_debug':
-                $item['options'] = $this->findExecutableOptions('debug');
+                $item->options = $this->findExecutableOptions('debug');
                 break;
             case 'results_prio':
             case 'results_remap':
                 $verdictsConfig      = $this->etcDir . '/verdicts.php';
                 $verdicts            = include $verdictsConfig;
-                $item['key_options'] = ['' => ''];
+                $item->keyOptions = ['' => ''];
                 foreach (array_keys($verdicts) as $verdict) {
-                    $item['key_options'][$verdict] = $verdict;
+                    $item->keyOptions[$verdict] = $verdict;
                 }
-                if ($item['name'] === 'results_remap') {
-                    $item['value_options'] = $item['key_options'];
+                if ($item->name === 'results_remap') {
+                    $item->valueOptions = $item->keyOptions;
                 }
         }
 
-        if ($item['type'] === 'enum') {
-            $enumClass = $item['enum_class'];
-            /** @var \BackedEnum[] $cases */
+        if ($item->type === 'enum') {
+            $enumClass = $item->enumClass;
+            /** @var BackedEnum[] $cases */
             $cases = call_user_func($enumClass . '::cases');
             foreach ($cases as $case) {
                 if (method_exists($case, 'getConfigDescription')) {
-                    $item['options'][$case->value] = $case->getConfigDescription();
+                    $item->options[$case->value] = $case->getConfigDescription();
                 } else {
-                    $item['options'][$case->value] = $case->name;
+                    $item->options[$case->value] = $case->name;
                 }
             }
         }

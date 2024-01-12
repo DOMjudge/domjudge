@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Contest;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
@@ -322,21 +323,21 @@ class RejudgingController extends BaseController
             }
         }
 
-        $restrictions = ['rejudgingid' => $rejudgingId];
+        $restrictions = new SubmissionRestriction(rejudgingId: $rejudgingId);
         if ($viewTypes[$view] == 'unverified') {
-            $restrictions['verified'] = false;
+            $restrictions->verified = false;
         }
         if ($viewTypes[$view] == 'unjudged') {
-            $restrictions['judged'] = false;
+            $restrictions->judged = false;
         }
         if ($viewTypes[$view] == 'diff') {
-            $restrictions['rejudgingdiff'] = true;
+            $restrictions->rejudgingDifference = true;
         }
         if ($oldverdict !== 'all') {
-            $restrictions['old_result'] = $oldverdict;
+            $restrictions->oldResult = $oldverdict;
         }
         if ($newverdict !== 'all') {
-            $restrictions['result'] = $newverdict;
+            $restrictions->result = $newverdict;
         }
 
         /** @var Submission[] $submissions */

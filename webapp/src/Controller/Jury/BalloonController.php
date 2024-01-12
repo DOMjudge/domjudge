@@ -156,7 +156,7 @@ class BalloonController extends AbstractController
                 'url' => $this->generateUrl('jury_balloons'),
                 'ajax' => true
             ],
-            'isfrozen' => isset($contest->getState()['frozen']),
+            'isfrozen' => isset($contest->getState()->frozen),
             'hasFilters' => !$this->areDefault($filters, $defaultCategories),
             'filteredAffiliations' => $filteredAffiliations,
             'filteredLocations' => $filteredLocations,

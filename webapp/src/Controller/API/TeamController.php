@@ -55,12 +55,7 @@ class TeamController extends AbstractRestController
         description: 'Returns all the teams for this contest',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(
-                allOf: [
-                    new OA\Schema(ref: new Model(type: Team::class)),
-                    new OA\Schema(ref: '#/components/schemas/Photo'),
-                ]
-            )
+            items: new OA\Items(ref: new Model(type: Team::class))
         )
     )]
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
@@ -96,12 +91,7 @@ class TeamController extends AbstractRestController
     #[OA\Response(
         response: 200,
         description: 'Returns the given team for this contest',
-        content: new OA\JsonContent(
-            allOf: [
-                new OA\Schema(ref: new Model(type: Team::class)),
-                new OA\Schema(ref: '#/components/schemas/Photo'),
-            ]
-        )
+        content: new OA\JsonContent(ref: new Model(type: Team::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response

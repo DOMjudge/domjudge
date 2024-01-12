@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\DataTransferObject\SubmissionRestriction;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Contest;
 use App\Entity\DebugPackage;
@@ -94,15 +95,15 @@ class SubmissionController extends BaseController
             'ajax' => true,
         ];
 
-        $restrictions = [];
+        $restrictions = new SubmissionRestriction();
         if ($viewTypes[$view] == 'unverified') {
-            $restrictions['verified'] = false;
+            $restrictions->verified = false;
         }
         if ($viewTypes[$view] == 'unjudged') {
-            $restrictions['judged'] = false;
+            $restrictions->judged = false;
         }
         if ($viewTypes[$view] == 'judging') {
-            $restrictions['judging'] = true;
+            $restrictions->judging = true;
         }
 
         $contests = $this->dj->getCurrentContests();

@@ -145,9 +145,9 @@ class OrganizationControllerTest extends BaseTestCase
             [
                 'href'     => "contests/1/organizations/$id/logo",
                 'mime'     => 'image/png',
+                'filename' => 'logo.png',
                 'width'    => 181,
                 'height'   => 101,
-                'filename' => 'logo.png',
             ]
         ];
         self::assertSame($logoConfig, $object['logo']);

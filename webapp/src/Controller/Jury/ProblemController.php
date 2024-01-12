@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judging;
@@ -430,11 +431,10 @@ class ProblemController extends BaseController
             return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
         }
 
-        $restrictions = ['probid' => $problem->getProbid()];
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
-            $restrictions
+            new SubmissionRestriction(problemId: $problem->getProbid()),
         );
 
         $data = [

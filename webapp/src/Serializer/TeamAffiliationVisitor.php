@@ -2,6 +2,7 @@
 
 namespace App\Serializer;
 
+use App\DataTransferObject\ImageFile;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -10,10 +11,7 @@ use App\Utils\Utils;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
-use JMS\Serializer\JsonSerializationVisitor;
-use JMS\Serializer\Metadata\StaticPropertyMetadata;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Intl\Countries;
 
 class TeamAffiliationVisitor implements EventSubscriberInterface
 {
@@ -31,18 +29,16 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
     {
         return [
             [
-                'event'  => Events::POST_SERIALIZE,
-                'class'  => TeamAffiliation::class,
+                'event' => Events::PRE_SERIALIZE,
+                'class' => TeamAffiliation::class,
                 'format' => 'json',
-                'method' => 'onPostSerialize'
+                'method' => 'onPreSerialize',
             ],
         ];
     }
 
-    public function onPostSerialize(ObjectEvent $event): void
+    public function onPreSerialize(ObjectEvent $event): void
     {
-        /** @var JsonSerializationVisitor $visitor */
-        $visitor = $event->getVisitor();
         /** @var TeamAffiliation $affiliation */
         $affiliation = $event->getObject();
 
@@ -58,30 +54,30 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
             ];
 
             foreach ($countryFlagSizes as $size => $viewBoxSize) {
-                $route      = $this->dj->apiRelativeUrl(
-                    'v4_app_api_generalinfo_countryflag', ['countryCode' => $affiliation->getCountry(), 'size' => $size]
+                $route = $this->dj->apiRelativeUrl(
+                    'v4_app_api_generalinfo_countryflag', [
+                        'countryCode' => $affiliation->getCountry(),
+                        'size' => $size,
+                    ]
                 );
-                $countryFlags[] = [
-                    'href'     => $route,
-                    'mime'     => 'image/svg+xml',
-                    'width'    => $viewBoxSize[0],
-                    'height'   => $viewBoxSize[1],
-                    'filename' => 'country-flag-' . $size . '.svg',
-                ];
+                $countryFlags[] = new ImageFile(
+                    href: $route,
+                    mime: 'image/svg+xml',
+                    filename: 'country-flag-' . $size . '.svg',
+                    width: $viewBoxSize[0],
+                    height: $viewBoxSize[1],
+                );
             }
 
-            $property = new StaticPropertyMetadata(
-                TeamAffiliation::class,
-                'country_flag',
-                null
-            );
-            $visitor->visitProperty($property, $countryFlags);
+            $affiliation->setCountryFlagForApi($countryFlags);
+        } else {
+            $affiliation->setCountryFlagForApi();
         }
 
         // Affiliation logo
         if ($affiliationLogo = $this->dj->assetPath((string)$id, 'affiliation', true)) {
             $imageSize = Utils::getImageSize($affiliationLogo);
-            $parts     = explode('.', $affiliationLogo);
+            $parts = explode('.', $affiliationLogo);
             $extension = $parts[count($parts) - 1];
 
             if ($cid = $this->requestStack->getCurrentRequest()->attributes->get('cid')) {
@@ -89,26 +85,21 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
                     'v4_organization_logo',
                     [
                         'cid' => $cid,
-                        'id'  => $id,
+                        'id' => $id,
                     ]
                 );
             } else {
                 $route = $this->dj->apiRelativeUrl('v4_no_contest_organization_logo', ['id' => $id]);
             }
-            $property = new StaticPropertyMetadata(
-                TeamAffiliation::class,
-                'logo',
-                null
-            );
-            $visitor->visitProperty($property, [
-                [
-                    'href'     => $route,
-                    'mime'     => mime_content_type($affiliationLogo),
-                    'width'    => $imageSize[0],
-                    'height'   => $imageSize[1],
-                    'filename' => 'logo.' . $extension,
-                ]
-            ]);
+            $affiliation->setLogoForApi(new ImageFile(
+                href: $route,
+                mime: mime_content_type($affiliationLogo),
+                filename: 'logo.' . $extension,
+                width: $imageSize[0],
+                height: $imageSize[1],
+            ));
+        } else {
+            $affiliation->setLogoForApi();
         }
     }
 }

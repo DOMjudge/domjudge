@@ -2,16 +2,19 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\Award;
 use App\Entity\Contest;
 use App\Service\AwardService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
+use App\Utils\Scoreboard\Scoreboard;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -41,6 +44,8 @@ class AwardsController extends AbstractRestController
      * Get all the awards standings for this contest.
      *
      * @throws Exception
+     *
+     * @return Award[]
      */
     #[Rest\Get('')]
     #[OA\Response(
@@ -48,12 +53,13 @@ class AwardsController extends AbstractRestController
         description: 'Returns the current teams qualifying for each award',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: '#/components/schemas/Award')
+            items: new OA\Items(ref: new Model(type: Award::class))
         )
     )]
-    public function listAction(Request $request): ?array
+    public function listAction(Request $request): array
     {
-        return $this->getAwardsData($request);
+        [$contest, $scoreboard] = $this->getContestAndScoreboard($request);
+        return $this->awards->getAwards($contest, $scoreboard);
     }
 
     /**
@@ -65,12 +71,13 @@ class AwardsController extends AbstractRestController
     #[OA\Response(
         response: 200,
         description: 'Returns the award for this contest',
-        content: new OA\JsonContent(ref: '#/components/schemas/Award')
+        content: new OA\JsonContent(ref: new Model(type: Award::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
-    public function singleAction(Request $request, string $id): array
+    public function singleAction(Request $request, string $id): Award
     {
-        $award = $this->getAwardsData($request, $id);
+        [$contest, $scoreboard] = $this->getContestAndScoreboard($request);
+        $award = $this->awards->getAward($contest, $scoreboard, $id);
 
         if ($award === null) {
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
@@ -80,9 +87,9 @@ class AwardsController extends AbstractRestController
     }
 
     /**
-     * Get the awards data for the given request and optional award ID.
+     * @return array{Contest, Scoreboard}
      */
-    protected function getAwardsData(Request $request, string $requestedType = null): ?array
+    protected function getContestAndScoreboard(Request $request): array
     {
         $public = !$this->dj->checkrole('api_reader');
         if ($this->dj->checkrole('api_reader') && $request->query->has('public')) {
@@ -97,7 +104,7 @@ class AwardsController extends AbstractRestController
         }
         $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, null, true);
 
-        return $this->awards->getAwards($contest, $scoreboard, $requestedType);
+        return [$contest, $scoreboard];
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder

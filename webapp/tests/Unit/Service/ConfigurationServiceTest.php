@@ -308,10 +308,10 @@ class ConfigurationServiceTest extends KernelTestCase
             ->willReturn($executables);
 
         $spec = $this->config->getConfigSpecification()[$item];
-        self::assertArrayNotHasKey('options', $spec);
+        self::assertNull($spec->options);
         $spec = $this->config->addOptions($spec);
 
-        self::assertSame($expected, $spec['options']);
+        self::assertSame($expected, $spec->options);
     }
 
     public function provideAddOptionsExecutables(): Generator
@@ -339,14 +339,14 @@ class ConfigurationServiceTest extends KernelTestCase
         }
 
         $spec = $this->config->getConfigSpecification()[$item];
-        self::assertArrayNotHasKey('options', $spec);
+        self::assertNull($spec->options);
         $spec = $this->config->addOptions($spec);
 
-        self::assertSame($verdictOptions, $spec['key_options']);
+        self::assertSame($verdictOptions, $spec->keyOptions);
         if ($item === 'results_remap') {
-            self::assertSame($verdictOptions, $spec['value_options']);
+            self::assertSame($verdictOptions, $spec->valueOptions);
         } else {
-            self::assertArrayNotHasKey('value_options', $spec);
+            self::assertNull($spec->valueOptions);
         }
     }
 

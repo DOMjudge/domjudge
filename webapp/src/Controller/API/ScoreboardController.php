@@ -2,6 +2,10 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\Scoreboard\Problem;
+use App\DataTransferObject\Scoreboard\Row;
+use App\DataTransferObject\Scoreboard\Score;
+use App\DataTransferObject\Scoreboard\Scoreboard;
 use App\Entity\Contest;
 use App\Entity\Event;
 use App\Entity\TeamCategory;
@@ -16,6 +20,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -48,7 +53,7 @@ class ScoreboardController extends AbstractRestController
     #[OA\Response(
         response: 200,
         description: 'Returns the scoreboard',
-        content: new OA\JsonContent(ref: '#/components/schemas/Scoreboard')
+        content: new OA\JsonContent(ref: new Model(type: Scoreboard::class))
     )]
     #[OA\Parameter(
         name: 'allteams',
@@ -102,7 +107,7 @@ class ScoreboardController extends AbstractRestController
         ?int $sortorder = null,
         #[MapQueryParameter]
         bool $strict = false,
-    ): array {
+    ): Scoreboard {
         $filter = new Filter();
         if ($category) {
             $filter->categories = [$category];
@@ -144,18 +149,15 @@ class ScoreboardController extends AbstractRestController
 
         $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, $filter, !$allTeams);
 
-        $results = [];
+        $results = new Scoreboard();
         if ($event) {
             // Build up scoreboard results.
-            $results = [
-                'time' => Utils::absTime($event->getEventtime()),
-                'contest_time' => Utils::relTime($event->getEventtime() - $contest->getStarttime()),
-                'state' => $contest->getState(),
-                'rows' => [],
-            ];
-            if (!$strict) {
-                $results['event_id'] = (string)$event->getEventid();
-            }
+            $results = new Scoreboard(
+                eventId: (string)$event->getEventid(),
+                time: Utils::absTime($event->getEventtime()),
+                contestTime: Utils::relTime($event->getEventtime() - $contest->getStarttime()),
+                state: $contest->getState(),
+            );
         }
 
         // Return early if there's nothing to display yet.
@@ -169,56 +171,55 @@ class ScoreboardController extends AbstractRestController
             if ($teamScore->team->getCategory()->getSortorder() !== $sortorder) {
                 continue;
             }
-            $row = [
-                'rank' => $teamScore->rank,
-                'team_id' => $teamScore->team->getApiId($this->eventLogService),
-                'score' => [
-                    'num_solved' => $teamScore->numPoints,
-                ],
-                'problems' => [],
-            ];
 
             if ($contest->getRuntimeAsScoreTiebreaker()) {
-                $row['score']['total_runtime'] = $teamScore->totalRuntime;
+                $score = new Score(
+                    numSolved: $teamScore->numPoints,
+                    totalRuntime: $teamScore->totalRuntime,
+                );
             } else {
-                $row['score']['total_time'] = $teamScore->totalTime;
+                $score = new Score(
+                    numSolved: $teamScore->numPoints,
+                    totalTime: $teamScore->totalTime,
+                );
             }
 
+            $problems = [];
             foreach ($scoreboard->getMatrix()[$teamScore->team->getTeamid()] as $problemId => $matrixItem) {
                 $contestProblem = $scoreboard->getProblems()[$problemId];
-                $problem        = [
-                    'label' => $contestProblem->getShortname(),
-                    'problem_id' => $contestProblem->getApiId($this->eventLogService),
-                    'num_judged' => $matrixItem->numSubmissions,
-                    'num_pending' => $matrixItem->numSubmissionsPending,
-                    'solved' => $matrixItem->isCorrect,
-                ];
+                $problem = new Problem(
+                    label: $contestProblem->getShortname(),
+                    problemId: $contestProblem->getApiId($this->eventLogService),
+                    numJudged: $matrixItem->numSubmissions,
+                    numPending: $matrixItem->numSubmissionsPending,
+                    solved: $matrixItem->isCorrect,
+                );
 
                 if ($contest->getRuntimeAsScoreTiebreaker()) {
-                    $problem['fastest_submission'] = $matrixItem->isCorrect && $scoreboard->isFastestSubmission($teamScore->team, $contestProblem);
+                    $problem->fastestSubmission = $matrixItem->isCorrect && $scoreboard->isFastestSubmission($teamScore->team, $contestProblem);
                     if ($matrixItem->isCorrect) {
-                        $problem['runtime'] = $matrixItem->runtime;
+                        $problem->runtime = $matrixItem->runtime;
                     }
                 } else {
-                    $problem['first_to_solve'] = $matrixItem->isCorrect && $scoreboard->solvedFirst($teamScore->team, $contestProblem);
+                    $problem->firstToSolve = $matrixItem->isCorrect && $scoreboard->solvedFirst($teamScore->team, $contestProblem);
                     if ($matrixItem->isCorrect) {
-                        $problem['time'] = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
+                        $problem->time = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
                     }
                 }
 
-                $row['problems'][] = $problem;
+                $problems[] = $problem;
             }
 
-            usort($row['problems'], fn($a, $b) => $a['label'] <=> $b['label']);
+            usort($problems, fn(Problem $a, Problem $b) => $a->label <=> $b->label);
 
-            if ($strict) {
-                foreach ($row['problems'] as $key => $data) {
-                    unset($row['problems'][$key]['label']);
-                    unset($row['problems'][$key]['first_to_solve']);
-                }
-            }
+            $row = new Row(
+                rank: $teamScore->rank,
+                teamId: $teamScore->team->getApiId($this->eventLogService),
+                score: $score,
+                problems: $problems,
+            );
 
-            $results['rows'][] = $row;
+            $results->rows[] = $row;
         }
 
         return $results;

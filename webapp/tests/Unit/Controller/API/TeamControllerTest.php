@@ -54,9 +54,9 @@ class TeamControllerTest extends BaseTestCase
             [
                 'href'     => "contests/1/teams/$id/photo",
                 'mime'     => 'image/jpeg',
+                'filename' => 'photo.jpg',
                 'width'    => 320,
                 'height'   => 200,
-                'filename' => 'photo.jpg',
             ]
         ];
         self::assertSame($logoConfig, $object['photo']);

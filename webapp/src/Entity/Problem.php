@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
+use App\DataTransferObject\FileWithName;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -167,6 +168,11 @@ class Problem extends BaseApiEntity
     #[ORM\OrderBy(['name' => 'ASC'])]
     #[Serializer\Exclude]
     private Collection $attachments;
+
+    // This field gets filled by the contest problem visitor with a data transfer
+    // object that represents the problem statement.
+    #[Serializer\Exclude]
+    private ?FileWithName $statementForApi = null;
 
     public function setProbid(int $probid): Problem
     {
@@ -515,5 +521,21 @@ class Problem extends BaseApiEntity
         $response->headers->set('Content-Length', (string)strlen($problemText));
 
         return $response;
+    }
+
+    public function setStatementForApi(?FileWithName $statementForApi = null): void
+    {
+        $this->statementForApi = $statementForApi;
+    }
+
+    /**
+     * @return FileWithName[]
+     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('statement')]
+    #[Serializer\Type('array<App\DataTransferObject\FileWithName>')]
+    public function getStatementForApi(): array
+    {
+        return array_filter([$this->statementForApi]);
     }
 }

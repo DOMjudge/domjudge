@@ -2,10 +2,12 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\JudgementType;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -21,6 +23,7 @@ class JudgementTypeController extends AbstractRestController
      * Get all the judgement types for this contest.
      *
      * @throws NonUniqueResultException
+     * @return JudgementType[]
      */
     #[Rest\Get('')]
     #[OA\Response(
@@ -28,7 +31,7 @@ class JudgementTypeController extends AbstractRestController
         description: 'Returns all the judgement types for this contest',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: '#/components/schemas/JudgementType')
+            items: new OA\Items(ref: new Model(type: JudgementType::class))
         )
     )]
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
@@ -59,10 +62,10 @@ class JudgementTypeController extends AbstractRestController
     #[OA\Response(
         response: 200,
         description: 'Returns the given judgement type for this contest',
-        content: new OA\JsonContent(ref: '#/components/schemas/JudgementType')
+        content: new OA\JsonContent(ref: new Model(type: JudgementType::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
-    public function singleAction(Request $request, string $id): array
+    public function singleAction(Request $request, string $id): JudgementType
     {
         // Call getContestId to make sure we have an active contest.
         $this->getContestId($request);
@@ -77,6 +80,10 @@ class JudgementTypeController extends AbstractRestController
 
     /**
      * Get the judgement types, optionally filtered on the given IDs.
+     *
+     * @param string[]|null $filteredOn
+     *
+     * @return JudgementType[]
      */
     protected function getJudgementTypes(array $filteredOn = null): array
     {
@@ -96,12 +103,12 @@ class JudgementTypeController extends AbstractRestController
             if ($filteredOn !== null && !in_array($label, $filteredOn)) {
                 continue;
             }
-            $result[] = [
-                'id' => (string)$label,
-                'name' => str_replace('-', ' ', $name),
-                'penalty' => (bool)$penalty,
-                'solved' => (bool)$solved,
-            ];
+            $result[] = new JudgementType(
+                id: $label,
+                name: str_replace('-', ' ', $name),
+                penalty: (bool)$penalty,
+                solved: $solved,
+            );
         }
         return $result;
     }

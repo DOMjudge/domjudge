@@ -2,6 +2,7 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
+use App\DataTransferObject\Command;
 use App\Validator\Constraints\Identifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -217,37 +218,31 @@ class Language extends BaseApiEntity
         return $this->compile_executable?->getImmutableExecutable()->getHash();
     }
 
-    /**
-     * @return array<string, string|null>
-     */
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('compiler')]
     #[Serializer\Exclude(if:'object.getCompilerVersionCommand() == ""')]
-    public function getCompilerData(): array
+    public function getCompilerData(): Command
     {
-        $ret = [];
+        $ret = new Command();
         if (!empty($this->getCompilerVersionCommand())) {
-            $ret['version_command'] = $this->getCompilerVersionCommand();
+            $ret->versionCommand = $this->getCompilerVersionCommand();
             if (!empty($this->getCompilerVersion())) {
-                $ret['version'] = $this->getCompilerVersion();
+                $ret->version = $this->getCompilerVersion();
             }
         }
         return $ret;
     }
 
-    /**
-     * @return array<string, string|null>
-     */
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('runner')]
     #[Serializer\Exclude(if:'object.getRunnerVersionCommand() == ""')]
-    public function getRunnerData(): array
+    public function getRunnerData(): Command
     {
-        $ret = [];
+        $ret = new Command();
         if (!empty($this->getRunnerVersionCommand())) {
-            $ret['version_command'] = $this->getRunnerVersionCommand();
+            $ret->versionCommand = $this->getRunnerVersionCommand();
             if (!empty($this->getRunnerVersion())) {
-                $ret['version'] = $this->getRunnerVersion();
+                $ret->version = $this->getRunnerVersion();
             }
         }
         return $ret;

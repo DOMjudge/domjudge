@@ -80,7 +80,7 @@ class BalloonService
 
     /**
      * @return array<array{data: array{balloonid: int, time: string, problem: string, contestproblem: ContestProblem,
-     *                                 team: Team, teamid: int, location: string|null, affiliation: TeamAffiliation|null,
+     *                                 team: Team, teamid: int, location: string|null, affiliation: string|null,
      *                                 affiliationid: int, category: string, categoryid: int, total: array<string, ContestProblem>,
      *                                 awards: string, done: bool}}>
     */

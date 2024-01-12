@@ -2,6 +2,10 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\ApiInfo;
+use App\DataTransferObject\ApiVersion;
+use App\DataTransferObject\DomJudgeApiInfo;
+use App\DataTransferObject\ExtendedContestStatus;
 use App\Entity\Contest;
 use App\Entity\User;
 use App\Service\CheckConfigService;
@@ -16,6 +20,7 @@ use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use InvalidArgumentException;
+use JMS\Serializer\SerializerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
@@ -59,14 +64,11 @@ class GeneralInfoController extends AbstractFOSRestController
     #[OA\Response(
         response: 200,
         description: 'The current API version information',
-        content: new OA\JsonContent(
-            properties: [new OA\Property(property: 'api_version', type: 'integer')],
-            type: 'object'
-        )
+        content: new OA\JsonContent(ref: new Model(type: ApiVersion::class))
     )]
-    public function getVersionAction(): array
+    public function getVersionAction(): ApiVersion
     {
-        return ['api_version' => static::API_VERSION];
+        return new ApiVersion(static::API_VERSION);
     }
 
     /**
@@ -77,74 +79,36 @@ class GeneralInfoController extends AbstractFOSRestController
     #[OA\Response(
         response: 200,
         description: 'Information about the API and DOMjudge',
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(
-                    property: 'version',
-                    description: 'Version of the CCS Specs Contest API the API adheres to',
-                    type: 'string'
-                ),
-                new OA\Property(
-                    property: 'version_url',
-                    description: 'URL with the specification of the Contest API',
-                    type: 'string'
-                ),
-                new OA\Property(
-                    property: 'domjudge',
-                    description: 'DOMjudge information',
-                    properties: [
-                        new OA\Property(
-                            property: 'api_version',
-                            description: 'Version of the API',
-                            type: 'integer'
-                        ),
-                        new OA\Property(
-                            property: 'domjudge_version',
-                            description: 'Version of DOMjudge',
-                            type: 'string'
-                        ),
-                        new OA\Property(
-                            property: 'environment',
-                            description: 'Environment DOMjudge is running in',
-                            type: 'string'
-                        ),
-                        new OA\Property(
-                            property: 'doc_url',
-                            description: 'URL to DOMjudge API docs',
-                            type: 'string'
-                        ),
-                    ],
-                    type: 'object'
-                ),
-            ],
-            type: 'object'
-        )
+        content: new OA\JsonContent(ref: new Model(type: ApiInfo::class))
     )]
     public function getInfoAction(
         #[MapQueryParameter]
         bool $strict = false
-    ): array {
-        $result = [
-            'version' => self::CCS_SPEC_API_VERSION,
-            'version_url' => self::CCS_SPEC_API_URL,
-            'name' => 'DOMjudge',
-        ];
+    ): ApiInfo {
+        $domjudge = null;
         if (!$strict) {
-            $result['domjudge'] = [
-                'api_version' => static::API_VERSION,
-                'version' => $this->getParameter('domjudge.version'),
-                'environment' => $this->getParameter('kernel.environment'),
-                'doc_url' => $this->router->generate('app.swagger_ui', [], RouterInterface::ABSOLUTE_URL),
-            ];
+            $domjudge = new DomJudgeApiInfo(
+                apiversion: static::API_VERSION,
+                version: $this->getParameter('domjudge.version'),
+                environment: $this->getParameter('kernel.environment'),
+                docUrl: $this->router->generate('app.swagger_ui', [], RouterInterface::ABSOLUTE_URL)
+            );
         }
 
-        return $result;
+        return new ApiInfo(
+            version: self::CCS_SPEC_API_VERSION,
+            versionUrl: self::CCS_SPEC_API_URL,
+            name: 'DOMjudge',
+            domjudge: $domjudge
+        );
     }
 
     /**
      * Get general status information
      * @throws NoResultException
      * @throws NonUniqueResultException
+     *
+     * @return ExtendedContestStatus[]
      */
     #[IsGranted('ROLE_API_READER')]
     #[Rest\Get('/status')]
@@ -153,15 +117,7 @@ class GeneralInfoController extends AbstractFOSRestController
         description: 'General status information for the currently active contests',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(
-                properties: [
-                    new OA\Property(property: 'cid', type: 'integer'),
-                    new OA\Property(property: 'num_submissions', type: 'integer'),
-                    new OA\Property(property: 'num_queued', type: 'integer'),
-                    new OA\Property(property: 'num_judging', type: 'integer'),
-                ],
-                type: 'object'
-            )
+            items: new OA\Items(ref: new Model(type: ExtendedContestStatus::class))
         )
     )]
     public function getStatusAction(): array
@@ -174,10 +130,11 @@ class GeneralInfoController extends AbstractFOSRestController
         $result = [];
         foreach ($contests as $contest) {
             $contestStats = $this->dj->getContestStats($contest);
-            $contestStats['cid'] =
+            $result[] = new ExtendedContestStatus(
                 $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_LOCAL
-                    ? $contest->getCid() : $contest->getExternalid();
-            $result[] = $contestStats;
+                    ? (string)$contest->getCid() : $contest->getExternalid(),
+                $contestStats
+            );
         }
 
         return $result;
@@ -296,7 +253,7 @@ class GeneralInfoController extends AbstractFOSRestController
         description: 'Result of the various checks performed, errors found.',
         content: new OA\JsonContent(type: 'object')
     )]
-    public function getConfigCheckAction(): JsonResponse
+    public function getConfigCheckAction(SerializerInterface $serializer): Response
     {
         $result = $this->checkConfigService->runAll();
 
@@ -308,18 +265,17 @@ class GeneralInfoController extends AbstractFOSRestController
         $aggregate = 200;
         foreach ($result as &$cat) {
             foreach ($cat as &$test) {
-                if ($test['result'] == 'E') {
+                if ($test->result == 'E') {
                     $aggregate = max($aggregate, 260);
-                } elseif ($test['result'] == 'W') {
+                } elseif ($test->result == 'W') {
                     $aggregate = max($aggregate, 250);
                 }
-                unset($test['escape']);
             }
             unset($test);
         }
         unset($cat);
 
-        return $this->json($result, $aggregate);
+        return new Response($serializer->serialize($result, 'json'), $aggregate);
     }
 
     /**

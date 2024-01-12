@@ -2,11 +2,11 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\ContestProblemArray;
+use App\DataTransferObject\ContestProblemWrapper;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
-use App\Helpers\ContestProblemWrapper;
-use App\Helpers\OrdinalArray;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -16,8 +16,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,6 +25,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Yaml;
 
 #[Rest\Route('/contests/{cid}/problems')]
@@ -111,7 +112,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         description: 'Returns all the problems for this contest',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: '#/components/schemas/ContestProblem')
+            items: new OA\Items(ref: new Model(type: ContestProblem::class))
         )
     )]
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
@@ -133,7 +134,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
         $objects = array_map($this->transformObject(...), $objects);
 
-        $ordinalArray = new OrdinalArray($objects);
+        $ordinalArray = new ContestProblemArray($objects);
         $objects      = $ordinalArray->getItems();
 
         if ($request->query->has('ids')) {
@@ -143,7 +144,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             $objects = [];
             foreach ($ordinalArray->getItems() as $item) {
                 /** @var ContestProblemWrapper|ContestProblem $contestProblem */
-                $contestProblem = $item->getItem();
+                $contestProblem = $item->getContestProblemWrapper();
                 if ($contestProblem instanceof ContestProblemWrapper) {
                     $contestProblem = $contestProblem->getContestProblem();
                 }
@@ -291,7 +292,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     #[OA\Response(
         response: 200,
         description: 'Returns the linked problem for this contest',
-        content: new OA\JsonContent(ref: '#/components/schemas/ContestProblem')
+        content: new OA\JsonContent(ref: new Model(type: ContestProblem::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function linkProblemAction(Request $request, string $id): Response
@@ -372,17 +373,17 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     #[OA\Response(
         response: 200,
         description: 'Returns the given problem for this contest',
-        content: new OA\JsonContent(ref: '#/components/schemas/ContestProblem')
+        content: new OA\JsonContent(ref: new Model(type: ContestProblem::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
     {
-        $ordinalArray = new OrdinalArray($this->listActionHelper($request));
+        $ordinalArray = new ContestProblemArray($this->listActionHelper($request));
 
         $object = null;
         foreach ($ordinalArray->getItems() as $item) {
             /** @var ContestProblemWrapper|ContestProblem $contestProblem */
-            $contestProblem = $item->getItem();
+            $contestProblem = $item->getContestProblemWrapper();
             if ($contestProblem instanceof ContestProblemWrapper) {
                 $contestProblem = $contestProblem->getContestProblem();
             }

@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\Balloon;
 use App\Entity\Contest;
 use App\Entity\Team;
 use App\Service\BalloonService;
@@ -9,6 +10,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,6 +31,7 @@ class BalloonController extends AbstractRestController
      * Get all the balloons for this contest.
      *
      * @throws NonUniqueResultException
+     * @return Balloon[]
      */
     #[Rest\Get('')]
     #[OA\Response(
@@ -36,7 +39,7 @@ class BalloonController extends AbstractRestController
         description: 'Returns the balloons for this contest.',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: '#/components/schemas/Balloon')
+            items: new OA\Items(ref: new Model(type: Balloon::class))
         )
     )]
     #[OA\Parameter(
@@ -54,13 +57,30 @@ class BalloonController extends AbstractRestController
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
         $balloonsData = $balloonService->collectBalloonTable($contest, $todo);
-        foreach ($balloonsData as &$b) {
+        $balloons = [];
+        foreach ($balloonsData as $b) {
             /** @var Team $team */
             $team = $b['data']['team'];
-            $b['data']['team'] = "t" . $team->getTeamid() . ": " . $team->getEffectiveName();
+            $teamName = "t" . $team->getTeamid() . ": " . $team->getEffectiveName();
+            $balloons[] = new Balloon(
+                balloonid: $b['data']['balloonid'],
+                time: $b['data']['time'],
+                problem: $b['data']['problem'],
+                contestproblem: $b['data']['contestproblem'],
+                team: $teamName,
+                teamid: $team->getTeamid(),
+                location: $b['data']['location'],
+                affiliation: $b['data']['affiliation'],
+                affiliationid: $b['data']['affiliationid'],
+                category: $b['data']['category'],
+                categoryid: $b['data']['categoryid'],
+                total: $b['data']['total'],
+                awards: $b['data']['awards'],
+                done: $b['data']['done'],
+            );
         }
         unset($b);
-        return array_column($balloonsData, 'data');
+        return $balloons;
     }
 
     /**

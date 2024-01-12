@@ -3,7 +3,9 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
-use App\Helpers\TeamLocation;
+use App\DataTransferObject\FileWithName;
+use App\DataTransferObject\ImageFile;
+use App\DataTransferObject\TeamLocation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -187,6 +189,11 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[ORM\InverseJoinColumn(name: 'mesgid', referencedColumnName: 'clarid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private Collection $unread_clarifications;
+
+    // This field gets filled by the team visitor with a data transfer
+    // object that represents the team photo
+    #[Serializer\Exclude]
+    private ?ImageFile $photoForApi = null;
 
     public function setTeamid(int $teamid): Team
     {
@@ -645,5 +652,22 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
             'photo' => $this->isClearPhoto(),
             default => null,
         };
+    }
+
+    public function setPhotoForApi(?ImageFile $photoForApi = null): void
+    {
+        $this->photoForApi = $photoForApi;
+    }
+
+    /**
+     * @return ImageFile[]
+     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('photo')]
+    #[Serializer\Type('array<App\DataTransferObject\ImageFile>')]
+    #[Serializer\Exclude(if: 'object.getPhotoForApi() === []')]
+    public function getPhotoForApi(): array
+    {
+        return array_filter([$this->photoForApi]);
     }
 }

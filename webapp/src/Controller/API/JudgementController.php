@@ -2,8 +2,8 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\JudgingWrapper;
 use App\Entity\Judging;
-use App\Helpers\JudgingWrapper;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -58,12 +58,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
         description: 'Returns all the judgements for this contest',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(
-                allOf: [
-                    new OA\Schema(ref: new Model(type: Judging::class)),
-                    new OA\Schema(ref: '#/components/schemas/JudgementExtraFields'),
-                ]
-            )
+            items: new OA\Items(ref: new Model(type: JudgingWrapper::class))
         )
     )]
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
@@ -94,12 +89,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     #[OA\Response(
         response: 200,
         description: 'Returns the given judgement for this contest',
-        content: new OA\JsonContent(
-            allOf: [
-                new OA\Schema(ref: new Model(type: Judging::class)),
-                new OA\Schema(ref: '#/components/schemas/JudgementExtraFields'),
-            ]
-        )
+        content: new OA\JsonContent(ref: new Model(type: JudgingWrapper::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response

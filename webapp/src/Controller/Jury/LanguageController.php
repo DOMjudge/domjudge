@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Submission;
@@ -175,11 +176,10 @@ class LanguageController extends BaseController
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
-        $restrictions = ['langid' => $language->getLangid()];
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
-            $restrictions
+            new SubmissionRestriction(languageId: $language->getLangid())
         );
 
         $data = [
