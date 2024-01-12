@@ -1,0 +1,73 @@
+name: 'Build example tarball'
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  create-unofficial-tarball:
+    if: github.repository == 'domjudge/domjudge'
+    name: Build example tarball (Unofficial)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download release script
+        run: wget https://raw.githubusercontent.com/DOMjudge/domjudge-scripts/main/make_release.sh
+
+      - name: Bring apt in a good state
+        run: sudo apt update
+
+      - name: Install development needed packages
+        run: |
+          sudo apt install -y autoconf automake bats \
+                              python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig python3-yaml \
+                              latexmk texlive-latex-recommended texlive-latex-extra tex-gyre
+
+      - name: Create release tarball
+        run: |
+          sh ./make_release.sh ${{ github.ref_name }}
+
+      - name: Install our new version dependencies
+        run: |
+          sudo apt install -y acl zip unzip mariadb-server apache2 php php-fpm php-gd php-cli php-intl php-mbstring \
+                              php-mysql php-curl php-json php-xml php-zip composer ntp \
+                              make pkg-config sudo debootstrap libcgroup-dev php-cli php-curl php-json php-xml \
+                              php-zip lsof procps
+          
+      - name: Unpack the tarball again
+        run: |
+          for directory in build all docs domserver judgehost; do
+            mkdir /tmp/${directory}
+            tar zxvf domjudge-${{ github.ref_name }}.tar.gz --directory /tmp/${directory}
+          done
+
+      - name: Configure and install in default setting
+        run: |
+          for directory in build all docs domserver judgehost; do
+            cd /tmp/${directory}/domjudge-${{ github.ref_name }}
+            ./configure
+            make ${directory}
+            if [ "$directory" != "docs" ] && [ "$directory" != "judgehost" ]; then
+              sudo make install-domserver
+            fi
+            if [ "$directory" != "docs" ] && [ "$directory" != "domserver" ]; then
+              sudo make install-judgehost
+            fi
+            if [ "$directory" = "docs" ] || [ "$directory" = "all" ]; then
+              sudo make install-docs
+            fi
+            make clean
+            make distclean
+          done
+
+      - name: "See the new_release_howto.txt (L28/domjudge-scripts) for the next step."
+        run: true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unofficial-tarball-${{ github.ref_name }}
+          path: domjudge-${{ github.ref_name }}.tar.gz
+          retention-days: 2
+
