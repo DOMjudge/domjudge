@@ -866,7 +866,7 @@ JS;
     {
         $line   = strtok($difftext, "\n"); // first line
         $return = '';
-        while ($line !== false && strlen($line) != 0) {
+        while ($line !== false) {
             // Strip any additional DOS/MAC newline characters:
             $line = str_replace("\r", "↵", $line);
             $formdiffline = match (substr($line, 0, 1)) {
