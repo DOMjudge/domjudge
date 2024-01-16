@@ -697,7 +697,7 @@ EOF;
     "group_ids": ["24"],
     "name": "¡i¡i¡",
     "organization_id": "INST-42",
-    "location": "AUD 10"
+    "location": {"description": "AUD 10"}
 }, {
     "id": "12",
     "icpc_id": "447837",

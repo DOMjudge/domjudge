@@ -22,7 +22,7 @@ class TeamControllerTest extends BaseTestCase
             'display_name'    => null,
             'members'         => null,
             'photo'           => null,
-            'location'        => 'Utrecht',
+            'location'        => ['description' => 'Utrecht'],
         ],
     ];
 

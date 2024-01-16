@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
+use App\Helpers\TeamLocation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -88,7 +89,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
 
     #[ORM\Column(nullable: true, options: ['comment' => 'Physical location of team'])]
     #[OA\Property(nullable: true)]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\Exclude]
     private ?string $location = null;
 
     #[ORM\Column(
@@ -295,6 +296,14 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     public function getLocation(): ?string
     {
         return $this->location;
+    }
+
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('location')]
+    public function getLocationForApi(): ?TeamLocation
+    {
+        return $this->location ? new TeamLocation($this->location) : null;
     }
 
     public function setInternalComments(?string $comments): Team
