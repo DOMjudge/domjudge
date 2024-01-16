@@ -862,6 +862,10 @@ JS;
                            sprintf($editor, $code, $editable ? 'false' : 'true', $mode, $extraForEdit));
     }
 
+    // This function expects $difftext to be in unified diff format. In
+    // particular each line is expected to contain at least some character
+    // (that is, a leading space, + or -) so that strtok does not gobble up
+    // multiple empty lines in one go.
     protected function parseSourceDiff(string $difftext): string
     {
         $line   = strtok($difftext, "\n"); // first line
