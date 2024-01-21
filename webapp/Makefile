@@ -12,16 +12,18 @@ SUBDIRS = config
 copy-bundle-assets:
 # We can not use bin/console here, as when using a fakeroot,
 # the include paths are broken. We just copy in the data we need
-	-rm -rf public/bundles/nelmioapidoc
+	-rm -rf public/bundles/nelmioapidoc/*
 	mkdir -p public/bundles/nelmioapidoc
-	cp -R ../lib/vendor/nelmio/api-doc-bundle/Resources/public/* public/bundles/nelmioapidoc/
+	cp -a ../lib/vendor/nelmio/api-doc-bundle/Resources/public/* public/bundles/nelmioapidoc/
 
 clean-l:
 	-rm -rf public/bundles/nelmioapidoc
 
-install-domserver:
+domserver-l:
 # This must be done first to install with the rest.
 	$(MAKE) copy-bundle-assets
+
+install-domserver:
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
 	for d in bin config migrations public resources src templates tests ; do \
 		$(call install_tree,$(DESTDIR)$(domserver_webappdir),$$d) ; \
