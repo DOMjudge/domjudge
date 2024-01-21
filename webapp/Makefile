@@ -9,7 +9,7 @@ include $(TOPDIR)/Makefile.global
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = config
 
-domserver: composer-dump-autoload
+domserver: composer-dump-autoload public/bundles/nelmioapidoc
 
 # Install PHP dependencies
 composer-dependencies:
@@ -43,20 +43,17 @@ composer-dump-autoload-dev:
 	@echo "# the DOMjudge Symfony application in developer mode. Adjust as needed." >> $@
 	@echo "APP_ENV=dev" >> $@
 
-copy-bundle-assets:
+public/bundles/nelmioapidoc:
 # We can not use bin/console here, as when using a fakeroot,
 # the include paths are broken. We just copy in the data we need
-	-rm -rf public/bundles/nelmioapidoc
-	mkdir -p public/bundles/nelmioapidoc
-	cp -R vendor/nelmio/api-doc-bundle/public/* public/bundles/nelmioapidoc/
+	mkdir -p $@
+	cp -a vendor/nelmio/api-doc-bundle/public/* $@
 
 clean-l:
 	-rm -rf public/bundles/nelmioapidoc
 	-rm -f vendor/autoload_runtime.php
 
 install-domserver:
-# This must be done first to install with the rest.
-	$(MAKE) copy-bundle-assets
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
 	for d in bin config migrations public resources src templates tests vendor; do \
 		$(call install_tree,$(DESTDIR)$(domserver_webappdir),$$d) ; \
@@ -71,6 +68,11 @@ maintainer-conf: .env.local
 
 maintainer-install: composer-dump-autoload-dev
 
+maintainer-install-l:
+# This must be done first to install with the rest.
+	-rm -rf public/bundles/nelmioapidoc
+	$(MAKE) public/bundles/nelmioapidoc
+
 maintainer-clean-l:
 	-for d in cache log ; do \
 		for t in dev prod ; do \
@@ -78,5 +80,4 @@ maintainer-clean-l:
 		done ; \
 	done
 
-.PHONY: composer-dump-autoload composer-dump-autoload-dev \
-        copy-bundle-assets
+.PHONY: composer-dump-autoload composer-dump-autoload-dev
