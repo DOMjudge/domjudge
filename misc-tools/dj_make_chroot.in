@@ -67,7 +67,7 @@ Options:
   -i <debs>    List of extra package names to install (comma separated).
   -r <debs>    List of extra package names to remove (comma separated).
   -l <debs>    List of local package files to install (comma separated).
-  -s <lists>   List of apt repository .list files that exist outside the chroot 
+  -s <lists>   List of apt repository .list files that exist outside the chroot
                to add to the chroot (comma separated). Signing keys for the
                repository will be imported if they exist as <filename>.gpg,
                <filename>.asc or <filename>.arm.
@@ -178,7 +178,7 @@ if [ "$DISTRO" = 'Debian' ]; then
     REMOVEDEBS=""
 
     # Which debootstrap package to install on non-Debian systems:
-    DEBOOTDEB="debootstrap_1.0.128+nmu2_all.deb"
+    DEBOOTDEB="debootstrap_1.0.128+nmu2+deb12u1_all.deb"
 
     # The Debian mirror/proxy below can be passed as environment
     # variables; if none are given the following defaults are used.
