@@ -18,6 +18,9 @@ parameters:
         -
             message: '#PHPDoc tag @var for variable .* has no value type specified in iterable type array#'
             path: webapp/tests
+        -
+            message: "#Method .* return type has no value type specified in iterable type array#"
+            path: webapp/src/DataFixtures/Test
 includes:
     - phpstan-baseline.neon
     - lib/vendor/phpstan/phpstan-doctrine/extension.neon

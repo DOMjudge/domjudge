@@ -132,6 +132,9 @@ abstract class BaseController extends AbstractController
 
     /**
      * Helper function to get the database structure for an object.
+     *
+     * @param string[] $files
+     * @return array<string, array<array{'target': string, 'targetColumn': string, 'type': string}>>
      */
     protected function getDatabaseRelations(array $files, EntityManagerInterface $entityManager): array
     {
@@ -166,6 +169,8 @@ abstract class BaseController extends AbstractController
 
     /**
      * Handle the actual removal of an entity and the dependencies in the database.
+     *
+     * @param int[] $primaryKeyData
      */
     protected function commitDeleteEntity(
         object $entity,
@@ -268,6 +273,11 @@ abstract class BaseController extends AbstractController
         }
     }
 
+    /**
+     * @param Object[] $entities
+     * @param array<string, array<string, array{'target': string, 'targetColumn': string, 'type': string}>> $relations
+     * @return array{0: bool, 1: array<int[]>, 2: string[]}
+     */
     protected function buildDeleteTree(
         array $entities,
         array $relations,
@@ -277,7 +287,6 @@ abstract class BaseController extends AbstractController
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $inflector        = InflectorFactory::create()->build();
         $readableType     = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
-        /** @phpstan-ignore-next-line  */
         $metadata         = $entityManager->getClassMetadata($entities[0]::class);
         $primaryKeyData   = [];
         $messages         = [];
@@ -353,6 +362,7 @@ abstract class BaseController extends AbstractController
     /**
      * Perform delete operation for the given entities.
      *
+     * @param Object[] $entities
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -426,6 +436,10 @@ abstract class BaseController extends AbstractController
         return $this->render('jury/delete.html.twig', $data);
     }
 
+    /**
+     * @param array<string, array<array{'target': string, 'targetColumn': string, 'type': string}>> $relations
+     * @return string[]
+     */
     protected function getDependentEntities(string $entityClass, array $relations): array
     {
         $result = [];

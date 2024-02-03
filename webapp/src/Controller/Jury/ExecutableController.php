@@ -488,6 +488,11 @@ class ExecutableController extends BaseController
 
     /**
      * Get the data to use for the executable editor.
+     *
+     * @return array{'executable': Executable, 'filenames': string[],
+     *               'skippedBinary': array<array{filename: string, execfileid: int}>,
+     *               'aceFilenames': string[], 'ranks': int[],
+     *               'files': string[], 'executableBits': bool[]}
      */
     protected function dataForEditor(Executable $executable): array
     {

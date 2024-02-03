@@ -1046,6 +1046,9 @@ class ProblemController extends BaseController
         ]);
     }
 
+    /**
+     * @param Testcase[] $testcases
+     */
     private function addTestcasesToZip(array $testcases, ZipArchive $zip, bool $isSample): void
     {
         $formatString = sprintf('data/%%s/%%0%dd', ceil(log10(count($testcases) + 1)));

@@ -779,6 +779,9 @@ class RejudgingController extends BaseController
         });
     }
 
+    /**
+     * @param Judging[] $skipped
+     */
     private function generateFlashMessagesForSkippedJudgings(array $skipped): void
     {
         /** @var Judging $judging */
@@ -796,6 +799,18 @@ class RejudgingController extends BaseController
         }
     }
 
+    /**
+     * @return array{'judging_runs_differ': int[], 'judging_runs_differ_overflow': int,
+     *                'runtime_spread': array<array{'submitid': int, 'rank': int,
+     *                                              'spread': float, 'count': int,
+     *                                              'verdict': string}>,
+     *                'judgehost_stats': array<string, array{'judgehost': string, 'njudged': int,
+     *                                                       'avgrun': float, 'stddev': float,
+     *                                                       'avgduration': float}>,
+     *                'judgings': array<array{'rejudgingid': int, 'judgingid': int, 'submitid': int,
+     *                                        'hostname': string, 'result': string, 'runtime_avg': float|null,
+     *                                        'ntestcases': int, 'duration': float}>}
+     */
     private function getStats(Rejudging $rejudging): array
     {
         $judgings = $this->em->createQueryBuilder()
