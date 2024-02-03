@@ -3,10 +3,14 @@
 namespace App\Controller\Jury;
 
 use App\Entity\JudgeTask;
+use App\Entity\Judging;
 use App\Entity\QueueTask;
 
 trait JudgeRemainingTrait
 {
+    /**
+     * @param Judging[] $judgings
+     */
     protected function judgeRemaining(array $judgings): void
     {
         $inProgress = [];

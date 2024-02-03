@@ -28,6 +28,10 @@ class BalloonController extends AbstractController
         protected readonly EventLogService $eventLogService
     ) {}
 
+    /**
+     * @param array<string, array<string>> $filters
+     * @param int[] $defaultCategories
+     */
     private function areDefault(array $filters, array $defaultCategories): bool {
         if (isset($filters['affiliation-id'])) {
             return false;

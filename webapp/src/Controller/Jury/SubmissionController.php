@@ -1098,6 +1098,12 @@ class SubmissionController extends BaseController
         return $this->redirectToLocalReferrer($this->router, $request, $redirect);
     }
 
+    /**
+     * @param SubmissionFile[] $files
+     * @param SubmissionFile[] $oldFiles
+     * @return array{'changed': string[], 'changedfiles': array<SubmissionFile[]>,
+     *               'unchanged': string[], 'added': string[], 'removed': string[]}
+     */
     protected function determineFileChanged(array $files, array $oldFiles): array
     {
         $result = [
@@ -1190,6 +1196,9 @@ class SubmissionController extends BaseController
         return $this->redirectToRoute('jury_submission', ['submitId' => $submitId]);
     }
 
+    /**
+     * @param string[] $allErrors
+     */
     private function maybeGetErrors(string $type, string $expectedConfigString, string $observedConfigString, array &$allErrors): void
     {
         $expectedConfig = $this->dj->jsonDecode($expectedConfigString);

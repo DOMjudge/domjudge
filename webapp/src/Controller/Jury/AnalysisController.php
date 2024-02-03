@@ -49,7 +49,8 @@ class AnalysisController extends AbstractController
 
         $maxDelayedJudgings = 10;
         $delayedTimeDiff = 5;
-        /** @var array $delayedJudgings */
+        /** @var array<array{'submitid': int, 'judgingid': int, 'submittime': float,
+         *                   'timediff': float, 'num_judgings': int}> $delayedJudgings */
         $delayedJudgings = $em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->innerJoin(Judging::class, 'j', Expr\Join::WITH, 's.submitid = j.submission')
