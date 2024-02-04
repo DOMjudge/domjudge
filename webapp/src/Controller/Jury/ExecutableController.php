@@ -108,7 +108,7 @@ class ExecutableController extends BaseController
             if (in_array($e, $executablesWithContestProblems)) {
                 foreach (array_merge($e->getProblemsRun()->toArray(), $e->getProblemsCompare()->toArray()) as $execProblem) {
                     $execContestProblems = $execProblem->getContestProblems();
-                    foreach($contestProblemsWithExecutables as $cp) {
+                    foreach ($contestProblemsWithExecutables as $cp) {
                         if ($execContestProblems->contains($cp)) {
                             $badges[] = $cp;
                         }
