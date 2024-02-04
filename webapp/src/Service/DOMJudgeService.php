@@ -30,6 +30,7 @@ use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -294,6 +295,9 @@ class DOMJudgeService
         return $response;
     }
 
+    /**
+     * @return array<array{'clarid': int, 'body': string}>
+     */
     public function getUnreadClarifications(): array
     {
         $user           = $this->getUser();
@@ -315,6 +319,16 @@ class DOMJudgeService
         return $unreadClarifications;
     }
 
+    /**
+     * @return array{clarifications: array<array{clarid: int, body: string}>,
+     *               judgehosts: array<array{hostname: string, polltime: float}>,
+     *               rejudgings: array<array{rejudgingid: int, starttime: string, endtime: string|float}>,
+     *               internal_errors: array<array{errorid: int, description: string}>,
+     *               balloons: array<array{balloonid: int, name: string, location: string|null, pname: string}>,
+     *               shadow_difference_count: int,
+     *               external_contest_source_is_down: bool,
+     *               external_source_warning_count: int}
+     */
     public function getUpdates(): array
     {
         $contest = $this->getCurrentContest();
@@ -540,6 +554,9 @@ class DOMJudgeService
 
     /**
      * Dis- or re-enable what caused an internal error.
+     *
+     * @param array{kind: string, probid?: string, hostname?: string, langid?: string,
+     *              execid?: string, testcaseid?: string} $disabled
      */
     public function setInternalError(array $disabled, ?Contest $contest, ?bool $enabled): void
     {
@@ -628,6 +645,7 @@ class DOMJudgeService
     /**
      * Perform an internal API request to the given URL with the given data.
      *
+     * @param array<string, string[]> $queryOrPostData
      * @param UploadedFile[] $files
      *
      * @return mixed|null
@@ -676,6 +694,9 @@ class DOMJudgeService
         return $this->params->get('domjudge.webappdir');
     }
 
+    /**
+     * @return array{'name': string, 'link'?: string, 'icon'?: string}
+     */
     public function getDocLinks(): array
     {
         return $this->params->get('domjudge.doc_links');
@@ -715,6 +736,7 @@ class DOMJudgeService
      * @param string|null $teamname Teamname of the team this user belongs to, if any
      * @param string|null $teamid   Teamid of the team this user belongs to, if any
      * @param string|null $location Location of the team, if any.
+     * @return array{0: bool, 1: string}
      */
     public function printFile(
         string $filename,
@@ -908,6 +930,7 @@ class DOMJudgeService
     /**
      * @throws NoResultException
      * @throws NonUniqueResultException
+     * @return array<string, int>
      */
     public function getContestStats(Contest $contest): array
     {
@@ -944,6 +967,12 @@ class DOMJudgeService
     }
 
     /**
+     * @return array{'problems': ContestProblem[], 'samples': string[], 'showLimits': bool,
+     *               'defaultMemoryLimit': int, 'timeFactorDiffers': bool,
+     *               'stats': array{'numBuckets': int, 'maxBucketSizeCorrect': int,
+     *                              'maxBucketSizeCorrect': int, 'maxBucketSizeIncorrect': int,
+     *                              'problems': array<array{'correct': array<array{'start': DateTime, 'end': DateTime, 'count': int}>,
+     *                                                      'incorrect': array<array{'start': DateTime, 'end': DateTime, 'count': int}>}>}}
      * @throws NonUniqueResultException
      */
     public function getTwigDataForProblemsAction(
@@ -1311,6 +1340,9 @@ class DOMJudgeService
         return $executable->getImmutableExecutable();
     }
 
+    /**
+     * @return Problem[]
+     */
     private function getProblemsForExecutable(Executable $executable): array
     {
         $ret = array_merge($executable->getProblemsCompare()->toArray(),
@@ -1328,6 +1360,8 @@ class DOMJudgeService
 
     /**
      * Get the URL to a route relative to the API root
+     *
+     * @param array<string, string> $params
      */
     public function apiRelativeUrl(string $route, array $params = []): string
     {
@@ -1453,6 +1487,9 @@ class DOMJudgeService
         return $team;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function parseMetadata(string $raw_metadata): array
     {
         // TODO: Reduce duplication with judgedaemon code.

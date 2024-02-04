@@ -819,6 +819,9 @@ class CheckConfigService
             'desc' => $desc];
     }
 
+    /**
+     * @return array<string, array{caption: string, result: string, desc: string, escape: bool}>
+     */
     public function checkAllExternalIdentifiers(): array
     {
         $this->stopwatch->start(__FUNCTION__);
