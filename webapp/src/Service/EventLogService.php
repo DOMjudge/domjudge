@@ -137,7 +137,10 @@ class EventLogService
         ],
     ];
 
-    // Entities to endpoints. Will be filled automatically except for special cases.
+    /**
+     * Entities to endpoints. Will be filled automatically except for special cases.
+     * @var array<string, string> $entityToEndpoint
+     */
     protected array $entityToEndpoint = [
         // Special case for contest problems, as they should map to problems.
         ContestProblem::class => 'problems',
@@ -566,6 +569,8 @@ class EventLogService
      * This method will make sure that the events are all only inserted once,
      * even if called simultaneously from different processes.
      *
+     * @param string[] $endpointIds
+     * @param array<array<string, mixed>> $contents
      * @throws NonUniqueResultException
      */
     protected function insertEvents(
@@ -630,6 +635,8 @@ class EventLogService
      *
      * This method will make sure that the event is only inserted once,
      * even if called simultaneously from different processes.
+     *
+     * @param array<string, string|null> $content
      *
      * @throws NonUniqueResultException
      */
@@ -723,6 +730,7 @@ class EventLogService
 
     /**
      * Check if all events for dependent objects are present for the given type and data.
+     * @param array<string, string|int|null|bool|string[]> $data
      * @return bool True if and only if all references are present
      */
     protected function hasAllDependentObjectEvents(Contest $contest, string $type, array $data): bool
