@@ -181,51 +181,6 @@ parameters:
 			path: webapp/src/Controller/API/SubmissionController.php
 
 		-
-			message: "#^Method App\\\\Controller\\\\Jury\\\\ClarificationController\\:\\:getClarificationFormData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/Jury/ClarificationController.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\ExternalRelationshipEntityInterface\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/ExternalRelationshipEntityInterface.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\ExternalSourceWarning\\:\\:getContent\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/ExternalSourceWarning.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\ExternalSourceWarning\\:\\:setContent\\(\\) has parameter \\$content with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/ExternalSourceWarning.php
-
-		-
-			message: "#^Property App\\\\Entity\\\\ExternalSourceWarning\\:\\:\\$content type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/ExternalSourceWarning.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\Judging\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Judging.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\Submission\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Submission.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\Team\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/Team.php
-
-		-
-			message: "#^Method App\\\\Entity\\\\User\\:\\:getExternalRelationships\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Entity/User.php
-
-		-
 			message: "#^Method App\\\\FosRestBundle\\\\FlattenExceptionHandler\\:\\:serializeToJson\\(\\) has parameter \\$type with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/FosRestBundle/FlattenExceptionHandler.php
@@ -249,21 +204,6 @@ parameters:
 			message: "#^Method App\\\\Helpers\\\\OrdinalArray\\:\\:__construct\\(\\) has parameter \\$items with no value type specified in iterable type array\\|Traversable\\.$#"
 			count: 1
 			path: webapp/src/Helpers/OrdinalArray.php
-
-		-
-			message: "#^Method App\\\\Service\\\\AwardService\\:\\:getAwards\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/AwardService.php
-
-		-
-			message: "#^Property App\\\\Service\\\\AwardService\\:\\:\\$awardCache type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/AwardService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\BalloonService\\:\\:collectBalloonTable\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/BalloonService.php
 
 		-
 			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:addOrUpdateWarning\\(\\) has parameter \\$content with no value type specified in iterable type array\\.$#"

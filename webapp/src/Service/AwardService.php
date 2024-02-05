@@ -8,6 +8,7 @@ use App\Utils\Scoreboard\Scoreboard;
 
 class AwardService
 {
+    /** @var array<array{id: string, citation: string, team_ids: string[]}> $awardCache */
     protected array $awardCache = [];
 
     public function __construct(protected readonly EventLogService $eventLogService)
@@ -114,6 +115,9 @@ class AwardService
         $this->awardCache[$contest->getCid()] = $results;
     }
 
+    /**
+     * @return array<array{id: string, citation: string, team_ids: string[]}>|array{id: string, citation: string, team_ids: string[]}|null
+     */
     public function getAwards(Contest $contest, Scoreboard $scoreboard, string $requestedType = null): ?array
     {
         if (!isset($this->awardCache[$contest->getCid()])) {

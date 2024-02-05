@@ -444,6 +444,8 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *
      * This method should return an array with as keys the JSON field names and as values the actual entity
      * objects that the SetExternalIdVisitor should check for applicable external ID's.
+     *
+     * @return array{submission_id: Submission}
      */
     public function getExternalRelationships(): array
     {
