@@ -24,7 +24,7 @@ services:
     image: domjudge/domjudge-contributor
     hostname: domjudge-contributor
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup
       - .:${PWD}:cached
       - /chroot
     links:
