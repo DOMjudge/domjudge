@@ -211,6 +211,9 @@ class ClarificationController extends AbstractController
         );
     }
 
+    /**
+     * @return array{teams: array<string|int, string>, subjects: array<string, array<string, string>>}
+     */
     protected function getClarificationFormData(?Team $team = null): array
     {
         $teamlist = [];

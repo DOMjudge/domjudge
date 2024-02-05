@@ -4,9 +4,12 @@ namespace App\Service;
 
 use App\Entity\Balloon;
 use App\Entity\Contest;
+use App\Entity\ContestProblem;
 use App\Entity\Judging;
 use App\Entity\ScoreCache;
 use App\Entity\Submission;
+use App\Entity\Team;
+use App\Entity\TeamAffiliation;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -75,6 +78,12 @@ class BalloonService
         }
     }
 
+    /**
+     * @return array<array{data: array{balloonid: int, time: string, problem: string, contestproblem: ContestProblem,
+     *                                 team: Team, teamid: int, location: string|null, affiliation: TeamAffiliation|null,
+     *                                 affiliationid: int, category: string, categoryid: int, total: array<string, ContestProblem>,
+     *                                 awards: string, done: bool}}>
+    */
     public function collectBalloonTable(Contest $contest, bool $todo = false): array
     {
         $em = $this->em;

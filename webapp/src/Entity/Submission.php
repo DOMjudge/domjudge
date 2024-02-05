@@ -444,6 +444,8 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      *
      * This method should return an array with as keys the JSON field names and as values the actual entity
      * objects that the SetExternalIdVisitor should check for applicable external ID's.
+     *
+     * @return array{language_id: Language, problem_id: Problem, team_id: Team|null}
      */
     public function getExternalRelationships(): array
     {

@@ -591,7 +591,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     }
 
     /**
-     * @inheritdoc
+     * @return array{organization_id: TeamAffiliation|null, group_ids: TeamCategory[]}
      */
     public function getExternalRelationships(): array
     {

@@ -13,6 +13,8 @@ interface ExternalRelationshipEntityInterface
      *
      * This method should return an array with as keys the JSON field names and as values the actual entity
      * objects that the SetExternalIdVisitor should check for applicable external IDs.
+     *
+     * @return array<string, Object|Object[]|null>
      */
     public function getExternalRelationships(): array;
 }

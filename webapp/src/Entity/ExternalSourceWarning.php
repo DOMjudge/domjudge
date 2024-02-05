@@ -54,6 +54,7 @@ class ExternalSourceWarning
     #[ORM\Column(options: ['comment' => 'Hash of this warning. Unique within the source.'])]
     private string $hash;
 
+    /** @var array<string, mixed> $content */
     #[ORM\Column(
         type: 'json',
         options: ['comment' => 'JSON encoded content of the warning. Type-specific.']
@@ -135,11 +136,17 @@ class ExternalSourceWarning
         return $this;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getContent(): array
     {
         return $this->content;
     }
 
+    /**
+     * @param array<string, mixed> $content
+     */
     public function setContent(array $content): ExternalSourceWarning
     {
         $this->content = $content;

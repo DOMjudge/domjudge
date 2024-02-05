@@ -500,6 +500,9 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this->getUsername();
     }
 
+    /**
+     * @return array{team_id: Team|null}
+     */
     public function getExternalRelationships(): array
     {
         return [
