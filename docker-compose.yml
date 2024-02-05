@@ -22,7 +22,7 @@ services:
     image: domjudge/domjudge-contributor
     hostname: domjudge-contributor
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup
       - .:/domjudge:cached
       - /chroot
     links:
