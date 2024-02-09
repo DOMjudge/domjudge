@@ -80,8 +80,9 @@ class GroupControllerTest extends BaseTestCase
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
         $postWithId = $this->newGroupsPostData[0];
         $postWithId['id'] = '1';
-        // CLICS does not allow POST to set the id value
-        $this->verifyApiJsonResponse('POST', $url, 400, 'admin', $postWithId);
+        // CLICS does not allow POST to set the id value. Our API will just ignore the property
+        $returnedObject = $this->verifyApiJsonResponse('POST', $url, 201, 'admin', $postWithId);
+        self::assertNotEquals($returnedObject['id'], $postWithId['id']);
     }
 
     public function provideNewAddedGroup(): Generator

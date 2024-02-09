@@ -137,11 +137,15 @@ abstract class AbstractRestController extends AbstractFOSRestController
         $params = [
             'id' => $id,
         ];
+        $postfix = '';
         if ($routeType !== 'user') {
             $params['cid'] = $request->attributes->get('cid');
+            if ($params['cid'] === null) {
+                $postfix = '_1';
+            }
         }
         $headers = [
-            'Location' => $this->generateUrl("v4_app_api_{$routeType}_single", $params, UrlGeneratorInterface::ABSOLUTE_URL),
+            'Location' => $this->generateUrl("v4_app_api_{$routeType}_single$postfix", $params, UrlGeneratorInterface::ABSOLUTE_URL),
         ];
         return $this->renderData($request, $data, Response::HTTP_CREATED,
             $headers);

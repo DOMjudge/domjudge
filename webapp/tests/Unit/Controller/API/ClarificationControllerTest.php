@@ -8,6 +8,7 @@ use App\Entity\Clarification;
 use App\Entity\Problem;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
+use Symfony\Component\HttpFoundation\Response;
 
 class ClarificationControllerTest extends BaseTestCase
 {
@@ -132,12 +133,17 @@ class ClarificationControllerTest extends BaseTestCase
             $url .= '/' . $dataToSend['id'];
         }
         $data = $this->verifyApiJsonResponse($method, $url, 400, $user, $dataToSend);
-        static::assertEquals($expectedMessage, $data['message']);
+        if (str_starts_with($expectedMessage, '/')) {
+            static::assertMatchesRegularExpression($expectedMessage, $data['message']);
+        } else {
+            static::assertEquals($expectedMessage, $data['message']);
+        }
     }
 
     public function provideAddInvalidData(): Generator
     {
-        yield ['demo', [], "Argument 'text' is mandatory."];
+        yield ['demo', [], ""];
+        yield ['demo', ['invalidfield' => 'value'], "/text:\n.*This value should be of type unknown./"];
         yield ['demo', ['text' => 'This is a clarification', 'from_team_id' => '1'], "Can not create a clarification from a different team."];
         yield ['demo', ['text' => 'This is a clarification', 'to_team_id' => '2'], "Can not create a clarification that is sent to a team."];
         yield ['demo', ['text' => 'This is a clarification', 'problem_id' => '4'], "Problem '4' not found."];

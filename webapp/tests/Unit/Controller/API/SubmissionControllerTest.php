@@ -83,14 +83,19 @@ class SubmissionControllerTest extends BaseTestCase
             $url .= '/' . $dataToSend['id'];
         }
         $data = $this->verifyApiJsonResponse($method, $url, 400, $user, $dataToSend);
-        static::assertEquals($expectedMessage, $data['message']);
+        if (str_starts_with($expectedMessage, '/')) {
+            static::assertMatchesRegularExpression($expectedMessage, $data['message']);
+        } else {
+            static::assertEquals($expectedMessage, $data['message']);
+        }
     }
 
     public function provideAddInvalidData(): Generator
     {
-        yield ['demo', [], "One of the arguments 'problem', 'problem_id' is mandatory."];
-        yield ['demo', ['problem' => 1], "One of the arguments 'language', 'language_id' is mandatory."];
-        yield ['demo', ['problem_id' => 1], "One of the arguments 'language', 'language_id' is mandatory."];
+        yield ['demo', [], ""];
+        yield ['demo', ['unknown_key'], "/One of the arguments 'problem', 'problem_id' is required/"];
+        yield ['demo', ['problem' => 1], "/One of the arguments 'language', 'language_id' is required/"];
+        yield ['demo', ['problem_id' => 1], "/One of the arguments 'language', 'language_id' is required/"];
         yield ['demo', ['problem_id' => 4, 'language' => 'cpp'], "Problem '4' not found or not submittable."];
         yield ['demo', ['problem_id' => 1, 'language' => 'cpp'], "No files specified."];
         yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp'], "No files specified."];
@@ -101,11 +106,12 @@ class SubmissionControllerTest extends BaseTestCase
         yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'user_id' => 1], "Can not submit for a different user."];
         yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123'], "A team can not assign id."];
         yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'time' => '2021-01-01T00:00:00'], "A team can not assign time."];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'files' => []], "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'files' => []], "No files specified."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'files' => [['invalidkey' => 'somevalue']]], "/files\[0\].data:\n.*This value should be of type unknown./"];
         yield [
             'demo',
             ['problem_id' => 1, 'language_id' => 'cpp', 'files' => 'this is not an array'],
-            "Unexpected value for parameter \"files\": expecting \"array\", got \"string\"."
+            "/files:\n.*This value should be of type array/"
         ];
         yield [
             'demo',

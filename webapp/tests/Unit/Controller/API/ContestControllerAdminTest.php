@@ -214,7 +214,7 @@ EOF;
         // Note that if the first item contains "id", we replace it with the correct ID in the test
 
         // General tests
-        yield [[], 400, 'Missing \"id\" in request.'];
+        yield [['dummy' => 'dummy'], 400, "This value should be of type unknown."];
         yield [['id' => 1], 400, 'Missing \"start_time\" or \"scoreboard_thaw_time\" in request.'];
         yield [['id' => 1, 'start_time' => null, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 400, 'Setting both \"start_time\" and \"scoreboard_thaw_time\" at the same time is not allowed.'];
 

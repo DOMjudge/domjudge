@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\TeamCategoryPost;
 use App\Entity\TeamCategory;
 use App\Service\ImportExportService;
 use Doctrine\ORM\NonUniqueResultException;
@@ -9,6 +10,7 @@ use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -76,11 +78,7 @@ class GroupController extends AbstractRestController
         content: [
             new OA\MediaType(
                 mediaType: 'multipart/form-data',
-                schema: new OA\Schema(ref: '#/components/schemas/TeamCategoryPost')
-            ),
-            new OA\MediaType(
-                mediaType: 'application/json',
-                schema: new OA\Schema(ref: '#/components/schemas/TeamCategoryPost')
+                schema: new OA\Schema(ref: new Model(type: TeamCategoryPost::class))
             ),
         ]
     )]
@@ -89,14 +87,23 @@ class GroupController extends AbstractRestController
         description: 'Returns the added group',
         content: new Model(type: TeamCategory::class)
     )]
-    public function addAction(Request $request, ImportExportService $importExport): Response
-    {
+    public function addAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        TeamCategoryPost $teamCategoryPost,
+        Request $request,
+        ImportExportService $importExport
+    ): Response {
         $saved = [];
-        $postedData = $request->request->all();
-        if (array_key_exists('id', $postedData)) {
-            throw new BadRequestHttpException("Cannot add group with ID");
-        }
-        $importExport->importGroupsJson([$postedData], $message, $saved);
+        $importExport->importGroupsJson([
+            [
+                'name' => $teamCategoryPost->name,
+                'hidden' => $teamCategoryPost->hidden,
+                'icpc_id' => $teamCategoryPost->icpcId,
+                'sortorder' => $teamCategoryPost->sortorder,
+                'color' => $teamCategoryPost->color,
+                'allow_self_registration' => $teamCategoryPost->allowSelfRegistration,
+            ],
+        ], $message, $saved);
         if (!empty($message)) {
             throw new BadRequestHttpException("Error while adding group: $message");
         }
