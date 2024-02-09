@@ -240,6 +240,9 @@ class ExternalContestSourceService
                         ->getSingleScalarResult();
     }
 
+    /**
+     * @param string[] $eventsToSkip
+     */
     public function import(bool $fromStart, array $eventsToSkip, ?callable $progressReporter = null): bool
     {
         // We need the verdicts to validate judgement-types.
@@ -290,6 +293,9 @@ class ExternalContestSourceService
             ->execute();
     }
 
+    /**
+     * @param string[] $eventsToSkip
+     */
     protected function importFromCcsApi(array $eventsToSkip, ?callable $progressReporter = null): bool
     {
         while (true) {
@@ -568,6 +574,17 @@ class ExternalContestSourceService
 
     /**
      * Import the given event.
+     *
+     * @param array{token?: string, id: string, type: string, time: string, op?: string, end_of_updates?: bool,
+     *              data?: array{run_time?: float, time?: string, contest_time?: string, ordinal?: int,
+     *                           id: string, judgement_id?: string, judgement_type_id: string|null,
+     *                           max_run_time?: float|null, start_time: string, start_contest_time?: string,
+     *                           end_time?: string|null, end_contest_time?: string|null, submission_id: string,
+     *                           output_compile_as_string: null, language_id?: string, externalid?: null,
+     *                           team_id: string, problem_id?: string, entry_point?: string|null, old_result?: null,
+     *                           files?: array{href: string}}|mixed[]
+     *             } $event
+     * @param string[] $eventsToSkip
      * @throws DBALException
      * @throws NonUniqueResultException
      * @throws TransportExceptionInterface
@@ -1776,6 +1793,15 @@ class ExternalContestSourceService
         }
     }
 
+    /**
+     * @param array{run_time?: float, time?: string, contest_time?: string, ordinal?: int,
+     *              id: string, judgement_id?: string, judgement_type_id: string|null,
+     *              max_run_time?: float|null, start_time: string, start_contest_time?: string,
+     *              end_time?: string|null, end_contest_time?: string|null, submission_id: string,
+     *              output_compile_as_string: null, language_id?: string, externalid?: null,
+     *              team_id: string, problem_id?: string, entry_point?: string|null, old_result?: null,
+     *              files?: array{href: string}} $data
+     */
     protected function addPendingEvent(string $type, string|int $id, string $operation, string $entityType, ?string $eventId, array $data): void
     {
         // First, check if we already have pending events for this event.
@@ -1996,6 +2022,17 @@ class ExternalContestSourceService
         }
     }
 
+    /**
+     * @param array{token?: string, id: string, type: string, time: string, op?: string, end_of_updates?: bool,
+     *              data?: array{run_time?: float, time?: string, contest_time?: string, ordinal?: int,
+     *                           id: string, judgement_id?: string, judgement_type_id: string|null,
+     *                           max_run_time?: float|null, start_time: string, start_contest_time?: string,
+     *                           end_time?: string|null, end_contest_time?: string|null, submission_id: string,
+     *                           output_compile_as_string: null, language_id?: string, externalid?: null,
+     *                           team_id: string, problem_id?: string, entry_point?: string|null, old_result?: null,
+     *                           files?: array{href: string}}|mixed[]
+     *             } $event
+     */
     protected function getEventFeedFormat(array $event): EventFeedFormat
     {
         return match ($this->getApiVersion()) {
