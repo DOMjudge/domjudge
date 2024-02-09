@@ -70,11 +70,6 @@ parameters:
 			path: webapp/src/FosRestBundle/FlattenExceptionHandler.php
 
 		-
-			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:addPendingEvent\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ExternalContestSourceService.php
-
-		-
 			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:compareOrCreateValues\\(\\) has parameter \\$extraDiff with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/ExternalContestSourceService.php
@@ -85,32 +80,7 @@ parameters:
 			path: webapp/src/Service/ExternalContestSourceService.php
 
 		-
-			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:getEventFeedFormat\\(\\) has parameter \\$event with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ExternalContestSourceService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:import\\(\\) has parameter \\$eventsToSkip with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ExternalContestSourceService.php
-
-		-
 			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importClarification\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ExternalContestSourceService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importEvent\\(\\) has parameter \\$event with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ExternalContestSourceService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importEvent\\(\\) has parameter \\$eventsToSKip with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Service/ExternalContestSourceService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:importFromCcsApi\\(\\) has parameter \\$eventsToSkip with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Service/ExternalContestSourceService.php
 
