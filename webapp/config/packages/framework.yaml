@@ -6,6 +6,9 @@ framework:
     http_method_override: true
     annotations: true
     handle_all_throwables: true
+    serializer:
+        enabled: true
+        name_converter: serializer.name_converter.camel_case_to_snake_case
 
     # Enables session support. Note that the session will ONLY be started if you read or write from it.
     # Remove or comment this section to explicitly disable session support.

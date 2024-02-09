@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\AddUser;
 use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
@@ -16,6 +17,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -291,11 +293,7 @@ class UserController extends AbstractRestController
         content: [
             new OA\MediaType(
                 mediaType: 'multipart/form-data',
-                schema: new OA\Schema(ref: '#/components/schemas/AddUser')
-            ),
-            new OA\MediaType(
-                mediaType: 'application/json',
-                schema: new OA\Schema(ref: '#/components/schemas/AddUser')
+                schema: new OA\Schema(ref: new Model(type: AddUser::class))
             )
         ]
     )]
@@ -304,52 +302,42 @@ class UserController extends AbstractRestController
         description: 'Returns the added user',
         content: new Model(type: User::class)
     )]
-    public function addAction(Request $request): Response
-    {
-        $required = [
-            'username',
-            'name',
-            'roles',
-        ];
-
-        foreach ($required as $argument) {
-            if (!$request->request->has($argument)) {
-                throw new BadRequestHttpException(
-                    sprintf("Argument '%s' is mandatory", $argument));
-            }
-        }
-
-        if ($this->em->getRepository(User::class)->findOneBy(['username' => $request->request->get('username')])) {
-            throw new BadRequestHttpException(sprintf("User %s already exists", $request->request->get('username')));
+    public function addAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        AddUser $addUser,
+        Request $request
+    ): Response {
+        if ($this->em->getRepository(User::class)->findOneBy(['username' => $addUser->username])) {
+            throw new BadRequestHttpException(sprintf("User %s already exists", $addUser->username));
         }
 
         $user = new User();
         $user
-            ->setUsername($request->request->get('username'))
-            ->setName($request->request->get('name'))
-            ->setEmail($request->request->get('email'))
-            ->setIpAddress($request->request->get('ip'))
-            ->setPlainPassword($request->request->get('password'))
-            ->setEnabled($request->request->getBoolean('enabled', true));
+            ->setUsername($addUser->username)
+            ->setName($addUser->name)
+            ->setEmail($addUser->email)
+            ->setIpAddress($addUser->ip)
+            ->setPlainPassword($addUser->password)
+            ->setEnabled($addUser->enabled ?? true);
 
-        if ($request->request->get('team_id')) {
+        if ($addUser->teamId) {
             /** @var Team|null $team */
             $team = $this->em->createQueryBuilder()
                 ->from(Team::class, 't')
                 ->select('t')
                 ->andWhere(sprintf('t.%s = :team',
                     $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid'))
-                ->setParameter('team', $request->request->get('team_id'))
+                ->setParameter('team', $addUser->teamId)
                 ->getQuery()
                 ->getOneOrNullResult();
 
             if ($team === null) {
-                throw new BadRequestHttpException(sprintf("Team %s not found", $request->request->get('team_id')));
+                throw new BadRequestHttpException(sprintf("Team %s not found", $addUser->teamId));
             }
             $user->setTeam($team);
         }
 
-        $roles = $request->request->all('roles');
+        $roles = $addUser->roles;
         // For the file import we change a CDS user to the roles needed for ICPC CDS.
         if ($user->getUsername() === 'cds') {
             $roles = ['cds'];

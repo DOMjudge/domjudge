@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\DataTransferObject\ContestProblemArray;
+use App\DataTransferObject\ContestProblemPut;
 use App\DataTransferObject\ContestProblemWrapper;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -21,6 +22,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -282,28 +284,19 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      */
     #[IsGranted('ROLE_ADMIN')]
     #[Rest\Put('/{id}')]
-    #[OA\RequestBody(
-        required: true,
-        content: new OA\MediaType(
-            mediaType: 'application/json',
-            schema: new OA\Schema(ref: '#/components/schemas/ContestProblemPut')
-        )
-    )]
     #[OA\Response(
         response: 200,
         description: 'Returns the linked problem for this contest',
         content: new OA\JsonContent(ref: new Model(type: ContestProblem::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
-    public function linkProblemAction(Request $request, string $id): Response
+    public function linkProblemAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        ContestProblemPut $contestProblemPut,
+        Request $request,
+        string $id
+    ): Response
     {
-        $required = ['label'];
-        foreach ($required as $argument) {
-            if (!$request->request->has($argument)) {
-                throw new BadRequestHttpException(sprintf("Argument '%s' is mandatory.", $argument));
-            }
-        }
-
         $problem = $this->em->createQueryBuilder()
                             ->from(Problem::class, 'p')
                             ->select('p')
@@ -341,16 +334,16 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
 
         $lazyEvalResults = null;
-        if ($request->request->has('lazy_eval_results')) {
-            $lazyEvalResults = (int)$request->request->getBoolean('lazy_eval_results');
+        if ($contestProblemPut->lazyEvalResults !== null) {
+            $lazyEvalResults = (int)$contestProblemPut->lazyEvalResults;
         }
 
         $contestProblem = (new ContestProblem())
             ->setContest($contest)
             ->setProblem($problem)
-            ->setShortname($request->request->get('label'))
-            ->setColor($request->request->get('rgb') ?? $request->request->get('color'))
-            ->setPoints($request->request->getInt('points', 1))
+            ->setShortname($contestProblemPut->label)
+            ->setColor($contestProblemPut->rgb ?? $contestProblemPut->color)
+            ->setPoints($contestProblemPut->points)
             ->setLazyEvalResults($lazyEvalResults);
 
         $this->em->persist($contestProblem);

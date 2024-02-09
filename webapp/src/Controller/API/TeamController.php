@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\AddTeam;
 use App\Entity\Contest;
 use App\Entity\Team;
 use App\Service\AssetUpdateService;
@@ -15,6 +16,7 @@ use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -244,10 +246,7 @@ class TeamController extends AbstractRestController
         content: [
             new OA\MediaType(
                 mediaType: 'multipart/form-data',
-                schema: new OA\Schema(ref: '#/components/schemas/Team')),
-            new OA\MediaType(
-                mediaType: 'application/json',
-                schema: new OA\Schema(ref: '#/components/schemas/Team')),
+                schema: new OA\Schema(ref: new Model(type: AddTeam::class))),
         ]
     )]
     #[OA\Response(
@@ -255,10 +254,29 @@ class TeamController extends AbstractRestController
         description: 'Returns the added team',
         content: new Model(type: Team::class)
     )]
-    public function addAction(Request $request, ImportExportService $importExport): Response
-    {
+    public function addAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        AddTeam $addTeam,
+        Request $request,
+        ImportExportService $importExport
+    ): Response {
         $saved = [];
-        $importExport->importTeamsJson([$request->request->all()], $message, $saved);
+        $importExport->importTeamsJson([
+            [
+                'id' => $addTeam->id,
+                'icpc_id' => $addTeam->icpcId,
+                'label' => $addTeam->label,
+                'group_ids' => $addTeam->groupIds,
+                'name' => $addTeam->name,
+                'display_name' => $addTeam->displayName,
+                'public_description' => $addTeam->publicDescription,
+                'members' => $addTeam->members,
+                'location' => [
+                    'description' => $addTeam->location?->description,
+                ],
+                'organization_id' => $addTeam->organizationId,
+            ],
+        ], $message, $saved);
         if (!empty($message)) {
             throw new BadRequestHttpException("Error while adding team: $message");
         }

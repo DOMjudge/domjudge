@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\AddSubmission;
 use App\DataTransferObject\SourceCode;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -24,6 +25,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -110,89 +112,7 @@ class SubmissionController extends AbstractRestController
         content: [
             new OA\MediaType(
                 mediaType: 'multipart/form-data',
-                schema: new OA\Schema(
-                    required: ['problem', 'language', 'code'],
-                    properties: [
-                        new OA\Property(
-                            property: 'problem',
-                            description: 'The problem to submit a solution for',
-                            type: 'string'
-                        ),
-                        new OA\Property(
-                            property: 'language',
-                            description: 'The language to submit a solution in',
-                            type: 'string'
-                        ),
-                        new OA\Property(
-                            property: 'code',
-                            description: 'The file(s) to submit',
-                            type: 'array',
-                            items: new OA\Items(type: 'string', format: 'binary')
-                        ),
-                        new OA\Property(
-                            property: 'entry_point',
-                            description: 'The entry point for the submission. Required for languages requiring an entry point',
-                            type: 'string'
-                        ),
-                    ]
-                )
-            ),
-            new OA\MediaType(
-                mediaType: 'application/json',
-                schema: new OA\Schema(
-                    required: ['problem_id', 'language_id', 'files'],
-                    properties: [
-                        new OA\Property(
-                            property: 'problem_id',
-                            description: 'The problem ID to submit a solution for',
-                            type: 'string'
-                        ),
-                        new OA\Property(
-                            property: 'language_id',
-                            description: 'The language to submit a solution in',
-                            type: 'string'
-                        ),
-                        new OA\Property(
-                            property: 'team_id',
-                            description: 'The team to submit a solution for. Only used when adding a submission as admin',
-                            type: 'string'
-                        ),
-                        new OA\Property(
-                            property: 'time',
-                            description: 'The time to use for the submission. Only used when adding a submission as admin',
-                            type: 'string',
-                            format: 'date-time'
-                        ),
-                        new OA\Property(
-                            property: 'id',
-                            description: 'The ID to use for the submission. Only used when adding a submission as admin and only allowed with PUT',
-                            type: 'string'
-                        ),
-                        new OA\Property(
-                            property: 'files',
-                            description: 'The base64 encoded ZIP file to submit',
-                            type: 'array',
-                            items: new OA\Items(
-                                required: ['data'],
-                                properties: [
-                                    new OA\Property(
-                                        property: 'data',
-                                        description: 'The base64 encoded ZIP archive',
-                                        type: 'string'
-                                    ),
-                                ],
-                                type: 'object'
-                            ),
-                            maxItems: 1,
-                            minItems: 1
-                        ),
-                        new OA\Property(
-                            property: 'entry_point',
-                            description: 'The entry point for the submission. Required for languages requiring an entry point',
-                            type: 'string'
-                        ),
-                    ]
-                )
+                schema: new OA\Schema(ref: new Model(type: AddSubmission::class))
             ),
         ]
     )]
@@ -201,33 +121,19 @@ class SubmissionController extends AbstractRestController
         description: 'When submitting was successful',
         content: new OA\JsonContent(ref: new Model(type: Submission::class))
     )]
-    public function addSubmissionAction(Request $request, ?string $id): Response
-    {
-        $required = [
-            'problem'  => ['problem', 'problem_id'],
-            'language' => ['language', 'language_id'],
-        ];
-        $data = [];
-
-        foreach ($required as $field => $requiredList) {
-            $hasAny = false;
-            foreach ($requiredList as $argument) {
-                if ($request->request->has($argument)) {
-                    $data[$field] = $request->request->get($argument);
-                    $hasAny       = true;
-                }
-            }
-            if (!$hasAny) {
-                $requiredListQuoted = array_map(fn($item) => "'$item'", $requiredList);
-                throw new BadRequestHttpException(
-                    sprintf("One of the arguments %s is mandatory.", implode(', ', $requiredListQuoted)));
-            }
-        }
+    public function addSubmissionAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        AddSubmission $addSubmission,
+        Request $request,
+        ?string $id
+    ): Response {
+        $problemId = $addSubmission->problem ?? $addSubmission->problemId;
+        $languageId = $addSubmission->language ?? $addSubmission->languageId;
 
         // By default, use the user and team of the user.
         $user = $this->dj->getUser();
         $team = $user->getTeam();
-        if ($teamId = $request->request->get('team_id')) {
+        if ($teamId = $addSubmission->teamId) {
             $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
             $method  = sprintf('get%s', ucfirst($idField));
 
@@ -247,7 +153,7 @@ class SubmissionController extends AbstractRestController
             throw new BadRequestHttpException('User does not belong to a team.');
         }
 
-        if ($userId = $request->request->get('user_id')) {
+        if ($userId = $addSubmission->userId) {
             // If the current user is an admin or API writer, allow it to specify the user.
             if ($this->isGranted('ROLE_API_WRITER')) {
                 // Load the user.
@@ -282,14 +188,14 @@ class SubmissionController extends AbstractRestController
                                $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
             ->andWhere('cp.contest = :contest')
             ->andWhere('cp.allowSubmit = 1')
-            ->setParameter('problem', $data['problem'])
+            ->setParameter('problem', $problemId)
             ->setParameter('contest', $this->getContestId($request))
             ->getQuery()
             ->getOneOrNullResult();
 
         if ($problem === null) {
             throw new BadRequestHttpException(
-                sprintf("Problem '%s' not found or not submittable.", $data['problem']));
+                sprintf("Problem '%s' not found or not submittable.", $problemId));
         }
 
         // Load the language.
@@ -300,27 +206,27 @@ class SubmissionController extends AbstractRestController
             ->andWhere(sprintf('lang.%s = :language',
                                $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid'))
             ->andWhere('lang.allowSubmit = 1')
-            ->setParameter('language', $data['language'])
+            ->setParameter('language', $languageId)
             ->getQuery()
             ->getOneOrNullResult();
 
         if ($language === null) {
             throw new BadRequestHttpException(
-                sprintf("Language '%s' not found or not submittable.", $data['language']));
+                sprintf("Language '%s' not found or not submittable.", $languageId));
         }
 
         // Determine the entry point.
         $entryPoint = null;
         if ($language->getRequireEntryPoint()) {
-            if (!$request->request->get('entry_point')) {
+            if (!$addSubmission->entryPoint) {
                 $entryPointDescription = $language->getEntryPointDescription() ?: 'Entry point';
                 throw new BadRequestHttpException(sprintf('%s required, but not specified.', $entryPointDescription));
             }
-            $entryPoint = $request->request->get('entry_point');
+            $entryPoint = $addSubmission->entryPoint;
         }
 
         $time = null;
-        if ($timeString = $request->request->get('time')) {
+        if ($timeString = $addSubmission->time) {
             if ($this->isGranted('ROLE_API_WRITER')) {
                 try {
                     $time = Utils::toEpochFloat($timeString);
@@ -332,7 +238,7 @@ class SubmissionController extends AbstractRestController
             }
         }
 
-        if ($submissionId = $request->request->get('id')) {
+        if ($submissionId = $addSubmission->id) {
             if ($request->isMethod('POST')) {
                 throw new BadRequestHttpException('Passing an ID is not supported for POST.');
             } elseif ($id !== $submissionId) {
@@ -362,18 +268,17 @@ class SubmissionController extends AbstractRestController
 
         $tempFiles = [];
 
-        if ($request->request->has('files')) {
+        if ($addSubmission->files) {
             // CCS spec format, files are a ZIP, get them and transform them into a file object.
-            $filesList = $request->request->all('files');
-            if (count($filesList) !== 1 || !isset($filesList[0]['data'])) {
+            if (count($addSubmission->files) !== 1 || !isset($addSubmission->files[0]->data)) {
                 throw new BadRequestHttpException("The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field.");
             }
 
-            if (isset($filesList[0]['mime']) && $filesList[0]['mime'] !== 'application/zip') {
+            if ($addSubmission->files[0]->mime && $addSubmission->files[0]->mime !== 'application/zip') {
                 throw new BadRequestHttpException("The 'files[0].mime' attribute must be application/zip if provided.");
             }
 
-            $data        = $filesList[0]['data'];
+            $data        = $addSubmission->files[0]->data;
             $decodedData = base64_decode($data, true);
             if ($decodedData === false) {
                 throw new BadRequestHttpException("The 'files[0].data' attribute is not base64 encoded.");

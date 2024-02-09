@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\ClarificationPost;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -17,6 +18,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -92,11 +94,8 @@ class ClarificationController extends AbstractRestController
         content: [
             new OA\MediaType(
                 mediaType: 'multipart/form-data',
-                schema: new OA\Schema(ref: '#/components/schemas/ClarificationPost')
-            ),
-            new OA\MediaType(
-                mediaType: 'application/json',
-                schema: new OA\Schema(ref: '#/components/schemas/ClarificationPost'))
+                schema: new OA\Schema(ref: new Model(type: ClarificationPost::class))
+            )
         ]
     )]
     #[OA\Response(
@@ -104,24 +103,21 @@ class ClarificationController extends AbstractRestController
         description: 'When creating a clarification was successful',
         content: new Model(type: Clarification::class)
     )]
-    public function addAction(Request $request, ?string $id): Response
-    {
-        $required = ['text'];
-        foreach ($required as $argument) {
-            if (!$request->request->has($argument)) {
-                throw new BadRequestHttpException(sprintf("Argument '%s' is mandatory.", $argument));
-            }
-        }
-
+    public function addAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        ClarificationPost $clarificationPost,
+        Request $request,
+        ?string $id
+    ): Response {
         $contestId = $this->getContestId($request);
         $contest   = $this->em->getRepository(Contest::class)->find($contestId);
 
         $clarification = new Clarification();
         $clarification
             ->setContest($contest)
-            ->setBody($request->request->get('text'));
+            ->setBody($clarificationPost->text);
 
-        if ($problemId = $request->request->get('problem_id')) {
+        if ($problemId = $clarificationPost->problemId) {
             // Load the problem
             /** @var ContestProblem|null $problem */
             $problem = $this->em->createQueryBuilder()
@@ -146,7 +142,7 @@ class ClarificationController extends AbstractRestController
             $clarification->setProblem($problem->getProblem());
         }
 
-        if ($replyToId = $request->request->get('reply_to_id')) {
+        if ($replyToId = $clarificationPost->replyToId) {
             // Load the clarification.
             /** @var Clarification|null $replyTo */
             $replyTo = $this->em->createQueryBuilder()
@@ -169,7 +165,7 @@ class ClarificationController extends AbstractRestController
 
         // By default, use the team of the user
         $fromTeam = $this->isGranted('ROLE_API_WRITER') ? null : $this->dj->getUser()->getTeam();
-        if ($fromTeamId = $request->request->get('from_team_id')) {
+        if ($fromTeamId = $clarificationPost->fromTeamId) {
             $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
             $method  = sprintf('get%s', ucfirst($idField));
 
@@ -189,7 +185,7 @@ class ClarificationController extends AbstractRestController
 
         // By default, send to jury.
         $toTeam = null;
-        if ($toTeamId = $request->request->get('to_team_id')) {
+        if ($toTeamId = $clarificationPost->toTeamId) {
             $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
 
             // If the user is an admin or API writer, allow it to specify the team.
@@ -207,7 +203,7 @@ class ClarificationController extends AbstractRestController
         }
 
         $time = Utils::now();
-        if ($timeString = $request->request->get('time')) {
+        if ($timeString = $clarificationPost->time) {
             if ($this->isGranted('ROLE_API_WRITER')) {
                 try {
                     $time = Utils::toEpochFloat($timeString);
@@ -221,7 +217,7 @@ class ClarificationController extends AbstractRestController
 
         $clarification->setSubmittime($time);
 
-        if ($clarificationId = $request->request->get('id')) {
+        if ($clarificationId = $clarificationPost->id) {
             if ($request->isMethod('POST')) {
                 throw new BadRequestHttpException('Passing an ID is not supported for POST.');
             } elseif ($id !== $clarificationId) {

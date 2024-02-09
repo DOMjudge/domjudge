@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\DataTransferObject\AddOrganization;
 use App\Entity\TeamAffiliation;
 use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
@@ -14,6 +15,7 @@ use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -232,11 +234,7 @@ class OrganizationController extends AbstractRestController
         content: [
             new OA\MediaType(
                 mediaType: 'multipart/form-data',
-                schema: new OA\Schema(ref: '#/components/schemas/TeamAffiliation')
-            ),
-            new OA\MediaType(
-                mediaType: 'application/json',
-                schema: new OA\Schema(ref: '#/components/schemas/TeamAffiliation')
+                schema: new OA\Schema(ref: new Model(type: AddOrganization::class))
             ),
         ]
     )]
@@ -245,10 +243,22 @@ class OrganizationController extends AbstractRestController
         description: 'Returns the added organization',
         content: new Model(type: TeamAffiliation::class)
     )]
-    public function addAction(Request $request, ImportExportService $importExport): Response
-    {
+    public function addAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        AddOrganization $addOrganization,
+        Request $request,
+        ImportExportService $importExport
+    ): Response {
         $saved = [];
-        $importExport->importOrganizationsJson([$request->request->all()], $message, $saved);
+        $importExport->importOrganizationsJson([
+            [
+                'id' => $addOrganization->id,
+                'shortname' => $addOrganization->shortname,
+                'name' => $addOrganization->formalName ?? $addOrganization->name,
+                'country' => $addOrganization->country,
+                'icpc_id' => $addOrganization->icpcId,
+            ],
+        ], $message, $saved);
         if (!empty($message)) {
             throw new BadRequestHttpException("Error while adding organization: $message");
         }

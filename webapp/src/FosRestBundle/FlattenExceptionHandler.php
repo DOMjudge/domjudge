@@ -11,6 +11,7 @@ use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 #[AsAlias('fos_rest.serializer.flatten_exception_handler')]
 class FlattenExceptionHandler implements SubscribingHandlerInterface
@@ -58,6 +59,10 @@ class FlattenExceptionHandler implements SubscribingHandlerInterface
             $statusCode = $context->getAttribute('status_code');
         } else {
             $statusCode = $exception->getStatusCode();
+        }
+
+        if ($exception->getPrevious() && $exception->getPrevious()->getClass() === ValidationFailedException::class) {
+            $exception = $exception->getPrevious();
         }
 
         $showMessage = $this->messagesMap->resolveFromClassName($exception->getClass());

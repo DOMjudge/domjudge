@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use App\DataTransferObject\ContestState;
 use App\DataTransferObject\ContestStatus;
+use App\DataTransferObject\PatchContest;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
@@ -28,6 +29,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -268,33 +270,7 @@ class ContestController extends AbstractRestController
         required: true,
         content: new OA\MediaType(
             mediaType: 'application/x-www-form-urlencoded',
-            schema: new OA\Schema(
-                required: ['id'],
-                properties: [
-                    new OA\Property(
-                        property: 'id',
-                        description: 'The ID of the contest to change the start time for',
-                        type: 'string'
-                    ),
-                    new OA\Property(
-                        property: 'start_time',
-                        description: 'The new start time of the contest',
-                        type: 'string',
-                        format: 'date-time'
-                    ),
-                    new OA\Property(
-                        property: 'scoreboard_thaw_time',
-                        description: 'The new unfreeze (thaw) time of the contest',
-                        type: 'string',
-                        format: 'date-time'
-                    ),
-                    new OA\Property(
-                        property: 'force',
-                        description: '"Force overwriting the start_time even when in next 30s or the scoreboard_thaw_time when already set or too much in the past"',
-                        type: 'boolean'
-                    ),
-                ]
-            )
+            schema: new OA\Schema(ref: new Model(type: PatchContest::class))
         )
     )]
     #[OA\Response(
@@ -307,6 +283,8 @@ class ContestController extends AbstractRestController
         content: new OA\JsonContent(ref: new Model(type: Contest::class))
     )]
     public function changeStartTimeAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        PatchContest $patchContest,
         Request $request,
         #[OA\PathParameter(description: 'The ID of the contest to change the start time for')]
         string $cid
@@ -315,9 +293,7 @@ class ContestController extends AbstractRestController
         $contest  = $this->getContestWithId($request, $cid);
         $now      = (int)Utils::now();
         $changed  = false;
-        if (!$request->request->has('id')) {
-            throw new BadRequestHttpException('Missing "id" in request.');
-        }
+        // We still need these checks explicit check since they can be null.
         if (!$request->request->has('start_time') && !$request->request->has('scoreboard_thaw_time')) {
             throw new BadRequestHttpException('Missing "start_time" or "scoreboard_thaw_time" in request.');
         }
@@ -331,24 +307,24 @@ class ContestController extends AbstractRestController
         if ($request->request->has('start_time')) {
             // By default, it is not allowed to change the start time in the last 30 seconds before contest start.
             // We allow the "force" parameter to override this.
-            if (!$request->request->getBoolean('force') &&
+            if (!$patchContest->force &&
                 $contest->getStarttime() != null &&
                 $contest->getStarttime() < $now + 30) {
                 throw new AccessDeniedHttpException('Current contest already started or about to start.');
             }
 
-            if ($request->request->get('start_time') === null) {
+            if ($patchContest->startTime === null) {
                 $contest->setStarttimeEnabled(false);
                 $this->em->flush();
                 $changed = true;
             } else {
-                $date = date_create($request->request->get('start_time'));
+                $date = date_create($patchContest->startTime);
                 if ($date === false) {
                     throw new BadRequestHttpException('Invalid "start_time" in request.');
                 }
 
                 $new_start_time = $date->getTimestamp();
-                if (!$request->request->getBoolean('force') && $new_start_time < $now + 30) {
+                if (!$patchContest->force && $new_start_time < $now + 30) {
                     throw new AccessDeniedHttpException('New start_time not far enough in the future.');
                 }
                 $newStartTimeString = date('Y-m-d H:i:s e', $new_start_time);
@@ -360,17 +336,17 @@ class ContestController extends AbstractRestController
             }
         }
         if ($request->request->has('scoreboard_thaw_time')) {
-            if (!$request->request->getBoolean('force') && $contest->getUnfreezetime() !== null) {
+            if (!$patchContest->force && $contest->getUnfreezetime() !== null) {
                 throw new AccessDeniedHttpException('Current contest already has an unfreeze time set.');
             }
 
-            $date = date_create($request->request->get('scoreboard_thaw_time') ?? 'not a valid date');
+            $date = date_create($patchContest->scoreboardThawTime ?? 'not a valid date');
             if ($date === false) {
                 throw new BadRequestHttpException('Invalid "scoreboard_thaw_time" in request.');
             }
 
             $new_unfreeze_time = $date->getTimestamp();
-            if (!$request->request->getBoolean('force') && $new_unfreeze_time < $now - 30) {
+            if (!$patchContest->force && $new_unfreeze_time < $now - 30) {
                 throw new AccessDeniedHttpException('New scoreboard_thaw_time too far in the past.');
             }
 
