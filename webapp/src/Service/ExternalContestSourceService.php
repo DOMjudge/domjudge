@@ -1948,6 +1948,9 @@ class ExternalContestSourceService
         return true;
     }
 
+    /**
+     * @param array<string, mixed> $content
+     */
     protected function addOrUpdateWarning(
         ?string $eventId,
         string $entityType,

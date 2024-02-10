@@ -745,6 +745,8 @@ class ScoreboardService
 
     /**
      * Get a list of affiliation names grouped on category name.
+     *
+     * @return array<array<string, array<array{id: string, name: string}>>>
      */
     public function getGroupedAffiliations(Contest $contest): array
     {
@@ -863,6 +865,12 @@ class ScoreboardService
 
     /**
      * Get the scoreboard Twig data for a given contest.
+     *
+     * @return array{refresh: array{after: int, url: string, ajax: bool}, static: bool, contest: Contest,
+     *               scoreFilter: Filter, scoreboard: Scoreboard, filterValues: array<string, string[]>,
+     *               groupedAffiliations: null|TeamAffiliation[], showFlags: int, showAffiliationLogos: bool,
+     *               showAffiliations: int, showPending: int, showTeamSubmissions: int, scoreInSeconds: bool,
+     *               maxWidth: int, jury?: bool, public?: bool, ajax?: bool}
      */
     public function getScoreboardTwigData(
         ?Request $request,

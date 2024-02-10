@@ -88,6 +88,17 @@ class StatisticsService
      * @param Team[]  $teams
      * @param bool    $noFrozen             Do not show frozen data
      * @param bool    $verificationRequired Only show verified submissions
+     *
+     * @return array{total_submissions: int, total_accepted: int, num_teams: int,
+     *               problem_num_testcases: int[], team_num_submissions: int[],
+     *               team_attempted_n_problems: int[], teams_solved_n_problems: int[],
+     *               problem_attempts: int[], problem_solutions: int[],
+     *               problem_stats: array{teams_attempted: array<int[]>, teams_solved: array<int[]>},
+     *               submissions: Submission[], misery_index: float,
+     *               team_stats: array<array{total_submitted: int, total_accepted: int,
+     *                                       problems_submitted: int[], problems_accepted: int[]}>,
+     *               language_stats: array{total_submissions: array<string, int>, total_solutions: array<string, int>,
+     *                                     teams_attempted: array<string, int[]>, teams_solved: array<string, int[]>}}
      */
     public function getMiscContestStatistics(
         Contest $contest,
@@ -221,6 +232,11 @@ class StatisticsService
 
     /**
      * Get the team statistics for the given team.
+     *
+     * @return array{contest: Contest, team: Team, submissions: Submission[],
+     *               problems: Problem[], judgings: Judging[], misc: array{correct_percentage: float},
+     *               results: array{no-output: int, compiler-error: int, wrong-answer: int, correct: int,
+     *                              run-error: int, timelimit: int, output-limit: int}}
      */
     public function getTeamStats(Contest $contest, Team $team): array
     {
@@ -294,6 +310,15 @@ class StatisticsService
         ];
     }
 
+    /**
+     * @return array{contest: Contest, contest_problem: ContestProblem, problem: Problem,
+     *               timelimit: float, submissions: Submission[], judgings: Judging[],
+     *               filters: array<string, string>, view: string,
+     *               misc: array{num_teams_attempted: int, num_teams_correct: int,
+     *                           correct_percentage: int, teams_correct_percentage: int},
+     *               results: array{no-output: int, compiler-error: int, wrong-answer: int, correct: int,
+     *                              run-error: int, timelimit: int, output-limit: int}}
+     */
     public function getProblemStats(
         Contest $contest,
         Problem $problem,
@@ -498,6 +523,9 @@ class StatisticsService
         };
     }
 
+    /**
+     * @param array<string, int> $array
+     */
     protected static function setOrIncrement(array &$array, int|string $index): void
     {
         if (!array_key_exists($index, $array)) {
