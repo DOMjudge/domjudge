@@ -2,7 +2,6 @@
 
 namespace App\DataTransferObject;
 
-
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
