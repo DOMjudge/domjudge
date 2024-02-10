@@ -42,6 +42,9 @@ class ImportExportService
 
     /**
      * Get the YAML data for a given contest.
+     *
+     * @return array<string, int|string|array<array{id: string, label: string, letter: string,
+     *                                              name: string, color: string, rgb: string}>> $contest
      */
     public function getContestYamlData(Contest $contest, bool $includeProblems = true): array
     {
@@ -297,9 +300,17 @@ class ImportExportService
         return true;
     }
 
+    /**
+     * @param array{name?: string, short-name?: string, id?: string, label?: string,
+     *              letter?: string, time_limit?: int, rgb?: string, color?: string,
+     *              problems?: array{name?: string, short-name?: string, id?: string, label?: string,
+     *                              letter?: string, label?: string, letter?: string}} $problems
+     * @param string[]|null $ids
+     */
     public function importProblemsData(Contest $contest, array $problems, array &$ids = null): bool
     {
         // For problemset.yaml the root key is called `problems`, so handle that case
+        // TODO: Move this check away to make the $problems array shape easier
         if (isset($problems['problems'])) {
             $problems = $problems['problems'];
         }
@@ -338,6 +349,8 @@ class ImportExportService
 
     /**
      * Get group data
+     *
+     * @return array<string[]>
      */
     public function getGroupData(): array
     {
@@ -359,6 +372,8 @@ class ImportExportService
 
     /**
      * Get team data
+     *
+     * @return array<array<string|null>>
      */
     public function getTeamData(): array
     {
@@ -390,19 +405,20 @@ class ImportExportService
 
     /**
      * Get results data for the given sortorder.
+     *
+     * We'll here assume that the requested file will be of the current contest,
+     * as all our scoreboard interfaces do:
+     * 0    ICPC ID     24314   string
+     * 1    Rank in contest     1   integer|''
+     * 2    Award   Gold Medal  string
+     * 3    Number of problems the team has solved  4   integer
+     * 4    Total Time  534     integer
+     * 5    Time of the last submission     233     integer
+     * 6    Group Winner    North American  string
+     * @return array<array{0: string, 1: integer|string, 2: string, 3: integer, 4: integer, 5: integer, 6: string}>
      */
     public function getResultsData(int $sortOrder, bool $full = false): array
     {
-        // We'll here assume that the requested file will be of the current contest,
-        // as all our scoreboard interfaces do:
-        // 1    ICPC ID     24314   string
-        // 2    Rank in contest     1   integer
-        // 3    Award   Gold Medal  string
-        // 4    Number of problems the team has solved  4   integer
-        // 5    Total Time  534     integer
-        // 6    Time of the last submission     233     integer
-        // 7    Group Winner    North American  string
-
         $contest = $this->dj->getCurrentContest();
         if ($contest === null) {
             throw new BadRequestHttpException('No current contest');
@@ -604,6 +620,8 @@ class ImportExportService
 
     /**
      * Import groups TSV.
+     *
+     * @param string[] $content
      */
     protected function importGroupsTsv(array $content, ?string &$message = null): int
     {
@@ -623,6 +641,8 @@ class ImportExportService
     /**
      * Import groups JSON
      *
+     * @param array<array{id: string, icpc_id: string, name: string, sortorder?: int,
+     *                    color?: string, hidden?: true, allow_self_registration?: bool}> $data
      * @param TeamCategory[]|null $saved The saved groups
      */
     public function importGroupsJson(array $data, ?string &$message = null, ?array &$saved = null): int
@@ -646,6 +666,8 @@ class ImportExportService
     /**
      * Import group data from the given array
      *
+     * @param array<array{categoryid: string, icpc_id?: string, name: string, visible?: bool,
+     *              sortorder?: int|null, color?: string|null, allow_self_registration: bool}> $groupData
      * @param TeamCategory[]|null $saved The saved groups
      *
      * @throws NonUniqueResultException
@@ -709,6 +731,9 @@ class ImportExportService
     /**
      * Import organizations JSON.
      *
+     * @param array<array{shortname?: string, short_name?: string, short-name?: string, id: string, icpc_id?: string, name: string, formal_name?: string,
+     *                    country: string, logo: array{href: string, mime: string, hash: string,
+     *                                                 filename: string, width: string|int, height: string|int}}> $data
      * @param TeamAffiliation[]|null $saved The saved groups
      */
     public function importOrganizationsJson(array $data, ?string &$message = null, ?array &$saved = null): int
@@ -717,8 +742,8 @@ class ImportExportService
         foreach ($data as $organization) {
             $organizationData[] = [
                 'externalid' => @$organization['id'],
-                'shortname' => @$organization['short_name'] ?? @$organization['short-name'] ?? @$organization['shortname'] ?? @$organization['name'],
-                'name' => @$organization['formal_name'] ?? @$organization['name'],
+                'shortname' => $organization['short_name'] ?? $organization['short-name'] ?? $organization['shortname'] ?? $organization['name'],
+                'name' => $organization['formal_name'] ?? $organization['name'],
                 'country' => @$organization['country'],
                 'icpc_id' => $organization['icpc_id'] ?? null,
             ];
@@ -730,6 +755,7 @@ class ImportExportService
     /**
      * Import organization data from the given array.
      *
+     * @param array<array{externalid: string, shortname?: string, icpc_id?: string, name: string, country: string}> $organizationData
      * @param TeamAffiliation[]|null $saved The saved groups
      *
      * @throws NonUniqueResultException
@@ -786,6 +812,8 @@ class ImportExportService
 
     /**
      * Import teams TSV
+     *
+     * @param string[] $content
      * @throws NonUniqueResultException
      */
     protected function importTeamsTsv(array $content, ?string &$message = null): int
@@ -839,6 +867,9 @@ class ImportExportService
     /**
      * Import teams JSON.
      *
+     * @param array<array{label?: string, name?: string, organization_id?: string,
+     *              group_ids?: string[], icpc_id?: string, id?: string, display_name?: string,
+     *              location?: array{description: string}, members?: string, public_description?: string}> $data
      * @param Team[]|null $saved The saved teams
      */
     public function importTeamsJson(array $data, ?string &$message = null, ?array &$saved = null): int
@@ -851,10 +882,10 @@ class ImportExportService
                     'icpcid' => $team['icpc_id'] ?? null,
                     'label' => $team['label'] ?? null,
                     'categoryid' => $team['group_ids'][0] ?? null,
-                    'name' => @$team['name'],
-                    'display_name' => @$team['display_name'],
-                    'publicdescription' => $team['public_description'] ?? @$team['members'],
-                    'location' => @$team['location']['description'],
+                    'name' => $team['name'] ?? '',
+                    'display_name' => $team['display_name'] ?? '',
+                    'publicdescription' => $team['public_description'] ?? $team['members'] ?? '',
+                    'location' => $team['location']['description'] ?? null,
                 ],
                 'team_affiliation' => [
                     'externalid' => $team['organization_id'] ?? null,
@@ -865,6 +896,9 @@ class ImportExportService
         return $this->importTeamData($teamData, $message, $saved);
     }
 
+    /**
+     * @return array<string, Role>
+     */
     private function getDjRoles(): array
     {
         $djRoles = [];
@@ -878,6 +912,8 @@ class ImportExportService
     /**
      * Import accounts JSON.
      *
+     * @param array<array{id?: string, username?: string, name?: string, password?: string,
+     *                    externalid?: string, type: string, team_id?: string, ip?: string}> $data
      * @param User[]|null $saved The saved users
      */
     public function importAccountsJson(array $data, ?string &$message = null, ?array &$saved = null): int
@@ -952,6 +988,11 @@ class ImportExportService
     /**
      * Import team data from the given array.
      *
+     * @param array<array{team: array{teamid: string|null, icpcid: string|null, label?: string|null,
+     *                                categoryid: string|null, name: string|null, display_name?: string,
+     *                                publicdescription?: string, location?: string|null, affilid?: string},
+     *                    team_affiliation: array{externalid: string|null, shortname?: string, name?: string,
+     *                                            country?: string}}> $teamData
      * @param Team[]|null $saved The saved teams
      *
      * @throws NonUniqueResultException
@@ -1088,7 +1129,12 @@ class ImportExportService
      * Import account data from the given array.
      *
      * @param User[]|null $saved The saved users
-     *
+     * @param array<array{user: array{name: string|null, externalid: string, username: string,
+     *                           plain_password: string|null, teamid?: string|null,
+     *                           team?: array{name: string, category: string, externalid: string}|null,
+     *                           user_roles: Role[], ip_address: string|null},
+     *               team?: array{name: string, externalid: string, category: TeamCategory,
+     *                           publicdescription?: string}}> $accountData
      * @throws NonUniqueResultException
      */
     protected function importAccountData(array $accountData, ?array &$saved = null): int
@@ -1181,6 +1227,8 @@ class ImportExportService
 
     /**
      * Import accounts TSV
+     *
+     * @param string[] $content
      */
     protected function importAccountsTsv(array $content, ?string &$message = null): int
     {
