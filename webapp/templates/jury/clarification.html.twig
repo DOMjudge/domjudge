@@ -61,7 +61,7 @@
                                 <span class="clarification-subject-form" data-current-selected-subject="{{ clar.categoryid }}" data-clarification-id="{{clar.clarid}}">
                                     <form action="{{ path('jury_clarification_change_subject', {'clarId': clar.clarid }) }}" method="post" class="d-flex">
                                         <select name="subject" class="subject form-select form-select-sm w-auto" id="subselect">
-                                            {% for contest,subject in clarform.subjects %}
+                                            {% for contest,subject in subjects %}
                                                 <optgroup label="{{ contest }}">
                                                 {% for id,descr in subject %}
                                                     <option value="{{id}}"{% if clar.categoryid == id %} selected{% endif %}>{{descr}}</option>
@@ -96,7 +96,7 @@
                                     <form action="{{ path('jury_clarification_change_queue', {'clarId': clar.clarid }) }}" class="d-flex" method="post">
                                         <select name="queue" class="queue form-select w-auto form-select-sm" id="qselect">
                                             <option value="unassigned">Unassigned issues</option>
-                                            {% for qid,queue in clarform.queues %}
+                                            {% for qid,queue in queues %}
                                                 <option value="{{qid}}"{% if clar.queueid == qid %} selected{% endif %}>{{queue}}</option>
                                             {% endfor %}
                                             </select>
@@ -110,7 +110,7 @@
 
                     <hr/>
 
-                    <div class="card-text">{{ clar.body | markdown_to_html }}</div>
+                    <div class="card-text">{{ clar.body | markdown_to_html | sanitize_html('app.clarification_sanitizer') }}</div>
 
                 </div>
             </div>
@@ -197,7 +197,7 @@
         });
         $('#clar_answers').change(clarificationAppendAnswer);
 
-        setupPreviewClarification($('#bodytext') , $('#messagepreview'), true);
+        setupPreviewClarification($('#jury_clarification_message') , $('#messagepreview'), true);
      });
 </script>
 {% endblock %}

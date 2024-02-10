@@ -167,7 +167,7 @@ class TeamController extends BaseController
             $teamactions[] = [
                 'icon' => 'envelope',
                 'title' => 'send clarification to this team',
-                'link' => $this->generateUrl('jury_clarification_send', [
+                'link' => $this->generateUrl('jury_clarification_new', [
                     'teamto' => $t->getTeamId(),
                 ])
             ];

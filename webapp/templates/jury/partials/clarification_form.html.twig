@@ -1,74 +1,48 @@
-<form action="{{ path('jury_clarification_send') }}" method="post" id="sendclar" onsubmit="return confirmClar();">
-
-{% if origclar.clarid is defined %}
-<input type="hidden" name="id" value="{{ origclar.clarid }}">
-{% endif %}
-
-<div class="mb-3">
-<label for="sendto" class="form-label">Send to:</label>
-<select id="sendto" name="sendto" class="form-select">
-{% for id,team in clarform.teams %}
-<option value="{{id}}"{% if clarform.toteam is defined and clarform.toteam == id %} selected{% endif %}>{{team}}</option>
-{% endfor %}
-</select>
-</div>
-
-    <div class="mb-3">
-        <label for="subject" class="form-label">Subject:</label>
-        <select name="problem" id="subject" class="form-select">
-            {% for contest,subject in clarform.subjects %}
-                {% if current_contest is null %}<optgroup label="{{ contest }}">{% endif %}
-                {% for id,descr in subject %}
-                    <option
-                        value="{{ id }}"{% if clarform.onsubject is defined and clarform.onsubject == id %} selected{% endif %}>{{ descr }}</option>
-                {% endfor %}
-                {% if current_contest is null %}</optgroup>{% endif %}
-            {% endfor %}
-        </select>
-    </div>
-
+{{ form_start(form) }}
+{{ form_row(form.recipient) }}
+{{ form_row(form.subject) }}
 <div class="list-group mb-3">
     <div class="list-group-item">
         <div class="flex-column">
-            <label for="bodytext" class="form-label text-muted d-flex justify-content-end"><small>message</small></label>
+            <label for="jury_clarification_message"
+                   class="form-label text-muted d-flex justify-content-end"><small>message</small></label>
         </div>
-        <textarea class="form-control" name="bodytext" id="bodytext"
-                  rows="8" cols="85"
-                  required>{{ clarform.quotedtext|default("") }}</textarea>
+        {{ form_row(form.message) }}
     </div>
     <div class="list-group-item">
         <div class="mb-3">
             <div class="flex-column">
-                <label class="form-label text-muted d-flex justify-content-end"><small>message preview</small></label>
+                <label class="form-label text-muted d-flex justify-content-end">
+                    <small>message preview</small></label>
             </div>
             <div class="card">
-                <div class="card-body" id="messagepreview"></div>
+                <div class="card-body" id="messagepreview">
+                    Start typing to see a preview of your message
+                </div>
             </div>
         </div>
     </div>
 </div>
-
 <div class="row">
-<div class="col-sm">
-<div class="mb-3">
-<button type="submit" name="submit" class="btn btn-primary"><i class="fas fa-envelope"></i> Send</button>
-</div>
-</div>
+    <div class="col-sm">
+        <div class="mb-3">
+            <button type="submit" name="submit" class="btn btn-primary"><i class="fas fa-envelope"></i> Send</button>
+        </div>
+    </div>
 
-<div class="col-sm text-end">
-{% if clarform.answers is defined and clarform.answers|length > 0 %}
-<div class="input-group">
-<span class="input-group-text"><i class="fas fa-fish"></i></span>
-<select class="form-select form-control-sm" id="clar_answers">
-<option selected value="_default">Add canned answer...</option>
-{% for item in clarform.answers %}
-<option>{{ item }}</option>
-{% endfor %}
-</select>
-</div>
-{% endif %}
-</div>
+    <div class="col-sm text-end">
+        {% if answers is defined and answers|length > 0 %}
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-fish"></i></span>
+                <select class="form-select form-control-sm" id="clar_answers">
+                    <option selected value="_default">Add canned answer...</option>
+                    {% for item in answers %}
+                        <option>{{ item }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+    </div>
 
 </div>
-
-</form>
+{{ form_end(form) }}
