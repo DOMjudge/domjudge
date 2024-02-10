@@ -12,7 +12,7 @@ class ContestProblemPut
         public readonly string $label,
         #[OA\Property(description: 'Human readable color of the problem to add. Will be overwritten by `rgb` if supplied', nullable: true)]
         public readonly ?string $color,
-        #[OA\Property(description: 'Hexadecimal RGB value of the color of the problem to add. Will be used if both `color` and `rgb` are supplied', nullable: true)]
+        #[OA\Property(description: 'Hexadecimal RGB value of the color of the problem to add. Overrules `color` if supplied', nullable: true)]
         public readonly ?string $rgb,
         #[OA\Property(description: 'The number of points for the problem to add. Defaults to 1')]
         public readonly int $points = 1,
