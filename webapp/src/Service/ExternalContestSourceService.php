@@ -572,7 +572,7 @@ class ExternalContestSourceService
      * @throws NonUniqueResultException
      * @throws TransportExceptionInterface
      */
-    public function importEvent(array $event, array $eventsToSKip): void
+    public function importEvent(array $event, array $eventsToSkip): void
     {
         // Check whether we have received an exit signal.
         if (function_exists('pcntl_signal_dispatch')) {
@@ -604,7 +604,7 @@ class ExternalContestSourceService
             $entityType = 'contests';
         }
 
-        if ($eventId !== null && in_array($eventId, $eventsToSKip)) {
+        if ($eventId !== null && in_array($eventId, $eventsToSkip)) {
             $this->logger->info("Skipping event with ID %s and type %s as requested",
                                 [$eventId, $event['type']]);
             return;
