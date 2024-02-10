@@ -804,7 +804,7 @@ class ImportExportService
             if (empty($teamIcpcId)) {
                 $teamIcpcId = null;
             }
-            $affiliationExternalid = preg_replace('/^INST-(U-)?/', '', @$line[7]);
+            $affiliationExternalid = preg_replace('/^INST-(U-)?/', '', $line[7] ?? '');
             if (empty($affiliationExternalid)) {
                 // TODO: note that when we set this external ID to NULL, we *will* add team affiliations
                 // multiple times, as the App\Entity\TeamAffiliation query below will not find an affiliation.
