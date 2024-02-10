@@ -420,10 +420,10 @@ function toggleExpand(event)
 function clarificationAppendAnswer() {
     if ( $('#clar_answers').val() == '_default' ) { return; }
     var selected = $("#clar_answers option:selected").text();
-    var textbox = $('#bodytext');
+    var textbox = $('#jury_clarification_message');
     textbox.val(textbox.val().replace(/\n$/, "") + '\n' + selected);
     textbox.scrollTop(textbox[0].scrollHeight);
-    previewClarification($('#bodytext') , $('#messagepreview'));
+    previewClarification($('#jury_clarification_message') , $('#messagepreview'));
 }
 
 function confirmLogout() {

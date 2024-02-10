@@ -101,14 +101,14 @@ class ClarificationControllerTest extends BaseTestCase
         self::assertEquals('Example teamname (t2)', $options[3]);
 
         $labels = $crawler->filter('label')->extract(['_text']);
-        self::assertEquals('Send to:', $labels[0]);
-        self::assertEquals('Subject:', $labels[1]);
+        self::assertEquals('Send to', $labels[0]);
+        self::assertEquals('Subject', $labels[1]);
         self::assertEquals('message', $labels[2]);
 
         $this->client->submitForm('Send', [
-            'sendto' => '',
-            'problem' => '1-tech',
-            'bodytext' => 'This is a clarification',
+            'jury_clarification[recipient]' => '',
+            'jury_clarification[subject]' => '1-tech',
+            'jury_clarification[message]' => 'This is a clarification',
         ]);
 
         $this->client->followRedirect();

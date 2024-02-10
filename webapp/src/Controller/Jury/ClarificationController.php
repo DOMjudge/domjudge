@@ -8,13 +8,14 @@ use App\Entity\ContestProblem;
 use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\User;
+use App\Form\Type\JuryClarificationType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -122,32 +123,62 @@ class ClarificationController extends AbstractController
     }
 
     #[Route(path: '/{id<\d+>}', name: 'jury_clarification')]
-    public function viewAction(int $id): Response
+    public function viewAction(Request $request, int $id): Response
     {
         $clarification = $this->em->getRepository(Clarification::class)->find($id);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %s not found', $id));
         }
 
-        $clardata = ['list'=>[]];
-        $clardata['clarform'] = $this->getClarificationFormData($clarification->getSender());
-        $clardata['showExternalId'] = $this->eventLogService->externalIdFieldForEntity(Clarification::class);
-
-        $categories = $clardata['clarform']['subjects'];
-        $queues     = $this->config->get('clar_queues');
-        $clar_answers = $this->config->get('clar_answers');
-
         if ($inReplyTo = $clarification->getInReplyTo()) {
             $clarification = $inReplyTo;
         }
-        $clarlist = [$clarification];
+        $clarificationList = [$clarification];
         $replies = $clarification->getReplies();
-        foreach ($replies as $clar_reply) {
-            $clarlist[] = $clar_reply;
+        foreach ($replies as $reply) {
+            $clarificationList[] = $reply;
         }
 
-        $concernsteam = null;
-        foreach ($clarlist as $clar) {
+        $parameters = ['list' => []];
+        $parameters['showExternalId'] = $this->eventLogService->externalIdFieldForEntity(Clarification::class);
+
+        $formData = [
+            'recipient' => JuryClarificationType::RECIPIENT_MUST_SELECT,
+            'subject' => sprintf('%s-%s', $clarification->getContest()->getCid(), $clarification->getProblem()?->getProbid() ?? $clarification->getCategory()),
+        ];
+        if ($clarification->getRecipient()) {
+            $formData['recipient'] = $clarification->getRecipient()->getTeamid();
+        }
+
+        /** @var Clarification $lastClarification */
+        $lastClarification = end($clarificationList);
+        $formData['message'] = "> " . str_replace("\n", "\n> ", Utils::wrapUnquoted($lastClarification->getBody())) . "\n\n";
+
+        $form = $this->createForm(JuryClarificationType::class, $formData, ['limit_to_team' => $clarification->getSender()]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            return $this->processSubmittedClarification($form, $clarification);
+        }
+
+        $parameters['form'] = $form->createView();
+
+        $categories = array_flip($form->get('subject')->getConfig()->getOptions()['choices']);
+        $groupedCategories = [];
+        foreach ($categories as $key => $value) {
+            if ($this->dj->getCurrentContest()) {
+                $groupedCategories[$this->dj->getCurrentContest()->getShortname()][$key] = $value;
+            } else {
+                [$group] = explode(' - ', $value, 2);
+                $groupedCategories[$group][$key] = $value;
+            }
+        }
+        $parameters['subjects'] = $groupedCategories;
+        $queues = $this->config->get('clar_queues');
+        $clarificationAnswers = $this->config->get('clar_answers');
+
+        foreach ($clarificationList as $clar) {
             $data = ['clarid' => $clar->getClarid(), 'externalid' => $clar->getExternalid()];
             $data['time'] = $clar->getSubmittime();
 
@@ -161,7 +192,6 @@ class ClarificationController extends AbstractController
             if ($fromteam = $clar->getSender()) {
                 $data['from_teamname'] = $fromteam->getEffectiveName();
                 $data['from_team'] = $fromteam;
-                $concernsteam = $fromteam->getTeamid();
             }
             if ($toteam = $clar->getRecipient()) {
                 $data['to_teamname'] = $toteam->getEffectiveName();
@@ -181,7 +211,7 @@ class ClarificationController extends AbstractController
                 $concernssubject = "";
             }
             if ($concernssubject !== "") {
-                $data['subject'] = $categories[$clarcontest][$concernssubject];
+                $data['subject'] = $categories[$concernssubject];
             } else {
                 $data['subject'] = $clarcontest;
             }
@@ -192,104 +222,36 @@ class ClarificationController extends AbstractController
             $data['answered'] = $clar->getAnswered();
 
             $data['body'] = $clar->getBody();
-            $clardata['list'][] = $data;
+            $parameters['list'][] = $data;
         }
 
-        if ($concernsteam) {
-            $clardata['clarform']['toteam'] = $concernsteam;
-        }
-        if ($concernssubject) {
-            $clardata['clarform']['onsubject'] = $concernssubject;
-        }
+        $parameters['queues'] = $queues;
+        $parameters['answers'] = $clarificationAnswers;
 
-        $clardata['clarform']['quotedtext'] = "> " . str_replace("\n", "\n> ", Utils::wrapUnquoted($data['body'])) . "\n\n";
-        $clardata['clarform']['queues'] = $queues;
-        $clardata['clarform']['answers'] = $clar_answers;
-
-        return $this->render('jury/clarification.html.twig',
-            $clardata
-        );
+        return $this->render('jury/clarification.html.twig', $parameters);
     }
 
-    /**
-     * @return array{teams: array<string|int, string>, subjects: array<string, array<string, string>>}
-     */
-    protected function getClarificationFormData(?Team $team = null): array
-    {
-        $teamlist = [];
-        $em = $this->em;
-        if ($team !== null) {
-            $teamlist[$team->getTeamid()] = sprintf("%s (t%s)", $team->getEffectiveName(), $team->getTeamid());
-        } else {
-            $teams = $em->getRepository(Team::class)->findAll();
-            foreach ($teams as $team) {
-                $teamlist[$team->getTeamid()] = sprintf("%s (t%s)", $team->getEffectiveName(), $team->getTeamid());
-            }
-        }
-        asort($teamlist, SORT_STRING | SORT_FLAG_CASE);
-        $teamlist = ['domjudge-must-select' => '(select...)', '' => 'ALL'] + $teamlist;
-
-        $data= ['teams' => $teamlist ];
-
-        $subject_options = [];
-
-        $categories = $this->config->get('clar_categories');
-        $contest = $this->dj->getCurrentContest();
-        $hasCurrentContest = $contest !== null;
-        if ($hasCurrentContest) {
-            $contests = [$contest->getCid() => $contest];
-        } else {
-            $contests = $this->dj->getCurrentContests();
-        }
-
-        /** @var ContestProblem[] $contestproblems */
-        $contestproblems = $this->em->createQueryBuilder()
-            ->from(ContestProblem::class, 'cp')
-            ->select('cp, p')
-            ->innerJoin('cp.problem', 'p')
-            ->where('cp.contest IN (:contests)')
-            ->setParameter('contests', $contests)
-            ->orderBy('cp.shortname')
-            ->getQuery()->getResult();
-
-        foreach ($contests as $cid => $cdata) {
-            $cshort = $cdata->getShortName();
-            $namePrefix = '';
-            if (!$hasCurrentContest) {
-                $namePrefix = $cshort . ' - ';
-            }
-            foreach ($categories as $name => $desc) {
-                $subject_options[$cshort]["$cid-$name"] = "$namePrefix $desc";
-            }
-
-            foreach ($contestproblems as $cp) {
-                if ($cp->getCid()!=$cid) {
-                    continue;
-                }
-                $subject_options[$cshort]["$cid-" . $cp->getProbid()] =
-                    $namePrefix . $cp->getShortname() . ': ' . $cp->getProblem()->getName();
-            }
-        }
-
-        $data['subjects'] = $subject_options;
-
-        return $data;
-    }
-
-    #[Route(path: '/send', methods: ['GET'], name: 'jury_clarification_new')]
+    #[Route(path: '/send', name: 'jury_clarification_new')]
     public function composeClarificationAction(
+        Request $request,
         #[MapQueryParameter]
-        ?string $teamto = null
+        ?string $teamto = null,
     ): Response {
-        // TODO: Use a proper Symfony form for this.
-
-        $data = $this->getClarificationFormData();
+        $formData = ['recipient' => JuryClarificationType::RECIPIENT_MUST_SELECT];
 
         if ($teamto !== null) {
-            $data['toteam'] = $teamto;
+            $formData['recipient'] = $teamto;
         }
 
-        return $this->render('jury/clarification_new.html.twig', ['clarform' => $data]);
+        $form = $this->createForm(JuryClarificationType::class, $formData);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            return $this->processSubmittedClarification($form);
+        }
+
+        return $this->render('jury/clarification_new.html.twig', ['form' => $form->createView()]);
     }
 
     #[Route(path: '/{clarId<\d+>}/claim', name: 'jury_clarification_claim')]
@@ -387,30 +349,25 @@ class ClarificationController extends AbstractController
         return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
     }
 
-    #[Route(path: '/send', methods: ['POST'], name: 'jury_clarification_send')]
-    public function sendAction(Request $request, HtmlSanitizerInterface $htmlSanitizer): Response
-    {
+    protected function processSubmittedClarification(
+        FormInterface $form,
+        ?Clarification $inReplTo = null
+    ): Response {
+        $formData = $form->getData();
         $clarification = new Clarification();
+        $clarification->setInReplyTo($inReplTo);
 
-        if ($respid = $request->request->get('id')) {
-            $respclar = $this->em->getRepository(Clarification::class)->find($respid);
-            $clarification->setInReplyTo($respclar);
-        }
-
-        $sendto = $request->request->get('sendto');
-        if (empty($sendto)) {
-            $sendto = null;
-        } elseif ($sendto === 'domjudge-must-select') {
-            $message = 'You must select somewhere to send the clarification to.';
-            $this->addFlash('danger', $message);
-            return $this->redirectToRoute('jury_clarification_send');
+        $recipient = $formData['recipient'];
+        if (empty($recipient)) {
+            $recipient = null;
         } else {
-            $team = $this->em->getReference(Team::class, $sendto);
+            $team = $this->em->getReference(Team::class, $recipient);
             $clarification->setRecipient($team);
         }
 
-        $problem = $request->request->get('problem');
-        [$cid, $probid] = explode('-', $problem);
+
+        $subject = $formData['subject'];
+        [$cid, $probid] = explode('-', $subject);
 
         $contest = $this->em->getReference(Contest::class, $cid);
         $clarification->setContest($contest);
@@ -428,8 +385,8 @@ class ClarificationController extends AbstractController
             }
         }
 
-        if ($respid) {
-            $queue = $respclar->getQueue();
+        if ($inReplTo) {
+            $queue = $inReplTo->getQueue();
         } else {
             $queue = $this->config->get('clar_default_problem_queue');
             if ($queue === "") {
@@ -440,14 +397,13 @@ class ClarificationController extends AbstractController
 
         $clarification->setJuryMember($this->getUser()->getUserIdentifier());
         $clarification->setAnswered(true);
-        $clarification->setBody($htmlSanitizer->sanitize($request->request->get('bodytext')));
+        $clarification->setBody($formData['message']);
         $clarification->setSubmittime(Utils::now());
 
         $this->em->persist($clarification);
-        if ($respid) {
-            $respclar->setAnswered(true);
-            $respclar->setJuryMember($this->getUser()->getUserIdentifier());
-            $this->em->persist($respclar);
+        if ($inReplTo) {
+            $inReplTo->setAnswered(true);
+            $inReplTo->setJuryMember($this->getUser()->getUserIdentifier());
         }
         $this->em->flush();
 
@@ -457,9 +413,8 @@ class ClarificationController extends AbstractController
         // Reload clarification to make sure we have a fresh one after calling the event log service.
         $clarification = $this->em->getRepository(Clarification::class)->find($clarId);
 
-        if ($sendto) {
-            $team = $this->em->getRepository(Team::class)->find($sendto);
-            $team->addUnreadClarification($clarification);
+        if ($clarification->getRecipient()) {
+            $clarification->getRecipient()->addUnreadClarification($clarification);
         } else {
             $teams = $this->em->getRepository(Team::class)->findAll();
             foreach ($teams as $team) {

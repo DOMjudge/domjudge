@@ -13,22 +13,23 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class TeamClarificationType extends AbstractType
 {
-    public function __construct(protected readonly DOMJudgeService $dj, protected readonly ConfigurationService $config)
-    {
-    }
+    public function __construct(
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config
+    ) {}
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('recipient', TextType::class, [
-        'data' => 'Jury',
-        'disabled' => true,
+            'data' => 'Jury',
+            'disabled' => true,
         ]);
 
         $subjects = [];
         /** @var string[] $categories */
         $categories = $this->config->get('clar_categories');
-        $user       = $this->dj->getUser();
-        $contest    = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
+        $user = $this->dj->getUser();
+        $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         if ($contest) {
             foreach ($categories as $categoryId => $categoryName) {
                 $subjects[$categoryName] = sprintf('%d-%s', $contest->getCid(), $categoryId);
@@ -37,8 +38,8 @@ class TeamClarificationType extends AbstractType
                 /** @var ContestProblem $problem */
                 foreach ($contest->getProblems() as $problem) {
                     if ($problem->getAllowSubmit()) {
-                        $problemName            = sprintf('%s: %s', $problem->getShortname(),
-                                                          $problem->getProblem()->getName());
+                        $problemName = sprintf('%s: %s', $problem->getShortname(),
+                            $problem->getProblem()->getName());
                         $subjects[$problemName] = sprintf('%d-%d', $contest->getCid(), $problem->getProbid());
                     }
                 }
@@ -50,7 +51,6 @@ class TeamClarificationType extends AbstractType
         ]);
         $builder->add('message', TextareaType::class, [
             'label' => false,
-            'sanitize_html' => true,
             'attr' => [
                 'rows' => 5,
                 'cols' => 85,
