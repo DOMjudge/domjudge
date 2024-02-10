@@ -295,8 +295,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         ContestProblemPut $contestProblemPut,
         Request $request,
         string $id
-    ): Response
-    {
+    ): Response {
         $problem = $this->em->createQueryBuilder()
                             ->from(Problem::class, 'p')
                             ->select('p')

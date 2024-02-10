@@ -647,6 +647,7 @@ class ImportExportService
      */
     public function importGroupsJson(array $data, ?string &$message = null, ?array &$saved = null): int
     {
+        // TODO: can we have this use the DTO?
         $groupData = [];
         foreach ($data as $group) {
             $groupData[] = [
