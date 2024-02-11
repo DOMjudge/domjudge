@@ -1710,7 +1710,7 @@ class ExternalContestSourceService
         }
 
         // Now check if we have all dependent data.
-        $judgementId = $data['judgement_id'] ?? null;
+        $judgementId = $data['judgement_id'];
         $externalJudgement = $this->em
             ->getRepository(ExternalJudgement::class)
             ->findOneBy([
