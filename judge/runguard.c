@@ -1242,6 +1242,13 @@ int main(int argc, char **argv)
 		}
 		verbose("pipes closed in child");
 
+		if ( outputmeta ) {
+			if ( fclose(metafile)!=0 ) {
+				error(errno,"closing file `%s'",metafilename);
+			}
+			verbose("metafile closed in child");
+		}
+
 		/* And execute child command. */
 		execvp(cmdname,cmdargs);
 		error(errno,"cannot start `%s'",cmdname);
