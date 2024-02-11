@@ -1591,7 +1591,7 @@ class ExternalContestSourceService
         }
 
         // Now check if we have all dependent data.
-        $submissionId = $data['submission_id'] ?? null;
+        $submissionId = $data['submission_id'];
         $submission = $this->em
             ->getRepository(Submission::class)
             ->findOneBy([
