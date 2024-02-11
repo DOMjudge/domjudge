@@ -401,6 +401,9 @@ class StatisticsService
 
     /**
      * @param Problem[] $problems
+     * @return array{'numBuckets': int, 'maxBucketSizeCorrect': int, 'maxBucketSizeCorrect': int, 'maxBucketSizeIncorrect': int,
+     *               'problems': array<array{'correct': array<array{'start': DateTime, 'end': DateTime, 'count': int}>,
+     *                                       'incorrect': array<array{'start': DateTime, 'end': DateTime, 'count': int}>}>}
      */
     public function getGroupedProblemsStats(
         Contest $contest,

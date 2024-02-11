@@ -46,7 +46,18 @@ class ExternalContestSourceService
     protected ?ExternalContestSource $source = null;
 
     protected bool $contestLoaded = false;
+    /**
+     * @var array{scoreboard_type: string, external_id: string, end_time: string, duration: string, name: string,
+     *            scoreboard_freeze_duration: string, id: string, allow_submit: bool, allow_submit: bool,
+     *            penalty_time: int, start_time?: string|null, formal_name?: string|null, shortname?: string|null,
+     *            scoreboard_thaw_time?: string, warning_message?: string|null} $cachedContestData
+     */
     protected ?array $cachedContestData = null;
+    /**
+     * @var array{version: string, version_url: string, name: string,
+     *             provider?: array{name?: string, build_date?: string, version?: string},
+     *             domjudge?: array{apiversion: int, version: string, environment: string, doc_url: string}} $cachedApiInfoData
+     */
     protected ?array $cachedApiInfoData = null;
     protected ?string $loadingError = null;
     protected bool $shouldStopReading = false;
@@ -65,6 +76,17 @@ class ExternalContestSourceService
      * - The first dimension is the type of the dependent event type
      * - The second dimension is the (external) ID of the dependent event
      * - The third dimension contains an array of all events that should be processed
+     *
+     * @var array<string, array<string, array{token?: string, id: string, type: string, time: string, op?: string,
+     *                                        end_of_updates?: bool,
+     *                                        data?: array{run_time?: float, time?: string, contest_time?: string,
+     *                                                     ordinal?: int, id: string, judgement_id?: string,
+     *                                                     judgement_type_id: string|null, max_run_time?: float|null,
+     *                                                     start_time: string, start_contest_time?: string, end_time?: string|null,
+     *                                                     end_contest_time?: string|null, submission_id: string,
+     *                                                     output_compile_as_string: null, language_id?: string, externalid?: null,
+     *                                                     team_id: string, problem_id?: string, entry_point?: string|null,
+     *                                                     old_result?: null, files?: array{href: string}}|mixed[]}>> $pendingEvents
      */
     protected array $pendingEvents = [
         // Initialize it with all types that can be a dependent event.
@@ -411,6 +433,9 @@ class ExternalContestSourceService
         }
     }
 
+    /**
+     * @param string[] $eventsToSkip
+     */
     protected function importFromContestArchive(array $eventsToSkip, ?callable $progressReporter = null): bool
     {
         $file = fopen($this->source->getSource() . '/event-feed.ndjson', 'r');
@@ -580,7 +605,7 @@ class ExternalContestSourceService
      *                           id: string, judgement_id?: string, judgement_type_id: string|null,
      *                           max_run_time?: float|null, start_time: string, start_contest_time?: string,
      *                           end_time?: string|null, end_contest_time?: string|null, submission_id: string,
-     *                           output_compile_as_string: null, language_id?: string, externalid?: null,
+     *                           output_compile_as_string: null, language_id?: string, externalid?: string|null,
      *                           team_id: string, problem_id?: string, entry_point?: string|null, old_result?: null,
      *                           files?: array{href: string}}|mixed[]
      *             } $event
@@ -684,6 +709,10 @@ class ExternalContestSourceService
     }
 
     /**
+     * @param array{id: string, name: string, duration: string, scoreboard_type: string, penalty_time: int,
+     *              formal_name?: string, start_time?: string|null, countdown_pause_time?: int|null,
+     *              scoreboard_freeze_duration: string|null, scoreboard_thaw_time?: string|null,
+     *              banner: array{0: array{href: string, filename: string, mime: string, width: int, height: int}}} $data
      * @throws NonUniqueResultException
      */
     protected function validateAndUpdateContest(string $entityType, ?string $eventId, string $operation, array $data): void
@@ -793,6 +822,9 @@ class ExternalContestSourceService
         $this->eventLog->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE, $this->getSourceContestId());
     }
 
+    /**
+     * @param array{id: string, name: string, penalty: bool, solved: bool} $data description
+     */
     protected function importJudgementType(string $entityType, ?string $eventId, string $operation, array $data): void
     {
         if (!$this->warningIfUnsupported($operation, $eventId, $entityType, $data['id'], [EventLogService::ACTION_CREATE])) {
@@ -835,6 +867,12 @@ class ExternalContestSourceService
         $this->compareOrCreateValues($eventId, $entityType, $data['id'], $this->source->getContest(), [], $extraDiff, false);
     }
 
+    /**
+     * @param array{id: string, name: string, entry_point_required: true, entry_point_name?: string|null,
+     *              extensions: string[],
+     *              compiler?: array{command: string, args?: string, version?: string, version_command?: string},
+     *              runner?: array{command: string, args?: string, version?: string, version_command?: string}} $data
+     */
     protected function validateLanguage(string $entityType, ?string $eventId, string $operation, array $data): void
     {
         if (!$this->warningIfUnsupported($operation, $eventId, $entityType, $data['id'], [EventLogService::ACTION_CREATE])) {
@@ -861,6 +899,10 @@ class ExternalContestSourceService
         }
     }
 
+    /**
+     * @param array{id: string, name: string, icpc_id?: string|null, type?: string|null, location?: string|null,
+     *              hidden?: bool, sortorder?: int|null, color?: string|null} $data
+     */
     protected function validateAndUpdateGroup(string $entityType, ?string $eventId, string $operation, array $data): void
     {
         $groupId = $data['id'];
@@ -918,6 +960,11 @@ class ExternalContestSourceService
         $this->processPendingEvents('group', $category->getExternalid());
     }
 
+    /**
+     * @param array{id: string, name: string, icpc_id?: string|null, formal_name?: string|null, country?: string,
+     *              country_flag?: array{0: array<string, string>}, url?: string, twitter_hashtag?: string,
+     *              twitter_account?: string, location?: array{0: array<string, string>}, logo?: array{0: array<string, string>}} $data
+     */
     protected function validateAndUpdateOrganization(string $entityType, ?string $eventId, string $operation, array $data): void
     {
         $organizationId = $data['id'];
@@ -972,6 +1019,9 @@ class ExternalContestSourceService
         $this->processPendingEvents('organization', $affiliation->getExternalid());
     }
 
+    /**
+     * @param array{id: string, name: string, time_limit: int, label?: string|null, rgb?: string|null} $data
+     */
     protected function validateAndUpdateProblem(string $entityType, ?string $eventId, string $operation, array $data): void
     {
         if (!$this->warningIfUnsupported($operation, $eventId, $entityType, $data['id'], [EventLogService::ACTION_CREATE, EventLogService::ACTION_UPDATE])) {
@@ -1031,6 +1081,10 @@ class ExternalContestSourceService
         $this->processPendingEvents('problem', $problem->getProbid());
     }
 
+    /**
+     * @param array{id: string, name: string, formal_name?: string|null, icpc_id?: string|null, country?: string|null,
+     *              organization_id?: string|null, group_ids?: string[], display_name?: string|null, country?: string|null} $data
+     */
     protected function validateAndUpdateTeam(string $entityType, ?string $eventId, string $operation, array $data): void
     {
         $teamId = $data['id'];
@@ -1106,6 +1160,8 @@ class ExternalContestSourceService
     }
 
     /**
+     * @param array{id: string, text: string, time: string, contest_time: string, from_team_id?: string|null,
+     *              to_team_id?: string|null, reply_to_id: string|null, problem_id?: string|null} $data
      * @throws NonUniqueResultException
      */
     protected function importClarification(string $entityType, ?string $eventId, string $operation, array $data): void
@@ -1245,6 +1301,10 @@ class ExternalContestSourceService
     }
 
     /**
+     * @param array{id: string, language_id: string, problem_id: string, team_id: string,
+     *              time: string, contest_time: string, entry_point?: string|null,
+     *              files: array<array{href: string, filename: string, mime?: string}>,
+     *              reaction?: array<array<string, string>>} $data
      * @throws TransportExceptionInterface
      * @throws DBALException
      * @throws NonUniqueResultException
@@ -1547,6 +1607,8 @@ class ExternalContestSourceService
     }
 
     /**
+     * @param array{start_time: string, start_contest_time: string, id: string, submission_id: string,
+     *              max_run_time?: int|null, end_time?: string|null, output_compile_as_string?: string|null, judgement_type_id?: string|null} $data
      * @throws DBALException
      */
     protected function importJudgement(string $entityType, ?string $eventId, string $operation, array $data): void
@@ -1668,6 +1730,10 @@ class ExternalContestSourceService
         $this->processPendingEvents('judgement', $judgement->getExternalid());
     }
 
+    /**
+     * @param array{id: string, judgement_id: string, ordinal: int, judgement_type_id?: string|null,
+     *              time?: string|null, contest_time?: string|null, run_time?: int|null} $data
+     */
     protected function importRun(string $entityType, ?string $eventId, string $operation, array $data): void
     {
         // Note that we do not emit events for imported runs, as we will generate our own.
@@ -1795,12 +1861,12 @@ class ExternalContestSourceService
 
     /**
      * @param array{run_time?: float, time?: string, contest_time?: string, ordinal?: int,
-     *              id: string, judgement_id?: string, judgement_type_id: string|null,
-     *              max_run_time?: float|null, start_time: string, start_contest_time?: string,
-     *              end_time?: string|null, end_contest_time?: string|null, submission_id: string,
-     *              output_compile_as_string: null, language_id?: string, externalid?: null,
-     *              team_id: string, problem_id?: string, entry_point?: string|null, old_result?: null,
-     *              files?: array{href: string}} $data
+     *              id: string, judgement_id?: string, judgement_type_id?: string|null,
+     *              max_run_time?: float|null, start_time?: string, start_contest_time?: string,
+     *              end_time?: string|null, end_contest_time?: string|null, submission_id?: string,
+     *              output_compile_as_string?: string|null, language_id?: string, externalid?: string|null,
+     *              team_id?: string, problem_id?: string, entry_point?: string|null, old_result?: null,
+     *              files?: array<array{href: string, filename: string, mime?: string}>} $data
      */
     protected function addPendingEvent(string $type, string|int $id, string $operation, string $entityType, ?string $eventId, array $data): void
     {
@@ -1894,6 +1960,14 @@ class ExternalContestSourceService
         $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
     }
 
+    /**
+     * @param array{'affiliation.externalid'?: string|null, 'category.externalid'?: string|null, color?: string|null,
+     *              country?: string|null, display_name?: string|null, end_time?: string, externalid?: string,
+     *              freeze_time?: string|null, icpc_id?: string|null, label?: string, name?: string, rgb?: string|null,
+     *              shortname?: string, sortorder?: int, start_time_enabled?: bool, start_time_string?: string,
+     *              timelimit?: int, visible?: bool} $values
+     * @param array<string, array{0: bool, 1: bool}> $extraDiff
+     */
     private function compareOrCreateValues(
         ?string       $eventId,
         string        $entityType,
@@ -2027,8 +2101,8 @@ class ExternalContestSourceService
      *              data?: array{run_time?: float, time?: string, contest_time?: string, ordinal?: int,
      *                           id: string, judgement_id?: string, judgement_type_id: string|null,
      *                           max_run_time?: float|null, start_time: string, start_contest_time?: string,
-     *                           end_time?: string|null, end_contest_time?: string|null, submission_id: string,
-     *                           output_compile_as_string: null, language_id?: string, externalid?: null,
+     *                           end_time?: string|null, end_contest_time?: string|null, submission_id?: string,
+     *                           output_compile_as_string: null, language_id?: string, externalid?: string|null,
      *                           team_id: string, problem_id?: string, entry_point?: string|null, old_result?: null,
      *                           files?: array{href: string}}|mixed[]
      *             } $event
