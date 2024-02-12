@@ -1444,6 +1444,7 @@ function judge(array $judgeTask): bool
         'metadata' => rest_encode_file($testcasedir . '/program.meta', false),
         'output_diff'  => rest_encode_file($testcasedir . '/feedback/judgemessage.txt', $output_storage_limit),
         'hostname' => $myhost,
+        'testcasedir' => $testcasedir,
     ];
 
     if (file_exists($testcasedir . '/feedback/teammessage.txt')) {

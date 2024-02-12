@@ -394,6 +394,9 @@ class SubmissionController extends BaseController
                     '/\[output storage truncated after \d* B\]/',
                     (string)$runResult['output_run_last_bytes']
                 );
+                if ($firstJudgingRun) {
+                    $runResult['testcasedir'] = $firstJudgingRun->getTestcaseDir();
+                }
                 $runsOutput[] = $runResult;
             }
         }
