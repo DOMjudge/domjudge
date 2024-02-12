@@ -86,6 +86,14 @@ class JudgingRun extends BaseApiEntity
     #[Serializer\Exclude]
     private ?JudgeTask $judgetask = null;
 
+    #[ORM\Column(
+        length: 256,
+        nullable: true,
+        options: ['comment' => 'The path to the testcase directory on the judgehost.']
+    )]
+    #[Serializer\Exclude]
+    private ?string $testcaseDir = null;
+
     public function __construct()
     {
         $this->output = new ArrayCollection();
@@ -220,5 +228,16 @@ class JudgingRun extends BaseApiEntity
     public function getOutput(): ?JudgingRunOutput
     {
         return $this->output->first() ?: null;
+    }
+
+    public function setTestcaseDir(?string $testcaseDir): JudgingRun
+    {
+        $this->testcaseDir = $testcaseDir;
+        return $this;
+    }
+
+    public function getTestcaseDir(): ?string
+    {
+        return $this->testcaseDir;
     }
 }

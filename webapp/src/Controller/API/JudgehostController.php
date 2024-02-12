@@ -634,6 +634,7 @@ class JudgehostController extends AbstractFOSRestController
         $outputSystem = $request->request->get('output_system');
         $teamMessage  = $request->request->get('team_message');
         $metadata     = $request->request->get('metadata');
+        $testcasedir  = $request->request->get('testcasedir');
 
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
@@ -641,7 +642,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
-            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata);
+            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
@@ -905,7 +906,8 @@ class JudgehostController extends AbstractFOSRestController
         string $outputDiff,
         string $outputRun,
         ?string $teamMessage,
-        string $metadata
+        string $metadata,
+        ?string $testcasedir
     ): bool {
         $resultsRemap = $this->config->get('results_remap');
         $resultsPrio  = $this->config->get('results_prio');
@@ -925,7 +927,8 @@ class JudgehostController extends AbstractFOSRestController
             $outputDiff,
             $outputRun,
             $teamMessage,
-            $metadata
+            $metadata,
+            $testcasedir
         ) {
             $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
                 ['judgetaskid' => $judgeTaskId]);
@@ -938,7 +941,8 @@ class JudgehostController extends AbstractFOSRestController
             $judgingRun
                 ->setRunresult($runResult)
                 ->setRuntime((float)$runTime)
-                ->setEndtime(Utils::now());
+                ->setEndtime(Utils::now())
+                ->setTestcasedir($testcasedir);
             $judgingRunOutput
                 ->setOutputRun(base64_decode($outputRun))
                 ->setOutputDiff(base64_decode($outputDiff))
