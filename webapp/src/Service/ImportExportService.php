@@ -641,8 +641,8 @@ class ImportExportService
     /**
      * Import groups JSON
      *
-     * @param array<array{id: string, icpc_id: string, name: string, sortorder?: int,
-     *                    color?: string, hidden?: true, allow_self_registration?: bool}> $data
+     * @param array<array{id?: string, icpc_id: string, name: string, sortorder?: int,
+     *                    color?: string, hidden?: bool, allow_self_registration?: bool}> $data
      * @param TeamCategory[]|null $saved The saved groups
      */
     public function importGroupsJson(array $data, ?string &$message = null, ?array &$saved = null): int
@@ -732,7 +732,7 @@ class ImportExportService
      * Import organizations JSON.
      *
      * @param array<array{shortname?: string, short_name?: string, short-name?: string, id: string, icpc_id?: string, name: string, formal_name?: string,
-     *                    country: string, logo: array{href: string, mime: string, hash: string,
+     *                    country: string, logo?: array{href: string, mime: string, hash: string,
      *                                                 filename: string, width: string|int, height: string|int}}> $data
      * @param TeamAffiliation[]|null $saved The saved groups
      */
