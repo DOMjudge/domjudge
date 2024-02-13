@@ -10,6 +10,7 @@ class ApiInfo
         public readonly string $version,
         public readonly string $versionUrl,
         public readonly string $name,
+        public readonly ?ApiInfoProvider $provider,
         #[Serializer\Exclude(if: '!object.domjudge')]
         public readonly ?DomJudgeApiInfo $domjudge,
     ) {}
