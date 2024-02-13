@@ -140,6 +140,8 @@ abstract class AbstractRestController extends AbstractFOSRestController
         $postfix = '';
         if ($routeType !== 'user') {
             $params['cid'] = $request->attributes->get('cid');
+            // If we request any entity without contest, we need to use the rout postfixed with _1,
+            // which is the route without the contest in the URL.
             if ($params['cid'] === null) {
                 $postfix = '_1';
             }
