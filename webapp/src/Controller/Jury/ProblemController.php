@@ -261,7 +261,10 @@ class ProblemController extends BaseController
         $yaml = ['name' => $problem->getName()];
         if (!empty($problem->getCompareExecutable())) {
             $yaml['validation'] = 'custom';
+        } elseif ($problem->getCombinedRunCompare() && !empty($problem->getRunExecutable())) {
+            $yaml['validation'] = 'custom interactive';
         }
+
         if (!empty($problem->getSpecialCompareArgs())) {
             $yaml['validator_flags'] = $problem->getSpecialCompareArgs();
         }
@@ -289,6 +292,27 @@ class ProblemController extends BaseController
         if (!empty($problem->getProblemtext())) {
             $zip->addFromString('problem.' . $problem->getProblemtextType(),
                                 stream_get_contents($problem->getProblemtext()));
+        }
+
+        $compareExecutable = null;
+        if ($problem->getCompareExecutable()) {
+            $compareExecutable = $problem->getCompareExecutable();
+        } elseif ($problem->getCombinedRunCompare()) {
+            $compareExecutable = $problem->getRunExecutable();
+        }
+        if ($compareExecutable) {
+            foreach ($compareExecutable->getImmutableExecutable()->getFiles() as $file) {
+                $filename = sprintf('output_validators/%s/%s', $compareExecutable->getExecid(), $file->getFilename());
+                $zip->addFromString($filename, $file->getFileContent());
+                if ($file->isExecutable()) {
+                    // 100755 = regular file, executable
+                    $zip->setExternalAttributesName(
+                        $filename,
+                        ZipArchive::OPSYS_UNIX,
+                        octdec('100755') << 16
+                    );
+                }
+            }
         }
 
         foreach ([true, false] as $isSample) {
