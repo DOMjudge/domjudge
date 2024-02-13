@@ -19,15 +19,12 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y autoconf automake
-      - name: Try to get qodana in a good state
-        run: make dist
       - name: Install dependencies
         run: |
           sudo apt install -y composer php php-fpm php-gd \
                php-cli php-intl php-mbstring php-mysql \
                php-curl php-json php-xml php-zip
-          composer install
-          # --no-dev --no-scripts
+          composer install --no-scripts
       - name: 'Qodana Scan (PHP)'
         uses: JetBrains/qodana-action@v2023.2
         env:
