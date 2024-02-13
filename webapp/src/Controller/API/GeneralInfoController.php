@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\DataTransferObject\ApiInfo;
+use App\DataTransferObject\ApiInfoProvider;
 use App\DataTransferObject\ApiVersion;
 use App\DataTransferObject\DomJudgeApiInfo;
 use App\DataTransferObject\ExtendedContestStatus;
@@ -99,6 +100,10 @@ class GeneralInfoController extends AbstractFOSRestController
             version: self::CCS_SPEC_API_VERSION,
             versionUrl: self::CCS_SPEC_API_URL,
             name: 'DOMjudge',
+            provider: new ApiInfoProvider(
+                name: 'DOMjudge',
+                version: $this->getParameter('domjudge.version'),
+            ),
             domjudge: $domjudge
         );
     }
