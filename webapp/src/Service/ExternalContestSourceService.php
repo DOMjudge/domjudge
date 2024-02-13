@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\DataTransferObject\ApiInfo;
+use App\DataTransferObject\Shadowing\ContestData;
 use App\Entity\BaseApiEntity;
 use App\Entity\Clarification;
 use App\Entity\Contest;
@@ -24,7 +26,7 @@ use DateTimeZone;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use JsonException;
+use Exception;
 use LogicException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -33,6 +35,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\Exception\UninitializedPropertyException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -46,19 +49,8 @@ class ExternalContestSourceService
     protected ?ExternalContestSource $source = null;
 
     protected bool $contestLoaded = false;
-    /**
-     * @var array{scoreboard_type: string, external_id: string, end_time: string, duration: string, name: string,
-     *            scoreboard_freeze_duration: string, id: string, allow_submit: bool, allow_submit: bool,
-     *            penalty_time: int, start_time?: string|null, formal_name?: string|null, shortname?: string|null,
-     *            scoreboard_thaw_time?: string, warning_message?: string|null} $cachedContestData
-     */
-    protected ?array $cachedContestData = null;
-    /**
-     * @var array{version: string, version_url: string, name: string,
-     *             provider?: array{name?: string, build_date?: string, version?: string},
-     *             domjudge?: array{apiversion: int, version: string, environment: string, doc_url: string}} $cachedApiInfoData
-     */
-    protected ?array $cachedApiInfoData = null;
+    protected ?ContestData $cachedContestData = null;
+    protected ?ApiInfo $cachedApiInfoData = null;
     protected ?string $loadingError = null;
     protected bool $shouldStopReading = false;
     /** @var array<string, string> $verdicts */
@@ -109,6 +101,7 @@ class ExternalContestSourceService
         protected readonly EventLogService $eventLog,
         protected readonly SubmissionService $submissionService,
         protected readonly ScoreboardService $scoreboardService,
+        protected readonly SerializerInterface $serializer,
         #[Autowire('%domjudge.version%')]
         string $domjudgeVersion
     ) {
@@ -159,7 +152,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedContestData['id'];
+        return $this->cachedContestData->id;
     }
 
     public function getContestName(): string
@@ -168,7 +161,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedContestData['name'];
+        return $this->cachedContestData->name;
     }
 
     public function getContestStartTime(): ?float
@@ -176,8 +169,8 @@ class ExternalContestSourceService
         if (!$this->isValidContestSource()) {
             throw new LogicException('The contest source is not valid');
         }
-        if (isset($this->cachedContestData['start_time'])) {
-            return Utils::toEpochFloat($this->cachedContestData['start_time']);
+        if (isset($this->cachedContestData->startTime)) {
+            return Utils::toEpochFloat($this->cachedContestData->startTime);
         } else {
             $this->logger->warning('Contest has no start time, is the contest paused?');
             return null;
@@ -190,7 +183,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedContestData['duration'];
+        return $this->cachedContestData->duration;
     }
 
     public function getApiVersion(): ?string
@@ -199,7 +192,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData['version'] ?? null;
+        return $this->cachedApiInfoData->version ?? null;
     }
 
     public function getApiVersionUrl(): ?string
@@ -208,7 +201,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData['version_url'] ?? null;
+        return $this->cachedApiInfoData->versionUrl ?? null;
     }
 
     public function getApiProviderName(): ?string
@@ -217,7 +210,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData['provider']['name'] ?? $this->cachedApiInfoData['name'] ?? null;
+        return $this->cachedApiInfoData->provider?->name ?? $this->cachedApiInfoData->name;
     }
 
     public function getApiProviderVersion(): ?string
@@ -226,7 +219,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData['provider']['version'] ?? null;
+        return $this->cachedApiInfoData->provider?->version ?? $this->cachedApiInfoData->domjudge?->version;
     }
 
     public function getApiProviderBuildDate(): ?string
@@ -235,7 +228,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData['provider']['build_date'] ?? null;
+        return $this->cachedApiInfoData->provider?->buildDate;
     }
 
     public function getLoadingError(): string
@@ -494,7 +487,6 @@ class ExternalContestSourceService
      * - A boolean that can be set to true (pass-by-reference) to stop processing
      *
      * @param resource $filePointer
-     * @throws JsonException
      */
     protected function readEventsFromFile($filePointer, callable $callback): void
     {
@@ -555,10 +547,10 @@ class ExternalContestSourceService
                         }
                         $this->httpClient = $this->httpClient->withOptions($clientOptions);
                         $contestResponse = $this->httpClient->request('GET', $this->source->getSource());
-                        $this->cachedContestData = $contestResponse->toArray();
+                        $this->cachedContestData = $this->serializer->deserialize($contestResponse->getContent(), ContestData::class, 'json');
 
                         $apiInfoResponse = $this->httpClient->request('GET', '');
-                        $this->cachedApiInfoData = $apiInfoResponse->toArray();
+                        $this->cachedApiInfoData = $this->serializer->deserialize($apiInfoResponse->getContent(), ApiInfo::class, 'json');
                     }
                 } catch (HttpExceptionInterface|DecodingExceptionInterface|TransportExceptionInterface $e) {
                     $this->cachedContestData = null;
@@ -580,15 +572,15 @@ class ExternalContestSourceService
                     $this->loadingError = 'event-feed.ndjson not found in archive';
                 } else {
                     try {
-                        $this->cachedContestData = $this->dj->jsonDecode(file_get_contents($contestFile));
-                    } catch (JsonException $e) {
+                        $this->cachedContestData = $this->serializer->deserialize(file_get_contents($contestFile), ContestData::class, 'json');
+                    } catch (Exception $e) {
                         $this->loadingError = $e->getMessage();
                     }
 
                     if (is_file($apiInfoFile)) {
                         try {
-                            $this->cachedApiInfoData = $this->dj->jsonDecode(file_get_contents($apiInfoFile));
-                        } catch (JsonException $e) {
+                            $this->cachedApiInfoData = $this->serializer->deserialize(file_get_contents($apiInfoFile), ApiInfo::class, 'json');
+                        } catch (Exception $e) {
                             $this->loadingError = $e->getMessage();
                         }
                     }
