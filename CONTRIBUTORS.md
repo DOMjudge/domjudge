@@ -69,5 +69,7 @@ how to best contribute.
 
 ## Special thanks
 
-Special thanks go to Aidan Stephenson for researching and responsibly
-disclosing a security vulnerability in DOMjudge.
+Special thanks go to the following people for researching and
+responsibly disclosing a security vulnerability in DOMjudge:
+* Atsutoshi Kikuchi
+* Aidan Stephenson
