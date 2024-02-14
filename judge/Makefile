@@ -16,7 +16,6 @@ $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 runguard: LDFLAGS := $(filter-out -pie,$(LDFLAGS))
 
 runguard: -lm $(LIBCGROUP)
-runguard: CFLAGS += -std=c99
 runguard$(OBJEXT): $(TOPDIR)/etc/runguard-config.h
 
 evict: evict.c $(LIBHEADERS) $(LIBSOURCES)

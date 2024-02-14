@@ -193,9 +193,6 @@ paths.mk:
 	@exit 1
 
 # Configure for running in source tree, not meant for normal use:
-MAINT_CXFLAGS=-g -O1 -Wall -fstack-protector -D_FORTIFY_SOURCE=2 \
-              -fPIE -Wformat -Wformat-security -pedantic
-MAINT_LDFLAGS=-fPIE -pie -Wl,-z,relro -Wl,-z,now
 maintainer-conf: inplace-conf-common composer-dependencies-dev webapp/.env.local
 inplace-conf: inplace-conf-common composer-dependencies
 inplace-conf-common: dist
@@ -212,9 +209,6 @@ inplace-conf-common: dist
 	            --with-judgehost_judgedir=$(CURDIR)/output/judgings \
 	            --with-domserver_databasedumpdir=$(CURDIR)/output/db-dumps \
 	            --with-baseurl='http://localhost/domjudge/' \
-	            CFLAGS='$(MAINT_CXFLAGS) -std=c11' \
-	            CXXFLAGS='$(MAINT_CXFLAGS) -std=c++11' \
-	            LDFLAGS='$(MAINT_LDFLAGS)' \
 	            $(CONFIGURE_FLAGS)
 
 # Run Symfony in dev mode (for maintainer-mode):

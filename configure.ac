@@ -51,20 +51,23 @@ if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 		eval enable_${flag}_setting=$res
 		AC_MSG_RESULT($res)
 	done
-	
+
 	DEF_CXFLAGS="-g -O2"
 	DEF_LDFLAGS=""
-	
+
 	AX_APPEND_COMPILE_FLAGS(-Wall,               DEF_CXFLAGS)
+	AX_APPEND_COMPILE_FLAGS(-Wformat,            DEF_CXFLAGS)
+	AX_APPEND_COMPILE_FLAGS(-Wformat-security,   DEF_CXFLAGS)
+	AX_APPEND_COMPILE_FLAGS(-pedantic,           DEF_CXFLAGS)
 	AX_APPEND_COMPILE_FLAGS(-fstack-protector,   DEF_CXFLAGS)
 	AX_APPEND_COMPILE_FLAGS(-fPIE,               DEF_CXFLAGS)
 	AX_APPEND_COMPILE_FLAGS(-D_FORTIFY_SOURCE=2, DEF_CXFLAGS)
 	AX_APPEND_LINK_FLAGS([-fPIE -pie],   DEF_LDFLAGS)
 	AX_APPEND_LINK_FLAGS([-Wl,-z,relro], DEF_LDFLAGS)
 	AX_APPEND_LINK_FLAGS([-Wl,-z,now],   DEF_LDFLAGS)
-	
-	test "x$enable_CFLAGS_setting"   = xyes && AC_SUBST(CFLAGS,   $DEF_CXFLAGS)
-	test "x$enable_CXXFLAGS_setting" = xyes && AC_SUBST(CXXFLAGS, $DEF_CXFLAGS)
+
+	test "x$enable_CFLAGS_setting"   = xyes && AC_SUBST(CFLAGS,   "$DEF_CXFLAGS -std=c11")
+	test "x$enable_CXXFLAGS_setting" = xyes && AC_SUBST(CXXFLAGS, "$DEF_CXFLAGS -std=c++11")
 	test "x$enable_LDFLAGS_setting"  = xyes && AC_SUBST(LDFLAGS,  $DEF_LDFLAGS)
 fi
 
@@ -94,7 +97,7 @@ if test "x$DOMSERVER_BUILD_ENABLED" = xyes; then
 	AC_MSG_CHECKING([webserver-group])
 	AC_ARG_WITH([webserver-group], [AS_HELP_STRING([--with-webserver-group=GROUP],
 	[Webserver group for password files (default: try to detect).])], [], [])
-	
+
 	if test "x$with_webserver_group" = x; then
 		# Try a number of group names and choose first one found
 		found=0
