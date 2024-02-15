@@ -100,6 +100,7 @@ class GeneralInfoController extends AbstractFOSRestController
             version: self::CCS_SPEC_API_VERSION,
             versionUrl: self::CCS_SPEC_API_URL,
             name: 'DOMjudge',
+            //TODO: Add DOMjudge logo
             provider: new ApiInfoProvider(
                 name: 'DOMjudge',
                 version: $this->getParameter('domjudge.version'),
