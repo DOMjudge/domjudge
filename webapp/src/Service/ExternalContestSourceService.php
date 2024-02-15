@@ -483,7 +483,7 @@ class ExternalContestSourceService
     /**
      * Read events from the given file.
      *
-     * The callback will be called for every found event and will receive three
+     * The callback will be called for every found event and will receive two
      * arguments:
      * - The event line to process
      * - A boolean that can be set to true (pass-by-reference) to stop processing
