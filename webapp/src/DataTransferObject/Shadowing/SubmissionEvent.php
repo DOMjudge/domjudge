@@ -13,7 +13,6 @@ class SubmissionEvent implements EventData
         public readonly string $problemId,
         public readonly string $teamId,
         public readonly string $time,
-        public readonly string $contestTime,
         public readonly ?string $entryPoint,
         public readonly array $files,
     ) {}

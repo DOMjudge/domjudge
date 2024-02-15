@@ -4,5 +4,5 @@ namespace App\DataTransferObject\Shadowing;
 
 class TeamMember implements EventData
 {
-
+    // Not used currently, so no fields
 }
