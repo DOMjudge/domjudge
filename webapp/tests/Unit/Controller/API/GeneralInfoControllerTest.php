@@ -33,13 +33,15 @@ class GeneralInfoControllerTest extends BaseTestCase
             $response = $this->verifyApiJsonResponse('GET', $endpoint, 200);
 
             static::assertIsArray($response);
-            static::assertCount(4, $response);
+            static::assertCount(5, $response);
             static::assertEquals(GeneralInfoController::CCS_SPEC_API_VERSION, $response['version']);
             static::assertEquals(GeneralInfoController::CCS_SPEC_API_URL, $response['version_url']);
             static::assertEquals('DOMjudge', $response['name']);
             static::assertMatchesRegularExpression('/^\d+\.\d+\.\d+/', $response['domjudge']['version']);
             static::assertEquals('test', $response['domjudge']['environment']);
             static::assertStringStartsWith('http', $response['domjudge']['doc_url']);
+            static::assertMatchesRegularExpression('/^\d+\.\d+\.\d+/', $response['provider']['version']);
+            static::assertEquals('DOMjudge', $response['provider']['name']);
         }
     }
 
