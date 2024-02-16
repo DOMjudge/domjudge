@@ -11,5 +11,6 @@ class ContestData
         public readonly ?string $scoreboardFreezeDuration,
         public readonly int $penaltyTime,
         public readonly ?string $startTime,
+        // TODO: check for end time and scoreboard thaw time
     ) {}
 }
