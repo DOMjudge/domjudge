@@ -74,23 +74,25 @@ class UserRegistrationType extends AbstractType
                 ],
             ])
             ->add('email', EmailType::class, [
-                'label' => false,
+		    'label' => false,
+		    'help' => 'Including an email is required if you ever need to reset your password.',
                 'required' => false,
                 'attr' => [
-                    'placeholder' => 'Email address (optional)',
+                    'placeholder' => 'Email Address (optional)',
                 ],
                 'constraints' => new Email(),
             ])
             ->add('teamName', TextType::class, [
-                'label' => false,
+		    'label' => false,
+		    'help' => 'We reserve the right to disable inappropriate accounts without warning.',
                 'attr' => [
-                    'placeholder' => 'Team name',
+                    'placeholder' => 'Display Name',
                 ],
                 'constraints' => [
                     new NotBlank(),
                     new Callback(function ($teamName, ExecutionContext $context) {
                         if ($this->em->getRepository(Team::class)->findOneBy(['name' => $teamName])) {
-                            $context->buildViolation('This team name is already in use.')
+                            $context->buildViolation('This display name is already in use.')
                                 ->addViolation();
                         }
                     }),
@@ -166,8 +168,8 @@ class UserRegistrationType extends AbstractType
                     'attr' => [
                         'placeholder' => 'Affiliation',
                     ],
-                ]);
-        }
+	    ]);
+	}
 
         $builder
             ->add('plainPassword', RepeatedType::class, [

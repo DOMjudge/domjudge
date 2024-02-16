@@ -661,7 +661,7 @@ class ScoreboardService
             ->select('p')
             ->andWhere('cp.contest = :contest')
             ->setParameter(':contest', $contest)
-            ->orderBy('cp.shortname')
+            ->orderBy('p.probid')
             ->getQuery()
             ->getResult();
 
@@ -1049,7 +1049,7 @@ class ScoreboardService
             ->andWhere('cp.allowSubmit = 1')
             ->andWhere('cp.contest = :contest')
             ->setParameter(':contest', $contest)
-            ->orderBy('cp.shortname');
+            ->orderBy('p.probid');
 
         /** @var ContestProblem[] $contestProblems */
         $contestProblems = $queryBuilder->getQuery()->getResult();

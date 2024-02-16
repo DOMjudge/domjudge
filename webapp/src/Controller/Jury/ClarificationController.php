@@ -281,7 +281,7 @@ class ClarificationController extends AbstractController
             ->innerJoin('cp.problem', 'p')
             ->where('cp.contest IN (:contests)')
             ->setParameter(':contests', $contests)
-            ->orderBy('cp.shortname')
+            ->orderBy('p.probid')
             ->getQuery()->getResult();
 
         foreach($contests as $cid => $cdata) {

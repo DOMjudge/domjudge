@@ -11,6 +11,7 @@
             <th scope="col">problem</th>
             <th scope="col">lang</th>
             <th scope="col">result</th>
+            <th scope="col">cases</th>
         </tr>
         </thead>
         <tbody>
@@ -56,6 +57,11 @@
                         {%- endif %}
                     </a>
                 </td>
+		{%- if showTestcases is defined and showTestcases %}
+                    <td class="testcase-results{{ tdExtraClass }}">
+                        {{- submission | testcaseResults -}}
+                    </td>
+                {%- endif %}
             </tr>
         {%- endfor %}
         </tbody>

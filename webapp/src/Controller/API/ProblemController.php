@@ -274,7 +274,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->andWhere('cp.contest = :cid')
             ->andWhere('cp.allowSubmit = 1')
             ->setParameter(':cid', $contestId)
-            ->orderBy('cp.shortname')
+            ->orderBy('p.probid')
             ->groupBy('cp.problem');
 
         // For non-API-reader users, only expose the problems after the contest has started

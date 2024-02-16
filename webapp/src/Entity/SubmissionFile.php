@@ -45,7 +45,7 @@ class SubmissionFile
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="rank",
+     * @ORM\Column(type="integer", name="`rank`",
      *     options={"comment"="Order of the submission files, zero-indexed", "unsigned"=true},
      *     nullable=false)
      */

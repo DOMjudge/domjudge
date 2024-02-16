@@ -8,8 +8,13 @@
         </button>
     </a>
 {% else %}
-    <a class="nav-link justify-content-center" href="{{ path('login') }}">
+    <a class="nav-link justify-content-center" href="{{ path('register') }}">
         <button type="button" class="btn btn-info btn-sm">
+            Sign Up
+        </button>
+    </a>
+    <a class="nav-link justify-content-center" href="{{ path('login') }}">
+        <button type="button" class="btn btn-outline-info btn-sm">
             <i class="fas fa-sign-in-alt"></i> Login
         </button>
     </a>

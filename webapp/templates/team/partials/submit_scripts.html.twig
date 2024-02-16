@@ -142,13 +142,14 @@
             if (auxfileno > 0) {
                 extrafiles = "Additional source files: " + auxfileno + '\n';
             }
-            var question =
+            {# var question =
                 'Main source file: ' + filename + '\n' +
                 extrafiles + '\n' +
                 'Problem: ' + problemtxt + '\n' +
                 'Language: ' + languagetxt + '\n' +
                 '\nMake submission?';
-            return confirm(question);
+            return confirm(question); #}
+            return true;
         });
 
         processFile();

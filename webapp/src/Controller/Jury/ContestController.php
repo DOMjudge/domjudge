@@ -429,7 +429,7 @@ class ContestController extends BaseController
             ->select('cp', 'partial p.{probid,externalid,name,timelimit,memlimit}')
             ->andWhere('cp.contest = :contest')
             ->setParameter(':contest', $contest)
-            ->orderBy('cp.shortname')
+            ->orderBy('p.probid')
             ->getQuery()
             ->getResult();
 
