@@ -16,3 +16,9 @@
     </div>
 
 {% endblock %}
+
+{% block extrafooter %}
+    <script>
+        setupPreviewClarification($('#team_clarification_message') , $('#messagepreview'), true);
+    </script>
+{% endblock %}
