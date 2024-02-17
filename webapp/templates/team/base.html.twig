@@ -11,8 +11,21 @@
 
     <script>
         $(function () {
-            $('body').on('submit', 'form[name=team_clarification]', function () {
+            var $body = $('body');
+            $body.on('submit', 'form[name=team_clarification]', function () {
                 return confirm("Send clarification request to Jury?");
+            });
+
+            $body.on('click', '#clarification-reply-button', function() {
+                var $submitButton = $('<button type="submit" name="submit" class="btn btn-primary"><i class="fas fa-envelope"></i> Send</button>');
+                $(this).replaceWith($submitButton);
+
+                $submitButton.on('click', function() {
+                    var $form = $('form[name="team_clarification"]');
+                    if ($form[0].reportValidity()) {
+                        $form.submit();
+                    }
+                })
             });
 
             /* Show the notification options if the browser supports it */
