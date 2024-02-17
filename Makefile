@@ -47,7 +47,7 @@ endif
 domserver: domserver-configure paths.mk config
 judgehost: judgehost-configure paths.mk config
 docs: paths.mk config
-install-domserver: domserver composer-dump-autoload domserver-create-dirs
+install-domserver: composer-dump-autoload domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
 dist: configure composer-dependencies

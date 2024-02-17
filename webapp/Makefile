@@ -12,7 +12,7 @@ SUBDIRS = config
 copy-bundle-assets:
 # We can not use bin/console here, as when using a fakeroot,
 # the include paths are broken. We just copy in the data we need
-	-rm -rf public/bundles/nelmioapidoc/*
+	-rm -rf public/bundles/nelmioapidoc
 	mkdir -p public/bundles/nelmioapidoc
 	cp -a ../lib/vendor/nelmio/api-doc-bundle/Resources/public/* public/bundles/nelmioapidoc/
 
