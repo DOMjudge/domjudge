@@ -48,13 +48,6 @@
             $('[data-flash-messages]').html($flash);
         }
 
-        {% if app.request.uri == url('team_clarification_add') %}
-            var previewInitial = false;
-        {% else %}
-            var previewInitial = true;
-        {% endif %}
-        setupPreviewClarification($('#team_clarification_message') , $('#messagepreview'), previewInitial);
-
         window.initModalClarificationPreviewAdd = function() {
             setupPreviewClarification($('#team_clarification_message') , $('#messagepreview'), false);
         };
