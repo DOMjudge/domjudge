@@ -28,16 +28,6 @@
       junit:
         - unit-tests.xml
 
-run runpipe tests:
-  extends: [.normal_job]
-  stage: unit
-  script:
-    - ./gitlab/runpipe-tests.sh
-  artifacts:
-    when: always
-    paths:
-      - gitlabartifacts
-
 run unit tests:
   only:
     - main
