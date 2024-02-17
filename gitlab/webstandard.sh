@@ -80,6 +80,10 @@ if [ "$TEST" = "w3cval" ]; then
     rm -f localhost/domjudge/css/select2-bootstrap*.css*
     rm -f localhost/domjudge/css/dataTables*.css*
     rm -f localhost/domjudge/jury/config/check/phpinfo*
+    # We need any value for bs-gutter-x to calculate with in CSS
+    for f in $(find ./ -name "style_domjudge.css*"); do
+        sed -i 's/var(--bs-gutter-x)/1em/g' $f
+    done
     section_end upstream_problems
 
     section_start_collap test_suite "Install testsuite"

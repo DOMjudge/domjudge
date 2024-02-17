@@ -635,3 +635,30 @@ blockquote {
     margin-right: 2em;
     font-weight: normal;
 }
+
+.row-scoreboard {
+    width: fit-content;
+}
+
+.alert-danger {
+    position: sticky;
+    width: calc(100vw - var(--bs-gutter-x) * 1.75);
+    left: calc(var(--bs-gutter-x) * .5);
+}
+
+.banner-fixed {
+    position: sticky;
+    width: calc(100vw - var(--bs-gutter-x) * 1.75);
+    left: calc(var(--bs-gutter-x) * .5);
+}
+
+.card-contest-frozen-info {
+    position: sticky;
+    width: calc(100vw - var(--bs-gutter-x) * 1.75);
+    left: calc(var(--bs-gutter-x) * .5);
+}
+
+.progress-bar {
+    position: sticky;
+    left: 0;
+}

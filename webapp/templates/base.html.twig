@@ -30,7 +30,7 @@
 {% block menu %}{% endblock %}
 {% block body %}
     <div class="container-fluid">
-        <div class="row">
+        <div class="row {% if scroll_width is defined and scroll_width %}row-scoreboard{% endif %}">
             <div class="col-12">
                 {% block messages %}
                     {% include 'partials/messages.html.twig' %}
