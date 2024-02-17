@@ -1,0 +1,30 @@
+name: Run runpipe tests
+on:
+  push:
+    branches-ignore:
+      - main
+      - '[0-9]+.[0-9]+'
+      - gh-readonly-queue/main/*
+      - gh-readonly-queue/main/[0-9]+.[0-9]+
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+
+jobs:
+  runpipe:
+    runs-on: ubuntu-latest
+    container:
+      image: domjudge/gitlabci:2.1
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create the configure file
+        run: make configure
+      - name: Do the default configure
+        run: ./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge
+      - name: Prepare judgehost files
+        run: make judgehost
+      - name: Run the actual runpipe tests
+        working-directory: judge/runpipe_test
+        run: make test
+
