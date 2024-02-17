@@ -70,7 +70,7 @@ class ClarificationController extends BaseController
             if ($clarification->getProblem()) {
                 $formData['subject'] = sprintf('%d-%d', $clarification->getContest()->getCid(), $clarification->getProblem()->getProbid());
             } else {
-                $formData['subject'] = sprintf('%d-%s', $clarification->getContest()->getCid(), $clarification->getQueue());
+                $formData['subject'] = sprintf('%d-%s', $clarification->getContest()->getCid(), $clarification->getCategory());
             }
 
             $formData['message'] = "> " . str_replace("\n", "\n> ", Utils::wrapUnquoted($clarification->getBody())) . "\n\n";
@@ -79,6 +79,8 @@ class ClarificationController extends BaseController
             ->createBuilder(TeamClarificationType::class, $formData)
             ->setAction($this->generateUrl('team_clarification', ['clarId' => $clarId]))
             ->getForm();
+
+        $form->remove('subject');
 
         $form->handleRequest($request);
 
