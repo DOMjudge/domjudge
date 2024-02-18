@@ -99,7 +99,6 @@ class JuryClarificationType extends AbstractType
         ]);
 
         $builder->add('message', TextareaType::class, [
-            'label' => false,
             'attr' => [
                 'rows' => 5,
                 'cols' => 85,

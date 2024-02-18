@@ -19,6 +19,11 @@
 
 {% block extrafooter %}
     <script>
-        setupPreviewClarification($('#team_clarification_message') , $('#messagepreview'), true);
+        setupPreviewClarification($('#team_clarification_message'), $('#messagepreview'), true);
+        {% if not form.vars.valid %}
+        $(function () {
+            replaceClarificationReplyButton();
+        });
+        {% endif %}
     </script>
 {% endblock %}

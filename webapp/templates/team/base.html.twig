@@ -16,16 +16,21 @@
                 return confirm("Send clarification request to Jury?");
             });
 
-            $body.on('click', '#clarification-reply-button', function() {
+            window.replaceClarificationReplyButton = function() {
+                var $replyButton = $('#clarification-reply-button');
                 var $submitButton = $('<button type="submit" name="submit" class="btn btn-primary"><i class="fas fa-envelope"></i> Send</button>');
-                $(this).replaceWith($submitButton);
+                $replyButton.replaceWith($submitButton);
 
                 $submitButton.on('click', function() {
                     var $form = $('form[name="team_clarification"]');
                     if ($form[0].reportValidity()) {
                         $form.submit();
                     }
-                })
+                });
+            }
+
+            $body.on('click', '#clarification-reply-button', function() {
+                replaceClarificationReplyButton();
             });
 
             /* Show the notification options if the browser supports it */
