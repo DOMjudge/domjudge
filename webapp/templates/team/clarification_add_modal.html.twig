@@ -11,23 +11,14 @@
             <div class="modal-body clarificationform">
                 {{ form_row(form.recipient) }}
                 {{ form_row(form.subject) }}
-                <div class="list-group mb-3">
-                    <div class="list-group-item">
-                        <div class="flex-column">
-                            <label for="team_clarification_message" class="form-label text-muted d-flex justify-content-end"><small>message</small></label>
-                        </div>
-                        {{ form_row(form.message) }}
-                    </div>
-                    <div class="list-group-item">
-                        <div class="mb-3">
-                            <div class="flex-column">
-                                <label class="form-label text-muted d-flex justify-content-end"><small>message preview</small></label>
-                            </div>
-                            <div class="card">
-                                <div class="card-body" id="messagepreview">Start typing to see a preview of your message</div>
+                    {{ form_row(form.message) }}
+                    <div class="mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <label class="form-label text-muted"><small>rendered preview</small></label>
+                                <div id="messagepreview">Start typing to see a preview of your message</div>
                             </div>
                         </div>
-                    </div>
                 </div>
             </div>
             <div class="modal-footer">
