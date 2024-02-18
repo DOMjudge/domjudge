@@ -635,3 +635,14 @@ blockquote {
     margin-right: 2em;
     font-weight: normal;
 }
+
+.rendered-preview-badge {
+    position: relative;
+    float: right;
+    background-color: Gainsboro;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-radius: 4px;
+    font-style: italic;
+    font-size: smaller;
+}
