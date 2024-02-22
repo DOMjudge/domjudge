@@ -375,8 +375,6 @@ Run COMMAND with restrictions.\n\
 Note that root privileges are needed for the `root' and `user' options.\n\
 If `user' is set, then `group' defaults to the same to prevent security\n\
 issues, since otherwise the process would retain group root permissions.\n\
-Additionally, Linux cgroup support is required for the `memsize', `cpuset'\n\
-and `cputime' options, and to report actual memory usage.\n\
 The COMMAND path is relative to the changed ROOT directory if specified.\n\
 TIME may be specified as a float; two floats separated by `:' are treated\n\
 as soft and hard limits. The runtime written to file is that of the last\n\
@@ -444,21 +442,9 @@ void output_exit_time(int exitcode, double cpudiff)
 	write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
 }
 
-/* Return whether we need to use cgroups. This is checked in the
- * cgroup_* functions below. If not used they return without
- * performing any action.
- */
-int use_cgroup()
-{
-	return use_cputime || memsize!=RLIM_INFINITY ||
-	    ( cpuset!=NULL && strlen(cpuset)>0 );
-}
-
 void check_remaining_procs()
 {
     char path[1024];
-
-    if ( !use_cgroup() ) return;
 
     snprintf(path, 1023, "/sys/fs/cgroup/cpuacct%scgroup.procs", cgroupname);
     FILE *file = fopen(path, "r");
@@ -479,8 +465,6 @@ void output_cgroup_stats(double *cputime)
 	int64_t max_usage, cpu_time_int;
 	struct cgroup *cg;
 	struct cgroup_controller *cg_controller;
-
-	if ( !use_cgroup() ) return;
 
 	if ( (cg = cgroup_new_cgroup(cgroupname))==NULL ) error(0,"cgroup_new_cgroup");
 	if ((ret = cgroup_get_cgroup(cg)) != 0) error(ret,"get cgroup information");
@@ -511,8 +495,6 @@ void cgroup_create()
 	int ret;
 	struct cgroup *cg;
 	struct cgroup_controller *cg_controller;
-
-	if ( !use_cgroup() ) return;
 
 	cg = cgroup_new_cgroup(cgroupname);
 	if (!cg) error(0,"cgroup_new_cgroup");
@@ -560,8 +542,6 @@ void cgroup_attach()
 	int ret;
 	struct cgroup *cg;
 
-	if ( !use_cgroup() ) return;
-
 	cg = cgroup_new_cgroup(cgroupname);
 	if (!cg) error(0,"cgroup_new_cgroup");
 
@@ -579,8 +559,6 @@ void cgroup_kill()
 	void *handle = NULL;
 	pid_t pid;
 
-	if ( !use_cgroup() ) return;
-
 	/* kill any remaining tasks, and wait for them to be gone */
 	while(1) {
 		ret = cgroup_get_task_begin(cgroupname, "memory", &handle, &pid);
@@ -594,8 +572,6 @@ void cgroup_delete()
 {
 	int ret;
 	struct cgroup *cg;
-
-	if ( !use_cgroup() ) return;
 
 	cg = cgroup_new_cgroup(cgroupname);
 	if (!cg) error(0,"cgroup_new_cgroup");
@@ -1198,11 +1174,9 @@ int main(int argc, char **argv)
 		}
 	}
 	/* Make libcgroup ready for use */
-	if ( use_cgroup() ) {
-		ret = cgroup_init();
-		if ( ret!=0 ) {
-			error(0,"libcgroup initialization failed: %s(%d)\n", cgroup_strerror(ret), ret);
-		}
+	ret = cgroup_init();
+	if ( ret!=0 ) {
+		error(0,"libcgroup initialization failed: %s(%d)\n", cgroup_strerror(ret), ret);
 	}
 	/* Define the cgroup name that we will use and make sure it will
 	 * be unique. Note: group names must have slashes!
