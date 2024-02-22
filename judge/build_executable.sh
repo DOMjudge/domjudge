@@ -76,7 +76,9 @@ logmsg $LOG_INFO "starting build"
 
 exitcode=0
 $GAINROOT "$RUNGUARD" ${DEBUG:+-v} -u "$RUNUSER" -g "$RUNGROUP" \
-	-r "$CHROOTDIR" -d '/build' --no-core -- \
+	-r "$CHROOTDIR" -d '/build' \
+	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT --no-core -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT \
+	-- \
 	'./build' > 'build.log' 2>&1 || \
 	exitcode=$?
 

@@ -439,6 +439,11 @@ function fetch_executable_internal(
 
         if ($do_compile) {
             logmsg(LOG_DEBUG, "Building executable in $execdir, under 'build/'");
+
+            putenv('SCRIPTTIMELIMIT=' . djconfig_get_value('script_timelimit'));
+            putenv('SCRIPTMEMLIMIT='  . djconfig_get_value('script_memory_limit'));
+            putenv('SCRIPTFILELIMIT=' . djconfig_get_value('script_filesize_limit'));
+
             system(LIBJUDGEDIR . '/build_executable.sh ' . dj_escapeshellarg($execdir), $retval);
             if ($retval !== 0) {
                 return [null, "Failed to build executable in $execdir.", "$execdir/build.log"];
