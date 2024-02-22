@@ -80,7 +80,7 @@ fi
 exitcode=0
 $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
 	-r "$PWD/.." -d "/version_check" \
-	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT \
+	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT --no-core -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT \
 	-M "$WORKDIR/version_check.meta" $ENVIRONMENT_VARS -- \
 	"/version_check-script/$(basename $VERSION_CHECK_SCRIPT)" >"$WORKDIR/version_check.tmp" 2>&1 || \
 	exitcode=$?
