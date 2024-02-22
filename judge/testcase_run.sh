@@ -229,7 +229,7 @@ if [ $COMBINED_RUN_COMPARE -eq 0 ]; then
 	chmod a+w feedback
 
 	runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
-		-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
+		-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT --no-core \
 		-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
 		"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
 				  >compare.tmp 2>&1

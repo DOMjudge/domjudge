@@ -150,7 +150,7 @@ fi
 exitcode=0
 $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
 	-r "$PWD/.." -d "/compile" \
-	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT \
+	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT --no-core -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT \
 	-M "$WORKDIR/compile.meta" $ENVIRONMENT_VARS -- \
 	"/compile-script/$(basename "$COMPILE_SCRIPT")" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
