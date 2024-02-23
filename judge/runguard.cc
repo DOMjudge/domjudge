@@ -229,7 +229,6 @@ void error(int errnum, const char *format, ...)
 	va_start(ap,format);
 	sigset_t sigs;
 	char *errstr;
-	int errlen, errpos;
 
 	/*
 	 * Make sure the signal handler for these (terminate()) does not
@@ -240,14 +239,14 @@ void error(int errnum, const char *format, ...)
 	sigprocmask(SIG_BLOCK, &sigs, nullptr);
 
 	/* First print to string to be able to reuse the message. */
-	errlen = strlen(progname)+255;
+    size_t errlen = strlen(progname)+255;
 	if ( format!=nullptr ) errlen += strlen(format);
 
 	errstr = (char *)malloc(errlen);
 	if ( errstr==nullptr ) abort();
 
 	sprintf(errstr,"%s",progname);
-	errpos = strlen(errstr);
+	size_t errpos = strlen(errstr);
 
 	if ( format!=nullptr ) {
 		snprintf(errstr+errpos,errlen-errpos,": ");
