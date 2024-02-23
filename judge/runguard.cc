@@ -160,29 +160,29 @@ struct timeval progstarttime, starttime, endtime;
 struct tms startticks, endticks;
 
 struct option const long_opts[] = {
-	{"root",       required_argument, NULL,         'r'},
-	{"user",       required_argument, NULL,         'u'},
-	{"group",      required_argument, NULL,         'g'},
-	{"chdir",      required_argument, NULL,         'd'},
-	{"walltime",   required_argument, NULL,         't'},
-	{"cputime",    required_argument, NULL,         'C'},
-	{"memsize",    required_argument, NULL,         'm'},
-	{"filesize",   required_argument, NULL,         'f'},
-	{"nproc",      required_argument, NULL,         'p'},
-	{"cpuset",     required_argument, NULL,         'P'},
-	{"no-core",    no_argument,       NULL,         'c'},
-	{"stdout",     required_argument, NULL,         'o'},
-	{"stderr",     required_argument, NULL,         'e'},
-	{"streamsize", required_argument, NULL,         's'},
-	{"environment",no_argument,       NULL,         'E'},
-	{"variable",   required_argument, NULL,         'V'},
-	{"outmeta",    required_argument, NULL,         'M'},
-	{"runpipepid", required_argument, NULL,         'U'},
-	{"verbose",    no_argument,       NULL,         'v'},
-	{"quiet",      no_argument,       NULL,         'q'},
-	{"help",       no_argument,       &show_help,    1 },
-	{"version",    no_argument,       &show_version, 1 },
-	{ NULL,        0,                 NULL,          0 }
+	{"root",       required_argument, nullptr,         'r'},
+	{"user",       required_argument, nullptr,         'u'},
+	{"group",      required_argument, nullptr,         'g'},
+	{"chdir",      required_argument, nullptr,         'd'},
+	{"walltime",   required_argument, nullptr,         't'},
+	{"cputime",    required_argument, nullptr,         'C'},
+	{"memsize",    required_argument, nullptr,         'm'},
+	{"filesize",   required_argument, nullptr,         'f'},
+	{"nproc",      required_argument, nullptr,         'p'},
+	{"cpuset",     required_argument, nullptr,         'P'},
+	{"no-core",    no_argument,       nullptr,         'c'},
+	{"stdout",     required_argument, nullptr,         'o'},
+	{"stderr",     required_argument, nullptr,         'e'},
+	{"streamsize", required_argument, nullptr,         's'},
+	{"environment",no_argument,       nullptr,         'E'},
+	{"variable",   required_argument, nullptr,         'V'},
+	{"outmeta",    required_argument, nullptr,         'M'},
+	{"runpipepid", required_argument, nullptr,         'U'},
+	{"verbose",    no_argument,       nullptr,         'v'},
+	{"quiet",      no_argument,       nullptr,         'q'},
+	{"help",       no_argument,       &show_help,       1 },
+	{"version",    no_argument,       &show_version,    1 },
+	{ nullptr,     0,                 nullptr,          0 }
 };
 
 void warning(   const char *, ...) __attribute__((format (printf, 1, 2)));
@@ -212,7 +212,7 @@ void verbose(const char *format, ...)
 	double runtime;
 
 	if ( ! be_quiet && be_verbose ) {
-		gettimeofday(&currtime,NULL);
+		gettimeofday(&currtime,nullptr);
 		runtime = (currtime.tv_sec  - progstarttime.tv_sec ) +
 		          (currtime.tv_usec - progstarttime.tv_usec)*1E-6;
 		fprintf(stderr,"%s [%d @ %10.6lf]: verbose: ",progname,getpid(),runtime);
@@ -237,19 +237,19 @@ void error(int errnum, const char *format, ...)
 	 */
 	sigaddset(&sigs, SIGALRM);
 	sigaddset(&sigs, SIGTERM);
-	sigprocmask(SIG_BLOCK, &sigs, NULL);
+	sigprocmask(SIG_BLOCK, &sigs, nullptr);
 
 	/* First print to string to be able to reuse the message. */
 	errlen = strlen(progname)+255;
-	if ( format!=NULL ) errlen += strlen(format);
+	if ( format!=nullptr ) errlen += strlen(format);
 
 	errstr = (char *)malloc(errlen);
-	if ( errstr==NULL ) abort();
+	if ( errstr==nullptr ) abort();
 
 	sprintf(errstr,"%s",progname);
 	errpos = strlen(errstr);
 
-	if ( format!=NULL ) {
+	if ( format!=nullptr ) {
 		snprintf(errstr+errpos,errlen-errpos,": ");
 		errpos += 2;
 		vsnprintf(errstr+errpos,errlen-errpos,format,ap);
@@ -269,7 +269,7 @@ void error(int errnum, const char *format, ...)
 		}
 		errpos += strlen(errstr+errpos);
 	}
-	if ( format==NULL && errnum==0 ) {
+	if ( format==nullptr && errnum==0 ) {
 		snprintf(errstr+errpos,errlen-errpos,": unknown error");
 	}
 
@@ -277,7 +277,7 @@ void error(int errnum, const char *format, ...)
 	va_end(ap);
 
 	write_meta("internal-error","%s",errstr);
-	if ( outputmeta && metafile != NULL && fclose(metafile)!=0 ) {
+	if ( outputmeta && metafile != nullptr && fclose(metafile)!=0 ) {
 		fprintf(stderr,"\nError writing to metafile '%s'.\n",metafilename);
 	}
 
@@ -296,7 +296,7 @@ void error(int errnum, const char *format, ...)
 		}
 
 		/* Wait a while to make sure the process is killed by now. */
-		nanosleep(&killdelay,NULL);
+		nanosleep(&killdelay,nullptr);
 	}
 
 	exit(exit_failure);
@@ -444,7 +444,7 @@ void check_remaining_procs()
 
     snprintf(path, 1023, "/sys/fs/cgroup/cpuacct%scgroup.procs", cgroupname);
     FILE *file = fopen(path, "r");
-    if (file == NULL) {
+    if (file == nullptr) {
         error(errno, "opening cgroups file `%s'", path);
     }
 
@@ -462,7 +462,7 @@ void output_cgroup_stats(double *cputime)
 	struct cgroup *cg;
 	struct cgroup_controller *cg_controller;
 
-	if ( (cg = cgroup_new_cgroup(cgroupname))==NULL ) error(0,"cgroup_new_cgroup");
+	if ( (cg = cgroup_new_cgroup(cgroupname))==nullptr ) error(0,"cgroup_new_cgroup");
 	if ((ret = cgroup_get_cgroup(cg)) != 0) error(ret,"get cgroup information");
 
 	cg_controller = cgroup_get_controller(cg, "memory");
@@ -497,7 +497,7 @@ void cgroup_create()
 
 	/* Set up the memory restrictions; these two options limit ram use
 	   and ram+swap use. They are the same so no swapping can occur */
-	if ( (cg_controller = cgroup_add_controller(cg, "memory"))==NULL ) {
+	if ( (cg_controller = cgroup_add_controller(cg, "memory"))==nullptr ) {
 		error(0,"cgroup_add_controller memory");
 	}
 
@@ -507,8 +507,8 @@ void cgroup_create()
 	/* Set up cpu restrictions; we pin the task to a specific set of
 	   cpus. We also give it exclusive access to those cores, and set
 	   no limits on memory nodes */
-	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
-		if ( (cg_controller = cgroup_add_controller(cg, "cpuset"))==NULL ) {
+	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
+		if ( (cg_controller = cgroup_add_controller(cg, "cpuset"))==nullptr ) {
 			error(0,"cgroup_add_controller cpuset");
 		}
 		/* To make a cpuset exclusive, some additional setup outside of domjudge is
@@ -520,7 +520,7 @@ void cgroup_create()
 		verbose("cpuset undefined");
 	}
 
-	if ( (cg_controller = cgroup_add_controller(cg, "cpuacct"))==NULL ) {
+	if ( (cg_controller = cgroup_add_controller(cg, "cpuacct"))==nullptr ) {
 		error(0,"cgroup_add_controller cpuacct");
 	}
 
@@ -552,7 +552,7 @@ void cgroup_attach()
 void cgroup_kill()
 {
 	int ret;
-	void *handle = NULL;
+	void *handle = nullptr;
 	pid_t pid;
 
 	/* kill any remaining tasks, and wait for them to be gone */
@@ -572,14 +572,14 @@ void cgroup_delete()
 	cg = cgroup_new_cgroup(cgroupname);
 	if (!cg) error(0,"cgroup_new_cgroup");
 
-	if ( cgroup_add_controller(cg, "cpuacct")==NULL ) error(0,"cgroup_add_controller cpuacct");
-	if ( cgroup_add_controller(cg, "memory")==NULL ) error(0,"cgroup_add_controller memory");
+	if ( cgroup_add_controller(cg, "cpuacct")==nullptr ) error(0,"cgroup_add_controller cpuacct");
+	if ( cgroup_add_controller(cg, "memory")==nullptr ) error(0,"cgroup_add_controller memory");
 
-	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
-		if ( cgroup_add_controller(cg, "cpuset")==NULL ) error(0,"cgroup_add_controller cpuset");
+	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
+		if ( cgroup_add_controller(cg, "cpuset")==nullptr ) error(0,"cgroup_add_controller cpuset");
 	}
 	/* Clean up our cgroup */
-	nanosleep(&cg_delete_delay,NULL);
+	nanosleep(&cg_delete_delay,nullptr);
 	ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
 	if ( ret!=0 ) error(ret,"deleting cgroup");
 
@@ -598,10 +598,10 @@ void terminate(int sig)
 	if ( sigemptyset(&sigact.sa_mask)!=0 ) {
 		warning("could not initialize signal mask");
 	}
-	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
+	if ( sigaction(SIGTERM,&sigact,nullptr)!=0 ) {
 		warning("could not restore signal handler");
 	}
-	if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) {
+	if ( sigaction(SIGALRM,&sigact,nullptr)!=0 ) {
 		warning("could not restore signal handler");
 	}
 
@@ -628,7 +628,7 @@ void terminate(int sig)
 
 	/* Prefer nanosleep over sleep because of higher resolution and
 	   it does not interfere with signals. */
-	nanosleep(&killdelay,NULL);
+	nanosleep(&killdelay,nullptr);
 
 	verbose("sending SIGKILL");
 	if ( kill(-child_pid,SIGKILL)!=0 && errno!=ESRCH ) {
@@ -636,7 +636,7 @@ void terminate(int sig)
 	}
 
 	/* Wait another while to make sure the process is killed by now. */
-	nanosleep(&killdelay,NULL);
+	nanosleep(&killdelay,nullptr);
 }
 
 static void child_handler(int sig)
@@ -651,7 +651,7 @@ int userid(char *name)
 	errno = 0; /* per the linux GETPWNAM(3) man-page */
 	pwd = getpwnam(name);
 
-	if ( pwd==NULL || errno ) return -1;
+	if ( pwd==nullptr || errno ) return -1;
 
 	return (int) pwd->pw_uid;
 }
@@ -663,7 +663,7 @@ int groupid(char *name)
 	errno = 0; /* per the linux GETGRNAM(3) man-page */
 	grp = getgrnam(name);
 
-	if ( grp==NULL || errno ) return -1;
+	if ( grp==nullptr || errno ) return -1;
 
 	return (int) grp->gr_gid;
 }
@@ -686,10 +686,10 @@ void read_optarg_time(const char *desc, double *times)
 {
 	char *optcopy, *ptr, *sep;
 
-	if ( (optcopy=strdup(optarg))==NULL ) error(0,"strdup() failed");
+	if ( (optcopy=strdup(optarg))==nullptr ) error(0,"strdup() failed");
 
 	/* Check for soft:hard limit separator and cut string. */
-	if ( (sep=strchr(optcopy,':'))!=NULL ) *sep = 0;
+	if ( (sep=strchr(optcopy,':'))!=nullptr ) *sep = 0;
 
 	errno = 0;
 	times[0] = strtod(optcopy,&ptr);
@@ -698,7 +698,7 @@ void read_optarg_time(const char *desc, double *times)
 	}
 
 	/* And repeat for hard limit if we found the ':' separator. */
-	if ( sep!=NULL ) {
+	if ( sep!=nullptr ) {
 		errno = 0;
 		times[1] = strtod(sep+1,&ptr);
 		if ( errno || *(sep+1)=='\0' || *ptr!='\0' || !finite(times[1]) || times[1]<=0 ) {
@@ -726,18 +726,18 @@ void setrestrictions()
 	/* Clear environment to prevent all kinds of security holes, save PATH */
 	if ( !preserve_environment ) {
 		path = getenv("PATH");
-		environ[0] = NULL;
+		environ[0] = nullptr;
 		/* FIXME: Clean path before setting it again? */
-		if ( path!=NULL ) setenv("PATH",path,1);
+		if ( path!=nullptr ) setenv("PATH",path,1);
 	}
 
 	/* Set additional environment variables. */
-	if (environment_variables != NULL) {
+	if (environment_variables != nullptr) {
 		char *token = strtok(environment_variables, ";");
-		while (token != NULL) {
+		while (token != nullptr) {
 			verbose("setting environment variable: %s", token);
 			putenv(token);
-			token = strtok(NULL, ";");
+			token = strtok(nullptr, ";");
 		}
 	}
 
@@ -812,14 +812,14 @@ void setrestrictions()
 		if ( chdir(rootdir)!=0 ) error(errno,"cannot chdir to `%s'",rootdir);
 
 		/* Get absolute pathname of rootdir, by reading it. */
-		if ( getcwd(cwd,PATH_MAX)==NULL ) error(errno,"cannot get directory");
+		if ( getcwd(cwd,PATH_MAX)==nullptr ) error(errno,"cannot get directory");
 		if ( cwd[strlen(cwd)-1]!='/' ) strcat(cwd,"/");
 
 		/* Canonicalize CHROOT_PREFIX. */
-		if ( (path = (char *) malloc(PATH_MAX+1))==NULL ) {
+		if ( (path = (char *) malloc(PATH_MAX+1))==nullptr ) {
 			error(errno,"allocating memory");
 		}
-		if ( realpath(CHROOT_PREFIX,path)==NULL ) {
+		if ( realpath(CHROOT_PREFIX,path)==nullptr ) {
 			error(errno,"cannot canonicalize path '%s'",CHROOT_PREFIX);
 		}
 
@@ -831,7 +831,7 @@ void setrestrictions()
 
 		if ( chroot(".")!=0 ) error(errno,"cannot change root to `%s'",cwd);
 		if ( chdir("/")!=0 ) error(errno,"cannot chdir to `/' in chroot");
-		if ( rootchdir!=NULL ) {
+		if ( rootchdir!=nullptr ) {
 			if ( chdir(rootchdir)!=0 ) error(errno,"cannot chdir to `%s' in chroot", rootchdir);
 		}
 		verbose("using root-directory `%s'",cwd);
@@ -887,8 +887,8 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 				}
 
 				if ( use_splice ) {
-					nread = splice(child_pipefd[i][PIPE_OUT], NULL,
-					               child_redirfd[i], NULL,
+					nread = splice(child_pipefd[i][PIPE_OUT], nullptr,
+					               child_redirfd[i], nullptr,
 					               to_read, SPLICE_F_MOVE | SPLICE_F_NONBLOCK);
 
 					if ( nread==-1 && errno==EINVAL ) {
@@ -969,7 +969,7 @@ int main(int argc, char **argv)
 
 	progname = argv[0];
 
-	if ( gettimeofday(&progstarttime,NULL) ) error(errno,"getting time");
+	if ( gettimeofday(&progstarttime,nullptr) ) error(errno,"getting time");
 
 	/* Parse command-line options */
 	use_root = use_walltime = use_cputime = use_user = no_coredump = 0;
@@ -988,7 +988,7 @@ int main(int argc, char **argv)
 		case 'r': /* rootdir option */
 			use_root = 1;
 			rootdir = (char *) malloc(strlen(optarg)+2);
-			if ( rootdir==NULL ) error(errno,"allocating memory");
+			if ( rootdir==nullptr ) error(errno,"allocating memory");
 			strcpy(rootdir,optarg);
 			break;
 		case 'u': /* user option: uid or string */
@@ -1002,7 +1002,7 @@ int main(int argc, char **argv)
 				if ( regcomp(&userregex,"^[A-Za-z][A-Za-z0-9\\._-]*$", REG_NOSUB)!=0 ) {
 					error(0,"could not create username regex");
 				}
-				if ( regexec(&userregex, runuser, 0, NULL, 0)!=0 ) {
+				if ( regexec(&userregex, runuser, 0, nullptr, 0)!=0 ) {
 					error(0,"username `%s' does not match POSIX pattern", runuser);
 				}
 			}
@@ -1019,7 +1019,7 @@ int main(int argc, char **argv)
 			break;
 		case 'd': /* chdir option */
 			rootchdir = (char *) malloc(strlen(optarg)+2);
-			if ( rootchdir==NULL ) error(errno,"allocating memory");
+			if ( rootchdir==nullptr ) error(errno,"allocating memory");
 			strcpy(rootchdir,optarg);
 			break;
 		case 't': /* wallclock time option */
@@ -1126,7 +1126,7 @@ int main(int argc, char **argv)
 	cmdname = argv[optind];
 	cmdargs = argv+optind;
 
-	if ( outputmeta && (metafile = fopen(metafilename,"w"))==NULL ) {
+	if ( outputmeta && (metafile = fopen(metafilename,"w"))==nullptr ) {
 		error(errno,"cannot open `%s'",metafilename);
 	}
 
@@ -1136,9 +1136,9 @@ int main(int argc, char **argv)
 	   This check must be done before chroot for /etc/passwd lookup. */
 	if ( use_user ) {
 		valid_users = strdup(VALID_USERS);
-		for(ptr=strtok(valid_users,","); ptr!=NULL; ptr=strtok(NULL,",")) {
+		for(ptr=strtok(valid_users,","); ptr!=nullptr; ptr=strtok(nullptr,",")) {
 			if ( runuid==userid(ptr) ) break;
-			if ( runuser!=NULL ) {
+			if ( runuser!=nullptr ) {
 				ret = fnmatch(ptr,runuser,0);
 				if ( ret==0 ) break;
 				if ( ret!=FNM_NOMATCH ) {
@@ -1146,7 +1146,7 @@ int main(int argc, char **argv)
 				}
 			}
 		}
-		if ( ptr==NULL || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
+		if ( ptr==nullptr || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
 	}
 
 	/* Setup pipes connecting to child stdout/err streams (ignore stdin). */
@@ -1159,7 +1159,7 @@ int main(int argc, char **argv)
 	/* unmask all signals, except SIGCHLD: detected in pselect() below */
 	sigmask = emptymask;
 	if ( sigaddset(&sigmask, SIGCHLD)!=0 ) error(errno,"setting signal mask");
-	if ( sigprocmask(SIG_SETMASK, &sigmask, NULL)!=0 ) {
+	if ( sigprocmask(SIG_SETMASK, &sigmask, nullptr)!=0 ) {
 		error(errno,"unmasking signals");
 	}
 
@@ -1168,11 +1168,11 @@ int main(int argc, char **argv)
 	sigact.sa_handler = child_handler;
 	sigact.sa_flags   = 0;
 	sigact.sa_mask    = emptymask;
-	if ( sigaction(SIGCHLD,&sigact,NULL)!=0 ) {
+	if ( sigaction(SIGCHLD,&sigact,nullptr)!=0 ) {
 		error(errno,"installing signal handler");
 	}
 
-	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
+	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
 		int ret = strtol(cpuset, &ptr, 10);
 		/* check if input is only a single integer */
 		if ( *ptr == '\0' ) {
@@ -1192,7 +1192,7 @@ int main(int argc, char **argv)
 	/* Define the cgroup name that we will use and make sure it will
 	 * be unique. Note: group names must have slashes!
 	 */
-	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
+	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
 		strncpy(str, cpuset, 16);
 	} else {
 		str[0] = 0;
@@ -1211,10 +1211,10 @@ int main(int argc, char **argv)
 	 * processes, and at least older versions of sshd seemed to set
 	 * it, leading to processes getting a timelimit instead of memory
 	 * exceeded, when running via SSH. */
-	fp = NULL;
+	fp = nullptr;
 	if ( !fp && (fp = fopen(OOM_PATH_NEW,"r+")) ) oom_path = strdup(OOM_PATH_NEW);
 	if ( !fp && (fp = fopen(OOM_PATH_OLD,"r+")) ) oom_path = strdup(OOM_PATH_OLD);
-	if ( fp!=NULL ) {
+	if ( fp!=nullptr ) {
 		if ( fscanf(fp,"%d",&ret)!=1 ) error(errno,"cannot read from `%s'",oom_path);
 		if ( ret<0 ) {
 			verbose("resetting `%s' from %d to %d",oom_path,ret,OOM_RESET_VALUE);
@@ -1269,7 +1269,7 @@ int main(int argc, char **argv)
 			verbose("watchdog using user ID `%d'",getuid());
 		}
 
-		if ( gettimeofday(&starttime,NULL) ) error(errno,"getting time");
+		if ( gettimeofday(&starttime,nullptr) ) error(errno,"getting time");
 
 		/* Close unused file descriptors */
 		for(i=1; i<=2; i++) {
@@ -1311,13 +1311,13 @@ int main(int argc, char **argv)
 		sigact.sa_mask    = sigmask;
 
 		/* Kill child command when we receive SIGTERM */
-		if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
+		if ( sigaction(SIGTERM,&sigact,nullptr)!=0 ) {
 			error(errno,"installing signal handler");
 		}
 
 		if ( use_walltime ) {
 			/* Kill child when we receive SIGALRM */
-			if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) {
+			if ( sigaction(SIGALRM,&sigact,nullptr)!=0 ) {
 				error(errno,"installing signal handler");
 			}
 
@@ -1327,7 +1327,7 @@ int main(int argc, char **argv)
 			itimer.it_value.tv_sec  = (int) walltimelimit[1];
 			itimer.it_value.tv_usec = (int)(modf(walltimelimit[1],&tmpd) * 1E6);
 
-			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
+			if ( setitimer(ITIMER_REAL,&itimer,nullptr)!=0 ) {
 				error(errno,"setting timer");
 			}
 			verbose("setting hard wall-time limit to %.3f seconds",walltimelimit[1]);
@@ -1357,7 +1357,7 @@ int main(int argc, char **argv)
 				}
 			}
 
-			r = pselect(nfds+1, &readfds, NULL, NULL, NULL, &emptymask);
+			r = pselect(nfds+1, &readfds, nullptr, NULL, NULL, &emptymask);
 			if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
 
 			if ( received_SIGCHLD || received_signal == SIGALRM ) {
@@ -1399,7 +1399,7 @@ int main(int argc, char **argv)
 			error(errno,"getting end clock ticks");
 		}
 
-		if ( gettimeofday(&endtime,NULL) ) error(errno,"getting time");
+		if ( gettimeofday(&endtime,nullptr) ) error(errno,"getting time");
 
 		/* Test whether command has finished abnormally */
 		exitcode = 0;
@@ -1433,7 +1433,7 @@ int main(int argc, char **argv)
 			itimer.it_value.tv_sec  = 0;
 			itimer.it_value.tv_usec = 0;
 
-			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
+			if ( setitimer(ITIMER_REAL,&itimer,nullptr)!=0 ) {
 				error(errno,"disarming timer");
 			}
 		}
