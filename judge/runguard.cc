@@ -151,8 +151,6 @@ pid_t child_pid = -1;
 static volatile sig_atomic_t received_SIGCHLD = 0;
 static volatile sig_atomic_t received_signal = -1;
 
-FILE *child_stdout;
-FILE *child_stderr;
 int child_pipefd[3][2];
 int child_redirfd[3];
 
