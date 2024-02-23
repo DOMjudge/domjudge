@@ -32,11 +32,6 @@
 /* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
 #include "runguard-config.h"
 
-/* For chroot(), which is not POSIX. */
-#define _DEFAULT_SOURCE
-/* For unshare() used by cgroups. */
-#define _GNU_SOURCE
-
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/param.h>
@@ -99,10 +94,6 @@ const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
 const struct timespec cg_delete_delay = { 0, 10000000L }; /* 0.01 seconds */
 
 extern int errno;
-
-#ifndef _GNU_SOURCE
-extern char **environ;
-#endif
 
 const int exit_failure = -1;
 
