@@ -20,7 +20,7 @@ class Configuration
     #[ORM\Column(options: ['comment' => 'Configuration ID', 'unsigned' => true])]
     private int $configid;
 
-    #[ORM\Column(length: 32, options: ['comment' => 'Name of the configuration variable'])]
+    #[ORM\Column(length: 64, options: ['comment' => 'Name of the configuration variable'])]
     private string $name;
 
     #[ORM\Column(
