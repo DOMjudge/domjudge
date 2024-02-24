@@ -206,13 +206,12 @@ void verbose(const char *format, ...)
 {
 	va_list ap;
 	va_start(ap,format);
-	struct timeval currtime;
-	double runtime;
 
 	if ( ! be_quiet && be_verbose ) {
+        struct timeval currtime{};
 		gettimeofday(&currtime,nullptr);
-		runtime = (currtime.tv_sec  - progstarttime.tv_sec ) +
-		          (currtime.tv_usec - progstarttime.tv_usec)*1E-6;
+		double runtime = (currtime.tv_sec  - progstarttime.tv_sec ) +
+		                 (currtime.tv_usec - progstarttime.tv_usec)*1E-6;
 		fprintf(stderr,"%s [%d @ %10.6lf]: verbose: ",progname,getpid(),runtime);
 		vfprintf(stderr,format,ap);
 		fprintf(stderr,"\n");
@@ -225,22 +224,21 @@ void error(int errnum, const char *format, ...)
 {
 	va_list ap;
 	va_start(ap,format);
-	sigset_t sigs;
-	char *errstr;
 
 	/*
 	 * Make sure the signal handler for these (terminate()) does not
 	 * interfere, we are exiting now anyway.
 	 */
+	sigset_t sigs;
 	sigaddset(&sigs, SIGALRM);
 	sigaddset(&sigs, SIGTERM);
 	sigprocmask(SIG_BLOCK, &sigs, nullptr);
 
 	/* First print to string to be able to reuse the message. */
-    size_t errlen = strlen(progname)+255;
+	size_t errlen = strlen(progname)+255;
 	if ( format!=nullptr ) errlen += strlen(format);
 
-	errstr = (char *)malloc(errlen);
+	char *errstr = (char *)malloc(errlen);
 	if ( errstr==nullptr ) abort();
 
 	sprintf(errstr,"%s",progname);
@@ -301,10 +299,9 @@ void error(int errnum, const char *format, ...)
 
 void write_meta(const char *key, const char *format, ...)
 {
-	va_list ap;
-
 	if ( !outputmeta ) return;
 
+	va_list ap;
 	va_start(ap,format);
 
 	if ( fprintf(metafile,"%s: ",key)<=0 ) {
@@ -379,10 +376,6 @@ real user ID.\n");
 
 void output_exit_time(int exitcode, double cpudiff)
 {
-	double walldiff, userdiff, sysdiff;
-	int timelimit_reached = 0;
-	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
-
 	verbose("command exited with exitcode %d",exitcode);
 	write_meta("exitcode","%d",exitcode);
 
@@ -390,11 +383,12 @@ void output_exit_time(int exitcode, double cpudiff)
 		write_meta("signal", "%d", received_signal);
 	}
 
-	walldiff = (endtime.tv_sec  - starttime.tv_sec ) +
-	           (endtime.tv_usec - starttime.tv_usec)*1E-6;
+	double walldiff = (endtime.tv_sec  - starttime.tv_sec ) +
+	                  (endtime.tv_usec - starttime.tv_usec)*1E-6;
 
-	userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
-	sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
+	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
+	double userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
+	double sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
 
 	write_meta("wall-time","%.3f", walldiff);
 	write_meta("user-time","%.3f", userdiff);
@@ -414,6 +408,7 @@ void output_exit_time(int exitcode, double cpudiff)
 		warning("timelimit exceeded (soft cpu time)");
 	}
 
+	int timelimit_reached = 0;
 	switch ( outputtimetype ) {
 	case WALL_TIME_TYPE:
 		write_meta("time-used","wall-time");
@@ -437,31 +432,31 @@ void output_exit_time(int exitcode, double cpudiff)
 
 void check_remaining_procs()
 {
-    char path[1024];
+	char path[1024];
+	snprintf(path, 1023, "/sys/fs/cgroup/cpuacct%scgroup.procs", cgroupname);
 
-    snprintf(path, 1023, "/sys/fs/cgroup/cpuacct%scgroup.procs", cgroupname);
-    FILE *file = fopen(path, "r");
-    if (file == nullptr) {
-        error(errno, "opening cgroups file `%s'", path);
-    }
+	FILE *file = fopen(path, "r");
+	if (file == nullptr) {
+		error(errno, "opening cgroups file `%s'", path);
+	}
 
-    fseek(file, 0L, SEEK_END);
-    if (ftell(file) > 0) {
-        error(0, "found left-over processes in cgroup controller, please check!");
-    }
+	fseek(file, 0L, SEEK_END);
+	if (ftell(file) > 0) {
+		error(0, "found left-over processes in cgroup controller, please check!");
+	}
 	if (fclose(file) != 0) error(errno, "closing file `%s'", path);
 }
 
 void output_cgroup_stats(double *cputime)
 {
-	int ret;
-	int64_t max_usage, cpu_time_int;
 	struct cgroup *cg;
-	struct cgroup_controller *cg_controller;
-
 	if ( (cg = cgroup_new_cgroup(cgroupname))==nullptr ) error(0,"cgroup_new_cgroup");
+
+	int ret;
 	if ((ret = cgroup_get_cgroup(cg)) != 0) error(ret,"get cgroup information");
 
+	int64_t max_usage;
+	struct cgroup_controller *cg_controller;
 	cg_controller = cgroup_get_controller(cg, "memory");
 	ret = cgroup_get_value_int64(cg_controller, "memory.memsw.max_usage_in_bytes", &max_usage);
 	if ( ret!=0 ) error(ret,"get cgroup value memory.memsw.max_usage_in_bytes");
@@ -469,6 +464,7 @@ void output_cgroup_stats(double *cputime)
 	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
 	write_meta("memory-bytes","%" PRId64, max_usage);
 
+	int64_t cpu_time_int;
 	cg_controller = cgroup_get_controller(cg, "cpuacct");
 	ret = cgroup_get_value_int64(cg_controller, "cpuacct.usage", &cpu_time_int);
 	if ( ret!=0 ) error(ret,"get cgroup value cpuacct.usage");
@@ -485,19 +481,18 @@ void output_cgroup_stats(double *cputime)
 
 void cgroup_create()
 {
-	int ret;
 	struct cgroup *cg;
-	struct cgroup_controller *cg_controller;
-
 	cg = cgroup_new_cgroup(cgroupname);
 	if (!cg) error(0,"cgroup_new_cgroup");
 
 	/* Set up the memory restrictions; these two options limit ram use
 	   and ram+swap use. They are the same so no swapping can occur */
+	struct cgroup_controller *cg_controller;
 	if ( (cg_controller = cgroup_add_controller(cg, "memory"))==nullptr ) {
 		error(0,"cgroup_add_controller memory");
 	}
 
+	int ret;
 	cgroup_add_value(int64, "memory.limit_in_bytes", memsize);
 	cgroup_add_value(int64, "memory.memsw.limit_in_bytes", memsize);
 
@@ -532,12 +527,11 @@ void cgroup_create()
 
 void cgroup_attach()
 {
-	int ret;
 	struct cgroup *cg;
-
 	cg = cgroup_new_cgroup(cgroupname);
 	if (!cg) error(0,"cgroup_new_cgroup");
 
+	int ret;
 	if ( (ret = cgroup_get_cgroup(cg))!=0 ) error(ret,"get cgroup information");
 
 	/* Attach task to the cgroup */
@@ -548,13 +542,12 @@ void cgroup_attach()
 
 void cgroup_kill()
 {
-	int ret;
 	void *handle = nullptr;
 	pid_t pid;
 
 	/* kill any remaining tasks, and wait for them to be gone */
 	while(1) {
-		ret = cgroup_get_task_begin(cgroupname, "memory", &handle, &pid);
+		int ret = cgroup_get_task_begin(cgroupname, "memory", &handle, &pid);
 		cgroup_get_task_end(&handle);
 		if (ret == ECGEOF) break;
 		kill(pid, SIGKILL);
@@ -563,9 +556,7 @@ void cgroup_kill()
 
 void cgroup_delete()
 {
-	int ret;
 	struct cgroup *cg;
-
 	cg = cgroup_new_cgroup(cgroupname);
 	if (!cg) error(0,"cgroup_new_cgroup");
 
@@ -577,7 +568,7 @@ void cgroup_delete()
 	}
 	/* Clean up our cgroup */
 	nanosleep(&cg_delete_delay,nullptr);
-	ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
+	int ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
 	if ( ret!=0 ) error(ret,"deleting cgroup");
 
 	cgroup_free(&cg);
@@ -643,9 +634,9 @@ static void child_handler(int sig)
 
 int userid(char *name)
 {
-	struct passwd *pwd;
-
 	errno = 0; /* per the linux GETPWNAM(3) man-page */
+
+	struct passwd *pwd;
 	pwd = getpwnam(name);
 
 	if ( pwd==nullptr || errno ) return -1;
@@ -667,11 +658,10 @@ int groupid(char *name)
 
 long read_optarg_int(const char *desc, long minval, long maxval)
 {
-	long arg;
 	char *ptr;
 
 	errno = 0;
-	arg = strtol(optarg,&ptr,10);
+	long arg = strtol(optarg,&ptr,10);
 	if ( errno || *ptr!='\0' || arg<minval || arg>maxval ) {
 		error(errno,"invalid %s specified: `%s'",desc,optarg);
 	}
@@ -681,13 +671,14 @@ long read_optarg_int(const char *desc, long minval, long maxval)
 
 void read_optarg_time(const char *desc, double *times)
 {
-	char *optcopy, *ptr, *sep;
-
+	char *optcopy;
 	if ( (optcopy=strdup(optarg))==nullptr ) error(0,"strdup() failed");
 
 	/* Check for soft:hard limit separator and cut string. */
+	char *sep;
 	if ( (sep=strchr(optcopy,':'))!=nullptr ) *sep = 0;
 
+	char *ptr;
 	errno = 0;
 	times[0] = strtod(optcopy,&ptr);
 	if ( errno || *ptr!='\0' || !finite(times[0]) || times[0]<=0 ) {
@@ -714,14 +705,9 @@ void read_optarg_time(const char *desc, double *times)
 
 void setrestrictions()
 {
-	char *path;
-	char  cwd[PATH_MAX+1];
-	gid_t aux_groups[10];
-
-	struct rlimit lim;
-
 	/* Clear environment to prevent all kinds of security holes, save PATH */
 	if ( !preserve_environment ) {
+		char *path;
 		path = getenv("PATH");
 		environ[0] = nullptr;
 		/* FIXME: Clean path before setting it again? */
@@ -742,6 +728,7 @@ void setrestrictions()
 	   Note that limits can thus be raised from the systems defaults! */
 
 	/* First define shorthand macro function */
+	struct rlimit lim;
 #define setlim(type) \
 	if ( setrlimit(RLIMIT_ ## type, &lim)!=0 ) { \
 		if ( errno==EPERM ) { \
@@ -809,10 +796,12 @@ void setrestrictions()
 		if ( chdir(rootdir)!=0 ) error(errno,"cannot chdir to `%s'",rootdir);
 
 		/* Get absolute pathname of rootdir, by reading it. */
+		char  cwd[PATH_MAX+1];
 		if ( getcwd(cwd,PATH_MAX)==nullptr ) error(errno,"cannot get directory");
 		if ( cwd[strlen(cwd)-1]!='/' ) strcat(cwd,"/");
 
 		/* Canonicalize CHROOT_PREFIX. */
+		char *path;
 		if ( (path = (char *) malloc(PATH_MAX+1))==nullptr ) {
 			error(errno,"allocating memory");
 		}
@@ -837,6 +826,7 @@ void setrestrictions()
 	/* Set group-id (must be root for this, so before setting user). */
 	if ( use_group ) {
 		if ( setgid(rungid) ) error(errno,"cannot set group ID to `%d'",rungid);
+		gid_t aux_groups[10];
 		aux_groups[0] = rungid;
 		if ( setgroups(1, aux_groups) ) error(errno,"cannot clear auxiliary groups");
 
@@ -865,10 +855,9 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 	char buf[BUF_SIZE];
 	ssize_t nread, nwritten;
 	size_t to_read, to_write;
-	int i;
 
 	/* Check to see if data is available and pass it on */
-	for(i=1; i<=2; i++) {
+	for(int i=1; i<=2; i++) {
 		if ( child_pipefd[i][PIPE_OUT] != -1 &&
 		     FD_ISSET(child_pipefd[i][PIPE_OUT], readfds) ) {
 
@@ -942,17 +931,7 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 
 int main(int argc, char **argv)
 {
-	sigset_t sigmask, emptymask;
-	fd_set readfds;
-	pid_t pid;
-	int   i, r, nfds;
 	int   ret;
-	FILE *fp;
-	char *oom_path;
-	int   status;
-	int   exitcode;
-	char *valid_users;
-	char *ptr;
 	regex_t userregex;
 	int   opt;
 	double tmpd;
@@ -978,6 +957,7 @@ int main(int argc, char **argv)
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
+	char *ptr;
 	while ( (opt = getopt_long(argc,argv,"+r:u:g:d:t:C:m:f:p:P:co:e:s:EV:M:vqU:",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
@@ -1132,7 +1112,7 @@ int main(int argc, char **argv)
 	   length string of valid POSIX username characters [A-Za-z0-9._-].
 	   This check must be done before chroot for /etc/passwd lookup. */
 	if ( use_user ) {
-		valid_users = strdup(VALID_USERS);
+		char *valid_users = strdup(VALID_USERS);
 		for(ptr=strtok(valid_users,","); ptr!=nullptr; ptr=strtok(nullptr,",")) {
 			if ( runuid==userid(ptr) ) break;
 			if ( runuser!=nullptr ) {
@@ -1147,14 +1127,15 @@ int main(int argc, char **argv)
 	}
 
 	/* Setup pipes connecting to child stdout/err streams (ignore stdin). */
-	for(i=1; i<=2; i++) {
+	for(int i=1; i<=2; i++) {
 		if ( pipe(child_pipefd[i])!=0 ) error(errno,"creating pipe for fd %d",i);
 	}
 
+	sigset_t emptymask;
 	if ( sigemptyset(&emptymask)!=0 ) error(errno,"creating empty signal mask");
 
 	/* unmask all signals, except SIGCHLD: detected in pselect() below */
-	sigmask = emptymask;
+	sigset_t sigmask = emptymask;
 	if ( sigaddset(&sigmask, SIGCHLD)!=0 ) error(errno,"setting signal mask");
 	if ( sigprocmask(SIG_SETMASK, &sigmask, nullptr)!=0 ) {
 		error(errno,"unmasking signals");
@@ -1208,7 +1189,8 @@ int main(int argc, char **argv)
 	 * processes, and at least older versions of sshd seemed to set
 	 * it, leading to processes getting a timelimit instead of memory
 	 * exceeded, when running via SSH. */
-	fp = nullptr;
+	FILE *fp = nullptr;
+	char *oom_path;
 	if ( !fp && (fp = fopen(OOM_PATH_NEW,"r+")) ) oom_path = strdup(OOM_PATH_NEW);
 	if ( !fp && (fp = fopen(OOM_PATH_OLD,"r+")) ) oom_path = strdup(OOM_PATH_OLD);
 	if ( fp!=nullptr ) {
@@ -1234,7 +1216,7 @@ int main(int argc, char **argv)
 		/* Connect pipes to command (stdin/)stdout/stderr and close
 		 * unneeded fd's. Do this after setting restrictions to let
 		 * any messages not go to command stderr pipe. */
-		for(i=1; i<=2; i++) {
+		for(int i=1; i<=2; i++) {
 			if ( dup2(child_pipefd[i][PIPE_IN],i)<0 ) {
 				error(errno,"redirecting child fd %d",i);
 			}
@@ -1269,14 +1251,14 @@ int main(int argc, char **argv)
 		if ( gettimeofday(&starttime,nullptr) ) error(errno,"getting time");
 
 		/* Close unused file descriptors */
-		for(i=1; i<=2; i++) {
+		for(int i=1; i<=2; i++) {
 			if ( close(child_pipefd[i][PIPE_IN])!=0 ) {
 				error(errno,"closing pipe for fd %i",i);
 			}
 		}
 
 		/* Redirect child stdout/stderr to file */
-		for(i=1; i<=2; i++) {
+		for(int i=1; i<=2; i++) {
 			child_redirfd[i] = i; /* Default: no redirects */
 			data_read[i] = data_passed[i] = 0; /* Reset data counters */
 		}
@@ -1299,7 +1281,7 @@ int main(int argc, char **argv)
 
 		/* Construct one-time signal handler to terminate() for TERM
 		   and ALRM signals. */
-		sigmask = emptymask;
+		sigset_t sigmask = emptymask;
 		if ( sigaddset(&sigmask,SIGALRM)!=0 ||
 		     sigaddset(&sigmask,SIGTERM)!=0 ) error(errno,"setting signal mask");
 
@@ -1337,27 +1319,29 @@ int main(int argc, char **argv)
 		/* Wait for child data or exit.
 		   Initialize status here to quelch clang++ warning about
 		   uninitialized value; it is set by the wait() call. */
-		status = 0;
+		int status = 0;
 		/* We start using splice() to copy data from child to parent
 		   I/O file descriptors. If that fails (not all I/O
 		   source - dest combinations support it), then we revert to
 		   using read()/write(). */
 		use_splice = 1;
+		fd_set readfds;
 		while ( 1 ) {
 
 			FD_ZERO(&readfds);
-			nfds = -1;
-			for(i=1; i<=2; i++) {
+			int nfds = -1;
+			for(int i=1; i<=2; i++) {
 				if ( child_pipefd[i][PIPE_OUT]>=0 ) {
 					FD_SET(child_pipefd[i][PIPE_OUT],&readfds);
 					nfds = max(nfds,child_pipefd[i][PIPE_OUT]);
 				}
 			}
 
-			r = pselect(nfds+1, &readfds, nullptr, NULL, NULL, &emptymask);
+			int r = pselect(nfds+1, &readfds, nullptr, NULL, NULL, &emptymask);
 			if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
 
 			if ( received_SIGCHLD || received_signal == SIGALRM ) {
+				pid_t pid;
 				if ( (pid = wait(&status))<0 ) error(errno,"waiting on child");
 				if ( pid==child_pid ) break;
 			}
@@ -1367,10 +1351,10 @@ int main(int argc, char **argv)
 
 		/* Reset pipe filedescriptors to use blocking I/O. */
 		FD_ZERO(&readfds);
-		for(i=1; i<=2; i++) {
+		for(int i=1; i<=2; i++) {
 			if ( child_pipefd[i][PIPE_OUT]>=0 ) {
 				FD_SET(child_pipefd[i][PIPE_OUT],&readfds);
-				r = fcntl(child_pipefd[i][PIPE_OUT], F_GETFL);
+				int r = fcntl(child_pipefd[i][PIPE_OUT], F_GETFL);
 				if (r == -1) {
 					error(errno, "fcntl, getting flags");
 				}
@@ -1387,7 +1371,7 @@ int main(int argc, char **argv)
 		} while ( data_passed[1] + data_passed[2] > total_data );
 
 		/* Close the output files */
-		for(i=1; i<=2; i++) {
+		for(int i=1; i<=2; i++) {
 			ret = close(child_redirfd[i]);
 			if( ret!=0 ) error(errno,"closing output fd %d", i);
 		}
@@ -1399,7 +1383,7 @@ int main(int argc, char **argv)
 		if ( gettimeofday(&endtime,nullptr) ) error(errno,"getting time");
 
 		/* Test whether command has finished abnormally */
-		exitcode = 0;
+		int exitcode = 0;
 		if ( ! WIFEXITED(status) ) {
 			if ( WIFSIGNALED(status) ) {
 				if ( WTERMSIG(status)==SIGXCPU ) {
