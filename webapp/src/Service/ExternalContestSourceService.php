@@ -1449,6 +1449,7 @@ class ExternalContestSourceService
                     // Relative URL, prepend the base URL.
                     $zipUrl = ($this->basePath ?? '') . $zipUrl;
                 }
+                $zipUrl = str_replace('//', '/', $zipUrl);
 
                 $tmpdir = $this->dj->getDomjudgeTmpDir();
 
