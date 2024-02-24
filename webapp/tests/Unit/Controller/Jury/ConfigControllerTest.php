@@ -55,6 +55,18 @@ class ConfigControllerTest extends BaseTestCase
     }
 
     /**
+     * Test that we can change a longer config value.
+     */
+    public function testChangedLongConfigName(): void
+    {
+        $this->withChangedConfiguration('config_external_contest_sources_allow_untrusted_certificates', 'on',
+            function ($errors) {
+                static::assertEmpty($errors);
+                $this->verifyPageResponse('GET', '/jury/config', 200);
+            });
+    }
+
+    /**
      * Test that an invalid penalty time produces an error
      */
     public function testChangedPenaltyTimeInvalid(): void
