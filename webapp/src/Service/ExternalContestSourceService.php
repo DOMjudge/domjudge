@@ -1436,7 +1436,7 @@ class ExternalContestSourceService
                     'message' => 'No source files in event',
                 ]);
                 $submissionDownloadSucceeded = false;
-            } elseif (($data->files[0]->mime ?? null) !== 'application/zip') {
+            } elseif ($data->files[0]->mime !== null && $data->files[0]->mime !== 'application/zip') {
                 $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
                     'message' => 'Non-ZIP source files in event',
                 ]);
