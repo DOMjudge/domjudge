@@ -1028,13 +1028,15 @@ class ExternalContestSourceService
             'timelimit' => $data->timeLimit,
         ];
 
+        /* Disable as PC2 can have 2 problems with the same label
         if ($contestProblem->getShortname() !== $data->label) {
+        if ($contestProblem->getShortname() !== $data['label']) {
             $this->logger->warning(
                 'Contest problem short name does not match between feed (%s) and local (%s), updating',
                 [$data->label, $contestProblem->getShortname()]
             );
             $contestProblem->setShortname($data->label);
-        }
+        } */
         if ($contestProblem->getColor() !== ($data->rgb)) {
             $this->logger->warning(
                 'Contest problem color does not match between feed (%s) and local (%s), updating',
