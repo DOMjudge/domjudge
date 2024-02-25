@@ -200,14 +200,15 @@ class ImportExportService
             return false;
         }
 
-        $contest = new Contest();
+        $newShortNameAndExternalId = preg_replace(
+                $invalid_regex,
+                '_',
+                $data['short_name'] ?? $data['shortname'] ?? $data['short-name'] ?? $data['id']
+            );
+        $contest = $this->em->getRepository(Contest::class)->findOneBy(['externalid' => $newShortNameAndExternalId]) ?: new Contest();
         $contest
             ->setName($data['name'] ?? $data['formal_name'] )
-            ->setShortname(preg_replace(
-                               $invalid_regex,
-                               '_',
-                               $data['short_name'] ?? $data['shortname'] ?? $data['short-name'] ?? $data['id']
-                           ))
+            ->setShortname($newShortNameAndExternalId)
             ->setExternalid($contest->getShortname())
             ->setWarningMessage($data['warning-message'] ?? null)
             ->setStarttimeString(date_format($startTime, 'Y-m-d H:i:s e'))
@@ -320,7 +321,7 @@ class ImportExportService
             $problemName  = $problemData['name'] ?? $problemData['short-name'] ?? $problemData['id'] ?? null;
             $problemLabel = $problemData['label'] ?? $problemData['letter'] ?? null;
 
-            $problem = new Problem();
+            $problem = $this->em->getRepository(Problem::class)->findOneBy(['name' => $problemName]) ?: new Problem();
             $problem
                 ->setName($problemName)
                 ->setTimelimit($problemData['time_limit'] ?? 10)
@@ -329,7 +330,7 @@ class ImportExportService
             $this->em->persist($problem);
             $this->em->flush();
 
-            $contestProblem = new ContestProblem();
+            $contestProblem = $this->em->getRepository(ContestProblem::class)->findOneBy(['shortname' => $problemLabel, 'problem' => $problem, 'contest' => $contest]) ?: new ContestProblem();
             $contestProblem
                 ->setShortname($problemLabel)
                 ->setColor($problemData['rgb'] ?? $problemData['color'] ?? null)
