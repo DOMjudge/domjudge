@@ -19,8 +19,6 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
         protected readonly DOMJudgeService $dj,
         protected readonly LoggerInterface $logger,
         protected readonly UserPasswordHasherInterface $passwordHasher,
-        #[Autowire('%kernel.debug%')]
-        protected readonly bool $debug
     ) {}
 
     public function load(ObjectManager $manager): void
@@ -44,12 +42,10 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
                 ->setName('Administrator')
                 ->setPassword($this->passwordHasher->hashPassword($adminUser, trim($adminpasswordContents)))
                 ->addUserRole($this->getReference(RoleFixture::ADMIN_REFERENCE, Role::class));
-            if ($this->debug) {
-                $domjudgeTeam = $this->getReference(TeamFixture::DOMJUDGE_REFERENCE, Team::class);
-                $adminUser
-                    ->setTeam($domjudgeTeam)
-                    ->addUserRole($this->getReference(RoleFixture::TEAM_REFERENCE, Role::class));
-            }
+            $domjudgeTeam = $this->getReference(TeamFixture::DOMJUDGE_REFERENCE, Team::class);
+            $adminUser
+                ->setTeam($domjudgeTeam)
+                ->addUserRole($this->getReference(RoleFixture::TEAM_REFERENCE, Role::class));
             $manager->persist($adminUser);
         } else {
             $this->logger->info('User admin already exists, not created');
