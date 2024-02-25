@@ -176,8 +176,8 @@ struct option const long_opts[] = {
 	{"outmeta",    required_argument, nullptr,         'M'},
 	{"verbose",    no_argument,       nullptr,         'v'},
 	{"quiet",      no_argument,       nullptr,         'q'},
-	{"help",       no_argument,       &show_help,      1 },
-	{"version",    no_argument,       &show_version,   1 },
+	{"help",       no_argument,       &show_help,       1 },
+	{"version",    no_argument,       &show_version,    1 },
 	{ nullptr,     0,                 nullptr,          0 }
 };
 
