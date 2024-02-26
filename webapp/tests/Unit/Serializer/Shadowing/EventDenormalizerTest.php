@@ -24,7 +24,7 @@ class EventDenormalizerTest extends KernelTestCase
         Operation $expectedOperation,
         ?string $expectedObjectId,
         array $expectedData
-    ) {
+    ): void {
         $serializer = $this->getcontainer()->get(SerializerInterface::class);
         $event = $serializer->denormalize($data, Event::class, 'json', $context);
         self::assertEquals($expectedId, $event->id);
@@ -45,7 +45,7 @@ class EventDenormalizerTest extends KernelTestCase
         Operation $expectedOperation,
         ?string $expectedObjectId,
         array $expectedData
-    ) {
+    ): void {
         $serializer = $this->getcontainer()->get(SerializerInterface::class);
         $event = $serializer->denormalize($data, Event::class, 'json', ['api_version' => null]);
         self::assertEquals($expectedId, $event->id);
@@ -86,6 +86,21 @@ class EventDenormalizerTest extends KernelTestCase
                     files: []
                 ),
             ],
+        ];
+        yield '2022-07 format, create/update unknown class' => [
+            [
+                'type' => 'team-members',
+                'token' => 'sometoken',
+                'data' => [
+                    ['id' => '123'],
+                ],
+            ],
+            ['api_version' => '2022-07'],
+            'sometoken',
+            EventType::TEAM_MEMBERS,
+            Operation::CREATE,
+            '123',
+            [],
         ];
         yield '2022-07 format, create/update multiple' => [
             [

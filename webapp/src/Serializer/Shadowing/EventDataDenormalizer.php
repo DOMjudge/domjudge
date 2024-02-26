@@ -39,6 +39,9 @@ class EventDataDenormalizer implements DenormalizerInterface, SerializerAwareInt
 
         $eventType = $context['event_type'];
         $eventClass = $eventType->getEventClass();
+        if ($eventClass === null) {
+            return null;
+        }
 
         // Unset the event type, so we are not calling ourselves recursively
         unset($context['event_type']);
