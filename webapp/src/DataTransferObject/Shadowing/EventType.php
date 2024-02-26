@@ -30,15 +30,11 @@ enum EventType: string
     }
 
     /**
-     * @return class-string<EventData>
+     * @return class-string<EventData>|null
      */
-    public function getEventClass(): string
+    public function getEventClass(): ?string
     {
         switch ($this) {
-            case self::ACCOUNTS:
-                return Account::class;
-            case self::AWARDS:
-                return Award::class;
             case self::CLARIFICATIONS:
                 return ClarificationEvent::class;
             case self::CONTESTS:
@@ -63,8 +59,7 @@ enum EventType: string
                 return SubmissionEvent::class;
             case self::TEAMS:
                 return TeamEvent::class;
-            case self::TEAM_MEMBERS:
-                return TeamMember::class;
         }
+        return null;
     }
 }

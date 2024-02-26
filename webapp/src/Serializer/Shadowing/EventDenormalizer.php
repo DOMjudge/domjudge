@@ -62,16 +62,23 @@ class EventDenormalizer implements DenormalizerInterface, SerializerAwareInterfa
             } else {
                 $id = null;
             }
+            if ($eventType->getEventClass() === null) {
+                $eventData = [];
+            } else {
+                $eventData = isset($data['data']) ? $this->serializer->denormalize($data['data'], EventData::class . '[]', $format, $context + ['event_type' => $eventType]) : [];
+            }
             return new Event(
                 $data['token'] ?? null,
                 $eventType,
                 $operation,
                 $id,
-                isset($data['data']) ? $this->serializer->denormalize($data['data'], EventData::class . '[]', $format, $context + ['event_type' => $eventType]) : [],
+                $eventData,
             );
         } else {
             $operation = Operation::from($data['op']);
             if ($operation === Operation::DELETE) {
+                $eventData = [];
+            } elseif ($eventType->getEventClass() === null) {
                 $eventData = [];
             } else {
                 $eventData = [$this->serializer->denormalize($data['data'], EventData::class, $format, $context + ['event_type' => $eventType])];
