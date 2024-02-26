@@ -30,6 +30,7 @@ class EventDenormalizer implements DenormalizerInterface, SerializerAwareInterfa
      *     data: array{id: string}|array<array{id: string}>|null
      * }                                  $data
      * @param array{api_version?: string} $context
+     *
      * @return Event<EventData>
      *
      * @throws ExceptionInterface
@@ -51,24 +52,36 @@ class EventDenormalizer implements DenormalizerInterface, SerializerAwareInterfa
         $eventType = EventType::fromString($data['type']);
         if ($this->getEventFeedFormat($data, $context) === EventFeedFormat::Format_2022_07) {
             $operation = isset($data['data']) ? Operation::CREATE : Operation::DELETE;
-            if (!isset($data['data'][0])) {
+            if (isset($data['data']) && !isset($data['data'][0])) {
                 $data['data'] = [$data['data']];
             }
-            $id = $operation === Operation::DELETE ? $data['id'] : $data['data'][0]['id'] ?? null;
+            if ($operation === Operation::CREATE && count($data['data']) === 1) {
+                $id = $data['data'][0]['id'];
+            } elseif ($operation === Operation::DELETE) {
+                $id = $data['id'];
+            } else {
+                $id = null;
+            }
             return new Event(
                 $data['token'] ?? null,
                 $eventType,
                 $operation,
                 $id,
-                $this->serializer->denormalize($data['data'], EventData::class . '[]', $format, $context + ['event_type' => $eventType]),
+                isset($data['data']) ? $this->serializer->denormalize($data['data'], EventData::class . '[]', $format, $context + ['event_type' => $eventType]) : [],
             );
         } else {
+            $operation = Operation::from($data['op']);
+            if ($operation === Operation::DELETE) {
+                $eventData = [];
+            } else {
+                $eventData = [$this->serializer->denormalize($data['data'], EventData::class, $format, $context + ['event_type' => $eventType])];
+            }
             return new Event(
                 $data['id'] ?? null,
                 $eventType,
-                Operation::from($data['op']),
+                $operation,
                 $data['data']['id'],
-                [$this->serializer->denormalize($data['data'], EventData::class, $format, $context + ['event_type' => $eventType])],
+                $eventData,
             );
         }
     }
