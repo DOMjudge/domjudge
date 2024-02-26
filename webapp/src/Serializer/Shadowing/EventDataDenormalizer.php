@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\SerializerAwareTrait;
 /**
  * This class converts the data of an event into the correct event data object
  */
-class EventDataNormalizer implements DenormalizerInterface, SerializerAwareInterface
+class EventDataDenormalizer implements DenormalizerInterface, SerializerAwareInterface
 {
     use SerializerAwareTrait;
 
