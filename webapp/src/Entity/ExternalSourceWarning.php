@@ -170,7 +170,7 @@ class ExternalSourceWarning
         $this->setHash(static::calculateHash($this->getType(), $this->getEntityType(), $this->getEntityId()));
     }
 
-    public static function calculateHash(string $type, string $entityType, string $enttiyId): string
+    public static function calculateHash(string $type, string $entityType, ?string $enttiyId): string
     {
         return "$entityType-$enttiyId-$type";
     }
