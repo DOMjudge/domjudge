@@ -1024,9 +1024,12 @@ class ExternalContestSourceService
         $this->removeWarning($event->type, $data->id, ExternalSourceWarning::TYPE_ENTITY_NOT_FOUND);
 
         $toCheckProblem = [
-            'name'      => $data->name,
-            'timelimit' => $data->timeLimit,
+            'name' => $data->name,
         ];
+
+        if ($data->timeLimit !== null) {
+            $toCheckProblem['timelimit'] = $data->timeLimit;
+        }
 
         /* Disable as PC2 can have 2 problems with the same label
         if ($contestProblem->getShortname() !== $data->label) {
