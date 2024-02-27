@@ -677,7 +677,7 @@
                                 -#})
                             {% endif %}
                         {% endif %}
-                        {% if runsOutput[runIdx].testcasedir is not null %}
+                        {% if runsOutput[runIdx].testcasedir is defined and runsOutput[runIdx].testcasedir is not null %}
                           | <code>.../{{ runsOutput[runIdx].testcasedir | split('/') | last }}</code>{#-
                             -#}<button type="button" class="btn btn-link" onclick="navigator.clipboard.writeText('{{ runsOutput[runIdx].testcasedir }}')"><i class="fa-regular fa-copy"></i></button>
                         {% endif %}
