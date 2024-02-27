@@ -1,8 +1,9 @@
 DOMjudge Programming Contest Judging System
 
-Version 8.2.3DEV
-----------------
+Version 8.2.3 - 28 February 2023
+--------------------------------
  - [security] Close metadata file descriptor for the child in runguard.
+ - Various documentation & bugfixes.
 
 Version 8.2.2 - 20 October 2023
 -------------------------------
