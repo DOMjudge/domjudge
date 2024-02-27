@@ -56,7 +56,7 @@ class EventDenormalizer implements DenormalizerInterface, SerializerAwareInterfa
                 $data['data'] = [$data['data']];
             }
             if ($operation === Operation::CREATE && count($data['data']) === 1) {
-                $id = $data['data'][0]['id'];
+                $id = $data['data'][0]['id'] ?? null;
             } elseif ($operation === Operation::DELETE) {
                 $id = $data['id'];
             } else {
@@ -87,7 +87,7 @@ class EventDenormalizer implements DenormalizerInterface, SerializerAwareInterfa
                 $data['id'] ?? null,
                 $eventType,
                 $operation,
-                $data['data']['id'],
+                $data['data']['id'] ?? null,
                 $eventData,
             );
         }
