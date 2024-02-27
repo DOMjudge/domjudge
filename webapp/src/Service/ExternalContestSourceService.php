@@ -523,7 +523,7 @@ class ExternalContestSourceService
                 try {
                     // The base URL is the URL of the CCS API root.
                     // Proper is '^(.*\/)contests\/.*/', but PC^2 doesn't expose this (yet).
-                    if (preg_match('/^(.*\/)contest(s\/.*)/',
+                    if (preg_match('/^(.*\/)contest(s\/.*)?/',
                                    $this->source->getSource(), $matches) === 0) {
                         $this->loadingError      = 'Cannot determine base URL. Did you pass a CCS API contest URL?';
                         $this->cachedContestData = null;
