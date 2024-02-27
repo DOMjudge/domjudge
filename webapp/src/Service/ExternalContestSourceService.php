@@ -1448,6 +1448,10 @@ class ExternalContestSourceService
                 $zipUrl = $data->files[0]->href;
                 if (preg_match('/^https?:\/\//', $zipUrl) === 0) {
                     // Relative URL, prepend the base URL.
+                    // If both the base path ends with a / and the zip URL starts with one, drop one of them
+                    if (str_ends_with($this->basePath, '/') && str_starts_with($zipUrl, '/')) {
+                        $zipUrl = substr($zipUrl, 1);
+                    }
                     $zipUrl = ($this->basePath ?? '') . $zipUrl;
                 }
 
