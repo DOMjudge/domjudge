@@ -46,7 +46,7 @@
                     {% elseif id == 'multiple' %}
                         is judged as {{ result.actual }} but has multiple possible outcomes ({{ result.expected|join(', ') }})
                     {% elseif id == 'verified' %}
-                        verfied as '{{ result.actual }}'
+                        verified as '{{ result.actual }}'
                     {% elseif id == 'nomatch' %}
                         expected results unknown, leaving submission unchecked
                     {% elseif id == 'earlier' %}
