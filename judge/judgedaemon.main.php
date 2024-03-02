@@ -1121,6 +1121,7 @@ function compile(
                         "Getting $type version failed with exit code $retval\n"
                         . $versions[$type];
                 }
+                unlink($vcscript);
             }
             if (isset($versions[$type])) {
                 $args .= "&$type=" . urlencode(base64_encode($versions[$type]));
