@@ -93,7 +93,7 @@ if [ ! -d ${DIR}/chroot/domjudge/ ]; then
 fi
 section_end judgehost
 
-section_start more_setup "Remaining setup (e.g. starting judgedaemon)"
+section_start more_setup "Remaining setup"
 
 # Download yajsv and ccs-specs for API check.
 cd $HOME
@@ -118,9 +118,6 @@ fi
 
 sudo useradd -d /nonexistent -g nogroup -s /bin/false -u $((2000+(RANDOM%1000))) $RUN_USER
 
-# start judgedaemon
-cd /opt/domjudge/judgehost/
-
 # Since ubuntu20.04 gitlabci image this is sometimes needed
 # It should be safe to remove this when it creates issues
 set +e
@@ -130,10 +127,21 @@ set -e
 if [ $PIN_JUDGEDAEMON -eq 1 ]; then
     PINNING="-n 0"
 fi
+section_end more_setup
+
+section_start runguard_tests "Running isolated runguard tests"
+sudo addgroup domjudge-run-0
+sudo usermod -g domjudge-run-0 domjudge-run-0
+cd ${DIR}/judge/runguard_test
+make test
+section_end runguard_tests
+
+section_start start_judging "Start judging"
+cd /opt/domjudge/judgehost/
+
 sudo -u domjudge bin/judgedaemon $PINNING |& tee /tmp/judgedaemon.log &
 sleep 5
-
-section_end more_setup
+section_end start_judging
 
 section_start submitting "Importing Kattis examples"
 export SUBMITBASEURL='http://localhost/domjudge/'
