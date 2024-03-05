@@ -937,7 +937,7 @@ class ProblemController extends BaseController
                 )) {
                     $this->dj->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
                 } else {
-                    $this->addFlash('danger', implode("\n", $messages));
+                    $this->postMessages($messages);
                     return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
                 }
             } catch (Exception $e) {
