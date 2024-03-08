@@ -279,7 +279,7 @@ class JudgehostController extends AbstractFOSRestController
         Request $request,
         #[OA\PathParameter(description: 'The hostname of the judgehost that wants to update the judging')]
         string $hostname,
-        #[OA\PathParameter(description: 'The ID of the judgetask to update')]
+        #[OA\PathParameter(description: 'The ID of the judgetask to update', schema: new OA\Schema(type: 'integer'))]
         int $judgetaskid
     ): void {
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
@@ -470,7 +470,7 @@ class JudgehostController extends AbstractFOSRestController
         Request $request,
         #[OA\PathParameter(description: 'The hostname of the judgehost that wants to add the debug info')]
         string $hostname,
-        #[OA\PathParameter(description: 'The ID of the judgetask to add')]
+        #[OA\PathParameter(description: 'The ID of the judgetask to add', schema: new OA\Schema(type: 'integer'))]
         int $judgeTaskId
     ): void {
         $judgeTask = $this->em->getRepository(JudgeTask::class)->find($judgeTaskId);
@@ -607,7 +607,7 @@ class JudgehostController extends AbstractFOSRestController
         Request $request,
         #[OA\PathParameter(description: 'The hostname of the judgehost that wants to add the judging run')]
         string $hostname,
-        #[OA\PathParameter(description: 'The ID of the judgetask to add')]
+        #[OA\PathParameter(description: 'The ID of the judgetask to add', schema: new OA\Schema(type: 'integer'))]
         int $judgeTaskId
     ): int {
         $required = [
@@ -1443,9 +1443,7 @@ class JudgehostController extends AbstractFOSRestController
         description: 'Returns the workarray.',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(
-                new OA\Schema(ref: new Model(type: JudgeTask::class)),
-            )
+            items: new OA\Items(ref: new Model(type: JudgeTask::class))
         )
     )]
     #[OA\Parameter(
