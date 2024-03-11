@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\DataTransferObject\SubmissionRestriction;
+use App\Entity\ExternalContestSource;
 use App\Service\ConfigurationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -62,6 +63,19 @@ class ShadowDifferencesController extends BaseController
         if (!$this->dj->getCurrentContest()) {
             $this->addFlash('danger', 'Shadow differences need an active contest.');
             return $this->redirectToRoute('jury_index');
+        }
+
+        /** @var ExternalContestSource|null $externalContestSource */
+        $externalContestSource = $this->em->createQueryBuilder()
+            ->from(ExternalContestSource::class, 'ecs')
+            ->select('ecs')
+            ->andWhere('ecs.contest = :contest')
+            ->setParameter('contest', $this->dj->getCurrentContest())
+            ->getQuery()->getOneOrNullResult();
+
+        if (!$externalContestSource) {
+            $this->addFlash('warning', 'No external contest present yet, please configure one first');
+            return $this->redirectToRoute('jury_external_contest_manage');
         }
 
         // Close the session, as this might take a while and we don't need the session below.

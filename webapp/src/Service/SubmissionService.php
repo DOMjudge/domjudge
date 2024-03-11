@@ -175,7 +175,7 @@ class SubmissionService
             } else {
                 $queryBuilder
                     ->andWhere('ej.result = :externalresult')
-                    ->setParameter('externalresult', $restrictions['external_result']);
+                    ->setParameter('externalresult', $restrictions->externalResult);
             }
         }
 
