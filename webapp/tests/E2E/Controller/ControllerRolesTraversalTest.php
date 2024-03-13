@@ -101,6 +101,8 @@ class ControllerRolesTraversalTest extends BaseTestCase
         } elseif (($response->getStatusCode() === 302 ) && $response->isRedirection()) {
             if (str_contains($url, '/jury/external-contest')) {
                 self::assertTrue(str_contains($response->headers->get('location'), '/jury/external-contest/manage'));
+            } elseif (str_contains($url, '/jury/shadow-differences')) {
+                self::assertTrue(str_contains($response->headers->get('location'), '/jury'));
             } else {
                 self::assertTrue(str_contains($response->headers->get('location'), '/public'));
             }
