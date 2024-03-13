@@ -254,8 +254,7 @@ class ScoreboardService
         Contest $contest,
         Team    $team,
         Problem $problem,
-        bool    $updateRankCache = true,
-        bool    $updatePotentialFirstToSolves = true
+        bool    $updateRankCache = true
     ): void {
         $this->logger->debug(
             "ScoreboardService::calculateScoreRow '%d' '%d' '%d'",
@@ -418,7 +417,6 @@ class ScoreboardService
         // See if this submission was the first to solve this problem.
         // Only relevant if it was correct in the first place.
         $firstToSolve = false;
-        $potentialFirstToSolve = false;
         if ($correctJury) {
             $params = [
                 'cid' => $contest->getCid(),
@@ -439,49 +437,32 @@ class ScoreboardService
             //   - or already judged to be correct (if it is judged but not correct,
             //     it is not a first to solve)
             // - or the submission is still queued for judgement (judgehost is NULL).
-            // If there are no valid correct submissions submitted earlier but there
-            // are submissions awaiting judgement, we are potentially the first to solve.
-            // We need to keep track of this since we later need to set the actual first to solve.
-            $verificationRequiredExtra = ($verificationRequired && !$useExternalJudgements) ? 'OR j.verified = 0' : '';
+            $verificationRequiredExtra = $verificationRequired ? 'OR j.verified = 0' : '';
             if ($useExternalJudgements) {
-                $baseQuery = '
+                $firstToSolve = 0 == $this->em->getConnection()->fetchOne('
                 SELECT count(*) FROM submission s
                     LEFT JOIN external_judgement ej USING (submitid)
                     LEFT JOIN external_judgement ej2 ON ej2.submitid = s.submitid AND ej2.starttime > ej.starttime
                     LEFT JOIN team t USING(teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
+                    (ej.result IS NULL OR ej.result = :correctResult '.
+                    $verificationRequiredExtra.') AND
                     s.cid = :cid AND s.probid = :probid AND
                     tc.sortorder = :teamSortOrder AND
-                    round(s.submittime,4) < :submitTime';
-                $judgingTable = 'ej';
+                    round(s.submittime,4) < :submitTime', $params);
             } else {
-                $baseQuery = '
+                $firstToSolve = 0 == $this->em->getConnection()->fetchOne('
                 SELECT count(*) FROM submission s
                     LEFT JOIN judging j ON (s.submitid=j.submitid AND j.valid=1)
                     LEFT JOIN team t USING (teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
+                    (j.judgingid IS NULL OR j.result IS NULL OR j.result = :correctResult '.
+                    $verificationRequiredExtra.') AND
                     s.cid = :cid AND s.probid = :probid AND
                     tc.sortorder = :teamSortOrder AND
-                    round(s.submittime,4) < :submitTime';
-                $judgingTable = 'j';
-            }
-
-            $numEarlierCorrect = $this->em->getConnection()->fetchOne(
-                "$baseQuery AND $judgingTable.result = :correctResult",
-                $params);
-            $numEarlierPending = $this->em->getConnection()->fetchOne(
-                "$baseQuery AND ($judgingTable.result IS NULL $verificationRequiredExtra)",
-                $params);
-
-            if ($numEarlierCorrect == 0) {
-                // This is either a first to solve or potential first to solve
-                if ($numEarlierPending == 0) {
-                    $firstToSolve = true;
-                } else {
-                    $potentialFirstToSolve = true;
-                }
+                    round(s.submittime,4) < :submitTime', $params);
             }
         }
 
@@ -501,14 +482,13 @@ class ScoreboardService
             'runtimePublic' => $runtimePubl === PHP_INT_MAX ? 0 : $runtimePubl,
             'isCorrectPublic' => (int)$correctPubl,
             'isFirstToSolve' => (int)$firstToSolve,
-            'isPotentialFirstToSolve' => (int)$potentialFirstToSolve,
         ];
         $this->em->getConnection()->executeQuery('REPLACE INTO scorecache
             (cid, teamid, probid,
              submissions_restricted, pending_restricted, solvetime_restricted, runtime_restricted, is_correct_restricted,
-             submissions_public, pending_public, solvetime_public, runtime_public, is_correct_public, is_first_to_solve, is_potential_first_to_solve)
+             submissions_public, pending_public, solvetime_public, runtime_public, is_correct_public, is_first_to_solve)
             VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :runtimeRestricted, :isCorrectRestricted,
-            :submissionsPublic, :pendingPublic, :solvetimePublic, :runtimePublic, :isCorrectPublic, :isFirstToSolve, :isPotentialFirstToSolve)', $params);
+            :submissionsPublic, :pendingPublic, :solvetimePublic, :runtimePublic, :isCorrectPublic, :isFirstToSolve)', $params);
 
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                                                     ['lock' => $lockString]) != 1) {
@@ -518,31 +498,6 @@ class ScoreboardService
         // If we found a new correct result, update the rank cache too.
         if ($updateRankCache && ($correctJury || $correctPubl)) {
             $this->updateRankCache($contest, $team);
-        }
-
-        // If we did not have a first to solve, we need to check if we have any
-        // potential first to solve that are now the first to solve.
-        // We only do this if there are no pending submissions for this problem
-        // for this team and if this submission is not a potential first to solve itself.
-        // We also do this only once, to not have infinite loops if we have multiple
-        // potential first to solves.
-        if ($updatePotentialFirstToSolves && $pendingJury === 0 && !$potentialFirstToSolve) {
-            /** @var ScoreCache[] $potentialFirstToSolves */
-            $potentialFirstToSolves = $this->em->createQueryBuilder()
-                ->from(ScoreCache::class, 's')
-                ->join('s.team', 't')
-                ->select('s', 't')
-                ->andWhere('s.contest = :contest')
-                ->andWhere('s.problem = :problem')
-                ->andWhere('s.is_potential_first_to_solve = 1')
-                ->setParameter('contest', $contest)
-                ->setParameter('problem', $problem)
-                ->getQuery()
-                ->getResult();
-
-            foreach ($potentialFirstToSolves as $row) {
-                $this->calculateScoreRow($contest, $row->getTeam(), $problem, $updateRankCache, false);
-            }
         }
     }
 
