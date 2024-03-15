@@ -209,7 +209,7 @@ class ImportExportService
                                $data['short_name'] ?? $data['shortname'] ?? $data['short-name'] ?? $data['id']
                            ))
             ->setExternalid($contest->getShortname())
-            ->setWarningMessage($data['warning-message'] ?? null)
+            ->setWarningMessage($data['warning_message'] ?? $data['warning-message'] ?? null)
             ->setStarttimeString(date_format($startTime, 'Y-m-d H:i:s e'))
             ->setActivatetimeString(date_format($activateTime, 'Y-m-d H:i:s e'))
             ->setEndtimeString(sprintf('+%s', $data['duration']));
