@@ -8,7 +8,7 @@ version: '3'
 
 services:
   mariadb:
-    image: mariadb
+    image: docker.io/mariadb
     environment:
       - MYSQL_ROOT_PASSWORD=domjudge
       - MYSQL_USER=domjudge
@@ -21,7 +21,7 @@ services:
     volumes:
       - /var/lib/mysql
   domjudge:
-    image: domjudge/domjudge-contributor
+    image: docker.io/domjudge/domjudge-contributor
     hostname: domjudge-contributor
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
