@@ -526,7 +526,10 @@ class SubmissionController extends BaseController
         } else {
             $contestProblem = $submission->getContestProblem();
             /** @var JudgeTask[] $judgeTasks */
-            $judgeTasks = $this->em->getRepository(JudgeTask::class)->findBy(['jobid' => $selectedJudging->getJudgingid()]);
+            $judgeTasks = $this->em->getRepository(JudgeTask::class)->findBy([
+                'jobid' => $selectedJudging->getJudgingid(),
+                'type' => JudgeTaskType::JUDGING_RUN,
+                ]);
             $unique_compiler_versions = [];
             $unique_runner_versions = [];
             $sampleJudgeTask = null;
