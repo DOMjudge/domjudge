@@ -6,6 +6,7 @@ use App\Entity\ContestProblem;
 use App\Entity\Team;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -22,6 +23,7 @@ class JuryClarificationType extends AbstractType
         private readonly EntityManagerInterface $em,
         private readonly ConfigurationService $config,
         private readonly DOMJudgeService $dj,
+        private readonly EventLogService $eventLogService,
     ) {}
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -33,12 +35,12 @@ class JuryClarificationType extends AbstractType
 
         $limitToTeam = $options['limit_to_team'] ?? null;
         if ($limitToTeam) {
-            $recipientOptions[sprintf("%s (t%s)", $limitToTeam->getEffectiveName(), $limitToTeam->getTeamid())] = $limitToTeam->getTeamid();
+            $recipientOptions[$this->getTeamLabel($limitToTeam)] = $limitToTeam->getTeamid();
         } else {
             /** @var Team|null $limitToTeam */
             $teams = $this->em->getRepository(Team::class)->findAll();
             foreach ($teams as $team) {
-                $recipientOptions[sprintf("%s (t%s)", $team->getEffectiveName(), $team->getTeamid())] = $team->getTeamid();
+                $recipientOptions[$this->getTeamLabel($team)] = $team->getTeamid();
             }
         }
 
@@ -109,5 +111,18 @@ class JuryClarificationType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefault('limit_to_team', null);
+    }
+
+    private function getTeamLabel(Team $team): string
+    {
+        if ($team->getLabel()) {
+            return sprintf('%s (%s)', $team->getEffectiveName(), $team->getLabel());
+        }
+
+        if ($this->eventLogService->externalIdFieldForEntity($team)) {
+            return sprintf('%s (%s)', $team->getEffectiveName(), $team->getExternalId());
+        }
+
+        return sprintf('%s (t%s)', $team->getEffectiveName(), $team->getTeamid());
     }
 }

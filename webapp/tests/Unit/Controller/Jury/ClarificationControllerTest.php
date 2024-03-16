@@ -97,8 +97,8 @@ class ClarificationControllerTest extends BaseTestCase
 
         $options = $crawler->filter('option')->extract(['_text']);
         self::assertEquals('ALL', $options[1]);
-        self::assertEquals('DOMjudge (t1)', $options[2]);
-        self::assertEquals('Example teamname (t2)', $options[3]);
+        self::assertEquals('DOMjudge (domjudge)', $options[2]);
+        self::assertEquals('Example teamname (exteam)', $options[3]);
 
         $labels = $crawler->filter('label')->extract(['_text']);
         self::assertEquals('Send to', $labels[0]);
