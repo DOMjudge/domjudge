@@ -13,6 +13,7 @@ enum EventType: string
     case JUDGEMENT_TYPES = 'judgement-types';
     case LANGUAGES = 'languages';
     case ORGANIZATIONS = 'organizations';
+    case PERSONS = 'persons';
     case PROBLEMS = 'problems';
     case RUNS = 'runs';
     case STATE = 'state';
