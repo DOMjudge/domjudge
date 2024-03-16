@@ -1070,7 +1070,7 @@ class JudgehostController extends AbstractFOSRestController
             }
 
             // Send an event for an endtime (and max runtime update).
-            if ($sendJudgingEvent) {
+            if ($sendJudgingEvent && $judging->getValid()) {
                 $this->eventLogService->log('judging', $judging->getJudgingid(),
                     EventLogService::ACTION_UPDATE, $judging->getContest()->getCid());
             }
