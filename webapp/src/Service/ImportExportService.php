@@ -224,7 +224,9 @@ class ImportExportService
             $contest->setMedalsEnabled(false);
         } else {
             foreach ($visibleCategories as $visibleCategory) {
-                $contest->addMedalCategory($visibleCategory);
+                $contest
+                    ->setMedalsEnabled(true)
+                    ->addMedalCategory($visibleCategory);
             }
         }
 
