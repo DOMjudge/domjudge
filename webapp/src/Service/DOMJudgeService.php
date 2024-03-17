@@ -1126,7 +1126,7 @@ class DOMJudgeService
         }
     }
 
-    public function unblockJudgeTasksForSubmission(string $submissionId): void
+    public function unblockJudgeTasksForSubmission(string $submissionId, bool $judgeCompletely = false): void
     {
         // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
         $judgings = $this->helperUnblockJudgeTasks()
@@ -1136,7 +1136,7 @@ class DOMJudgeService
             ->getQuery()
             ->getResult();
         foreach ($judgings as $judging) {
-            $this->maybeCreateJudgeTasks($judging, JudgeTask::PRIORITY_DEFAULT, true);
+            $this->maybeCreateJudgeTasks($judging, JudgeTask::PRIORITY_DEFAULT, true, judgeCompletely: $judgeCompletely);
         }
     }
 
@@ -1151,7 +1151,7 @@ class DOMJudgeService
         }
     }
 
-    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = false): void
+    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = false, bool $judgeCompletely = false): void
     {
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
@@ -1179,6 +1179,10 @@ class DOMJudgeService
         }
         if (!$problem->getAllowJudge() || !$language->getAllowJudge() || $evalOnDemand) {
             return;
+        }
+
+        if ($judgeCompletely) {
+            $judging->setJudgeCompletely(true);
         }
 
         // We use a mass insert query, since that is way faster than doing a separate insert for each testcase.

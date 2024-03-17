@@ -494,6 +494,15 @@ class SubmissionController extends BaseController
                 ->getSingleScalarResult();
         }
 
+        $evalOnDemand = false;
+        $problemLazyEvalResults = $submission->getContestProblem()->getLazyEvalResults();
+        if (((int)$problemLazyEvalResults === (int)DOMJudgeService::EVAL_DEFAULT
+             && (int)$this->config->get('lazy_eval_results') === (int)DOMJudgeService::EVAL_DEMAND)
+            || (int)$problemLazyEvalResults === (int)DOMJudgeService::EVAL_DEMAND
+        ) {
+            $evalOnDemand = true;
+        }
+
         $twigData = [
             'submission' => $submission,
             'lastSubmission' => $lastSubmission,
@@ -515,6 +524,7 @@ class SubmissionController extends BaseController
             'combinedRunCompare' => $submission->getProblem()->getCombinedRunCompare(),
             'requestedOutputCount' => $requestedOutputCount,
             'version_warnings' => [],
+            'evalOnDemand' => $evalOnDemand,
         ];
 
         if ($selectedJudging === null) {
@@ -1200,6 +1210,14 @@ class SubmissionController extends BaseController
     {
         $this->dj->unblockJudgeTasksForSubmission($submitId);
         $this->addFlash('info', "Started judging for submission: $submitId");
+        return $this->redirectToRoute('jury_submission', ['submitId' => $submitId]);
+    }
+
+    #[Route(path: '/{submitId<\d+>}/create-tasks-full', name: 'jury_submission_create_tasks_full')]
+    public function createJudgeTasksFull(string $submitId): RedirectResponse
+    {
+        $this->dj->unblockJudgeTasksForSubmission($submitId, true);
+        $this->addFlash('info', "Started judging all testcases for submission: $submitId");
         return $this->redirectToRoute('jury_submission', ['submitId' => $submitId]);
     }
 

@@ -395,10 +395,19 @@
                 &nbsp;
                 {% if selectedJudging is null or selectedJudging.result is empty %}
                     {%- if not selectedJudging or not selectedJudging.started %}
+                        {% if evalOnDemand %}
+                            <a href="{{ path('jury_submission_create_tasks_full', {'submitId': submission.submitid}) }}">
+                                <button class="btn btn-sm btn-outline-secondary" >
+                                    <i class="fas fa-gavel"></i>
+                                    Judge submission (all testcases)
+                                </button>
+                            </a>
+                            &nbsp;
+                        {% endif %}
                         <a href="{{ path('jury_submission_create_tasks', {'submitId': submission.submitid}) }}">
                             <button class="btn btn-sm btn-outline-secondary" >
                                 <i class="fas fa-gavel"></i>
-                                Judge submission
+                                Judge submission {% if evalOnDemand %}(lazy){% endif %}
                             </button>
                         </a>
                     {%- endif %}
