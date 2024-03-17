@@ -740,15 +740,19 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             if ($idx >= strlen($log)) {
                 break;
             }
-            $is_validator = $log[$idx] == '>';
-            $content      = substr($log, $idx + 3, $len);
-            if (empty($content)) {
-                break;
+            $is_validator = $log[$idx] == '>' || $log[$idx] == ']';
+            if ($log[$idx] == ']' || $log[$idx] == '[') {
+                $content = '<td style="font-style:italic; color: dimgrey;">EOF from program</td>';
+            } else {
+                $content = substr($log, $idx + 3, $len);
+                if (empty($content)) {
+                    break;
+                }
+                $content = htmlspecialchars($content);
+                $content = '<td class="output_text">'
+                    . str_replace("\n", "\u{21B5}<br/>", $content)
+                    . '</td>';
             }
-            $content   = htmlspecialchars($content);
-            $content   = '<td class="output_text">'
-                         . str_replace("\n", "\u{21B5}<br/>", $content)
-                         . '</td>';
             $idx       += $len + 4;
             $team      = $is_validator ? '<td/>' : $content;
             $validator = $is_validator ? $content : '<td/>';

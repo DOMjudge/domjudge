@@ -60,6 +60,7 @@
 #include "lib.error.h"
 #include "lib.misc.h"
 
+#include <cstring>
 #include <chrono>
 #include <fcntl.h>
 #include <fstream>
@@ -770,6 +771,15 @@ struct state_t {
       // write an extra \n at its end.
       ssize_t nread = read(from.process_to_proxy, buffer, BUF_SIZE - 1);
       if (nread == 0) {
+        auto duration = chrono::steady_clock::now() - output_file.start;
+        auto time = duration.count() / 1000 / 1000; // ns -> ms
+        int time_sec = time / 1000;
+        int time_millis = time % 1000;
+        char direction = from.index == 0 ? ']' : '[';
+        char eofbuf[128];
+        sprintf(eofbuf, "[%3d.%03ds/%ld]%c", time_sec, time_millis, 0LL, direction);
+        write_all(output_file.output_file, eofbuf, strlen(eofbuf));
+
         warning(0, "EOF from process #%ld", from.index);
         // The process closed stdout, we need to close the pipe's file
         // descriptors as well.
