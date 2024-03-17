@@ -1024,12 +1024,9 @@ class ExternalContestSourceService
         $this->removeWarning($event->type, $data->id, ExternalSourceWarning::TYPE_ENTITY_NOT_FOUND);
 
         $toCheckProblem = [
-            'name' => $data->name,
+            'name'      => $data->name,
+            'timelimit' => $data->timeLimit,
         ];
-
-        if ($data->timeLimit !== null) {
-            $toCheckProblem['timelimit'] = $data->timeLimit;
-        }
 
         if ($contestProblem->getShortname() !== $data->label) {
             $this->logger->warning(
