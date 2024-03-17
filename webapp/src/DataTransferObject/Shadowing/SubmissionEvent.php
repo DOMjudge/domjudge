@@ -14,6 +14,8 @@ class SubmissionEvent implements EventData
         public readonly string $teamId,
         public readonly string $time,
         public readonly ?string $entryPoint,
+        // For the analyst instance we lose access to the files
+        // during the freeze.
         public readonly ?array $files,
     ) {}
 }
