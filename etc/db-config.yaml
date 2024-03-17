@@ -111,16 +111,9 @@
             type: int
             default_value: 50000
             public: false
-            description: Maximum size of error/system output stored in the database (in bytes); use `-1` to disable any limits.
-            regex: /^[1-9]\d*$/
-            error_message: A positive number is required.
-        -   name: output_display_limit
-            type: int
-            default_value: 2000
-            public: false
-            description: Maximum size of run/diff/error/system output shown in the jury interface (in bytes); use `-1` to disable any limits.
-            regex: /^[1-9]\d*$/
-            error_message: A positive number is required.
+            description: Maximum size of error/system output stored in the database (in bytes); use `-1` to disable any limits. See `Display` / `output_display_limit` for how to control the output *shown*.
+            regex: /^([1-9]\d*|-1)$/
+            error_message: A positive number or -1 is required.
         -   name: lazy_eval_results
             type: int
             default_value: 1
@@ -208,6 +201,13 @@
 -   category: Display
     description: Options related to the DOMjudge user interface.
     items:
+        -   name: output_display_limit
+            type: int
+            default_value: 2000
+            public: false
+            description: Maximum size of run/diff/error/system output shown in the jury interface (in bytes); use `-1` to disable any limits.
+            regex: /^([1-9]\d*|-1)$/
+            error_message: A positive number or -1 is required.
         -   name: show_pending
             type: bool
             default_value: true
