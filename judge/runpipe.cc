@@ -39,6 +39,9 @@
 // emulate it by sending a message in the SIGCHLD signal handler using an extra
 // pipe.
 //
+// Additionally, we set up a signal handler for SIGUSR1 which runguard will use
+// to indicate when it killed its child process due to a time limit.
+//
 // If the proxy is not enabled (i.e. no traffic capturing), the pipes are setup
 // like this:
 //
@@ -46,6 +49,7 @@
 // stdout -----> stdin
 // stdin  <----- stdout
 // SIGCHLD -----------------> epoll
+// SIGUSR1 -----------------> epoll
 //
 //
 // If the proxy is enabled the pipes are setup like this:
@@ -54,6 +58,7 @@
 // stdout  ----->  epoll  -----> stdin
 // stdin   <-----  epoll  <----- stdout
 // SIGCHLD ----------^
+// SIGUSR1 ----------^
 
 #include "config.h"
 
@@ -234,11 +239,20 @@ struct process_t {
   void spawn() {
     fd_t stdio[3] = {stdin_fd, stdout_fd, FDREDIR_NONE};
 
-    vector<const char *> argv(args.size());
+    char pid_buf[12];
+    vector<const char *> argv;
     for (size_t i = 0; i < args.size(); i++) {
-      argv[i] = args[i].c_str();
+        argv.push_back(args[i].c_str());
+        if (i == 1 && cmd == "sudo" &&
+            args[i].find("/runguard") != string::npos) {
+            // This is a hack, and can be improved significantly after implementing
+            // https://docs.google.com/document/d/1WZRwdvJUamsczYC7CpP3ZIBU8xG6wNqYqrNJf7osxYs/edit#heading=h.i7kgdnmw8qd7
+            argv.push_back("-U");
+            sprintf(pid_buf, "%d", getpid());
+            argv.push_back(pid_buf);
+        }
     }
-    pid = execute(cmd.c_str(), argv.data(), args.size(), stdio, 0);
+    pid = execute(cmd.c_str(), argv.data(), argv.size(), stdio, 0);
     if (pid < 0) {
       error(errno, "failed to execute command #%ld", index);
     }
@@ -398,9 +412,15 @@ struct state_t {
   // The PID of the first process that exited.
   pid_t first_process_exit_id = -1;
 
+  // Child indicated TLE.
+  bool child_indicated_timelimit = false;
+
   // The pipe from which the events about the child exits can be read. The
   // events are writted by the SIGCHLD handler.
   fd_t child_exited_pipe = -1;
+  // The pipe from which the events about the child time limits can be read. The
+  // events are writted by the SIGUSR1 handler.
+  fd_t child_timelimit_pipe = -1;
   // The file descriptor of the epoll.
   fd_t epoll_fd = -1;
 
@@ -572,7 +592,7 @@ struct state_t {
     }
   }
 
-  // Install an handler for the SIGCHLD signal. The handler will send a byte to
+  // Install a handler for the SIGCHLD signal. The handler will send a byte to
   // a pipe notifying the main loop that a child exited.
   // This method can be called only once.
   void install_sigchld_handler() {
@@ -597,7 +617,7 @@ struct state_t {
     signal(SIGCHLD, [](int) {
       // TODO: Decide whether to keep some logging as the line below. We can't
       // use logmsg here since that will in turn call syslog which is not safe
-      // to do in a signal handler (see also `man signl-safety`).
+      // to do in a signal handler (see also `man signal-safety`).
       // logmsg(LOG_DEBUG, "caught SIGCHLD signal");
 
       // Notify the main loop that a child exited by sending a message via
@@ -610,6 +630,46 @@ struct state_t {
 
     child_exited_pipe = read_end;
   }
+
+ // Install a handler for the SIGUSR1 signal. The handler will send a byte to
+ // a pipe notifying the main loop that the child was terminated due to time limit.
+ // This method can be called only once.
+ // TODO: Refactor code to avoid code duplication with install_sigchld_handler.
+ void install_sigusr1_handler() {
+     fd_t fds[2];
+     if (pipe2(fds, O_CLOEXEC | O_NONBLOCK)) {
+         error(errno, "creating exit pipes");
+     }
+
+     // The lambda below cannot capture anything, otherwise it couldn't be made
+     // into a function pointer. Therefore the write_end must have a static
+     // lifetime.
+     fd_t read_end = fds[0];
+     static fd_t write_end = -1;
+     if (write_end != -1) {
+         error(0, "install_sigchld_handler can be called only once");
+     }
+     write_end = fds[1];
+
+     logmsg(LOG_DEBUG, "exit handler will send event using %d -> %d", write_end,
+            read_end);
+
+     signal(SIGUSR1, [](int) {
+         // TODO: Decide whether to keep some logging as the line below. We can't
+         // use logmsg here since that will in turn call syslog which is not safe
+         // to do in a signal handler (see also `man signal-safety`).
+         // logmsg(LOG_DEBUG, "caught SIGUSR1 signal");
+
+         // Notify the main loop that a child was terminated due to time limit by sending a message via
+         // child_timelimit_pipe.
+         static char buf[] = {42};
+         if (write(write_end, buf, 1) != 1) {
+             error(errno, "failed to notify child exit");
+         }
+     });
+
+     child_timelimit_pipe = read_end;
+ }
 
   // Create the pipes used for the process communication, including the ones for
   // the proxy, if enabled.
@@ -685,6 +745,12 @@ struct state_t {
     }
     add_fd(child_exited_pipe);
 
+    // Always listen for child timelimit events.
+    if (child_timelimit_pipe == -1) {
+        error(0, "SIGUSR1 handler not installed");
+    }
+    add_fd(child_timelimit_pipe);
+
     // Listen for incoming data only when proxy is enabled.
     if (has_proxy()) {
       for (auto &proc : processes) {
@@ -719,7 +785,8 @@ struct state_t {
 
     logmsg(LOG_DEBUG, "child with pid %d exited", pid);
 
-    if (first_process_exit_id == -1) {
+    // Only set the first process if runguard didn't tell us about a TLE.
+    if (first_process_exit_id == -1 && !child_indicated_timelimit) {
       first_process_exit_id = pid;
     }
 
@@ -846,6 +913,18 @@ struct state_t {
           }
           continue;
         }
+        if (fd == child_timelimit_pipe) {
+            static char buffer[1];
+            if (read(child_timelimit_pipe, buffer, 1) != 1) {
+                if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                    error(errno, "failed to read from tle pipe");
+                }
+            }
+            logmsg(LOG_WARNING, "child indicated TLE");
+            child_indicated_timelimit = true;
+            continue;
+        }
+
 
         // A process wrote in one of the pipes to the proxy.
         for (size_t i = 0; i < processes.size(); i++) {
@@ -904,6 +983,7 @@ int main(int argc, char **argv) {
   signal(SIGPIPE, SIG_IGN);
   state.install_sigterm_handler();
   state.install_sigchld_handler();
+  state.install_sigusr1_handler();
   state.setup_pipes();
   for (auto &proc : state.processes) {
     proc.spawn();
