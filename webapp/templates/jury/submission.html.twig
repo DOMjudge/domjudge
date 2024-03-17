@@ -442,15 +442,19 @@
                         {% set judgehostLink = path('jury_judgehost', {judgehostid: judgehostid}) %}
                         <a href="{{ judgehostLink }}">{{ hostname | printHost }}</a>
                     {% endfor %} -
-                    <span class="judgetime">Judging started: {{ selectedJudging.starttime | printtime('H:i:s') }}
-                        {%- if selectedJudging.endtime -%}
-                            , finished in {{ selectedJudging.starttime | printtimediff(selectedJudging.endtime) }}s
-                        {%- elseif selectedJudging.valid or selectedJudging.rejudging -%}
-                            &nbsp;[still judging - busy {{ selectedJudging.starttime | printtimediff }}]
-                        {%- else -%}
-                            &nbsp;[aborted]
-                        {%- endif -%}
-                    </span>
+                    {%- if selectedJudging.starttime -%}
+                        <span class="judgetime">Judging started: {{ selectedJudging.starttime | printtime('H:i:s') }}
+                            {%- if selectedJudging.endtime -%}
+                                , finished in {{ selectedJudging.starttime | printtimediff(selectedJudging.endtime) }}s
+                            {%- elseif selectedJudging.valid or selectedJudging.rejudging -%}
+                                &nbsp;[still judging - busy {{ selectedJudging.starttime | printtimediff }}]
+                            {%- else -%}
+                                &nbsp;[aborted]
+                            {%- endif -%}
+                        </span>
+                    {% else %}
+                        <span class="judgetime">Judging not started yet</span>
+                    {%- endif -%}
                 {% endif -%}
                 {%- if externalJudgement is not null %}
                     <span class="judgetime">(external judging started: {{ externalJudgement.starttime | printtime('H:i:s') }}
