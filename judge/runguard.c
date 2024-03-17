@@ -145,6 +145,7 @@ int be_verbose;
 int be_quiet;
 int show_help;
 int show_version;
+pid_t runpipe_pid = -1;
 
 double walltimelimit[2], cputimelimit[2]; /* in seconds, soft and hard limits */
 int walllimit_reached, cpulimit_reached; /* 1=soft, 2=hard, 3=both limits reached */
@@ -610,6 +611,11 @@ void terminate(int sig)
 	}
 
 	if ( sig==SIGALRM ) {
+		if (runpipe_pid > 0) {
+			warning("sending SIGUSR1 to runpipe with pid %d", runpipe_pid);
+			kill(runpipe_pid, SIGUSR1);
+		}
+
 		walllimit_reached |= hard_timelimit;
 		warning("timelimit exceeded (hard wall time): aborting command");
 	} else {
@@ -977,7 +983,7 @@ int main(int argc, char **argv)
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+r:u:g:d:t:C:m:f:p:P:co:e:s:EV:M:vq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:d:t:C:m:f:p:P:co:e:s:EV:M:vqU:",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -1084,6 +1090,9 @@ int main(int argc, char **argv)
 			break;
 		case 'q': /* quiet option */
 			be_quiet = 1;
+			break;
+		case 'U':
+			runpipe_pid = strtol(optarg, &ptr, 10);
 			break;
 		case ':': /* getopt error */
 		case '?':
