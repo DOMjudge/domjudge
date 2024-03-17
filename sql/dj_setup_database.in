@@ -398,29 +398,36 @@ dump)
 	;;
 
 load)
-	choice=""
 	DUMPNAME="$2"
+	FILE=""
 	if [ -z "$DUMPNAME" ]; then
-		set -- $(ls $DATABASEDUMPDIR)
-		ind=0
+		databases=$(find "$DATABASEDUMPDIR" -name "*.sql.gz" -type f -print0)
+		if [ -z "$databases" ]; then
+			echo "No files with .sql.gz suffix found in '$DATABASEDUMPDIR'"
+			exit 1
+		fi
+		ind=1
+		for i in "$databases"; do
+			echo "$ind) $i"
+			: $((ind+=1))
+		done
 		while true; do
 			read -p "Which database should be loaded? " db
-			ind=0
-			for i in $@; do
+			ind=1
+			for i in "$databases"; do
 				if [ "$ind" = "$db" ]; then
-					choice="$i"
+					FILE="$i"
 					break
 				fi
 				: $((ind+=1))
 			done
-			if [ -n "$choice" ]; then
+			if [ -n "$FILE" ]; then
 				break
 			fi
 		done
 	else
-		choice="${DUMPNAME}.sql.gz"
+		FILE="$DATABASEDUMPDIR/${DUMPNAME}.sql.gz"
 	fi
-	FILE="$DATABASEDUMPDIR/${choice}"
 
 	if [ ! -f "${FILE}" ]; then
 		echo "Error: file ${FILE} not found."
