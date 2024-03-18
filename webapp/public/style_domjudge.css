@@ -731,3 +731,11 @@ blockquote {
 .faicon-dot-green {
     color: #28a745;
 }
+
+/* xs to (not including) lg */
+@media (max-width: 1200px) {
+    nav.navbar {
+        max-height: 100vh;
+        overflow-y: scroll;
+    }
+}
