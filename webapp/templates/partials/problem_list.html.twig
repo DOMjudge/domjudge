@@ -123,19 +123,12 @@
                                             </div>
                                         {% endif %}
 
-                                        <div class="text-center mb-2">
+                                        <div class="text-center">
                                             {% if problem.problem.problemstatementType is not empty %}
                                                 <a class="btn btn-secondary" role="button"
                                                    href="{{ path(problem_statement_path, {'probId': problem.probid}) }}">
                                                     <i class="fas fa-file-{{ problem.problem.problemstatementType }}"></i>
-                                                    statement
-                                                </a>
-                                            {% endif %}
-
-                                            {% if numsamples > 0 %}
-                                                <a class="btn btn-secondary" role="button"
-                                                   href="{{ path(problem_sample_zip_path, {'probId': problem.probid}) }}">
-                                                    <i class="fas fa-file-archive"></i> samples
+                                                    Problem
                                                 </a>
                                             {% endif %}
 
@@ -158,15 +151,15 @@
 
                                         {% if show_submit_button | default(false) %}
                                             {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
-                                                <div class="text-center">
+                                                <div class="text-center mt-2">
                                                     <div class="btn-group">
                                                         <button type="button" class="btn btn-outline-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                                            Open in online editor
+                                                            <i class="fa-solid fa-code"></i> Open in online editor
                                                         </button>
                                                         <div class="dropdown-menu">
                                                             {% for lang in submission_languages %}
                                                                 <a class="dropdown-item"
-                                                                   href="{{ path('team_editor', {probId: problem.probid, langId: lang.langId}) }}">
+                                                                   href="{{ path('team_editor', {probId: problem.probid, langId: lang.langId, cid: current_team_contest.cid}) }}">
                                                                     {{ lang.name }}
                                                                 </a>
                                                             {% endfor %}
@@ -177,17 +170,29 @@
                                         {% endif %}
 
                                         {% if problem.problem.attachments | length > 0 %}
-                                            <hr/>
-                                            <ol class="text-center list-group list-group-flush">
-                                                {% for attachment in problem.problem.attachments %}
-                                                    <li class="list-group-item">
-                                                        <a class="btn btn-outline-secondary" role="button"
-                                                           href="{{ path(problem_attachment_path, {'probId': problem.probid, 'attachmentId': attachment.attachmentid}) }}">
-                                                            <i class="{{ attachment.type | fileTypeIcon }}"></i> {{ attachment.name }}
-                                                        </a>
-                                                    </li>
-                                                {% endfor %}
-                                            </ol>
+                                            <div class="text-center mt-2">
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                        <i class="fa-solid fa-download"></i> Attachments
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        {% if numsamples > 0 %}
+                                                            <a class="dropdown-item" role="button"
+                                                               href="{{ path(problem_sample_zip_path, {'probId': problem.probid}) }}">
+                                                                <i class="fas fa-file-archive"></i> samples
+                                                            </a>
+                                                            <div class="dropdown-divider"></div>
+                                                        {% endif %}
+
+                                                        {% for attachment in problem.problem.attachments %}
+                                                            <a class="dropdown-item" role="button"
+                                                               href="{{ path(problem_attachment_path, {'probId': problem.probid, 'attachmentId': attachment.attachmentid}) }}">
+                                                                <i class="{{ attachment.type | fileTypeIcon }}"></i> {{ attachment.name }}
+                                                            </a>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         {% endif %}
 
                                     </div>
