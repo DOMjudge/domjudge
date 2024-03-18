@@ -1,7 +1,20 @@
 <li class="nav-item dropdown" style="padding-left: 10px;">
-    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownContests" role="button" data-bs-toggle="dropdown"
+    {% set active_contests = contests | filter(c => not c.getState().finalized) %}
+    {% set finalized_contests = contests | filter(c => c.getState().finalized) %}
+
+    {% set badge_color = contest.getState().finalized ? "red" : "green" %}
+
+    <a class="nav-link dropdown-toggle"
+       href="#" id="navbarDropdownContests" role="button" data-bs-toggle="dropdown"
        aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-trophy"></i>
+        <div class="faicon-badge-container">
+            <i class="fas fa-trophy"></i>
+
+            {# We want to add badge (distinquis) contest only when there are some finalized #}
+            {% if finalized_contests is not empty %}
+                <span class="faicon-badge-dot-{{ badge_color }}"></span>
+            {% endif %}
+        </div>
     </a>
     <div class="dropdown-menu dropdown-menu-right scrollable-menu" aria-labelledby="navbarDropdown" data-current-contest="{{ current_contest_id }}">
         {% if show_no_contest and contest is not empty %}
@@ -9,11 +22,13 @@
             <div class="dropdown-divider"></div>
         {% endif %}
 
-        {% set active_contests = contests | filter(c => not c.getState().finalized) %}
-        {% set finalized_contests = contests | filter(c => c.getState().finalized) %}
-
         {% if active_contests is not empty %}
-            <span class="dropdown-header px-3 text-center">Active Contests</span>
+            <span class="dropdown-header px-3 text-center">
+                Active Contests
+                {% if finalized_contests is not empty %}
+                    <i class="fa-solid fa-circle fa-sm faicon-dot-green"></i>
+                {% endif %}
+            </span>
             {% for c in active_contests %}
                 <a class="dropdown-item {{ c == contest ? "active" : "" }}"
                    href="{{ c == contest ? '#' : path(change_path, {'contestId': c.cid}) }}">
@@ -23,7 +38,12 @@
         {% endif %}
 
         {% if finalized_contests is not empty %}
-            <span class="dropdown-header px-3 text-center">Finalized Contests</span>
+            <span class="dropdown-header px-3 text-center">
+                Finalized Contests
+                {% if finalized_contests is not empty %}
+                    <i class="fa-solid fa-circle fa-sm faicon-dot-red"></i>
+                {% endif %}
+            </span>
             {% for c in finalized_contests %}
                 <a class="dropdown-item {{ c == contest ? "active" : "" }}"
                    href="{{ c == contest ? '#' : path(change_path, {'contestId': c.cid}) }}">

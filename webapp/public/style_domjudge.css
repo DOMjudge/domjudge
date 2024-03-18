@@ -699,3 +699,35 @@ blockquote {
     padding: 3px;
     border-radius: 5px;
 }
+
+.faicon-badge-container {
+    position: relative;
+    display: inline-block;
+}
+
+.faicon-badge-dot-red {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background-color: #e43636;
+    border-radius: 50%;
+}
+
+.faicon-badge-dot-green {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background-color: #28a745;
+    border-radius: 50%;
+}
+
+.faicon-dot-red {
+    color: #e43636;
+}
+.faicon-dot-green {
+    color: #28a745;
+}
