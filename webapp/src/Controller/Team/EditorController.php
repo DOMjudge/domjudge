@@ -3,6 +3,7 @@
 namespace App\Controller\Team;
 
 use App\Entity\Contest;
+use App\Entity\ContestProblem;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
@@ -106,12 +107,10 @@ class EditorController extends BaseController
         $team = $this->dj->getUser()->getTeam();
         $contest = $this->dj->getCurrentContest($team->getTeamid());
 
-        $contestProblemsIds = [];
-        foreach ($contest->getProblems() as $contestProblem) {
-            $contestProblemsIds[] = $contestProblem->getProbid();
-        }
-
-        if (!in_array($problem->getProbid(), $contestProblemsIds)) {
+        if (!$contest->getProblems()
+            ->map(fn (ContestProblem $p) => $p->getProbid())
+            ->contains($problem->getProbid())
+        ) {
             $this->addFlash('warning', 'This problem is not part of the current contest');
             return $this->redirectToRoute('team_problems', ['cid' => $contest->getCid()]);
         }
