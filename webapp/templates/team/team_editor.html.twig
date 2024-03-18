@@ -31,6 +31,40 @@
 
 {% block content %}
 
+    {% if current_team_contest is not empty and not current_team_contest.allowSubmit %}
+        <div data-flash-messages>
+            {% include 'partials/alert.html.twig' with {'type': 'danger', 'message': 'Submissions disabled.\nPlease switch to the active contest using trophy icon in the top navigation.'} %}
+
+            {% set available_contests_cids = current_team_contests | keys %}
+            {% set problem_available_contests = problem.getContestProblems | filter(
+                contest_problem => contest_problem.contest.cid in available_contests_cids and contest_problem.contest.allowSubmit
+            ) %}
+
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                {% if problem_available_contests is not empty %}
+                    This problem is now available in the following contests
+
+                    <ul class="list-unstyled ml-4 mt-1 mb-1">
+                        {% for contest_problem in problem_available_contests %}
+                            {% set contest = contest_problem.contest %}
+                            <li>
+                                <a href="{{ path('team_problems', {'cid': contest.cid}) }}">
+                                    <i class="fas fa-book-open"></i> {{ contest.name }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    This problem is no longer available in any contest.
+                {% endif %}
+
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    {% endif %}
+
     <!-- problem text modal -->
     <div class="modal fade" id="problemText" tabindex="-1" role="dialog" aria-labelledby="problemTextModal" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
@@ -53,7 +87,7 @@
         </div>
     </div>
 
-    {{ form_start(form) }}
+    {{ form_start(form, {'attr': {'id': 'teamEditorForm'}}) }}
 
     <ul class="nav mt-3 mb-2">
         <!-- Left side buttons -->
@@ -127,6 +161,36 @@
                     $newProgress.parent().remove();
                 }
             };
+        });
+    </script>
+
+    <script>
+        // https://stackoverflow.com/questions/38879742/is-it-possible-to-display-a-custom-message-in-the-beforeunload-popup
+
+        var teamEditorFormChanged = false,
+            teamEditorFormSubmitted = false;
+
+        document.querySelectorAll('#teamEditorForm input, #teamEditorForm select, #teamEditorForm textarea').forEach(function (input) {
+            input.addEventListener('change', function () {
+                teamEditorFormChanged = true;
+            });
+        });
+
+        document.querySelectorAll('#teamEditorForm button[type=submit]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                teamEditorFormSubmitted = true;
+            });
+        });
+
+        window.addEventListener('beforeunload', function (e) {
+            if (!teamEditorFormChanged || teamEditorFormSubmitted) {
+                return undefined;
+            }
+
+            var confirmationMessage = 'It looks like you have been editing something. ' +
+                'If you leave before saving, your changes will be lost.';
+            (e || window.event).returnValue = confirmationMessage;
+            return confirmationMessage;
         });
     </script>
 {% endblock %}

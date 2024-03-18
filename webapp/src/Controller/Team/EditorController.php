@@ -106,6 +106,16 @@ class EditorController extends BaseController
         $team = $this->dj->getUser()->getTeam();
         $contest = $this->dj->getCurrentContest($team->getTeamid());
 
+        $contestProblemsIds = [];
+        foreach ($contest->getProblems() as $contestProblem) {
+            $contestProblemsIds[] = $contestProblem->getProbid();
+        }
+
+        if (!in_array($problem->getProbid(), $contestProblemsIds)) {
+            $this->addFlash('warning', 'This problem is not part of the current contest');
+            return $this->redirectToRoute('team_problems', ['cid' => $contest->getCid()]);
+        }
+
         /** @var Submission|null $submission */
         $submission = $this->getLatestSubmission($team, $problem, $language, $contest);
 
@@ -159,18 +169,22 @@ class EditorController extends BaseController
             $data['source' . $file->getRank()] = $file->getSourcecode();
         }
 
+        $enabledSubmission = $contest->getAllowSubmit();
+
         $formBuilder = $this->createFormBuilder($data)
             ->add('entry_point', HiddenType::class)
             ->add('save', SubmitType::class, [
                 'attr' => [
-                    'class' => 'btn-outline-info'
-                ]
+                    'class' => 'btn-outline-info',
+                ],
+                'disabled' => !$enabledSubmission
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Save & Submit',
                 'attr' => [
                     'class' => 'btn-outline-success'
-                ]
+                ],
+                'disabled' => !$enabledSubmission
             ]);
 
         foreach ($files as $file) {
