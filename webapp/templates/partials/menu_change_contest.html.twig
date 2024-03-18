@@ -1,4 +1,4 @@
-<li class="nav-item dropdown" style="padding-left: 10px;">
+<li class="nav-item dropdown pl-xl-2">
     {% set active_contests = contests | filter(c => not c.getState().finalized) %}
     {% set finalized_contests = contests | filter(c => c.getState().finalized) %}
 
