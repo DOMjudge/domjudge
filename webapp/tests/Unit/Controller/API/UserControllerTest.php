@@ -64,7 +64,7 @@ class UserControllerTest extends AccountBaseTestCase
         static::assertEquals(['team'], $response['roles']);
     }
 
-    public function testAddNonLocal(): void
+    public function testUpdateNonLocal(): void
     {
         $this->setupDataSource(DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL);
         $data = [
@@ -75,14 +75,14 @@ class UserControllerTest extends AccountBaseTestCase
             'password' => 'testpassword',
         ];
 
-        $response = $this->verifyApiJsonResponse('POST', $this->helperGetEndpointURL($this->apiEndpoint), 201, 'admin', $data);
+        $response = $this->verifyApiJsonResponse('PUT', $this->helperGetEndpointURL($this->apiEndpoint) . '/someid', 201, 'admin', $data);
         static::assertEquals('someid', $response['id']);
         static::assertEquals('testuser', $response['username']);
         static::assertEquals('Test User', $response['name']);
         static::assertEquals(['team'], $response['roles']);
     }
 
-    public function testAddNonLocalNoId(): void
+    public function testUpdateNonLocalNoId(): void
     {
         $this->setupDataSource(DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL);
         $data = [
@@ -92,7 +92,7 @@ class UserControllerTest extends AccountBaseTestCase
             'password' => 'testpassword',
         ];
 
-        $response = $this->verifyApiJsonResponse('POST', $this->helperGetEndpointURL($this->apiEndpoint), 400, 'admin', $data);
-        static::assertStringContainsString('`id` field is required', $response['message']);
+        $response = $this->verifyApiJsonResponse('PUT', $this->helperGetEndpointURL($this->apiEndpoint) . '/someid', 400, 'admin', $data);
+        static::assertMatchesRegularExpression('/id:\n.*This value should be of type unknown./', $response['message']);
     }
 }

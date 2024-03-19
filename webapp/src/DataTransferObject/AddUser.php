@@ -12,8 +12,6 @@ class AddUser
      * @param array<string> $roles
      */
     public function __construct(
-        #[OA\Property(nullable: true)]
-        public readonly ?string $id,
         public readonly string $username,
         public readonly string $name,
         #[OA\Property(format: 'email', nullable: true)]

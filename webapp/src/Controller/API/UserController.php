@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\DataTransferObject\AddUser;
+use App\DataTransferObject\UpdateUser;
 use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
@@ -64,7 +65,7 @@ class UserController extends AbstractRestController
                         description: 'The groups.json files to import.',
                         type: 'string',
                         format: 'binary'
-                    )
+                    ),
                 ]
             )
         )
@@ -106,7 +107,7 @@ class UserController extends AbstractRestController
                         property: 'json',
                         description: 'The organizations.json files to import.',
                         type: 'string',
-                        format: 'binary')
+                        format: 'binary'),
                 ]
             )
         )
@@ -150,7 +151,7 @@ class UserController extends AbstractRestController
                         description: 'The teams.json files to import.',
                         type: 'string',
                         format: 'binary'
-                    )
+                    ),
                 ]
             )
         )
@@ -205,7 +206,7 @@ class UserController extends AbstractRestController
                         description: 'The accounts.yaml files to import.',
                         type: 'string',
                         format: 'binary'
-                    )
+                    ),
                 ]
             )
         )
@@ -294,7 +295,7 @@ class UserController extends AbstractRestController
             new OA\MediaType(
                 mediaType: 'multipart/form-data',
                 schema: new OA\Schema(ref: new Model(type: AddUser::class))
-            )
+            ),
         ]
     )]
     #[OA\Response(
@@ -307,7 +308,39 @@ class UserController extends AbstractRestController
         AddUser $addUser,
         Request $request
     ): Response {
-        if ($this->eventLogService->externalIdFieldForEntity(User::class) && !$addUser->id) {
+        return $this->addOrUpdateUser($addUser, $request);
+    }
+
+    /**
+     * Update an existing User or create one with the given ID
+     */
+    #[IsGranted('ROLE_API_WRITER')]
+    #[Rest\Put('/{id}')]
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: new Model(type: UpdateUser::class))
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 201,
+        description: 'Returns the added user',
+        content: new Model(type: User::class)
+    )]
+    public function updateAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        UpdateUser $updateUser,
+        Request $request
+    ): Response {
+        return $this->addOrUpdateUser($updateUser, $request);
+    }
+
+    protected function addOrUpdateUser(AddUser $addUser, Request $request): Response
+    {
+        if ($addUser instanceof UpdateUser && $this->eventLogService->externalIdFieldForEntity(User::class) && !$addUser->id) {
             throw new BadRequestHttpException('`id` field is required');
         }
 
@@ -316,14 +349,23 @@ class UserController extends AbstractRestController
         }
 
         $user = new User();
+        if ($addUser instanceof UpdateUser) {
+            $existingUser = $this->em->getRepository(User::class)->findOneBy([$this->eventLogService->externalIdFieldForEntity(User::class) => $addUser->id]);
+            if ($existingUser) {
+                $user = $existingUser;
+            }
+        }
         $user
-            ->setExternalid($addUser->id)
             ->setUsername($addUser->username)
             ->setName($addUser->name)
             ->setEmail($addUser->email)
             ->setIpAddress($addUser->ip)
             ->setPlainPassword($addUser->password)
             ->setEnabled($addUser->enabled ?? true);
+
+        if ($addUser instanceof UpdateUser) {
+            $user->setExternalid($addUser->id);
+        }
 
         if ($addUser->teamId) {
             /** @var Team|null $team */
