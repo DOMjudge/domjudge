@@ -8,8 +8,6 @@ use OpenApi\Attributes as OA;
 class TeamCategoryPost
 {
     public function __construct(
-        #[OA\Property(description: 'The ID of the group. Only allowed with PUT requests', nullable: true)]
-        public readonly ?string $id,
         #[OA\Property(description: 'How to name this group on the scoreboard')]
         public readonly string $name,
         #[OA\Property(description: 'Show this group on the scoreboard?')]

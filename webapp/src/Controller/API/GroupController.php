@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\DataTransferObject\TeamCategoryPost;
+use App\DataTransferObject\TeamCategoryPut;
 use App\Entity\TeamCategory;
 use App\Service\ImportExportService;
 use Doctrine\ORM\NonUniqueResultException;
@@ -73,7 +74,6 @@ class GroupController extends AbstractRestController
      */
     #[IsGranted('ROLE_API_WRITER')]
     #[Rest\Post]
-    #[Rest\Put('/{id}')]
     #[OA\RequestBody(
         required: true,
         content: [
@@ -93,7 +93,6 @@ class GroupController extends AbstractRestController
         TeamCategoryPost $teamCategoryPost,
         Request $request,
         ImportExportService $importExport,
-        ?string $id = null
     ): Response {
         $saved = [];
         $groupData = [
@@ -104,11 +103,57 @@ class GroupController extends AbstractRestController
             'color' => $teamCategoryPost->color,
             'allow_self_registration' => $teamCategoryPost->allowSelfRegistration,
         ];
-        if ($id !== null) {
-            if ($id !== $teamCategoryPost->id) {
-                throw new BadRequestHttpException('ID in URL does not match ID in payload');
-            }
-            $groupData['id'] = $id;
+        $importExport->importGroupsJson([$groupData], $message, $saved);
+        if (!empty($message)) {
+            throw new BadRequestHttpException("Error while adding group: $message");
+        }
+
+        $group = $saved[0];
+        $idField = $this->eventLogService->externalIdFieldForEntity(TeamCategory::class) ?? 'categoryid';
+        $method = sprintf('get%s', ucfirst($idField));
+        $id = call_user_func([$group, $method]);
+
+        return $this->renderCreateData($request, $saved[0], 'group', $id);
+    }
+
+    /**
+     * Update an existing group or create one with the given ID
+     */
+    #[IsGranted('ROLE_API_WRITER')]
+    #[Rest\Put('/{id}')]
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: new Model(type: TeamCategoryPut::class))
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 201,
+        description: 'Returns the updated / added group',
+        content: new Model(type: TeamCategory::class)
+    )]
+    public function updateAction(
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        TeamCategoryPut $teamCategoryPut,
+        Request $request,
+        ImportExportService $importExport,
+        string $id,
+    ): Response {
+        $saved = [];
+        $groupData = [
+            'id' => $teamCategoryPut->id,
+            'name' => $teamCategoryPut->name,
+            'hidden' => $teamCategoryPut->hidden,
+            'icpc_id' => $teamCategoryPut->icpcId,
+            'sortorder' => $teamCategoryPut->sortorder,
+            'color' => $teamCategoryPut->color,
+            'allow_self_registration' => $teamCategoryPut->allowSelfRegistration,
+        ];
+        if ($id !== $teamCategoryPut->id) {
+            throw new BadRequestHttpException('ID in URL does not match ID in payload');
         }
         $importExport->importGroupsJson([$groupData], $message, $saved);
         if (!empty($message)) {
