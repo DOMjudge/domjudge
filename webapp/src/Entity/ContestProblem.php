@@ -71,11 +71,11 @@ class ContestProblem
     private ?string $color = null;
 
     #[ORM\Column(
-        nullable: true,
+        nullable: false,
         options: ['comment' => 'Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private ?int $lazyEvalResults = null;
+    private int $lazyEvalResults = 0;
 
     #[ORM\Id]
     #[ORM\ManyToOne(inversedBy: 'problems')]
@@ -193,13 +193,13 @@ class ContestProblem
         return Utils::convertToColor($this->getColor());
     }
 
-    public function setLazyEvalResults(?int $lazyEvalResults): ContestProblem
+    public function setLazyEvalResults(int $lazyEvalResults): ContestProblem
     {
-        $this->lazyEvalResults = $lazyEvalResults === 0 ? null : $lazyEvalResults;
+        $this->lazyEvalResults = $lazyEvalResults;
         return $this;
     }
 
-    public function getLazyEvalResults(): ?int
+    public function getLazyEvalResults(): int
     {
         return $this->lazyEvalResults;
     }

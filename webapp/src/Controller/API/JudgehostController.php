@@ -994,7 +994,7 @@ class JudgehostController extends AbstractFOSRestController
             // Lookup global lazy evaluation of results setting and possible problem specific override.
             $lazyEval    = $this->config->get('lazy_eval_results');
             $problemLazy = $judging->getSubmission()->getContestProblem()->getLazyEvalResults();
-            if (isset($problemLazy)) {
+            if ($problemLazy !== DOMJudgeService::EVAL_DEFAULT) {
                 $lazyEval = $problemLazy;
             }
 

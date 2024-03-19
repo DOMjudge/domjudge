@@ -58,7 +58,7 @@ class ContestProblemType extends AbstractType
         $builder->add('lazyEvalResults', ChoiceType::class, [
             'label' => 'Lazy eval',
             'choices' => [
-                'Default' => null,
+                'Default' => DJS::EVAL_DEFAULT,
                 'Yes' => DJS::EVAL_LAZY,
                 'No' => DJS::EVAL_FULL,
                 'On demand' => DJS::EVAL_DEMAND,

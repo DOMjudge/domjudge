@@ -332,8 +332,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
 
-        $lazyEvalResults = null;
-        if ($contestProblemPut->lazyEvalResults !== null) {
+        $lazyEvalResults = 0;
+        if ($contestProblemPut->lazyEvalResults !== DOMJudgeService::LAZY_DEFAULT) {
             $lazyEvalResults = (int)$contestProblemPut->lazyEvalResults;
         }
 
