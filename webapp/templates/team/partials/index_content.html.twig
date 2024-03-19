@@ -8,7 +8,7 @@
     </h2>
 {% else %}
 
-    <div id="teamscoresummary">
+    <div class="table-responsive" id="teamscoresummary">
         {% set displayRank = not contest.freezeData.showFrozen %}
         {% include 'partials/scoreboard_table.html.twig' with {displayRank: displayRank, jury: false, public: false} %}
     </div>
@@ -21,12 +21,12 @@
     </div>
 
     <div class="row">
-        <div class="col">
+        <div class="col-md-6">
             <h1 class="teamoverview">Submissions</h1>
 
             {% include 'team/partials/submission_list.html.twig' %}
         </div>
-        <div class="col">
+        <div class="col-md-6">
             <h1 class="teamoverview">Messages</h1>
             {% if clarifications is empty %}
                 <p class="nodata">No messages.</p>

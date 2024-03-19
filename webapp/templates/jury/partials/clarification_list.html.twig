@@ -1,5 +1,5 @@
-<div class="table-wrapper">
-<table class="data-table table table-striped table-hover table-sm table-full-clickable-cell" style="width:auto">
+<div class="table-responsive table-wrapper">
+<table class="data-table table table-striped table-hover table-sm" style="width:auto">
     <thead>
     <tr>
         <th scope="col">ID</th>
@@ -71,7 +71,11 @@
 
             <td><a href="{{ link }}">
                     {%- if clarification.problem -%}
-                        problem {{ clarification.problem.contestProblems.first | problemBadge -}}
+                        {%- if clarification.problem and clarification.problem.contestProblems is not empty -%}
+                            problem {{ clarification.problem.contestProblems.first | problemBadge -}}
+                        {% else %}
+                            unknown problem {{ clarification.problem | entityIdBadge('p') }}
+                        {% endif %}
                     {%- elseif clarification.category -%}
                         {{- categories[clarification.category]|default('general') -}}
                     {%- else -%}
