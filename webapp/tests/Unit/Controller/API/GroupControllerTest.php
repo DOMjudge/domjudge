@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\Service\DOMJudgeService;
 use Generator;
 
 class GroupControllerTest extends BaseTestCase
@@ -83,6 +84,60 @@ class GroupControllerTest extends BaseTestCase
         // CLICS does not allow POST to set the id value. Our API will just ignore the property
         $returnedObject = $this->verifyApiJsonResponse('POST', $url, 201, 'admin', $postWithId);
         self::assertNotEquals($returnedObject['id'], $postWithId['id']);
+    }
+
+    /**
+     * @dataProvider provideNewAddedGroup
+     */
+    public function testNewAddedGroupPut(array $newGroupPostData): void
+    {
+        // This only works for non-local data sources
+        $this->setupDataSource(DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL);
+
+        $url = $this->helperGetEndpointURL($this->apiEndpoint);
+        $objectsBeforeTest = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+
+        $newGroupPostData['id'] = 'someid';
+
+        $returnedObject = $this->verifyApiJsonResponse('PUT', $url . '/someid', 201, 'admin', $newGroupPostData);
+        foreach ($newGroupPostData as $key => $value) {
+            self::assertEquals($value, $returnedObject[$key]);
+        }
+
+        $objectsAfterTest  = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+        $newItems = array_map('unserialize', array_diff(array_map('serialize', $objectsAfterTest), array_map('serialize', $objectsBeforeTest)));
+        self::assertEquals(1, count($newItems));
+        $listKey = array_keys($newItems)[0];
+        foreach ($newGroupPostData as $key => $value) {
+            self::assertEquals($value, $newItems[$listKey][$key]);
+        }
+    }
+
+    /**
+     * @dataProvider provideNewAddedGroup
+     */
+    public function testNewAddedGroupPutWithoutId(array $newGroupPostData): void
+    {
+        // This only works for non-local data sources
+        $this->setupDataSource(DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL);
+
+        $url = $this->helperGetEndpointURL($this->apiEndpoint);
+        $returnedObject = $this->verifyApiJsonResponse('PUT', $url . '/someid', 400, 'admin', $newGroupPostData);
+        self::assertStringContainsString('ID in URL does not match ID in payload', $returnedObject['message']);
+    }
+
+    /**
+     * @dataProvider provideNewAddedGroup
+     */
+    public function testNewAddedGroupPutWithDifferentId(array $newGroupPostData): void
+    {
+        // This only works for non-local data sources
+        $this->setupDataSource(DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL);
+
+        $newGroupPostData['id'] = 'someotherid';
+        $url = $this->helperGetEndpointURL($this->apiEndpoint);
+        $returnedObject = $this->verifyApiJsonResponse('PUT', $url . '/someid', 400, 'admin', $newGroupPostData);
+        self::assertStringContainsString('ID in URL does not match ID in payload', $returnedObject['message']);
     }
 
     public function provideNewAddedGroup(): Generator

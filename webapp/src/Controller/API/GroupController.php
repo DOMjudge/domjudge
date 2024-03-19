@@ -73,6 +73,7 @@ class GroupController extends AbstractRestController
      */
     #[IsGranted('ROLE_API_WRITER')]
     #[Rest\Post]
+    #[Rest\Put('/{id}')]
     #[OA\RequestBody(
         required: true,
         content: [
@@ -91,19 +92,25 @@ class GroupController extends AbstractRestController
         #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
         TeamCategoryPost $teamCategoryPost,
         Request $request,
-        ImportExportService $importExport
+        ImportExportService $importExport,
+        ?string $id = null
     ): Response {
         $saved = [];
-        $importExport->importGroupsJson([
-            [
-                'name' => $teamCategoryPost->name,
-                'hidden' => $teamCategoryPost->hidden,
-                'icpc_id' => $teamCategoryPost->icpcId,
-                'sortorder' => $teamCategoryPost->sortorder,
-                'color' => $teamCategoryPost->color,
-                'allow_self_registration' => $teamCategoryPost->allowSelfRegistration,
-            ],
-        ], $message, $saved);
+        $groupData = [
+            'name' => $teamCategoryPost->name,
+            'hidden' => $teamCategoryPost->hidden,
+            'icpc_id' => $teamCategoryPost->icpcId,
+            'sortorder' => $teamCategoryPost->sortorder,
+            'color' => $teamCategoryPost->color,
+            'allow_self_registration' => $teamCategoryPost->allowSelfRegistration,
+        ];
+        if ($id !== null) {
+            if ($id !== $teamCategoryPost->id) {
+                throw new BadRequestHttpException('ID in URL does not match ID in payload');
+            }
+            $groupData['id'] = $id;
+        }
+        $importExport->importGroupsJson([$groupData], $message, $saved);
         if (!empty($message)) {
             throw new BadRequestHttpException("Error while adding group: $message");
         }
