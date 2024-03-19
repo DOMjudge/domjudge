@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Service\DOMJudgeService as DJS;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -202,6 +203,16 @@ class ContestProblem
     public function getLazyEvalResults(): int
     {
         return $this->lazyEvalResults;
+    }
+
+    public function determineOnDemand(int $config_lazy_eval_results): bool {
+        if ($this->lazyEvalResults === DJS::EVAL_DEMAND) {
+            return true;
+        }
+        if ($this->lazyEvalResults === DJS::EVAL_DEFAULT && $config_lazy_eval_results === DJS:: EVAL_DEMAND) {
+            return true;
+        }
+        return false;
     }
 
     public function setContest(?Contest $contest = null): ContestProblem

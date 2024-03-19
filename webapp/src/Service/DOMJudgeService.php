@@ -1163,8 +1163,7 @@ class DOMJudgeService
 
         $evalOnDemand = false;
         // We have 2 cases, the problem picks the global value or the value is set.
-        if (($problem->getLazyEvalResults() === DOMJudgeService::EVAL_DEFAULT && $this->config->get('lazy_eval_results') === static::EVAL_DEMAND)
-             || $problem->getLazyEvalResults() === DOMJudgeService::EVAL_DEMAND) {
+        if ($problem->determineOnDemand($this->config->get('lazy_eval_results'))) {
             $evalOnDemand = true;
 
             // Special case, we're shadow and someone submits on our side in that case
