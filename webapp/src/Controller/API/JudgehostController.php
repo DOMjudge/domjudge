@@ -1008,7 +1008,7 @@ class JudgehostController extends AbstractFOSRestController
                 }
             }
             $sendJudgingEvent = false;
-            if (!$hasNullResults || $lazyEval != DOMJudgeService::EVAL_FULL) {
+            if (!$hasNullResults || $lazyEval !== DOMJudgeService::EVAL_FULL) {
                 // NOTE: setting endtime here determines in testcases_GET
                 // whether a next testcase will be handed out.
                 $judging->setEndtime(Utils::now());
@@ -1024,7 +1024,7 @@ class JudgehostController extends AbstractFOSRestController
                     throw new BadMethodCallException('internal bug: the evaluated result changed during judging');
                 }
 
-                if ($lazyEval != DOMJudgeService::EVAL_FULL) {
+                if ($lazyEval !== DOMJudgeService::EVAL_FULL) {
                     // We don't want to continue on this problem, even if there's spare resources.
                     $this->em->getConnection()->executeStatement(
                         'UPDATE judgetask SET valid=0, priority=:priority'
@@ -1076,7 +1076,7 @@ class JudgehostController extends AbstractFOSRestController
             }
         }
 
-        return $judging->getResult() === null || $judging->getJudgeCompletely() || $lazyEval == DOMJudgeService::EVAL_FULL;
+        return $judging->getResult() === null || $judging->getJudgeCompletely() || $lazyEval === DOMJudgeService::EVAL_FULL;
     }
 
     private function maybeUpdateActiveJudging(Judging $judging): void
