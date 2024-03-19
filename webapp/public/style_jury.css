@@ -243,3 +243,9 @@ table.table-full-clickable-cell tr .table-button-head-right-right{
 .timebutton {
     min-width: 9em;
 }
+
+#currentContests .collapsing {
+    -webkit-transition: none;
+    transition: none;
+    display: none;
+}
