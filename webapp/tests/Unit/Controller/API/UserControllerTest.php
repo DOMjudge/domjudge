@@ -2,6 +2,8 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\Service\DOMJudgeService;
+
 class UserControllerTest extends AccountBaseTestCase
 {
     protected ?string $apiEndpoint = 'users';
@@ -45,4 +47,52 @@ class UserControllerTest extends AccountBaseTestCase
             "enabled" => true
         ],
     ];
+
+    public function testAddLocal(): void
+    {
+        $data = [
+            'username' => 'testuser',
+            'name' => 'Test User',
+            'roles' => ['team'],
+            'password' => 'testpassword',
+        ];
+
+        $response = $this->verifyApiJsonResponse('POST', $this->helperGetEndpointURL($this->apiEndpoint), 201, 'admin', $data);
+        static::assertArrayHasKey('id', $response);
+        static::assertEquals('testuser', $response['username']);
+        static::assertEquals('Test User', $response['name']);
+        static::assertEquals(['team'], $response['roles']);
+    }
+
+    public function testAddNonLocal(): void
+    {
+        $this->setupDataSource(DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL);
+        $data = [
+            'id' => 'someid',
+            'username' => 'testuser',
+            'name' => 'Test User',
+            'roles' => ['team'],
+            'password' => 'testpassword',
+        ];
+
+        $response = $this->verifyApiJsonResponse('POST', $this->helperGetEndpointURL($this->apiEndpoint), 201, 'admin', $data);
+        static::assertEquals('someid', $response['id']);
+        static::assertEquals('testuser', $response['username']);
+        static::assertEquals('Test User', $response['name']);
+        static::assertEquals(['team'], $response['roles']);
+    }
+
+    public function testAddNonLocalNoId(): void
+    {
+        $this->setupDataSource(DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL);
+        $data = [
+            'username' => 'testuser',
+            'name' => 'Test User',
+            'roles' => ['team'],
+            'password' => 'testpassword',
+        ];
+
+        $response = $this->verifyApiJsonResponse('POST', $this->helperGetEndpointURL($this->apiEndpoint), 400, 'admin', $data);
+        static::assertStringContainsString('`id` field is required', $response['message']);
+    }
 }

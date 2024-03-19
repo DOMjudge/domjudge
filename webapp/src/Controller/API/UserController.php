@@ -307,12 +307,17 @@ class UserController extends AbstractRestController
         AddUser $addUser,
         Request $request
     ): Response {
+        if ($this->eventLogService->externalIdFieldForEntity(User::class) && !$addUser->id) {
+            throw new BadRequestHttpException('`id` field is required');
+        }
+
         if ($this->em->getRepository(User::class)->findOneBy(['username' => $addUser->username])) {
             throw new BadRequestHttpException(sprintf("User %s already exists", $addUser->username));
         }
 
         $user = new User();
         $user
+            ->setExternalid($addUser->id)
             ->setUsername($addUser->username)
             ->setName($addUser->name)
             ->setEmail($addUser->email)
