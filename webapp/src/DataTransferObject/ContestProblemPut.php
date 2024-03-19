@@ -16,7 +16,7 @@ class ContestProblemPut
         public readonly ?string $rgb,
         #[OA\Property(description: 'The number of points for the problem to add. Defaults to 1')]
         public readonly int $points = 1,
-        #[OA\Property(description: 'Whether to use lazy evaluation for this problem. Defaults to the global setting', nullable: true)]
-        public readonly ?bool $lazyEvalResults = null,
+        #[OA\Property(description: 'Whether to use lazy evaluation for this problem. Defaults to the global setting')]
+        public readonly int $lazyEvalResults = 0,
     ) {}
 }

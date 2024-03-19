@@ -70,7 +70,7 @@ class DOMJudgeService
     final public const DATA_SOURCE_LOCAL = 0;
     final public const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
     final public const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
-    final public const EVAL_DEFAULT = null;
+    final public const EVAL_DEFAULT = 0;
     final public const EVAL_LAZY = 1;
     final public const EVAL_FULL = 2;
     final public const EVAL_DEMAND = 3;
@@ -1163,7 +1163,7 @@ class DOMJudgeService
 
         $evalOnDemand = false;
         // We have 2 cases, the problem picks the global value or the value is set.
-        if (((int)$problem->getLazyEvalResults() === (int)DOMJudgeService::EVAL_DEFAULT && $this->config->get('lazy_eval_results') === static::EVAL_DEMAND)
+        if (($problem->getLazyEvalResults() === DOMJudgeService::EVAL_DEFAULT && $this->config->get('lazy_eval_results') === static::EVAL_DEMAND)
              || $problem->getLazyEvalResults() === DOMJudgeService::EVAL_DEMAND) {
             $evalOnDemand = true;
         }
