@@ -1,0 +1,106 @@
+#!/bin/sh
+
+# C# (dotnet) compile and run wrapper-script for .NET.
+# This script compiles with the .NET C# compiler and generates
+# a shell script to run it with the .NET runtime later.
+#
+# This script requires the .NET SDK to be installed.
+#
+# Inspired by
+# - https://stackoverflow.com/questions/46065777/is-it-possible-to-compile-a-single-c-sharp-code-file-with-the-net-core-roslyn-c
+
+# https://github.com/dotnet/sdk/issues/31457
+export DOTNET_EnableWriteXorExecute=0
+export TMPDIR="$PWD"/tmp
+
+id
+
+ls -la
+
+mkdir $TMPDIR
+
+ls -la
+
+pwd
+ls -la /
+df /tmp
+
+which dotnet
+dotnet --info
+
+ls -la /usr/bin/dotnet
+ls -la /usr/lib/dotnet-8.0/dotnet
+ls -la /usr/lib/dotnet-8.0
+
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+MAINSOURCE="$1"
+
+DESTCLI="${DEST}.exe"
+DESTDIR=$(dirname "$DEST")
+
+SOURCEDIR="${MAINSOURCE%/*}"
+[ "$SOURCEDIR" = "$MAINSOURCE" ] && SOURCEDIR='.'
+
+DOTNETDIR=$(dirname $(dirname $(dotnet --info | grep "Base Path" | cut -d' ' -f 6)))
+CSCPATH=$(find "$DOTNETDIR" -name csc.dll -print | sort | tail -n1)
+NETSTANDARDPATH=$(find "$DOTNETDIR" -path *sdk/*/ref/netstandard.dll ! -path *NuGetFallback* -print | sort | tail -n1)
+
+echo "CSCPATH: $CSCPATH"
+echo "NETSTANDARDPATH: $NETSTANDARDPATH"
+
+alias csc='dotnet "$CSCPATH" /r:"$NETSTANDARDPATH"'
+
+# Compile using the .NET CLI:
+# You can add -define:ONLINE_JUDGE,DOMJUDGE if you need specific compilation symbols.
+echo "running csc -o+ -out:$DESTCLI $@"
+csc -o+ -out:"$DESTCLI" "$@"
+EXITCODE=$?
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+
+# Check for output file:
+if [ ! -f "$DESTCLI" ]; then
+    echo "Error: compiled file '$DESTCLI' not found."
+    exit 1
+fi
+
+DOTNET_CSC_RUNTIME_CONFIG="$DESTDIR"/csc-console-app.runtimeconfig.json
+DOTNET_RUNTIME_VERSION=$(dotnet --list-runtimes | grep 'Microsoft.NETCore.App' | tail -1 | cut -d' ' -f2)
+
+if [ -f "$DOTNET_CSC_RUNTIME_CONFIG" ]; then
+    rm "$DOTNET_CSC_RUNTIME_CONFIG"
+fi
+
+cat << EOF > $DOTNET_CSC_RUNTIME_CONFIG
+{
+  "runtimeOptions": {
+    "framework": {
+      "name": "Microsoft.NETCore.App",
+      "version": "$DOTNET_RUNTIME_VERSION"
+    }
+  }
+}
+EOF
+
+# Write executing script, executes dotnet compiled program:
+cat > "$DEST" <<EOF
+#!/bin/sh
+# Generated shell-script to execute dotnet on the compiled C# program.
+
+export DOTNET_EnableWriteXorExecute=0
+export TMPDIR="$TMPDIR"
+
+# Detect dirname and change dir to prevent class not found errors.
+if [ "\${0%/*}" != "\$0" ]; then
+	cd "\${0%/*}"
+fi
+
+exec dotnet exec --runtimeconfig "$DOTNET_CSC_RUNTIME_CONFIG" "$DESTCLI" "\$@"
+EOF
+
+echo "running cat $DEST"
+cat "$DEST"
+
+chmod a+x "$DEST"
+
+exit 0
