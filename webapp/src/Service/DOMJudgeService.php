@@ -1166,16 +1166,17 @@ class DOMJudgeService
         if (($problem->getLazyEvalResults() === DOMJudgeService::EVAL_DEFAULT && $this->config->get('lazy_eval_results') === static::EVAL_DEMAND)
              || $problem->getLazyEvalResults() === DOMJudgeService::EVAL_DEMAND) {
             $evalOnDemand = true;
-        }
-        // Special case, we're shadow and someone submits on our side in that case
-        // we're not super lazy.
-        if ($this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL
-            && $submission->getExternalid() === null) {
+
+            // Special case, we're shadow and someone submits on our side in that case
+            // we're not super lazy.
+            if ($this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL
+                && $submission->getExternalid() === null) {
+                    $evalOnDemand = false;
+            }
+            if ($manualRequest) {
+                // When explicitly requested, judge the submission.
                 $evalOnDemand = false;
-        }
-        if ($manualRequest) {
-            // When explicitly requested, judge the submission.
-            $evalOnDemand = false;
+            }
         }
         if (!$problem->getAllowJudge() || !$language->getAllowJudge() || $evalOnDemand) {
             return;
