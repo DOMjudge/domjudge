@@ -1,16 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method App\\\\Controller\\\\API\\\\AbstractRestController\\:\\:listActionHelper\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/AbstractRestController.php
-
-		-
-			message: "#^PHPDoc tag @var for variable \\$objects has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/AbstractRestController.php
-
-		-
 			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:addProblemAction\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/GeneralInfoController.php

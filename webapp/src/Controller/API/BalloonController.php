@@ -7,8 +7,6 @@ use App\Entity\Contest;
 use App\Entity\Team;
 use App\Service\BalloonService;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\QueryBuilder;
-use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
@@ -25,7 +23,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
 #[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
 #[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
-class BalloonController extends AbstractRestController
+class BalloonController extends AbstractApiController
 {
     /**
      * Get all the balloons for this contest.
@@ -96,15 +94,5 @@ class BalloonController extends AbstractRestController
     public function markDoneAction(int $balloonId, BalloonService $balloonService): void
     {
         $balloonService->setDone($balloonId);
-    }
-
-    protected function getQueryBuilder(Request $request): QueryBuilder
-    {
-        throw new Exception('Not implemented');
-    }
-
-    protected function getIdField(): string
-    {
-        throw new Exception('Not implemented');
     }
 }

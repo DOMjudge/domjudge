@@ -14,6 +14,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+/**
+ * @extends AbstractRestController<User, User>
+ */
 #[Rest\Route('/contests/{cid}')]
 #[OA\Tag(name: 'Accounts')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]

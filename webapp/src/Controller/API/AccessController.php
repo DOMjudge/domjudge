@@ -6,8 +6,6 @@ use App\DataTransferObject\Access;
 use App\DataTransferObject\AccessEndpoint;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\QueryBuilder;
-use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
@@ -22,7 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 #[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
 #[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
 #[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
-class AccessController extends AbstractRestController
+class AccessController extends AbstractApiController
 {
     /**
      * Get access information
@@ -217,15 +215,5 @@ class AccessController extends AbstractRestController
                 ),
             ],
         );
-    }
-
-    protected function getQueryBuilder(Request $request): QueryBuilder
-    {
-        throw new Exception('Not implemented');
-    }
-
-    protected function getIdField(): string
-    {
-        throw new Exception('Not implemented');
     }
 }

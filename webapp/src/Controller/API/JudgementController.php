@@ -18,6 +18,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+/**
+ * @extends AbstractRestController<Judging, JudgingWrapper>
+ */
 #[Rest\Route('/')]
 #[OA\Tag(name: 'Judgements')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]

@@ -16,6 +16,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
+/**
+ * @extends AbstractRestController<TeamCategory, TeamCategory>
+ */
 #[Rest\Route('/contests/{cid}/groups')]
 #[OA\Tag(name: 'Groups')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]

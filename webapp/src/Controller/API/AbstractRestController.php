@@ -2,40 +2,24 @@
 
 namespace App\Controller\API;
 
-use App\Entity\Contest;
-use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
-use App\Service\EventLogService;
-use App\Utils\Utils;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\BaseApiEntity;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
-use Exception;
-use FOS\RestBundle\Controller\AbstractFOSRestController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
-abstract class AbstractRestController extends AbstractFOSRestController
+/**
+ * @template T of BaseApiEntity
+ * @template U
+ */
+abstract class AbstractRestController extends AbstractApiController
 {
-    final public const GROUP_DEFAULT = 'Default';
-    final public const GROUP_NONSTRICT = 'Nonstrict';
-    final public const GROUP_RESTRICTED = 'Restricted';
-    final public const GROUP_RESTRICTED_NONSTRICT = 'RestrictedNonstrict';
-
-    public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
-        protected readonly ConfigurationService $config,
-        protected readonly EventLogService $eventLogService
-    ) {}
-
     /**
      * Get all objects for this endpoint.
      * @throws NonUniqueResultException
@@ -154,76 +138,6 @@ abstract class AbstractRestController extends AbstractFOSRestController
     }
 
     /**
-     * Get the query builder used for getting contests.
-     * @param bool $onlyActive return only contests that are active
-     */
-    protected function getContestQueryBuilder(bool $onlyActive = false): QueryBuilder
-    {
-        $now = Utils::now();
-        $qb  = $this->em->createQueryBuilder();
-        $qb
-            ->from(Contest::class, 'c')
-            ->select('c')
-            ->andWhere('c.enabled = 1')
-            ->orderBy('c.activatetime');
-
-        if ($onlyActive || !$this->dj->checkrole('api_reader')) {
-            $qb
-                ->andWhere('c.activatetime <= :now')
-                ->andWhere('c.deactivatetime IS NULL OR c.deactivatetime > :now')
-                ->setParameter('now', $now);
-        }
-
-        // Filter on contests this user has access to
-        if (!$this->dj->checkrole('api_reader') && !$this->dj->checkrole('judgehost')) {
-            if ($this->dj->checkrole('team') && $this->dj->getUser()->getTeam()) {
-                $qb->leftJoin('c.teams', 'ct')
-                    ->leftJoin('c.team_categories', 'tc')
-                    ->leftJoin('tc.teams', 'tct')
-                    ->andWhere('ct.teamid = :teamid OR tct.teamid = :teamid OR c.openToAllTeams = 1')
-                    ->setParameter('teamid', $this->dj->getUser()->getTeam());
-            } else {
-                $qb->andWhere('c.public = 1');
-            }
-        }
-
-        return $qb;
-    }
-
-    /**
-     * @throws NonUniqueResultException
-     */
-    protected function getContestId(Request $request): int
-    {
-        if (!$request->attributes->has('cid')) {
-            throw new BadRequestHttpException('cid parameter missing');
-        }
-
-        $qb = $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
-        $qb
-            ->andWhere(sprintf('c.%s = :cid', $this->getContestIdField()))
-            ->setParameter('cid', $request->attributes->get('cid'));
-
-        /** @var Contest|null $contest */
-        $contest = $qb->getQuery()->getOneOrNullResult();
-
-        if ($contest === null) {
-            throw new NotFoundHttpException(sprintf('Contest with ID \'%s\' not found', $request->attributes->get('cid')));
-        }
-
-        return $contest->getCid();
-    }
-
-    protected function getContestIdField(): string
-    {
-        try {
-            return $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
-        } catch (Exception) {
-            return 'cid';
-        }
-    }
-
-    /**
      * Get the query builder to use for request for this REST endpoint.
      * @throws NonUniqueResultException
      */
@@ -235,6 +149,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
     abstract protected function getIdField(): string;
 
     /**
+     * @return array<U>
      * @throws NonUniqueResultException
      */
     protected function listActionHelper(Request $request): array
@@ -271,7 +186,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
             }
         }
 
-        /** @var array $objects */
+        /** @var array<T> $objects */
         $objects = $queryBuilder
             ->getQuery()
             ->getResult();

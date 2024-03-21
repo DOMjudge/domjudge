@@ -17,6 +17,9 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use ZipArchive;
 
+/**
+ * @extends AbstractRestController<Language, Language>
+ */
 #[Rest\Route('/')]
 #[OA\Tag(name: 'Languages')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]

@@ -37,7 +37,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
     exp: 'object.getShortname()',
     options: [new Serializer\Groups(['Nonstrict']), new Serializer\Type('string')]
 )]
-class ContestProblem
+class ContestProblem extends BaseApiEntity
 {
     #[ORM\Column(options: [
         'comment' => 'Unique problem ID within contest, used to sort problems in the scoreboard and typically a single letter',

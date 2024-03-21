@@ -34,6 +34,9 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
+/**
+ * @extends AbstractRestController<Submission, Submission>
+ */
 #[Rest\Route('/')]
 #[OA\Tag(name: 'Submissions')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]

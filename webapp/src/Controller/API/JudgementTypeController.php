@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 #[OA\Parameter(ref: '#/components/parameters/strict')]
 #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
 #[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
-class JudgementTypeController extends AbstractRestController
+class JudgementTypeController extends AbstractApiController
 {
     /**
      * Get all the judgement types for this contest.
@@ -111,15 +111,5 @@ class JudgementTypeController extends AbstractRestController
             );
         }
         return $result;
-    }
-
-    protected function getQueryBuilder(Request $request): QueryBuilder
-    {
-        throw new Exception('Not implemented');
-    }
-
-    protected function getIdField(): string
-    {
-        throw new Exception('Not implemented');
     }
 }
