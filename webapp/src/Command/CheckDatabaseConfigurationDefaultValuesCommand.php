@@ -27,38 +27,38 @@ class CheckDatabaseConfigurationDefaultValuesCommand extends Command
         foreach ($this->config->getConfigSpecification() as $specification) {
             $message = sprintf(
                 'Configuration %s (in category %s) is of type %s but has wrong type for default_value (%s)',
-                $specification['name'],
-                $specification['category'],
-                $specification['type'],
-                json_encode($specification['default_value'], JSON_THROW_ON_ERROR)
+                $specification->name,
+                $specification->category,
+                $specification->type,
+                json_encode($specification->defaultValue, JSON_THROW_ON_ERROR)
             );
-            switch ($specification['type']) {
+            switch ($specification->type) {
                 case 'bool':
-                    if (!is_bool($specification['default_value'])) {
+                    if (!is_bool($specification->defaultValue)) {
                         $messages[] = $message;
                     }
                     break;
                 case 'int':
-                    if (!is_int($specification['default_value'])) {
+                    if (!is_int($specification->defaultValue)) {
                         $messages[] = $message;
                     }
                     break;
                 case 'string':
-                    if (!is_string($specification['default_value'])) {
+                    if (!is_string($specification->defaultValue)) {
                         $messages[] = $message;
                     }
                     break;
                 case 'array_val':
-                    if (!(empty($specification['default_value']) || (
-                            is_array($specification['default_value']) &&
-                            is_int(key($specification['default_value']))))) {
+                    if (!(empty($specification->defaultValue) || (
+                            is_array($specification->defaultValue) &&
+                            is_int(key($specification->defaultValue))))) {
                         $messages[] = $message;
                     }
                     break;
                 case 'array_keyval':
-                    if (!(empty($specification['default_value']) || (
-                            is_array($specification['default_value']) &&
-                            is_string(key($specification['default_value']))))) {
+                    if (!(empty($specification->defaultValue) || (
+                            is_array($specification->defaultValue) &&
+                            is_string(key($specification->defaultValue))))) {
                         $messages[] = $message;
                     }
                     break;
