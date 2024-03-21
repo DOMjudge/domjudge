@@ -1,16 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:getDatabaseConfigurationAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/GeneralInfoController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\API\\\\GeneralInfoController\\:\\:updateConfigurationAction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: webapp/src/Controller/API/GeneralInfoController.php
-
-		-
 			message: "#^Method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:checkVersions\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/JudgehostController.php

@@ -163,6 +163,8 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Get configuration variables.
+     *
+     * @return array<string, bool|int|string|array<string, string>>
      */
     #[Rest\Get('/config')]
     #[OA\Response(
@@ -202,6 +204,8 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Update configuration variables.
+     * @return JsonResponse|array<string, bool|int|array<string, string>|string>
+     *
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_ADMIN')]
