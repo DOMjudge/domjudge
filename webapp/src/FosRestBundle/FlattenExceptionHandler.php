@@ -38,6 +38,11 @@ class FlattenExceptionHandler implements SubscribingHandlerInterface
         ];
     }
 
+    /**
+     * @param array{params: string[]} $type
+     *
+     * @return array{code: int, message: string}
+     */
     public function serializeToJson(
         JsonSerializationVisitor $visitor,
         FlattenException $exception,
