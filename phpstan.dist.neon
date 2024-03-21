@@ -22,5 +22,4 @@ parameters:
             message: "#Method .* return type has no value type specified in iterable type array#"
             path: webapp/src/DataFixtures/Test
 includes:
-    - phpstan-baseline.neon
     - lib/vendor/phpstan/phpstan-doctrine/extension.neon
