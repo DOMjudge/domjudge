@@ -113,6 +113,8 @@ class JudgehostController extends AbstractFOSRestController
     /**
      * Add a new judgehost to the list of judgehosts.
      * Also restarts (and returns) unfinished judgings.
+     *
+     * @return array<array{jobid: int, submitid: int}>
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_JUDGEHOST')]
@@ -192,6 +194,8 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Update the configuration of the given judgehost.
+     *
+     * @return Judgehost[]
      */
     #[IsGranted('ROLE_JUDGEHOST')]
     #[Rest\Put('/{hostname}')]
@@ -1184,6 +1188,8 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Get version commands for a given compile script.
+     *
+     * @return array{compiler_version_command?: string, runner_version_command?: string}
      */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Get('/get_version_commands/{judgetaskid<\d+>}')]
@@ -1224,6 +1230,9 @@ class JudgehostController extends AbstractFOSRestController
         return $ret;
     }
 
+    /**
+     * @return array{}
+     */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Put('/check_versions/{judgetaskid}')]
     #[OA\Response(
