@@ -414,6 +414,7 @@ class Language extends BaseApiEntity
             'py2', 'py3' => 'python',
             'rb' => 'ruby',
             'rs' => 'rust',
+            'csharp-dotnet' => 'csharp',
             default => $this->getLangid(),
         };
     }
