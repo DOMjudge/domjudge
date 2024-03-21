@@ -30,6 +30,9 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Yaml;
 
+/**
+ * @extends AbstractRestController<ContestProblem, ContestProblem|ContestProblemWrapper>
+ */
 #[Rest\Route('/contests/{cid}/problems')]
 #[OA\Tag(name: 'Problems')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]

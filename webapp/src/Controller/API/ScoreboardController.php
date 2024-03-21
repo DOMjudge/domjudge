@@ -17,8 +17,6 @@ use App\Utils\Scoreboard\Filter;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\QueryBuilder;
-use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
@@ -33,7 +31,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 #[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
 #[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
 #[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
-class ScoreboardController extends AbstractRestController
+class ScoreboardController extends AbstractApiController
 {
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -223,15 +221,5 @@ class ScoreboardController extends AbstractRestController
         }
 
         return $results;
-    }
-
-    protected function getQueryBuilder(Request $request): QueryBuilder
-    {
-        throw new Exception('Not implemented');
-    }
-
-    protected function getIdField(): string
-    {
-        throw new Exception('Not implemented');
     }
 }

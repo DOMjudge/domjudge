@@ -25,6 +25,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
+/**
+ * @extends AbstractRestController<User, User>
+ */
 #[Rest\Route('/users', defaults: ['_format' => 'json'])]
 #[OA\Tag(name: 'Users')]
 #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]

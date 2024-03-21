@@ -45,6 +45,9 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
 use TypeError;
 
+/**
+ * @extends AbstractRestController<Contest, Contest>
+ */
 #[Rest\Route('/contests')]
 #[OA\Tag(name: 'Contests')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]

@@ -22,6 +22,9 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+/**
+ * @extends AbstractRestController<Clarification, Clarification>
+ */
 #[Rest\Route('/contests/{cid}/clarifications')]
 #[OA\Tag(name: 'Clarifications')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]

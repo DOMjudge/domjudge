@@ -26,6 +26,9 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+/**
+ * @extends AbstractRestController<Team, Team>
+ */
 #[Rest\Route('/')]
 #[OA\Tag(name: 'Teams')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]

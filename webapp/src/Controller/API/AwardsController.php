@@ -11,7 +11,6 @@ use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Utils\Scoreboard\Scoreboard;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -27,7 +26,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 #[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
 #[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
 #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
-class AwardsController extends AbstractRestController
+class AwardsController extends AbstractApiController
 {
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -105,15 +104,5 @@ class AwardsController extends AbstractRestController
         $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, null, true);
 
         return [$contest, $scoreboard];
-    }
-
-    protected function getQueryBuilder(Request $request): QueryBuilder
-    {
-        throw new Exception('Not implemented');
-    }
-
-    protected function getIdField(): string
-    {
-        throw new Exception('Not implemented');
     }
 }

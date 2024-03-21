@@ -19,6 +19,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+/**
+ * @extends AbstractRestController<JudgingRun, JudgingRunWrapper>
+ */
 #[Rest\Route('/contests/{cid}/runs')]
 #[OA\Tag(name: 'Runs')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
