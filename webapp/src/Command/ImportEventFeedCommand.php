@@ -105,7 +105,7 @@ class ImportEventFeedCommand extends Command
         $dataSource       = (int)$this->config->get('data_source');
         $importDataSource = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
         if ($dataSource !== $importDataSource) {
-            $dataSourceOptions = $this->config->getConfigSpecification()['data_source']['options'];
+            $dataSourceOptions = $this->config->getConfigSpecification()['data_source']->options;
             $this->style->error(sprintf(
                                     "data_source configuration setting is set to '%s' but should be '%s'.",
                                     $dataSourceOptions[$dataSource],
