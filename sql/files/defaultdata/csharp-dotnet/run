@@ -13,24 +13,7 @@
 export DOTNET_EnableWriteXorExecute=0
 export TMPDIR="$PWD"/tmp
 
-id
-
-ls -la
-
-mkdir $TMPDIR
-
-ls -la
-
-pwd
-ls -la /
-df /tmp
-
-which dotnet
-dotnet --info
-
-ls -la /usr/bin/dotnet
-ls -la /usr/lib/dotnet-8.0/dotnet
-ls -la /usr/lib/dotnet-8.0
+mkdir "$TMPDIR"
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
@@ -42,19 +25,14 @@ DESTDIR=$(dirname "$DEST")
 SOURCEDIR="${MAINSOURCE%/*}"
 [ "$SOURCEDIR" = "$MAINSOURCE" ] && SOURCEDIR='.'
 
-DOTNETDIR=$(dirname $(dirname $(dotnet --info | grep "Base Path" | cut -d' ' -f 6)))
-CSCPATH=$(find "$DOTNETDIR" -name csc.dll -print | sort | tail -n1)
-NETSTANDARDPATH=$(find "$DOTNETDIR" -path *sdk/*/ref/netstandard.dll ! -path *NuGetFallback* -print | sort | tail -n1)
-
-echo "CSCPATH: $CSCPATH"
-echo "NETSTANDARDPATH: $NETSTANDARDPATH"
-
-alias csc='dotnet "$CSCPATH" /r:"$NETSTANDARDPATH"'
+DOTNET_DIR=$(dirname $(dirname $(dotnet --info | grep "Base Path" | cut -d' ' -f 6)))
+CSC_PATH=$(find "$DOTNET_DIR" -name csc.dll -print | sort | tail -n1)
+REFS_PATH=$(find "$DOTNET_DIR" -path "*packs/Microsoft.NETCore.App.Ref/*/ref" -print | sort -V | tail -n1)
+REFS=$(find "$REFS_PATH" -path '*.dll' -printf "-r:\"%p\" ")
 
 # Compile using the .NET CLI:
 # You can add -define:ONLINE_JUDGE,DOMJUDGE if you need specific compilation symbols.
-echo "running csc -o+ -out:$DESTCLI $@"
-csc -o+ -out:"$DESTCLI" "$@"
+dotnet "$CSC_PATH" -nologo $REFS -o+ -out:"$DESTCLI" "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
@@ -97,9 +75,6 @@ fi
 
 exec dotnet exec --runtimeconfig "$DOTNET_CSC_RUNTIME_CONFIG" "$DESTCLI" "\$@"
 EOF
-
-echo "running cat $DEST"
-cat "$DEST"
 
 chmod a+x "$DEST"
 
