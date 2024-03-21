@@ -57,6 +57,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     /**
      * Add one or more problems.
      *
+     * @return int[]
      * @throws BadRequestHttpException
      * @throws NonUniqueResultException
      */
@@ -463,7 +464,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Transform the given object before returning it from the API.
-     * @param array $object
+     * @param array{0: ContestProblem, testdatacount: int} $object
      */
     public function transformObject($object): ContestProblem|ContestProblemWrapper
     {
