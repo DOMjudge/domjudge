@@ -169,6 +169,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Add a problem to this contest.
+     * @return array{problem_id: string, messages: array<string, string[]>}
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_ADMIN')]
