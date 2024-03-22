@@ -118,7 +118,7 @@ class ProblemController extends BaseController
             if ($p->getProblemtextType()) {
                 $problemactions[] = [
                     'icon' => 'file-' . $p->getProblemtextType(),
-                    'title' => 'view problem description',
+                    'title' => 'view all problem statements of the contest',
                     'link' => $this->generateUrl('jury_problem_text', [
                         'probId' => $p->getProbid(),
                     ])

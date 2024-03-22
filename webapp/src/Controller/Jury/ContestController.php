@@ -37,6 +37,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -169,6 +170,7 @@ class ContestController extends BaseController
             return $this->redirectToRoute('jury_contests');
         }
 
+        /** @var Contest[] $contests */
         $contests = $em->createQueryBuilder()
             ->select('c')
             ->from(Contest::class, 'c')
@@ -244,6 +246,18 @@ class ContestController extends BaseController
                 }
             }
 
+            // Create action links
+            if ($contest->getContestTextType()) {
+                $contestactions[] = [
+                    'icon' => 'file-' . $contest->getContestTextType(),
+                    'title' => 'view contest description',
+                    'link' => $this->generateUrl('jury_contest_text', [
+                        'cid' => $contest->getCid(),
+                    ])
+                ];
+            } else {
+                $contestactions[] = [];
+            }
             if ($this->isGranted('ROLE_ADMIN') && !$contest->isLocked()) {
                 $contestactions[] = [
                     'icon' => 'edit',
@@ -986,5 +1000,16 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
         return $this->dj->getScoreboardZip($request, $requestStack, $contest, $scoreboardService, $type === 'unfrozen');
+    }
+
+    #[Route(path: '/{cid<\d+>}/text', name: 'jury_contest_text')]
+    public function viewTextAction(int $cid): StreamedResponse
+    {
+        $contest = $this->em->getRepository(Contest::class)->find($cid);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $cid));
+        }
+
+        return $contest->getContestTextStreamedResponse();
     }
 }

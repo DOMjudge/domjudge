@@ -264,6 +264,121 @@ class ContestController extends AbstractRestController
     }
 
     /**
+     * Delete the text for the given contest.
+     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Rest\Delete('/{cid}/text', name: 'delete_contest_text')]
+    #[OA\Response(response: 204, description: 'Deleting text succeeded')]
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
+    public function deleteTextAction(Request $request, string $cid): Response
+    {
+        $contest = $this->getContestAndCheckIfLocked($request, $cid);
+        $contest->setClearContestText(true);
+        $contest->processContestText();
+        $this->em->flush();
+
+        $this->eventLogService->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE,
+            $contest->getCid());
+
+        return new Response('', Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Set the text for the given contest.
+     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Rest\Post("/{cid}/text", name: 'post_contest_text')]
+    #[Rest\Put("/{cid}/text", name: 'put_contest_text')]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: 'multipart/form-data',
+            schema: new OA\Schema(
+                required: ['text'],
+                properties: [
+                    new OA\Property(
+                        property: 'text',
+                        description: 'The text to use, as either text/html, text/plain or application/pdf.',
+                        type: 'string',
+                        format: 'binary'
+                    ),
+                ]
+            )
+        )
+    )]
+    #[OA\Response(response: 204, description: 'Setting text succeeded')]
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
+    public function setTextAction(Request $request, string $cid, ValidatorInterface $validator): Response
+    {
+        $contest = $this->getContestAndCheckIfLocked($request, $cid);
+
+        /** @var UploadedFile|null $text */
+        $text = $request->files->get('text');
+        if (!$text) {
+            return new JsonResponse(['title' => 'Validation failed', 'errors' => ['Please supply a text']], Response::HTTP_BAD_REQUEST);
+        }
+        if (!in_array($text->getMimeType(), ['text/html', 'text/plain', 'application/pdf'])) {
+            return new JsonResponse(['title' => 'Validation failed', 'errors' => ['Invalid text type']], Response::HTTP_BAD_REQUEST);
+        }
+
+        $contest->setContestTextFile($text);
+
+        if ($errorResponse = $this->responseForErrors($validator->validate($contest), true)) {
+            return $errorResponse;
+        }
+
+        $contest->processContestText();
+        $this->em->flush();
+
+        $this->eventLogService->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE,
+            $contest->getCid());
+
+        return new Response('', Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Get the text for the given contest.
+     */
+    #[Rest\Get('/{cid}/text', name: 'contest_text')]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given contest text in PDF, HTML or TXT format',
+        content: [
+            new OA\MediaType(mediaType: 'application/pdf'),
+            new OA\MediaType(mediaType: 'text/plain'),
+            new OA\MediaType(mediaType: 'text/html'),
+        ]
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
+    public function textAction(Request $request, string $cid): Response
+    {
+        /** @var Contest|null $contest */
+        $contest = $this->getQueryBuilder($request)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->setParameter('id', $cid)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        $hasAccess = $this->dj->checkrole('jury') ||
+            $this->dj->checkrole('api_reader') ||
+            $contest->getFreezeData()->started();
+
+        if (!$hasAccess) {
+            throw new AccessDeniedHttpException();
+        }
+
+        if ($contest === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $cid));
+        }
+
+        if (!$contest->getContestTextType()) {
+            throw new NotFoundHttpException(sprintf('Contest with ID \'%s\' has no text', $cid));
+        }
+
+        return $contest->getContestTextStreamedResponse();
+    }
+
+    /**
      * Change the start time or unfreeze (thaw) time of the given contest.
      * @throws NonUniqueResultException
      */

@@ -101,6 +101,14 @@ abstract class BaseController extends AbstractController
     ): void {
         $auditLogType = Utils::tableForEntity($entity);
 
+        // Call the prePersist lifecycle callbacks.
+        // This used to work in preUpdate, but Doctrine has deprecated that feature.
+        // See https://www.doctrine-project.org/projects/doctrine-orm/en/3.1/reference/events.html#events-overview.
+        $metadata = $entityManager->getClassMetadata($entity::class);
+        foreach ($metadata->lifecycleCallbacks['prePersist'] ?? [] as $prePersistMethod) {
+            $entity->$prePersistMethod();
+        }
+
         $entityManager->persist($entity);
         $entityManager->flush();
 

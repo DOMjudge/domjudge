@@ -4,6 +4,7 @@ namespace App\Utils;
 use DateTime;
 use Doctrine\Inflector\InflectorFactory;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Generic utility class.
@@ -890,5 +891,62 @@ class Utils
             $reindexed[$callback($item, $key)] = $item;
         });
         return $reindexed;
+    }
+
+    public static function getTextType(string $clientName, string $realPath): ?string
+    {
+        $textType = null;
+
+        if (strrpos($clientName, '.') !== false) {
+            $ext = substr($clientName, strrpos($clientName, '.') + 1);
+            if (in_array($ext, ['txt', 'html', 'pdf'])) {
+                $textType = $ext;
+            }
+        }
+        if (!isset($textType)) {
+            $finfo = finfo_open(FILEINFO_MIME);
+
+            [$type] = explode('; ', finfo_file($finfo, $realPath));
+
+            finfo_close($finfo);
+
+            switch ($type) {
+                case 'application/pdf':
+                    $textType = 'pdf';
+                    break;
+                case 'text/html':
+                    $textType = 'html';
+                    break;
+                case 'text/plain':
+                    $textType = 'txt';
+                    break;
+            }
+        }
+
+        return $textType;
+    }
+
+    public static function getTextStreamedResponse(
+        ?string $textType,
+        BadRequestHttpException $exceptionMessage,
+        string $filename,
+        ?string $text
+    ): StreamedResponse {
+        $mimetype = match ($textType) {
+            'pdf' => 'application/pdf',
+            'html' => 'text/html',
+            'txt' => 'text/plain',
+            default => throw $exceptionMessage,
+        };
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($text) {
+            echo $text;
+        });
+        $response->headers->set('Content-Type', sprintf('%s; name="%s"', $mimetype, $filename));
+        $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', $filename));
+        $response->headers->set('Content-Length', (string)strlen($text));
+
+        return $response;
     }
 }

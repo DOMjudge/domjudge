@@ -175,6 +175,17 @@ class ContestType extends AbstractExternalIdEntityType
             'label' => 'Delete banner',
             'required' => false,
         ]);
+        $builder->add('contestTextFile', FileType::class, [
+            'label' => 'Contest text',
+            'required' => false,
+            'attr' => [
+                'accept' => 'text/html,text/plain,application/pdf',
+            ],
+        ]);
+        $builder->add('clearContestText', CheckboxType::class, [
+            'label' => 'Delete contest text',
+            'required' => false,
+        ]);
         $builder->add('warningMessage', TextType::class, [
             'required' => false,
             'label' => 'Scoreboard warning message',
@@ -201,6 +212,10 @@ class ContestType extends AbstractExternalIdEntityType
 
             if (!$contest || !$this->dj->assetPath($id, 'contest')) {
                 $form->remove('clearBanner');
+            }
+
+            if ($contest && !$contest->getContestText()) {
+                $form->remove('clearContestText');
             }
         });
     }
