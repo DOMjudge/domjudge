@@ -15,6 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Yaml\Yaml;
 
 class ContestControllerAdminTest extends ContestControllerTest
@@ -162,6 +163,49 @@ EOF;
         // Verify we have no banner anymore
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
         self::assertArrayNotHasKey('banner', $object);
+    }
+
+    public function testTextManagement(): void
+    {
+        // First, make sure we have no text
+        $id = 1;
+        if ($this->objectClassForExternalId !== null) {
+            $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+        }
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, (string)$id);
+        $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+        self::assertArrayNotHasKey('text', $object);
+
+        // Now upload a banner
+        $textFile = __DIR__ . '/../../../../../webapp/public/doc/logos/DOMjudgelogo.pdf';
+        $text = new UploadedFile($textFile, 'DOMjudgelogo.pdf');
+        $this->verifyApiJsonResponse('POST', $url . '/text', 204, $this->apiUser, null, ['text' => $text]);
+
+        // Verify we do have a banner now
+        $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+        $textConfig = [
+            [
+                'href'     => "contests/$id/text",
+                'mime'     => 'application/pdf',
+                'filename' => 'text.pdf',
+            ],
+        ];
+        self::assertSame($textConfig, $object['text']);
+
+        $this->client->request('GET', '/api' . $url . '/text');
+        /** @var StreamedResponse $response */
+        $response = $this->client->getResponse();
+        ob_start();
+        $response->getCallback()();
+        $callbackData = ob_get_clean();
+        self::assertEquals(file_get_contents($textFile), $callbackData);
+
+        // Delete the text again
+        $this->verifyApiJsonResponse('DELETE', $url . '/text', 204, $this->apiUser);
+
+        // Verify we have no text anymore
+        $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+        self::assertArrayNotHasKey('text', $object);
     }
 
     /**

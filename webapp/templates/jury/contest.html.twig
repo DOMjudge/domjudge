@@ -113,6 +113,17 @@
                         </form>
                     </td>
                 </tr>
+                {% if contest.contestTextType is not empty %}
+                    <tr>
+                        <th>Contest text</th>
+                        <td>
+                            <a href="{{ path('jury_contest_text', {'cid': contest.cid}) }}">
+                                <i title="view all problem statements of the contest"
+                                   class="fas fa-file-{{ contest.contestTextType }}"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
                 <tr>
                     <th>Process balloons</th>
                     <td>{{ contest.processBalloons | printYesNo }}</td>
@@ -395,7 +406,7 @@
                             </td>
                             <td>
                                 {% if problem.problem.problemtextType %}
-                                    <a title="View problem description" href="{{ path('jury_problem_text', {'probId': problem.probid}) }}">
+                                    <a title="view all problem statements of the contest" href="{{ path('jury_problem_text', {'probId': problem.probid}) }}">
                                         <i class="fas fa-file-{{ problem.problem.problemtextType }}"></i>
                                     </a>
                                 {% endif %}

@@ -114,6 +114,24 @@ def import_contest_banner(cid: str):
         else:
             print('Skipping contest banner import.')
 
+def import_contest_text(cid: str):
+    """Import the contest text"""
+
+    files = ['contest.pdf', 'contest-web.pdf', 'contest.html', 'contest.txt']
+
+    text_file = None
+    for file in files:
+        if os.path.isfile(file):
+            text_file = file
+            break
+
+    if text_file:
+        if dj_utils.confirm(f'Import {text_file} for contest?', False):
+            dj_utils.upload_file(f'contests/{cid}/text', 'text', text_file)
+            print('Contest text imported.')
+        else:
+            print('Skipping contest text import.')
+
 if len(sys.argv) == 1:
     dj_utils.domjudge_webapp_folder_or_api_url = webappdir
 elif len(sys.argv) == 2:
@@ -154,6 +172,7 @@ else:
 if cid is not None:
     print(f' -> cid={cid}')
     import_contest_banner(cid)
+    import_contest_text(cid)
 
 # Problem import is also special: we need to upload each individual problem and detect what they are
 if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path.exists('problemset.yaml'):

@@ -5,6 +5,8 @@ namespace App\Controller\Team;
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Clarification;
+use App\Entity\Contest;
+use App\Entity\ContestProblem;
 use App\Entity\Language;
 use App\Form\Type\PrintType;
 use App\Service\ConfigurationService;
@@ -16,6 +18,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -210,5 +215,16 @@ class MiscController extends BaseController
     public function docsAction(): Response
     {
         return $this->render('team/docs.html.twig');
+    }
+
+    #[Route(path: '/contest-text', name: 'team_contest_text')]
+    public function contestTextAction(): StreamedResponse
+    {
+        $user    = $this->dj->getUser();
+        $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
+        if (!$contest->getFreezeData()->started()) {
+            throw new NotFoundHttpException('Contest text not found or not available');
+        }
+        return $contest->getContestTextStreamedResponse();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Serializer;
 
+use App\DataTransferObject\FileWithName;
 use App\DataTransferObject\ImageFile;
 use App\Entity\Contest;
 use App\Service\ConfigurationService;
@@ -12,6 +13,7 @@ use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class ContestVisitor implements EventSubscriberInterface
 {
@@ -68,6 +70,33 @@ class ContestVisitor implements EventSubscriberInterface
             ));
         } else {
             $contest->setBannerForApi();
+        }
+
+        $hasAccess = $this->dj->checkrole('jury') ||
+            $this->dj->checkrole('api_reader') ||
+            $contest->getFreezeData()->started();
+
+        // Problem statement
+        if ($contest->getContestTextType() && $hasAccess) {
+            $route = $this->dj->apiRelativeUrl(
+                'v4_contest_text',
+                [
+                    'cid' => $contest->getApiId($this->eventLogService),
+                ]
+            );
+            $mimeType = match ($contest->getContestTextType()) {
+                'pdf' => 'application/pdf',
+                'html' => 'text/html',
+                'txt' => 'text/plain',
+                default => throw new BadRequestHttpException(sprintf('Contest c%d text has unknown type', $contest->getCid())),
+            };
+            $contest->setTextForApi(new FileWithName(
+                $route,
+                $mimeType,
+                'text.' . $contest->getContestTextType()
+            ));
+        } else {
+            $contest->setTextForApi();
         }
     }
 }
