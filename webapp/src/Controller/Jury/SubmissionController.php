@@ -494,7 +494,7 @@ class SubmissionController extends BaseController
                 ->getSingleScalarResult();
         }
 
-	$evalOnDemand = $submission->getContestProblem()->determineOnDemand($this->config->get('lazy_eval_results'));
+        $evalOnDemand = $submission->getContestProblem()->determineOnDemand($this->config->get('lazy_eval_results'));
 
         $twigData = [
             'submission' => $submission,
