@@ -65,13 +65,30 @@ class ConfigController extends AbstractController
                     }
                 }
             }
+            $before = $this->config->all();
             $errors = $this->config->saveChanges($data, $eventLogService, $this->dj, $options);
+            $after = $this->config->all();
+
+            // Compile a list of differences.
+            $diffs = [];
+            foreach ($before as $key => $value) {
+                if (!array_key_exists($key, $after)) {
+                    $diffs[$key] = ['before' => $value, 'after' => null];
+                } elseif ($value !== $after[$key]) {
+                    $diffs[$key] = ['before' => $value, 'after' => $after[$key]];
+                }
+            }
+            foreach ($after as $key => $value) {
+                if (!array_key_exists($key, $before)) {
+                    $diffs[$key] = ['before' => null, 'after' => $value];
+                }
+            }
 
             if (empty($errors)) {
                 $this->addFlash('scoreboard_refresh', 'After changing specific ' .
                     'settings, you might need to refresh the scoreboard.');
 
-                return $this->redirectToRoute('jury_config');
+                return $this->redirectToRoute('jury_config', ['diffs' => json_encode($diffs)]);
             } else {
                 $this->addFlash('danger', 'Some errors occurred while saving configuration, ' .
                     'please check the data you entered.');
@@ -114,10 +131,15 @@ class ConfigController extends AbstractController
                 'data' => $data
             ];
         }
+        $diffs = $request->query->get('diffs');
+        if ($diffs !== null) {
+            $diffs = json_decode($diffs, true);
+        }
         return $this->render('jury/config.html.twig', [
             'options' => $allData,
             'errors' => $errors ?? [],
             'activeCategory' => $activeCategory ?? 'Scoring',
+            'diffs' => $diffs,
         ]);
     }
 
