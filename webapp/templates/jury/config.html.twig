@@ -15,6 +15,28 @@
 {% endblock %}
 
 {% block content %}
+    {% if diffs is not null %}
+        {% if diffs %}
+            <div class="alert alert-info" role="alert">
+                Saved changes:
+                <ul>
+                    {% for key, change in diffs %}
+                        <li>
+                            <code>{{ key }}</code>:
+                            {{ change.before | json_encode }}
+                            ⟶
+                            {{ change.after | json_encode }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                <p>No changes made, no changes saved.</p>
+            </div>
+        {% endif %}
+
+    {% endif %}
     <h1>Configuration</h1>
 
     <form method="post">
