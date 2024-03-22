@@ -12,7 +12,12 @@
                 <div class="card">
                     <div class="card-body">
                         <h2 class="card-title">
-                            <code>{{ lang.langid }}</code>
+                            <code>{{ lang.name }}</code>
+                            <span style="font-size:50%; font-weight: normal;"> with
+                                extension{% if lang.extensions|length > 1 %}s{% endif %}:
+                            {% for ext in lang.extensions %}
+                                <code>.{{ ext }}</code>{% if not loop.last %}, {% endif %}
+                            {% endfor %}
                         </h2>
                     </div>
                     {% if lang.compilerVersion and lang.compilerVersionCommand %}
