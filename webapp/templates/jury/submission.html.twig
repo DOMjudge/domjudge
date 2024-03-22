@@ -170,7 +170,7 @@
             <i class="fas fa-book-open" title="Problem:"></i>
             <a href="{{ path('jury_problem', {'probId': submission.problem.probid}) }}">
                 {% if submission.contestProblem %}
-                    {{ submission.contestProblem.shortname }}: {{ submission.problem.name }}
+                    {{ submission.contestProblem | problemBadge }}: {{ submission.problem.name }}
                 {% else %}
                     {{ submission.problem.name }}
                 {% endif %}
