@@ -460,33 +460,7 @@ class Problem extends BaseApiEntity
         } elseif ($this->getProblemtextFile()) {
             $content         = file_get_contents($this->getProblemtextFile()->getRealPath());
             $clientName      = $this->getProblemtextFile()->getClientOriginalName();
-            $problemTextType = null;
-
-            if (strrpos($clientName, '.') !== false) {
-                $ext = substr($clientName, strrpos($clientName, '.') + 1);
-                if (in_array($ext, ['txt', 'html', 'pdf'])) {
-                    $problemTextType = $ext;
-                }
-            }
-            if (!isset($problemTextType)) {
-                $finfo = finfo_open(FILEINFO_MIME);
-
-                [$type] = explode('; ', finfo_file($finfo, $this->getProblemtextFile()->getRealPath()));
-
-                finfo_close($finfo);
-
-                switch ($type) {
-                    case 'application/pdf':
-                        $problemTextType = 'pdf';
-                        break;
-                    case 'text/html':
-                        $problemTextType = 'html';
-                        break;
-                    case 'text/plain':
-                        $problemTextType = 'txt';
-                        break;
-                }
-            }
+            $problemTextType = Utils::getTextType($clientName, $this->getProblemtextFile()->getRealPath());
 
             if (!isset($problemTextType)) {
                 throw new Exception('Problem statement has unknown file type.');
@@ -502,25 +476,12 @@ class Problem extends BaseApiEntity
 
     public function getProblemTextStreamedResponse(): StreamedResponse
     {
-        $mimetype = match ($this->getProblemtextType()) {
-            'pdf' => 'application/pdf',
-            'html' => 'text/html',
-            'txt' => 'text/plain',
-            default => throw new BadRequestHttpException(sprintf('Problem p%d text has unknown type', $this->getProbid())),
-        };
-
-        $filename    = sprintf('prob-%s.%s', $this->getName(), $this->getProblemtextType());
-        $problemText = $this->getProblemtext();
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($problemText) {
-            echo $problemText;
-        });
-        $response->headers->set('Content-Type', sprintf('%s; name="%s"', $mimetype, $filename));
-        $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', $filename));
-        $response->headers->set('Content-Length', (string)strlen($problemText));
-
-        return $response;
+        return Utils::getTextStreamedResponse(
+            $this->getProblemtextType(),
+            new BadRequestHttpException(sprintf('Problem p%d text has unknown type', $this->getProbid())),
+            sprintf('prob-%s.%s', $this->getName(), $this->getProblemtextType()),
+            $this->getProblemtext()
+        );
     }
 
     public function setStatementForApi(?FileWithName $statementForApi = null): void

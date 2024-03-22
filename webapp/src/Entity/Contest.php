@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
 use App\DataTransferObject\ContestState;
+use App\DataTransferObject\FileWithName;
 use App\DataTransferObject\ImageFile;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
@@ -19,6 +20,8 @@ use JMS\Serializer\Annotation as Serializer;
 use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -313,6 +316,21 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private bool $isLocked = false;
 
+    #[Assert\File]
+    #[Serializer\Exclude]
+    private ?UploadedFile $contestTextFile = null;
+
+    #[Serializer\Exclude]
+    private bool $clearContestText = false;
+
+    #[ORM\Column(
+        length: 4,
+        nullable: true,
+        options: ['comment' => 'File type of contest text']
+    )]
+    #[Serializer\Exclude]
+    private ?string $contestTextType = null;
+
     /**
      * @var Collection<int, Team>
      */
@@ -392,6 +410,27 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private ?ImageFile $bannerForApi = null;
 
+    /**
+     * @var Collection<int, ContestTextContent>
+     *
+     * We use a OneToMany instead of a OneToOne here, because otherwise this
+     * relation will always be loaded. See the commit message of commit
+     * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
+     */
+    #[ORM\OneToMany(
+        mappedBy: 'contest',
+        targetEntity: ContestTextContent::class,
+        cascade: ['persist'],
+        orphanRemoval: true
+    )]
+    #[Serializer\Exclude]
+    private Collection $contestTextContent;
+
+    // This field gets filled by the contest visitor with a data transfer
+    // object that represents the contest text.
+    #[Serializer\Exclude]
+    private ?FileWithName $textForApi = null;
+
     public function __construct()
     {
         $this->problems               = new ArrayCollection();
@@ -403,6 +442,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         $this->team_categories        = new ArrayCollection();
         $this->medal_categories       = new ArrayCollection();
         $this->externalContestSources = new ArrayCollection();
+        $this->contestTextContent     = new ArrayCollection();
     }
 
     public function getCid(): ?int
@@ -1348,6 +1388,57 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this;
     }
 
+    public function setContestTextContent(?ContestTextContent $content): self
+    {
+        $this->contestTextContent->clear();
+        if ($content) {
+            $this->contestTextContent->add($content);
+            $content->setContest($this);
+        }
+
+        return $this;
+    }
+
+    public function getContestTextContent(): ?ContestTextContent
+    {
+        return $this->contestTextContent->first() ?: null;
+    }
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function processContestText(): void
+    {
+        if ($this->isClearContestText()) {
+            $this
+                ->setContestTextContent(null)
+                ->setContestTextType(null);
+        } elseif ($this->getContestTextFile()) {
+            $content         = file_get_contents($this->getContestTextFile()->getRealPath());
+            $clientName      = $this->getContestTextFile()->getClientOriginalName();
+            $contestTextType = Utils::getTextType($clientName, $this->getContestTextFile()->getRealPath());
+
+            if (!isset($contestTextType)) {
+                throw new Exception('Contest statement has unknown file type.');
+            }
+
+            $contestTextContent = (new ContestTextContent())
+                ->setContent($content);
+            $this
+                ->setContestTextContent($contestTextContent)
+                ->setContestTextType($contestTextType);
+        }
+    }
+
+    public function getContestTextStreamedResponse(): StreamedResponse
+    {
+        return Utils::getTextStreamedResponse(
+            $this->getContestTextType(),
+            new BadRequestHttpException(sprintf('Contest c%d text has unknown type', $this->getCid())),
+            sprintf('contest-%s.%s', $this->getShortname(), $this->getContestTextType()),
+            $this->getContestText()
+        );
+    }
+
     public function getBannerFile(): ?UploadedFile
     {
         return $this->bannerFile;
@@ -1391,6 +1482,50 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         };
     }
 
+    public function setContestTextFile(?UploadedFile $contestTextFile): Contest
+    {
+        $this->contestTextFile = $contestTextFile;
+
+        // Clear the contest text to make sure the entity is modified.
+        $this->setContestTextContent(null);
+
+        return $this;
+    }
+
+    public function setClearContestText(bool $clearContestText): Contest
+    {
+        $this->clearContestText = $clearContestText;
+        $this->setContestTextContent(null);
+
+        return $this;
+    }
+
+    public function getContestText(): ?string
+    {
+        return $this->getContestTextContent()?->getContent();
+    }
+
+    public function getContestTextFile(): ?UploadedFile
+    {
+        return $this->contestTextFile;
+    }
+
+    public function isClearContestText(): bool
+    {
+        return $this->clearContestText;
+    }
+
+    public function setContestTextType(?string $contestTextType): Contest
+    {
+        $this->contestTextType = $contestTextType;
+        return $this;
+    }
+
+    public function getContestTextType(): ?string
+    {
+        return $this->contestTextType;
+    }
+
     public function setPenaltyTimeForApi(?int $penaltyTimeForApi): Contest
     {
         $this->penaltyTimeForApi = $penaltyTimeForApi;
@@ -1418,5 +1553,22 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     public function getBannerForApi(): array
     {
         return array_filter([$this->bannerForApi]);
+    }
+
+    public function setTextForApi(?FileWithName $textForApi = null): void
+    {
+        $this->textForApi = $textForApi;
+    }
+
+    /**
+     * @return FileWithName[]
+     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('text')]
+    #[Serializer\Type('array<App\DataTransferObject\FileWithName>')]
+    #[Serializer\Exclude(if: 'object.getTextForApi() === []')]
+    public function getTextForApi(): array
+    {
+        return array_filter([$this->textForApi]);
     }
 }

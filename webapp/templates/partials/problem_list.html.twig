@@ -1,6 +1,22 @@
 {# problem \App\Entity\ContestProblem #}
 
-<h1 class="mt-4 text-center">{{ contest.name | default('Contest') }} problems</h1>
+{% set contest_text_add_cid = contest_text_add_cid | default(false) %}
+
+<h1 class="mt-4 text-center">
+    {{ contest.name | default('Contest') }} problems
+    {% if contest and show_contest_text and contest.contestTextType is not empty %}
+        {% if contest_text_add_cid %}
+            {% set contest_text_url = path(contest_text_path, {'cid': contest.cid}) %}
+        {% else %}
+            {% set contest_text_url = path(contest_text_path) %}
+        {% endif %}
+        <a class="btn btn-secondary" role="button"
+           href="{{ contest_text_url }}">
+            <i class="fas fa-file-{{ contest.contestTextType }}"></i>
+            text
+        </a>
+    {% endif %}
+</h1>
 
 {% if problems is empty %}
     <div class="alert alert-secondary">No problem texts available at this point.</div>

@@ -5,6 +5,9 @@
 {% block content %}
     {% include 'partials/problem_list.html.twig' with {
         contest: current_team_contest,
+        show_contest_text: true,
+        contest_text_path: 'jury_contest_text',
+        contest_text_add_cid: true,
         problem_text_path: 'jury_problem_text',
         problem_attachment_path: 'jury_attachment_fetch',
         problem_sample_zip_path: 'jury_problem_sample_zip',

@@ -187,6 +187,16 @@ class PublicController extends BaseController
         });
     }
 
+    #[Route(path: '/contest-text', name: 'public_contest_text')]
+    public function contestTextAction(): StreamedResponse
+    {
+        $contest = $this->dj->getCurrentContest(onlyPublic: true);
+        if (!$contest->getFreezeData()->started()) {
+            throw new NotFoundHttpException('Contest text not found or not available');
+        }
+        return $contest->getContestTextStreamedResponse();
+    }
+
     /**
      * @throws NonUniqueResultException
      */

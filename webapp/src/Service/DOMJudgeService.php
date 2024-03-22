@@ -894,6 +894,11 @@ class DOMJudgeService
             }
         }
 
+        if ($contest->getContestTextType()) {
+            $filename = sprintf('contest.%s', $contest->getContestTextType());
+            $zip->addFromString($filename, $contest->getContestText());
+        }
+
         $zip->close();
         $zipFileContents = file_get_contents($tempFilename);
         unlink($tempFilename);
