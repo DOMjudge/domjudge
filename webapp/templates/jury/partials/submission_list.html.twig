@@ -135,7 +135,7 @@
                 </td>
                 <td class="langid{{ tdExtraClass }}" rowspan="{{ rowSpan }}">
                     <a href="{{ link }}"
-                       title="{{ submission.language.name }}">{{ submission.language.langid }}</a>
+                       title="{{ submission.language.name }}">{{ submission.language | entityIdBadge }}</a>
                 </td>
                 {% if showExternalResult and showExternalTestcases %}
                     <td class="{{ tdExtraClass }}">
