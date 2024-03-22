@@ -85,8 +85,26 @@ class ConfigController extends AbstractController
             }
 
             if (empty($errors)) {
-                $this->addFlash('scoreboard_refresh', 'After changing specific ' .
-                    'settings, you might need to refresh the scoreboard.');
+                $needsRefresh = false;
+                $needsRejudging = false;
+                foreach ($diffs as $key => $diff) {
+                    $category = $this->config->getCategory($key);
+                    if ($category === 'Scoring') {
+                        $needsRefresh = true;
+                    }
+                    if ($category === 'Judging') {
+                        $needsRejudging = true;
+                    }
+                }
+
+                if ($needsRefresh) {
+                    $this->addFlash('scoreboard_refresh', 'After changing specific ' .
+                        'scoring related settings, you might need to refresh the scoreboard (cache).');
+                }
+                if ($needsRejudging) {
+                    $this->addFlash('danger', 'After changing specific ' .
+                        'judging related settings, you might need to rejudge affected submissions.');
+                }
 
                 return $this->redirectToRoute('jury_config', ['diffs' => json_encode($diffs)]);
             } else {

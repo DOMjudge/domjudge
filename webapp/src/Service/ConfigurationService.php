@@ -70,6 +70,11 @@ class ConfigurationService
         return $value;
     }
 
+    public function getCategory(string $name): string
+    {
+        return $this->getConfigSpecification()[$name]->category;
+    }
+
     /**
      * Get all the configuration values, indexed by name.
      *
