@@ -158,13 +158,15 @@
             </span>
         {% endif %}
 
-        <span>
-            <i class="fas fa-trophy" title="Contest:"></i>
-            <a href="{{ path('jury_contest', {'contestId': submission.contest.cid}) }}">
-                {{ submission.contest.shortname }}
-                {{ submission.contest | entityIdBadge('c') }}
-            </a>
-        </span>
+        {% if current_contest.cid != submission.contest.cid %}
+            <span>
+                <i class="fas fa-trophy" title="Contest:"></i>
+                <a href="{{ path('jury_contest', {'contestId': submission.contest.cid}) }}">
+                    {{ submission.contest.shortname }}
+                    {{ submission.contest | entityIdBadge('c') }}
+                </a>
+            </span>
+        {% endif %}
 
         <span>
             <i class="fas fa-book-open" title="Problem:"></i>
