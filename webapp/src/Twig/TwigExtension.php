@@ -23,6 +23,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
+use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -110,6 +111,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('fileTypeIcon', $this->fileTypeIcon(...)),
             new TwigFilter('problemBadge', $this->problemBadge(...), ['is_safe' => ['html']]),
             new TwigFilter('problemBadgeForContest', $this->problemBadgeForContest(...), ['is_safe' => ['html']]),
+            new TwigFilter('problemBadgeMaybe', $this->problemBadgeMaybe(...), ['is_safe' => ['html']]),
             new TwigFilter('printMetadata', $this->printMetadata(...), ['is_safe' => ['html']]),
             new TwigFilter('printWarningContent', $this->printWarningContent(...), ['is_safe' => ['html']]),
             new TwigFilter('entityIdBadge', $this->entityIdBadge(...), ['is_safe' => ['html']]),
@@ -1089,6 +1091,41 @@ EOF;
             $foreground,
             $problem->getShortname()
         );
+    }
+
+    public function problemBadgeMaybe(ContestProblem $problem, ScoreboardMatrixItem $matrixItem): string
+    {
+        $rgb        = Utils::convertToHex($problem->getColor() ?? '#ffffff');
+        if (!$matrixItem->isCorrect) {
+            $rgb = 'whitesmoke';
+        }
+        $background = Utils::parseHexColor($rgb);
+
+        // Pick a border that's a bit darker.
+        $darker = $background;
+        $darker[0] = max($darker[0] - 64, 0);
+        $darker[1] = max($darker[1] - 64, 0);
+        $darker[2] = max($darker[2] - 64, 0);
+        $border    = Utils::rgbToHex($darker);
+
+        // Pick the foreground text color based on the background color.
+        $foreground = ($background[0] + $background[1] + $background[2] > 450) ? '#000000' : '#ffffff';
+        if (!$matrixItem->isCorrect) {
+            $foreground = 'silver';
+            $border = 'linen';
+        }
+
+        $ret = sprintf(
+            '<span class="badge problem-badge" style="font-size: x-small; background-color: %s; min-width: 18px; border: 1px solid %s;"><span style="color: %s;">%s</span></span>',
+            $rgb,
+            $border,
+            $foreground,
+            $problem->getShortname()
+        );
+        if (!$matrixItem->isCorrect && $matrixItem->numSubmissions > 0) {
+            $ret = '<span><span class="strike-diagonal">' . $ret . '</span></span>';
+        }
+        return $ret;
     }
 
     public function problemBadgeForContest(Problem $problem, ?Contest $contest = null): string
