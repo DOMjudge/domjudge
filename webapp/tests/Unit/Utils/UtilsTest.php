@@ -505,8 +505,11 @@ class UtilsTest extends TestCase
     {
         self::assertEquals("0 B", Utils::printsize(0));
         self::assertEquals("1000 B", Utils::printsize(1000));
-        self::assertEquals("1024 B", Utils::printsize(1024));
+        self::assertEquals("1023 B", Utils::printsize(1023));
+        self::assertEquals("1 KB", Utils::printsize(1024));
         self::assertEquals("1.0 KB", Utils::printsize(1025));
+        self::assertEquals("1.0 KB", Utils::printsize(1075));
+        self::assertEquals("1.1 KB", Utils::printsize(1076));
         self::assertEquals("2 KB", Utils::printsize(2048));
         self::assertEquals("2.5 KB", Utils::printsize(2560));
         self::assertEquals("5 MB", Utils::printsize(5242880));

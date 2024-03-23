@@ -430,18 +430,18 @@ class Utils
     }
 
     /**
-     * Print (file) size in human readable format by using B,KB,MB,GB suffixes.
-     * Input is a integer (the size in bytes), output a string with suffix.
+     * Print (file) size in human-readable format by using B,KB,MB,GB suffixes.
+     * Input is an integer (the size in bytes), output a string with suffix.
      */
     public static function printsize(int $size, int $decimals = 1): string
     {
         $factor = 1024;
         $units = ['B', 'KB', 'MB', 'GB'];
-        $display = (int)$size;
+        $display = $size;
 
         $exact = true;
-        for ($i = 0; $i < count($units) && $display > $factor; $i++) {
-            if (((int)$display % $factor)!=0) {
+        for ($i = 0; $i < count($units) && $display >= $factor; $i++) {
+            if (($display % $factor)!=0) {
                 $exact = false;
             }
             $display /= $factor;
