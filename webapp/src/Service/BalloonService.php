@@ -6,10 +6,12 @@ use App\Entity\Balloon;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judging;
+use App\Entity\Problem;
 use App\Entity\ScoreCache;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -36,7 +38,7 @@ class BalloonService
     public function updateBalloons(
         Contest $contest,
         Submission $submission,
-        ?Judging $judging = null
+        Judging $judging
     ): void {
         // Balloon processing disabled for contest.
         if (!$contest->getProcessBalloons()) {
@@ -44,7 +46,7 @@ class BalloonService
         }
 
         // Make sure judging is correct.
-        if (!$judging || $judging->getResult() !== Judging::RESULT_CORRECT) {
+        if ($judging->getResult() !== Judging::RESULT_CORRECT) {
             return;
         }
 
@@ -57,12 +59,10 @@ class BalloonService
         // Prevent duplicate balloons in case of multiple correct submissions.
         $numCorrect = $this->em->createQueryBuilder()
             ->from(Balloon::class, 'b')
-            ->join('b.submission', 's')
             ->select('COUNT(b.submission) AS numBalloons')
-            ->andWhere('s.valid = 1')
-            ->andWhere('s.problem = :probid')
-            ->andWhere('s.team = :teamid')
-            ->andWhere('s.contest = :cid')
+            ->andWhere('b.problem = :probid')
+            ->andWhere('b.team = :teamid')
+            ->andWhere('b.contest = :cid')
             ->setParameter('probid', $submission->getProblem())
             ->setParameter('teamid', $submission->getTeam())
             ->setParameter('cid', $submission->getContest())
@@ -71,10 +71,16 @@ class BalloonService
 
         if ($numCorrect == 0) {
             $balloon = new Balloon();
-            $balloon->setSubmission(
-                $this->em->getReference(Submission::class, $submission->getSubmitid()));
+            $balloon->setSubmission($this->em->getReference(Submission::class, $submission->getSubmitid()));
+            $balloon->setTeam($this->em->getReference(Team::class, $submission->getTeamId()));
+            $balloon->setContest(
+                $this->em->getReference(Contest::class, $submission->getContest()->getCid()));
+            $balloon->setProblem($this->em->getReference(Problem::class, $submission->getProblemId()));
             $this->em->persist($balloon);
-            $this->em->flush();
+            try {
+                $this->em->flush();
+            } catch (UniqueConstraintViolationException $e) {
+            }
         }
     }
 
@@ -108,10 +114,10 @@ class BalloonService
                 'a.affilid AS affilid', 'a.shortname AS affilshort')
             ->from(Balloon::class, 'b')
             ->leftJoin('b.submission', 's')
-            ->leftJoin('s.problem', 'p')
-            ->leftJoin('s.contest', 'co')
+            ->leftJoin('b.problem', 'p')
+            ->leftJoin('b.contest', 'co')
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
-            ->leftJoin('s.team', 't')
+            ->leftJoin('b.team', 't')
             ->leftJoin('t.category', 'c')
             ->leftJoin('t.affiliation', 'a')
             ->andWhere('co.cid = :cid')
