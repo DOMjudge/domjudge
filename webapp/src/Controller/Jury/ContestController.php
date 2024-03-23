@@ -258,22 +258,31 @@ class ContestController extends BaseController
             } else {
                 $contestactions[] = [];
             }
-            if ($this->isGranted('ROLE_ADMIN') && !$contest->isLocked()) {
-                $contestactions[] = [
-                    'icon' => 'edit',
-                    'title' => 'edit this contest',
-                    'link' => $this->generateUrl('jury_contest_edit', [
-                        'contestId' => $contest->getCid(),
-                    ])
-                ];
-                $contestactions[] = [
-                    'icon' => 'trash-alt',
-                    'title' => 'delete this contest',
-                    'link' => $this->generateUrl('jury_contest_delete', [
-                        'contestId' => $contest->getCid(),
-                    ]),
-                    'ajaxModal' => true,
-                ];
+            if ($this->isGranted('ROLE_ADMIN')) {
+                if ($contest->isLocked()) {
+                    // The number of table columns and thus the number of actions need
+                    // to match for all rows to not get DataTables errors.
+                    // Since we add two actions for non-locked contests, we need to add
+                    // two empty actions for locked contests.
+                    $contestactions[] = [];
+                    $contestactions[] = [];
+                } else {
+                    $contestactions[] = [
+                        'icon' => 'edit',
+                        'title' => 'edit this contest',
+                        'link' => $this->generateUrl('jury_contest_edit', [
+                            'contestId' => $contest->getCid(),
+                        ])
+                    ];
+                    $contestactions[] = [
+                        'icon' => 'trash-alt',
+                        'title' => 'delete this contest',
+                        'link' => $this->generateUrl('jury_contest_delete', [
+                            'contestId' => $contest->getCid(),
+                        ]),
+                        'ajaxModal' => true,
+                    ];
+                }
             }
 
             $contestdata['process_balloons'] = [
