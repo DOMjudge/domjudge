@@ -29,6 +29,30 @@ Version 8.3.0DEV
  - Add direct button to public page for registering when enabled.
  - Scale batch size of judge tasks dynamically.
  - Rename room to location for teams.
+ - Add option to upload contest problemset document.
+ - Improve on the advice for rejuding on config changes, only when relevant
+   advice to start a rejudging, similar for updating the scoreboard cache.
+ - For interactive problems: add explicit statement to when one of sides of
+   the interactions ran closed their output.
+ - Allow importing a (generic) contest warning which is displayed on the scoreboard.
+ - Added option in the dj_setup_database to make dumps, useful before major
+   upgrades and during the contest before problem imports.
+ - Fixed some bugs to become OpenAPI spec compliant again.
+ - Prevent a race condition leading to two submissions receiving the same
+   colour balloon.
+ - Compile executables with `-std=gnu++20` now.
+ - Record the testcase directory for judging runs, this makes investigating
+   easier.
+ - Set default C/C++ standards in configure script, we intend to ship all
+   scripts free of warnings/errors.
+ - Respect basic authentication in the URL for the import-contest when .netrc
+   exists.
+ - Fix CORS header for API to make extending with other tools easier.
+ - Fix eventfeed when SQL commits happen out of order to send all events.
+ - Lazy load the team pictures for the scoreboard, to prevent spamming access
+   log with HTTP404s
+ - Make TLE detection more robust for interactive problems.
+ - Added option for ICPC online scoreboard with no rank displays.
 
 Version 8.2.0 - 6 March 2023
 ----------------------------
