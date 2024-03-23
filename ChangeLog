@@ -29,7 +29,7 @@ Version 8.3.0DEV
  - Add direct button to public page for registering when enabled.
  - Scale batch size of judge tasks dynamically.
  - Rename room to location for teams.
- - Add option to upload contest text/statement.
+ - Add option to upload contest problemset document.
  - Improve on the advice for rejuding on config changes, only when relevant
    advice to start a rejudging, similar for updating the scoreboard cache.
  - For interactive problems: Add option to upload contest text/statement.
