@@ -94,7 +94,7 @@
                 <tr>
                     <td><b>Content</b></td>
                     <td colspan="5">
-                        <pre>{{ clarification.body | wrapUnquoted(80) }}</pre>
+                        <div class="card-text">{{ clarification.body | markdown_to_html | sanitize_html('app.clarification_sanitizer') }}</div>
                     </td>
                 </tr>
                 {% if clarification.replies is not empty %}
@@ -110,7 +110,7 @@
                                 </b>
                             </td>
                             <td colspan="5">
-                                <pre>{{ reply.body | wrapUnquoted(80) }}</pre>
+                                <div class="card-text">{{ reply.body | markdown_to_html | sanitize_html('app.clarification_sanitizer') }}</div>
                             </td>
                         </tr>
                     {% endfor %}
