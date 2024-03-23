@@ -121,11 +121,11 @@ class ProblemController extends BaseController
             }
 
             // Create action links
-            if ($p->getProblemtextType()) {
+            if ($p->getProblemstatementType()) {
                 $problemactions[] = [
-                    'icon' => 'file-' . $p->getProblemtextType(),
-                    'title' => 'view all problem statements of the contest',
-                    'link' => $this->generateUrl('jury_problem_text', [
+                    'icon' => 'file-' . $p->getProblemstatementType(),
+                    'title' => 'view problem statement',
+                    'link' => $this->generateUrl('jury_problem_statement', [
                         'probId' => $p->getProbid(),
                     ])
                 ];
@@ -265,7 +265,7 @@ class ProblemController extends BaseController
         $problem = $this->em->createQueryBuilder()
             ->from(Problem::class, 'p')
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
-            ->leftJoin('p.problemTextContent', 'content')
+            ->leftJoin('p.problemStatementContent', 'content')
             ->select('p', 'cp', 'content')
             ->andWhere('p.probid = :problemId')
             ->setParameter('problemId', $problemId)
@@ -323,9 +323,9 @@ class ProblemController extends BaseController
         $zip->addFromString('domjudge-problem.ini', $iniString);
         $zip->addFromString('problem.yaml', $yamlString);
 
-        if (!empty($problem->getProblemtext())) {
-            $zip->addFromString('problem.' . $problem->getProblemtextType(),
-                $problem->getProblemtext());
+        if (!empty($problem->getProblemstatement())) {
+            $zip->addFromString('problem.' . $problem->getProblemstatementType(),
+                $problem->getProblemstatement());
         }
 
         $compareExecutable = null;
@@ -515,7 +515,7 @@ class ProblemController extends BaseController
         return $this->render('jury/problem.html.twig', $data);
     }
 
-    #[Route(path: '/{probId<\d+>}/text', name: 'jury_problem_text')]
+    #[Route(path: '/{probId<\d+>}/statement', name: 'jury_problem_statement')]
     public function viewTextAction(int $probId): StreamedResponse
     {
         $problem = $this->em->getRepository(Problem::class)->find($probId);
@@ -523,7 +523,7 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
 
-        return $problem->getProblemTextStreamedResponse();
+        return $problem->getProblemStatementStreamedResponse();
     }
 
     #[Route(path: '/{probId<\d+>}/testcases', name: 'jury_problem_testcases')]

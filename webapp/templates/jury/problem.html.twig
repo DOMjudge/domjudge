@@ -64,13 +64,13 @@
                         {% endif %}
                     </td>
                 </tr>
-                {% if problem.problemtextType is not empty %}
+                {% if problem.problemstatementType is not empty %}
                     <tr>
-                        <th>Problem text</th>
+                        <th>Problem statement</th>
                         <td>
-                            <a href="{{ path('jury_problem_text', {'probId': problem.probid}) }}">
-                                <i title="view all problem statements of the contest"
-                                   class="fas fa-file-{{ problem.problemtextType }}"></i>
+                            <a href="{{ path('jury_problem_statement', {'probId': problem.probid}) }}">
+                                <i title="view problem statement"
+                                   class="fas fa-file-{{ problem.problemstatementType }}"></i>
                             </a>
                         </td>
                     </tr>

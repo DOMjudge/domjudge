@@ -147,11 +147,11 @@ class ContestController extends BaseController
             }
 
             // Create action links
-            if ($contest->getContestTextType()) {
+            if ($contest->getContestProblemsetType()) {
                 $contestactions[] = [
-                    'icon' => 'file-' . $contest->getContestTextType(),
-                    'title' => 'view contest description',
-                    'link' => $this->generateUrl('jury_contest_text', [
+                    'icon' => 'file-' . $contest->getContestProblemsetType(),
+                    'title' => 'view contest problemset document',
+                    'link' => $this->generateUrl('jury_contest_problemset', [
                         'cid' => $contest->getCid(),
                     ])
                 ];
@@ -1031,14 +1031,14 @@ class ContestController extends BaseController
         return $this->dj->getScoreboardZip($request, $requestStack, $contest, $scoreboardService, $type === 'unfrozen');
     }
 
-    #[Route(path: '/{cid<\d+>}/text', name: 'jury_contest_text')]
-    public function viewTextAction(int $cid): StreamedResponse
+    #[Route(path: '/{cid<\d+>}/problemset', name: 'jury_contest_problemset')]
+    public function viewProblemsetAction(int $cid): StreamedResponse
     {
         $contest = $this->em->getRepository(Contest::class)->find($cid);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $cid));
         }
 
-        return $contest->getContestTextStreamedResponse();
+        return $contest->getContestProblemsetStreamedResponse();
     }
 }

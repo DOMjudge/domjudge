@@ -8,9 +8,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
-    'comment' => 'Stores contents of contest texts',
+    'comment' => 'Stores contents of contest problemset documents',
 ])]
-class ContestTextContent
+class ContestProblemsetContent
 {
     /**
      * We use a ManyToOne instead of a OneToOne here, because otherwise the
@@ -18,11 +18,11 @@ class ContestTextContent
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation.
      */
     #[ORM\Id]
-    #[ORM\ManyToOne(inversedBy: 'contestTextContent')]
+    #[ORM\ManyToOne(inversedBy: 'contestProblemsetContent')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     private Contest $contest;
 
-    #[ORM\Column(type: 'blobtext', options: ['comment' => 'Text content'])]
+    #[ORM\Column(type: 'blobtext', options: ['comment' => 'Problemset document content'])]
     private string $content;
 
     public function getContest(): Contest

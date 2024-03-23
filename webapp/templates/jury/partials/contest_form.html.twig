@@ -38,9 +38,9 @@
         {% if form.offsetExists('clearBanner') %}
             {{ form_row(form.clearBanner) }}
         {% endif %}
-        {{ form_row(form.contestTextFile) }}
-        {% if form.offsetExists('clearContestText') %}
-            {{ form_row(form.clearContestText) }}
+        {{ form_row(form.contestProblemsetFile) }}
+        {% if form.offsetExists('clearContestProblemset') %}
+            {{ form_row(form.clearContestProblemset) }}
         {% endif %}
         {{ form_row(form.warningMessage) }}
     </div>

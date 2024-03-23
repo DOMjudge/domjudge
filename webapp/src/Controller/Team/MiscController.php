@@ -217,14 +217,14 @@ class MiscController extends BaseController
         return $this->render('team/docs.html.twig');
     }
 
-    #[Route(path: '/contest-text', name: 'team_contest_text')]
-    public function contestTextAction(): StreamedResponse
+    #[Route(path: '/problemset', name: 'team_contest_problemset')]
+    public function contestProblemsetAction(): StreamedResponse
     {
         $user    = $this->dj->getUser();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         if (!$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException('Contest text not found or not available');
         }
-        return $contest->getContestTextStreamedResponse();
+        return $contest->getContestProblemsetStreamedResponse();
     }
 }

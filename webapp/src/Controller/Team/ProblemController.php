@@ -45,8 +45,8 @@ class ProblemController extends BaseController
     }
 
 
-    #[Route(path: '/problems/{probId<\d+>}/text', name: 'team_problem_text')]
-    public function problemTextAction(int $probId): StreamedResponse
+    #[Route(path: '/problems/{probId<\d+>}/statement', name: 'team_problem_statement')]
+    public function problemStatementAction(int $probId): StreamedResponse
     {
         return $this->getBinaryFile($probId, function (
             int $probId,
@@ -56,7 +56,7 @@ class ProblemController extends BaseController
             $problem = $contestProblem->getProblem();
 
             try {
-                return $problem->getProblemTextStreamedResponse();
+                return $problem->getProblemStatementStreamedResponse();
             } catch (BadRequestHttpException $e) {
                 $this->addFlash('danger', $e->getMessage());
                 return $this->redirectToRoute('team_problems');

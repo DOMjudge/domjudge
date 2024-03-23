@@ -93,18 +93,18 @@ class Problem extends BaseApiEntity
 
     #[Assert\File]
     #[Serializer\Exclude]
-    private ?UploadedFile $problemtextFile = null;
+    private ?UploadedFile $problemstatementFile = null;
 
     #[Serializer\Exclude]
-    private bool $clearProblemtext = false;
+    private bool $clearProblemstatement = false;
 
     #[ORM\Column(
         length: 4,
         nullable: true,
-        options: ['comment' => 'File type of problem text']
+        options: ['comment' => 'File type of problem statement']
     )]
     #[Serializer\Exclude]
-    private ?string $problemtext_type = null;
+    private ?string $problemstatement_type = null;
 
     /**
      * @var Collection<int, Submission>
@@ -146,7 +146,7 @@ class Problem extends BaseApiEntity
     private Collection $testcases;
 
     /**
-     * @var Collection<int, ProblemTextContent>
+     * @var Collection<int, ProblemStatementContent>
      *
      * We use a OneToMany instead of a OneToOne here, because otherwise this
      * relation will always be loaded. See the commit message of commit
@@ -154,12 +154,12 @@ class Problem extends BaseApiEntity
      */
     #[ORM\OneToMany(
         mappedBy: 'problem',
-        targetEntity: ProblemTextContent::class,
+        targetEntity: ProblemStatementContent::class,
         cascade: ['persist'],
         orphanRemoval: true
     )]
     #[Serializer\Exclude]
-    private Collection $problemTextContent;
+    private Collection $problemStatementContent;
 
     /**
      * @var Collection<int, ProblemAttachment>
@@ -270,48 +270,48 @@ class Problem extends BaseApiEntity
         return $this->combined_run_compare;
     }
 
-    public function setProblemtextFile(?UploadedFile $problemtextFile): Problem
+    public function setProblemstatementFile(?UploadedFile $problemstatementFile): Problem
     {
-        $this->problemtextFile = $problemtextFile;
+        $this->problemstatementFile = $problemstatementFile;
 
-        // Clear the problem text to make sure the entity is modified.
-        $this->setProblemTextContent(null);
+        // Clear the problem statement to make sure the entity is modified.
+        $this->setProblemStatementContent(null);
 
         return $this;
     }
 
-    public function setClearProblemtext(bool $clearProblemtext): Problem
+    public function setClearProblemstatement(bool $clearProblemstatement): Problem
     {
-        $this->clearProblemtext = $clearProblemtext;
-        $this->setProblemTextContent(null);
+        $this->clearProblemstatement = $clearProblemstatement;
+        $this->setProblemStatementContent(null);
 
         return $this;
     }
 
-    public function getProblemtext(): ?string
+    public function getProblemstatement(): ?string
     {
-        return $this->getProblemTextContent()?->getContent();
+        return $this->getProblemStatementContent()?->getContent();
     }
 
-    public function getProblemtextFile(): ?UploadedFile
+    public function getProblemstatementFile(): ?UploadedFile
     {
-        return $this->problemtextFile;
+        return $this->problemstatementFile;
     }
 
-    public function isClearProblemtext(): bool
+    public function isClearProblemstatement(): bool
     {
-        return $this->clearProblemtext;
+        return $this->clearProblemstatement;
     }
 
-    public function setProblemtextType(?string $problemtextType): Problem
+    public function setProblemstatementType(?string $problemstatementType): Problem
     {
-        $this->problemtext_type = $problemtextType;
+        $this->problemstatement_type = $problemstatementType;
         return $this;
     }
 
-    public function getProblemtextType(): ?string
+    public function getProblemstatementType(): ?string
     {
-        return $this->problemtext_type;
+        return $this->problemstatement_type;
     }
 
     public function setCompareExecutable(?Executable $compareExecutable = null): Problem
@@ -343,7 +343,7 @@ class Problem extends BaseApiEntity
         $this->clarifications     = new ArrayCollection();
         $this->contest_problems   = new ArrayCollection();
         $this->attachments        = new ArrayCollection();
-        $this->problemTextContent = new ArrayCollection();
+        $this->problemStatementContent = new ArrayCollection();
     }
 
     public function addTestcase(Testcase $testcase): Problem
@@ -433,54 +433,54 @@ class Problem extends BaseApiEntity
         return $this->attachments;
     }
 
-    public function setProblemTextContent(?ProblemTextContent $content): self
+    public function setProblemStatementContent(?ProblemStatementContent $content): self
     {
-        $this->problemTextContent->clear();
+        $this->problemStatementContent->clear();
         if ($content) {
-            $this->problemTextContent->add($content);
+            $this->problemStatementContent->add($content);
             $content->setProblem($this);
         }
 
         return $this;
     }
 
-    public function getProblemTextContent(): ?ProblemTextContent
+    public function getProblemStatementContent(): ?ProblemStatementContent
     {
-        return $this->problemTextContent->first() ?: null;
+        return $this->problemStatementContent->first() ?: null;
     }
 
     #[ORM\PrePersist]
     #[ORM\PreUpdate]
-    public function processProblemText(): void
+    public function processProblemStatement(): void
     {
-        if ($this->isClearProblemtext()) {
+        if ($this->isClearProblemstatement()) {
             $this
-                ->setProblemTextContent(null)
-                ->setProblemtextType(null);
-        } elseif ($this->getProblemtextFile()) {
-            $content         = file_get_contents($this->getProblemtextFile()->getRealPath());
-            $clientName      = $this->getProblemtextFile()->getClientOriginalName();
-            $problemTextType = Utils::getTextType($clientName, $this->getProblemtextFile()->getRealPath());
+                ->setProblemStatementContent(null)
+                ->setProblemstatementType(null);
+        } elseif ($this->getProblemstatementFile()) {
+            $content              = file_get_contents($this->getProblemstatementFile()->getRealPath());
+            $clientName           = $this->getProblemstatementFile()->getClientOriginalName();
+            $problemStatementType = Utils::getTextType($clientName, $this->getProblemstatementFile()->getRealPath());
 
-            if (!isset($problemTextType)) {
+            if (!isset($problemStatementType)) {
                 throw new Exception('Problem statement has unknown file type.');
             }
 
-            $problemTextContent = (new ProblemTextContent())
+            $problemStatementContent = (new ProblemStatementContent())
                 ->setContent($content);
             $this
-                ->setProblemTextContent($problemTextContent)
-                ->setProblemtextType($problemTextType);
+                ->setProblemStatementContent($problemStatementContent)
+                ->setProblemstatementType($problemStatementType);
         }
     }
 
-    public function getProblemTextStreamedResponse(): StreamedResponse
+    public function getProblemStatementStreamedResponse(): StreamedResponse
     {
         return Utils::getTextStreamedResponse(
-            $this->getProblemtextType(),
-            new BadRequestHttpException(sprintf('Problem p%d text has unknown type', $this->getProbid())),
-            sprintf('prob-%s.%s', $this->getName(), $this->getProblemtextType()),
-            $this->getProblemtext()
+            $this->getProblemstatementType(),
+            new BadRequestHttpException(sprintf('Problem p%d statement has unknown type', $this->getProbid())),
+            sprintf('prob-%s.%s', $this->getName(), $this->getProblemstatementType()),
+            $this->getProblemstatement()
         );
     }
 
