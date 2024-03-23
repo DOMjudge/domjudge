@@ -11,6 +11,7 @@ import requests
 import requests.utils
 import subprocess
 import sys
+from urllib.parse import urlparse
 
 _myself = os.path.basename(sys.argv[0])
 _default_user_agent = requests.utils.default_user_agent()
@@ -76,12 +77,16 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
     else:
         global ca_check
         url = f'{domjudge_webapp_folder_or_api_url}/{name}'
+        parsed = urlparse(domjudge_webapp_folder_or_api_url)
+        auth = None
+        if parsed.username or parsed.password:
+            auth = (parsed.username, parsed.password)
 
         try:
             if method == 'GET':
-                response = requests.get(url, headers=headers, verify=ca_check)
+                response = requests.get(url, headers=headers, verify=ca_check, auth=auth)
             elif method == 'PUT':
-                response = requests.put(url, headers=headers, verify=ca_check, json=jsonData)
+                response = requests.put(url, headers=headers, verify=ca_check, json=jsonData, auth=auth)
         except requests.exceptions.SSLError as e:
             ca_check = not confirm(
                 "Can not verify certificate, ignore certificate check?", False)
