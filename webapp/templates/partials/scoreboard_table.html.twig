@@ -28,7 +28,7 @@
     </style>
 {% endif %}
 
-<table class="scoreboard center {% if jury %}scoreboard_jury{% endif %}">
+<table class="d-none d-md-block scoreboard center {% if jury %}scoreboard_jury{% endif %}">
 
     {# output table column groups (for the styles) #}
     <colgroup>
@@ -314,6 +314,176 @@
     </tbody>
 </table>
 
+<table class="d-md-none scoreboard center {% if jury %}scoreboard_jury{% endif %}">
+    <thead>
+    {# output table column groups (for the styles) #}
+    <colgroup>
+        <col id="scorerank"/>
+        {% if showFlags %}
+            <col id="scoreflags"/>
+        {% else %}
+            <col/>
+        {% endif %}
+        {% if showAffiliationLogos %}
+            <col id="scorelogos"/>
+        {% endif %}
+        <col id="scoreteamname"/>
+    </colgroup>
+    <colgroup>
+        <col id="scoresolv"/>
+    </colgroup>
+
+    {% set teamColspan = 2 %}
+    {% if showAffiliationLogos %}
+        {% set teamColspan = teamColspan + 1 %}
+    {% endif %}
+
+    <tr class="scoreheader" data-static="{{ static }}" style="font-size: 75%;">
+        <th title="rank" scope="col">rank</th>
+        <th title="team name" scope="col" colspan="{{ teamColspan }}">team</th>
+        <th title="# solved / penalty time" colspan="1" scope="col">score</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% set previousSortOrder = -1 %}
+    {% set previousTeam = null %}
+    {% set backgroundColors = {"#FFFFFF": 1} %}
+    {% set medalCount = 0 %}
+    {% for score in scores %}
+    {% set classes = [] %}
+    {% if score.team.category.sortorder != previousSortOrder %}
+        {% if previousSortOrder != -1 %}
+            {# Output summary of previous sort order #}
+            {% include 'partials/scoreboard_summary.html.twig' with {sortOrder: previousSortOrder} %}
+        {% endif %}
+        {% set classes = classes | merge(['sortorderswitch']) %}
+        {% set previousSortOrder = score.team.category.sortorder %}
+        {% set previousTeam = null %}
+    {% endif %}
+
+    {# process medal color #}
+    {% set medalColor = '' %}
+    {% if showLegends %}
+        {% set medalColor = score.team | medalType(contest, scoreboard) %}
+    {% endif %}
+
+    {# check whether this is us, otherwise use category colour #}
+    {% if myTeamId is defined and myTeamId == score.team.teamid %}
+        {% set classes = classes | merge(['scorethisisme']) %}
+        {% set color = '#FFFF99' %}
+    {% else %}
+        {% set color = score.team.category.color %}
+    {% endif %}
+    <tr class="{{ classes | join(' ') }}" id="team:{{ score.team.teamid }}" style="border-bottom-width: 0; height: 28px;">
+        <td class="scorepl {{medalColor}}" rowspan="2">
+            {# Only print rank when score is different from the previous team #}
+            {% if not displayRank %}
+                ?
+            {% elseif previousTeam is null or scoreboard.scores[previousTeam.teamid].rank != score.rank %}
+                {{ score.rank }}
+            {% else %}
+            {% endif %}
+            {% set previousTeam = score.team %}
+        </td>
+        <td class="scoreaf">
+            {% if showFlags %}
+                {% if score.team.affiliation %}
+                    {% set link = null %}
+                    {% if jury %}
+                        {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
+                    {% endif %}
+                    <a {% if link %}href="{{ link }}"{% endif %}>
+                        {{ score.team.affiliation.country|countryFlag }}
+                    </a>
+                {% endif %}
+            {% endif %}
+        </td>
+        {% if showAffiliationLogos %}
+            <td class="scoreaf">
+                {% if score.team.affiliation %}
+                    {% set link = null %}
+                    {% if jury %}
+                        {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
+                    {% endif %}
+                    <a {% if link %}href="{{ link }}"{% endif %}>
+                        {% set affiliationId = score.team.affiliation.affilid %}
+                        {% if showExternalId(score.team.affiliation) %}
+                            {% set affiliationId = score.team.affiliation.externalid %}
+                        {% endif %}
+                        {% set affiliationImage = affiliationId | assetPath('affiliation') %}
+                        {% if affiliationImage %}
+                            <img loading="lazy" width="16px" height="16px"
+                                 src="{{ asset(affiliationImage) }}" alt="{{ score.team.affiliation.name }}"
+                                 title="{{ score.team.affiliation.name }}">
+                        {% else %}
+                            {{ affiliationId }}
+                        {% endif %}
+                    </a>
+                {% endif %}
+            </td>
+        {% endif %}
+        {% if color is null %}
+            {% set color = "#FFFFFF" %}
+            {% set colorClass = "_FFFFFF" %}
+        {% else %}
+            {% set colorClass = color | replace({"#": "_"}) %}
+            {% set backgroundColors = backgroundColors | merge({(color): 1}) %}
+        {% endif %}
+        <td class="scoretn cl{{ colorClass }}" title="{{ score.team.effectiveName }}">
+        {% set link = null %}
+        {% set extra = null %}
+        {% if static %}
+            {% set link = '#' %}
+            {% set extra = 'data-bs-toggle="modal" data-bs-target="#team-modal-' ~ score.team.teamid ~ '"' %}
+        {% else %}
+            {% if jury %}
+                {% set link = path('jury_team', {teamId: score.team.teamid}) %}
+            {% elseif public %}
+                {% set link = path('public_team', {teamId: score.team.teamid}) %}
+                {% set extra = 'data-ajax-modal' %}
+            {% else %}
+                {% set link = path('team_team', {teamId: score.team.teamid}) %}
+                {% set extra = 'data-ajax-modal' %}
+            {% endif %}
+        {% endif %}
+        <a {% if extra is not null %}{{ extra | raw }}{% endif %} {% if link is not null %}href="{{ link }}"{% endif %}>
+                    <span class="forceWidth">
+                        {% if false and usedCategories | length > 1 and scoreboard.bestInCategory(score.team, limitToTeamIds) %}
+                            <span class="badge text-bg-warning category-best">
+                            {{ score.team.category.name }}
+                        </span>
+                        {% endif %}
+                        {{ score.team.effectiveName }}
+                    </span>
+            {% if showAffiliations %}
+                <span class="univ forceWidth">
+                            {% if score.team.affiliation %}
+                                {{ score.team.affiliation.name }}
+                            {% endif %}
+                        </span>
+            {% endif %}
+        </a>
+        </td>
+        {% set totalTime = score.totalTime %}
+        {% if scoreInSeconds %}
+            {% set totalTime = totalTime | printTimeRelative %}
+        {% endif %}
+        {% set totalPoints = score.numPoints %}
+        <td class="scorenc" rowspan="2">{{ totalPoints }}<br/><span class="scorett" style="font-weight: normal;">{{ totalTime }}</span></td>
+    </tr>
+        <tr style="height: 32px;">
+            <td/>
+            <td colspan="2">
+                {% for problem in problems %}
+                    {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
+                    {{ problem | problemBadgeMaybe(matrixItem) }}
+                {% endfor %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
 {% if static %}
     {% for score in scores %}
         {% embed 'partials/modal.html.twig' with {'modalId': 'team-modal-' ~ score.team.teamid} %}
@@ -364,7 +534,7 @@
         {% else %}
             {% set cellColors = {first: 'Solved first', correct: 'Solved', incorrect: 'Tried, incorrect', pending: 'Tried, pending', neutral: 'Untried'} %}
         {% endif %}
-        <table id="cell_legend" class="scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
+        <table id="cell_legend" class="d-none d-md-block scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
             <thead>
             <tr>
                 <th scope="col">Cell colours</th>
@@ -383,7 +553,7 @@
     {% endif %}
 
     {% if medalsEnabled %}
-        <table class="scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
+        <table class="d-none d-md-block scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
             <thead>
             <tr>
                 <th scope="col">Medals {% if not scoreboard.freezeData.showFinal %}(tentative){% endif %}</th>

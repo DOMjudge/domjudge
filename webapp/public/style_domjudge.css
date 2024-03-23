@@ -659,3 +659,24 @@ blockquote {
 .lasttcruns, .lastresult {
     opacity: 0.5;
 }
+
+.strike-diagonal {
+    position: relative;
+    text-align: center;
+}
+
+.strike-diagonal:before {
+    position: absolute;
+    content: "";
+    left: 0;
+    top: 50%;
+    right: 0;
+    border-top: 2px solid;
+    border-color: firebrick;
+
+    -webkit-transform:rotate(-35deg);
+    -moz-transform:rotate(-35deg);
+    -ms-transform:rotate(-35deg);
+    -o-transform:rotate(-35deg);
+    transform:rotate(-35deg);
+}
