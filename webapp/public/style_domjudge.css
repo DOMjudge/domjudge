@@ -646,3 +646,7 @@ blockquote {
     font-style: italic;
     font-size: smaller;
 }
+
+.right {
+    text-align: right;
+}
