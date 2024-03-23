@@ -226,6 +226,9 @@ class ImportExportService
             $contest->setDeactivatetimeString(date_format($deactivateTime, 'Y-m-d H:i:s e'));
         }
 
+        $contestsCount = $this->em->getRepository(Contest::class)->count([]);
+        $contest->setRank($contestsCount + 1);
+
         // Get all visible categories. For now, we assume these are the ones getting awards
         $visibleCategories = $this->em->getRepository(TeamCategory::class)->findBy(['visible' => true]);
 
