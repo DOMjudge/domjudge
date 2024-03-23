@@ -36,20 +36,20 @@ class ProblemControllerTest extends BaseTestCase
         ];
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
-        $problemTextsData = $em->createQueryBuilder()
+        $problemStatementsData = $em->createQueryBuilder()
             ->from(Problem::class, 'p')
-            ->leftJoin('p.problemTextContent', 'c')
+            ->leftJoin('p.problemStatementContent', 'c')
             ->select('p.externalid, c.content')
             ->getQuery()
             ->getResult();
-        $problemTexts = [];
-        foreach ($problemTextsData as $data) {
-            $problemTexts[array_search($data['externalid'], $problems)] = $data['content'];
+        $problemStatements = [];
+        foreach ($problemStatementsData as $data) {
+            $problemStatements[array_search($data['externalid'], $problems)] = $data['content'];
         }
 
         $this->withChangedConfiguration('show_limits_on_team_page', $withLimits,
             function () use (
-                $problemTexts,
+                $problemStatements,
                 $descriptions,
                 $withLimits,
                 $letters
@@ -82,10 +82,10 @@ class ProblemControllerTest extends BaseTestCase
                     }
 
                     // Download the problem text and make sure it is correct.
-                    $problemTextLink = $card->selectLink('text');
-                    $this->client->click($problemTextLink->link());
+                    $problemStatementLink = $card->selectLink('statement');
+                    $this->client->click($problemStatementLink->link());
 
-                    static::assertSame($problemTexts[$i], $this->client->getInternalResponse()->getContent());
+                    static::assertSame($problemStatements[$i], $this->client->getInternalResponse()->getContent());
                 }
             });
     }

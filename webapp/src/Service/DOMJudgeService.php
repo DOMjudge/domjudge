@@ -861,7 +861,7 @@ class DOMJudgeService
             ->innerJoin('c.problems', 'cp')
             ->innerJoin('cp.problem', 'p')
             ->leftJoin('p.attachments', 'a')
-            ->leftJoin('p.problemTextContent', 'content')
+            ->leftJoin('p.problemStatementContent', 'content')
             ->select('c', 'cp', 'p', 'a', 'content')
             ->andWhere('c.cid = :cid')
             ->setParameter('cid', $contest->getCid())
@@ -882,9 +882,9 @@ class DOMJudgeService
         foreach ($contest->getProblems() as $problem) {
             $this->addSamplesToZip($zip, $problem, $problem->getShortname());
 
-            if ($problem->getProblem()->getProblemtextType()) {
-                $filename    = sprintf('%s/statement.%s', $problem->getShortname(), $problem->getProblem()->getProblemtextType());
-                $zip->addFromString($filename, $problem->getProblem()->getProblemtext());
+            if ($problem->getProblem()->getProblemstatementType()) {
+                $filename    = sprintf('%s/statement.%s', $problem->getShortname(), $problem->getProblem()->getProblemstatementType());
+                $zip->addFromString($filename, $problem->getProblem()->getProblemstatement());
             }
 
             /** @var ProblemAttachment $attachment */
@@ -894,9 +894,9 @@ class DOMJudgeService
             }
         }
 
-        if ($contest->getContestTextType()) {
-            $filename = sprintf('contest.%s', $contest->getContestTextType());
-            $zip->addFromString($filename, $contest->getContestText());
+        if ($contest->getContestProblemsetType()) {
+            $filename = sprintf('contest.%s', $contest->getContestProblemsetType());
+            $zip->addFromString($filename, $contest->getContestProblemset());
         }
 
         $zip->close();

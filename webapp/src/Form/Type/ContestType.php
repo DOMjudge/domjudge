@@ -175,15 +175,15 @@ class ContestType extends AbstractExternalIdEntityType
             'label' => 'Delete banner',
             'required' => false,
         ]);
-        $builder->add('contestTextFile', FileType::class, [
-            'label' => 'Contest text',
+        $builder->add('contestProblemsetFile', FileType::class, [
+            'label' => 'Problemset document',
             'required' => false,
             'attr' => [
                 'accept' => 'text/html,text/plain,application/pdf',
             ],
         ]);
-        $builder->add('clearContestText', CheckboxType::class, [
-            'label' => 'Delete contest text',
+        $builder->add('clearContestProblemset', CheckboxType::class, [
+            'label' => 'Delete contest problemset document',
             'required' => false,
         ]);
         $builder->add('warningMessage', TextType::class, [
@@ -214,8 +214,8 @@ class ContestType extends AbstractExternalIdEntityType
                 $form->remove('clearBanner');
             }
 
-            if ($contest && !$contest->getContestText()) {
-                $form->remove('clearContestText');
+            if ($contest && !$contest->getContestProblemset()) {
+                $form->remove('clearContestProblemset');
             }
         });
     }

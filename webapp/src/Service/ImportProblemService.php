@@ -9,7 +9,7 @@ use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
 use App\Entity\ProblemAttachmentContent;
-use App\Entity\ProblemTextContent;
+use App\Entity\ProblemStatementContent;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\Testcase;
@@ -210,8 +210,8 @@ class ImportProblemService
                 ->setCombinedRunCompare(false)
                 ->setMemlimit(null)
                 ->setOutputlimit(null)
-                ->setProblemTextContent(null)
-                ->setProblemtextType(null);
+                ->setProblemStatementContent(null)
+                ->setProblemstatementType(null);
 
             $contestProblem
                 ?->setPoints(1)
@@ -314,11 +314,11 @@ class ImportProblemService
                 $filename = sprintf('%sproblem.%s', $dir, $type);
                 $text     = $zip->getFromName($filename);
                 if ($text !== false) {
-                    $content = (new ProblemTextContent())
+                    $content = (new ProblemStatementContent())
                         ->setContent($text);
                     $problem
-                        ->setProblemTextContent($content)
-                        ->setProblemtextType($type);
+                        ->setProblemStatementContent($content)
+                        ->setProblemstatementType($type);
                     $messages['info'][] = "Added/updated problem statement from: $filename";
                     break 2;
                 }

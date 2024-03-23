@@ -38,15 +38,15 @@ class ProblemType extends AbstractExternalIdEntityType
             'help' => 'leave empty for default',
             'input_group_after' => 'kB',
         ]);
-        $builder->add('problemtextFile', FileType::class, [
-            'label' => 'Problem text',
+        $builder->add('problemstatementFile', FileType::class, [
+            'label' => 'Problem statement',
             'required' => false,
             'attr' => [
                 'accept' => 'text/html,text/plain,application/pdf',
             ],
         ]);
-        $builder->add('clearProblemtext', CheckboxType::class, [
-            'label' => 'Delete problem text',
+        $builder->add('clearProblemstatement', CheckboxType::class, [
+            'label' => 'Delete problem statement',
             'required' => false,
         ]);
         $builder->add('runExecutable', EntityType::class, [
@@ -83,14 +83,14 @@ class ProblemType extends AbstractExternalIdEntityType
         ]);
         $builder->add('save', SubmitType::class);
 
-        // Remove clearProblemtext field when we do not have a problem text.
+        // Remove clearProblemstatement field when we do not have a problem text.
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
             /** @var Problem|null $problem */
             $problem = $event->getData();
             $form    = $event->getForm();
 
-            if ($problem && !$problem->getProblemtext()) {
-                $form->remove('clearProblemtext');
+            if ($problem && !$problem->getProblemstatement()) {
+                $form->remove('clearProblemstatement');
             }
         });
     }

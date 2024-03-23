@@ -407,7 +407,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     public function statementAction(Request $request, string $id): Response
     {
         $queryBuilder = $this->getQueryBuilder($request)
-            ->leftJoin('p.problemTextContent', 'content')
+            ->leftJoin('p.problemStatementContent', 'content')
             ->addSelect('content')
             ->setParameter('id', $id)
             ->andWhere(sprintf('%s = :id', $this->getIdField()));
@@ -425,11 +425,11 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         /** @var ContestProblem $contestProblem */
         $contestProblem = $contestProblemData[0];
 
-        if ($contestProblem->getProblem()->getProblemtextType() !== 'pdf') {
+        if ($contestProblem->getProblem()->getProblemstatementType() !== 'pdf') {
             throw new NotFoundHttpException(sprintf('Problem with ID \'%s\' has no PDF statement', $id));
         }
 
-        return $contestProblem->getProblem()->getProblemTextStreamedResponse();
+        return $contestProblem->getProblem()->getProblemStatementStreamedResponse();
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder

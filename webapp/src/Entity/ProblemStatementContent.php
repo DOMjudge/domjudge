@@ -8,9 +8,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
-    'comment' => 'Stores contents of problem texts',
+    'comment' => 'Stores contents of problem statement',
 ])]
-class ProblemTextContent
+class ProblemStatementContent
 {
     /**
      * We use a ManyToOne instead of a OneToOne here, because otherwise the
@@ -18,11 +18,11 @@ class ProblemTextContent
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation.
      */
     #[ORM\Id]
-    #[ORM\ManyToOne(inversedBy: 'problemTextContent')]
+    #[ORM\ManyToOne(inversedBy: 'problemStatementContent')]
     #[ORM\JoinColumn(name: 'probid', referencedColumnName: 'probid', onDelete: 'CASCADE')]
     private Problem $problem;
 
-    #[ORM\Column(type: 'blobtext', options: ['comment' => 'Text content'])]
+    #[ORM\Column(type: 'blobtext', options: ['comment' => 'Statement content'])]
     private string $content;
 
     public function getProblem(): Problem

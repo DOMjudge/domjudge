@@ -318,18 +318,18 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
 
     #[Assert\File]
     #[Serializer\Exclude]
-    private ?UploadedFile $contestTextFile = null;
+    private ?UploadedFile $contestProblemsetFile = null;
 
     #[Serializer\Exclude]
-    private bool $clearContestText = false;
+    private bool $clearContestProblemset = false;
 
     #[ORM\Column(
         length: 4,
         nullable: true,
-        options: ['comment' => 'File type of contest text']
+        options: ['comment' => 'File type of contest problemset document']
     )]
     #[Serializer\Exclude]
-    private ?string $contestTextType = null;
+    private ?string $contestProblemsetType = null;
 
     /**
      * @var Collection<int, Team>
@@ -411,7 +411,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private ?ImageFile $bannerForApi = null;
 
     /**
-     * @var Collection<int, ContestTextContent>
+     * @var Collection<int, ContestProblemsetContent>
      *
      * We use a OneToMany instead of a OneToOne here, because otherwise this
      * relation will always be loaded. See the commit message of commit
@@ -419,30 +419,30 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      */
     #[ORM\OneToMany(
         mappedBy: 'contest',
-        targetEntity: ContestTextContent::class,
+        targetEntity: ContestProblemsetContent::class,
         cascade: ['persist'],
         orphanRemoval: true
     )]
     #[Serializer\Exclude]
-    private Collection $contestTextContent;
+    private Collection $contestProblemsetContent;
 
     // This field gets filled by the contest visitor with a data transfer
-    // object that represents the contest text.
+    // object that represents the contest problemset document.
     #[Serializer\Exclude]
-    private ?FileWithName $textForApi = null;
+    private ?FileWithName $problemsetForApi = null;
 
     public function __construct()
     {
-        $this->problems               = new ArrayCollection();
-        $this->teams                  = new ArrayCollection();
-        $this->removedIntervals       = new ArrayCollection();
-        $this->clarifications         = new ArrayCollection();
-        $this->submissions            = new ArrayCollection();
-        $this->internal_errors        = new ArrayCollection();
-        $this->team_categories        = new ArrayCollection();
-        $this->medal_categories       = new ArrayCollection();
-        $this->externalContestSources = new ArrayCollection();
-        $this->contestTextContent     = new ArrayCollection();
+        $this->problems                 = new ArrayCollection();
+        $this->teams                    = new ArrayCollection();
+        $this->removedIntervals         = new ArrayCollection();
+        $this->clarifications           = new ArrayCollection();
+        $this->submissions              = new ArrayCollection();
+        $this->internal_errors          = new ArrayCollection();
+        $this->team_categories          = new ArrayCollection();
+        $this->medal_categories         = new ArrayCollection();
+        $this->externalContestSources   = new ArrayCollection();
+        $this->contestProblemsetContent = new ArrayCollection();
     }
 
     public function getCid(): ?int
@@ -1388,54 +1388,54 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this;
     }
 
-    public function setContestTextContent(?ContestTextContent $content): self
+    public function setContestProblemsetContent(?ContestProblemsetContent $content): self
     {
-        $this->contestTextContent->clear();
+        $this->contestProblemsetContent->clear();
         if ($content) {
-            $this->contestTextContent->add($content);
+            $this->contestProblemsetContent->add($content);
             $content->setContest($this);
         }
 
         return $this;
     }
 
-    public function getContestTextContent(): ?ContestTextContent
+    public function getContestProblemsetContent(): ?ContestProblemsetContent
     {
-        return $this->contestTextContent->first() ?: null;
+        return $this->contestProblemsetContent->first() ?: null;
     }
 
     #[ORM\PrePersist]
     #[ORM\PreUpdate]
-    public function processContestText(): void
+    public function processContestProblemset(): void
     {
-        if ($this->isClearContestText()) {
+        if ($this->isClearContestProblemset()) {
             $this
-                ->setContestTextContent(null)
-                ->setContestTextType(null);
-        } elseif ($this->getContestTextFile()) {
-            $content         = file_get_contents($this->getContestTextFile()->getRealPath());
-            $clientName      = $this->getContestTextFile()->getClientOriginalName();
-            $contestTextType = Utils::getTextType($clientName, $this->getContestTextFile()->getRealPath());
+                ->setContestProblemsetContent(null)
+                ->setContestProblemsetType(null);
+        } elseif ($this->getContestProblemsetFile()) {
+            $content               = file_get_contents($this->getContestProblemsetFile()->getRealPath());
+            $clientName            = $this->getContestProblemsetFile()->getClientOriginalName();
+            $contestProblemsetType = Utils::getTextType($clientName, $this->getContestProblemsetFile()->getRealPath());
 
-            if (!isset($contestTextType)) {
-                throw new Exception('Contest statement has unknown file type.');
+            if (!isset($contestProblemsetType)) {
+                throw new Exception('Contest problemset has unknown file type.');
             }
 
-            $contestTextContent = (new ContestTextContent())
+            $contestProblemsetContent = (new ContestProblemsetContent())
                 ->setContent($content);
             $this
-                ->setContestTextContent($contestTextContent)
-                ->setContestTextType($contestTextType);
+                ->setContestProblemsetContent($contestProblemsetContent)
+                ->setContestProblemsetType($contestProblemsetType);
         }
     }
 
-    public function getContestTextStreamedResponse(): StreamedResponse
+    public function getContestProblemsetStreamedResponse(): StreamedResponse
     {
         return Utils::getTextStreamedResponse(
-            $this->getContestTextType(),
-            new BadRequestHttpException(sprintf('Contest c%d text has unknown type', $this->getCid())),
-            sprintf('contest-%s.%s', $this->getShortname(), $this->getContestTextType()),
-            $this->getContestText()
+            $this->getContestProblemsetType(),
+            new BadRequestHttpException(sprintf('Contest c%d problemset has unknown type', $this->getCid())),
+            sprintf('contest-%s.%s', $this->getShortname(), $this->getContestProblemsetType()),
+            $this->getContestProblemset()
         );
     }
 
@@ -1482,48 +1482,48 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         };
     }
 
-    public function setContestTextFile(?UploadedFile $contestTextFile): Contest
+    public function setContestProblemsetFile(?UploadedFile $contestProblemsetFile): Contest
     {
-        $this->contestTextFile = $contestTextFile;
+        $this->contestProblemsetFile = $contestProblemsetFile;
 
         // Clear the contest text to make sure the entity is modified.
-        $this->setContestTextContent(null);
+        $this->setContestProblemsetContent(null);
 
         return $this;
     }
 
-    public function setClearContestText(bool $clearContestText): Contest
+    public function setClearContestProblemset(bool $clearContestProblemset): Contest
     {
-        $this->clearContestText = $clearContestText;
-        $this->setContestTextContent(null);
+        $this->clearContestProblemset = $clearContestProblemset;
+        $this->setContestProblemsetContent(null);
 
         return $this;
     }
 
-    public function getContestText(): ?string
+    public function getContestProblemset(): ?string
     {
-        return $this->getContestTextContent()?->getContent();
+        return $this->getContestProblemsetContent()?->getContent();
     }
 
-    public function getContestTextFile(): ?UploadedFile
+    public function getContestProblemsetFile(): ?UploadedFile
     {
-        return $this->contestTextFile;
+        return $this->contestProblemsetFile;
     }
 
-    public function isClearContestText(): bool
+    public function isClearContestProblemset(): bool
     {
-        return $this->clearContestText;
+        return $this->clearContestProblemset;
     }
 
-    public function setContestTextType(?string $contestTextType): Contest
+    public function setContestProblemsetType(?string $contestProblemsetType): Contest
     {
-        $this->contestTextType = $contestTextType;
+        $this->contestProblemsetType = $contestProblemsetType;
         return $this;
     }
 
-    public function getContestTextType(): ?string
+    public function getContestProblemsetType(): ?string
     {
-        return $this->contestTextType;
+        return $this->contestProblemsetType;
     }
 
     public function setPenaltyTimeForApi(?int $penaltyTimeForApi): Contest
@@ -1555,20 +1555,20 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return array_filter([$this->bannerForApi]);
     }
 
-    public function setTextForApi(?FileWithName $textForApi = null): void
+    public function setProblemsetForApi(?FileWithName $problemsetForApi = null): void
     {
-        $this->textForApi = $textForApi;
+        $this->problemsetForApi = $problemsetForApi;
     }
 
     /**
      * @return FileWithName[]
      */
     #[Serializer\VirtualProperty]
-    #[Serializer\SerializedName('text')]
+    #[Serializer\SerializedName('problemset')]
     #[Serializer\Type('array<App\DataTransferObject\FileWithName>')]
-    #[Serializer\Exclude(if: 'object.getTextForApi() === []')]
-    public function getTextForApi(): array
+    #[Serializer\Exclude(if: 'object.getProblemsetForApi() === []')]
+    public function getProblemsetForApi(): array
     {
-        return array_filter([$this->textForApi]);
+        return array_filter([$this->problemsetForApi]);
     }
 }

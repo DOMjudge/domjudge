@@ -168,8 +168,8 @@ class PublicController extends BaseController
             $this->dj->getTwigDataForProblemsAction($this->stats));
     }
 
-    #[Route(path: '/problems/{probId<\d+>}/text', name: 'public_problem_text')]
-    public function problemTextAction(int $probId): StreamedResponse
+    #[Route(path: '/problems/{probId<\d+>}/statement', name: 'public_problem_statement')]
+    public function problemStatementAction(int $probId): StreamedResponse
     {
         return $this->getBinaryFile($probId, function (
             int $probId,
@@ -179,7 +179,7 @@ class PublicController extends BaseController
             $problem = $contestProblem->getProblem();
 
             try {
-                return $problem->getProblemTextStreamedResponse();
+                return $problem->getProblemStatementStreamedResponse();
             } catch (BadRequestHttpException $e) {
                 $this->addFlash('danger', $e->getMessage());
                 return $this->redirectToRoute('public_problems');
@@ -187,14 +187,14 @@ class PublicController extends BaseController
         });
     }
 
-    #[Route(path: '/contest-text', name: 'public_contest_text')]
-    public function contestTextAction(): StreamedResponse
+    #[Route(path: '/problemset', name: 'public_contest_problemset')]
+    public function contestProblemsetAction(): StreamedResponse
     {
         $contest = $this->dj->getCurrentContest(onlyPublic: true);
         if (!$contest->getFreezeData()->started()) {
-            throw new NotFoundHttpException('Contest text not found or not available');
+            throw new NotFoundHttpException('Contest problemset not found or not available');
         }
-        return $contest->getContestTextStreamedResponse();
+        return $contest->getContestProblemsetStreamedResponse();
     }
 
     /**

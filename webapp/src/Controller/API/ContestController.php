@@ -264,17 +264,17 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Delete the text for the given contest.
+     * Delete the problemset document for the given contest.
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Delete('/{cid}/text', name: 'delete_contest_text')]
-    #[OA\Response(response: 204, description: 'Deleting text succeeded')]
+    #[Rest\Delete('/{cid}/problemset', name: 'delete_contest_problemset')]
+    #[OA\Response(response: 204, description: 'Deleting problemset document succeeded')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
-    public function deleteTextAction(Request $request, string $cid): Response
+    public function deleteProblemsetAction(Request $request, string $cid): Response
     {
         $contest = $this->getContestAndCheckIfLocked($request, $cid);
-        $contest->setClearContestText(true);
-        $contest->processContestText();
+        $contest->setClearContestProblemset(true);
+        $contest->processContestProblemset();
         $this->em->flush();
 
         $this->eventLogService->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE,
@@ -284,21 +284,21 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Set the text for the given contest.
+     * Set the problemset document for the given contest.
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Post("/{cid}/text", name: 'post_contest_text')]
-    #[Rest\Put("/{cid}/text", name: 'put_contest_text')]
+    #[Rest\Post("/{cid}/problemset", name: 'post_contest_problemset')]
+    #[Rest\Put("/{cid}/problemset", name: 'put_contest_problemset')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
             mediaType: 'multipart/form-data',
             schema: new OA\Schema(
-                required: ['text'],
+                required: ['problemset'],
                 properties: [
                     new OA\Property(
                         property: 'text',
-                        description: 'The text to use, as either text/html, text/plain or application/pdf.',
+                        description: 'The problemset document to use, as either text/html, text/plain or application/pdf.',
                         type: 'string',
                         format: 'binary'
                     ),
@@ -306,28 +306,28 @@ class ContestController extends AbstractRestController
             )
         )
     )]
-    #[OA\Response(response: 204, description: 'Setting text succeeded')]
+    #[OA\Response(response: 204, description: 'Setting problemset document succeeded')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
-    public function setTextAction(Request $request, string $cid, ValidatorInterface $validator): Response
+    public function setProblemsetAction(Request $request, string $cid, ValidatorInterface $validator): Response
     {
         $contest = $this->getContestAndCheckIfLocked($request, $cid);
 
-        /** @var UploadedFile|null $text */
-        $text = $request->files->get('text');
-        if (!$text) {
-            return new JsonResponse(['title' => 'Validation failed', 'errors' => ['Please supply a text']], Response::HTTP_BAD_REQUEST);
+        /** @var UploadedFile|null $problemset */
+        $problemset = $request->files->get('problemset');
+        if (!$problemset) {
+            return new JsonResponse(['title' => 'Validation failed', 'errors' => ['Please supply a problemset document']], Response::HTTP_BAD_REQUEST);
         }
-        if (!in_array($text->getMimeType(), ['text/html', 'text/plain', 'application/pdf'])) {
-            return new JsonResponse(['title' => 'Validation failed', 'errors' => ['Invalid text type']], Response::HTTP_BAD_REQUEST);
+        if (!in_array($problemset->getMimeType(), ['text/html', 'text/plain', 'application/pdf'])) {
+            return new JsonResponse(['title' => 'Validation failed', 'errors' => ['Invalid problemset document type']], Response::HTTP_BAD_REQUEST);
         }
 
-        $contest->setContestTextFile($text);
+        $contest->setContestProblemsetFile($problemset);
 
         if ($errorResponse = $this->responseForErrors($validator->validate($contest), true)) {
             return $errorResponse;
         }
 
-        $contest->processContestText();
+        $contest->processContestProblemset();
         $this->em->flush();
 
         $this->eventLogService->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE,
@@ -337,12 +337,12 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Get the text for the given contest.
+     * Get the problemset document for the given contest.
      */
-    #[Rest\Get('/{cid}/text', name: 'contest_text')]
+    #[Rest\Get('/{cid}/problemset', name: 'contest_problemset')]
     #[OA\Response(
         response: 200,
-        description: 'Returns the given contest text in PDF, HTML or TXT format',
+        description: 'Returns the given contest problemset document in PDF, HTML or TXT format',
         content: [
             new OA\MediaType(mediaType: 'application/pdf'),
             new OA\MediaType(mediaType: 'text/plain'),
@@ -350,7 +350,7 @@ class ContestController extends AbstractRestController
         ]
     )]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
-    public function textAction(Request $request, string $cid): Response
+    public function problemsetAction(Request $request, string $cid): Response
     {
         /** @var Contest|null $contest */
         $contest = $this->getQueryBuilder($request)
@@ -371,11 +371,11 @@ class ContestController extends AbstractRestController
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $cid));
         }
 
-        if (!$contest->getContestTextType()) {
-            throw new NotFoundHttpException(sprintf('Contest with ID \'%s\' has no text', $cid));
+        if (!$contest->getContestProblemsetType()) {
+            throw new NotFoundHttpException(sprintf('Contest with ID \'%s\' has no problemset text', $cid));
         }
 
-        return $contest->getContestTextStreamedResponse();
+        return $contest->getContestProblemsetStreamedResponse();
     }
 
     /**

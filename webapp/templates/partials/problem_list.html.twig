@@ -1,19 +1,19 @@
 {# problem \App\Entity\ContestProblem #}
 
-{% set contest_text_add_cid = contest_text_add_cid | default(false) %}
+{% set contest_problemset_add_cid = contest_problemset_add_cid | default(false) %}
 
 <h1 class="mt-4 text-center">
     {{ contest.name | default('Contest') }} problems
-    {% if contest and show_contest_text and contest.contestTextType is not empty %}
-        {% if contest_text_add_cid %}
-            {% set contest_text_url = path(contest_text_path, {'cid': contest.cid}) %}
+    {% if contest and show_contest_problemset and contest.contestProblemsetType is not empty %}
+        {% if contest_problemset_add_cid %}
+            {% set contest_problemset_url = path(contest_problemset_path, {'cid': contest.cid}) %}
         {% else %}
-            {% set contest_text_url = path(contest_text_path) %}
+            {% set contest_problemset_url = path(contest_problemset_path) %}
         {% endif %}
         <a class="btn btn-secondary" role="button"
-           href="{{ contest_text_url }}">
-            <i class="fas fa-file-{{ contest.contestTextType }}"></i>
-            text
+           href="{{ contest_problemset_url }}">
+            <i class="fas fa-file-{{ contest.contestProblemsetType }}"></i>
+            problemset
         </a>
     {% endif %}
 </h1>
@@ -106,11 +106,11 @@
                                         {% endif %}
 
                                         <div class="text-center">
-                                            {% if problem.problem.problemtextType is not empty %}
+                                            {% if problem.problem.problemstatementType is not empty %}
                                                 <a class="btn btn-secondary" role="button"
-                                                   href="{{ path(problem_text_path, {'probId': problem.probid}) }}">
-                                                    <i class="fas fa-file-{{ problem.problem.problemtextType }}"></i>
-                                                    text
+                                                   href="{{ path(problem_statement_path, {'probId': problem.probid}) }}">
+                                                    <i class="fas fa-file-{{ problem.problem.problemstatementType }}"></i>
+                                                    statement
                                                 </a>
                                             {% endif %}
 

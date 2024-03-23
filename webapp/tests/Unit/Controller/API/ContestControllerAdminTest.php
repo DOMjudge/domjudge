@@ -165,47 +165,47 @@ EOF;
         self::assertArrayNotHasKey('banner', $object);
     }
 
-    public function testTextManagement(): void
+    public function testProblemsetManagement(): void
     {
-        // First, make sure we have no text
+        // First, make sure we have no problemset document
         $id = 1;
         if ($this->objectClassForExternalId !== null) {
             $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
         }
         $url = $this->helperGetEndpointURL($this->apiEndpoint, (string)$id);
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
-        self::assertArrayNotHasKey('text', $object);
+        self::assertArrayNotHasKey('problemset', $object);
 
         // Now upload a banner
-        $textFile = __DIR__ . '/../../../../../webapp/public/doc/logos/DOMjudgelogo.pdf';
-        $text = new UploadedFile($textFile, 'DOMjudgelogo.pdf');
-        $this->verifyApiJsonResponse('POST', $url . '/text', 204, $this->apiUser, null, ['text' => $text]);
+        $problemsetFile = __DIR__ . '/../../../../../webapp/public/doc/logos/DOMjudgelogo.pdf';
+        $problemset = new UploadedFile($problemsetFile, 'DOMjudgelogo.pdf');
+        $this->verifyApiJsonResponse('POST', $url . '/problemset', 204, $this->apiUser, null, ['problemset' => $problemset]);
 
         // Verify we do have a banner now
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
-        $textConfig = [
+        $problemsetConfig = [
             [
-                'href'     => "contests/$id/text",
+                'href'     => "contests/$id/problemset",
                 'mime'     => 'application/pdf',
-                'filename' => 'text.pdf',
+                'filename' => 'problemset.pdf',
             ],
         ];
-        self::assertSame($textConfig, $object['text']);
+        self::assertSame($problemsetConfig, $object['problemset']);
 
-        $this->client->request('GET', '/api' . $url . '/text');
+        $this->client->request('GET', '/api' . $url . '/problemset');
         /** @var StreamedResponse $response */
         $response = $this->client->getResponse();
         ob_start();
         $response->getCallback()();
         $callbackData = ob_get_clean();
-        self::assertEquals(file_get_contents($textFile), $callbackData);
+        self::assertEquals(file_get_contents($problemsetFile), $callbackData);
 
-        // Delete the text again
-        $this->verifyApiJsonResponse('DELETE', $url . '/text', 204, $this->apiUser);
+        // Delete the problemset again
+        $this->verifyApiJsonResponse('DELETE', $url . '/problemset', 204, $this->apiUser);
 
-        // Verify we have no text anymore
+        // Verify we have no problemset anymore
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
-        self::assertArrayNotHasKey('text', $object);
+        self::assertArrayNotHasKey('problemset', $object);
     }
 
     /**

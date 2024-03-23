@@ -72,12 +72,12 @@
                 {% if not static %}
                     {% if jury %}
                         {% set link = path('jury_problem', {'probId': problem.probid}) %}
-                    {% elseif problem.problem.problemtextType is not empty %}
+                    {% elseif problem.problem.problemstatementType is not empty %}
                         {% if public %}
-                            {% set link = path('public_problem_text', {probId: problem.probid}) %}
+                            {% set link = path('public_problem_statement', {probId: problem.probid}) %}
                             {% set target = '_blank' %}
                         {% else %}
-                            {% set link = path('team_problem_text', {probId: problem.probid}) %}
+                            {% set link = path('team_problem_statement', {probId: problem.probid}) %}
                             {% set target = '_blank' %}
                         {% endif %}
                     {% endif %}

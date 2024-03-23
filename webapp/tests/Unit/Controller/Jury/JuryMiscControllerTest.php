@@ -112,7 +112,7 @@ class JuryMiscControllerTest extends BaseTestCase
         }
         foreach (range(1, 3) as $id) {
             $statusCode = in_array($contestStage, ['preActivation','preStart','postDeactivate']) || !$public ? 404 : 200;
-            $this->verifyPageResponse('HEAD', '/public/problems/'.$id.'/text', $statusCode);
+            $this->verifyPageResponse('HEAD', '/public/problems/'.$id.'/statement', $statusCode);
         }
         $this->verifyPageResponse('GET', '/public/problems', 200);
         if (in_array($contestStage, ['preStart', ...$nonActiveStages]) || !$public) {

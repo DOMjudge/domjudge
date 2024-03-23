@@ -77,26 +77,26 @@ class ContestVisitor implements EventSubscriberInterface
             $contest->getFreezeData()->started();
 
         // Problem statement
-        if ($contest->getContestTextType() && $hasAccess) {
+        if ($contest->getContestProblemsetType() && $hasAccess) {
             $route = $this->dj->apiRelativeUrl(
-                'v4_contest_text',
+                'v4_contest_problemset',
                 [
                     'cid' => $contest->getApiId($this->eventLogService),
                 ]
             );
-            $mimeType = match ($contest->getContestTextType()) {
+            $mimeType = match ($contest->getContestProblemsetType()) {
                 'pdf' => 'application/pdf',
                 'html' => 'text/html',
                 'txt' => 'text/plain',
                 default => throw new BadRequestHttpException(sprintf('Contest c%d text has unknown type', $contest->getCid())),
             };
-            $contest->setTextForApi(new FileWithName(
+            $contest->setProblemsetForApi(new FileWithName(
                 $route,
                 $mimeType,
-                'text.' . $contest->getContestTextType()
+                'problemset.' . $contest->getContestProblemsetType()
             ));
         } else {
-            $contest->setTextForApi();
+            $contest->setProblemsetForApi();
         }
     }
 }

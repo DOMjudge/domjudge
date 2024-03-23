@@ -43,7 +43,7 @@ class ContestProblemVisitor implements EventSubscriberInterface
         $contestProblem = $event->getObject();
 
         // Problem statement
-        if ($contestProblem->getProblem()->getProblemtextType() === 'pdf') {
+        if ($contestProblem->getProblem()->getProblemstatementType() === 'pdf') {
             $route = $this->dj->apiRelativeUrl(
                 'v4_app_api_problem_statement',
                 [
