@@ -704,13 +704,13 @@
                                 <a href="{{ path('jury_submission_team_output', {'submission': submission.submitid, 'run': run.firstJudgingRun.runid, 'contest': submission.contest.cid}) }}">
                                     <button class="btn btn-sm btn-outline-secondary" >
                                         <i class="fas fa-download"></i>
-                                        {% if runsOutput[runIdx].is_output_run_truncated %}
+                                        {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
                                             Truncated
                                         {% endif %}
                                         Team Output
                                     </button>
                                 </a>
-                                {% if runsOutput[runIdx].is_output_run_truncated %}
+                                {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
                                     <a href="{{ path('request_output', {'jid': run.firstJudgingRun.judgingid, 'jrid': run.firstJudgingRun.runid}) }}">
                                         <button class="btn btn-sm btn-outline-secondary" >
                                             <i class="fas fa-upload"></i>
