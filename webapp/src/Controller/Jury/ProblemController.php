@@ -70,9 +70,15 @@ class ProblemController extends BaseController
             ->groupBy('p.probid')
             ->getQuery()->getResult();
 
+        $badgeTitle = '';
+        $currentContest = $this->dj->getCurrentContest();
+        if ($currentContest !== null) {
+            $badgeTitle = 'in ' . $currentContest->getShortname();
+        }
         $table_fields = [
             'probid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
             'name' => ['title' => 'name', 'sort' => true],
+            'badges' => ['title' => $badgeTitle, 'sort' => false],
             'num_contests' => ['title' => '# contests', 'sort' => true],
             'timelimit' => ['title' => 'time limit', 'sort' => true],
             'memlimit' => ['title' => 'memory limit', 'sort' => true],
@@ -165,22 +171,41 @@ class ProblemController extends BaseController
                 }
                 $problemactions[] = $deleteAction;
             }
+            $default_memlimit = $this->config->get('memory_limit');
+            $default_output_limit = $this->config->get('output_limit');
 
             // Add formatted {mem,output}limit row data for the table.
             foreach (['memlimit', 'outputlimit'] as $col) {
                 $orig_value = @$problemdata[$col]['value'];
                 if (!isset($orig_value)) {
+                    $value = 'default';
+                    if ($col == 'memlimit' && !empty($default_memlimit)) {
+                        $value .= ' (' . Utils::printsize(1024 * $default_memlimit) . ')';
+                    }
+                    if ($col == 'outputlimit' && !empty($default_output_limit)) {
+                        $value .= ' (' . Utils::printsize(1024 * $default_output_limit) . ')';
+                    }
                     $problemdata[$col] = [
-                        'value' => 'default',
+                        'value' => $value,
                         'cssclass' => 'disabled',
                     ];
                 } else {
                     $problemdata[$col] = [
                         'value' => Utils::printsize(1024 * $orig_value),
                         'sortvalue' => $orig_value,
+                        'cssclass' => 'right',
                     ];
                 }
             }
+            $problemdata['timelimit']['value'] = @$problemdata['timelimit']['value'] . 's';
+            $problemdata['timelimit']['cssclass'] = 'right';
+
+            $contestProblems = $p->getContestProblems()->toArray();
+            $badges = [];
+            if ($this->dj->getCurrentContest() !== null) {
+                $badges = array_filter($contestProblems, fn($cp) => $cp->getCid() === $this->dj->getCurrentContest()->getCid());
+            }
+            $problemdata['badges'] = ['value' => $badges];
 
             // merge in the rest of the data
             $problemdata = array_merge($problemdata, [
