@@ -82,9 +82,30 @@
             padding-top: 2rem;
         }
 
+        code {
+            font-size: .875em;
+            color: rgb(214, 51, 132);
+            word-wrap: break-word;
+        }
+
         pre {
+            border-top: 1px dotted #C0C0C0;
+            border-bottom: 1px dotted #C0C0C0;
+            background-color: #FAFAFA;
             margin: 0;
-            white-space: pre-wrap;
+            padding: 5px;
+            font-family: monospace;
+            white-space: pre;
+        }
+
+        pre > code {
+            color: inherit;
+	}
+
+        blockquote {
+            border-left: darkgrey solid .2em;
+            padding-left: .5em;
+            color: darkgrey;
         }
     </style>
 </head>

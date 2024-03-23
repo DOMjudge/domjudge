@@ -179,8 +179,8 @@ exteam	1	Gold Medal	0	0	0	Participants
         self::assertSelectorExists('h1:contains("Clarifications for Demo contest")');
         self::assertSelectorExists('td:contains("Example teamname")');
         self::assertSelectorExists('td:contains("A: Hello World")');
-        self::assertSelectorExists('pre:contains("Is it necessary to read the problem statement carefully?")');
-        self::assertSelectorExists('pre:contains("Lunch is served")');
+        self::assertSelectorExists('div:contains("Is it necessary to read the problem statement carefully?")');
+        self::assertSelectorExists('div:contains("Lunch is served")');
     }
 
     /**
