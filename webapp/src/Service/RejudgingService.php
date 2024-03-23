@@ -277,9 +277,10 @@ class RejudgingService
                     }
 
                     // Update balloons.
-                    $contest    = $this->em->getRepository(Contest::class)->find($submission['cid']);
-                    $submission = $this->em->getRepository(Submission::class)->find($submission['submitid']);
-                    $this->balloonService->updateBalloons($contest, $submission);
+                    $contest          = $this->em->getRepository(Contest::class)->find($submission['cid']);
+                    $submissionEntity = $this->em->getRepository(Submission::class)->find($submission['submitid']);
+                    $judging          = $this->em->getRepository(Judging::class)->find($submission['judgingid']);
+                    $this->balloonService->updateBalloons($contest, $submissionEntity, $judging);
                 });
             } elseif ($action === self::ACTION_CANCEL) {
                 // Reset submission and invalidate judging tasks.
