@@ -29,6 +29,21 @@ Version 8.3.0DEV
  - Add direct button to public page for registering when enabled.
  - Scale batch size of judge tasks dynamically.
  - Rename room to location for teams.
+ - Add option to upload contest text/statement.
+ - Improve on the advice for rejuding on config changes, only when relevant
+   advice to start a rejudging, similar for updating the scoreboard cache.
+ - For interactive problems: Add option to upload contest text/statement.
+ - Allow importing a (generic) contest warning which is displayed on the scoreboard.
+ - [UI] Use entity badges on submission pages.
+ - Added option in the dj_setup_database to make dumps, we advice to use those
+   before the next phase of a contest like setup of teams, before problem
+   imports, before upgrades.
+ - Fixed some bugs to become OpenAPI spec compliant again.
+ - Compile executables with `-std=gnu++20` now.
+ - Record the testcase directory for judging runs, this makes investigating
+   easier.
+ - Set default C/C++ standards in configure script, we intend to ship all
+   scripts free of warnings/errors.
 
 Version 8.2.0 - 6 March 2023
 ----------------------------
