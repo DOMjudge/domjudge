@@ -436,7 +436,7 @@ class Utils
     public static function printsize(int $size, int $decimals = 1): string
     {
         $factor = 1024;
-        $units = ['B', 'KB', 'MB', 'GB'];
+        $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
         $display = $size;
 
         $exact = true;

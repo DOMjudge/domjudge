@@ -159,7 +159,7 @@
         </div>
     </div>
 
-    <div class="mt-4 collapse container clarificationform" id="collapsereplyform">
+    <div class="mt-4 collapse {% if not form.vars.valid %}show{% endif%} container clarificationform" id="collapsereplyform">
         <div class="card">
             <div class="card-header">Send clarification</div>
             <div class="card-body">
