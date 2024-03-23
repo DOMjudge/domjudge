@@ -390,9 +390,10 @@ class SubmissionController extends BaseController
                     $runResult['hostname'] = $firstJudgingRun->getJudgeTask()->getJudgehost()->getHostname();
                     $runResult['judgehostid'] = $firstJudgingRun->getJudgeTask()->getJudgehost()->getJudgehostid();
                 }
-                $runResult['is_output_run_truncated'] = $outputDisplayLimit >= 0 && preg_match(
+                $runResult['is_output_run_truncated_in_db'] = preg_match(
                     '/\[output storage truncated after \d* B\]/',
-                    (string)$runResult['output_run_last_bytes']
+                    $outputDisplayLimit >= 0 ?
+                        (string)$runResult['output_run_last_bytes'] : (string)$runResult['output_run']
                 );
                 if ($firstJudgingRun) {
                     $runResult['testcasedir'] = $firstJudgingRun->getTestcaseDir();
