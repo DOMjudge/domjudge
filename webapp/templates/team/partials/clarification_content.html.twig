@@ -5,7 +5,7 @@
     {% endfor %}
 </div>
 
-<div class="{% if form.vars.valid %}collapse{% endif%} mt-3 container clarificationform" id="collapsereplyform">
+<div class="collapse {% if not form.vars.valid %}show{% endif%} mt-3 container clarificationform" id="collapsereplyform">
     <div class="card card-body">
         {{ form_start(form) }}
         {{ form_row(form.recipient) }}
