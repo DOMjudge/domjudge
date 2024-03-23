@@ -130,7 +130,7 @@ if os.path.exists('languages.json'):
                             dj_utils.upload_file(f'languages/{langid}/executable', 'executable', f'executables/{langid}.zip')
                     for langid in executables:
                         os.remove(f'executables/{langid}.zip')
-            if dj_utils.confirm('  - Upload configuration changes?', True):
+            if dj_utils.confirm('  - Upload language configuration changes?', True):
                 actual_config = _keyify_list(dj_utils.upload_file(f'languages', 'json', f'languages.json'))
                 diffs, new_keys, missing_keys = compare_configs(
                         actual_config=actual_config,
