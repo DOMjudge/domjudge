@@ -213,11 +213,11 @@ class LanguageController extends BaseController
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
-        $language->setAllowSubmit($request->request->getBoolean('allow_submit'));
+        $language->setAllowSubmit($request->request->getBoolean('value'));
         $this->em->flush();
 
         $this->dj->auditlog('language', $langId, 'set allow submit',
-                                         $request->request->getBoolean('allow_submit') ? 'yes' : 'no');
+                                         $request->request->getBoolean('value') ? 'yes' : 'no');
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
 
@@ -229,7 +229,7 @@ class LanguageController extends BaseController
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
-        $enabled = $request->request->getBoolean('allow_judge');
+        $enabled = $request->request->getBoolean('value');
         $language->setAllowJudge($enabled);
         $this->em->flush();
 
@@ -238,7 +238,24 @@ class LanguageController extends BaseController
         }
 
         $this->dj->auditlog('language', $langId, 'set allow judge',
-                                         $request->request->getBoolean('allow_judge') ? 'yes' : 'no');
+                                         $request->request->getBoolean('value') ? 'yes' : 'no');
+        return $this->redirectToRoute('jury_language', ['langId' => $langId]);
+    }
+
+    #[Route(path: '/{langId}/toggle-filter-compiler-flags', name: 'jury_language_toggle_filter_compiler_files')]
+    public function toggleFilterCompilerFlagsAction(Request $request, string $langId): Response
+    {
+        $language = $this->em->getRepository(Language::class)->find($langId);
+        if (!$language) {
+            throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
+        }
+
+        $enabled = $request->request->getBoolean('value');
+        $language->setFilterCompilerFiles($enabled);
+        $this->em->flush();
+
+        $this->dj->auditlog('language', $langId, 'set filter compiler flags',
+            $request->request->getBoolean('value') ? 'yes' : 'no');
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
 

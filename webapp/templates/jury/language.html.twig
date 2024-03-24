@@ -38,19 +38,13 @@
                 <tr>
                     <th>Allow submit</th>
                     <td>
-                        <form action="{{ path('jury_language_toggle_submit', {'langId': language.langid}) }}" method="post" class="d-inline">
-                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
-                                   name="allow_submit" {% if language.allowSubmit %}checked{% endif %}>
-                        </form>
+                        {% include 'jury/partials/language_toggle.html.twig' with {path: 'jury_language_toggle_submit', value: language.allowSubmit} %}
                     </td>
                 </tr>
                 <tr>
                     <th>Allow judge</th>
                     <td>
-                        <form action="{{ path('jury_language_toggle_judge', {'langId': language.langid}) }}" method="post" class="d-inline">
-                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
-                                   name="allow_judge" {% if language.allowJudge %}checked{% endif %}>
-                        </form>
+                        {% include 'jury/partials/language_toggle.html.twig' with {path: 'jury_language_toggle_judge', value: language.allowJudge} %}
                     </td>
                 </tr>
                 <tr>
@@ -74,7 +68,7 @@
                 <tr>
                     <th>Filter files passed to compiler by extension list</th>
                     <td>
-                        {{ language.filterCompilerFiles | printYesNo }}
+                        {% include 'jury/partials/language_toggle.html.twig' with {path: 'jury_language_toggle_filter_compiler_files', value: language.filterCompilerFiles} %}
                     </td>
                 </tr>
                     <tr>
