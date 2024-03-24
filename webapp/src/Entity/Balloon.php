@@ -103,5 +103,4 @@ class Balloon
         $this->contest = $contest;
         return $this;
     }
-
 }
