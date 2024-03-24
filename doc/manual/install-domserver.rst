@@ -128,7 +128,7 @@ settings. Reload the web server for changes to take effect.
 
 An nginx webserver configuration snippet is also provided in
 ``etc/nginx-conf``.  You still need ``htpasswd`` from ``apache2-utils``
-though. To use this configuration, perform the following steps::
+though. To use this configuration, perform the following steps:
 
 .. parsed-literal::
 
@@ -139,7 +139,7 @@ though. To use this configuration, perform the following steps::
   service php\ |phpversion|-fpm reload
   service nginx reload
 
-On Fedora, use the following nginx configuration steps::
+On Fedora, use the following nginx configuration steps:
 
 .. parsed-literal::
 
