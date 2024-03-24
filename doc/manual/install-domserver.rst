@@ -179,6 +179,20 @@ this approach is that the webserver is not aware of the actual client IP. This
 means that access logs for the webserver will still report the IP of the proxy
 or loadbalancer.
 
+Scaling the domserver
+---------------------
+
+Documenting all possible ways to properly size the domserver is out of scope for this
+manual. But properly think about the memory management for the PHP-FPM children with
+~40 per gigabyte of memory, 500 for a 16Gb system.
+
+* Consider the amount of submissions you expect at any given time, does the load stay uniform.
+* Should you expect all teams to solve the easy problems in the first hour.
+  as a rule of thumb you can expect: ``#testcases * #submissions/teams`` as extra load. Similar
+  for the harder problems (which look simple) where multiple wrong submissions can be expected.
+* For more info see the `wiki <https://github.com/DOMjudge/domjudge/wiki/Scaling-and-load-testing>`_
+
+
 Log in to DOMjudge
 ------------------
 The DOMserver should now be operational. You can access the web application
