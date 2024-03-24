@@ -212,7 +212,8 @@ class ImportExportService
             ->setWarningMessage($data['warning_message'] ?? $data['warning-message'] ?? null)
             ->setStarttimeString(date_format($startTime, 'Y-m-d H:i:s e'))
             ->setActivatetimeString(date_format($activateTime, 'Y-m-d H:i:s e'))
-            ->setEndtimeString(sprintf('+%s', $data['duration']));
+            ->setEndtimeString(sprintf('+%s', $data['duration']))
+            ->setPublic($data['public'] ?? true);
         if ($deactivateTime) {
             $contest->setDeactivatetimeString(date_format($deactivateTime, 'Y-m-d H:i:s e'));
         }
