@@ -26,7 +26,7 @@ class BalloonCorrectSubmissionFixture extends AbstractTestDataFixture
 
         /** @var Contest $contest */
         $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'beforeFreeze']);
-        
+
         /** @var Problem $problemA */
         $problemA = new Problem();
         $problemA->setName('U');
@@ -39,9 +39,10 @@ class BalloonCorrectSubmissionFixture extends AbstractTestDataFixture
         $manager->persist($problemA);
         $manager->persist($cp);
         foreach ($submissionData as $index => $submissionItem) {
+            $team = $manager->getRepository(Team::class)->findOneBy(['name' => $submissionItem[0]]);
             $submission = (new Submission())
                 ->setContest($contest)
-                ->setTeam($manager->getRepository(Team::class)->findOneBy(['name' => $submissionItem[0]]))
+                ->setTeam($team)
                 ->setContestProblem($cp)
                 ->setLanguage($manager->getRepository(Language::class)->find($submissionItem[1]))
                 ->setSubmittime(Utils::now()-2)
@@ -57,7 +58,10 @@ class BalloonCorrectSubmissionFixture extends AbstractTestDataFixture
                 /** @var Balloon $balloon */
                 $balloon = new Balloon();
                 $balloon->setSubmission($submission)
-                        ->setDone(false);
+                    ->setDone(false)
+                    ->setTeam($team)
+                    ->setContest($contest)
+                    ->setProblem($problemA);
                 $manager->persist($balloon);
             }
             $submission->addJudging($judging);
