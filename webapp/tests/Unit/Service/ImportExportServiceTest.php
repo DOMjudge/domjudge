@@ -106,6 +106,7 @@ class ImportExportServiceTest extends KernelTestCase
         $contest = $this->getContest($cid);
 
         self::assertEquals($data['name'], $contest->getName());
+        self::assertEquals($data['public'] ?? true, $contest->getPublic());
         self::assertEquals($expectedShortName, $contest->getShortname());
 
         $problems = [];
@@ -154,6 +155,7 @@ class ImportExportServiceTest extends KernelTestCase
                 'scoreboard-freeze-length' => '30:00',
                 'short-name'               => 'practice',
                 'start-time'               => '2021-03-27 09:00:00+00:00',
+                'public'                   => true,
                 'problems'                 => [
                     [
                         'color'      => '#FE9DAF',
@@ -187,6 +189,7 @@ class ImportExportServiceTest extends KernelTestCase
                 'duration'                   => '5:00:00',
                 'start_time'                 => '2020-01-01T12:34:56+02:00',
                 'scoreboard_freeze_duration' => '1:00:00',
+                'public'                     => false,
             ],
             'test-contest',
         ];
