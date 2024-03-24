@@ -21,7 +21,7 @@ final class Version20240322141105 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
 
-        // remove dupicates
+        // remove duplicates
         $this->addSql('DELETE b FROM balloon as b LEFT JOIN (SELECT balloonid FROM balloon as b LEFT JOIN submission as s USING (submitid) GROUP BY teamid, probid, cid) as c ON(b.balloonid = c.balloonid) WHERE c.balloonid IS NULL');
 
         $this->addSql('ALTER TABLE balloon ADD teamid INT UNSIGNED DEFAULT NULL COMMENT \'Team ID\', ADD probid INT UNSIGNED DEFAULT NULL COMMENT \'Problem ID\', ADD cid INT UNSIGNED DEFAULT NULL COMMENT \'Contest ID\'');
