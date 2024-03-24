@@ -161,7 +161,7 @@ class LanguagesControllerTest extends JuryControllerTestCase
 
         // Now, disable the language.
         $url = "/jury/languages/c/toggle-judge";
-        $this->client->request(Request::METHOD_POST, $url, ['allow_judge' => false]);
+        $this->client->request(Request::METHOD_POST, $url, ['value' => false]);
 
         // Submit again.
         $this->addSubmission('DOMjudge', 'fltcmp');
@@ -171,7 +171,7 @@ class LanguagesControllerTest extends JuryControllerTestCase
         self::assertEquals(4, $judgeTaskQuery->getSingleScalarResult());
 
         // Enable judging again.
-        $this->client->request(Request::METHOD_POST, $url, ['allow_judge' => true]);
+        $this->client->request(Request::METHOD_POST, $url, ['value' => true]);
 
         // This should add more queue and judge tasks.
         self::assertEquals(2, $queueTaskQuery->getSingleScalarResult());
