@@ -390,7 +390,6 @@ class ContestControllerTest extends JuryControllerTestCase
             'Edit',
             'Delete',
             'Lock',
-            'Finalize this contest',
             'Judge remaining testcases',
             'Heat up judgehosts with contest data',
         ];

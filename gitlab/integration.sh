@@ -239,8 +239,8 @@ set -x
 # Finalize contest so that awards appear in the feed; first freeze and end the
 # contest if that has not already been done.
 export CURLOPTS="--fail -m 30 -b $COOKIEJAR"
-curl $CURLOPTS -X POST -d 'contest=1&donow[freeze]=freeze now' http://localhost/domjudge/jury/contests || true
-curl $CURLOPTS -X POST -d 'contest=1&donow[end]=end now' http://localhost/domjudge/jury/contests || true
+curl $CURLOPTS http://localhost/domjudge/jury/contests/1/freeze/doNow || true
+curl $CURLOPTS http://localhost/domjudge/jury/contests/1/end/doNow || true
 curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/1/finalize
 
 # shellcheck disable=SC2002,SC2196

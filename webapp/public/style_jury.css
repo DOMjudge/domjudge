@@ -239,3 +239,7 @@ table.table-full-clickable-cell tr .table-button-head-right-right{
 .execid {
     font-family: monospace;
 }
+
+.timebutton {
+    min-width: 9em;
+}
