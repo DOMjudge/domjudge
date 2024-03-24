@@ -342,19 +342,43 @@ class ContestController extends BaseController
         ]);
     }
 
-    #[Route(path: '/{contestId}/toggle-submit', name: 'jury_contest_toggle_submit')]
-    public function toggleSubmitAction(Request $request, string $contestId): Response
+    #[Route(path: '/{contestId}/toggle/{type<submit|balloons|tiebreaker|medals|public>}', name: 'jury_contest_toggle')]
+    public function toggleSubmitAction(Request $request, string $contestId, string $type): Response
     {
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
 
-        $contest->setAllowSubmit($request->request->getBoolean('allow_submit'));
+        $value = $request->request->getBoolean('value');
+
+        switch ($type) {
+            case 'submit':
+                $contest->setAllowSubmit($value);
+                $label = 'set allow submit';
+                break;
+            case 'balloons':
+                $contest->setProcessBalloons($value);
+                $label = 'set process balloons';
+                break;
+            case 'tiebreaker':
+                $contest->setRuntimeAsScoreTiebreaker($value);
+                $label = 'set runtime as tiebreaker';
+                break;
+            case 'medals':
+                $contest->setMedalsEnabled($value);
+                $label = 'set medal processing';
+                break;
+            case 'public':
+                $contest->setPublic($value);
+                $label = 'set publicly visible';
+                break;
+            default:
+                throw new BadRequestHttpException('Unknown toggle type');
+        }
         $this->em->flush();
 
-        $this->dj->auditlog('contest', $contestId, 'set allow submit',
-            $request->request->getBoolean('allow_submit') ? 'yes' : 'no');
+        $this->dj->auditlog('contest', $contestId, $label, $value ? 'yes' : 'no');
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
