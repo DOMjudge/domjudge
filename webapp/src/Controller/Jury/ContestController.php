@@ -70,106 +70,6 @@ class ContestController extends BaseController
     {
         $em = $this->em;
 
-        if ($doNow = $request->request->all('donow')) {
-            $times         = ['activate', 'start', 'freeze', 'end',
-                              'unfreeze', 'finalize', 'deactivate'];
-            $start_actions = ['delay_start', 'resume_start'];
-            $actions       = array_merge($times, $start_actions);
-
-            if (!$this->isGranted('ROLE_ADMIN')) {
-                throw new AccessDeniedHttpException();
-            }
-            $contest = $em->getRepository(Contest::class)->find($request->request->get('contest'));
-            if (!$contest) {
-                throw new NotFoundHttpException('Contest not found');
-            }
-
-            $time = key($doNow);
-            if (!in_array($time, $actions, true)) {
-                throw new BadRequestHttpException(
-                    sprintf("Unknown value '%s' for timetype", $time)
-                );
-            }
-
-            if ($time === 'finalize') {
-                return $this->redirectToRoute(
-                    'jury_contest_finalize',
-                    ['contestId' => $contest->getCid()]
-                );
-            }
-
-            $now       = (int)floor(Utils::now());
-            $nowstring = date('Y-m-d H:i:s ', $now) . date_default_timezone_get();
-            $this->dj->auditlog('contest', $contest->getCid(), $time . ' now', $nowstring);
-
-            // Special case delay/resume start (only sets/unsets starttime_undefined).
-            $maxSeconds = Contest::STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
-            if (in_array($time, $start_actions, true)) {
-                $enabled = $time !== 'delay_start';
-                if (Utils::difftime((float)$contest->getStarttime(false), $now) <= $maxSeconds) {
-                    $this->addFlash(
-                        'error',
-                        sprintf("Cannot %s less than %d seconds before contest start.",
-                                $time, $maxSeconds)
-                    );
-                    return $this->redirectToRoute('jury_contests');
-                }
-                $contest->setStarttimeEnabled($enabled);
-                $em->flush();
-                $this->eventLogService->log(
-                    'contest',
-                    $contest->getCid(),
-                    EventLogService::ACTION_UPDATE,
-                    $contest->getCid()
-                );
-                $this->addFlash('scoreboard_refresh',
-                                'After changing the contest start time, it may be ' .
-                                'necessary to recalculate any cached scoreboards.');
-                return $this->redirectToRoute('jury_contests');
-            }
-
-            $juryTimeData = $contest->getDataForJuryInterface();
-            if (!$juryTimeData[$time]['show_button']) {
-                throw new BadRequestHttpException(
-                    sprintf('Cannot update %s time at this moment', $time)
-                );
-            }
-
-            // starttime is special because other, relative times depend on it.
-            if ($time == 'start') {
-                if ($contest->getStarttimeEnabled() &&
-                    Utils::difftime((float)$contest->getStarttime(false),
-                                    $now) <= $maxSeconds) {
-                    $this->addFlash(
-                        'danger',
-                        sprintf("Cannot update starttime less than %d seconds before contest start.",
-                                $maxSeconds)
-                    );
-                    return $this->redirectToRoute('jury_contests');
-                }
-                $contest
-                    ->setStarttime($now)
-                    ->setStarttimeString($nowstring)
-                    ->setStarttimeEnabled(true);
-                $em->flush();
-
-                $this->addFlash('scoreboard_refresh',
-                                'After changing the contest start time, it may be ' .
-                                'necessary to recalculate any cached scoreboards.');
-            } else {
-                $method = sprintf('set%stimeString', $time);
-                $contest->{$method}($nowstring);
-                $em->flush();
-            }
-            $this->eventLogService->log(
-                'contest',
-                $contest->getCid(),
-                EventLogService::ACTION_UPDATE,
-                $contest->getCid()
-            );
-            return $this->redirectToRoute('jury_contests');
-        }
-
         /** @var Contest[] $contests */
         $contests = $em->createQueryBuilder()
             ->select('c')
@@ -870,6 +770,102 @@ class ContestController extends BaseController
             'blockers' => $blockers,
             'form' => $form,
         ]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{contestId<\d+>}/{time}/doNow', name: 'jury_contest_donow')]
+    public function doNowAction(Request $request, int $contestId, string $time): Response
+    {
+        $times         = ['activate', 'start', 'freeze', 'end', 'unfreeze', 'finalize', 'deactivate'];
+        $start_actions = ['delay_start', 'resume_start'];
+        $actions       = array_merge($times, $start_actions);
+
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
+        }
+
+        if (!in_array($time, $actions, true)) {
+            throw new BadRequestHttpException(sprintf("Unknown value '%s' for timetype", $time));
+        }
+
+        if ($time === 'finalize') {
+            return $this->redirectToRoute('jury_contest_finalize', ['contestId' => $contest->getCid()]);
+        }
+
+        $now       = (int)floor(Utils::now());
+        $nowstring = date('Y-m-d H:i:s ', $now) . date_default_timezone_get();
+        $this->dj->auditlog('contest', $contest->getCid(), $time . ' now', $nowstring);
+
+        // Special case delay/resume start (only sets/unsets starttime_undefined).
+        $maxSeconds = Contest::STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
+        if (in_array($time, $start_actions, true)) {
+            $enabled = $time !== 'delay_start';
+            if (Utils::difftime((float)$contest->getStarttime(false), $now) <= $maxSeconds) {
+                $this->addFlash(
+                    'error',
+                    sprintf("Cannot '%s' less than %d seconds before contest start.",
+                        $time, $maxSeconds)
+                );
+                return $this->redirectToRoute('jury_contests');
+            }
+            $contest->setStarttimeEnabled($enabled);
+            $this->em->flush();
+            $this->eventLogService->log(
+                'contest',
+                $contest->getCid(),
+                EventLogService::ACTION_UPDATE,
+                $contest->getCid()
+            );
+            $this->addFlash('scoreboard_refresh', 'After changing the contest start time, it may be '
+                . 'necessary to recalculate any cached scoreboards.');
+            return $this->redirectToRoute('jury_contests');
+        }
+
+        $juryTimeData = $contest->getDataForJuryInterface();
+        if (!$juryTimeData[$time]['show_button']) {
+            throw new BadRequestHttpException(
+                sprintf("Cannot update '%s' time at this moment", $time)
+            );
+        }
+
+        // starttime is special because other, relative times depend on it.
+        if ($time == 'start') {
+            if ($contest->getStarttimeEnabled() &&
+                Utils::difftime((float)$contest->getStarttime(false),
+                    $now) <= $maxSeconds) {
+                $this->addFlash(
+                    'danger',
+                    sprintf("Cannot update starttime less than %d seconds before contest start.",
+                        $maxSeconds)
+                );
+                return $this->redirectToRoute('jury_contests');
+            }
+            $contest
+                ->setStarttime($now)
+                ->setStarttimeString($nowstring)
+                ->setStarttimeEnabled(true);
+            $this->em->flush();
+
+            $this->addFlash('scoreboard_refresh', 'After changing the contest start time, it may be '
+                . 'necessary to recalculate any cached scoreboards.');
+        } else {
+            $method = sprintf('set%stimeString', $time);
+            $contest->{$method}($nowstring);
+            $this->em->flush();
+        }
+        $this->eventLogService->log(
+            'contest',
+            $contest->getCid(),
+            EventLogService::ACTION_UPDATE,
+            $contest->getCid()
+        );
+
+        $referer = $request->headers->get('referer');
+        if ($referer) {
+            return $this->redirect($referer);
+        }
+        return $this->redirectToRoute('jury_contests');
     }
 
     #[Route(path: '/{contestId<\d+>}/request-remaining', name: 'jury_contest_request_remaining')]
