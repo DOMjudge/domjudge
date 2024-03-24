@@ -22,7 +22,7 @@ final class Version20240322141105 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
 
         // remove duplicates
-        $this->addSql('DELETE b FROM balloon as b LEFT JOIN (SELECT balloonid FROM balloon as b LEFT JOIN submission as s USING (submitid) GROUP BY teamid, probid, cid) as c ON(b.balloonid = c.balloonid) WHERE c.balloonid IS NULL');
+        $this->addSql('DELETE b FROM balloon as b LEFT JOIN (SELECT min(b.balloonid) AS min_balloonid FROM balloon as b LEFT JOIN submission as s USING (submitid) GROUP BY teamid, probid, cid) as c ON(b.balloonid = c.min_balloonid) WHERE c.min_balloonid IS NULL');
 
         $this->addSql('ALTER TABLE balloon ADD teamid INT UNSIGNED DEFAULT NULL COMMENT \'Team ID\', ADD probid INT UNSIGNED DEFAULT NULL COMMENT \'Problem ID\', ADD cid INT UNSIGNED DEFAULT NULL COMMENT \'Contest ID\'');
         $this->addSql('ALTER TABLE balloon ADD CONSTRAINT FK_643B3B904DD6ABF3 FOREIGN KEY (teamid) REFERENCES team (teamid) ON DELETE CASCADE');
