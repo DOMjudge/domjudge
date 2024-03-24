@@ -187,7 +187,7 @@ manual. But properly think about the memory management for the PHP-FPM children 
 ~40 per gigabyte of memory, 500 for a 16Gb system.
 
 * Consider the amount of submissions you expect at any given time, does the load stay uniform.
-* Should you expect all teams to solve the easy problems in the first hour.
+* Do you expect all teams to solve the easy problems in the first hour?
   as a rule of thumb you can expect: ``#testcases * #submissions/teams`` as extra load. Similar
   for the harder problems (which look simple) where multiple wrong submissions can be expected.
 * For more info see the `wiki <https://github.com/DOMjudge/domjudge/wiki/Scaling-and-load-testing>`_
