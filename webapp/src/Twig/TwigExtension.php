@@ -156,6 +156,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                                                $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'doc_links'                     => $this->dj->getDocLinks(),
             'allow_registration'            => $selfRegistrationCategoriesCount !== 0,
+            'enable_ranking'                => $this->config->get('enable_ranking'),
         ];
     }
 

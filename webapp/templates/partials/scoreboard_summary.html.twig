@@ -5,15 +5,20 @@
             {% if showAffiliationLogos %}
                 {% set summaryColspan = summaryColspan + 1 %}
             {% endif %}
-            <td class="scoresummary" title="Summary" colspan="{{ summaryColspan }}">Summary</td>
-            {% if scoreboard.showPoints %}
-                <td class="scorenc"></td>
-            {% else %}
-                <td title="total solved" class="scorenc">
-                    {{ scoreboard.summary.numberOfPoints(sortOrder) }}
-                </td>
+            {% if not enable_ranking %}
+                {% set summaryColspan = summaryColspan - 1 %}
             {% endif %}
-            <td></td>
+            <td class="scoresummary" title="Summary" colspan="{{ summaryColspan }}">Summary</td>
+            {% if enable_ranking %}
+                {% if scoreboard.showPoints %}
+                    <td class="scorenc"></td>
+                {% else %}
+                    <td title="total solved" class="scorenc">
+                        {{ scoreboard.summary.numberOfPoints(sortOrder) }}
+                    </td>
+                {% endif %}
+                <td></td>
+            {% endif %}
             {% for problem in scoreboard.problems %}
                 {% set summary = scoreboard.summary.problem(problem.probid) %}
                 <td style="text-align: left;">
