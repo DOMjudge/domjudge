@@ -9,6 +9,7 @@ use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,6 +33,10 @@ class ScoreboardController extends BaseController
     #[Route(path: '/scoreboard', name: 'team_scoreboard')]
     public function scoreboardAction(Request $request): Response
     {
+        if ($this->config->get('enable_ranking')) {
+            throw new BadRequestHttpException('Scoreboard is not available.');
+        }
+
         $user       = $this->dj->getUser();
         $response   = new Response();
         $contest    = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
@@ -51,6 +56,10 @@ class ScoreboardController extends BaseController
     #[Route(path: '/team/{teamId<\d+>}', name: 'team_team')]
     public function teamAction(Request $request, int $teamId): Response
     {
+        if ($this->config->get('enable_ranking')) {
+            throw new BadRequestHttpException('Scoreboard is not available.');
+        }
+
         /** @var Team|null $team */
         $team             = $this->em->getRepository(Team::class)->find($teamId);
         if ($team && $team->getCategory() && !$team->getCategory()->getVisible() && $teamId !== $this->dj->getUser()->getTeamId()) {

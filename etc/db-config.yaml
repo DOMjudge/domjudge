@@ -318,6 +318,11 @@
                 2: After first submission
             regex: /^\d+$/
             error_message: A value between 0 and 2 is required.
+        -   name: enable_ranking
+            type: bool
+            default_value: true
+            public: true
+            description: If disabled, no ranking information is shown to contestants.
 -   category: Authentication
     description: Options related to authentication.
     items:

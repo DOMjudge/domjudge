@@ -22,6 +22,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 #[Rest\Route('/contests/{cid}/scoreboard')]
 #[OA\Tag(name: 'Scoreboard')]
@@ -106,6 +107,10 @@ class ScoreboardController extends AbstractApiController
         #[MapQueryParameter]
         bool $strict = false,
     ): Scoreboard {
+        if (!$this->config->get('enable_ranking') && !$this->dj->checkrole('jury')) {
+            throw new BadRequestHttpException('Scoreboard is not available.');
+        }
+
         $filter = new Filter();
         if ($category) {
             $filter->categories = [$category];
