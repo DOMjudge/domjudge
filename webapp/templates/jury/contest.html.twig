@@ -107,9 +107,9 @@
                 <tr>
                     <th>Allow submit</th>
                     <td>
-                        <form action="{{ path('jury_contest_toggle_submit', {'contestId': contest.cid}) }}" method="post" class="d-inline">
+                        <form action="{{ path('jury_contest_toggle', {'contestId': contest.cid, 'type': 'submit'}) }}" method="post" class="d-inline">
                             <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
-                                   name="allow_submit" {% if contest.allowSubmit %}checked{% endif %}>
+                                   name="value" {% if contest.allowSubmit %}checked{% endif %}>
                         </form>
                     </td>
                 </tr>
@@ -126,15 +126,30 @@
                 {% endif %}
                 <tr>
                     <th>Process balloons</th>
-                    <td>{{ contest.processBalloons | printYesNo }}</td>
+                    <td>
+                        <form action="{{ path('jury_contest_toggle', {'contestId': contest.cid, 'type': 'balloons'}) }}" method="post" class="d-inline">
+                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
+                                   name="value" {% if contest.processBalloons %}checked{% endif %}>
+                        </form>
+                    </td>
                 </tr>
                 <tr>
                     <th>Runtime as tiebreaker</th>
-                    <td>{{ contest.runtimeAsScoreTiebreaker | printYesNo }}</td>
+                    <td>
+                        <form action="{{ path('jury_contest_toggle', {'contestId': contest.cid, 'type': 'tiebreaker'}) }}" method="post" class="d-inline">
+                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
+                                   name="value" {% if contest.runtimeAsScoreTiebreaker %}checked{% endif %}>
+                        </form>
+                    </td>
                 </tr>
                 <tr>
                     <th>Process medals</th>
-                    <td>{{ contest.medalsEnabled | printYesNo }}</td>
+                    <td>
+                        <form action="{{ path('jury_contest_toggle', {'contestId': contest.cid, 'type': 'medals'}) }}" method="post" class="d-inline">
+                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
+                                   name="value" {% if contest.medalsEnabled %}checked{% endif %}>
+                        </form>
+                    </td>
                 </tr>
                 <tr>
                     <th>Medals</th>
@@ -175,7 +190,12 @@
                 </tr>
                 <tr>
                     <th>Publicly visible</th>
-                    <td>{{ contest.public | printYesNo }}</td>
+                    <td>
+                        <form action="{{ path('jury_contest_toggle', {'contestId': contest.cid, 'type': 'public'}) }}" method="post" class="d-inline">
+                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
+                                   name="value" {% if contest.public %}checked{% endif %}>
+                        </form>
+                    </td>
                 </tr>
                 <tr>
                     <th>Open to all teams</th>
