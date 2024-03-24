@@ -107,10 +107,7 @@
                 <tr>
                     <th>Allow submit</th>
                     <td>
-                        <form action="{{ path('jury_contest_toggle', {'contestId': contest.cid, 'type': 'submit'}) }}" method="post" class="d-inline">
-                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
-                                   name="value" {% if contest.allowSubmit %}checked{% endif %}>
-                        </form>
+                        {% include 'jury/partials/contest_toggle.html.twig' with {type: 'submit', enabled: contest.allowSubmit} %}
                     </td>
                 </tr>
                 {% if contest.contestTextType is not empty %}
@@ -127,28 +124,19 @@
                 <tr>
                     <th>Process balloons</th>
                     <td>
-                        <form action="{{ path('jury_contest_toggle', {'contestId': contest.cid, 'type': 'balloons'}) }}" method="post" class="d-inline">
-                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
-                                   name="value" {% if contest.processBalloons %}checked{% endif %}>
-                        </form>
+                        {% include 'jury/partials/contest_toggle.html.twig' with {type: 'balloons', enabled: contest.processBalloons} %}
                     </td>
                 </tr>
                 <tr>
                     <th>Runtime as tiebreaker</th>
                     <td>
-                        <form action="{{ path('jury_contest_toggle', {'contestId': contest.cid, 'type': 'tiebreaker'}) }}" method="post" class="d-inline">
-                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
-                                   name="value" {% if contest.runtimeAsScoreTiebreaker %}checked{% endif %}>
-                        </form>
+                        {% include 'jury/partials/contest_toggle.html.twig' with {type: 'tiebreaker', enabled: contest.runtimeAsScoreTiebreaker} %}
                     </td>
                 </tr>
                 <tr>
                     <th>Process medals</th>
                     <td>
-                        <form action="{{ path('jury_contest_toggle', {'contestId': contest.cid, 'type': 'medals'}) }}" method="post" class="d-inline">
-                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
-                                   name="value" {% if contest.medalsEnabled %}checked{% endif %}>
-                        </form>
+                        {% include 'jury/partials/contest_toggle.html.twig' with {type: 'medals', enabled: contest.medalsEnabled} %}
                     </td>
                 </tr>
                 <tr>
@@ -191,10 +179,7 @@
                 <tr>
                     <th>Publicly visible</th>
                     <td>
-                        <form action="{{ path('jury_contest_toggle', {'contestId': contest.cid, 'type': 'public'}) }}" method="post" class="d-inline">
-                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
-                                   name="value" {% if contest.public %}checked{% endif %}>
-                        </form>
+                        {% include 'jury/partials/contest_toggle.html.twig' with {type: 'public', enabled: contest.public} %}
                     </td>
                 </tr>
                 <tr>
