@@ -32,7 +32,7 @@ Version 8.3.0DEV
  - Add option to upload contest problemset document.
  - Improve on the advice for rejuding on config changes, only when relevant
    advice to start a rejudging, similar for updating the scoreboard cache.
- - For interactive problems: Add option to upload contest text/statement.
+ - For interactive problems: add explicit statement to when one of sides of the interactions ran closed their output.
  - Allow importing a (generic) contest warning which is displayed on the scoreboard.
  - [UI] Use entity badges on submission pages.
  - Added option in the dj_setup_database to make dumps, we advice to use those
