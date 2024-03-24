@@ -1,10 +1,10 @@
 {% extends "jury/base.html.twig" %}
 
-{% block title %}Contest problems {{ current_jury_contest.shortname | default('') }} - {{ parent() }}{% endblock %}
+{% block title %}Contest problems {{ current_contest.shortname | default('') }} - {{ parent() }}{% endblock %}
 
 {% block content %}
     {% include 'partials/problem_list.html.twig' with {
-        contest: current_team_contest,
+        contest: current_contest,
         show_contest_text: true,
         contest_text_path: 'jury_contest_text',
         contest_text_add_cid: true,
