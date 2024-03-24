@@ -14,7 +14,7 @@ final class Version20240322141105 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Add columns teamid, probid, cid and an uniq index with them to the baloon table.';
+        return 'Add columns teamid, probid, cid and an uniq index with them to the balloon table.';
     }
 
     public function up(Schema $schema): void
