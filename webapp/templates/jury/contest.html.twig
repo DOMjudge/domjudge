@@ -40,75 +40,55 @@
                 <tr>
                     <th>CID</th>
                     <td>c{{ contest.cid }}</td>
+                    <td></td>
                 </tr>
                 {% if showExternalId(contest) %}
                     <tr>
                         <th>External ID</th>
                         <td>{{ contest.externalid }}</td>
+                        <td></td>
                     </tr>
                 {% endif %}
                 <tr>
                     <th>Short name</th>
                     <td>{{ contest.shortname }}</td>
+                    <td></td>
                 </tr>
-                <tr>
-                    <th>Activate time</th>
-                    <td>
-                        {{ contest.activatetimeString }}
-                        {% if contest.isActive %}
-                            <i class="fas fa-check"></i>
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Start time</th>
-                    <td>
-                        {% if contest.starttimeEnabled %}
-                            {{ contest.starttimeString }}
-                            {% if contest.state.started %}
-                                <i class="fas fa-check"></i>
+                {% for type, data in contest.dataForJuryInterface %}
+                    <tr>
+                        <td class="{{ data.class|default('') }}"><b>{{ data.label }}:</b></td>
+                        <td class="{{ data.class|default('') }}">
+                            {{ data.time }}
+                            {% if data.icon is defined %}
+                                <i class="fas fa-{{ data.icon }}"></i>
                             {% endif %}
+                        </td>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <td>
+                                {% if data.show_button %}
+                                    {% set button_label =  type ~ " now" %}
+                                    {{ button(path('jury_contest_donow', {'contestId': contest.cid, 'time': type}), button_label, 'primary btn-sm timebutton') }}
+                                {% endif %}
+                                {% if data.extra_button is defined %}
+                                    {{ button(path('jury_contest_donow', {'contestId': contest.cid, 'time': data.extra_button.type}), data.extra_button.label, 'primary btn-sm timebutton') }}
+                                {% endif %}
+                                {% if type == 'finalize' %}
+                                    {% if contest.finalizetime %}
+                                        {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary btn-sm timebutton') }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
                         {% else %}
-                            <span class="ignore">{{ contest.starttimeString }}</span> <em>delayed</em>
+                            <td></td>
                         {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Scoreboard freeze</th>
-                    <td>
-                        {{ contest.freezetimeString|default('-') }}
-                        {% if contest.state.frozen %}
-                            <i class="fas fa-check"></i>
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>End time</th>
-                    <td>
-                        {{ contest.endtimeString }}
-                        {% if contest.state.ended %}
-                            <i class="fas fa-check"></i>
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Scoreboard unfreeze</th>
-                    <td>
-                        {{ contest.unfreezetimeString|default('-') }}
-                        {% if contest.state.thawed %}
-                            <i class="fas fa-check"></i>
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Deactivate time</th>
-                    <td>{{ contest.deactivatetimeString }}</td>
-                </tr>
+                    </tr>
+                {% endfor %}
                 <tr>
                     <th>Allow submit</th>
                     <td>
                         {% include 'jury/partials/contest_toggle.html.twig' with {type: 'submit', enabled: contest.allowSubmit} %}
                     </td>
+                    <td></td>
                 </tr>
                 {% if contest.contestProblemsetType is not empty %}
                     <tr>
@@ -119,6 +99,7 @@
                                    class="fas fa-file-{{ contest.contestProblemsetType }}"></i>
                             </a>
                         </td>
+                        <td></td>
                     </tr>
                 {% endif %}
                 <tr>
@@ -126,6 +107,7 @@
                     <td>
                         {% include 'jury/partials/contest_toggle.html.twig' with {type: 'balloons', enabled: contest.processBalloons} %}
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <th>Runtime as tiebreaker</th>
@@ -138,6 +120,7 @@
                     <td>
                         {% include 'jury/partials/contest_toggle.html.twig' with {type: 'medals', enabled: contest.medalsEnabled} %}
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <th>Medals</th>
@@ -175,16 +158,19 @@
                             <em>none</em>
                         {% endif %}
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <th>Publicly visible</th>
                     <td>
                         {% include 'jury/partials/contest_toggle.html.twig' with {type: 'public', enabled: contest.public} %}
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <th>Open to all teams</th>
                     <td>{{ contest.openToAllTeams | printYesNo }}</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <th>Teams</th>
@@ -207,6 +193,7 @@
                             {% endfor %}
                         {% endif %}
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <th>Public static scoreboard ZIP</th>
@@ -215,6 +202,7 @@
                             <i class="fas fa-download"></i> Download
                         </a>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <th>Jury (unfrozen) static scoreboard ZIP</th>
@@ -223,6 +211,7 @@
                             <i class="fas fa-download"></i> Download
                         </a>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <th>Sample data ZIP</th>
@@ -235,6 +224,7 @@
                             Contains samples, attachments and statement for all problems.
                         </small>
                     </td>
+                    <td></td>
                 </tr>
                 {% set contestId = contest.cid %}
                 {% if showExternalId(contest) %}
@@ -248,11 +238,13 @@
                     <tr>
                         <th>Banner</th>
                         <td><img style="max-width: 300px;" src="{{ asset(banner) }}" title="{{ contest.name }}" /></td>
+                        <td></td>
                     </tr>
                 {% endif %}
                 <tr>
                     <th>Warning message</th>
                     <td>{{ contest.warningMessage }}</td>
+                    <td></td>
                 </tr>
             </table>
         </div>
@@ -452,11 +444,6 @@
                 {{ button(path('jury_contest_edit', {'contestId': contest.cid}), 'Edit', 'primary', 'edit') }}
                 {{ button(path('jury_contest_delete', {'contestId': contest.cid}), 'Delete', 'danger', 'trash-alt', true) }}
                 {{ button(path('jury_contest_lock', {'contestId': contest.cid}), 'Lock', 'secondary', 'lock') }}
-                {% if contest.finalizetime %}
-                    {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary', 'lock') }}
-                {% else %}
-                    {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'flag-checkered') }}
-                {% endif %}
             {% endif %}
             {{ button(path('jury_contest_request_remaining', {'contestId': contest.cid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
         {% endif %}

@@ -1093,6 +1093,11 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             $resultItem = [];
             $method     = sprintf('get%stime', ucfirst($time));
             $timeValue  = $this->{$method}();
+            $timeValueString = '';
+            if ($time !== 'finalize') {
+                $method = sprintf('get%stimeString', ucfirst($time));
+                $timeValueString = $this->{$method}();
+            }
             if ($time === 'start' && !$this->getStarttimeEnabled()) {
                 $resultItem['icon'] = 'ellipsis-h';
                 $timeValue          = $this->getStarttime(false);
@@ -1109,7 +1114,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             }
 
             $resultItem['label'] = sprintf('%s time', ucfirst($time));
-            $resultItem['time']  = Utils::printtime($timeValue, 'Y-m-d H:i:s (T)');
+            $resultItem['time']  = $timeValueString;
+            if (empty($resultItem['time'])) {
+                $resultItem['time']  = Utils::printtime($timeValue, 'Y-m-d H:i:s (T)');
+            }
             if ($time === 'start' && !$this->getStarttimeEnabled()) {
                 $resultItem['class'] = 'ignore';
             }
