@@ -1,6 +1,6 @@
 {% if limitToTeamIds is null %}
     {% if showTeamSubmissions or jury %}
-        <tr class="summaryline">
+        <tr style="border-top: 2px solid black;">
             {% set summaryColspan = 3 %}
             {% if showAffiliationLogos %}
                 {% set summaryColspan = summaryColspan + 1 %}
@@ -16,32 +16,32 @@
             <td></td>
             {% for problem in scoreboard.problems %}
                 {% set summary = scoreboard.summary.problem(problem.probid) %}
-                <td class="problem-summary">
+                <td style="text-align: left;">
                     {% set link = null %}
                     {% if jury %}
                         {% set link = path('jury_problem', {'probId': problem.probid}) %}
                     {% endif %}
                     <a {% if link %}href="{{ link }}"{% endif %}>
                         <i class="fas fa-thumbs-up fa-fw"></i>
-                        <span class="submcorrect problem-summary-title" title="number of accepted submissions">
+                        <span class="submcorrect" style="font-size:90%;" title="number of accepted submissions">
                                 {{ summary.numSubmissionsCorrect[sortOrder] ?? 0 }}
                             </span>
                         <br/>
 
                         <i class="fas fa-thumbs-down fa-fw"></i>
-                        <span class="submreject problem-summary-title" title="number of rejected submissions">
+                        <span class="submreject" style="font-size:90%;" title="number of rejected submissions">
                                 {{ summary.numSubmissions[sortOrder] ?? 0 - summary.numSubmissionsCorrect[sortOrder] ?? 0 }}
                             </span>
                         <br/>
 
                         <i class="fas fa-question-circle fa-fw"></i>
-                        <span class="submpend problem-summary-title" title="number of pending submissions">
+                        <span class="submpend" style="font-size:90%;" title="number of pending submissions">
                                 {{ summary.numSubmissionsPending[sortOrder] ?? 0 }}
                             </span>
                         <br/>
 
                         <i class="fas fa-clock fa-fw"></i>
-                        <span class="problem-summary-title" title="first solved">
+                        <span style="font-size:90%;" title="first solved">
                             {% if summary.bestTimeInMinutes(sortOrder) is not null %}
                                 {{ summary.bestTimeInMinutes(sortOrder) }}min
                             {% else %}
