@@ -32,11 +32,6 @@
 /* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
 #include "runguard-config.h"
 
-/* For chroot(), which is not POSIX. */
-#define _DEFAULT_SOURCE
-/* For unshare() used by cgroups. */
-#define _GNU_SOURCE
-
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/param.h>
@@ -46,23 +41,23 @@
 #include <sys/times.h>
 #include <sys/resource.h>
 #include <sys/types.h>
-#include <errno.h>
+#include <cerrno>
 #include <fcntl.h>
-#include <signal.h>
-#include <stdlib.h>
+#include <csignal>
+#include <cstdlib>
 #include <unistd.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdarg>
+#include <cstdio>
 #include <getopt.h>
 #include <fnmatch.h>
 #include <regex.h>
 #include <pwd.h>
 #include <grp.h>
-#include <time.h>
-#include <math.h>
-#include <limits.h>
-#include <inttypes.h>
+#include <ctime>
+#include <cmath>
+#include <climits>
+#include <cinttypes>
 #include <libcgroup.h>
 #include <sched.h>
 #include <sys/sysinfo.h>
@@ -99,10 +94,6 @@ const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
 const struct timespec cg_delete_delay = { 0, 10000000L }; /* 0.01 seconds */
 
 extern int errno;
-
-#ifndef _GNU_SOURCE
-extern char **environ;
-#endif
 
 const int exit_failure = -1;
 
@@ -159,8 +150,6 @@ pid_t child_pid = -1;
 static volatile sig_atomic_t received_SIGCHLD = 0;
 static volatile sig_atomic_t received_signal = -1;
 
-FILE *child_stdout;
-FILE *child_stderr;
 int child_pipefd[3][2];
 int child_redirfd[3];
 
@@ -168,28 +157,28 @@ struct timeval progstarttime, starttime, endtime;
 struct tms startticks, endticks;
 
 struct option const long_opts[] = {
-	{"root",       required_argument, NULL,         'r'},
-	{"user",       required_argument, NULL,         'u'},
-	{"group",      required_argument, NULL,         'g'},
-	{"chdir",      required_argument, NULL,         'd'},
-	{"walltime",   required_argument, NULL,         't'},
-	{"cputime",    required_argument, NULL,         'C'},
-	{"memsize",    required_argument, NULL,         'm'},
-	{"filesize",   required_argument, NULL,         'f'},
-	{"nproc",      required_argument, NULL,         'p'},
-	{"cpuset",     required_argument, NULL,         'P'},
-	{"no-core",    no_argument,       NULL,         'c'},
-	{"stdout",     required_argument, NULL,         'o'},
-	{"stderr",     required_argument, NULL,         'e'},
-	{"streamsize", required_argument, NULL,         's'},
-	{"environment",no_argument,       NULL,         'E'},
-	{"variable",   required_argument, NULL,         'V'},
-	{"outmeta",    required_argument, NULL,         'M'},
-	{"verbose",    no_argument,       NULL,         'v'},
-	{"quiet",      no_argument,       NULL,         'q'},
-	{"help",       no_argument,       &show_help,    1 },
-	{"version",    no_argument,       &show_version, 1 },
-	{ NULL,        0,                 NULL,          0 }
+	{"root",       required_argument, nullptr,         'r'},
+	{"user",       required_argument, nullptr,         'u'},
+	{"group",      required_argument, nullptr,         'g'},
+	{"chdir",      required_argument, nullptr,         'd'},
+	{"walltime",   required_argument, nullptr,         't'},
+	{"cputime",    required_argument, nullptr,         'C'},
+	{"memsize",    required_argument, nullptr,         'm'},
+	{"filesize",   required_argument, nullptr,         'f'},
+	{"nproc",      required_argument, nullptr,         'p'},
+	{"cpuset",     required_argument, nullptr,         'P'},
+	{"no-core",    no_argument,       nullptr,         'c'},
+	{"stdout",     required_argument, nullptr,         'o'},
+	{"stderr",     required_argument, nullptr,         'e'},
+	{"streamsize", required_argument, nullptr,         's'},
+	{"environment",no_argument,       nullptr,         'E'},
+	{"variable",   required_argument, nullptr,         'V'},
+	{"outmeta",    required_argument, nullptr,         'M'},
+	{"verbose",    no_argument,       nullptr,         'v'},
+	{"quiet",      no_argument,       nullptr,         'q'},
+	{"help",       no_argument,       &show_help,       1 },
+	{"version",    no_argument,       &show_version,    1 },
+	{ nullptr,     0,                 nullptr,          0 }
 };
 
 void warning(   const char *, ...) __attribute__((format (printf, 1, 2)));
@@ -215,13 +204,12 @@ void verbose(const char *format, ...)
 {
 	va_list ap;
 	va_start(ap,format);
-	struct timeval currtime;
-	double runtime;
 
 	if ( ! be_quiet && be_verbose ) {
-		gettimeofday(&currtime,NULL);
-		runtime = (currtime.tv_sec  - progstarttime.tv_sec ) +
-		          (currtime.tv_usec - progstarttime.tv_usec)*1E-6;
+        struct timeval currtime{};
+		gettimeofday(&currtime,nullptr);
+		double runtime = (currtime.tv_sec  - progstarttime.tv_sec ) +
+		                 (currtime.tv_usec - progstarttime.tv_usec)*1E-6;
 		fprintf(stderr,"%s [%d @ %10.6lf]: verbose: ",progname,getpid(),runtime);
 		vfprintf(stderr,format,ap);
 		fprintf(stderr,"\n");
@@ -234,29 +222,27 @@ void error(int errnum, const char *format, ...)
 {
 	va_list ap;
 	va_start(ap,format);
-	sigset_t sigs;
-	char *errstr;
-	int errlen, errpos;
 
 	/*
 	 * Make sure the signal handler for these (terminate()) does not
 	 * interfere, we are exiting now anyway.
 	 */
+	sigset_t sigs;
 	sigaddset(&sigs, SIGALRM);
 	sigaddset(&sigs, SIGTERM);
-	sigprocmask(SIG_BLOCK, &sigs, NULL);
+	sigprocmask(SIG_BLOCK, &sigs, nullptr);
 
 	/* First print to string to be able to reuse the message. */
-	errlen = strlen(progname)+255;
-	if ( format!=NULL ) errlen += strlen(format);
+	size_t errlen = strlen(progname)+255;
+	if ( format!=nullptr ) errlen += strlen(format);
 
-	errstr = (char *)malloc(errlen);
-	if ( errstr==NULL ) abort();
+	char *errstr = (char *)malloc(errlen);
+	if ( errstr==nullptr ) abort();
 
 	sprintf(errstr,"%s",progname);
-	errpos = strlen(errstr);
+	size_t errpos = strlen(errstr);
 
-	if ( format!=NULL ) {
+	if ( format!=nullptr ) {
 		snprintf(errstr+errpos,errlen-errpos,": ");
 		errpos += 2;
 		vsnprintf(errstr+errpos,errlen-errpos,format,ap);
@@ -276,7 +262,7 @@ void error(int errnum, const char *format, ...)
 		}
 		errpos += strlen(errstr+errpos);
 	}
-	if ( format==NULL && errnum==0 ) {
+	if ( format==nullptr && errnum==0 ) {
 		snprintf(errstr+errpos,errlen-errpos,": unknown error");
 	}
 
@@ -284,7 +270,7 @@ void error(int errnum, const char *format, ...)
 	va_end(ap);
 
 	write_meta("internal-error","%s",errstr);
-	if ( outputmeta && metafile != NULL && fclose(metafile)!=0 ) {
+	if ( outputmeta && metafile != nullptr && fclose(metafile)!=0 ) {
 		fprintf(stderr,"\nError writing to metafile '%s'.\n",metafilename);
 	}
 
@@ -303,7 +289,7 @@ void error(int errnum, const char *format, ...)
 		}
 
 		/* Wait a while to make sure the process is killed by now. */
-		nanosleep(&killdelay,NULL);
+		nanosleep(&killdelay,nullptr);
 	}
 
 	exit(exit_failure);
@@ -311,10 +297,9 @@ void error(int errnum, const char *format, ...)
 
 void write_meta(const char *key, const char *format, ...)
 {
-	va_list ap;
-
 	if ( !outputmeta ) return;
 
+	va_list ap;
 	va_start(ap,format);
 
 	if ( fprintf(metafile,"%s: ",key)<=0 ) {
@@ -386,10 +371,6 @@ real user ID.\n");
 
 void output_exit_time(int exitcode, double cpudiff)
 {
-	double walldiff, userdiff, sysdiff;
-	int timelimit_reached = 0;
-	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
-
 	verbose("command exited with exitcode %d",exitcode);
 	write_meta("exitcode","%d",exitcode);
 
@@ -397,11 +378,12 @@ void output_exit_time(int exitcode, double cpudiff)
 		write_meta("signal", "%d", received_signal);
 	}
 
-	walldiff = (endtime.tv_sec  - starttime.tv_sec ) +
-	           (endtime.tv_usec - starttime.tv_usec)*1E-6;
+	double walldiff = (endtime.tv_sec  - starttime.tv_sec ) +
+	                  (endtime.tv_usec - starttime.tv_usec)*1E-6;
 
-	userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
-	sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
+	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
+	double userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
+	double sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
 
 	write_meta("wall-time","%.3f", walldiff);
 	write_meta("user-time","%.3f", userdiff);
@@ -421,6 +403,7 @@ void output_exit_time(int exitcode, double cpudiff)
 		warning("timelimit exceeded (soft cpu time)");
 	}
 
+	int timelimit_reached = 0;
 	switch ( outputtimetype ) {
 	case WALL_TIME_TYPE:
 		write_meta("time-used","wall-time");
@@ -444,31 +427,31 @@ void output_exit_time(int exitcode, double cpudiff)
 
 void check_remaining_procs()
 {
-    char path[1024];
+	char path[1024];
+	snprintf(path, 1023, "/sys/fs/cgroup/cpuacct%scgroup.procs", cgroupname);
 
-    snprintf(path, 1023, "/sys/fs/cgroup/cpuacct%scgroup.procs", cgroupname);
-    FILE *file = fopen(path, "r");
-    if (file == NULL) {
-        error(errno, "opening cgroups file `%s'", path);
-    }
+	FILE *file = fopen(path, "r");
+	if (file == nullptr) {
+		error(errno, "opening cgroups file `%s'", path);
+	}
 
-    fseek(file, 0L, SEEK_END);
-    if (ftell(file) > 0) {
-        error(0, "found left-over processes in cgroup controller, please check!");
-    }
+	fseek(file, 0L, SEEK_END);
+	if (ftell(file) > 0) {
+		error(0, "found left-over processes in cgroup controller, please check!");
+	}
 	if (fclose(file) != 0) error(errno, "closing file `%s'", path);
 }
 
 void output_cgroup_stats(double *cputime)
 {
-	int ret;
-	int64_t max_usage, cpu_time_int;
 	struct cgroup *cg;
-	struct cgroup_controller *cg_controller;
+	if ( (cg = cgroup_new_cgroup(cgroupname))==nullptr ) error(0,"cgroup_new_cgroup");
 
-	if ( (cg = cgroup_new_cgroup(cgroupname))==NULL ) error(0,"cgroup_new_cgroup");
+	int ret;
 	if ((ret = cgroup_get_cgroup(cg)) != 0) error(ret,"get cgroup information");
 
+	int64_t max_usage;
+	struct cgroup_controller *cg_controller;
 	cg_controller = cgroup_get_controller(cg, "memory");
 	ret = cgroup_get_value_int64(cg_controller, "memory.memsw.max_usage_in_bytes", &max_usage);
 	if ( ret!=0 ) error(ret,"get cgroup value memory.memsw.max_usage_in_bytes");
@@ -476,6 +459,7 @@ void output_cgroup_stats(double *cputime)
 	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
 	write_meta("memory-bytes","%" PRId64, max_usage);
 
+	int64_t cpu_time_int;
 	cg_controller = cgroup_get_controller(cg, "cpuacct");
 	ret = cgroup_get_value_int64(cg_controller, "cpuacct.usage", &cpu_time_int);
 	if ( ret!=0 ) error(ret,"get cgroup value cpuacct.usage");
@@ -492,27 +476,26 @@ void output_cgroup_stats(double *cputime)
 
 void cgroup_create()
 {
-	int ret;
 	struct cgroup *cg;
-	struct cgroup_controller *cg_controller;
-
 	cg = cgroup_new_cgroup(cgroupname);
 	if (!cg) error(0,"cgroup_new_cgroup");
 
 	/* Set up the memory restrictions; these two options limit ram use
 	   and ram+swap use. They are the same so no swapping can occur */
-	if ( (cg_controller = cgroup_add_controller(cg, "memory"))==NULL ) {
+	struct cgroup_controller *cg_controller;
+	if ( (cg_controller = cgroup_add_controller(cg, "memory"))==nullptr ) {
 		error(0,"cgroup_add_controller memory");
 	}
 
+	int ret;
 	cgroup_add_value(int64, "memory.limit_in_bytes", memsize);
 	cgroup_add_value(int64, "memory.memsw.limit_in_bytes", memsize);
 
 	/* Set up cpu restrictions; we pin the task to a specific set of
 	   cpus. We also give it exclusive access to those cores, and set
 	   no limits on memory nodes */
-	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
-		if ( (cg_controller = cgroup_add_controller(cg, "cpuset"))==NULL ) {
+	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
+		if ( (cg_controller = cgroup_add_controller(cg, "cpuset"))==nullptr ) {
 			error(0,"cgroup_add_controller cpuset");
 		}
 		/* To make a cpuset exclusive, some additional setup outside of domjudge is
@@ -524,7 +507,7 @@ void cgroup_create()
 		verbose("cpuset undefined");
 	}
 
-	if ( (cg_controller = cgroup_add_controller(cg, "cpuacct"))==NULL ) {
+	if ( (cg_controller = cgroup_add_controller(cg, "cpuacct"))==nullptr ) {
 		error(0,"cgroup_add_controller cpuacct");
 	}
 
@@ -539,12 +522,11 @@ void cgroup_create()
 
 void cgroup_attach()
 {
-	int ret;
 	struct cgroup *cg;
-
 	cg = cgroup_new_cgroup(cgroupname);
 	if (!cg) error(0,"cgroup_new_cgroup");
 
+	int ret;
 	if ( (ret = cgroup_get_cgroup(cg))!=0 ) error(ret,"get cgroup information");
 
 	/* Attach task to the cgroup */
@@ -555,13 +537,12 @@ void cgroup_attach()
 
 void cgroup_kill()
 {
-	int ret;
-	void *handle = NULL;
+	void *handle = nullptr;
 	pid_t pid;
 
 	/* kill any remaining tasks, and wait for them to be gone */
 	while(1) {
-		ret = cgroup_get_task_begin(cgroupname, "memory", &handle, &pid);
+		int ret = cgroup_get_task_begin(cgroupname, "memory", &handle, &pid);
 		cgroup_get_task_end(&handle);
 		if (ret == ECGEOF) break;
 		kill(pid, SIGKILL);
@@ -570,21 +551,19 @@ void cgroup_kill()
 
 void cgroup_delete()
 {
-	int ret;
 	struct cgroup *cg;
-
 	cg = cgroup_new_cgroup(cgroupname);
 	if (!cg) error(0,"cgroup_new_cgroup");
 
-	if ( cgroup_add_controller(cg, "cpuacct")==NULL ) error(0,"cgroup_add_controller cpuacct");
-	if ( cgroup_add_controller(cg, "memory")==NULL ) error(0,"cgroup_add_controller memory");
+	if ( cgroup_add_controller(cg, "cpuacct")==nullptr ) error(0,"cgroup_add_controller cpuacct");
+	if ( cgroup_add_controller(cg, "memory")==nullptr ) error(0,"cgroup_add_controller memory");
 
-	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
-		if ( cgroup_add_controller(cg, "cpuset")==NULL ) error(0,"cgroup_add_controller cpuset");
+	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
+		if ( cgroup_add_controller(cg, "cpuset")==nullptr ) error(0,"cgroup_add_controller cpuset");
 	}
 	/* Clean up our cgroup */
-	nanosleep(&cg_delete_delay,NULL);
-	ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
+	nanosleep(&cg_delete_delay,nullptr);
+	int ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
 	if ( ret!=0 ) error(ret,"deleting cgroup");
 
 	cgroup_free(&cg);
@@ -602,10 +581,10 @@ void terminate(int sig)
 	if ( sigemptyset(&sigact.sa_mask)!=0 ) {
 		warning("could not initialize signal mask");
 	}
-	if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
+	if ( sigaction(SIGTERM,&sigact,nullptr)!=0 ) {
 		warning("could not restore signal handler");
 	}
-	if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) {
+	if ( sigaction(SIGALRM,&sigact,nullptr)!=0 ) {
 		warning("could not restore signal handler");
 	}
 
@@ -627,7 +606,7 @@ void terminate(int sig)
 
 	/* Prefer nanosleep over sleep because of higher resolution and
 	   it does not interfere with signals. */
-	nanosleep(&killdelay,NULL);
+	nanosleep(&killdelay,nullptr);
 
 	verbose("sending SIGKILL");
 	if ( kill(-child_pid,SIGKILL)!=0 && errno!=ESRCH ) {
@@ -635,7 +614,7 @@ void terminate(int sig)
 	}
 
 	/* Wait another while to make sure the process is killed by now. */
-	nanosleep(&killdelay,NULL);
+	nanosleep(&killdelay,nullptr);
 }
 
 static void child_handler(int sig)
@@ -645,12 +624,12 @@ static void child_handler(int sig)
 
 int userid(char *name)
 {
-	struct passwd *pwd;
-
 	errno = 0; /* per the linux GETPWNAM(3) man-page */
+
+	struct passwd *pwd;
 	pwd = getpwnam(name);
 
-	if ( pwd==NULL || errno ) return -1;
+	if ( pwd==nullptr || errno ) return -1;
 
 	return (int) pwd->pw_uid;
 }
@@ -662,17 +641,15 @@ int groupid(char *name)
 	errno = 0; /* per the linux GETGRNAM(3) man-page */
 	grp = getgrnam(name);
 
-	if ( grp==NULL || errno ) return -1;
+	if ( grp==nullptr || errno ) return -1;
 
 	return (int) grp->gr_gid;
 }
 
 long read_optarg_int(const char *desc, long minval, long maxval)
 {
-	long arg;
 	char *ptr;
-
-	arg = strtol(optarg,&ptr,10);
+	long arg = strtol(optarg,&ptr,10);
 	if ( errno || *ptr!='\0' || arg<minval || arg>maxval ) {
 		error(errno,"invalid %s specified: `%s'",desc,optarg);
 	}
@@ -682,20 +659,21 @@ long read_optarg_int(const char *desc, long minval, long maxval)
 
 void read_optarg_time(const char *desc, double *times)
 {
-	char *optcopy, *ptr, *sep;
-
-	if ( (optcopy=strdup(optarg))==NULL ) error(0,"strdup() failed");
+	char *optcopy;
+	if ( (optcopy=strdup(optarg))==nullptr ) error(0,"strdup() failed");
 
 	/* Check for soft:hard limit separator and cut string. */
-	if ( (sep=strchr(optcopy,':'))!=NULL ) *sep = 0;
+	char *sep;
+	if ( (sep=strchr(optcopy,':'))!=nullptr ) *sep = 0;
 
+	char *ptr;
 	times[0] = strtod(optcopy,&ptr);
 	if ( errno || *ptr!='\0' || !finite(times[0]) || times[0]<=0 ) {
 		error(errno,"invalid %s specified: `%s'",desc,optarg);
 	}
 
 	/* And repeat for hard limit if we found the ':' separator. */
-	if ( sep!=NULL ) {
+	if ( sep!=nullptr ) {
 		times[1] = strtod(sep+1,&ptr);
 		if ( errno || *ptr!='\0' || !finite(times[1]) || times[1]<=0 ) {
 			error(errno,"invalid %s specified: `%s'",desc,optarg);
@@ -713,27 +691,22 @@ void read_optarg_time(const char *desc, double *times)
 
 void setrestrictions()
 {
-	char *path;
-	char  cwd[PATH_MAX+1];
-	gid_t aux_groups[10];
-
-	struct rlimit lim;
-
 	/* Clear environment to prevent all kinds of security holes, save PATH */
 	if ( !preserve_environment ) {
+		char *path;
 		path = getenv("PATH");
-		environ[0] = NULL;
+		environ[0] = nullptr;
 		/* FIXME: Clean path before setting it again? */
-		if ( path!=NULL ) setenv("PATH",path,1);
+		if ( path!=nullptr ) setenv("PATH",path,1);
 	}
 
 	/* Set additional environment variables. */
-	if (environment_variables != NULL) {
+	if (environment_variables != nullptr) {
 		char *token = strtok(environment_variables, ";");
-		while (token != NULL) {
+		while (token != nullptr) {
 			verbose("setting environment variable: %s", token);
 			putenv(token);
-			token = strtok(NULL, ";");
+			token = strtok(nullptr, ";");
 		}
 	}
 
@@ -741,6 +714,7 @@ void setrestrictions()
 	   Note that limits can thus be raised from the systems defaults! */
 
 	/* First define shorthand macro function */
+	struct rlimit lim;
 #define setlim(type) \
 	if ( setrlimit(RLIMIT_ ## type, &lim)!=0 ) { \
 		if ( errno==EPERM ) { \
@@ -808,14 +782,16 @@ void setrestrictions()
 		if ( chdir(rootdir)!=0 ) error(errno,"cannot chdir to `%s'",rootdir);
 
 		/* Get absolute pathname of rootdir, by reading it. */
-		if ( getcwd(cwd,PATH_MAX)==NULL ) error(errno,"cannot get directory");
+		char  cwd[PATH_MAX+1];
+		if ( getcwd(cwd,PATH_MAX)==nullptr ) error(errno,"cannot get directory");
 		if ( cwd[strlen(cwd)-1]!='/' ) strcat(cwd,"/");
 
 		/* Canonicalize CHROOT_PREFIX. */
-		if ( (path = (char *) malloc(PATH_MAX+1))==NULL ) {
+		char *path;
+		if ( (path = (char *) malloc(PATH_MAX+1))==nullptr ) {
 			error(errno,"allocating memory");
 		}
-		if ( realpath(CHROOT_PREFIX,path)==NULL ) {
+		if ( realpath(CHROOT_PREFIX,path)==nullptr ) {
 			error(errno,"cannot canonicalize path '%s'",CHROOT_PREFIX);
 		}
 
@@ -827,7 +803,7 @@ void setrestrictions()
 
 		if ( chroot(".")!=0 ) error(errno,"cannot change root to `%s'",cwd);
 		if ( chdir("/")!=0 ) error(errno,"cannot chdir to `/' in chroot");
-		if ( rootchdir!=NULL ) {
+		if ( rootchdir!=nullptr ) {
 			if ( chdir(rootchdir)!=0 ) error(errno,"cannot chdir to `%s' in chroot", rootchdir);
 		}
 		verbose("using root-directory `%s'",cwd);
@@ -836,6 +812,7 @@ void setrestrictions()
 	/* Set group-id (must be root for this, so before setting user). */
 	if ( use_group ) {
 		if ( setgid(rungid) ) error(errno,"cannot set group ID to `%d'",rungid);
+		gid_t aux_groups[1];
 		aux_groups[0] = rungid;
 		if ( setgroups(1, aux_groups) ) error(errno,"cannot clear auxiliary groups");
 
@@ -864,10 +841,9 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 	char buf[BUF_SIZE];
 	ssize_t nread, nwritten;
 	size_t to_read, to_write;
-	int i;
 
 	/* Check to see if data is available and pass it on */
-	for(i=1; i<=2; i++) {
+	for(int i=1; i<=2; i++) {
 		if ( child_pipefd[i][PIPE_OUT] != -1 &&
 		     FD_ISSET(child_pipefd[i][PIPE_OUT], readfds) ) {
 
@@ -883,8 +859,8 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 				}
 
 				if ( use_splice ) {
-					nread = splice(child_pipefd[i][PIPE_OUT], NULL,
-					               child_redirfd[i], NULL,
+					nread = splice(child_pipefd[i][PIPE_OUT], nullptr,
+					               child_redirfd[i], nullptr,
 					               to_read, SPLICE_F_MOVE | SPLICE_F_NONBLOCK);
 
 					if ( nread==-1 && errno==EINVAL ) {
@@ -941,17 +917,7 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 
 int main(int argc, char **argv)
 {
-	sigset_t sigmask, emptymask;
-	fd_set readfds;
-	pid_t pid;
-	int   i, r, nfds;
 	int   ret;
-	FILE *fp;
-	char *oom_path;
-	int   status;
-	int   exitcode;
-	char *valid_users;
-	char *ptr;
 	regex_t userregex;
 	int   opt;
 	double tmpd;
@@ -965,7 +931,7 @@ int main(int argc, char **argv)
 
 	progname = argv[0];
 
-	if ( gettimeofday(&progstarttime,NULL) ) error(errno,"getting time");
+	if ( gettimeofday(&progstarttime,nullptr) ) error(errno,"getting time");
 
 	/* Parse command-line options */
 	use_root = use_walltime = use_cputime = use_user = no_coredump = 0;
@@ -977,6 +943,7 @@ int main(int argc, char **argv)
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
+	char *ptr;
 	while ( (opt = getopt_long(argc,argv,"+r:u:g:d:t:C:m:f:p:P:co:e:s:EV:M:vq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
@@ -984,7 +951,7 @@ int main(int argc, char **argv)
 		case 'r': /* rootdir option */
 			use_root = 1;
 			rootdir = (char *) malloc(strlen(optarg)+2);
-			if ( rootdir==NULL ) error(errno,"allocating memory");
+			if ( rootdir==nullptr ) error(errno,"allocating memory");
 			strcpy(rootdir,optarg);
 			break;
 		case 'u': /* user option: uid or string */
@@ -996,7 +963,7 @@ int main(int argc, char **argv)
 				if ( regcomp(&userregex,"^[A-Za-z][A-Za-z0-9\\._-]*$", REG_NOSUB)!=0 ) {
 					error(0,"could not create username regex");
 				}
-				if ( regexec(&userregex, runuser, 0, NULL, 0)!=0 ) {
+				if ( regexec(&userregex, runuser, 0, nullptr, 0)!=0 ) {
 					error(0,"username `%s' does not match POSIX pattern", runuser);
 				}
 			}
@@ -1011,7 +978,7 @@ int main(int argc, char **argv)
 			break;
 		case 'd': /* chdir option */
 			rootchdir = (char *) malloc(strlen(optarg)+2);
-			if ( rootchdir==NULL ) error(errno,"allocating memory");
+			if ( rootchdir==nullptr ) error(errno,"allocating memory");
 			strcpy(rootchdir,optarg);
 			break;
 		case 't': /* wallclock time option */
@@ -1115,7 +1082,7 @@ int main(int argc, char **argv)
 	cmdname = argv[optind];
 	cmdargs = argv+optind;
 
-	if ( outputmeta && (metafile = fopen(metafilename,"w"))==NULL ) {
+	if ( outputmeta && (metafile = fopen(metafilename,"w"))==nullptr ) {
 		error(errno,"cannot open `%s'",metafilename);
 	}
 
@@ -1124,10 +1091,10 @@ int main(int argc, char **argv)
 	   length string of valid POSIX username characters [A-Za-z0-9._-].
 	   This check must be done before chroot for /etc/passwd lookup. */
 	if ( use_user ) {
-		valid_users = strdup(VALID_USERS);
-		for(ptr=strtok(valid_users,","); ptr!=NULL; ptr=strtok(NULL,",")) {
+		char *valid_users = strdup(VALID_USERS);
+		for(ptr=strtok(valid_users,","); ptr!=nullptr; ptr=strtok(nullptr,",")) {
 			if ( runuid==userid(ptr) ) break;
-			if ( runuser!=NULL ) {
+			if ( runuser!=nullptr ) {
 				ret = fnmatch(ptr,runuser,0);
 				if ( ret==0 ) break;
 				if ( ret!=FNM_NOMATCH ) {
@@ -1135,20 +1102,21 @@ int main(int argc, char **argv)
 				}
 			}
 		}
-		if ( ptr==NULL || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
+		if ( ptr==nullptr || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
 	}
 
 	/* Setup pipes connecting to child stdout/err streams (ignore stdin). */
-	for(i=1; i<=2; i++) {
+	for(int i=1; i<=2; i++) {
 		if ( pipe(child_pipefd[i])!=0 ) error(errno,"creating pipe for fd %d",i);
 	}
 
+	sigset_t emptymask;
 	if ( sigemptyset(&emptymask)!=0 ) error(errno,"creating empty signal mask");
 
 	/* unmask all signals, except SIGCHLD: detected in pselect() below */
-	sigmask = emptymask;
+	sigset_t sigmask = emptymask;
 	if ( sigaddset(&sigmask, SIGCHLD)!=0 ) error(errno,"setting signal mask");
-	if ( sigprocmask(SIG_SETMASK, &sigmask, NULL)!=0 ) {
+	if ( sigprocmask(SIG_SETMASK, &sigmask, nullptr)!=0 ) {
 		error(errno,"unmasking signals");
 	}
 
@@ -1157,11 +1125,11 @@ int main(int argc, char **argv)
 	sigact.sa_handler = child_handler;
 	sigact.sa_flags   = 0;
 	sigact.sa_mask    = emptymask;
-	if ( sigaction(SIGCHLD,&sigact,NULL)!=0 ) {
+	if ( sigaction(SIGCHLD,&sigact,nullptr)!=0 ) {
 		error(errno,"installing signal handler");
 	}
 
-	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
+	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
 		int ret = strtol(cpuset, &ptr, 10);
 		/* check if input is only a single integer */
 		if ( *ptr == '\0' ) {
@@ -1181,7 +1149,7 @@ int main(int argc, char **argv)
 	/* Define the cgroup name that we will use and make sure it will
 	 * be unique. Note: group names must have slashes!
 	 */
-	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
+	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
 		strncpy(str, cpuset, 16);
 	} else {
 		str[0] = 0;
@@ -1200,10 +1168,11 @@ int main(int argc, char **argv)
 	 * processes, and at least older versions of sshd seemed to set
 	 * it, leading to processes getting a timelimit instead of memory
 	 * exceeded, when running via SSH. */
-	fp = NULL;
+	FILE *fp = nullptr;
+	char *oom_path;
 	if ( !fp && (fp = fopen(OOM_PATH_NEW,"r+")) ) oom_path = strdup(OOM_PATH_NEW);
 	if ( !fp && (fp = fopen(OOM_PATH_OLD,"r+")) ) oom_path = strdup(OOM_PATH_OLD);
-	if ( fp!=NULL ) {
+	if ( fp!=nullptr ) {
 		if ( fscanf(fp,"%d",&ret)!=1 ) error(errno,"cannot read from `%s'",oom_path);
 		if ( ret<0 ) {
 			verbose("resetting `%s' from %d to %d",oom_path,ret,OOM_RESET_VALUE);
@@ -1226,7 +1195,7 @@ int main(int argc, char **argv)
 		/* Connect pipes to command (stdin/)stdout/stderr and close
 		 * unneeded fd's. Do this after setting restrictions to let
 		 * any messages not go to command stderr pipe. */
-		for(i=1; i<=2; i++) {
+		for(int i=1; i<=2; i++) {
 			if ( dup2(child_pipefd[i][PIPE_IN],i)<0 ) {
 				error(errno,"redirecting child fd %d",i);
 			}
@@ -1258,17 +1227,17 @@ int main(int argc, char **argv)
 			verbose("watchdog using user ID `%d'",getuid());
 		}
 
-		if ( gettimeofday(&starttime,NULL) ) error(errno,"getting time");
+		if ( gettimeofday(&starttime,nullptr) ) error(errno,"getting time");
 
 		/* Close unused file descriptors */
-		for(i=1; i<=2; i++) {
+		for(int i=1; i<=2; i++) {
 			if ( close(child_pipefd[i][PIPE_IN])!=0 ) {
 				error(errno,"closing pipe for fd %i",i);
 			}
 		}
 
 		/* Redirect child stdout/stderr to file */
-		for(i=1; i<=2; i++) {
+		for(int i=1; i<=2; i++) {
 			child_redirfd[i] = i; /* Default: no redirects */
 			data_read[i] = data_passed[i] = 0; /* Reset data counters */
 		}
@@ -1291,7 +1260,7 @@ int main(int argc, char **argv)
 
 		/* Construct one-time signal handler to terminate() for TERM
 		   and ALRM signals. */
-		sigmask = emptymask;
+		sigset_t sigmask = emptymask;
 		if ( sigaddset(&sigmask,SIGALRM)!=0 ||
 		     sigaddset(&sigmask,SIGTERM)!=0 ) error(errno,"setting signal mask");
 
@@ -1300,13 +1269,13 @@ int main(int argc, char **argv)
 		sigact.sa_mask    = sigmask;
 
 		/* Kill child command when we receive SIGTERM */
-		if ( sigaction(SIGTERM,&sigact,NULL)!=0 ) {
+		if ( sigaction(SIGTERM,&sigact,nullptr)!=0 ) {
 			error(errno,"installing signal handler");
 		}
 
 		if ( use_walltime ) {
 			/* Kill child when we receive SIGALRM */
-			if ( sigaction(SIGALRM,&sigact,NULL)!=0 ) {
+			if ( sigaction(SIGALRM,&sigact,nullptr)!=0 ) {
 				error(errno,"installing signal handler");
 			}
 
@@ -1316,7 +1285,7 @@ int main(int argc, char **argv)
 			itimer.it_value.tv_sec  = (int) walltimelimit[1];
 			itimer.it_value.tv_usec = (int)(modf(walltimelimit[1],&tmpd) * 1E6);
 
-			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
+			if ( setitimer(ITIMER_REAL,&itimer,nullptr)!=0 ) {
 				error(errno,"setting timer");
 			}
 			verbose("setting hard wall-time limit to %.3f seconds",walltimelimit[1]);
@@ -1329,27 +1298,29 @@ int main(int argc, char **argv)
 		/* Wait for child data or exit.
 		   Initialize status here to quelch clang++ warning about
 		   uninitialized value; it is set by the wait() call. */
-		status = 0;
+		int status = 0;
 		/* We start using splice() to copy data from child to parent
 		   I/O file descriptors. If that fails (not all I/O
 		   source - dest combinations support it), then we revert to
 		   using read()/write(). */
 		use_splice = 1;
+		fd_set readfds;
 		while ( 1 ) {
 
 			FD_ZERO(&readfds);
-			nfds = -1;
-			for(i=1; i<=2; i++) {
+			int nfds = -1;
+			for(int i=1; i<=2; i++) {
 				if ( child_pipefd[i][PIPE_OUT]>=0 ) {
 					FD_SET(child_pipefd[i][PIPE_OUT],&readfds);
 					nfds = max(nfds,child_pipefd[i][PIPE_OUT]);
 				}
 			}
 
-			r = pselect(nfds+1, &readfds, NULL, NULL, NULL, &emptymask);
+			int r = pselect(nfds+1, &readfds, nullptr, NULL, NULL, &emptymask);
 			if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
 
 			if ( received_SIGCHLD || received_signal == SIGALRM ) {
+				pid_t pid;
 				if ( (pid = wait(&status))<0 ) error(errno,"waiting on child");
 				if ( pid==child_pid ) break;
 			}
@@ -1359,10 +1330,10 @@ int main(int argc, char **argv)
 
 		/* Reset pipe filedescriptors to use blocking I/O. */
 		FD_ZERO(&readfds);
-		for(i=1; i<=2; i++) {
+		for(int i=1; i<=2; i++) {
 			if ( child_pipefd[i][PIPE_OUT]>=0 ) {
 				FD_SET(child_pipefd[i][PIPE_OUT],&readfds);
-				r = fcntl(child_pipefd[i][PIPE_OUT], F_GETFL);
+				int r = fcntl(child_pipefd[i][PIPE_OUT], F_GETFL);
 				if (r == -1) {
 					error(errno, "fcntl, getting flags");
 				}
@@ -1379,7 +1350,7 @@ int main(int argc, char **argv)
 		} while ( data_passed[1] + data_passed[2] > total_data );
 
 		/* Close the output files */
-		for(i=1; i<=2; i++) {
+		for(int i=1; i<=2; i++) {
 			ret = close(child_redirfd[i]);
 			if( ret!=0 ) error(errno,"closing output fd %d", i);
 		}
@@ -1388,10 +1359,10 @@ int main(int argc, char **argv)
 			error(errno,"getting end clock ticks");
 		}
 
-		if ( gettimeofday(&endtime,NULL) ) error(errno,"getting time");
+		if ( gettimeofday(&endtime,nullptr) ) error(errno,"getting time");
 
 		/* Test whether command has finished abnormally */
-		exitcode = 0;
+		int exitcode = 0;
 		if ( ! WIFEXITED(status) ) {
 			if ( WIFSIGNALED(status) ) {
 				if ( WTERMSIG(status)==SIGXCPU ) {
@@ -1422,7 +1393,7 @@ int main(int argc, char **argv)
 			itimer.it_value.tv_sec  = 0;
 			itimer.it_value.tv_usec = 0;
 
-			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
+			if ( setitimer(ITIMER_REAL,&itimer,nullptr)!=0 ) {
 				error(errno,"disarming timer");
 			}
 		}
