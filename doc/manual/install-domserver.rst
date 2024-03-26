@@ -188,8 +188,10 @@ manual. But properly think about the memory management for the PHP-FPM children,
 
 * Consider the amount of submissions you expect at any given time, does the load stay uniform?
 * Do you expect all teams to solve the easy problems in the first hour?
-  As a rule of thumb you can expect: ``#testcases * #submissions/teams`` as extra load. Similar
-  for the harder problems (which look simple) where multiple wrong submissions can be expected.
+  As a rule of thumb you can expect: ``#testcases * #submissions/teams`` as extra load (HTTP traffic
+  from the judgehost reporting the results per testcase additionally on the team refreshing the page
+  to know the verdict). Similar for the harder problems (which look simple) where multiple wrong
+  submissions can be expected.
 * For more info see the `wiki <https://github.com/DOMjudge/domjudge/wiki/Scaling-and-load-testing>`_
 
 
