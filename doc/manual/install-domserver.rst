@@ -183,8 +183,8 @@ Scaling the domserver
 ---------------------
 
 Documenting all possible ways to properly size the domserver is out of scope for this
-manual. But properly think about the memory management for the PHP-FPM children with
-~40 per gigabyte of memory, 500 for a 16Gb system.
+manual. But properly think about the memory management for the PHP-FPM children, we advice
+40 FPM children per gigabyte of RAM memory so around 500 for a 16Gb system.
 
 * Consider the amount of submissions you expect at any given time, does the load stay uniform?
 * Do you expect all teams to solve the easy problems in the first hour?
