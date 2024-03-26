@@ -38,11 +38,17 @@ Version 8.3.0DEV
    before the next phase of a contest like setup of teams, before problem
    imports, before upgrades.
  - Fixed some bugs to become OpenAPI spec compliant again.
+ - Prevent a race condition leading to two submissions receiving the same
+   colour balloon.
  - Compile executables with `-std=gnu++20` now.
  - Record the testcase directory for judging runs, this makes investigating
    easier.
  - Set default C/C++ standards in configure script, we intend to ship all
    scripts free of warnings/errors.
+ - Add option to not show any rank on mirror contests, this is useful when
+   you want to disclose the problems but not make comparing easy between the
+   official contest and the mirror.
+ - Allow basic authentication for the import-contest URL.
 
 Version 8.2.0 - 6 March 2023
 ----------------------------
