@@ -757,15 +757,19 @@ class ExternalContestSourceService
             ];
         }
 
-        $toCheck['name'] = $data->name;
+        if ($data->name) {
+            $toCheck['name'] = $data->name;
+        }
 
         // Also compare the penalty time
-        $penaltyTime = $data->penaltyTime;
-        if ($this->config->get('penalty_time') != $penaltyTime) {
-            $this->logger->warning(
-                'Penalty time does not match between feed (%d) and local (%d)',
-                [$penaltyTime, $this->config->get('penalty_time')]
-            );
+        if ($data->penaltyTime !== null) {
+            $penaltyTime = $data->penaltyTime;
+            if ($this->config->get('penalty_time') != $penaltyTime) {
+                $this->logger->warning(
+                    'Penalty time does not match between feed (%d) and local (%d)',
+                    [$penaltyTime, $this->config->get('penalty_time')]
+                );
+	    }
         }
 
         $this->compareOrCreateValues($event, $data->id, $contest, $toCheck);
