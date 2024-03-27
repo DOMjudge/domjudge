@@ -128,7 +128,7 @@ settings. Reload the web server for changes to take effect.
 
 An nginx webserver configuration snippet is also provided in
 ``etc/nginx-conf``.  You still need ``htpasswd`` from ``apache2-utils``
-though. To use this configuration, perform the following steps::
+though. To use this configuration, perform the following steps:
 
 .. parsed-literal::
 
@@ -139,7 +139,7 @@ though. To use this configuration, perform the following steps::
   service php\ |phpversion|-fpm reload
   service nginx reload
 
-On Fedora, use the following nginx configuration steps::
+On Fedora, use the following nginx configuration steps:
 
 .. parsed-literal::
 
@@ -178,6 +178,22 @@ multiple IP addresses by separating them by a comma (``,``). The drawback to
 this approach is that the webserver is not aware of the actual client IP. This
 means that access logs for the webserver will still report the IP of the proxy
 or loadbalancer.
+
+Scaling the domserver
+---------------------
+
+Documenting all possible ways to properly size the domserver is out of scope for this
+manual. But properly think about the memory management for the PHP-FPM children, we advice
+40 FPM children per gigabyte of RAM memory so around 500 for a 16Gb system.
+
+* Consider the amount of submissions you expect at any given time, does the load stay uniform?
+* Do you expect all teams to solve the easy problems in the first hour?
+  As a rule of thumb you can expect: ``#testcases * #submissions/teams`` as extra load (HTTP traffic
+  from the judgehost reporting the results per testcase additionally on the team refreshing the page
+  to know the verdict). Similar for the harder problems (which look simple) where multiple wrong
+  submissions can be expected.
+* For more info see the `wiki <https://github.com/DOMjudge/domjudge/wiki/Scaling-and-load-testing>`_
+
 
 Log in to DOMjudge
 ------------------
