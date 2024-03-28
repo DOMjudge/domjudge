@@ -176,12 +176,12 @@ EOF;
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
         self::assertArrayNotHasKey('problemset', $object);
 
-        // Now upload a banner
+        // Now upload a problemset
         $problemsetFile = __DIR__ . '/../../../../../webapp/public/doc/logos/DOMjudgelogo.pdf';
         $problemset = new UploadedFile($problemsetFile, 'DOMjudgelogo.pdf');
         $this->verifyApiJsonResponse('POST', $url . '/problemset', 204, $this->apiUser, null, ['problemset' => $problemset]);
 
-        // Verify we do have a banner now
+        // Verify we do have a problemset now
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
         $problemsetConfig = [
             [
@@ -190,6 +190,23 @@ EOF;
                 'filename' => 'problemset.pdf',
             ],
         ];
+        self::assertSame($problemsetConfig, $object['problemset']);
+
+        $this->client->request('GET', '/api' . $url . '/problemset');
+        /** @var StreamedResponse $response */
+        $response = $this->client->getResponse();
+        ob_start();
+        $response->getCallback()();
+        $callbackData = ob_get_clean();
+        self::assertEquals(file_get_contents($problemsetFile), $callbackData);
+
+        // Upload the problemset again, this time using PUT to also test that
+        $problemsetFile = __DIR__ . '/../../../../../webapp/public/doc/logos/DOMjudgelogo.pdf';
+        $problemset = new UploadedFile($problemsetFile, 'DOMjudgelogo.pdf');
+        $this->verifyApiJsonResponse('PUT', $url . '/problemset', 204, $this->apiUser, null, ['problemset' => $problemset]);
+
+        // Verify we still have a problemset
+        $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);;
         self::assertSame($problemsetConfig, $object['problemset']);
 
         $this->client->request('GET', '/api' . $url . '/problemset');

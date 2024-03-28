@@ -127,10 +127,10 @@ def import_contest_problemset_document(cid: str):
 
     if text_file:
         if dj_utils.confirm(f'Import {text_file} for contest?', False):
-            dj_utils.upload_file(f'contests/{cid}/problemset', 'text', text_file)
-            print('Contest text imported.')
+            dj_utils.upload_file(f'contests/{cid}/problemset', 'problemset', text_file)
+            print('Contest problemset imported.')
         else:
-            print('Skipping contest text import.')
+            print('Skipping contest problemset import.')
 
 if len(sys.argv) == 1:
     dj_utils.domjudge_webapp_folder_or_api_url = webappdir

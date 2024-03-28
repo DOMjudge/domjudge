@@ -297,7 +297,7 @@ class ContestController extends AbstractRestController
                 required: ['problemset'],
                 properties: [
                     new OA\Property(
-                        property: 'text',
+                        property: 'problemset',
                         description: 'The problemset document to use, as either text/html, text/plain or application/pdf.',
                         type: 'string',
                         format: 'binary'
