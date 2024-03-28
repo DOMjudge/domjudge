@@ -206,7 +206,7 @@ EOF;
         $this->verifyApiJsonResponse('PUT', $url . '/problemset', 204, $this->apiUser, null, ['problemset' => $problemset]);
 
         // Verify we still have a problemset
-        $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);;
+        $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
         self::assertSame($problemsetConfig, $object['problemset']);
 
         $this->client->request('GET', '/api' . $url . '/problemset');
