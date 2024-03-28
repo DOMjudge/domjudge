@@ -1390,7 +1390,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
 
     public function setContestProblemsetContent(?ContestProblemsetContent $content): self
     {
-        $this->contestProblemsetContent->clear();
+        $this->contestProblemsetContent = new ArrayCollection();
         if ($content) {
             $this->contestProblemsetContent->add($content);
             $content->setContest($this);
