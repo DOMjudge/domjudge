@@ -22,6 +22,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
@@ -98,12 +99,24 @@ class LanguageController extends BaseController
 
             $executable = $lang->getCompileExecutable();
 
+            $allowJudgeOptions = [
+                'toggle_partial' => 'language_toggle.html.twig',
+                'partial_arguments' => [
+                    'path' => 'jury_language_toggle_judge',
+                    'language' => $lang,
+                    'value' => $lang->getAllowJudge(),
+                ],
+            ];
+
+            if (!$lang->getAllowJudge()) {
+                $allowJudgeOptions['cssclass'] = 'text-danger font-weight-bold';
+            }
+
             // Merge in the rest of the data.
             $langdata = array_merge($langdata, [
                 'entrypoint' => ['value' => $lang->getRequireEntryPoint() ? 'yes' : 'no'],
                 'extensions' => ['value' => implode(', ', $lang->getExtensions())],
-                'allowjudge' => $lang->getAllowJudge() ?
-                    ['value' => 'yes'] : ['value' => 'no', 'cssclass'=>'text-danger font-weight-bold'],
+                'allowjudge' => $allowJudgeOptions,
                 'executable' => [
                     'value' => $executable === null ? '-' : $executable->getShortDescription(),
                     'link' => $executable === null ? null : $this->generateUrl('jury_executable', [
@@ -222,8 +235,11 @@ class LanguageController extends BaseController
     }
 
     #[Route(path: '/{langId}/toggle-judge', name: 'jury_language_toggle_judge')]
-    public function toggleJudgeAction(Request $request, string $langId): Response
-    {
+    public function toggleJudgeAction(
+        RouterInterface $router,
+        Request $request,
+        string $langId
+    ): Response {
         $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
@@ -239,7 +255,11 @@ class LanguageController extends BaseController
 
         $this->dj->auditlog('language', $langId, 'set allow judge',
                                          $request->request->getBoolean('value') ? 'yes' : 'no');
-        return $this->redirectToRoute('jury_language', ['langId' => $langId]);
+        return $this->redirectToLocalReferrer(
+            $router,
+            $request,
+            $this->generateUrl('jury_language', ['langId' => $langId])
+        );
     }
 
     #[Route(path: '/{langId}/toggle-filter-compiler-flags', name: 'jury_language_toggle_filter_compiler_files')]

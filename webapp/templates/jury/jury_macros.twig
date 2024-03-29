@@ -131,8 +131,10 @@
                                 {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}
                                 {% if (column.render | default('')) == "entity_id_badge" %}style="text-align: right;" {% endif %}>
                             {%- if item.link is defined %}<a href="{{ item.link }}" {%- if item.showlink is defined %} class="showlink"{% endif %}>
-                            {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
-                            {% if key == "status" %}
+                            {%- elseif row.link is defined and not item.toggle_partial is defined %}<a href="{{ row.link }}">{% endif %}
+                            {% if item.toggle_partial is defined %}
+                                {% include 'jury/partials/' ~ item.toggle_partial with item.partial_arguments %}
+                            {% elseif key == "status" %}
                             {{- (item.value|default(item.default|default('')))|statusIcon -}}
                             {% elseif key == "country" %}
                             {{- (item.value|default(item.default|default('')))|countryFlag -}}
@@ -150,7 +152,7 @@
                             {{- (item.value|default(item.default|default(''))) -}}
                             {% endif %}
                             {% if item.icon is defined %}<i class="fas fa-{{ item.icon }}"></i>{%- endif %}
-                            {%- if item.link is defined or row.link is defined -%}</a>{% endif %}
+                            {%- if item.link is defined or (row.link is defined and not item.toggle_partial is defined) -%}</a>{% endif %}
                         </td>
                     {%- endfor %}
                     {%- for action in row.actions %}
