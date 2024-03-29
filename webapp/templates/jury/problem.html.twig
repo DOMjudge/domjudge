@@ -164,14 +164,10 @@
                                 <a href="{{ link }}">{{ contestProblem.shortname }}</a>
                             </td>
                             <td>
-                                <a href="{{ link }}">
-                                    {% include 'jury/partials/problem_toggle.html.twig' with {type: 'submit', enabled: contestProblem.allowSubmit} %}
-                                </a>
+                                {% include 'jury/partials/problem_toggle.html.twig' with {type: 'submit', enabled: contestProblem.allowSubmit} %}
                             </td>
                             <td>
-                                <a href="{{ link }}">
-                                    {% include 'jury/partials/problem_toggle.html.twig' with {type: 'judge', enabled: contestProblem.allowJudge} %}
-                                </a>
+                                {% include 'jury/partials/problem_toggle.html.twig' with {type: 'judge', enabled: contestProblem.allowJudge} %}
                             </td>
                             {% if contestProblem.color is empty %}
                                 <td><a href="{{ link }}">&nbsp;</a></td>
