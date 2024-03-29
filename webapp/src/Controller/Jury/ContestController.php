@@ -44,6 +44,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
@@ -186,12 +187,29 @@ class ContestController extends BaseController
             }
 
             $contestdata['process_balloons'] = [
-                'value' => $contest->getProcessBalloons() ? 'yes' : 'no'
+                'toggle_partial' => 'contest_toggle.html.twig',
+                'partial_arguments' => [
+                    'type' => 'balloons',
+                    'contest' => $contest,
+                    'enabled' => $contest->getProcessBalloons(),
+                ],
             ];
             $contestdata['medals_enabled'] = [
-                'value' => $contest->getMedalsEnabled() ? 'yes' : 'no'
+                'toggle_partial' => 'contest_toggle.html.twig',
+                'partial_arguments' => [
+                    'type' => 'medals',
+                    'contest' => $contest,
+                    'enabled' => $contest->getMedalsEnabled(),
+                ],
             ];
-            $contestdata['public'] = ['value' => $contest->getPublic() ? 'yes' : 'no'];
+            $contestdata['public'] = [
+                'toggle_partial' => 'contest_toggle.html.twig',
+                'partial_arguments' => [
+                    'type' => 'public',
+                    'contest' => $contest,
+                    'enabled' => $contest->getPublic(),
+                ],
+            ];
             if ($contest->isOpenToAllTeams()) {
                 $contestdata['num_teams'] = ['value' => 'all'];
             } else {
@@ -343,8 +361,12 @@ class ContestController extends BaseController
     }
 
     #[Route(path: '/{contestId}/toggle/{type<submit|balloons|tiebreaker|medals|public>}', name: 'jury_contest_toggle')]
-    public function toggleSubmitAction(Request $request, string $contestId, string $type): Response
-    {
+    public function toggleSubmitAction(
+        RouterInterface $router,
+        Request $request,
+        string $contestId,
+        string $type
+    ): Response {
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
@@ -379,7 +401,11 @@ class ContestController extends BaseController
         $this->em->flush();
 
         $this->dj->auditlog('contest', $contestId, $label, $value ? 'yes' : 'no');
-        return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
+        return $this->redirectToLocalReferrer(
+            $router,
+            $request,
+            $this->generateUrl('jury_contest', ['contestId' => $contestId])
+        );
     }
 
     #[Route(path: '/{contestId<\d+>}/remove-interval/{intervalId}', name: 'jury_contest_remove_interval', methods: ['POST'])]
