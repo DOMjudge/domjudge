@@ -39,6 +39,7 @@ class BalloonCorrectSubmissionFixture extends AbstractTestDataFixture
         $manager->persist($problemA);
         $manager->persist($cp);
         foreach ($submissionData as $index => $submissionItem) {
+            /** @var Team $team */
             $team = $manager->getRepository(Team::class)->findOneBy(['name' => $submissionItem[0]]);
             $submission = (new Submission())
                 ->setContest($contest)
