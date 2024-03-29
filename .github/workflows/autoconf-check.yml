@@ -21,8 +21,6 @@ jobs:
           - releaseBranch: false
         include:
           - os: debian
-            version: testing
-          - os: debian
             version: stable
     runs-on: ubuntu-latest
     env:
