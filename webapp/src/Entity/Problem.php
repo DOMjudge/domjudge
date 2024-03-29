@@ -435,7 +435,7 @@ class Problem extends BaseApiEntity
 
     public function setProblemStatementContent(?ProblemStatementContent $content): self
     {
-        $this->problemStatementContent->clear();
+        $this->problemStatementContent = new ArrayCollection();
         if ($content) {
             $this->problemStatementContent->add($content);
             $content->setProblem($this);
