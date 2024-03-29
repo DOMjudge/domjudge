@@ -735,7 +735,7 @@ class CheckConfigService
                     } elseif ($width !== 64 || $height !== 64) {
                         // For other images we check the size
                         $result = 'W';
-                        $desc   .= sprintf("Logo for %s is not 64x64\n", $affiliation->getShortname());
+                        $desc   .= sprintf("Logo for %s is not 64x64 but %dx%d\n", $affiliation->getShortname(), $width, $height);
                     }
                 }
             }
