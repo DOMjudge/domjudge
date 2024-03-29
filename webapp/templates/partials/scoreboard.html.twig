@@ -20,7 +20,7 @@
     <div class="card" {% if refreshstop is defined %}data-ajax-refresh-stop="1"{% endif %}>
         <div class="card-header" style="font-family: Roboto, sans-serif; display: flex;">
             <span style="font-weight: bold;">{{ current_contest.name }}</span>
-            <span id="contesttimer" style="color: DimGray; margin-left: auto;">
+            <span id="contesttimer">
                 {% if scoreboard is null %}
                     {{ current_contest | printContestStart }}
                 {% elseif scoreboard.freezeData.showFinal(jury) %}

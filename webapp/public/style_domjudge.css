@@ -650,3 +650,8 @@ blockquote {
 .right {
     text-align: right;
 }
+
+#contesttimer {
+	color: DimGray;
+	margin-left: auto;
+}
