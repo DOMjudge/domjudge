@@ -393,8 +393,12 @@
                             <td><a href="{{ link }}">{{ problem.problem.name }}</a></td>
                             <td><a href="{{ link }}">{{ problem.shortname }}</a></td>
                             <td><a href="{{ link }}">{{ problem.points }}</a></td>
-                            <td><a href="{{ link }}">{{ problem.allowSubmit | printYesNo }}</a></td>
-                            <td><a href="{{ link }}">{{ problem.allowJudge | printYesNo }}</a></td>
+                            <td>
+                                {% include 'jury/partials/problem_toggle.html.twig' with {contestProblem: problem, type: 'submit', enabled: problem.allowSubmit} %}
+                            </td>
+                            <td>
+                                {% include 'jury/partials/problem_toggle.html.twig' with {contestProblem: problem, type: 'judge', enabled: problem.allowJudge} %}
+                            </td>
                             {% if problem.color is empty %}
                                 <td><a href="{{ link }}">&nbsp;</a></td>
                             {% else %}
