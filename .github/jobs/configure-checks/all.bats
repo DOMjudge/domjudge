@@ -129,14 +129,6 @@ compile_assertions_finished () {
     compile_assertions_finished
 }
 
-@test "Install GNU C/C++ compilers" {
-    # The test above already does this
-    # repo-remove clang
-    # repo-install gcc g++ libcgroup-dev
-    # compiler_assertions
-    # compile_assertions_finished
-}
-
 @test "Install C/C++ compilers (Clang as alternative)" {
     if [ "$distro_id" = "ID=fedora" ]; then
         # Fedora has gcc as dependency for clang
