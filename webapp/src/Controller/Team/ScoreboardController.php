@@ -33,7 +33,7 @@ class ScoreboardController extends BaseController
     #[Route(path: '/scoreboard', name: 'team_scoreboard')]
     public function scoreboardAction(Request $request): Response
     {
-        if ($this->config->get('enable_ranking')) {
+        if (!$this->config->get('enable_ranking')) {
             throw new BadRequestHttpException('Scoreboard is not available.');
         }
 
@@ -56,7 +56,7 @@ class ScoreboardController extends BaseController
     #[Route(path: '/team/{teamId<\d+>}', name: 'team_team')]
     public function teamAction(Request $request, int $teamId): Response
     {
-        if ($this->config->get('enable_ranking')) {
+        if (!$this->config->get('enable_ranking')) {
             throw new BadRequestHttpException('Scoreboard is not available.');
         }
 
