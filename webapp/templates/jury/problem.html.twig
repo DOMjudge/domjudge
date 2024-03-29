@@ -6,6 +6,7 @@
 {% block extrahead %}
     {{ parent() }}
     {{ macros.table_extrahead() }}
+    {{ macros.toggle_extrahead() }}
 {% endblock %}
 
 {% block content %}
@@ -163,10 +164,14 @@
                                 <a href="{{ link }}">{{ contestProblem.shortname }}</a>
                             </td>
                             <td>
-                                <a href="{{ link }}">{{ contestProblem.allowSubmit | printYesNo }}</a>
+                                <a href="{{ link }}">
+                                    {% include 'jury/partials/problem_toggle.html.twig' with {type: 'submit', enabled: contestProblem.allowSubmit} %}
+                                </a>
                             </td>
                             <td>
-                                <a href="{{ link }}">{{ contestProblem.allowJudge | printYesNo }}</a>
+                                <a href="{{ link }}">
+                                    {% include 'jury/partials/problem_toggle.html.twig' with {type: 'judge', enabled: contestProblem.allowJudge} %}
+                                </a>
                             </td>
                             {% if contestProblem.color is empty %}
                                 <td><a href="{{ link }}">&nbsp;</a></td>
@@ -248,4 +253,8 @@
         {%- include 'jury/partials/submission_list.html.twig' with {showTestcases: false} %}
     </div>
 
+{% endblock %}
+
+{% block extrafooter %}
+    {{ macros.toggle_autosubmit_extrafooter() }}
 {% endblock %}

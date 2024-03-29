@@ -34,11 +34,13 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Yaml;
 use ZipArchive;
@@ -1149,6 +1151,43 @@ class ProblemController extends BaseController
                           ->getResult();
         $this->judgeRemaining($judgings);
         return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
+    }
+
+    #[Route(path: '/{contestId}/{probId}/toggle/{type<judge|submit>}', name: 'jury_problem_toggle')]
+    public function toggleSubmitAction(
+        RouterInterface $router,
+        Request $request,
+        string $contestId,
+        string $probId,
+        string $type
+    ): Response {
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
+            'contest' => $contestId,
+            'problem' => $probId,
+        ]);
+        if (!$contestProblem) {
+            throw new NotFoundHttpException(sprintf('Problem with ID %s not found for contest %s', $probId, $contestId));
+        }
+
+        $value = $request->request->getBoolean('value');
+
+        switch ($type) {
+            case 'judge':
+                $contestProblem->setAllowJudge($value);
+                $label = 'set allow judge';
+                break;
+            case 'submit':
+                $contestProblem->setAllowSubmit($value);
+                $label = 'set allow submit';
+                break;
+            default:
+                throw new BadRequestHttpException('Unknown toggle type');
+        }
+        $this->em->flush();
+
+        $id = [$contestProblem->getCid(), $contestProblem->getProbid()];
+        $this->dj->auditlog('contest_problem', implode(', ', $id), $label, $value ? 'yes' : 'no');
+        return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_problems'));
     }
 
     /**
