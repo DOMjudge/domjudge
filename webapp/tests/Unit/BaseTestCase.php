@@ -322,6 +322,6 @@ abstract class BaseTestCase extends WebTestCase
         $config   = self::getContainer()->get(ConfigurationService::class);
         $eventLog = self::getContainer()->get(EventLogService::class);
         $dj       = self::getContainer()->get(DOMJudgeService::class);
-        $config->saveChanges(['data_source'=>$dataSource], $eventLog, $dj);
+        $config->saveChanges(['data_source'=>$dataSource], $eventLog, $dj, treatMissingBooleansAsFalse: false);
     }
 }

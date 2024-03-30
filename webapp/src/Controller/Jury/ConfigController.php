@@ -66,7 +66,7 @@ class ConfigController extends AbstractController
                 }
             }
             $before = $this->config->all();
-            $errors = $this->config->saveChanges($data, $eventLogService, $this->dj, $options);
+            $errors = $this->config->saveChanges($data, $eventLogService, $this->dj, options: $options);
             $after = $this->config->all();
 
             // Compile a list of differences.
