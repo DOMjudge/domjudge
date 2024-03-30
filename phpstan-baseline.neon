@@ -1406,13 +1406,18 @@ parameters:
 			path: webapp/tests/Unit/BaseTestCase.php
 
 		-
-			message: "#^Call to an undefined method object\\:\\:getRepository\\(\\)\\.$#"
+			message: "#^Call to an undefined method object\\:\\:getExternalid\\(\\)\\.$#"
 			count: 1
 			path: webapp/tests/Unit/BaseTestCase.php
 
 		-
 			message: "#^Call to an undefined method object\\:\\:saveChanges\\(\\)\\.$#"
 			count: 2
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Parameter \\#1 \\$className of method Doctrine\\\\ORM\\\\EntityManagerInterface\\:\\:getRepository\\(\\) expects class\\-string\\<object\\>, string given\\.$#"
+			count: 1
 			path: webapp/tests/Unit/BaseTestCase.php
 
 		-
@@ -1442,6 +1447,11 @@ parameters:
 
 		-
 			message: "#^Parameter \\#2 \\$string of function explode expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Unable to resolve the template type T in call to method Doctrine\\\\ORM\\\\EntityManagerInterface\\:\\:getRepository\\(\\)$#"
 			count: 1
 			path: webapp/tests/Unit/BaseTestCase.php
 
