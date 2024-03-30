@@ -33,13 +33,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
     protected function getLoops(): array
     {
         $dataSources = $this->getDatasourceLoops()['dataSources'];
-        $riskyURLs = [];
-        $crawlAll = getenv('CRAWL_RISKY');
-        if ($crawlAll) {
-            $riskyURLs = explode(',', $crawlAll);
-        } else {
-            $riskyURLs = array_slice(self::$riskyURLs, 0, 1);
-        }
+        $riskyURLs = array_slice(self::$riskyURLs, 0, 1);
         return ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs];
     }
 
