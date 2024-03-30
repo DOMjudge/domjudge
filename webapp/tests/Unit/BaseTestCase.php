@@ -17,6 +17,8 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Link;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\SessionFactory;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use ZipArchive;
 
@@ -155,8 +157,12 @@ abstract class BaseTestCase extends WebTestCase
     protected function logOut(): void
     {
         if ($this->client->getContainer()->has('session.factory')) {
-            $session = $this->client->getContainer()->get('session.factory')->createSession();
+            /** @var SessionFactory $sessionFactory */
+            $sessionFactory = $this->client->getContainer()->get('session.factory');
+            /** @var Session $session */
+            $session = $sessionFactory->createSession();
         } else {
+            /** @var Session $session */
             $session = $this->client->getContainer()->get('session');
         }
         $this->client->getCookieJar()->expire($session->getName());
@@ -167,6 +173,7 @@ abstract class BaseTestCase extends WebTestCase
      */
     protected function setupUser(): User
     {
+        /** @var EntityManagerInterface $em */
         $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
         $user = $em->getRepository(User::class)->findOneBy(['username' => 'demo']);
         if ($user === null) {
