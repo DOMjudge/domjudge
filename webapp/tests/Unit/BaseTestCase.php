@@ -271,7 +271,9 @@ abstract class BaseTestCase extends WebTestCase
     protected function resolveEntityId(string $class, ?string $id): ?string
     {
         if ($id !== null && !$this->dataSourceIsLocal()) {
-            $entity = static::getContainer()->get(EntityManagerInterface::class)->getRepository($class)->find($id);
+            /** @var EntityManagerInterface $em */
+            $em = static::getContainer()->get(EntityManagerInterface::class);
+            $entity = $em->getRepository($class)->find($id);
             // If we can't find the entity, assume we use an invalid one.
             if ($entity === null) {
                 return $id;
