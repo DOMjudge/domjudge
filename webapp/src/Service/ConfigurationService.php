@@ -166,6 +166,7 @@ EOF;
         array $dataToSet,
         EventLogService $eventLog,
         DOMJudgeService $dj,
+        bool $treatMissingBooleansAsFalse = true,
         ?array &$options = null
     ): array {
         $specs = $this->getConfigSpecification();
@@ -196,7 +197,7 @@ EOF;
                 $options[$specName] = $optionToSet;
             }
             if (!array_key_exists($specName, $dataToSet)) {
-                if ($spec->type == 'bool') {
+                if ($spec->type == 'bool' && $treatMissingBooleansAsFalse) {
                     // Special-case bool, since checkboxes don't return a
                     // value when unset.
                     $val = false;
