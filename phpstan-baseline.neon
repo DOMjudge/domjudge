@@ -1,0 +1,1971 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Parameter \\#3 \\$mimeType of class Symfony\\\\Component\\\\HttpFoundation\\\\File\\\\UploadedFile constructor expects string\\|null, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Command/CallApiActionCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$dirs of method Symfony\\\\Component\\\\Finder\\\\Finder\\:\\:in\\(\\) expects array\\<string\\>\\|string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Command/ScoreboardMergeCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$json of function json_decode expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Command/ScoreboardMergeCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$input of static method Symfony\\\\Component\\\\Yaml\\\\Yaml\\:\\:parse\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Config/Loader/YamlConfigLoader.php
+
+		-
+			message: "#^Cannot access an offset on array\\<int, string\\|Stringable\\>\\|string\\|Stringable\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/AbstractRestController.php
+
+		-
+			message: "#^Parameter \\#2 \\$values of method Symfony\\\\Component\\\\HttpFoundation\\\\ResponseHeaderBag\\:\\:set\\(\\) expects array\\<string\\>\\|string\\|null, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/AbstractRestController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\API\\\\AwardsController\\:\\:getContestAndScoreboard\\(\\) should return array\\{App\\\\Entity\\\\Contest, App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\} but returns array\\{App\\\\Entity\\\\Contest, App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\|null\\}\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/AwardsController.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of function call_user_func expects callable\\(\\)\\: mixed, array\\{App\\\\Entity\\\\Team, non\\-falsy\\-string\\} given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/ClarificationController.php
+
+		-
+			message: "#^Parameter \\#1 \\$category of method App\\\\Entity\\\\Clarification\\:\\:setCategory\\(\\) expects string\\|null, int\\|string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/ClarificationController.php
+
+		-
+			message: "#^Access to an undefined property Metadata\\\\ClassHierarchyMetadata\\|Metadata\\\\MergeableClassMetadata\\:\\:\\$propertyMetadata\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/ContestController.php
+
+		-
+			message: "#^Argument of an invalid type array\\<int, string\\>\\|false supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/ContestController.php
+
+		-
+			message: "#^Parameter \\#1 \\$str of method App\\\\Service\\\\DOMJudgeService\\:\\:jsonDecode\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/ContestController.php
+
+		-
+			message: "#^Parameter \\$environment of class App\\\\DataTransferObject\\\\DomJudgeApiInfo constructor expects string, array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/GeneralInfoController.php
+
+		-
+			message: "#^Parameter \\$version of class App\\\\DataTransferObject\\\\ApiInfoProvider constructor expects string, array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/GeneralInfoController.php
+
+		-
+			message: "#^Parameter \\$version of class App\\\\DataTransferObject\\\\DomJudgeApiInfo constructor expects string, array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/GeneralInfoController.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of function call_user_func expects callable\\(\\)\\: mixed, array\\{mixed, non\\-falsy\\-string\\} given\\.$#"
+			count: 2
+			path: webapp/src/Controller/API/GroupController.php
+
+		-
+			message: "#^Parameter \\#1 \\$data of method App\\\\Service\\\\ImportExportService\\:\\:importGroupsJson\\(\\) expects array\\<array\\{id\\?\\: string, icpc_id\\: string, name\\: string, sortorder\\?\\: int, color\\?\\: string, hidden\\?\\: bool, allow_self_registration\\?\\: bool\\}\\>, array\\{array\\{id\\: string\\|null, name\\: string, hidden\\: bool, icpc_id\\: string\\|null, sortorder\\: int, color\\: string\\|null, allow_self_registration\\: bool\\}\\} given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/GroupController.php
+
+		-
+			message: "#^Parameter \\#1 \\$data of method App\\\\Service\\\\ImportExportService\\:\\:importGroupsJson\\(\\) expects array\\<array\\{id\\?\\: string, icpc_id\\: string, name\\: string, sortorder\\?\\: int, color\\?\\: string, hidden\\?\\: bool, allow_self_registration\\?\\: bool\\}\\>, array\\{array\\{name\\: string, hidden\\: bool, icpc_id\\: string\\|null, sortorder\\: int, color\\: string\\|null, allow_self_registration\\: bool\\}\\} given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/GroupController.php
+
+		-
+			message: "#^Binary operation \"/\" between bool\\|float\\|int\\|string\\|null and bool\\|float\\|int\\|string\\|null results in an error\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#1 \\$description of method App\\\\Entity\\\\InternalError\\:\\:setDescription\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#1 \\$entryPoint of method App\\\\Entity\\\\Submission\\:\\:setEntryPoint\\(\\) expects string\\|null, float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string\\|true given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of method App\\\\Entity\\\\DebugPackage\\:\\:setFilename\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#1 \\$hostname of method App\\\\Entity\\\\Judgehost\\:\\:setHostname\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#1 \\$judgehostlog of method App\\\\Entity\\\\InternalError\\:\\:setJudgehostlog\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#1 \\$str of method App\\\\Service\\\\DOMJudgeService\\:\\:jsonDecode\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function base64_decode expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 6
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#10 \\$metadata of method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:addSingleJudgingRun\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#11 \\$testcasedir of method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:addSingleJudgingRun\\(\\) expects string\\|null, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#2 \\$max_batchsize of method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:getJudgetasks\\(\\) expects int, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 3
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#3 \\$runResult of method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:addSingleJudgingRun\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#4 \\$runTime of method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:addSingleJudgingRun\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#5 \\$outputSystem of method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:addSingleJudgingRun\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#6 \\$outputError of method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:addSingleJudgingRun\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#7 \\$outputDiff of method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:addSingleJudgingRun\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#8 \\$outputRun of method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:addSingleJudgingRun\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Parameter \\#9 \\$teamMessage of method App\\\\Controller\\\\API\\\\JudgehostController\\:\\:addSingleJudgingRun\\(\\) expects string\\|null, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/JudgehostController.php
+
+		-
+			message: "#^Cannot access offset 'id' on App\\\\Entity\\\\Language\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/LanguageController.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of method App\\\\Entity\\\\ExecutableFile\\:\\:setFilename\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/LanguageController.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method ZipArchive\\:\\:getFromName\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/LanguageController.php
+
+		-
+			message: "#^Parameter \\#1 \\$str of method App\\\\Service\\\\DOMJudgeService\\:\\:jsonDecode\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/LanguageController.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of function call_user_func expects callable\\(\\)\\: mixed, array\\{mixed, non\\-falsy\\-string\\} given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/OrganizationController.php
+
+		-
+			message: "#^Parameter \\#1 \\$data of method App\\\\Service\\\\ImportExportService\\:\\:importOrganizationsJson\\(\\) expects array\\<array\\{shortname\\?\\: string, short_name\\?\\: string, short\\-name\\?\\: string, id\\: string, icpc_id\\?\\: string, name\\: string, formal_name\\?\\: string, country\\: string, \\.\\.\\.\\}\\>, array\\{array\\{id\\: string\\|null, shortname\\: string\\|null, name\\: string\\|null, country\\: string\\|null, icpc_id\\: string\\|null\\}\\} given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/OrganizationController.php
+
+		-
+			message: "#^Parameter \\#1 \\$items of class App\\\\DataTransferObject\\\\ContestProblemArray constructor expects array\\<App\\\\DataTransferObject\\\\ContestProblemWrapper\\>, array\\<App\\\\DataTransferObject\\\\ContestProblemWrapper\\|App\\\\Entity\\\\ContestProblem\\> given\\.$#"
+			count: 2
+			path: webapp/src/Controller/API/ProblemController.php
+
+		-
+			message: "#^Binary operation \"\\-\" between float\\|string and float\\|null results in an error\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/ScoreboardController.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of function call_user_func expects callable\\(\\)\\: mixed, array\\{App\\\\Entity\\\\Team, non\\-falsy\\-string\\} given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/SubmissionController.php
+
+		-
+			message: "#^Parameter \\#2 \\$originalName of class Symfony\\\\Component\\\\HttpFoundation\\\\File\\\\UploadedFile constructor expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/SubmissionController.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of function call_user_func expects callable\\(\\)\\: mixed, array\\{mixed, non\\-falsy\\-string\\} given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/TeamController.php
+
+		-
+			message: "#^Parameter \\#1 \\$data of method App\\\\Service\\\\ImportExportService\\:\\:importTeamsJson\\(\\) expects array\\<array\\{label\\?\\: string, name\\?\\: string, organization_id\\?\\: string, group_ids\\?\\: array\\<string\\>, icpc_id\\?\\: string, id\\?\\: string, display_name\\?\\: string, location\\?\\: array\\{description\\: string\\}, \\.\\.\\.\\}\\>, array\\{array\\{id\\: string\\|null, icpc_id\\: string\\|null, label\\: string\\|null, group_ids\\: array\\<string\\>, name\\: string\\|null, display_name\\: string\\|null, public_description\\: string\\|null, members\\: string\\|null, \\.\\.\\.\\}\\} given\\.$#"
+			count: 1
+			path: webapp/src/Controller/API/TeamController.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getShortDescription\\(\\)\\.$#"
+			count: 2
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Cannot call method getContest\\(\\) on class\\-string\\|object\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Cannot call method getContests\\(\\) on class\\-string\\|object\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:getDatabaseRelations\\(\\) should return array\\<string, array\\<array\\{target\\: string, targetColumn\\: string, type\\: string\\}\\>\\> but returns array\\<class\\-string, array\\<string, array\\{target\\: class\\-string, targetColumn\\: string, type\\: string\\|null\\}\\>\\>\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Parameter \\#1 \\$files of method App\\\\Controller\\\\BaseController\\:\\:getDatabaseRelations\\(\\) expects array\\<string\\>, array\\<int, string\\>\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Parameter \\#1 \\$message of class Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\BadRequestHttpException constructor expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/BaseController.php
+
+		-
+			message: "#^Cannot cast bool\\|float\\|int\\|string\\|Symfony\\\\Component\\\\HttpFoundation\\\\InputBag\\|null to string\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/BalloonController.php
+
+		-
+			message: "#^Parameter \\#1 \\$queue of method App\\\\Entity\\\\Clarification\\:\\:setQueue\\(\\) expects string\\|null, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/ClarificationController.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of function explode expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ClarificationController.php
+
+		-
+			message: "#^Argument of an invalid type array\\<int, string\\>\\|false supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ConfigController.php
+
+		-
+			message: "#^Parameter \\#1 \\$json of function json_decode expects string, bool\\|float\\|int\\|string given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ConfigController.php
+
+		-
+			message: "#^Parameter \\#1 \\$size of static method App\\\\Utils\\\\Utils\\:\\:printsize\\(\\) expects int, int\\<0, max\\>\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ConfigController.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of function call_user_func expects callable\\(\\)\\: mixed, array\\{mixed, string\\} given\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/ContestController.php
+
+		-
+			message: "#^Cannot cast bool\\|float\\|int\\|string\\|Symfony\\\\Component\\\\HttpFoundation\\\\InputBag\\|null to string\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ExternalContestController.php
+
+		-
+			message: "#^Anonymous function should return int but returns int\\|false\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ImportExportController.php
+
+		-
+			message: "#^Cannot access offset 'name' on App\\\\Entity\\\\TeamCategory\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ImportExportController.php
+
+		-
+			message: "#^Cannot access offset 'sortorder' on App\\\\Entity\\\\TeamCategory\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ImportExportController.php
+
+		-
+			message: "#^Offset 'execid' does not exist on array\\{kind\\: 'executable', hostname\\?\\: string, execid\\?\\: string, probid\\?\\: string, langid\\?\\: string\\}\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/InternalErrorController.php
+
+		-
+			message: "#^Offset 'hostname' does not exist on array\\{kind\\: 'judgehost', hostname\\?\\: string, execid\\?\\: string, probid\\?\\: string, langid\\?\\: string\\}\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/InternalErrorController.php
+
+		-
+			message: "#^Offset 'langid' does not exist on array\\{kind\\: 'language', hostname\\?\\: string, execid\\?\\: string, probid\\?\\: string, langid\\?\\: string\\}\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/InternalErrorController.php
+
+		-
+			message: "#^Offset 'probid' does not exist on array\\{kind\\: 'problem', hostname\\?\\: string, execid\\?\\: string, probid\\?\\: string, langid\\?\\: string\\}\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/InternalErrorController.php
+
+		-
+			message: "#^Parameter \\#1 \\$content of class Symfony\\\\Component\\\\HttpFoundation\\\\Response constructor expects string\\|null, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/JuryMiscController.php
+
+		-
+			message: "#^Parameter \\#1 \\$content of method App\\\\Entity\\\\ProblemAttachmentContent\\:\\:setContent\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ProblemController.php
+
+		-
+			message: "#^Parameter \\#1 \\$description of method App\\\\Entity\\\\Testcase\\:\\:setDescription\\(\\) expects resource\\|string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ProblemController.php
+
+		-
+			message: "#^Parameter \\#1 \\$haystack of function str_contains expects string, resource\\|string given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ProblemController.php
+
+		-
+			message: "#^Parameter \\#1 \\$image of method App\\\\Entity\\\\TestcaseContent\\:\\:setImage\\(\\) expects string\\|null, string\\|false given\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/ProblemController.php
+
+		-
+			message: "#^Parameter \\#1 \\$image of static method App\\\\Utils\\\\Utils\\:\\:getImageThumb\\(\\) expects string, string\\|false given\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/ProblemController.php
+
+		-
+			message: "#^Parameter \\#1 \\$image of static method App\\\\Utils\\\\Utils\\:\\:getImageType\\(\\) expects string, string\\|false given\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/ProblemController.php
+
+		-
+			message: "#^Parameter \\#1 \\$imageThumb of method App\\\\Entity\\\\TestcaseContent\\:\\:setImageThumb\\(\\) expects string\\|null, string\\|true given\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/ProblemController.php
+
+		-
+			message: "#^Parameter \\#1 \\$imageType of method App\\\\Entity\\\\Testcase\\:\\:setImageType\\(\\) expects string, string\\|true given\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/ProblemController.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function md5 expects string, string\\|false given\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/ProblemController.php
+
+		-
+			message: "#^Parameter \\#2 \\$content of method ZipArchive\\:\\:addFromString\\(\\) expects string, resource\\|string given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/ProblemController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\Jury\\\\RejudgingController\\:\\:getStats\\(\\) should return array\\{judging_runs_differ\\: array\\<int\\>, judging_runs_differ_overflow\\: int, runtime_spread\\: array\\<array\\{submitid\\: int, rank\\: int, spread\\: float, count\\: int, verdict\\: string\\}\\>, judgehost_stats\\: array\\<string, array\\{judgehost\\: string, njudged\\: int, avgrun\\: float, stddev\\: float, avgduration\\: float\\}\\>, judgings\\: array\\<array\\{rejudgingid\\: int, judgingid\\: int, submitid\\: int, hostname\\: string, result\\: string, runtime_avg\\: float\\|null, ntestcases\\: int, duration\\: float\\}\\>\\} but returns array\\{judging_runs_differ\\: array\\<int\\<0, max\\>, int\\|string\\>, judging_runs_differ_overflow\\: int\\<\\-10, max\\>, runtime_spread\\: array\\<int\\<0, max\\>, array\\{submitid\\: int\\|string, rank\\: mixed, spread\\: float, count\\: int\\<1, max\\>, verdict\\: mixed\\}\\>, judgehost_stats\\: array\\<int\\|string, array\\{judgehost\\: int\\|string, njudged\\: int\\<1, max\\>, avgrun\\: float, stddev\\: float, avgduration\\: float\\}\\>, judgings\\: mixed\\}\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/RejudgingController.php
+
+		-
+			message: "#^Parameter \\#1 \\$priorityString of static method App\\\\Entity\\\\JudgeTask\\:\\:parsePriority\\(\\) expects string, float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string\\|true given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/RejudgingController.php
+
+		-
+			message: "#^Parameter \\#1 \\$reason of method App\\\\Service\\\\RejudgingService\\:\\:createRejudging\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/RejudgingController.php
+
+		-
+			message: "#^Parameter \\#1 \\$reason of method App\\\\Service\\\\RejudgingService\\:\\:createRejudging\\(\\) expects string, float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string\\|true given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/RejudgingController.php
+
+		-
+			message: "#^Parameter \\#2 \\$referer of method App\\\\Controller\\\\BaseController\\:\\:isLocalRefererUrl\\(\\) expects string, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/RejudgingController.php
+
+		-
+			message: "#^Parameter \\#3 \\$redirect of closure expects string\\|null, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 2
+			path: webapp/src/Controller/Jury/RejudgingController.php
+
+		-
+			message: "#^Cannot cast bool\\|float\\|int\\|string\\|Symfony\\\\Component\\\\HttpFoundation\\\\InputBag\\|null to string\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Cannot cast float\\|int\\|non\\-falsy\\-string\\|Symfony\\\\Component\\\\HttpFoundation\\\\InputBag\\|true to string\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Parameter \\#1 \\$content of static method App\\\\Utils\\\\Utils\\:\\:streamAsBinaryFile\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Parameter \\#1 \\$judging of method App\\\\Controller\\\\Jury\\\\SubmissionController\\:\\:processClaim\\(\\) expects App\\\\Entity\\\\ExternalJudgement\\|App\\\\Entity\\\\Judging\\|null, App\\\\Entity\\\\ExternalJudgement\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Parameter \\#1 \\$verifyComment of method App\\\\Entity\\\\ExternalJudgement\\:\\:setVerifyComment\\(\\) expects string\\|null, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Parameter \\#1 \\$verifyComment of method App\\\\Entity\\\\Judging\\:\\:setVerifyComment\\(\\) expects string\\|null, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Parameter \\#3 \\$subject of function preg_replace expects array\\|string, int\\|string given\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Possibly invalid array key type float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string\\|Symfony\\\\Component\\\\HttpFoundation\\\\InputBag\\|true\\.$#"
+			count: 1
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Possibly invalid array key type float\\|int\\|string\\|Symfony\\\\Component\\\\HttpFoundation\\\\InputBag\\|true\\.$#"
+			count: 5
+			path: webapp/src/Controller/Jury/SubmissionController.php
+
+		-
+			message: "#^Parameter \\#1 \\$body of method Twig\\\\Extra\\\\Markdown\\\\MarkdownRuntime\\:\\:convert\\(\\) expects string, bool\\|float\\|int\\|string given\\.$#"
+			count: 1
+			path: webapp/src/Controller/RootController.php
+
+		-
+			message: "#^Parameter \\#1 \\$contestProblem of method App\\\\Entity\\\\Submission\\:\\:setContestProblem\\(\\) expects App\\\\Entity\\\\ContestProblem\\|null, App\\\\Entity\\\\ContestProblem\\|false given\\.$#"
+			count: 1
+			path: webapp/src/DataFixtures/Test/RejudgingFirstToSolveFixture.php
+
+		-
+			message: "#^Parameter \\#1 \\$contestProblem of method App\\\\Entity\\\\Submission\\:\\:setContestProblem\\(\\) expects App\\\\Entity\\\\ContestProblem\\|null, App\\\\Entity\\\\ContestProblem\\|false given\\.$#"
+			count: 1
+			path: webapp/src/DataFixtures/Test/RejudgingStatesFixture.php
+
+		-
+			message: "#^Parameter \\#1 \\$contestProblem of method App\\\\Entity\\\\Submission\\:\\:setContestProblem\\(\\) expects App\\\\Entity\\\\ContestProblem\\|null, App\\\\Entity\\\\ContestProblem\\|false given\\.$#"
+			count: 1
+			path: webapp/src/DataFixtures/Test/SampleSubmissionsFixture.php
+
+		-
+			message: "#^Parameter \\#1 \\$contestProblem of method App\\\\Entity\\\\Submission\\:\\:setContestProblem\\(\\) expects App\\\\Entity\\\\ContestProblem\\|null, App\\\\Entity\\\\ContestProblem\\|false given\\.$#"
+			count: 1
+			path: webapp/src/DataFixtures/Test/SampleSubmissionsInBucketsFixture.php
+
+		-
+			message: "#^Parameter \\#1 \\$contestProblem of method App\\\\Entity\\\\Submission\\:\\:setContestProblem\\(\\) expects App\\\\Entity\\\\ContestProblem\\|null, App\\\\Entity\\\\ContestProblem\\|false given\\.$#"
+			count: 1
+			path: webapp/src/DataFixtures/Test/SampleSubmissionsMultipleTriesFixture.php
+
+		-
+			message: "#^Parameter \\#1 \\$contestProblem of method App\\\\Entity\\\\Submission\\:\\:setContestProblem\\(\\) expects App\\\\Entity\\\\ContestProblem\\|null, App\\\\Entity\\\\ContestProblem\\|false given\\.$#"
+			count: 1
+			path: webapp/src/DataFixtures/Test/SampleSubmissionsThreeTriesCorrectFixture.php
+
+		-
+			message: "#^Parameter \\#1 \\$contestProblem of method App\\\\Entity\\\\Submission\\:\\:setContestProblem\\(\\) expects App\\\\Entity\\\\ContestProblem\\|null, App\\\\Entity\\\\ContestProblem\\|false given\\.$#"
+			count: 1
+			path: webapp/src/DataFixtures/Test/SampleSubmissionsThreeTriesCorrectSameLanguageFixture.php
+
+		-
+			message: "#^Parameter \\#12 \\$enumClass of class App\\\\DataTransferObject\\\\ConfigurationSpecification constructor expects class\\-string\\<BackedEnum\\>\\|null, string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/DataTransferObject/ConfigurationSpecification.php
+
+		-
+			message: "#^Parameter \\#2 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null given\\.$#"
+			count: 1
+			path: webapp/src/DependencyInjection/Compiler/SetDocLinksPass.php
+
+		-
+			message: "#^Property App\\\\Doctrine\\\\ORM\\\\Query\\\\AST\\\\Functions\\\\RightFunction\\:\\:\\$fieldExpression \\(Doctrine\\\\ORM\\\\Query\\\\AST\\\\Node\\|null\\) does not accept Doctrine\\\\ORM\\\\Query\\\\AST\\\\Node\\|string\\.$#"
+			count: 1
+			path: webapp/src/Doctrine/ORM/Query/AST/Functions/RightFunction.php
+
+		-
+			message: "#^Property App\\\\Doctrine\\\\ORM\\\\Query\\\\AST\\\\Functions\\\\RightFunction\\:\\:\\$lengthExpression \\(Doctrine\\\\ORM\\\\Query\\\\AST\\\\Node\\|null\\) does not accept Doctrine\\\\ORM\\\\Query\\\\AST\\\\Node\\|string\\.$#"
+			count: 1
+			path: webapp/src/Doctrine/ORM/Query/AST/Functions/RightFunction.php
+
+		-
+			message: "#^Property App\\\\Doctrine\\\\ORM\\\\Query\\\\AST\\\\Functions\\\\TruncateFunction\\:\\:\\$appendWhenTruncatedExpression \\(Doctrine\\\\ORM\\\\Query\\\\AST\\\\Node\\|null\\) does not accept Doctrine\\\\ORM\\\\Query\\\\AST\\\\Node\\|string\\.$#"
+			count: 1
+			path: webapp/src/Doctrine/ORM/Query/AST/Functions/TruncateFunction.php
+
+		-
+			message: "#^Property App\\\\Doctrine\\\\ORM\\\\Query\\\\AST\\\\Functions\\\\TruncateFunction\\:\\:\\$fieldExpression \\(Doctrine\\\\ORM\\\\Query\\\\AST\\\\Node\\|null\\) does not accept Doctrine\\\\ORM\\\\Query\\\\AST\\\\Node\\|string\\.$#"
+			count: 1
+			path: webapp/src/Doctrine/ORM/Query/AST/Functions/TruncateFunction.php
+
+		-
+			message: "#^Property App\\\\Doctrine\\\\ORM\\\\Query\\\\AST\\\\Functions\\\\TruncateFunction\\:\\:\\$lengthExpression \\(Doctrine\\\\ORM\\\\Query\\\\AST\\\\Node\\|null\\) does not accept Doctrine\\\\ORM\\\\Query\\\\AST\\\\Node\\|string\\.$#"
+			count: 1
+			path: webapp/src/Doctrine/ORM/Query/AST/Functions/TruncateFunction.php
+
+		-
+			message: "#^Binary operation \"\\-\" between float\\|string and float\\|null results in an error\\.$#"
+			count: 1
+			path: webapp/src/Entity/Clarification.php
+
+		-
+			message: "#^Binary operation \"\\+\" between float\\|string\\|null and float\\|int results in an error\\.$#"
+			count: 1
+			path: webapp/src/Entity/Contest.php
+
+		-
+			message: "#^Binary operation \"\\-\" between float\\|null and float\\|string\\|null results in an error\\.$#"
+			count: 1
+			path: webapp/src/Entity/Contest.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Contest\\:\\:getDataForJuryInterface\\(\\) should return array\\<string, array\\{icon\\: string\\|null, label\\: string, time\\: string, show_button\\: bool\\}\\> but returns non\\-empty\\-array\\<'activate'\\|'deactivate'\\|'end'\\|'finalize'\\|'freeze'\\|'start'\\|'unfreeze', array\\{icon\\?\\: 'check'\\|'ellipsis\\-h'\\|null, label\\: 'Activate time'\\|'Deactivate time'\\|'End time'\\|'Finalize time'\\|'Freeze time'\\|'Start time'\\|'Unfreeze time', time\\: string, class\\?\\: 'ignore', show_button\\: bool, extra_button\\?\\: array\\{type\\: 'delay_start'\\|'resume_start', label\\: 'delay start'\\|'resume start'\\}\\}\\>\\.$#"
+			count: 1
+			path: webapp/src/Entity/Contest.php
+
+		-
+			message: "#^Parameter \\#1 \\$content of method App\\\\Entity\\\\ContestProblemsetContent\\:\\:setContent\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Entity/Contest.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Executable\\:\\:getZipfileContent\\(\\) should return string but returns string\\|false\\.$#"
+			count: 1
+			path: webapp/src/Entity/Executable.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\InternalError\\:\\:\\$disabled \\(array\\{kind\\: string, hostname\\?\\: string, execid\\?\\: string, probid\\: string, langid\\: string\\}\\) does not accept array\\{kind\\: string, hostname\\?\\: string, execid\\?\\: string, probid\\?\\: string, langid\\?\\: string\\}\\.$#"
+			count: 1
+			path: webapp/src/Entity/InternalError.php
+
+		-
+			message: "#^Binary operation \"\\-\" between float\\|non\\-falsy\\-string and float\\|null results in an error\\.$#"
+			count: 1
+			path: webapp/src/Entity/Judging.php
+
+		-
+			message: "#^Binary operation \"\\-\" between float\\|string\\|null and float\\|null results in an error\\.$#"
+			count: 1
+			path: webapp/src/Entity/Judging.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Judging\\:\\:getOutputCompile\\(\\) should return resource\\|string\\|null but returns string\\|false\\.$#"
+			count: 1
+			path: webapp/src/Entity/Judging.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Judging\\:\\:\\$output_compile \\(resource\\|null\\) does not accept resource\\|string\\.$#"
+			count: 1
+			path: webapp/src/Entity/Judging.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Judging\\:\\:\\$output_compile_as_string \\(string\\|null\\) does not accept string\\|false\\.$#"
+			count: 1
+			path: webapp/src/Entity/Judging.php
+
+		-
+			message: "#^Binary operation \"\\-\" between float\\|string\\|null and float\\|null results in an error\\.$#"
+			count: 1
+			path: webapp/src/Entity/JudgingRun.php
+
+		-
+			message: "#^Parameter \\#1 \\$content of method App\\\\Entity\\\\ProblemStatementContent\\:\\:setContent\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Entity/Problem.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Testcase\\:\\:getDescription\\(\\) should return resource\\|string\\|null but returns string\\|false\\.$#"
+			count: 1
+			path: webapp/src/Entity/Testcase.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Testcase\\:\\:\\$description \\(resource\\|null\\) does not accept resource\\|string\\.$#"
+			count: 1
+			path: webapp/src/Entity/Testcase.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Testcase\\:\\:\\$description_as_string \\(string\\|null\\) does not accept string\\|false\\.$#"
+			count: 1
+			path: webapp/src/Entity/Testcase.php
+
+		-
+			message: "#^Call to static method convert\\(\\) on an unknown class Riverline\\\\MultiPartParser\\\\Converters\\\\HttpFoundation\\.$#"
+			count: 1
+			path: webapp/src/EventListener/ParseFilesForPutListener.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function file_put_contents expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/EventListener/ParseFilesForPutListener.php
+
+		-
+			message: "#^Parameter \\#1 \\$path of class Symfony\\\\Component\\\\HttpFoundation\\\\File\\\\UploadedFile constructor expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/EventListener/ParseFilesForPutListener.php
+
+		-
+			message: "#^Parameter \\#3 \\$length of function substr expects int\\|null, int\\<0, max\\>\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Form/Type/JuryClarificationType.php
+
+		-
+			message: "#^Cannot call method getShortName\\(\\) on App\\\\Entity\\\\ContestProblem\\|false\\.$#"
+			count: 1
+			path: webapp/src/Form/Type/SubmitProblemType.php
+
+		-
+			message: "#^Method App\\\\FosRestBundle\\\\FlattenExceptionHandler\\:\\:serializeToJson\\(\\) should return array\\{code\\: int, message\\: string\\} but returns array\\|ArrayObject\\.$#"
+			count: 1
+			path: webapp/src/FosRestBundle/FlattenExceptionHandler.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of class Symfony\\\\Component\\\\Security\\\\Csrf\\\\CsrfToken constructor expects string\\|null, bool\\|float\\|int\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Security/DOMJudgeIPAuthenticator.php
+
+		-
+			message: "#^Parameter \\$mime of class App\\\\DataTransferObject\\\\ImageFile constructor expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Serializer/ContestVisitor.php
+
+		-
+			message: "#^Offset 'event_type' does not exist on array\\{api_version\\?\\: string, event_type\\?\\: App\\\\DataTransferObject\\\\Shadowing\\\\EventType\\}\\.$#"
+			count: 1
+			path: webapp/src/Serializer/Shadowing/EventDataDenormalizer.php
+
+		-
+			message: "#^Offset 'api_version' does not exist on array\\{api_version\\?\\: string\\}\\.$#"
+			count: 1
+			path: webapp/src/Serializer/Shadowing/EventDenormalizer.php
+
+		-
+			message: "#^Offset 'id' does not exist on array\\{id\\?\\: string, type\\: string, op\\?\\: string, token\\?\\: string, data\\: array\\<array\\<array\\{id\\: string\\}\\|string\\>\\|string\\>\\|null\\}\\.$#"
+			count: 1
+			path: webapp/src/Serializer/Shadowing/EventDenormalizer.php
+
+		-
+			message: "#^Offset 'op' does not exist on array\\{id\\?\\: string, type\\: string, op\\?\\: string, token\\?\\: string, data\\: array\\<array\\{id\\: string\\}\\|string\\>\\|null\\}\\.$#"
+			count: 1
+			path: webapp/src/Serializer/Shadowing/EventDenormalizer.php
+
+		-
+			message: "#^Parameter \\#4 \\$objectId of class App\\\\DataTransferObject\\\\Shadowing\\\\Event constructor expects string\\|null, array\\<string, string\\>\\|string\\|null given\\.$#"
+			count: 2
+			path: webapp/src/Serializer/Shadowing/EventDenormalizer.php
+
+		-
+			message: "#^Parameter \\#2 \\$params of method App\\\\Service\\\\DOMJudgeService\\:\\:apiRelativeUrl\\(\\) expects array\\<string, string\\>, array\\<string, int\\|string\\> given\\.$#"
+			count: 1
+			path: webapp/src/Serializer/SubmissionVisitor.php
+
+		-
+			message: "#^Parameter \\$mime of class App\\\\DataTransferObject\\\\ImageFile constructor expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Serializer/TeamAffiliationVisitor.php
+
+		-
+			message: "#^Parameter \\$mime of class App\\\\DataTransferObject\\\\ImageFile constructor expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Serializer/TeamVisitor.php
+
+		-
+			message: "#^Property App\\\\Service\\\\AwardService\\:\\:\\$awardCache \\(array\\<int, array\\<App\\\\DataTransferObject\\\\Award\\>\\>\\) does not accept array\\<int\\|string, array\\<App\\\\DataTransferObject\\\\Award\\>\\>\\.$#"
+			count: 1
+			path: webapp/src/Service/AwardService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\BalloonService\\:\\:collectBalloonTable\\(\\) should return array\\<array\\{data\\: array\\{balloonid\\: int, time\\: string, problem\\: string, contestproblem\\: App\\\\Entity\\\\ContestProblem, team\\: App\\\\Entity\\\\Team, teamid\\: int, location\\: string\\|null, affiliation\\: string\\|null, \\.\\.\\.\\}\\}\\> but returns array\\<int\\<0, max\\>, array\\{data\\: array\\{balloonid\\: int, time\\: mixed, problem\\: mixed, contestproblem\\: App\\\\Entity\\\\ContestProblem, team\\: App\\\\Entity\\\\Team, teamid\\: mixed, location\\: mixed, affiliation\\: mixed, \\.\\.\\.\\}\\}\\>\\.$#"
+			count: 1
+			path: webapp/src/Service/BalloonService.php
+
+		-
+			message: "#^Offset 'contest' does not exist on array\\{\\}\\|array\\{contest\\?\\: mixed, problem\\?\\: non\\-empty\\-array\\<''\\|int, non\\-empty\\-array\\<int\\<0, max\\>, mixed\\>\\>\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/BalloonService.php
+
+		-
+			message: "#^Argument of an invalid type array\\<int, string\\>\\|false supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Cannot access offset 'max' on array\\<string, mixed\\>\\|false\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Cannot access offset 'output_size' on App\\\\Entity\\\\Testcase\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Cannot access offset 'rank' on App\\\\Entity\\\\Testcase\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Parameter \\#1 \\$size_str of static method App\\\\Utils\\\\Utils\\:\\:phpiniToBytes\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/CheckConfigService.php
+
+		-
+			message: "#^Argument of an invalid type array\\<int\\|string, string\\>\\|string\\|false supplied for foreach, only iterables are supported\\.$#"
+			count: 2
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Cannot cast array\\<int\\|string, string\\>\\|string\\|false to string\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Parameter \\#1 \\$array of static method App\\\\DataTransferObject\\\\ConfigurationSpecification\\:\\:fromArray\\(\\) expects array\\{name\\: string, type\\: string, public\\: bool, description\\: string, category\\: string, default_value\\: mixed, regex\\?\\: string, key_placeholder\\?\\: string, \\.\\.\\.\\}, array given\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of function call_user_func expects callable\\(\\)\\: mixed, non\\-falsy\\-string given\\.$#"
+			count: 2
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Parameter \\#4 \\$contestId of method App\\\\Service\\\\EventLogService\\:\\:log\\(\\) expects int\\|null, int\\|string given\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Property App\\\\DataTransferObject\\\\ConfigurationSpecification\\:\\:\\$keyOptions \\(array\\<string, string\\>\\|null\\) does not accept array\\<int\\|string, int\\|string\\>\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Property App\\\\DataTransferObject\\\\ConfigurationSpecification\\:\\:\\$valueOptions \\(array\\<string, string\\>\\|null\\) does not accept array\\<int\\|string, int\\|string\\>\\.$#"
+			count: 1
+			path: webapp/src/Service/ConfigurationService.php
+
+		-
+			message: "#^Argument of an invalid type array\\<int, string\\>\\|false supplied for foreach, only iterables are supported\\.$#"
+			count: 2
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Binary operation \"\\+\" between float\\|string and \\(float\\|int\\) results in an error\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Binary operation \"\\.\" between array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null and '/alert' results in an error\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getCacheDir\\(\\) should return string but returns array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getCurrentContestCookie\\(\\) should return string\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getDocLinks\\(\\) should return array\\{name\\: string, link\\?\\: string, icon\\?\\: string\\} but returns array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getDomjudgeEtcDir\\(\\) should return string but returns array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getDomjudgeTmpDir\\(\\) should return string but returns array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getDomjudgeWebappDir\\(\\) should return string but returns array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getSamplesZipContent\\(\\) should return string but returns string\\|false\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getTwigDataForProblemsAction\\(\\) should return array\\{problems\\: array\\<App\\\\Entity\\\\ContestProblem\\>, samples\\: array\\<string\\>, showLimits\\: bool, defaultMemoryLimit\\: int, timeFactorDiffers\\: bool, stats\\: array\\{numBuckets\\: int, maxBucketSizeCorrect\\: int, maxBucketSizeIncorrect\\: int, problems\\: array\\<array\\{correct\\: array\\<array\\{start\\: DateTime, end\\: DateTime, count\\: int\\}\\>, incorrect\\: array\\<array\\{start\\: DateTime, end\\: DateTime, count\\: int\\}\\>\\}\\>\\}\\} but returns array\\{problems\\: mixed, samples\\: array\\<int\\|string, mixed\\>, showLimits\\: bool, defaultMemoryLimit\\: int, timeFactorDiffers\\: bool, stats\\?\\: array\\{numBuckets\\: int, maxBucketSizeCorrect\\: int, maxBucketSizeIncorrect\\: int, problems\\: array\\<array\\{correct\\: array\\<array\\{start\\: DateTime, end\\: DateTime, count\\: int\\}\\>, incorrect\\: array\\<array\\{start\\: DateTime, end\\: DateTime, count\\: int\\}\\>\\}\\>\\}\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\DOMJudgeService\\:\\:getUpdates\\(\\) should return array\\{clarifications\\: array\\<array\\{clarid\\: int, body\\: string\\}\\>, judgehosts\\: array\\<array\\{hostname\\: string, polltime\\: float\\}\\>, rejudgings\\: array\\<array\\{rejudgingid\\: int, starttime\\: string, endtime\\: float\\|string\\}\\>, internal_errors\\: array\\<array\\{errorid\\: int, description\\: string\\}\\>, balloons\\: array\\<array\\{balloonid\\: int, name\\: string, location\\: string\\|null, pname\\: string\\}\\>, shadow_difference_count\\: int, external_contest_source_is_down\\: bool, external_source_warning_count\\: int\\} but returns array\\{clarifications\\: mixed, judgehosts\\: mixed, rejudgings\\: mixed, internal_errors\\: mixed, balloons\\: mixed, shadow_difference_count\\: bool\\|float\\|int\\|string\\|null, external_contest_source_is_down\\: bool, external_source_warning_count\\: array\\{\\}\\|bool\\|float\\|int\\|string\\|null\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Offset 'execid' does not exist on array\\{kind\\: 'executable', probid\\?\\: string, hostname\\?\\: string, langid\\?\\: string, execid\\?\\: string, testcaseid\\?\\: string\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Offset 'hostname' does not exist on array\\{kind\\: 'judgehost', probid\\?\\: string, hostname\\?\\: string, langid\\?\\: string, execid\\?\\: string, testcaseid\\?\\: string\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Offset 'langid' does not exist on array\\{kind\\: 'language', probid\\?\\: string, hostname\\?\\: string, langid\\?\\: string, execid\\?\\: string, testcaseid\\?\\: string\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Offset 'probid' does not exist on array\\{kind\\: 'problem', probid\\?\\: string, hostname\\?\\: string, langid\\?\\: string, execid\\?\\: string, testcaseid\\?\\: string\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Offset 'testcaseid' does not exist on array\\{kind\\: 'testcase', probid\\?\\: string, hostname\\?\\: string, langid\\?\\: string, execid\\?\\: string, testcaseid\\?\\: string\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Parameter \\#1 \\$content of static method App\\\\Utils\\\\Utils\\:\\:streamAsBinaryFile\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Parameter \\#1 \\$fileContent of method App\\\\Entity\\\\ExecutableFile\\:\\:setFileContent\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Parameter \\#1 \\$filepath of method ZipArchive\\:\\:addFile\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Parameter \\#1 \\$haystack of function str_starts_with expects string, string\\|false given\\.$#"
+			count: 2
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Parameter \\#1 \\$path of function basename expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Parameter \\#1 \\$str of method App\\\\Service\\\\DOMJudgeService\\:\\:jsonDecode\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Parameter \\#2 \\$message of class Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\HttpException constructor expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Parameter \\#2 \\$needle of function str_starts_with expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Parameter \\#2 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Service/DOMJudgeService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\EventLogService\\:\\:getExternalIds\\(\\) should return array\\<string\\> but returns array\\<int\\|string\\>\\.$#"
+			count: 2
+			path: webapp/src/Service/EventLogService.php
+
+		-
+			message: "#^Property App\\\\Service\\\\EventLogService\\:\\:\\$entityToEndpoint \\(array\\<string, string\\>\\) does not accept array\\<int\\|string, \\(int\\|string\\)\\>\\.$#"
+			count: 1
+			path: webapp/src/Service/EventLogService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ExternalContestSourceService\\:\\:getLastReadEventId\\(\\) should return string\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Parameter \\#1 \\$filePointer of method App\\\\Service\\\\ExternalContestSourceService\\:\\:readEventsFromFile\\(\\) expects resource, resource\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function unlink expects string, string\\|false given\\.$#"
+			count: 2
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of method ZipArchive\\:\\:open\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method ZipArchive\\:\\:getFromName\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Parameter \\#1 \\$stream of function fclose expects resource, resource\\|false given\\.$#"
+			count: 3
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Parameter \\#1 \\$stream of function fwrite expects resource, resource\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Parameter \\#2 \\$originalName of class Symfony\\\\Component\\\\HttpFoundation\\\\File\\\\UploadedFile constructor expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Parameter \\$objectId of class App\\\\DataTransferObject\\\\Shadowing\\\\Event constructor expects string\\|null, int\\|string given\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Property App\\\\Service\\\\ExternalContestSourceService\\:\\:\\$pendingEvents \\(array\\<string, array\\<string, array\\<App\\\\DataTransferObject\\\\Shadowing\\\\Event\\<App\\\\DataTransferObject\\\\Shadowing\\\\EventData\\>\\>\\>\\>\\) does not accept array\\<int\\|string, array\\<int\\|string, array\\<App\\\\DataTransferObject\\\\Shadowing\\\\Event\\<App\\\\DataTransferObject\\\\Shadowing\\\\EventData\\>\\>\\>\\>\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Property App\\\\Service\\\\ExternalContestSourceService\\:\\:\\$pendingEvents \\(array\\<string, array\\<string, array\\<App\\\\DataTransferObject\\\\Shadowing\\\\Event\\<App\\\\DataTransferObject\\\\Shadowing\\\\EventData\\>\\>\\>\\>\\) does not accept array\\<int\\|string, array\\<int\\|string, array\\>\\>\\.$#"
+			count: 1
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Property App\\\\Service\\\\ExternalContestSourceService\\:\\:\\$pendingEvents \\(array\\<string, array\\<string, array\\<App\\\\DataTransferObject\\\\Shadowing\\\\Event\\<App\\\\DataTransferObject\\\\Shadowing\\\\EventData\\>\\>\\>\\>\\) does not accept array\\<string, array\\<int\\|string, array\\<App\\\\DataTransferObject\\\\Shadowing\\\\Event\\<App\\\\DataTransferObject\\\\Shadowing\\\\EventData\\>\\>\\>\\>\\.$#"
+			count: 2
+			path: webapp/src/Service/ExternalContestSourceService.php
+
+		-
+			message: "#^Binary operation \"\\-\" between int\\|non\\-empty\\-string and int\\|non\\-empty\\-string results in an error\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportExportService\\:\\:getResultsData\\(\\) should return array\\<array\\{string, int\\|string, string, int, int, int, string\\}\\> but returns array\\<int\\<0, max\\>, array\\{string\\|null, ''\\|int, 'Bronze Medal'\\|'Gold Medal'\\|'Honorable'\\|'Ranked'\\|'Silver Medal', int, int, int\\<\\-1, max\\>, string\\|null\\}\\>\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Offset 'color' does not exist on array\\{id\\?\\: string, icpc_id\\: string, name\\: string, sortorder\\?\\: int, color\\?\\: string, hidden\\?\\: bool, allow_self_registration\\?\\: bool\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Offset 'id' does not exist on array\\{id\\?\\: string, icpc_id\\: string, name\\: string, sortorder\\?\\: int, color\\?\\: string, hidden\\?\\: bool, allow_self_registration\\?\\: bool\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Offset 'sortorder' does not exist on array\\{id\\?\\: string, icpc_id\\: string, name\\: string, sortorder\\?\\: int, color\\?\\: string, hidden\\?\\: bool, allow_self_registration\\?\\: bool\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Offset 'username' does not exist on array\\{id\\?\\: string, username\\?\\: string, name\\?\\: string, password\\?\\: string, externalid\\?\\: string, type\\: string, team_id\\?\\: string, ip\\?\\: string\\}\\.$#"
+			count: 5
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Parameter \\#1 \\$accountData of method App\\\\Service\\\\ImportExportService\\:\\:importAccountData\\(\\) expects array\\<array\\{user\\: array\\{name\\: string\\|null, externalid\\: string, username\\: string, plain_password\\: string\\|null, teamid\\?\\: string\\|null, team\\?\\: array\\{name\\: string, category\\: string, externalid\\: string\\}\\|null, user_roles\\: array\\<App\\\\Entity\\\\Role\\>, ip_address\\: string\\|null\\}, team\\?\\: array\\{name\\: string, externalid\\: string, category\\: App\\\\Entity\\\\TeamCategory, publicdescription\\?\\: string\\}\\}\\>, array\\<int\\<0, max\\>, array\\{user\\: array\\{name\\: string, externalid\\: string, username\\: string, plain_password\\: string, team\\: App\\\\Entity\\\\Team\\|null, user_roles\\: array\\{0\\: App\\\\Entity\\\\Role, 1\\?\\: App\\\\Entity\\\\Role, 2\\?\\: App\\\\Entity\\\\Role, 3\\?\\: App\\\\Entity\\\\Role\\}, ip_address\\: string\\|null\\}, team\\: array\\{name\\: string, externalid\\: string, category\\: App\\\\Entity\\\\TeamCategory, publicdescription\\: string\\}\\|null\\}\\> given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Parameter \\#1 \\$accountData of method App\\\\Service\\\\ImportExportService\\:\\:importAccountData\\(\\) expects array\\<array\\{user\\: array\\{name\\: string\\|null, externalid\\: string, username\\: string, plain_password\\: string\\|null, teamid\\?\\: string\\|null, team\\?\\: array\\{name\\: string, category\\: string, externalid\\: string\\}\\|null, user_roles\\: array\\<App\\\\Entity\\\\Role\\>, ip_address\\: string\\|null\\}, team\\?\\: array\\{name\\: string, externalid\\: string, category\\: App\\\\Entity\\\\TeamCategory, publicdescription\\?\\: string\\}\\}\\>, array\\<int\\<0, max\\>, array\\{user\\: array\\{name\\: string\\|null, externalid\\: string, username\\: string, plain_password\\: string\\|null, teamid\\: string\\|null, user_roles\\: array\\{0\\: App\\\\Entity\\\\Role, 1\\?\\: App\\\\Entity\\\\Role, 2\\?\\: App\\\\Entity\\\\Role, 3\\?\\: App\\\\Entity\\\\Role\\}, ip_address\\: string\\|null\\}, team\\: array\\{name\\: string, externalid\\: string, category\\: App\\\\Entity\\\\TeamCategory, publicdescription\\: string\\}\\|null\\}\\> given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Parameter \\#1 \\$array of function array_shift expects array, array\\<int, string\\>\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Parameter \\#1 \\$input of static method Symfony\\\\Component\\\\Yaml\\\\Yaml\\:\\:parse\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Parameter \\#1 \\$organizationData of method App\\\\Service\\\\ImportExportService\\:\\:importOrganizationData\\(\\) expects array\\<array\\{externalid\\: string, shortname\\?\\: string, icpc_id\\?\\: string, name\\: string, country\\: string\\}\\>, array\\<int\\<0, max\\>, array\\{externalid\\: string, shortname\\: string, name\\: string, country\\: string, icpc_id\\: string\\|null\\}\\> given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Parameter \\#1 \\$str of method App\\\\Service\\\\DOMJudgeService\\:\\:jsonDecode\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Parameter \\#1 \\$teamData of method App\\\\Service\\\\ImportExportService\\:\\:importTeamData\\(\\) expects array\\<array\\{team\\: array\\{teamid\\: string\\|null, icpcid\\: string\\|null, label\\?\\: string\\|null, categoryid\\: string\\|null, name\\: string\\|null, display_name\\?\\: string, publicdescription\\?\\: string, location\\?\\: string\\|null, \\.\\.\\.\\}, team_affiliation\\: array\\{externalid\\: string\\|null, shortname\\?\\: string, name\\?\\: string, country\\?\\: string\\}\\}\\>, array\\<int\\<0, max\\>, array\\{team\\: array\\{teamid\\: int\\<min, \\-1\\>\\|int\\<1, max\\>\\|string, icpcid\\: non\\-falsy\\-string\\|null, categoryid\\: string, name\\: string\\}, team_affiliation\\: array\\{shortname\\: non\\-falsy\\-string\\|null, name\\: string, country\\: string, externalid\\: non\\-falsy\\-string\\|null\\}\\}\\> given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Parameter \\#2 \\$callback of function uasort expects callable\\(array\\{string\\|null, int\\|string, string, int, int, int, string\\|null\\}, array\\{string\\|null, int\\|string, string, int, int, int, string\\|null\\}\\)\\: int, Closure\\(mixed, mixed\\)\\: \\(float\\|int\\|false\\) given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportExportService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ImportProblemService\\:\\:importProblemFromRequest\\(\\) should return array\\{problem_id\\: string, messages\\: array\\<string, array\\<string\\>\\>\\} but returns array\\{problem_id\\: bool\\|float\\|int\\|string\\|null, messages\\: array\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function chmod expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$haystack of function mb_strrpos expects string, string\\|false given\\.$#"
+			count: 3
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$haystack of function str_contains expects string, string\\|false given\\.$#"
+			count: 2
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$haystack of static method App\\\\Utils\\\\Utils\\:\\:endsWith\\(\\) expects string, string\\|false given\\.$#"
+			count: 2
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$haystack of static method App\\\\Utils\\\\Utils\\:\\:startsWith\\(\\) expects string, string\\|false given\\.$#"
+			count: 5
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$imageThumb of method App\\\\Entity\\\\TestcaseContent\\:\\:setImageThumb\\(\\) expects string\\|null, bool\\|string\\|null given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$imageType of method App\\\\Entity\\\\Testcase\\:\\:setImageType\\(\\) expects string, bool\\|string given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$input of method App\\\\Entity\\\\TestcaseContent\\:\\:setInput\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method ZipArchive\\:\\:getFromName\\(\\) expects string, string\\|false given\\.$#"
+			count: 2
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$output of method App\\\\Entity\\\\TestcaseContent\\:\\:setOutput\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$path of function basename expects string, string\\|false given\\.$#"
+			count: 3
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$path of function dirname expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$source of static method App\\\\Service\\\\SubmissionService\\:\\:getExpectedResults\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function mb_strlen expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function mb_substr expects string, string\\|false given\\.$#"
+			count: 3
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function md5 expects string, string\\|false given\\.$#"
+			count: 2
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of function explode expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#2 \\$string2 of function strncmp expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#3 \\$length of function mb_substr expects int\\|null, int\\<0, max\\>\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Parameter \\#3 \\$subject of function preg_replace expects array\\|string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/ImportProblemService.php
+
+		-
+			message: "#^Binary operation \"\\-\\=\" between bool\\|float\\|int\\|string\\|null and bool\\|float\\|int\\|string\\|null results in an error\\.$#"
+			count: 1
+			path: webapp/src/Service/RejudgingService.php
+
+		-
+			message: "#^Cannot access offset 'cid' on App\\\\Entity\\\\Submission\\.$#"
+			count: 4
+			path: webapp/src/Service/RejudgingService.php
+
+		-
+			message: "#^Cannot access offset 'judgingid' on App\\\\Entity\\\\Submission\\.$#"
+			count: 5
+			path: webapp/src/Service/RejudgingService.php
+
+		-
+			message: "#^Cannot access offset 'probid' on App\\\\Entity\\\\Submission\\.$#"
+			count: 1
+			path: webapp/src/Service/RejudgingService.php
+
+		-
+			message: "#^Cannot access offset 'submitid' on App\\\\Entity\\\\Submission\\.$#"
+			count: 6
+			path: webapp/src/Service/RejudgingService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\RejudgingService\\:\\:calculateTodo\\(\\) should return array\\{todo\\: int, done\\: int\\} but returns array\\{todo\\: mixed, done\\: bool\\|float\\|int\\|string\\|null\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/RejudgingService.php
+
+		-
+			message: "#^Binary operation \"\\+\" between bool\\|float\\|int\\|string\\|null and 1 results in an error\\.$#"
+			count: 1
+			path: webapp/src/Service/ScoreboardService.php
+
+		-
+			message: "#^Cannot cast float\\|int\\<min, \\-1\\>\\|int\\<1, max\\>\\|non\\-falsy\\-string\\|Symfony\\\\Component\\\\HttpFoundation\\\\InputBag\\|true to string\\.$#"
+			count: 1
+			path: webapp/src/Service/ScoreboardService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ScoreboardService\\:\\:getFilterValues\\(\\) should return array\\{affiliations\\: array\\<string\\>, countries\\: array\\<string\\>, categories\\: array\\<string\\>\\} but returns array\\{affiliations\\: array\\<''\\|int, string\\|null\\>, countries\\: array\\<int\\<0, max\\>, string\\>, categories\\: array\\<''\\|int, string\\|null\\>\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/ScoreboardService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ScoreboardService\\:\\:getGroupedAffiliations\\(\\) should return array\\<array\\<string, array\\<array\\{id\\: string, name\\: string\\}\\>\\>\\> but returns array\\<int, non\\-empty\\-array\\<string, non\\-empty\\-array\\<int, array\\{id\\: \\-1\\|string, name\\: string\\|null\\}\\>\\>\\>\\.$#"
+			count: 1
+			path: webapp/src/Service/ScoreboardService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\ScoreboardService\\:\\:getScoreboardTwigData\\(\\) should return array\\{refresh\\: array\\{after\\: int, url\\: string, ajax\\: bool\\}, static\\: bool, contest\\: App\\\\Entity\\\\Contest, scoreFilter\\: App\\\\Utils\\\\Scoreboard\\\\Filter, scoreboard\\: App\\\\Utils\\\\Scoreboard\\\\Scoreboard, filterValues\\: array\\<string, array\\<string\\>\\>, groupedAffiliations\\: array\\<App\\\\Entity\\\\TeamAffiliation\\>\\|null, showFlags\\: int, \\.\\.\\.\\} but returns array\\{refresh\\: array\\{after\\: 30, url\\: string, ajax\\: true\\}, static\\: bool, contest\\: App\\\\Entity\\\\Contest, scoreFilter\\: App\\\\Utils\\\\Scoreboard\\\\Filter\\|null, scoreboard\\: App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\|null, filterValues\\: array\\{affiliations\\: array\\<string\\>, countries\\: array\\<string\\>, categories\\: array\\<string\\>\\}, groupedAffiliations\\: array\\<array\\<string, array\\<array\\{id\\: string, name\\: string\\}\\>\\>\\>\\|null, showFlags\\: mixed, \\.\\.\\.\\}\\|array\\{refresh\\: array\\{after\\: 30, url\\: string, ajax\\: true\\}, static\\: bool, contest\\: App\\\\Entity\\\\Contest, scoreFilter\\: App\\\\Utils\\\\Scoreboard\\\\Filter\\|null, scoreboard\\: App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\|null, filterValues\\: array\\{affiliations\\: array\\<string\\>, countries\\: array\\<string\\>, categories\\: array\\<string\\>\\}, groupedAffiliations\\: array\\<array\\<string, array\\<array\\{id\\: string, name\\: string\\}\\>\\>\\>\\|null, showFlags\\: mixed, \\.\\.\\.\\}\\|array\\{refresh\\: array\\{after\\: 30, url\\: string, ajax\\: true\\}, static\\: bool, jury\\: bool, public\\: bool, ajax\\: true\\}\\|array\\{refresh\\: array\\{after\\: 30, url\\: string, ajax\\: true\\}, static\\: bool\\}\\|array\\{static\\: bool, refreshstop\\: true, contest\\: App\\\\Entity\\\\Contest, scoreFilter\\: App\\\\Utils\\\\Scoreboard\\\\Filter\\|null, scoreboard\\: App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\|null, filterValues\\: array\\{affiliations\\: array\\<string\\>, countries\\: array\\<string\\>, categories\\: array\\<string\\>\\}, groupedAffiliations\\: array\\<array\\<string, array\\<array\\{id\\: string, name\\: string\\}\\>\\>\\>\\|null, showFlags\\: mixed, \\.\\.\\.\\}\\|array\\{static\\: bool, refreshstop\\: true, contest\\: App\\\\Entity\\\\Contest, scoreFilter\\: App\\\\Utils\\\\Scoreboard\\\\Filter\\|null, scoreboard\\: App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\|null, filterValues\\: array\\{affiliations\\: array\\<string\\>, countries\\: array\\<string\\>, categories\\: array\\<string\\>\\}, groupedAffiliations\\: array\\<array\\<string, array\\<array\\{id\\: string, name\\: string\\}\\>\\>\\>\\|null, showFlags\\: mixed, \\.\\.\\.\\}\\|array\\{static\\: bool, refreshstop\\: true, jury\\: bool, public\\: bool, ajax\\: true\\}\\|array\\{static\\: bool, refreshstop\\: true\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/ScoreboardService.php
+
+		-
+			message: "#^Binary operation \"\\-\" between float\\|null and float\\|string results in an error\\.$#"
+			count: 1
+			path: webapp/src/Service/StatisticsService.php
+
+		-
+			message: "#^Binary operation \"\\-\" between int and float\\|string results in an error\\.$#"
+			count: 1
+			path: webapp/src/Service/StatisticsService.php
+
+		-
+			message: "#^Cannot call method getVerified\\(\\) on App\\\\Entity\\\\Judging\\|false\\.$#"
+			count: 1
+			path: webapp/src/Service/StatisticsService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\StatisticsService\\:\\:getGroupedProblemsStats\\(\\) should return array\\{numBuckets\\: int, maxBucketSizeCorrect\\: int, maxBucketSizeIncorrect\\: int, problems\\: array\\<array\\{correct\\: array\\<array\\{start\\: DateTime, end\\: DateTime, count\\: int\\}\\>, incorrect\\: array\\<array\\{start\\: DateTime, end\\: DateTime, count\\: int\\}\\>\\}\\>\\} but returns array\\{problems\\: array\\<int\\|string, non\\-empty\\-array\\<'correct'\\|'incorrect', non\\-empty\\-array\\<int\\<0, max\\>, array\\{start\\: DateTime, end\\: DateTime, count\\: mixed\\}\\>\\>\\>, numBuckets\\: mixed, maxBucketSizeCorrect\\: mixed, maxBucketSizeIncorrect\\: mixed\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/StatisticsService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\StatisticsService\\:\\:getMiscContestStatistics\\(\\) should return array\\{total_submissions\\: int, total_accepted\\: int, num_teams\\: int, problem_num_testcases\\: array\\<int\\>, team_num_submissions\\: array\\<int\\>, team_attempted_n_problems\\: array\\<int\\>, teams_solved_n_problems\\: array\\<int\\>, problem_attempts\\: array\\<int\\>, \\.\\.\\.\\} but returns array\\{language_stats\\: array\\{total_submissions\\: array\\{\\}, total_solutions\\: array\\{\\}, teams_attempted\\: array\\<string, non\\-empty\\-array\\<''\\|int, int\\|null\\>\\>, teams_solved\\: array\\<string, non\\-empty\\-array\\<''\\|int, int\\|null\\>\\>\\}, num_teams\\: int\\<0, max\\>, problem_attempts\\: array\\{\\}, problem_num_testcases\\: array\\<int\\>, problem_solutions\\: array\\{\\}, problem_stats\\: array\\{teams_attempted\\: array\\<''\\|int, non\\-empty\\-array\\<''\\|int, int\\|null\\>\\>, teams_solved\\: array\\<''\\|int, non\\-empty\\-array\\<''\\|int, int\\|null\\>\\>\\}, team_attempted_n_problems\\: array\\{\\}, team_num_submissions\\: array\\<int\\>, \\.\\.\\.\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/StatisticsService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\StatisticsService\\:\\:getProblemStats\\(\\) should return array\\{contest\\: App\\\\Entity\\\\Contest, contest_problem\\: App\\\\Entity\\\\ContestProblem, problem\\: App\\\\Entity\\\\Problem, timelimit\\: float, submissions\\: array\\<App\\\\Entity\\\\Submission\\>, judgings\\: array\\<App\\\\Entity\\\\Judging\\>, filters\\: array\\<string, string\\>, view\\: string, \\.\\.\\.\\} but returns array\\{contest\\: App\\\\Entity\\\\Contest, contest_problem\\: App\\\\Entity\\\\ContestProblem\\|null, problem\\: App\\\\Entity\\\\Problem, timelimit\\: float, submissions\\: array\\<int\\<0, max\\>, App\\\\Entity\\\\Submission\\>, judgings\\: array\\<App\\\\Entity\\\\Judging\\>, results\\: mixed, misc\\: array\\{num_teams_attempted\\: int\\<0, max\\>, num_teams_correct\\: int\\<0, max\\>, correct_percentage\\: 0\\|float, teams_correct_percentage\\: 0\\|float\\}, \\.\\.\\.\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/StatisticsService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\SubmissionService\\:\\:getSubmissionList\\(\\) should return array\\{array\\<App\\\\Entity\\\\Submission\\>, array\\<string, int\\>\\} but returns array\\{mixed, non\\-empty\\-array\\<'correct'\\|'ignored'\\|'judging'\\|'perteam'\\|'queued'\\|'shadowUnverified'\\|'total'\\|'unverified', bool\\|float\\|int\\|string\\|null\\>\\}\\.$#"
+			count: 1
+			path: webapp/src/Service/SubmissionService.php
+
+		-
+			message: "#^Parameter \\#1 \\$source of static method App\\\\Service\\\\SubmissionService\\:\\:getExpectedResults\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/SubmissionService.php
+
+		-
+			message: "#^Parameter \\#1 \\$sourcecode of method App\\\\Entity\\\\SubmissionFile\\:\\:setSourcecode\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Service/SubmissionService.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Entity\\\\ExternalRun\\|App\\\\Entity\\\\JudgingRun\\:\\:getJudgeTask\\(\\)\\.$#"
+			count: 1
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Entity\\\\ExternalRun\\|App\\\\Entity\\\\JudgingRun\\:\\:getResult\\(\\)\\.$#"
+			count: 1
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Entity\\\\ExternalRun\\|App\\\\Entity\\\\JudgingRun\\:\\:getRunresult\\(\\)\\.$#"
+			count: 1
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Cannot access offset int\\<0, max\\> on array\\<int, string\\>\\|false\\.$#"
+			count: 2
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Cannot call method getEndtime\\(\\) on App\\\\Entity\\\\Judging\\|true\\.$#"
+			count: 1
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Cannot call method getJudgingid\\(\\) on App\\\\Entity\\\\Judging\\|true\\.$#"
+			count: 1
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of function call_user_func expects callable\\(\\)\\: mixed, array\\{class\\-string, string\\}\\|\\(callable\\(\\)\\: mixed\\)\\|null given\\.$#"
+			count: 2
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Parameter \\#1 \\$value of function sizeof expects array\\|Countable, array\\<int, string\\>\\|false given\\.$#"
+			count: 3
+			path: webapp/src/Twig/TwigExtension.php
+
+		-
+			message: "#^Property App\\\\Utils\\\\Scoreboard\\\\ProblemSummary\\:\\:\\$bestTimes \\(array\\<float\\>\\) does not accept array\\<float\\|string\\>\\.$#"
+			count: 1
+			path: webapp/src/Utils/Scoreboard/ProblemSummary.php
+
+		-
+			message: "#^Method App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\:\\:scoreboardCompare\\(\\) should return int but returns int\\|false\\.$#"
+			count: 1
+			path: webapp/src/Utils/Scoreboard/Scoreboard.php
+
+		-
+			message: "#^Binary operation \"\\-\" between float\\|int\\|string\\|null and float\\|int\\|string\\|null results in an error\\.$#"
+			count: 4
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Binary operation \"/\" between float\\|string and 60 results in an error\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Cannot access offset 'height' on SimpleXMLElement\\|false\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Cannot access offset 'viewBox' on SimpleXMLElement\\|false\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Cannot access offset 'width' on SimpleXMLElement\\|false\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Cannot access offset \\(float\\|int\\) on array\\<int, string\\>\\|false\\.$#"
+			count: 2
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Cannot access offset 0 on array\\{0\\: int, 1\\: int, 2\\: int, 3\\: string, mime\\: string, channels\\?\\: int, bits\\?\\: int\\}\\|false\\.$#"
+			count: 4
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Cannot access offset 1 on array\\{0\\: int, 1\\: int, 2\\: int, 3\\: string, mime\\: string, channels\\?\\: int, bits\\?\\: int\\}\\|false\\.$#"
+			count: 4
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Cannot access offset int\\<0, max\\> on array\\<int, string\\>\\|false\\.$#"
+			count: 10
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Parameter \\#1 \\$finfo of function finfo_close expects finfo, finfo\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Parameter \\#1 \\$finfo of function finfo_file expects finfo, finfo\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Parameter \\#1 \\$stream of function fpassthru expects resource, resource\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Parameter \\#1 \\$value of function sizeof expects array\\|Countable, array\\<int, string\\>\\|false given\\.$#"
+			count: 4
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Parameter \\#2 \\$offset of function substr expects int, float\\|int\\<1, max\\> given\\.$#"
+			count: 2
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of function explode expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Parameter \\#3 \\$length of function substr expects int\\|null, float\\|int\\<0, max\\> given\\.$#"
+			count: 3
+			path: webapp/src/Utils/Utils.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of function explode expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/E2E/Controller/ControllerRolesTraversalTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:createSession\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:flush\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:get\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getClassMetadata\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getDomjudgeTmpDir\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getRepository\\(\\)\\.$#"
+			count: 3
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:saveChanges\\(\\)\\.$#"
+			count: 2
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Parameter \\#1 \\$em of class Doctrine\\\\Common\\\\DataFixtures\\\\Executor\\\\ORMExecutor constructor expects Doctrine\\\\ORM\\\\EntityManagerInterface, object given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function file_put_contents expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function unlink expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of method ZipArchive\\:\\:open\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Parameter \\#2 \\$class of method Doctrine\\\\Common\\\\DataFixtures\\\\ReferenceRepository\\:\\:getReference\\(\\) expects class\\-string\\<object\\>\\|null, string\\|null given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of function explode expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/BaseTestCase.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function trim expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Command/ResetUserPasswordCommandTest.php
+
+		-
+			message: "#^Parameter \\#2 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Command/ResetUserPasswordCommandTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function file_put_contents expects string, string\\|false given\\.$#"
+			count: 3
+			path: webapp/tests/Unit/Controller/API/AccountBaseTestCase.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function unlink expects string, string\\|false given\\.$#"
+			count: 3
+			path: webapp/tests/Unit/Controller/API/AccountBaseTestCase.php
+
+		-
+			message: "#^Parameter \\#1 \\$path of class Symfony\\\\Component\\\\HttpFoundation\\\\File\\\\UploadedFile constructor expects string, string\\|false given\\.$#"
+			count: 3
+			path: webapp/tests/Unit/Controller/API/AccountBaseTestCase.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getRepository\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/BaseTestCase.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function trim expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/BaseTestCase.php
+
+		-
+			message: "#^Parameter \\#2 \\$id of method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\BaseTestCase\\:\\:helperGetEndpointURL\\(\\) expects string\\|null, int\\|string given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/BaseTestCase.php
+
+		-
+			message: "#^Parameter \\#2 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/BaseTestCase.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getRepository\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ClarificationControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:clear\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ContestControllerAdminTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:get\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ContestControllerAdminTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getRepository\\(\\)\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Controller/API/ContestControllerAdminTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function file_put_contents expects string, string\\|false given\\.$#"
+			count: 3
+			path: webapp/tests/Unit/Controller/API/ContestControllerAdminTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function unlink expects string, string\\|false given\\.$#"
+			count: 3
+			path: webapp/tests/Unit/Controller/API/ContestControllerAdminTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$path of class Symfony\\\\Component\\\\HttpFoundation\\\\File\\\\UploadedFile constructor expects string, string\\|false given\\.$#"
+			count: 3
+			path: webapp/tests/Unit/Controller/API/ContestControllerAdminTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$content of method App\\\\Tests\\\\Unit\\\\BaseTestCase\\:\\:unzipString\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ExecutableControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getDomjudgeWebappDir\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/GeneralInfoControllerTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$json of function json_decode expects string, string\\|false given\\.$#"
+			count: 3
+			path: webapp/tests/Unit/Controller/API/GeneralInfoControllerTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$id of method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\BaseTestCase\\:\\:helperGetEndpointURL\\(\\) expects string\\|null, int\\|string given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/JudgehostControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getDomjudgeTmpDir\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/LanguageControllerTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function unlink expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/LanguageControllerTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of method ZipArchive\\:\\:open\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/LanguageControllerTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$path of class Symfony\\\\Component\\\\HttpFoundation\\\\File\\\\UploadedFile constructor expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/LanguageControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:get\\(\\)\\.$#"
+			count: 3
+			path: webapp/tests/Unit/Controller/API/OrganizationControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:clear\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ProblemControllerAdminTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:get\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ProblemControllerAdminTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getRepository\\(\\)\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Controller/API/ProblemControllerAdminTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function file_put_contents expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ProblemControllerAdminTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function unlink expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ProblemControllerAdminTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$path of class Symfony\\\\Component\\\\HttpFoundation\\\\File\\\\UploadedFile constructor expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ProblemControllerAdminTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$id of method App\\\\Tests\\\\Unit\\\\Controller\\\\API\\\\BaseTestCase\\:\\:helperGetEndpointURL\\(\\) expects string\\|null, int\\|string given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/ProblemControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getDomjudgeTmpDir\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getRepository\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function file_get_contents expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function unlink expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of method ZipArchive\\:\\:open\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function base64_encode expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/API/SubmissionControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getRepository\\(\\)\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Controller/Jury/ClarificationControllerTest.php
+
+		-
+			message: "#^Cannot access offset mixed on array\\<array\\<Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\>\\|Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\>\\|Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Controller/Jury/ContestControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getManager\\(\\)\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Cannot access offset string on array\\<array\\<Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\>\\|Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\>\\|Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Parameter \\#2 \\$array of function array_key_exists expects array, array\\|string given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Parameter \\#1 \\$json of function json_decode expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryMiscControllerTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function trim expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/PrintControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:saveChanges\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/QueueTaskControllerTest.php
+
+		-
+			message: "#^Cannot call method getJudgingid\\(\\) on App\\\\Entity\\\\Judging\\|false\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Controller/Jury/QueueTaskControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\QueueTaskControllerTest\\:\\:\\$em \\(Doctrine\\\\ORM\\\\EntityManagerInterface\\) does not accept object\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/QueueTaskControllerTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Controller\\\\Jury\\\\QueueTaskControllerTest\\:\\:\\$submissionService \\(App\\\\Service\\\\SubmissionService\\) does not accept object\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/QueueTaskControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getRepository\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/RejudgingControllerTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$json of function json_decode expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/RejudgingControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:get\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Jury/TeamAffiliationControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:flush\\(\\)\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getRepository\\(\\)\\.$#"
+			count: 3
+			path: webapp/tests/Unit/Controller/PublicControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:flush\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Team/MiscControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:persist\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Team/MiscControllerTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function trim expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Controller/Team/MiscControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:flush\\(\\)\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Controller/Team/ProblemControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getRepository\\(\\)\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Controller/Team/ProblemControllerTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getManager\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/QueuetaskIntegrationTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:setToken\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/QueuetaskIntegrationTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$dj of class App\\\\Service\\\\ScoreboardService constructor expects App\\\\Service\\\\DOMJudgeService, object given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/QueuetaskIntegrationTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$logger of class App\\\\Service\\\\SubmissionService constructor expects Psr\\\\Log\\\\LoggerInterface, object given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/QueuetaskIntegrationTest.php
+
+		-
+			message: "#^Parameter \\#3 \\$dj of class App\\\\Service\\\\SubmissionService constructor expects App\\\\Service\\\\DOMJudgeService, object given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/QueuetaskIntegrationTest.php
+
+		-
+			message: "#^Parameter \\#4 \\$logger of class App\\\\Service\\\\ScoreboardService constructor expects Psr\\\\Log\\\\LoggerInterface, object given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/QueuetaskIntegrationTest.php
+
+		-
+			message: "#^Parameter \\#5 \\$eventLogService of class App\\\\Service\\\\ScoreboardService constructor expects App\\\\Service\\\\EventLogService, object given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/QueuetaskIntegrationTest.php
+
+		-
+			message: "#^Parameter \\#5 \\$eventLogService of class App\\\\Service\\\\SubmissionService constructor expects App\\\\Service\\\\EventLogService, object given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/QueuetaskIntegrationTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getManager\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/ScoreboardIntegrationTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$dj of class App\\\\Service\\\\ScoreboardService constructor expects App\\\\Service\\\\DOMJudgeService, object given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/ScoreboardIntegrationTest.php
+
+		-
+			message: "#^Parameter \\#4 \\$logger of class App\\\\Service\\\\ScoreboardService constructor expects Psr\\\\Log\\\\LoggerInterface, object given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/ScoreboardIntegrationTest.php
+
+		-
+			message: "#^Parameter \\#5 \\$eventLogService of class App\\\\Service\\\\ScoreboardService constructor expects App\\\\Service\\\\EventLogService, object given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/ScoreboardIntegrationTest.php
+
+		-
+			message: "#^Property App\\\\Tests\\\\Unit\\\\Integration\\\\ScoreboardIntegrationTest\\:\\:\\$dj \\(App\\\\Service\\\\DOMJudgeService\\) does not accept object\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Integration/ScoreboardIntegrationTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:denormalize\\(\\)\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Serializer/Shadowing/EventDenormalizerTest.php
+
+		-
+			message: "#^Binary operation \"\\.\" between array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null and '/db\\-config\\.yaml' results in an error\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ConfigurationServiceTest.php
+
+		-
+			message: "#^Binary operation \"\\.\" between array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null and '/verdicts\\.php' results in an error\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ConfigurationServiceTest.php
+
+		-
+			message: "#^Parameter \\#3 \\$configCache of class App\\\\Service\\\\ConfigurationService constructor expects Symfony\\\\Component\\\\Config\\\\ConfigCacheFactoryInterface, object given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ConfigurationServiceTest.php
+
+		-
+			message: "#^Parameter \\#4 \\$debug of class App\\\\Service\\\\ConfigurationService constructor expects bool, array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ConfigurationServiceTest.php
+
+		-
+			message: "#^Parameter \\#5 \\$cacheDir of class App\\\\Service\\\\ConfigurationService constructor expects string, array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ConfigurationServiceTest.php
+
+		-
+			message: "#^Parameter \\#6 \\$etcDir of class App\\\\Service\\\\ConfigurationService constructor expects string, array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ConfigurationServiceTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:clear\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ImportExportServiceTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:get\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ImportExportServiceTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getDomjudgeTmpDir\\(\\)\\.$#"
+			count: 7
+			path: webapp/tests/Unit/Service/ImportExportServiceTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getRepository\\(\\)\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Service/ImportExportServiceTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:isPasswordValid\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/ImportExportServiceTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function file_put_contents expects string, string\\|false given\\.$#"
+			count: 7
+			path: webapp/tests/Unit/Service/ImportExportServiceTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function unlink expects string, string\\|false given\\.$#"
+			count: 7
+			path: webapp/tests/Unit/Service/ImportExportServiceTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$path of class Symfony\\\\Component\\\\HttpFoundation\\\\File\\\\UploadedFile constructor expects string, string\\|false given\\.$#"
+			count: 7
+			path: webapp/tests/Unit/Service/ImportExportServiceTest.php
+
+		-
+			message: "#^Cannot call method addJudging\\(\\) on App\\\\Entity\\\\Submission\\|false\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/RejudgingServiceTest.php
+
+		-
+			message: "#^Cannot call method getEndtime\\(\\) on App\\\\Entity\\\\Judging\\|false\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/RejudgingServiceTest.php
+
+		-
+			message: "#^Cannot call method getJudgings\\(\\) on App\\\\Entity\\\\Submission\\|false\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/RejudgingServiceTest.php
+
+		-
+			message: "#^Cannot call method getStarttime\\(\\) on App\\\\Entity\\\\Judging\\|false\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/RejudgingServiceTest.php
+
+		-
+			message: "#^Cannot call method setRejudging\\(\\) on App\\\\Entity\\\\Submission\\|false\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/RejudgingServiceTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$submission of method App\\\\Entity\\\\Judging\\:\\:setSubmission\\(\\) expects App\\\\Entity\\\\Submission\\|null, App\\\\Entity\\\\Submission\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Service/RejudgingServiceTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$problem of method App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\:\\:solvedFirst\\(\\) expects App\\\\Entity\\\\ContestProblem, App\\\\Entity\\\\ContestProblem\\|false given\\.$#"
+			count: 4
+			path: webapp/tests/Unit/Service/RejudgingServiceTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getManager\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Utils/FreezeDataTest.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:getManager\\(\\)\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Utils/Scoreboard/ScoreboardTest.php
+
+		-
+			message: "#^Cannot access offset 'mime' on array\\{0\\: int, 1\\: int, 2\\: int, 3\\: string, mime\\: string, channels\\?\\: int, bits\\?\\: int\\}\\|false\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Utils/UtilsTest.php
+
+		-
+			message: "#^Cannot access offset 0 on array\\{0\\: int, 1\\: int, 2\\: int, 3\\: string, mime\\: string, channels\\?\\: int, bits\\?\\: int\\}\\|false\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Utils/UtilsTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$image of static method App\\\\Utils\\\\Utils\\:\\:getImageThumb\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Utils/UtilsTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$image of static method App\\\\Utils\\\\Utils\\:\\:getImageType\\(\\) expects string, string\\|false given\\.$#"
+			count: 2
+			path: webapp/tests/Unit/Utils/UtilsTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function getimagesizefromstring expects string, bool\\|string given\\.$#"
+			count: 1
+			path: webapp/tests/Unit/Utils/UtilsTest.php

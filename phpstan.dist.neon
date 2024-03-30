@@ -1,5 +1,5 @@
 parameters:
-    level: 6
+    level: 7
     paths:
         - webapp/src
         - webapp/tests
@@ -23,3 +23,4 @@ parameters:
             path: webapp/src/DataFixtures/Test
 includes:
     - lib/vendor/phpstan/phpstan-doctrine/extension.neon
+    - phpstan-baseline.neon
