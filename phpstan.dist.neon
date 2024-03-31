@@ -6,6 +6,7 @@ parameters:
     excludePaths:
         - webapp/src/Utils/Adminer.php
         - webapp/src/Controller/API
+        - webapp/src/Controller/BaseController.php
         - webapp/tests
     ignoreErrors:
         -

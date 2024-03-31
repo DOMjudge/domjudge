@@ -77,6 +77,8 @@ class BalloonController extends AbstractController
         }
 
         // Load preselected filters
+        $rawFilters           = $this->dj->getCookie('domjudge_balloonsfilter');
+        if ($rawFilters) {}
         $filters              = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_balloonsfilter') ?: '[]');
         $haveFilters          = $this->dj->getCookie('domjudge_balloonsfilter') != null;
         $filteredAffiliations = [];

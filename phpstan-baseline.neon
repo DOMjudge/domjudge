@@ -1,41 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Call to an undefined method object\\:\\:getShortDescription\\(\\)\\.$#"
-			count: 2
-			path: webapp/src/Controller/BaseController.php
-
-		-
-			message: "#^Cannot call method getContest\\(\\) on class\\-string\\|object\\.$#"
-			count: 1
-			path: webapp/src/Controller/BaseController.php
-
-		-
-			message: "#^Cannot call method getContests\\(\\) on class\\-string\\|object\\.$#"
-			count: 1
-			path: webapp/src/Controller/BaseController.php
-
-		-
-			message: "#^Method App\\\\Controller\\\\BaseController\\:\\:getDatabaseRelations\\(\\) should return array\\<string, array\\<array\\{target\\: string, targetColumn\\: string, type\\: string\\}\\>\\> but returns array\\<class\\-string, array\\<string, array\\{target\\: class\\-string, targetColumn\\: string, type\\: string\\|null\\}\\>\\>\\.$#"
-			count: 1
-			path: webapp/src/Controller/BaseController.php
-
-		-
-			message: "#^Parameter \\#1 \\$files of method App\\\\Controller\\\\BaseController\\:\\:getDatabaseRelations\\(\\) expects array\\<string\\>, array\\<int, string\\>\\|false given\\.$#"
-			count: 1
-			path: webapp/src/Controller/BaseController.php
-
-		-
-			message: "#^Parameter \\#1 \\$message of class Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\BadRequestHttpException constructor expects string, string\\|false given\\.$#"
-			count: 1
-			path: webapp/src/Controller/BaseController.php
-
-		-
-			message: "#^Cannot cast bool\\|float\\|int\\|string\\|Symfony\\\\Component\\\\HttpFoundation\\\\InputBag\\|null to string\\.$#"
-			count: 1
-			path: webapp/src/Controller/Jury/BalloonController.php
-
-		-
 			message: "#^Parameter \\#1 \\$queue of method App\\\\Entity\\\\Clarification\\:\\:setQueue\\(\\) expects string\\|null, bool\\|float\\|int\\|string\\|null given\\.$#"
 			count: 2
 			path: webapp/src/Controller/Jury/ClarificationController.php
