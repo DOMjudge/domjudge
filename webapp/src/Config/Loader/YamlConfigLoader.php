@@ -17,7 +17,11 @@ class YamlConfigLoader extends FileLoader
      */
     public function load(mixed $resource, string $type = null)
     {
-        return Yaml::parse(file_get_contents($resource));
+        $fileContent = file_get_contents($resource);
+        if ($fileContent === false) {
+            throw new Exception('Could not read file ' . $resource);
+        }
+        return Yaml::parse($fileContent);
     }
 
     public function supports($resource, string $type = null): bool

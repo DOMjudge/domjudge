@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Parameter \\#1 \\$input of static method Symfony\\\\Component\\\\Yaml\\\\Yaml\\:\\:parse\\(\\) expects string, string\\|false given\\.$#"
-			count: 1
-			path: webapp/src/Config/Loader/YamlConfigLoader.php
-
-		-
 			message: "#^Cannot access an offset on array\\<int, string\\|Stringable\\>\\|string\\|Stringable\\.$#"
 			count: 1
 			path: webapp/src/Controller/API/AbstractRestController.php
