@@ -621,7 +621,7 @@ class Utils
      * Generate resized thumbnail image and return as string.
      * Return FALSE on errors and stores error message in $error if set.
      */
-    public static function getImageThumb(string $image, int $thumbMaxSize, string $tmpdir, ?string &$error = null): bool|string
+    public static function getImageThumb(string $image, int $thumbMaxSize, string $tmpdir, ?string &$error = null): string|false
     {
         if (!function_exists('gd_info')) {
             $error = self::GD_MISSING;

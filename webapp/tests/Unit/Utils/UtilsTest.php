@@ -673,7 +673,7 @@ class UtilsTest extends TestCase
             $this->fail("Reading file $logo failed.");
         }
         $thumb = Utils::getImageThumb($image, $maxsize, $tmp, $error);
-        if ($thumb === true || $thumb === false) {
+        if ($thumb === false) {
             $this->fail('Required libraries are not installed.');
         }
         self::assertNull($error);

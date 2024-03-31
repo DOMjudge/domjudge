@@ -381,11 +381,6 @@ parameters:
 			path: webapp/src/Controller/Jury/ProblemController.php
 
 		-
-			message: "#^Parameter \\#1 \\$imageThumb of method App\\\\Entity\\\\TestcaseContent\\:\\:setImageThumb\\(\\) expects string\\|null, string\\|true given\\.$#"
-			count: 2
-			path: webapp/src/Controller/Jury/ProblemController.php
-
-		-
 			message: "#^Parameter \\#1 \\$imageType of method App\\\\Entity\\\\Testcase\\:\\:setImageType\\(\\) expects string, string\\|true given\\.$#"
 			count: 2
 			path: webapp/src/Controller/Jury/ProblemController.php
@@ -1091,7 +1086,7 @@ parameters:
 			path: webapp/src/Service/ImportProblemService.php
 
 		-
-			message: "#^Parameter \\#1 \\$imageThumb of method App\\\\Entity\\\\TestcaseContent\\:\\:setImageThumb\\(\\) expects string\\|null, bool\\|string\\|null given\\.$#"
+			message: "#^Parameter \\#1 \\$imageThumb of method App\\\\Entity\\\\TestcaseContent\\:\\:setImageThumb\\(\\) expects string\\|null, string\\|false\\|null given\\.$#"
 			count: 1
 			path: webapp/src/Service/ImportProblemService.php
 
