@@ -14,6 +14,7 @@ use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Scoreboard;
+use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -110,7 +111,11 @@ class ScoreboardMergeCommand extends Command
                 ->request('GET', $url . $endpoint . $args)
                 ->toArray();
         }
-        return json_decode(file_get_contents($url . $endpoint . '.json'), true);
+        $fileContent = file_get_contents($url . $endpoint . '.json');
+        if ($fileContent === false) {
+            throw new Exception('Could not read file ' . $url . $endpoint . '.json');
+        }
+        return json_decode($fileContent, true);
     }
 
     /**
@@ -358,6 +363,10 @@ class ScoreboardMergeCommand extends Command
 
         // Now add all files we need
         $publicDir = realpath(sprintf('%s/public/', $this->projectDir));
+        if ($publicDir === false) {
+            $style->error('Unable to find public dir: ' . $publicDir);
+            return Command::FAILURE;
+        }
         foreach ($filesToAdd as $fileToAdd) {
             $finder = new Finder();
             $lastSlash = strrpos($fileToAdd, '/');
