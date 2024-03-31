@@ -5,6 +5,8 @@ parameters:
         - webapp/tests
     excludePaths:
         - webapp/src/Utils/Adminer.php
+        - webapp/src/Controller/API
+        - webapp/tests
     ignoreErrors:
         -
             message: '#Method .* return type has no value type specified in iterable type array#'

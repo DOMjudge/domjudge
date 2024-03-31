@@ -2,6 +2,7 @@
 
 namespace App\Config\Loader;
 
+use Exception;
 use Symfony\Component\Config\Loader\FileLoader;
 use Symfony\Component\Yaml\Yaml;
 
