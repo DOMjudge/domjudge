@@ -619,6 +619,9 @@ class UtilsTest extends TestCase
         $image = file_get_contents($logo);
         $error = null;
 
+        if ($image === false) {
+            $this->fail("Reading file $logo failed.");
+        }
         $type = Utils::getImageType($image, $error);
         self::assertEquals('jpeg', $type);
         self::assertNull($error);
@@ -633,6 +636,9 @@ class UtilsTest extends TestCase
         $image = file_get_contents($logo);
         $error = null;
 
+        if ($image === false) {
+            $this->fail("Reading file $logo failed.");
+        }
         $type = Utils::getImageType($image, $error);
         self::assertFalse($type);
         self::assertEquals('Could not determine image information.', $error);
@@ -663,10 +669,19 @@ class UtilsTest extends TestCase
         $tmp = sys_get_temp_dir();
         $maxsize = 30;
 
+        if ($image === false) {
+            $this->fail("Reading file $logo failed.");
+        }
         $thumb = Utils::getImageThumb($image, $maxsize, $tmp, $error);
+        if ($thumb === true || $thumb === false) {
+            $this->fail('Required libraries are not installed.');
+        }
         self::assertNull($error);
 
         $data = getimagesizefromstring($thumb);
+        if ($data === false) {
+            $this->fail("Reading image $logo failed.");
+        }
         self::assertEquals($maxsize, $data[0]);  // resized width
         self::assertEquals($mime, $data['mime']);
     }

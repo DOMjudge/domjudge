@@ -1934,28 +1934,3 @@ parameters:
 			message: "#^Call to an undefined method object\\:\\:getManager\\(\\)\\.$#"
 			count: 1
 			path: webapp/tests/Unit/Utils/Scoreboard/ScoreboardTest.php
-
-		-
-			message: "#^Cannot access offset 'mime' on array\\{0\\: int, 1\\: int, 2\\: int, 3\\: string, mime\\: string, channels\\?\\: int, bits\\?\\: int\\}\\|false\\.$#"
-			count: 1
-			path: webapp/tests/Unit/Utils/UtilsTest.php
-
-		-
-			message: "#^Cannot access offset 0 on array\\{0\\: int, 1\\: int, 2\\: int, 3\\: string, mime\\: string, channels\\?\\: int, bits\\?\\: int\\}\\|false\\.$#"
-			count: 1
-			path: webapp/tests/Unit/Utils/UtilsTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$image of static method App\\\\Utils\\\\Utils\\:\\:getImageThumb\\(\\) expects string, string\\|false given\\.$#"
-			count: 1
-			path: webapp/tests/Unit/Utils/UtilsTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$image of static method App\\\\Utils\\\\Utils\\:\\:getImageType\\(\\) expects string, string\\|false given\\.$#"
-			count: 2
-			path: webapp/tests/Unit/Utils/UtilsTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$string of function getimagesizefromstring expects string, bool\\|string given\\.$#"
-			count: 1
-			path: webapp/tests/Unit/Utils/UtilsTest.php
