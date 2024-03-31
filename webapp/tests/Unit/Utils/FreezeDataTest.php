@@ -6,6 +6,8 @@ use App\DataFixtures\Test\ContestTimeFixture;
 use App\Entity\Contest;
 use App\Tests\Unit\BaseTestCase as BaseBaseTestCase;
 use App\Utils\FreezeData;
+use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 
 class FreezeDataTest extends BaseBaseTestCase
@@ -13,7 +15,11 @@ class FreezeDataTest extends BaseBaseTestCase
     protected function getContestData(string $reference): FreezeData
     {
         $this->loadFixture(ContestTimeFixture::class);
-        $em = self::getContainer()->get('doctrine')->getManager();
+
+        /** @var Registry $reg */
+        $reg = self::getContainer()->get('doctrine');
+        /** @var EntityManagerInterface $em */
+        $em = $reg->getManager();
         $contest = $em->getRepository(Contest::class)->findOneBy(['name' => $reference]);
         return new FreezeData($contest);
     }

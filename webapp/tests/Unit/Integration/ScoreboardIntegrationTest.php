@@ -21,6 +21,7 @@ use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -80,7 +81,11 @@ class ScoreboardIntegrationTest extends KernelTestCase
             ->will($this->returnCallback($this->getConfig(...)));
 
         $this->dj = self::getContainer()->get(DOMJudgeService::class);
-        $this->em = self::getContainer()->get('doctrine')->getManager();
+        /** @var Registry $reg */
+        $reg = self::getContainer()->get('doctrine');
+        /** @var EntityManager $em */
+        $em = $reg->getManager();
+        $this->em = $em; //Annotation for PHPstan doesn't seem to work otherwise.
         $this->ss = new ScoreboardService(
             $this->em, $this->dj, $this->config,
             self::getContainer()->get(LoggerInterface::class),

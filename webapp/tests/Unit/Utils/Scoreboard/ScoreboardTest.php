@@ -10,6 +10,8 @@ use App\Tests\Unit\Utils\FreezeDataTest;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\TeamScore;
+use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 
 class ScoreboardTest extends BaseBaseTestCase
@@ -131,7 +133,10 @@ class ScoreboardTest extends BaseBaseTestCase
         bool $_6
     ): void {
         $this->loadFixture(ContestTimeFixture::class);
-        $em = self::getContainer()->get('doctrine')->getManager();
+        /** @var Registry $reg */
+        $reg = self::getContainer()->get('doctrine');
+        /** @var EntityManagerInterface $em */
+        $em = $reg->getManager();
         $contest = $em->getRepository(Contest::class)->findOneBy(['name' => $reference]);
         $freezeData = new FreezeData($contest);
         $scoreBoard = new Scoreboard($contest, [], [], [], [], $freezeData, false, 0, true);

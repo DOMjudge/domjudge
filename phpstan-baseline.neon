@@ -1656,18 +1656,23 @@ parameters:
 			path: webapp/tests/Unit/Controller/Jury/ContestControllerTest.php
 
 		-
-			message: "#^Call to an undefined method object\\:\\:getManager\\(\\)\\.$#"
+			message: "#^Cannot access offset string on array\\<array\\<Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\>\\|Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\>\\|Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\.$#"
 			count: 2
 			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
 
 		-
-			message: "#^Cannot access offset string on array\\<array\\<Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\>\\|Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\>\\|Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\.$#"
+			message: "#^Parameter \\#1 \\$className of method Doctrine\\\\ORM\\\\EntityManagerInterface\\:\\:getRepository\\(\\) expects class\\-string\\<object\\>, string given\\.$#"
 			count: 2
 			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
 
 		-
 			message: "#^Parameter \\#2 \\$array of function array_key_exists expects array, array\\|string given\\.$#"
 			count: 1
+			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
+
+		-
+			message: "#^Unable to resolve the template type T in call to method Doctrine\\\\ORM\\\\EntityManagerInterface\\:\\:getRepository\\(\\)$#"
+			count: 2
 			path: webapp/tests/Unit/Controller/Jury/JuryControllerTestCase.php
 
 		-
@@ -1751,11 +1756,6 @@ parameters:
 			path: webapp/tests/Unit/Controller/Team/ProblemControllerTest.php
 
 		-
-			message: "#^Call to an undefined method object\\:\\:getManager\\(\\)\\.$#"
-			count: 1
-			path: webapp/tests/Unit/Integration/QueuetaskIntegrationTest.php
-
-		-
 			message: "#^Call to an undefined method object\\:\\:setToken\\(\\)\\.$#"
 			count: 1
 			path: webapp/tests/Unit/Integration/QueuetaskIntegrationTest.php
@@ -1789,11 +1789,6 @@ parameters:
 			message: "#^Parameter \\#5 \\$eventLogService of class App\\\\Service\\\\SubmissionService constructor expects App\\\\Service\\\\EventLogService, object given\\.$#"
 			count: 1
 			path: webapp/tests/Unit/Integration/QueuetaskIntegrationTest.php
-
-		-
-			message: "#^Call to an undefined method object\\:\\:getManager\\(\\)\\.$#"
-			count: 1
-			path: webapp/tests/Unit/Integration/ScoreboardIntegrationTest.php
 
 		-
 			message: "#^Parameter \\#2 \\$dj of class App\\\\Service\\\\ScoreboardService constructor expects App\\\\Service\\\\DOMJudgeService, object given\\.$#"
@@ -1924,13 +1919,3 @@ parameters:
 			message: "#^Parameter \\#2 \\$problem of method App\\\\Utils\\\\Scoreboard\\\\Scoreboard\\:\\:solvedFirst\\(\\) expects App\\\\Entity\\\\ContestProblem, App\\\\Entity\\\\ContestProblem\\|false given\\.$#"
 			count: 4
 			path: webapp/tests/Unit/Service/RejudgingServiceTest.php
-
-		-
-			message: "#^Call to an undefined method object\\:\\:getManager\\(\\)\\.$#"
-			count: 1
-			path: webapp/tests/Unit/Utils/FreezeDataTest.php
-
-		-
-			message: "#^Call to an undefined method object\\:\\:getManager\\(\\)\\.$#"
-			count: 1
-			path: webapp/tests/Unit/Utils/Scoreboard/ScoreboardTest.php

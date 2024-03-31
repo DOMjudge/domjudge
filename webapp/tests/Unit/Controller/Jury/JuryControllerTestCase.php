@@ -9,7 +9,7 @@ use App\Entity\Submission;
 use App\Entity\Team;
 use App\Service\SubmissionService;
 use App\Tests\Unit\BaseTestCase;
-use Doctrine\ORM\EntityManager;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\EntityManagerInterface;
 use DOMElement;
 use Generator;
@@ -205,7 +205,10 @@ abstract class JuryControllerTestCase extends BaseTestCase
             if ($identifier === '' || $entityShortName === '') {
                 continue;
             }
-            $em = self::getContainer()->get('doctrine')->getManager();
+            /** @var Registry $reg */
+            $reg = self::getContainer()->get('doctrine');
+            /** @var EntityManagerInterface $em */
+            $em = $reg->getManager();
             $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
             $entityUrl = static::$baseUrl . '/' . $ent->{static::$getIDFunc}();
             foreach ([static::$delete=>static::$deleteDefault,
@@ -555,7 +558,10 @@ abstract class JuryControllerTestCase extends BaseTestCase
         $this->logIn();
         $this->loadFixtures(static::$deleteFixtures);
         // Find a CID we can delete.
-        $em = self::getContainer()->get('doctrine')->getManager();
+        /** @var Registry $reg */
+        $reg = self::getContainer()->get('doctrine');
+        /** @var EntityManagerInterface $em */
+        $em = $reg->getManager();
         $ent = $em->getRepository(static::$className)->findOneBy([static::$deleteEntityIdentifier => $entityShortName]);
         $entityUrl = static::$baseUrl . '/' . $ent->{static::$getIDFunc}();
         // Check that the Delete button is visible on an entity page.

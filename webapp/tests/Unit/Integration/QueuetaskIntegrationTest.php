@@ -18,6 +18,7 @@ use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
@@ -67,7 +68,11 @@ class QueuetaskIntegrationTest extends KernelTestCase
             ->will($this->returnCallback($this->getConfig(...)));
 
         $dj = self::getContainer()->get(DOMJudgeService::class);
-        $this->em = self::getContainer()->get('doctrine')->getManager();
+        /** @var Registry $reg */
+        $reg = self::getContainer()->get('doctrine');
+        /** @var EntityManagerInterface $em */
+        $em = $reg->getManager();
+        $this->em = $em;
 
         $this->scoreboardService = new ScoreboardService(
             $this->em, $dj, $this->config,
