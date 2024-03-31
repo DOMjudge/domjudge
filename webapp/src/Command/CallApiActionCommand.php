@@ -129,7 +129,12 @@ class CallApiActionCommand extends Command
                     return self::FAILURE;
                 }
 
-                $files[$parts[0]] = new UploadedFile($parts[1], basename($parts[1]), mime_content_type($parts[1]), null, true);
+                $mime = mime_content_type($parts[1]);
+                if ($mime === false) {
+                    $output->writeln(sprintf('Parsing mime type failed for: %s', $parts[1]));
+                    return self::FAILURE;
+                }
+                $files[$parts[0]] = new UploadedFile($parts[1], basename($parts[1]), $mime, null, true);
             }
         } else {
             if ($input->getOption('data')) {

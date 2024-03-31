@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Parameter \\#3 \\$mimeType of class Symfony\\\\Component\\\\HttpFoundation\\\\File\\\\UploadedFile constructor expects string\\|null, string\\|false given\\.$#"
-			count: 1
-			path: webapp/src/Command/CallApiActionCommand.php
-
-		-
 			message: "#^Parameter \\#1 \\$dirs of method Symfony\\\\Component\\\\Finder\\\\Finder\\:\\:in\\(\\) expects array\\<string\\>\\|string, string\\|false given\\.$#"
 			count: 1
 			path: webapp/src/Command/ScoreboardMergeCommand.php
