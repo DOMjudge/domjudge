@@ -114,9 +114,9 @@ class UserRegistrationType extends AbstractType
             $builder
                 ->add('affiliation', ChoiceType::class, [
                     'choices' => [
-                        'No affiliation' => 'none',
-                        'Add new affiliation' => 'new',
                         'Use existing affiliation' => 'existing',
+                        'Add new affiliation' => 'new',
+                        'No affiliation' => 'none',
                     ],
                     'expanded' => true,
                     'mapped' => false,
