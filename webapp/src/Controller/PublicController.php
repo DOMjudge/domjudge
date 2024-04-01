@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
@@ -41,9 +42,16 @@ class PublicController extends BaseController
         #[MapQueryParameter]
         ?bool $static = false,
     ): Response {
-        $response   = new Response();
-        $refreshUrl = $this->generateUrl('public_index');
-        $contest    = $this->dj->getCurrentContest(onlyPublic: true);
+        $response         = new Response();
+        $refreshUrl       = $this->generateUrl('public_index');
+        $contest          = $this->dj->getCurrentContest(onlyPublic: true);
+        $nonPublicContest = $this->dj->getCurrentContest(onlyPublic: false);
+        if (!$contest && $nonPublicContest && $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1])) {
+            // This leaks a little bit of information about the existence of the non-public contest,
+            // but since self registration is enabled, it's not a big deal.
+            return $this->redirectToRoute('register');
+        }
+
 
         if ($static) {
             $refreshParams = [
