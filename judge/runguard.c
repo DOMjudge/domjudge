@@ -186,6 +186,7 @@ struct option const long_opts[] = {
 	{"environment",no_argument,       NULL,         'E'},
 	{"variable",   required_argument, NULL,         'V'},
 	{"outmeta",    required_argument, NULL,         'M'},
+	{"runpipepid", required_argument, NULL,         'U'},
 	{"verbose",    no_argument,       NULL,         'v'},
 	{"quiet",      no_argument,       NULL,         'q'},
 	{"help",       no_argument,       &show_help,    1 },
@@ -365,8 +366,11 @@ Run COMMAND with restrictions.\n\
   -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
   -s, --streamsize=SIZE  truncate COMMAND stdout/stderr streams at SIZE kB\n\
   -E, --environment      preserve environment variables (default only PATH)\n\
-  -V, --variable         add additional environment variables (in form KEY=VALUE;KEY2=VALUE2)\n\
-  -M, --outmeta=FILE     write metadata (runtime, exitcode, etc.) to FILE\n");
+  -V, --variable         add additional environment variables\n\
+                           (in form KEY=VALUE;KEY2=VALUE2)\n\
+  -M, --outmeta=FILE     write metadata (runtime, exitcode, etc.) to FILE\n\
+  -U, --runpipepid=PID   process ID of runpipe to send SIGUSR1 signal when\n\
+                           timelimit is reached\n");
 	printf("\
   -v, --verbose          display some extra warnings and information\n\
   -q, --quiet            suppress all warnings and verbose output\n\
