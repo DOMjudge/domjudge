@@ -471,10 +471,12 @@
     </tr>
         <tr style="height: 32px;">
             <td colspan="3" class="text-end">
-                {% for problem in problems %}
-                    {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
-                    {{ problem | problemBadgeMaybe(matrixItem) }}
-                {% endfor %}
+                <span class="mobile-problem-badges me-2 ms-2">
+                    {% for problem in problems %}
+                        {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
+                        {{ problem | problemBadgeMaybe(matrixItem) }}
+                    {% endfor %}
+                </span>
             </td>
         </tr>
     {% endfor %}
@@ -598,16 +600,29 @@
         if (mobileScoreboard.offsetWidth === 0) {
             return;
         }
-        const windowWidth = window.screen.width;
-        const teamNameMaxWidth = Math.max(100, windowWidth - 150);
+        const windowWidth = document.body.offsetWidth;
+        const teamNameMaxWidth = Math.max(10, windowWidth - 150);
+        const problemBadgesMaxWidth = Math.max(10, windowWidth - 78);
         document.querySelectorAll(".mobile-scoreboard .forceWidth:not(.toolong)").forEach(el => {
-            console.warn(el.innerText);
-            console.warn(`teamNameMaxWidth: ${teamNameMaxWidth}, el.offsetWidth: ${el.offsetWidth}`);
+            el.classList.remove("toolong");
             el.style.maxWidth = teamNameMaxWidth + 'px';
             if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
                 el.classList.add("toolong");
             } else {
                 el.classList.remove("toolong");
+            }
+        });
+        document.querySelectorAll(".mobile-scoreboard .mobile-problem-badges:not(.toolong)").forEach(el => {
+            el.classList.remove("toolong");
+            el.style.maxWidth = problemBadgesMaxWidth + 'px';
+            if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
+                el.classList.add("toolong");
+                const scale = el.offsetWidth / el.scrollWidth;
+                const offset = -1 * (el.scrollWidth - el.offsetWidth) / 2;
+                el.style.transform = `scale(${scale}) translateX(${offset}px)`;
+            } else {
+                el.classList.remove("toolong");
+                el.style.transform = null;
             }
         });
     };
