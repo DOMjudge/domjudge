@@ -317,22 +317,21 @@
 </div>
 
 <table class="d-md-none scoreboard mobile-scoreboard center {% if jury %}scoreboard_jury{% endif %}">
-    <thead>
     {# output table column groups (for the styles) #}
     <colgroup>
-        <col id="scorerank"/>
+        <col id="scorerank-mobile"/>
         {% if showFlags %}
-            <col id="scoreflags"/>
+            <col id="scoreflags-mobile"/>
         {% else %}
             <col/>
         {% endif %}
         {% if showAffiliationLogos %}
-            <col id="scorelogos"/>
+            <col id="scorelogos-mobile"/>
         {% endif %}
-        <col id="scoreteamname"/>
+        <col id="scoreteamname-mobile"/>
     </colgroup>
     <colgroup>
-        <col id="scoresolv"/>
+        <col id="scoresolv-mobile"/>
     </colgroup>
 
     {% set teamColspan = 2 %}
@@ -340,6 +339,7 @@
         {% set teamColspan = teamColspan + 1 %}
     {% endif %}
 
+    <thead>
     <tr class="scoreheader" data-static="{{ static }}" style="font-size: 75%;">
         <th title="rank" scope="col">rank</th>
         <th title="team name" scope="col" colspan="{{ teamColspan }}">team</th>
@@ -372,7 +372,7 @@
     {% else %}
         {% set color = score.team.category.color %}
     {% endif %}
-    <tr class="{{ classes | join(' ') }}" id="team:{{ score.team.teamid }}" style="border-bottom-width: 0; height: 28px;">
+    <tr class="{{ classes | join(' ') }}" id="team:{{ score.team.teamid }}:mobile" style="border-bottom-width: 0; height: 28px;">
         <td class="scorepl {{medalColor}}" rowspan="2">
             {# Only print rank when score is different from the previous team #}
             {% if not displayRank %}
