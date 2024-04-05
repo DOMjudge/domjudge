@@ -18,31 +18,37 @@
     {% endif %}
 
     <div class="card" {% if refreshstop is defined %}data-ajax-refresh-stop="1"{% endif %}>
-        <div class="card-header" style="font-family: Roboto, sans-serif; display: flex;">
-            <span style="font-weight: bold;">{{ current_contest.name }}</span>
-            <span id="contesttimer">
-                {% if scoreboard is null %}
-                    {{ current_contest | printContestStart }}
-                {% elseif scoreboard.freezeData.showFinal(jury) %}
-                    {% if current_contest.finalizetime is empty %}
-                        preliminary results - not final
+        <div class="card-header" style="font-family: Roboto, sans-serif;">
+            <div class="row">
+                <div class="col-md-6 col-12">
+                    <span style="font-weight: bold;">{{ current_contest.name }}</span>
+                </div>
+                <div class="col-md-6 col-12 text-md-end text-start">
+                    <span id="contesttimer">
+                    {% if scoreboard is null %}
+                        {{ current_contest | printContestStart }}
+                    {% elseif scoreboard.freezeData.showFinal(jury) %}
+                        {% if current_contest.finalizetime is empty %}
+                            preliminary results - not final
+                        {% else %}
+                            final standings
+                        {% endif %}
+                    {% elseif scoreboard.freezeData.stopped %}
+                        contest over, waiting for results
+                    {% elseif static %}
+                        {% set now = 'now'|date('U') %}
+                        {{ current_contest.starttime | printelapsedminutes(now) }}
                     {% else %}
-                        final standings
+                        {% if current_contest.freezeData.started %}
+                            started:
+                        {% else %}
+                            starts:
+                        {% endif %}
+                        {{ current_contest.starttime | printtime }} - ends: {{ current_contest.endtime | printtime }}
                     {% endif %}
-                {% elseif scoreboard.freezeData.stopped %}
-                    contest over, waiting for results
-                {% elseif static %}
-                    {% set now = 'now'|date('U') %}
-                    {{ current_contest.starttime | printelapsedminutes(now) }}
-                {% else %}
-                    {% if current_contest.freezeData.started %}
-                        started:
-                    {% else %}
-                        starts:
-                    {% endif %}
-                    {{ current_contest.starttime | printtime }} - ends: {{ current_contest.endtime | printtime }}
-                {% endif %}
-            </span>
+                </span>
+                </div>
+            </div>
         </div>
 
         {% if static %}
