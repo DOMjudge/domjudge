@@ -220,6 +220,12 @@ del {
     overflow: hidden;
 }
 
+.mobile-problem-badges {
+    position: relative;
+    display: block;
+    white-space: nowrap;
+}
+
 .toolong:after {
     content: "";
     width: 30%;
