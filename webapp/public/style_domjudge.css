@@ -219,6 +219,7 @@ del {
     display: block;
     overflow: hidden;
 }
+
 .toolong:after {
     content: "";
     width: 30%;
