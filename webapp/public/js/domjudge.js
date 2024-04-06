@@ -938,3 +938,52 @@ function initializeKeyboardShortcuts() {
         }
     });
 }
+
+// Make sure the items in the desktop scoreboard fit
+document.querySelectorAll(".desktop-scoreboard .forceWidth:not(.toolong)").forEach(el => {
+    if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
+        el.classList.add("toolong");
+    }
+});
+
+/**
+ * Helper method to resize mobile team names and problem badges
+ */
+function resizeMobileTeamNamesAndProblemBadges() {
+    // Make team names fit on the screen, but only when the mobile
+    // scoreboard is visible
+    const mobileScoreboard = document.querySelector('.mobile-scoreboard');
+    if (mobileScoreboard.offsetWidth === 0) {
+        return;
+    }
+    const windowWidth = document.body.offsetWidth;
+    const teamNameMaxWidth = Math.max(10, windowWidth - 150);
+    const problemBadgesMaxWidth = Math.max(10, windowWidth - 78);
+    document.querySelectorAll(".mobile-scoreboard .forceWidth:not(.toolong)").forEach(el => {
+        el.classList.remove("toolong");
+        el.style.maxWidth = teamNameMaxWidth + 'px';
+        if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
+            el.classList.add("toolong");
+        } else {
+            el.classList.remove("toolong");
+        }
+    });
+    document.querySelectorAll(".mobile-scoreboard .mobile-problem-badges:not(.toolong)").forEach(el => {
+        el.classList.remove("toolong");
+        el.style.maxWidth = problemBadgesMaxWidth + 'px';
+        if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
+            el.classList.add("toolong");
+            const scale = el.offsetWidth / el.scrollWidth;
+            const offset = -1 * (el.scrollWidth - el.offsetWidth) / 2;
+            el.style.transform = `scale(${scale}) translateX(${offset}px)`;
+        } else {
+            el.classList.remove("toolong");
+            el.style.transform = null;
+        }
+    });
+}
+
+if (document.querySelector('.mobile-scoreboard')) {
+    window.addEventListener('resize', resizeMobileTeamNamesAndProblemBadges);
+    resizeMobileTeamNamesAndProblemBadges();
+}
