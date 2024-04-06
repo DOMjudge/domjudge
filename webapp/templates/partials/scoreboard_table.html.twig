@@ -470,7 +470,7 @@
         <td rowspan="2">{{ totalPoints }}<br/><span class="scorett" style="font-weight: normal;">{{ totalTime }}</span></td>
     </tr>
         <tr style="height: 32px;">
-            <td colspan="3" class="text-end">
+            <td colspan="{% if showAffiliationLogos %}3{% else %}2{% endif %}" class="text-end">
                 <span class="mobile-problem-badges me-2 ms-2">
                     {% for problem in problems %}
                         {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
