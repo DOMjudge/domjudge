@@ -84,6 +84,9 @@ class TeamController extends AbstractRestController
     )]
     public function listAction(Request $request): Response
     {
+        if (!$this->config->get('enable_ranking') && !$this->dj->checkrole('jury')) {
+            throw new BadRequestHttpException("teams list not available.");
+        }
         return parent::performListAction($request);
     }
 
@@ -101,6 +104,9 @@ class TeamController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
     {
+        if (!$this->config->get('enable_ranking') && !$this->dj->checkrole('jury')) {
+            throw new BadRequestHttpException("team not available.");
+        }
         return parent::performSingleAction($request, $id);
     }
 
@@ -121,6 +127,9 @@ class TeamController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function photoAction(Request $request, string $id): Response
     {
+        if (!$this->config->get('enable_ranking') && !$this->dj->checkrole('jury')) {
+            throw new BadRequestHttpException("team photo not available.");
+        }
         /** @var Team|null $team */
         $team = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
