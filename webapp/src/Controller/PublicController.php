@@ -35,6 +35,7 @@ class PublicController extends BaseController
     ) {}
 
     #[Route(path: '', name: 'public_index')]
+    #[Route(path: '/scoreboard')]
     public function scoreboardAction(
         Request $request,
         #[MapQueryParameter(name: 'contest')]
