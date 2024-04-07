@@ -919,10 +919,11 @@ struct state_t {
                 if (errno != EAGAIN && errno != EWOULDBLOCK) {
                     error(errno, "failed to read from tle pipe");
                 }
+            } else if (buffer[0] == 42) {
+                logmsg(LOG_WARNING, "child indicated TLE");
+                child_indicated_timelimit = true;
+                continue;
             }
-            logmsg(LOG_WARNING, "child indicated TLE");
-            child_indicated_timelimit = true;
-            continue;
         }
 
 
