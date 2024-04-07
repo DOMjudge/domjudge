@@ -3,7 +3,9 @@
 
     {# Display verification data: verified, by whom, and comment #}
     <p>
-        {{ label }}: <strong>{% if judging.verified %}yes{% else %}no{% endif %}</strong>
+        {% if judging.verified %}
+        {{ label }}: <strong>yes</strong>
+        {% endif %}
         {%- if judging.verified and judging.juryMember is not empty -%}
             , by {{ judging.juryMember }}
             {%- if judging.verifyComment is not empty %}
