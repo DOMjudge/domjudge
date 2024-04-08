@@ -124,10 +124,6 @@ class InternalErrorController extends BaseController
             'internalError' => $internalError,
             'affectedLink' => $affectedLink,
             'affectedText' => $affectedText,
-            'refresh' => [
-                'after' => 15,
-                'url' => $this->generateUrl('jury_internal_error', ['errorId' => $internalError->getErrorid()]),
-            ]
         ]);
     }
 
