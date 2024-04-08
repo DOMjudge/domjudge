@@ -136,7 +136,8 @@ class SubmissionController extends AbstractRestController
         // By default, use the user and team of the user.
         $user = $this->dj->getUser();
         $team = $user->getTeam();
-        if ($teamId = $addSubmission->teamId) {
+        $teamId = $addSubmission->teamId;
+        if ($teamId) {
             $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
             $method  = sprintf('get%s', ucfirst($idField));
 
