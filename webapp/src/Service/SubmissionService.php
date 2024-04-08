@@ -556,7 +556,9 @@ class SubmissionService
 
         // First look up any expected results in all submission files to minimize the
         // SQL transaction time below.
-        if ($this->dj->checkrole('jury')) {
+        // Only do this for problem import submissions, as we do not want this for re-submitted submissions nor
+        // submissions that come through the API, e.g. when doing a replay of an old contest.
+        if ($this->dj->checkrole('jury') && $source == 'problem import') {
             $results = null;
             foreach ($files as $file) {
                 $fileResult = self::getExpectedResults(file_get_contents($file->getRealPath()),
