@@ -204,15 +204,15 @@ section_end judging
 
 # We expect
 # - two submissions with ambiguous outcome,
-# - no submissions without magic string,
+# - one submissions submitted through the submit client, and thus the magic string ignored,
 # - and all submissions to be judged.
-if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
+if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 1 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
     section_start error "Short error description"
     # We error out below anyway, so no need to fail earlier than that.
     set +e
     echo "verified subs: $NUMVERIFIED, unverified subs: $NUMNOTVERIFIED, total subs: $NUMSUBS"
     echo "(expected 2 submissions to be unverified, but all to be processed)"
-    echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 0)."
+    echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 1)."
     curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" | w3m -dump -T text/html
     section_end error
 
