@@ -983,7 +983,9 @@ function resizeMobileTeamNamesAndProblemBadges() {
     });
 }
 
-if (document.querySelector('.mobile-scoreboard')) {
-    window.addEventListener('resize', resizeMobileTeamNamesAndProblemBadges);
-    resizeMobileTeamNamesAndProblemBadges();
-}
+$(function() {
+    if (document.querySelector('.mobile-scoreboard')) {
+        window.addEventListener('resize', resizeMobileTeamNamesAndProblemBadges);
+        resizeMobileTeamNamesAndProblemBadges();
+    }
+});
