@@ -118,6 +118,16 @@ class SubmissionController extends BaseController
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] =
             $this->submissionService->getSubmissionList($contests, $restrictions, $limit);
+        $disabledProblems = [];
+        $disabledLangs = [];
+        foreach ($submissions as $submission) {
+            if (!$submission->getContestProblem()->getAllowJudge()) {
+                $disabledProblems[$submission->getProblemId()] = $submission->getProblem()->getName();
+            }
+            if (!$submission->getLanguage()->getAllowJudge()) {
+                $disabledLangs[$submission->getLanguage()->getLangid()] = $submission->getLanguage()->getName();
+            }
+        }
 
         // Load preselected filters
         $filters = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
@@ -138,6 +148,8 @@ class SubmissionController extends BaseController
             'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'showTestcases' => count($submissions) <= $latestCount,
+            'disabledProbs' => $disabledProblems,
+            'disabledLangs' => $disabledLangs,
         ];
 
         // For ajax requests, only return the submission list partial.
