@@ -82,12 +82,22 @@ class RejudgingService
         $index = 0;
         $first = true;
         foreach ($judgings as $judging) {
+            $submission = $judging->getSubmission();
+            $contestProblem = $submission->getContestProblem();
+            $language = $submission->getLanguage();
+
             $index++;
-            if ($judging->getSubmission()->getRejudging() !== null) {
-                // The submission is already part of another rejudging, record and skip it.
+            if (
+                // Record and skip submission/judging if it is already part of another judging or is not allowed
+                // to be judged.
+                $submission->getRejudging() !== null
+                || !$contestProblem->getAllowJudge()
+                || !$language->getAllowJudge()
+            ) {
                 $skipped[] = $judging;
                 continue;
             }
+
 
             $this->em->wrapInTransaction(function () use (
                 $priority,
