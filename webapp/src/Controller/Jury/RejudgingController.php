@@ -215,6 +215,21 @@ class RejudgingController extends BaseController
             ->getQuery()
             ->getOneOrNullResult();
 
+        $disabledProblems = [];
+        $disabledLangs = [];
+        foreach ($rejudging->getJudgings() as $judging) {
+            $submission = $judging->getSubmission();
+            $problem = $submission->getContestProblem();
+            $language = $submission->getLanguage();
+
+            if (!$problem->getAllowJudge()) {
+                $disabledProblems[$submission->getProblemId()] = $submission->getProblem()->getName();
+            }
+            if (!$language->getAllowJudge()) {
+                $disabledLangs[$submission->getLanguage()->getLangid()] = $submission->getLanguage()->getName();
+            }
+        }
+
         if (!$rejudging) {
             throw new NotFoundHttpException(sprintf('Rejudging with ID %s not found', $rejudgingId));
         }
@@ -389,6 +404,8 @@ class RejudgingController extends BaseController
                 'url' => $request->getRequestUri(),
                 'ajax' => true,
             ],
+            'disabledProbs' => $disabledProblems,
+            'disabledLangs' => $disabledLangs,
         ];
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;
