@@ -585,6 +585,16 @@ class CheckConfigService
                     }
                 }
             }
+
+            foreach ($problem->getContestProblems() as $contestProblem) {
+                if (!$contestProblem->getAllowJudge()) {
+                    $result = 'E';
+                    $moreproblemerrors[$probid] .= sprintf(
+                        "p%s is disabled in contest '%s'\n",
+                        $probid, $contestProblem->getContest()->getName()
+                    );
+                }
+            }
         }
 
         $desc = '';
@@ -637,6 +647,11 @@ class CheckConfigService
                     $result = 'E';
                     $morelanguageerrors[$langid] .= sprintf("Compile script %s exists but is of wrong type (%s instead of compile) for %s\n", $compile, $exec->getType(), $langid);
                 }
+            }
+
+            if ($language->getAllowSubmit() && !$language->getAllowJudge()) {
+                $result = 'E';
+                $morelanguageerrors[$langid] .= sprintf("Language '%s' is allowed to be submit, but not judged.\n", $langid);
             }
         }
 
