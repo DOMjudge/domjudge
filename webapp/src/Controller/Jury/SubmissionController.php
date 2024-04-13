@@ -466,7 +466,7 @@ class SubmissionController extends BaseController
         }
 
         $unjudgableReasons = [];
-        if ($runsOutstanding) {
+        if ($runsOutstanding || $submission->getResult() == null) {
             // Determine if this submission is unjudgable.
 
             $numActiveJudgehosts = (int)$this->em->createQueryBuilder()
