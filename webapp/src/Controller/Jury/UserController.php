@@ -16,6 +16,7 @@ use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,6 +43,8 @@ class UserController extends BaseController
         KernelInterface $kernel,
         protected readonly EventLogService $eventLogService,
         protected readonly TokenStorageInterface $tokenStorage,
+        #[Autowire(param: 'min_password_length')]
+        private readonly int $minimumPasswordLength,
     ) {
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
@@ -197,12 +200,12 @@ class UserController extends BaseController
 
     public function checkPasswordLength(User $user, FormInterface $form): ?Response
     {
-        if ($user->getPlainPassword() && strlen($user->getPlainPassword()) < static::MIN_PASSWORD_LENGTH) {
-            $this->addFlash('danger', "Password should be " . static::MIN_PASSWORD_LENGTH . "+ chars.");
+        if ($user->getPlainPassword() && strlen($user->getPlainPassword()) < $this->minimumPasswordLength) {
+            $this->addFlash('danger', "Password should be " . $this->minimumPasswordLength . "+ chars.");
             return $this->render('jury/user_edit.html.twig', [
                 'user' => $user,
                 'form' => $form,
-                'min_password_length' => static::MIN_PASSWORD_LENGTH,
+                'min_password_length' => $this->minimumPasswordLength,
             ]);
         }
 
@@ -245,7 +248,6 @@ class UserController extends BaseController
         return $this->render('jury/user_edit.html.twig', [
             'user'                => $user,
             'form'                => $form,
-            'min_password_length' => static::MIN_PASSWORD_LENGTH,
         ]);
     }
 
@@ -295,7 +297,6 @@ class UserController extends BaseController
         return $this->render('jury/user_add.html.twig', [
             'user' => $user,
             'form' => $form,
-            'min_password_length' => static::MIN_PASSWORD_LENGTH,
         ]);
     }
 
