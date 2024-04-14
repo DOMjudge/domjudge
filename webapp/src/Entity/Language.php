@@ -403,14 +403,14 @@ class Language extends BaseApiEntity
     public function getAceLanguage(): string
     {
         return match ($this->getLangid()) {
-            'c', 'cpp', 'cxx' => 'c_cpp',
-            'pas' => 'pascal',
-            'hs' => 'haskell',
-            'pl' => 'perl',
-            'bash' => 'sh',
-            'py2', 'py3' => 'python',
             'adb' => 'ada',
+            'bash' => 'sh',
+            'c', 'cpp', 'cxx' => 'c_cpp',
+            'hs' => 'haskell',
+            'pas' => 'pascal',
+            'pl' => 'perl',
             'plg' => 'prolog',
+            'py2', 'py3' => 'python',
             'rb' => 'ruby',
             'rs' => 'rust',
             default => $this->getLangid(),
