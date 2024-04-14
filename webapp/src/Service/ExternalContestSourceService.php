@@ -1024,8 +1024,11 @@ class ExternalContestSourceService
 
         $toCheckProblem = [
             'name'      => $data->name,
-            'timelimit' => $data->timeLimit,
         ];
+
+        if ($data->timeLimit) {
+            $toCheckProblem['timelimit'] = $data->timeLimit;
+        }
 
         if ($contestProblem->getShortname() !== $data->label) {
             $this->logger->warning(
