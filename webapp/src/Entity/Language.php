@@ -407,6 +407,7 @@ class Language extends BaseApiEntity
             'bash' => 'sh',
             'c', 'cpp', 'cxx' => 'c_cpp',
             'hs' => 'haskell',
+            'kt' => 'kotlin',
             'pas' => 'pascal',
             'pl' => 'perl',
             'plg' => 'prolog',
