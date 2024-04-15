@@ -668,6 +668,30 @@ class SubmissionController extends BaseController
         ]);
     }
 
+    #[Route(path: '/by-contest-and-external-id/{externalContestId}/{externalId}', name: 'jury_submission_by_context_external_id')]
+    public function viewForContestExternalIdAction(string $externalContestId, string $externalId): Response
+    {
+        $contest = $this->em->getRepository(Contest::class)->findOneBy(['externalid' => $externalContestId]);
+        if ($contest === null) {
+            throw new NotFoundHttpException("Cannot find the contest with the given external id.");
+        }
+
+        $submission = $this->em->getRepository(Submission::class)
+            ->findOneBy([
+                'contest' => $this->dj->getCurrentContest(),
+                'externalid' => $externalId
+            ]);
+
+        if (!$submission) {
+            throw new NotFoundHttpException(sprintf('No submission found with external ID %s', $externalId));
+        }
+
+        $response = $this->redirectToRoute('jury_submission', [
+            'submitId' => $submission->getSubmitid(),
+        ]);
+        return $this->dj->setCookie('domjudge_cid', (string)$contest->getCid(), 0, null, '', false, false, $response);
+    }
+
     #[Route(path: '/by-external-id/{externalId}', name: 'jury_submission_by_external_id')]
     public function viewForExternalIdAction(string $externalId): RedirectResponse
     {
