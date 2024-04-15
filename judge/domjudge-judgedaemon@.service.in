@@ -20,6 +20,9 @@ Type=simple
 
 ExecStart=@judgehost_bindir@/judgedaemon -n %i
 User=@DOMJUDGE_USER@
+KillSignal=SIGTERM
+TimeoutStopSec=180
+FinalKillSignal=SIGKILL
 
 Restart=always
 RestartSec=3
