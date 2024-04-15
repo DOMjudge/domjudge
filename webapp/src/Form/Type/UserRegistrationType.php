@@ -155,6 +155,9 @@ class UserRegistrationType extends AbstractType
                     'mapped' => false,
                     'choice_label' => 'name',
                     'placeholder' => '-- Select affiliation --',
+                    'query_builder' => fn(EntityRepository $er) => $er
+                        ->createQueryBuilder('a')
+                        ->orderBy('a.name'),
                     'attr' => [
                         'placeholder' => 'Affiliation',
                     ],
