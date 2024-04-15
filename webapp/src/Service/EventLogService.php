@@ -470,12 +470,14 @@ class EventLogService
 
         // Because some states can happen in multiple different orders, we need to check per
         // field to see if we have a state event where that field matches the current value.
+        // If the contest start is disabled, all fields should be null.
+        // Note that for `started` the check already happens within the method, but we can better be explicit here.
         $states = [
-            'started' => $contest->getStarttime(),
-            'ended' => $contest->getEndtime(),
-            'frozen' => $contest->getFreezetime(),
-            'thawed' => $contest->getUnfreezetime(),
-            'finalized' => $contest->getFinalizetime(),
+            'started' => $contest->getStarttimeEnabled() ? $contest->getStarttime() : null,
+            'ended' => $contest->getStarttimeEnabled() ? $contest->getEndtime() : null,
+            'frozen' => $contest->getStarttimeEnabled() ? $contest->getFreezetime() : null,
+            'thawed' => $contest->getStarttimeEnabled() ? $contest->getUnfreezetime() : null,
+            'finalized' => $contest->getStarttimeEnabled() ? $contest->getFinalizetime() : null,
         ];
 
         // Because we have the events in order now, we can keep 'growing' the data to insert,
