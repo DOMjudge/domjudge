@@ -407,10 +407,13 @@ class ExternalContestSourceService
                         $this->setLastEvent($this->getLastReadEventId());
                     }
                 } catch (TransportException $e) {
-                    $this->logger->error(
-                        'Received error while reading event feed: %s',
-                        [$e->getMessage()]
-                    );
+                    if (!str_starts_with($e->getMessage(), 'OpenSSL SSL_read: error:0A000126')) {
+                        // Ignore error of not fully compliant TLS implementation on server-side
+                        $this->logger->error(
+                            'Received error while reading event feed: %s',
+                            [$e->getMessage()]
+                        );
+                    }
                 }
             }
 
