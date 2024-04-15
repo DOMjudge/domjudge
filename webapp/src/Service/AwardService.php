@@ -56,6 +56,10 @@ class AwardService
         $overall_winners = $medal_winners = [];
 
         $additionalBronzeMedals = $contest->getB() ?? 0;
+        // Do not consider additional bronze medals until the contest is unfrozen.
+        if (!$scoreboard->isRestricted()) {
+            $additionalBronzeMedals = 0;
+        }
 
         $currentSortOrder = -1;
 

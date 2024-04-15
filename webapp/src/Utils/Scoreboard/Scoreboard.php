@@ -49,6 +49,14 @@ class Scoreboard
     }
 
     /**
+     * @return bool Whether this Scoreboard has restricted access (either a jury member can see, or after unfreeze).
+     */
+    public function isRestricted(): bool
+    {
+        return $this->restricted;
+    }
+
+    /**
      * @return Team[]
      */
     public function getTeams(): array
