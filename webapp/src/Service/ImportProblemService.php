@@ -265,10 +265,6 @@ class ImportProblemService
             $yamlData = Yaml::parse($problemYaml);
 
             if (!empty($yamlData)) {
-                if (isset($yamlData['uuid']) && $contestProblem !== null) {
-                    $contestProblem->setShortname($yamlData['uuid']);
-                }
-
                 $yamlProblemProperties = [];
                 if (isset($yamlData['name'])) {
                     if (is_array($yamlData['name'])) {
