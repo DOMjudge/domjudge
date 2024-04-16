@@ -748,8 +748,8 @@ class ExternalContestSourceService
             $toCheck = [
                 'start_time_enabled' => true,
                 'start_time_string'  => $startTime->format('Y-m-d H:i:s ') . $timezoneToUse,
-                'end_time'           => $contest->getAbsoluteTime($fullDuration),
-                'freeze_time'        => $contest->getAbsoluteTime($fullFreeze),
+                'end_time_string'    => preg_replace('/\.000$/', '', $fullDuration),
+                'freeze_time_string' => preg_replace('/\.000$/', '', $fullFreeze),
             ];
         } else {
             $toCheck = [
