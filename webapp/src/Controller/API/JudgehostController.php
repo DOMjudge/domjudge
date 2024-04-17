@@ -288,7 +288,9 @@ class JudgehostController extends AbstractFOSRestController
     ): void {
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
-            throw new BadRequestHttpException("Who are you and why are you sending us any data?");
+            throw new BadRequestHttpException(
+                'Register yourself first. You (' . $hostname . ') are not known to us yet.'
+            );
         }
 
         $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgetaskid]);
