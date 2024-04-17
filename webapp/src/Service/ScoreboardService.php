@@ -58,7 +58,8 @@ class ScoreboardService
         Contest $contest,
         bool $jury = false,
         ?Filter $filter = null,
-        bool $visibleOnly = false
+        bool $visibleOnly = false,
+        bool $forceUnfrozen = false,
     ): ?Scoreboard {
         $freezeData = new FreezeData($contest);
 
@@ -74,9 +75,9 @@ class ScoreboardService
 
         return new Scoreboard(
             $contest, $teams, $categories, $problems,
-            $scoreCache, $freezeData, $jury,
+            $scoreCache, $freezeData, $jury || $forceUnfrozen,
             (int)$this->config->get('penalty_time'),
-            (bool)$this->config->get('score_in_seconds')
+            (bool)$this->config->get('score_in_seconds'),
         );
     }
 
@@ -903,7 +904,12 @@ class ScoreboardService
                 $scoreFilter = null;
             }
             if ($scoreboard === null) {
-                $scoreboard = $this->getScoreboard($contest, $jury, $scoreFilter);
+                $scoreboard = $this->getScoreboard(
+                    contest: $contest,
+                    jury: $jury,
+                    filter: $scoreFilter,
+                    forceUnfrozen: $forceUnfrozen
+                );
             }
 
             if ($forceUnfrozen) {
