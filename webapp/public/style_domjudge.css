@@ -400,7 +400,7 @@ tr.ignore td, td.ignore, span.ignore {
     margin-right: auto;
 }
 
-#teampicture {
+.teampicture {
     width: 100%;
     border: 1px solid black;
 }

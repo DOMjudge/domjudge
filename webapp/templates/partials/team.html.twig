@@ -60,7 +60,7 @@
     {% set teamImage = teamId | assetPath('team') %}
     {% if teamImage %}
         <div class="col-lg-{{ size | default(4) }}">
-        <img id="teampicture" src="{{ asset(teamImage) }}" alt="Picture of team {{ team.effectiveName }}"
+        <img loading="lazy" class="teampicture" src="{{ asset(teamImage) }}" alt="Picture of team {{ team.effectiveName }}"
              title="Picture of team {{ team.effectiveName }}">
         </div>
     {% endif %}
