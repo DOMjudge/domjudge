@@ -682,6 +682,7 @@ long read_optarg_int(const char *desc, long minval, long maxval)
 	long arg;
 	char *ptr;
 
+	errno = 0;
 	arg = strtol(optarg,&ptr,10);
 	if ( errno || *ptr!='\0' || arg<minval || arg>maxval ) {
 		error(errno,"invalid %s specified: `%s'",desc,optarg);
@@ -699,6 +700,7 @@ void read_optarg_time(const char *desc, double *times)
 	/* Check for soft:hard limit separator and cut string. */
 	if ( (sep=strchr(optcopy,':'))!=NULL ) *sep = 0;
 
+	errno = 0;
 	times[0] = strtod(optcopy,&ptr);
 	if ( errno || *ptr!='\0' || !finite(times[0]) || times[0]<=0 ) {
 		error(errno,"invalid %s specified: `%s'",desc,optarg);
@@ -706,8 +708,9 @@ void read_optarg_time(const char *desc, double *times)
 
 	/* And repeat for hard limit if we found the ':' separator. */
 	if ( sep!=NULL ) {
+		errno = 0;
 		times[1] = strtod(sep+1,&ptr);
-		if ( errno || *ptr!='\0' || !finite(times[1]) || times[1]<=0 ) {
+		if ( errno || *(sep+1)=='\0' || *ptr!='\0' || !finite(times[1]) || times[1]<=0 ) {
 			error(errno,"invalid %s specified: `%s'",desc,optarg);
 		}
 		if ( times[1]<times[0] ) {
@@ -999,8 +1002,10 @@ int main(int argc, char **argv)
 			break;
 		case 'u': /* user option: uid or string */
 			use_user = 1;
-			runuid = strtol(optarg,&ptr,10);
 			runuser = strdup(optarg);
+			if ( runuser==NULL ) error(errno,"strdup() failed");
+			errno = 0;
+			runuid = strtol(optarg,&ptr,10);
 			if ( errno || *ptr!='\0' ) {
 				runuid = userid(optarg);
 				if ( regcomp(&userregex,"^[A-Za-z][A-Za-z0-9\\._-]*$", REG_NOSUB)!=0 ) {
@@ -1014,8 +1019,10 @@ int main(int argc, char **argv)
 			break;
 		case 'g': /* group option: gid or string */
 			use_group = 1;
-			rungid = strtol(optarg,&ptr,10);
 			rungroup = strdup(optarg);
+			if ( rungroup==NULL ) error(errno,"strdup() failed");
+			errno = 0;
+			rungid = strtol(optarg,&ptr,10);
 			if ( errno || *ptr!='\0' ) rungid = groupid(optarg);
 			if ( rungid<0 ) error(0,"invalid groupname or ID specified: `%s'",optarg);
 			break;
