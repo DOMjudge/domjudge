@@ -369,7 +369,6 @@ class ImportExportService
 
             if ($hasErrors) {
                 return false;
-
             }
 
             $this->em->persist($problem);
