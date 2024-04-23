@@ -64,7 +64,7 @@ class ScoreboardService
         $freezeData = new FreezeData($contest);
 
         // Don't leak information before start of contest.
-        if (!$freezeData->started() && !$jury) {
+        if (!$freezeData->started() && !$jury && !$forceUnfrozen) {
             return null;
         }
 
@@ -892,7 +892,7 @@ class ScoreboardService
              ],
              'static' => $static,
         ];
-        if ($static && $contest && $contest->getFreezeData()->showFinal()) {
+        if ($static && $contest && ($forceUnfrozen || $contest->getFreezeData()->showFinal())) {
             unset($data['refresh']);
             $data['refreshstop'] = true;
         }
@@ -916,7 +916,12 @@ class ScoreboardService
                 $scoreboard->getFreezeData()
                     ->setForceValue(FreezeData::KEY_SHOW_FROZEN, false)
                     ->setForceValue(FreezeData::KEY_SHOW_FINAL, true)
+                    ->setForceValue(FreezeData::KEY_SHOW_FINAL_JURY, true)
                     ->setForceValue(FreezeData::KEY_FINALIZED, true);
+
+                if (!$contest->getFinalizetime()) {
+                    $contest->setFinalizetime(Utils::now());
+                }
             }
 
             $data['contest']              = $contest;
