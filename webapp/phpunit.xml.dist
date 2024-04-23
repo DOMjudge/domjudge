@@ -17,6 +17,10 @@
         <server name="SHELL_VERBOSITY" value="-1"/>
         <server name="SYMFONY_PHPUNIT_REMOVE" value=""/>
         <server name="SYMFONY_PHPUNIT_VERSION" value="9.6" />
+
+        <!-- ###+ nelmio/cors-bundle ### -->
+        <env name="CORS_ALLOW_ORIGIN" value="'^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'"/>
+        <!-- ###- nelmio/cors-bundle ### -->
     </php>
     <testsuites>
         <testsuite name="Unit tests">
