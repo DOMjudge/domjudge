@@ -377,16 +377,19 @@ class ImportExportController extends BaseController
         $ranked        = [];
         $honorable     = [];
         $regionWinners = [];
+        $rankPerTeam   = [];
 
         $sortOrder = $request->query->getInt('sort_order');
 
         foreach ($this->importExportService->getResultsData($sortOrder, full: $full) as $row) {
             $team = $teamNames[$row[0]];
+            $rankPerTeam[$row[0]] = $row[1];
 
             if ($row[6] !== '') {
                 $regionWinners[] = [
                     'group' => $row[6],
                     'team' => $team,
+                    'rank' => $row[1] ?: '-',
                 ];
             }
 
@@ -434,6 +437,7 @@ class ImportExportController extends BaseController
                 'problem_name' => $problem->getProblem()->getName(),
                 'team' => null,
                 'time' => null,
+                'rank' => null,
             ];
             foreach ($teams as $team) {
                 if (!isset($categories[$team->getCategory()->getCategoryid()]) || $team->getCategory()->getSortorder() !== $sortOrder) {
@@ -446,6 +450,7 @@ class ImportExportController extends BaseController
                         'problem' => $problem->getShortname(),
                         'problem_name' => $problem->getProblem()->getName(),
                         'team' => $teamNames[$team->getIcpcId()],
+                        'rank' => $rankPerTeam[$team->getIcpcId()] ?: '-',
                         'time' => Utils::scoretime($matrixItem->time, $scoreIsInSeconds),
                     ];
                 }
