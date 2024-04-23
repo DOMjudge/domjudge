@@ -238,11 +238,15 @@ class ImportExportController extends BaseController
                 $this->addFlash('danger', "Parse error in YAML/JSON file (" . $file->getClientOriginalName() . "): " . $e->getMessage());
                 return $this->redirectToRoute('jury_import_export');
             }
-            if ($this->importExportService->importProblemsData($problemsImportForm->get('contest')->getData(), $data)) {
+            if ($this->importExportService->importProblemsData($problemsImportForm->get('contest')->getData(), $data, $ids, $messages)) {
                 $this->addFlash('success',
                     sprintf('The file %s is successfully imported.', $file->getClientOriginalName()));
             } else {
-                $this->addFlash('danger', 'Failed importing problems');
+                if (!empty($messages)) {
+                    $this->postMessages($messages);
+                } else {
+                    $this->addFlash('danger', 'Failed importing problems');
+                }
             }
             return $this->redirectToRoute('jury_import_export');
         }

@@ -309,8 +309,9 @@ class ImportExportService
      *              problems?: array{name?: string, short-name?: string, id?: string, label?: string,
      *                              letter?: string, label?: string, letter?: string}} $problems
      * @param string[]|null $ids
+     * @param array<string, string[]> $messages
      */
-    public function importProblemsData(Contest $contest, array $problems, array &$ids = null): bool
+    public function importProblemsData(Contest $contest, array $problems, array &$ids = null, ?array &$messages = []): bool
     {
         // For problemset.yaml the root key is called `problems`, so handle that case
         // TODO: Move this check away to make the $problems array shape easier
@@ -329,8 +330,20 @@ class ImportExportService
                 ->setTimelimit($problemData['time_limit'] ?? 10)
                 ->setExternalid($problemData['id'] ?? $problemData['short-name'] ?? $problemLabel ?? null);
 
-            $this->em->persist($problem);
-            $this->em->flush();
+            $hasErrors = false;
+            $errors    = $this->validator->validate($problem);
+            if ($errors->count()) {
+                $hasErrors = true;
+                /** @var ConstraintViolationInterface $error */
+                foreach ($errors as $error) {
+                    $messages['danger'][] = sprintf(
+                        'Error: problems.%s.%s: %s',
+                        $problem->getExternalid(),
+                        $error->getPropertyPath(),
+                        $error->getMessage()
+                    );
+                }
+            }
 
             $contestProblem = new ContestProblem();
             $contestProblem
@@ -339,14 +352,35 @@ class ImportExportService
                 // We need to set both the entities and the IDs because of the composite primary key.
                 ->setProblem($problem)
                 ->setContest($contest);
+
+            $errors    = $this->validator->validate($contestProblem);
+            if ($errors->count()) {
+                $hasErrors = true;
+                /** @var ConstraintViolationInterface $error */
+                foreach ($errors as $error) {
+                    $messages['danger'][] = sprintf(
+                        'Error: problems.%s.contestproblem.%s: %s',
+                        $problem->getExternalid(),
+                        $error->getPropertyPath(),
+                        $error->getMessage()
+                    );
+                }
+            }
+
+            if ($hasErrors) {
+                return false;
+
+            }
+
+            $this->em->persist($problem);
             $this->em->persist($contestProblem);
+            $this->em->flush();
 
             $ids[] = $problem->getApiId($this->eventLogService);
         }
 
         $this->em->flush();
 
-        // For now this method will never fail so always return true.
         return true;
     }
 
