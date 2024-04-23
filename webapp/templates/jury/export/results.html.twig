@@ -65,6 +65,7 @@
         <thead>
         <tr>
             <th scope="col">Region</th>
+            <th scope="col">Rank</th>
             <th scope="col">Team</th>
         </tr>
         </thead>
@@ -72,6 +73,7 @@
         {% for row in regionWinners %}
             <tr>
                 <th scope="row">{{ row.group }}</th>
+                <td>{{ row.rank }}</td>
                 <td>{{ row.team }}</td>
             </tr>
         {% endfor %}
@@ -84,6 +86,7 @@
         <tr>
             <th scope="col">Problem</th>
             <th scope="col">Team</th>
+            <th scope="col">Rank</th>
             <th scope="col">Time</th>
         </tr>
         </thead>
@@ -96,6 +99,13 @@
                         {{ row.team }}
                     {% else %}
                         <i>Not solved</i>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if row.rank is not null %}
+                        {{ row.rank }}
+                    {% else %}
+                        <i>-</i>
                     {% endif %}
                 </td>
                 <td>
