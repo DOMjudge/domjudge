@@ -22,6 +22,8 @@ jobs:
         include:
           - os: debian
             version: stable
+          - os: debian
+            version: testing
     runs-on: ubuntu-latest
     env:
       DEBIAN_FRONTEND: noninteractive
