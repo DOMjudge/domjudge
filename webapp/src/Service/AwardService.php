@@ -57,7 +57,7 @@ class AwardService
 
         $additionalBronzeMedals = $contest->getB() ?? 0;
         // Do not consider additional bronze medals until the contest is unfrozen.
-        if (!$scoreboard->isRestricted()) {
+        if (!$scoreboard->hasRestrictedAccess()) {
             $additionalBronzeMedals = 0;
         }
 
