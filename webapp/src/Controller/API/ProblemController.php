@@ -105,10 +105,11 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         if ($this->importExportService->importProblemsData($contest, $data, $ids, $messages)) {
             return $ids;
         }
+        $message = "Error while adding problems";
         if (!empty($messages)) {
-            throw new BadRequestHttpException($this->dj->jsonEncode($messages));
+            $message .= ': ' . $this->dj->jsonEncode($messages);
         }
-        throw new BadRequestHttpException("Error while adding problems");
+        throw new BadRequestHttpException($message);
     }
 
     /**
