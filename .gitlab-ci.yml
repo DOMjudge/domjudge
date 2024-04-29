@@ -14,4 +14,4 @@ stages:
   - style
   - ci_checks
 
-image: domjudge/gitlabci:22.04
+image: domjudge/gitlabci:24.04

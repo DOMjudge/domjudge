@@ -3,7 +3,7 @@
   stage: integration
   script:
     - set -eux
-    - if [ -z ${PHPVERSION+x} ]; then export PHPVERSION=8.1; fi
+    - if [ -z ${PHPVERSION+x} ]; then export PHPVERSION=8.3; fi
     - if [ "$TEST" = "E2E" ]; then exit 0; fi
     - if [ "$CRAWL_DATASOURCES" != "0" ]; then exit 0; fi
     - timeout --signal=15 40m ./gitlab/integration.sh $PHPVERSION
