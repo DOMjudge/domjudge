@@ -65,16 +65,16 @@
         <thead>
         <tr>
             <th scope="col">Region</th>
-            <th scope="col">Rank</th>
             <th scope="col">Team</th>
+            <th scope="col">Rank</th>
         </tr>
         </thead>
         <tbody>
         {% for row in regionWinners %}
             <tr>
                 <th scope="row">{{ row.group }}</th>
-                <td>{{ row.rank }}</td>
                 <td>{{ row.team }}</td>
+                <td>{{ row.rank }}</td>
             </tr>
         {% endfor %}
         </tbody>
