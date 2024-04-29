@@ -330,10 +330,9 @@ class ImportExportService
                 ->setTimelimit($problemData['time_limit'] ?? 10)
                 ->setExternalid($problemData['id'] ?? $problemData['short-name'] ?? $problemLabel ?? null);
 
-            $hasErrors = false;
-            $errors    = $this->validator->validate($problem);
-            if ($errors->count()) {
-                $hasErrors = true;
+            $errors           = $this->validator->validate($problem);
+            $hasProblemErrors = $errors->count();
+            if ($hasProblemErrors) {
                 /** @var ConstraintViolationInterface $error */
                 foreach ($errors as $error) {
                     $messages['danger'][] = sprintf(
@@ -353,9 +352,9 @@ class ImportExportService
                 ->setProblem($problem)
                 ->setContest($contest);
 
-            $errors    = $this->validator->validate($contestProblem);
-            if ($errors->count()) {
-                $hasErrors = true;
+            $errors                  = $this->validator->validate($contestProblem);
+            $hasContestProblemErrors = $errors->count();
+            if ($hasContestProblemErrors) {
                 /** @var ConstraintViolationInterface $error */
                 foreach ($errors as $error) {
                     $messages['danger'][] = sprintf(
@@ -367,7 +366,7 @@ class ImportExportService
                 }
             }
 
-            if ($hasErrors) {
+            if ($hasProblemErrors || $hasContestProblemErrors) {
                 return false;
             }
 
