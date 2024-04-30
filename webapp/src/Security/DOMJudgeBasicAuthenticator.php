@@ -67,7 +67,11 @@ class DOMJudgeBasicAuthenticator extends AbstractAuthenticator
         // Otherwise, we pass along to the next authenticator.
         if ($exception instanceof BadCredentialsException || $exception instanceof UserNotFoundException) {
             $resp = new Response('', Response::HTTP_UNAUTHORIZED);
-            $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
+
+            if (!$request->isXmlHttpRequest()) {
+                $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
+            }
+  
             return $resp;
         }
 
