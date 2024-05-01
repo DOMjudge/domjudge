@@ -1023,9 +1023,11 @@ class JudgehostController extends AbstractFOSRestController
             if (!$hasNullResults || $lazyEval !== DOMJudgeService::EVAL_FULL) {
                 // NOTE: setting endtime here determines in testcases_GET
                 // whether a next testcase will be handed out.
+                $this->logger->error('Judging %d is done, setting endtime, it had %d', [ $judging->getJudgingid(), $judging->getEndtime() ]);
+                $this->logger->error('Verdict is %s', [$result]);
+                $sendJudgingEvent = !$judging->getEndtime();
                 $judging->setEndtime(Utils::now());
                 $this->maybeUpdateActiveJudging($judging);
-                $sendJudgingEvent = true;
             }
             $this->em->flush();
 
