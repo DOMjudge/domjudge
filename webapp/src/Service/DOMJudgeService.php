@@ -710,14 +710,18 @@ class DOMJudgeService
     public function openZipFile(string $filename): ZipArchive
     {
         $zip = new ZipArchive();
-        $res = $zip->open($filename, ZIPARCHIVE::CHECKCONS);
-        if ($res === ZIPARCHIVE::ER_NOZIP || $res === ZIPARCHIVE::ER_INCONS) {
-            throw new BadRequestHttpException('No valid zip archive given');
+        $res = $zip->open($filename, ZipArchive::CHECKCONS);
+        if ($res === ZipArchive::ER_NOZIP) {
+            throw new BadRequestHttpException('No valid ZIP archive given.');
+        } elseif ($res === ZipArchive::ER_INCONS) {
+            throw new BadRequestHttpException(
+                'ZIP archive is inconsistent; this can happen when using built-in graphical ZIP tools on Mac OS or Ubuntu,'
+            . ' use the command line zip tool instead, e.g.: zip -r ../problemarchive.zip *');
         } elseif ($res === ZIPARCHIVE::ER_MEMORY) {
-            throw new ServiceUnavailableHttpException(null, 'Not enough memory to extract zip archive');
+            throw new ServiceUnavailableHttpException(null, 'Not enough memory to extract ZIP archive.');
         } elseif ($res !== true) {
             throw new ServiceUnavailableHttpException(null,
-                'Unknown error while extracting zip archive: ' . print_r($res, true));
+                'Unknown error while extracting ZIP archive: ' . print_r($res, true));
         }
 
         return $zip;
