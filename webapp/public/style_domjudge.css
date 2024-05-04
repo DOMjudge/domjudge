@@ -655,3 +655,7 @@ blockquote {
 	color: DimGray;
 	margin-left: auto;
 }
+
+.nvd3 rect[height="1"] {
+  display: none !important;
+}
