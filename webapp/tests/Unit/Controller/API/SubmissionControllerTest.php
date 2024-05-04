@@ -148,7 +148,7 @@ class SubmissionControllerTest extends BaseTestCase
                     ['data' => 'aaa'],
                 ],
             ],
-            "No valid zip archive given"
+            "No valid ZIP archive given."
         ];
         yield [
             'demo',
