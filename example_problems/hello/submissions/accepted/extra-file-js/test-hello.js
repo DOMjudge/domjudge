@@ -3,9 +3,4 @@
 //
 // @EXPECTED_RESULTS@: CORRECT
 
-if ( process.env.DOMJUDGE ) {
-  console.log('Hello world!');
-} else {
-  console.log('DOMJUDGE not defined');
-  process.exit(1);
-}
+console.log('Hello world!');
