@@ -11,10 +11,6 @@ public class Hello
 {
 	public static void Main(string[] args)
 	{
-#if ONLINE_JUDGE
 		Console.Write("Hello world!\n");
-#else
-		Console.Write("ONLINE_JUDGE not defined\n");
-#endif
 	}
 }
