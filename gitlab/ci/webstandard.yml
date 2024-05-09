@@ -3,7 +3,7 @@ webstandard_check_role:
   only:
     - main
     - /^[0-9].[0-9]$/
-  extends: [.short_job,.mariadb_job]
+  extends: [.long_job,.mariadb_job]
   parallel:
     matrix:
       - ROLE: public
