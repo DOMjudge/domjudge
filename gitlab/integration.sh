@@ -16,7 +16,8 @@ function finish() {
     cp /opt/domjudge/domserver/webapp/var/log/prod.log "$GITLABARTIFACTS/symfony.log"
     cp /opt/domjudge/domserver/webapp/var/log/prod.log.errors "$GITLABARTIFACTS/symfony_errors.log"
     cp /tmp/judgedaemon.log "$GITLABARTIFACTS/judgedaemon.log"
-    cp /proc/cmdline "$GITLABARTIFACTS/cmdline"
+    cp /proc/cmdline "$GITLABARTIFACTS/cmdline.txt"
+    cp /proc/cgroups "$GITLABARTIFACTS/cgroups.txt"
     CHROOTDIR=/chroot/domjudge
     if [ -n "${CI+x}" ]; then
         CHROOTDIR=${DIR}${CHROOTDIR}
@@ -73,6 +74,10 @@ section_start submit_client "Test submit client"
 cd ${DIR}/submit
 make check-full
 section_end submit_client
+
+section_start cgroupv "Show supported Cgroup versions"
+cat /proc/cgroups
+section_end cgroupv
 
 section_start mount "Show runner mounts"
 mount
