@@ -77,6 +77,8 @@ section_end submit_client
 
 section_start cgroupv "Show supported Cgroup versions"
 cat /proc/cgroups
+mount | grep cgroup
+stat -fc %T /sys/fs/cgroup/
 section_end cgroupv
 
 section_start mount "Show runner mounts"
