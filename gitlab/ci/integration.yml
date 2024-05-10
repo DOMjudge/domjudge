@@ -4,3 +4,4 @@ integration_test:
     - set -eux
     - cat /proc/cgroups
     - cat /proc/cmdline
+    - lsb_release -a

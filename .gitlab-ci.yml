@@ -4,4 +4,4 @@ include:
 stages:
   - integration
 
-image: domjudge/gitlabci:24.04
+image: domjudge/gitlabci:22.04
