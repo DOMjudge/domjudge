@@ -667,6 +667,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      */
     public function printHosts(array $hostnames): string
     {
+        $hostnames = array_values($hostnames);
         if (empty($hostnames)) {
             return "";
         }
