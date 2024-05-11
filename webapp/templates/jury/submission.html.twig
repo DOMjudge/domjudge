@@ -343,7 +343,10 @@
 
     {% if selectedJudging is not null or externalJudgement is not null %}
 
-        {% include 'jury/partials/submission_graph.html.twig' %}
+        {% if (selectedJudging is not null and selectedJudging.result != 'compiler-error')
+              or (externalJudgement is not null and externalJudgement.result != 'compiler-error') %}
+            {% include 'jury/partials/submission_graph.html.twig' %}
+        {% endif %}
 
         {% if selectedJudging is not null %}
 
@@ -467,21 +470,6 @@
                         {%- endif -%}
                     )</span>
                 {%- endif -%}
-                {%- if selectedJudging is not null and selectedJudging.result != 'compiler-error' -%}
-                    , max/sum runtime:
-                    {{ selectedJudging.maxRuntime | number_format(2, '.', '') }}/{{ selectedJudging.sumRuntime | number_format(2, '.', '') }}s
-                    {%- if lastJudging is not null -%}
-                        <span class="lastruntime">
-                        (<a href="{{ lastSubmissionLink }}">s{{ lastSubmission.submitid }}</a>:
-                            {{ lastJudging.maxRuntime | number_format(2, '.', '') }}{#-
-                        -#}/{{ lastJudging.sumRuntime | number_format(2, '.', '') }}s)
-                    </span>
-                    {%- endif -%}
-                {% endif -%}
-                {%- if externalJudgement is not null and externalJudgement.result != 'compiler-error' and externalJudgement.result != null -%}
-                    , external max/sum runtime:
-                    {{ externalJudgement.maxRuntime | number_format(2, '.', '') }}/{{ externalJudgement.sumRuntime | number_format(2, '.', '') }}s
-                {% endif %}
             </div>
 
             {# Display testcase results #}
