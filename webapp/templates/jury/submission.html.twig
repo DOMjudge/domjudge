@@ -414,7 +414,6 @@
         <div class="mb-2">
             <div>
                 {% if not submission.importError %}
-                    Result:
                     {% if selectedJudging is null or selectedJudging.result is empty %}
                         {%- if selectedJudging and selectedJudging.started %}
                             {{- '' | printValidJuryResult -}}
@@ -431,7 +430,7 @@
                 {%- if lastJudging is not null -%}
                     {% set lastSubmissionLink = path('jury_submission', {submitId: lastSubmission.submitid}) %}{#-
                 -#}<span class="lastresult">
-                    (<a href="{{ lastSubmissionLink }}">s{{ lastSubmission.submitid }}</a>: {{ lastJudging.result }}){#-
+                    (<a href="{{ lastSubmissionLink }}">s{{ lastSubmission.submitid }}</a>: {{ lastJudging.result | printResult }}){#-
                 -#}</span>
                 {%- endif -%}
                 {%- if externalJudgement is not null %}
@@ -472,7 +471,6 @@
                 <table>
                     {% if not submission.importError %}
                         <tr>
-                            <td>testcase runs:</td>
                             <td>
                                 {% if selectedJudging is null %}
                                     {% set judgingDone = false %}
@@ -480,6 +478,8 @@
                                     {% set judgingDone = selectedJudging.endtime is not empty %}
                                 {% endif %}
                                 {{ runs | displayTestcaseResults(judgingDone) }}
+                            </td>
+                            <td>
                                 {% if selectedJudging is not null and runsOutstanding %}
                                     {% if selectedJudging.judgeCompletely %}
                                         <i class="fas fa-balance-scale" title="remaining test cases requested to be judged"></i>
@@ -493,44 +493,39 @@
                             </td>
                         </tr>
                     {% endif %}
-                    {% if lastJudging is not null %}
-                        <tr class="lasttcruns">
+                    {% if externalJudgement is not null %}
+                        <tr>
                             <td>
-                                <a href="{{ lastSubmissionLink }}">s{{ lastSubmission.submitid }}</a> runs:
+                                {{ externalRuns | displayTestcaseResults(externalJudgement.endtime is not empty, true) }}
                             </td>
                             <td>
-                                {{ lastRuns | displayTestcaseResults(lastJudging.endtime is not empty) }}
+                                {% if externalSubmissionUrl and externalSubmissionUrl is not empty %}
+                                <a href="{{ externalSubmissionUrl }}">
+                                    {% endif %}
+                                    external {{ externalJudgement.extjudgementid }}
+                                    {% if externalSubmissionUrl and externalSubmissionUrl is not empty %}
+                                </a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endif %}
-                    {% if externalJudgement is not null %}
-                        <tr>
-                            <td>external runs:</td>
+                    {% if lastJudging is not null %}
+                        <tr class="lasttcruns">
                             <td>
-                                {{ externalRuns | displayTestcaseResults(externalJudgement.endtime is not empty, true) }}
+                                {{ lastRuns | displayTestcaseResults(lastJudging.endtime is not empty) }}
+                            </td>
+                            <td>
+                                <a href="{{ lastSubmissionLink }}">previous s{{ lastSubmission.submitid }}</a>
+                                {% if lastJudging.verifyComment %}
+                                    <span class="prevsubmit">(verify comment: '{{ lastJudging.verifyComment }}')</span>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endif %}
                 </table>
 
-                {# Show JS toggle of previous submission results #}
-                {% if lastJudging is not null %}
-                    <span class="testcases_prev">
-                    <a href="javascript:togglelastruns();">show/hide</a>
-                    results of previous <a href="{{ lastSubmissionLink }}">submission s{{ lastSubmission.submitid }}</a>
-                        {% if lastJudging.verifyComment %}
-                            <span class="prevsubmit">(verify comment: '{{ lastJudging.verifyComment }}')</span>
-                        {% endif %}
-                </span>
-                {% endif %}
             {% endif %}
         </div>
-
-        <script>
-            $(function () {
-                togglelastruns();
-            });
-        </script>
 
         {# Show verify info, but only when a result is known #}
         {% if selectedJudging is not null and selectedJudging.result is not empty %}
