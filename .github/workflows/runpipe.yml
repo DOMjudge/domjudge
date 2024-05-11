@@ -17,7 +17,7 @@ jobs:
     container:
       image: domjudge/gitlabci:2.1
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Create the configure file
         run: make configure
       - name: Do the default configure

@@ -13,7 +13,7 @@ jobs:
   phpstan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install DOMjudge
         run: .github/jobs/baseinstall.sh admin
       - uses: php-actions/phpstan@v3
