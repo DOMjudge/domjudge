@@ -26,7 +26,7 @@ jobs:
       DB_USER: user
       DB_PASSWORD: password
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install DOMjudge
         run: .github/jobs/baseinstall.sh ${{ inputs.version }}
