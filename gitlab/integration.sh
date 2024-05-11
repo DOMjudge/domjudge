@@ -81,11 +81,25 @@ mount
 mount -o remount,exec,dev /builds
 section_end mount
 
+section_start check_cgroup_v1 "Checking for cgroup v1 availability"
+grep cgroup$ /proc/filesystems
+if [ $? -eq 0 ]; then
+    cgroupv1=1
+else
+    echo "Skipping tests that rely on cgroup v1"
+    cgroupv1=0
+fi
+section_end check_cgroup_v1
+
 section_start judgehost "Configure judgehost"
 cd /opt/domjudge/judgehost/
 sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/
 sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
-sudo bin/create_cgroups
+if [ $cgroupv1 -ne 0 ]; then
+    # We allow this to go wrong as some gitlab runners do not have the
+    # swapaccount kernel option set.
+    sudo bin/create_cgroups || cgroupv1=0
+fi
 
 if [ ! -d ${DIR}/chroot/domjudge/ ]; then
     cd ${DIR}/misc-tools
@@ -129,19 +143,23 @@ if [ $PIN_JUDGEDAEMON -eq 1 ]; then
 fi
 section_end more_setup
 
-section_start runguard_tests "Running isolated runguard tests"
-sudo addgroup domjudge-run-0
-sudo usermod -g domjudge-run-0 domjudge-run-0
-cd ${DIR}/judge/runguard_test
-make test
-section_end runguard_tests
+if [ $cgroupv1 -ne 0 ]; then
+    section_start runguard_tests "Running isolated runguard tests"
+    sudo addgroup domjudge-run-0
+    sudo usermod -g domjudge-run-0 domjudge-run-0
+    cd ${DIR}/judge/runguard_test
+    make test
+    section_end runguard_tests
+fi
 
-section_start start_judging "Start judging"
-cd /opt/domjudge/judgehost/
-
-sudo -u domjudge bin/judgedaemon $PINNING |& tee /tmp/judgedaemon.log &
-sleep 5
-section_end start_judging
+if [ $cgroupv1 -ne 0 ]; then
+    section_start start_judging "Start judging"
+    cd /opt/domjudge/judgehost/
+    
+    sudo -u domjudge bin/judgedaemon $PINNING |& tee /tmp/judgedaemon.log &
+    sleep 5
+    section_end start_judging
+fi
 
 section_start submitting "Importing Kattis examples"
 export SUBMITBASEURL='http://localhost/domjudge/'
@@ -164,9 +182,7 @@ for i in hello_kattis different guess; do
 done
 section_end submitting
 
-section_start judging "Waiting until all submissions are judged"
-# wait for and check results
-NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/1/submissions | python3 -mjson.tool | grep -c '"id":')
+section_start curlcookie "Preparing cookie jar for curl"
 export COOKIEJAR
 COOKIEJAR=$(mktemp --tmpdir)
 export CURLOPTS="--fail -sq -m 30 -b $COOKIEJAR"
@@ -179,57 +195,65 @@ curl $CURLOPTS -c $COOKIEJAR -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F
 # Send a general clarification to later test if we see the event.
 curl $CURLOPTS -F "sendto=" -F "problem=1-" -F "bodytext=Testing" -F "submit=Send" \
      "http://localhost/domjudge/jury/clarifications/send" -o /dev/null
+    
+section_end curlcookie
 
-# Don't spam the log.
-set +x
-
-while /bin/true; do
-    sleep 30s
-    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
-
-    # Check if we are done, i.e. everything is judged or something got disabled by internal error...
-    if tail /tmp/judgedaemon.log | grep -q "No submissions in queue"; then
-        break
-    fi
-    # ... or something has crashed.
-    if ! pgrep -f judgedaemon; then
-        break
-    fi
-done
-
-NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked"     | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
-NUMVERIFIED=$(   curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
-NUMNOMAGIC=$(    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string"    | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
-section_end judging
-
-# We expect
-# - two submissions with ambiguous outcome,
-# - one submissions submitted through the submit client, and thus the magic string ignored,
-# - and all submissions to be judged.
-if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 1 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
-    section_start error "Short error description"
-    # We error out below anyway, so no need to fail earlier than that.
-    set +e
-    echo "verified subs: $NUMVERIFIED, unverified subs: $NUMNOTVERIFIED, total subs: $NUMSUBS"
-    echo "(expected 2 submissions to be unverified, but all to be processed)"
-    echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 1)."
-    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" | w3m -dump -T text/html
-    section_end error
-
-    section_start logfiles "All the more or less useful logfiles"
-    for i in /opt/domjudge/judgehost/judgings/*/*/*/*/*/compile.out; do
-        echo $i;
-        head -n 100 $i;
-        dir=$(dirname $i)
-        if [ -r $dir/testcase001/system.out ]; then
-            head $dir/testcase001/system.out
-            head $dir/testcase001/runguard.err
-            head $dir/testcase001/program.err
-            head $dir/testcase001/program.meta
+if [ $cgroupv1 -ne 0 ]; then
+    section_start judging "Waiting until all submissions are judged"
+    # wait for and check results
+    NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/1/submissions | python3 -mjson.tool | grep -c '"id":')
+    
+    # Don't spam the log.
+    set +x
+    
+    while /bin/true; do
+        sleep 30s
+        curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
+    
+        # Check if we are done, i.e. everything is judged or something got disabled by internal error...
+        if tail /tmp/judgedaemon.log | grep -q "No submissions in queue"; then
+            break
         fi
-        echo;
+        # ... or something has crashed.
+        if ! pgrep -f judgedaemon; then
+            break
+        fi
     done
-    exit 1;
+    
+    NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked"     | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
+    NUMVERIFIED=$(   curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
+    NUMNOMAGIC=$(    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string"    | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
+    section_end judging
+    
+    # We expect
+    # - two submissions with ambiguous outcome,
+    # - one submissions submitted through the submit client, and thus the magic string ignored,
+    # - and all submissions to be judged.
+    if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 1 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
+        section_start error "Short error description"
+        # We error out below anyway, so no need to fail earlier than that.
+        set +e
+        echo "verified subs: $NUMVERIFIED, unverified subs: $NUMNOTVERIFIED, total subs: $NUMSUBS"
+        echo "(expected 2 submissions to be unverified, but all to be processed)"
+        echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 1)."
+        curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" | w3m -dump -T text/html
+        section_end error
+    
+        section_start logfiles "All the more or less useful logfiles"
+        for i in /opt/domjudge/judgehost/judgings/*/*/*/*/*/compile.out; do
+            echo $i;
+            head -n 100 $i;
+            dir=$(dirname $i)
+            if [ -r $dir/testcase001/system.out ]; then
+                head $dir/testcase001/system.out
+                head $dir/testcase001/runguard.err
+                head $dir/testcase001/program.err
+                head $dir/testcase001/program.meta
+            fi
+            echo;
+        done
+        exit 1;
+    fi
 fi
 
 section_start api_check "Performing API checks"
@@ -249,7 +273,13 @@ if cat /opt/domjudge/domserver/webapp/var/log/prod.log | egrep '(CRITICAL|ERROR)
 fi
 
 # Check the Contest API:
-$CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
+if [ $cgroupv1 -ne 0 ]; then
+    $CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
+else
+    # With cgroup v1 not being available we don't judge, so we cannot do
+    # consistency checks, so running the above command without -C.
+    $CHECK_API -n -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
+fi
 section_end api_check |& tee "$GITLABARTIFACTS/check_api.log"
 
 section_start validate_feed "Validate the eventfeed against API (ignoring failures)"
