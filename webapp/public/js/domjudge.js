@@ -117,21 +117,6 @@ function collapse(x)
     $(x).toggleClass('d-none');
 }
 
-function togglelastruns()
-{
-    var names = {'lastruntime':0, 'lastresult':1, 'lasttcruns':2};
-    for (var name in names) {
-        var cells = document.getElementsByClassName(name);
-        for (var i = 0; i < cells.length; i++) {
-            var style = 'inline';
-            if (name === 'lasttcruns') {
-                style = 'table-row';
-            }
-            cells[i].style.display = (cells[i].style.display === 'none') ? style : 'none';
-        }
-    }
-}
-
 // TODO: We should probably reload the page if the clock hits contest
 // start (and end?).
 function updateClock()

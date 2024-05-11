@@ -655,3 +655,7 @@ blockquote {
 	color: DimGray;
 	margin-left: auto;
 }
+
+.lasttcruns, .lastresult {
+    opacity: 0.5;
+}
