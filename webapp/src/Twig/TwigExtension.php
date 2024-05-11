@@ -215,26 +215,31 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
     }
 
-    public function printHumanTimeDiff(float|null $datetime): string
+    public function printHumanTimeDiff(float|null $startTime, float|null $endTime): string
     {
-        if ($datetime === null) {
+        if ($startTime === null) {
             return '';
         }
-        $diff = Utils::now() - $datetime;
+        $suffix = '';
+        if ($endTime === null) {
+            $suffix = ' ago';
+            $endTime = Utils::now();
+        }
+        $diff = $endTime - $startTime;
 
         if ($diff < 120) {
-            return (int)($diff) . ' seconds ago';
+            return (int)($diff) . ' seconds' . $suffix;
         }
         $diff /= 60;
         if ($diff < 120) {
-            return (int)($diff) . ' minutes ago';
+            return (int)($diff) . ' minutes' . $suffix;
         }
         $diff /= 60;
         if ($diff < 48) {
-            return (int)($diff) . ' hours ago';
+            return (int)($diff) . ' hours' . $suffix;
         }
         $diff /= 24;
-        return (int)($diff) . ' days ago';
+        return (int)($diff) . ' days' . $suffix;
     }
 
     /**
@@ -438,7 +443,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $lastTypeSample = true;
         foreach ($testcases as $testcase) {
             if ($testcase->getSample() != $lastTypeSample) {
-                $results        .= ' | ';
+                $results        .= ' <strong>|</strong> ';
                 $lastTypeSample = $testcase->getSample();
             }
 
@@ -662,6 +667,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      */
     public function printHosts(array $hostnames): string
     {
+        $hostnames = array_values($hostnames);
         if (empty($hostnames)) {
             return "";
         }
