@@ -439,24 +439,19 @@
                     {% endif %}
                 {%- endif %}
                 {%- if selectedJudging is not null and judgehosts is not empty -%}
-                    , Judgehost(s):
-                    {% for judgehostid, hostname in judgehosts %}
-                        {% set judgehostLink = path('jury_judgehost', {judgehostid: judgehostid}) %}
-                        <a href="{{ judgehostLink }}">{{ hostname | printHost }}</a>
-                    {% endfor %} -
-                    {%- if selectedJudging.starttime -%}
-                        <span class="judgetime">Judging started: {{ selectedJudging.starttime | printtime('H:i:s') }}
-                            {%- if selectedJudging.endtime -%}
-                                , finished in {{ selectedJudging.starttime | printtimediff(selectedJudging.endtime) }}s
-                            {%- elseif selectedJudging.valid or selectedJudging.rejudging -%}
-                                &nbsp;[still judging - busy {{ selectedJudging.starttime | printtimediff }}]
-                            {%- else -%}
-                                &nbsp;[aborted]
-                            {%- endif -%}
-                        </span>
+                    , on {{ judgehosts | printHosts }}
+                    {% if selectedJudging.starttime %}
+                        {% if selectedJudging.endtime %}
+                            , took {{ selectedJudging.starttime | printHumanTimeDiff(selectedJudging.endtime) }}
+                        {% elseif selectedJudging.valid or selectedJudging.rejudging %}
+                            &nbsp;[still judging - busy {{ selectedJudging.starttime | printtimediff }}]
+                        {% else %}
+                            &nbsp;[aborted]
+                        {% endif %}
+                        <span class="judgetime">(started: {{ selectedJudging.starttime | printtime('H:i:s') }})</span>
                     {% else %}
-                        <span class="judgetime">Judging not started yet</span>
-                    {%- endif -%}
+                        , not started yet
+                    {% endif %}
                 {% endif -%}
                 {%- if externalJudgement is not null %}
                     <span class="judgetime">(external judging started: {{ externalJudgement.starttime | printtime('H:i:s') }}
