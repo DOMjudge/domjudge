@@ -383,15 +383,18 @@ class JudgehostController extends AbstractFOSRestController
                     }
                 }
             } else {
+                $compileMetadata = $request->request->get('compile_metadata');
                 $this->em->wrapInTransaction(function () use (
                     $judgehost,
                     $judging,
                     $query,
-                    $output_compile
+                    $output_compile,
+                    $compileMetadata
                 ) {
                     if ($judging->getOutputCompile() === null) {
                         $judging
                             ->setOutputCompile($output_compile)
+                            ->setCompileMetadata(base64_decode($compileMetadata))
                             ->setResult(Judging::RESULT_COMPILER_ERROR)
                             ->setEndtime(Utils::now());
                         $this->em->flush();
