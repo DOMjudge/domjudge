@@ -20,14 +20,16 @@ if [ -z "$ENTRY_POINT" ]; then
     echo "Info: detected entry_point: $MAINSOURCE"
 fi
 
-# No easy way to test R scripts for syntax
-
 # Check if entry point is valid
 if [ ! -r "$MAINSOURCE" ]; then
     echo "Error: main source file '$MAINSOURCE' is not readable" >&2
     exit 1
 fi
 
+# Check syntax
+Rscript -e "parse('"$@"')"
+EXITCODE=$?
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
 # Write executing script:
 cat > "$DEST" <<EOF
