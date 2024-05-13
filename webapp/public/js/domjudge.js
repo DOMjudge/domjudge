@@ -860,3 +860,62 @@ $(function() {
         resizeMobileTeamNamesAndProblemBadges();
     }
 });
+
+function initializeKeyboardShortcuts() {
+    var $body = $('body');
+    $body.on('keydown', function(e) {
+        // Check if the user is not typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        var key = e.key.toLowerCase();
+        if (key == 'j' || key == 'k') {
+            var parts = window.location.href.split('/');
+            var currentNumber = parseInt(parts[parts.length - 1]);
+            if (isNaN(currentNumber)) {
+                return;
+            }
+            if (key == 'j') {
+                parts[parts.length - 1] = currentNumber + 1;
+            } else if (key == 'k') {
+                parts[parts.length - 1] = currentNumber - 1;
+            }
+            window.location = parts.join('/');
+        } else if (key == 's') {
+            var oldFunc = null;
+            var events = $._data($body[0], 'events');
+            if (events && events.keydown) {
+                oldFunc = events.keydown[0].handler;
+            }
+            var sequence = '';
+            var box = null;
+            var $sequenceBox = $('<div class="keybox"></div>');
+            box = $sequenceBox;
+            $sequenceBox.text('s' + sequence);
+            $sequenceBox.appendTo($body);
+            $body.on('keydown', function(e) {
+                if (e.key >= '0' && e.key <= '9') {
+                    sequence += e.key;
+                    box.text('s' + sequence);
+                } else if (e.key == 'Enter') {
+                    if (sequence) {
+                        window.location = domjudge_base_url + '/jury/submissions/' + sequence;
+                    }
+                    if (box) {
+                        box.remove();
+                    }
+                    sequence = '';
+                    $body.off('keydown');
+                    $body.on('keydown', oldFunc);
+                } else {
+                    if (box) {
+                        box.remove();
+                    }
+                    sequence = '';
+                    $body.off('keydown');
+                    $body.on('keydown', oldFunc);
+                }
+            });
+        }
+    });
+}

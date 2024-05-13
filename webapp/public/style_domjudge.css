@@ -687,3 +687,16 @@ blockquote {
     -o-transform:rotate(-35deg);
     transform:rotate(-35deg);
 }
+.keybox {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #295D8A;
+    font-size: 200%;
+    font-weight: bold;
+    color: white;
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 1000;
+}
