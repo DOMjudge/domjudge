@@ -39,5 +39,40 @@
 
             $('[data-bs-toggle="tooltip"]').tooltip();
         });
+
+        initializeKeyboardShortcuts();
     </script>
+
+    <div class="container d-none" id="keyhelp">
+        <h1>Keyboard shortcuts</h1>
+
+        <code>?</code> display this help, <code>Escape</code> to exit <br/>
+        <br/>
+
+        <code>j</code> go to the next item, e.g. next submission <br/>
+        <code>k</code> go to the previous item, e.g. previous submission <br/>
+        <br/>
+
+        <code>s</code> <code>↵</code> open the list of submissions <br/>
+        <code>s</code> <code>[0-9]+</code> <code>↵</code> open a specific submission, e.g. <code>s42↵</code> to go to submission 42 <br/>
+        <br/>
+
+        <code>t</code> <code>↵</code> open the list of teams <br/>
+        <code>t</code> <code>[0-9]+</code> <code>↵</code> open to a specific team <br/>
+        <br/>
+
+        <code>p</code> <code>↵</code> open the list of problems <br/>
+        <code>p</code> <code>[0-9]+</code> <code>↵</code> open a specific problem <br/>
+        <br/>
+
+        <code>c</code> <code>↵</code> open the list of clarifications <br/>
+        <code>c</code> <code>[0-9]+</code> <code>↵</code> open a specific clarification <br/>
+        <br/>
+
+        <code>Shift + j</code> <code>[0-9]+</code> <code>↵</code> open a specific judging <br/>
+        <br/>
+
+        <code>Shift + s</code> open the scoreboard<br/>
+        <br/>
+    </div>
 {% endblock %}

@@ -659,3 +659,40 @@ blockquote {
 .lasttcruns, .lastresult {
     opacity: 0.5;
 }
+
+.keybox {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #295D8A;
+    font-size: 200%;
+    font-weight: bold;
+    color: white;
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 1000;
+}
+
+#keyhelp {
+    position: fixed;
+    height: 90%;
+    width: 90%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(41, 93, 138, 0.9);
+    font-size: 150%;
+    font-weight: bold;
+    color: white;
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 1001;
+}
+
+#keyhelp code {
+    color: white;
+    background-color: black;
+    padding: 3px;
+    border-radius: 5px;
+}

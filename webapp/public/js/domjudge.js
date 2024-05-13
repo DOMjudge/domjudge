@@ -809,3 +809,112 @@ function setupPreviewClarification($input, $previewDiv, previewInitial) {
 $(function () {
     $('[data-toggle="tooltip"]').tooltip();
 });
+
+function initializeKeyboardShortcuts() {
+    var $body = $('body');
+    var ignore = false;
+    $body.on('keydown', function(e) {
+        // Check if the user is not typing in an input field.
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        var key = e.key.toLowerCase();
+        if (key === '?') {
+            var $keyhelp = $('#keyhelp');
+            if ($keyhelp.length) {
+                $keyhelp.toggleClass('d-none');
+            }
+            return;
+        }
+        if (key === 'escape') {
+            var $keyhelp = $('#keyhelp');
+            if ($keyhelp.length && !$keyhelp.hasClass('d-none')) {
+                $keyhelp.addClass('d-none');
+            }
+        }
+
+        if (!ignore && !e.shiftKey && (key === 'j' || key === 'k')) {
+            var parts = window.location.href.split('/');
+            var lastPart = parts[parts.length - 1];
+            var params = lastPart.split('?');
+            var currentNumber = parseInt(params[0]);
+            if (isNaN(currentNumber)) {
+                return;
+            }
+            if (key === 'j') {
+                parts[parts.length - 1] = currentNumber + 1;
+            } else if (key === 'k') {
+                parts[parts.length - 1] = currentNumber - 1;
+            }
+            if (params.length > 1) {
+                parts[parts.length - 1] += '?' + params[1];
+            }
+            window.location = parts.join('/');
+        } else if (!ignore && (key === 's' || key === 't' || key === 'p' || key === 'j' || key === 'c')) {
+            if (e.shiftKey && key === 's') {
+                window.location = domjudge_base_url + '/jury/scoreboard';
+                return;
+            }
+            var type = key;
+            ignore = true;
+            var oldFunc = null;
+            var events = $._data($body[0], 'events');
+            if (events && events.keydown) {
+                oldFunc = events.keydown[0].handler;
+            }
+            var sequence = '';
+            var box = null;
+            var $sequenceBox = $('<div class="keybox"></div>');
+            box = $sequenceBox;
+            $sequenceBox.text(type + sequence);
+            $sequenceBox.appendTo($body);
+            $body.on('keydown', function(e) {
+                // Check if the user is not typing in an input field.
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    ignore = false;
+                    if (box) {
+                        box.remove();
+                    }
+                    sequence = '';
+                    return;
+                }
+                if (e.key >= '0' && e.key <= '9') {
+                    sequence += e.key;
+                    box.text(type + sequence);
+                } else if (e.key === 'Enter') {
+                    ignore = false;
+                    switch (type) {
+                        case 's':
+                            type = 'submissions';
+                            break;
+                        case 't':
+                            type = 'teams';
+                            break;
+                        case 'p':
+                            type = 'problems';
+                            break;
+                        case 'c':
+                            type = 'clarifications';
+                            break;
+                        case 'j':
+                            window.location = domjudge_base_url + '/jury/submissions/by-judging-id/' + sequence;
+                            return;
+                    }
+                    var redirect_to = domjudge_base_url + '/jury/' + type;
+                    if (sequence) {
+                        redirect_to += '/' + sequence;
+                    }
+                    window.location = redirect_to;
+                } else {
+                    ignore = false;
+                    if (box) {
+                        box.remove();
+                    }
+                    sequence = '';
+                    $body.off('keydown');
+                    $body.on('keydown', oldFunc);
+                }
+            });
+        }
+    });
+}
