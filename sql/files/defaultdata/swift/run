@@ -50,6 +50,12 @@ fi
 # Add -DONLINE_JUDGE or -DDOMJUDGE below if you want it make easier for teams
 # to do local debugging.
 
+# Compilation needs to store temporary files. The current workdirectory is not
+# available during the submission run. The `HOME`
+# is needed for the linker to work.
+export TMPDIR="$PWD"
+export HOME="$PWD"
+
 # -O:                 Optimizations (default for speed)
 # -static-executable: Statically link the executable
 # -static-stdlib:     Statically link the Swift standard library
