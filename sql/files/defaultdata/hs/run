@@ -10,6 +10,9 @@ MAINSOURCE="$1"
 # Set non-existing HOME variable to make GHC program happy, see:
 # https://ghc.haskell.org/trac/ghc/ticket/11678
 export HOME=/does/not/exist
+# Allow temporary files during compilation, this directory is not
+# available during the submission run.
+export TMPDIR="$PWD"
 
 # Add -DONLINE_JUDGE or -DDOMJUDGE below if you want it make easier for teams
 # to do local debugging.
