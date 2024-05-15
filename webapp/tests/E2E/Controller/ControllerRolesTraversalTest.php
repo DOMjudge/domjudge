@@ -224,7 +224,16 @@ class ControllerRolesTraversalTest extends BaseTestCase
         $response = $this->client->getResponse();
         self::assertNotEquals(500, $response->getStatusCode(), sprintf('Failed at %s', $url));
         if ($dropdown && !str_contains($url, '/public')) {
-            self::assertSelectorExists('a#navbarDropdownContests:contains("no contest")');
+            try {
+                self::assertSelectorExists('a#navbarDropdownContests:contains("no contest")', "Failed at: " . $url);
+            } catch (\Exception $e) {
+                $gitlabArtifacts = getenv('GITLABARTIFACTS');
+                if ($gitlabArtifacts != '') {
+                    $fileHandler = fopen(sprintf("%s/%s", $gitlabArtifacts, str_replace('/', '_s_', $url)), 'w');
+                    fwrite($fileHandler, $response->getContent());
+                }
+                throw $e;
+            }
         }
     }
 
