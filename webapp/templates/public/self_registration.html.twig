@@ -1,0 +1,21 @@
+{% extends 'public/base.html.twig' %}
+
+{% block title %}
+    Self registration
+{% endblock %}
+
+{% block content %}
+    <div class="row mt-5">
+        <div class="col-12 col-md-6 offset-md-3 self-registration-info">
+            <p>There are currently no publicly accessible contests, but this DOMjudge instance allows self-registration.</p>
+            <p>After signing up or logging in, the following contest{% if nonPublicContests | length > 1 %}s are{% else %}is{% endif%} available:</p>
+            <ul>
+                {% for contest in nonPublicContests %}
+                <li>{{ contest.name }} {{ contest | printContestStart }}</li>
+                {% endfor %}
+            </ul>
+            <p>Use the buttons above to <a href="{{ path('register') }}">register</a> or <a href="{{ path('login') }}">login</a>.</p>
+        </div>
+    </div>
+{% endblock %}
+

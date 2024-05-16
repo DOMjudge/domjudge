@@ -48,9 +48,13 @@ class PublicController extends BaseController
         $contest          = $this->dj->getCurrentContest(onlyPublic: true);
         $nonPublicContest = $this->dj->getCurrentContest(onlyPublic: false);
         if (!$contest && $nonPublicContest && $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1])) {
+            $nonPublicContests = $this->dj->getCurrentContests(onlyPublic: false);
+            $nonPublicContests = array_filter($nonPublicContests, fn(Contest $c) => !$c->getPublic());
             // This leaks a little bit of information about the existence of the non-public contest,
             // but since self registration is enabled, it's not a big deal.
-            return $this->redirectToRoute('register');
+            return $this->render('public/self_registration.html.twig', [
+                'nonPublicContests' => $nonPublicContests,
+            ]);
         }
 
 
