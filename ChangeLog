@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 8.3.0DEV
-----------------------------
+Version 8.3.0 - 31 May 2024
+---------------------------
  - [security] Close metadata file descriptor for the child in runguard.
  - Document that minimum PHP version is now 8.1.0.
  - Upgrade Symfony to 6.2 and upgrade other library dependencies.
