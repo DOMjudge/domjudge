@@ -34,7 +34,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
             ['f95',    'f95',        'Fortran',     ['f95', 'f90'],              false, null,         false,  true,   1,     'f95',               'gfortran --version', ''],
             ['hs',     'haskell',    'Haskell',     ['hs', 'lhs'],               false, null,         false,  true,   1,     'hs',                'ghc --version',      ''],
             ['java',   'java',       'Java',        ['java'],                    false, 'Main class', true,   true,   1,     'java_javac_detect', 'javac -version',     'java -version'],
-            ['js',     'javascript', 'JavaScript',  ['js'],                      false, 'Main file',  false,  true,   1,     'js',                'nodejs --version',   'nodejs --version'],
+            ['js',     'javascript', 'JavaScript',  ['js', 'mjs'],               false, 'Main file',  false,  true,   1,     'js',                'nodejs --version',   'nodejs --version'],
             ['lua',    'lua',        'Lua',         ['lua'],                     false, null,         false,  true,   1,     'lua',               'luac -v',            'lua -v'],
             ['kt',     'kotlin',     'Kotlin',      ['kt'],                      true,  'Main class', false,  true,   1,     'kt',                'kotlinc -version',   'kotlin -version'],
             ['pas',    'pascal',     'Pascal',      ['pas', 'p'],                false, 'Main file',  false,  true,   1,     'pas',               'fpc -iW',            ''],
