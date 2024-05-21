@@ -4,8 +4,6 @@
 # It is recommended to use `docker compose up` to start this stack. Note, don't
 # use sudo or the legacy docker-compose.
 
-version: '3'
-
 services:
   mariadb:
     image: docker.io/mariadb
