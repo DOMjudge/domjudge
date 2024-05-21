@@ -32,13 +32,15 @@ use Symfony\Component\Routing\Attribute\Route;
 class TeamController extends BaseController
 {
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly KernelInterface $kernel,
+        KernelInterface $kernel,
         protected readonly EventLogService $eventLogService,
-        protected readonly AssetUpdateService $assetUpdater
-    ) {}
+        protected readonly AssetUpdateService $assetUpdater,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_teams')]
     public function indexAction(): Response
@@ -88,6 +90,7 @@ class TeamController extends BaseController
 
         $table_fields = [
             'teamid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
+            'externalid' => ['title' => 'external ID', 'sort' => true],
             'label' => ['title' => 'label', 'sort' => true,],
             'effective_name' => ['title' => 'name', 'sort' => true,],
             'category' => ['title' => 'category', 'sort' => true,],
@@ -98,13 +101,6 @@ class TeamController extends BaseController
             'status' => ['title' => '', 'sort' => false,],
             'stats' => ['title' => 'stats', 'sort' => true,],
         ];
-
-        // Insert external ID field when configured to use it.
-        if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(Team::class)) {
-            $table_fields = array_slice($table_fields, 0, 1, true) +
-                [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
-                array_slice($table_fields, 1, null, true);
-        }
 
         $userDataPerTeam = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
@@ -295,8 +291,7 @@ class TeamController extends BaseController
         $data['restrictionText']    = $restrictionText;
         $data['submissions']        = $submissions;
         $data['submissionCounts']   = $submissionCounts;
-        $data['showExternalResult'] = $this->config->get('data_source') ===
-            DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
+        $data['showExternalResult'] = $this->dj->shadowMode();
         $data['showContest']        = count($this->dj->getCurrentContests(honorCookie: true)) > 1;
 
         if ($request->isXmlHttpRequest()) {
@@ -324,8 +319,7 @@ class TeamController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->possiblyAddUser($team);
             $this->assetUpdater->updateAssets($team);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team,
-                              $team->getTeamid(), false);
+            $this->saveEntity($team, $team->getTeamid(), false);
             return $this->redirectToRoute('jury_team', ['teamId' => $team->getTeamid()]);
         }
 
@@ -344,8 +338,7 @@ class TeamController extends BaseController
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$team], $this->generateUrl('jury_teams'));
+        return $this->deleteEntities($request, [$team], $this->generateUrl('jury_teams'));
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -358,12 +351,18 @@ class TeamController extends BaseController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->possiblyAddUser($team);
-            $this->em->persist($team);
-            $this->assetUpdater->updateAssets($team);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team, null, true);
-            return $this->redirectToRoute('jury_team', ['teamId' => $team->getTeamid()]);
+        if ($response = $this->processAddFormForExternalIdEntity(
+            $form, $team,
+            fn() => $this->generateUrl('jury_team', ['teamId' => $team->getTeamid()]),
+            function () use ($team) {
+                $this->possiblyAddUser($team);
+                $this->em->persist($team);
+                $this->assetUpdater->updateAssets($team);
+                $this->saveEntity($team, null, true);
+                return null;
+            }
+        )) {
+            return $response;
         }
 
         return $this->render('jury/team_add.html.twig', [
@@ -381,10 +380,7 @@ class TeamController extends BaseController
             // Create a user for the team.
             $user = new User();
             $user->setUsername($team->getNewUsername());
-            // Set the external ID if we need to do so.
-            if ($this->eventLogService->externalIdFieldForEntity(User::class)) {
-                $user->setExternalid($team->getNewUsername());
-            }
+            $user->setExternalid($team->getNewUsername());
             $team->addUser($user);
             // Make sure the user has the team role to make validation work.
             $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);

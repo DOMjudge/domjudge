@@ -25,7 +25,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[UniqueEntity(fields: 'langid')]
 #[UniqueEntity(fields: 'externalid')]
-class Language extends BaseApiEntity
+class Language extends BaseApiEntity implements
+    HasExternalIdInterface,
+    ExternalIdFromInternalIdInterface
 {
     #[ORM\Id]
     #[ORM\Column(length: 32, options: ['comment' => 'Language ID (string)'])]
@@ -259,7 +261,7 @@ class Language extends BaseApiEntity
         return $this->langid;
     }
 
-    public function setExternalid(string $externalid): Language
+    public function setExternalid(?string $externalid): Language
     {
         $this->externalid = $externalid;
         return $this;

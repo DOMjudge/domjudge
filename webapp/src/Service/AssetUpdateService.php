@@ -21,7 +21,7 @@ class AssetUpdateService
         foreach ($entity->getAssetProperties() as $assetProperty) {
             $assetPaths = [];
             foreach (DOMJudgeService::MIMETYPE_TO_EXTENSION as $mimetype => $extension) {
-                $assetPaths[$mimetype] = $this->dj->fullAssetPath($entity, $assetProperty, $this->eventLog->externalIdFieldForEntity($entity) !== null, $extension);
+                $assetPaths[$mimetype] = $this->dj->fullAssetPath($entity, $assetProperty, $extension);
             }
             if ($entity->isClearAsset($assetProperty)) {
                 foreach ($assetPaths as $assetPath) {

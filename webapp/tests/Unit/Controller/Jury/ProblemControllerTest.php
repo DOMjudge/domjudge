@@ -56,6 +56,7 @@ class ProblemControllerTest extends JuryControllerTestCase
                                                   'combinedRunCompare'   => false],
                                                  ['externalid'           => '._-3xternal1']];
     protected static array  $addEntitiesFailure = ['This value should not be blank.' => [['name' => '']],
+                                                   'Only letters, numbers, dashes, underscores and dots are allowed.' => [['externalid' => 'limited_special_chars!']],
                                                    // This is a placeholder on the Add/Edit page
                                                    'leave empty for default' => [['memlimit' => 'zero'],
                                                                                  ['timelimit' => 'zero'],
@@ -63,18 +64,9 @@ class ProblemControllerTest extends JuryControllerTestCase
                                                                                  ['memlimit' => '-1'],
                                                                                  ['timelimit' => '-1'],
                                                                                  ['outputlimit' => '-1']]];
-    protected static array  $addEntitiesFailureNonLocal = ['Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => 'limited_special_chars!']]];
 
     public function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {
-        // Add external IDs when needed.
-        if (!$this->dataSourceIsLocal()) {
-            $entity['externalid'] = md5(json_encode($entity, JSON_THROW_ON_ERROR));
-            $expected['externalid'] = md5(json_encode($entity, JSON_THROW_ON_ERROR));
-        } else {
-            unset($entity['externalid']);
-            unset($expected['externalid']);
-        }
         return [$entity, $expected];
     }
 

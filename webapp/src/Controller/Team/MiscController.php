@@ -21,6 +21,7 @@ use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -41,13 +42,16 @@ use Symfony\Component\Routing\RouterInterface;
 class MiscController extends BaseController
 {
     public function __construct(
-        protected readonly DOMJudgeService $dj,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly EntityManagerInterface $em,
+        EntityManagerInterface $em,
         protected readonly ScoreboardService $scoreboardService,
         protected readonly SubmissionService $submissionService,
-        protected readonly EventLogService $eventLogService
-    ) {}
+        protected readonly EventLogService $eventLogService,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     /**
      * @throws NoResultException
@@ -184,13 +188,10 @@ class MiscController extends BaseController
 
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             $team = $this->dj->getUser()->getTeam();
-            $externalIdField = $this->eventLogService->externalIdFieldForEntity($team);
             if ($team->getLabel()) {
                 $teamId = $team->getLabel();
-            } elseif ($externalIdField && ($externalId = $propertyAccessor->getValue($team, $externalIdField))) {
-                $teamId = $externalId;
             } else {
-                $teamId = (string)$team->getTeamid();
+                $teamId = $team->getExternalid();
             }
             $ret  = $this->dj->printFile($realfile, $originalfilename, $langid,
                 $username, $team->getEffectiveName(), $teamId, $team->getLocation());

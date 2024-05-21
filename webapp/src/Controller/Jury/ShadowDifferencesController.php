@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\ExternalContestSource;
 use App\Service\ConfigurationService;
+use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -16,6 +17,7 @@ use App\Entity\Submission;
 use App\Service\DOMJudgeService;
 use App\Service\SubmissionService;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -27,12 +29,16 @@ use Symfony\Component\Routing\Attribute\Route;
 class ShadowDifferencesController extends BaseController
 {
     public function __construct(
-        protected readonly DOMJudgeService $dj,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly SubmissionService $submissions,
         protected readonly RequestStack $requestStack,
-        protected readonly EntityManagerInterface $em
-    ) {}
+        EntityManagerInterface $em,
+        protected readonly EventLogService $eventLogService,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     /**
      * @throws NoResultException
@@ -50,13 +56,8 @@ class ShadowDifferencesController extends BaseController
         #[MapQueryParameter]
         string $local = 'all',
     ): Response {
-        $shadowMode = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
-        $dataSource = $this->config->get('data_source');
-        if ($dataSource != $shadowMode) {
-            $this->addFlash('danger', sprintf(
-                'Shadow differences only supported when data_source is %d',
-                $shadowMode
-            ));
+        if (!$this->dj->shadowMode()) {
+            $this->addFlash('danger', 'Shadow differences only supported when shadow_mode is true');
             return $this->redirectToRoute('jury_index');
         }
 

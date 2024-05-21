@@ -155,7 +155,7 @@ fi
 if [ $cgroupv1 -ne 0 ]; then
     section_start start_judging "Start judging"
     cd /opt/domjudge/judgehost/
-    
+
     sudo -u domjudge bin/judgedaemon $PINNING |& tee /tmp/judgedaemon.log &
     sleep 5
     section_end start_judging
@@ -178,7 +178,7 @@ for i in hello_kattis different guess; do
         cd "$i"
         zip -r "../${i}.zip" -- *
     )
-    curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/1/problems
+    curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/demo/problems
 done
 section_end submitting
 
@@ -195,21 +195,21 @@ curl $CURLOPTS -c $COOKIEJAR -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F
 # Send a general clarification to later test if we see the event.
 curl $CURLOPTS -F "sendto=" -F "problem=1-" -F "bodytext=Testing" -F "submit=Send" \
      "http://localhost/domjudge/jury/clarifications/send" -o /dev/null
-    
+
 section_end curlcookie
 
 if [ $cgroupv1 -ne 0 ]; then
     section_start judging "Waiting until all submissions are judged"
     # wait for and check results
-    NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/1/submissions | python3 -mjson.tool | grep -c '"id":')
-    
+    NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/demo/submissions | python3 -mjson.tool | grep -c '"id":')
+
     # Don't spam the log.
     set +x
-    
+
     while /bin/true; do
         sleep 30s
         curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
-    
+
         # Check if we are done, i.e. everything is judged or something got disabled by internal error...
         if tail /tmp/judgedaemon.log | grep -q "No submissions in queue"; then
             break
@@ -219,12 +219,12 @@ if [ $cgroupv1 -ne 0 ]; then
             break
         fi
     done
-    
+
     NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked"     | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
     NUMVERIFIED=$(   curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
     NUMNOMAGIC=$(    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string"    | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
     section_end judging
-    
+
     # We expect
     # - two submissions with ambiguous outcome,
     # - one submissions submitted through the submit client, and thus the magic string ignored,
@@ -238,7 +238,7 @@ if [ $cgroupv1 -ne 0 ]; then
         echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 1)."
         curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" | w3m -dump -T text/html
         section_end error
-    
+
         section_start logfiles "All the more or less useful logfiles"
         for i in /opt/domjudge/judgehost/judgings/*/*/*/*/*/compile.out; do
             echo $i;

@@ -3,10 +3,7 @@
 {% block title %}Scoreboard {{ contest.shortname | default('') }} - {{ parent() }}{% endblock %}
 {% block content %}
     {% if contest is defined %}
-        {% set contestId = contest.cid %}
-        {% if showExternalId(contest) %}
-            {% set contestId = contest.externalid %}
-        {% endif %}
+        {% set contestId = contest.externalid %}
         {% if contestId %}
             {% set bannerImage = contestId | assetPath('contest') %}
         {% endif %}

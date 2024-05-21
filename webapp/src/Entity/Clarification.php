@@ -31,13 +31,15 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
     options: ['lengths' => [null, 190]]
 )]
 #[UniqueEntity(fields: 'externalid')]
-class Clarification extends BaseApiEntity implements ExternalRelationshipEntityInterface
+class Clarification extends BaseApiEntity implements
+    HasExternalIdInterface,
+    ExternalIdFromInternalIdInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Clarification ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('id')]
-    #[Serializer\Type('string')]
+    #[Serializer\SerializedName('clarid')]
+    #[Serializer\Groups([ARC::GROUP_RESTRICTED_NONSTRICT])]
     protected int $clarid;
 
     #[ORM\Column(
@@ -48,7 +50,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         ]
     )]
     #[OA\Property(nullable: true)]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\SerializedName('id')]
     protected ?string $externalid = null;
 
     #[ORM\Column(
@@ -236,13 +238,17 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->problem;
     }
 
-    #[OA\Property(nullable: true)]
-    #[Serializer\VirtualProperty]
-    #[Serializer\SerializedName('problem_id')]
-    #[Serializer\Type('string')]
     public function getProblemId(): ?int
     {
         return $this->getProblem()?->getProbid();
+    }
+
+    #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('problem_id')]
+    public function getApiProblemId(): ?string
+    {
+        return $this->getProblem()?->getExternalid();
     }
 
     public function setContest(?Contest $contest = null): Clarification
@@ -270,10 +276,9 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('reply_to_id')]
-    #[Serializer\Type('string')]
-    public function getInReplyToId(): ?int
+    public function getInReplyToId(): ?string
     {
-        return $this->getInReplyTo()?->getClarid();
+        return $this->getInReplyTo()?->getExternalid();
     }
 
     public function addReply(Clarification $reply): Clarification
@@ -304,10 +309,9 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('from_team_id')]
-    #[Serializer\Type('string')]
-    public function getSenderId(): ?int
+    public function getSenderId(): ?string
     {
-        return $this->getSender()?->getTeamid();
+        return $this->getSender()?->getExternalid();
     }
 
     public function setRecipient(?Team $recipient = null): Clarification
@@ -324,29 +328,9 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('to_team_id')]
-    #[Serializer\Type('string')]
-    public function getRecipientId(): ?int
+    public function getRecipientId(): ?string
     {
-        return $this->getRecipient()?->getTeamid();
-    }
-
-    /**
-     * Get the entities to check for external ID's while serializing.
-     *
-     * This method should return an array with as keys the JSON field names and as values the actual entity
-     * objects that the SetExternalIdVisitor should check for applicable external ID's
-     *
-     * @return array{from_team_id: Team|null, to_team_id: Team|null,
-     *               problem_id: Problem|null, reply_to_id: Clarification|null}
-     */
-    public function getExternalRelationships(): array
-    {
-        return [
-            'from_team_id' => $this->getSender(),
-            'to_team_id'   => $this->getRecipient(),
-            'problem_id'   => $this->getProblem(),
-            'reply_to_id'  => $this->getInReplyTo()
-        ];
+        return $this->getRecipient()?->getExternalid();
     }
 
     public function getSummary(): string

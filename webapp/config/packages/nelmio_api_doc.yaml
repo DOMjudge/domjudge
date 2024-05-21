@@ -32,15 +32,12 @@ nelmio_api_doc:
                     schema:
                         type: string
                     examples:
-                        int0:
-                            value: "2"
-                            summary: The Demo contest (datasource=0)
-                        int02:
-                            value: "1"
-                            summary: The Demo practice contest (datasource=0)
-                        string:
+                        demo:
                             value: "demo"
-                            summary: The Demo contest (datasource=1)
+                            summary: The Demo contest
+                        demoprac:
+                            value: "demoprac"
+                            summary: The Demo practice contest
                 balloonId:
                     name: balloonId
                     in: path

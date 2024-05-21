@@ -174,12 +174,7 @@ class AwardServiceTest extends KernelTestCase
 
     protected function getAwardService(): AwardService
     {
-        // Always use external IDs so we also test that those are used in the correct spot
-        $eventLogService = $this->createMock(EventLogService::class);
-        $eventLogService->expects(self::any())
-            ->method('apiIdFieldForEntity')
-            ->willReturn('externalId');
-        return new AwardService($eventLogService);
+        return new AwardService();
     }
 
     protected function getAward(string $label): ?Award

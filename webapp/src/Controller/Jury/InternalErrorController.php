@@ -9,10 +9,12 @@ use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
 use App\Entity\Problem;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Service\RejudgingService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,11 +28,15 @@ use Symfony\Component\Routing\Attribute\Route;
 class InternalErrorController extends BaseController
 {
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         protected readonly RejudgingService $rejudgingService,
         protected readonly RequestStack $requestStack,
-    ) {}
+        protected readonly EventLogService $eventLogService,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_internal_errors')]
     public function indexAction(): Response

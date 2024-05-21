@@ -3,7 +3,7 @@
     <thead>
     <tr>
         <th scope="col">ID</th>
-        {% if showExternalId %}
+        {% if shadowMode() %}
             <th scope="col">external ID</th>
         {% endif %}
         {%- if current_contest is null and current_contests | length > 1 %}
@@ -28,7 +28,7 @@
 
         <tr>
             <td><a href="{{ link }}">{{ clarification.clarid }}</a></td>
-            {% if showExternalId %}
+            {% if shadowMode() %}
                 <td><a href="{{ link }}">{{ clarification.externalid }}</a></td>
             {% endif %}
             {%- if current_contest is null and current_contests | length > 1 %}

@@ -30,7 +30,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Index(columns: ['special_compare'], name: 'special_compare')]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: 'externalid')]
-class Problem extends BaseApiEntity
+class Problem extends BaseApiEntity implements
+    HasExternalIdInterface,
+    ExternalIdFromInternalIdInterface,
+    PrefixedExternalIdInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -45,7 +48,7 @@ class Problem extends BaseApiEntity
             'collation' => 'utf8mb4_bin',
         ]
     )]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\SerializedName('id')]
     protected ?string $externalid = null;
 
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]

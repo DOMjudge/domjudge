@@ -7,10 +7,12 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -27,11 +29,15 @@ use Symfony\Component\Routing\Attribute\Route;
 class ProblemController extends BaseController
 {
     public function __construct(
-        protected readonly DOMJudgeService $dj,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly StatisticsService $stats,
-        protected readonly EntityManagerInterface $em
-    ) {}
+        protected readonly EventLogService $eventLogService,
+        EntityManagerInterface $em,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     /**
      * @throws NonUniqueResultException

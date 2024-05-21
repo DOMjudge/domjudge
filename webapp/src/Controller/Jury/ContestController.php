@@ -54,13 +54,15 @@ class ContestController extends BaseController
     use JudgeRemainingTrait;
 
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly KernelInterface $kernel,
+        KernelInterface $kernel,
         protected readonly EventLogService $eventLogService,
-        protected readonly AssetUpdateService $assetUpdater
-    ) {}
+        protected readonly AssetUpdateService $assetUpdater,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     /**
      * @throws NonUniqueResultException
@@ -81,6 +83,7 @@ class ContestController extends BaseController
 
         $table_fields = [
             'cid'          => ['title' => 'CID', 'sort' => true],
+            'externalid'   => ['title' => "external ID", 'sort' => true],
             'shortname'    => ['title' => 'shortname', 'sort' => true],
             'name'         => ['title' => 'name', 'sort' => true],
             'activatetime' => ['title' => 'activate', 'sort' => true],
@@ -127,13 +130,6 @@ class ContestController extends BaseController
             'num_teams'        => ['title' => '# teams', 'sort' => true],
             'num_problems'     => ['title' => '# problems', 'sort' => true],
         ]);
-
-        // Insert external ID field when configured to use it
-        if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(Contest::class)) {
-            $table_fields = array_slice($table_fields, 0, 1, true) +
-                [$externalIdField => ['title' => "external ID", 'sort' => true]] +
-                array_slice($table_fields, 1, null, true);
-        }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $contests_table   = [];
@@ -550,24 +546,19 @@ class ContestController extends BaseController
             $deletedProblems = $getDeletedEntities($contest->getProblems(), 'getProbid');
 
             $this->assetUpdater->updateAssets($contest);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest,
-                              $contest->getCid(), false);
-
-            $teamEndpoint         = $this->eventLogService->endpointForEntity(Team::class);
-            $teamCategoryEndpoint = $this->eventLogService->endpointForEntity(TeamCategory::class);
-            $problemEndpoint      = $this->eventLogService->endpointForEntity(Problem::class);
+            $this->saveEntity($contest, $contest->getCid(), false);
 
             // TODO: cascade deletes. Maybe use getDependentEntities()?
             foreach ($deletedTeams as $team) {
-                $this->eventLogService->log($teamEndpoint, $team->getTeamid(),
+                $this->eventLogService->log('teams', $team->getTeamid(),
                     EventLogService::ACTION_DELETE, $contest->getCid(), null, null, false);
             }
             foreach ($deletedTeamCategories as $category) {
-                $this->eventLogService->log($teamCategoryEndpoint, $category->getCategoryid(),
+                $this->eventLogService->log('groups', $category->getCategoryid(),
                     EventLogService::ACTION_DELETE, $contest->getCid(), null, null, false);
             }
             foreach ($deletedProblems as $problem) {
-                $this->eventLogService->log($problemEndpoint, $problem->getProbid(),
+                $this->eventLogService->log('problems', $problem->getProbid(),
                     EventLogService::ACTION_DELETE, $contest->getCid(), null, null, false);
             }
             return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getcid()]);
@@ -595,8 +586,7 @@ class ContestController extends BaseController
             return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$contest], $this->generateUrl('jury_contests'));
+        return $this->deleteEntities($request, [$contest], $this->generateUrl('jury_contests'));
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -619,8 +609,7 @@ class ContestController extends BaseController
             return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$contestProblem], $this->generateUrl('jury_contest', ['contestId' => $contestId]));
+        return $this->deleteEntities($request, [$contestProblem], $this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -635,38 +624,45 @@ class ContestController extends BaseController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $response = $this->checkTimezones($form);
-            if ($response !== null) {
-                return $response;
+        if ($response = $this->processAddFormForExternalIdEntity(
+            $form, $contest,
+            fn () => $this->generateUrl('jury_contest', ['contestId' => $contest->getcid()]),
+            function () use ($form, $contest) {
+                $response = $this->checkTimezones($form);
+                if ($response !== null) {
+                    return $response;
+                }
+
+                $this->em->wrapInTransaction(function () use ($contest) {
+                    // A little 'hack': we need to first persist and save the
+                    // contest, before we can persist and save the problem,
+                    // because we need a contest ID.
+                    /** @var ContestProblem[] $problems */
+                    $problems = $contest->getProblems()->toArray();
+                    foreach ($contest->getProblems() as $problem) {
+                        $contest->removeProblem($problem);
+                    }
+                    $this->em->persist($contest);
+                    $this->em->flush();
+
+                    // Now we can assign the problems to the contest and persist them.
+                    foreach ($problems as $problem) {
+                        $problem->setContest($contest);
+                        $this->em->persist($problem);
+                    }
+                    $this->assetUpdater->updateAssets($contest);
+                    $this->saveEntity($contest, null, true);
+                    // Note that we do not send out create events for problems,
+                    // teams and team categories for this contest. This happens
+                    // when someone connects to the event feed (or we have a
+                    // dependent event) anyway and adding the code here would
+                    // overcomplicate this function.
+                });
+
+                return null;
             }
-
-            $this->em->wrapInTransaction(function () use ($contest) {
-                // A little 'hack': we need to first persist and save the
-                // contest, before we can persist and save the problem,
-                // because we need a contest ID.
-                /** @var ContestProblem[] $problems */
-                $problems = $contest->getProblems()->toArray();
-                foreach ($contest->getProblems() as $problem) {
-                    $contest->removeProblem($problem);
-                }
-                $this->em->persist($contest);
-                $this->em->flush();
-
-                // Now we can assign the problems to the contest and persist them.
-                foreach ($problems as $problem) {
-                    $problem->setContest($contest);
-                    $this->em->persist($problem);
-                }
-                $this->assetUpdater->updateAssets($contest);
-                $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest, null, true);
-                // Note that we do not send out create events for problems,
-                // teams and team categories for this contest. This happens
-                // when someone connects to the event feed (or we have a
-                // dependent event) anyway and adding the code here would
-                // overcomplicate this function.
-            });
-            return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getcid()]);
+        )) {
+            return $response;
         }
 
         return $this->render('jury/contest_add.html.twig', [

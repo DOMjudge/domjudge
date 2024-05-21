@@ -197,11 +197,6 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
                 problems_file = 'problemset.yaml'
             dj_utils.upload_file(f'contests/{cid}/problems/add-data', 'data', problems_file)
 
-        # We might need to translate the problem external ID's into an internal ID (when we are in data source = local mode)
-        # For this, we get the problems from the API and create a dict with the mapping
-        problem_mapping = {problem['externalid']: problem['id']
-                           for problem in dj_utils.do_api_request(f'contests/{cid}/problems')}
-
         if os.path.exists('problems.yaml'):
             with open('problems.yaml') as problemFile:
                 problemData = yaml.safe_load(problemFile)
@@ -226,11 +221,10 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
                 exit(3)
             os.system(f'cd {problem} && zip -r \'../{problem}\' -- .timelimit *')
 
-            problem_id = problem_mapping[problem]
-            if ((not confirmIndividually) or dj_utils.confirm(f'Ready to import problem \'{problem}\' to probid={problem_id}. Continue?', True)):
+            if ((not confirmIndividually) or dj_utils.confirm(f'Ready to import problem \'{problem}\' to problem={problem}. Continue?', True)):
                 print(f'Uploading problem \'{problem}\', please be patient, this may take a while.')
                 response = dj_utils.upload_file(
-                    f'contests/{cid}/problems', 'zip', f'{problem}.zip', {'problem': problem_id})
+                    f'contests/{cid}/problems', 'zip', f'{problem}.zip', {'problem': problem})
                 print(json.dumps(response, indent=4))
     else:
         print('Skipping contest import.')

@@ -12,24 +12,20 @@ class AwardService
     /** @var array<int, Award[]> */
     protected array $awardCache = [];
 
-    public function __construct(protected readonly EventLogService $eventLogService)
-    {
-    }
-
     protected function loadAwards(Contest $contest, Scoreboard $scoreboard): void
     {
         $group_winners = $problem_winners = $problem_shortname = [];
         $groups = [];
         foreach ($scoreboard->getTeams() as $team) {
-            $teamid = $team->getApiId($this->eventLogService);
+            $teamid = $team->getExternalid();
             if ($scoreboard->isBestInCategory($team)) {
-                $catId = $team->getCategory()->getApiId($this->eventLogService);
+                $catId = $team->getCategory()->getExternalid();
                 $group_winners[$catId][] = $teamid;
                 $groups[$catId] = $team->getCategory()->getName();
             }
             foreach ($scoreboard->getProblems() as $problem) {
                 $shortname = $problem->getShortname();
-                $probid = $problem->getApiId($this->eventLogService);
+                $probid = $problem->getExternalId();
                 if ($scoreboard->solvedFirst($team, $problem)) {
                     $problem_winners[$probid][] = $teamid;
                     $problem_shortname[$probid] = $shortname;
@@ -78,7 +74,7 @@ class AwardService
                 continue;
             }
             $rank = $teamScore->rank;
-            $teamid = $teamScore->team->getApiId($this->eventLogService);
+            $teamid = $teamScore->team->getExternalid();
             if ($rank === 1) {
                 $overall_winners[] = $teamid;
             }
@@ -145,7 +141,7 @@ class AwardService
 
     public function medalType(Team $team, Contest $contest, Scoreboard $scoreboard): ?string
     {
-        $teamid = $team->getApiId($this->eventLogService);
+        $teamid = $team->getExternalid();
         if (!isset($this->awardCache[$contest->getCid()])) {
             $this->loadAwards($contest, $scoreboard);
         }

@@ -138,19 +138,16 @@ class SubmissionController extends AbstractRestController
         $team = $user->getTeam();
         $teamId = $addSubmission->teamId;
         if ($teamId) {
-            $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
-            $method  = sprintf('get%s', ucfirst($idField));
-
             // If the user is an admin or API writer, allow it to specify the team.
             if ($this->isGranted('ROLE_API_WRITER')) {
                 /** @var Contest $contest */
                 $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
                 /** @var Team $team */
-                $team = $this->dj->loadTeam($idField, $teamId, $contest);
+                $team = $this->dj->loadTeam($teamId, $contest);
                 $user = $team->getUsers()->first() ?: null;
             } elseif (!$team) {
                 throw new BadRequestHttpException('User does not belong to a team.');
-            } elseif ((string)call_user_func([$team, $method]) !== (string)$teamId) {
+            } elseif ($team->getExternalid() !== $teamId) {
                 throw new BadRequestHttpException('Can not submit for a different team.');
             }
         } elseif (!$team) {
@@ -188,8 +185,7 @@ class SubmissionController extends AbstractRestController
             ->join('cp.problem', 'p')
             ->join('cp.contest', 'c')
             ->select('cp, c')
-            ->andWhere(sprintf('p.%s = :problem',
-                               $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
+            ->andWhere('p.externalid = :problem')
             ->andWhere('cp.contest = :contest')
             ->andWhere('cp.allowSubmit = 1')
             ->setParameter('problem', $problemId)
@@ -207,8 +203,7 @@ class SubmissionController extends AbstractRestController
         $language = $this->em->createQueryBuilder()
             ->from(Language::class, 'lang')
             ->select('lang')
-            ->andWhere(sprintf('lang.%s = :language',
-                               $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid'))
+            ->andWhere('lang.externalid = :language')
             ->andWhere('lang.allowSubmit = 1')
             ->setParameter('language', $languageId)
             ->getQuery()
@@ -256,7 +251,7 @@ class SubmissionController extends AbstractRestController
                 $existingSubmission = $this->em->createQueryBuilder()
                     ->from(Submission::class, 's')
                     ->select('s')
-                    ->andWhere('(s.externalid IS NULL AND s.submitid = :submitid) OR s.externalid = :submitid')
+                    ->andWhere('s.externalid = :submitid')
                     ->andWhere('s.contest = :contest')
                     ->setParameter('submitid', $submissionId)
                     ->setParameter('contest', $problem->getContest())
@@ -373,12 +368,7 @@ class SubmissionController extends AbstractRestController
             ->select('s, f')
             ->setParameter('id', $id);
 
-        $idField = $this->getIdField();
-        if ($idField === 's.submitid') {
-            $queryBuilder->andWhere('(s.externalid IS NULL AND s.submitid = :id) OR s.externalid = :id');
-        } else {
-            $queryBuilder->andWhere(sprintf('%s = :id', $idField));
-        }
+        $queryBuilder->andWhere('s.externalid = :id');
 
         /** @var Submission[] $submissions */
         $submissions = $queryBuilder->getQuery()->getResult();
@@ -488,6 +478,6 @@ class SubmissionController extends AbstractRestController
 
     protected function getIdField(): string
     {
-        return sprintf('s.%s', $this->eventLogService->externalIdFieldForEntity(Submission::class) ?? 'submitid');
+        return 's.externalid';
     }
 }

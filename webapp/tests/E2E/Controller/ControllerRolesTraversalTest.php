@@ -32,14 +32,14 @@ class ControllerRolesTraversalTest extends BaseTestCase
 
     protected function getLoops(): array
     {
-        $dataSources = $this->getDatasourceLoops()['dataSources'];
+        $shadowModes = $this->getShadowModeLoops()['shadowModes'];
         $riskyURLs = [];
         if (array_key_exists('CRAWL_RISKY', getenv())) {
             $riskyURLs = explode(',', getenv('CRAWL_RISKY'));
         } elseif (!array_key_exists('CRAWL_ALL', getenv())) {
             $riskyURLs = array_slice(self::$riskyURLs, 0, 1);
         }
-        return ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs];
+        return ['shadowModes' => $shadowModes, 'riskyURLs' => $riskyURLs];
     }
 
     /**
@@ -197,12 +197,12 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * @param string   $roleBaseURL The base URL of the role.
      * @param string[] $baseRoles The default role of the user.
      * @param string[] $optionalRoles The roles which should not restrict the viewable pages.
-     * @param int      $dataSource Put the installation in this dataSource mode.
+     * @param bool     $shadowMode Put the installation in this shadow mode.
      * @dataProvider provideRoleAccessData
      */
-    public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages, int $dataSource, string $skip): void
+    public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages, bool $shadowMode, string $skip): void
     {
-        $this->setupDatasource($dataSource);
+        $this->setupShadowMode($shadowMode);
         $this->roles = $baseRoles;
         $this->logOut();
         $this->logIn();
@@ -251,10 +251,10 @@ class ControllerRolesTraversalTest extends BaseTestCase
         array $roles,
         array $rolesOther,
         bool $allPages,
-        int $dataSource,
+        bool $shadowMode,
         string $skip
     ): void {
-        $this->setupDataSource($dataSource);
+        $this->setupShadowMode($shadowMode);
         $urlsToCheck        = $this->getPagesRoles([$roleBaseURL], $roles, $allPages, $skip);
         $urlsToCheckOther   = $this->getPagesRoles($roleOthersBaseURL, $rolesOther, $allPages, $skip);
         $this->roles = $roles;
@@ -271,9 +271,9 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * Test that pages depending on an active contest do not crash on the server.
      * @dataProvider provideNoContestScenario
      */
-    public function testNoContestAccess(string $roleBaseURL, array $baseRoles, int $dataSource, string $skip): void
+    public function testNoContestAccess(string $roleBaseURL, array $baseRoles, bool $shadowMode, string $skip): void
     {
-        $this->setupDataSource($dataSource);
+        $this->setupShadowMode($shadowMode);
         $this->roles = $baseRoles;
         $this->logOut();
         $this->logIn();
@@ -293,16 +293,16 @@ class ControllerRolesTraversalTest extends BaseTestCase
      */
     public function provideRoleAccessData(): Generator
     {
-        ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs] = $this->getLoops();
+        ['shadowModes' => $shadowModes, 'riskyURLs' => $riskyURLs] = $this->getLoops();
         foreach ($riskyURLs as $skip) {
-            foreach ($dataSources as $str_data_source) {
-                $data_source = (int)$str_data_source;
-                yield ['/jury',   ['admin'],            ['jury','team','balloon','clarification_rw'],         false, $data_source, $skip];
-                yield ['/jury',   ['jury'],             ['admin','team','balloon','clarification_rw'],        false, $data_source, $skip];
-                yield ['/jury',   ['balloon'],          ['admin','team','clarification_rw'],                  true,  $data_source, $skip];
-                yield ['/jury',   ['clarification_rw'], ['admin','team','balloon'],                           true,  $data_source, $skip];
-                yield ['/team',   ['team'],             ['admin','jury','balloon','clarification_rw'],        true,  $data_source, $skip];
-                yield ['/public', [],                   ['team','admin','jury','balloon','clarification_rw'], true,  $data_source, $skip];
+            foreach ($shadowModes as $str_shadow_mode) {
+                $shadow_mode = (bool)$str_shadow_mode;
+                yield ['/jury',   ['admin'],            ['jury','team','balloon','clarification_rw'],         false, $shadow_mode, $skip];
+                yield ['/jury',   ['jury'],             ['admin','team','balloon','clarification_rw'],        false, $shadow_mode, $skip];
+                yield ['/jury',   ['balloon'],          ['admin','team','clarification_rw'],                  true,  $shadow_mode, $skip];
+                yield ['/jury',   ['clarification_rw'], ['admin','team','balloon'],                           true,  $shadow_mode, $skip];
+                yield ['/team',   ['team'],             ['admin','jury','balloon','clarification_rw'],        true,  $shadow_mode, $skip];
+                yield ['/public', [],                   ['team','admin','jury','balloon','clarification_rw'], true,  $shadow_mode, $skip];
             }
         }
     }
@@ -318,31 +318,31 @@ class ControllerRolesTraversalTest extends BaseTestCase
      **/
     public function provideRoleAccessOtherRoles(): Generator
     {
-        ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs] = $this->getLoops();
+        ['shadowModes' => $shadowModes, 'riskyURLs' => $riskyURLs] = $this->getLoops();
         foreach ($riskyURLs as $skip) {
-            foreach ($dataSources as $str_data_source) {
-                $data_source = (int)$str_data_source;
-                yield ['/jury',   ['/jury','/team'], ['admin'],            ['jury','team'],                                        false, $data_source, $skip];
-                yield ['/jury',   ['/jury','/team'], ['jury'],             ['admin','team'],                                       false, $data_source, $skip];
-                yield ['/jury',   ['/jury','/team'], ['balloon'],          ['admin','team','clarification_rw'],                    false, $data_source, $skip];
-                yield ['/jury',   ['/jury','/team'], ['clarification_rw'], ['admin','team','balloon'],                             false, $data_source, $skip];
-                yield ['/team',   ['/jury'],         ['team'],             ['admin','jury','balloon','clarification_rw'],          true, $data_source, $skip];
-                yield ['/public', ['/jury','/team'], [],                   ['admin','jury','team','balloon','clarification_rw'],   true, $data_source, $skip];
+            foreach ($shadowModes as $str_shadow_mode) {
+                $shadow_mode = (bool)$str_shadow_mode;
+                yield ['/jury',   ['/jury','/team'], ['admin'],            ['jury','team'],                                        false, $shadow_mode, $skip];
+                yield ['/jury',   ['/jury','/team'], ['jury'],             ['admin','team'],                                       false, $shadow_mode, $skip];
+                yield ['/jury',   ['/jury','/team'], ['balloon'],          ['admin','team','clarification_rw'],                    false, $shadow_mode, $skip];
+                yield ['/jury',   ['/jury','/team'], ['clarification_rw'], ['admin','team','balloon'],                             false, $shadow_mode, $skip];
+                yield ['/team',   ['/jury'],         ['team'],             ['admin','jury','balloon','clarification_rw'],          true, $shadow_mode, $skip];
+                yield ['/public', ['/jury','/team'], [],                   ['admin','jury','team','balloon','clarification_rw'],   true, $shadow_mode, $skip];
             }
         }
     }
 
     public function provideNoContestScenario(): Generator
     {
-        ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs] = $this->getLoops();
+        ['shadowModes' => $shadowModes, 'riskyURLs' => $riskyURLs] = $this->getLoops();
         foreach ($riskyURLs as $skip) {
-            foreach ($dataSources as $str_data_source) {
-                $data_source = (int)$str_data_source;
-                yield ['/jury', ['admin'],            $data_source, $skip];
-                yield ['/jury', ['jury'],             $data_source, $skip];
-                yield ['/jury', ['balloon'],          $data_source, $skip];
-                yield ['/jury', ['clarification_rw'], $data_source, $skip];
-                yield ['/team', ['team'],             $data_source, $skip];
+            foreach ($shadowModes as $str_shadow_modes) {
+                $shadow_mode = (bool)$str_shadow_modes;
+                yield ['/jury', ['admin'],            $shadow_mode, $skip];
+                yield ['/jury', ['jury'],             $shadow_mode, $skip];
+                yield ['/jury', ['balloon'],          $shadow_mode, $skip];
+                yield ['/jury', ['clarification_rw'], $shadow_mode, $skip];
+                yield ['/team', ['team'],             $shadow_mode, $skip];
             }
         }
     }

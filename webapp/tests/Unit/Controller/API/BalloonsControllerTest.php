@@ -18,10 +18,6 @@ class BalloonsControllerTest extends BaseTestCase
         $manager = static::getContainer()->get(EntityManagerInterface::class);
         /** @var Contest $contest */
         $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'beforeFreeze']);
-        if ($this->dataSourceIsLocal()) {
-            return (string)$contest->getCid();
-        }
-
         return $contest->getExternalid();
     }
 

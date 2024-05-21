@@ -16,29 +16,24 @@ path of your installation) as follows:
 - *Affiliation logos*: these will be shown with the teams that are
   part of the affiliation, if the ``show_affiliation_logos`` configuration
   option is enabled. They can be placed in
-  `public/images/affiliations/1234.png` where *1234* is the numeric ID
+  `public/images/affiliations/1234.png` where *1234* is the :ref:`external ID <external-ids>`
   of the affiliation as shown in the DOMjudge interface. There is a
   separate option ``show_affiliations`` that independently controls where
   the affiliation *names* are shown on the scoreboard. These logos should be
   square and be at least 64x64 pixels, but not much bigger.
 - *Team pictures*: a photo of the team will be shown in the team details
   page if `public/images/teams/456.jpg` exists, where *456* is the
-  team's numeric ID as shown in the DOMjudge interface. DOMjudge will not
+  team's :ref:`external ID <external-ids>` as shown in the DOMjudge interface. DOMjudge will not
   modify the photos in any way or form, so make sure you don't upload photos
   that are too big, since that will incur a lot of network traffic.
 - *Contest Banners*: a page-wide banner can be shown on the public scoreboard
   if that image is placed in `public/images/banners/1.png` where *1* is the
-  contest's numeric ID as shown in the DOMjudge interface. Alternatively, you
+  contest's :ref:`external ID <external-ids>` as shown in the DOMjudge interface. Alternatively, you
   can place a file at `public/images/banner.png` which will be used as a banner
   for all contests. Contest-specific banners always have priority. Contest
   banners usually are rectangular, having a width of around 1920 pixels and a
   height of around 300 pixels. Other ratio's and sizes are supported, but check
   the public scoreboard to see how it looks.
-
-.. note::
-
-  The IDs for affiliations, teams and contests need to be the *external ID*
-  if the ``data_source`` setting of DOMjudge is set to external.
 
 It is also possible to load custom CSS and/or JavaScript files. To do so, place
 files ending in `.css` under `public/css/custom/` and/or files ending in `.js`

@@ -235,8 +235,7 @@ class SubmissionService
             }
         }
 
-        if ($this->config->get('data_source') ==
-            DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
+        if ($this->dj->shadowMode()) {
             // When we are shadow, also load the external results
             $queryBuilder
                 ->leftJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1')
@@ -615,6 +614,7 @@ class SubmissionService
             $judging
                 ->setContest($contest)
                 ->setSubmission($submission);
+            $submission->addJudging($judging);
             if ($juryMember !== null) {
                 $judging->setJuryMember($juryMember);
             }

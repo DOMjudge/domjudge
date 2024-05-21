@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit;
 
+use App\Entity\HasExternalIdInterface;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Service\ConfigurationService;
@@ -34,9 +35,6 @@ abstract class BaseTestCase extends WebTestCase
     protected ?ORMExecutor $fixtureExecutor = null;
     /** @var string[] */
     protected static array $fixtures = [];
-    protected static array $dataSources = [DOMJudgeService::DATA_SOURCE_LOCAL,
-                                           DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL,
-                                           DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL];
 
     protected ?string $entityClass = null;
 
@@ -249,21 +247,11 @@ abstract class BaseTestCase extends WebTestCase
     }
 
     /**
-     * Whether the data source is local.
-     */
-    protected function dataSourceIsLocal(): bool
-    {
-        $config = self::getContainer()->get(ConfigurationService::class);
-        $dataSource = $config->get('data_source');
-        return $dataSource === DOMJudgeService::DATA_SOURCE_LOCAL;
-    }
-
-    /**
      * Resolve the entity ID for the given class if not running in local mode.
      */
     protected function resolveEntityId(string $class, ?string $id): ?string
     {
-        if ($id !== null && !$this->dataSourceIsLocal()) {
+        if ($id !== null) {
             $entity = static::getContainer()->get(EntityManagerInterface::class)->getRepository($class)->find($id);
             // If we can't find the entity, assume we use an invalid one.
             if ($entity === null) {
@@ -306,22 +294,22 @@ abstract class BaseTestCase extends WebTestCase
         self::bootKernel();
     }
 
-    protected function getDatasourceLoops(): array
+    protected function getShadowModeLoops(): array
     {
-        $dataSources = [];
-        if (array_key_exists('CRAWL_DATASOURCES', getenv())) {
-            $dataSources = explode(',', getenv('CRAWL_DATASOURCES'));
+        $shadowModes = [];
+        if (array_key_exists('CRAWL_SHADOW_MODE', getenv())) {
+            $shadowModes = explode(',', getenv('CRAWL_SHADOW_MODE'));
         } elseif (!array_key_exists('CRAWL_ALL', getenv())) {
-            $dataSources = array_slice(self::$dataSources, 0, 1);
+            $shadowModes = [0];
         }
-        return ['dataSources' => $dataSources];
+        return ['shadowModes' => $shadowModes];
     }
 
-    protected function setupDataSource(int $dataSource): void
+    protected function setupShadowMode(bool $shadowMode): void
     {
         $config   = self::getContainer()->get(ConfigurationService::class);
         $eventLog = self::getContainer()->get(EventLogService::class);
         $dj       = self::getContainer()->get(DOMJudgeService::class);
-        $config->saveChanges(['data_source'=>$dataSource], $eventLog, $dj, treatMissingBooleansAsFalse: false);
+        $config->saveChanges(['shadow_mode'=>$shadowMode], $eventLog, $dj, treatMissingBooleansAsFalse: false);
     }
 }

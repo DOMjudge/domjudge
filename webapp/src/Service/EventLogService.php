@@ -7,6 +7,7 @@ use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
+use App\Entity\HasExternalIdInterface;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Submission;
@@ -30,110 +31,66 @@ use Symfony\Component\HttpFoundation\Request;
 class EventLogService
 {
     // Keys used in below config:
-    final public const KEY_TYPE = 'type';
-    final public const KEY_URL = 'url';
     final public const KEY_ENTITY = 'entity';
     final public const KEY_TABLES = 'tables';
-    final public const KEY_USE_EXTERNAL_ID = 'use-external-id';
-    final public const KEY_ALWAYS_USE_EXTERNAL_ID = 'always-use-external-id';
-    final public const KEY_SKIP_IN_EVENT_FEED = 'skip-in-event-feed';
 
-    // Types of endpoints:
-    final public const TYPE_CONFIGURATION = 'configuration';
-    final public const TYPE_LIVE = 'live';
-    final public const TYPE_AGGREGATE = 'aggregate';
 
     // Allowed actions:
     final public const ACTION_CREATE = 'create';
     final public const ACTION_UPDATE = 'update';
     final public const ACTION_DELETE = 'delete';
 
-    // TODO: Add a way to specify when to use external ID using some (DB)
-    // config instead of hardcoding it here. Also relates to
-    // AbstractRestController::getIdField.
     /** @var mixed[] */
     public array $apiEndpoints = [
-        'contests' => [
-            self::KEY_TYPE => self::TYPE_CONFIGURATION,
-            self::KEY_URL => '',
-            self::KEY_USE_EXTERNAL_ID => true,
-        ],
+        'contests' => [],
         'judgement-types' => [ // hardcoded in $VERDICTS and the API
-            self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_ENTITY => null,
             self::KEY_TABLES => [],
         ],
-        'languages' => [
-            self::KEY_TYPE => self::TYPE_CONFIGURATION,
-            self::KEY_USE_EXTERNAL_ID => true,
-            self::KEY_ALWAYS_USE_EXTERNAL_ID => true,
-        ],
+        'languages' => [],
         'problems' => [
-            self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_TABLES => ['problem', 'contestproblem'],
-            self::KEY_USE_EXTERNAL_ID => true,
         ],
         'groups' => [
-            self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_ENTITY => TeamCategory::class,
             self::KEY_TABLES => ['team_category'],
-            self::KEY_USE_EXTERNAL_ID => true,
         ],
         'organizations' => [
-            self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_ENTITY => TeamAffiliation::class,
             self::KEY_TABLES => ['team_affiliation'],
-            self::KEY_USE_EXTERNAL_ID => true,
         ],
         'teams' => [
-            self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_TABLES => ['team', 'contestteam'],
-            self::KEY_USE_EXTERNAL_ID => true,
         ],
         'state' => [
-            self::KEY_TYPE => self::TYPE_AGGREGATE,
             self::KEY_ENTITY => null,
             self::KEY_TABLES => [],
         ],
-        'submissions' => [
-            self::KEY_TYPE => self::TYPE_LIVE,
-            self::KEY_USE_EXTERNAL_ID => true,
-        ],
+        'submissions' => [],
         'judgements' => [
-            self::KEY_TYPE => self::TYPE_LIVE,
             self::KEY_ENTITY => Judging::class,
             self::KEY_TABLES => ['judging'],
         ],
         'runs' => [
-            self::KEY_TYPE => self::TYPE_LIVE,
             self::KEY_ENTITY => JudgingRun::class,
             self::KEY_TABLES => ['judging_run'],
         ],
-        'clarifications' => [
-            self::KEY_TYPE => self::TYPE_LIVE,
-            self::KEY_USE_EXTERNAL_ID => true,
-        ],
+        'clarifications' => [],
         'awards' => [
-            self::KEY_TYPE => self::TYPE_AGGREGATE,
             self::KEY_ENTITY => null,
             self::KEY_TABLES => [],
         ],
         'scoreboard' => [
-            self::KEY_TYPE => self::TYPE_AGGREGATE,
             self::KEY_ENTITY => null,
             self::KEY_TABLES => [],
         ],
         'event-feed' => [
-            self::KEY_TYPE => self::TYPE_AGGREGATE,
             self::KEY_ENTITY => null,
             self::KEY_TABLES => ['event'],
         ],
         'accounts' => [
-            self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_ENTITY => User::class,
             self::KEY_TABLES => ['user'],
-            self::KEY_USE_EXTERNAL_ID => true,
-            self::KEY_SKIP_IN_EVENT_FEED => true,
         ],
     ];
 
@@ -153,9 +110,6 @@ class EventLogService
         protected readonly LoggerInterface $logger
     ) {
         foreach ($this->apiEndpoints as $endpoint => $data) {
-            if (!array_key_exists(self::KEY_URL, $data)) {
-                $this->apiEndpoints[$endpoint][self::KEY_URL] = '/' . $endpoint;
-            }
             if (!array_key_exists(self::KEY_ENTITY, $data)) {
                 // Determine default controller
                 $inflector = InflectorFactory::create()->build();
@@ -265,12 +219,6 @@ class EventLogService
             );
             return;
         }
-        if ($endpoint[self::KEY_URL] === null) {
-            $this->logger->warning(
-                "EventLogService::log: no endpoint for '%s', ignoring", [ $type ]
-            );
-            return;
-        }
 
         // Look up external/API ID from various sources.
         if ($ids === null) {
@@ -355,12 +303,12 @@ class EventLogService
         if ($action === self::ACTION_DELETE) {
             $json = array_values(array_map(fn($id) => ['id' => (string)$id], $ids));
         } elseif ($json === null) {
-            $url = $endpoint[self::KEY_URL];
+            $url = $type === 'contests' ? '' : ('/' . $type);
 
             // Temporary fix for single/multi contest API:
             if (isset($contestId)) {
-                $externalContestIds = $this->getExternalIds('contests', [$contestId]);
-                $url                = '/contests/' . reset($externalContestIds) . $url;
+                $externalContestId = $this->em->getRepository(Contest::class)->find($contestId)->getExternalid();
+                $url               = '/contests/' . $externalContestId . $url;
             }
 
             if (in_array($type, ['contests', 'state'])) {
@@ -535,7 +483,7 @@ class EventLogService
 
             if ($field === 'finalized') {
                 // Insert all awards events.
-                $url = sprintf('/contests/%s/awards', $contest->getApiId($this));
+                $url = sprintf('/contests/%s/awards', $contest->getExternalid());
                 $awards = [];
                 $this->dj->withAllRoles(function () use ($url, &$awards) {
                     $awards = $this->dj->internalApiRequest($url);
@@ -660,19 +608,24 @@ class EventLogService
      */
     public function initStaticEvents(Contest $contest): void
     {
+        $staticEventTypes = [
+            'contests',
+            'judgement-types',
+            'languages',
+            'problems',
+            'groups',
+            'organizations',
+            'teams',
+        ];
         // Loop over all configuration endpoints with an URL and check if we have all data.
         foreach ($this->apiEndpoints as $endpoint => $endpointData) {
-            if ($endpointData[static::KEY_SKIP_IN_EVENT_FEED] ?? false) {
-                continue;
-            }
-            if ($endpointData[EventLogService::KEY_TYPE] === EventLogService::TYPE_CONFIGURATION &&
-                isset($endpointData[EventLogService::KEY_URL])) {
-                $contestId = $contest->getApiId($this);
+            if (in_array($endpoint, $staticEventTypes, true)) {
+                $contestId = $contest->getExternalid();
 
                 // Do an internal API request to the overview URL
                 // of the endpoint to get current data.
-                $url = sprintf('/contests/%s%s', $contestId,
-                               $endpointData[EventLogService::KEY_URL]);
+                $urlPart = $endpoint === 'contests' ? '' : ('/' . $endpoint);
+                $url = sprintf('/contests/%s%s', $contestId, $urlPart);
                 $this->dj->withAllRoles(function () use ($url, &$data) {
                     $data = $this->dj->internalApiRequest($url);
                 });
@@ -739,7 +692,7 @@ class EventLogService
     {
         // Build up the referenced data to check for.
         $toCheck = [
-            'contests' => $contest->getApiId($this),
+            'contests' => $contest->getExternalid(),
         ];
         switch ($type) {
             case 'teams':
@@ -846,9 +799,6 @@ class EventLogService
         }
 
         $endpointData = $this->apiEndpoints[$type];
-        if (!isset($endpointData[self::KEY_USE_EXTERNAL_ID])) {
-            return $ids;
-        }
 
         /** @var class-string<BaseApiEntity> $entity */
         $entity = $endpointData[self::KEY_ENTITY];
@@ -856,25 +806,7 @@ class EventLogService
             throw new BadMethodCallException(sprintf('No entity defined for type \'%s\'', $type));
         }
 
-        // Special case for submissions and clarifications: they can have an external ID even if when running in
-        // full local mode, because one can use the API to upload one with an external ID.
-        $externalIdAlwaysAllowed = [
-            Submission::class    => 's.submitid',
-            Clarification::class => 'clar.clarid',
-        ];
-        if (isset($externalIdAlwaysAllowed[$entity])) {
-            $fullField = $externalIdAlwaysAllowed[$entity];
-            [$table, $field] = explode('.', $fullField);
-            return array_map(fn(array $item) => $item['externalid'] ?? $item[$field], $this->em->createQueryBuilder()
-                ->from($entity, $table)
-                ->select($fullField, sprintf('%s.externalid', $table))
-                ->andWhere(sprintf('%s IN (:ids)', $fullField))
-                ->setParameter('ids', $ids)
-                ->getQuery()
-                ->getScalarResult());
-        }
-
-        if (!$this->externalIdFieldForEntity($entity)) {
+        if (!is_a($entity, HasExternalIdInterface::class, true)) {
             return $ids;
         }
 
@@ -896,80 +828,6 @@ class EventLogService
                ->getQuery()
                ->getScalarResult()
         );
-    }
-
-    /**
-     * Get the external ID field for a given entity type. Will return null if
-     * no external ID field should be used.
-     * @param object|string $entity
-     */
-    public function externalIdFieldForEntity($entity): ?string
-    {
-        // Allow passing in a class instance: convert it to its class type.
-        if (is_object($entity)) {
-            $entity = $entity::class;
-        }
-        // Special case: strip of Doctrine proxies.
-        if (str_starts_with($entity, 'Proxies\\__CG__\\')) {
-            $entity = substr($entity, strlen('Proxies\\__CG__\\'));
-        }
-
-        if (!isset($this->entityToEndpoint[$entity])) {
-            throw new BadMethodCallException(sprintf('Entity \'%s\' does not have a corresponding endpoint',
-                                                      $entity));
-        }
-
-        $endpointData = $this->apiEndpoints[$this->entityToEndpoint[$entity]];
-
-        if (!isset($endpointData[self::KEY_USE_EXTERNAL_ID])) {
-            return null;
-        }
-
-        $useExternalId = false;
-        if ($endpointData[self::KEY_ALWAYS_USE_EXTERNAL_ID] ?? false) {
-            $useExternalId = true;
-        } else {
-            $dataSource = $this->config->get('data_source');
-
-            if ($dataSource !== DOMJudgeService::DATA_SOURCE_LOCAL) {
-                $endpointType = $endpointData[self::KEY_TYPE];
-                if ($endpointType === self::TYPE_CONFIGURATION &&
-                    in_array($dataSource, [
-                        DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL,
-                        DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL
-                    ])) {
-                    $useExternalId = true;
-                } elseif ($endpointType === self::TYPE_LIVE &&
-                    $dataSource === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
-                    $useExternalId = true;
-                }
-            }
-        }
-
-        if ($useExternalId) {
-            return 'externalid';
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Get the API ID field for a given entity type.
-     * @param object|string $entity
-     */
-    public function apiIdFieldForEntity($entity): string
-    {
-        if ($field = $this->externalIdFieldForEntity($entity)) {
-            return $field;
-        }
-        /** @var class-string<BaseApiEntity> $class */
-        $class    = is_object($entity) ? $entity::class : $entity;
-        $metadata = $this->em->getClassMetadata($class);
-        try {
-            return $metadata->getSingleIdentifierFieldName();
-        } catch (MappingException) {
-            throw new BadMethodCallException("Entity '$class' has a composite primary key");
-        }
     }
 
     /**

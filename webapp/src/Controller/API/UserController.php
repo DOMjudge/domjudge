@@ -343,7 +343,7 @@ class UserController extends AbstractRestController
 
     protected function addOrUpdateUser(AddUser $addUser, Request $request): Response
     {
-        if ($addUser instanceof UpdateUser && $this->eventLogService->externalIdFieldForEntity(User::class) && !$addUser->id) {
+        if ($addUser instanceof UpdateUser && !$addUser->id) {
             throw new BadRequestHttpException('`id` field is required');
         }
 
@@ -353,7 +353,7 @@ class UserController extends AbstractRestController
 
         $user = new User();
         if ($addUser instanceof UpdateUser) {
-            $existingUser = $this->em->getRepository(User::class)->findOneBy([$this->eventLogService->externalIdFieldForEntity(User::class) => $addUser->id]);
+            $existingUser = $this->em->getRepository(User::class)->findOneBy(['externalid' => $addUser->id]);
             if ($existingUser) {
                 $user = $existingUser;
             }
@@ -375,8 +375,7 @@ class UserController extends AbstractRestController
             $team = $this->em->createQueryBuilder()
                 ->from(Team::class, 't')
                 ->select('t')
-                ->andWhere(sprintf('t.%s = :team',
-                    $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid'))
+                ->andWhere('t.externalid = :team')
                 ->setParameter('team', $addUser->teamId)
                 ->getQuery()
                 ->getOneOrNullResult();
@@ -433,6 +432,6 @@ class UserController extends AbstractRestController
 
     protected function getIdField(): string
     {
-        return sprintf('u.%s', $this->eventLogService->externalIdFieldForEntity(User::class) ?? 'userid');
+        return 'u.externalid';
     }
 }

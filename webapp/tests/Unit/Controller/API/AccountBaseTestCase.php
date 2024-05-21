@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\TeamWithExternalIdEqualsOneFixture;
 use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Yaml\Yaml;
@@ -135,6 +136,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
      */
     public function testCreateUserFileImport(string $newUsersFile, string $type, array $newUserPostData, ?array $overwritten = null): void
     {
+        $this->loadFixture(TeamWithExternalIdEqualsOneFixture::class);
         $usersURL = $this->helperGetEndpointURL('users').'/accounts';
         $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
         $objectsBeforeTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);

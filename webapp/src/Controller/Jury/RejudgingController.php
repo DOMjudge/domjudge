@@ -18,6 +18,7 @@ use App\Entity\User;
 use App\Form\Type\RejudgingType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Service\RejudgingService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
@@ -26,6 +27,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,13 +45,17 @@ use Symfony\Component\Routing\RouterInterface;
 class RejudgingController extends BaseController
 {
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        protected readonly EventLogService $eventLogService,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly RejudgingService $rejudgingService,
         protected readonly RouterInterface $router,
-        protected readonly RequestStack $requestStack
-    ) {}
+        protected readonly RequestStack $requestStack,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     /**
      * @throws NoResultException
@@ -396,8 +402,7 @@ class RejudgingController extends BaseController
             'newverdict' => $newverdict,
             'repetitions' => array_column($repetitions, 'rejudgingid'),
             'showStatistics' => $showStatistics,
-            'showExternalResult' => $this->config->get('data_source') ==
-                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+            'showExternalResult' => $this->dj->shadowMode(),
             'stats' => $stats,
             'refresh' => [
                 'after' => 15,

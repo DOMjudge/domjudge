@@ -20,12 +20,10 @@
                     <th>ID</th>
                     <td>p{{ problem.probid }}</td>
                 </tr>
-                {% if showExternalId(problem) %}
-                    <tr>
-                        <th>External ID</th>
-                        <td>{{ problem.externalid }}</td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <th>External ID</th>
+                    <td>{{ problem.externalid }}</td>
+                </tr>
                 <tr>
                     <th>Testcases</th>
                     <td>

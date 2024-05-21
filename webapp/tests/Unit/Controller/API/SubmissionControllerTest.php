@@ -26,16 +26,16 @@ class SubmissionControllerTest extends BaseTestCase
 
     protected array $expectedObjects = [
         SampleSubmissionsFixture::class . ':0' => [
-            'problem_id'  => '1',
+            'problem_id'  => 'hello',
             'language_id' => 'cpp',
-            'team_id'     => '1',
+            'team_id'     => 'domjudge',
             'entry_point' => null,
             'time'        => '2021-01-01T12:34:56.000+00:00',
         ],
         SampleSubmissionsFixture::class . ':1' => [
-            'problem_id'  => '3',
+            'problem_id'  => 'boolfind',
             'language_id' => 'java',
-            'team_id'     => '2',
+            'team_id'     => 'exteam',
             'entry_point' => 'Main',
             'time'        => '2021-03-04T12:00:00.000+00:00',
         ],
@@ -94,29 +94,29 @@ class SubmissionControllerTest extends BaseTestCase
     {
         yield ['demo', [], ""];
         yield ['demo', ['unknown_key'], "/One of the arguments 'problem', 'problem_id' is required/"];
-        yield ['demo', ['problem' => 1], "/One of the arguments 'language', 'language_id' is required/"];
-        yield ['demo', ['problem_id' => 1], "/One of the arguments 'language', 'language_id' is required/"];
-        yield ['demo', ['problem_id' => 4, 'language' => 'cpp'], "Problem '4' not found or not submittable."];
-        yield ['demo', ['problem_id' => 1, 'language' => 'cpp'], "No files specified."];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp'], "No files specified."];
-        yield ['demo', ['problem_id' => 1, 'language' => 'abc'], "Language 'abc' not found or not submittable."];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language 'abc' not found or not submittable."];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language 'abc' not found or not submittable."];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'team_id' => '1'], "Can not submit for a different team."];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'user_id' => 1], "Can not submit for a different user."];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123'], "A team can not assign id."];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'time' => '2021-01-01T00:00:00'], "A team can not assign time."];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'files' => []], "No files specified."];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'files' => [['invalidkey' => 'somevalue']]], "/files\[0\].data:\n.*This value should be of type unknown./"];
+        yield ['demo', ['problem' => 'hello'], "/One of the arguments 'language', 'language_id' is required/"];
+        yield ['demo', ['problem_id' => 'hello'], "/One of the arguments 'language', 'language_id' is required/"];
+        yield ['demo', ['problem_id' => 'noprob', 'language' => 'cpp'], "Problem 'noprob' not found or not submittable."];
+        yield ['demo', ['problem_id' => 'hello', 'language' => 'cpp'], "No files specified."];
+        yield ['demo', ['problem_id' => 'hello', 'language_id' => 'cpp'], "No files specified."];
+        yield ['demo', ['problem_id' => 'hello', 'language' => 'abc'], "Language 'abc' not found or not submittable."];
+        yield ['demo', ['problem_id' => 'hello', 'language_id' => 'abc'], "Language 'abc' not found or not submittable."];
+        yield ['demo', ['problem_id' => 'hello', 'language_id' => 'abc'], "Language 'abc' not found or not submittable."];
+        yield ['demo', ['problem_id' => 'hello', 'language_id' => 'cpp', 'team_id' => 'domjudge'], "Can not submit for a different team."];
+        yield ['demo', ['problem_id' => 'hello', 'language_id' => 'cpp', 'user_id' => 'admin'], "Can not submit for a different user."];
+        yield ['demo', ['problem_id' => 'hello', 'language_id' => 'cpp', 'id' => '123'], "A team can not assign id."];
+        yield ['demo', ['problem_id' => 'hello', 'language_id' => 'cpp', 'time' => '2021-01-01T00:00:00'], "A team can not assign time."];
+        yield ['demo', ['problem_id' => 'hello', 'language_id' => 'cpp', 'files' => []], "No files specified."];
+        yield ['demo', ['problem_id' => 'hello', 'language_id' => 'cpp', 'files' => [['invalidkey' => 'somevalue']]], "/files\[0\].data:\n.*This value should be of type unknown./"];
         yield [
             'demo',
-            ['problem_id' => 1, 'language_id' => 'cpp', 'files' => 'this is not an array'],
+            ['problem_id' => 'hello', 'language_id' => 'cpp', 'files' => 'this is not an array'],
             "/files:\n.*This value should be of type array/"
         ];
         yield [
             'demo',
             [
-                'problem_id'  => 1,
+                'problem_id'  => 'hello',
                 'language_id' => 'cpp',
                 'files'       => [
                     // More than one item
@@ -129,7 +129,7 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'demo',
             [
-                'problem_id'  => 1,
+                'problem_id'  => 'hello',
                 'language_id' => 'cpp',
                 'files'       => [
                     // Not valid base64
@@ -141,7 +141,7 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'demo',
             [
-                'problem_id'  => 1,
+                'problem_id'  => 'hello',
                 'language_id' => 'cpp',
                 'files'       => [
                     // Valid base64, but not a ZIP file
@@ -153,7 +153,7 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'demo',
             [
-                'problem_id'  => 1,
+                'problem_id'  => 'hello',
                 'language_id' => 'cpp',
                 'files'       => [
                     ['data' => 'aaa', 'mime' => 'wrong'],
@@ -161,19 +161,19 @@ class SubmissionControllerTest extends BaseTestCase
             ],
             "The 'files[0].mime' attribute must be application/zip if provided."
         ];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1'], "No files specified."];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '3'], "Team with ID '3' not found in contest or not enabled."];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'user_id' => 'doesnotexist'], "User not found."];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'user_id' => AddMoreDemoUsersFixture::class . ':seconddemo'], "User not linked to provided team."];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'user_id' => AddMoreDemoUsersFixture::class . ':thirddemo'], "User not enabled."];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'user_id' => AddMoreDemoUsersFixture::class . ':fourthdemo'], "User not linked to a team."];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'time' => 'this is not a time'], "Can not parse time 'this is not a time'."];
+        yield ['admin', ['problem_id' => 'hello', 'language' => 'cpp', 'team_id' => 'domjudge'], "No files specified."];
+        yield ['admin', ['problem_id' => 'hello', 'language' => 'cpp', 'team_id' => 'noteam'], "Team with ID 'noteam' not found in contest or not enabled."];
+        yield ['admin', ['problem_id' => 'hello', 'language' => 'cpp', 'team_id' => 'domjudge', 'user_id' => 'doesnotexist'], "User not found."];
+        yield ['admin', ['problem_id' => 'hello', 'language' => 'cpp', 'team_id' => 'domjudge', 'user_id' => AddMoreDemoUsersFixture::class . ':seconddemo'], "User not linked to provided team."];
+        yield ['admin', ['problem_id' => 'hello', 'language' => 'cpp', 'team_id' => 'domjudge', 'user_id' => AddMoreDemoUsersFixture::class . ':thirddemo'], "User not enabled."];
+        yield ['admin', ['problem_id' => 'hello', 'language' => 'cpp', 'team_id' => 'domjudge', 'user_id' => AddMoreDemoUsersFixture::class . ':fourthdemo'], "User not linked to a team."];
+        yield ['admin', ['problem_id' => 'hello', 'language' => 'cpp', 'team_id' => 'domjudge', 'time' => 'this is not a time'], "Can not parse time 'this is not a time'."];
         yield [
             'admin',
             [
-                'problem_id'  => 1,
+                'problem_id'  => 'hello',
                 'language_id' => 'cpp',
-                'team_id'     => '1',
+                'team_id'     => 'domjudge',
                 'id'          => '$this is not valid$',
             ],
             "ID '\$this is not valid$' is not valid.",
@@ -332,7 +332,7 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'demo',
             [
-                'problem'  => 1,
+                'problem'  => 'hello',
                 'language' => 'cpp',
             ],
             null,
@@ -350,7 +350,7 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'demo',
             [
-                'problem'  => 1,
+                'problem'  => 'hello',
                 'language' => 'cpp',
             ],
             null,
@@ -376,7 +376,7 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'demo',
             [
-                'problem'     => 1,
+                'problem'     => 'hello',
                 'language'    => 'kotlin',
                 'entry_point' => 'SomeFileKt',
             ],
@@ -400,7 +400,7 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'demo',
             [
-                'problem_id'  => 1,
+                'problem_id'  => 'hello',
                 'language_id' => 'cpp',
             ],
             ['main.cpp' => '// No content'],
@@ -418,7 +418,7 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'demo',
             [
-                'problem_id'  => 2,
+                'problem_id'  => 'fltcmp',
                 'language_id' => 'java',
                 'files'       => [
                     ['mime' => 'application/zip'],
@@ -445,9 +445,9 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'admin',
             [
-                'problem_id'  => 1,
+                'problem_id'  => 'hello',
                 'language_id' => 'cpp',
-                'team_id'     => '2',
+                'team_id'     => 'exteam',
             ],
             ['main.cpp' => '// No content'],
             [],
@@ -464,9 +464,9 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'admin',
             [
-                'problem_id'  => 1,
+                'problem_id'  => 'hello',
                 'language_id' => 'cpp',
-                'team_id'     => '2',
+                'team_id'     => 'exteam',
                 'user_id'     => AddMoreDemoUsersFixture::class . ':seconddemo',
             ],
             ['main.cpp' => '// No content'],
@@ -484,9 +484,9 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'admin',
             [
-                'problem_id'  => 1,
+                'problem_id'  => 'hello',
                 'language_id' => 'cpp',
-                'team_id'     => '1',
+                'team_id'     => 'domjudge',
                 'id'          => 'myextid123',
             ],
             ['main.cpp' => '// No content'],
@@ -504,9 +504,9 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'admin',
             [
-                'problem_id'  => 1,
+                'problem_id'  => 'hello',
                 'language_id' => 'cpp',
-                'team_id'     => '1',
+                'team_id'     => 'domjudge',
                 'time'        => '2020-01-01T12:34:56',
             ],
             ['main.cpp' => '// No content'],

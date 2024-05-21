@@ -36,13 +36,15 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
     options: ['lengths' => [null, 190]]
 )]
 #[UniqueEntity(fields: 'externalid')]
-class Submission extends BaseApiEntity implements ExternalRelationshipEntityInterface
+class Submission extends BaseApiEntity implements
+    HasExternalIdInterface,
+    ExternalIdFromInternalIdInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Submission ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('id')]
-    #[Serializer\Type('string')]
+    #[Serializer\SerializedName('submitid')]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     protected int $submitid;
 
     #[ORM\Column(
@@ -53,8 +55,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         ]
     )]
     #[OA\Property(nullable: true)]
-    #[Serializer\SerializedName('external_id')]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\SerializedName('id')]
     protected ?string $externalid = null;
 
     #[ORM\Column(
@@ -218,7 +219,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
 
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('language_id')]
-    #[Serializer\Type('string')]
     public function getLanguageId(): string
     {
         return $this->getLanguage()->getExternalid();
@@ -312,12 +312,16 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this->team;
     }
 
-    #[Serializer\VirtualProperty]
-    #[Serializer\SerializedName('team_id')]
-    #[Serializer\Type('string')]
     public function getTeamId(): int
     {
         return $this->getTeam()->getTeamid();
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('team_id')]
+    public function getApiTeamId(): string
+    {
+        return $this->getTeam()->getExternalid();
     }
 
     public function setUser(?User $user = null): Submission
@@ -415,12 +419,16 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this->problem;
     }
 
-    #[Serializer\VirtualProperty]
-    #[Serializer\SerializedName('problem_id')]
-    #[Serializer\Type('string')]
     public function getProblemId(): int
     {
         return $this->getProblem()->getProbid();
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('problem_id')]
+    public function getApiProblemId(): string
+    {
+        return $this->getProblem()->getExternalid();
     }
 
     public function setContestProblem(?ContestProblem $contestProblem = null): Submission
@@ -443,23 +451,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     public function getRejudging(): ?Rejudging
     {
         return $this->rejudging;
-    }
-
-    /**
-     * Get the entities to check for external ID's while serializing.
-     *
-     * This method should return an array with as keys the JSON field names and as values the actual entity
-     * objects that the SetExternalIdVisitor should check for applicable external ID's.
-     *
-     * @return array{language_id: Language, problem_id: Problem, team_id: Team|null}
-     */
-    public function getExternalRelationships(): array
-    {
-        return [
-            'language_id' => $this->getLanguage(),
-            'problem_id'  => $this->getProblem(),
-            'team_id'     => $this->getTeam(),
-        ];
     }
 
     public function isAfterFreeze(): bool

@@ -866,7 +866,7 @@ class ImportProblemService
             $problem = $this->em->createQueryBuilder()
                 ->from(Problem::class, 'p')
                 ->select('p')
-                ->andWhere(sprintf('p.%s = :id', $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
+                ->andWhere('p.externalid = :id')
                 ->setParameter('id', $probId)
                 ->getQuery()
                 ->getOneOrNullResult();
@@ -886,7 +886,7 @@ class ImportProblemService
             $allMessages = array_merge($allMessages, $messages);
             if ($newProblem) {
                 $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
-                $probId = $newProblem->getApiId($this->eventLogService);
+                $probId = $newProblem->getExternalid();
             } else {
                 $errors = array_merge($errors, $messages);
             }

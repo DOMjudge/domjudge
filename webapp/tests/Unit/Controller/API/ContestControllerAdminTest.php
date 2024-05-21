@@ -118,13 +118,7 @@ EOF;
     {
         // First clear the entity manager to have all data.
         static::getContainer()->get(EntityManagerInterface::class)->clear();
-        $config = static::getContainer()->get(ConfigurationService::class);
-        $dataSource = $config->get('data_source');
-        if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
-            return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
-        } else {
-            return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
-        }
+        return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
     }
 
     public function testBannerManagement(): void

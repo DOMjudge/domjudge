@@ -5,20 +5,14 @@ namespace App\Serializer;
 use App\DataTransferObject\FileWithName;
 use App\Entity\ContestProblem;
 use App\Service\DOMJudgeService;
-use App\Service\EventLogService;
-use App\Utils\Utils;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
-use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
 class ContestProblemVisitor implements EventSubscriberInterface
 {
-    public function __construct(
-        protected readonly DOMJudgeService $dj,
-        protected readonly EventLogService $eventLogService
-    ) {}
+    public function __construct(protected readonly DOMJudgeService $dj) {}
 
     /**
      * @return array<array{event: string, class: string, format: string, method: string}>
@@ -47,8 +41,8 @@ class ContestProblemVisitor implements EventSubscriberInterface
             $route = $this->dj->apiRelativeUrl(
                 'v4_app_api_problem_statement',
                 [
-                    'cid' => $contestProblem->getContest()->getApiId($this->eventLogService),
-                    'id'  => $contestProblem->getApiId($this->eventLogService),
+                    'cid' => $contestProblem->getContest()->getExternalid(),
+                    'id'  => $contestProblem->getExternalId(),
                 ]
             );
             $contestProblem->getProblem()->setStatementForApi(new FileWithName(

@@ -111,10 +111,9 @@ class GroupController extends AbstractRestController
             throw new BadRequestHttpException("Error while adding group: $message");
         }
 
+        /** @var TeamCategory $group */
         $group = $saved[0];
-        $idField = $this->eventLogService->externalIdFieldForEntity(TeamCategory::class) ?? 'categoryid';
-        $method = sprintf('get%s', ucfirst($idField));
-        $id = call_user_func([$group, $method]);
+        $id = $group->getexternalid();
 
         return $this->renderCreateData($request, $saved[0], 'group', $id);
     }
@@ -163,10 +162,9 @@ class GroupController extends AbstractRestController
             throw new BadRequestHttpException("Error while adding group: $message");
         }
 
+        /** @var TeamCategory $group */
         $group = $saved[0];
-        $idField = $this->eventLogService->externalIdFieldForEntity(TeamCategory::class) ?? 'categoryid';
-        $method = sprintf('get%s', ucfirst($idField));
-        $id = call_user_func([$group, $method]);
+        $id = $group->getexternalid();
 
         return $this->renderCreateData($request, $saved[0], 'group', $id);
     }
@@ -190,6 +188,6 @@ class GroupController extends AbstractRestController
 
     protected function getIdField(): string
     {
-        return sprintf('c.%s', $this->eventLogService->externalIdFieldForEntity(TeamCategory::class) ?? 'categoryid');
+        return 'c.externalid';
     }
 }

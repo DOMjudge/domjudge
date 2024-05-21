@@ -312,7 +312,7 @@ class ImportExportService
             $this->importProblemsData($contest, $data['problems']);
         }
 
-        $cid = $contest->getApiId($this->eventLogService);
+        $cid = $contest->getExternalid();
 
         $this->em->flush();
         return true;
@@ -389,7 +389,7 @@ class ImportExportService
             $this->em->persist($contestProblem);
             $this->em->flush();
 
-            $ids[] = $problem->getApiId($this->eventLogService);
+            $ids[] = $problem->getExternalid();
         }
 
         $this->em->flush();
@@ -414,7 +414,7 @@ class ImportExportService
 
         $data = [];
         foreach ($categories as $category) {
-            $data[] = [$category->getApiId($this->eventLogService), $category->getName()];
+            $data[] = [$category->getExternalid(), $category->getName()];
         }
 
         return $data;
@@ -439,9 +439,9 @@ class ImportExportService
         $data = [];
         foreach ($teams as $team) {
             $data[] = [
-                $team->getApiId($this->eventLogService),
+                $team->getExternalid(),
                 $team->getIcpcId(),
-                $team->getCategory()->getApiId($this->eventLogService),
+                $team->getCategory()->getExternalid(),
                 $team->getEffectiveName(),
                 $team->getAffiliation() ? $team->getAffiliation()->getName() : '',
                 $team->getAffiliation() ? $team->getAffiliation()->getShortname() : '',
@@ -740,8 +740,7 @@ class ImportExportService
                 $teamCategory = null;
             } else {
                 $categoryId = $groupItem['categoryid'];
-                $field = $this->eventLogService->apiIdFieldForEntity(TeamCategory::class);
-                $teamCategory = $this->em->getRepository(TeamCategory::class)->findOneBy([$field => $categoryId]);
+                $teamCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $categoryId]);
             }
             $added = false;
             if (!$teamCategory) {
@@ -1156,8 +1155,7 @@ class ImportExportService
             unset($teamItem['team']['affilid']);
 
             if (!empty($teamItem['team']['categoryid'])) {
-                $field = $this->eventLogService->apiIdFieldForEntity(TeamCategory::class);
-                $teamCategory = $this->em->getRepository(TeamCategory::class)->findOneBy([$field => $teamItem['team']['categoryid']]);
+                $teamCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $teamItem['team']['categoryid']]);
                 if (!$teamCategory) {
                     $teamCategory = new TeamCategory();
                     $teamCategory
@@ -1186,8 +1184,7 @@ class ImportExportService
             if (empty($teamItem['team']['teamid'])) {
                 $team = null;
             } else {
-                $field = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
-                $team = $this->em->getRepository(Team::class)->findOneBy([$field => $teamItem['team']['teamid']]);
+                $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamItem['team']['teamid']]);
             }
             if (!$team) {
                 $team  = new Team();
@@ -1348,12 +1345,11 @@ class ImportExportService
                 unset($accountItem['user']['teamid']);
                 $team = null;
                 if ($teamId !== null) {
-                    $field = $this->eventLogService->apiIdFieldForEntity(Team::class);
-                    $team  = $this->em->getRepository(Team::class)->findOneBy([$field => $teamId]);
+                    $team  = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
                     if (!$team) {
                         $team = new Team();
                         $team
-                            ->setExternalid($teamId)
+                            ->setExternalid((string)$teamId)
                             ->setName($teamId . ' - auto-create during import');
                         $this->em->persist($team);
                         $this->dj->auditlog('team', $team->getTeamid(),
@@ -1478,8 +1474,7 @@ class ImportExportService
                         $line[2]);
                     return -1;
                 }
-                $field = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
-                $team = $this->em->getRepository(Team::class)->findOneBy([$field => $teamId]);
+                $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
                 if ($team === null) {
                     $message = sprintf('Unknown team id %s on line %d', $teamId, $lineNr);
                     return -1;

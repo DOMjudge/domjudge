@@ -9,37 +9,37 @@ class UserControllerTest extends AccountBaseTestCase
     protected ?string $apiEndpoint = 'users';
 
     protected array $expectedObjects = [
-        1 => [
+        'admin' => [
             "team" => "DOMjudge",
             "roles" => [
                 "admin",
                 "team"
             ],
-            "id" => "1",
+            "id" => "admin",
             "username" => "admin",
             "name" => "Administrator",
             "email" => null,
             "ip" => null,
             "enabled" => true
         ],
-        2 => [
+        'judgehost' => [
             "team" => null,
             "roles" => [
                 "judgehost"
             ],
-            "id" => "2",
+            "id" => "judgehost",
             "username" => "judgehost",
             "name" => "User for judgedaemons",
             "email" => null,
             "ip" => null,
             "enabled" => true
         ],
-        3 => [
+        'demo' => [
             "team" => "Example teamname",
             "roles" => [
                  "team"
             ],
-            "id" => "3",
+            "id" => "demo",
             "username" => "demo",
             "name" => "demo user for example team",
             "email" => null,
@@ -64,9 +64,8 @@ class UserControllerTest extends AccountBaseTestCase
         static::assertEquals(['team'], $response['roles']);
     }
 
-    public function testUpdateNonLocal(): void
+    public function testUpdate(): void
     {
-        $this->setupDataSource(DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL);
         $data = [
             'id' => 'someid',
             'username' => 'testuser',
@@ -82,9 +81,8 @@ class UserControllerTest extends AccountBaseTestCase
         static::assertEquals(['team'], $response['roles']);
     }
 
-    public function testUpdateNonLocalNoId(): void
+    public function testUpdateNoId(): void
     {
-        $this->setupDataSource(DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL);
         $data = [
             'username' => 'testuser',
             'name' => 'Test User',

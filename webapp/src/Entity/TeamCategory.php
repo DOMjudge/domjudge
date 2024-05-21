@@ -28,20 +28,24 @@ use Symfony\Component\Validator\Constraints as Assert;
     options: [new Serializer\Type('boolean'), new Serializer\Groups(['Nonstrict'])]
 )]
 #[UniqueEntity(fields: 'externalid')]
-class TeamCategory extends BaseApiEntity implements Stringable
+class TeamCategory extends BaseApiEntity implements
+    Stringable,
+    HasExternalIdInterface,
+    ExternalIdFromInternalIdInterface,
+    PrefixedExternalIdInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Team category ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('id')]
-    #[Serializer\Type('string')]
+    #[Serializer\SerializedName('categoryid')]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     protected ?int $categoryid = null;
 
     #[ORM\Column(
         nullable: true,
         options: ['comment' => 'Team category ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
-    #[Serializer\Exclude]
+    #[Serializer\SerializedName('id')]
     protected ?string $externalid = null;
 
     #[ORM\Column(

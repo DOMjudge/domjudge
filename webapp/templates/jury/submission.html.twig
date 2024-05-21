@@ -220,7 +220,7 @@
         {% endif %}
     </div>
 
-    {% if submission.externalid %}
+    {% if shadowMode() and submission.externalid %}
         <div class="mb-2">
             External ID:
             {% if external_ccs_submission_url is empty %}
