@@ -8,6 +8,7 @@ use App\Entity\ContestProblem;
 use App\Entity\ExternalJudgement;
 use App\Entity\ExternalRun;
 use App\Entity\ExternalSourceWarning;
+use App\Entity\HasExternalIdInterface;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Language;
@@ -59,9 +60,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return [
             new TwigFunction('button', $this->button(...), ['is_safe' => ['html']]),
             new TwigFunction('calculatePenaltyTime', $this->calculatePenaltyTime(...)),
-            new TwigFunction('showExternalId', $this->showExternalId(...)),
             new TwigFunction('customAssetFiles', $this->customAssetFiles(...)),
             new TwigFunction('globalBannerAssetPath', $this->dj->globalBannerAssetPath(...)),
+            new TwigFunction('shadowMode', $this->shadowMode(...)),
         ];
     }
 
@@ -153,7 +154,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             ),
             'show_shadow_differences'       => $this->tokenStorage->getToken() &&
                                                $this->authorizationChecker->isGranted('ROLE_ADMIN') &&
-                                               $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+                                               $this->dj->shadowMode(),
             'doc_links'                     => $this->dj->getDocLinks(),
             'allow_registration'            => $selfRegistrationCategoriesCount !== 0,
             'enable_ranking'                => $this->config->get('enable_ranking'),
@@ -585,16 +586,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     {
         $extCcsUrl = $this->config->get('external_ccs_submission_url');
         if (!empty($extCcsUrl)) {
-            $dataSource = $this->config->get('data_source');
-            if ($dataSource == 2 && $submission->getExternalid()) {
-                return str_replace(['[contest]', '[id]'],
-                                   [$submission->getContest()->getExternalid(), $submission->getExternalid()],
-                                   $extCcsUrl);
-            } elseif ($dataSource == 1) {
-                return str_replace(['[contest]', '[id]'],
-                                   [$submission->getContest()->getExternalid(), $submission->getSubmitid()],
-                                   $extCcsUrl);
-            }
+            return str_replace(['[contest]', '[id]'],
+                [$submission->getContest()->getExternalid(), $submission->getExternalid()],
+                $extCcsUrl);
         }
 
         return null;
@@ -1013,12 +1007,9 @@ EOF;
         }
     }
 
-    /**
-     * @param object|string $entity
-     */
-    public function showExternalId($entity): bool
+    public function shadowMode(): bool
     {
-        return $this->eventLogService->externalIdFieldForEntity($entity) !== null;
+        return $this->dj->shadowMode();
     }
 
     public function wrapUnquoted(string $text, int $width = 75, string $quote = '>'): string
@@ -1195,13 +1186,16 @@ EOF;
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $metadata = $this->em->getClassMetadata($entity::class);
         $primaryKeyColumn = $metadata->getIdentifierColumnNames()[0];
-        $externalIdField = $this->eventLogService->externalIdFieldForEntity($entity);
 
         $data = [
             'idPrefix' => $idPrefix,
             'id' => $propertyAccessor->getValue($entity, $primaryKeyColumn),
-            'externalId' => $externalIdField ? $propertyAccessor->getValue($entity, $externalIdField) : null,
+            'externalId' => null,
         ];
+
+        if ($entity instanceof HasExternalIdInterface) {
+            $data['externalId'] = $entity->getExternalid();
+        }
 
         if ($entity instanceof Team) {
             $data['label'] = $entity->getLabel();

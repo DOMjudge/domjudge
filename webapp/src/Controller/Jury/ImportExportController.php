@@ -30,6 +30,7 @@ use Exception;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\SubmitButton;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,15 +53,18 @@ class ImportExportController extends BaseController
     public function __construct(
         protected readonly ICPCCmsService $icpcCmsService,
         protected readonly ImportExportService $importExportService,
-        protected readonly EntityManagerInterface $em,
+        EntityManagerInterface $em,
         protected readonly ScoreboardService $scoreboardService,
-        protected readonly DOMJudgeService $dj,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService,
         protected readonly ImportProblemService $importProblemService,
+        KernelInterface $kernel,
         #[Autowire('%domjudge.version%')]
-        protected readonly string $domjudgeVersion
-    ) {}
+        protected readonly string $domjudgeVersion,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     /**
      * @throws ClientExceptionInterface

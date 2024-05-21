@@ -5,7 +5,7 @@
     - set -eux
     - if [ -z ${PHPVERSION+x} ]; then export PHPVERSION=8.3; fi
     - if [ "$TEST" = "E2E" ]; then exit 0; fi
-    - if [ "$CRAWL_DATASOURCES" != "0" ]; then exit 0; fi
+    - if [ "$CRAWL_SHADOW_MODE" != "0" ]; then exit 0; fi
     - timeout --signal=15 40m ./gitlab/integration.sh $PHPVERSION
   artifacts:
     when: always
@@ -29,7 +29,7 @@ integration_mysql:
     MYSQL_REQUIRE_PRIMARY_KEY: 1
     PIN_JUDGEDAEMON: 1
     TEST: "Unit"
-    CRAWL_DATASOURCES: "0"
+    CRAWL_SHADOW_MODE: "0"
 
 integration_mariadb_pr:
   except:
@@ -61,4 +61,4 @@ integration_unpinned_judgehost:
     MARIADB_PORT_3306_TCP_ADDR: sqlserver
     PIN_JUDGEDAEMON: 0
     TEST: "Unit"
-    CRAWL_DATASOURCES: "0"
+    CRAWL_SHADOW_MODE: "0"

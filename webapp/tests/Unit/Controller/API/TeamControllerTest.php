@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\AddLocationToTeamFixture;
+use App\Entity\Team;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -11,12 +12,12 @@ class TeamControllerTest extends BaseTestCase
     protected ?string $apiEndpoint = 'teams';
 
     protected array $expectedObjects = [
-        '2' => [
-            'organization_id' => '1',
-            'group_ids'       => ['3'],
+        'exteam' => [
+            'organization_id' => 'utrecht',
+            'group_ids'       => ['participants'],
             'affiliation'     => 'Utrecht University',
             'nationality'     => 'NLD',
-            'id'              => '2',
+            'id'              => 'exteam',
             'icpc_id'         => 'exteam',
             'name'            => 'Example teamname',
             'display_name'    => null,
@@ -29,6 +30,8 @@ class TeamControllerTest extends BaseTestCase
     protected static array $fixtures = [AddLocationToTeamFixture::class];
 
     protected array $expectedAbsent = ['4242', 'nonexistent'];
+
+    protected ?string $objectClassForExternalId = Team::class;
 
     public function testLogoManagement(): void
     {
@@ -52,7 +55,7 @@ class TeamControllerTest extends BaseTestCase
         $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
         $logoConfig = [
             [
-                'href'     => "contests/1/teams/$id/photo",
+                'href'     => "contests/demo/teams/$id/photo",
                 'mime'     => 'image/jpeg',
                 'filename' => 'photo.jpg',
                 'width'    => 320,

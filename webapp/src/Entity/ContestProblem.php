@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController as ARC;
 use App\Service\DOMJudgeService as DJS;
 use App\Service\EventLogService;
 use App\Utils\Utils;
@@ -28,14 +29,15 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\Index(columns: ['probid'], name: 'probid')]
 #[ORM\UniqueConstraint(name: 'shortname', columns: ['cid', 'shortname'], options: ['lengths' => [null, 190]])]
 #[Serializer\VirtualProperty(
-    name: 'id',
+    name: 'probid',
     exp: 'object.getProblem().getProbid()',
-    options: [new Serializer\Type('string')]
+    options: [new Serializer\Groups([ARC::GROUP_NONSTRICT])]
 )]
+
 #[Serializer\VirtualProperty(
     name: 'short_name',
     exp: 'object.getShortname()',
-    options: [new Serializer\Groups(['Nonstrict']), new Serializer\Type('string')]
+    options: [new Serializer\Groups([ARC::GROUP_NONSTRICT]), new Serializer\Type('string')]
 )]
 class ContestProblem extends BaseApiEntity
 {
@@ -254,11 +256,6 @@ class ContestProblem extends BaseApiEntity
     public function getExternalId(): string
     {
         return $this->getProblem()->getExternalid();
-    }
-
-    public function getApiId(EventLogService $eventLogService): string
-    {
-        return $this->getProblem()->getApiId($eventLogService);
     }
 
     #[Assert\Callback]

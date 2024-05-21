@@ -237,15 +237,8 @@ class ContestControllerTest extends JuryControllerTestCase
                                                                                                                         'lazyEvalResults' => '0']], 'name' => 'No known problem']],
                                                           'Only alphanumeric characters and ._- are allowed' => [['shortname' => '"quoted"']]];
 
-    protected static array $addEntitiesFailureNonLocal = ['This value should not be blank.' => [['externalid' => '', 'name' => 'Empty externalid']]];
-
     protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {
-        // Add external ID's when needed.
-        if (!$this->dataSourceIsLocal()) {
-            $entity['externalid'] = $entity['shortname'];
-            $expected['externalid'] = $entity['shortname'];
-        }
         return [$entity, $expected];
     }
 

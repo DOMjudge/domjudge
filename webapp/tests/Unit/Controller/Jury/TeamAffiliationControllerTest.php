@@ -40,14 +40,14 @@ class TeamAffiliationControllerTest extends JuryControllerTestCase
                                                           ['name' => 'icpc (alpnum-_)',
                                                            'icpcid' => '-_1aZ'],
                                                           ['name' => 'Special chars 😀',
-                                                           'shortname' => 'yes😀']];
-    protected static array   $addEntitiesNonLocal      = [['name' => 'External set', 'externalid' => 'ext12-._']];
+                                                           'shortname' => 'yes😀'],
+                                                          ['name' => 'External set',
+                                                           'externalid' => 'ext12-._']];
     protected static array   $addEntitiesFailure       = ['This value should not be blank.' => [['shortname' => ''],
                                                                                                 ['name' => '']],
                                                           'Only letters, numbers, dashes and underscores are allowed.' => [['icpcid' => '()viol'],
-                                                                                                                           ['icpcid' => '|viol']]];
-    protected static array $addEntitiesFailureNonLocal = ['This value should not be blank.' => [['externalid' => '']],
-                                                          'Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => '()']]];
+                                                                                                                           ['icpcid' => '|viol']],
+                                                          'Only letters, numbers, dashes, underscores and dots are allowed.' => [['externalid' => '()']]];
 
     protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {
@@ -57,14 +57,6 @@ class TeamAffiliationControllerTest extends JuryControllerTestCase
         if (!$showFlags) {
             unset($entity['country']);
             unset($expected['country']);
-        }
-        // Remove/Add external ID's when needed
-        if ($this->dataSourceIsLocal()) {
-            unset($entity['externalid']);
-            unset($expected['externalid']);
-        } else {
-            $entity['externalid'] = $entity['shortname'];
-            $expected['externalid'] = $entity['shortname'];
         }
         return [$entity, $expected];
     }

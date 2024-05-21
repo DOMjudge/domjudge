@@ -42,13 +42,11 @@
                     <td>c{{ contest.cid }}</td>
                     <td></td>
                 </tr>
-                {% if showExternalId(contest) %}
-                    <tr>
-                        <th>External ID</th>
-                        <td>{{ contest.externalid }}</td>
-                        <td></td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <th>External ID</th>
+                    <td>{{ contest.externalid }}</td>
+                    <td></td>
+                </tr>
                 <tr>
                     <th>Short name</th>
                     <td>{{ contest.shortname }}</td>
@@ -226,10 +224,7 @@
                     </td>
                     <td></td>
                 </tr>
-                {% set contestId = contest.cid %}
-                {% if showExternalId(contest) %}
-                    {% set contestId = contest.externalid %}
-                {% endif %}
+                {% set contestId = contest.externalid %}
                 {% set banner = contestId | assetPath('contest') %}
                 {% if not banner %}
                     {% set banner = globalBannerAssetPath() %}

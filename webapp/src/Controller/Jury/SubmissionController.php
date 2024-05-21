@@ -49,6 +49,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -60,12 +61,16 @@ class SubmissionController extends BaseController
     use JudgeRemainingTrait;
 
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        protected readonly EventLogService $eventLogService,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly SubmissionService $submissionService,
-        protected readonly RouterInterface $router
-    ) {}
+        protected readonly RouterInterface $router,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_submissions')]
     public function indexAction(
@@ -145,8 +150,7 @@ class SubmissionController extends BaseController
             'showContest' => count($contests) > 1,
             'hasFilters' => !empty($filters),
             'results' => $results,
-            'showExternalResult' => $this->config->get('data_source') ==
-                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+            'showExternalResult' => $this->dj->shadowMode(),
             'showTestcases' => count($submissions) <= $latestCount,
             'disabledProbs' => $disabledProblems,
             'disabledLangs' => $disabledLangs,

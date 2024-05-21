@@ -15,55 +15,52 @@ class ProblemControllerTest extends BaseTestCase
     protected ?string $entityClass = Problem::class;
 
     protected array $expectedObjects = [
-        3 => [
+        'boolfind' => [
             "ordinal"    => 2,
-            "id"         => "3",
+            "id"         => "boolfind",
             "short_name" => "C",
             "label"      => "C",
             "time_limit" => 5,
-            "externalid" => "boolfind",
             "name"       => "Boolean switch search",
             "rgb"        => "#9B630C",
             "color"      => "saddlebrown",
             "statement"  => [
                 [
-                    'href'     => 'contests/1/problems/3/statement',
+                    'href'     => 'contests/demo/problems/boolfind/statement',
                     'mime'     => 'application/pdf',
                     'filename' => 'C.pdf',
                 ],
             ],
         ],
-        2 => [
+        'fltcmp' => [
             "ordinal"    => 1,
-            "id"         => "2",
+            "id"         => "fltcmp",
             "short_name" => "B",
             "label"      => "B",
             "time_limit" => 5,
-            "externalid" => "fltcmp",
             "name"       => "Float special compare test",
             "rgb"        => "#E93603",
             "color"      => "orangered",
             "statement"  => [
                 [
-                    'href'     => 'contests/1/problems/2/statement',
+                    'href'     => 'contests/demo/problems/fltcmp/statement',
                     'mime'     => 'application/pdf',
                     'filename' => 'B.pdf',
                 ],
             ],
         ],
-        1 => [
+        'hello' => [
             "ordinal"    => 0,
-            "id"         => "1",
+            "id"         => "hello",
             "short_name" => "A",
             "label"      => "A",
             "time_limit" => 5,
-            "externalid" => "hello",
             "name"       => "Hello World",
             "rgb"        => "#9486EA",
             "color"      => "mediumpurple",
             "statement"  => [
                 [
-                    'href'     => 'contests/1/problems/1/statement',
+                    'href'     => 'contests/demo/problems/hello/statement',
                     'mime'     => 'application/pdf',
                     'filename' => 'A.pdf',
                 ],

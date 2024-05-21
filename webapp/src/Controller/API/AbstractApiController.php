@@ -79,7 +79,7 @@ abstract class AbstractApiController extends AbstractFOSRestController
 
         $qb = $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
         $qb
-            ->andWhere(sprintf('c.%s = :cid', $this->getContestIdField()))
+            ->andWhere('c.externalid = :cid')
             ->setParameter('cid', $request->attributes->get('cid'));
 
         /** @var Contest|null $contest */
@@ -90,14 +90,5 @@ abstract class AbstractApiController extends AbstractFOSRestController
         }
 
         return $contest->getCid();
-    }
-
-    protected function getContestIdField(): string
-    {
-        try {
-            return $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
-        } catch (Exception) {
-            return 'cid';
-        }
     }
 }

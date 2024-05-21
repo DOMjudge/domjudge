@@ -19,12 +19,10 @@
                     <th>ID</th>
                     <td>{{ team.teamid }}</td>
                 </tr>
-                {% if showExternalId(team) %}
-                    <tr>
-                        <th>External ID</th>
-                        <td>{{ team.externalid }}</td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <th>External ID</th>
+                    <td>{{ team.externalid }}</td>
+                </tr>
                 <tr>
                     <th>ICPC ID</th>
                     <td>
@@ -126,10 +124,7 @@
                     <tr>
                         <th>Affiliation</th>
                         <td>
-                            {% set affiliationId = team.affiliation.affilid %}
-                            {% if showExternalId(team.affiliation) %}
-                                {% set affiliationId = team.affiliation.externalid %}
-                            {% endif %}
+                            {% set affiliationId = team.affiliation.externalid %}
                             {% set affiliationLogo = affiliationId | assetPath('affilation') %}
                             {% if affiliationLogo %}
                                 <img src="{{ asset(affiliationLogo) }}" alt="{{ team.affiliation.shortname }}"
@@ -175,10 +170,7 @@
                 {% endif %}
             </table>
         </div>
-    {% set teamId = team.teamid %}
-    {% if showExternalId(team) %}
-        {% set teamId = team.externalid %}
-    {% endif %}
+    {% set teamId = team.externalid %}
     {% set teamImage = teamId | assetPath('team') %}
     {% if teamImage %}
         <div class="col">

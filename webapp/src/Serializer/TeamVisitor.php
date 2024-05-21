@@ -5,7 +5,6 @@ namespace App\Serializer;
 use App\DataTransferObject\ImageFile;
 use App\Entity\Team;
 use App\Service\DOMJudgeService;
-use App\Service\EventLogService;
 use App\Utils\Utils;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
@@ -18,7 +17,6 @@ class TeamVisitor implements EventSubscriberInterface
 {
     public function __construct(
         protected readonly DOMJudgeService $dj,
-        protected readonly EventLogService $eventLogService,
         protected readonly RequestStack $requestStack
     ) {}
 
@@ -57,7 +55,7 @@ class TeamVisitor implements EventSubscriberInterface
                 'label',
                 null
             );
-            $visitor->visitProperty($property, $team->getApiId($this->eventLogService));
+            $visitor->visitProperty($property, $team->getExternalid());
         }
     }
 
@@ -66,7 +64,7 @@ class TeamVisitor implements EventSubscriberInterface
         /** @var Team $team */
         $team = $event->getObject();
 
-        $id = $team->getApiId($this->eventLogService);
+        $id = $team->getExternalid();
 
         // Check if the asset actually exists
         if (!($teamPhoto = $this->dj->assetPath($id, 'team', true))) {

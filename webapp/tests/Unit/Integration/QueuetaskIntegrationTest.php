@@ -55,7 +55,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
             'compile_penalty' => false,
             'penalty_time' => 20,
             'score_in_seconds' => false,
-            'data_source' => 0,
+            'shadow_mode' => 0,
             'sourcefiles_limit' => 1,
             'sourcesize_limit' => 1024*256,
         ];
@@ -71,8 +71,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
 
         $this->scoreboardService = new ScoreboardService(
             $this->em, $dj, $this->config,
-            self::getContainer()->get(LoggerInterface::class),
-            self::getContainer()->get(EventLogService::class)
+            self::getContainer()->get(LoggerInterface::class)
         );
         $this->submissionService = new SubmissionService(
             $this->em,

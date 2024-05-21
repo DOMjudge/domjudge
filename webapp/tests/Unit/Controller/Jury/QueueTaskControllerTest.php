@@ -130,11 +130,11 @@ class QueueTaskControllerTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider provideLazyDataSource
+     * @dataProvider provideLazyShadowMode
      */
-    public function testLazy(int $dataSource, int $globalLazy, int $problemLazy): void
+    public function testLazy(bool $shadowMode, int $globalLazy, int $problemLazy): void
     {
-        $this->setupDatasource($dataSource);
+        $this->setupShadowMode($shadowMode);
         $contest = $this->em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         $problem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => 'hello']);
         $hello = $this->em->getRepository(ContestProblem::class)->find(
@@ -159,7 +159,7 @@ class QueueTaskControllerTest extends BaseTestCase
         $tableBody = $crawler->filter('table.data-table.table.table-sm.table-striped tbody');
         $expectedNumberQueueItems = 4;
         // In case we shadow we judge all local submissions to keep analyst working.
-        if ($dataSource !== DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
+        if (!$shadowMode) {
             if ($globalLazy === DOMJudgeService::EVAL_DEMAND) {
                 if ($problemLazy === DOMJudgeService::EVAL_DEMAND || (int)$problemLazy === (int)DOMJudgeService::EVAL_DEFAULT) {
                     $expectedNumberQueueItems = 0;
@@ -299,17 +299,17 @@ class QueueTaskControllerTest extends BaseTestCase
         }
     }
 
-    public function provideLazyDataSource(): Generator
+    public function provideLazyShadowMode(): Generator
     {
-        ['dataSources' => $dataSources] = $this->getDatasourceLoops();
-        foreach ($dataSources as $str_data_source) {
-            $dataSource = (int)$str_data_source;
+        ['shadowModes' => $shadowModes] = $this->getShadowModeLoops();
+        foreach ($shadowModes as $str_shadow_mode) {
+            $shadowMode = (bool)$str_shadow_mode;
             foreach ([DOMJudgeService::EVAL_DEMAND,
                       DOMJudgeService::EVAL_FULL] as $globalLazy) {
                 foreach ([(int)DOMJudgeService::EVAL_DEFAULT,
                           DOMJudgeService::EVAL_DEMAND,
                           DOMJudgeService::EVAL_FULL] as $problemLazy) {
-                    yield [$dataSource, $globalLazy, $problemLazy];
+                    yield [$shadowMode, $globalLazy, $problemLazy];
                 }
             }
         }

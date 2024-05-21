@@ -168,10 +168,7 @@
                             {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
-                            {% set affiliationId = score.team.affiliation.affilid %}
-                            {% if showExternalId(score.team.affiliation) %}
-                                {% set affiliationId = score.team.affiliation.externalid %}
-                            {% endif %}
+                            {% set affiliationId = score.team.affiliation.externalid %}
                             {% set affiliationImage = affiliationId | assetPath('affiliation') %}
                             {% if affiliationImage %}
                                 <img loading="lazy" class="affiliation-logo"

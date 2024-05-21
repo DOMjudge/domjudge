@@ -158,8 +158,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
                 if ($contestProblem instanceof ContestProblemWrapper) {
                     $contestProblem = $contestProblem->getContestProblem();
                 }
-                $probid = $this->getIdField() === 'p.probid' ? $contestProblem->getProbid() : $contestProblem->getExternalId();
-                if (in_array($probid, $ids)) {
+                if (in_array($contestProblem->getExternalId(), $ids)) {
                     $objects[] = $item;
                 }
             }
@@ -383,8 +382,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             if ($contestProblem instanceof ContestProblemWrapper) {
                 $contestProblem = $contestProblem->getContestProblem();
             }
-            $probid                = $this->getIdField() === 'p.probid' ? $contestProblem->getProbid() : $contestProblem->getExternalId();
-            if ($probid == $id) {
+            if ($contestProblem->getExternalId() == $id) {
                 $object = $item;
                 break;
             }
@@ -463,7 +461,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     protected function getIdField(): string
     {
-        return sprintf('p.%s', $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid');
+        return 'p.externalid';
     }
 
     /**

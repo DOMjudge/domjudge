@@ -417,7 +417,7 @@ class ContestController extends AbstractRestController
         if (!$request->request->has('start_time') && !$request->request->has('scoreboard_thaw_time')) {
             throw new BadRequestHttpException('Missing "start_time" or "scoreboard_thaw_time" in request.');
         }
-        if ($request->request->get('id') != $contest->getApiId($this->eventLogService)) {
+        if ($request->request->get('id') != $contest->getExternalid()) {
             throw new BadRequestHttpException('Invalid "id" in request.');
         }
         if ($request->request->has('start_time') && $request->request->has('scoreboard_thaw_time')) {
@@ -945,7 +945,7 @@ class ContestController extends AbstractRestController
 
     protected function getIdField(): string
     {
-        return sprintf('c.%s', $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid');
+        return 'c.externalid';
     }
 
     /**

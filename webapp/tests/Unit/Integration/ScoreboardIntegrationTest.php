@@ -69,7 +69,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
             'compile_penalty'          => false,
             'penalty_time'             => 20,
             'score_in_seconds'         => false,
-            'data_source'              => 0,
+            'shadow_mode'              => 0,
             'show_teams_on_scoreboard' => 0,
         ];
 
@@ -83,8 +83,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->em = self::getContainer()->get('doctrine')->getManager();
         $this->ss = new ScoreboardService(
             $this->em, $this->dj, $this->config,
-            self::getContainer()->get(LoggerInterface::class),
-            self::getContainer()->get(EventLogService::class)
+            self::getContainer()->get(LoggerInterface::class)
         );
 
         // Create a contest, problems and teams for which to test the

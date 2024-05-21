@@ -137,8 +137,7 @@ class GeneralInfoController extends AbstractFOSRestController
         foreach ($contests as $contest) {
             $contestStats = $this->dj->getContestStats($contest);
             $result[] = new ExtendedContestStatus(
-                $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_LOCAL
-                    ? (string)$contest->getCid() : $contest->getExternalid(),
+                $contest->getExternalid(),
                 $contestStats
             );
         }
@@ -384,17 +383,5 @@ class GeneralInfoController extends AbstractFOSRestController
     public function addProblemAction(Request $request): array
     {
         return $this->importProblemService->importProblemFromRequest($request);
-    }
-
-    /**
-     * Get the field to use for getting contests by ID.
-     */
-    protected function getContestIdField(): string
-    {
-        try {
-            return $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
-        } catch (Exception) {
-            return 'cid';
-        }
     }
 }

@@ -5,6 +5,7 @@ namespace App\Service;
 use App\DataTransferObject\ConfigCheckItem;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
+use App\Entity\HasExternalIdInterface;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Team;
@@ -485,7 +486,7 @@ class CheckConfigService
         $desc = '';
         $result = 'O';
         foreach ($contests as $contest) {
-            if ($cid = $contest->getApiId($this->eventLogService)) {
+            if ($cid = $contest->getExternalid()) {
                 $bannerpath = $this->dj->assetPath($cid, 'contest', true);
                 $contestName = 'c' . $contest->getCid() . ' (' . $contest->getShortname() . ')';
                 if ($bannerpath) {
@@ -685,7 +686,7 @@ class CheckConfigService
         $desc = '';
         $result = 'O';
         foreach ($teams as $team) {
-            if ($tid = $team->getApiId($this->eventLogService)) {
+            if ($tid = $team->getExternalid()) {
                 $photopath = $this->dj->assetPath($tid, 'team', true);
                 if ($photopath && ($filesize = filesize($photopath)) > 5 * 1024 * 1024) {
                     $result = 'W';
@@ -729,7 +730,7 @@ class CheckConfigService
                 continue;
             }
 
-            if ($aid = $affiliation->getApiId($this->eventLogService)) {
+            if ($aid = $affiliation->getExternalid()) {
                 $logopath = $this->dj->assetPath($aid, 'affiliation', true);
                 $logopathMask = str_replace('.jpg', '.{jpg,png,svg}', $this->dj->assetPath($aid, 'affiliation', true, 'jpg'));
                 if (!$logopath) {
@@ -845,10 +846,8 @@ class CheckConfigService
             $class      = sprintf('App\\Entity\\%s', $shortClass);
             try {
                 if (class_exists($class)
-                    // ContestProblem is checked using Problem.
-                    && $class != ContestProblem::class
-                    && ($externalIdField = $this->eventLogService->externalIdFieldForEntity($class))) {
-                    $result[$shortClass] = $this->checkExternalIdentifiers($class, $externalIdField);
+                    && is_a($class, HasExternalIdInterface::class, true)) {
+                    $result[$shortClass] = $this->checkExternalIdentifiers($class);
                 }
             } catch (BadMethodCallException) {
                 // Ignore, this entity does not have an API endpoint.
@@ -862,7 +861,7 @@ class CheckConfigService
     /**
      * @param class-string $class
      */
-    protected function checkExternalIdentifiers(string $class, string $externalIdField): ConfigCheckItem
+    protected function checkExternalIdentifiers(string $class): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
         $parts      = explode('\\', $class);
@@ -872,7 +871,7 @@ class CheckConfigService
         $rowsWithoutExternalId = $this->em->createQueryBuilder()
             ->from($class, 'e')
             ->select('e')
-            ->andWhere(sprintf('e.%s IS NULL or e.%s = :empty', $externalIdField, $externalIdField))
+            ->andWhere('e.externalid IS NULL or e.externalid = :empty')
             ->setParameter('empty', '')
             ->getQuery()
             ->getResult();

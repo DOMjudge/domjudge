@@ -31,7 +31,6 @@ abstract class BaseTestCase extends BaseBaseTestCase
      */
     protected array $expectedObjects = [];
 
-    /** If the class to check uses external IDs in non-local mode, set the class name. */
     protected ?string $objectClassForExternalId = null;
 
     /**
@@ -67,10 +66,6 @@ abstract class BaseTestCase extends BaseBaseTestCase
      */
     protected function getDemoContestId(): string
     {
-        if ($this->dataSourceIsLocal()) {
-            return (string)$this->demoContest->getCid();
-        }
-
         return $this->demoContest->getExternalid();
     }
 

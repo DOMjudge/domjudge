@@ -6,20 +6,17 @@ use App\DataTransferObject\BaseFile;
 use App\DataTransferObject\FileWithName;
 use App\Entity\Submission;
 use App\Service\DOMJudgeService;
-use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
-use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
 class SubmissionVisitor implements EventSubscriberInterface
 {
     public function __construct(
         protected readonly DOMJudgeService $dj,
-        protected readonly EventLogService $eventLogService,
-        protected readonly EntityManagerInterface $em
+        protected readonly EntityManagerInterface $em,
     ) {}
 
     /**
@@ -45,8 +42,8 @@ class SubmissionVisitor implements EventSubscriberInterface
             $route = $this->dj->apiRelativeUrl(
                 'v4_submission_files',
                 [
-                    'cid' => $submission->getContest()->getApiId($this->eventLogService),
-                    'id'  => $submission->getExternalid() ?? $submission->getSubmitid(),
+                    'cid' => $submission->getContest()->getExternalid(),
+                    'id'  => $submission->getExternalid(),
                 ]
             );
             $property = new StaticPropertyMetadata(

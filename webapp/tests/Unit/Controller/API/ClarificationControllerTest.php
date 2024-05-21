@@ -22,8 +22,8 @@ class ClarificationControllerTest extends BaseTestCase
 
     protected array $expectedObjects = [
         ClarificationFixture::class . ':0' => [
-            "problem_id"   => "1",
-            "from_team_id" => "2",
+            "problem_id"   => "hello",
+            "from_team_id" => "exteam",
             "to_team_id"   => null,
             "reply_to_id"  => null,
             "time"         => "2018-02-11T21:48:58.901+00:00",
@@ -40,9 +40,9 @@ class ClarificationControllerTest extends BaseTestCase
             "answered"     => true,
         ],
         ClarificationFixture::class . ':2' => [
-            "problem_id"   => "1",
+            "problem_id"   => "hello",
             "from_team_id" => null,
-            "to_team_id"   => "2",
+            "to_team_id"   => "exteam",
             "reply_to_id"  => null,
             "time"         => "2018-02-11T21:47:43.689+00:00",
             "text"         => "There was a mistake in judging this problem. Please try again",
@@ -90,7 +90,7 @@ class ClarificationControllerTest extends BaseTestCase
             $clarificationFromApi = $this->verifyApiJsonResponse('GET', $clarificationApi.$postfix, 200, 'demo');
             static::assertCount($expectedNumber, $clarificationFromApi);
 
-            static::assertEquals("2", $clarificationFromApi[0]['from_team_id']);
+            static::assertEquals("exteam", $clarificationFromApi[0]['from_team_id']);
             static::assertEquals("Is it necessary to read the problem statement carefully?", $clarificationFromApi[0]['text']);
             static::assertArrayNotHasKey('answered', $clarificationFromApi[0]);
 
@@ -100,7 +100,7 @@ class ClarificationControllerTest extends BaseTestCase
                 static::assertArrayNotHasKey('answered', $clarificationFromApi[1]);
             }
 
-            static::assertEquals("2", $clarificationFromApi[$mistakJudgingId]['to_team_id']);
+            static::assertEquals("exteam", $clarificationFromApi[$mistakJudgingId]['to_team_id']);
             static::assertEquals("There was a mistake in judging this problem. Please try again", $clarificationFromApi[$mistakJudgingId]['text']);
             static::assertArrayNotHasKey('answered', $clarificationFromApi[$mistakJudgingId]);
         }
@@ -144,15 +144,15 @@ class ClarificationControllerTest extends BaseTestCase
     {
         yield ['demo', [], ""];
         yield ['demo', ['invalidfield' => 'value'], "/text:\n.*This value should be of type unknown./"];
-        yield ['demo', ['text' => 'This is a clarification', 'from_team_id' => '1'], "Can not create a clarification from a different team."];
-        yield ['demo', ['text' => 'This is a clarification', 'to_team_id' => '2'], "Can not create a clarification that is sent to a team."];
-        yield ['demo', ['text' => 'This is a clarification', 'problem_id' => '4'], "Problem '4' not found."];
+        yield ['demo', ['text' => 'This is a clarification', 'from_team_id' => 'domjudge'], "Can not create a clarification from a different team."];
+        yield ['demo', ['text' => 'This is a clarification', 'to_team_id' => 'exteam'], "Can not create a clarification that is sent to a team."];
+        yield ['demo', ['text' => 'This is a clarification', 'problem_id' => 'prob'], "Problem 'prob' not found."];
         yield ['demo', ['text' => 'This is a clarification', 'time' => '1234'], "A team can not assign time."];
         yield ['demo', ['text' => 'This is a clarification', 'id' => '1234'], "A team can not assign id."];
         yield ['demo', ['text' => 'This is a clarification', 'reply_to_id' => 'nonexistent'], "Clarification 'nonexistent' not found."];
-        yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => '2', 'to_team_id' => '2'], "Can not send a clarification from and to a team."];
-        yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => '3'], "Team with ID '3' not found in contest or not enabled."];
-        yield ['admin', ['text' => 'This is a clarification', 'to_team_id' => '3'], "Team with ID '3' not found in contest or not enabled."];
+        yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => 'exteam', 'to_team_id' => 'exteam'], "Can not send a clarification from and to a team."];
+        yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => 'noteam'], "Team with ID 'noteam' not found in contest or not enabled."];
+        yield ['admin', ['text' => 'This is a clarification', 'to_team_id' => 'noteam'], "Team with ID 'noteam' not found in contest or not enabled."];
         yield ['admin', ['text' => 'This is a clarification', 'time' => 'this is not a time'], "Can not parse time 'this is not a time'."];
     }
 
@@ -202,10 +202,10 @@ class ClarificationControllerTest extends BaseTestCase
         array $dataToSend,
         bool $idIsExternal,
         string $expectedBody,
-        ?int $expectedProblemId,
-        ?int $expectedInReplyToId,
-        ?int $expectedSenderId,
-        ?int $expectedRecipientId,
+        ?string $expectedProblemId,
+        ?string $expectedInReplyToId,
+        ?string $expectedSenderId,
+        ?string $expectedRecipientId,
         ?string $expectedClarificationExternalId, // If known
         ?string $expectedTime // If known
     ): void {
@@ -272,7 +272,7 @@ class ClarificationControllerTest extends BaseTestCase
             'This is some text',
             null,
             null,
-            2,
+            'exteam',
             null,
             null,
             null,
@@ -315,24 +315,24 @@ class ClarificationControllerTest extends BaseTestCase
         ];
         yield [
             'admin',
-            ['text' => 'This is a clarification to a specific team', 'to_team_id' => '2'],
+            ['text' => 'This is a clarification to a specific team', 'to_team_id' => 'exteam'],
             false,
             'This is a clarification to a specific team',
             null,
             null,
             null,
-            2,
+            'exteam',
             null,
             null,
         ];
         yield [
             'admin',
-            ['text' => 'This is a clarification from a specific team', 'from_team_id' => '1'],
+            ['text' => 'This is a clarification from a specific team', 'from_team_id' => 'domjudge'],
             false,
             'This is a clarification from a specific team',
             null,
             null,
-            1,
+            'domjudge',
             null,
             null,
             null,

@@ -132,7 +132,7 @@ class TeamController extends AbstractRestController
         }
         /** @var Team|null $team */
         $team = $this->getQueryBuilder($request)
-            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->andWhere('t.externalid = :id')
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
@@ -162,7 +162,7 @@ class TeamController extends AbstractRestController
         $contestId = null;
         /** @var Team|null $team */
         $team = $this->getQueryBuilder($request)
-            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->andWhere('t.externalid = :id')
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
@@ -214,7 +214,7 @@ class TeamController extends AbstractRestController
     {
         /** @var Team|null $team */
         $team = $this->getQueryBuilder($request)
-            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->andWhere('t.externalid = :id')
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
@@ -293,10 +293,9 @@ class TeamController extends AbstractRestController
             throw new BadRequestHttpException("Error while adding team: $message");
         }
 
+        /** @var Team $team */
         $team = $saved[0];
-        $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
-        $method = sprintf('get%s', ucfirst($idField));
-        $id = call_user_func([$team, $method]);
+        $id = $team->getExternalid();
 
         return $this->renderCreateData($request, $saved[0], 'team', $id);
     }
@@ -341,6 +340,6 @@ class TeamController extends AbstractRestController
 
     protected function getIdField(): string
     {
-        return sprintf('t.%s', $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid');
+        return 't.externalid';
     }
 }

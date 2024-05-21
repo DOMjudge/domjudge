@@ -152,7 +152,7 @@ HEREDOC;
     public function provideTsvContents(): Generator
     {
         yield ['a:contains("teams.tsv")', 'teams	1
-2	exteam	3	Example teamname	Utrecht University	UU	NLD	utrecht
+exteam	exteam	participants	Example teamname	Utrecht University	UU	NLD	utrecht
 '];
         yield ['li:contains("wf_results.tsv") a:contains("for sort order 0")', 'results	1
 exteam	1	Gold Medal	0	0	0	Participants
@@ -165,9 +165,9 @@ exteam	1	Gold Medal	0	0	0	Participants
         yield ['li:contains("full_results.tsv") a:contains("for sort order 1")', 'results	1
 '];
         yield ['a:contains("groups.tsv")', 'groups	1
-2	Self-Registered
-3	Participants
-4	Observers
+self-registered	Self-Registered
+participants	Participants
+observers	Observers
 '];
     }
 

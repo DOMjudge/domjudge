@@ -50,23 +50,25 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 )]
 #[UniqueEntity(fields: 'shortname')]
 #[UniqueEntity(fields: 'externalid')]
-class Contest extends BaseApiEntity implements AssetEntityInterface
+class Contest extends BaseApiEntity implements
+    HasExternalIdInterface,
+    AssetEntityInterface,
+    ExternalIdFromInternalIdInterface,
+    PrefixedExternalIdInterface
 {
     final public const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Contest ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('id')]
-    #[Serializer\Type('string')]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     protected ?int $cid = null;
 
     #[ORM\Column(
         nullable: true,
         options: ['comment' => 'Contest ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
-    #[Serializer\SerializedName('external_id')]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\SerializedName('id')]
     protected ?string $externalid = null;
 
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]

@@ -128,8 +128,7 @@ class ClarificationController extends AbstractRestController
                 ->join('cp.problem', 'p')
                 ->join('cp.contest', 'c')
                 ->select('cp, c')
-                ->andWhere(sprintf('p.%s = :problem',
-                    $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
+                ->andWhere('p.externalid = :problem')
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')
                 ->setParameter('problem', $problemId)
@@ -151,8 +150,7 @@ class ClarificationController extends AbstractRestController
             $replyTo = $this->em->createQueryBuilder()
                 ->from(Clarification::class, 'c')
                 ->select('c')
-                ->andWhere(sprintf('c.%s = :clarification',
-                    $this->eventLogService->externalIdFieldForEntity(Clarification::class) ?? 'clarid'))
+                ->andWhere('c.externalid = :clarification')
                 ->andWhere('c.contest = :contest')
                 ->setParameter('clarification', $replyToId)
                 ->setParameter('contest', $contestId)
@@ -169,15 +167,12 @@ class ClarificationController extends AbstractRestController
         // By default, use the team of the user
         $fromTeam = $this->isGranted('ROLE_API_WRITER') ? null : $this->dj->getUser()->getTeam();
         if ($fromTeamId = $clarificationPost->fromTeamId) {
-            $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
-            $method  = sprintf('get%s', ucfirst($idField));
-
             // If the user is an admin or API writer, allow it to specify the team
             if ($this->isGranted('ROLE_API_WRITER')) {
-                $fromTeam = $this->dj->loadTeam($idField, $fromTeamId, $contest);
+                $fromTeam = $this->dj->loadTeam($fromTeamId, $contest);
             } elseif (!$fromTeam) {
                 throw new BadRequestHttpException('User does not belong to a team.');
-            } elseif ((string)call_user_func([$fromTeam, $method]) !== (string)$fromTeamId) {
+            } elseif ($fromTeam->getExternalid() !== $fromTeamId) {
                 throw new BadRequestHttpException('Can not create a clarification from a different team.');
             }
         } elseif (!$this->isGranted('ROLE_API_WRITER') && !$fromTeam) {
@@ -189,11 +184,9 @@ class ClarificationController extends AbstractRestController
         // By default, send to jury.
         $toTeam = null;
         if ($toTeamId = $clarificationPost->toTeamId) {
-            $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
-
             // If the user is an admin or API writer, allow it to specify the team.
             if ($this->isGranted('ROLE_API_WRITER')) {
-                $toTeam = $this->dj->loadTeam($idField, $toTeamId, $contest);
+                $toTeam = $this->dj->loadTeam($toTeamId, $contest);
             } else {
                 throw new BadRequestHttpException('Can not create a clarification that is sent to a team.');
             }
@@ -287,7 +280,8 @@ class ClarificationController extends AbstractRestController
             ->leftJoin('clar.problem', 'p')
             ->select('clar, c, r, reply, p')
             ->andWhere('clar.contest = :cid')
-            ->setParameter('cid', $this->getContestId($request));
+            ->setParameter('cid', $this->getContestId($request))
+            ->orderBy('clar.clarid');
 
         if (!$this->dj->checkrole('api_reader') &&
             !$this->dj->checkrole('judgehost')) {
@@ -313,6 +307,6 @@ class ClarificationController extends AbstractRestController
 
     protected function getIdField(): string
     {
-        return sprintf('clar.%s', $this->eventLogService->externalIdFieldForEntity(Clarification::class) ?? 'clarid');
+        return 'clar.externalid';
     }
 }

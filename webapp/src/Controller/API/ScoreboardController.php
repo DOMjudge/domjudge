@@ -192,7 +192,7 @@ class ScoreboardController extends AbstractApiController
                 $contestProblem = $scoreboard->getProblems()[$problemId];
                 $problem = new Problem(
                     label: $contestProblem->getShortname(),
-                    problemId: $contestProblem->getApiId($this->eventLogService),
+                    problemId: $contestProblem->getProblem()->getExternalid(),
                     numJudged: $matrixItem->numSubmissions,
                     numPending: $matrixItem->numSubmissionsPending,
                     solved: $matrixItem->isCorrect,
@@ -217,7 +217,7 @@ class ScoreboardController extends AbstractApiController
 
             $row = new Row(
                 rank: $teamScore->rank,
-                teamId: $teamScore->team->getApiId($this->eventLogService),
+                teamId: $teamScore->team->getExternalid(),
                 score: $score,
                 problems: $problems,
             );

@@ -32,12 +32,14 @@ class TeamCategoryController extends BaseController
     use JudgeRemainingTrait;
 
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly KernelInterface $kernel,
-        protected readonly EventLogService $eventLogService
-    ) {}
+        KernelInterface $kernel,
+        protected readonly EventLogService $eventLogService,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_team_categories')]
     public function indexAction(): Response
@@ -53,6 +55,7 @@ class TeamCategoryController extends BaseController
             ->getQuery()->getResult();
         $table_fields   = [
             'categoryid' => ['title' => 'ID', 'sort' => true],
+            'externalid' => ['title' => 'external ID', 'sort' => true],
             'icpcid' => ['title' => 'ICPC ID', 'sort' => true],
             'sortorder' => ['title' => 'sort', 'sort' => true, 'default_sort' => true],
             'name' => ['title' => 'name', 'sort' => true],
@@ -60,13 +63,6 @@ class TeamCategoryController extends BaseController
             'visible' => ['title' => 'visible', 'sort' => true],
             'allow_self_registration' => ['title' => 'self-registration', 'sort' => true],
         ];
-
-        // Insert external ID field when configured to use it.
-        if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(TeamCategory::class)) {
-            $table_fields = array_slice($table_fields, 0, 1, true) +
-                [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
-                array_slice($table_fields, 1, null, true);
-        }
 
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
         $team_categories_table = [];
@@ -140,8 +136,7 @@ class TeamCategoryController extends BaseController
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
-            'showExternalResult' => $this->config->get('data_source') ==
-                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+            'showExternalResult' => $this->dj->shadowMode(),
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]),
@@ -172,13 +167,12 @@ class TeamCategoryController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamCategory,
-                              $teamCategory->getCategoryid(), false);
+            $this->saveEntity($teamCategory, $teamCategory->getCategoryid(), false);
             // Also emit an update event for all teams of the category, since the hidden property might have changed
             $teams = $teamCategory->getTeams();
             if (!$teams->isEmpty()) {
                 $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $teams->toArray());
-                foreach ($this->contestsForEntity($teamCategory, $this->dj) as $contest) {
+                foreach ($this->contestsForEntity($teamCategory) as $contest) {
                     $this->eventLogService->log(
                         'teams',
                         $teamIds,
@@ -209,8 +203,7 @@ class TeamCategoryController extends BaseController
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$teamCategory], $this->generateUrl('jury_team_categories'));
+        return $this->deleteEntities($request, [$teamCategory], $this->generateUrl('jury_team_categories'));
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -223,10 +216,11 @@ class TeamCategoryController extends BaseController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->persist($teamCategory);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamCategory, null, true);
-            return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
+        if ($response = $this->processAddFormForExternalIdEntity(
+            $form, $teamCategory,
+            fn() => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()])
+        )) {
+            return $response;
         }
 
         return $this->render('jury/team_category_add.html.twig', [

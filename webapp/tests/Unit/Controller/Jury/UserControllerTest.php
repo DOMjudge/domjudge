@@ -89,5 +89,4 @@ class UserControllerTest extends JuryControllerTestCase
                                                                                                 ['ipAddress' => '1.1.1.256'],
                                                                                                 ['ipAddress' => '1.1.1.1.1'],
                                                                                                 ['ipAddress' => '::g']]];
-    protected static array   $addEntitiesFailureNonLocal = ['This value should not be blank.' => [['externalid' => '', 'name' => 'Empty externalid (Skipped when datasource=0)']]];
 }

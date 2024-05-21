@@ -355,17 +355,11 @@
             enum_class: App\Utils\EventFeedFormat
             public: false
             description: Format of the event feed to use. See [current draft](https://ccs-specs.icpc.io/draft/contest_api#event-feed) and [versions available](https://ccs-specs.icpc.io/).
-        -   name: data_source
-            type: int
-            default_value: 0
+        -   name: shadow_mode
+            type: bool
+            default_value: false
             public: false
-            description: "Source of data: used to indicate whether internal or external IDs are exposed in the API. `configuration data external` is typically used when loading configuration data from the ICPC CMS, and `configuration and live data external` when running DOMjudge as \"shadow system\"."
-            options:
-                0: all local
-                1: configuration data external
-                2: configuration and live data external
-            regex: /^\d+$/
-            error_message: A value between 0 and 2 is required.
+            description: Is this system running as a shadow system?
             docdescription: See :doc:`the chapter on running DOMjudge as a shadow system<shadow>` for more information.
         -   name: external_contest_sources_allow_untrusted_certificates
             type: bool

@@ -67,9 +67,6 @@ class DOMJudgeService
     protected ?Executable $defaultCompareExecutable = null;
     protected ?Executable $defaultRunExecutable = null;
 
-    final public const DATA_SOURCE_LOCAL = 0;
-    final public const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
-    final public const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
     final public const EVAL_DEFAULT = 0;
     final public const EVAL_LAZY = 1;
     final public const EVAL_FULL = 2;
@@ -385,7 +382,7 @@ class DOMJudgeService
                 ->setParameter('status', 'open')
                 ->getQuery()->getResult();
 
-            if ($this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
+            if ($this->shadowMode()) {
                 if ($contest) {
                     $shadow_difference_count = $this->em->createQueryBuilder()
                         ->from(Submission::class, 's')
@@ -1308,7 +1305,7 @@ class DOMJudgeService
      * @param bool $fullPath If true, get the full path. If false, get the webserver relative path
      * @param string|null $forceExtension If set, also return the asset path if it does not exist currently and use the given extension
      */
-    public function assetPath(string $name, string $type, bool $fullPath = false, ?string $forceExtension = null): ?string
+    public function assetPath(?string $name, string $type, bool $fullPath = false, ?string $forceExtension = null): ?string
     {
         $prefix = $fullPath ? ($this->getDomjudgeWebappDir() . '/public/') : '';
         switch ($type) {
@@ -1353,20 +1350,20 @@ class DOMJudgeService
     /**
      * Get the full asset path for the given entity and property.
      */
-    public function fullAssetPath(AssetEntityInterface $entity, string $property, bool $useExternalid, ?string $forceExtension = null): ?string
+    public function fullAssetPath(AssetEntityInterface $entity, string $property, ?string $forceExtension = null): ?string
     {
         if ($entity instanceof Team && $property == 'photo') {
-            return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getTeamid(), 'team', true, $forceExtension);
+            return $this->assetPath($entity->getExternalid(), 'team', true, $forceExtension);
         } elseif ($entity instanceof TeamAffiliation && $property == 'logo') {
-            return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getAffilid(), 'affiliation', true, $forceExtension);
+            return $this->assetPath($entity->getExternalid(), 'affiliation', true, $forceExtension);
         } elseif ($entity instanceof Contest && $property == 'banner') {
-            return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getCid(), 'contest', true, $forceExtension);
+            return $this->assetPath($entity->getExternalid(), 'contest', true, $forceExtension);
         }
 
         return null;
     }
 
-    public function loadTeam(string $idField, string $teamId, Contest $contest): Team
+    public function loadTeam(string $teamId, Contest $contest): Team
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't')
@@ -1374,7 +1371,7 @@ class DOMJudgeService
             ->leftJoin('t.category', 'tc')
             ->leftJoin('t.contests', 'c')
             ->leftJoin('tc.contests', 'cc')
-            ->andWhere(sprintf('t.%s = :team', $idField))
+            ->andWhere('t.externalid = :team')
             ->andWhere('t.enabled = 1')
             ->setParameter('team', $teamId);
 
@@ -1564,8 +1561,7 @@ class DOMJudgeService
 
             // Special case, we're shadow and someone submits on our side in that case
             // we're not super lazy.
-            if ($this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL
-                && $submission->getExternalid() === null) {
+            if ($this->shadowMode() && $submission->getExternalid() === null) {
                 $evalOnDemand = false;
             }
             if ($manualRequest) {
@@ -1664,5 +1660,10 @@ class DOMJudgeService
         }
 
         $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParamsWithoutColon);
+    }
+
+    public function shadowMode(): bool
+    {
+        return (bool)$this->config->get('shadow_mode');
     }
 }

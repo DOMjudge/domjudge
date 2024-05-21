@@ -2,6 +2,8 @@
 
 namespace App\Tests\Unit\Service;
 
+use App\DataFixtures\Test\TeamWithExternalIdEqualsOneFixture;
+use App\DataFixtures\Test\TeamWithExternalIdEqualsTwoFixture;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
@@ -11,6 +13,7 @@ use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ImportExportService;
+use App\Tests\Unit\BaseTestCase;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
@@ -18,7 +21,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class ImportExportServiceTest extends KernelTestCase
+class ImportExportServiceTest extends BaseTestCase
 {
     protected function setUp(): void
     {
@@ -332,6 +335,8 @@ class ImportExportServiceTest extends KernelTestCase
 
     public function testImportAccountsTsvSuccess(): void
     {
+        $this->loadFixtures([TeamWithExternalIdEqualsOneFixture::class, TeamWithExternalIdEqualsTwoFixture::class]);
+
         // We test all account types twice:
         // - Team without postfix
         // - Team with postfix
@@ -382,13 +387,13 @@ EOF;
   name: Team 1
   password: password1
   type: team
-  team_id: 1
+  team_id: domjudge
 - id: team2
   username: team2
   name: Team 2
   password: password2
   type: team
-  team_id: 2
+  team_id: exteam
   ip: 1.2.3.4
 - id: judge1
   username: judge1
@@ -1142,12 +1147,6 @@ EOF;
     {
         // First clear the entity manager to have all data.
         static::getContainer()->get(EntityManagerInterface::class)->clear();
-        $config = static::getContainer()->get(ConfigurationService::class);
-        $dataSource = $config->get('data_source');
-        if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
-            return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
-        } else {
-            return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
-        }
+        return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
     }
 }

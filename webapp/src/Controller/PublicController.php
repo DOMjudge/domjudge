@@ -8,6 +8,7 @@ use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,6 +21,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -27,12 +29,16 @@ use Symfony\Component\Routing\RouterInterface;
 class PublicController extends BaseController
 {
     public function __construct(
-        protected readonly DOMJudgeService $dj,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly ScoreboardService $scoreboardService,
         protected readonly StatisticsService $stats,
-        protected readonly EntityManagerInterface $em
-    ) {}
+        EntityManagerInterface $em,
+        EventLogService $eventLog,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLog, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'public_index')]
     #[Route(path: '/scoreboard')]

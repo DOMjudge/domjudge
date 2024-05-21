@@ -25,10 +25,7 @@
                     <tr>
                         <th>Affiliation</th>
                         <td>
-                        {% set affiliationId = team.affiliation.affilid %}
-                        {% if showExternalId(team.affiliation) %}
-                            {% set affiliationId = team.affiliation.externalid %}
-                        {% endif %}
+                        {% set affiliationId = team.affiliation.externalid %}
                         {% set affiliationLogo = affiliationId | assetPath('affiliation') %}
                         {% if affiliationLogo %}
                             <img src="{{ asset(affiliationLogo) }}" alt="{{ team.affiliation.shortname }}"
@@ -53,10 +50,7 @@
                 {% endif %}
             </table>
         </div>
-    {% set teamId = team.teamid %}
-    {% if showExternalId(team) %}
-        {% set teamId = team.externalid %}
-    {% endif %}
+    {% set teamId = team.externalid %}
     {% set teamImage = teamId | assetPath('team') %}
     {% if teamImage %}
         <div class="col-lg-{{ size | default(4) }}">

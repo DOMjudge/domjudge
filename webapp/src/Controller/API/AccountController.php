@@ -110,7 +110,8 @@ class AccountController extends AbstractRestController
 
         if ($request->query->has('team')) {
             $queryBuilder
-                ->andWhere('u.team = :team')
+                ->leftJoin('u.team', 't')
+                ->andWhere('t.externalid = :team')
                 ->setParameter('team', $request->query->get('team'));
         }
 
@@ -119,6 +120,6 @@ class AccountController extends AbstractRestController
 
     protected function getIdField(): string
     {
-        return sprintf('u.%s', $this->eventLogService->externalIdFieldForEntity(User::class) ?? 'userid');
+        return 'u.externalid';
     }
 }
