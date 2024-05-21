@@ -322,6 +322,7 @@ class TeamController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->possiblyAddUser($team);
             $this->assetUpdater->updateAssets($team);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team,
                               $team->getTeamid(), false);
@@ -358,21 +359,7 @@ class TeamController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var User $user */
-            $user = $team->getUsers()->first();
-            if ($team->getAddUserForTeam() === Team::CREATE_NEW_USER) {
-                // Create a user for the team.
-                $user = new User();
-                $user->setUsername($team->getNewUsername());
-                $team->addUser($user);
-                // Make sure the user has the team role to make validation work.
-                $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
-                $user->addUserRole($role);
-                // Set the user's name to the team name when creating a new user.
-                $user->setName($team->getEffectiveName());
-            } elseif ($team->getAddUserForTeam() === Team::ADD_EXISTING_USER) {
-                $team->addUser($team->getExistingUser());
-            }
+            $this->possiblyAddUser($team);
             $this->em->persist($team);
             $this->assetUpdater->updateAssets($team);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team, null, true);
@@ -383,5 +370,29 @@ class TeamController extends BaseController
             'team' => $team,
             'form' => $form,
         ]);
+    }
+
+    /**
+     * Add an existing or new user to a team if configured to do so
+     */
+    protected function possiblyAddUser(Team $team): void
+    {
+        if ($team->getAddUserForTeam() === Team::CREATE_NEW_USER) {
+            // Create a user for the team.
+            $user = new User();
+            $user->setUsername($team->getNewUsername());
+            // Set the external ID if we need to do so.
+            if ($this->eventLogService->externalIdFieldForEntity(User::class)) {
+                $user->setExternalid($team->getNewUsername());
+            }
+            $team->addUser($user);
+            // Make sure the user has the team role to make validation work.
+            $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
+            $user->addUserRole($role);
+            // Set the user's name to the team name when creating a new user.
+            $user->setName($team->getEffectiveName());
+        } elseif ($team->getAddUserForTeam() === Team::ADD_EXISTING_USER) {
+            $team->addUser($team->getExistingUser());
+        }
     }
 }
