@@ -63,6 +63,14 @@ class ImportExportService
         if ($warnMsg = $contest->getWarningMessage()) {
             $data['warning_message'] = $warnMsg;
         }
+
+        foreach (['gold', 'silver', 'bronze'] as $medal) {
+            $medalCount = $contest->{'get' . ucfirst($medal) . 'Medals'}();
+            if ($medalCount) {
+                $data['medals'][$medal] = $medalCount;
+            }
+        }
+
         if ($contest->getFreezetime() !== null) {
             $data['scoreboard_freeze_time'] = Utils::absTime($contest->getFreezetime(), true);
             $data['scoreboard_freeze_duration'] = Utils::relTime(
@@ -228,6 +236,13 @@ class ImportExportService
                 $contest
                     ->setMedalsEnabled(true)
                     ->addMedalCategory($visibleCategory);
+            }
+
+            foreach (['gold', 'silver', 'bronze'] as $medal) {
+                if (isset($data['medals'][$medal])) {
+                    $setter = 'set' . ucfirst($medal) . 'Medals';
+                    $contest->$setter($data['medals'][$medal]);
+                }
             }
         }
 

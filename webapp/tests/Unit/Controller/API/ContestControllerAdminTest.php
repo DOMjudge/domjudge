@@ -61,6 +61,10 @@ start_time: '2021-03-27T09:00:00+00:00'
 end_time: '2021-03-27T11:00:00+00:00'
 duration: 2:00:00.000
 penalty_time: 20
+medals:
+    gold: 4
+    silver: 4
+    bronze: 4
 scoreboard_freeze_time: '2021-03-27T10:30:00+00:00'
 scoreboard_freeze_duration: 0:30:00
 EOF;
