@@ -102,6 +102,10 @@ end_time: '{$year}-01-01T13:00:00+00:00'
 duration: '5:00:00.000'
 penalty_time: 20
 activate_time: '{$pastYear}-01-01T08:00:00+00:00'
+medals:
+    gold: 4
+    silver: 4
+    bronze: 4
 scoreboard_freeze_time: '{$year}-01-01T12:00:00+00:00'
 scoreboard_freeze_duration: '1:00:00'
 problems:
