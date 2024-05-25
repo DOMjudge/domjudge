@@ -1113,7 +1113,7 @@ EOF;
         }
 
         $ret = sprintf(
-            '<span class="badge problem-badge" style="font-size: x-small; background-color: %s; min-width: 18px; border: 1px solid %s;"><span style="color: %s;">%s</span></span>',
+            '<span class="badge problem-badge" style="background-color: %s; min-width: 2.3em; border: 1px solid %s"><span style="color: %s;">%s</span></span>',
             $rgb,
             $border,
             $foreground,
