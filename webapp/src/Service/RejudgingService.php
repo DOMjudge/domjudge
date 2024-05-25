@@ -390,31 +390,27 @@ class RejudgingService
     public function calculateTodo(Rejudging $rejudging): array
     {
         // Make sure we have the most recent data. This is necessary to
-        // guarantee that repeated rejugdings are scheduled correctly.
+        // guarantee that repeated rejudgings are scheduled correctly.
         $this->em->flush();
 
-        $todo = $this->em->createQueryBuilder()
-            ->from(Submission::class, 's')
-            ->select('COUNT(s)')
-            ->andWhere('s.rejudging = :rejudging')
-            ->setParameter('rejudging', $rejudging)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $done = $this->em->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->select('COUNT(j)')
             ->andWhere('j.rejudging = :rejudging')
-            ->andWhere('j.endtime IS NOT NULL')
-            // This is necessary for rejudgings which apply automatically.
-            // We remove the association of the submission with the rejudging,
-            // but not the one of the judging with the rejudging for accounting reasons.
-            ->andWhere('j.valid = 0')
-            ->setParameter('rejudging', $rejudging)
+            ->setParameter('rejudging', $rejudging);
+
+        $clonedQueryBuilder = clone $queryBuilder;
+
+        $todo = $queryBuilder
+            ->andWhere('j.endtime IS NULL')
             ->getQuery()
             ->getSingleScalarResult();
 
-        $todo -= $done;
+        $done = $clonedQueryBuilder
+            ->andWhere('j.endtime IS NOT NULL')
+            ->getQuery()
+            ->getSingleScalarResult();
+
         return ['todo' => $todo, 'done' => $done];
     }
 }
