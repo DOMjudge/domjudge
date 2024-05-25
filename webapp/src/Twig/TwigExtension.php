@@ -1085,7 +1085,7 @@ EOF;
         // Pick the foreground text color based on the background color.
         $foreground = ($background[0] + $background[1] + $background[2] > 450) ? '#000000' : '#ffffff';
         return sprintf(
-            '<span class="badge problem-badge" style="background-color: %s; min-width: 28px; border: 1px solid %s"><span style="color: %s;">%s</span></span>',
+            '<span class="badge problem-badge" style="background-color: %s; border: 1px solid %s"><span style="color: %s;">%s</span></span>',
             $rgb,
             $border,
             $foreground,
