@@ -143,7 +143,7 @@ abstract class BaseTestCase extends WebTestCase
      */
     protected function logIn(): void
     {
-        $this->client->loginUser($this->setupUser());
+        $this->client->loginUser($this->setupUser(), 'domjudge');
     }
 
     /**
