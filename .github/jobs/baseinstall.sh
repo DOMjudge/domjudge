@@ -26,7 +26,7 @@ sudo apt update
 section_end
 
 section_start "Install needed packages"
-sudo apt install -y acl zip unzip nginx php php-fpm php-gd \
+sudo apt install -y acl zip unzip nginx composer php php-fpm php-gd \
                     php-cli php-intl php-mbstring php-mysql php-curl php-json \
                     php-xml php-zip ntp make sudo debootstrap \
                     libcgroup-dev lsof php-cli php-curl php-json php-xml \
@@ -38,13 +38,6 @@ section_end
 
 PHPVERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION."\n";')
 export PHPVERSION
-
-section_start "Install composer"
-php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-HASH="$(wget -q -O - https://composer.github.io/installer.sig)"
-php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
-section_end
 
 section_start "Run composer"
 export APP_ENV="dev"
