@@ -618,7 +618,9 @@ tr.ignore td, td.ignore, span.ignore {
 }
 
 .problem-badge {
-    font-size: 100%;
+    --badge-padding-x: 0.5em;
+    font-size: 1em;
+    min-width: 2em;
 }
 
 .tooltip .tooltip-inner {
