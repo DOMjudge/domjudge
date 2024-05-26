@@ -452,6 +452,43 @@ EOF;
         $this->testImportAccounts($importCount, $message, false);
     }
 
+    public function testImportAccountsJsonError(): void
+    {
+        $accounts = <<<EOF
+- id: team001
+  username: team2//
+  name: Team 1
+  password: password1
+  type: team
+  team_id: 1
+- id: team2
+  username: team2
+  name: Team 2
+  password: password2
+  type: team
+  team_id: 2
+  ip: 1.2.3.4
+EOF;
+
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $preCount = $em->getRepository(User::class)->count([]);
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-yaml');
+        file_put_contents($fileName, $accounts);
+        $file = new UploadedFile($fileName, 'accounts.yaml');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('accounts', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertEquals(0, $importCount);
+        self::assertMatchesRegularExpression('/Only alphanumeric characters and _-@. are allowed/', $message);
+
+        $postCount = $em->getRepository(User::class)->count([]);
+        self::assertEquals($preCount, $postCount);
+    }
+
     protected function testImportAccounts(int $importCount, ?string $message, bool $forTsv): void
     {
         $expectedUsers = [
@@ -784,6 +821,43 @@ EOF;
         }
     }
 
+    public function testImportTeamsJsonError(): void
+    {
+        $teamsData = <<<EOF
+[{
+    "id": "11",
+    "icpc_id": "447047",
+    "label": "team1",
+    "group_ids": ["24"],
+    "organization_id": "INST-42",
+    "location": {"description": "AUD 10"}
+}, {
+    "id": "12",
+    "icpc_id": "447837",
+    "group_ids": ["25"],
+    "name": "Pleading not FAUlty",
+    "organization_id": "INST-43"
+}]
+EOF;
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $preCount = $em->getRepository(Team::class)->count([]);
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'teams-json');
+        file_put_contents($fileName, $teamsData);
+        $file = new UploadedFile($fileName, 'teams.json');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('teams', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertMatchesRegularExpression('/name: This value should not be blank./', $message);
+        self::assertEquals(0, $importCount);
+
+        $postCount = $em->getRepository(Team::class)->count([]);
+        self::assertEquals($preCount, $postCount);
+    }
+
     public function testImportGroupsTsv(): void
     {
         // Example from the manual
@@ -892,6 +966,41 @@ EOF;
         }
     }
 
+    public function testImportGroupsJsonError(): void
+    {
+        // Example from the manual
+        $groupsData = <<<EOF
+[{
+    "id": "13337",
+    "icpc_id": "123",
+    "hidden": true
+}, {
+    "id": "47",
+    "name": "Participants"
+}]
+EOF;
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $preCount = $em->getRepository(TeamCategory::class)->count([]);
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'groups-json');
+        file_put_contents($fileName, $groupsData);
+        $file = new UploadedFile($fileName, 'groups.json');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('groups', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertMatchesRegularExpression('/name: This value should not be blank/', $message);
+        self::assertEquals(0, $importCount);
+
+        $postCount = $em->getRepository(TeamCategory::class)->count([]);
+        self::assertEquals($preCount, $postCount);
+    }
+
+
     public function testImportOrganizationsJson(): void
     {
         // Example from the manual
@@ -950,6 +1059,44 @@ EOF;
             self::assertEquals($data['name'], $affiliation->getName());
             self::assertEquals($data['country'], $affiliation->getCountry());
         }
+    }
+
+    public function testImportOrganizationsErrorJson(): void
+    {
+        // Example from the manual
+        $organizationsData = <<<EOF
+[{
+    "id": "INST-42",
+    "icpc_id": "42",
+    "name": "LU",
+    "formal_name": "Lund University",
+    "country": "XXX"
+}, {
+    "id": "INST-43",
+    "icpc_id": "43",
+    "name": "FAU",
+    "formal_name": "Friedrich-Alexander-University Erlangen-Nuremberg",
+    "country": "DEU"
+}]
+EOF;
+
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $preCount = $em->getRepository(TeamAffiliation::class)->count([]);
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'organizations-json');
+        file_put_contents($fileName, $organizationsData);
+        $file = new UploadedFile($fileName, 'organizations.json');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('organizations', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertMatchesRegularExpression('/ISO3166-1 alpha-3 values are allowed/', $message);
+        self::assertEquals(0, $importCount);
+
+        $postCount = $em->getRepository(TeamAffiliation::class)->count([]);
+        self::assertEquals($preCount, $postCount);
     }
 
 

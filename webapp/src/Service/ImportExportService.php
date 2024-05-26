@@ -691,7 +691,7 @@ class ImportExportService
     /**
      * Import groups JSON
      *
-     * @param array<array{id?: string, icpc_id: string, name: string, sortorder?: int,
+     * @param array<array{id?: string, icpc_id: string, name?: string, sortorder?: int,
      *                    color?: string, hidden?: bool, allow_self_registration?: bool}> $data
      * @param TeamCategory[]|null $saved The saved groups
      */
@@ -703,7 +703,7 @@ class ImportExportService
             $groupData[] = [
                 'categoryid' => @$group['id'],
                 'icpc_id' => @$group['icpc_id'],
-                'name' => @$group['name'],
+                'name' => $group['name'] ?? '',
                 'visible' => !($group['hidden'] ?? false),
                 'sortorder' => @$group['sortorder'],
                 'color' => @$group['color'],
@@ -711,7 +711,7 @@ class ImportExportService
             ];
         }
 
-        return $this->importGroupData($groupData, $saved);
+        return $this->importGroupData($groupData, $saved, $message);
     }
 
     /**
@@ -723,13 +723,18 @@ class ImportExportService
      *
      * @throws NonUniqueResultException
      */
-    protected function importGroupData(array $groupData, ?array &$saved = null): int
-    {
+    protected function importGroupData(
+        array $groupData,
+        ?array &$saved = null,
+        ?string &$message = null
+    ): int {
         // We want to overwrite the ID so change the ID generator.
         $createdCategories = [];
         $updatedCategories = [];
+        $allCategories     = [];
+        $anyErrors         = [];
 
-        foreach ($groupData as $groupItem) {
+        foreach ($groupData as $index => $groupItem) {
             if (empty($groupItem['categoryid'])) {
                 $categoryId = null;
                 $teamCategory = null;
@@ -744,7 +749,6 @@ class ImportExportService
                 if ($categoryId !== null) {
                     $teamCategory->setExternalid($categoryId);
                 }
-                $this->em->persist($teamCategory);
                 $added = true;
             }
             $teamCategory
@@ -754,17 +758,39 @@ class ImportExportService
                 ->setColor($groupItem['color'] ?? null)
                 ->setIcpcid($groupItem['icpc_id'] ?? null);
             $teamCategory->setAllowSelfRegistration($groupItem['allow_self_registration']);
-            $this->em->flush();
-            $this->dj->auditlog('team_category', $teamCategory->getCategoryid(), 'replaced',
-                                             'imported from tsv / json');
-            if ($added) {
-                $createdCategories[] = $teamCategory->getCategoryid();
+
+            $errors = $this->validator->validate($teamCategory);
+            if ($errors->count()) {
+                $messages = [];
+                /** @var ConstraintViolationInterface $error */
+                foreach ($errors as $error) {
+                    $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
+                }
+
+                $message .= sprintf("Group at index %d has errors:\n\n%s\n", $index, implode("\n", $messages));
+                $anyErrors = true;
             } else {
-                $updatedCategories[] = $teamCategory->getCategoryid();
+                $allCategories[] = $teamCategory;
+                if ($added) {
+                    $createdCategories[] = $teamCategory->getCategoryid();
+                } else {
+                    $updatedCategories[] = $teamCategory->getCategoryid();
+                }
+                if ($saved !== null) {
+                    $saved[] = $teamCategory;
+                }
             }
-            if ($saved !== null) {
-                $saved[] = $teamCategory;
-            }
+        }
+
+        if ($anyErrors) {
+            return 0;
+        }
+
+        foreach ($allCategories as $category) {
+            $this->em->persist($category);
+            $this->em->flush();
+            $this->dj->auditlog('team_category', $category->getCategoryid(), 'replaced',
+                'imported from tsv / json');
         }
 
         if ($contest = $this->dj->getCurrentContest()) {
@@ -800,7 +826,7 @@ class ImportExportService
             ];
         }
 
-        return $this->importOrganizationData($organizationData, $saved);
+        return $this->importOrganizationData($organizationData, $saved, $message);
     }
 
     /**
@@ -811,11 +837,16 @@ class ImportExportService
      *
      * @throws NonUniqueResultException
      */
-    protected function importOrganizationData(array $organizationData, ?array &$saved = null): int
-    {
+    protected function importOrganizationData(
+        array $organizationData,
+        ?array &$saved = null,
+        ?string &$message = null,
+    ): int {
         $createdOrganizations = [];
         $updatedOrganizations = [];
-        foreach ($organizationData as $organizationItem) {
+        $allOrganizations     = [];
+        $anyErrors            = false;
+        foreach ($organizationData as $index => $organizationItem) {
             $externalId      = $organizationItem['externalid'];
             $teamAffiliation = null;
             $added           = false;
@@ -825,7 +856,6 @@ class ImportExportService
             if (!$teamAffiliation) {
                 $teamAffiliation = new TeamAffiliation();
                 $teamAffiliation->setExternalid($externalId);
-                $this->em->persist($teamAffiliation);
                 $added = true;
             }
             if (!isset($organizationItem['shortname'])) {
@@ -836,17 +866,38 @@ class ImportExportService
                 ->setName($organizationItem['name'])
                 ->setCountry($organizationItem['country'])
                 ->setIcpcid($organizationItem['icpc_id'] ?? null);
-            $this->em->flush();
-            if ($added) {
-                $createdOrganizations[] = $teamAffiliation->getAffilid();
+            $errors = $this->validator->validate($teamAffiliation);
+            if ($errors->count()) {
+                $messages = [];
+                /** @var ConstraintViolationInterface $error */
+                foreach ($errors as $error) {
+                    $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
+                }
+
+                $message .= sprintf("Organization at index %d has errors:\n\n%s\n", $index, implode("\n", $messages));
+                $anyErrors = true;
             } else {
-                $updatedOrganizations[] = $teamAffiliation->getAffilid();
+                $allOrganizations[] = $teamAffiliation;
+                if ($added) {
+                    $createdOrganizations[] = $teamAffiliation->getAffilid();
+                } else {
+                    $updatedOrganizations[] = $teamAffiliation->getAffilid();
+                }
+                if ($saved !== null) {
+                    $saved[] = $teamAffiliation;
+                }
             }
-            $this->dj->auditlog('team_affiliation', $teamAffiliation->getAffilid(), 'replaced',
-                                             'imported from tsv / json');
-            if ($saved !== null) {
-                $saved[] = $teamAffiliation;
-            }
+        }
+
+        if ($anyErrors) {
+            return 0;
+        }
+
+        foreach ($allOrganizations as $organization) {
+            $this->em->persist($organization);
+            $this->em->flush();
+            $this->dj->auditlog('team_affiliation', $organization->getAffilid(), 'replaced',
+                'imported from tsv / json');
         }
 
         if ($contest = $this->dj->getCurrentContest()) {
@@ -984,13 +1035,6 @@ class ImportExportService
             $type     = $account['type'];
             $username = $account['username'];
 
-            $icpcRegexChars = "[a-zA-Z0-9@._-]";
-            $icpcRegex = "/^" . $icpcRegexChars . "+$/";
-            if (!preg_match($icpcRegex, $username)) {
-                $message = sprintf('Username "%s" should be non empty and only contain: %s', $username, $icpcRegexChars);
-                return -1;
-            }
-
             // Special case for the World Finals, if the username is CDS we limit the access.
             // The user can see what every admin can see, but can not log in via the UI.
             if (isset($account['username']) && $account['username'] === 'cds') {
@@ -1033,7 +1077,7 @@ class ImportExportService
             ];
         }
 
-        return $this->importAccountData($accountData, $saved);
+        return $this->importAccountData($accountData, $saved, $message);
     }
 
     /**
@@ -1051,9 +1095,12 @@ class ImportExportService
     protected function importTeamData(array $teamData, ?string &$message, ?array &$saved = null): int
     {
         $createdAffiliations = [];
+        $createdCategories   = [];
         $createdTeams        = [];
         $updatedTeams        = [];
-        foreach ($teamData as $teamItem) {
+        $allTeams            = [];
+        $anyErrors           = false;
+        foreach ($teamData as $index => $teamItem) {
             // It is legitimate that a team has no affiliation. Do not add it then.
             $teamAffiliation = null;
             $teamCategory    = null;
@@ -1067,11 +1114,19 @@ class ImportExportService
                         $propertyAccessor->setValue($teamAffiliation, $field, $value);
                     }
 
-                    $this->em->persist($teamAffiliation);
-                    $this->em->flush();
-                    $createdAffiliations[] = $teamAffiliation->getAffilid();
-                    $this->dj->auditlog('team_affiliation', $teamAffiliation->getAffilid(),
-                                        'added', 'imported from tsv');
+                    $errors = $this->validator->validate($teamAffiliation);
+                    if ($errors->count()) {
+                        $messages = [];
+                        /** @var ConstraintViolationInterface $error */
+                        foreach ($errors as $error) {
+                            $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
+                        }
+
+                        $message .= sprintf("Organization for team at index %d has errors:\n\n%s\n", $index, implode("\n", $messages));
+                        $anyErrors = true;
+                    } else {
+                        $createdAffiliations[] = $teamAffiliation;
+                    }
                 }
             } elseif (!empty($teamItem['team_affiliation']['externalid'])) {
                 $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $teamItem['team_affiliation']['externalid']]);
@@ -1081,10 +1136,20 @@ class ImportExportService
                         ->setExternalid($teamItem['team_affiliation']['externalid'])
                         ->setName($teamItem['team_affiliation']['externalid'] . ' - auto-create during import')
                         ->setShortname($teamItem['team_affiliation']['externalid'] . ' - auto-create during import');
-                    $this->em->persist($teamAffiliation);
-                    $this->dj->auditlog('team_affiliation',
-                        $teamAffiliation->getAffilid(),
-                        'added', 'imported from tsv / json');
+
+                    $errors = $this->validator->validate($teamAffiliation);
+                    if ($errors->count()) {
+                        $messages = [];
+                        /** @var ConstraintViolationInterface $error */
+                        foreach ($errors as $error) {
+                            $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
+                        }
+
+                        $message .= sprintf("Organization for team at index %d has errors:\n\n%s\n", $index, implode("\n", $messages));
+                        $anyErrors = true;
+                    } else {
+                        $createdAffiliations[] = $teamAffiliation;
+                    }
                 }
             }
             $teamItem['team']['affiliation'] = $teamAffiliation;
@@ -1098,9 +1163,20 @@ class ImportExportService
                     $teamCategory
                         ->setExternalid($teamItem['team']['categoryid'])
                         ->setName($teamItem['team']['categoryid'] . ' - auto-create during import');
-                    $this->em->persist($teamCategory);
-                    $this->dj->auditlog('team_category', $teamCategory->getCategoryid(),
-                                        'added', 'imported from tsv');
+
+                    $errors = $this->validator->validate($teamCategory);
+                    if ($errors->count()) {
+                        $messages = [];
+                        /** @var ConstraintViolationInterface $error */
+                        foreach ($errors as $error) {
+                            $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
+                        }
+
+                        $message .= sprintf("Group for team at index %d has errors:\n\n%s\n", $index, implode("\n", $messages));
+                        $anyErrors = true;
+                    } else {
+                        $createdCategories[] = $teamCategory;
+                    }
                 }
             }
             $teamItem['team']['category'] = $teamCategory;
@@ -1130,11 +1206,6 @@ class ImportExportService
                 return -1;
             }
 
-            if (!$teamItem['team']['name']) {
-                $message = 'Name for team required';
-                return -1;
-            }
-
             $team->setExternalid($teamItem['team']['teamid']);
             unset($teamItem['team']['teamid']);
 
@@ -1143,10 +1214,19 @@ class ImportExportService
                 $propertyAccessor->setValue($team, $field, $value);
             }
 
-            if ($added) {
-                $this->em->persist($team);
+            $errors = $this->validator->validate($team);
+            if ($errors->count()) {
+                $messages = [];
+                /** @var ConstraintViolationInterface $error */
+                foreach ($errors as $error) {
+                    $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
+                }
+
+                $message .= sprintf("Team at index %d has errors:\n\n%s\n", $index, implode("\n", $messages));
+                $anyErrors = true;
+            } else {
+                $allTeams[] = $team;
             }
-            $this->em->flush();
 
             if ($added) {
                 $createdTeams[] = $team->getTeamid();
@@ -1154,15 +1234,40 @@ class ImportExportService
                 $updatedTeams[] = $team->getTeamid();
             }
 
-            $this->dj->auditlog('team', $team->getTeamid(), 'replaced', 'imported from tsv');
             if ($saved !== null) {
                 $saved[] = $team;
             }
         }
 
+        if ($anyErrors) {
+            return 0;
+        }
+
+        foreach ($createdAffiliations as $affiliation) {
+            $this->em->persist($affiliation);
+            $this->em->flush();
+            $this->dj->auditlog('team_affiliation',
+                $affiliation->getAffilid(),
+                'added', 'imported from tsv / json');
+        }
+
+        foreach ($createdCategories as $category) {
+            $this->em->persist($category);
+            $this->em->flush();
+            $this->dj->auditlog('team_category', $category->getCategoryid(),
+                                    'added', 'imported from tsv');
+        }
+
+        foreach ($allTeams as $team) {
+            $this->em->persist($team);
+            $this->em->flush();
+            $this->dj->auditlog('team', $team->getTeamid(), 'replaced', 'imported from tsv');
+        }
+
         if ($contest = $this->dj->getCurrentContest()) {
             if (!empty($createdAffiliations)) {
-                $this->eventLogService->log('team_affiliation', $createdAffiliations,
+                $affiliationIds = array_map(fn (TeamAffiliation $affiliation) => $affiliation->getAffilid(), $createdAffiliations);
+                $this->eventLogService->log('team_affiliation', $affiliationIds,
                                             'create', $contest->getCid());
             }
             if (!empty($createdTeams)) {
@@ -1188,10 +1293,15 @@ class ImportExportService
      *                           publicdescription?: string}}> $accountData
      * @throws NonUniqueResultException
      */
-    protected function importAccountData(array $accountData, ?array &$saved = null): int
-    {
+    protected function importAccountData(
+        array $accountData,
+        ?array &$saved = null,
+        ?string &$message = null
+    ): int {
         $newTeams     = [];
-        foreach ($accountData as $accountItem) {
+        $anyErrors    = false;
+        $allUsers     = [];
+        foreach ($accountData as $index => $accountItem) {
             if (!empty($accountItem['team'])) {
                 $team = $this->em->getRepository(Team::class)->findOneBy([
                     'name' => $accountItem['team']['name'],
@@ -1204,28 +1314,33 @@ class ImportExportService
                         ->setCategory($accountItem['team']['category'])
                         ->setExternalid($accountItem['team']['externalid'])
                         ->setPublicDescription($accountItem['team']['publicdescription'] ?? null);
-                    $this->em->persist($team);
                     $action = EventLogService::ACTION_CREATE;
                 } else {
                     $action = EventLogService::ACTION_UPDATE;
                 }
-                $this->em->flush();
-                $newTeams[] = [
-                    'team' => $team,
-                    'action' => $action,
-                ];
-                $this->dj->auditlog('team', $team->getTeamid(), 'replaced',
-                    'imported from tsv, autocreated for judge');
+                $errors = $this->validator->validate($team);
+                if ($errors->count()) {
+                    $messages = [];
+                    /** @var ConstraintViolationInterface $error */
+                    foreach ($errors as $error) {
+                        $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
+                    }
+
+                    $message .= sprintf("Team for user at index %d has errors:\n\n%s\n", $index, implode("\n", $messages));
+                    $anyErrors = true;
+                } else {
+                    $newTeams[] = [
+                        'team' => $team,
+                        'action' => $action,
+                    ];
+                }
                 $accountItem['user']['team'] = $team;
                 unset($accountItem['user']['teamid']);
             }
 
             $user = $this->em->getRepository(User::class)->findOneBy(['username' => $accountItem['user']['username']]);
             if (!$user) {
-                $user  = new User();
-                $added = true;
-            } else {
-                $added = false;
+                $user = new User();
             }
 
             if (array_key_exists('teamid', $accountItem['user'])) {
@@ -1253,15 +1368,41 @@ class ImportExportService
                 $propertyAccessor->setValue($user, $field, $value);
             }
 
-            if ($added) {
-                $this->em->persist($user);
-            }
-            $this->em->flush();
+            $errors = $this->validator->validate($user);
+            if ($errors->count()) {
+                $messages = [];
+                /** @var ConstraintViolationInterface $error */
+                foreach ($errors as $error) {
+                    $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
+                }
 
-            if ($saved !== null) {
-                $saved[] = $user;
-            }
+                $message .= sprintf("User at index %d has errors:\n\n%s\n", $index, implode("\n", $messages));
+                $anyErrors = true;
+            } else {
+                $allUsers[] = $user;
 
+                if ($saved !== null) {
+                    $saved[] = $user;
+                }
+            }
+        }
+
+        if ($anyErrors) {
+            return 0;
+        }
+
+        foreach ($allUsers as $user) {
+            $this->em->persist($user);
+        }
+
+        foreach ($newTeams as $newTeam) {
+            $team = $newTeam['team'];
+            $this->em->persist($team);
+        }
+
+        $this->em->flush();
+
+        foreach ($allUsers as $user) {
             $this->dj->auditlog('user', $user->getUserid(), 'replaced', 'imported from tsv');
         }
 
@@ -1269,6 +1410,8 @@ class ImportExportService
             foreach ($newTeams as $newTeam) {
                 $team = $newTeam['team'];
                 $action = $newTeam['action'];
+                $this->dj->auditlog('team', $team->getTeamid(), 'replaced',
+                    'imported from tsv, autocreated for judge');
                 $this->eventLogService->log('team', $team->getTeamid(), $action, $contest->getCid());
             }
         }
