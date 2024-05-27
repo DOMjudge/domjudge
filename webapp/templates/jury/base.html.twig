@@ -34,6 +34,15 @@
                 }
             }
 
+            $('#keys_disable').click(disableKeys);
+            $('#keys_enable').click(enableKeys);
+            var keysCookie = getCookie('domjudge_keys');
+            if (keysCookie != 1 && keysCookie != "") {
+                $('#keys_enable').removeClass('d-none');
+            } else {
+                $('#keys_disable').removeClass('d-none');
+            }
+
             updateMenuAlerts();
             setInterval(updateMenuAlerts, 20000);
 

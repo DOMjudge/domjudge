@@ -55,6 +55,22 @@ function disableNotifications()
     return true;
 }
 
+function enableKeys()
+{
+   setCookie('domjudge_keys', 1);
+    $("#keys_disable").removeClass('d-none');
+    $("#keys_disable").show();
+    $("#keys_enable").hide();
+}
+
+function disableKeys()
+{
+    setCookie('domjudge_keys', 0);
+    $("#keys_enable").removeClass('d-none');
+    $("#keys_enable").show();
+    $("#keys_disable").hide();
+}
+
 // Send a notification if notifications have been enabled.
 // The options argument is passed to the Notification constructor,
 // except that the following tags (if found) are interpreted and
@@ -814,6 +830,10 @@ function initializeKeyboardShortcuts() {
     var $body = $('body');
     var ignore = false;
     $body.on('keydown', function(e) {
+        var keysCookie = getCookie('domjudge_keys');
+        if (keysCookie != 1 && keysCookie != "") {
+            return;
+        }
         // Check if the user is not typing in an input field.
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
             return;
