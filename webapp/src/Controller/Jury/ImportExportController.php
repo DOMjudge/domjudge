@@ -45,8 +45,8 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-#[IsGranted('ROLE_ADMIN')]
 #[Route(path: '/jury/import-export')]
+#[IsGranted('ROLE_JURY')]
 class ImportExportController extends BaseController
 {
     public function __construct(
@@ -70,6 +70,7 @@ class ImportExportController extends BaseController
      * @throws TransportExceptionInterface
      */
     #[Route(path: '', name: 'jury_import_export')]
+    #[IsGranted('ROLE_ADMIN')]
     public function indexAction(Request $request): Response
     {
         $tsvForm = $this->createForm(TsvImportType::class);
