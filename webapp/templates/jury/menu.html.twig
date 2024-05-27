@@ -116,18 +116,24 @@
 
                         {% if refresh is defined and refresh %}
                             <a class="dropdown-item" href="#" id="refresh-navitem">
-                                <i class="fas fa-sync-alt fa-fw"></i> <span id="refresh-toggle">
-                  {% if refresh_flag %}
-                      Disable Refresh
-                  {% else %}
-                      Enable Refresh
-                  {% endif %}
-                </span>
-                                {% if refresh %}
-                                    <span class="small text-muted">({{ refresh.after }}s)</span>
-                                {% endif %}
+                                <i class="fas fa-sync-alt fa-fw"></i>
+                                <span id="refresh-toggle">
+                                    {% if refresh_flag %}
+                                        Disable Refresh
+                                    {% else %}
+                                        Enable Refresh
+                                    {% endif %}
+                                </span>
+                                <span class="small text-muted">({{ refresh.after }}s)</span>
                             </a>
                         {% endif %}
+
+                        <a class="dropdown-item d-none" href="#" id="keys_disable">
+                            <i class="fas fa-keyboard fa-fw"></i> Disable keyboard shortcuts
+                        </a>
+                        <a class="dropdown-item d-none" href="#" id="keys_enable">
+                            <i class="fas fa-keyboard fa-fw"></i> Enable keyboard shortcuts
+                        </a>
 
                         <a class="dropdown-item" href="{{ path('logout') }}"><i class="fas fa-sign-out-alt fa-fw"></i>Logout </a>
                     </div>
