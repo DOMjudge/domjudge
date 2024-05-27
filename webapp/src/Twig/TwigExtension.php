@@ -374,7 +374,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $externalJudgementId = $externalJudgement?->getExtjudgementid();
             $probId              = $submission->getProblem()->getProbid();
             $testcases           = $this->em->getConnection()->fetchAllAssociative(
-                'SELECT er.result as runresult, t.ranknumber, t.description
+                'SELECT er.result as runresult, t.ranknumber, t.description, t.sample
                   FROM testcase t
                   LEFT JOIN external_run er ON (er.testcaseid = t.testcaseid
                                               AND er.extjudgementid = :extjudgementid)
@@ -388,7 +388,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $judgingId = $judging ? $judging->getJudgingid() : null;
             $probId    = $submission->getProblem()->getProbid();
             $testcases = $this->em->getConnection()->fetchAllAssociative(
-                'SELECT r.runresult, jh.hostname, jt.valid, t.ranknumber, t.description
+                'SELECT r.runresult, jh.hostname, jt.valid, t.ranknumber, t.description, t.sample
                   FROM testcase t
                   LEFT JOIN judging_run r ON (r.testcaseid = t.testcaseid
                                               AND r.judgingid = :judgingid)
@@ -401,7 +401,12 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
 
         $results = '';
+        $lastTypeSample = true;
         foreach ($testcases as $key => $testcase) {
+            if ($testcase['sample'] != $lastTypeSample) {
+                $results        .= ' | ';
+                $lastTypeSample = $testcase['sample'];
+            }
             $class = $submissionDone ? 'secondary' : 'primary';
             $text  = '?';
 
