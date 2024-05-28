@@ -227,7 +227,7 @@ del {
     right: 0;
     bottom: 0;
 }
-.scoreboard .scoreaf { white-space: nowrap; border: 0; text-align: center; }
+.scoreboard .scoreaf { white-space: nowrap; border: 0; padding-left: 2px; text-align: center; }
 .scoreboard .scoreaf img { vertical-align: middle; }
 .univ {
     font-size: 80%;
@@ -337,10 +337,11 @@ td.scorenc { border-color: silver; border-right: 0; }
 }
 
 .countryflag {
-    height: 30px;
-    width: 40px;
-    border-radius: 8px;
-    padding: 2px;
+    height: 1.5rem;
+    width: 2rem;
+    border-radius: .375rem;
+    margin: .125rem;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .2);
 }
 
 .select2 img.countryflag {
