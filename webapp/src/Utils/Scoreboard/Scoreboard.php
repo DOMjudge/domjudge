@@ -136,6 +136,7 @@ class Scoreboard
     {
         // Calculate matrix and update scores.
         $this->matrix = [];
+        $freezeOffset = $this->contest->getFreezetime() - $this->contest->getStarttime();
         foreach ($this->scoreCache as $scoreRow) {
             $teamId = $scoreRow->getTeam()->getTeamid();
             $probId = $scoreRow->getProblem()->getProbid();
@@ -151,6 +152,8 @@ class Scoreboard
                 $this->penaltyTime, $this->scoreIsInSeconds
             );
 
+            $inFreeze = $scoreRow->getIsCorrect($this->restricted)
+                && $scoreRow->getSolveTime($this->restricted) >= $freezeOffset;
             $this->matrix[$teamId][$probId] = new ScoreboardMatrixItem(
                 $scoreRow->getIsCorrect($this->restricted),
                 $scoreRow->getIsCorrect($this->restricted) && $scoreRow->getIsFirstToSolve(),
@@ -158,7 +161,8 @@ class Scoreboard
                 $scoreRow->getPending($this->restricted),
                 $scoreRow->getSolveTime($this->restricted),
                 $penalty,
-                $scoreRow->getRuntime($this->restricted)
+                $scoreRow->getRuntime($this->restricted),
+                $inFreeze,
             );
 
             if ($scoreRow->getIsCorrect($this->restricted)) {
@@ -216,7 +220,7 @@ class Scoreboard
                 $problemId = $contestProblem->getProbid();
                 // Provide default scores when nothing submitted for this team + problem yet
                 if (!isset($this->matrix[$teamId][$problemId])) {
-                    $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, false, 0, 0, 0, 0, 0);
+                    $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, false, 0, 0, 0, 0, 0, false);
                 }
 
                 $problemMatrixItem = $this->matrix[$teamId][$problemId];

@@ -255,6 +255,9 @@
                                     {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
                             {% endif %}
                         {% endif %}
+                        {% if jury and matrixItem.inFreeze %}
+                            {% set scoreCssClass = scoreCssClass ~ ' glowing' %}
+                        {% endif %}
                     {% elseif showPending and matrixItem.numSubmissionsPending > 0 %}
                         {% set scoreCssClass = 'score_pending' %}
                     {% elseif matrixItem.numSubmissions > 0 %}

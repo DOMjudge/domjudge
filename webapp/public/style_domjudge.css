@@ -699,3 +699,16 @@ blockquote {
     padding: 3px;
     border-radius: 5px;
 }
+
+.glowing {
+  animation: glow 1s infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 0 0 rgba(242,161,0,0.9);
+    }
+    to {
+        box-shadow: 0 0 7px 4px rgba(242,161,0,0.9);
+    }
+}

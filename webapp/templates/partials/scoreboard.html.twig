@@ -97,7 +97,8 @@
             <div class="alert alert-warning" role="alert" style="font-size: 80%;">
                 {% if jury %}
                     <a href="{{ path('public_index') }}">The public scoreboard</a>
-                    was frozen with {{ current_contest.minutesRemaining }} minutes remaining
+                    was frozen with {{ current_contest.minutesRemaining }} minutes remaining.
+                    Correct submissions after freeze are indicated by glowing.
                 {% else %}
                     The scoreboard was frozen with {{ current_contest.minutesRemaining }} minutes remaining - solutions
                     submitted in the last {{ current_contest.minutesRemaining }} minutes of the contest {% if showPending %}are still shown as pending{% else %}are not shown{% endif %}.
