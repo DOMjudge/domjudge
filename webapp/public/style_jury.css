@@ -48,6 +48,11 @@ tr.summary td { border-top: 1px solid black; }
    clickable in the jury scoreboard and for all team cells */
 .scoreboard_jury td, .scoreboard_jury th { padding: 0; }
 
+/* show pending submissions using a blue corner */
+.score_pending.score_correct             { background: linear-gradient(45deg, #60e760 85%, #6666ff 85%); }
+.score_pending.score_correct.score_first { background: linear-gradient(45deg, #1daa1d 85%, #6666ff 85%); }
+.score_pending.score_incorrect           { background: linear-gradient(45deg, #e87272 85%, #6666ff 85%); }
+
 #submission_layout { width: 100%; }
 
 #djlogo {

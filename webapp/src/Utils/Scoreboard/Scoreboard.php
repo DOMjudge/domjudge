@@ -154,8 +154,9 @@ class Scoreboard
             $this->matrix[$teamId][$probId] = new ScoreboardMatrixItem(
                 $scoreRow->getIsCorrect($this->restricted),
                 $scoreRow->getIsCorrect($this->restricted) && $scoreRow->getIsFirstToSolve(),
-                $scoreRow->getSubmissions($this->restricted),
-                $scoreRow->getPending($this->restricted),
+                // When public scoreboard is frozen, also show "x + y tries" for jury
+                $scoreRow->getSubmissions($this->freezeData->showFrozen() ? false : $this->restricted),
+                $scoreRow->getPending($this->freezeData->showFrozen() ? false : $this->restricted),
                 $scoreRow->getSolveTime($this->restricted),
                 $penalty,
                 $scoreRow->getRuntime($this->restricted)

@@ -93,11 +93,12 @@
             </div>
         {% endif %}
 
-        {% if scoreboard.freezeData.showFrozen(false) %}
+        {% if scoreboard.freezeData.showFrozen %}
             <div class="alert alert-warning" role="alert" style="font-size: 80%;">
                 {% if jury %}
                     <a href="{{ path('public_index') }}">The public scoreboard</a>
-                    was frozen with {{ current_contest.minutesRemaining }} minutes remaining
+                    was frozen with {{ current_contest.minutesRemaining }} minutes remaining.
+                    {% if showPending %}Submissions after the freeze are indicated with a blue corner.{% endif %}
                 {% else %}
                     The scoreboard was frozen with {{ current_contest.minutesRemaining }} minutes remaining - solutions
                     submitted in the last {{ current_contest.minutesRemaining }} minutes of the contest {% if showPending %}are still shown as pending{% else %}are not shown{% endif %}.
@@ -109,7 +110,7 @@
             (filterValues.affiliations | length > 1 or
              filterValues.countries | length > 1 or
              filterValues.categories | length > 1) %}
-	<div class="dropdown">
+        <div class="dropdown">
             <button class="btn btn-outline-secondary btn-sm m-2 dropdown-toggle" data-bs-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false" id="filter-toggle">
                 <i class="fas fa-filter"></i>

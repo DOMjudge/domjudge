@@ -932,7 +932,7 @@ class ScoreboardService
             $data['showFlags']            = $this->config->get('show_flags');
             $data['showAffiliationLogos'] = $this->config->get('show_affiliation_logos');
             $data['showAffiliations']     = $this->config->get('show_affiliations');
-            $data['showPending']          = $this->config->get('show_pending');
+            $data['showPending']          = empty($scoreboard) || $scoreboard->getFreezeData()->showFrozen() ? $this->config->get('show_pending') : 0;
             $data['showTeamSubmissions']  = $this->config->get('show_teams_submissions');
             $data['scoreInSeconds']       = $this->config->get('score_in_seconds');
             $data['maxWidth']             = $this->config->get('team_column_width');
