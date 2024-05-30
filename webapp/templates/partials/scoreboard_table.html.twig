@@ -249,16 +249,23 @@
                         {% set scoreCssClass = 'score_correct' %}
                         {% if enable_ranking %}
                             {% if not scoreboard.getRuntimeAsScoreTiebreaker() and scoreboard.solvedFirst(score.team, problem) %}
-                                    {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
+                                {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
                             {% endif %}
                             {% if scoreboard.getRuntimeAsScoreTiebreaker() and scoreboard.isFastestSubmission(score.team, problem) %}
-                                    {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
+                                {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
                             {% endif %}
                         {% endif %}
                     {% elseif showPending and matrixItem.numSubmissionsPending > 0 %}
                         {% set scoreCssClass = 'score_pending' %}
                     {% elseif matrixItem.numSubmissions > 0 %}
                         {% set scoreCssClass = 'score_incorrect' %}
+                    {% endif %}
+                    {% if jury and showPending and matrixItem.numSubmissionsPending > 0 %}
+                        {% if scoreCssClass == 'score_pending' %}
+                            {% set scoreCssClass = scoreCssClass ~ ' score_incorrect' %}
+                        {% else %}
+                            {% set scoreCssClass = scoreCssClass ~ ' score_pending' %}
+                        {% endif %}
                     {% endif %}
 
                     {% set numSubmissions = matrixItem.numSubmissions %}
