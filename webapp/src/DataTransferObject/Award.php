@@ -11,7 +11,7 @@ class Award
      */
     public function __construct(
         public readonly string $id,
-        public readonly string $citation,
+        public readonly ?string $citation,
         #[Serializer\Type('array<string>')]
         public readonly array $teamIds,
     ) {}
