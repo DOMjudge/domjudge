@@ -1,4 +1,4 @@
-name: Run runpipe tests
+name: Run runpipe and runguard tests
 on:
   push:
     branches-ignore:
@@ -13,11 +13,14 @@ on:
 
 jobs:
   runpipe:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: domjudge/gitlabci:24.04
+      options: --privileged --cgroupns=host --init
     steps:
       - uses: actions/checkout@v4
+      - name: info
+        run: cat /proc/cmdline && echo && cat /proc/mounts && echo && ls -al /sys/fs/cgroup && echo && uname -a && echo && stat -fc %T /sys/fs/cgroup && echo && cat /proc/self/cgroup
       - name: Create the configure file
         run: make configure
       - name: Do the default configure
@@ -26,5 +29,15 @@ jobs:
         run: make judgehost
       - name: Run the actual runpipe tests
         working-directory: judge/runpipe_test
+        run: make test
+      - name: Add user/group
+        run: sudo addgroup domjudge-run-0 && sudo usermod -g domjudge-run-0 domjudge-run-0
+      - name: Create dir
+        run: mkdir -p /opt/domjudge/judgehost/tmp/
+      - name: Run the actual runguard tests
+        working-directory: judge/runguard_test
+        env:
+          judgehost_tmpdir: /tmp
+          judgehost_judgedir: /tmp
         run: make test
 

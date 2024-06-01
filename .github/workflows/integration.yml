@@ -1,0 +1,140 @@
+name: Run integration tests
+on:
+  push:
+    branches-ignore:
+      - main
+      - '[0-9]+.[0-9]+'
+      - gh-readonly-queue/main/*
+      - gh-readonly-queue/main/[0-9]+.[0-9]+
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+
+jobs:
+  integration:
+    runs-on: ubuntu-24.04
+    container:
+      image: domjudge/gitlabci:24.04
+      options: --privileged --cgroupns=host --init
+    services:
+      sqlserver:
+        image: mariadb
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: domjudge
+          MYSQL_PASSWORD: domjudge
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v4
+      - name: info
+        run: |
+          cat /proc/cmdline && echo &&
+          cat /proc/mounts && echo &&
+          ls -al /sys/fs/cgroup && echo &&
+          uname -a && echo &&
+          stat -fc %T /sys/fs/cgroup && echo &&
+          cat /proc/self/cgroup && echo &&
+          cat /proc/cpuinfo
+      - name: pstree
+        run: pstree -p
+      - name: Install DOMjudge
+        run: .github/jobs/baseinstall.sh all
+      - name: Set up chroot
+        run: sudo misc-tools/dj_make_chroot -a amd64
+      - name: Check nginx
+        run: curl -v https://localhost/domjudge/
+      - name: Testing submit client
+        working-directory: submit
+        run: make check-full
+      - name: Configure judgehost
+        run: sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/ && sudo chmod 400 /etc/sudoers.d/sudoers-domjudge && cat /opt/domjudge/judgehost/etc/sudoers-domjudge
+      - name: Create user
+        run: sudo userdel -f -r domjudge-run-0 ; sudo useradd -d /nonexistent -g nogroup -s /bin/false -u 2222 domjudge-run-0
+      - name: Start judging
+        run: sudo -u domjudge sh -c 'cd /opt/domjudge/judgehost/ && nohup bin/judgedaemon -n 0 &'
+      - name: Import Kattis example problems
+        run: |
+          cd /tmp
+          git clone --depth=1 https://github.com/Kattis/problemtools.git
+          cd problemtools/examples
+          mv hello hello_kattis
+          # Remove 2 submissions that will not pass validation. The first is because it is
+          # a Python 2 submission. The latter has a judgement type we do not understand.
+          rm different/submissions/accepted/different_py2.py different/submissions/slow_accepted/different_slow.py
+          for i in hello_kattis different guess; do
+              (
+                  cd "$i"
+                  zip -r "../${i}.zip" -- *
+              )
+              curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/demo/problems
+          done
+      - name: Monitor judgehost log and stop once all submissions are judged
+        run: |
+          tail -f /opt/domjudge/judgehost/log/judge*-0.log | while read line; do
+            echo "$line"
+            grep "No submissions in queue" /opt/domjudge/judgehost/log/judge*-0.log && break
+          done
+      - name: dump the db
+        run: mysqldump -uroot -proot domjudge > /tmp/db.sql
+      - name: Upload artifact for debugging
+        uses: actions/upload-artifact@v3
+        with:
+          name: DB-dump
+          path: /tmp/db.sql
+      - name: Verifying submissions
+        shell: bash
+        run: |
+          set -x
+          export CURLOPTS="--fail -sq -m 30 -b /tmp/cookiejar"
+          # Make an initial request which will get us a session id, and grab the csrf token from it
+          CSRFTOKEN=$(curl $CURLOPTS -c /tmp/cookiejar "http://localhost/domjudge/login" | sed -n 's/.*_csrf_token.*value="\(.*\)".*/\1/p')
+          # Make a second request with our session + csrf token to actually log in
+          curl $CURLOPTS -c /tmp/cookiejar -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F "_password=password" "http://localhost/domjudge/login"
+          # Send a general clarification to later test if we see the event.
+          curl $CURLOPTS -F "sendto=" -F "problem=1-" -F "bodytext=Testing" -F "submit=Send" \
+               "http://localhost/domjudge/jury/clarifications/send" -o /dev/null
+          curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
+          NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked"     | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
+          NUMVERIFIED=$(   curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
+          NUMNOMAGIC=$(    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string"    | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
+          NUMSUBS=$(curl $CURLOPTS http://localhost/domjudge/api/contests/demo/submissions | python3 -mjson.tool | grep -c '"id":')
+          # We expect
+          # - two submissions with ambiguous outcome,
+          # - one submissions submitted through the submit client, and thus the magic string ignored,
+          # - and all submissions to be judged.
+          if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 1 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
+            echo "verified subs: $NUMVERIFIED, unverified subs: $NUMNOTVERIFIED, total subs: $NUMSUBS"
+            echo "(expected 2 submissions to be unverified, but all to be processed)"
+            echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 1)."
+            curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" | w3m -dump -T text/html
+            exit 1
+          fi
+      - name: Finalize contest so that awards appear in the feed
+        shell: bash
+        run: |
+          set -x
+          export CURLOPTS="--fail -m 30 -b $COOKIEJAR"
+          curl $CURLOPTS http://localhost/domjudge/jury/contests/1/freeze/doNow || true
+          curl $CURLOPTS http://localhost/domjudge/jury/contests/1/end/doNow || true
+          curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/1/finalize
+      - name: Verify no errors in prod.log
+        shell: bash
+        run: |
+          if cat /opt/domjudge/domserver/webapp/var/log/prod.log | egrep '(CRITICAL|ERROR):'; then
+             exit 1
+          fi
+      - name: Download and perform API check
+        shell: bash
+        run: |
+          cd $HOME
+          curl -o yajsv https://github.com/neilpa/yajsv/releases/download/v1.4.1/yajsv.linux.amd64
+          chmod a+x yajsv
+          echo -e "\033[0m"
+          git clone https://github.com/icpc/ccs-specs.git
+          export CCS_SPECS_PINNED_SHA1='a68aff54c4e60fc2bff2fc5c36c119bffa4d30f1'
+          ( cd ccs-specs && git reset --hard $CCS_SPECS_PINNED_SHA1 )
+          export CHECK_API="${HOME}/ccs-specs/check-api.sh -j ${HOME}/yajsv"
+          $CHECK_API -n -C -e -a 'strict=1' http://admin:password@localhost/domjudge/api
