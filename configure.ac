@@ -153,9 +153,6 @@ if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 		AC_SUBST(RUNGROUP,$with_rungroup)
 		AC_MSG_RESULT($RUNGROUP)
 	fi
-
-	# Check for using Linux cgroups for memory control
-	AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]), AC_MSG_ERROR([Linux cgroup library not found.]))
 fi
 # }}}
 
