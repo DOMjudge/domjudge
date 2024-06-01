@@ -18,7 +18,7 @@ evict: evict.c $(LIBHEADERS) $(LIBSOURCES)
 
 LIBCGROUP_DIR = lib/libcgroup-3.1.0
 runguard: runguard.cc $(LIBHEADERS) $(LIBSOURCES) $(TOPDIR)/etc/runguard-config.h
-	$(CXX) $(CXXFLAGS) -L$(TOPDIR)/$(LIBCGROUP_DIR)/src/.libs -I$(TOPDIR)/$(LIBCGROUP_DIR)/include  -o $@ $< $(LIBSOURCES) -lcgroup
+	$(CXX) $(CXXFLAGS) -L$(TOPDIR)/$(LIBCGROUP_DIR)/src/.libs -I$(TOPDIR)/$(LIBCGROUP_DIR)/include  -o $@ $< $(LIBSOURCES) -lcgroup -Wl,-rpath,$(TOPDIR)/$(LIBCGROUP_DIR)/src/.libs
 
 runpipe: runpipe.cc $(LIBHEADERS) $(LIBSOURCES)
 	$(CXX) $(CXXFLAGS) -static -o $@ $< $(LIBSOURCES)
