@@ -858,6 +858,44 @@ EOF;
         self::assertEquals($preCount, $postCount);
     }
 
+    public function testImportTeamsJsonErrorEmptyString(): void
+    {
+        $teamsData = <<<EOF
+[{
+    "id": "11",
+    "icpc_id": "447047",
+    "label": "team1",
+    "name": "",
+    "group_ids": ["24"],
+    "organization_id": "INST-42",
+    "location": {"description": "AUD 10"}
+}, {
+    "id": "12",
+    "icpc_id": "447837",
+    "group_ids": ["25"],
+    "name": "Pleading not FAUlty",
+    "organization_id": "INST-43"
+}]
+EOF;
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $preCount = $em->getRepository(Team::class)->count([]);
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'teams-json');
+        file_put_contents($fileName, $teamsData);
+        $file = new UploadedFile($fileName, 'teams.json');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('teams', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertMatchesRegularExpression('/name: This value should not be blank./', $message);
+        self::assertEquals(0, $importCount);
+
+        $postCount = $em->getRepository(Team::class)->count([]);
+        self::assertEquals($preCount, $postCount);
+    }
+
     public function testImportGroupsTsv(): void
     {
         // Example from the manual
