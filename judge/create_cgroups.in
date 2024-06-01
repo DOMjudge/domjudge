@@ -9,6 +9,13 @@
 JUDGEHOSTUSER=@DOMJUDGE_USER@
 CGROUPBASE="/sys/fs/cgroup"
 
+# We do not need to do any of this with cgroup v2.
+fs_type=$(awk '$2 == "/sys/fs/cgroup" {print $3}' /proc/mounts)
+if [ "$fs_type" = "cgroup2" ]; then
+    echo "cgroup v2 detected, skipping cgroup creation" >&2
+    exit 0
+fi
+
 cgroup_error_and_usage () {
     echo "$1" >&2
     echo "To fix this, please make the following changes:

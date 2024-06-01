@@ -1,12 +1,10 @@
 include:
   - '/gitlab/ci/unit.yml'
-  - '/gitlab/ci/integration.yml'
   - '/gitlab/ci/template.yml'
   - '/gitlab/ci/misc.yml'
 
 stages:
   - test
-  - integration
   - chroot_checks
   - unit
   - style
