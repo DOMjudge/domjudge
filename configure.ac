@@ -189,7 +189,6 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(judgehost_tmpdir,          /tmp)
 	AC_SUBST(judgehost_judgedir,        $localstatedir/lib/${PACKAGE_TARNAME}/judgings)
 	AC_SUBST(judgehost_chrootdir,       /chroot/${PACKAGE_TARNAME})
-	AC_SUBST(judgehost_cgroupdir,       /sys/fs/cgroup)
 	fi
 
 	AC_SUBST(domjudge_docdir,           $docdir)
@@ -241,7 +240,6 @@ AX_PATH(judgehost_rundir,          [$judgehost_root/run])
 AX_PATH(judgehost_tmpdir,          [$judgehost_root/tmp])
 AX_PATH(judgehost_judgedir,        [$judgehost_root/judgings])
 AX_PATH(judgehost_chrootdir,       [/chroot/${PACKAGE_TARNAME}])
-AX_PATH(judgehost_cgroupdir,       [/sys/fs/cgroup])
 fi
 AX_WITH_COMMENT(7,[      ])
 
@@ -405,7 +403,6 @@ echo "    - run..............: AX_VAR_EXPAND($judgehost_rundir)"
 echo "    - tmp..............: AX_VAR_EXPAND($judgehost_tmpdir)"
 echo "    - judge............: AX_VAR_EXPAND($judgehost_judgedir)"
 echo "    - chroot...........: AX_VAR_EXPAND($judgehost_chrootdir)"
-echo "    - cgroup...........: AX_VAR_EXPAND($judgehost_cgroupdir)"
 fi
 echo ""
 echo " * systemd unit files..: AX_VAR_EXPAND($systemd_unitdir)"
