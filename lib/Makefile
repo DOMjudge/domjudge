@@ -6,7 +6,10 @@ include $(TOPDIR)/Makefile.global
 
 OBJECTS = $(addsuffix $(OBJEXT),lib.error lib.misc)
 
-build: $(OBJECTS)
+build: $(OBJECTS) libcgroup
+
+libcgroup:
+	$(MAKE) -C libcgroup-3.1.0
 
 $(OBJECTS): %$(OBJEXT): %.c %.h
 
