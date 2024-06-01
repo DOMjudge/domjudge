@@ -103,7 +103,6 @@ judgehost_rundir          = @judgehost_rundir@
 judgehost_tmpdir          = @judgehost_tmpdir@
 judgehost_judgedir        = @judgehost_judgedir@
 judgehost_chrootdir       = @judgehost_chrootdir@
-judgehost_cgroupdir       = @judgehost_cgroupdir@
 
 domjudge_docdir           = @domjudge_docdir@
 
@@ -153,7 +152,6 @@ define substconfigvars
 	-e 's,@judgehost_tmpdir[@],@judgehost_tmpdir@,g' \
 	-e 's,@judgehost_judgedir[@],@judgehost_judgedir@,g' \
 	-e 's,@judgehost_chrootdir[@],@judgehost_chrootdir@,g' \
-	-e 's,@judgehost_cgroupdir[@],@judgehost_cgroupdir@,g' \
 	-e 's,@domjudge_docdir[@],@domjudge_docdir@,g' \
 	-e 's,@systemd_unitdir[@],@systemd_unitdir@,g' \
 	-e 's,@DOMJUDGE_USER[@],@DOMJUDGE_USER@,g' \

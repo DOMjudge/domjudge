@@ -7,7 +7,7 @@
 # (hence: not the 'domjudge-run' user!)
 
 JUDGEHOSTUSER=@DOMJUDGE_USER@
-CGROUPBASE=@judgehost_cgroupdir@
+CGROUPBASE="/sys/fs/cgroup"
 
 cgroup_error_and_usage () {
     echo "$1" >&2

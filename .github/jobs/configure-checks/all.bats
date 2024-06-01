@@ -248,7 +248,6 @@ compile_assertions_finished () {
    assert_line "    - tmp..............: /opt/domjudge/judgehost/tmp"
    assert_line "    - judge............: /opt/domjudge/judgehost/judgings"
    assert_line "    - chroot...........: /chroot/domjudge"
-   assert_line "    - cgroup...........: /sys/fs/cgroup"
 }
 
 @test "Prefix configured" {
@@ -309,12 +308,11 @@ compile_assertions_finished () {
    assert_line "    - tmp..............: /tmp"
    assert_line "    - judge............: /usr/local/var/lib/domjudge/judgings"
    assert_line "    - chroot...........: /chroot/domjudge"
-   assert_line "    - cgroup...........: /sys/fs/cgroup"
 }
 
 @test "Alternative dirs together with FHS" {
    setup
-   run run_configure --enable-fhs --with-domserver_webappdir=/run/webapp --with-domserver_tmpdir=/tmp/domserver --with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot/domjudge --with-judgehost_cgroupdir=/sys/fs/altcgroup
+   run run_configure --enable-fhs --with-domserver_webappdir=/run/webapp --with-domserver_tmpdir=/tmp/domserver --with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot/domjudge
    assert_line " * prefix..............: /usr/local"
    assert_line " * documentation.......: /usr/local/share/doc/domjudge"
    assert_line " * domserver...........: "
@@ -343,13 +341,11 @@ compile_assertions_finished () {
    assert_line "    - judge............: /srv/judgings"
    refute_line "    - chroot...........: /chroot/domjudge"
    assert_line "    - chroot...........: /srv/chroot/domjudge"
-   refute_line "    - cgroup...........: /sys/fs/cgroup"
-   assert_line "    - cgroup...........: /sys/fs/altcgroup"
 }
 
 @test "Alternative dirs together with defaults" {
    setup
-   run run_configure "--with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot --with-judgehost_cgroupdir=/sys/fs/altcgroup --with-domserver_logdir=/log"
+   run run_configure "--with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot --with-domserver_logdir=/log"
    assert_line " * prefix..............: /opt/domjudge"
    assert_line " * documentation.......: /opt/domjudge/doc"
    assert_line " * domserver...........: /opt/domjudge/domserver"
@@ -362,8 +358,6 @@ compile_assertions_finished () {
    assert_line "    - judge............: /srv/judgings"
    refute_line "    - chroot...........: /chroot/domjudge"
    assert_line "    - chroot...........: /srv/chroot"
-   refute_line "    - cgroup...........: /sys/fs/cgroup"
-   assert_line "    - cgroup...........: /sys/fs/altcgroup"
 }
 
 @test "Default URL not set, docs mention" {
