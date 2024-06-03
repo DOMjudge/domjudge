@@ -1272,6 +1272,8 @@ int main(int argc, char **argv)
 		}
 	}
 
+    cgroup_set_default_logger(CGROUP_LOG_DEBUG);
+
 	/* Make libcgroup ready for use */
 	ret = cgroup_init();
 	if ( ret!=0 ) {
