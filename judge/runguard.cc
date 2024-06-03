@@ -1287,7 +1287,7 @@ int main(int argc, char **argv)
 	} else {
 		str[0] = 0;
 	}
-    snprintf(cgroupname, 255, "/domjudge/dj_cgroup_%d_%.16s_%d.%06d/",
+    snprintf(cgroupname, 255, "domjudge/dj_cgroup_%d_%.16s_%d.%06d/",
              getpid(), str, (int) progstarttime.tv_sec, (int) progstarttime.tv_usec);
 
 	cgroup_create();
