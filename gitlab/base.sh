@@ -2,6 +2,7 @@
 
 . gitlab/ci_settings.sh
 
+sudo apt update
 sudo apt install -y flexc++ bison++ bisonc++
 
 # If this script is called from unit.sh, we use the test environment
