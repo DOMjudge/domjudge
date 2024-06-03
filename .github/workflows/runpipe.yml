@@ -18,6 +18,8 @@ jobs:
       image: domjudge/gitlabci:24.04
     steps:
       - uses: actions/checkout@v4
+      - name: apt
+        run: sudo apt update && sudo apt install -y flex flexc++ bison++ bisonc++ libsystemd-dev
       - name: Create the configure file
         run: make configure
       - name: Do the default configure
