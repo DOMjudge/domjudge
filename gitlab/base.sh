@@ -3,7 +3,7 @@
 . gitlab/ci_settings.sh
 
 sudo apt update
-sudo apt install -y flex-old flexc++ bison++ bisonc++
+sudo apt install -y flex flexc++ bison++ bisonc++
 
 # If this script is called from unit.sh, we use the test environment
 export APP_ENV="${1:-prod}"
