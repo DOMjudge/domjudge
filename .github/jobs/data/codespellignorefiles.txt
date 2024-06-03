@@ -11,6 +11,7 @@
 ./gitlab/codespell.yml
 ./.github/jobs/uploadcodecov.sh
 ./webapp/vendor
+./lib/libcgroup-3.1
 ./webapp/public/bundles
 ./webapp/public/js/ace
 ./webapp/templates/bundles
