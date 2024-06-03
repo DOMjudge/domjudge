@@ -506,10 +506,10 @@ void output_cgroup_stats_v2(double *cputime)
     void *handle;
     ret = cgroup_read_stats_begin("cpu", cgroupname, &handle, &stat);
     while (ret == 0) {
+        verbose("cpu.stat: %s = %s", stat.name, stat.value);
         if (strcmp(stat.name, "usage_usec") == 0) {
             long long usec = strtoll(stat.value, NULL, 10);
             *cputime = usec / 1e6;
-            break;
         }
         ret = cgroup_read_stats_next(&handle, &stat);
     }
