@@ -2,6 +2,10 @@
 
 . gitlab/ci_settings.sh
 
+cat /proc/mounts
+
+cat /proc/mounts | grep cgroup
+
 sudo apt update
 sudo apt install -y flex flexc++ bison++ bisonc++ libsystemd-dev
 
