@@ -19,6 +19,8 @@ jobs:
       options: --privileged
     steps:
       - uses: actions/checkout@v4
+      - name: info
+        run: cat /proc/cmdline && echo && cat /proc/mounts && echo && ls -al /sys/fs/cgroup && echo && uname -a
       - name: apt
         run: sudo apt update && sudo apt install -y flex flexc++ bison++ bisonc++ libsystemd-dev
       - name: Create the configure file
