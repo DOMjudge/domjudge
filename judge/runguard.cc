@@ -570,14 +570,14 @@ void cgroup_create()
 		verbose("cpuset undefined");
 	}
 
-	if ( (cg_controller = cgroup_add_controller(cg, "cpu"))==nullptr ) {
-		error(0,"cgroup_add_controller cpu");
+	if (!is_cgroup_v2) {
+		if ( (cg_controller = cgroup_add_controller(cg, "cpu"))==nullptr ) {
+			error(0,"cgroup_add_controller cpu");
+		}
+		if ((cg_controller = cgroup_add_controller(cg, "cpuacct")) == nullptr) {
+			error(0, "cgroup_add_controller cpuacct");
+		}
 	}
-    if (!is_cgroup_v2) {
-        if ((cg_controller = cgroup_add_controller(cg, "cpuacct")) == nullptr) {
-            error(0, "cgroup_add_controller cpuacct");
-        }
-    }
 
 	/* Perform the actual creation of the cgroup */
 	if ( (ret = cgroup_create_cgroup(cg, 1))!=0 ) error(ret,"creating cgroup");
@@ -1272,7 +1272,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-    cgroup_set_default_logger(CGROUP_LOG_DEBUG);
+//    cgroup_set_default_logger(CGROUP_LOG_DEBUG);
 
 	/* Make libcgroup ready for use */
 	ret = cgroup_init();
