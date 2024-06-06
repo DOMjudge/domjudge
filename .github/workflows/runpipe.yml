@@ -37,7 +37,7 @@ jobs:
       - name: Run the actual runguard tests
         working-directory: judge/runguard_test
         env:
-          judgehost_tmpdir=/tmp
-          judgehost_judgedir=/tmp
+          judgehost_tmpdir: /tmp
+          judgehost_judgedir: /tmp
         run: make test
 
