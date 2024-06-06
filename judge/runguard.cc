@@ -210,7 +210,7 @@ void verbose(const char *format, ...)
 	va_list ap;
 	va_start(ap,format);
 
-	if ( ! be_quiet && be_verbose ) {
+	if ( true ) { //! be_quiet && be_verbose ) {
         struct timeval currtime{};
 		gettimeofday(&currtime,nullptr);
 		double runtime = (currtime.tv_sec  - progstarttime.tv_sec ) +
@@ -1272,7 +1272,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-//    cgroup_set_default_logger(CGROUP_LOG_DEBUG);
+	cgroup_set_default_logger(CGROUP_LOG_DEBUG);
 
 	/* Make libcgroup ready for use */
 	ret = cgroup_init();
