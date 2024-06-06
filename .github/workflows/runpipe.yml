@@ -15,7 +15,8 @@ jobs:
   runpipe:
     runs-on: ubuntu-latest
     container:
-      image: domjudge/gitlabci:24.04
+      image: domjudge/gitlabci:2.1
+      options: --privileged
     steps:
       - uses: actions/checkout@v4
       - name: apt
