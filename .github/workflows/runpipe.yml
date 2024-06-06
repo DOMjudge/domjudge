@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: info
-        run: cat /proc/cmdline && echo && cat /proc/mounts && echo && ls -al /sys/fs/cgroup && echo && uname -a
+        run: cat /proc/cmdline && echo && cat /proc/mounts && echo && ls -al /sys/fs/cgroup && echo && uname -a && echo && stat -fc %T /sys/fs/cgroup && echo && cat /proc/self/cgroup
       - name: apt
         run: sudo apt update && sudo apt install -y flex flexc++ bison++ bisonc++ libsystemd-dev
       - name: Create the configure file
