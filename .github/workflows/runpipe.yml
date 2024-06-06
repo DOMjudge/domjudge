@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-24.04
     container:
       image: domjudge/gitlabci:2.1
-      options: --privileged
+      options: --privileged --cgroupns=host
     steps:
       - uses: actions/checkout@v4
       - name: info
