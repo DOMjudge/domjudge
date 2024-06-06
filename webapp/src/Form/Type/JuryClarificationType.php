@@ -39,6 +39,12 @@ class JuryClarificationType extends AbstractType
         } else {
             /** @var Team|null $limitToTeam */
             $teams = $this->em->getRepository(Team::class)->findAll();
+
+            // Sort teams by identifier
+            usort($teams, function (Team $a, Team $b) {
+                return strnatcmp($this->getTeamIdentifier($a), $this->getTeamIdentifier($b));
+            });
+
             foreach ($teams as $team) {
                 $recipientOptions[$this->getTeamLabel($team)] = $team->getTeamid();
             }
@@ -115,14 +121,19 @@ class JuryClarificationType extends AbstractType
 
     private function getTeamLabel(Team $team): string
     {
+        return sprintf('%s (%s)', $team->getEffectiveName(), $this->getTeamIdentifier($team));
+    }
+
+    private function getTeamIdentifier(Team $team): string
+    {
         if ($team->getLabel()) {
-            return sprintf('%s (%s)', $team->getEffectiveName(), $team->getLabel());
+            return $team->getLabel();
         }
 
         if ($this->eventLogService->externalIdFieldForEntity($team)) {
-            return sprintf('%s (%s)', $team->getEffectiveName(), $team->getExternalId());
+            return $team->getExternalId();
         }
 
-        return sprintf('%s (t%s)', $team->getEffectiveName(), $team->getTeamid());
+        return (string)$team->getTeamid();
     }
 }
