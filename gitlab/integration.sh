@@ -78,7 +78,7 @@ section_start mount "Show runner mounts"
 mount
 # Currently gitlab has some runners with noexec/nodev,
 # This can be removed if we have more stable runners.
-mount -o remount,exec,dev /builds
+mount -o remount,exec,dev /builds || true
 section_end mount
 
 section_start check_cgroup_v1 "Checking for cgroup v1 availability"
