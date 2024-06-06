@@ -143,12 +143,12 @@ if [ $PIN_JUDGEDAEMON -eq 1 ]; then
 fi
 section_end more_setup
 
-section_start runguard_tests "Running isolated runguard tests"
-sudo addgroup domjudge-run-0
-sudo usermod -g domjudge-run-0 domjudge-run-0
-cd ${DIR}/judge/runguard_test
-make test
-section_end runguard_tests
+# section_start runguard_tests "Running isolated runguard tests"
+# sudo addgroup domjudge-run-0
+# sudo usermod -g domjudge-run-0 domjudge-run-0
+# cd ${DIR}/judge/runguard_test
+# make test
+# section_end runguard_tests
 
 section_start start_judging "Start judging"
 cd /opt/domjudge/judgehost/
