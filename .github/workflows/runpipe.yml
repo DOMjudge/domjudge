@@ -34,6 +34,8 @@ jobs:
         run: make test
       - name: Add user/group
         run: sudo addgroup domjudge-run-0 && sudo usermod -g domjudge-run-0 domjudge-run-0
+      - name: Create dir
+        run: mkdir -p /opt/domjudge/judgehost/tmp/
       - name: Run the actual runguard tests
         working-directory: judge/runguard_test
         env:
