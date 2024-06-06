@@ -29,6 +29,8 @@ jobs:
       - name: Run the actual runpipe tests
         working-directory: judge/runpipe_test
         run: make test
+      - name: Add user/group
+        run: sudo addgroup domjudge-run-0 && sudo usermod -g domjudge-run-0 domjudge-run-0
       - name: Run the actual runguard tests
         working-directory: judge/runguard_test
         run: make test
