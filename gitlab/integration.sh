@@ -144,9 +144,11 @@ fi
 section_end more_setup
 
 # section_start runguard_tests "Running isolated runguard tests"
-# sudo addgroup domjudge-run-0
-# sudo usermod -g domjudge-run-0 domjudge-run-0
-# cd ${DIR}/judge/runguard_test
+sudo addgroup domjudge-run-0
+sudo usermod -g domjudge-run-0 domjudge-run-0
+cd ${DIR}/judge/runguard_test
+
+sleep 10000
 # make test
 # section_end runguard_tests
 
