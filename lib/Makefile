@@ -8,11 +8,6 @@ OBJECTS = $(addsuffix $(OBJEXT),lib.error lib.misc)
 
 build: $(OBJECTS)
 
-judgehost: libcgroup
-
-libcgroup:
-	$(MAKE) -C libcgroup-3.1.0
-
 $(OBJECTS): %$(OBJEXT): %.c %.h
 
 clean-l:

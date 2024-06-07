@@ -316,8 +316,6 @@ AC_SUBST(PHPVERSION, [$phpversion])
 
 AC_CONFIG_FILES([paths.mk])
 
-AC_CONFIG_COMMANDS([lib/libcgroup-3.1.0], [sh lib/libcgroup-3.1.0/myconfigure])
-
 AC_OUTPUT
 
 # summary {{{
