@@ -863,7 +863,7 @@ void setrestrictions()
 
 	/* Put the child process in the cgroup */
     if (is_cgroup_v2) {
-        const char *controllers[] = { "cpu", "memory", "cpuset", NULL };
+        const char *controllers[] = { "memory", NULL };
         if (cgroup_change_cgroup_path(cgroupname, getpid(), controllers) != 0) {
            error(0, "Failed to move the process to the cgroup");
        }
