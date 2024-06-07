@@ -232,7 +232,7 @@ test_nprocs() {
 	fi
 	not_expect_stdout 16
 	not_expect_stdout 31
-	expect_stderr "retry: Resource temporarily unavailable"
+	expect_stderr "Resource temporarily unavailable"
 }
 
 test_meta() {

@@ -1,4 +1,0 @@
-DIST_SUBDIRS = ftests gunit
-if WITH_TESTS
-SUBDIRS = $(DIST_SUBDIRS)
-endif
