@@ -610,7 +610,7 @@ void cgroup_kill()
         int size;
         do {
             pid_t* pids;
-            int ret = cgroup_get_procs(cgroupname, NULL, &pids, &size);
+            int ret = cgroup_get_procs(cgroupname, "memory", &pids, &size);
             if (ret != 0) error(ret, "cgroup_get_procs");
             for(int i = 0; i < size; i++) {
                 kill(pids[i], SIGKILL);
@@ -646,8 +646,9 @@ void cgroup_delete()
 	}
 	/* Clean up our cgroup */
 	nanosleep(&cg_delete_delay,nullptr);
-	int ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
-	if ( ret!=0 ) error(ret,"deleting cgroup");
+    int ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
+    // TODO: is this actually benign?
+	if ( ret!=0 && ret!=ECGOTHER ) error(ret,"deleting cgroup");
 
 	cgroup_free(&cg);
 
@@ -862,7 +863,8 @@ void setrestrictions()
 
 	/* Put the child process in the cgroup */
     if (is_cgroup_v2) {
-       if (cgroup_change_cgroup_path(cgroupname, getpid(), NULL) != 0) {
+        const char *controllers[] = { "cpu", "memory", "cpuset", NULL };
+        if (cgroup_change_cgroup_path(cgroupname, getpid(), controllers) != 0) {
            error(0, "Failed to move the process to the cgroup");
        }
     } else {
@@ -1351,6 +1353,7 @@ int main(int argc, char **argv)
 		error(errno,"cannot start `%s'",cmdname);
 
 	default: /* become watchdog */
+        verbose("child pid = %d", child_pid);
 		/* Shed privileges, only if not using a separate child uid,
 		   because in that case we may need root privileges to kill
 		   the child process. Do not use Linux specific setresuid()
