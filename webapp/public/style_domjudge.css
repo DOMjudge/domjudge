@@ -84,9 +84,9 @@ a {
 .prevsubmit     { color: #696969; }
 
 .output_text {
-    border-top: 1px dotted #C0C0C0;
-    border-bottom: 1px dotted #C0C0C0;
-    background-color: #FAFAFA;
+    border-top: 1px dotted #c0c0c0;
+    border-bottom: 1px dotted #c0c0c0;
+    background-color: #fafafa;
     margin: 0;
     padding: 5px;
     font-family: monospace;
@@ -94,9 +94,9 @@ a {
 }
 
 .clarificationform pre {
-    border-top: 1px dotted #C0C0C0;
-    border-bottom: 1px dotted #C0C0C0;
-    background-color: #FAFAFA;
+    border-top: 1px dotted #c0c0c0;
+    border-bottom: 1px dotted #c0c0c0;
+    background-color: #fafafa;
     margin: 0;
     padding: 5px;
     font-family: monospace;
@@ -104,7 +104,7 @@ a {
 }
 
 kbd {
-    background-color: #FAFAFA;
+    background-color: #fafafa;
     color: black;
 }
 
@@ -270,9 +270,9 @@ img.affiliation-logo {
 .score_incorrect           { background: #e87272; }
 .score_pending             { background: #6666ff; }
 
-.gold-medal   { background-color: #EEC710 }
-.silver-medal { background-color: #AAA }
-.bronze-medal { background-color: #C08E55 }
+.gold-medal   { background-color: #eec710 }
+.silver-medal { background-color: #aaa }
+.bronze-medal { background-color: #c08e55 }
 
 #scoresolv,#scoretotal { width: 2.5em; }
 .scorenc,.scorett,.scorepl { text-align: center; width: 2ex; }
@@ -655,8 +655,8 @@ blockquote {
 }
 
 #contesttimer {
-	color: DimGray;
-	margin-left: auto;
+    color: DimGray;
+    margin-left: auto;
 }
 
 .lasttcruns, .lastresult {
@@ -668,7 +668,7 @@ blockquote {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: #295D8A;
+    background-color: #295d8a;
     font-size: 200%;
     font-weight: bold;
     color: white;
