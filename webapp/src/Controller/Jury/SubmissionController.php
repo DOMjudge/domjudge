@@ -732,7 +732,7 @@ class SubmissionController extends BaseController
             throw new BadRequestHttpException('Integrity problem while fetching team output.');
         }
         if ($run->getOutput() === null) {
-            throw new BadRequestHttpException('No team output available (yet).');
+            throw new NotFoundHttpException('No team output available (yet).');
         }
 
         $filename = sprintf('p%d.t%d.%s.run%d.team%d.out', $submission->getProblem()->getProbid(), $run->getTestcase()->getRank(),
