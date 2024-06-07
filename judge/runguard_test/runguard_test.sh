@@ -223,7 +223,7 @@ test_nprocs() {
 	expect_stdout 31
 
 	exec_check_fail sudo $RUNGUARD -u domjudge-run-0 -p 16 ./forky.sh
-	if [ -n "$GITHUB_ACTIONS ]; then
+	if [ -n "$GITHUB_ACTIONS" ]; then
 		# TODO: Why does this not output anything on github, perhaps we
 		# need to use a different user id for domjudge-run-0
 		ps axuwww | grep ^domjudge-run
