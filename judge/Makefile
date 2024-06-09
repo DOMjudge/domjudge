@@ -13,13 +13,12 @@ judgehost: $(TARGETS) $(SUBST_FILES)
 $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 
-runguard: LDFLAGS := $(filter-out -pie,$(LDFLAGS))
-
-runguard: -lm $(LIBCGROUP)
-runguard$(OBJEXT): $(TOPDIR)/etc/runguard-config.h
-
 evict: evict.c $(LIBHEADERS) $(LIBSOURCES)
 	$(CC) $(CFLAGS) -o $@ $< $(LIBSOURCES)
+
+LIBCGROUP_DIR = lib/libcgroup-3.1.0
+runguard: runguard.cc $(LIBHEADERS) $(LIBSOURCES) $(TOPDIR)/etc/runguard-config.h
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LIBSOURCES) -lcgroup
 
 runpipe: runpipe.cc $(LIBHEADERS) $(LIBSOURCES)
 	$(CXX) $(CXXFLAGS) -static -o $@ $< $(LIBSOURCES)

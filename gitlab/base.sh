@@ -2,6 +2,13 @@
 
 . gitlab/ci_settings.sh
 
+cat /proc/mounts
+
+cat /proc/mounts | grep cgroup
+
+sudo apt update
+sudo apt install -y flex flexc++ bison++ bisonc++ libsystemd-dev
+
 # If this script is called from unit.sh, we use the test environment
 export APP_ENV="${1:-prod}"
 

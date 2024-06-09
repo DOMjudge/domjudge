@@ -153,9 +153,6 @@ if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 		AC_SUBST(RUNGROUP,$with_rungroup)
 		AC_MSG_RESULT($RUNGROUP)
 	fi
-
-	# Check for using Linux cgroups for memory control
-	AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]), AC_MSG_ERROR([Linux cgroup library not found.]))
 fi
 # }}}
 
@@ -340,6 +337,7 @@ AS_IF([test x"$PHP_CHECK" != x"yes"],
 AC_SUBST(PHPVERSION, [$phpversion])
 
 AC_CONFIG_FILES([paths.mk])
+
 AC_OUTPUT
 
 # summary {{{

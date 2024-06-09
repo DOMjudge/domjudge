@@ -33,7 +33,7 @@ sudo apt install -y acl zip unzip nginx composer php php-fpm php-gd \
                     php-zip procps gcc g++ default-jre-headless \
                     default-jdk-headless ghc fp-compiler autoconf automake bats \
                     python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig \
-                    python3-yaml latexmk curl
+                    python3-yaml latexmk curl flex flexc++ bison++ bisonc++ libsystemd-dev
 section_end
 
 PHPVERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION."\n";')
