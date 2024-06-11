@@ -144,7 +144,7 @@ class QueueTaskControllerTest extends BaseTestCase
         $config   = self::getContainer()->get(ConfigurationService::class);
         $eventLog = self::getContainer()->get(EventLogService::class);
         $dj       = self::getContainer()->get(DOMJudgeService::class);
-        $config->saveChanges(['lazy_eval_results'=>$globalLazy], $eventLog, $dj);
+        $config->saveChanges(['lazy_eval_results'=>$globalLazy], $eventLog, $dj, treatMissingBooleansAsFalse: false);
 
         $this->roles = ['admin'];
         $this->logOut();

@@ -38,7 +38,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[UniqueEntity(fields: 'externalid')]
 class Submission extends BaseApiEntity implements
     HasExternalIdInterface,
-    ExternalIdFromInternalIdInterface
+    ExternalIdFromInternalIdInterface,
+    PrefixedExternalIdInShadowModeInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

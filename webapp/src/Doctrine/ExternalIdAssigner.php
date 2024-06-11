@@ -4,7 +4,9 @@ namespace App\Doctrine;
 
 use App\Entity\CalculatedExternalIdBasedOnRelatedFieldInterface;
 use App\Entity\ExternalIdFromInternalIdInterface;
+use App\Entity\PrefixedExternalIdInShadowModeInterface;
 use App\Entity\PrefixedExternalIdInterface;
+use App\Service\DOMJudgeService;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\PostPersistEventArgs;
@@ -15,6 +17,7 @@ class ExternalIdAssigner
 {
     public function __construct(
         protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
     ) {}
 
     public function __invoke(PostPersistEventArgs $args): void
@@ -36,6 +39,8 @@ class ExternalIdAssigner
             $primaryKeyField = $metadata->getSingleIdentifierFieldName();
             $externalid = (string)$metadata->getFieldValue($entity, $primaryKeyField);
             if ($entity instanceof PrefixedExternalIdInterface) {
+                $externalid = 'dj-' . $externalid;
+            } elseif ($this->dj->shadowMode() && $entity instanceof PrefixedExternalIdInShadowModeInterface) {
                 $externalid = 'dj-' . $externalid;
             }
         }

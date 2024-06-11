@@ -1561,7 +1561,7 @@ class DOMJudgeService
 
             // Special case, we're shadow and someone submits on our side in that case
             // we're not super lazy.
-            if ($this->shadowMode() && $submission->getExternalid() === null) {
+            if ($this->shadowMode() && $submission->getExternalid() === ('dj-' . $submission->getSubmitid())) {
                 $evalOnDemand = false;
             }
             if ($manualRequest) {
