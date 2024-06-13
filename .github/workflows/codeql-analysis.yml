@@ -12,12 +12,14 @@ on:
 
 jobs:
   analyze:
-    # We can not run with our gitlab container
-    # CodeQL has missing .so files otherwise
+    container:
+      image: domjudge/gitlabci:24.04
+      options: --user domjudge
     name: Analyze
     runs-on: ubuntu-latest
     env:
       COMPILED: "cpp"
+      USER: "domjudge"
     permissions:
       actions: read
       contents: read
@@ -33,27 +35,13 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
 
-    - name: Install required tools
-      if: ${{ contains(env.COMPILED, matrix.language) }}
-      run: |
-        sudo apt update
-        sudo apt install -y acl zip unzip apache2 composer php php-fpm php-gd \
-                            php-cli php-intl php-mbstring php-mysql php-curl php-json \
-                            php-xml php-zip ntp make sudo debootstrap \
-                            libcgroup-dev lsof php-cli php-curl php-json php-xml \
-                            php-zip procps gcc g++ default-jre-headless \
-                            default-jdk-headless ghc fp-compiler autoconf automake bats \
-                            python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig \
-                            python3-yaml latexmk
-
     - name: Install composer files
       if: ${{ contains(env.COMPILED, matrix.language) }}
-      run: |
-        composer install --no-scripts
+      run: composer install --no-scripts
 
     - name: Configure Makefile
       if: ${{ contains(env.COMPILED, matrix.language) }}
@@ -88,4 +76,4 @@ jobs:
       run: sudo chown -R ${USER} ./installdir
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
