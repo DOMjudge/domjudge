@@ -47,7 +47,7 @@ endif
 domserver: domserver-configure paths.mk config
 judgehost: judgehost-configure paths.mk config
 docs: paths.mk config
-install-domserver: domserver composer-dump-autoload domserver-create-dirs
+install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
 dist: configure composer-dependencies
@@ -76,12 +76,6 @@ endif
 composer-dependencies-dev:
 	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
 
-# Dump autoload dependencies (including plugins)
-# This is needed since symfony/runtime is a Composer plugin that runs while dumping
-# the autoload file
-composer-dump-autoload:
-	composer $(subst 1,-q,$(QUIET)) dump-autoload -o -a
-
 composer-dump-autoload-dev:
 	composer $(subst 1,-q,$(QUIET)) dump-autoload
 
@@ -101,7 +95,7 @@ build-scripts:
 
 # List of SUBDIRS for recursive targets:
 build:             SUBDIRS=        lib           misc-tools
-domserver:         SUBDIRS=etc         sql       misc-tools webapp
+domserver:         SUBDIRS=etc     lib sql       misc-tools webapp
 install-domserver: SUBDIRS=etc     lib sql       misc-tools webapp example_problems
 judgehost:         SUBDIRS=etc             judge misc-tools
 install-judgehost: SUBDIRS=etc     lib     judge misc-tools
@@ -222,7 +216,7 @@ webapp/.env.local:
 # symlinks where necessary to let it work from the source tree.
 # This stuff is a hack!
 maintainer-install: inplace-install composer-dump-autoload-dev
-inplace-install: build composer-dump-autoload domserver-create-dirs judgehost-create-dirs
+inplace-install: build domserver-create-dirs judgehost-create-dirs
 inplace-install-l:
 # Replace libjudgedir with symlink to prevent lots of symlinks:
 	-rmdir $(judgehost_libjudgedir)
@@ -341,5 +335,5 @@ clean-autoconf:
         $(addprefix inplace-,conf conf-common install uninstall) \
         $(addprefix maintainer-,conf install) clean-autoconf config distdocs \
         composer-dependencies composer-dependencies-dev \
-        composer-dump-autoload composer-dump-autoload-dev \
+        composer-dump-autoload-dev \
         coverity-conf coverity-build
