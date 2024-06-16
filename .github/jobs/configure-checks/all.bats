@@ -37,7 +37,7 @@ setup() {
     if [ "$distro_id" = "ID=fedora" ]; then
         repo-install httpd
     fi
-    repo-install gcc g++ libcgroup-dev
+    repo-install gcc g++ libcgroup-dev composer
 }
 
 run_configure () {
