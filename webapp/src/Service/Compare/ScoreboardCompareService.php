@@ -59,22 +59,21 @@ class ScoreboardCompareService extends AbstractCompareService
 
         foreach ($object1->rows as $index => $row) {
             if ($row->teamId !== $object2->rows[$index]->teamId) {
-                $this->addMessage(MessageType::ERROR, sprintf('Row %d: Team ID does not match', $index), $row->teamId, $object2->rows[$index]->teamId);
+                $this->addMessage(MessageType::ERROR, sprintf('Row %d: team ID does not match', $index), $row->teamId, $object2->rows[$index]->teamId);
             }
 
             if ($row->rank !== $object2->rows[$index]->rank) {
-                $this->addMessage(MessageType::ERROR, sprintf('Row %d: Rank does not match', $index), (string)$row->rank, (string)$object2->rows[$index]->rank);
+                $this->addMessage(MessageType::ERROR, sprintf('Row %d: rank does not match', $index), (string)$row->rank, (string)$object2->rows[$index]->rank);
             }
 
             if ($row->score->numSolved !== $object2->rows[$index]->score->numSolved) {
-                $this->addMessage(MessageType::ERROR, sprintf('Row %d: Num solved does not match', $index), (string)$row->score->numSolved, (string)$object2->rows[$index]->score->numSolved);
+                $this->addMessage(MessageType::ERROR, sprintf('Row %d: num solved does not match', $index), (string)$row->score->numSolved, (string)$object2->rows[$index]->score->numSolved);
             }
 
             if ($row->score->totalTime !== $object2->rows[$index]->score->totalTime) {
-                $this->addMessage(MessageType::ERROR, sprintf('Row %d: Total time does not match', $index), (string)$row->score->totalTime, (string)$object2->rows[$index]->score->totalTime);
+                $this->addMessage(MessageType::ERROR, sprintf('Row %d: total time does not match', $index), (string)$row->score->totalTime, (string)$object2->rows[$index]->score->totalTime);
             }
 
-            // Problem messages are mostly info for now, since PC^2 doesn't expose time info
             foreach ($row->problems as $problem) {
                 /** @var Problem|null $problemForSecond */
                 $problemForSecond = null;
@@ -91,7 +90,7 @@ class ScoreboardCompareService extends AbstractCompareService
                 }
 
                 if ($problemForSecond === null && $problem->solved) {
-                    $this->addMessage(MessageType::ERROR, sprintf('Row %d: Problem %s solved in first file, but not in second file', $index, $problem->problemId));
+                    $this->addMessage(MessageType::ERROR, sprintf('Row %d: Problem %s solved in first file, but not found in second file', $index, $problem->problemId));
                 } elseif ($problemForSecond !== null && $problem->solved !== $problemForSecond->solved) {
                     $this->addMessage(MessageType::ERROR, sprintf('Row %d: Problem %s solved does not match', $index, $problem->problemId), (string)$problem->solved, (string)$problemForSecond->solved);
                 }
@@ -106,6 +105,7 @@ class ScoreboardCompareService extends AbstractCompareService
                     }
 
                     if ($problem->time !== $problemForSecond->time) {
+                        // This is an info message for now, since PC^2 doesn't expose time info
                         $this->addMessage(MessageType::INFO, sprintf('Row %d: Problem %s time does not match', $index, $problem->problemId), (string)$problem->time, (string)$problemForSecond->time);
                     }
                 }
@@ -126,7 +126,7 @@ class ScoreboardCompareService extends AbstractCompareService
                 }
 
                 if ($problemForFirst === null && $problem2->solved) {
-                    $this->addMessage(MessageType::ERROR, sprintf('Row %d: Problem %s solved in second file, but not in first file', $index, $problem2->problemId));
+                    $this->addMessage(MessageType::ERROR, sprintf('Row %d: Problem %s solved in second file, but not found in first file', $index, $problem2->problemId));
                 }
             }
         }
