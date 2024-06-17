@@ -236,6 +236,14 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->problem;
     }
 
+    public function getContestProblem(): ?ContestProblem
+    {
+        if (!$this->problem) {
+            return null;
+        }
+        return $this->contest->getContestProblem($this->problem);
+    }
+
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('problem_id')]
