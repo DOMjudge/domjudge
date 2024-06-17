@@ -48,14 +48,14 @@
                         {% if executable.type == 'compare' %}
                             {% for problem in executable.problemsCompare %}
                                 <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">
-                                    p{{ problem.probid }} {{ problem | problemBadgeForProblemAndContest(current_contest) }}
+                                    p{{ problem.probid }} {{ problem | problemBadgeForContest }}
                                 </a>
                                 {% set used = true %}
                             {% endfor %}
                         {% elseif executable.type == 'run' %}
                             {% for problem in executable.problemsRun %}
                                 <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">
-                                    p{{ problem.probid }} {{ problem | problemBadgeForProblemAndContest(current_contest) }}
+                                    p{{ problem.probid }} {{ problem | problemBadgeForContest }}
                                 </a>
                                 {% set used = true %}
                             {% endfor %}
