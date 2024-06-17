@@ -1084,14 +1084,11 @@ EOF;
         );
     }
 
-    public function problemBadgeForProblemAndContest(Problem $problem, ?Contest $contest): string
+    public function problemBadgeForProblemAndContest(Problem $problem, ?Contest $contest = null): string
     {
-        foreach ($problem->getContestProblems() as $contestProblem) {
-            if ($contestProblem->getContest() === $contest) {
-                return $this->problemBadge($contestProblem);
-            }
-        }
-        return '';
+        $contest ??= $this->dj->getCurrentContest();
+        $contestProblem = $contest?->getContestProblem($problem);
+        return $contestProblem === null ? '' : $this->problemBadge($contestProblem);
     }
 
     public function printMetadata(?string $metadata): string
