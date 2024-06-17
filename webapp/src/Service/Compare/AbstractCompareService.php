@@ -73,4 +73,12 @@ abstract class AbstractCompareService
     ): void {
         $this->messages[] = new Message($type, $message, $source, $target);
     }
+
+    /**
+     * @return Message[]
+     */
+    public function getMessages(): array
+    {
+        return $this->messages;
+    }
 }
