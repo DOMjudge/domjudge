@@ -913,6 +913,16 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->problems;
     }
 
+    public function getContestProblem(Problem $problem): ?ContestProblem
+    {
+        foreach ($this->getProblems() as $contestProblem) {
+            if ($contestProblem->getProblem() === $problem) {
+                return $contestProblem;
+            }
+        }
+        return null;
+    }
+
     public function addClarification(Clarification $clarification): Contest
     {
         $this->clarifications[] = $clarification;
