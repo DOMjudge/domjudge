@@ -1,9 +1,9 @@
 nelmio_api_doc:
     documentation:
         servers:
-            - url: "%domjudge.baseurl%api"
+            - url: ~ # Will be set by App\NelmioApiDocBundle\ExternalDocDescriber
               description: API used at this contest
-            - url: https://www.domjudge.org/demoweb/api
+            - url: https://www.domjudge.org/demoweb
               description: New API in development
         info:
             title: DOMjudge
