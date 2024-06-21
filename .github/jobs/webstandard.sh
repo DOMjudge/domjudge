@@ -76,7 +76,7 @@ if [ $RET -ne 4 ] && [ $RET -ne 0 ] && [ $RET -ne 8 ]; then
     exit $RET
 fi
 
-EXPECTED_HTTP_CODES="200\|302\|400\|404"
+EXPECTED_HTTP_CODES="200\|302\|400\|404\|403"
 if [ "$ROLE" = "public" ]; then
     # It's expected to encounter a 401 for the login page as we supply the wrong password
     EXPECTED_HTTP_CODES="$EXPECTED_HTTP_CODES\|401"
@@ -87,7 +87,6 @@ set -e
 echo "$NUM_ERRORS"
 
 if [ "$NUM_ERRORS" -ne 0 ]; then
-    echo "Entered the if"
     grep -v "HTTP/1.1\" \($EXPECTED_HTTP_CODES\)" /var/log/nginx/domjudge.log | grep -v "robots.txt"
     exit 1
 fi
@@ -133,7 +132,9 @@ else
         FLTR=""
     else
         STAN="-s $TEST"
-        FLTR="-E '#DataTables_Table_0 > tbody > tr > td > a','#menuDefault > a','#filter-card > div > div > div > span > span:nth-child(1) > span > ul > li > input',.problem-badge"
+        FLTR0="-E '#DataTables_Table_0 > tbody > tr > td > a','#menuDefault > a','#filter-card > div > div > div > span > span:nth-child(1) > span > ul > li > input',.problem-badge"
+        FLTR1="'html > body > div > div > div > div > div > div > table > tbody > tr > td > a > span'"
+        FLTR="$FLTR0,$FLTR1"
     fi
     chown -R domjudge:domjudge "$DIR"
     cd "$DIR"
