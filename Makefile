@@ -5,7 +5,7 @@
 export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
-            docs install-docs inplace-install inplace-uninstall
+            docs install-docs inplace-install inplace-uninstall maintainer-conf
 
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
@@ -107,6 +107,7 @@ judgehost:                  SUBDIRS=etc             judge misc-tools
 install-judgehost:          SUBDIRS=etc     lib     judge misc-tools
 docs:                       SUBDIRS=    doc
 install-docs:               SUBDIRS=    doc
+maintainer-conf:            SUBDIRS=                                 webapp
 inplace-install:            SUBDIRS=    doc               misc-tools
 inplace-uninstall:          SUBDIRS=    doc               misc-tools
 dist:                       SUBDIRS=        lib sql       misc-tools
@@ -193,7 +194,7 @@ paths.mk:
 	@exit 1
 
 # Configure for running in source tree, not meant for normal use:
-maintainer-conf: inplace-conf-common composer-dependencies-dev webapp/.env.local
+maintainer-conf: inplace-conf-common composer-dependencies-dev
 inplace-conf: inplace-conf-common composer-dependencies
 inplace-conf-common: dist
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
@@ -210,13 +211,6 @@ inplace-conf-common: dist
 	            --with-domserver_databasedumpdir=$(CURDIR)/output/db-dumps \
 	            --with-baseurl='http://localhost/domjudge/' \
 	            $(CONFIGURE_FLAGS)
-
-# Run Symfony in dev mode (for maintainer-mode):
-webapp/.env.local:
-	@echo "Creating file '$@'..."
-	@echo "# This file was automatically created by 'make maintainer-conf' to run" > $@
-	@echo "# the DOMjudge Symfony application in developer mode. Adjust as needed." >> $@
-	@echo "APP_ENV=dev" >> $@
 
 # Install the system in place: don't really copy stuff, but create
 # symlinks where necessary to let it work from the source tree.

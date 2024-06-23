@@ -9,6 +9,15 @@ include $(TOPDIR)/Makefile.global
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = config
 
+maintainer-conf: .env.local
+
+# Run Symfony in dev mode (for maintainer-mode):
+.env.local:
+	@echo "Creating file '$@'..."
+	@echo "# This file was automatically created by 'make maintainer-conf' to run" > $@
+	@echo "# the DOMjudge Symfony application in developer mode. Adjust as needed." >> $@
+	@echo "APP_ENV=dev" >> $@
+
 copy-bundle-assets:
 # We can not use bin/console here, as when using a fakeroot,
 # the include paths are broken. We just copy in the data we need
