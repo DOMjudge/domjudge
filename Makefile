@@ -108,7 +108,7 @@ install-judgehost:          SUBDIRS=etc     lib     judge misc-tools
 docs:                       SUBDIRS=    doc
 install-docs:               SUBDIRS=    doc
 maintainer-conf:            SUBDIRS=                                 webapp
-inplace-install:            SUBDIRS=    doc               misc-tools
+inplace-install:            SUBDIRS=    doc               misc-tools webapp
 inplace-uninstall:          SUBDIRS=    doc               misc-tools
 dist:                       SUBDIRS=        lib sql       misc-tools
 clean:                      SUBDIRS=etc doc lib sql judge misc-tools webapp
@@ -233,8 +233,6 @@ inplace-install-l:
 # because judgehost-create-dirs sets wrong permissions:
 	$(MKDIR_P) $(domserver_tmpdir)
 	chmod a+rwx $(domserver_tmpdir)
-# Make sure we're running from a clean state:
-	composer auto-scripts
 	@echo ""
 	@echo "========== Maintainer Install Completed =========="
 	@echo ""

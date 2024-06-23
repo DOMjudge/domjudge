@@ -49,6 +49,12 @@ install-domserver:
 	done
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
 
+inplace-install: composer-autoclean
+
+composer-autoclean:
+	# Make sure we're running from a clean state:
+	composer auto-scripts
+
 maintainer-clean-l:
 	-for d in cache log ; do \
 		for t in dev prod ; do \
