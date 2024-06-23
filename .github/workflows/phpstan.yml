@@ -21,6 +21,7 @@ jobs:
           configuration: phpstan.dist.neon
           path: webapp/src webapp/tests
           php_extensions: gd intl mysqli pcntl zip
+          autoload_file: webapp/vendor/autoload.php
       - uses: actions/upload-artifact@v4
         if: always()
         with:
