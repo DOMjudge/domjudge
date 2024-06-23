@@ -12,6 +12,7 @@ define('ETCDIR',    '@domserver_etcdir@');
 define('WEBAPPDIR', '@domserver_webappdir@');
 define('LIBDIR',    '@domserver_libdir@');
 define('SQLDIR',    '@domserver_sqldir@');
+define('VENDORDIR', '@domserver_webappdir@/vendor');
 define('LOGDIR',    '@domserver_logdir@');
 define('RUNDIR',    '@domserver_rundir@');
 define('TMPDIR',    '@domserver_tmpdir@');
