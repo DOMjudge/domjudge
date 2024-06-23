@@ -65,15 +65,6 @@ ifneq "$(JUDGEHOST_BUILD_ENABLED)" "yes"
 	@exit 1
 endif
 
-# Dump autoload dependencies (including plugins)
-# This is needed since symfony/runtime is a Composer plugin that runs while dumping
-# the autoload file
-composer-dump-autoload:
-	composer $(subst 1,-q,$(QUIET)) dump-autoload -o -a
-
-composer-dump-autoload-dev:
-	composer $(subst 1,-q,$(QUIET)) dump-autoload
-
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.
 distdocs:
@@ -97,6 +88,7 @@ install-judgehost:          SUBDIRS=etc     lib     judge misc-tools
 docs:                       SUBDIRS=    doc
 install-docs:               SUBDIRS=    doc
 maintainer-conf:            SUBDIRS=                                 webapp
+maintainer-install:         SUBDIRS=                                 webapp
 inplace-install:            SUBDIRS=    doc               misc-tools webapp
 inplace-uninstall:          SUBDIRS=    doc               misc-tools
 dist:                       SUBDIRS=        lib sql       misc-tools

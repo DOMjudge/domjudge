@@ -18,6 +18,15 @@ maintainer-conf: .env.local
 	@echo "# the DOMjudge Symfony application in developer mode. Adjust as needed." >> $@
 	@echo "APP_ENV=dev" >> $@
 
+# Dump autoload dependencies (including plugins)
+# This is needed since symfony/runtime is a Composer plugin that runs while dumping
+# the autoload file
+composer-dump-autoload:
+	composer $(subst 1,-q,$(QUIET)) dump-autoload -o -a
+
+composer-dump-autoload-dev:
+	composer $(subst 1,-q,$(QUIET)) dump-autoload
+
 copy-bundle-assets:
 # We can not use bin/console here, as when using a fakeroot,
 # the include paths are broken. We just copy in the data we need
@@ -28,7 +37,7 @@ copy-bundle-assets:
 clean-l:
 	-rm -rf public/bundles/nelmioapidoc
 
-install-domserver:
+install-domserver: composer-dump-autoload
 # This must be done first to install with the rest.
 	$(MAKE) copy-bundle-assets
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
@@ -49,7 +58,8 @@ install-domserver:
 	done
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
 
-inplace-install: composer-autoclean
+inplace-install: composer-autoclean composer-dump-autoload
+maintainer-install: composer-dump-autoload-dev
 
 # Install PHP dependencies
 composer-dependencies:
