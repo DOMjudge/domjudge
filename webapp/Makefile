@@ -51,6 +51,18 @@ install-domserver:
 
 inplace-install: composer-autoclean
 
+# Install PHP dependencies
+composer-dependencies:
+ifeq (, $(shell command -v composer 2> /dev/null))
+	$(error "'composer' command not found in $(PATH), install it via your package manager or https://getcomposer.org/download/")
+endif
+# We use --no-scripts here because at this point the autoload.php file is
+# not generated yet, which is needed to run the post-install scripts.
+	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o -a --no-scripts --no-plugins
+
+composer-dependencies-dev:
+	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
+
 composer-autoclean:
 	# Make sure we're running from a clean state:
 	composer auto-scripts

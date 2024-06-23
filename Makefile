@@ -5,7 +5,8 @@
 export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
-            docs install-docs inplace-install inplace-uninstall maintainer-conf
+            docs install-docs inplace-install inplace-uninstall maintainer-conf \
+            composer-dependencies composer-dependencies-dev
 
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
@@ -64,18 +65,6 @@ ifneq "$(JUDGEHOST_BUILD_ENABLED)" "yes"
 	@exit 1
 endif
 
-# Install PHP dependencies
-composer-dependencies:
-ifeq (, $(shell command -v composer 2> /dev/null))
-	$(error "'composer' command not found in $(PATH), install it via your package manager or https://getcomposer.org/download/")
-endif
-# We use --no-scripts here because at this point the autoload.php file is
-# not generated yet, which is needed to run the post-install scripts.
-	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o -a --no-scripts --no-plugins
-
-composer-dependencies-dev:
-	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
-
 # Dump autoload dependencies (including plugins)
 # This is needed since symfony/runtime is a Composer plugin that runs while dumping
 # the autoload file
@@ -114,6 +103,8 @@ dist:                       SUBDIRS=        lib sql       misc-tools
 clean:                      SUBDIRS=etc doc lib sql judge misc-tools webapp
 distclean:                  SUBDIRS=etc doc lib sql judge misc-tools webapp
 maintainer-clean:           SUBDIRS=etc doc lib sql judge misc-tools webapp
+composer-dependencies:      SUBDIRS=                                 webapp
+composer-dependencies-dev:  SUBDIRS=                                 webapp
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(domserver_dirs))
