@@ -9,21 +9,39 @@ include $(TOPDIR)/Makefile.global
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = config
 
+maintainer-conf: .env.local
+
+# Run Symfony in dev mode (for maintainer-mode):
+.env.local:
+	@echo "Creating file '$@'..."
+	@echo "# This file was automatically created by 'make maintainer-conf' to run" > $@
+	@echo "# the DOMjudge Symfony application in developer mode. Adjust as needed." >> $@
+	@echo "APP_ENV=dev" >> $@
+
+# Dump autoload dependencies (including plugins)
+# This is needed since symfony/runtime is a Composer plugin that runs while dumping
+# the autoload file
+composer-dump-autoload:
+	composer $(subst 1,-q,$(QUIET)) dump-autoload -o -a
+
+composer-dump-autoload-dev:
+	composer $(subst 1,-q,$(QUIET)) dump-autoload
+
 copy-bundle-assets:
 # We can not use bin/console here, as when using a fakeroot,
 # the include paths are broken. We just copy in the data we need
 	-rm -rf public/bundles/nelmioapidoc
 	mkdir -p public/bundles/nelmioapidoc
-	cp -R ../lib/vendor/nelmio/api-doc-bundle/public/* public/bundles/nelmioapidoc/
+	cp -R ../webapp/vendor/nelmio/api-doc-bundle/public/* public/bundles/nelmioapidoc/
 
 clean-l:
 	-rm -rf public/bundles/nelmioapidoc
 
-install-domserver:
+install-domserver: composer-dump-autoload
 # This must be done first to install with the rest.
 	$(MAKE) copy-bundle-assets
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
-	for d in bin config migrations public resources src templates tests ; do \
+	for d in bin config migrations public resources src templates tests vendor; do \
 		$(call install_tree,$(DESTDIR)$(domserver_webappdir),$$d) ; \
 	done
 # Change webapp/public/doc symlink
@@ -32,13 +50,32 @@ install-domserver:
 # Now change all relative symlinks in webapp/public to their correct paths
 	for link in $$(find $(DESTDIR)$(domserver_webappdir)/public/$$dir -maxdepth 2 -type l); do \
 		target=$$(readlink $$link) ; \
-		if echo $${target} | grep -q '\.\./\.\./lib/vendor' ; then \
+		if echo $${target} | grep -q '\.\./\.\./webapp/vendor' ; then \
 			rm $$link ; \
-			realtarget=$(domserver_libvendordir)$$(echo $${target} | sed 's!^.*\.\./\.\./lib/vendor!!') ; \
+			realtarget=$(domserver_webappdir)/vendor$$(echo $${target} | sed 's!^.*\.\./\.\./webapp/vendor!!') ; \
 			ln -s $$realtarget $$link ; \
 		fi \
 	done
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
+
+inplace-install: composer-autoclean composer-dump-autoload
+maintainer-install: composer-dump-autoload-dev
+
+# Install PHP dependencies
+composer-dependencies:
+ifeq (, $(shell command -v composer 2> /dev/null))
+	$(error "'composer' command not found in $(PATH), install it via your package manager or https://getcomposer.org/download/")
+endif
+# We use --no-scripts here because at this point the autoload.php file is
+# not generated yet, which is needed to run the post-install scripts.
+	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o -a --no-scripts --no-plugins
+
+composer-dependencies-dev:
+	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
+
+composer-autoclean:
+	# Make sure we're running from a clean state:
+	composer auto-scripts
 
 maintainer-clean-l:
 	-for d in cache log ; do \

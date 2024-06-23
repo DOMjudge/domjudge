@@ -27,9 +27,9 @@
 .cached_vendor:
   extends: [.clean_ordering]
   cache:
-    key: libvendor-260522
+    key: webappvendor-20240623
     paths:
-      - lib/vendor/
+      - webapp/vendor/
 
 .mysql_job:
   script:

@@ -96,7 +96,7 @@ class DOMJudgeService
         protected readonly Environment $twig,
         #[Autowire('%kernel.project_dir%')]
         protected string $projectDir,
-        #[Autowire('%domjudge.libvendordir%')]
+        #[Autowire('%domjudge.vendordir%')]
         protected string $vendorDir,
     ) {}
 
