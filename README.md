@@ -72,7 +72,7 @@ The M4 autoconf macros are licensed under all-permissive and GPL3+
 licences; see the respective files under m4/ for details.
 
 The DOMjudge tarball ships external library dependencies in the
-lib/vendor directory. These are covered by their individual licenses
+webapp/vendor directory. These are covered by their individual licenses
 as specified in the file composer.lock.
 
 Contact

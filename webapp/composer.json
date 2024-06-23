@@ -125,15 +125,15 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"App\\": "webapp/src/"
+			"App\\": "src/"
 		},
 		"files": [
-			"webapp/resources/functions.php"
+			"resources/functions.php"
 		]
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"App\\Tests\\": "webapp/tests/"
+			"App\\Tests\\": "tests/"
 		}
 	},
 	"config": {
@@ -144,8 +144,6 @@
 		"platform": {
 			"php": "8.1.0"
 		},
-		"vendor-dir": "lib/vendor",
-		"component-dir": "lib/vendor/components",
 		"allow-plugins": {
 			"composer/package-versions-deprecated": true,
 			"symfony/flex": true,
@@ -178,12 +176,8 @@
 	},
 	"extra": {
 		"symfony": {
-			"root-dir": "webapp/",
 			"allow-contrib": true,
 			"require": "6.4.*"
-		},
-		"runtime": {
-			"dotenv_path": "webapp/.env"
 		}
 	}
 }

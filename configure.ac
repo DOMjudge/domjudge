@@ -170,7 +170,6 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(domserver_webappdir,       $datadir/${PACKAGE_TARNAME}/webapp)
 	AC_SUBST(domserver_sqldir,          $datadir/${PACKAGE_TARNAME}/sql)
 	AC_SUBST(domserver_libdir,          $libdir/${PACKAGE_TARNAME})
-	AC_SUBST(domserver_libvendordir,    $libdir/${PACKAGE_TARNAME}/vendor)
 	AC_SUBST(domserver_logdir,          $localstatedir/log/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_rundir,          $localstatedir/run/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_tmpdir,          /tmp)
@@ -222,7 +221,6 @@ AX_PATH(domserver_etcdir,          [$domserver_root/etc])
 AX_PATH(domserver_webappdir,       [$domserver_root/webapp])
 AX_PATH(domserver_sqldir,          [$domserver_root/sql])
 AX_PATH(domserver_libdir,          [$domserver_root/lib])
-AX_PATH(domserver_libvendordir,    [$domserver_root/lib/vendor])
 AX_PATH(domserver_logdir,          [$domserver_root/log])
 AX_PATH(domserver_rundir,          [$domserver_root/run])
 AX_PATH(domserver_tmpdir,          [$domserver_root/tmp])
@@ -382,7 +380,6 @@ echo " * domserver...........: AX_VAR_EXPAND($domserver_root)"
 echo "    - bin..............: AX_VAR_EXPAND($domserver_bindir)"
 echo "    - etc..............: AX_VAR_EXPAND($domserver_etcdir)"
 echo "    - lib..............: AX_VAR_EXPAND($domserver_libdir)"
-echo "    - libvendor........: AX_VAR_EXPAND($domserver_libvendordir)"
 echo "    - log..............: AX_VAR_EXPAND($domserver_logdir)"
 echo "    - run..............: AX_VAR_EXPAND($domserver_rundir)"
 echo "    - sql..............: AX_VAR_EXPAND($domserver_sqldir)"

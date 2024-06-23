@@ -12,8 +12,8 @@ use Doctrine\Common\Annotations\AnnotationRegistry;
 use Composer\Autoload\ClassLoader;
 
 // Load the static domserver file if we don't have the constants from it yet
-if (!defined('LIBVENDORDIR')) {
+if (!defined('VENDORDIR')) {
     require('@domserver_etcdir@/domserver-static.php');
 }
 
-return require LIBVENDORDIR.'/autoload.php';
+return require VENDORDIR.'/autoload.php';
