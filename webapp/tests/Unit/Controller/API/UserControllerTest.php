@@ -91,6 +91,6 @@ class UserControllerTest extends AccountBaseTestCase
         ];
 
         $response = $this->verifyApiJsonResponse('PUT', $this->helperGetEndpointURL($this->apiEndpoint) . '/someid', 400, 'admin', $data);
-        static::assertMatchesRegularExpression('/id:\n.*This value should be of type unknown./', $response['message']);
+        static::assertMatchesRegularExpression('/id:\n.*This value should be of type string./', $response['message']);
     }
 }
