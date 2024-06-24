@@ -107,7 +107,7 @@ class SubmissionControllerTest extends BaseTestCase
         yield ['demo', ['problem_id' => 'hello', 'language_id' => 'cpp', 'id' => '123'], "A team can not assign id."];
         yield ['demo', ['problem_id' => 'hello', 'language_id' => 'cpp', 'time' => '2021-01-01T00:00:00'], "A team can not assign time."];
         yield ['demo', ['problem_id' => 'hello', 'language_id' => 'cpp', 'files' => []], "No files specified."];
-        yield ['demo', ['problem_id' => 'hello', 'language_id' => 'cpp', 'files' => [['invalidkey' => 'somevalue']]], "/files\[0\].data:\n.*This value should be of type unknown./"];
+        yield ['demo', ['problem_id' => 'hello', 'language_id' => 'cpp', 'files' => [['invalidkey' => 'somevalue']]], "/files\[0\].data:\n.*This value should be of type string./"];
         yield [
             'demo',
             ['problem_id' => 'hello', 'language_id' => 'cpp', 'files' => 'this is not an array'],
