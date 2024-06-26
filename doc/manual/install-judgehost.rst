@@ -178,7 +178,7 @@ added kernel options. On VM hosting providers such as Google Cloud or
 DigitalOcean, ``GRUB_CMDLINE_LINUX_DEFAULT`` may be overwritten
 by other files in ``/etc/default/grub.d/``.
 
-You have now configured the system to use cgroups. In a FHS install, to create
+You have now configured the system to use cgroups. To create
 the actual cgroups that DOMjudge will use, run::
 
   sudo systemctl enable create-cgroups --now
@@ -231,6 +231,3 @@ the judgedaemon.
 The judgedaemon can also be run as a service by running::
 
   sudo systemctl enable --now domjudge-judgehost
-
-This only works in a FHS install, if the judgehost has been installed with another
-option those `service` files have to manually copied to the right directory e.g. `/etc/systemd`.
