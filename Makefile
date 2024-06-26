@@ -167,6 +167,17 @@ endif
 # Fix permissions and ownership for password files:
 	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir) \
 		etc/restapi.secret
+	@echo ""
+	@echo "========== Judgehost Install Completed =========="
+	@echo ""
+	@echo "Optionally:"
+	@echo "    - Install the create-cgroup service to setup the secure judging restrictions:"
+	@echo "        cp <DOMSERVER_UNPACK_PATH>/judge/create-cgroups.service /etc/systemd/system/"
+	@echo "    - Install the judgehost service:"
+	@echo "        cp <DOMSERVER_UNPACK_PATH>/judge/domjudge-judgedaemon@.service /etc/systemd/system/"
+	@echo "    - You can enable the judghost on core 1 as:"
+	@echo "        systemctl enable domjudge-judgedaemon@1"
+	@echo ""
 
 check-root:
 	@if [ `id -u` -ne 0 -a -z "$(QUIET)" ]; then \
