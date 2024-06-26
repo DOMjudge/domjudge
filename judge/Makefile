@@ -30,11 +30,6 @@ install-judgehost:
 		judgedaemon.main.php run-interactive.sh
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) \
 		judgedaemon runguard runpipe create_cgroups
-ifneq ($(systemd_unitdir),)
-	$(INSTALL_DIR)     $(DESTDIR)$(systemd_unitdir)
-	$(INSTALL_DATA) -t $(DESTDIR)$(systemd_unitdir) \
-		create-cgroups.service domjudge-judgehost.target domjudge-judgedaemon@.service
-endif
 
 clean-l:
 	-rm -f $(TARGETS) $(TARGETS:%=%$(OBJEXT))
