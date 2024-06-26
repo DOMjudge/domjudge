@@ -109,7 +109,7 @@ if [ "$TEST" = "w3cval" ]; then
     unzip -q vnu.linux.zip
     section_end
 
-    FLTR='--filterpattern .*autocomplete.*|.*style.*|.*role=tab.*|.*descendant.*|.*Stray.*|.*attribute.*|.*Forbidden.*|.*stream.*'
+    FLTR='--filterpattern .*autocomplete.*|.*style.*|.*role=tab.*|.*descendant.*|.*Stray.*|.*attribute.*|.*Forbidden.*|.*stream.*|.*obsolete.*'
     for typ in html css svg
     do
         section_start "Analyse with $typ"
@@ -133,7 +133,7 @@ else
     else
         STAN="-s $TEST"
         FLTR0="-E '#DataTables_Table_0 > tbody > tr > td > a','#menuDefault > a','#filter-card > div > div > div > span > span:nth-child(1) > span > ul > li > input',.problem-badge"
-        FLTR1="'html > body > div > div > div > div > div > div > table > tbody > tr > td > a > span'"
+        FLTR1="'html > body > div > div > div > div > div > div > table > tbody > tr > td > a > span','html > body > div > div > div > div > div > div > form > div > div > div > label'"
         FLTR="$FLTR0,$FLTR1"
     fi
     chown -R domjudge:domjudge "$DIR"

@@ -48,21 +48,24 @@ parameters:
     domjudge.webappdir: /webapp
     domjudge.libdir: /lib
     domjudge.sqldir: /sql
-    domjudge.libvendordir: /lib/vendor
+    domjudge.vendordir: /webapp/vendor
     domjudge.logdir: /output/log
     domjudge.rundir: /output/run
     domjudge.tmpdir: /output/tmp
     domjudge.baseurl: http://localhost/domjudge
 EOF
 
+# Composer steps
+cd webapp
 # install check if the cache might be dirty
 set +e
-composer install --no-scripts || rm -rf lib/vendor
+composer install --no-scripts || rm -rf vendor
 set -e
 
 # install all php dependencies
 composer install --no-scripts
 echo -e "\033[0m"
+cd $DIR
 
 # configure, make and install (but skip documentation)
 make configure

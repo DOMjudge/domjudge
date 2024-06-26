@@ -1,25 +1,25 @@
 parameters:
     level: 6
     paths:
-        - webapp/src
-        - webapp/tests
+        - src
+        - tests
     excludePaths:
-        - webapp/src/Utils/Adminer.php
+        - src/Utils/Adminer.php
     ignoreErrors:
         -
             message: '#Method .* return type has no value type specified in iterable type array#'
-            path: webapp/tests
+            path: tests
         -
             message: '#Method .* has parameter .* with no value type specified in iterable type array#'
-            path: webapp/tests
+            path: tests
         -
             message: '#Property .* type has no value type specified in iterable type array#'
-            path: webapp/tests
+            path: tests
         -
             message: '#PHPDoc tag @var for variable .* has no value type specified in iterable type array#'
-            path: webapp/tests
+            path: tests
         -
             message: "#Method .* return type has no value type specified in iterable type array#"
-            path: webapp/src/DataFixtures/Test
+            path: src/DataFixtures/Test
 includes:
-    - lib/vendor/phpstan/phpstan-doctrine/extension.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon

@@ -12,7 +12,9 @@ export PHPVERSION
 
 section_start "Run composer"
 export APP_ENV="dev"
+cd webapp
 composer install --no-scripts |tee "$ARTIFACTS"/composer_out.txt
+cd ..
 section_end
 
 section_start "Set simple admin password"
@@ -58,9 +60,6 @@ section_end
 
 section_start "Install DOMjudge database"
 /opt/domjudge/domserver/bin/dj_setup_database -uroot -proot bare-install
-#>> "$ARTIFACTS"/mysql.txt
-# We don't have -o pipefail so the `tee` eats away the potential error.
-#cat "$ARTIFACTS"/mysql.txt
 section_end
 
 section_start "Show PHP config"
