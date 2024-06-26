@@ -68,6 +68,15 @@ example to install DOMjudge in the directory ``domjudge`` under `/opt`::
   make judgehost
   sudo make install-judgehost
 
+Example service files for the judgehost and the judgedaemon are provided in
+``judge/create-cgroups.service`` and ``judge/domjudge-judgedaemon@.service``. The rest of the manual assumes you install those
+in a location which is picked up by ``systemd``, for example ``/etc/systemd/system``.
+
+.. parsed-literal::
+
+     cp judge/domjudge-judgedaemon@.service /etc/systemd/system/
+     cp judge/create-cgroups.service /etc/systemd/system/
+
 The judgedaemon can be run on various hardware configurations;
 
 - A virtual machine, typically these have 1 or 2 cores and no hyperthreading, because the kernel will schedule its own tasks on CPU 0, we advice CPU 1,
