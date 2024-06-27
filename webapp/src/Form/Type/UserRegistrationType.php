@@ -2,6 +2,7 @@
 
 namespace App\Form\Type;
 
+use App\Controller\Jury\UserController;
 use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
@@ -174,6 +175,7 @@ class UserRegistrationType extends AbstractType
                         'placeholder' => 'Password',
                         'autocomplete' => 'new-password',
                         'spellcheck' => 'false',
+                        'minlength' => UserController::MIN_PASSWORD_LENGTH,
                     ],
                 ],
                 'second_options' => [
@@ -182,6 +184,7 @@ class UserRegistrationType extends AbstractType
                         'placeholder' => 'Repeat Password',
                         'autocomplete' => 'new-password',
                         'spellcheck' => 'false',
+                        'minlength' => UserController::MIN_PASSWORD_LENGTH,
                     ],
                 ],
                 'mapped' => false,
