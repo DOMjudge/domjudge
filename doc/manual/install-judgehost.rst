@@ -75,8 +75,8 @@ in a location which is picked up by ``systemd``, for example ``/etc/systemd/syst
 
 .. parsed-literal::
 
-     cp <DOMSERVER_UNPACK_PATH>/judge/domjudge-judgedaemon@.service /etc/systemd/system/
-     cp <DOMSERVER_UNPACK_PATH>/judge/create-cgroups.service /etc/systemd/system/
+     cp judge/domjudge-judgedaemon@.service /etc/systemd/system/
+     cp judge/create-cgroups.service /etc/systemd/system/
 
 The judgedaemon can be run on various hardware configurations;
 
