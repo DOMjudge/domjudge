@@ -175,7 +175,7 @@ endif
 	@echo "        cp <DOMSERVER_UNPACK_PATH>/judge/create-cgroups.service /etc/systemd/system/"
 	@echo "    - Install the judgehost service:"
 	@echo "        cp <DOMSERVER_UNPACK_PATH>/judge/domjudge-judgedaemon@.service /etc/systemd/system/"
-	@echo "    - You can enable the judghost on core 1 as:"
+	@echo "    - You can enable the judgehost on CPU core 1 with:"
 	@echo "        systemctl enable domjudge-judgedaemon@1"
 	@echo ""
 

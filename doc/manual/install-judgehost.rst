@@ -70,7 +70,7 @@ example to install DOMjudge in the directory ``domjudge`` under `/opt`::
 
 Example service files for the judgehost and the judgedaemon are provided in
 ``judge/create-cgroups.service`` and ``judge/domjudge-judgedaemon@.service``. The rest of the manual assumes you install those
-in a location which is picked up by ``systemd`` for example ``/etc/systemd/system``.
+in a location which is picked up by ``systemd``, for example ``/etc/systemd/system``.
 
 
 .. parsed-literal::
