@@ -179,6 +179,24 @@ this approach is that the webserver is not aware of the actual client IP. This
 means that access logs for the webserver will still report the IP of the proxy
 or loadbalancer.
 
+Scaling the domserver
+---------------------
+
+Documenting all possible ways to properly size the domserver is out of scope for this
+manual. But properly think about the memory management for the PHP-FPM children, we advice
+40 FPM children per gigabyte of RAM memory so around 500 for a 16Gb system.
+
+* Consider the amount of submissions you expect at any given time, does the load stay uniform?
+* Do you expect all teams to solve the easy problems in the first hour?
+Do not forget to account for "hidden load", i.e. requests that the judging system makes to the domserver. You can expect ``#testcases * #submissions`` requests that you need to account for. Not only are these requests spread out over the duration of the contest but they can also be spread out unevenly. The 'middle three' hours of a full five hour contest usually see fewer submissions than the first and last hours. 
+
+This "hidden load" can be mitigated by keeping the "lazy evaluation" option enabled. Lazy evaluation helps when it is expected that many submissions fail which is often the case. It achieves this by stopping with submission evaluation whenever the judgehost decides a verdict can be reached. e.g. a submission who's verdict on the first sample testcase is "Wrong Answer" does not need to be checked against the other testcases. 
+
+Additionally, the scoreboard pages for spectators and teams auto-refresh every 30s, so every 30 teams = 1 req/sec minimum (on top of teams refreshing manually to know the verdict from their submission).
+  submissions can be expected.
+* For more info see the `wiki <https://github.com/DOMjudge/domjudge/wiki/Scaling-and-load-testing>`_
+
+
 Log in to DOMjudge
 ------------------
 The DOMserver should now be operational. You can access the web application
