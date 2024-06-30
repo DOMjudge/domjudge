@@ -21,6 +21,7 @@ use Symfony\Component\Yaml\Yaml;
 class ContestControllerAdminTest extends ContestControllerTest
 {
     protected ?string $apiUser = 'admin';
+    protected static string $testedRole = 'api_contest_change';
 
     private function parseSortYaml(string $yamlString): array
     {
@@ -29,7 +30,10 @@ class ContestControllerAdminTest extends ContestControllerTest
         return $new;
     }
 
-    public function testAddYaml(): void
+    /**
+     * @dataProvider provideAllowedUsers
+     */
+    public function testAddYaml(string $user, array $newRoles): void
     {
         $yaml = <<<EOF
 duration: 2:00:00
@@ -69,6 +73,8 @@ scoreboard_freeze_time: '2021-03-27T10:30:00+00:00'
 scoreboard_freeze_duration: 0:30:00
 EOF;
 
+        $this->roles = $newRoles;
+        self::setUp();
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
         $tempYamlFile = tempnam(sys_get_temp_dir(), "/contest-yaml-");
         file_put_contents($tempYamlFile, $yaml);
@@ -89,7 +95,10 @@ EOF;
         self::assertNull($this->getContest($cid)->getDeactivatetime());
     }
 
-    public function testAddJson(): void
+    /**
+     * @dataProvider provideAllowedUsers
+     */
+    public function testAddJson(string $user, array $newRoles): void
     {
         $json = <<<EOF
 {
@@ -103,6 +112,8 @@ EOF;
 }
 EOF;
 
+        $this->roles = $newRoles;
+        self::setUp();
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
         $tempJsonFile = tempnam(sys_get_temp_dir(), "/contest-json-");
         file_put_contents($tempJsonFile, $json);
@@ -121,8 +132,13 @@ EOF;
         return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
     }
 
-    public function testBannerManagement(): void
+    /**
+     * @dataProvider provideAllowedUsers
+     */
+    public function testBannerManagement(string $user, array $newRoles): void
     {
+        $this->roles = $newRoles;
+        self::setUp();
         // First, make sure we have no banner
         $id = 1;
         if ($this->objectClassForExternalId !== null) {
@@ -163,8 +179,13 @@ EOF;
         self::assertArrayNotHasKey('banner', $object);
     }
 
-    public function testProblemsetManagement(): void
+    /**
+     * @dataProvider provideAllowedUsers
+     */
+    public function testProblemsetManagement(string $user, array $newRoles): void
     {
+        $this->roles = $newRoles;
+        self::setUp();
         // First, make sure we have no problemset document
         $id = 1;
         if ($this->objectClassForExternalId !== null) {
@@ -233,7 +254,10 @@ EOF;
         array $extraFixtures = [],
         bool $checkUnfreezeTime = false,
         bool $convertRelativeTimes = false,
+        array $newRoles = [],
     ): void {
+        $this->roles = $newRoles;
+        self::setUp();
         $this->loadFixture(DemoPreStartContestFixture::class);
         $this->loadFixtures($extraFixtures);
         $id = 1;
@@ -299,6 +323,10 @@ EOF;
         yield [['id' => 1, 'scoreboard_thaw_time' => '+15 seconds', 'force' => true], 204, null, [DemoPostUnfreezeContestFixture::class], false, true];
         yield [['id' => 1, 'scoreboard_thaw_time' => '+15 seconds'], 204, null, [], false, true];
         yield [['id' => 1, 'scoreboard_thaw_time' => '-15 seconds'], 200, 'Demo contest', [], true, true];
+
+        // Show that this works for both roles
+        yield [['id' => 1, 'scoreboard_thaw_time' => '-14 seconds'], 200, 'Demo contest', [], true, true, ['admin']];
+        yield [['id' => 1, 'scoreboard_thaw_time' => '-13 seconds'], 200, 'Demo contest', [], true, true, ['api_contest_change']];
     }
 
     /**
@@ -306,7 +334,7 @@ EOF;
      */
     public function testActivateTimeContestYaml(
         string $activateTime, string $startTime, ?string $deactivateTime,
-        bool $setActivate, bool $setDeactivate
+        bool $setActivate, bool $setDeactivate, array $newRoles = [],
     ): void {
         $yaml = <<<EOF
 duration: 2:00:00
@@ -322,6 +350,8 @@ problems:
     id: anothereruption
 EOF;
 
+        $this->roles = $newRoles;
+        self::setUp();
         if ($setActivate) {
             $yaml = "activate_time: ".$activateTime."\n".$yaml;
         }
