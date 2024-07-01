@@ -9,7 +9,8 @@ use Doctrine\Migrations\AbstractMigration;
 
 final class Version20240629154640 extends AbstractMigration
 {
-    private const NEW_ROLES = ['api_problem_change' => 'API Problem Changer'];
+    private const NEW_ROLES = ['api_problem_change' => 'API Problem Changer',
+                               'api_contest_change' => 'API Contest Changer'];
 
     public function getDescription(): string
     {
