@@ -384,7 +384,7 @@ class ContestController extends AbstractRestController
      * Change the start time or unfreeze (thaw) time of the given contest.
      * @throws NonUniqueResultException
      */
-    #[IsGranted('ROLE_API_WRITER')]
+    #[IsGranted(new Expression("is_granted('ROLE_API_WRITER') or is_granted('ROLE_API_CONTEST_CHANGE')"))]
     #[Rest\Patch('/{cid}')]
     #[OA\RequestBody(
         required: true,

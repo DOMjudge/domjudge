@@ -6,12 +6,12 @@ use App\DataFixtures\Test\DummyProblemFixture;
 use App\DataFixtures\Test\LockedContestFixture;
 use App\Entity\Problem;
 use Doctrine\ORM\EntityManagerInterface;
-use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ProblemControllerAdminTest extends ProblemControllerTest
 {
     protected ?string $apiUser = 'admin';
+    protected static string $testedRole = 'api_problem_change';
 
     protected function setUp(): void
     {
@@ -233,11 +233,5 @@ EOF;
         $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/fltcmp';
         $problemResponse = $this->verifyApiJsonResponse('DELETE', $url, 403, $this->apiUser);
         self::assertStringContainsString('Contest is locked', $problemResponse['message']);
-    }
-
-    private function provideAllowedUsers(): Generator
-    {
-	    yield ['admin', ['admin']];
-	    yield ['team', ['api_problem_change']];
     }
 }
