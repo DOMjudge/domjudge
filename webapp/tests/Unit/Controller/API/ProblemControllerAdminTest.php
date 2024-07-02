@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class ProblemControllerAdminTest extends ProblemControllerTest
 {
     protected ?string $apiUser = 'admin';
+    protected static string $testedRole = 'api_problem_change';
 
     protected function setUp(): void
     {
@@ -21,7 +22,10 @@ class ProblemControllerAdminTest extends ProblemControllerTest
         parent::setUp();
     }
 
-    public function testAddJson(): void
+    /**
+     * @dataProvider provideAllowedUsers
+     */
+    public function testAddJson(string $user, array $newRoles): void
     {
         $json = <<<EOF
 [
@@ -61,6 +65,8 @@ class ProblemControllerAdminTest extends ProblemControllerTest
 ]
 EOF;
 
+        $this->roles = $newRoles;
+        self::setUp();
         $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/add-data';
         $tempJsonFile = tempnam(sys_get_temp_dir(), "/problems-json-");
         file_put_contents($tempJsonFile, $json);
@@ -86,8 +92,13 @@ EOF;
         self::assertEquals($expectedProblems, $addedProblems);
     }
 
-    public function testDelete(): void
+    /**
+     * @dataProvider provideAllowedUsers
+     */
+    public function testDelete(string $user, array $newRoles): void
     {
+        $this->roles = $newRoles;
+        self::setUp();
         // Check that we can delete the problem
         $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/fltcmp';
         $this->verifyApiJsonResponse('DELETE', $url, 204, $this->apiUser);
@@ -98,15 +109,25 @@ EOF;
         self::assertCount(2, $problems);
     }
 
-    public function testDeleteNotFound(): void
+    /**
+     * @dataProvider provideAllowedUsers
+     */
+    public function testDeleteNotFound(string $user, array $newRoles): void
     {
+        $this->roles = $newRoles;
+        self::setUp();
         // Check that we can delete the problem
         $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/4';
         $this->verifyApiJsonResponse('DELETE', $url, 404, $this->apiUser);
     }
 
-    public function testAdd(): void
+    /**
+     * @dataProvider provideAllowedUsers
+     */
+    public function testAdd(string $user, array $newRoles): void
     {
+        $this->roles = $newRoles;
+        self::setUp();
         $this->loadFixture(DummyProblemFixture::class);
 
         $body = [
@@ -145,16 +166,26 @@ EOF;
         self::assertCount(4, $problems);
     }
 
-    public function testAddNotFound(): void
+    /**
+     * @dataProvider provideAllowedUsers
+     */
+    public function testAddNotFound(string $user, array $newRoles): void
     {
+        $this->roles = $newRoles;
+        self::setUp();
         // Check that we can delete the problem
         $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/notfound';
         $response = $this->verifyApiJsonResponse('PUT', $url, 404, $this->apiUser, ['label' => 'dummy']);
         self::assertEquals("Object with ID 'notfound' not found", $response['message']);
     }
 
-    public function testAddExisting(): void
+    /**
+     * @dataProvider provideAllowedUsers
+     */
+    public function testAddExisting(string $user, array $newRoles): void
     {
+        $this->roles = $newRoles;
+        self::setUp();
         $this->loadFixture(DummyProblemFixture::class);
 
         // Check that we can not add a problem that is already added
@@ -163,8 +194,13 @@ EOF;
         self::assertEquals('Problem already linked to contest', $response['message']);
     }
 
-    public function testAddToLocked(): void
+    /**
+     * @dataProvider provideAllowedUsers
+     */
+    public function testAddToLocked(string $user, array $newRoles): void
     {
+        $this->roles = $newRoles;
+        self::setUp();
         $this->loadFixture(LockedContestFixture::class);
         $this->loadFixture(DummyProblemFixture::class);
 
@@ -184,9 +220,14 @@ EOF;
         self::assertStringContainsString('Contest is locked', $problemResponse['message']);
     }
 
-    public function testDeleteFromLocked(): void
+    /**
+     * @dataProvider provideAllowedUsers
+     */
+    public function testDeleteFromLocked(string $user, array $newRoles): void
     {
         $this->loadFixture(LockedContestFixture::class);
+        $this->roles = $newRoles;
+        self::setUp();
 
         // Check that we cannot delete the problem.
         $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/fltcmp';
