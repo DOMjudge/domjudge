@@ -1,0 +1,102 @@
+[
+    {
+        "hidden": false,
+        "categoryid": 5,
+        "id": "21495",
+        "icpc_id": "21495",
+        "name": "South Pacific",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    },
+    {
+        "hidden": false,
+        "categoryid": 6,
+        "id": "21496",
+        "icpc_id": "21496",
+        "name": "Europe",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    },
+    {
+        "hidden": false,
+        "categoryid": 7,
+        "id": "21497",
+        "icpc_id": "21497",
+        "name": "North America",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    },
+    {
+        "hidden": false,
+        "categoryid": 10,
+        "id": "21500",
+        "icpc_id": "21500",
+        "name": "Asia Pacific",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    },
+    {
+        "hidden": false,
+        "categoryid": 11,
+        "id": "21501",
+        "icpc_id": "21501",
+        "name": "Asia West",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    },
+    {
+        "hidden": false,
+        "categoryid": 12,
+        "id": "21502",
+        "icpc_id": "21502",
+        "name": "Northern Eurasia",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    },
+    {
+        "hidden": false,
+        "categoryid": 23,
+        "id": "21513",
+        "icpc_id": "21513",
+        "name": "Africa and Arab",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    },
+    {
+        "hidden": false,
+        "categoryid": 24,
+        "id": "21514",
+        "icpc_id": "21514",
+        "name": "Latin America",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    },
+    {
+        "hidden": false,
+        "categoryid": 25,
+        "id": "21515",
+        "icpc_id": "21515",
+        "name": "Asia",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    },
+    {
+        "hidden": false,
+        "categoryid": 27,
+        "id": "21517",
+        "icpc_id": "21517",
+        "name": "Asia East",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    }
+]

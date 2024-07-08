@@ -4,21 +4,30 @@ namespace App\Tests\Unit\Service;
 
 use App\DataFixtures\Test\TeamWithExternalIdEqualsOneFixture;
 use App\DataFixtures\Test\TeamWithExternalIdEqualsTwoFixture;
+use App\DataTransferObject\ResultRow;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Language;
+use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
-use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ImportExportService;
+use App\Service\ScoreboardService;
 use App\Tests\Unit\BaseTestCase;
+use Collator;
+use DateInterval;
 use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class ImportExportServiceTest extends BaseTestCase
@@ -43,63 +52,72 @@ class ImportExportServiceTest extends BaseTestCase
     public function provideImportContestDataErrors(): Generator
     {
         yield [[], 'Error parsing YAML file.'];
-        yield [['name' => 'Some name'], 'Missing fields: one of (start_time, start-time), one of (id, short_name, short-name), duration'];
-        yield [['short-name' => 'somename', 'start-time' => '2020-01-01 12:34:56'], 'Missing fields: one of (name, formal_name), duration'];
+        yield [
+            ['name' => 'Some name'],
+            'Missing fields: one of (start_time, start-time), one of (id, short_name, short-name), duration',
+        ];
+        yield [
+            ['short-name' => 'somename', 'start-time' => '2020-01-01 12:34:56'],
+            'Missing fields: one of (name, formal_name), duration',
+        ];
         yield [
             [
-                'name'       => 'Test contest',
+                'name' => 'Test contest',
                 'short-name' => 'test',
-                'duration'   => '5:00:00',
+                'duration' => '5:00:00',
                 'start-time' => 'Invalid start time here',
             ],
-            'Can not parse start-time'
+            'Can not parse start-time',
         ];
         yield [
             [
-                'name'       => 'Test contest',
-                'id'         => 'test',
-                'duration'   => '5:00:00',
+                'name' => 'Test contest',
+                'id' => 'test',
+                'duration' => '5:00:00',
                 'start_time' => 'Invalid start time here',
             ],
-            'Can not parse start_time'
+            'Can not parse start_time',
         ];
         yield [
             [
-                'name'                     => 'Test contest',
-                'short-name'               => 'test',
-                'duration'                 => '5:00:00',
-                'start-time'               => '2020-01-01T12:34:56+02:00',
+                'name' => 'Test contest',
+                'short-name' => 'test',
+                'duration' => '5:00:00',
+                'start-time' => '2020-01-01T12:34:56+02:00',
                 'scoreboard-freeze-length' => '6:00:00',
             ],
-            'Freeze duration is longer than contest length'
+            'Freeze duration is longer than contest length',
         ];
         yield [
             [
-                'name'                       => 'Test contest',
-                'id'                         => 'test',
-                'duration'                   => '5:00:00',
-                'start_time'                 => '2020-01-01T12:34:56+02:00',
+                'name' => 'Test contest',
+                'id' => 'test',
+                'duration' => '5:00:00',
+                'start_time' => '2020-01-01T12:34:56+02:00',
                 'scoreboard_freeze_duration' => '6:00:00',
             ],
-            'Freeze duration is longer than contest length'
+            'Freeze duration is longer than contest length',
         ];
         yield [
             [
-                'name'                     => '',
-                'short-name'               => '',
-                'duration'                 => '5:00:00',
-                'start-time'               => '2020-01-01T12:34:56+02:00',
+                'name' => '',
+                'short-name' => '',
+                'duration' => '5:00:00',
+                'start-time' => '2020-01-01T12:34:56+02:00',
                 'scoreboard-freeze-length' => '30:00',
             ],
-            "Contest has errors:\n\nname: This value should not be blank.\nshortname: This value should not be blank."
+            "Contest has errors:\n\nname: This value should not be blank.\nshortname: This value should not be blank.",
         ];
     }
 
     /**
      * @dataProvider provideImportContestDataSuccess
      */
-    public function testImportContestDataSuccess(mixed $data, string $expectedShortName, array $expectedProblems = []): void
-    {
+    public function testImportContestDataSuccess(
+        mixed $data,
+        string $expectedShortName,
+        array $expectedProblems = []
+    ): void {
         /** @var ImportExportService $importExportService */
         $importExportService = static::getContainer()->get(ImportExportService::class);
         self::assertTrue($importExportService->importContestData($data, $message, $cid), 'Importing failed: ' . $message);
@@ -128,10 +146,10 @@ class ImportExportServiceTest extends BaseTestCase
         // Simple case
         yield [
             [
-                'name'                     => 'Some test contest',
-                'short-name'               => 'test-contest',
-                'duration'                 => '5:00:00',
-                'start-time'               => '2020-01-01T12:34:56+02:00',
+                'name' => 'Some test contest',
+                'short-name' => 'test-contest',
+                'duration' => '5:00:00',
+                'start-time' => '2020-01-01T12:34:56+02:00',
                 'scoreboard-freeze-length' => '1:00:00',
             ],
             'test-contest',
@@ -141,10 +159,10 @@ class ImportExportServiceTest extends BaseTestCase
         // - Use DateTime object for start time
         yield [
             [
-                'name'                     => 'Some test contest',
-                'short-name'               => 'test-contest $-@ test',
-                'duration'                 => '5:00:00',
-                'start-time'               => new DateTime('2020-01-01T12:34:56+02:00'),
+                'name' => 'Some test contest',
+                'short-name' => 'test-contest $-@ test',
+                'duration' => '5:00:00',
+                'start-time' => new DateTime('2020-01-01T12:34:56+02:00'),
                 'scoreboard-freeze-length' => '30:00',
             ],
             'test-contest__-__test',
@@ -152,30 +170,30 @@ class ImportExportServiceTest extends BaseTestCase
         // Real life example from NWERC 2020 practice session, including problems.
         yield [
             [
-                'duration'                 => '2:00:00',
-                'name'                     => 'NWERC 2020 Practice Session',
-                'penalty-time'             => '20',
+                'duration' => '2:00:00',
+                'name' => 'NWERC 2020 Practice Session',
+                'penalty-time' => '20',
                 'scoreboard-freeze-length' => '30:00',
-                'short-name'               => 'practice',
-                'start-time'               => '2021-03-27 09:00:00+00:00',
-                'public'                   => true,
-                'problems'                 => [
+                'short-name' => 'practice',
+                'start-time' => '2021-03-27 09:00:00+00:00',
+                'public' => true,
+                'problems' => [
                     [
-                        'color'      => '#FE9DAF',
-                        'letter'     => 'A',
-                        'rgb'        => '#FE9DAF',
+                        'color' => '#FE9DAF',
+                        'letter' => 'A',
+                        'rgb' => '#FE9DAF',
                         'short-name' => 'anothereruption',
                     ],
                     [
-                        'color'      => '#008100',
-                        'letter'     => 'B',
-                        'rgb'        => '#008100',
+                        'color' => '#008100',
+                        'letter' => 'B',
+                        'rgb' => '#008100',
                         'short-name' => 'brokengears',
                     ],
                     [
-                        'color'      => '#FF7109',
-                        'letter'     => 'C',
-                        'rgb'        => '#FF7109',
+                        'color' => '#FF7109',
+                        'letter' => 'C',
+                        'rgb' => '#FF7109',
                         'short-name' => 'cheating',
                     ],
                 ],
@@ -187,12 +205,12 @@ class ImportExportServiceTest extends BaseTestCase
         // JSON (API) format:
         yield [
             [
-                'name'                       => 'Some test contest',
-                'id'                         => 'test-contest',
-                'duration'                   => '5:00:00',
-                'start_time'                 => '2020-01-01T12:34:56+02:00',
+                'name' => 'Some test contest',
+                'id' => 'test-contest',
+                'duration' => '5:00:00',
+                'start_time' => '2020-01-01T12:34:56+02:00',
                 'scoreboard_freeze_duration' => '1:00:00',
-                'public'                     => false,
+                'public' => false,
             ],
             'test-contest',
         ];
@@ -205,10 +223,10 @@ class ImportExportServiceTest extends BaseTestCase
     {
         // First create a new contest by import it
         $contestData = [
-            'name'                       => 'Some test contest',
-            'id'                         => 'test-contest',
-            'duration'                   => '5:00:00',
-            'start_time'                 => '2020-01-01T12:34:56+02:00',
+            'name' => 'Some test contest',
+            'id' => 'test-contest',
+            'duration' => '5:00:00',
+            'start_time' => '2020-01-01T12:34:56+02:00',
             'scoreboard_freeze_duration' => '1:00:00',
         ];
         /** @var ImportExportService $importExportService */
@@ -226,10 +244,10 @@ class ImportExportServiceTest extends BaseTestCase
         /** @var ContestProblem $problem */
         foreach ($contest->getProblems() as $problem) {
             $problems[$problem->getShortname()] = [
-                'name'       => $problem->getProblem()->getName(),
+                'name' => $problem->getProblem()->getName(),
                 'externalid' => $problem->getProblem()->getExternalid(),
-                'timelimit'  => $problem->getProblem()->getTimelimit(),
-                'color'      => $problem->getColor(),
+                'timelimit' => $problem->getProblem()->getTimelimit(),
+                'color' => $problem->getColor(),
             ];
         }
 
@@ -241,93 +259,93 @@ class ImportExportServiceTest extends BaseTestCase
         yield [
             [
                 [
-                    'color'      => '#FE9DAF',
-                    'letter'     => 'A',
-                    'rgb'        => '#FE9DAF',
+                    'color' => '#FE9DAF',
+                    'letter' => 'A',
+                    'rgb' => '#FE9DAF',
                     'short-name' => 'anothereruption',
                 ],
                 [
-                    'color'      => '#008100',
-                    'letter'     => 'B',
-                    'rgb'        => '#008100',
+                    'color' => '#008100',
+                    'letter' => 'B',
+                    'rgb' => '#008100',
                     'short-name' => 'brokengears',
                 ],
                 [
-                    'color'      => '#FF7109',
-                    'letter'     => 'C',
-                    'rgb'        => '#FF7109',
+                    'color' => '#FF7109',
+                    'letter' => 'C',
+                    'rgb' => '#FF7109',
                     'short-name' => 'cheating',
                 ],
             ],
             [
                 'A' => [
-                    'name'       => 'anothereruption',
+                    'name' => 'anothereruption',
                     'externalid' => 'anothereruption',
-                    'timelimit'  => 10,
-                    'color'      => '#FE9DAF',
+                    'timelimit' => 10,
+                    'color' => '#FE9DAF',
                 ],
                 'B' => [
-                    'name'       => 'brokengears',
+                    'name' => 'brokengears',
                     'externalid' => 'brokengears',
-                    'timelimit'  => 10,
-                    'color'      => '#008100',
+                    'timelimit' => 10,
+                    'color' => '#008100',
                 ],
                 'C' => [
-                    'name'       => 'cheating',
+                    'name' => 'cheating',
                     'externalid' => 'cheating',
-                    'timelimit'  => 10,
-                    'color'      => '#FF7109',
+                    'timelimit' => 10,
+                    'color' => '#FF7109',
                 ],
             ],
         ];
         yield [
             [
                 [
-                    'ordinal'    => 0,
-                    'id'         => 'accesspoints',
-                    'label'      => 'A',
+                    'ordinal' => 0,
+                    'id' => 'accesspoints',
+                    'label' => 'A',
                     'time_limit' => 2,
-                    'name'       => 'Access Points',
-                    'rgb'        => '#FF0000',
-                    'color'      => 'red'
+                    'name' => 'Access Points',
+                    'rgb' => '#FF0000',
+                    'color' => 'red',
                 ],
                 [
-                    'ordinal'    => 1,
-                    'id'         => 'brexitnegotiations',
-                    'label'      => 'B',
+                    'ordinal' => 1,
+                    'id' => 'brexitnegotiations',
+                    'label' => 'B',
                     'time_limit' => 6,
-                    'name'       => 'Brexit Negotiations',
-                    'rgb'        => '#0422D8',
-                    'color'      => 'mediumblue'
+                    'name' => 'Brexit Negotiations',
+                    'rgb' => '#0422D8',
+                    'color' => 'mediumblue',
                 ],
                 [
-                    'ordinal'    => 2,
-                    'id'         => 'circuitdesign',
-                    'label'      => 'C',
+                    'ordinal' => 2,
+                    'id' => 'circuitdesign',
+                    'label' => 'C',
                     'time_limit' => 6,
-                    'name'       => 'Circuit Board Design',
-                    'rgb'        => '#008100',
-                    'color'      => 'green'
+                    'name' => 'Circuit Board Design',
+                    'rgb' => '#008100',
+                    'color' => 'green',
                 ],
             ],
             [
                 'A' => [
-                    'name'       => 'Access Points',
+                    'name' => 'Access Points',
                     'externalid' => 'accesspoints',
-                    'timelimit'  => 2,
-                    'color'      => '#FF0000',
+                    'timelimit' => 2,
+                    'color' => '#FF0000',
                 ],
                 'B' => [
-                    'name'       => 'Brexit Negotiations',
+                    'name' => 'Brexit Negotiations',
                     'externalid' => 'brexitnegotiations',
-                    'timelimit'  => 6,
-                    'color'      => '#0422D8',
+                    'timelimit' => 6,
+                    'color' => '#0422D8',
                 ],
                 'C' => [
-                    'name'       => 'Circuit Board Design',
+                    'name' => 'Circuit Board Design',
                     'externalid' => 'circuitdesign',
-                    'timelimit'  => 6,
-                    'color'      => '#008100',
+                    'timelimit' => 6,
+                    'color' => '#008100',
                 ],
             ],
         ];
@@ -335,7 +353,10 @@ class ImportExportServiceTest extends BaseTestCase
 
     public function testImportAccountsTsvSuccess(): void
     {
-        $this->loadFixtures([TeamWithExternalIdEqualsOneFixture::class, TeamWithExternalIdEqualsTwoFixture::class]);
+        $this->loadFixtures([
+            TeamWithExternalIdEqualsOneFixture::class,
+            TeamWithExternalIdEqualsTwoFixture::class,
+        ]);
 
         // We test all account types twice:
         // - Team without postfix
@@ -552,7 +573,7 @@ EOF;
                 ],
             ],
             [
-                'roles' => ['admin','team'],
+                'roles' => ['admin', 'team'],
                 'name' => 'Some admin',
                 'username' => 'adminx',
                 'password' => 'password7',
@@ -563,7 +584,7 @@ EOF;
                 ],
             ],
             [
-                'roles' => ['admin','team'],
+                'roles' => ['admin', 'team'],
                 'name' => 'Another admin',
                 'username' => 'adminy',
                 'password' => 'password8',
@@ -587,24 +608,28 @@ EOF;
             ],
         ];
         if ($forTsv) {
-            $expectedUsers = [...$expectedUsers, [
-                'roles' => ['team'],
-                'name' => 'Team 2 user a',
-                'username' => 'team02a',
-                'password' => 'password3',
-                'ip' => '5.6.7.8',
-                'team' => [
-                    'id' => 2,
+            $expectedUsers = [
+                ...$expectedUsers,
+                [
+                    'roles' => ['team'],
+                    'name' => 'Team 2 user a',
+                    'username' => 'team02a',
+                    'password' => 'password3',
+                    'ip' => '5.6.7.8',
+                    'team' => [
+                        'id' => 2,
+                    ],
                 ],
-            ], [
-                'roles' => ['team'],
-                'name' => 'Team 2 user b',
-                'username' => 'team02b',
-                'password' => 'password4',
-                'team' => [
-                    'id' => 2,
+                [
+                    'roles' => ['team'],
+                    'name' => 'Team 2 user b',
+                    'username' => 'team02b',
+                    'password' => 'password4',
+                    'team' => [
+                        'id' => 2,
+                    ],
                 ],
-            ]];
+            ];
         }
         $unexpectedUsers = ['analyst1', 'analyst2'];
 
@@ -682,7 +707,8 @@ EOF;
                     'name' => 'Lund University',
                     'country' => 'SWE',
                 ],
-            ], [
+            ],
+            [
                 'externalid' => '12',
                 'icpcid' => '447837',
                 'label' => null,
@@ -772,7 +798,8 @@ EOF;
                 'affiliation' => [
                     'externalid' => 'INST-42',
                 ],
-            ], [
+            ],
+            [
                 'externalid' => '12',
                 'icpcid' => '447837',
                 'label' => null,
@@ -784,7 +811,8 @@ EOF;
                 'affiliation' => [
                     'externalid' => 'INST-43',
                 ],
-            ], [
+            ],
+            [
                 'externalid' => '13',
                 'icpcid' => '123456',
                 'label' => '0',
@@ -916,11 +944,13 @@ EOF;
                 'externalid' => '13337',
                 'name' => 'Companies',
                 'visible' => true,
-            ], [
+            ],
+            [
                 'externalid' => '47',
                 'name' => 'Participants',
                 'visible' => true,
-            ], [
+            ],
+            [
                 'externalid' => '23',
                 'name' => 'Spectators',
                 'visible' => true,
@@ -974,11 +1004,13 @@ EOF;
                 'name' => 'Companies',
                 'icpcid' => '123',
                 'visible' => false,
-            ], [
+            ],
+            [
                 'externalid' => '47',
                 'name' => 'Participants',
                 'visible' => true,
-            ], [
+            ],
+            [
                 'externalid' => '23',
                 'name' => 'Spectators',
                 'visible' => true,
@@ -1070,7 +1102,8 @@ EOF;
                 'shortname' => 'LU',
                 'name' => 'Lund University',
                 'country' => 'SWE',
-            ], [
+            ],
+            [
                 'externalid' => 'INST-43',
                 'icpcid' => '43',
                 'shortname' => 'FAU',
@@ -1148,5 +1181,301 @@ EOF;
         // First clear the entity manager to have all data.
         static::getContainer()->get(EntityManagerInterface::class)->clear();
         return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
+    }
+
+    /**
+     * @dataProvider provideGetResultsData
+     */
+    public function testGetResultsData(bool $full): void
+    {
+        // Set up some results we can test with
+        // This data is based on the ICPC World Finals 47
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $startTime = new DateTimeImmutable('2023-05-01 08:00:00');
+
+        $contest = (new Contest())
+            ->setName('ICPC World Finals 47')
+            ->setShortname('wf47')
+            ->setStarttimeString($startTime->format(DateTimeInterface::ATOM))
+            ->setEndtimeString($startTime->add(new DateInterval('PT5H'))->format(DateTimeInterface::ATOM));
+        $em->persist($contest);
+        $em->flush();
+
+        $groupsById = [];
+        $groupsData = json_decode(file_get_contents(__DIR__ . '/../Fixtures/sample-groups.json'), true);
+        foreach ($groupsData as $groupData) {
+            $group = (new TeamCategory())
+                ->setExternalid($groupData['id'])
+                ->setName($groupData['name'])
+                ->setSortorder(37);
+            $em->persist($group);
+            $em->flush();
+            $groupsById[$group->getExternalid()] = $group;
+        }
+        $teamsData = json_decode(file_get_contents(__DIR__ . '/../Fixtures/sample-teams.json'), true);
+        /** @var array<string,Team> $teamsById */
+        $teamsById = [];
+        /** @var array<string,Team> $teamsByIcpcId */
+        $teamsByIcpcId = [];
+        foreach ($teamsData as $teamData) {
+            $team = (new Team())
+                ->setExternalid($teamData['id'])
+                ->setIcpcid($teamData['icpc_id'])
+                ->setName($teamData['name'])
+                ->setDisplayName($teamData['display_name'])
+                ->setCategory($groupsById[$teamData['group_ids'][0]]);
+            $em->persist($team);
+            $em->flush();
+            $teamsById[$team->getExternalid()] = $team;
+            $teamsByIcpcId[$team->getIcpcId()] = $team;
+        }
+
+        $problemsData = json_decode(file_get_contents(__DIR__ . '/../Fixtures/sample-problems.json'), true);
+        $contestProblemsById = [];
+        foreach ($problemsData as $problemData) {
+            $problem = (new Problem())
+                ->setExternalid($problemData['id'])
+                ->setName($problemData['name']);
+            $contestProblem = (new ContestProblem())
+                ->setProblem($problem)
+                ->setContest($contest)
+                ->setColor($problemData['rgb'])
+                ->setShortname($problemData['label']);
+            $em->persist($problem);
+            $em->persist($contestProblem);
+            $em->flush();
+            $contestProblemsById[$contestProblem->getExternalid()] = $contestProblem;
+        }
+
+        $cpp = $em->getRepository(Language::class)->find('cpp');
+
+        // We use direct queries here to speed this up
+        $submissionInsertQuery = $em->getConnection()->prepare('INSERT INTO submission (teamid, cid, probid, langid, submittime) VALUES (:teamid, :cid, :probid, :langid, :submittime)');
+        $judgingInsertQuery = $em->getConnection()->prepare('INSERT INTO judging (uuid, submitid, result) VALUES (:uuid, :submitid, :result)');
+
+        $scoreboardData = json_decode(file_get_contents(__DIR__ . '/../Fixtures/sample-scoreboard.json'), true);
+        foreach ($scoreboardData['rows'] as $scoreboardRow) {
+            $team = $teamsById[$scoreboardRow['team_id']];
+            foreach ($scoreboardRow['problems'] as $problemData) {
+                if ($problemData['solved']) {
+                    $contestProblem = $contestProblemsById[$problemData['problem_id']];
+                    // Add fake submission for this problem. First add wrong ones
+                    for ($i = 0; $i < $problemData['num_judged'] - 1; $i++) {
+                        $submissionInsertQuery->executeQuery([
+                            'teamid' => $team->getTeamid(),
+                            'cid' => $contest->getCid(),
+                            'probid' => $contestProblem->getProbid(),
+                            'langid' => $cpp->getLangid(),
+                            'submittime' => $startTime
+                                ->add(new DateInterval('PT' . $problemData['time'] . 'M'))
+                                ->sub(new DateInterval('PT1M'))
+                                ->getTimestamp(),
+                        ]);
+                        $submitId = $em->getConnection()->lastInsertId();
+                        $judgingInsertQuery->executeQuery([
+                            'uuid' => Uuid::uuid4()->toString(),
+                            'submitid' => $submitId,
+                            'result' => 'wrong-awnser',
+                        ]);
+                    }
+                    // Add correct submission
+                    $submissionInsertQuery->executeQuery([
+                        'teamid' => $team->getTeamid(),
+                        'cid' => $contest->getCid(),
+                        'probid' => $contestProblem->getProbid(),
+                        'langid' => $cpp->getLangid(),
+                        'submittime' => $startTime
+                            ->add(new DateInterval('PT' . $problemData['time'] . 'M'))
+                            ->getTimestamp(),
+                    ]);
+                    $submitId = $em->getConnection()->lastInsertId();
+                    $judgingInsertQuery->executeQuery([
+                        'uuid' => Uuid::uuid4()->toString(),
+                        'submitid' => $submitId,
+                        'result' => 'correct',
+                    ]);
+                }
+            }
+        }
+
+        /** @var ScoreboardService $scoreboardService */
+        $scoreboardService = static::getContainer()->get(ScoreboardService::class);
+        $scoreboardService->refreshCache($contest);
+
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+
+        /** @var RequestStack $requestStack */
+        $requestStack = static::getContainer()->get(RequestStack::class);
+        $request = new Request();
+        $request->cookies->set('domjudge_cid', (string)$contest->getCid());
+        $requestStack->push($request);
+
+        $results = $importExportService->getResultsData(37, $full);
+        $expectedResults = [
+            new ResultRow('870679', 1, 'Gold Medal', 9, 995, 216, 'Northern Eurasia'),
+            new ResultRow('870257', 2, 'Gold Medal', 9, 1068, 227, 'Asia East'),
+            new ResultRow('870678', 3, 'Gold Medal', 9, 1143, 206),
+            new ResultRow('873624', 4, 'Gold Medal', 9, 1304, 292, 'Europe'),
+            new ResultRow('870259', 5, 'Silver Medal', 9, 1524, 274),
+            new ResultRow('870260', 6, 'Silver Medal', 8, 1013, 281),
+            new ResultRow('928309', 7, 'Silver Medal', 8, 1102, 230, 'Asia Pacific'),
+            new ResultRow('870037', 8, 'Silver Medal', 8, 1120, 268, 'North America'),
+            new ResultRow('870583', 9, 'Bronze Medal', 8, 1121, 260),
+            new ResultRow('870584', 10, 'Bronze Medal', 8, 1424, 291),
+            new ResultRow('870051', 11, 'Bronze Medal', 7, 842, 279),
+            new ResultRow('870647', 12, 'Bronze Medal', 7, 940, 259),
+            new ResultRow('870670', 13, 'Ranked', 7, 955, 291, 'Latin America'),
+            new ResultRow('870585', $full ? 14 : 13, 'Ranked', 7, 962, 290),
+            new ResultRow('870649', $full ? 14 : 13, 'Ranked', 7, 962, 290),
+            new ResultRow('870271', $full ? 16 : 13, 'Ranked', 7, 980, 283),
+            new ResultRow('870642', $full ? 17 : 13, 'Ranked', 7, 1021, 256),
+            new ResultRow('870045', $full ? 18 : 13, 'Ranked', 7, 1076, 271),
+            new ResultRow('870582', $full ? 19 : 13, 'Ranked', 7, 1128, 278),
+            new ResultRow('870654', $full ? 20 : 13, 'Ranked', 7, 1130, 284),
+            new ResultRow('868994', $full ? 21 : 13, 'Ranked', 7, 1381, 296),
+            new ResultRow('870644', 22, 'Ranked', 6, 510, 187),
+            new ResultRow('870646', $full ? 23 : 22, 'Ranked', 6, 642, 216),
+            new ResultRow('870680', $full ? 24 : 22, 'Ranked', 6, 645, 218),
+            new ResultRow('881825', $full ? 25 : 22, 'Ranked', 6, 680, 237),
+            new ResultRow('871349', $full ? 26 : 22, 'Ranked', 6, 683, 246),
+            new ResultRow('870692', $full ? 27 : 22, 'Ranked', 6, 708, 243),
+            new ResultRow('870041', $full ? 28 : 22, 'Ranked', 6, 718, 260),
+            new ResultRow('870268', $full ? 29 : 22, 'Ranked', 6, 765, 292),
+            new ResultRow('870681', $full ? 30 : 22, 'Ranked', 6, 932, 287),
+            new ResultRow('870040', $full ? 31 : 22, 'Ranked', 6, 968, 238),
+            new ResultRow('870044', $full ? 32 : 22, 'Ranked', 6, 1010, 275),
+            new ResultRow('870658', $full ? 33 : 22, 'Ranked', 6, 1046, 293),
+            new ResultRow('870038', $full ? 34 : 22, 'Ranked', 6, 1103, 282),
+            new ResultRow('870696', $full ? 35 : 22, 'Ranked', 6, 1189, 290),
+            new ResultRow('870650', 36, 'Ranked', 5, 398, 137),
+            new ResultRow('870672', $full ? 37 : 36, 'Ranked', 5, 489, 158),
+            new ResultRow('870656', $full ? 38 : 36, 'Ranked', 5, 496, 116),
+            new ResultRow('870043', $full ? 39 : 36, 'Ranked', 5, 522, 160),
+            new ResultRow('870648', $full ? 40 : 36, 'Ranked', 5, 573, 168),
+            new ResultRow('870652', $full ? 41 : 36, 'Ranked', 5, 578, 143),
+            new ResultRow('870627', $full ? 42 : 36, 'Ranked', 5, 579, 180, 'Asia West'),
+            new ResultRow('870639', $full ? 43 : 36, 'Ranked', 5, 582, 213),
+            new ResultRow('870273', $full ? 44 : 36, 'Ranked', 5, 592, 199),
+            new ResultRow('870653', $full ? 45 : 36, 'Ranked', 5, 630, 292),
+            new ResultRow('870659', $full ? 46 : 36, 'Ranked', 5, 644, 154),
+            new ResultRow('870683', $full ? 47 : 36, 'Ranked', 5, 653, 207),
+            new ResultRow('870874', $full ? 48 : 36, 'Ranked', 5, 660, 221),
+            new ResultRow('870052', $full ? 49 : 36, 'Ranked', 5, 662, 181),
+            new ResultRow('870270', $full ? 50 : 36, 'Ranked', 5, 683, 239),
+            new ResultRow('870046', $full ? 51 : 36, 'Ranked', 5, 737, 227),
+            new ResultRow('870050', $full ? 52 : 36, 'Ranked', 5, 739, 260),
+            new ResultRow('870637', $full ? 53 : 36, 'Ranked', 5, 742, 255),
+            new ResultRow('870048', $full ? 54 : 36, 'Ranked', 5, 743, 271),
+            new ResultRow('870630', $full ? 55 : 36, 'Ranked', 5, 747, 247),
+            new ResultRow('870272', $full ? 56 : 36, 'Ranked', 5, 747, 284),
+            new ResultRow('870667', $full ? 57 : 36, 'Ranked', 5, 770, 216),
+            new ResultRow('870686', $full ? 58 : 36, 'Ranked', 5, 795, 219),
+            new ResultRow('870578', $full ? 59 : 36, 'Ranked', 5, 807, 257),
+            new ResultRow('870579', $full ? 60 : 36, 'Ranked', 5, 822, 205),
+            new ResultRow('870267', $full ? 61 : 36, 'Ranked', 5, 833, 257),
+            new ResultRow('870674', $full ? 62 : 36, 'Ranked', 5, 837, 226),
+            new ResultRow('870691', $full ? 63 : 36, 'Ranked', 5, 839, 243),
+            new ResultRow('870264', $full ? 64 : 36, 'Ranked', 5, 850, 209),
+            new ResultRow('870635', $full ? 65 : 36, 'Ranked', 5, 862, 275),
+            new ResultRow('870590', $full ? 66 : 36, 'Ranked', 5, 867, 245),
+            new ResultRow('870269', $full ? 67 : 36, 'Ranked', 5, 878, 267),
+            new ResultRow('870668', $full ? 68 : 36, 'Ranked', 5, 889, 257),
+            new ResultRow('870263', $full ? 69 : 36, 'Ranked', 5, 891, 220),
+            new ResultRow('870065', $full ? 70 : 36, 'Ranked', 5, 908, 238, 'Africa and Arab'),
+            new ResultRow('870053', $full ? 71 : 36, 'Ranked', 5, 968, 260),
+            new ResultRow('870042', $full ? 72 : 36, 'Ranked', 5, 971, 292),
+            new ResultRow('870689', $full ? 73 : 36, 'Ranked', 5, 1008, 298),
+            new ResultRow('870685', $full ? 74 : 36, 'Ranked', 5, 1048, 267),
+            new ResultRow('870638', $full ? 75 : 36, 'Ranked', 5, 1164, 294),
+            new ResultRow('871379', $full ? 76 : 36, 'Ranked', 5, 1227, 273),
+            new ResultRow('870056', null, 'Honorable', 2, 465, 299),
+            new ResultRow('870055', null, 'Honorable', 4, 465, 164),
+            new ResultRow('870063', null, 'Honorable', 1, 348, 288),
+            new ResultRow('870066', null, 'Honorable', 2, 289, 173),
+            new ResultRow('870054', null, 'Honorable', 4, 693, 255),
+            new ResultRow('870067', null, 'Honorable', 2, 405, 259),
+            new ResultRow('870688', null, 'Honorable', 4, 632, 198),
+            new ResultRow('870690', null, 'Honorable', 3, 691, 271),
+            new ResultRow('870574', null, 'Honorable', 4, 339, 128),
+            new ResultRow('870640', null, 'Honorable', 3, 435, 195),
+            new ResultRow('870636', null, 'Honorable', 3, 333, 130),
+            new ResultRow('870061', null, 'Honorable', 1, 140, 140),
+            new ResultRow('871347', null, 'Honorable', 3, 599, 287),
+            new ResultRow('870577', null, 'Honorable', 4, 590, 215),
+            new ResultRow('870057', null, 'Honorable', 2, 367, 253),
+            new ResultRow('870641', null, 'Honorable', 3, 448, 243),
+            new ResultRow('870663', null, 'Honorable', 0, 0, 0),
+            new ResultRow('870662', null, 'Honorable', 2, 459, 238),
+            new ResultRow('870058', null, 'Honorable', 2, 312, 196),
+            new ResultRow('870629', null, 'Honorable', 3, 538, 299),
+            new ResultRow('870628', null, 'Honorable', 4, 712, 298),
+            new ResultRow('870631', null, 'Honorable', 4, 421, 191),
+            new ResultRow('870632', null, 'Honorable', 4, 603, 266),
+            new ResultRow('870633', null, 'Honorable', 3, 469, 250),
+            new ResultRow('870634', null, 'Honorable', 1, 96, 96),
+            new ResultRow('870694', null, 'Honorable', 4, 879, 290),
+            new ResultRow('870068', null, 'Honorable', 1, 74, 74),
+            new ResultRow('870693', null, 'Honorable', 3, 650, 279),
+            new ResultRow('870587', null, 'Honorable', 4, 447, 228),
+            new ResultRow('870588', null, 'Honorable', 4, 707, 244),
+            new ResultRow('873768', null, 'Honorable', 4, 651, 210),
+            new ResultRow('870687', null, 'Honorable', 4, 870, 268),
+            new ResultRow('870643', null, 'Honorable', 4, 379, 192),
+            new ResultRow('870581', null, 'Honorable', 2, 398, 287),
+            new ResultRow('870258', null, 'Honorable', 4, 448, 141),
+            new ResultRow('870062', null, 'Honorable', 1, 58, 58),
+            new ResultRow('869963', null, 'Honorable', 4, 920, 274),
+            new ResultRow('870675', null, 'Honorable', 1, 162, 162),
+            new ResultRow('870664', null, 'Honorable', 2, 255, 226),
+            new ResultRow('870660', null, 'Honorable', 3, 766, 289),
+            new ResultRow('870676', null, 'Honorable', 2, 279, 150),
+            new ResultRow('870673', null, 'Honorable', 1, 230, 190),
+            new ResultRow('870671', null, 'Honorable', 3, 333, 196),
+            new ResultRow('870661', null, 'Honorable', 3, 728, 272),
+            new ResultRow('870669', null, 'Honorable', 4, 654, 210),
+            new ResultRow('870666', null, 'Honorable', 3, 382, 177),
+            new ResultRow('870665', null, 'Honorable', 3, 568, 224),
+            new ResultRow('870657', null, 'Honorable', 4, 333, 107),
+            new ResultRow('870651', null, 'Honorable', 4, 474, 160),
+            new ResultRow('870645', null, 'Honorable', 3, 609, 277),
+            new ResultRow('870591', null, 'Honorable', 1, 86, 66),
+            new ResultRow('870589', null, 'Honorable', 3, 480, 178),
+            new ResultRow('870039', null, 'Honorable', 3, 596, 252),
+            new ResultRow('870697', null, 'Honorable', 3, 761, 275),
+        ];
+
+        if (!$full) {
+            // Sort by rank/name.
+            uasort($expectedResults, function (ResultRow $a, ResultRow $b) use ($teamsByIcpcId) {
+                if ($a->rank !== $b->rank) {
+                    // Honorable mention has no rank.
+                    if ($a->rank === null) {
+                        return 1;
+                    } elseif ($b->rank === null) {
+                        return -1;
+                    }
+                    return $a->rank <=> $b->rank;
+                }
+                $teamA = $teamsByIcpcId[$a->teamId] ?? null;
+                $teamB = $teamsByIcpcId[$b->teamId] ?? null;
+                $nameA = $teamA?->getEffectiveName();
+                $nameB = $teamB?->getEffectiveName();
+                $collator = new Collator('en');
+                return $collator->compare($nameA, $nameB);
+            });
+            $expectedResults = array_values($expectedResults);
+        }
+
+
+        self::assertEquals($expectedResults, $results);
+    }
+
+    public function provideGetResultsData(): Generator
+    {
+        yield [true];
+        yield [false];
     }
 }

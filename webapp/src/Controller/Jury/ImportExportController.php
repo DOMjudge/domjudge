@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\DataTransferObject\ResultRow;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -321,6 +322,9 @@ class ImportExportController extends BaseController
             echo sprintf("%s\t%s\n", $tsvType, $version);
             foreach ($data as $row) {
                 // Utils::toTsvFields handles escaping of reserved characters.
+                if ($row instanceof ResultRow) {
+                    $row = $row->toArray();
+                }
                 echo implode("\t", array_map(fn($field) => Utils::toTsvField((string)$field), $row)) . "\n";
             }
         });
@@ -391,31 +395,31 @@ class ImportExportController extends BaseController
         $sortOrder = $request->query->getInt('sort_order');
 
         foreach ($this->importExportService->getResultsData($sortOrder, full: $full) as $row) {
-            $team = $teamNames[$row[0]];
-            $rankPerTeam[$row[0]] = $row[1];
+            $team = $teamNames[$row->teamId];
+            $rankPerTeam[$row->teamId] = $row->rank;
 
-            if ($row[6] !== '') {
+            if ($row->groupWinner) {
                 $regionWinners[] = [
-                    'group' => $row[6],
+                    'group' => $row->groupWinner,
                     'team' => $team,
-                    'rank' => $row[1] ?: '-',
+                    'rank' => $row->rank ?? '-',
                 ];
             }
 
             $row = [
                 'team' => $team,
-                'rank' => $row[1],
-                'award' => $row[2],
-                'solved' => $row[3],
-                'total_time' => $row[4],
-                'max_time' => $row[5],
+                'rank' => $row->rank,
+                'award' => $row->award,
+                'solved' => $row->numSolved,
+                'total_time' => $row->totalTime,
+                'max_time' => $row->timeOfLastSubmission,
             ];
             if (preg_match('/^(.*) Medal$/', $row['award'], $matches)) {
                 $row['class'] = strtolower($matches[1]);
             } else {
                 $row['class'] = '';
             }
-            if ($row['rank'] === '') {
+            if ($row['rank'] === null) {
                 $honorable[] = $row['team'];
             } elseif ($row['award'] === 'Ranked') {
                 $ranked[] = $row;
