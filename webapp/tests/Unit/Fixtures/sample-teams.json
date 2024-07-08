@@ -1,0 +1,2082 @@
+[
+    {
+        "location": null,
+        "organization_id": "2349",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "University of Central Florida",
+        "teamid": 2,
+        "id": "47120",
+        "icpc_id": "868994",
+        "label": "47120",
+        "name": "UCF Beehive",
+        "display_name": "University of Central Florida",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1872",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "Taras Shevchenko National University of Kyiv",
+        "teamid": 3,
+        "id": "47091",
+        "icpc_id": "869963",
+        "label": "47091",
+        "name": "KNU_stascool5",
+        "display_name": "Taras Shevchenko National University of Kyiv",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2566",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "University of Waterloo",
+        "teamid": 4,
+        "id": "47133",
+        "icpc_id": "870037",
+        "label": "47133",
+        "name": "Waterloo Black",
+        "display_name": "University of Waterloo",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "232",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "Carnegie Mellon University",
+        "teamid": 5,
+        "id": "47020",
+        "icpc_id": "870038",
+        "label": "47020",
+        "name": "CMU2",
+        "display_name": "Carnegie Mellon University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2411",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "University of Maryland",
+        "teamid": 6,
+        "id": "47125",
+        "icpc_id": "870039",
+        "label": "47125",
+        "name": "UMD RED",
+        "display_name": "University of Maryland",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3328",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "Purdue University",
+        "teamid": 7,
+        "id": "47076",
+        "icpc_id": "870040",
+        "label": "47076",
+        "name": "Purdue BTR",
+        "display_name": "Purdue University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2334",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "University of California San Diego",
+        "teamid": 8,
+        "id": "47116",
+        "icpc_id": "870041",
+        "label": "47116",
+        "name": "UCSD Fallen Star",
+        "display_name": "University of California San Diego",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3670",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "University of California Irvine",
+        "teamid": 9,
+        "id": "47115",
+        "icpc_id": "870042",
+        "label": "47115",
+        "name": "UCI Map",
+        "display_name": "University of California Irvine",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1822",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "Stanford University",
+        "teamid": 10,
+        "id": "47089",
+        "icpc_id": "870043",
+        "label": "47089",
+        "name": "Stanford Cardinal",
+        "display_name": "Stanford University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "597",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "Georgia Institute of Technology",
+        "teamid": 11,
+        "id": "47031",
+        "icpc_id": "870044",
+        "label": "47031",
+        "name": "Georgia Tech Pandas",
+        "display_name": "Georgia Institute of Technology",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1145",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "Massachusetts Institute of Technology",
+        "teamid": 12,
+        "id": "47059",
+        "icpc_id": "870045",
+        "label": "47059",
+        "name": "Taxi",
+        "display_name": "Massachusetts Institute of Technology",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2556",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "University of Toronto",
+        "teamid": 13,
+        "id": "47131",
+        "icpc_id": "870046",
+        "label": "47131",
+        "name": "UofT Blue",
+        "display_name": "University of Toronto",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2337",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "University of California, Berkeley",
+        "teamid": 14,
+        "id": "47117",
+        "icpc_id": "870048",
+        "label": "47117",
+        "name": "Golden State Geeks",
+        "display_name": "University of California, Berkeley",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2339",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "University of California Los Angeles",
+        "teamid": 15,
+        "id": "47118",
+        "icpc_id": "870050",
+        "label": "47118",
+        "name": "UCLA Tortellini",
+        "display_name": "University of California Los Angeles",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "187",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "Brigham Young University",
+        "teamid": 16,
+        "id": "47017",
+        "icpc_id": "870051",
+        "label": "47017",
+        "name": "BYU TTL 255",
+        "display_name": "Brigham Young University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1329",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "New York University",
+        "teamid": 17,
+        "id": "47072",
+        "icpc_id": "870052",
+        "label": "47072",
+        "name": "RTFP",
+        "display_name": "New York University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2538",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "The University of Texas at Dallas",
+        "teamid": 18,
+        "id": "47092",
+        "icpc_id": "870053",
+        "label": "47092",
+        "name": "\ud83d\udc4cwhoosh\ud83d\udc4c",
+        "display_name": "The University of Texas at Dallas",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "4369",
+        "hidden": false,
+        "group_ids": [
+            "21513"
+        ],
+        "affiliation": "Arab Academy for Science, Technology and Maritime Transport - Cairo",
+        "teamid": 19,
+        "id": "47005",
+        "icpc_id": "870054",
+        "label": "47005",
+        "name": "Three Sannin",
+        "display_name": "Arab Academy for Science, Technology and Maritime Transport - Cairo",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "7113",
+        "hidden": false,
+        "group_ids": [
+            "21513"
+        ],
+        "affiliation": "Al-Baath University",
+        "teamid": 20,
+        "id": "47002",
+        "icpc_id": "870055",
+        "label": "47002",
+        "name": "Kindergarteners > Project Managers",
+        "display_name": "Al-Baath University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3664",
+        "hidden": false,
+        "group_ids": [
+            "21513"
+        ],
+        "affiliation": "Ain Shams University - Faculty of Computer and Information Sciences",
+        "teamid": 21,
+        "id": "47001",
+        "icpc_id": "870056",
+        "label": "47001",
+        "name": "Sa3t El Sefr",
+        "display_name": "Ain Shams University - Faculty of Computer and Information Sciences",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "358",
+        "hidden": false,
+        "group_ids": [
+            "21513"
+        ],
+        "affiliation": "Damascus University",
+        "teamid": 22,
+        "id": "47024",
+        "icpc_id": "870057",
+        "label": "47024",
+        "name": "Win Win Situation",
+        "display_name": "Damascus University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3519",
+        "hidden": false,
+        "group_ids": [
+            "21513"
+        ],
+        "affiliation": "German University in Cairo",
+        "teamid": 23,
+        "id": "47032",
+        "icpc_id": "870058",
+        "label": "47032",
+        "name": "Persistent Imposters",
+        "display_name": "German University in Cairo",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3348",
+        "hidden": false,
+        "group_ids": [
+            "21513"
+        ],
+        "affiliation": "Cairo University - Faculty of Computers and Artificial Intelligence",
+        "teamid": 24,
+        "id": "47018",
+        "icpc_id": "870061",
+        "label": "47018",
+        "name": "Kofta Sentinel Edition",
+        "display_name": "Cairo University - Faculty of Computers and Artificial Intelligence",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "8162",
+        "hidden": false,
+        "group_ids": [
+            "21513"
+        ],
+        "affiliation": "Syrian Virtual University",
+        "teamid": 25,
+        "id": "47090",
+        "icpc_id": "870062",
+        "label": "47090",
+        "name": "AHA",
+        "display_name": "Syrian Virtual University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "5627",
+        "hidden": false,
+        "group_ids": [
+            "21513"
+        ],
+        "affiliation": "Aleppo University",
+        "teamid": 26,
+        "id": "47003",
+        "icpc_id": "870063",
+        "label": "47003",
+        "name": "ZER\u00d8s",
+        "display_name": "Aleppo University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "6581",
+        "hidden": false,
+        "group_ids": [
+            "21513"
+        ],
+        "affiliation": "Higher Institute for Applied Sciences and Technology",
+        "teamid": 27,
+        "id": "47036",
+        "icpc_id": "870065",
+        "label": "47036",
+        "name": "nON-sTOP",
+        "display_name": "Higher Institute for Applied Sciences and Technology",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "65",
+        "hidden": false,
+        "group_ids": [
+            "21513"
+        ],
+        "affiliation": "American University of Beirut",
+        "teamid": 28,
+        "id": "47004",
+        "icpc_id": "870066",
+        "label": "47004",
+        "name": "AIM",
+        "display_name": "American University of Beirut",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "93",
+        "hidden": false,
+        "group_ids": [
+            "21513"
+        ],
+        "affiliation": "Assiut University",
+        "teamid": 29,
+        "id": "47006",
+        "icpc_id": "870067",
+        "label": "47006",
+        "name": "Assuit U",
+        "display_name": "Assiut University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "5676",
+        "hidden": false,
+        "group_ids": [
+            "21513"
+        ],
+        "affiliation": "Jordan University of Science and Technology",
+        "teamid": 30,
+        "id": "47052",
+        "icpc_id": "870068",
+        "label": "47052",
+        "name": "divideAndKrunker",
+        "display_name": "Jordan University of Science and Technology",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1438",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "Peking University",
+        "teamid": 31,
+        "id": "47074",
+        "icpc_id": "870257",
+        "label": "47074",
+        "name": "Let It Rot",
+        "display_name": "Peking University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "7255",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "Southern University of Science and Technology",
+        "teamid": 32,
+        "id": "47085",
+        "icpc_id": "870258",
+        "label": "47085",
+        "name": "SUSTech-Vichy",
+        "display_name": "Southern University of Science and Technology",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2039",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "Tsinghua University",
+        "teamid": 33,
+        "id": "47095",
+        "icpc_id": "870259",
+        "label": "47095",
+        "name": "there is a hand owning feet",
+        "display_name": "Tsinghua University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1268",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "Nanjing University",
+        "teamid": 34,
+        "id": "47062",
+        "icpc_id": "870260",
+        "label": "47062",
+        "name": "triple_dogs",
+        "display_name": "Nanjing University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1657",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "Shandong University",
+        "teamid": 35,
+        "id": "47081",
+        "icpc_id": "870263",
+        "label": "47081",
+        "name": "Big Black Dog Candy",
+        "display_name": "Shandong University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "245",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "Central South University",
+        "teamid": 36,
+        "id": "47021",
+        "icpc_id": "870264",
+        "label": "47021",
+        "name": "Trio of Tomorrow Winds",
+        "display_name": "Central South University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3120",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "Beihang University",
+        "teamid": 37,
+        "id": "47009",
+        "icpc_id": "870267",
+        "label": "47009",
+        "name": "Dauntless Shield",
+        "display_name": "Beihang University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "13852",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "Huazhong University of Science and Technology",
+        "teamid": 38,
+        "id": "47037",
+        "icpc_id": "870268",
+        "label": "47037",
+        "name": "Clover",
+        "display_name": "Huazhong University of Science and Technology",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "680",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "Hunan University",
+        "teamid": 39,
+        "id": "47038",
+        "icpc_id": "870269",
+        "label": "47038",
+        "name": "Gold legend",
+        "display_name": "Hunan University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1975",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "University of Hong Kong",
+        "teamid": 40,
+        "id": "47124",
+        "icpc_id": "870270",
+        "label": "47124",
+        "name": "I am not in danger. I am the danger.",
+        "display_name": "University of Hong Kong",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2720",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "Xi'an Jiaotong University",
+        "teamid": 41,
+        "id": "47135",
+        "icpc_id": "870271",
+        "label": "47135",
+        "name": "Dodo Kindergarten",
+        "display_name": "Xi'an Jiaotong University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1973",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "University of Electronic Science and Technology of China",
+        "teamid": 42,
+        "id": "47122",
+        "icpc_id": "870272",
+        "label": "47122",
+        "name": "UESTC_Hanabi",
+        "display_name": "University of Electronic Science and Technology of China",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2505",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "University of Science and Technology of China",
+        "teamid": 43,
+        "id": "47129",
+        "icpc_id": "870273",
+        "label": "47129",
+        "name": "penalty limit exceeded",
+        "display_name": "University of Science and Technology of China",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "161",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "Bina Nusantara University",
+        "teamid": 44,
+        "id": "47012",
+        "icpc_id": "870574",
+        "label": "47012",
+        "name": "okePeko",
+        "display_name": "Bina Nusantara University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3514",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "Chulalongkorn University",
+        "teamid": 45,
+        "id": "47023",
+        "icpc_id": "870577",
+        "label": "47023",
+        "name": "Waifu=Senpai:Re",
+        "display_name": "Chulalongkorn University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1276",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "Nanyang Technological University",
+        "teamid": 46,
+        "id": "47063",
+        "icpc_id": "870578",
+        "label": "47063",
+        "name": "UknoWho",
+        "display_name": "Nanyang Technological University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1025",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "KAIST",
+        "teamid": 47,
+        "id": "47053",
+        "icpc_id": "870579",
+        "label": "47053",
+        "name": "BabyPenguin",
+        "display_name": "KAIST",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1735",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "Soongsil University",
+        "teamid": 48,
+        "id": "47084",
+        "icpc_id": "870581",
+        "label": "47084",
+        "name": "NLP",
+        "display_name": "Soongsil University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1058",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "Kyoto University",
+        "teamid": 49,
+        "id": "47056",
+        "icpc_id": "870582",
+        "label": "47056",
+        "name": "Heno World",
+        "display_name": "Kyoto University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1987",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "The University of Tokyo",
+        "teamid": 50,
+        "id": "47093",
+        "icpc_id": "870583",
+        "label": "47093",
+        "name": "Time Manipulators",
+        "display_name": "The University of Tokyo",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2006",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "Tokyo Institute of Technology",
+        "teamid": 51,
+        "id": "47094",
+        "icpc_id": "870584",
+        "label": "47094",
+        "name": "tonosama",
+        "display_name": "Tokyo Institute of Technology",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1303",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "National Taiwan University",
+        "teamid": 52,
+        "id": "47066",
+        "icpc_id": "870585",
+        "label": "47066",
+        "name": "8BQube",
+        "display_name": "National Taiwan University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1308",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "National Tsing Hua University",
+        "teamid": 53,
+        "id": "47067",
+        "icpc_id": "870587",
+        "label": "47067",
+        "name": "KiminoShiranaiMonogatari",
+        "display_name": "National Tsing Hua University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1316",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "National University of Singapore",
+        "teamid": 54,
+        "id": "47068",
+        "icpc_id": "870588",
+        "label": "47068",
+        "name": "The Spiders from Mars",
+        "display_name": "National University of Singapore",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3663",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "University of Engineering and Technology - VNU",
+        "teamid": 55,
+        "id": "47123",
+        "icpc_id": "870589",
+        "label": "47123",
+        "name": "mongoDB",
+        "display_name": "University of Engineering and Technology - VNU",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3705",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "University of Science, VNU-HCM",
+        "teamid": 56,
+        "id": "47130",
+        "icpc_id": "870590",
+        "label": "47130",
+        "name": "HCMUS-BurnedTomatoes",
+        "display_name": "University of Science, VNU-HCM",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2366",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "University of Dhaka",
+        "teamid": 57,
+        "id": "47121",
+        "icpc_id": "870591",
+        "label": "47121",
+        "name": "DU_Kronos",
+        "display_name": "University of Dhaka",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "725",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Indian Institute of Technology - Delhi",
+        "teamid": 58,
+        "id": "47040",
+        "icpc_id": "870627",
+        "label": "47040",
+        "name": "AuditPass",
+        "display_name": "Indian Institute of Technology - Delhi",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "5640",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Indian Institute of Technology - Indore",
+        "teamid": 59,
+        "id": "47041",
+        "icpc_id": "870628",
+        "label": "47041",
+        "name": "Paradigm Shift",
+        "display_name": "Indian Institute of Technology - Indore",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "6685",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Ghulam Ishaq Khan Institute of Engineering Sciences and Technology",
+        "teamid": 60,
+        "id": "47033",
+        "icpc_id": "870629",
+        "label": "47033",
+        "name": "AC47",
+        "display_name": "Ghulam Ishaq Khan Institute of Engineering Sciences and Technology",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "727",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Indian Institute of Technology - Kanpur",
+        "teamid": 61,
+        "id": "47042",
+        "icpc_id": "870630",
+        "label": "47042",
+        "name": "facelessmen3.0",
+        "display_name": "Indian Institute of Technology - Kanpur",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "728",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Indian Institute of Technology - Kharagpur",
+        "teamid": 62,
+        "id": "47043",
+        "icpc_id": "870631",
+        "label": "47043",
+        "name": "Ab_Ki_Baar",
+        "display_name": "Indian Institute of Technology - Kharagpur",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "723",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Indian Institute of Technology - Madras",
+        "teamid": 63,
+        "id": "47044",
+        "icpc_id": "870632",
+        "label": "47044",
+        "name": "Yorozuya Forever",
+        "display_name": "Indian Institute of Technology - Madras",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "6908",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Indian Institute of Technology - Patna",
+        "teamid": 64,
+        "id": "47045",
+        "icpc_id": "870633",
+        "label": "47045",
+        "name": "Maanzar",
+        "display_name": "Indian Institute of Technology - Patna",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "9636",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Indian Institute Of Technology Jodhpur",
+        "teamid": 65,
+        "id": "47046",
+        "icpc_id": "870634",
+        "label": "47046",
+        "name": "Pratyahara",
+        "display_name": "Indian Institute Of Technology Jodhpur",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "114",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Bangladesh University of Engineering and Technology",
+        "teamid": 66,
+        "id": "47008",
+        "icpc_id": "870635",
+        "label": "47008",
+        "name": "BUET Sommohito",
+        "display_name": "Bangladesh University of Engineering and Technology",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "5628",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "BITS-Pilani, Hyderabad Campus",
+        "teamid": 67,
+        "id": "47015",
+        "icpc_id": "870636",
+        "label": "47015",
+        "name": ":(){ :|:& };:",
+        "display_name": "BITS-Pilani, Hyderabad Campus",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3945",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Jadavpur University, Kolkata",
+        "teamid": 68,
+        "id": "47050",
+        "icpc_id": "870637",
+        "label": "47050",
+        "name": "BForBruteForce",
+        "display_name": "Jadavpur University, Kolkata",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "181",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "BRAC University",
+        "teamid": 69,
+        "id": "47016",
+        "icpc_id": "870638",
+        "label": "47016",
+        "name": "BRACU_Crows",
+        "display_name": "BRAC University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "724",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Indian Institute of Technology - Bombay",
+        "teamid": 70,
+        "id": "47039",
+        "icpc_id": "870639",
+        "label": "47039",
+        "name": "Leaf Papad",
+        "display_name": "Indian Institute of Technology - Bombay",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "4223",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Birla Institute of Technology and Science, Pilani Campus",
+        "teamid": 71,
+        "id": "47013",
+        "icpc_id": "870640",
+        "label": "47013",
+        "name": "jaggu's bois",
+        "display_name": "Birla Institute of Technology and Science, Pilani Campus",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3944",
+        "hidden": false,
+        "group_ids": [
+            "21501"
+        ],
+        "affiliation": "Dhirubhai Ambani Institute of Information and Communication Technology, Gandhinagar",
+        "teamid": 72,
+        "id": "47025",
+        "icpc_id": "870641",
+        "label": "47025",
+        "name": "Silent 3lers",
+        "display_name": "Dhirubhai Ambani Institute of Information and Communication Technology, Gandhinagar",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3065",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "University of Novi Sad",
+        "teamid": 73,
+        "id": "47127",
+        "icpc_id": "870642",
+        "label": "47127",
+        "name": "Infinity",
+        "display_name": "University of Novi Sad",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "8667",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "Neapolis University Pafos",
+        "teamid": 74,
+        "id": "47071",
+        "icpc_id": "870643",
+        "label": "47071",
+        "name": "bird-cherry",
+        "display_name": "Neapolis University Pafos",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3375",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "Lviv National University",
+        "teamid": 75,
+        "id": "47058",
+        "icpc_id": "870644",
+        "label": "47058",
+        "name": "LNU Stallions",
+        "display_name": "Lviv National University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "196",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "University of Bucharest",
+        "teamid": 76,
+        "id": "47114",
+        "icpc_id": "870645",
+        "label": "47114",
+        "name": "Echipa Sarata",
+        "display_name": "University of Bucharest",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "931",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "Jagiellonian University in Krakow",
+        "teamid": 77,
+        "id": "47051",
+        "icpc_id": "870646",
+        "label": "47051",
+        "name": "Jagiellonian 1",
+        "display_name": "Jagiellonian University in Krakow",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2673",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "University of Warsaw",
+        "teamid": 78,
+        "id": "47132",
+        "icpc_id": "870647",
+        "label": "47132",
+        "name": "Warsaw Eagles 2023",
+        "display_name": "University of Warsaw",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "269",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "Charles University",
+        "teamid": 79,
+        "id": "47022",
+        "icpc_id": "870648",
+        "label": "47022",
+        "name": "MFF3",
+        "display_name": "Charles University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2343",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "University of Cambridge",
+        "teamid": 80,
+        "id": "47119",
+        "icpc_id": "870649",
+        "label": "47119",
+        "name": "Trinity's Trinity",
+        "display_name": "University of Cambridge",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1112",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "Lund University",
+        "teamid": 81,
+        "id": "47057",
+        "icpc_id": "870650",
+        "label": "47057",
+        "name": "ezcp",
+        "display_name": "Lund University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2320",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "University of Bergen",
+        "teamid": 82,
+        "id": "47113",
+        "icpc_id": "870651",
+        "label": "47113",
+        "name": "Algos but Greek chars",
+        "display_name": "University of Bergen",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3620",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "University of Oxford",
+        "teamid": 83,
+        "id": "47128",
+        "icpc_id": "870652",
+        "label": "47128",
+        "name": "lamelame",
+        "display_name": "University of Oxford",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2267",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "Saarland University",
+        "teamid": 84,
+        "id": "47077",
+        "icpc_id": "870653",
+        "label": "47077",
+        "name": "\u229b\u02ef\u26d2",
+        "display_name": "Saarland University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3436",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "\u00c9cole Normale Sup\u00e9rieure de Paris",
+        "teamid": 85,
+        "id": "47027",
+        "icpc_id": "870654",
+        "label": "47027",
+        "name": "ENS Ulm 1",
+        "display_name": "\u00c9cole Normale Sup\u00e9rieure de Paris",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "451",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "ETH Z\u00fcrich",
+        "teamid": 86,
+        "id": "47029",
+        "icpc_id": "870656",
+        "label": "47029",
+        "name": "gETHyped",
+        "display_name": "ETH Z\u00fcrich",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "8869",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "Universit\u00e0 di Pisa",
+        "teamid": 87,
+        "id": "47110",
+        "icpc_id": "870657",
+        "label": "47110",
+        "name": "flag[10]",
+        "display_name": "Universit\u00e0 di Pisa",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "478",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "Universidade do Porto",
+        "teamid": 88,
+        "id": "47106",
+        "icpc_id": "870658",
+        "label": "47106",
+        "name": "Heroes of the C",
+        "display_name": "Universidade do Porto",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2112",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidad de La Habana",
+        "teamid": 89,
+        "id": "47100",
+        "icpc_id": "870659",
+        "label": "47100",
+        "name": "UH Top",
+        "display_name": "Universidad de La Habana",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "8140",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidad de Guanajuato - DCNE",
+        "teamid": 90,
+        "id": "47099",
+        "icpc_id": "870660",
+        "label": "47099",
+        "name": "OWO",
+        "display_name": "Universidad de Guanajuato - DCNE",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3372",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidad Panamericana Campus Bonaterra",
+        "teamid": 91,
+        "id": "47104",
+        "icpc_id": "870661",
+        "label": "47104",
+        "name": "UPsolving",
+        "display_name": "Universidad Panamericana Campus Bonaterra",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "7138",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Facultad de Ciencias-Universidad Nacional Aut\u00f3noma de M\u00e9xico",
+        "teamid": 92,
+        "id": "47030",
+        "icpc_id": "870662",
+        "label": "47030",
+        "name": "Cagua++",
+        "display_name": "Facultad de Ciencias-Universidad Nacional Aut\u00f3noma de M\u00e9xico",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "467",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Escuela Superior De Computo Instituto Politecnico Nacional",
+        "teamid": 93,
+        "id": "47028",
+        "icpc_id": "870663",
+        "label": "47028",
+        "name": "Exceso de F\u00e9",
+        "display_name": "Escuela Superior De Computo Instituto Politecnico Nacional",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3424",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidad de Guadalajara CUCEI",
+        "teamid": 94,
+        "id": "47098",
+        "icpc_id": "870664",
+        "label": "47098",
+        "name": "Almost Retired",
+        "display_name": "Universidad de Guadalajara CUCEI",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2242",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidade Federal do Rio de Janeiro",
+        "teamid": 95,
+        "id": "47109",
+        "icpc_id": "870665",
+        "label": "47109",
+        "name": "Lebenslangerschicksalsschatz",
+        "display_name": "Universidade Federal do Rio de Janeiro",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2230",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidade Federal de Minas Gerais",
+        "teamid": 96,
+        "id": "47108",
+        "icpc_id": "870666",
+        "label": "47108",
+        "name": "Humuhumunukunukuapua'a",
+        "display_name": "Universidade Federal de Minas Gerais",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2216",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidade Estadual de Campinas",
+        "teamid": 97,
+        "id": "47107",
+        "icpc_id": "870667",
+        "label": "47107",
+        "name": "Voc\u00ea beijaria Matheus Leal Viana?",
+        "display_name": "Universidade Estadual de Campinas",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2951",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Instituto Militar de Engenharia",
+        "teamid": 98,
+        "id": "47048",
+        "icpc_id": "870668",
+        "label": "47048",
+        "name": "12k Club",
+        "display_name": "Instituto Militar de Engenharia",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2195",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidade de Bras\u00edlia",
+        "teamid": 99,
+        "id": "47105",
+        "icpc_id": "870669",
+        "label": "47105",
+        "name": "FLAMENGO",
+        "display_name": "Universidade de Bras\u00edlia",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3683",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidad de Buenos Aires - FCEN",
+        "teamid": 100,
+        "id": "47096",
+        "icpc_id": "870670",
+        "label": "47096",
+        "name": "una ma y no inchamo ma",
+        "display_name": "Universidad de Buenos Aires - FCEN",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2154",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidad Nacional de Rosario",
+        "teamid": 101,
+        "id": "47103",
+        "icpc_id": "870671",
+        "label": "47103",
+        "name": "Don Gato",
+        "display_name": "Universidad Nacional de Rosario",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1480",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Pontificia Universidad Cat\u00f3lica de Chile",
+        "teamid": 102,
+        "id": "47075",
+        "icpc_id": "870672",
+        "label": "47075",
+        "name": "Laranjas.clear()",
+        "display_name": "Pontificia Universidad Cat\u00f3lica de Chile",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3272",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidad Nacional de Colombia - Bogot\u00e1",
+        "teamid": 103,
+        "id": "47102",
+        "icpc_id": "870673",
+        "label": "47102",
+        "name": "phiUN",
+        "display_name": "Universidad Nacional de Colombia - Bogot\u00e1",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3257",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "EAFIT University",
+        "teamid": 104,
+        "id": "47026",
+        "icpc_id": "870674",
+        "label": "47026",
+        "name": "Fast and Fourier",
+        "display_name": "EAFIT University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "5716",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidad de Costa Rica",
+        "teamid": 105,
+        "id": "47097",
+        "icpc_id": "870675",
+        "label": "47097",
+        "name": "UCR Mix",
+        "display_name": "Universidad de Costa Rica",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3503",
+        "hidden": false,
+        "group_ids": [
+            "21514"
+        ],
+        "affiliation": "Universidad Mayor de San Sim\u00f3n",
+        "teamid": 106,
+        "id": "47101",
+        "icpc_id": "870676",
+        "label": "47101",
+        "name": "Club de Front\u00f3n 2880",
+        "display_name": "Universidad Mayor de San Sim\u00f3n",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1220",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "Moscow Institute of Physics and Technology",
+        "teamid": 107,
+        "id": "47060",
+        "icpc_id": "870678",
+        "label": "47060",
+        "name": "Yolki-palki",
+        "display_name": "Moscow Institute of Physics and Technology",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3534",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "National Research University Higher School of Economics",
+        "teamid": 108,
+        "id": "47065",
+        "icpc_id": "870679",
+        "label": "47065",
+        "name": "FFTilted",
+        "display_name": "National Research University Higher School of Economics",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1802",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "St. Petersburg State University",
+        "teamid": 109,
+        "id": "47088",
+        "icpc_id": "870680",
+        "label": "47088",
+        "name": "Urgant Team",
+        "display_name": "St. Petersburg State University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "144",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "Belarusian State University",
+        "teamid": 110,
+        "id": "47010",
+        "icpc_id": "870681",
+        "label": "47010",
+        "name": "BelarusianSU 1: Dungeon Thread",
+        "display_name": "Belarusian State University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "3295",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "St. Petersburg ITMO University",
+        "teamid": 111,
+        "id": "47087",
+        "icpc_id": "870683",
+        "label": "47087",
+        "name": "Cataleptodius",
+        "display_name": "St. Petersburg ITMO University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "989",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "Kazakh-British Technical University",
+        "teamid": 112,
+        "id": "47055",
+        "icpc_id": "870685",
+        "label": "47055",
+        "name": "DeoxyriboNucleic Acid",
+        "display_name": "Kazakh-British Technical University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "9606",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "St. Petersburg Campus of Higher School of Economics",
+        "teamid": 113,
+        "id": "47086",
+        "icpc_id": "870686",
+        "label": "47086",
+        "name": "Just3Keks",
+        "display_name": "St. Petersburg Campus of Higher School of Economics",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "6514",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "Nazarbayev University",
+        "teamid": 114,
+        "id": "47070",
+        "icpc_id": "870687",
+        "label": "47070",
+        "name": "wf or gf?",
+        "display_name": "Nazarbayev University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "10637",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "Astana IT University",
+        "teamid": 115,
+        "id": "47007",
+        "icpc_id": "870688",
+        "label": "47007",
+        "name": "AITU 1",
+        "display_name": "Astana IT University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1237",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "Moscow State University",
+        "teamid": 116,
+        "id": "47061",
+        "icpc_id": "870689",
+        "label": "47061",
+        "name": "apes together strong",
+        "display_name": "Moscow State University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "140",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "Belarusian State University of Informatics and Radioelectronics",
+        "teamid": 117,
+        "id": "47011",
+        "icpc_id": "870690",
+        "label": "47011",
+        "name": "Belarusian SUIR #1: So stuffy",
+        "display_name": "Belarusian State University of Informatics and Radioelectronics",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1372",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "Novosibirsk State University",
+        "teamid": 118,
+        "id": "47073",
+        "icpc_id": "870691",
+        "label": "47073",
+        "name": "Novosibirsk SU 4: MathWay",
+        "display_name": "Novosibirsk State University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1623",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "Saratov State University",
+        "teamid": 119,
+        "id": "47078",
+        "icpc_id": "870692",
+        "label": "47078",
+        "name": "Saratov SU K",
+        "display_name": "Saratov State University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1215",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "National Research Nuclear University MEPhI (Moscow Engineering Physics Institute)",
+        "teamid": 120,
+        "id": "47064",
+        "icpc_id": "870693",
+        "label": "47064",
+        "name": "Useless but powerful",
+        "display_name": "National Research Nuclear University MEPhI (Moscow Engineering Physics Institute)",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "4330",
+        "hidden": false,
+        "group_ids": [
+            "21502"
+        ],
+        "affiliation": "International IT University",
+        "teamid": 121,
+        "id": "47049",
+        "icpc_id": "870694",
+        "label": "47049",
+        "name": "IITU: Defective Memory",
+        "display_name": "International IT University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2449",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "UNSW Sydney",
+        "teamid": 122,
+        "id": "47134",
+        "icpc_id": "870696",
+        "label": "47134",
+        "name": "Hell Hunt",
+        "display_name": "UNSW Sydney",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1978",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "University of Melbourne",
+        "teamid": 123,
+        "id": "47126",
+        "icpc_id": "870697",
+        "label": "47126",
+        "name": "Arts Students",
+        "display_name": "University of Melbourne",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1663",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "Shanghai Jiao Tong University",
+        "teamid": 124,
+        "id": "47082",
+        "icpc_id": "870874",
+        "label": "47082",
+        "name": "Silver Bullet",
+        "display_name": "Shanghai Jiao Tong University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "230",
+        "hidden": false,
+        "group_ids": [
+            "21497"
+        ],
+        "affiliation": "Carleton College",
+        "teamid": 125,
+        "id": "47019",
+        "icpc_id": "871347",
+        "label": "47019",
+        "name": "Chinela++",
+        "display_name": "Carleton College",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2751",
+        "hidden": false,
+        "group_ids": [
+            "21517"
+        ],
+        "affiliation": "Zhejiang University",
+        "teamid": 126,
+        "id": "47136",
+        "icpc_id": "871349",
+        "label": "47136",
+        "name": "Solitary Dream",
+        "display_name": "Zhejiang University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2390",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "Universitas Indonesia",
+        "teamid": 127,
+        "id": "47111",
+        "icpc_id": "871379",
+        "label": "47111",
+        "name": "Bingung weh",
+        "display_name": "Universitas Indonesia",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "9745",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "Harbour.Space University - Barcelona Campus",
+        "teamid": 128,
+        "id": "47034",
+        "icpc_id": "873624",
+        "label": "47034",
+        "name": "P+P+P",
+        "display_name": "Harbour.Space University - Barcelona Campus",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "275",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "National Yang Ming Chiao Tung University",
+        "teamid": 129,
+        "id": "47069",
+        "icpc_id": "873768",
+        "label": "47069",
+        "name": "NYCU_13",
+        "display_name": "National Yang Ming Chiao Tung University",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "2316",
+        "hidden": false,
+        "group_ids": [
+            "21496"
+        ],
+        "affiliation": "University of Belgrade",
+        "teamid": 130,
+        "id": "47112",
+        "icpc_id": "881825",
+        "label": "47112",
+        "name": "UoB R-Shuf",
+        "display_name": "University of Belgrade",
+        "public_description": ""
+    },
+    {
+        "location": null,
+        "organization_id": "1636",
+        "hidden": false,
+        "group_ids": [
+            "21500"
+        ],
+        "affiliation": "Seoul National University",
+        "teamid": 131,
+        "id": "47080",
+        "icpc_id": "928309",
+        "label": "47080",
+        "name": "HappyLastDance",
+        "display_name": "Seoul National University",
+        "public_description": ""
+    }
+]

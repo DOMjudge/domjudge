@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\DataTransferObject\ResultRow;
 use App\Entity\Configuration;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -456,16 +457,7 @@ class ImportExportService
     /**
      * Get results data for the given sortorder.
      *
-     * We'll here assume that the requested file will be of the current contest,
-     * as all our scoreboard interfaces do:
-     * 0    ICPC ID     24314   string
-     * 1    Rank in contest     1   integer|''
-     * 2    Award   Gold Medal  string
-     * 3    Number of problems the team has solved  4   integer
-     * 4    Total Time  534     integer
-     * 5    Time of the last submission     233     integer
-     * 6    Group Winner    North American  string
-     * @return array<array{0: string, 1: integer|string, 2: string, 3: integer, 4: integer, 5: integer, 6: string}>
+     * @return ResultRow[]
      */
     public function getResultsData(int $sortOrder, bool $full = false): array
     {
@@ -545,55 +537,47 @@ class ImportExportService
                 $awardString = 'Ranked';
             } else {
                 $awardString = 'Honorable';
-                $rank        = '';
+                $rank        = null;
             }
 
-            $groupWinner = "";
+            $groupWinner = null;
             $categoryId  = $teamScore->team->getCategory()->getCategoryid();
             if (!isset($groupWinners[$categoryId])) {
                 $groupWinners[$categoryId] = true;
                 $groupWinner               = $teamScore->team->getCategory()->getName();
             }
 
-            $data[] = [
+            $data[] = new ResultRow(
                 $teamScore->team->getIcpcId(),
                 $rank,
                 $awardString,
                 $teamScore->numPoints,
                 $teamScore->totalTime,
                 $maxTime,
-                $groupWinner
-            ];
+                $groupWinner,
+            );
         }
 
         // Sort by rank/name.
-        uasort($data, function ($a, $b) use ($teams) {
-            if ($a[1] != $b[1]) {
+        uasort($data, function (ResultRow $a, ResultRow $b) use ($teams) {
+            if ($a->rank !== $b->rank) {
                 // Honorable mention has no rank.
-                if ($a[1] === '') {
+                if ($a->rank === null) {
                     return 1;
-                } elseif ($b[1] === '') {
+                } elseif ($b->rank === null) {
                     return -11;
                 }
-                return $a[1] - $b[1];
+                return $a->rank <=> $b->rank;
             }
-            $teamA = $teams[$a[0]] ?? null;
-            $teamB = $teams[$b[0]] ?? null;
-            if ($teamA) {
-                $nameA = $teamA->getEffectiveName();
-            } else {
-                $nameA = '';
-            }
-            if ($teamB) {
-                $nameB = $teamB->getEffectiveName();
-            } else {
-                $nameB = '';
-            }
+            $teamA = $teams[$a->teamId] ?? null;
+            $teamB = $teams[$b->teamId] ?? null;
+            $nameA = $teamA?->getEffectiveName();
+            $nameB = $teamB?->getEffectiveName();
             $collator = new Collator('en');
             return $collator->compare($nameA, $nameB);
         });
 
-        return $data;
+        return array_values($data);
     }
 
     /**
