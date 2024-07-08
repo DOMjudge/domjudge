@@ -14,6 +14,17 @@ class ResultRow
         public readonly ?string $groupWinner = null,
     ) {}
 
+    /**
+     * @return array{
+     *     team_id: string,
+     *     rank: int|null,
+     *     award: string,
+     *     num_solved: int,
+     *     total_time: int,
+     *     time_of_last_submission: int,
+     *     group_winner: string|null,
+     * }
+     */
     public function toArray(): array
     {
         return [
