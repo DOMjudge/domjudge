@@ -504,9 +504,10 @@ class ImportExportService
             }
         }
 
-        $ranks        = [];
-        $groupWinners = [];
-        $data         = [];
+        $ranks            = [];
+        $groupWinners     = [];
+        $data             = [];
+        $lowestMedalPoints = 0;
 
         foreach ($scoreboard->getScores() as $teamScore) {
             if ($teamScore->team->getCategory()->getSortorder() !== $sortOrder) {
@@ -522,10 +523,13 @@ class ImportExportService
             $numPoints = $teamScore->numPoints;
             if ($rank <= $contest->getGoldMedals()) {
                 $awardString = 'Gold Medal';
+                $lowestMedalPoints = $teamScore->numPoints;
             } elseif ($rank <= $contest->getGoldMedals() + $contest->getSilverMedals()) {
                 $awardString = 'Silver Medal';
+                $lowestMedalPoints = $teamScore->numPoints;
             } elseif ($rank <= $contest->getGoldMedals() + $contest->getSilverMedals() + $contest->getBronzeMedals() + $contest->getB()) {
                 $awardString = 'Bronze Medal';
+                $lowestMedalPoints = $teamScore->numPoints;
             } elseif ($numPoints >= $median) {
                 // Teams with equally solved number of problems get the same rank unless $full is true.
                 if (!$full) {
@@ -534,7 +538,13 @@ class ImportExportService
                     }
                     $rank = $ranks[$numPoints];
                 }
-                $awardString = 'Ranked';
+                if ($numPoints === $lowestMedalPoints) {
+                    $awardString = 'Highest Honors';
+                } elseif ($numPoints === $lowestMedalPoints - 1) {
+                    $awardString = 'High Honors';
+                } else {
+                    $awardString = 'Honors';
+                }
             } else {
                 $awardString = 'Honorable';
                 $rank        = null;
