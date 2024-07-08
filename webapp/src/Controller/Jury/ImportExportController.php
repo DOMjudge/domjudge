@@ -421,8 +421,8 @@ class ImportExportController extends BaseController
             }
             if ($row['rank'] === null) {
                 $honorable[] = $row['team'];
-            } elseif ($row['award'] === 'Ranked') {
-                $ranked[] = $row;
+            } elseif (in_array($row['award'], ['Highest Honors', 'High Honors', 'Honors'], true)) {
+                $ranked[$row['award']][] = $row;
             } else {
                 $awarded[] = $row;
             }
@@ -432,13 +432,16 @@ class ImportExportController extends BaseController
 
         $collator = new Collator('en_US');
         $collator->sort($honorable);
-        usort($ranked, function (array $a, array $b) use ($collator): int {
-            if ($a['rank'] !== $b['rank']) {
-                return $a['rank'] <=> $b['rank'];
-            }
+        foreach ($ranked as $award => &$rankedTeams) {
+            usort($rankedTeams, function (array $a, array $b) use ($collator): int {
+                if ($a['rank'] !== $b['rank']) {
+                    return $a['rank'] <=> $b['rank'];
+                }
 
-            return $collator->compare($a['team'], $b['team']);
-        });
+                return $collator->compare($a['team'], $b['team']);
+            });
+        }
+        unset($rankedTeams);
 
         $problems     = $scoreboard->getProblems();
         $matrix       = $scoreboard->getMatrix();
