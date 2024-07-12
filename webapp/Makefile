@@ -7,7 +7,7 @@ REC_TARGETS = domserver
 include $(TOPDIR)/Makefile.global
 
 # Subdirectories to recurse into for REC_TARGETS
-SUBDIRS = config
+SUBDIRS = config vendor
 
 maintainer-conf: .env.local
 
@@ -17,12 +17,6 @@ maintainer-conf: .env.local
 	@echo "# This file was automatically created by 'make maintainer-conf' to run" > $@
 	@echo "# the DOMjudge Symfony application in developer mode. Adjust as needed." >> $@
 	@echo "APP_ENV=dev" >> $@
-
-# Dump autoload dependencies (including plugins)
-# This is needed since symfony/runtime is a Composer plugin that runs while dumping
-# the autoload file
-composer-dump-autoload:
-	composer $(subst 1,-q,$(QUIET)) dump-autoload -o -a
 
 composer-dump-autoload-dev:
 	composer $(subst 1,-q,$(QUIET)) dump-autoload
@@ -37,7 +31,7 @@ copy-bundle-assets:
 clean-l:
 	-rm -rf public/bundles/nelmioapidoc
 
-install-domserver: composer-dump-autoload
+install-domserver:
 # This must be done first to install with the rest.
 	$(MAKE) copy-bundle-assets
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
@@ -58,7 +52,7 @@ install-domserver: composer-dump-autoload
 	done
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
 
-inplace-install: composer-autoclean composer-dump-autoload
+inplace-install: composer-autoclean
 maintainer-install: composer-dump-autoload-dev
 
 # Install PHP dependencies

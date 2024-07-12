@@ -289,7 +289,7 @@ coverity-conf:
 coverity-build: paths.mk
 	$(MAKE) build build-scripts
 # Secondly, delete all upstream PHP libraries to not analyze those:
-	-rm -rf lib/vendor/*
+	-rm -rf webapp/vendor/*
 	@VERSION=` grep '^VERSION ='   paths.mk | sed 's/^VERSION = *//'` ; \
 	PUBLISHED=`grep '^PUBLISHED =' paths.mk | sed 's/^PUBLISHED = *//'` ; \
 	if [ "$$PUBLISHED" = release ]; then DESC="release" ; \
