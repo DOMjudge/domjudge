@@ -23,7 +23,7 @@ if [ ! -x /usr/bin/shellcheck ]; then
 fi
 
 find . \( \
-       -path ./lib/vendor        -prune \
+       -path ./webapp/vendor        -prune \
 	-o -path ./webapp/var        -prune \
 	-o -path ./output            -prune \
 	-o -path ./.git              -prune \
@@ -41,7 +41,7 @@ while read -r i ; do
 	fi
 	if grep -q "^#\\!.*/bin/sh" "$i" && \
 		[ "${i##*.}" != "zip" ] && \
-		echo "$i" | grep -qvE '(^\./(misc-tools/dj_judgehost_cleanup.in|misc-tools/dj_make_chroot.in|config|autom4te|install-sh|sql/files/defaultdata/hs/run|sql/files/defaultdata/kt/run|lib/vendor/|output|judge/judgedaemon))'; then
+		echo "$i" | grep -qvE '(^\./(misc-tools/dj_judgehost_cleanup.in|misc-tools/dj_make_chroot.in|config|autom4te|install-sh|sql/files/defaultdata/hs/run|sql/files/defaultdata/kt/run|webapp/vendor/|output|judge/judgedaemon))'; then
 		# shellcheck disable=SC2001
 		echo "$i" | sed -e 's|^./|check for bashisms: |'
 		checkbashisms "$i"
