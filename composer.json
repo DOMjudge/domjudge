@@ -84,7 +84,7 @@
 		"riverline/multipart-parser": "^2.1",
 		"select2/select2": "4.*",
 		"sentry/sentry-symfony": "^4.5",
-        "setono/editorjs-php": "0.1.x-dev",
+		"setono/editorjs-php": "0.1.x-dev",
 		"symfony/asset": "6.4.*",
 		"symfony/browser-kit": "6.4.*",
 		"symfony/console": "6.4.*",
