@@ -94,7 +94,7 @@
             </ul>
         {% endif %}
 
-        <ul class="navbar-nav ml-auto">
+        <ul class="navbar-nav ms-auto">
 
             {# Render user information + logout button #}
             {% if is_granted('IS_AUTHENTICATED_FULLY') %}
@@ -102,7 +102,7 @@
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-user"></i> {{ app.user.getUsername() }}
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                         {% if app.user and app.user.getName() %}
                             <a class="dropdown-item disabled" href="#">{{ app.user.getName() }}</a>
                         {% endif %}

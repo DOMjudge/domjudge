@@ -1,4 +1,4 @@
-<li class="nav-item dropdown pl-xl-2">
+<li class="nav-item dropdown ps-xl-2">
     {% set active_contests = contests | filter(c => not c.getState().finalized) %}
     {% set finalized_contests = contests | filter(c => c.getState().finalized) %}
 
@@ -16,7 +16,7 @@
             {% endif %}
         </div>
     </a>
-    <div class="dropdown-menu dropdown-menu-right scrollable-menu" aria-labelledby="navbarDropdown" data-current-contest="{{ current_contest_id }}">
+    <div class="dropdown-menu dropdown-menu-end scrollable-menu" aria-labelledby="navbarDropdown" data-current-contest="{{ current_contest_id }}">
         {% if show_no_contest and contest is not empty %}
             <a class="dropdown-item" href="{{ path(change_path, {'contestId': -1}) }}">no contest</a>
             <div class="dropdown-divider"></div>

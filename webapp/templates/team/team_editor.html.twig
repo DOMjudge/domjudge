@@ -44,7 +44,7 @@
                 {% if problem_available_contests is not empty %}
                     This problem is now available in the following contests
 
-                    <ul class="list-unstyled ml-4 mt-1 mb-1">
+                    <ul class="list-unstyled ms-4 mt-1 mb-1">
                         {% for contest_problem in problem_available_contests %}
                             {% set contest = contest_problem.contest %}
                             <li>
@@ -102,10 +102,10 @@
         </li>
 
         <!-- Spacer to push the right buttons to the end -->
-        <li class="nav-item ml-auto"></li>
+        <li class="nav-item ms-auto"></li>
 
         <!-- Right side buttons -->
-        <li class="nav-item my-1 mr-2">
+        <li class="nav-item my-1 me-2">
             {{ form_widget(form.save) }}
         </li>
         <li class="nav-item my-1">
