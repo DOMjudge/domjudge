@@ -31,7 +31,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -42,46 +41,29 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
 use Symfony\Component\Yaml\Yaml;
 use ZipArchive;
 
-/**
- * @Route("/jury/problems")
- * @IsGranted("ROLE_JURY")
- */
+#[Route('/jury/problems')]
+#[IsGranted('ROLE_JURY')]
 class ProblemTestcaseGroupController extends BaseController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected KernelInterface $kernel;
-    protected EventLogService $eventLogService;
-    protected SubmissionService $submissionService;
-    protected ImportProblemService $importProblemService;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService        $dj,
-        ConfigurationService   $config,
-        KernelInterface        $kernel,
-        EventLogService        $eventLogService,
-        SubmissionService      $submissionService,
-        ImportProblemService   $importProblemService
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService        $dj,
+        protected ConfigurationService   $config,
+        protected KernelInterface        $kernel,
+        protected EventLogService        $eventLogService,
+        protected SubmissionService      $submissionService,
+        protected ImportProblemService   $importProblemService
     )
     {
-        $this->em = $em;
-        $this->dj = $dj;
-        $this->config = $config;
-        $this->kernel = $kernel;
-        $this->eventLogService = $eventLogService;
-        $this->submissionService = $submissionService;
-        $this->importProblemService = $importProblemService;
     }
 
-    /**
-     * @Route("/{probId<\d+>}/testcase-groups", name="jury_problem_testcase_groups")
-     */
+    #[Route('/{probId<\d+>}/testcase-groups', name: 'jury_problem_testcase_groups')]
     public function indexAction(Request $request, int $probId): Response
     {
         /** @var Problem $problem */
@@ -155,11 +137,12 @@ class ProblemTestcaseGroupController extends BaseController
         return $this->render('jury/problem_testcase_groups.html.twig', $data);
     }
 
-    private function generateTestcaseGroupsTable($testcaseGroups,
-                                                 array $tableFields,
-                                                 bool $allowDeletion,
-                                                 bool $problemIsLocked,
-                                                 int $problemId): array
+    private function generateTestcaseGroupsTable(
+        $testcaseGroups,
+        array $tableFields,
+        bool $allowDeletion,
+        bool $problemIsLocked,
+        int $problemId): array
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $testcaseGroupsTable = [];
@@ -217,10 +200,8 @@ class ProblemTestcaseGroupController extends BaseController
         return $testcaseGroupsTable;
     }
 
-    /**
-     * @Route("/{probId<\d+>}/testcase-groups/{testcaseGroupId<\d+>}/delete", name="jury_problem_testcase_group_delete")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route('/{probId<\d+>}/testcase-groups/{testcaseGroupId<\d+>}/delete', name: 'jury_problem_testcase_group_delete')]
+    #[IsGranted('ROLE_ADMIN')]
     public function deleteAction(Request $request, int $probId, int $testcaseGroupId): Response
     {
         $testcaseGroup = $this->em->getRepository(TestcaseGroup::class)->find($testcaseGroupId);
@@ -236,11 +217,9 @@ class ProblemTestcaseGroupController extends BaseController
             [$testcaseGroup], $this->generateUrl('jury_problem_testcase_groups', ['probId' => $probId]));
     }
 
-    /**
-     * @Route("/{probId<\d+>}/testcase-groups/add", name="jury_problem_testcase_group_add")
-     * @Route("/{probId<\d+>}/testcase-groups/{testcaseGroupId<\d+>}/edit", name="jury_problem_testcase_group_edit")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route('/{probId<\d+>}/testcase-groups/add', name: 'jury_problem_testcase_group_add')]
+    #[Route('/{probId<\d+>}/testcase-groups/{testcaseGroupId<\d+>}/edit', name: 'jury_problem_testcase_group_edit')]
+    #[IsGranted('ROLE_ADMIN')]
     public function addEditAction(Request $request, int $probId, ?int $testcaseGroupId = null): Response
     {
         $editing = $testcaseGroupId !== null;

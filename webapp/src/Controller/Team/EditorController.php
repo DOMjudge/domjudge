@@ -14,64 +14,45 @@ use App\Service\ConfigurationService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\Query\Expr\Join;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Psr\Log\LoggerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Service\DOMJudgeService;
 use App\Controller\BaseController;
 use App\Service\SubmissionService;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Class EditorController
  *
- * @Route("/team/editor")
- * @IsGranted("ROLE_TEAM")
- * @Security("user.getTeam() !== null", message="You do not have a team associated with your account. ")
- *
  * @package App\Controller\Team
  */
+#[Route('/team/editor')]
+#[IsGranted('ROLE_TEAM')]
+#[Security('user.getTeam() !== null')]
 class EditorController extends BaseController
 {
-    protected LoggerInterface $logger;
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected SubmissionService $submissionService;
-    protected ScoreboardService $scoreboardService;
-    protected ConfigurationService $config;
-
     public function __construct(
-        LoggerInterface        $logger,
-        EntityManagerInterface $em,
-        DOMJudgeService        $dj,
-        SubmissionService      $submissionService,
-        ScoreboardService      $scoreboardService,
-        ConfigurationService   $config
+        protected LoggerInterface        $logger,
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService        $dj,
+        protected SubmissionService      $submissionService,
+        protected ScoreboardService      $scoreboardService,
+        protected ConfigurationService   $config
     )
     {
-        $this->logger = $logger;
-        $this->em = $em;
-        $this->dj = $dj;
-        $this->submissionService = $submissionService;
-        $this->scoreboardService = $scoreboardService;
-        $this->config = $config;
     }
 
-    /**
-     * @Route("/{probId<\d+>}/{langId}", name="team_editor")
-     */
+    #[Route('/{probId<\d+>}/{langId}', name: 'team_editor')]
     public function viewAction(Request $request, int $probId, string $langId): Response
     {
         /** @var Problem $problem */
@@ -108,7 +89,7 @@ class EditorController extends BaseController
         $contest = $this->dj->getCurrentContest($team->getTeamid());
 
         if (!$contest->getProblems()
-            ->map(fn (ContestProblem $p) => $p->getProbid())
+            ->map(fn(ContestProblem $p) => $p->getProbid())
             ->contains($problem->getProbid())
         ) {
             $this->addFlash('warning', 'This problem is not part of the current contest');
@@ -133,8 +114,7 @@ class EditorController extends BaseController
                 ->setOriginalSubmission(null);
 
             $attachments = $problem->getAttachments()->filter(
-                fn (ProblemAttachment $attachment) =>
-                    $attachment->getType() === $language->getLangid()
+                fn(ProblemAttachment $attachment) => $attachment->getType() === $language->getLangid()
             );
 
             foreach ($attachments as $rank => $attachment) {
@@ -270,9 +250,7 @@ class EditorController extends BaseController
         ));
     }
 
-    /**
-     * @Route("/status/{submitId<\d+>}", name="team_editor_status")
-     */
+    #[Route('/status/{submitId<\d+>}', name: 'team_editor_status')]
     public function statusAction(Request $request, int $submitId): Response
     {
         $submission = $this->getTeamSubmission($this->dj->getUser()->getTeam(), $submitId);
@@ -315,7 +293,8 @@ class EditorController extends BaseController
         ) : [];
     }
 
-    public function getSubmissionsData(Submission $submission): array {
+    public function getSubmissionsData(Submission $submission): array
+    {
         return [
             'submissions' => [$submission],
             'allowDownload' => (bool)$this->config->get('allow_team_submission_download'),

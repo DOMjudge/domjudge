@@ -3,12 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\BlogPost;
-use App\Entity\Clarification;
-use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
-use App\Utils\Utils;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Setono\EditorJS\Parser\BlockParser\CodeBlockParser;
@@ -19,49 +16,33 @@ use Setono\EditorJS\Parser\BlockParser\ParagraphBlockParser;
 use Setono\EditorJS\Parser\BlockParser\TableBlockParser;
 use Setono\EditorJS\Parser\Parser;
 use Setono\EditorJS\Renderer\BlockRenderer\CodeBlockRenderer;
-use Setono\EditorJS\Renderer\BlockRenderer\DelimiterBlockRenderer;
 use Setono\EditorJS\Renderer\BlockRenderer\HeaderBlockRenderer;
 use Setono\EditorJS\Renderer\BlockRenderer\ImageBlockRenderer;
 use Setono\EditorJS\Renderer\BlockRenderer\ListBlockRenderer;
 use Setono\EditorJS\Renderer\BlockRenderer\ParagraphBlockRenderer;
-use Setono\EditorJS\Renderer\BlockRenderer\RawBlockRenderer;
 use Setono\EditorJS\Renderer\BlockRenderer\TableBlockRenderer;
 use Setono\EditorJS\Renderer\Renderer;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Attribute\Route;
 
-/**
- * @Route("/public/blog")
- */
+#[Route("/public/blog")]
 class BlogController extends BaseController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EventLogService $eventLogService;
-
     private int $postsPerPage;
 
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService        $dj,
-        ConfigurationService   $config,
-        EventLogService        $eventLogService
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService        $dj,
+        protected ConfigurationService   $config,
+        protected EventLogService        $eventLogService
     )
     {
-        $this->em = $em;
-        $this->dj = $dj;
-        $this->config = $config;
-        $this->eventLogService = $eventLogService;
-
         $this->postsPerPage = $this->config->get('blog_posts_per_page');
     }
 
-    /**
-     * @Route("", name="public_blog_list")
-     */
+    #[Route("", name: "public_blog_list")]
     public function listAction(Request $request): Response
     {
         $totalPosts = $this->em->getRepository(BlogPost::class)
@@ -94,9 +75,7 @@ class BlogController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{slug}", name="public_blog_post")
-     */
+    #[Route("/{slug}", name: "public_blog_post")]
     public function viewAction(string $slug): Response
     {
         /** @var BlogPost $blogPost */

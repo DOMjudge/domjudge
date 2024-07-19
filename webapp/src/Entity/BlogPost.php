@@ -9,86 +9,49 @@ use JMS\Serializer\Annotation as Serializer;
 use OpenApi\Annotations as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
-/**
- * Public blog posts sent by the jury
- *
- * @ORM\Entity()
- * @ORM\Table(
- *     name="blog_post",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Public blog posts sent by the jury"},
- *     indexes={
- *         @ORM\Index(name="slug", columns={"slug"}),
- *     },
- *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="slug", columns={"slug"})
- *     })
- * @UniqueEntity("slug")
- */
+#[ORM\Entity]
+#[ORM\Table(
+    name: 'blog_post',
+    options: ['collation' => 'utf8mb4_unicode_ci', 'charset' => 'utf8mb4', 'comment' => 'Public blog posts sent by the jury'],
+    indexes: [new ORM\Index(name: 'slug', columns: ['slug'])],
+    uniqueConstraints: [new ORM\UniqueConstraint(name: 'slug', columns: ['slug'])]
+)]
+#[UniqueEntity('slug')]
 class BlogPost extends BaseApiEntity
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", length=4, name="blogpostid",
-     *     options={"comment"="Blog post ID","unsigned"=true},
-     *     nullable=false)
-     * @Serializer\SerializedName("id")
-     * @Serializer\Type("string")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer', length: 4, name: 'blogpostid', options: ['comment' => 'Blog post ID', 'unsigned' => true], nullable: false)]
+    #[Serializer\SerializedName('id')]
+    #[Serializer\Type('string')]
     protected int $blogpostid;
 
-    /**
-     * @ORM\Column(type="string", name="slug", length=255,
-     *     options={"comment"="Unique slug"},
-     *     nullable=false)
-     * @Serializer\Exclude()
-     */
+    #[ORM\Column(type: 'string', name: 'slug', length: 255, options: ['comment' => 'Unique slug'], nullable: false)]
+    #[Serializer\Exclude]
     private string $slug;
 
-    /**
-     * @ORM\Column(type="datetime", name="publishtime", options={"comment"="Time sent", "unsigned"=true}, nullable=false)
-     * @Serializer\Exclude()
-     */
+    #[ORM\Column(type: 'datetime', name: 'publishtime', options: ['comment' => 'Time sent', 'unsigned' => true], nullable: false)]
+    #[Serializer\Exclude]
     private DateTime $publishtime;
 
-    /**
-     * @ORM\Column(type="string", name="author", length=255,
-     *     options={"comment"="Name of the post author"},
-     *     nullable=true)
-     * @Serializer\Exclude()
-     */
+    #[ORM\Column(type: 'string', name: 'author', length: 255, options: ['comment' => 'Name of the post author'], nullable: true)]
+    #[Serializer\Exclude]
     private ?string $author;
 
-    /**
-     * @ORM\Column(type="string", name="title", length=511,
-     *     options={"comment"="Blog post title"},
-     *     nullable=false)
-     * @Serializer\Exclude()
-     */
+    #[ORM\Column(type: 'string', name: 'title', length: 511, options: ['comment' => 'Blog post title'], nullable: false)]
+    #[Serializer\Exclude]
     private string $title;
 
-    /**
-     * @ORM\Column(type="text", length=4294967295, name="subtitle",
-     *     options={"comment"="Blog post subtitle"},
-     *     nullable=false)
-     * @Serializer\SerializedName("subtitle")
-     */
+    #[ORM\Column(type: 'text', length: 4294967295, name: 'subtitle', options: ['comment' => 'Blog post subtitle'], nullable: false)]
+    #[Serializer\SerializedName('subtitle')]
     private string $subtitle;
 
-    /**
-     * @ORM\Column(type="string", name="thumbnail_file_name", length=255,
-     *     options={"comment"="Thumbnail file name"},
-     *     nullable=false)
-     * @Serializer\Exclude()
-     */
+    #[ORM\Column(type: 'string', name: 'thumbnail_file_name', length: 255, options: ['comment' => 'Thumbnail file name'], nullable: false)]
+    #[Serializer\Exclude]
     private string $thumbnail_file_name;
 
-    /**
-     * @ORM\Column(type="text", length=4294967295, name="body",
-     *     options={"comment"="Blog post text"},
-     *     nullable=false)
-     * @Serializer\SerializedName("text")
-     */
+    #[ORM\Column(type: 'text', length: 4294967295, name: 'body', options: ['comment' => 'Blog post text'], nullable: false)]
+    #[Serializer\SerializedName('text')]
     private string $body;
 
     public function __construct()
@@ -127,17 +90,11 @@ class BlogPost extends BaseApiEntity
         return $this->blogpostid;
     }
 
-    /**
-     * @return DateTime
-     */
     public function getPublishtime(): DateTime
     {
         return $this->publishtime;
     }
 
-    /**
-     * @param DateTime $publishtime
-     */
     public function setPublishtime(DateTime $publishtime): void
     {
         $this->publishtime = $publishtime;

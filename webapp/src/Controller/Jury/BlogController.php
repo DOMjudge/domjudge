@@ -4,13 +4,10 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Entity\BlogPost;
-use App\Entity\Role;
-use App\Entity\User;
 use App\Form\Type\BlogPostType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
-use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -20,14 +17,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\AsciiSlugger;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
-/**
- * @Route("/jury/blog")
- * @IsGranted("ROLE_JURY")
- */
+#[Route(path: '/jury/blog')]
+#[IsGranted('ROLE_JURY')]
 class BlogController extends BaseController
 {
     private const EDITORJS_IMAGE_BASE_URL = '/media/cache/resolve/cache/media/images/';
@@ -57,9 +52,7 @@ class BlogController extends BaseController
         $this->slugger = new AsciiSlugger();
     }
 
-    /**
-     * @Route("", methods={"GET"}, name="jury_blog")
-     */
+    #[Route(path: '', name: 'jury_blog', methods: ['GET'])]
     public function indexAction(): Response
     {
         /** @var BlogPost[] $blogPosts */
@@ -132,10 +125,8 @@ class BlogController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/send/image-upload", methods={"POST"}, name="jury_blog_image_upload")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route(path: '/send/image-upload', name: 'jury_blog_image_upload', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function uploadPostImageAction(Request $request): JsonResponse
     {
         /** @var UploadedFile|null $imageFile */
@@ -165,11 +156,9 @@ class BlogController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/send", methods={"GET", "POST"}, name="jury_blog_post_send")
-     * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="jury_blog_post_edit")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route(path: '/send', name: 'jury_blog_post_send', methods: ['GET', 'POST'])]
+    #[Route(path: '/{id<\d+>}/edit', name: 'jury_blog_post_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function sendBlogPostAction(Request $request, ?int $id = null): Response
     {
         $editing = $id !== null;
@@ -229,10 +218,8 @@ class BlogController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{id<\d+>}/delete", name="jury_blog_post_delete")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route(path: '/{id<\d+>}/delete', name: 'jury_blog_post_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function deleteBlogPostAction(Request $request, int $id): Response
     {
         /** @var BlogPost $blogPost */
