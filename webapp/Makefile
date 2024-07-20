@@ -7,7 +7,9 @@ REC_TARGETS = domserver
 include $(TOPDIR)/Makefile.global
 
 # Subdirectories to recurse into for REC_TARGETS
-SUBDIRS = config vendor
+SUBDIRS = config
+
+domserver: composer-dump-autoload
 
 maintainer-conf: .env.local
 
@@ -17,6 +19,16 @@ maintainer-conf: .env.local
 	@echo "# This file was automatically created by 'make maintainer-conf' to run" > $@
 	@echo "# the DOMjudge Symfony application in developer mode. Adjust as needed." >> $@
 	@echo "APP_ENV=dev" >> $@
+
+# Dump autoload dependencies (including plugins)
+# This is needed since symfony/runtime is a Composer plugin that runs while dumping
+# the autoload file.
+# We skip it if autoload_runtime.php already exists, to avoid running composer
+# as root during `sudo make install-domserver`.
+composer-dump-autoload: vendor/autoload_runtime.php
+
+vendor/autoload_runtime.php:
+	composer $(subst 1,-q,$(QUIET)) dump-autoload -o -a
 
 composer-dump-autoload-dev:
 	composer $(subst 1,-q,$(QUIET)) dump-autoload
@@ -30,6 +42,7 @@ copy-bundle-assets:
 
 clean-l:
 	-rm -rf public/bundles/nelmioapidoc
+	-rm -f vendor/autoload_runtime.php
 
 install-domserver:
 # This must be done first to install with the rest.
@@ -52,7 +65,6 @@ install-domserver:
 	done
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
 
-inplace-install: composer-autoclean
 maintainer-install: composer-dump-autoload-dev
 
 # Install PHP dependencies
@@ -67,10 +79,6 @@ endif
 composer-dependencies-dev:
 	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
 
-composer-autoclean:
-# Make sure we're running from a clean state:
-	composer auto-scripts
-
 maintainer-clean-l:
 	-for d in cache log ; do \
 		for t in dev prod ; do \
@@ -78,4 +86,5 @@ maintainer-clean-l:
 		done ; \
 	done
 
-.PHONY: copy-bundle-assets
+.PHONY: composer-dump-autoload composer-dump-autoload-dev \
+        copy-bundle-assets
