@@ -6,7 +6,7 @@ export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
             docs install-docs inplace-install inplace-uninstall maintainer-conf \
-            composer-dependencies composer-dependencies-dev
+            maintainer-install composer-dependencies composer-dependencies-dev
 
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
@@ -198,7 +198,7 @@ inplace-conf-common: dist
 # Install the system in place: don't really copy stuff, but create
 # symlinks where necessary to let it work from the source tree.
 # This stuff is a hack!
-maintainer-install: inplace-install composer-dump-autoload-dev
+maintainer-install: inplace-install
 inplace-install: build domserver-create-dirs judgehost-create-dirs
 inplace-install-l:
 # Replace libjudgedir with symlink to prevent lots of symlinks:
@@ -316,5 +316,4 @@ clean-autoconf:
         $(addprefix inplace-,conf conf-common install uninstall) \
         $(addprefix maintainer-,conf install) clean-autoconf config distdocs \
         composer-dependencies composer-dependencies-dev \
-        composer-dump-autoload-dev \
         coverity-conf coverity-build
