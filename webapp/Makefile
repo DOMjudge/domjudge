@@ -44,11 +44,11 @@ install-domserver:
 # Now change all relative symlinks in webapp/public to their correct paths
 	for link in $$(find $(DESTDIR)$(domserver_webappdir)/public/$$dir -maxdepth 2 -type l); do \
 		target=$$(readlink $$link) ; \
-		if echo $${target} | grep -q '\.\./vendor' ; then \
+		case $${target} in *../vendor*) \
 			rm $$link ; \
-			realtarget=$(domserver_webappdir)/vendor$$(echo $${target} | sed 's!^.*\.\./vendor!!') ; \
+			realtarget=$(domserver_webappdir)/vendor$${target#*../vendor} ; \
 			ln -s $$realtarget $$link ; \
-		fi \
+		esac \
 	done
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
 
