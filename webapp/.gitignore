@@ -8,7 +8,6 @@
 /var/log/*
 !var/log/.gitkeep
 /vendor/
-!vendor/Makefile
 
 ###> phpunit/phpunit ###
 /phpunit.xml
