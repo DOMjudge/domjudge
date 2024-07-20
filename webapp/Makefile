@@ -26,7 +26,7 @@ copy-bundle-assets:
 # the include paths are broken. We just copy in the data we need
 	-rm -rf public/bundles/nelmioapidoc
 	mkdir -p public/bundles/nelmioapidoc
-	cp -R ../webapp/vendor/nelmio/api-doc-bundle/public/* public/bundles/nelmioapidoc/
+	cp -R vendor/nelmio/api-doc-bundle/public/* public/bundles/nelmioapidoc/
 
 clean-l:
 	-rm -rf public/bundles/nelmioapidoc
@@ -44,9 +44,9 @@ install-domserver:
 # Now change all relative symlinks in webapp/public to their correct paths
 	for link in $$(find $(DESTDIR)$(domserver_webappdir)/public/$$dir -maxdepth 2 -type l); do \
 		target=$$(readlink $$link) ; \
-		if echo $${target} | grep -q '\.\./\.\./webapp/vendor' ; then \
+		if echo $${target} | grep -q '\.\./vendor' ; then \
 			rm $$link ; \
-			realtarget=$(domserver_webappdir)/vendor$$(echo $${target} | sed 's!^.*\.\./\.\./webapp/vendor!!') ; \
+			realtarget=$(domserver_webappdir)/vendor$$(echo $${target} | sed 's!^.*\.\./vendor!!') ; \
 			ln -s $$realtarget $$link ; \
 		fi \
 	done

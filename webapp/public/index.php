@@ -2,7 +2,7 @@
 
 use App\Kernel;
 
-require_once dirname(__DIR__, 2) . '/webapp/vendor/autoload_runtime.php';
+require_once dirname(__DIR__) . '/vendor/autoload_runtime.php';
 require_once dirname(__DIR__) . '/config/load_db_secrets.php';
 
 return function (array $context) {
