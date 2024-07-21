@@ -68,7 +68,7 @@ composer-dependencies-dev:
 	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
 
 composer-autoclean:
-	# Make sure we're running from a clean state:
+# Make sure we're running from a clean state:
 	composer auto-scripts
 
 maintainer-clean-l:
