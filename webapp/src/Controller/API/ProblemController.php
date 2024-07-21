@@ -61,7 +61,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @throws BadRequestHttpException
      * @throws NonUniqueResultException
      */
-    #[IsGranted('ROLE_API_PROBLEM_CHANGE')]
+    #[IsGranted('ROLE_API_PROBLEM_EDITOR')]
     #[Rest\Post('/add-data')]
     #[OA\RequestBody(
         required: true,
@@ -176,7 +176,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @return array{problem_id: string, messages: array<string, string[]>}
      * @throws NonUniqueResultException
      */
-    #[IsGranted('ROLE_API_PROBLEM_CHANGE')]
+    #[IsGranted('ROLE_API_PROBLEM_EDITOR')]
     #[Rest\Post('')]
     #[OA\RequestBody(
         required: true,
@@ -237,7 +237,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     /**
      * Unlink a problem from this contest.
      */
-    #[IsGranted('ROLE_API_PROBLEM_CHANGE')]
+    #[IsGranted('ROLE_API_PROBLEM_EDITOR')]
     #[Rest\Delete('/{id}')]
     #[OA\Response(response: 204, description: 'Problem unlinked from contest succeeded')]
     #[OA\Parameter(ref: '#/components/parameters/id')]
@@ -290,7 +290,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     /**
      * Link an existing problem to this contest.
      */
-    #[IsGranted('ROLE_API_PROBLEM_CHANGE')]
+    #[IsGranted('ROLE_API_PROBLEM_EDITOR')]
     #[Rest\Put('/{id}')]
     #[OA\Response(
         response: 200,

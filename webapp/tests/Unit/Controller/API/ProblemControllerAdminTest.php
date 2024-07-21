@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class ProblemControllerAdminTest extends ProblemControllerTest
 {
     protected ?string $apiUser = 'admin';
-    protected static string $testedRole = 'api_problem_change';
+    protected static string $testedRole = 'api_problem_editor';
 
     protected function setUp(): void
     {

@@ -21,7 +21,7 @@ use Symfony\Component\Yaml\Yaml;
 class ContestControllerAdminTest extends ContestControllerTest
 {
     protected ?string $apiUser = 'admin';
-    protected static string $testedRole = 'api_contest_change';
+    protected static string $testedRole = 'api_contest_editor';
 
     private function parseSortYaml(string $yamlString): array
     {
@@ -326,7 +326,7 @@ EOF;
 
         // Show that this works for both roles
         yield [['id' => 1, 'scoreboard_thaw_time' => '-14 seconds'], 200, 'Demo contest', [], true, true, ['admin']];
-        yield [['id' => 1, 'scoreboard_thaw_time' => '-13 seconds'], 200, 'Demo contest', [], true, true, ['api_contest_change']];
+        yield [['id' => 1, 'scoreboard_thaw_time' => '-13 seconds'], 200, 'Demo contest', [], true, true, ['api_contest_editor']];
     }
 
     /**
