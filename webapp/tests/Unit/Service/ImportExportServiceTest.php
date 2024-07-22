@@ -13,6 +13,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ImportExportService;
 use App\Service\ScoreboardService;
@@ -25,6 +26,7 @@ use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Ramsey\Uuid\Uuid;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -52,72 +54,63 @@ class ImportExportServiceTest extends BaseTestCase
     public function provideImportContestDataErrors(): Generator
     {
         yield [[], 'Error parsing YAML file.'];
-        yield [
-            ['name' => 'Some name'],
-            'Missing fields: one of (start_time, start-time), one of (id, short_name, short-name), duration',
-        ];
-        yield [
-            ['short-name' => 'somename', 'start-time' => '2020-01-01 12:34:56'],
-            'Missing fields: one of (name, formal_name), duration',
-        ];
+        yield [['name' => 'Some name'], 'Missing fields: one of (start_time, start-time), one of (id, short_name, short-name), duration'];
+        yield [['short-name' => 'somename', 'start-time' => '2020-01-01 12:34:56'], 'Missing fields: one of (name, formal_name), duration'];
         yield [
             [
-                'name' => 'Test contest',
+                'name'       => 'Test contest',
                 'short-name' => 'test',
-                'duration' => '5:00:00',
+                'duration'   => '5:00:00',
                 'start-time' => 'Invalid start time here',
             ],
-            'Can not parse start-time',
+            'Can not parse start-time'
         ];
         yield [
             [
-                'name' => 'Test contest',
-                'id' => 'test',
-                'duration' => '5:00:00',
+                'name'       => 'Test contest',
+                'id'         => 'test',
+                'duration'   => '5:00:00',
                 'start_time' => 'Invalid start time here',
             ],
-            'Can not parse start_time',
+            'Can not parse start_time'
         ];
         yield [
             [
-                'name' => 'Test contest',
-                'short-name' => 'test',
-                'duration' => '5:00:00',
-                'start-time' => '2020-01-01T12:34:56+02:00',
+                'name'                     => 'Test contest',
+                'short-name'               => 'test',
+                'duration'                 => '5:00:00',
+                'start-time'               => '2020-01-01T12:34:56+02:00',
                 'scoreboard-freeze-length' => '6:00:00',
             ],
-            'Freeze duration is longer than contest length',
+            'Freeze duration is longer than contest length'
         ];
         yield [
             [
-                'name' => 'Test contest',
-                'id' => 'test',
-                'duration' => '5:00:00',
-                'start_time' => '2020-01-01T12:34:56+02:00',
+                'name'                       => 'Test contest',
+                'id'                         => 'test',
+                'duration'                   => '5:00:00',
+                'start_time'                 => '2020-01-01T12:34:56+02:00',
                 'scoreboard_freeze_duration' => '6:00:00',
             ],
-            'Freeze duration is longer than contest length',
+            'Freeze duration is longer than contest length'
         ];
         yield [
             [
-                'name' => '',
-                'short-name' => '',
-                'duration' => '5:00:00',
-                'start-time' => '2020-01-01T12:34:56+02:00',
+                'name'                     => '',
+                'short-name'               => '',
+                'duration'                 => '5:00:00',
+                'start-time'               => '2020-01-01T12:34:56+02:00',
                 'scoreboard-freeze-length' => '30:00',
             ],
-            "Contest has errors:\n\nname: This value should not be blank.\nshortname: This value should not be blank.",
+            "Contest has errors:\n\nname: This value should not be blank.\nshortname: This value should not be blank."
         ];
     }
 
     /**
      * @dataProvider provideImportContestDataSuccess
      */
-    public function testImportContestDataSuccess(
-        mixed $data,
-        string $expectedShortName,
-        array $expectedProblems = []
-    ): void {
+    public function testImportContestDataSuccess(mixed $data, string $expectedShortName, array $expectedProblems = []): void
+    {
         /** @var ImportExportService $importExportService */
         $importExportService = static::getContainer()->get(ImportExportService::class);
         self::assertTrue($importExportService->importContestData($data, $message, $cid), 'Importing failed: ' . $message);
@@ -146,10 +139,10 @@ class ImportExportServiceTest extends BaseTestCase
         // Simple case
         yield [
             [
-                'name' => 'Some test contest',
-                'short-name' => 'test-contest',
-                'duration' => '5:00:00',
-                'start-time' => '2020-01-01T12:34:56+02:00',
+                'name'                     => 'Some test contest',
+                'short-name'               => 'test-contest',
+                'duration'                 => '5:00:00',
+                'start-time'               => '2020-01-01T12:34:56+02:00',
                 'scoreboard-freeze-length' => '1:00:00',
             ],
             'test-contest',
@@ -159,10 +152,10 @@ class ImportExportServiceTest extends BaseTestCase
         // - Use DateTime object for start time
         yield [
             [
-                'name' => 'Some test contest',
-                'short-name' => 'test-contest $-@ test',
-                'duration' => '5:00:00',
-                'start-time' => new DateTime('2020-01-01T12:34:56+02:00'),
+                'name'                     => 'Some test contest',
+                'short-name'               => 'test-contest $-@ test',
+                'duration'                 => '5:00:00',
+                'start-time'               => new DateTime('2020-01-01T12:34:56+02:00'),
                 'scoreboard-freeze-length' => '30:00',
             ],
             'test-contest__-__test',
@@ -170,30 +163,30 @@ class ImportExportServiceTest extends BaseTestCase
         // Real life example from NWERC 2020 practice session, including problems.
         yield [
             [
-                'duration' => '2:00:00',
-                'name' => 'NWERC 2020 Practice Session',
-                'penalty-time' => '20',
+                'duration'                 => '2:00:00',
+                'name'                     => 'NWERC 2020 Practice Session',
+                'penalty-time'             => '20',
                 'scoreboard-freeze-length' => '30:00',
-                'short-name' => 'practice',
-                'start-time' => '2021-03-27 09:00:00+00:00',
-                'public' => true,
-                'problems' => [
+                'short-name'               => 'practice',
+                'start-time'               => '2021-03-27 09:00:00+00:00',
+                'public'                   => true,
+                'problems'                 => [
                     [
-                        'color' => '#FE9DAF',
-                        'letter' => 'A',
-                        'rgb' => '#FE9DAF',
+                        'color'      => '#FE9DAF',
+                        'letter'     => 'A',
+                        'rgb'        => '#FE9DAF',
                         'short-name' => 'anothereruption',
                     ],
                     [
-                        'color' => '#008100',
-                        'letter' => 'B',
-                        'rgb' => '#008100',
+                        'color'      => '#008100',
+                        'letter'     => 'B',
+                        'rgb'        => '#008100',
                         'short-name' => 'brokengears',
                     ],
                     [
-                        'color' => '#FF7109',
-                        'letter' => 'C',
-                        'rgb' => '#FF7109',
+                        'color'      => '#FF7109',
+                        'letter'     => 'C',
+                        'rgb'        => '#FF7109',
                         'short-name' => 'cheating',
                     ],
                 ],
@@ -205,12 +198,12 @@ class ImportExportServiceTest extends BaseTestCase
         // JSON (API) format:
         yield [
             [
-                'name' => 'Some test contest',
-                'id' => 'test-contest',
-                'duration' => '5:00:00',
-                'start_time' => '2020-01-01T12:34:56+02:00',
+                'name'                       => 'Some test contest',
+                'id'                         => 'test-contest',
+                'duration'                   => '5:00:00',
+                'start_time'                 => '2020-01-01T12:34:56+02:00',
                 'scoreboard_freeze_duration' => '1:00:00',
-                'public' => false,
+                'public'                     => false,
             ],
             'test-contest',
         ];
@@ -223,10 +216,10 @@ class ImportExportServiceTest extends BaseTestCase
     {
         // First create a new contest by import it
         $contestData = [
-            'name' => 'Some test contest',
-            'id' => 'test-contest',
-            'duration' => '5:00:00',
-            'start_time' => '2020-01-01T12:34:56+02:00',
+            'name'                       => 'Some test contest',
+            'id'                         => 'test-contest',
+            'duration'                   => '5:00:00',
+            'start_time'                 => '2020-01-01T12:34:56+02:00',
             'scoreboard_freeze_duration' => '1:00:00',
         ];
         /** @var ImportExportService $importExportService */
@@ -244,10 +237,10 @@ class ImportExportServiceTest extends BaseTestCase
         /** @var ContestProblem $problem */
         foreach ($contest->getProblems() as $problem) {
             $problems[$problem->getShortname()] = [
-                'name' => $problem->getProblem()->getName(),
+                'name'       => $problem->getProblem()->getName(),
                 'externalid' => $problem->getProblem()->getExternalid(),
-                'timelimit' => $problem->getProblem()->getTimelimit(),
-                'color' => $problem->getColor(),
+                'timelimit'  => $problem->getProblem()->getTimelimit(),
+                'color'      => $problem->getColor(),
             ];
         }
 
@@ -259,93 +252,93 @@ class ImportExportServiceTest extends BaseTestCase
         yield [
             [
                 [
-                    'color' => '#FE9DAF',
-                    'letter' => 'A',
-                    'rgb' => '#FE9DAF',
+                    'color'      => '#FE9DAF',
+                    'letter'     => 'A',
+                    'rgb'        => '#FE9DAF',
                     'short-name' => 'anothereruption',
                 ],
                 [
-                    'color' => '#008100',
-                    'letter' => 'B',
-                    'rgb' => '#008100',
+                    'color'      => '#008100',
+                    'letter'     => 'B',
+                    'rgb'        => '#008100',
                     'short-name' => 'brokengears',
                 ],
                 [
-                    'color' => '#FF7109',
-                    'letter' => 'C',
-                    'rgb' => '#FF7109',
+                    'color'      => '#FF7109',
+                    'letter'     => 'C',
+                    'rgb'        => '#FF7109',
                     'short-name' => 'cheating',
                 ],
             ],
             [
                 'A' => [
-                    'name' => 'anothereruption',
+                    'name'       => 'anothereruption',
                     'externalid' => 'anothereruption',
-                    'timelimit' => 10,
-                    'color' => '#FE9DAF',
+                    'timelimit'  => 10,
+                    'color'      => '#FE9DAF',
                 ],
                 'B' => [
-                    'name' => 'brokengears',
+                    'name'       => 'brokengears',
                     'externalid' => 'brokengears',
-                    'timelimit' => 10,
-                    'color' => '#008100',
+                    'timelimit'  => 10,
+                    'color'      => '#008100',
                 ],
                 'C' => [
-                    'name' => 'cheating',
+                    'name'       => 'cheating',
                     'externalid' => 'cheating',
-                    'timelimit' => 10,
-                    'color' => '#FF7109',
+                    'timelimit'  => 10,
+                    'color'      => '#FF7109',
                 ],
             ],
         ];
         yield [
             [
                 [
-                    'ordinal' => 0,
-                    'id' => 'accesspoints',
-                    'label' => 'A',
+                    'ordinal'    => 0,
+                    'id'         => 'accesspoints',
+                    'label'      => 'A',
                     'time_limit' => 2,
-                    'name' => 'Access Points',
-                    'rgb' => '#FF0000',
-                    'color' => 'red',
+                    'name'       => 'Access Points',
+                    'rgb'        => '#FF0000',
+                    'color'      => 'red'
                 ],
                 [
-                    'ordinal' => 1,
-                    'id' => 'brexitnegotiations',
-                    'label' => 'B',
+                    'ordinal'    => 1,
+                    'id'         => 'brexitnegotiations',
+                    'label'      => 'B',
                     'time_limit' => 6,
-                    'name' => 'Brexit Negotiations',
-                    'rgb' => '#0422D8',
-                    'color' => 'mediumblue',
+                    'name'       => 'Brexit Negotiations',
+                    'rgb'        => '#0422D8',
+                    'color'      => 'mediumblue'
                 ],
                 [
-                    'ordinal' => 2,
-                    'id' => 'circuitdesign',
-                    'label' => 'C',
+                    'ordinal'    => 2,
+                    'id'         => 'circuitdesign',
+                    'label'      => 'C',
                     'time_limit' => 6,
-                    'name' => 'Circuit Board Design',
-                    'rgb' => '#008100',
-                    'color' => 'green',
+                    'name'       => 'Circuit Board Design',
+                    'rgb'        => '#008100',
+                    'color'      => 'green'
                 ],
             ],
             [
                 'A' => [
-                    'name' => 'Access Points',
+                    'name'       => 'Access Points',
                     'externalid' => 'accesspoints',
-                    'timelimit' => 2,
-                    'color' => '#FF0000',
+                    'timelimit'  => 2,
+                    'color'      => '#FF0000',
                 ],
                 'B' => [
-                    'name' => 'Brexit Negotiations',
+                    'name'       => 'Brexit Negotiations',
                     'externalid' => 'brexitnegotiations',
-                    'timelimit' => 6,
-                    'color' => '#0422D8',
+                    'timelimit'  => 6,
+                    'color'      => '#0422D8',
                 ],
                 'C' => [
-                    'name' => 'Circuit Board Design',
+                    'name'       => 'Circuit Board Design',
                     'externalid' => 'circuitdesign',
-                    'timelimit' => 6,
-                    'color' => '#008100',
+                    'timelimit'  => 6,
+                    'color'      => '#008100',
                 ],
             ],
         ];
@@ -353,10 +346,7 @@ class ImportExportServiceTest extends BaseTestCase
 
     public function testImportAccountsTsvSuccess(): void
     {
-        $this->loadFixtures([
-            TeamWithExternalIdEqualsOneFixture::class,
-            TeamWithExternalIdEqualsTwoFixture::class,
-        ]);
+        $this->loadFixtures([TeamWithExternalIdEqualsOneFixture::class, TeamWithExternalIdEqualsTwoFixture::class]);
 
         // We test all account types twice:
         // - Team without postfix
@@ -573,7 +563,7 @@ EOF;
                 ],
             ],
             [
-                'roles' => ['admin', 'team'],
+                'roles' => ['admin','team'],
                 'name' => 'Some admin',
                 'username' => 'adminx',
                 'password' => 'password7',
@@ -584,7 +574,7 @@ EOF;
                 ],
             ],
             [
-                'roles' => ['admin', 'team'],
+                'roles' => ['admin','team'],
                 'name' => 'Another admin',
                 'username' => 'adminy',
                 'password' => 'password8',
@@ -608,28 +598,24 @@ EOF;
             ],
         ];
         if ($forTsv) {
-            $expectedUsers = [
-                ...$expectedUsers,
-                [
-                    'roles' => ['team'],
-                    'name' => 'Team 2 user a',
-                    'username' => 'team02a',
-                    'password' => 'password3',
-                    'ip' => '5.6.7.8',
-                    'team' => [
-                        'id' => 2,
-                    ],
+            $expectedUsers = [...$expectedUsers, [
+                'roles' => ['team'],
+                'name' => 'Team 2 user a',
+                'username' => 'team02a',
+                'password' => 'password3',
+                'ip' => '5.6.7.8',
+                'team' => [
+                    'id' => 2,
                 ],
-                [
-                    'roles' => ['team'],
-                    'name' => 'Team 2 user b',
-                    'username' => 'team02b',
-                    'password' => 'password4',
-                    'team' => [
-                        'id' => 2,
-                    ],
+            ], [
+                'roles' => ['team'],
+                'name' => 'Team 2 user b',
+                'username' => 'team02b',
+                'password' => 'password4',
+                'team' => [
+                    'id' => 2,
                 ],
-            ];
+            ]];
         }
         $unexpectedUsers = ['analyst1', 'analyst2'];
 
@@ -707,8 +693,7 @@ EOF;
                     'name' => 'Lund University',
                     'country' => 'SWE',
                 ],
-            ],
-            [
+            ], [
                 'externalid' => '12',
                 'icpcid' => '447837',
                 'label' => null,
@@ -798,8 +783,7 @@ EOF;
                 'affiliation' => [
                     'externalid' => 'INST-42',
                 ],
-            ],
-            [
+            ], [
                 'externalid' => '12',
                 'icpcid' => '447837',
                 'label' => null,
@@ -811,8 +795,7 @@ EOF;
                 'affiliation' => [
                     'externalid' => 'INST-43',
                 ],
-            ],
-            [
+            ], [
                 'externalid' => '13',
                 'icpcid' => '123456',
                 'label' => '0',
@@ -944,13 +927,11 @@ EOF;
                 'externalid' => '13337',
                 'name' => 'Companies',
                 'visible' => true,
-            ],
-            [
+            ], [
                 'externalid' => '47',
                 'name' => 'Participants',
                 'visible' => true,
-            ],
-            [
+            ], [
                 'externalid' => '23',
                 'name' => 'Spectators',
                 'visible' => true,
@@ -1004,13 +985,11 @@ EOF;
                 'name' => 'Companies',
                 'icpcid' => '123',
                 'visible' => false,
-            ],
-            [
+            ], [
                 'externalid' => '47',
                 'name' => 'Participants',
                 'visible' => true,
-            ],
-            [
+            ], [
                 'externalid' => '23',
                 'name' => 'Spectators',
                 'visible' => true,
@@ -1102,8 +1081,7 @@ EOF;
                 'shortname' => 'LU',
                 'name' => 'Lund University',
                 'country' => 'SWE',
-            ],
-            [
+            ], [
                 'externalid' => 'INST-43',
                 'icpcid' => '43',
                 'shortname' => 'FAU',
@@ -1468,7 +1446,6 @@ EOF;
             });
             $expectedResults = array_values($expectedResults);
         }
-
 
         self::assertEquals($expectedResults, $results);
     }
