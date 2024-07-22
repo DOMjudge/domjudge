@@ -455,8 +455,6 @@ class ImportExportService
     }
 
     /**
-     * Get results data for the given sortorder.
-     *
      * @return ResultRow[]
      */
     public function getResultsData(int $sortOrder, bool $full = false): array
@@ -550,9 +548,10 @@ class ImportExportService
                 $rank        = null;
             }
 
-            $groupWinner = null;
             $categoryId  = $teamScore->team->getCategory()->getCategoryid();
-            if (!isset($groupWinners[$categoryId])) {
+            if (isset($groupWinners[$categoryId])) {
+                $groupWinner = null;
+            } else {
                 $groupWinners[$categoryId] = true;
                 $groupWinner               = $teamScore->team->getCategory()->getName();
             }
