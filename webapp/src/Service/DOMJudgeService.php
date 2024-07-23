@@ -419,7 +419,7 @@ class DOMJudgeService
             }
         }
 
-        if ($this->checkrole('balloon')) {
+        if ($this->checkrole('balloon') && $contest) {
             $balloonsQuery = $this->em->createQueryBuilder()
                 ->select('b.balloonid', 't.name', 't.location', 'p.name AS pname')
                 ->from(Balloon::class, 'b')
