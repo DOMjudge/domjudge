@@ -24,6 +24,14 @@ table tr a {
     color: inherit;
 }
 </style>
+<script>
+$(function() {
+    $('[data-bs-toggle="popover"]').popover({
+      trigger: 'hover',
+      html: true
+    })
+})
+</script>
 {% endblock %}
 
 {% block content %}
