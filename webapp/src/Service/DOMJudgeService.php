@@ -421,16 +421,16 @@ class DOMJudgeService
 
         if ($this->checkrole('balloon')) {
             $balloonsQuery = $this->em->createQueryBuilder()
-            ->select('b.balloonid', 't.name', 't.location', 'p.name AS pname')
-            ->from(Balloon::class, 'b')
-            ->leftJoin('b.submission', 's')
-            ->leftJoin('s.problem', 'p')
-            ->leftJoin('s.contest', 'co')
-            ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
-            ->leftJoin('s.team', 't')
-            ->andWhere('co.cid = :cid')
-            ->andWhere('b.done = 0')
-            ->setParameter('cid', $contest->getCid());
+                ->select('b.balloonid', 't.name', 't.location', 'p.name AS pname')
+                ->from(Balloon::class, 'b')
+                ->leftJoin('b.submission', 's')
+                ->leftJoin('s.problem', 'p')
+                ->leftJoin('s.contest', 'co')
+                ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
+                ->leftJoin('s.team', 't')
+                ->andWhere('co.cid = :cid')
+                ->andWhere('b.done = 0')
+                ->setParameter('cid', $contest->getCid());
 
             $freezetime = $contest->getFreezeTime();
             if ($freezetime !== null && !(bool)$this->config->get('show_balloons_postfreeze')) {
