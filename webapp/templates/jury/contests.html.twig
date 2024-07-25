@@ -23,6 +23,7 @@
                         {% if contest.locked %}
                             <i class="fas fa-lock"></i>
                         {% endif %}
+                        <a class="fa-regular fa-folder-open" style="float: right; color: black" href={{ path('jury_contest', {'contestId': contest.cid}) }}></a>
                     </div>
                     <div class="card-body">
                         {% if not contest.starttimeEnabled and contest.finalizetime is not empty %}
