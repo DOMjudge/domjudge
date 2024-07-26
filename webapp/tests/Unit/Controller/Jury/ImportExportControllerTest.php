@@ -23,10 +23,6 @@ class ImportExportControllerTest extends BaseTestCase
             self::assertSelectorExists(sprintf('h2:contains("%s")', $section));
         }
         self::assertSelectorExists('div.help-text:contains(\'Create a "Web Services Token"\')');
-
-        // We've reached the end of the page.
-        self::assertSelectorExists('li:contains("wf_results.tsv")');
-        self::assertSelectorExists('li:contains("full_results.tsv")');
     }
 
     /**
@@ -40,18 +36,6 @@ class ImportExportControllerTest extends BaseTestCase
 
         self::assertSelectorExists(sprintf('select#problem_upload_contest > option:contains("%s")', $contest));
         self::assertSelectorExists(sprintf('select#contest_export_contest > option:contains("%s")', $contest));
-    }
-
-    /**
-     * Test that the expected dynamic items on the index page are present.
-     *
-     * @dataProvider provideSortOrders
-     */
-    public function testIndexGeneratedItems(string $sortOrder): void
-    {
-        $this->verifyPageResponse('GET', '/jury/import-export', 200);
-
-        self::assertSelectorExists(sprintf('li:contains("for sort order %s")', $sortOrder));
     }
 
     public function provideContests(): Generator
@@ -154,16 +138,6 @@ HEREDOC;
         yield ['a:contains("teams.tsv")', 'teams	1
 exteam	exteam	participants	Example teamname	Utrecht University	UU	NLD	utrecht
 '];
-        yield ['li:contains("wf_results.tsv") a:contains("for sort order 0")', 'results	1
-exteam	1	Gold Medal	0	0	0	Participants
-'];
-        yield ['li:contains("wf_results.tsv") a:contains("for sort order 1")', 'results	1
-'];
-        yield ['li:contains("full_results.tsv") a:contains("for sort order 0")', 'results	1
-exteam	1	Gold Medal	0	0	0	Participants
-'];
-        yield ['li:contains("full_results.tsv") a:contains("for sort order 1")', 'results	1
-'];
         yield ['a:contains("groups.tsv")', 'groups	1
 self-registered	Self-Registered
 participants	Participants
@@ -188,30 +162,81 @@ observers	Observers
     }
 
     /**
-     * Test export of wf_results.html.
+     * Test export of results.html
+     *
+     * @dataProvider provideResultsHtmlExport
      */
-    public function testWfResultsHtmlExport(): void
+    public function testResultsHtmlExport(bool $individuallyRanked, bool $honors, string $format): void
     {
         $this->loadFixture(ClarificationFixture::class);
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
-        $link = $this->getCurrentCrawler()->filter('li:contains("wf_results.html") a:contains("for sort order 0")')->link();
-        $this->client->click($link);
+        $this->client->submitForm('export_results_export', [
+            'export_results[sortorder]' => 0,
+            'export_results[individually_ranked]' => (int)$individuallyRanked,
+            'export_results[honors]' => (int)$honors,
+            'export_results[format]' => $format,
+        ]);
         self::assertSelectorExists('h1:contains("Results for Demo contest")');
         self::assertSelectorExists('th:contains("Example teamname")');
         self::assertSelectorExists('th:contains("A: Hello World")');
     }
 
-    /**
-     * Test export of full_results.html.
-     */
-    public function testFullResultsHtmlExport(): void
+    public function provideResultsHtmlExport(): Generator
     {
+        yield [true, true, 'html_inline'];
+        yield [true, false, 'html_inline'];
+        yield [false, true, 'html_inline'];
+        yield [false, true, 'html_inline'];
+        yield [true, true, 'html_download'];
+        yield [true, false, 'html_download'];
+        yield [false, true, 'html_download'];
+        yield [false, true, 'html_download'];
+    }
+
+    /**
+     * Test export of results.tsv
+     *
+     * @dataProvider provideResultsTsvExport
+     */
+    public function testResultsTsvExport(
+        int $sortOrder,
+        bool $individuallyRanked,
+        bool $honors,
+        string $expectedData
+    ): void {
         $this->loadFixture(ClarificationFixture::class);
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
-        $link = $this->getCurrentCrawler()->filter('li:contains("full_results.html") a:contains("for sort order 0")')->link();
-        $this->client->click($link);
-        self::assertSelectorExists('h1:contains("Results for Demo contest")');
-        self::assertSelectorExists('th:contains("Example teamname")');
-        self::assertSelectorExists('th:contains("A: Hello World")');
+        $this->client->submitForm('export_results_export', [
+            'export_results[sortorder]' => $sortOrder,
+            'export_results[individually_ranked]' => (int)$individuallyRanked,
+            'export_results[honors]' => (int)$honors,
+            'export_results[format]' => 'tsv',
+        ]);
+
+        static::assertEquals($expectedData, $this->client->getInternalResponse()->getContent());
+    }
+
+    public function provideResultsTsvExport(): Generator
+    {
+        yield [0, true, true, 'results	1
+exteam	1	Gold Medal	0	0	0	Participants
+'];
+        yield [0, true, false, 'results	1
+exteam	1	Gold Medal	0	0	0	Participants
+'];
+        yield [0, false, true, 'results	1
+exteam	1	Gold Medal	0	0	0	Participants
+'];
+        yield [0, false, true, 'results	1
+exteam	1	Gold Medal	0	0	0	Participants
+'];
+        yield [1, true, true, 'results	1
+'];
+        yield [1, true, false, 'results	1
+'];
+        yield [1, false, true, 'results	1
+'];
+        yield [1, false, true, 'results	1
+'];
     }
 }

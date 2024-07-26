@@ -27,9 +27,15 @@
         </tbody>
     </table>
 
-    {% for award in ['Highest Honors', 'High Honors', 'Honors'] %}
+    {% for award in ['Ranked', 'Highest Honors', 'High Honors', 'Honors'] %}
         {% if ranked[award] is defined %}
-            <h2>{{ award }}</h2>
+            <h2>
+                {% if award == 'Ranked' %}
+                    Other ranked teams
+                {% else %}
+                    {{ award }}
+                {% endif %}
+            </h2>
             <table class="table">
                 <thead>
                 <tr>

@@ -457,8 +457,11 @@ class ImportExportService
     /**
      * @return ResultRow[]
      */
-    public function getResultsData(int $sortOrder, bool $full = false): array
-    {
+    public function getResultsData(
+        int $sortOrder,
+        bool $individuallyRanked = false,
+        bool $honors = true,
+    ): array {
         $contest = $this->dj->getCurrentContest();
         if ($contest === null) {
             throw new BadRequestHttpException('No current contest');
@@ -530,18 +533,22 @@ class ImportExportService
                 $lowestMedalPoints = $teamScore->numPoints;
             } elseif ($numPoints >= $median) {
                 // Teams with equally solved number of problems get the same rank unless $full is true.
-                if (!$full) {
+                if (!$individuallyRanked) {
                     if (!isset($ranks[$numPoints])) {
                         $ranks[$numPoints] = $rank;
                     }
                     $rank = $ranks[$numPoints];
                 }
-                if ($numPoints === $lowestMedalPoints) {
-                    $awardString = 'Highest Honors';
-                } elseif ($numPoints === $lowestMedalPoints - 1) {
-                    $awardString = 'High Honors';
+                if ($honors) {
+                    if ($numPoints === $lowestMedalPoints) {
+                        $awardString = 'Highest Honors';
+                    } elseif ($numPoints === $lowestMedalPoints - 1) {
+                        $awardString = 'High Honors';
+                    } else {
+                        $awardString = 'Honors';
+                    }
                 } else {
-                    $awardString = 'Honors';
+                    $awardString = 'Ranked';
                 }
             } else {
                 $awardString = 'Honorable';
