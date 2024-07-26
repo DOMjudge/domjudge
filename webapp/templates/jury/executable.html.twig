@@ -135,8 +135,8 @@
                 {{ form_widget(form) }}
             </div>
         </div>
-        {{ form_end(form) }}
     {% endif %}
+    {{ form_end(form) }}
 
     {% if is_granted('ROLE_ADMIN') %}
         <hr>
