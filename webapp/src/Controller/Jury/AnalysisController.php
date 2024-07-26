@@ -10,6 +10,7 @@ use App\Service\DOMJudgeService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -99,6 +100,7 @@ class AnalysisController extends AbstractController
 
     #[Route(path: '/problem/{probid}', name: 'analysis_problem')]
     public function problemAction(
+        #[MapEntity(id: 'probid')]
         Problem $problem,
         #[MapQueryParameter]
         ?string $view = null
