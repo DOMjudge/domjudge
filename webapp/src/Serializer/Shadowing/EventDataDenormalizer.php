@@ -28,7 +28,7 @@ class EventDataDenormalizer implements DenormalizerInterface, SerializerAwareInt
         string $type,
         ?string $format = null,
         array $context = []
-    ) {
+    ): mixed {
         if (!$this->supportsDenormalization($data, $type, $format, $context)) {
             throw new InvalidArgumentException('Unsupported data.');
         }
