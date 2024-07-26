@@ -1167,7 +1167,7 @@ EOF;
     /**
      * @dataProvider provideGetResultsData
      */
-    public function testGetResultsData(bool $full, string $expectedResultsFile): void
+    public function testGetResultsData(bool $full, bool $honors, string $expectedResultsFile): void
     {
         // Set up some results we can test with
         // This data is based on the ICPC World Finals 47
@@ -1236,47 +1236,41 @@ EOF;
         $submissionInsertQuery = $em->getConnection()->prepare('INSERT INTO submission (teamid, cid, probid, langid, submittime) VALUES (:teamid, :cid, :probid, :langid, :submittime)');
         $judgingInsertQuery = $em->getConnection()->prepare('INSERT INTO judging (uuid, submitid, result) VALUES (:uuid, :submitid, :result)');
 
+        $submissionInsertQuery->bindValue('cid', $contest->getCid());
+        $submissionInsertQuery->bindValue('langid', $cpp->getLangid());
+
         $scoreboardData = json_decode(file_get_contents(__DIR__ . '/../Fixtures/sample-scoreboard.json'), true);
         foreach ($scoreboardData['rows'] as $scoreboardRow) {
             $team = $teamsById[$scoreboardRow['team_id']];
+            $submissionInsertQuery->bindValue('teamid', $team->getTeamid());
             foreach ($scoreboardRow['problems'] as $problemData) {
                 if ($problemData['solved']) {
                     $contestProblem = $contestProblemsById[$problemData['problem_id']];
                     // Add fake submission for this problem. First add wrong ones
                     for ($i = 0; $i < $problemData['num_judged'] - 1; $i++) {
-                        $submissionInsertQuery->executeQuery([
-                            'teamid' => $team->getTeamid(),
-                            'cid' => $contest->getCid(),
-                            'probid' => $contestProblem->getProbid(),
-                            'langid' => $cpp->getLangid(),
-                            'submittime' => $startTime
-                                ->add(new DateInterval('PT' . $problemData['time'] . 'M'))
-                                ->sub(new DateInterval('PT1M'))
-                                ->getTimestamp(),
-                        ]);
+                        $submissionInsertQuery->bindValue('probid', $contestProblem->getProbid());
+                        $submissionInsertQuery->bindValue('submittime', $startTime
+                            ->add(new DateInterval('PT' . $problemData['time'] . 'M'))
+                            ->sub(new DateInterval('PT1M'))
+                            ->getTimestamp());
+                        $submissionInsertQuery->executeQuery();
                         $submitId = $em->getConnection()->lastInsertId();
-                        $judgingInsertQuery->executeQuery([
-                            'uuid' => Uuid::uuid4()->toString(),
-                            'submitid' => $submitId,
-                            'result' => 'wrong-awnser',
-                        ]);
+                        $judgingInsertQuery->bindValue('uuid', Uuid::uuid4()->toString());
+                        $judgingInsertQuery->bindValue('submitid', $submitId);
+                        $judgingInsertQuery->bindValue('result', 'wrong-awnser');
+                        $judgingInsertQuery->executeQuery();
                     }
                     // Add correct submission
-                    $submissionInsertQuery->executeQuery([
-                        'teamid' => $team->getTeamid(),
-                        'cid' => $contest->getCid(),
-                        'probid' => $contestProblem->getProbid(),
-                        'langid' => $cpp->getLangid(),
-                        'submittime' => $startTime
-                            ->add(new DateInterval('PT' . $problemData['time'] . 'M'))
-                            ->getTimestamp(),
-                    ]);
+                    $submissionInsertQuery->bindValue('probid', $contestProblem->getProbid());
+                    $submissionInsertQuery->bindValue('submittime', $startTime
+                        ->add(new DateInterval('PT' . $problemData['time'] . 'M'))
+                        ->getTimestamp());
+                    $submissionInsertQuery->executeQuery();
                     $submitId = $em->getConnection()->lastInsertId();
-                    $judgingInsertQuery->executeQuery([
-                        'uuid' => Uuid::uuid4()->toString(),
-                        'submitid' => $submitId,
-                        'result' => 'correct',
-                    ]);
+                    $judgingInsertQuery->bindValue('uuid', Uuid::uuid4()->toString());
+                    $judgingInsertQuery->bindValue('submitid', $submitId);
+                    $judgingInsertQuery->bindValue('result', 'correct');
+                    $judgingInsertQuery->executeQuery();
                 }
             }
         }
@@ -1294,7 +1288,7 @@ EOF;
         $request->cookies->set('domjudge_cid', (string)$contest->getCid());
         $requestStack->push($request);
 
-        $results = $importExportService->getResultsData(37, $full);
+        $results = $importExportService->getResultsData(37, $full, $honors);
 
         $resultsContents = file_get_contents(__DIR__ . '/../Fixtures/' . $expectedResultsFile);
         $resultsContents = substr($resultsContents, strpos($resultsContents, "\n") + 1);
@@ -1312,7 +1306,9 @@ EOF;
 
     public function provideGetResultsData(): Generator
     {
-        yield [true, 'results-full.tsv'];
-        yield [false, 'results-wf.tsv'];
+        yield [true, true, 'results-full-honors.tsv'];
+        yield [false, true, 'results-wf-honors.tsv'];
+        yield [true, false, 'results-full-ranked.tsv'];
+        yield [false, false, 'results-wf-ranked.tsv'];
     }
 }

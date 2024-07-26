@@ -11,6 +11,7 @@ use App\Entity\Problem;
 use App\Entity\TeamCategory;
 use App\Form\Type\ContestExportType;
 use App\Form\Type\ContestImportType;
+use App\Form\Type\ExportResultsType;
 use App\Form\Type\ICPCCmsType;
 use App\Form\Type\JsonImportType;
 use App\Form\Type\ProblemsImportType;
@@ -46,6 +47,7 @@ use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Twig\Environment;
 
 #[Route(path: '/jury/import-export')]
 #[IsGranted('ROLE_JURY')]
@@ -63,6 +65,7 @@ class ImportExportController extends BaseController
         KernelInterface $kernel,
         #[Autowire('%domjudge.version%')]
         protected readonly string $domjudgeVersion,
+        protected readonly Environment $twig,
     ) {
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
@@ -257,21 +260,73 @@ class ImportExportController extends BaseController
             return $this->redirectToRoute('jury_import_export');
         }
 
-        /** @var TeamCategory[] $teamCategories */
-        $teamCategories = $this->em->createQueryBuilder()
-            ->from(TeamCategory::class, 'c', 'c.categoryid')
-            ->select('c.sortorder, c.name')
-            ->where('c.visible = 1')
-            ->orderBy('c.sortorder')
-            ->getQuery()
-            ->getResult();
-        $sortOrders = [];
-        foreach ($teamCategories as $teamCategory) {
-            $sortOrder = $teamCategory['sortorder'];
-            if (!array_key_exists($sortOrder, $sortOrders)) {
-                $sortOrders[$sortOrder] = [];
+        $exportResultsForm = $this->createForm(ExportResultsType::class);
+
+        $exportResultsForm->handleRequest($request);
+
+        if ($exportResultsForm->isSubmitted() && $exportResultsForm->isValid()) {
+            $contest = $this->dj->getCurrentContest();
+            if ($contest === null) {
+                throw new BadRequestHttpException('No current contest');
             }
-            $sortOrders[$sortOrder][] = $teamCategory['name'];
+
+            $data = $exportResultsForm->getData();
+            $format = $data['format'];
+            $sortOrder = $data['sortorder'];
+            $individuallyRanked = $data['individually_ranked'];
+            $honors = $data['honors'];
+
+            $extension = match ($format) {
+                'html_inline', 'html_download' => 'html',
+                'tsv' => 'tsv',
+                default => throw new BadRequestHttpException('Invalid format'),
+            };
+            $contentType = match ($format) {
+                'html_inline' => 'text/html',
+                'html_download' => 'text/html',
+                'tsv' => 'text/csv',
+                default => throw new BadRequestHttpException('Invalid format'),
+            };
+            $contentDisposition = match ($format) {
+                'html_inline' => 'inline',
+                'html_download', 'tsv' => 'attachment',
+                default => throw new BadRequestHttpException('Invalid format'),
+            };
+            $filename = 'results.' . $extension;
+
+            $response = new StreamedResponse();
+            $response->setCallback(function () use (
+                $format,
+                $sortOrder,
+                $individuallyRanked,
+                $honors
+            ) {
+                if ($format === 'tsv') {
+                    $data = $this->importExportService->getResultsData(
+                        $sortOrder->sort_order,
+                        $individuallyRanked,
+                        $honors,
+                    );
+
+                    echo "results\t1\n";
+                    foreach ($data as $row) {
+                        echo implode("\t", array_map(fn($field) => Utils::toTsvField((string)$field), $row->toArray())) . "\n";
+                    }
+                } else {
+                    echo $this->getResultsHtml(
+                        $sortOrder->sort_order,
+                        $individuallyRanked,
+                        $honors,
+                    );
+                }
+            });
+            $response->headers->set('Content-Type', $contentType);
+            $response->headers->set('Content-Disposition', "$contentDisposition; filename=\"$filename\"");
+            $response->headers->set('Content-Transfer-Encoding', 'binary');
+            $response->headers->set('Connection', 'Keep-Alive');
+            $response->headers->set('Accept-Ranges', 'bytes');
+
+            return $response;
         }
 
         return $this->render('jury/import_export.html.twig', [
@@ -282,16 +337,13 @@ class ImportExportController extends BaseController
             'contest_export_form' => $contestExportForm,
             'contest_import_form' => $contestImportForm,
             'problems_import_form' => $problemsImportForm,
-            'sort_orders' => $sortOrders,
+            'export_results_form' => $exportResultsForm,
         ]);
     }
 
     #[Route(path: '/export/{type<groups|teams|wf_results|full_results>}.tsv', name: 'jury_tsv_export')]
-    public function exportTsvAction(
-        string $type,
-        #[MapQueryParameter(name: 'sort_order')]
-        ?int $sortOrder,
-    ): Response {
+    public function exportTsvAction(string $type): Response
+    {
         $data    = [];
         $tsvType = $type;
         try {
@@ -301,14 +353,6 @@ class ImportExportController extends BaseController
                     break;
                 case 'teams':
                     $data = $this->importExportService->getTeamData();
-                    break;
-                case 'wf_results':
-                    $data    = $this->importExportService->getResultsData($sortOrder);
-                    $tsvType = 'results';
-                    break;
-                case 'full_results':
-                    $data    = $this->importExportService->getResultsData($sortOrder, full: true);
-                    $tsvType = 'results';
                     break;
             }
         } catch (BadRequestHttpException $e) {
@@ -322,9 +366,6 @@ class ImportExportController extends BaseController
             echo sprintf("%s\t%s\n", $tsvType, $version);
             foreach ($data as $row) {
                 // Utils::toTsvFields handles escaping of reserved characters.
-                if ($row instanceof ResultRow) {
-                    $row = $row->toArray();
-                }
                 echo implode("\t", array_map(fn($field) => Utils::toTsvField((string)$field), $row)) . "\n";
             }
         });
@@ -335,29 +376,22 @@ class ImportExportController extends BaseController
         return $response;
     }
 
-    #[Route(path: '/export/{type<wf_results|full_results|clarifications>}.html', name: 'jury_html_export')]
-    public function exportHtmlAction(Request $request, string $type): Response
+    #[Route(path: '/export/clarifications.html', name: 'jury_html_export_clarifications')]
+    public function exportClarificationsHtmlAction(): Response
     {
         try {
-            switch ($type) {
-                case 'wf_results':
-                    return $this->getResultsHtml($request);
-                case 'full_results':
-                    return $this->getResultsHtml($request, full: true);
-                case 'clarifications':
-                    return $this->getClarificationsHtml();
-                default:
-                    $this->addFlash('danger', "Unknown export type '" . $type . "' requested.");
-                    return $this->redirectToRoute('jury_import_export');
-            }
+            return $this->getClarificationsHtml();
         } catch (BadRequestHttpException $e) {
             $this->addFlash('danger', $e->getMessage());
             return $this->redirectToRoute('jury_import_export');
         }
     }
 
-    protected function getResultsHtml(Request $request, bool $full = false): Response
-    {
+    protected function getResultsHtml(
+        int $sortOrder,
+        bool $individuallyRanked,
+        bool $honors
+    ): string {
         /** @var TeamCategory[] $categories */
         $categories  = $this->em->createQueryBuilder()
             ->from(TeamCategory::class, 'c', 'c.categoryid')
@@ -392,9 +426,7 @@ class ImportExportController extends BaseController
         $regionWinners = [];
         $rankPerTeam   = [];
 
-        $sortOrder = $request->query->getInt('sort_order');
-
-        foreach ($this->importExportService->getResultsData($sortOrder, full: $full) as $row) {
+        foreach ($this->importExportService->getResultsData($sortOrder, $individuallyRanked, $honors) as $row) {
             $team = $teamNames[$row->teamId];
             $rankPerTeam[$row->teamId] = $row->rank;
 
@@ -421,7 +453,7 @@ class ImportExportController extends BaseController
             }
             if ($row['rank'] === null) {
                 $honorable[] = $row['team'];
-            } elseif (in_array($row['award'], ['Highest Honors', 'High Honors', 'Honors'], true)) {
+            } elseif (in_array($row['award'], ['Ranked', 'Highest Honors', 'High Honors', 'Honors'], true)) {
                 $ranked[$row['award']][] = $row;
             } else {
                 $awarded[] = $row;
@@ -432,7 +464,7 @@ class ImportExportController extends BaseController
 
         $collator = new Collator('en_US');
         $collator->sort($honorable);
-        foreach ($ranked as $award => &$rankedTeams) {
+        foreach ($ranked as &$rankedTeams) {
             usort($rankedTeams, function (array $a, array $b) use ($collator): int {
                 if ($a['rank'] !== $b['rank']) {
                     return $a['rank'] <=> $b['rank'];
@@ -494,16 +526,10 @@ class ImportExportController extends BaseController
             'firstToSolve' => $firstToSolve,
             'domjudgeVersion' => $this->domjudgeVersion,
             'title' => sprintf('Results for %s', $contest->getName()),
-            'download' => $request->query->getBoolean('download'),
             'sortOrder' => $sortOrder,
         ];
-        $response = $this->render('jury/export/results.html.twig', $data);
 
-        if ($request->query->getBoolean('download')) {
-            $response->headers->set('Content-disposition', 'attachment; filename=results.html');
-        }
-
-        return $response;
+        return $this->twig->render('jury/export/results.html.twig', $data);
     }
 
     protected function getClarificationsHtml(): Response
