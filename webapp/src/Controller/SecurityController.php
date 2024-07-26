@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Controller\Jury\UserController;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
@@ -12,6 +13,7 @@ use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -103,7 +105,12 @@ class SecurityController extends AbstractController
         $registration_form->handleRequest($request);
         if ($registration_form->isSubmitted() && $registration_form->isValid()) {
             $plainPass = $registration_form->get('plainPassword')->getData();
-            $password  = $passwordHasher->hashPassword($user, $plainPass);
+            if (strlen($plainPass) < UserController::MIN_PASSWORD_LENGTH) {
+                $this->addFlash('danger', "Password should be " . UserController::MIN_PASSWORD_LENGTH . "+ chars.");
+                return $this->redirectToRoute('register');
+            }
+
+            $password = $passwordHasher->hashPassword($user, $plainPass);
             $user->setPassword($password);
             if ($user->getName() === null) {
                 $user->setName($user->getUsername());
