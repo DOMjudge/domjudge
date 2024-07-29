@@ -175,7 +175,7 @@ EOF;
         self::assertArrayNotHasKey('problemset', $object);
 
         // Now upload a problemset
-        $problemsetFile = __DIR__ . '/../../../../../webapp/public/doc/logos/DOMjudgelogo.pdf';
+        $problemsetFile = __DIR__ . '/../../../../public/doc/logos/DOMjudgelogo.pdf';
         $problemset = new UploadedFile($problemsetFile, 'DOMjudgelogo.pdf');
         $this->verifyApiJsonResponse('POST', $url . '/problemset', 204, $this->apiUser, null, ['problemset' => $problemset]);
 
@@ -199,7 +199,7 @@ EOF;
         self::assertEquals(file_get_contents($problemsetFile), $callbackData);
 
         // Upload the problemset again, this time using PUT to also test that
-        $problemsetFile = __DIR__ . '/../../../../../webapp/public/doc/logos/DOMjudgelogo.pdf';
+        $problemsetFile = __DIR__ . '/../../../../public/doc/logos/DOMjudgelogo.pdf';
         $problemset = new UploadedFile($problemsetFile, 'DOMjudgelogo.pdf');
         $this->verifyApiJsonResponse('PUT', $url . '/problemset', 204, $this->apiUser, null, ['problemset' => $problemset]);
 
