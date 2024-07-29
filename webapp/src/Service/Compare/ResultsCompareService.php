@@ -2,11 +2,11 @@
 
 namespace App\Service\Compare;
 
-use App\DataTransferObject\Result;
+use App\DataTransferObject\ResultRow;
 use Symfony\Component\Serializer\Encoder\CsvEncoder;
 
 /**
- * @extends AbstractCompareService<Result[]>
+ * @extends AbstractCompareService<ResultRow[]>
  */
 class ResultsCompareService extends AbstractCompareService
 {
@@ -21,16 +21,16 @@ class ResultsCompareService extends AbstractCompareService
         $resultsContents = substr($resultsContents, strpos($resultsContents, "\n") + 1);
 
         // Prefix file with a fake header, so we can deserialize them
-        $resultsContents = "team_id\trank\taward\tnum_solved\ttotal_time\tlast_time\tgroup_winner\n" . $resultsContents;
+        $resultsContents = "team_id\trank\taward\tnum_solved\ttotal_time\ttime_of_last_submission\tgroup_winner\n" . $resultsContents;
 
-        $results = $this->serializer->deserialize($resultsContents, Result::class . '[]', 'csv', [
+        $results = $this->serializer->deserialize($resultsContents, ResultRow::class . '[]', 'csv', [
             CsvEncoder::DELIMITER_KEY => "\t",
         ]);
 
         // Sort results: first by num_solved, then by total_time
         usort($results, fn(
-            Result $a,
-            Result $b
+            ResultRow $a,
+            ResultRow $b
         ) => $a->numSolved === $b->numSolved ? $a->totalTime <=> $b->totalTime : $b->numSolved <=> $a->numSolved);
 
         return $results;
@@ -38,13 +38,13 @@ class ResultsCompareService extends AbstractCompareService
 
     public function compare($object1, $object2): void
     {
-        /** @var array<string,Result> $results1Indexed */
+        /** @var array<string,ResultRow> $results1Indexed */
         $results1Indexed = [];
         foreach ($object1 as $result) {
             $results1Indexed[$result->teamId] = $result;
         }
 
-        /** @var array<string,Result> $results2Indexed */
+        /** @var array<string,ResultRow> $results2Indexed */
         $results2Indexed = [];
         foreach ($object2 as $result) {
             $results2Indexed[$result->teamId] = $result;
@@ -67,8 +67,8 @@ class ResultsCompareService extends AbstractCompareService
                 if ($result->totalTime !== $result2->totalTime) {
                     $this->addMessage(MessageType::ERROR, sprintf('Team "%s" has different total time', $result->teamId), (string)$result->totalTime, (string)$result2->totalTime);
                 }
-                if ($result->lastTime !== $result2->lastTime) {
-                    $this->addMessage(MessageType::ERROR, sprintf('Team "%s" has different last time', $result->teamId), (string)$result->lastTime, (string)$result2->lastTime);
+                if ($result->timeOfLastSubmission !== $result2->timeOfLastSubmission) {
+                    $this->addMessage(MessageType::ERROR, sprintf('Team "%s" has different last time', $result->teamId), (string)$result->timeOfLastSubmission, (string)$result2->timeOfLastSubmission);
                 }
                 if ($result->groupWinner !== $result2->groupWinner) {
                     $this->addMessage(MessageType::WARNING, sprintf('Team "%s" has different group winner', $result->teamId), (string)$result->groupWinner, (string)$result2->groupWinner);
