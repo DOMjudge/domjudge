@@ -2,13 +2,13 @@
 
 namespace App\Command;
 
-use App\DataTransferObject\Result;
+use App\DataTransferObject\ResultRow;
 use App\Service\Compare\ResultsCompareService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
- * @extends AbstractCompareCommand<Result[]>
+ * @extends AbstractCompareCommand<ResultRow[]>
  */
 #[AsCommand(
     name: 'compare:results',
