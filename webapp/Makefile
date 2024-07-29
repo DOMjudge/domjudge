@@ -11,14 +11,17 @@ SUBDIRS = config
 
 domserver: composer-dump-autoload
 
-maintainer-conf: .env.local
+# Install PHP dependencies
+composer-dependencies:
+ifeq (, $(shell command -v composer 2> /dev/null))
+	$(error "'composer' command not found in $(PATH), install it via your package manager or https://getcomposer.org/download/")
+endif
+# We use --no-scripts here because at this point the autoload.php file is
+# not generated yet, which is needed to run the post-install scripts.
+	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o -a --no-scripts --no-plugins
 
-# Run Symfony in dev mode (for maintainer-mode):
-.env.local:
-	@echo "Creating file '$@'..."
-	@echo "# This file was automatically created by 'make maintainer-conf' to run" > $@
-	@echo "# the DOMjudge Symfony application in developer mode. Adjust as needed." >> $@
-	@echo "APP_ENV=dev" >> $@
+composer-dependencies-dev:
+	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
 
 # Dump autoload dependencies (including plugins)
 # This is needed since symfony/runtime is a Composer plugin that runs while dumping
@@ -32,6 +35,13 @@ vendor/autoload_runtime.php:
 
 composer-dump-autoload-dev:
 	composer $(subst 1,-q,$(QUIET)) dump-autoload
+
+# Run Symfony in dev mode (for maintainer-mode):
+.env.local:
+	@echo "Creating file '$@'..."
+	@echo "# This file was automatically created by 'make maintainer-conf' to run" > $@
+	@echo "# the DOMjudge Symfony application in developer mode. Adjust as needed." >> $@
+	@echo "APP_ENV=dev" >> $@
 
 copy-bundle-assets:
 # We can not use bin/console here, as when using a fakeroot,
@@ -65,19 +75,9 @@ install-domserver:
 	done
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
 
+maintainer-conf: .env.local
+
 maintainer-install: composer-dump-autoload-dev
-
-# Install PHP dependencies
-composer-dependencies:
-ifeq (, $(shell command -v composer 2> /dev/null))
-	$(error "'composer' command not found in $(PATH), install it via your package manager or https://getcomposer.org/download/")
-endif
-# We use --no-scripts here because at this point the autoload.php file is
-# not generated yet, which is needed to run the post-install scripts.
-	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o -a --no-scripts --no-plugins
-
-composer-dependencies-dev:
-	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
 
 maintainer-clean-l:
 	-for d in cache log ; do \
