@@ -48,7 +48,7 @@ while read -r i ; do
 	fi
 	if grep -qE "^#\\!.*/bin/(ba)?sh" "$i" && \
 		[ "${i##*.}" != "zip" ] && \
-		echo "$i" | grep -qvE '(^\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output|judge/judgedaemon))'; then
+		echo "$i" | grep -qvE '(^\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|webapp/vendor/|output|judge/judgedaemon))'; then
 		# We ignore the following shellcheck warnings, for more details see:
 		# https://github.com/koalaman/shellcheck/wiki/<code>
 		#
