@@ -57,21 +57,33 @@ final class Version20240511091916 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        foreach (self::COMPILER_VERSION_COMMAND as $lang => $versionCommand) {
-            $this->addSql("UPDATE language SET compiler_version_command = '" . $versionCommand ."' WHERE langid='" . $lang . "' AND compiler_version_command IS NULL;");
+        foreach (self::COMPILER_VERSION_COMMAND as $langid => $versionCommand) {
+            $this->addSql(
+                "UPDATE language SET compiler_version_command = :compiler_version_command WHERE langid = :langid AND compiler_version_command IS NULL",
+                ['compiler_version_command' => $versionCommand, 'langid' => $langid]
+            );
         }
-        foreach (self::RUNNER_VERSION_COMMAND as $lang => $versionCommand) {
-            $this->addSql("UPDATE language SET runner_version_command = '" . $versionCommand ."' WHERE langid='" . $lang . "' AND runner_version_command IS NULL;");
+        foreach (self::RUNNER_VERSION_COMMAND as $langid => $versionCommand) {
+            $this->addSql(
+                "UPDATE language SET runner_version_command = :compiler_version_command WHERE langid = :langid AND runner_version_command IS NULL",
+                ['compiler_version_command' => $versionCommand, 'langid' => $langid]
+            );
         }
     }
 
     public function down(Schema $schema): void
     {
-        foreach (self::COMPILER_VERSION_COMMAND as $lang => $versionCommand) {
-            $this->addSql("UPDATE language SET compiler_version_command = NULL WHERE langid='" . $lang . "' AND compiler_version_command = '" . $versionCommand ."';");
+        foreach (self::COMPILER_VERSION_COMMAND as $langid => $versionCommand) {
+            $this->addSql(
+                "UPDATE language SET compiler_version_command = NULL WHERE langid = :langid AND compiler_version_command = :compiler_version_command",
+                ['compiler_version_command' => $versionCommand, 'langid' => $langid]
+            );
         }
-        foreach (self::RUNNER_VERSION_COMMAND as $lang => $versionCommand) {
-            $this->addSql("UPDATE language SET runner_version_command = NULL WHERE langid='" . $lang . "' AND runner_version_command = '" . $versionCommand ."';");
+        foreach (self::RUNNER_VERSION_COMMAND as $langid => $versionCommand) {
+            $this->addSql(
+                "UPDATE language SET runner_version_command = NULL WHERE langid = :langid AND runner_version_command = :compiler_version_command",
+                ['compiler_version_command' => $versionCommand, 'langid' => $langid]
+            );
         }
     }
 
