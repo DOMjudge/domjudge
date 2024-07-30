@@ -510,6 +510,10 @@ class ImportExportService
         $data             = [];
         $lowestMedalPoints = 0;
 
+        // For every team that we skip because it is not in a medal category, we need to include one
+        // additional rank. So keep track of the number of skipped teams
+        $skippedTeams     = 0;
+
         foreach ($scoreboard->getScores() as $teamScore) {
             if ($teamScore->team->getCategory()->getSortorder() !== $sortOrder) {
                 continue;
@@ -522,13 +526,20 @@ class ImportExportService
 
             $rank      = $teamScore->rank;
             $numPoints = $teamScore->numPoints;
-            if ($rank <= $contest->getGoldMedals()) {
+            $skip      = false;
+
+            if (!$contest->getMedalCategories()->contains($teamScore->team->getCategory())) {
+                $skip = true;
+                $skippedTeams++;
+            }
+
+            if (!$skip && $rank - $skippedTeams <= $contest->getGoldMedals()) {
                 $awardString = 'Gold Medal';
                 $lowestMedalPoints = $teamScore->numPoints;
-            } elseif ($rank <= $contest->getGoldMedals() + $contest->getSilverMedals()) {
+            } elseif (!$skip && $rank - $skippedTeams <= $contest->getGoldMedals() + $contest->getSilverMedals()) {
                 $awardString = 'Silver Medal';
                 $lowestMedalPoints = $teamScore->numPoints;
-            } elseif ($rank <= $contest->getGoldMedals() + $contest->getSilverMedals() + $contest->getBronzeMedals() + $contest->getB()) {
+            } elseif (!$skip && $rank - $skippedTeams <= $contest->getGoldMedals() + $contest->getSilverMedals() + $contest->getBronzeMedals() + $contest->getB()) {
                 $awardString = 'Bronze Medal';
                 $lowestMedalPoints = $teamScore->numPoints;
             } elseif ($numPoints >= $median) {
@@ -540,7 +551,8 @@ class ImportExportService
                     $rank = $ranks[$numPoints];
                 }
                 if ($honors) {
-                    if ($numPoints === $lowestMedalPoints) {
+                    if ($numPoints >= $lowestMedalPoints) {
+                        // Some teams out of the medal categories may get more points than the lowest medalist.
                         $awardString = 'Highest Honors';
                     } elseif ($numPoints === $lowestMedalPoints - 1) {
                         $awardString = 'High Honors';
