@@ -53,9 +53,9 @@ final class Version20210407120356 extends AbstractMigration
                     }
                     $this->connection->executeStatement(
                         'INSERT INTO executable_file '
-                        . '(`immutable_execid`, `filename`, `ranknumber`, `file_content`, `is_executable`) '
+                        . '(`immutable_execid`, `filename`, `ranknumber`, `file_content`, `hash`, `is_executable`) '
                         . 'VALUES (' . $immutable_execid . ', "' . $filename . '", '
-                        . $idx . ', ' . $encodedContent . ', '
+                        . $idx . ', ' . $encodedContent . ', "' . md5($content) . '", '
                         . $executableBit . ')'
                     );
                 }
