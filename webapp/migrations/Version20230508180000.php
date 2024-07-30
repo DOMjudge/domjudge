@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
-use App\Entity\ExecutableFile;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
@@ -32,7 +31,7 @@ final class Version20230508180000 extends AbstractMigration
                     )
                 )
             );
-            $this->connection->executeQuery('UPDATE immutable_executable SET hash = :hash WHERE immutable_execid = :id', [
+            $this->addSql('UPDATE immutable_executable SET hash = :hash WHERE immutable_execid = :id', [
                 'hash' => $newHash,
                 'id' => $immutableExecutable['immutable_execid'],
             ]);
