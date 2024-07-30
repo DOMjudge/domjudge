@@ -1181,8 +1181,6 @@ EOF;
             ->setShortname('wf47')
             ->setStarttimeString($startTime->format(DateTimeInterface::ATOM))
             ->setEndtimeString($startTime->add(new DateInterval('PT5H'))->format(DateTimeInterface::ATOM));
-        $em->persist($contest);
-        $em->flush();
 
         $groupsById = [];
         $groupsData = json_decode(file_get_contents(__DIR__ . '/../Fixtures/sample-groups.json'), true);
@@ -1194,7 +1192,12 @@ EOF;
             $em->persist($group);
             $em->flush();
             $groupsById[$group->getExternalid()] = $group;
+            $contest->addMedalCategory($group);
         }
+
+        $em->persist($contest);
+        $em->flush();
+
         $teamsData = json_decode(file_get_contents(__DIR__ . '/../Fixtures/sample-teams.json'), true);
         /** @var array<string,Team> $teamsById */
         $teamsById = [];
