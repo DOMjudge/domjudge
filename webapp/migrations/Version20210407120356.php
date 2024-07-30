@@ -66,7 +66,7 @@ final class Version20210407120356 extends AbstractMigration
                 );
             }
 
-            $this->addSql('ALTER TABLE `executable` DROP COLUMN `zipfile`');
+            $this->connection->executeStatement('ALTER TABLE `executable` DROP COLUMN `zipfile`');
         }
     }
 
