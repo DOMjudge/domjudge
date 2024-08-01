@@ -6,12 +6,12 @@
         <i class="fas fa-sign-out-alt fa-fw"></i> Logout
     </a>
 {% else %}
+    <a class="dropdown-item" href="{{ path('login') }}">
+        <i class="fas fa-sign-in-alt fa-fw"></i> Login
+    </a>
     {% if allow_registration %}
         <a class="dropdown-item" href="{{ path('register') }}">
             <i class="fas fa-user-plus fa-fw"></i> Register
         </a>
     {% endif %}
-    <a class="dropdown-item" href="{{ path('login') }}">
-        <i class="fas fa-sign-in-alt fa-fw"></i> Login
-    </a>
 {% endif %}
