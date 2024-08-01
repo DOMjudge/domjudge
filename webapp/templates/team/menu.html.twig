@@ -81,11 +81,10 @@
         {% if unreadClarifications is defined and unreadClarifications|length > 0 %}
             <div class="dropdown mb-2 mb-xl-0 me-3">
                 <button type="button"
-                        class="btn btn-warning btn-sm dropdown-toggle"
+                        class="btn btn-outline-warning btn-sm dropdown-toggle"
                         data-bs-toggle="dropdown"
                         aria-expanded="false">
-                    Unread messages
-                    <span class="badge badge-secondary">{{ unreadClarifications|length }}</span>
+                    <i class="fas fa-bell fa-fw"></i>
                 </button>
                 <div class="dropdown-menu overflow-auto" style="max-height: 30rem">
                     {% for clarification in unreadClarifications %}
@@ -104,24 +103,24 @@
             </div>
         {% endif %}
 
-        <div class="me-3">
-            <a class="nav-link d-none" id="notify_enable">
-                <span class="btn btn-warning btn-sm">
-                    <i class="fas fa-bell fa-fw"></i> Enable Notifications
-                </span>
-            </a>
-            <a class="nav-link d-none" id="notify_disable">
-                <span class="btn btn-secondary btn-sm">
-                    <i class="fas fa-bell-slash fa-fw"></i> Disable Notifications
-                </span>
-            </a>
+{#        <div class="me-3">#}
+{#            <a class="nav-link d-none" id="notify_enable">#}
+{#                <span class="btn btn-warning btn-sm">#}
+{#                    <i class="fas fa-bell fa-fw"></i> Enable Notifications#}
+{#                </span>#}
+{#            </a>#}
+{#            <a class="nav-link d-none" id="notify_disable">#}
+{#                <span class="btn btn-secondary btn-sm">#}
+{#                    <i class="fas fa-bell-slash fa-fw"></i> Disable Notifications#}
+{#                </span>#}
+{#            </a>#}
+{#        </div>#}
 
-        </div>
-        <div class="me-3">
+        <div class="me-2">
             {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
                 <a class="nav-link" data-ajax-modal data-ajax-modal-after="initSubmitModal"
                    href="{{ path('team_submit') }}">
-                    <span class="btn btn-success btn-sm me-3 mb-2 mb-xl-0">
+                    <span class="btn btn-success btn-sm mb-2 mb-xl-0">
                         <i class="fas fa-cloud-upload-alt"></i> Submit
                     </span>
                 </a>
