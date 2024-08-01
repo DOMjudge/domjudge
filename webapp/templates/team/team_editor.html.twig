@@ -70,7 +70,7 @@
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <a class="btn btn-outline-secondary" href="{{ path('team_problem_text', {'probId': problem.probid}) }}" download>
+                    <a class="btn btn-outline-secondary" href="{{ path('team_problem_statement', {'probId': problem.probid}) }}" download>
                         <i class="fa-solid fa-download"></i>
                     </a>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -78,7 +78,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <iframe src="{{ path('team_problem_text', {'probId': problem.probid}) }}"
+                    <iframe src="{{ path('team_problem_statement', {'probId': problem.probid}) }}"
                             style="width:100%;height:80vh;border: none;"
                             allowfullscreen
                     ></iframe>
@@ -96,7 +96,7 @@
                     class="btn btn-outline-secondary"
                     data-bs-toggle="modal"
                     data-target="#problemText">
-                <i class="fas fa-file-{{ problem.problemtextType }}"></i>
+                <i class="fas fa-file-{{ problem.problemstatementType }}"></i>
                 Problem
             </button>
         </li>
