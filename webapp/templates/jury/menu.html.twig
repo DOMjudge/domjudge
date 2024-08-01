@@ -87,14 +87,14 @@
         </ul>
 
         {% if app.debug %}
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav pe-xl-2">
                 <li class="nav-item">
                     <i class="fa-brands fa-dev fa-2x devmode-icon"></i>
                 </li>
             </ul>
         {% endif %}
 
-        <ul class="navbar-nav ms-auto">
+        <ul class="navbar-nav">
 
             {# Render user information + logout button #}
             {% if is_granted('IS_AUTHENTICATED_FULLY') %}
