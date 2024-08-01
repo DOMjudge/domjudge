@@ -65,17 +65,17 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     private ?string $result = null;
 
     #[ORM\Column(
-        type: 'float',
         name: 'points_scored',
+        type: 'float',
+        nullable: false,
         options: [
             'comment' => 'Points scored in this judging',
             'default' => 0,
             'unsigned' => true
-        ],
-        nullable: false
+        ]
     )]
     #[Serializer\Exclude]
-    private ?float $points_scored;
+    private ?float $points_scored = 0;
 
     #[ORM\Column(options: ['comment' => 'Result verified by jury member?', 'default' => 0])]
     #[Serializer\Exclude]
