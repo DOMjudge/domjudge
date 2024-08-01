@@ -79,13 +79,13 @@ class ContestProblem extends BaseApiEntity
     private int $lazyEvalResults = 0;
 
     #[ORM\Column(
-        type: 'boolean',
         name: 'partial_points_scoring',
+        type: 'boolean',
+        nullable: true,
         options: [
             'comment' => 'Whether to score this problem partially; if set this overrides the global configuration setting',
             'unsigned' => true
-        ],
-        nullable: true
+        ]
     )]
     private ?bool $partialPointsScoring = true;
 
