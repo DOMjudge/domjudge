@@ -94,7 +94,7 @@
         <li class="nav-item">
             <button type="button"
                     class="btn btn-outline-secondary"
-                    data-toggle="modal"
+                    data-bs-toggle="modal"
                     data-target="#problemText">
                 <i class="fas fa-file-{{ problem.problemtextType }}"></i>
                 Problem
@@ -117,7 +117,7 @@
         {%- for file in files %}
             <li class="nav-item">
                 <a class="nav-link {% if (selected is null and loop.first) or selected == file.rank %}active{% endif %}"
-                   data-toggle="tab" href="#source-{{ file.rank }}" role="tab">{{ file.filename }}</a>
+                   data-bs-toggle="tab" href="#source-{{ file.rank }}" role="tab">{{ file.filename }}</a>
             </li>
         {%- endfor %}
     </ul>

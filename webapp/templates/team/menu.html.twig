@@ -80,7 +80,9 @@
 
         {% if unreadClarifications is defined and unreadClarifications|length > 0 %}
             <div class="dropdown mb-2 mb-xl-0 me-3">
-                <button class="btn btn-warning btn-sm dropdown-toggle" type="button" data-toggle="dropdown"
+                <button type="button"
+                        class="btn btn-warning btn-sm dropdown-toggle"
+                        data-bs-toggle="dropdown"
                         aria-expanded="false">
                     Unread messages
                     <span class="badge badge-secondary">{{ unreadClarifications|length }}</span>
@@ -134,7 +136,7 @@
 
         <ul class="navbar-nav">
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAuth" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAuth" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="fas fa-user"></i>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">

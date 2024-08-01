@@ -153,7 +153,7 @@
                                             {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
                                                 <div class="text-center mt-2">
                                                     <div class="btn-group">
-                                                        <button type="button" class="btn btn-outline-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                        <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                                             <i class="fa-solid fa-code"></i> Open in online editor
                                                         </button>
                                                         <div class="dropdown-menu">
@@ -172,7 +172,7 @@
                                         {% if problem.problem.attachments | length > 0 %}
                                             <div class="text-center mt-2">
                                                 <div class="btn-group">
-                                                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                                         <i class="fa-solid fa-download"></i> Attachments
                                                     </button>
                                                     <div class="dropdown-menu">
