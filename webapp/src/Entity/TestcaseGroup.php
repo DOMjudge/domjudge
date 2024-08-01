@@ -8,46 +8,30 @@ use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Stores testcase groups per problem.
- *
- * @ORM\Entity()
- * @ORM\Table(
- *     name="testcase_group",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Stores testcase groups per problem."},
- *     indexes={
- *         @ORM\Index(name="probid", columns={"probid"})
- *     })
  */
+#[ORM\Entity]
+#[ORM\Table(
+    name: "testcase_group",
+    indexes: [new ORM\Index(columns: ["probid"], name: "probid")],
+    options: ["collation" => "utf8mb4_unicode_ci", "charset" => "utf8mb4", "comment" => "Stores testcase groups per problem."]
+)]
 class TestcaseGroup
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="testcasegroupid", length=4,
-     *     options={"comment"="Testcase group ID","unsigned"=true},
-     *     nullable=false)
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: "AUTO")]
+    #[ORM\Column(name: "testcasegroupid", type: "integer", nullable: false, options: ["comment" => "Testcase group ID", "unsigned" => true])]
     private int $testcasegroupid;
 
-    /**
-     * @ORM\Column(type="float", name="points_percentage",
-     *     options={"comment"="Percentage of problem points this group is worth", "default"="0", "unsigned"=true},
-     *     nullable=false)
-     * @Serializer\Exclude()
-     */
+    #[ORM\Column(name: "points_percentage", type: "float", nullable: false, options: ["comment" => "Percentage of problem points this group is worth", "default" => 0, "unsigned" => true])]
+    #[Serializer\Exclude]
     private float $points_percentage;
 
-    /**
-     * @ORM\Column(type="string", name="name", length=255,
-     *     options={"comment"="Which part of the problem this group tests.", "default"=null},
-     *     nullable=true)
-     */
+    #[ORM\Column(name: "name", type: "string", length: 255, nullable: true, options: ["comment" => "Which part of the problem this group tests.", "default" => null])]
     private string $name;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Testcase", mappedBy="testcase_group")
-     * @ORM\OrderBy({"ranknumber" = "ASC"})
-     * @Serializer\Exclude()
-     */
+    #[ORM\OneToMany(mappedBy: "testcase_group", targetEntity: Testcase::class)]
+    #[ORM\OrderBy(["ranknumber" => "ASC"])]
+    #[Serializer\Exclude]
     private Collection $testcases;
 
     public function getTestcasegroupid(): int
