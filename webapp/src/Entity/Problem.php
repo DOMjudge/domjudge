@@ -165,7 +165,6 @@ class Problem extends BaseApiEntity
         cascade: ['persist'],
         orphanRemoval: true
     )]
-    #[ORM\OrderBy(['type' => 'ASC'])]
     #[Serializer\Exclude]
     private Collection $problemStatementContent;
 
