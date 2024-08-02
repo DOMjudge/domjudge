@@ -41,6 +41,10 @@ class ContestIdSubscriber implements EventSubscriberInterface
         $teamId = $this->dj->getUser() ? $this->dj->getUser()->getTeamId() : -1;
         $currentContest = $this->dj->getCurrentContest($teamId);
 
+        if (!$currentContest) {
+            return;
+        }
+
         if (!$cid = (int)$request->query->get('cid')) {
             // "No cid found. Setting cid to current contest."
             $response = new RedirectResponse(
