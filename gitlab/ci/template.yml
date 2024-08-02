@@ -35,7 +35,8 @@
   script:
     - /bin/true
   services:
-    - name: mysql
+    - name: mysql:8.0
+      command: ["--default-authentication-plugin=mysql_native_password"]
       alias: sqlserver
 
 .mariadb_job:
