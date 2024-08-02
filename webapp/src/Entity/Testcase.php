@@ -116,11 +116,9 @@ class Testcase
     #[Serializer\Exclude]
     private ?Problem $problem = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="TestcaseGroup", inversedBy="testcases")
-     * @ORM\JoinColumn(name="testcasegroupid", referencedColumnName="testcasegroupid")
-     * @Serializer\Exclude()
-     */
+    #[ORM\ManyToOne(targetEntity: TestcaseGroup::class, inversedBy: 'testcases')]
+    #[ORM\JoinColumn(name: 'testcasegroupid', referencedColumnName: 'testcasegroupid')]
+    #[Serializer\Exclude]
     private ?TestcaseGroup $testcase_group;
 
     public function __construct()

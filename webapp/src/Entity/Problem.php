@@ -146,8 +146,8 @@ class Problem extends BaseApiEntity
     private Collection $testcases;
 
     #[ORM\OneToMany(
-        targetEntity: TestcaseGroup::class,
-        mappedBy: 'problem'
+        mappedBy: 'problem',
+        targetEntity: TestcaseGroup::class
     )]
     #[Serializer\Exclude]
     private Collection $testcase_groups;
