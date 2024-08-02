@@ -202,20 +202,16 @@ class EditorController extends BaseController
             $ignoreSubmission = !$form->get('submit')->isClicked();
 
             $submittedSubmission = $this->submissionService->submitSolution(
-                $team,
-                $this->dj->getUser(),
-                $submittedData['problem'],
-                $submission->getContest(),
-                $language,
-                $filesToSubmit,
-                'team/editor',
-                null,
-                null,
-                $entryPoint,
-                null,
-                null,
-                $message,
-                $ignoreSubmission
+                team: $team,
+                user: $this->dj->getUser(),
+                problem: $submittedData['problem'],
+                contest: $submission->getContest(),
+                language: $language,
+                files: $filesToSubmit,
+                source: 'team/editor',
+                entryPoint: $entryPoint,
+                message: $message,
+                ignoreSubmission: $ignoreSubmission
             );
 
             foreach ($filesToSubmit as $file) {
