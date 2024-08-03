@@ -1,4 +1,4 @@
-name: Run runpipe tests
+name: Run runpipe and runguard tests
 on:
   push:
     branches-ignore:
