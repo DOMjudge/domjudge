@@ -1111,7 +1111,7 @@ EOF;
     public function problemBadgeForContest(Problem $problem, ?Contest $contest = null): string
     {
         $contest ??= $this->dj->getCurrentContest();
-        $contestProblem = $contest?->getContestProblem($problem);
+        $contestProblem = $contest !== null ? $contest->getContestProblem($problem) : null;
         return $contestProblem === null ? '' : $this->problemBadge($contestProblem);
     }
 
