@@ -36,7 +36,7 @@ jobs:
       - name: Set up chroot
         run: sudo misc-tools/dj_make_chroot -a amd64
       - name: Check nginx
-        run: curl -v https://localhost/
+        run: curl -v https://localhost/domjudge/
       - name: Testing submit client
         working-directory: submit
         run: make check-full
