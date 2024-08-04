@@ -45,4 +45,4 @@ jobs:
       - name: Create user
         run: sudo userdel -f -r domjudge-run-0 && sudo useradd -d /nonexistent -g nogroup -s /bin/false -u 2222 domjudge-run-0
       - name: Start judging
-        run: sudo systemctl enable --now domjudge-judgehost
+        run: sudo cp judge/domjudge-*service judge/domjudge-*target /etc/systemd/system/ && sudo systemctl enable --now domjudge-judgehost
