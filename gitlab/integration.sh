@@ -6,6 +6,8 @@ export version=$1
 
 show_phpinfo $version
 
+cat /proc/cmdline && echo && cat /proc/mounts && echo && ls -al /sys/fs/cgroup && echo && uname -a && echo && stat -fc %T /sys/fs/cgroup && echo && cat /proc/self/cgroup
+
 function finish() {
     echo -e "\\n\\n=======================================================\\n"
     echo "Storing artifacts..."
@@ -148,6 +150,7 @@ sudo addgroup domjudge-run-0
 sudo usermod -g domjudge-run-0 domjudge-run-0
 cd ${DIR}/judge/runguard_test
 
+ldd ../runguard
 make test
 section_end runguard_tests
 
