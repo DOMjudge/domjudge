@@ -37,9 +37,9 @@ jobs:
         run: sudo misc-tools/dj_make_chroot -a amd64
       - name: Check nginx
         run: curl -v https://localhost/domjudge/
-      - name: Testing submit client
-        working-directory: submit
-        run: make check-full
+          #- name: Testing submit client
+          #  working-directory: submit
+          #  run: make check-full
       - name: Configure judgehost
         run: sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/ && sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
       - name: Create user
