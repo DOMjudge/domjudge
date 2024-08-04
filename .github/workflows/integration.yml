@@ -1,0 +1,46 @@
+name: Run integration tests
+on:
+  push:
+    branches-ignore:
+      - main
+      - '[0-9]+.[0-9]+'
+      - gh-readonly-queue/main/*
+      - gh-readonly-queue/main/[0-9]+.[0-9]+
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+
+jobs:
+  runpipe:
+    runs-on: ubuntu-24.04
+    container:
+      image: domjudge/gitlabci:24.04
+      options: --privileged --cgroupns=host
+    services:
+      sqlserver:
+        image: mariadb
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: domjudge
+          MYSQL_PASSWORD: domjudge
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v4
+      - name: info
+        run: cat /proc/cmdline && echo && cat /proc/mounts && echo && ls -al /sys/fs/cgroup && echo && uname -a && echo && stat -fc %T /sys/fs/cgroup && echo && cat /proc/self/cgroup
+      - name: Run composer
+        working-directory: webapp
+        run: composer install --no-scripts
+      - name: Create the configure file
+        run: make configure
+      - name: Do the default configure
+        run: ./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge
+      - name: Build everything
+        run: make build-scripts domserver judgehost docs
+      - name: Install everything
+        run: sudo make install-domserver install-judgehost install-docs
+      - name: Set up chroot
+        run: sudo misc-tools/dj_make_chroot -a amd64
