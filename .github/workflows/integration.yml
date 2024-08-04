@@ -31,16 +31,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: info
         run: cat /proc/cmdline && echo && cat /proc/mounts && echo && ls -al /sys/fs/cgroup && echo && uname -a && echo && stat -fc %T /sys/fs/cgroup && echo && cat /proc/self/cgroup
-      - name: Run composer
-        working-directory: webapp
-        run: composer install --no-scripts
-      - name: Create the configure file
-        run: make configure
-      - name: Do the default configure
-        run: ./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge
-      - name: Build everything
-        run: make build-scripts domserver judgehost docs
-      - name: Install everything
-        run: sudo make install-domserver install-judgehost install-docs
+      - name: Install DOMjudge
+        run: .github/jobs/baseinstall.sh all
       - name: Set up chroot
         run: sudo misc-tools/dj_make_chroot -a amd64
+      - name: Testing submit client
+        working-directory: submit
+        run: make check-full
+      - name: Configure judgehost
+        run: sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/ && sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
+      - name: Create user
+        run: sudo userdel -f -r domjudge-run-0 && sudo useradd -d /nonexistent -g nogroup -s /bin/false -u 2222 domjudge-run-0
+      - name: Start judging
+        run: sudo systemctl enable --now domjudge-judgehost
