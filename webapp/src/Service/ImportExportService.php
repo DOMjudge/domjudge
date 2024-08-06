@@ -533,6 +533,21 @@ class ImportExportService
                 $skippedTeams++;
             }
 
+            if ($numPoints === 0) {
+                // Teams with 0 points won't get a medal, a rank or an honor.
+                // They will always get an honorable mention.
+                $data[] = new ResultRow(
+                    $teamScore->team->getIcpcId(),
+                    null,
+                    'Honorable',
+                    $teamScore->numPoints,
+                    $teamScore->totalTime,
+                    $maxTime,
+                    null
+                );
+                continue;
+            }
+        
             if (!$skip && $rank - $skippedTeams <= $contest->getGoldMedals()) {
                 $awardString = 'Gold Medal';
                 $lowestMedalPoints = $teamScore->numPoints;
@@ -551,8 +566,9 @@ class ImportExportService
                     $rank = $ranks[$numPoints];
                 }
                 if ($honors) {
-                    if ($numPoints >= $lowestMedalPoints) {
-                        // Some teams out of the medal categories may get more points than the lowest medalist.
+                    if ($numPoints === $lowestMedalPoints
+                        || $rank - $skippedTeams <= $contest->getGoldMedals() + $contest->getSilverMedals() + $contest->getBronzeMedals() + $contest->getB()) {
+                        // Some teams out of the medal categories but ranked higher than bronze medallists may get more points.
                         $awardString = 'Highest Honors';
                     } elseif ($numPoints === $lowestMedalPoints - 1) {
                         $awardString = 'High Honors';
