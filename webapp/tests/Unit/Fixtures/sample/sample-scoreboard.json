@@ -1,0 +1,202 @@
+{
+    "event_id": "88478",
+    "time": "2024-04-18T16:48:58.897+02:00",
+    "contest_time": "5:00:59.897",
+    "state": {
+        "started": "2024-04-18T11:47:59.000+02:00",
+        "ended": "2024-04-18T16:47:59.000+02:00",
+        "frozen": "2024-04-18T15:47:59.000+02:00",
+        "thawed": null,
+        "finalized": null,
+        "end_of_updates": null
+    },
+    "rows": [
+        {
+            "rank": 1,
+            "team_id": "A",
+            "score": {
+                "total_time": 36
+            },
+            "problems": [
+                {
+                    "label": "A",
+                    "problem_id": "sample-problem-a",
+                    "num_judged": 1,
+                    "num_pending": 0,
+                    "solved": true,
+                    "time": 1,
+                    "first_to_solve": true
+                },
+                {
+                    "label": "B",
+                    "problem_id": "sample-problem-b",
+                    "num_judged": 1,
+                    "num_pending": 0,
+                    "solved": true,
+                    "time": 5,
+                    "first_to_solve": false
+                },
+                {
+                    "label": "C",
+                    "problem_id": "sample-problem-c",
+                    "num_judged": 1,
+                    "num_pending": 0,
+                    "solved": true,
+                    "time": 10,
+                    "first_to_solve": false
+                },
+                {
+                    "label": "D",
+                    "problem_id": "sample-problem-d",
+                    "num_judged": 1,
+                    "num_pending": 0,
+                    "solved": true,
+                    "time": 20,
+                    "first_to_solve": false
+                }
+            ]
+        },
+        {
+            "rank": 2,
+            "team_id": "B",
+            "score": {
+                "total_time": 5
+            },
+            "problems": [
+                {
+                    "label": "B",
+                    "problem_id": "sample-problem-b",
+                    "num_judged": 1,
+                    "num_pending": 0,
+                    "solved": true,
+                    "time": 2,
+                    "first_to_solve": true
+                },
+                {
+                    "label": "C",
+                    "problem_id": "sample-problem-c",
+                    "num_judged": 1,
+                    "num_pending": 0,
+                    "solved": true,
+                    "time": 3,
+                    "first_to_solve": true
+                }
+            ]
+        },
+        {
+            "rank": 3,
+            "team_id": "C",
+            "score": {
+                "total_time": 5
+            },
+            "problems": [
+                {
+                    "label": "B",
+                    "problem_id": "sample-problem-b",
+                    "num_judged": 1,
+                    "num_pending": 0,
+                    "solved": true,
+                    "time": 2,
+                    "first_to_solve": true
+                },
+                {
+                    "label": "C",
+                    "problem_id": "sample-problem-c",
+                    "num_judged": 1,
+                    "num_pending": 0,
+                    "solved": true,
+                    "time": 3,
+                    "first_to_solve": true
+                }
+            ]
+        },
+        {
+            "rank": 4,
+            "team_id": "D",
+            "score": {
+                "total_time": 12
+            },
+            "problems": [
+                {
+                    "label": "D",
+                    "problem_id": "sample-problem-d",
+                    "num_judged": 1,
+                    "num_pending": 0,
+                    "solved": true,
+                    "time": 12,
+                    "first_to_solve": true
+                }
+            ]
+        },
+        {
+            "rank": 5,
+            "team_id": "E",
+            "score": {
+                "total_time": 13
+            },
+            "problems": [
+                {
+                    "label": "D",
+                    "problem_id": "sample-problem-d",
+                    "num_judged": 1,
+                    "num_pending": 0,
+                    "solved": true,
+                    "time": 13,
+                    "first_to_solve": false
+                }
+            ]
+        },
+        {
+            "rank": 6,
+            "team_id": "F",
+            "score": {
+                "total_time": 14
+            },
+            "problems": [
+                {
+                    "label": "D",
+                    "problem_id": "sample-problem-d",
+                    "num_judged": 1,
+                    "num_pending": 0,
+                    "solved": true,
+                    "time": 14,
+                    "first_to_solve": false
+                }
+            ]
+        },
+        {
+            "rank": 7,
+            "team_id": "G",
+            "score": {
+                "total_time": 15
+            },
+            "problems": [
+                {
+                    "label": "D",
+                    "problem_id": "sample-problem-d",
+                    "num_judged": 1,
+                    "num_pending": 0,
+                    "solved": true,
+                    "time": 15,
+                    "first_to_solve": false
+                }
+            ]
+        },
+        {
+            "rank": 8,
+            "team_id": "H",
+            "score": {
+                "total_time": 0
+            },
+            "problems": []
+        },
+        {
+            "rank": 9,
+            "team_id": "I",
+            "score": {
+                "total_time": 0
+            },
+            "problems": []
+        }
+    ]
+}

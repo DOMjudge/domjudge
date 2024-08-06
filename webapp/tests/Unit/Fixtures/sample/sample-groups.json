@@ -1,0 +1,32 @@
+[
+    {
+        "hidden": false,
+        "categoryid": 5,
+        "id": "10001",
+        "icpc_id": "10001",
+        "name": "Sample Group A",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    },
+    {
+        "hidden": false,
+        "categoryid": 6,
+        "id": "10002",
+        "icpc_id": "10002",
+        "name": "Sample Group B",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    },
+    {
+        "hidden": false,
+        "categoryid": 7,
+        "id": "10003",
+        "icpc_id": "10003",
+        "name": "Sample Group C",
+        "sortorder": 0,
+        "color": null,
+        "allow_self_registration": false
+    }
+]
