@@ -24,14 +24,23 @@ section_end
 
 section_start "Install domserver"
 make configure
-./configure \
-  --with-baseurl='https://localhost/domjudge/' \
-  --with-domjudge-user=root \
-  --enable-doc-build=no \
-  --enable-judgehost-build=no | tee "$ARTIFACTS"/configure.txt
+if [ "$version" = "all" ]; then
+    ./configure \
+      --with-baseurl='https://localhost/domjudge/' \
+      --with-domjudge-user=domjudge \
+      --with-judgehost-chrootdir=/chroot/domjudge | tee "$ARTIFACTS"/configure.txt
+    make build-scripts domserver judgehost docs
+    make install-domserver install-judgehost install-docs
+else
+    ./configure \
+      --with-baseurl='https://localhost/domjudge/' \
+      --with-domjudge-user=root \
+      --enable-doc-build=no \
+      --enable-judgehost-build=no | tee "$ARTIFACTS"/configure.txt
+    make domserver
+    make install-domserver
+fi
 
-make domserver
-make install-domserver
 section_end
 
 section_start "SQL settings"
@@ -92,6 +101,7 @@ for service in nginx php${PHPVERSION}-fpm; do
     service "$service" restart
     service "$service" status
 done
+echo | openssl s_client -servername localhost -connect localhost:443 2>/dev/null | openssl x509 -noout -text
 section_end
 
 if [ "${db}" = "install" ]; then
@@ -116,6 +126,10 @@ elif [ "$version" = "balloon" ]; then
 elif [ "$version" = "admin" ]; then
     # Add admin to admin user
     mysql_root "INSERT INTO userrole (userid, roleid) VALUES (1, 1);" domjudge
+elif [ "$version" = "all" ]; then
+    mysql_root "INSERT INTO userrole (userid, roleid) VALUES (1, 1);" domjudge
+    mysql_root "INSERT INTO userrole (userid, roleid) VALUES (1, 3);" domjudge
+    mysql_root "UPDATE user SET teamid = 1 WHERE userid = 1;" domjudge
 fi
 section_end
 

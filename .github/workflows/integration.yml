@@ -1,0 +1,48 @@
+name: Run integration tests
+on:
+  push:
+    branches-ignore:
+      - main
+      - '[0-9]+.[0-9]+'
+      - gh-readonly-queue/main/*
+      - gh-readonly-queue/main/[0-9]+.[0-9]+
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+
+jobs:
+  runpipe:
+    runs-on: ubuntu-24.04
+    container:
+      image: domjudge/gitlabci:24.04
+      options: --privileged --cgroupns=host
+    services:
+      sqlserver:
+        image: mariadb
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: domjudge
+          MYSQL_PASSWORD: domjudge
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v4
+      - name: info
+        run: cat /proc/cmdline && echo && cat /proc/mounts && echo && ls -al /sys/fs/cgroup && echo && uname -a && echo && stat -fc %T /sys/fs/cgroup && echo && cat /proc/self/cgroup
+      - name: Install DOMjudge
+        run: .github/jobs/baseinstall.sh all
+      - name: Set up chroot
+        run: sudo misc-tools/dj_make_chroot -a amd64
+      - name: Check nginx
+        run: curl -v https://localhost/domjudge/
+          #- name: Testing submit client
+          #  working-directory: submit
+          #  run: make check-full
+      - name: Configure judgehost
+        run: sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/ && sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
+      - name: Create user
+        run: sudo userdel -f -r domjudge-run-0 && sudo useradd -d /nonexistent -g nogroup -s /bin/false -u 2222 domjudge-run-0
+      - name: Start judging
+        run: sudo cp judge/domjudge-*service judge/domjudge-*target /etc/systemd/system/ && sudo systemctl enable --now domjudge-judgehost
