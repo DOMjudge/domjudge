@@ -177,8 +177,8 @@ observers	Observers
             'export_results[format]' => $format,
         ]);
         self::assertSelectorExists('h1:contains("Results for Demo contest")');
-        self::assertSelectorExists('th:contains("Example teamname")');
         self::assertSelectorExists('th:contains("A: Hello World")');
+        self::assertSelectorExists('td:contains("Example teamname")');
     }
 
     public function provideResultsHtmlExport(): Generator
@@ -219,16 +219,16 @@ observers	Observers
     public function provideResultsTsvExport(): Generator
     {
         yield [0, true, true, 'results	1
-exteam	1	Gold Medal	0	0	0	Participants
+exteam		Honorable	0	0	0	
 '];
         yield [0, true, false, 'results	1
-exteam	1	Gold Medal	0	0	0	Participants
+exteam		Honorable	0	0	0	
 '];
         yield [0, false, true, 'results	1
-exteam	1	Gold Medal	0	0	0	Participants
+exteam		Honorable	0	0	0	
 '];
         yield [0, false, true, 'results	1
-exteam	1	Gold Medal	0	0	0	Participants
+exteam		Honorable	0	0	0	
 '];
         yield [1, true, true, 'results	1
 '];
