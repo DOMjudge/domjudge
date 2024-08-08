@@ -23,6 +23,36 @@ cleanup() {
 }
 trap cleanup EXIT
 
+if command -v lsb_release; then
+    get_host () {
+        lsb_release -i -s
+    }
+    get_codename () {
+        lsb_release -c -s
+    }
+    get_release () {
+        lsb_release -r -s
+    }
+elif -f /etc/os-release; then
+    sel_grep () {
+        # Discard everything up to \K and make sure line ends with '"'.
+        grep -oP '^${1}="\K.*(?=")' /etc/os_release
+    }
+    get_host () {
+        sel_grep "NAME"
+    }
+    get_codename () {
+        sel_gep "VERSION_CODENAME"
+    }
+    get_release () {
+        echo "Please install `lsb_release`."
+        exit 1
+    }
+else
+    echo "Please install `lsb_release`."
+    exit 1
+fi
+
 # Default directory where to build the chroot tree:
 CHROOTDIR="@judgehost_chrootdir@"
 
@@ -35,15 +65,14 @@ DEBIAN_ARCHLIST="amd64,arm64,armel,armhf,i386,mips,mips64el,mipsel,ppc64el,s390x
 UBUNTU_ARCHLIST="amd64,arm64,armhf,i386,powerpc,ppc64el,s390x"
 
 # If host system is Debian or Ubuntu, use its release and architecture by default
-if [ "$(lsb_release -i -s || true)" = 'Debian' ] || \
-   [ "$(lsb_release -i -s || true)" = 'Ubuntu' ]; then
-    DISTRO="$(lsb_release -i -s)"
-    RELEASE="$(lsb_release -c -s)"
-    if [ "$(lsb_release -i -s)" = 'Debian' ]; then
-        if [ "$(lsb_release -c -s)" = "sid" ]; then
+if [ "$(get_host)" = 'Debian' ] || [ "$(get_host)" = 'Ubuntu' ]; then
+    DISTRO="$(get_host)"
+    RELEASE="$(get_codename)"
+    if [ "$(get_host)" = 'Debian' ]; then
+        if [ "$(get_codename)" = "sid" ]; then
             RELEASE='unstable'
         fi
-        if [ "$(lsb_release -r -s)" = 'testing' ]; then
+        if [ "$(get_release)" = 'testing' ]; then
             RELEASE='testing'
         fi
     fi
