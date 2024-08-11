@@ -1061,9 +1061,12 @@ EOF;
         return 'fas fa-file-' . $iconName;
     }
 
-    public function problemBadge(ContestProblem $problem): string
+    public function problemBadge(ContestProblem $problem, bool $grayedOut = false): string
     {
         $rgb        = Utils::convertToHex($problem->getColor() ?? '#ffffff');
+        if ($grayedOut) {
+            $rgb = 'whitesmoke';
+        }
         $background = Utils::parseHexColor($rgb);
 
         // Pick a border that's a bit darker.
@@ -1075,6 +1078,10 @@ EOF;
 
         // Pick the foreground text color based on the background color.
         $foreground = ($background[0] + $background[1] + $background[2] > 450) ? '#000000' : '#ffffff';
+        if ($grayedOut) {
+            $foreground = 'silver';
+            $border = 'linen';
+        }
         return sprintf(
             '<span class="badge problem-badge" style="background-color: %s; border: 1px solid %s"><span style="color: %s;">%s</span></span>',
             $rgb,
