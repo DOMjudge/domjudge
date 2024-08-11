@@ -520,6 +520,7 @@ class StatisticsService
     /**
      * @return array{
      *     contest: Contest,
+     *     problems: ContestProblem[],
      *     filters: array<string, string>,
      *     view: string,
      *     languages: array<string, array{
@@ -529,6 +530,10 @@ class StatisticsService
      *          solved: int,
      *          not_solved: int,
      *          total: int,
+     *          problems_solved: array<int, ContestProblem>,
+     *          problems_solved_count: int,
+     *          problems_attempted: array<int, ContestProblem>,
+     *          problems_attempted_count: int,
      *     }>
      * }
      */
@@ -552,6 +557,10 @@ class StatisticsService
                 'solved' => 0,
                 'not_solved' => 0,
                 'total' => 0,
+                'problems_solved' => [],
+                'problems_solved_count' => 0,
+                'problems_attempted' => [],
+                'problems_attempted_count' => 0,
             ];
         }
 
@@ -577,20 +586,28 @@ class StatisticsService
                 $languageStats[$language->getLangid()]['total']++;
                 if ($s->getResult() === 'correct') {
                     $languageStats[$language->getLangid()]['solved']++;
+                    $languageStats[$language->getLangid()]['problems_solved'][$s->getProblem()->getProbId()] = $s->getContestProblem();
                 } else {
                     $languageStats[$language->getLangid()]['not_solved']++;
                 }
+                $languageStats[$language->getLangid()]['problems_attempted'][$s->getProblem()->getProbId()] = $s->getContestProblem();
             }
         }
 
         foreach ($languageStats as &$languageStat) {
-            usort($languageStat['teams'], static fn(Team $a, Team $b) => ($a->getLabel() ?: $a->getExternalid()) <=> ($b->getLabel() ?: $b->getExternalid()));
+            usort($languageStat['teams'], static fn(
+                Team $a,
+                Team $b
+            ) => ($a->getLabel() ?: $a->getExternalid()) <=> ($b->getLabel() ?: $b->getExternalid()));
             $languageStat['team_count'] = count($languageStat['teams']);
+            $languageStat['problems_solved_count'] = count($languageStat['problems_solved']);
+            $languageStat['problems_attempted_count'] = count($languageStat['problems_attempted']);
         }
         unset($languageStat);
 
         return [
             'contest' => $contest,
+            'problems' => $this->getContestProblems($contest),
             'filters' => StatisticsService::FILTERS,
             'view' => $view,
             'languages' => $languageStats,

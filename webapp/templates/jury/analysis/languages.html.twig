@@ -41,8 +41,22 @@
                             </div>
                         {% endif %}
                         <br/>
-                        <i class="fas fa-file-code fa-fw"></i> {{ language.total }} total submission{% if language.total != 1 %}s{% endif %}<br />
-                        <i class="fas fa-check fa-fw"></i> {{ language.solved }} submission{% if language.solved != 1 %}s{% endif %} solved problems<br />
+                        <i class="fas fa-file-code fa-fw"></i> {{ language.total }} total submission{% if language.total != 1 %}s{% endif %}
+                        for {{ language.problems_attempted_count }} problem{% if language.problems_attempted_count != 1 %}s{% endif %}:<br/>
+                        {% for problem in problems %}
+                            <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">
+                                {{ problem | problemBadge(language.problems_attempted[problem.probid] is not defined) }}
+                            </a>
+                        {% endfor %}
+                        <br />
+                        <i class="fas fa-check fa-fw"></i> {{ language.solved }} submission{% if language.solved != 1 %}s{% endif %} solved problems
+                        for {{ language.problems_solved_count }} problem{% if language.problems_solved_count != 1 %}s{% endif %}:<br/>
+                        {% for problem in problems %}
+                            <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">
+                                {{ problem | problemBadge(language.problems_solved[problem.probid] is not defined) }}
+                            </a>
+                        {% endfor %}
+                        <br />
                         <i class="fas fa-xmark fa-fw"></i> {{ language.not_solved }} submission{% if language.not_solved != 1 %}s{% endif %} did not solve a problem<br />
                     </div>
                 </div>
