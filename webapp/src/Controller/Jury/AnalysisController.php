@@ -120,4 +120,25 @@ class AnalysisController extends AbstractController
             $this->stats->getProblemStats($contest, $problem, $view)
         );
     }
+
+    #[Route(path: '/languages', name: 'analysis_languages')]
+    public function languagesAction(
+        #[MapQueryParameter]
+        ?string $view = null
+    ): Response {
+        $contest = $this->dj->getCurrentContest();
+
+        if ($contest === null) {
+            return $this->render('jury/error.html.twig', [
+                'error' => 'No contest selected',
+            ]);
+        }
+
+        $filterKeys = array_keys(StatisticsService::FILTERS);
+        $view = $view ?: reset($filterKeys);
+
+        return $this->render('jury/analysis/languages.html.twig',
+            $this->stats->getLanguagesStats($contest, $view)
+        );
+    }
 }

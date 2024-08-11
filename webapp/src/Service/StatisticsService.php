@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judging;
+use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Team;
@@ -58,6 +59,7 @@ class StatisticsService
                 ->join('t.category', 'tc')
                 ->leftJoin('t.affiliation', 'a')
                 ->join('t.submissions', 'ts')
+                ->join('ts.language', 'l')
                 ->join('ts.judgings', 'j')
                 ->andWhere('j.valid = true')
                 ->join('ts.language', 'lang')
@@ -72,6 +74,7 @@ class StatisticsService
                 ->join('t.category', 'tc')
                 ->leftJoin('tc.contests', 'cc')
                 ->join('t.submissions', 'ts')
+                ->join('ts.language', 'l')
                 ->join('ts.judgings', 'j')
                 ->andWhere('j.valid = true')
                 ->join('ts.language', 'lang')
@@ -512,6 +515,86 @@ class StatisticsService
         $stats['maxBucketSizeIncorrect'] = $maxBucketSizeIncorrect;
 
         return $stats;
+    }
+
+    /**
+     * @return array{
+     *     contest: Contest,
+     *     filters: array<string, string>,
+     *     view: string,
+     *     languages: array<string, array{
+     *          name: string,
+     *          teams: array<int, Team>,
+     *          team_count: int,
+     *          solved: int,
+     *          not_solved: int,
+     *          total: int,
+     *     }>
+     * }
+     */
+    public function getLanguagesStats(Contest $contest, string $view): array
+    {
+        /** @var Language[] $languages */
+        $languages = $this->em->getRepository(Language::class)
+            ->createQueryBuilder('l')
+            ->andWhere('l.allowSubmit = 1')
+            ->orderBy('l.name')
+            ->getQuery()
+            ->getResult();
+
+        $languageStats = [];
+
+        foreach ($languages as $language) {
+            $languageStats[$language->getLangid()] = [
+                'name' => $language->getName(),
+                'teams' => [],
+                'team_count' => 0,
+                'solved' => 0,
+                'not_solved' => 0,
+                'total' => 0,
+            ];
+        }
+
+        $teams = $this->getTeams($contest, $view);
+        foreach ($teams as $team) {
+            foreach ($team->getSubmissions() as $s) {
+                if ($s->getContest() != $contest) {
+                    continue;
+                }
+                if ($s->getSubmitTime() > $contest->getEndTime()) {
+                    continue;
+                }
+                if ($s->getSubmitTime() < $contest->getStartTime()) {
+                    continue;
+                }
+                if ($s->getSubmittime() > $contest->getFreezetime()) {
+                    continue;
+                }
+
+                $language = $s->getLanguage();
+
+                $languageStats[$language->getLangid()]['teams'][$team->getTeamid()] = $team;
+                $languageStats[$language->getLangid()]['total']++;
+                if ($s->getResult() === 'correct') {
+                    $languageStats[$language->getLangid()]['solved']++;
+                } else {
+                    $languageStats[$language->getLangid()]['not_solved']++;
+                }
+            }
+        }
+
+        foreach ($languageStats as &$languageStat) {
+            usort($languageStat['teams'], static fn(Team $a, Team $b) => ($a->getLabel() ?: $a->getExternalid()) <=> ($b->getLabel() ?: $b->getExternalid()));
+            $languageStat['team_count'] = count($languageStat['teams']);
+        }
+        unset($languageStat);
+
+        return [
+            'contest' => $contest,
+            'filters' => StatisticsService::FILTERS,
+            'view' => $view,
+            'languages' => $languageStats,
+        ];
     }
 
     /**
