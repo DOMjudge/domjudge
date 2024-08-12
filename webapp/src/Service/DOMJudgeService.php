@@ -1202,14 +1202,17 @@ class DOMJudgeService
         // - the new submission would get X+5+60 (since there's only one of their submissions still to be worked on),
         //   but we want to judge submissions of this team in order, so we take the current max (X+120) and add 1.
         $teamPriority = (int)(max($result['max']+1, $submission->getSubmittime() + 60*$result['count']));
-        $queueTask = new QueueTask();
-        $queueTask->setJudging($judging)
-            ->setPriority($priority)
-            ->setTeam($team)
-            ->setTeamPriority($teamPriority)
-            ->setStartTime(null);
-        $this->em->persist($queueTask);
-        $this->em->flush();
+        // Use a direct query to speed things up
+        $this->em->getConnection()->executeQuery(
+            'INSERT INTO queuetask (judgingid, priority, teamid, teampriority, starttime)
+             VALUES (:judgingid, :priority, :teamid, :teampriority, null)',
+            [
+                'judgingid' => $judging->getJudgingid(),
+                'priority' => $priority,
+                'teamid' => $team->getTeamid(),
+                'teampriority' => $teamPriority,
+            ]
+        );
     }
 
     public function getImmutableCompareExecutable(ContestProblem $problem): ImmutableExecutable
