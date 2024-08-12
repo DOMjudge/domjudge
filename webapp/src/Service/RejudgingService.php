@@ -16,6 +16,7 @@ use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Ramsey\Uuid\Uuid;
 
 class RejudgingService
 {
@@ -99,43 +100,62 @@ class RejudgingService
             }
 
 
-            $this->em->wrapInTransaction(function () use (
-                $priority,
-                $singleJudging,
-                $judging,
-                $rejudging
-            ) {
-                $this->em->getConnection()->executeStatement(
-                    'UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid AND rejudgingid IS NULL',
-                    [
-                        'rejudgingid' => $rejudging->getRejudgingid(),
-                        'submitid' => $judging->getSubmissionId(),
-                    ]
-                );
+            // $this->>em->wrapInTransaction flushes the entity manager, which is pretty slow.
+            // So use the direct connection transaction API here.
+            $this->em->getConnection()->beginTransaction();
 
-                if ($singleJudging) {
-                    $teamid = $judging->getSubmission()->getTeamId();
-                    if ($teamid) {
-                        $this->em->getConnection()->executeStatement(
-                            'UPDATE team SET judging_last_started = null WHERE teamid = :teamid',
-                            [ 'teamid' => $teamid ]
-                        );
-                    }
+            $this->em->getConnection()->executeStatement(
+                'UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid AND rejudgingid IS NULL',
+                [
+                    'rejudgingid' => $rejudging->getRejudgingid(),
+                    'submitid' => $judging->getSubmissionId(),
+                ]
+            );
+
+            if ($singleJudging) {
+                $teamid = $judging->getSubmission()->getTeamId();
+                if ($teamid) {
+                    $this->em->getConnection()->executeStatement(
+                        'UPDATE team SET judging_last_started = null WHERE teamid = :teamid',
+                        [ 'teamid' => $teamid ]
+                    );
                 }
+            }
 
-                // Give back judging, create a new one.
-                $newJudging = new Judging();
-                $newJudging
-                    ->setContest($judging->getContest())
-                    ->setValid(false)
-                    ->setSubmission($judging->getSubmission())
-                    ->setOriginalJudging($judging)
-                    ->setRejudging($rejudging);
-                $this->em->persist($newJudging);
-                $this->em->flush();
+            // Give back judging, create a new one.
+            // Use a direct query to speed things up.
+            $this->em->getConnection()->executeStatement(
+                'INSERT INTO judging (cid, valid, submitid, prevjudgingid, rejudgingid, uuid)
+                    VALUES (:cid, 0, :submitid, :prevjudgingid, :rejudgingid, :uuid)',
+                [
+                    'cid' => $judging->getContest()->getCid(),
+                    'submitid' => $judging->getSubmissionId(),
+                    'prevjudgingid' => $judging->getJudgingId(),
+                    'rejudgingid' => $rejudging->getRejudgingid(),
+                    'uuid' => Uuid::uuid4()->toString(),
+                ]
+            );
+            $newJudgingId = $this->em->getConnection()->lastInsertId();
+            $newJudging = $this->em->getRepository(Judging::class)
+                ->createQueryBuilder('j')
+                ->join('j.submission', 's')
+                ->join('s.contest_problem', 'cp')
+                ->join('s.language', 'l')
+                ->join('l.compile_executable', 'e')
+                ->join('cp.problem', 'p')
+                ->leftJoin('p.compare_executable', 'ce')
+                ->leftJoin('ce.immutableExecutable', 'ice')
+                ->leftJoin('p.run_executable', 're')
+                ->leftJoin('re.immutableExecutable', 'ire')
+                ->select('j', 's', 'cp', 'l', 'e', 'p', 'ce', 'ice', 're', 'ire')
+                ->andWhere('j.judgingid = :judgingid')
+                ->setParameter('judgingid', $newJudgingId)
+                ->getQuery()
+                ->getSingleResult();
 
-                $this->dj->maybeCreateJudgeTasks($newJudging, $priority);
-            });
+            $this->dj->maybeCreateJudgeTasks($newJudging, $priority);
+
+            $this->em->getConnection()->commit();
 
             if (!$first) {
                 $log .= ', ';
