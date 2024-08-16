@@ -28,15 +28,33 @@
                             </div>
                             <div class="card mt-2 mb-2 d-none" id="team-list-{{ langid }}">
                                 <div class="card-body">
-                                    <ul class="mb-0">
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                        <tr>
+                                            <td colspan="2">Team</td>
+                                            <td>Number of solved problems in {{ language.name }}</td>
+                                            <td>Total attempts in {{ language.name }}</td>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
                                         {% for team in language.teams %}
-                                        <li>
-                                            <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">
-                                                {{ team.effectiveName }} {{ team | entityIdBadge('t') }}
-                                            </a>
-                                        </li>
+                                            <tr>
+                                                <td>
+                                                    <a href="{{ path('jury_team', {'teamId': team.team.teamid}) }}">
+                                                        {{ team.team | entityIdBadge('t') }}
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <a href="{{ path('jury_team', {'teamId': team.team.teamid}) }}">
+                                                        {{ team.team.effectiveName }}
+                                                    </a>
+                                                </td>
+                                                <td>{{ team.solved }}</td>
+                                                <td>{{ team.total }}</td>
+                                            </tr>
                                         {% endfor %}
-                                    </ul>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         {% endif %}
