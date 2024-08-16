@@ -525,7 +525,11 @@ class StatisticsService
      *     view: string,
      *     languages: array<string, array{
      *          name: string,
-     *          teams: array<int, Team>,
+     *          teams: array<array{
+     *              team: Team,
+     *              solved: int,
+     *              total: int,
+     *          }>,
      *          team_count: int,
      *          solved: int,
      *          not_solved: int,
@@ -582,10 +586,18 @@ class StatisticsService
 
                 $language = $s->getLanguage();
 
-                $languageStats[$language->getLangid()]['teams'][$team->getTeamid()] = $team;
+                if (!isset($languageStats[$language->getLangid()]['teams'][$team->getTeamid()])) {
+                    $languageStats[$language->getLangid()]['teams'][$team->getTeamid()] = [
+                        'team' => $team,
+                        'solved' => 0,
+                        'total' => 0,
+                    ];
+                }
+                $languageStats[$language->getLangid()]['teams'][$team->getTeamid()]['total']++;
                 $languageStats[$language->getLangid()]['total']++;
                 if ($s->getResult() === 'correct') {
                     $languageStats[$language->getLangid()]['solved']++;
+                    $languageStats[$language->getLangid()]['teams'][$team->getTeamid()]['solved']++;
                     $languageStats[$language->getLangid()]['problems_solved'][$s->getProblem()->getProbId()] = $s->getContestProblem();
                 } else {
                     $languageStats[$language->getLangid()]['not_solved']++;
@@ -595,10 +607,13 @@ class StatisticsService
         }
 
         foreach ($languageStats as &$languageStat) {
-            usort($languageStat['teams'], static fn(
-                Team $a,
-                Team $b
-            ) => ($a->getLabel() ?: $a->getExternalid()) <=> ($b->getLabel() ?: $b->getExternalid()));
+            usort($languageStat['teams'], static function (array $a, array $b): int {
+                if ($a['solved'] === $b['solved']) {
+                    return $b['total'] <=> $a['total'];
+                }
+
+                return $b['solved'] <=> $a['solved'];
+            });
             $languageStat['team_count'] = count($languageStat['teams']);
             $languageStat['problems_solved_count'] = count($languageStat['problems_solved']);
             $languageStat['problems_attempted_count'] = count($languageStat['problems_attempted']);
