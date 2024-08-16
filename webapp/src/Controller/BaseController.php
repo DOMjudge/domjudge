@@ -561,7 +561,6 @@ abstract class BaseController extends AbstractController
                         return $response;
                     }
                 } else {
-                    $this->em->persist($entity);
                     $this->saveEntity($entity, null, true);
                 }
                 return $this->redirect($urlGenerator());
