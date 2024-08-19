@@ -56,4 +56,4 @@ configured problem by uploading a zip file that contains only testcase files.
 Any jury solutions present will be automatically submitted when ``allow_submit``
 is ``1`` and there's a team associated with the uploading user.
 
-.. _ICPC problem package specification: https://icpc.io/problem-package-format/spec/problem_package_format
+.. _ICPC problem package specification: https://icpc.io/problem-package-format/spec/legacy-icpc
