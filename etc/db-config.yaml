@@ -443,6 +443,11 @@
             default_value: ""
             public: false
             description: The tracking ID for Google Analytics.
+        -   name: hotjar_tracking_id
+            type: string
+            default_value: ""
+            public: false
+            description: The tracking ID for Hotjar.
         -   name: discord_invite_url
             type: string
             default_value: ""

@@ -162,6 +162,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'google_analytics_tracking_id'  =>
                 $this->tokenStorage->getToken() && $this->authorizationChecker->isGranted('ROLE_ADMIN') ?
                     '' : $this->config->get('google_analytics_tracking_id'),
+            'hotjar_tracking_id'            =>
+                $this->tokenStorage->getToken() && $this->authorizationChecker->isGranted('ROLE_ADMIN') ?
+                    '' : $this->config->get('hotjar_tracking_id'),
             'discord_invite_url'            => $this->config->get('discord_invite_url'),
         ];
     }
