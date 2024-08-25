@@ -50,9 +50,7 @@ services:
             $cspConfig:
                 defaultSrc: "'self'"
                 styleSrc: "'self' 'unsafe-inline'"
-                scriptSrc: "'self' 'unsafe-inline' https://*.googletagmanager.com"
-                imgSrc: "'self' https://*.google-analytics.com https://*.analytics.google.com
-                https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com data:"
-                connectSrc: "'self' https://*.google-analytics.com https://*.analytics.google.com
-                https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com"
+                scriptSrc: "'self' 'unsafe-inline' https://*.googletagmanager.com https://*.hotjar.com https://*.hotjar.io wss://*.hotjar.com"
+                imgSrc: "'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com data: https://*.hotjar.com https://*.hotjar.io wss://*.hotjar.com"
+                connectSrc: "'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com https://*.hotjar.com https://*.hotjar.io wss://*.hotjar.com"
                 frameAncestors: "'self'"
