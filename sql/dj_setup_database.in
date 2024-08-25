@@ -411,7 +411,7 @@ load)
 			ind=$((ind+1))
 		done
 		while true; do
-			echo "Which database should be loaded? "
+			printf "Which database should be loaded? "
 			read -r db
 			ind=1
 			for i in $databases; do
