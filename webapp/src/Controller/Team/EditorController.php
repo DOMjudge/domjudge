@@ -154,14 +154,14 @@ class EditorController extends BaseController
             ->add('entry_point', HiddenType::class)
             ->add('save', SubmitType::class, [
                 'attr' => [
-                    'class' => 'btn-outline-info',
+                    'class' => 'btn-secondary',
                 ],
                 'disabled' => !$enabledSubmission
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Save & Submit',
                 'attr' => [
-                    'class' => 'btn-outline-success'
+                    'class' => 'btn-success'
                 ],
                 'disabled' => !$enabledSubmission
             ]);
