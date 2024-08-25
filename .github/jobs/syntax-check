@@ -5,23 +5,23 @@ set -euo pipefail
 # shellcheck disable=SC2242
 
 # Change directory to the root of the repo relative to this script file
-cd "$(dirname "$0")/../../" || exit -1
+cd "$(dirname "$0")/../../" || exit 1
 
 PHP=$(command -v php)
 if [ ! -x "$PHP" ]; then
 	echo "PHP ($PHP) not found or not executable"
 	# shellcheck disable=SC2242
-	exit -1
+	exit 1
 fi
 if [ ! -x /usr/bin/checkbashisms ]; then
 	echo "/usr/bin/checkbashisms not found or not executable"
 	# shellcheck disable=SC2242
-	exit -1
+	exit 1
 fi
 if [ ! -x /usr/bin/shellcheck ]; then
 	echo "/usr/bin/shellcheck not found or not executable"
 	# shellcheck disable=SC2242
-	exit -1
+	exit 1
 fi
 
 find . \( \
