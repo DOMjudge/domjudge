@@ -37,11 +37,11 @@ class Version
     private ?string $compilerVersionCommand = null;
 
     #[ORM\ManyToOne(targetEntity: Language::class, inversedBy: "versions")]
-    #[ORM\JoinColumn(name: 'langid', referencedColumnName: 'langid')]
+    #[ORM\JoinColumn(name: 'langid', referencedColumnName: 'langid', onDelete: 'CASCADE')]
     private Language $language;
 
     #[ORM\ManyToOne(targetEntity: Judgehost::class)]
-    #[ORM\JoinColumn(name: 'judgehostid', referencedColumnName: 'judgehostid')]
+    #[ORM\JoinColumn(name: 'judgehostid', referencedColumnName: 'judgehostid', onDelete: 'SET NULL')]
     private Judgehost $judgehost;
 
     #[ORM\Column(
