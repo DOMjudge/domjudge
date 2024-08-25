@@ -53,24 +53,22 @@ EOF
 
 mysql_options()
 {
-	local user pass
-
 	# shellcheck disable=SC2153
 	if [ -n "$DBUSER" ]; then
-		user="-u $DBUSER"
+		_user="-u $DBUSER"
 	else
-		user="${DBA_USER:+-u ${DBA_USER}}"
+		_user="${DBA_USER:+-u ${DBA_USER}}"
 	fi
 	# shellcheck disable=SC2153
 	if [ -n "$PASSWD" ]; then
-		pass="-p$PASSWD"
+		_pass="-p$PASSWD"
 	else
-		[ -n "$PROMPT_PASSWD" ] && pass="-p"
-		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
+		[ -n "$PROMPT_PASSWD" ] && _pass="-p"
+		[ -n "$DBA_PASSWD" ]    && _pass="-p$DBA_PASSWD"
 	fi
 
 	[ -z "$USE_SOCKET" ] && port="-P$DBPORT"
-	echo $user ${pass:+"$pass"} -h "$DBHOST" ${port:+"$port"}
+	echo $_user ${_pass:+"$_pass"} -h "$DBHOST" ${port:+"$port"}
 }
 
 # Wrapper around mysql command to allow setting options, user, etc.
@@ -363,7 +361,7 @@ upgrade)
 	# Check if we need to upgrade the Doctrine migrations table
 	if ! echo "SHOW CREATE TABLE \`doctrine_migration_versions\`" | mysql "$DBNAME" >/dev/null 2>&1; then
 		symfony_console doctrine:migrations:sync-metadata-storage -n
-		# shellcheck disable=SC2016
+		# shellcheck disable=SC2016,SC2028
 		echo 'INSERT INTO `doctrine_migration_versions`
 			(version, executed_at, execution_time)
 			SELECT concat("DoctrineMigrations\\\\Version", version), executed_at, 1
@@ -386,7 +384,8 @@ dump)
 
 	if [ -f "${DATABASEDUMPDIR}/${DUMPNAME}.sql.gz" ]; then
 		while true; do
-			read -p "Overwrite existing database dump (y/N)? " yn
+			printf "Overwrite existing database dump (y/N)? "
+			read -r yn
 			case $yn in
 				[Yy]* ) break ;;
 				''|[Nn]* ) exit 0;;
@@ -407,19 +406,20 @@ load)
 			exit 1
 		fi
 		ind=1
-		for i in "$databases"; do
+		for i in $databases; do
 			echo "$ind) $i"
-			: $((ind+=1))
+			ind=$((ind+1))
 		done
 		while true; do
-			read -p "Which database should be loaded? " db
+			echo "Which database should be loaded? "
+			read -r db
 			ind=1
-			for i in "$databases"; do
+			for i in $databases; do
 				if [ "$ind" = "$db" ]; then
 					FILE="$i"
 					break
 				fi
-				: $((ind+=1))
+				ind=$((ind+1))
 			done
 			if [ -n "$FILE" ]; then
 				break
