@@ -82,8 +82,8 @@ mount -o remount,exec,dev /builds
 section_end mount
 
 section_start check_cgroup_v1 "Checking for cgroup v1 availability"
-grep cgroup$ /proc/filesystems
-if [ $? -eq 0 ]; then
+
+if grep cgroup$ /proc/filesystems; then
     cgroupv1=1
 else
     echo "Skipping tests that rely on cgroup v1"

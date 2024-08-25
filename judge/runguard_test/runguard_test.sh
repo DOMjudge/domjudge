@@ -1,10 +1,13 @@
 #!/bin/bash
+# Ignore unreachable code, as it is called by `make test`.
+# shellcheck disable=SC2317
 
-cd "$(dirname "${BASH_SOURCE}")"
+cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
 
 RUNGUARD=../runguard
 LOG1="$(mktemp)"
 LOG2="$(mktemp)"
+# shellcheck disable=SC2154
 META=$(mktemp -p "$judgehost_tmpdir")
 
 fail() {
@@ -98,7 +101,7 @@ test_streamsize() {
 	exec_check_fail sudo $RUNGUARD -u domjudge-run-0 -t 1 -s 123 yes DOMjudge
 	expect_stdout "DOMjudge"
 	limit=$((123*1024))
-	actual=$(cat "$LOG1" | wc -c)
+	actual=$(wc -c < "$LOG1")
 	[ $limit -eq $actual ] || fail "stdout not limited to ${limit}B, but wrote ${actual}B"
 }
 
@@ -107,7 +110,7 @@ test_streamsize_stderr() {
 	expect_stderr "DOMjudge"
 	# Allow 100 bytes extra, for the runguard time limit message.
 	limit=$((42*1024 + 100))
-	actual=$(cat "$LOG2" | wc -c)
+	actual=$(wc -c < "$LOG2")
 	[ $limit -gt $actual ] || fail "stdout not limited to ${limit}B, but wrote ${actual}B"
 }
 
@@ -120,7 +123,7 @@ test_redir_stdout() {
 	grep -q "foobar" "$stdout" || fail "did not find expected 'foobar' in redirect stdout"
 	
 	# Verify that stdout is empty.
-	actual=$(cat "$LOG1" | wc -c)
+	actual=$(wc -c < "$LOG1")
 	[ $actual -eq 0 ] || fail "stdout should be empty, but contains ${actual}B"
 
 	# This will fail because of the timeout.
@@ -129,13 +132,13 @@ test_redir_stdout() {
 	expect_stderr "hard wall time"
 
 	# Verify that stdout is empty.
-	actual=$(cat "$LOG1" | wc -c)
+	actual=$(wc -c < "$LOG1")
 	[ $actual -eq 0 ] || fail "stdout should be empty, but contains ${actual}B"
 
 	# Verify that redirected stdout has the right contents.
 	grep -q "DOMjudge" "$stdout" || fail "did not find expected 'DOMjudge' in redirect stdout"
 	limit=$((23*1024))
-	actual=$(cat "$stdout" | wc -c)
+	actual=$(wc -c < "$stdout")
 	[ $limit -eq $actual ] || fail "redirected stdout not limited to ${limit}B, but wrote ${actual}B"
 
 	rm "$stdout"
@@ -156,7 +159,7 @@ test_redir_stderr() {
 	# Verify that redirected stdout has the right contents.
 	grep -q "DOMjudge" "$stderr" || fail "did not find expected 'DOMjudge' in redirect stderr"
 	limit=$((11*1024))
-	actual=$(cat "$stderr" | wc -c)
+	actual=$(wc -c < "$stderr")
 	[ $limit -eq $actual ] || fail "redirected stdout not limited to ${limit}B, but wrote ${actual}B"
 
 	rm "$stderr"
@@ -164,6 +167,7 @@ test_redir_stderr() {
 
 test_rootdir_changedir() {
 	# Prepare test directory.
+	# shellcheck disable=SC2154
 	almost_empty_dir="$judgehost_judgedir/runguard_tests/almost_empty"
 	mkdir -p "$almost_empty_dir"/exists
 	cp hello "$almost_empty_dir"/
@@ -243,6 +247,7 @@ test_meta() {
 	exec_check_fail sudo $RUNGUARD -u domjudge-run-0 -M "$META" false
 	expect_meta 'exitcode: 1'
 
+	# shellcheck disable=SC2024
 	echo "DOMjudge" | sudo $RUNGUARD -u domjudge-run-0 -t 2 -M "$META" rev > "$LOG1" 2> "$LOG2"
 	expect_meta 'wall-time: 0.0'
 	expect_meta 'stdout-bytes: 9'
