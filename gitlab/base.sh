@@ -33,7 +33,7 @@ fi
 
 # Generate a dbpasswords file
 # Note that this does not use ${DATABASE_NAME} since Symfony adds the _test postfix itself
-echo "unused:sqlserver:domjudge:domjudge:domjudge:3306" > etc/dbpasswords.secret
+echo 'unused:sqlserver:domjudge:domjudge:domjudge_+% #$*)@(!/;,.:3306' > etc/dbpasswords.secret
 
 # Generate APP_SECRET for symfony
 # shellcheck disable=SC2164
