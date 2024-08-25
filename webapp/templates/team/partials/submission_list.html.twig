@@ -82,7 +82,8 @@
         {% endif %}
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>
-                        {{ submission.judgings.first.pointsScored }}/{{ submission.contestProblem.points }}
+                        {% set lastValidJudging = submission.judgings | filter(judging => judging.valid) | last %}
+                        {{ lastValidJudging.pointsScored }}/{{ submission.contestProblem.points }}
                     </a>
                 </td>
         {% if allowDownload %}
