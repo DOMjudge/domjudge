@@ -29,6 +29,7 @@ Commands:
   status           check database installation status
   genpass          generate DB,API,Symfony,admin password files
   create-db-users  create (empty) database and users
+  update-password  update DB user database to that in 'etc/dbpasswords.secret'
   install          create database, example contest and users if not existing
   bare-install     create database, setup defaults if not existing
   uninstall        remove database users and database, INCLUDING ALL DATA!
@@ -235,6 +236,17 @@ remove_db_users()
 	verbose "DOMjudge database and user(s) removed."
 }
 
+update_password()
+{
+	read_dbpasswords
+	(
+    echo "ALTER USER '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+	echo "FLUSH PRIVILEGES;"
+	) | mysql
+    verbose "ALTER USER '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+	verbose "Database user password updated from credentials file."
+}
+
 install_examples()
 {
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-example-data
@@ -335,6 +347,10 @@ install-loadtest)
 
 create-db-users)
 	create_db_users_helper
+	;;
+
+update-password)
+	update_password
 	;;
 
 bare-install|install)
