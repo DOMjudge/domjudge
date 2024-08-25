@@ -58,9 +58,7 @@
                     This problem is no longer available in any contest.
                 {% endif %}
 
-                <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
     {% endif %}
@@ -73,9 +71,7 @@
                     <a class="btn btn-outline-secondary" href="{{ path('team_problem_statement', {'probId': problem.probid}) }}" download>
                         <i class="fa-solid fa-download"></i>
                     </a>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <iframe src="{{ path('team_problem_statement', {'probId': problem.probid}) }}"
