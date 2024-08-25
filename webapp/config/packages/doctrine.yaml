@@ -7,7 +7,7 @@ doctrine:
             charset: utf8mb4
             collate: utf8mb4_unicode_ci
 
-        url: '%env(resolve:DATABASE_URL)%'
+        url: '%env(DATABASE_URL)%'
         profiling_collect_backtrace: '%kernel.debug%'
         types:
             tinyint: App\Doctrine\DBAL\Types\TinyIntType
