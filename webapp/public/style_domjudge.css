@@ -1,7 +1,7 @@
 :root {
     /** Specify the BG color in one place. **/
-    --background-color: white;
-    --text-color: black;
+    /*--background-color: white;*/
+    /*--text-color: black;*/
 }
 
 /** WCAG fixes start **/
@@ -17,8 +17,8 @@
 /** WCAG fixes end **/
 
 body {
-    color: var(--text-color);
-    background-color: var(--background-color);
+    /*color: var(--text-color);*/
+    /*background-color: var(--background-color);*/
     font-family: Roboto, sans-serif;
     padding-top: 4.5rem;
 }
@@ -198,6 +198,11 @@ del {
     min-width: 4.2em;
     border-right: none;
 }
+
+html[data-bs-theme="dark"] .scoreboard a {
+    color: var(--bs-light);
+}
+
 .scoreboard a {
     display: block;
     padding: 2px 1px 2px 1px;
@@ -228,6 +233,11 @@ del {
 }
 .scoreboard .scoreaf { white-space: nowrap; border: 0; padding-left: 2px; text-align: center; }
 .scoreboard .scoreaf img { vertical-align: middle; }
+
+html[data-bs-theme="dark"] .univ {
+    color: var(--bs-gray-400);
+}
+
 .univ {
     font-size: 80%;
     font-weight: normal;
@@ -250,7 +260,7 @@ img.affiliation-logo {
     box-shadow: -1px 0 0 0 silver inset,
                 0 2px 0 0 black;
     border: none;
-    background: var(--background-color);
+    /*background: var(--background-color);*/
     position: sticky;
     top: 0;
     z-index: 1;
@@ -259,7 +269,7 @@ img.affiliation-logo {
 .problempoints {
     font-size: smaller;
     font-weight: normal;
-    color: #303030;
+    /*color: #303030;*/
     padding-left: 3pt;
     padding-right: 3pt;
 }
@@ -622,6 +632,7 @@ tr.ignore td, td.ignore, span.ignore {
     font-size: 1em;
     min-width: 2em;
     white-space: normal;
+    text-wrap: nowrap;
 }
 
 .tooltip .tooltip-inner {

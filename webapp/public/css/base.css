@@ -11,3 +11,56 @@ footer {
     width: 100%;
     text-align: center;
 }
+
+/*
+ * Temporary dark mode solution for select2
+ * https://github.com/apalfrey/select2-bootstrap-5-theme/issues/65#issuecomment-1846786325
+ */
+
+/* Select 2 bootstrap-5 theme override */
+html[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection {
+    background-color: transparent !important;
+    border: 1px solid #495057;
+}
+
+html[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection--single {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+html[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    color: #dee2e6 !important;
+}
+
+html[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered .select2-selection__choice {
+    color: #dee2e6 !important;
+}
+
+html[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered .select2-selection__choice {
+    border: 1px solid var(--bs-gray-600);
+}
+
+html[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered .select2-selection__placeholder {
+    color: #dee2e6 !important;
+}
+
+html[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-dropdown .select2-search .select2-search__field {
+    background-color: transparent !important;
+    color: #dee2e6 !important;
+}
+
+html[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-dropdown {
+    color: #dee2e6 !important;
+    border: 1px solid #495057 !important;
+    background-color: var(--bs-body-bg);
+}
+
+html[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[role=group] .select2-results__group {
+    color: var(--bs-secondary-color) !important;
+}
+
+/*html[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--highlighted {*/
+/*    background-color: var(--bs-primary-color);*/
+/*    color: var(--bs-primary-text-color);*/
+/*}*/
+
+/* end of select2 bootstrap-5 theme override */

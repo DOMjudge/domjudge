@@ -103,9 +103,9 @@
                     <a {% if link %}href="{{ link }}"{% endif %} target="{{ target }}">
                         {{  problem | problemBadge }}
                         {% if showPoints %}
-                            <span class='problempoints'>
+                            <div class='problempoints mt-3 mb-2'>
                                 [{% if problem.points == 1 %}1 point{% else %}{{ problem.points }} points{% endif %}]
-                            </span>
+                            </div>
                         {% endif %}
                     </a>
                 </th>
@@ -413,9 +413,13 @@
     {% for color,i in backgroundColors %}
         {% set colorClass = color | replace({"#": "_"}) %}
 
-        .cl{{ colorClass }} {
-            background-color: {{ color }};
-        }
+        {#html[data-bs-theme="dark"] .cl{{ colorClass }} {#}
+        {#    background-color: #3d3d3d;#}
+        {#}#}
+
+        {#.cl{{ colorClass }} {#}
+        {#    background-color: {{ color }};#}
+        {#}#}
 
         {% set cMin = color|hexColorToRGBA(0) %}
         {% set cMax = color|hexColorToRGBA(1) %}

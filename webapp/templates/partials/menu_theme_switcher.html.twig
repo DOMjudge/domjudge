@@ -1,0 +1,36 @@
+<ul class="navbar-nav ps-xl-2">
+    <li class="nav-item dropdown">
+        <button class="nav-link" id="navbarDropdownTheme" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-circle-half-stroke"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownTheme">
+            <li>
+                <button class="dropdown-item" type="button" data-theme="auto">
+                    <i class="fas fa-fw fa-circle-half-stroke"></i> Auto
+                </button>
+            </li>
+            <li>
+                <button class="dropdown-item" type="button" data-theme="light">
+                    <i class="fas fa-fw fa-lightbulb"></i> Light Mode
+                </button>
+            </li>
+            <li>
+                <button class="dropdown-item" type="button" data-theme="dark">
+                    <i class="fas fa-fw fa-moon"></i> Dark Mode
+                </button>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<script>
+    ;(function () {
+        document.querySelectorAll('[data-theme]').forEach((button) => {
+            button.addEventListener('click', function () {
+                const theme = this.getAttribute('data-theme')
+                window.updateTheme(theme)
+            })
+        })
+    })();
+</script>
+
