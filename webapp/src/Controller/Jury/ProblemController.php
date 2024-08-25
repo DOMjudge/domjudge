@@ -592,7 +592,7 @@ class ProblemController extends BaseController
                     $messages[] = sprintf('Updated description of testcase %d ', $rank);
                 }
 
-                $newGroupId = intval($request->request->get('group')[$rank]);
+                $newGroupId = intval($request->request->all('group')[$rank]);
                 $oldGroupId = $testcase->getTestcaseGroup() === null ? -1 : $testcase->getTestcaseGroup()->getTestcasegroupid();
                 if ($oldGroupId !== $newGroupId) {
                     $newGroup = $newGroupId === -1 ? null : $this->em->getRepository(TestcaseGroup::class)->find($newGroupId);
