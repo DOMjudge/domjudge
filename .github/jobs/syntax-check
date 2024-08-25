@@ -3,7 +3,9 @@
 
 set -euo pipefail
 # shellcheck disable=SC2242
-cd "$(dirname "$0")" || exit -1
+
+# Change directory to the root of the repo relative to this script file
+cd "$(dirname "$0")/../../" || exit -1
 
 PHP=$(command -v php)
 if [ ! -x "$PHP" ]; then
