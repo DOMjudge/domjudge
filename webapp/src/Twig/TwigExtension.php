@@ -163,7 +163,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 $this->tokenStorage->getToken() && $this->authorizationChecker->isGranted('ROLE_ADMIN') ?
                     '' : $this->config->get('google_analytics_tracking_id'),
             'discord_invite_url'            => $this->config->get('discord_invite_url'),
-            'allow_registration'            => $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]) !== 0,
         ];
     }
 
