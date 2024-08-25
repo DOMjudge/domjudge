@@ -271,7 +271,13 @@ class EditorController extends BaseController
     {
         return ($this->em->contains($submission) && $submission->getValid()) ? array_merge(
             $this->scoreboardService->getScoreboardTwigData(
-                $request, null, '', true, false, true, $contest
+                request: $request,
+                response: null,
+                refreshUrl: '',
+                jury: true,
+                public: false,
+                static: true,
+                contest: $contest
             ),
             [
                 'showFlags' => $this->config->get('show_flags'),
@@ -294,7 +300,8 @@ class EditorController extends BaseController
         return [
             'submissions' => [$submission],
             'allowDownload' => (bool)$this->config->get('allow_team_submission_download'),
-            'verificationRequired' => (bool)$this->config->get('verification_required')
+            'verificationRequired' => (bool)$this->config->get('verification_required'),
+            'showTooLateResult' => (bool)$this->config->get('show_too_late_result'),
         ];
     }
 
