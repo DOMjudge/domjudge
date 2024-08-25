@@ -68,7 +68,7 @@ class PublicController extends BaseController
         ?bool $static = false,
     ): Response {
         $response         = new Response();
-        $refreshUrl       = $this->generateUrl('public_index');
+        $refreshUrl       = $this->generateUrl('public_scoreboard');
         $contest          = $this->dj->getCurrentContest(onlyPublic: true);
         $nonPublicContest = $this->dj->getCurrentContest(onlyPublic: false);
         if (!$contest && $nonPublicContest && $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1])) {
