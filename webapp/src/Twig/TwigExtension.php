@@ -1104,7 +1104,7 @@ EOF;
         // Pick the foreground text color based on the background color.
         $foreground = ($background[0] + $background[1] + $background[2] > 450) ? '#000000' : '#ffffff';
         return sprintf(
-            '<span class="rounded problem-badge p-2 mx-2" style="border: 2px solid %s">%s</span>',
+            '<div class="rounded problem-badge px-2 py-1 mx-2 mt-1" style="border: 2px solid %s">%s</div>',
             $border,
             $problem->getShortname()
         );

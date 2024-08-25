@@ -255,12 +255,17 @@ img.affiliation-logo {
     border-bottom: 2px solid black;
     white-space: nowrap;
 }
+
+html[data-bs-theme="dark"] .scoreheader th {
+    background: var(--bs-dark);
+}
+
 .scoreheader th {
     text-align: center;
     box-shadow: -1px 0 0 0 silver inset,
                 0 2px 0 0 black;
     border: none;
-    /*background: var(--background-color);*/
+    background: var(--bs-light);
     position: sticky;
     top: 0;
     z-index: 1;
@@ -646,7 +651,7 @@ blockquote {
 }
 
 .category-best {
-    margin-right: 2em;
+    /*margin-right: 2em;*/
     font-weight: normal;
 }
 
