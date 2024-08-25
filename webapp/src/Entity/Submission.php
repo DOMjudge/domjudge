@@ -118,7 +118,7 @@ class Submission extends BaseApiEntity implements
     private Team $team;
 
     #[ORM\ManyToOne(inversedBy: 'submissions')]
-    #[ORM\JoinColumn(name: 'userid', referencedColumnName: 'userid', onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'userid', referencedColumnName: 'userid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?User $user = null;
 
