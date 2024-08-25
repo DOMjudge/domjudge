@@ -205,8 +205,8 @@
         </div>
 
         <div class="row mb-2">
-            <div class="input-group col-sm-4">
-                <label for="add_group">Group</label>
+            <label class="col-sm-2 col-form-label" for="add_group">Group</label>
+            <div class="col-sm-4">
                 <select class="form-control" name="add_group" id="add_group">
                     {% if problem.testcaseGroups|length + emptyTestcaseGroups|length < 1 %}
                         <option value="-1">create default</option>
