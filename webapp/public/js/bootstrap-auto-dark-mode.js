@@ -15,6 +15,12 @@ window.updateTheme = function(theme) {
 
     localStorage.setItem("theme", theme);
     document.querySelector("html").setAttribute("data-bs-theme", theme);
+
+    editors = document.querySelectorAll(".editor");
+    for (let i = 0; i < editors.length; i++) {
+        let editor = editors[i].editor;
+        editor.setTheme(theme === "dark" ? "ace/theme/tomorrow_night" : "ace/theme/eclipse");
+    }
 }
 
 ;(function () {

@@ -859,11 +859,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 <div class="editor" id="__EDITOR__">%s</div>
 <script>
 var __EDITOR__ = ace.edit("__EDITOR__");
-__EDITOR__.setTheme("ace/theme/eclipse");
 __EDITOR__.setOptions({ maxLines: Infinity });
 __EDITOR__.setReadOnly(%s);
 %s
 document.getElementById("__EDITOR__").editor = __EDITOR__;
+window.updateTheme();
 %s
 </script>
 HTML;
