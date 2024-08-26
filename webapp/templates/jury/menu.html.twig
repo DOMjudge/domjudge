@@ -147,6 +147,8 @@
             {% include 'partials/menu_change_contest.html.twig' with {contest: current_contest, contests: current_contests, change_path: 'jury_change_contest', show_no_contest: true} %}
         </ul>
         {% include 'partials/menu_countdown.html.twig' with {contest: current_contest} %}
+
+        {% include 'partials/menu_theme_switcher.html.twig' %}
     </div>
   </div>
 </nav>
