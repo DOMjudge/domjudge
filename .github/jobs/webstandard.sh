@@ -14,7 +14,7 @@ ROLE="$2"
 cd /opt/domjudge/domserver
 
 section_start "Setup pa11y"
-pa11y --version
+/home/domjudge/node_modules/.bin/pa11y --version
 section_end
 
 section_start "Setup the test user"
@@ -143,8 +143,8 @@ else
     for file in $(find $URL -name "*.html")
     do
         section_start "$file"
-        su domjudge -c "pa11y --config .github/jobs/pa11y_config.json $STAN -r json -T $ACCEPTEDERR $FLTR $file" | python3 -m json.tool
-	ERR=$(su domjudge -c "pa11y --config .github/jobs/pa11y_config.json $STAN -r csv -T $ACCEPTEDERR $FLTR $file" | wc -l)
+        su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r json -T $ACCEPTEDERR $FLTR $file" | python3 -m json.tool
+	ERR=$(su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r csv -T $ACCEPTEDERR $FLTR $file" | wc -l)
         FOUNDERR=$((ERR+FOUNDERR-1)) # Remove header row
         section_end
     done
