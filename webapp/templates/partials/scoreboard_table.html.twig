@@ -413,13 +413,9 @@
     {% for color,i in backgroundColors %}
         {% set colorClass = color | replace({"#": "_"}) %}
 
-        {#html[data-bs-theme="dark"] .cl{{ colorClass }} {#}
-        {#    background-color: #3d3d3d;#}
-        {#}#}
-
-        {#.cl{{ colorClass }} {#}
-        {#    background-color: {{ color }};#}
-        {#}#}
+        .cl{{ colorClass }} {
+            border-left: 5px solid {{ color }};
+        }
 
         {% set cMin = color|hexColorToRGBA(0) %}
         {% set cMax = color|hexColorToRGBA(1) %}
