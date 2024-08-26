@@ -448,6 +448,10 @@ tr.ignore td, td.ignore, span.ignore {
     font-weight: normal;
 }
 
+html[data-bs-theme="dark"] .teamoverview {
+    background-color: var(--bs-dark);
+}
+
 .teamoverview {
     border-top: solid 1px darkgray;
     border-bottom: solid 1px darkgray;

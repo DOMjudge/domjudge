@@ -4,7 +4,7 @@
 {% if submissions is empty %}
     <div class="alert alert-warning">No submissions</div>
 {% else %}
-    <table class="data-table table table-hover table-striped table-sm submissions-table">
+    <table class="data-table table table-hover table-striped table-sm align-middle submissions-table">
         <thead class="thead-light">
         <tr>
             <th scope="col">time</th>
@@ -15,6 +15,7 @@
                 <th scope="col">runtime</th>
             {% endif %}
             <th scope="col">points</th>
+            <th scope="col"></th>
             {% if allowDownload %}
                 <th scope="col"></th>
             {% endif %}
@@ -86,9 +87,14 @@
                         {{ lastValidJudging.pointsScored }}/{{ submission.contestProblem.points }}
                     </a>
                 </td>
+                <td>
+                    <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>
+                        <i class="fas fa-magnifying-glass"></i>
+                    </a>
+                </td>
         {% if allowDownload %}
                 <td>
-                    <a title="Download submission ZIP" aria-label="download submission zip" class="btn btn-light" href="{{ path('team_submission_download', {'submitId': submission.submitid}) }}">
+                    <a title="Download submission ZIP" aria-label="download submission zip" class="btn" href="{{ path('team_submission_download', {'submitId': submission.submitid}) }}">
                         <i class="fa fa-file-archive"></i>
                     </a>
                 </td>

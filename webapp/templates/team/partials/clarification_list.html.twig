@@ -1,5 +1,5 @@
 <div class="table-responsive table-wrapper">
-    <table class="data-table table table-striped table-hover table-sm" style="width:100%;">
+    <table class="data-table table table-striped table-hover table-sm align-middle" style="width:100%;">
         <thead class="thead-light">
         <tr>
             <th scope="col">time</th>
@@ -7,6 +7,7 @@
             <th scope="col">to</th>
             <th scope="col">subject</th>
             <th scope="col">text</th>
+            <th scope="col"></th>
         </tr>
         </thead>
         <tbody>
@@ -56,6 +57,12 @@
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}">
                         {{ clarification.summary }}
+                    </a>
+                </td>
+
+                <td>
+                    <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}">
+                        <i class="fas fa-magnifying-glass"></i>
                     </a>
                 </td>
             </tr>
