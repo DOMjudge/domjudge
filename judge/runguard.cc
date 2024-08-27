@@ -136,7 +136,9 @@ int be_verbose;
 int be_quiet;
 int show_help;
 int show_version;
+int in_error_handling = 0;
 pid_t runpipe_pid = -1;
+
 
 double walltimelimit[2], cputimelimit[2]; /* in seconds, soft and hard limits */
 int walllimit_reached, cpulimit_reached; /* 1=soft, 2=hard, 3=both limits reached */
@@ -222,6 +224,10 @@ void verbose(const char *format, ...)
 
 void error(int errnum, const char *format, ...)
 {
+	// Silently ignore errors that happen while handling other errors.
+	if (in_error_handling) return;
+	in_error_handling = 1;
+
 	va_list ap;
 	va_start(ap,format);
 
@@ -305,12 +311,15 @@ void write_meta(const char *key, const char *format, ...)
 	va_start(ap,format);
 
 	if ( fprintf(metafile,"%s: ",key)<=0 ) {
+		outputmeta = 0;
 		error(0,"cannot write to file `%s'",metafilename);
 	}
 	if ( vfprintf(metafile,format,ap)<0 ) {
+		outputmeta = 0;
 		error(0,"cannot write to file `%s'(vfprintf)",metafilename);
 	}
 	if ( fprintf(metafile,"\n")<=0 ) {
+		outputmeta = 0;
 		error(0,"cannot write to file `%s'",metafilename);
 	}
 
