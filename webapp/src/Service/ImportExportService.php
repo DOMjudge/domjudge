@@ -1012,7 +1012,7 @@ class ImportExportService
                     'label' => $team['label'] ?? null,
                     'categoryid' => $team['group_ids'][0] ?? null,
                     'name' => $team['name'] ?? '',
-                    'display_name' => $team['display_name'] ?? '',
+                    'display_name' => $team['display_name'] ?? null,
                     'publicdescription' => $team['public_description'] ?? $team['members'] ?? '',
                     'location' => $team['location']['description'] ?? null,
                 ],
