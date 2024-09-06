@@ -33,12 +33,14 @@ class JudgehostController extends BaseController
     // Note: when adding or modifying routes, make sure they do not clash with the /judgehosts/{hostname} route.
 
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly EventLogService $eventLog,
-        protected readonly KernelInterface $kernel
-    ) {}
+        EventLogService $eventLog,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLog, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_judgehosts')]
     public function indexAction(Request $request): Response
@@ -269,8 +271,7 @@ class JudgehostController extends BaseController
             ->getQuery()
             ->getOneOrNullResult();
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLog, $this->kernel,
-                                     [$judgehost], $this->generateUrl('jury_judgehosts'));
+        return $this->deleteEntities($request, [$judgehost], $this->generateUrl('jury_judgehosts'));
     }
 
     #[IsGranted('ROLE_ADMIN')]

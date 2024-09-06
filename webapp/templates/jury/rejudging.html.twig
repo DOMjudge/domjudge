@@ -105,6 +105,27 @@
          <div class="alert alert-warning">Judgings in this rejudging will be applied automatically.</div>
     {% endif %}
 
+    {% if disabledLangs %}
+        <div class="alert alert-danger">
+            The following languages are currently not allowed to be judged:
+            <ul>
+                {% for id, name in disabledLangs %}
+                    <li>{{ name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    {% if disabledProbs %}
+        <div class="alert alert-danger">
+            The following problems are currently not allowed to be judged:
+            <ul>
+                {% for id, name in disabledProbs %}
+                    <li>{{ name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
     <div data-rejudging-matrix>
         {% include 'jury/partials/rejudging_matrix.html.twig' %}
     </div>

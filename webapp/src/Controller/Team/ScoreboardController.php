@@ -6,10 +6,12 @@ use App\Controller\BaseController;
 use App\Entity\Team;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,11 +26,15 @@ use Symfony\Component\Routing\Attribute\Route;
 class ScoreboardController extends BaseController
 {
     public function __construct(
-        protected readonly DOMJudgeService $dj,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly ScoreboardService $scoreboardService,
-        protected readonly EntityManagerInterface $em
-    ) {}
+        EntityManagerInterface $em,
+        protected readonly EventLogService $eventLogService,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '/scoreboard', name: 'team_scoreboard')]
     public function scoreboardAction(Request $request): Response

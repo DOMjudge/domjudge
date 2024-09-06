@@ -407,10 +407,13 @@ class ExternalContestSourceService
                         $this->setLastEvent($this->getLastReadEventId());
                     }
                 } catch (TransportException $e) {
-                    $this->logger->error(
-                        'Received error while reading event feed: %s',
-                        [$e->getMessage()]
-                    );
+                    if (!str_starts_with($e->getMessage(), 'OpenSSL SSL_read: error:0A000126')) {
+                        // Ignore error of not fully compliant TLS implementation on server-side
+                        $this->logger->error(
+                            'Received error while reading event feed: %s',
+                            [$e->getMessage()]
+                        );
+                    }
                 }
             }
 
@@ -620,7 +623,7 @@ class ExternalContestSourceService
 
         // Note the @vars here are to make PHPStan understand the correct types.
         $method = match ($event->type) {
-            EventType::AWARDS, EventType::TEAM_MEMBERS, EventType::ACCOUNTS, EventType::PERSONS => $this->ignoreEvent(...),
+            EventType::ACCOUNTS, EventType::AWARDS, EventType::MAP_INFO, EventType::PERSONS, EventType::TEAM_MEMBERS => $this->ignoreEvent(...),
             EventType::STATE => $this->validateState(...),
             EventType::CONTESTS => $this->validateAndUpdateContest(...),
             EventType::JUDGEMENT_TYPES => $this->importJudgementType(...),
@@ -748,8 +751,8 @@ class ExternalContestSourceService
             $toCheck = [
                 'start_time_enabled' => true,
                 'start_time_string'  => $startTime->format('Y-m-d H:i:s ') . $timezoneToUse,
-                'end_time'           => $contest->getAbsoluteTime($fullDuration),
-                'freeze_time'        => $contest->getAbsoluteTime($fullFreeze),
+                'end_time_string'    => preg_replace('/\.000$/', '', $fullDuration),
+                'freeze_time_string' => preg_replace('/\.000$/', '', $fullFreeze),
             ];
         } else {
             $toCheck = [

@@ -91,7 +91,7 @@ class JuryMiscControllerTest extends BaseTestCase
                 $elements = ["3 tries",'Demo contest','Utrecht University'];
             } elseif (in_array($contestStage, ['preEnd','preUnfreeze'])) {
                 $elements = ["0 + 4 tries","3 tries","2 + 1 tries",'Demo contest','Utrecht University'];
-                if ($contestStage === 'preFreeze') {
+                if ($contestStage === 'preUnfreeze') {
                     $elements[] = 'contest over, waiting for results';
                 }
             } else {

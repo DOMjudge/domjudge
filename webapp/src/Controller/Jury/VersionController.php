@@ -5,9 +5,12 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Entity\Language;
 use App\Entity\Version;
+use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -15,7 +18,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route(path: '/jury/versions')]
 class VersionController extends BaseController
 {
-    public function __construct(private readonly EntityManagerInterface $em) {}
+    public function __construct(
+        EntityManagerInterface $em,
+        protected readonly EventLogService $eventLogService,
+        DOMJudgeService $dj,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_versions')]
     public function indexAction(): Response

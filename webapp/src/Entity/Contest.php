@@ -50,23 +50,25 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 )]
 #[UniqueEntity(fields: 'shortname')]
 #[UniqueEntity(fields: 'externalid')]
-class Contest extends BaseApiEntity implements AssetEntityInterface
+class Contest extends BaseApiEntity implements
+    HasExternalIdInterface,
+    AssetEntityInterface,
+    ExternalIdFromInternalIdInterface,
+    PrefixedExternalIdInterface
 {
     final public const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Contest ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('id')]
-    #[Serializer\Type('string')]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     protected ?int $cid = null;
 
     #[ORM\Column(
         nullable: true,
         options: ['comment' => 'Contest ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
-    #[Serializer\SerializedName('external_id')]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\SerializedName('id')]
     protected ?string $externalid = null;
 
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]
@@ -913,6 +915,16 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->problems;
     }
 
+    public function getContestProblem(Problem $problem): ?ContestProblem
+    {
+        foreach ($this->getProblems() as $contestProblem) {
+            if ($contestProblem->getProblem() === $problem) {
+                return $contestProblem;
+            }
+        }
+        return null;
+    }
+
     public function addClarification(Clarification $clarification): Contest
     {
         $this->clarifications[] = $clarification;
@@ -1093,6 +1105,11 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             $resultItem = [];
             $method     = sprintf('get%stime', ucfirst($time));
             $timeValue  = $this->{$method}();
+            $timeValueString = '';
+            if ($time !== 'finalize') {
+                $method = sprintf('get%stimeString', ucfirst($time));
+                $timeValueString = $this->{$method}();
+            }
             if ($time === 'start' && !$this->getStarttimeEnabled()) {
                 $resultItem['icon'] = 'ellipsis-h';
                 $timeValue          = $this->getStarttime(false);
@@ -1109,7 +1126,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             }
 
             $resultItem['label'] = sprintf('%s time', ucfirst($time));
-            $resultItem['time']  = Utils::printtime($timeValue, 'Y-m-d H:i:s (T)');
+            $resultItem['time']  = $timeValueString;
+            if (empty($resultItem['time'])) {
+                $resultItem['time']  = Utils::printtime($timeValue, 'Y-m-d H:i:s (T)');
+            }
             if ($time === 'start' && !$this->getStarttimeEnabled()) {
                 $resultItem['class'] = 'ignore';
             }

@@ -148,12 +148,11 @@ class LanguageController extends AbstractRestController
             $language->setAllowSubmit(false);
         }
 
-        $idField = $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid';
         foreach ($newLanguages as $language) {
             /** @var Language $language */
             $lang_id = $language['id'];
             $lang = $this->em->getRepository(Language::class)->findOneBy(
-                [$idField => $lang_id]
+                ['externalid' => $lang_id]
             );
             if (!$lang) {
                 // TODO: Decide how to handle this case, either erroring out or creating a new language.
@@ -225,6 +224,6 @@ class LanguageController extends AbstractRestController
 
     protected function getIdField(): string
     {
-        return sprintf('lang.%s', $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid');
+        return 'lang.externalid';
     }
 }

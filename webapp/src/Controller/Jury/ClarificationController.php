@@ -115,7 +115,6 @@ class ClarificationController extends AbstractController
             'oldClarifications' => $oldClarifications,
             'generalClarifications' => $generalClarifications,
             'queues' => $queues,
-            'showExternalId' => $this->eventLogService->externalIdFieldForEntity(Clarification::class),
             'currentQueue' => $currentQueue,
             'currentFilter' => $currentFilter,
             'categories' => $categories,
@@ -140,7 +139,6 @@ class ClarificationController extends AbstractController
         }
 
         $parameters = ['list' => []];
-        $parameters['showExternalId'] = $this->eventLogService->externalIdFieldForEntity(Clarification::class);
 
         $formData = [
             'recipient' => JuryClarificationType::RECIPIENT_MUST_SELECT,

@@ -88,74 +88,50 @@
 
     <h2 id="results">Results</h2>
     <div class="row">
-        <div class="col-md-6">
-        </div>
-        <div class="col-md-6">
+        <div class="col-md-6 offset-md-6">
             <div class="tile">
-                <h3>Export &lt;html&gt;</h3>
-                    <ul>
-                        <li>
-                            <code>wf_results.html</code>:
-                            <ul>
-                                {% for sort_order, names in sort_orders %}
-                                    <li>
-                                        <a href="{{ path('jury_html_export', {'type': 'wf_results', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
-                                        ({{ names | join(', ') }})
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                        <li>
-                            <code>full_results.html</code>:
-                            <ul>
-                                {% for sort_order, names in sort_orders %}
-                                    <li>
-                                        <a href="{{ path('jury_html_export', {'type': 'full_results', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
-                                        ({{ names | join(', ') }})
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="{{ path('jury_html_export', {'type': 'clarifications'}) }}" target="_blank"><code>clarifications.html</code></a>
-                        </li>
-                    </ul>
+                <h3>Export clarifications</h3>
+                <ul>
+                    <li>
+                        <a href="{{ path('jury_html_export_clarifications') }}" target="_blank">
+                            <code>clarifications.html</code>
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col-md-6">
-        </div>
-        <div class="col-md-6">
+        <div class="col-md-6 offset-md-6">
             <div class="tile">
-                <h3>Export tab-separated</h3>
-                    <ul>
-                        <li>
-                            <code>wf_results.tsv</code>:
-                            <ul>
-                            {% for sort_order, names in sort_orders %}
-                                <li>
-                                    <a href="{{ path('jury_tsv_export', {'type': 'wf_results', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
-                                    ({{ names | join(', ') }})
-                                 </li>
-                            {% endfor %}
-                            </ul>
-                        </li>
-                        <li>
-                            <code>full_results.tsv</code>:
-                            <ul>
-                                {% for sort_order, names in sort_orders %}
-                                    <li>
-                                        <a href="{{ path('jury_tsv_export', {'type': 'full_results', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
-                                        ({{ names | join(', ') }})
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                    </ul>
-             </div>
+                <h3>Export results</h3>
+                {{ form(export_results_form) }}
+            </div>
         </div>
     </div>
     </div>
 
+{% endblock %}
+{% block extrafooter %}
+    {{ parent() }}
+    <script>
+        $(document).ready(function() {
+            const updateSortOrderCategories = function() {
+                const categories = $('#export_results_sortorder option:selected').data('categories');
+                const $sortOrderHelp = $('#export_results_sortorder_help');
+                const $ul = $('<ul>');
+                categories.forEach(function(category) {
+                    $ul.append($('<li>').text(category));
+                });
+                const $help = $('<div>').append($('<p>').text('This sort order contains the following categories:')).append($ul);
+                $sortOrderHelp.html($help);
+            };
+
+            updateSortOrderCategories();
+
+            $('#export_results_sortorder').on('change', function() {
+                updateSortOrderCategories();
+            });
+        });
+    </script>
 {% endblock %}

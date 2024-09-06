@@ -34,7 +34,7 @@ final class Version20231120225210 extends AbstractMigration
 
             if ($updated) {
                 $newExtensionsJson = json_encode($extensions);
-                $this->connection->executeQuery('UPDATE language SET extensions = :extensions WHERE langid = :langid', [
+                $this->addSql('UPDATE language SET extensions = :extensions WHERE langid = :langid', [
                     'extensions' => $newExtensionsJson,
                     'langid' => $language['langid'],
                 ]);

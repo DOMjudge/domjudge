@@ -11,11 +11,13 @@ use App\Entity\Testcase;
 use App\Form\Type\SubmitProblemType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -37,12 +39,16 @@ class SubmissionController extends BaseController
     final public const ALWAYS_SHOW_COMPILE_OUTPUT = 2;
 
     public function __construct(
-        protected readonly EntityManagerInterface $em,
+        EntityManagerInterface $em,
         protected readonly SubmissionService $submissionService,
-        protected readonly DOMJudgeService $dj,
+        protected readonly EventLogService $eventLogService,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly FormFactoryInterface $formFactory
-    ) {}
+        protected readonly FormFactoryInterface $formFactory,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '/submit/{problem}', name: 'team_submit')]
     public function createAction(Request $request, ?Problem $problem = null): Response

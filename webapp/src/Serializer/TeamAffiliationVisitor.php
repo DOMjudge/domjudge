@@ -6,7 +6,6 @@ use App\DataTransferObject\ImageFile;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
-use App\Service\EventLogService;
 use App\Utils\Utils;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
@@ -18,8 +17,7 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
     public function __construct(
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly EventLogService $eventLogService,
-        protected readonly RequestStack $requestStack
+        protected readonly RequestStack $requestStack,
     ) {}
 
     /**
@@ -42,7 +40,7 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
         /** @var TeamAffiliation $affiliation */
         $affiliation = $event->getObject();
 
-        $id = $affiliation->getApiId($this->eventLogService);
+        $id = $affiliation->getExternalid();
 
         // Country flag
         if ($this->config->get('show_flags') && $affiliation->getCountry()) {

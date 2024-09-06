@@ -20,14 +20,20 @@ if [ -z "$ENTRY_POINT" ]; then
     echo "Info: detected entry_point: $MAINSOURCE"
 fi
 
-# No easy way to test R scripts for syntax
-
 # Check if entry point is valid
 if [ ! -r "$MAINSOURCE" ]; then
     echo "Error: main source file '$MAINSOURCE' is not readable" >&2
     exit 1
 fi
 
+# Check syntax
+#
+# Store intermediate files in the current dir (/compile) as its only
+# available during compilation step.
+export TMPDIR=`pwd`
+Rscript -e "parse('"$@"')"
+EXITCODE=$?
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
 # Write executing script:
 cat > "$DEST" <<EOF
@@ -43,10 +49,14 @@ fi
 # debugging.
 # export ONLINE_JUDGE=1 DOMJUDGE=1
 
+# Rscript needs a temporary directory which is a security risk.
+# To make the language work you'll need to set DOMJUDGE_CREATE_WRITABLE_TEMP_DIR=1
+# as environment variable when starting the judgedaemon:
+# DOMJUDGE_CREATE_WRITABLE_TEMP_DIR=1 bin/judgedaemon
+
 exec Rscript "$MAINSOURCE" "\$@"
 EOF
 
 chmod a+x "$DEST"
 
 exit 0
-

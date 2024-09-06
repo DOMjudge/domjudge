@@ -38,7 +38,7 @@ class JudgeTask
     private int $judgetaskid;
 
     #[ORM\ManyToOne(inversedBy: 'judgetasks')]
-    #[ORM\JoinColumn(name: 'judgehostid', referencedColumnName: 'judgehostid')]
+    #[ORM\JoinColumn(name: 'judgehostid', referencedColumnName: 'judgehostid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Judgehost $judgehost = null;
 

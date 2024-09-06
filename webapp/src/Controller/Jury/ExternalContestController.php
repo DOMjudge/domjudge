@@ -25,13 +25,15 @@ use Symfony\Component\Routing\Attribute\Route;
 class ExternalContestController extends BaseController
 {
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly EventLogService $eventLog,
-        protected readonly KernelInterface $kernel,
-        private readonly ExternalContestSourceService $sourceService
-    ) {}
+        EventLogService $eventLog,
+        KernelInterface $kernel,
+        private readonly ExternalContestSourceService $sourceService,
+    ) {
+        parent::__construct($em, $eventLog, $dj, $kernel);
+    }
 
     #[Route(path: '/', name: 'jury_external_contest')]
     public function indexAction(Request $request): Response
@@ -156,7 +158,7 @@ class ExternalContestController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($externalContestSource);
-            $this->saveEntity($this->em, $this->eventLog, $this->dj, $externalContestSource, null, true);
+            $this->saveEntity($externalContestSource, null, true);
             return $this->redirectToRoute('jury_external_contest');
         }
 

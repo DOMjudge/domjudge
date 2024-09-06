@@ -39,6 +39,7 @@ class ImportEventFeedCommand extends Command
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly ConfigurationService $config,
+        protected readonly DOMJudgeService $dj,
         protected readonly TokenStorageInterface $tokenStorage,
         protected readonly ?Profiler $profiler,
         protected readonly ExternalContestSourceService $sourceService,
@@ -102,15 +103,8 @@ class ImportEventFeedCommand extends Command
             return Command::FAILURE;
         }
 
-        $dataSource       = (int)$this->config->get('data_source');
-        $importDataSource = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
-        if ($dataSource !== $importDataSource) {
-            $dataSourceOptions = $this->config->getConfigSpecification()['data_source']->options;
-            $this->style->error(sprintf(
-                                    "data_source configuration setting is set to '%s' but should be '%s'.",
-                                    $dataSourceOptions[$dataSource],
-                                    $dataSourceOptions[$importDataSource]
-                                ));
+        if (!$this->dj->shadowMode()) {
+            $this->style->error("shadow_mode configuration setting is set to 'false' but should be 'true'.");
             return Command::FAILURE;
         }
 

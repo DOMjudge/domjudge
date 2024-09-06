@@ -110,7 +110,7 @@ class OrganizationController extends AbstractRestController
     {
         /** @var TeamAffiliation|null $teamAffiliation */
         $teamAffiliation = $this->getQueryBuilder($request)
-            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->andWhere('ta.externalid = :id')
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
@@ -141,7 +141,7 @@ class OrganizationController extends AbstractRestController
         $contestId = null;
         /** @var TeamAffiliation|null $teamAffiliation */
         $teamAffiliation = $this->getQueryBuilder($request)
-            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->andWhere('ta.externalid = :id')
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
@@ -193,7 +193,7 @@ class OrganizationController extends AbstractRestController
     {
         /** @var TeamAffiliation|null $teamAffiliation */
         $teamAffiliation = $this->getQueryBuilder($request)
-            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->andWhere('ta.externalid = :id')
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
@@ -266,10 +266,9 @@ class OrganizationController extends AbstractRestController
             throw new BadRequestHttpException("Error while adding organization: $message");
         }
 
+        /** @var TeamAffiliation $organization */
         $organization = $saved[0];
-        $idField = $this->eventLogService->externalIdFieldForEntity(TeamAffiliation::class) ?? 'affilid';
-        $method = sprintf('get%s', ucfirst($idField));
-        $id = call_user_func([$organization, $method]);
+        $id = $organization->getExternalid();
 
         return $this->renderCreateData($request, $saved[0], 'organization', $id);
     }
@@ -296,6 +295,6 @@ class OrganizationController extends AbstractRestController
 
     protected function getIdField(): string
     {
-        return sprintf('ta.%s', $this->eventLogService->externalIdFieldForEntity(TeamAffiliation::class) ?? 'affilid');
+        return 'ta.externalid';
     }
 }

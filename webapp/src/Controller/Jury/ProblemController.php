@@ -52,14 +52,16 @@ class ProblemController extends BaseController
     use JudgeRemainingTrait;
 
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly KernelInterface $kernel,
+        KernelInterface $kernel,
         protected readonly EventLogService $eventLogService,
         protected readonly SubmissionService $submissionService,
-        protected readonly ImportProblemService $importProblemService
-    ) {}
+        protected readonly ImportProblemService $importProblemService,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_problems')]
     public function indexAction(): Response
@@ -79,6 +81,7 @@ class ProblemController extends BaseController
         }
         $table_fields = [
             'probid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
+            'externalid' => ['title' => 'external ID', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true],
             'badges' => ['title' => $badgeTitle, 'sort' => false],
             'num_contests' => ['title' => '# contests', 'sort' => true],
@@ -87,13 +90,6 @@ class ProblemController extends BaseController
             'outputlimit' => ['title' => 'output limit', 'sort' => true],
             'num_testcases' => ['title' => '# test cases', 'sort' => true],
         ];
-
-        // Insert external ID field when configured to use it.
-        if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(Problem::class)) {
-            $table_fields = array_slice($table_fields, 0, 1, true) +
-                [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
-                array_slice($table_fields, 1, null, true);
-        }
 
         $contestCountData = $this->em->createQueryBuilder()
             ->from(ContestProblem::class, 'cp')
@@ -498,8 +494,7 @@ class ProblemController extends BaseController
             'defaultRunExecutable' => (string)$this->config->get('default_run'),
             'defaultCompareExecutable' => (string)$this->config->get('default_compare'),
             'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
-            'showExternalResult' => $this->config->get('data_source') ===
-                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+            'showExternalResult' => $this->dj->shadowMode(),
             'lockedProblem' => $lockedProblem,
             'refresh' => [
                 'after' => 15,
@@ -931,8 +926,7 @@ class ProblemController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $problem,
-                              $problem->getProbid(), false);
+            $this->saveEntity($problem, $problem->getProbid(), false);
             return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
         }
 
@@ -1003,8 +997,7 @@ class ProblemController extends BaseController
             }
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$problem], $this->generateUrl('jury_problems'));
+        return $this->deleteEntities($request, [$problem], $this->generateUrl('jury_problems'));
     }
 
     #[Route(path: '/attachments/{attachmentId<\d+>}', name: 'jury_attachment_fetch')]
@@ -1039,8 +1032,7 @@ class ProblemController extends BaseController
             }
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$attachment], $this->generateUrl('jury_problem', ['probId' => $probId]));
+        return $this->deleteEntities($request, [$attachment], $this->generateUrl('jury_problem', ['probId' => $probId]));
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -1086,10 +1078,11 @@ class ProblemController extends BaseController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->persist($problem);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $problem, null, true);
-            return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
+        if ($response = $this->processAddFormForExternalIdEntity(
+            $form, $problem,
+            fn() => $this->generateUrl('jury_problem', ['probId' => $problem->getProbid()])
+        )) {
+            return $response;
         }
 
         return $this->render('jury/problem_add.html.twig', [

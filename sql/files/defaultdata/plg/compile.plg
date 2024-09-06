@@ -4,7 +4,7 @@
 :- dynamic(loading/1).
 :- asserta(loading(0)).
 
-% The first hook is for detectin
+% The first hook is for detecting
 % loading state
 
 user:message_hook(Term, _, _) :-

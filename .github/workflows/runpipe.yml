@@ -15,9 +15,9 @@ jobs:
   runpipe:
     runs-on: ubuntu-latest
     container:
-      image: domjudge/gitlabci:2.1
+      image: domjudge/gitlabci:24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Create the configure file
         run: make configure
       - name: Do the default configure

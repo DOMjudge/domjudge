@@ -23,7 +23,6 @@ class JuryClarificationType extends AbstractType
         private readonly EntityManagerInterface $em,
         private readonly ConfigurationService $config,
         private readonly DOMJudgeService $dj,
-        private readonly EventLogService $eventLogService,
     ) {}
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -119,10 +118,6 @@ class JuryClarificationType extends AbstractType
             return sprintf('%s (%s)', $team->getEffectiveName(), $team->getLabel());
         }
 
-        if ($this->eventLogService->externalIdFieldForEntity($team)) {
-            return sprintf('%s (%s)', $team->getEffectiveName(), $team->getExternalId());
-        }
-
-        return sprintf('%s (t%s)', $team->getEffectiveName(), $team->getTeamid());
+        return sprintf('%s (%s)', $team->getEffectiveName(), $team->getExternalId());
     }
 }

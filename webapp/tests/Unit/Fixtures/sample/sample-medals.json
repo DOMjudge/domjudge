@@ -1,0 +1,11 @@
+{
+    "medals": {
+        "gold": 2,
+        "silver": 1,
+        "bronze": 1
+    },
+    "medal_categories": [
+        "10001",
+        "10003"
+    ]
+}

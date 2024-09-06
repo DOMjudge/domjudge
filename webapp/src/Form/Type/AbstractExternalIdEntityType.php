@@ -2,6 +2,7 @@
 
 namespace App\Form\Type;
 
+use App\Entity\ExternalIdFromInternalIdInterface;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Symfony\Component\Form\AbstractType;
@@ -24,21 +25,19 @@ class AbstractExternalIdEntityType extends AbstractType
      */
     protected function addExternalIdField(FormBuilderInterface $builder, string $entity): void
     {
-        if ($this->eventLogService->externalIdFieldForEntity($entity) !== null) {
-            $builder->add('externalid', TextType::class, [
-                'label' => 'External ID',
-                'required' => false,
-                'empty_data' => '',
-                'constraints' => [
-                    new Regex(
-                        [
-                            'pattern' => DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX,
-                            'message' => 'Only letters, numbers, dashes, underscores and dots are allowed',
-                        ]
-                    ),
-                    new NotBlank(),
-                ]
-            ]);
-        }
+        $builder->add('externalid', TextType::class, [
+            'label' => 'External ID',
+            'help' => 'Leave empty to generate automatically.',
+            'required' => false,
+            'empty_data' => '',
+            'constraints' => [
+                new Regex(
+                    [
+                        'pattern' => DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX,
+                        'message' => 'Only letters, numbers, dashes, underscores and dots are allowed.',
+                    ]
+                ),
+            ]
+        ]);
     }
 }

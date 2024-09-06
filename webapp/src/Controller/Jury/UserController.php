@@ -36,13 +36,15 @@ class UserController extends BaseController
     public const MIN_PASSWORD_LENGTH = 10;
 
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly KernelInterface $kernel,
+        KernelInterface $kernel,
         protected readonly EventLogService $eventLogService,
-        protected readonly TokenStorageInterface $tokenStorage
-    ) {}
+        protected readonly TokenStorageInterface $tokenStorage,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_users')]
     public function indexAction(): Response
@@ -58,6 +60,7 @@ class UserController extends BaseController
 
         $table_fields = [
             'username'   => ['title' => 'username', 'sort' => true, 'default_sort' => true],
+            'externalid' => ['title' => 'external ID', 'sort' => true],
             'name'       => ['title' => 'name', 'sort' => true],
             'email'      => ['title' => 'email', 'sort' => true],
             'user_roles' => ['title' => 'roles', 'sort' => true],
@@ -69,13 +72,6 @@ class UserController extends BaseController
         }
         $table_fields['last_ip_address'] = ['title' => 'last IP', 'sort' => true];
         $table_fields['status']          = ['title' => '', 'sort' => true];
-
-        // Insert external ID field when configured to use it.
-        if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(User::class)) {
-            $table_fields = array_slice($table_fields, 0, 1, true) +
-                [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
-                array_slice($table_fields, 1, null, true);
-        }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $users_table      = [];
@@ -190,8 +186,7 @@ class UserController extends BaseController
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
-            'showExternalResult' => $this->config->get('data_source') ===
-                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+            'showExternalResult' => $this->dj->shadowMode(),
             'refresh' => [
                 'after' => 3,
                 'url' => $this->generateUrl('jury_user', ['userId' => $user->getUserid()]),
@@ -231,9 +226,7 @@ class UserController extends BaseController
             if ($errorResult = $this->checkPasswordLength($user, $form)) {
                 return $errorResult;
             }
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user,
-                              $user->getUserid(),
-                              false);
+            $this->saveEntity($user, $user->getUserid(), false);
 
             // If we save the currently logged in used, update the login token.
             if ($user->getUserid() === $this->dj->getUser()->getUserid()) {
@@ -265,8 +258,7 @@ class UserController extends BaseController
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$user], $this->generateUrl('jury_users'));
+        return $this->deleteEntities($request, [$user], $this->generateUrl('jury_users'));
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -285,13 +277,19 @@ class UserController extends BaseController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($errorResult = $this->checkPasswordLength($user, $form)) {
-                return $errorResult;
+        if ($response = $this->processAddFormForExternalIdEntity(
+            $form, $user,
+            fn() => $this->generateUrl('jury_user', ['userId' => $user->getUserid()]),
+            function () use ($user, $form) {
+                if ($errorResult = $this->checkPasswordLength($user, $form)) {
+                    return $errorResult;
+                }
+                $this->em->persist($user);
+                $this->saveEntity($user, null, true);
+                return null;
             }
-            $this->em->persist($user);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user, null, true);
-            return $this->redirectToRoute('jury_user', ['userId' => $user->getUserid()]);
+        )) {
+            return $response;
         }
 
         return $this->render('jury/user_add.html.twig', [

@@ -1,21 +1,51 @@
 {% set timelimit = submission.problem.timelimit * submission.language.timeFactor %}
 <div>
     {% if selectedJudging is not null %}
-        <div style="display: inline-block" id="testcaseruntime">
-            <h3 id="graphs">Testcase Runtimes</h3>
+        <div class="card" style="display: inline-block" id="testcaseruntime">
+            <div class="card-header">
+                <span id="graphs" style="font-weight: bold;">testcase CPU times
+                    <span style="font-weight: normal;">
+                            {%- if selectedJudging.result != 'compiler-error' -%}
+                                | max:
+                                {{ selectedJudging.maxRuntime | number_format(3, '.', '') }}s
+                                | sum: {{ selectedJudging.sumRuntime | number_format(3, '.', '') }}s
+                            {% endif %}
+                    </span>
+                </span>
+            </div>
+            <div class="card-body">
             <svg style="width:500px; height:250px;"></svg>
+            </div>
         </div>
     {% endif %}
     {% if externalJudgement is not null and externalJudgement.result is not null %}
-        <div style="display: inline-block" id="externalruntime">
-            <h3 id="graphs">External Testcase Runtimes</h3>
-            <svg style="width:500px; height:250px;"></svg>
+        <div class="card" style="display: inline-block" id="externalruntime">
+            <div class="card-header">
+                <span id="graphs" style="font-weight: bold;">External Testcase CPU times
+                    <span style="font-weight: normal;">
+                            {%- if externalJudging.result != 'compiler-error' -%}
+                                | max:
+                                {{ externalJudging.maxRuntime | number_format(3, '.', '') }}s
+                                | sum: {{ externalJudging.sumRuntime | number_format(3, '.', '') }}s
+                            {% endif %}
+                    </span>
+	        </span>
+            </div>
+            <div class="card-body">
+                <svg style="width:500px; height:250px;"></svg>
+            </div>
         </div>
     {% endif %}
     {% if judgings|length > 1 %}
-        <div style="display: inline-block" id="maxruntime">
-            <h3 id="graphs">Max Runtimes</h3>
-            <svg style="width:500px; height:250px;"></svg>
+        <div class="card" style="display: inline-block" id="maxruntime">
+            <div class="card" style="display: inline-block" id="externalruntime">
+                <div class="card-header">
+                    <span id="graphs" style="font-weight: bold;">Max. CPU times</span>
+                </div>
+                <div class="card-body">
+                    <svg style="width:500px; height:250px;"></svg>
+                </div>
+            </div>
         </div>
     {% endif %}
 </div>
@@ -59,7 +89,7 @@
         }
         chart.yAxis
             .tickValues(tickValues)
-            .axisLabel('Runtime');
+            .axisLabel('CPU time');
         if (tickStep >= 1) {
             chart.yAxis.tickFormat(function(d) { return d3.format(',f')(d) + 's' });
         } else {
@@ -145,7 +175,7 @@
                 var format = d3.format(".3f");
                 return "<b>Testcase " + obj.data.description + "</b><br><b>Runtime:</b> " + format(obj.data.value) + "s";
             });
-            chart.xAxis.axisLabel("Testcase Rank");
+            chart.xAxis.axisLabel("testcase rank");
             d3.select('#testcaseruntime svg')
                 .datum(testcase_times)
                 .call(chart);

@@ -31,18 +31,22 @@ def usage():
     exit(1)
 
 
-def compare_configs(expected_config: Set, actual_config: Set, num_spaces=4) -> (List, Set, Set):
+def compare_configs(expected_config: Set, actual_config: Set, num_spaces=4, key_mismatch_in_diff=False) -> (List, Set, Set):
     diffs = []
     space_string = ' ' * num_spaces
-    for k in expected_config.keys():
-        if k in actual_config and expected_config[k] != actual_config[k]:
-            if isinstance(expected_config[k], dict) and isinstance(actual_config[k], dict):
-                d, n, m = compare_configs(expected_config[k], actual_config[k], num_spaces=num_spaces+2)
-                if d:
-                    diffs.append(f'{space_string}- {k}:')
-                    diffs.extend(d)
-            else:
-                diffs.append(f'{space_string}- {k}:\n   {space_string}is: {actual_config[k]}\n  {space_string}new: {expected_config[k]}')
+    all_keys = set(expected_config.keys()) | set(actual_config.keys())
+    for k in all_keys:
+        if k in expected_config and k in actual_config:
+            if expected_config[k] != actual_config[k]:
+                if isinstance(expected_config[k], dict) and isinstance(actual_config[k], dict):
+                    d, _, _ = compare_configs(expected_config[k], actual_config[k], num_spaces=num_spaces+2, key_mismatch_in_diff=True)
+                    if d:
+                        diffs.append(f'{space_string}- {k}:')
+                        diffs.extend(d)
+                else:
+                    diffs.append(f'{space_string}- {k}:\n   {space_string}is: {actual_config[k]}\n  {space_string}new: {expected_config[k]}')
+        elif key_mismatch_in_diff:
+            diffs.append(f'{space_string}- {k}:\n   {space_string}is: {actual_config.get(k, "<missing>")}\n  {space_string}new: {expected_config.get(k, "<missing>")}')
 
     new_keys = set(expected_config.keys()).difference(set(actual_config.keys()))
     missing_keys = set(actual_config.keys()).difference(set(expected_config.keys()))

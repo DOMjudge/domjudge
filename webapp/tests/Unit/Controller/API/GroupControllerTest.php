@@ -10,26 +10,26 @@ class GroupControllerTest extends BaseTestCase
     protected ?string $apiEndpoint = 'groups';
 
     protected array $expectedObjects = [
-        '2' => [
+        'self-registered' => [
             'hidden'    => false,
             'icpc_id'   => null,
-            'id'        => '2',
+            'id'        => 'self-registered',
             'name'      => 'Self-Registered',
             'sortorder' => 8,
             'color'     => '#33cc44'
         ],
-        '3' => [
+        'participants' => [
             'hidden'    => false,
             'icpc_id'   => null,
-            'id'        => '3',
+            'id'        => 'participants',
             'name'      => 'Participants',
             'sortorder' => 0,
             'color'     => null
         ],
-        '4' => [
+        'observers' => [
             'hidden'    => false,
             'icpc_id'   => null,
-            'id'        => '4',
+            'id'        => 'observers',
             'name'      => 'Observers',
             'sortorder' => 1,
             'color'     => '#ffcc33'
@@ -91,9 +91,6 @@ class GroupControllerTest extends BaseTestCase
      */
     public function testNewAddedGroupPut(array $newGroupPostData): void
     {
-        // This only works for non-local data sources
-        $this->setupDataSource(DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL);
-
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
         $objectsBeforeTest = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
 
@@ -118,9 +115,6 @@ class GroupControllerTest extends BaseTestCase
      */
     public function testNewAddedGroupPutWithoutId(array $newGroupPostData): void
     {
-        // This only works for non-local data sources
-        $this->setupDataSource(DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL);
-
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
         $returnedObject = $this->verifyApiJsonResponse('PUT', $url . '/someid', 400, 'admin', $newGroupPostData);
         self::assertStringContainsString('ID in URL does not match ID in payload', $returnedObject['message']);
@@ -131,9 +125,6 @@ class GroupControllerTest extends BaseTestCase
      */
     public function testNewAddedGroupPutWithDifferentId(array $newGroupPostData): void
     {
-        // This only works for non-local data sources
-        $this->setupDataSource(DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL);
-
         $newGroupPostData['id'] = 'someotherid';
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
         $returnedObject = $this->verifyApiJsonResponse('PUT', $url . '/someid', 400, 'admin', $newGroupPostData);

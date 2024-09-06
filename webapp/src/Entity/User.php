@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController;
 use App\Controller\API\AbstractRestController as ARC;
 use App\Utils\Utils;
 use DateTime;
@@ -28,20 +29,25 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\UniqueConstraint(name: 'username', columns: ['username'], options: ['lengths' => [190]])]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[UniqueEntity(fields: 'username', message: "The username '{{ value }}' is already in use.")]
-class User extends BaseApiEntity implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface, ExternalRelationshipEntityInterface
+class User extends BaseApiEntity implements
+    UserInterface,
+    PasswordAuthenticatedUserInterface,
+    EquatableInterface,
+    HasExternalIdInterface,
+    CalculatedExternalIdBasedOnRelatedFieldInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'User ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('id')]
-    #[Serializer\Type('string')]
+    #[Serializer\SerializedName('userid')]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private ?int $userid = null;
 
     #[ORM\Column(
         nullable: true,
         options: ['comment' => 'User ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
-    #[Serializer\Exclude]
+    #[Serializer\SerializedName('id')]
     protected ?string $externalid = null;
 
     #[ORM\Column(options: ['comment' => 'User login name'])]
@@ -364,13 +370,18 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this->getTeam()?->getEffectiveName();
     }
 
+    public function getTeamId(): ?int
+    {
+        return $this->getTeam()?->getTeamid();
+    }
+
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('team_id')]
     #[Serializer\Type('string')]
-    public function getTeamId(): ?int
+    public function getApiTeamId(): ?string
     {
-        return $this->getTeam()?->getTeamid();
+        return $this->getTeam()?->getExternalid();
     }
 
     public function __construct()
@@ -500,13 +511,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this->getUsername();
     }
 
-    /**
-     * @return array{team_id: Team|null}
-     */
-    public function getExternalRelationships(): array
+    public function getCalculatedExternalId(): string
     {
-        return [
-            'team_id' => $this->getTeam(),
-        ];
+        return $this->getUsername();
     }
 }

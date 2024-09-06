@@ -74,14 +74,13 @@ class LanguagesControllerTest extends JuryControllerTestCase
                                                            'runnerVersionCommand' => 'run -x |yes|tr "\n" "\`true\`"']];
     protected static array   $addEntitiesFailure       = ['Only alphanumeric characters and ._- are allowed' => [['langid' => '§$#`"'],
                                                                                                                  ['langid' => '()*&']],
-                                                          'Only letters, numbers, dashes, underscores and dots are allowed' => [['externalid' => '§$#'],
+                                                          'Only letters, numbers, dashes, underscores and dots are allowed.' => [['externalid' => '§$#'],
                                                                                                                                 ['externalid' => '@#()|']],
                                                           'This value should be positive.' => [['timeFactor' => '0'],
                                                                                                ['timeFactor' => '-1'],
                                                                                                ['timeFactor' => '-.1']],
                                                           'This value should not be blank.' => [['langid' => ''],
-                                                                                                ['name' => ''],
-                                                                                                ['externalid' => '']]];
+                                                                                                ['name' => '']]];
 
     public function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {

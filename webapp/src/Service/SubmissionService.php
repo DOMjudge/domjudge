@@ -235,8 +235,7 @@ class SubmissionService
             }
         }
 
-        if ($this->config->get('data_source') ==
-            DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
+        if ($this->dj->shadowMode()) {
             // When we are shadow, also load the external results
             $queryBuilder
                 ->leftJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1')
@@ -556,7 +555,9 @@ class SubmissionService
 
         // First look up any expected results in all submission files to minimize the
         // SQL transaction time below.
-        if ($this->dj->checkrole('jury')) {
+        // Only do this for problem import submissions, as we do not want this for re-submitted submissions nor
+        // submissions that come through the API, e.g. when doing a replay of an old contest.
+        if ($this->dj->checkrole('jury') && $source == 'problem import') {
             $results = null;
             foreach ($files as $file) {
                 $fileResult = self::getExpectedResults(file_get_contents($file->getRealPath()),
@@ -613,6 +614,7 @@ class SubmissionService
             $judging
                 ->setContest($contest)
                 ->setSubmission($submission);
+            $submission->addJudging($judging);
             if ($juryMember !== null) {
                 $judging->setJuryMember($juryMember);
             }

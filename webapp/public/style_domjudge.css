@@ -84,9 +84,9 @@ a {
 .prevsubmit     { color: #696969; }
 
 .output_text {
-    border-top: 1px dotted #C0C0C0;
-    border-bottom: 1px dotted #C0C0C0;
-    background-color: #FAFAFA;
+    border-top: 1px dotted #c0c0c0;
+    border-bottom: 1px dotted #c0c0c0;
+    background-color: #fafafa;
     margin: 0;
     padding: 5px;
     font-family: monospace;
@@ -94,9 +94,9 @@ a {
 }
 
 .clarificationform pre {
-    border-top: 1px dotted #C0C0C0;
-    border-bottom: 1px dotted #C0C0C0;
-    background-color: #FAFAFA;
+    border-top: 1px dotted #c0c0c0;
+    border-bottom: 1px dotted #c0c0c0;
+    background-color: #fafafa;
     margin: 0;
     padding: 5px;
     font-family: monospace;
@@ -104,7 +104,7 @@ a {
 }
 
 kbd {
-    background-color: #FAFAFA;
+    background-color: #fafafa;
     color: black;
 }
 
@@ -219,6 +219,13 @@ del {
     display: block;
     overflow: hidden;
 }
+
+.mobile-problem-badges {
+    position: relative;
+    display: block;
+    white-space: nowrap;
+}
+
 .toolong:after {
     content: "";
     width: 30%;
@@ -227,7 +234,7 @@ del {
     right: 0;
     bottom: 0;
 }
-.scoreboard .scoreaf { white-space: nowrap; border: 0; text-align: center; }
+.scoreboard .scoreaf { white-space: nowrap; border: 0; padding-left: 2px; text-align: center; }
 .scoreboard .scoreaf img { vertical-align: middle; }
 .univ {
     font-size: 80%;
@@ -265,14 +272,14 @@ img.affiliation-logo {
     padding-right: 3pt;
 }
 
-.score_correct   { background: #60e760; }
-.score_first     { background: #1daa1d !important; }
-.score_pending   { background: #6666FF; }
-.score_incorrect { background: #e87272; }
+.score_correct             { background: #60e760; }
+.score_correct.score_first { background: #1daa1d; }
+.score_incorrect           { background: #e87272; }
+.score_pending             { background: #6666ff; }
 
-.gold-medal   { background-color: #EEC710 }
-.silver-medal { background-color: #AAA }
-.bronze-medal { background-color: #C08E55 }
+.gold-medal   { background-color: #eec710 }
+.silver-medal { background-color: #aaa }
+.bronze-medal { background-color: #c08e55 }
 
 #scoresolv,#scoretotal { width: 2.5em; }
 .scorenc,.scorett,.scorepl { text-align: center; width: 2ex; }
@@ -337,10 +344,11 @@ td.scorenc { border-color: silver; border-right: 0; }
 }
 
 .countryflag {
-    height: 30px;
-    width: 40px;
-    border-radius: 8px;
-    padding: 2px;
+    height: 1.5rem;
+    width: 2rem;
+    border-radius: .375rem;
+    margin: .125rem;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .2);
 }
 
 .select2 img.countryflag {
@@ -400,7 +408,7 @@ tr.ignore td, td.ignore, span.ignore {
     margin-right: auto;
 }
 
-#teampicture {
+.teampicture {
     width: 100%;
     border: 1px solid black;
 }
@@ -618,7 +626,9 @@ tr.ignore td, td.ignore, span.ignore {
 }
 
 .problem-badge {
-    font-size: 100%;
+    --badge-padding-x: 0.5em;
+    font-size: 1em;
+    min-width: 2em;
 }
 
 .tooltip .tooltip-inner {
@@ -652,6 +662,68 @@ blockquote {
 }
 
 #contesttimer {
-	color: DimGray;
-	margin-left: auto;
+    color: DimGray;
+    margin-left: auto;
+}
+
+.lasttcruns, .lastresult {
+    opacity: 0.5;
+}
+
+.keybox {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #295d8a;
+    font-size: 200%;
+    font-weight: bold;
+    color: white;
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 1000;
+}
+
+#keyhelp {
+    position: fixed;
+    height: 90%;
+    width: 90%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(41, 93, 138, 0.9);
+    font-size: 150%;
+    font-weight: bold;
+    color: white;
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 1001;
+}
+
+#keyhelp code {
+    color: white;
+    background-color: black;
+    padding: 3px;
+    border-radius: 5px;
+}
+
+.strike-diagonal {
+    position: relative;
+    text-align: center;
+}
+
+.strike-diagonal:before {
+    position: absolute;
+    content: "";
+    left: 0;
+    top: 50%;
+    right: 0;
+    border-top: 2px solid;
+    border-color: firebrick;
+
+    -webkit-transform:rotate(-35deg);
+    -moz-transform:rotate(-35deg);
+    -ms-transform:rotate(-35deg);
+    -o-transform:rotate(-35deg);
+    transform:rotate(-35deg);
 }

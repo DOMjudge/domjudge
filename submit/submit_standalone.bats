@@ -18,23 +18,23 @@ setup() {
 @test "baseurl set in environment" {
     run ./submit
     assert_failure 1
-    assert_regex "$SUBMITBASEHOST.*/api(/.*)?/contests.*: \[Errno -2\] Name or service not known"
+    assert_regex "$SUBMITBASEHOST.*/api(/.*)?/contests.*\[Errno -2\] Name or service not known"
 }
 
 @test "baseurl via parameter overrides environment" {
     run ./submit --url https://domjudge.example.edu
     assert_failure 1
-    assert_regex "domjudge.example.edu.*/api(/.*)?/contests.*: \[Errno -2\] Name or service not known"
+    assert_regex "domjudge.example.edu.*/api(/.*)?/contests.*\[Errno -2\] Name or service not known"
 
     run ./submit -u https://domjudge3.example.edu
     assert_failure 1
-    assert_regex "domjudge3.example.edu.*/api(/.*)?/contests.*: \[Errno -2\] Name or service not known"
+    assert_regex "domjudge3.example.edu.*/api(/.*)?/contests.*\[Errno -2\] Name or service not known"
 }
 
 @test "baseurl can end in slash" {
     run ./submit --url https://domjudge.example.edu/domjudge/
     assert_failure 1
-    assert_regex "domjudge.example.edu.*/api(/.*)?/contests.*: \[Errno -2\] Name or service not known"
+    assert_regex "domjudge.example.edu.*/api(/.*)?/contests.*\[Errno -2\] Name or service not known"
 }
 
 @test "display basic usage information" {

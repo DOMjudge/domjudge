@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
@@ -34,12 +35,15 @@ use Symfony\Component\Routing\Attribute\Route;
 class ClarificationController extends BaseController
 {
     public function __construct(
-        protected readonly DOMJudgeService $dj,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly EntityManagerInterface $em,
+        EntityManagerInterface $em,
         protected readonly EventLogService $eventLogService,
-        protected readonly FormFactoryInterface $formFactory
-    ) {}
+        protected readonly FormFactoryInterface $formFactory,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     /**
      * @throws NonUniqueResultException

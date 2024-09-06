@@ -108,7 +108,7 @@ def import_contest_banner(cid: str):
             break
 
     if banner_file:
-        if dj_utils.confirm(f'Import {banner_file} for contest?', False):
+        if dj_utils.confirm(f'Import {banner_file} for contest?', True):
             dj_utils.upload_file(f'contests/{cid}/banner', 'banner', banner_file)
             print('Contest banner imported.')
         else:
@@ -117,7 +117,7 @@ def import_contest_banner(cid: str):
 def import_contest_problemset_document(cid: str):
     """Import the contest problemset document"""
 
-    files = ['contest.pdf', 'contest-web.pdf', 'contest.html', 'contest.txt']
+    files = ['problemset.pdf', 'contest.pdf', 'contest-web.pdf', 'contest.html', 'contest.txt']
 
     text_file = None
     for file in files:
@@ -149,10 +149,10 @@ if import_file('organizations', ['organizations.json']):
     # Also import logos if we have any
     # We prefer the 64x64 logo. If it doesn't exist, accept a generic logo (which might be a SVG)
     # We also prefer PNG/SVG before JPG
-    import_images('organizations', 'logo', ['^logo\.64x\d+\.png$', '^logo\.(png|svg)$', '^logo\.64x\d+\.jpg$', '^logo\.jpg$'])
+    import_images('organizations', 'logo', ['^logo\\.64x\\d+\\.png$', '^logo\\.(png|svg)$', '^logo\\.64x\\d+\\.jpg$', '^logo\\.jpg$'])
 if import_file('teams', ['teams.json', 'teams2.tsv']):
     # Also import photos if we have any, but prefer JPG over SVG and PNG
-    import_images('teams', 'photo', ['^photo\.jpg$', '^photo\.(png|svg)$'])
+    import_images('teams', 'photo', ['^photo\\.jpg$', '^photo\\.(png|svg)$'])
 import_file('accounts', ['accounts.json', 'accounts.yaml', 'accounts.tsv'])
 
 problems_imported = False
@@ -197,11 +197,6 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
                 problems_file = 'problemset.yaml'
             dj_utils.upload_file(f'contests/{cid}/problems/add-data', 'data', problems_file)
 
-        # We might need to translate the problem external ID's into an internal ID (when we are in data source = local mode)
-        # For this, we get the problems from the API and create a dict with the mapping
-        problem_mapping = {problem['externalid']: problem['id']
-                           for problem in dj_utils.do_api_request(f'contests/{cid}/problems')}
-
         if os.path.exists('problems.yaml'):
             with open('problems.yaml') as problemFile:
                 problemData = yaml.safe_load(problemFile)
@@ -226,11 +221,10 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
                 exit(3)
             os.system(f'cd {problem} && zip -r \'../{problem}\' -- .timelimit *')
 
-            problem_id = problem_mapping[problem]
-            if ((not confirmIndividually) or dj_utils.confirm(f'Ready to import problem \'{problem}\' to probid={problem_id}. Continue?', True)):
+            if ((not confirmIndividually) or dj_utils.confirm(f'Ready to import problem \'{problem}\' to problem={problem}. Continue?', True)):
                 print(f'Uploading problem \'{problem}\', please be patient, this may take a while.')
                 response = dj_utils.upload_file(
-                    f'contests/{cid}/problems', 'zip', f'{problem}.zip', {'problem': problem_id})
+                    f'contests/{cid}/problems', 'zip', f'{problem}.zip', {'problem': problem})
                 print(json.dumps(response, indent=4))
     else:
         print('Skipping contest import.')

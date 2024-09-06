@@ -14,10 +14,10 @@ class OrganizationControllerTest extends BaseTestCase
     protected ?string $entityClass = TeamAffiliation::class;
 
     protected array $expectedObjects = [
-        '1'                                     => [
+        'utrecht'                                     => [
             'icpc_id'      => null,
             'shortname'    => 'UU',
-            'id'           => '1',
+            'id'           => 'utrecht',
             'name'         => 'UU',
             'formal_name'  => 'Utrecht University',
             'country'      => 'NLD',
@@ -113,7 +113,7 @@ class OrganizationControllerTest extends BaseTestCase
             $apiEndpoint = $this->apiEndpoint;
             $contestId = $this->getDemoContestId();
             // The hardcoded 1 here is the team affiliation from the TeamAffiliationFixture example data fixture.
-            $organizationId = $this->dataSourceIsLocal() ? 1 : 'utrecht';
+            $organizationId = 'utrecht';
             $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$organizationId", 200);
 
             static::assertArrayNotHasKey('country', $response);
@@ -143,7 +143,7 @@ class OrganizationControllerTest extends BaseTestCase
         $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
         $logoConfig = [
             [
-                'href'     => "contests/1/organizations/$id/logo",
+                'href'     => "contests/demo/organizations/$id/logo",
                 'mime'     => 'image/png',
                 'filename' => 'logo.png',
                 'width'    => 181,

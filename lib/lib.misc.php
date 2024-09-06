@@ -75,7 +75,8 @@ function alert(string $msgtype, string $description = '')
 }
 
 /**
- * Functions to support graceful shutdown of daemons upon receiving a signal
+ * Functions to support (graceful) shutdown of daemons upon receiving a
+ * signal.
  */
 function sig_handler(int $signal, $siginfo = null)
 {
@@ -85,10 +86,11 @@ function sig_handler(int $signal, $siginfo = null)
 
     switch ($signal) {
         case SIGHUP:
-            $gracefulexitsignalled = true;
-            // no break
         case SIGINT:   # Ctrl+C
         case SIGTERM:
+            $gracefulexitsignalled = true;
+            // no break
+        case SIGQUIT:  # Ctrl+/
             $exitsignalled = true;
     }
 }
@@ -106,12 +108,13 @@ function initsignals()
 
     logmsg(LOG_DEBUG, "Installing signal handlers");
 
-    // Install signal handler for TERMINATE, HANGUP and INTERRUPT
-    // signals. The sleep() call will automatically return on
-    // receiving a signal.
-    pcntl_signal(SIGTERM, "sig_handler");
+    // Install signal handler for HANGUP, INTERRUPT, QUIT and TERMINATE
+    // signals. All but the QUIT signal should trigger a graceful shutdown.
+    // The sleep() call will automatically return on receiving a signal.
     pcntl_signal(SIGHUP, "sig_handler");
     pcntl_signal(SIGINT, "sig_handler");
+    pcntl_signal(SIGQUIT, "sig_handler");
+    pcntl_signal(SIGTERM, "sig_handler");
 }
 
 /**

@@ -11,24 +11,24 @@ class AccountControllerTest extends AccountBaseTestCase
     protected ?string $apiUser = 'admin';
 
     protected array $expectedObjects = [
-        1 => [
-            "id"       => "1",
+        'admin' => [
+            "id"       => "admin",
             "username" => "admin",
-            "team_id"  => "1",
+            "team_id"  => "domjudge",
             "type"     => "admin",
             "ip"       => null,
         ],
-        2 => [
-            "id"       => "2",
+        'judgehost' => [
+            "id"       => "judgehost",
             "username" => "judgehost",
             "team_id"  => null,
             "type"     => null,
             "ip"       => null,
         ],
-        3 => [
-            "id"       => "3",
+        'demo' => [
+            "id"       => "demo",
             "username" => "demo",
-            "team_id"  => "2",
+            "team_id"  => "exteam",
             "type"     => "team",
             "ip"       => null,
         ],
@@ -56,7 +56,7 @@ class AccountControllerTest extends AccountBaseTestCase
 
     public function provideCurrentAccount(): Generator
     {
-        yield ['admin', ['id' => '1', 'team_id' => '1', 'username' => 'admin', 'type' => 'admin']];
-        yield ['demo', ['id' => '3', 'team_id' => '2', 'username' => 'demo', 'type' => 'team']];
+        yield ['admin', ['id' => 'admin', 'team_id' => 'domjudge', 'username' => 'admin', 'type' => 'admin']];
+        yield ['demo', ['id' => 'demo', 'team_id' => 'exteam', 'username' => 'demo', 'type' => 'team']];
     }
 }

@@ -20,7 +20,7 @@ echo "UPDATE user SET teamid = 1 WHERE userid = 1;" | mysql domjudge_test
 cp webapp/.env.test /opt/domjudge/domserver/webapp/
 
 # We also need the composer.json for PHPunit to detect the correct directory.
-cp composer.json /opt/domjudge/domserver/
+cp webapp/composer.json /opt/domjudge/domserver/webapp/
 
 cd /opt/domjudge/domserver
 
@@ -40,7 +40,7 @@ if [ $CODECOVERAGE -eq 1 ]; then
     CNT=$(sed -n '/Generating code coverage report/,$p' "$GITLABARTIFACTS"/phpunit.out | grep -v DoctrineTestBundle | grep -cv ^$)
     FILE=deprecation.txt
     sed -n '/Generating code coverage report/,$p' "$GITLABARTIFACTS"/phpunit.out > ${CI_PROJECT_DIR}/$FILE
-    if [ $CNT -le 74 ]; then
+    if [ $CNT -le 32 ]; then
         STATE=success
     else
         STATE=failure

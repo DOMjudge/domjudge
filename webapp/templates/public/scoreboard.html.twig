@@ -3,10 +3,7 @@
 {% block title %}Scoreboard {{ contest.shortname | default('') }} - {{ parent() }}{% endblock %}
 {% block content %}
     {% if contest is defined %}
-        {% set contestId = contest.cid %}
-        {% if showExternalId(contest) %}
-            {% set contestId = contest.externalid %}
-        {% endif %}
+        {% set contestId = contest.externalid %}
         {% if contestId %}
             {% set bannerImage = contestId | assetPath('contest') %}
         {% endif %}
@@ -15,7 +12,7 @@
         {% set bannerImage = globalBannerAssetPath() %}
     {% endif %}
     {% if bannerImage %}
-        <img class="banner" src="{{ asset(bannerImage) }}" alt="Banner">
+        <img class="banner mt-2" src="{{ asset(bannerImage) }}" alt="Banner">
     {% endif %}
 
     <div data-ajax-refresh-target data-ajax-refresh-after="initializeScoreboard" class="mt-3">
@@ -56,6 +53,7 @@
                 {% if static and refresh is defined %}
                 disableRefreshOnModal();
                 {% endif %}
+                resizeMobileTeamNamesAndProblemBadges();
             };
 
             {% if static and refresh is defined %}

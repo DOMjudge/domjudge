@@ -170,7 +170,6 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(domserver_webappdir,       $datadir/${PACKAGE_TARNAME}/webapp)
 	AC_SUBST(domserver_sqldir,          $datadir/${PACKAGE_TARNAME}/sql)
 	AC_SUBST(domserver_libdir,          $libdir/${PACKAGE_TARNAME})
-	AC_SUBST(domserver_libvendordir,    $libdir/${PACKAGE_TARNAME}/vendor)
 	AC_SUBST(domserver_logdir,          $localstatedir/log/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_rundir,          $localstatedir/run/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_tmpdir,          /tmp)
@@ -189,7 +188,6 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(judgehost_tmpdir,          /tmp)
 	AC_SUBST(judgehost_judgedir,        $localstatedir/lib/${PACKAGE_TARNAME}/judgings)
 	AC_SUBST(judgehost_chrootdir,       /chroot/${PACKAGE_TARNAME})
-	AC_SUBST(judgehost_cgroupdir,       /sys/fs/cgroup)
 	fi
 
 	AC_SUBST(domjudge_docdir,           $docdir)
@@ -223,7 +221,6 @@ AX_PATH(domserver_etcdir,          [$domserver_root/etc])
 AX_PATH(domserver_webappdir,       [$domserver_root/webapp])
 AX_PATH(domserver_sqldir,          [$domserver_root/sql])
 AX_PATH(domserver_libdir,          [$domserver_root/lib])
-AX_PATH(domserver_libvendordir,    [$domserver_root/lib/vendor])
 AX_PATH(domserver_logdir,          [$domserver_root/log])
 AX_PATH(domserver_rundir,          [$domserver_root/run])
 AX_PATH(domserver_tmpdir,          [$domserver_root/tmp])
@@ -241,29 +238,8 @@ AX_PATH(judgehost_rundir,          [$judgehost_root/run])
 AX_PATH(judgehost_tmpdir,          [$judgehost_root/tmp])
 AX_PATH(judgehost_judgedir,        [$judgehost_root/judgings])
 AX_PATH(judgehost_chrootdir,       [/chroot/${PACKAGE_TARNAME}])
-AX_PATH(judgehost_cgroupdir,       [/sys/fs/cgroup])
 fi
 AX_WITH_COMMENT(7,[      ])
-
-# }}}
-
-# {{{ Directory for systemd unit files
-
-PKG_PROG_PKG_CONFIG()
-AC_ARG_WITH([systemdsystemunitdir],
-     [AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files])],,
-     [with_systemdsystemunitdir=auto])
-AS_IF([test "x$with_systemdsystemunitdir" = "xyes" -o "x$with_systemdsystemunitdir" = "xauto"], [
-     AS_IF([test "x$PKG_CONFIG" = "x"],AC_MSG_ERROR([systemd support requested but no pkg-config available to query systemd package]))
-     def_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)
-
-     AS_IF([test "x$def_systemdsystemunitdir" = "x"],
-   [AS_IF([test "x$with_systemdsystemunitdir" = "xyes"],
-    [AC_MSG_ERROR([systemd support requested but pkg-config unable to query systemd package])])
-    with_systemdsystemunitdir=no],
-   [with_systemdsystemunitdir="$def_systemdsystemunitdir"])])
-AS_IF([test "x$with_systemdsystemunitdir" != "xno"],
-      [AC_SUBST([systemd_unitdir], [$with_systemdsystemunitdir])])
 
 # }}}
 
@@ -384,7 +360,6 @@ echo " * domserver...........: AX_VAR_EXPAND($domserver_root)"
 echo "    - bin..............: AX_VAR_EXPAND($domserver_bindir)"
 echo "    - etc..............: AX_VAR_EXPAND($domserver_etcdir)"
 echo "    - lib..............: AX_VAR_EXPAND($domserver_libdir)"
-echo "    - libvendor........: AX_VAR_EXPAND($domserver_libvendordir)"
 echo "    - log..............: AX_VAR_EXPAND($domserver_logdir)"
 echo "    - run..............: AX_VAR_EXPAND($domserver_rundir)"
 echo "    - sql..............: AX_VAR_EXPAND($domserver_sqldir)"
@@ -405,11 +380,7 @@ echo "    - run..............: AX_VAR_EXPAND($judgehost_rundir)"
 echo "    - tmp..............: AX_VAR_EXPAND($judgehost_tmpdir)"
 echo "    - judge............: AX_VAR_EXPAND($judgehost_judgedir)"
 echo "    - chroot...........: AX_VAR_EXPAND($judgehost_chrootdir)"
-echo "    - cgroup...........: AX_VAR_EXPAND($judgehost_cgroupdir)"
 fi
-echo ""
-echo " * systemd unit files..: AX_VAR_EXPAND($systemd_unitdir)"
-echo ""
 echo "Run 'make' without arguments to get a list of (build) targets."
 echo ""
 if test "x$BASEURL_UNCONFIGURED" = x1 ; then

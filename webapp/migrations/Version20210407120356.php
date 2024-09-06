@@ -42,7 +42,6 @@ final class Version20210407120356 extends AbstractMigration
                 for ($idx = 0; $idx < $zip->numFiles; $idx++) {
                     $filename = basename($zip->getNameIndex($idx));
                     $content = $zip->getFromIndex($idx);
-                    $encodedContent = ($content === '' ? '' : ('0x' . strtoupper(bin2hex($content))));
 
                     // In doubt make files executable, but try to read it from the zip file.
                     $executableBit = '1';
@@ -52,21 +51,19 @@ final class Version20210407120356 extends AbstractMigration
                         $executableBit = '0';
                     }
                     $this->connection->executeStatement(
-                        'INSERT INTO executable_file '
-                        . '(`immutable_execid`, `filename`, `ranknumber`, `file_content`, `is_executable`) '
-                        . 'VALUES (' . $immutable_execid . ', "' . $filename . '", '
-                        . $idx . ', ' . $encodedContent . ', '
-                        . $executableBit . ')'
+                        'INSERT INTO executable_file (`immutable_execid`, `filename`, `ranknumber`, `file_content`, `hash`, `is_executable`)'
+                        . ' VALUES (?, ?, ?, ?, ?, ?)',
+                        [$immutable_execid, $filename, $idx, $content, md5($content), $executableBit]
                     );
                 }
 
                 $this->connection->executeStatement(
-                    'UPDATE executable SET immutable_execid = '
-                    . $immutable_execid . ' WHERE execid = "' . $oldRow['execid'] . '"'
+                    'UPDATE executable SET immutable_execid = :immutable_execid WHERE execid = :execid',
+                    ['immutable_execid' => $immutable_execid, 'execid' => $oldRow['execid']]
                 );
             }
 
-            $this->addSql('ALTER TABLE `executable` DROP COLUMN `zipfile`');
+            $this->connection->executeStatement('ALTER TABLE `executable` DROP COLUMN `zipfile`');
         }
     }
 

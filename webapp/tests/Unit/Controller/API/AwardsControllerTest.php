@@ -21,7 +21,7 @@ class AwardsControllerTest extends BaseTestCase
      * This means that there's only the winner/gold award.
      */
     protected array $expectedObjects = [
-        'winner' => ["id" => "winner", "citation" => "Contest winner", "team_ids" => [2]],
+        'winner' => ["id" => "winner", "citation" => "Contest winner", "team_ids" => ['exteam']],
     ];
 
     protected array $expectedAbsent = ['bronze-medal', 'first-to-solve'];

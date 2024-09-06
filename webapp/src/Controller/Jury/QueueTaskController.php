@@ -5,8 +5,11 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Entity\JudgeTask;
 use App\Entity\QueueTask;
+use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,8 +33,13 @@ class QueueTaskController extends BaseController
         JudgeTask::PRIORITY_HIGH => 'thermometer-full',
     ];
 
-    public function __construct(private readonly EntityManagerInterface $em)
-    {
+    public function __construct(
+        EntityManagerInterface $em,
+        protected readonly EventLogService $eventLogService,
+        DOMJudgeService $dj,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
     #[Route(path: '', name: 'jury_queue_tasks')]

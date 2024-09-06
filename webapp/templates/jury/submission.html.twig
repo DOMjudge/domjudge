@@ -220,7 +220,7 @@
         {% endif %}
     </div>
 
-    {% if submission.externalid %}
+    {% if shadowMode() and submission.externalid %}
         <div class="mb-2">
             External ID:
             {% if external_ccs_submission_url is empty %}
@@ -343,7 +343,10 @@
 
     {% if selectedJudging is not null or externalJudgement is not null %}
 
-        {% include 'jury/partials/submission_graph.html.twig' %}
+        {% if (selectedJudging is not null and selectedJudging.result != 'compiler-error')
+              or (externalJudgement is not null and externalJudgement.result != 'compiler-error') %}
+            {% include 'jury/partials/submission_graph.html.twig' %}
+        {% endif %}
 
         {% if selectedJudging is not null %}
 
@@ -411,7 +414,6 @@
         <div class="mb-2">
             <div>
                 {% if not submission.importError %}
-                    Result:
                     {% if selectedJudging is null or selectedJudging.result is empty %}
                         {%- if selectedJudging and selectedJudging.started %}
                             {{- '' | printValidJuryResult -}}
@@ -428,7 +430,7 @@
                 {%- if lastJudging is not null -%}
                     {% set lastSubmissionLink = path('jury_submission', {submitId: lastSubmission.submitid}) %}{#-
                 -#}<span class="lastresult">
-                    (<a href="{{ lastSubmissionLink }}">s{{ lastSubmission.submitid }}</a>: {{ lastJudging.result }}){#-
+                    (<a href="{{ lastSubmissionLink }}">s{{ lastSubmission.submitid }}</a>: {{ lastJudging.result | printResult }}){#-
                 -#}</span>
                 {%- endif -%}
                 {%- if externalJudgement is not null %}
@@ -439,24 +441,19 @@
                     {% endif %}
                 {%- endif %}
                 {%- if selectedJudging is not null and judgehosts is not empty -%}
-                    , Judgehost(s):
-                    {% for judgehostid, hostname in judgehosts %}
-                        {% set judgehostLink = path('jury_judgehost', {judgehostid: judgehostid}) %}
-                        <a href="{{ judgehostLink }}">{{ hostname | printHost }}</a>
-                    {% endfor %} -
-                    {%- if selectedJudging.starttime -%}
-                        <span class="judgetime">Judging started: {{ selectedJudging.starttime | printtime('H:i:s') }}
-                            {%- if selectedJudging.endtime -%}
-                                , finished in {{ selectedJudging.starttime | printtimediff(selectedJudging.endtime) }}s
-                            {%- elseif selectedJudging.valid or selectedJudging.rejudging -%}
-                                &nbsp;[still judging - busy {{ selectedJudging.starttime | printtimediff }}]
-                            {%- else -%}
-                                &nbsp;[aborted]
-                            {%- endif -%}
-                        </span>
+                    , on {{ judgehosts | printHosts }}
+                    {% if selectedJudging.starttime %}
+                        {% if selectedJudging.endtime %}
+                            , took {{ selectedJudging.starttime | printHumanTimeDiff(selectedJudging.endtime) }}
+                        {% elseif selectedJudging.valid or selectedJudging.rejudging %}
+                            &nbsp;[still judging - busy {{ selectedJudging.starttime | printtimediff }}]
+                        {% else %}
+                            &nbsp;[aborted]
+                        {% endif %}
+                        <span class="judgetime">(started: {{ selectedJudging.starttime | printtime('H:i:s') }})</span>
                     {% else %}
-                        <span class="judgetime">Judging not started yet</span>
-                    {%- endif -%}
+                        , not started yet
+                    {% endif %}
                 {% endif -%}
                 {%- if externalJudgement is not null %}
                     <span class="judgetime">(external judging started: {{ externalJudgement.starttime | printtime('H:i:s') }}
@@ -467,21 +464,6 @@
                         {%- endif -%}
                     )</span>
                 {%- endif -%}
-                {%- if selectedJudging is not null and selectedJudging.result != 'compiler-error' -%}
-                    , max/sum runtime:
-                    {{ selectedJudging.maxRuntime | number_format(2, '.', '') }}/{{ selectedJudging.sumRuntime | number_format(2, '.', '') }}s
-                    {%- if lastJudging is not null -%}
-                        <span class="lastruntime">
-                        (<a href="{{ lastSubmissionLink }}">s{{ lastSubmission.submitid }}</a>:
-                            {{ lastJudging.maxRuntime | number_format(2, '.', '') }}{#-
-                        -#}/{{ lastJudging.sumRuntime | number_format(2, '.', '') }}s)
-                    </span>
-                    {%- endif -%}
-                {% endif -%}
-                {%- if externalJudgement is not null and externalJudgement.result != 'compiler-error' and externalJudgement.result != null -%}
-                    , external max/sum runtime:
-                    {{ externalJudgement.maxRuntime | number_format(2, '.', '') }}/{{ externalJudgement.sumRuntime | number_format(2, '.', '') }}s
-                {% endif %}
             </div>
 
             {# Display testcase results #}
@@ -489,7 +471,6 @@
                 <table>
                     {% if not submission.importError %}
                         <tr>
-                            <td>testcase runs:</td>
                             <td>
                                 {% if selectedJudging is null %}
                                     {% set judgingDone = false %}
@@ -497,6 +478,8 @@
                                     {% set judgingDone = selectedJudging.endtime is not empty %}
                                 {% endif %}
                                 {{ runs | displayTestcaseResults(judgingDone) }}
+                            </td>
+                            <td>
                                 {% if selectedJudging is not null and runsOutstanding %}
                                     {% if selectedJudging.judgeCompletely %}
                                         <i class="fas fa-balance-scale" title="remaining test cases requested to be judged"></i>
@@ -510,44 +493,39 @@
                             </td>
                         </tr>
                     {% endif %}
-                    {% if lastJudging is not null %}
-                        <tr class="lasttcruns">
+                    {% if externalJudgement is not null %}
+                        <tr>
                             <td>
-                                <a href="{{ lastSubmissionLink }}">s{{ lastSubmission.submitid }}</a> runs:
+                                {{ externalRuns | displayTestcaseResults(externalJudgement.endtime is not empty, true) }}
                             </td>
                             <td>
-                                {{ lastRuns | displayTestcaseResults(lastJudging.endtime is not empty) }}
+                                {% if externalSubmissionUrl and externalSubmissionUrl is not empty %}
+                                <a href="{{ externalSubmissionUrl }}">
+                                    {% endif %}
+                                    external {{ externalJudgement.extjudgementid }}
+                                    {% if externalSubmissionUrl and externalSubmissionUrl is not empty %}
+                                </a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endif %}
-                    {% if externalJudgement is not null %}
-                        <tr>
-                            <td>external runs:</td>
+                    {% if lastJudging is not null %}
+                        <tr class="lasttcruns">
                             <td>
-                                {{ externalRuns | displayTestcaseResults(externalJudgement.endtime is not empty, true) }}
+                                {{ lastRuns | displayTestcaseResults(lastJudging.endtime is not empty) }}
+                            </td>
+                            <td>
+                                <a href="{{ lastSubmissionLink }}">previous s{{ lastSubmission.submitid }}</a>
+                                {% if lastJudging.verifyComment %}
+                                    <span class="prevsubmit">(verify comment: '{{ lastJudging.verifyComment }}')</span>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endif %}
                 </table>
 
-                {# Show JS toggle of previous submission results #}
-                {% if lastJudging is not null %}
-                    <span class="testcases_prev">
-                    <a href="javascript:togglelastruns();">show/hide</a>
-                    results of previous <a href="{{ lastSubmissionLink }}">submission s{{ lastSubmission.submitid }}</a>
-                        {% if lastJudging.verifyComment %}
-                            <span class="prevsubmit">(verify comment: '{{ lastJudging.verifyComment }}')</span>
-                        {% endif %}
-                </span>
-                {% endif %}
             {% endif %}
         </div>
-
-        <script>
-            $(function () {
-                togglelastruns();
-            });
-        </script>
 
         {# Show verify info, but only when a result is known #}
         {% if selectedJudging is not null and selectedJudging.result is not empty %}
@@ -704,13 +682,13 @@
                                 <a href="{{ path('jury_submission_team_output', {'submission': submission.submitid, 'run': run.firstJudgingRun.runid, 'contest': submission.contest.cid}) }}">
                                     <button class="btn btn-sm btn-outline-secondary" >
                                         <i class="fas fa-download"></i>
-                                        {% if runsOutput[runIdx].is_output_run_truncated %}
+                                        {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
                                             Truncated
                                         {% endif %}
                                         Team Output
                                     </button>
                                 </a>
-                                {% if runsOutput[runIdx].is_output_run_truncated %}
+                                {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
                                     <a href="{{ path('request_output', {'jid': run.firstJudgingRun.judgingid, 'jrid': run.firstJudgingRun.runid}) }}">
                                         <button class="btn btn-sm btn-outline-secondary" >
                                             <i class="fas fa-upload"></i>

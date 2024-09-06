@@ -2,8 +2,13 @@
 
 namespace App\Tests\Unit\Service;
 
+use App\DataFixtures\Test\TeamWithExternalIdEqualsOneFixture;
+use App\DataFixtures\Test\TeamWithExternalIdEqualsTwoFixture;
+use App\DataTransferObject\ResultRow;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Language;
+use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
@@ -11,14 +16,26 @@ use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ImportExportService;
+use App\Service\ScoreboardService;
+use App\Tests\Unit\BaseTestCase;
+use App\Utils\Utils;
+use Collator;
+use DateInterval;
 use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
+use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Serializer\Encoder\CsvEncoder;
+use Symfony\Component\Serializer\SerializerInterface;
 
-class ImportExportServiceTest extends KernelTestCase
+class ImportExportServiceTest extends BaseTestCase
 {
     protected function setUp(): void
     {
@@ -332,6 +349,8 @@ class ImportExportServiceTest extends KernelTestCase
 
     public function testImportAccountsTsvSuccess(): void
     {
+        $this->loadFixtures([TeamWithExternalIdEqualsOneFixture::class, TeamWithExternalIdEqualsTwoFixture::class]);
+
         // We test all account types twice:
         // - Team without postfix
         // - Team with postfix
@@ -382,13 +401,13 @@ EOF;
   name: Team 1
   password: password1
   type: team
-  team_id: 1
+  team_id: domjudge
 - id: team2
   username: team2
   name: Team 2
   password: password2
   type: team
-  team_id: 2
+  team_id: exteam
   ip: 1.2.3.4
 - id: judge1
   username: judge1
@@ -450,6 +469,43 @@ EOF;
         unlink($fileName);
 
         $this->testImportAccounts($importCount, $message, false);
+    }
+
+    public function testImportAccountsJsonError(): void
+    {
+        $accounts = <<<EOF
+- id: team001
+  username: team2//
+  name: Team 1
+  password: password1
+  type: team
+  team_id: 1
+- id: team2
+  username: team2
+  name: Team 2
+  password: password2
+  type: team
+  team_id: 2
+  ip: 1.2.3.4
+EOF;
+
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $preCount = $em->getRepository(User::class)->count([]);
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-yaml');
+        file_put_contents($fileName, $accounts);
+        $file = new UploadedFile($fileName, 'accounts.yaml');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('accounts', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertEquals(0, $importCount);
+        self::assertMatchesRegularExpression('/Only alphanumeric characters and _-@. are allowed/', $message);
+
+        $postCount = $em->getRepository(User::class)->count([]);
+        self::assertEquals($preCount, $postCount);
     }
 
     protected function testImportAccounts(int $importCount, ?string $message, bool $forTsv): void
@@ -784,6 +840,81 @@ EOF;
         }
     }
 
+    public function testImportTeamsJsonError(): void
+    {
+        $teamsData = <<<EOF
+[{
+    "id": "11",
+    "icpc_id": "447047",
+    "label": "team1",
+    "group_ids": ["24"],
+    "organization_id": "INST-42",
+    "location": {"description": "AUD 10"}
+}, {
+    "id": "12",
+    "icpc_id": "447837",
+    "group_ids": ["25"],
+    "name": "Pleading not FAUlty",
+    "organization_id": "INST-43"
+}]
+EOF;
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $preCount = $em->getRepository(Team::class)->count([]);
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'teams-json');
+        file_put_contents($fileName, $teamsData);
+        $file = new UploadedFile($fileName, 'teams.json');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('teams', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertMatchesRegularExpression('/name: This value should not be blank./', $message);
+        self::assertEquals(0, $importCount);
+
+        $postCount = $em->getRepository(Team::class)->count([]);
+        self::assertEquals($preCount, $postCount);
+    }
+
+    public function testImportTeamsJsonErrorEmptyString(): void
+    {
+        $teamsData = <<<EOF
+[{
+    "id": "11",
+    "icpc_id": "447047",
+    "label": "team1",
+    "name": "",
+    "group_ids": ["24"],
+    "organization_id": "INST-42",
+    "location": {"description": "AUD 10"}
+}, {
+    "id": "12",
+    "icpc_id": "447837",
+    "group_ids": ["25"],
+    "name": "Pleading not FAUlty",
+    "organization_id": "INST-43"
+}]
+EOF;
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $preCount = $em->getRepository(Team::class)->count([]);
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'teams-json');
+        file_put_contents($fileName, $teamsData);
+        $file = new UploadedFile($fileName, 'teams.json');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('teams', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertMatchesRegularExpression('/name: This value should not be blank./', $message);
+        self::assertEquals(0, $importCount);
+
+        $postCount = $em->getRepository(Team::class)->count([]);
+        self::assertEquals($preCount, $postCount);
+    }
+
     public function testImportGroupsTsv(): void
     {
         // Example from the manual
@@ -892,6 +1023,41 @@ EOF;
         }
     }
 
+    public function testImportGroupsJsonError(): void
+    {
+        // Example from the manual
+        $groupsData = <<<EOF
+[{
+    "id": "13337",
+    "icpc_id": "123",
+    "hidden": true
+}, {
+    "id": "47",
+    "name": "Participants"
+}]
+EOF;
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $preCount = $em->getRepository(TeamCategory::class)->count([]);
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'groups-json');
+        file_put_contents($fileName, $groupsData);
+        $file = new UploadedFile($fileName, 'groups.json');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('groups', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertMatchesRegularExpression('/name: This value should not be blank/', $message);
+        self::assertEquals(0, $importCount);
+
+        $postCount = $em->getRepository(TeamCategory::class)->count([]);
+        self::assertEquals($preCount, $postCount);
+    }
+
+
     public function testImportOrganizationsJson(): void
     {
         // Example from the manual
@@ -952,17 +1118,212 @@ EOF;
         }
     }
 
+    public function testImportOrganizationsErrorJson(): void
+    {
+        // Example from the manual
+        $organizationsData = <<<EOF
+[{
+    "id": "INST-42",
+    "icpc_id": "42",
+    "name": "LU",
+    "formal_name": "Lund University",
+    "country": "XXX"
+}, {
+    "id": "INST-43",
+    "icpc_id": "43",
+    "name": "FAU",
+    "formal_name": "Friedrich-Alexander-University Erlangen-Nuremberg",
+    "country": "DEU"
+}]
+EOF;
+
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $preCount = $em->getRepository(TeamAffiliation::class)->count([]);
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'organizations-json');
+        file_put_contents($fileName, $organizationsData);
+        $file = new UploadedFile($fileName, 'organizations.json');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('organizations', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertMatchesRegularExpression('/ISO3166-1 alpha-3 values are allowed/', $message);
+        self::assertEquals(0, $importCount);
+
+        $postCount = $em->getRepository(TeamAffiliation::class)->count([]);
+        self::assertEquals($preCount, $postCount);
+    }
+
 
     protected function getContest(int|string $cid): Contest
     {
         // First clear the entity manager to have all data.
         static::getContainer()->get(EntityManagerInterface::class)->clear();
-        $config = static::getContainer()->get(ConfigurationService::class);
-        $dataSource = $config->get('data_source');
-        if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
-            return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
-        } else {
-            return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
+        return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
+    }
+
+    /**
+     * @dataProvider provideGetResultsData
+     */
+    public function testGetResultsData(bool $full, bool $honors, string $dataSet, string $expectedResultsFile): void
+    {
+        // Set up some results we can test with
+        // This data is based on the ICPC World Finals 47
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        $startTime = new DateTimeImmutable('2023-05-01 08:00:00');
+
+        $medalData = json_decode(file_get_contents(__DIR__ . '/../Fixtures/' . $dataSet . '/sample-medals.json'), true);
+
+        $contest = (new Contest())
+            ->setName('ICPC World Finals 47')
+            ->setShortname('wf47')
+            ->setStarttimeString($startTime->format(DateTimeInterface::ATOM))
+            ->setEndtimeString($startTime->add(new DateInterval('PT5H'))->format(DateTimeInterface::ATOM))
+            ->setMedalsEnabled(true)
+            ->setGoldMedals($medalData['medals']['gold'])
+            ->SetSilverMedals($medalData['medals']['silver'])
+            ->setBronzeMedals($medalData['medals']['bronze']);
+
+        $groupsById = [];
+        $groupsData = json_decode(file_get_contents(__DIR__ . '/../Fixtures/' . $dataSet . '/sample-groups.json'), true);
+        foreach ($groupsData as $groupData) {
+            $group = (new TeamCategory())
+                ->setExternalid($groupData['id'])
+                ->setName($groupData['name'])
+                ->setSortorder(37);
+            $em->persist($group);
+            $em->flush();
+            $groupsById[$group->getExternalid()] = $group;
+            if (in_array($group->getExternalid(), $medalData['medal_categories'], true)) {
+                $contest->addMedalCategory($group);
+            }
         }
+
+        $em->persist($contest);
+        $em->flush();
+
+        $teamsData = json_decode(file_get_contents(__DIR__ . '/../Fixtures/'. $dataSet . '/sample-teams.json'), true);
+        /** @var array<string,Team> $teamsById */
+        $teamsById = [];
+        /** @var array<string,Team> $teamsByIcpcId */
+        $teamsByIcpcId = [];
+        foreach ($teamsData as $teamData) {
+            $team = (new Team())
+                ->setExternalid($teamData['id'])
+                ->setIcpcid($teamData['icpc_id'])
+                ->setName($teamData['name'])
+                ->setDisplayName($teamData['display_name'])
+                ->setCategory($groupsById[$teamData['group_ids'][0]]);
+            $em->persist($team);
+            $em->flush();
+            $teamsById[$team->getExternalid()] = $team;
+            $teamsByIcpcId[$team->getIcpcId()] = $team;
+        }
+
+        $problemsData = json_decode(file_get_contents(__DIR__ . '/../Fixtures/'. $dataSet . '/sample-problems.json'), true);
+        $contestProblemsById = [];
+        foreach ($problemsData as $problemData) {
+            $problem = (new Problem())
+                ->setExternalid($problemData['id'])
+                ->setName($problemData['name']);
+            $contestProblem = (new ContestProblem())
+                ->setProblem($problem)
+                ->setContest($contest)
+                ->setColor($problemData['rgb'])
+                ->setShortname($problemData['label']);
+            $em->persist($problem);
+            $em->persist($contestProblem);
+            $em->flush();
+            $contestProblemsById[$contestProblem->getExternalid()] = $contestProblem;
+        }
+
+        $cpp = $em->getRepository(Language::class)->find('cpp');
+
+        // We use direct queries here to speed this up
+        $submissionInsertQuery = $em->getConnection()->prepare('INSERT INTO submission (teamid, cid, probid, langid, submittime) VALUES (:teamid, :cid, :probid, :langid, :submittime)');
+        $judgingInsertQuery = $em->getConnection()->prepare('INSERT INTO judging (uuid, submitid, result) VALUES (:uuid, :submitid, :result)');
+
+        $submissionInsertQuery->bindValue('cid', $contest->getCid());
+        $submissionInsertQuery->bindValue('langid', $cpp->getLangid());
+
+        $scoreboardData = json_decode(file_get_contents(__DIR__ . '/../Fixtures/'. $dataSet . '/sample-scoreboard.json'), true);
+        foreach ($scoreboardData['rows'] as $scoreboardRow) {
+            $team = $teamsById[$scoreboardRow['team_id']];
+            $submissionInsertQuery->bindValue('teamid', $team->getTeamid());
+            foreach ($scoreboardRow['problems'] as $problemData) {
+                if ($problemData['solved']) {
+                    $contestProblem = $contestProblemsById[$problemData['problem_id']];
+                    // Add fake submission for this problem. First add wrong ones
+                    for ($i = 0; $i < $problemData['num_judged'] - 1; $i++) {
+                        $submissionInsertQuery->bindValue('probid', $contestProblem->getProbid());
+                        $submissionInsertQuery->bindValue('submittime', $startTime
+                            ->add(new DateInterval('PT' . $problemData['time'] . 'M'))
+                            ->sub(new DateInterval('PT1M'))
+                            ->getTimestamp());
+                        $submissionInsertQuery->executeQuery();
+                        $submitId = $em->getConnection()->lastInsertId();
+                        $judgingInsertQuery->bindValue('uuid', Uuid::uuid4()->toString());
+                        $judgingInsertQuery->bindValue('submitid', $submitId);
+                        $judgingInsertQuery->bindValue('result', 'wrong-awnser');
+                        $judgingInsertQuery->executeQuery();
+                    }
+                    // Add correct submission
+                    $submissionInsertQuery->bindValue('probid', $contestProblem->getProbid());
+                    $submissionInsertQuery->bindValue('submittime', $startTime
+                        ->add(new DateInterval('PT' . $problemData['time'] . 'M'))
+                        ->getTimestamp());
+                    $submissionInsertQuery->executeQuery();
+                    $submitId = $em->getConnection()->lastInsertId();
+                    $judgingInsertQuery->bindValue('uuid', Uuid::uuid4()->toString());
+                    $judgingInsertQuery->bindValue('submitid', $submitId);
+                    $judgingInsertQuery->bindValue('result', 'correct');
+                    $judgingInsertQuery->executeQuery();
+                }
+            }
+        }
+
+        /** @var ScoreboardService $scoreboardService */
+        $scoreboardService = static::getContainer()->get(ScoreboardService::class);
+        $scoreboardService->refreshCache($contest);
+
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+
+        /** @var RequestStack $requestStack */
+        $requestStack = static::getContainer()->get(RequestStack::class);
+        $request = new Request();
+        $request->cookies->set('domjudge_cid', (string)$contest->getCid());
+        $requestStack->push($request);
+
+        $results = $importExportService->getResultsData(37, $full, $honors);
+
+        $resultsContents = file_get_contents(__DIR__ . '/../Fixtures/' . $dataSet . '/' . $expectedResultsFile);
+        $resultsContents = substr($resultsContents, strpos($resultsContents, "\n") + 1);
+        // Prefix file with a fake header, so we can deserialize them
+        $resultsContents = "team_id\trank\taward\tnum_solved\ttotal_time\ttime_of_last_submission\tgroup_winner\n" . $resultsContents;
+
+        $serializer = static::getContainer()->get(SerializerInterface::class);
+
+        $expectedResults = $serializer->deserialize($resultsContents, ResultRow::class . '[]', 'csv', [
+            CsvEncoder::DELIMITER_KEY => "\t",
+        ]);
+
+        self::assertEquals($expectedResults, $results);
+    }
+
+    public function provideGetResultsData(): Generator
+    {
+        yield [true, true, 'wf', 'results-full-honors.tsv'];
+        yield [false, true, 'wf', 'results-wf-honors.tsv'];
+        yield [true, false, 'wf', 'results-full-ranked.tsv'];
+        yield [false, false, 'wf', 'results-wf-ranked.tsv'];
+        yield [true, true, 'sample', 'results-full-honors.tsv'];
+        yield [false, true, 'sample', 'results-wf-honors.tsv'];
+        yield [true, false, 'sample', 'results-full-ranked.tsv'];
+        yield [false, true, 'sample', 'results-wf-honors.tsv'];
     }
 }

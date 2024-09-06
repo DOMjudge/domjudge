@@ -32,12 +32,14 @@ class LanguageController extends BaseController
     use JudgeRemainingTrait;
 
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly KernelInterface $kernel,
-        protected readonly EventLogService $eventLogService
-    ) {}
+        KernelInterface $kernel,
+        protected readonly EventLogService $eventLogService,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_languages')]
     public function indexAction(): Response
@@ -51,6 +53,7 @@ class LanguageController extends BaseController
             ->getQuery()->getResult();
         $table_fields = [
             'langid' => ['title' => 'ID', 'sort' => true],
+            'externalid' => ['title' => 'external ID', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true, 'default_sort' => true],
             'entrypoint' => ['title' => 'entry point', 'sort' => true],
             'allowjudge' => ['title' => 'allow judge', 'sort' => true],
@@ -58,13 +61,6 @@ class LanguageController extends BaseController
             'extensions' => ['title' => 'extensions', 'sort' => true],
             'executable' => ['title' => 'executable', 'sort' => true],
         ];
-
-        // Insert external ID field when configured to use it.
-        if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(Language::class)) {
-            $table_fields = array_slice($table_fields, 0, 1, true) +
-                [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
-                array_slice($table_fields, 1, null, true);
-        }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $enabled_languages  = [];
@@ -161,15 +157,22 @@ class LanguageController extends BaseController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Normalize extensions
-            if ($language->getExtensions()) {
-                $language->setExtensions(array_values($language->getExtensions()));
+        if ($response = $this->processAddFormForExternalIdEntity(
+            $form, $language,
+            fn() => $this->generateUrl('jury_language', ['langId' => $language->getLangid()]),
+            function () use ($language) {
+                // Normalize extensions
+                if ($language->getExtensions()) {
+                    $language->setExtensions(array_values($language->getExtensions()));
+                }
+                $this->em->persist($language);
+                $this->saveEntity($language,
+                    $language->getLangid(), true);
+
+                return null;
             }
-            $this->em->persist($language);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $language,
-                              $language->getLangid(), true);
-            return $this->redirectToRoute('jury_language', ['langId' => $language->getLangid()]);
+        )) {
+            return $response;
         }
 
         return $this->render('jury/language_add.html.twig', [
@@ -200,8 +203,7 @@ class LanguageController extends BaseController
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
-            'showExternalResult' => $this->config->get('data_source') ==
-                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+            'showExternalResult' => $this->dj->shadowMode(),
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_language', ['langId' => $language->getLangid()]),
@@ -297,8 +299,7 @@ class LanguageController extends BaseController
             if ($language->getExtensions()) {
                 $language->setExtensions(array_values($language->getExtensions()));
             }
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $language,
-                              $language->getLangid(), false);
+            $this->saveEntity($language, $language->getLangid(), false);
             if ($language->getAllowJudge()) {
                 $this->dj->unblockJudgeTasksForLanguage($langId);
             }
@@ -320,8 +321,7 @@ class LanguageController extends BaseController
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$language], $this->generateUrl('jury_languages')
+        return $this->deleteEntities($request, [$language], $this->generateUrl('jury_languages')
         );
     }
 

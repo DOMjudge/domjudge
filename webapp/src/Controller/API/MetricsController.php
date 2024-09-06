@@ -106,6 +106,9 @@ class MetricsController extends AbstractFOSRestController
                 new SubmissionRestriction(visible: true)
             );
             foreach ($submissionCounts as $kind => $count) {
+                if (!array_key_exists('submissions_' . $kind, $m)) {
+                         continue;
+                }
                 $m['submissions_' . $kind]->set((int)$count, $labels);
             }
             // Get team submission stats for the contest.
