@@ -28,7 +28,7 @@
     </style>
 {% endif %}
 
-<table class="d-none d-md-block scoreboard center {% if jury %}scoreboard_jury{% endif %}">
+<table class="d-none d-md-table scoreboard center {% if jury %}scoreboard_jury{% endif %}">
 
     {# output table column groups (for the styles) #}
     <colgroup>
@@ -533,7 +533,7 @@
         {% else %}
             {% set cellColors = {first: 'Solved first', correct: 'Solved', incorrect: 'Tried, incorrect', pending: 'Tried, pending', neutral: 'Untried'} %}
         {% endif %}
-        <table id="cell_legend" class="d-none d-md-block scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
+        <table id="cell_legend" class="d-none d-md-table scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
             <thead>
             <tr>
                 <th scope="col">Cell colours</th>
@@ -552,7 +552,7 @@
     {% endif %}
 
     {% if medalsEnabled %}
-        <table class="d-none d-md-block scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
+        <table class="d-none d-md-table scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
             <thead>
             <tr>
                 <th scope="col">Medals {% if not scoreboard.freezeData.showFinal %}(tentative){% endif %}</th>
