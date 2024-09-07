@@ -1153,7 +1153,8 @@ EOF;
             . Utils::printsize((int)($metadata['memory-bytes'])) . ', '
             . '<i class="far fa-question-circle" title="exit-status"></i> '
             . 'exit-code: ' . $metadata['exitcode']
-            . (($metadata['signal'] ?? -1) > 0 ? ' signal: ' . $metadata['signal'] : '');
+            . (($metadata['signal'] ?? -1) > 0 ? ' signal: ' . $metadata['signal'] : '')
+            . '</span>';
     }
 
     public function printWarningContent(ExternalSourceWarning $warning): string
