@@ -83,45 +83,130 @@
         {% endfor %}
     {% endif %}
 
-    <div class="mb-3">
-        <h1 style="display: inline;">
-            Submission {{ submission.submitid }}
-            {% if submission.originalSubmission %}
-                {% set origSubmissionUrl = path('jury_submission', {submitId: submission.originalSubmission.submitid}) %}
-                (resubmit of <a href="{{ origSubmissionUrl }}">s{{ submission.originalSubmission.submitid }}</a>)
-            {% endif %}
-            {% if submission.resubmissions is not empty %}
-                (resubmitted as
-                {%- for resubmission in submission.resubmissions -%}
-                    {% set resubmissionUrl = path('jury_submission', {submitId: resubmission.submitid}) %}
-                    <a href="{{ resubmissionUrl }}">s{{ resubmission.submitid }}</a>
-                    {%- if not loop.last -%},{%- endif -%}
-                {%- endfor -%}
-                )
-            {% endif %}
-            {% if not submission.valid %}
-                (ignored)
-            {% endif %}
-        </h1>
-        {% if not submission.importError %}
-            {% if is_granted('ROLE_ADMIN') %}
-                {% if submission.valid %}
-                    {% set action = 'ignore' %}
-                {% else %}
-                    {% set action = 'unignore' %}
+    <div class="card">
+        <div class="card-header">
+            <h1 style="display: inline;">
+                Submission s{{ submission.submitid }}
+                {% if submission.originalSubmission %}
+                    {% set origSubmissionUrl = path('jury_submission', {submitId: submission.originalSubmission.submitid}) %}
+                    (resubmit of <a href="{{ origSubmissionUrl }}">s{{ submission.originalSubmission.submitid }}</a>)
                 {% endif %}
-                <form action="{{ path('jury_submission_update_status', {'submitId': submission.submitid}) }}" method="post"
-                      style="display: inline; ">
-                    <input type="hidden" name="valid" value="{% if submission.valid %}0{% else %}1{% endif %}"/>
-                    <input type="submit" class="btn btn-outline-secondary btn-sm"
-                           value="{{ action | upper }} this submission"
-                           onclick="return confirm('Really {{ action }} submission s{{ submission.submitid }}?');"/>
-                </form>
+                {% if submission.resubmissions is not empty %}
+                    (resubmitted as
+                    {%- for resubmission in submission.resubmissions -%}
+                        {% set resubmissionUrl = path('jury_submission', {submitId: resubmission.submitid}) %}
+                        <a href="{{ resubmissionUrl }}">s{{ resubmission.submitid }}</a>
+                        {%- if not loop.last -%},{%- endif -%}
+                    {%- endfor -%}
+                    )
+                {% endif %}
+                {% if not submission.valid %}
+                    (ignored)
+                {% endif %}
+            </h1>
+            {% if not submission.importError %}
+                <div style="float: right;">
+                    {% if is_granted('ROLE_ADMIN') %}
+                        {% if submission.valid %}
+                            {% set action = 'ignore' %}
+                        {% else %}
+                            {% set action = 'unignore' %}
+                        {% endif %}
+                        <form action="{{ path('jury_submission_update_status', {'submitId': submission.submitid}) }}" method="post"
+                              style="display: inline; ">
+                            <input type="hidden" name="valid" value="{% if submission.valid %}0{% else %}1{% endif %}"/>
+                            <input type="submit" class="btn btn-outline-secondary btn-sm"
+                                   value="{{ action | upper }} this submission"
+                                   onclick="return confirm('Really {{ action }} submission s{{ submission.submitid }}?');"/>
+                        </form>
+                    {% endif %}
+
+                    {% include 'jury/partials/rejudge_form.html.twig' with {table: 'submission', id: submission.submitid} %}
+                </div>
             {% endif %}
 
-            {% include 'jury/partials/rejudge_form.html.twig' with {table: 'submission', id: submission.submitid} %}
-        {% endif %}
+            {# Condensed submission info on a single line with icons #}
+            <div class="submission-summary mb-2">
+                <span>
+                    <i class="fas fa-users" title="Team:"></i>
+                    <a href="{{ path('jury_team', {teamId: submission.team.teamid, cid: submission.contest.cid}) }}">
+                        {{ submission.team.effectiveName }} {{ submission.team | entityIdBadge('t') }}
+                    </a>
+                </span>
+
+                {% if submission.user %}
+                    <span>
+                        <i class="fas fa-user" title="User:"></i>
+                        <a href="{{ path('jury_user', {userId: submission.user.userid, cid: submission.contest.cid}) }}">
+                            {{ submission.user.username }} {{ submission.user | entityIdBadge('u') }}
+                        </a>
+                    </span>
+                {% endif %}
+
+                {% if current_contest.cid != submission.contest.cid %}
+                    <span>
+                        <i class="fas fa-trophy" title="Contest:"></i>
+                        <a href="{{ path('jury_contest', {'contestId': submission.contest.cid}) }}">
+                            {{ submission.contest.shortname }}
+                            {{ submission.contest | entityIdBadge('c') }}
+                        </a>
+                    </span>
+                {% endif %}
+
+                <span>
+                    <i class="fas fa-book-open" title="Problem:"></i>
+                    <a href="{{ path('jury_problem', {'probId': submission.problem.probid}) }}">
+                        {% if submission.contestProblem %}
+                            {{ submission.contestProblem | problemBadge }} {{ submission.problem.name }}
+                        {% else %}
+                            {{ submission.problem.name }}
+                        {% endif %}
+                        {{ submission.problem | entityIdBadge('p') }}
+                    </a>
+                </span>
+
+                <span>
+                    <i class="fas fa-comments" title="Language:"></i>
+                    <a href="{{ path('jury_language', {'langId': submission.language.langid}) }}">
+                        {{ submission.language.name }}
+                        {{ submission.language | entityIdBadge }}
+                    </a>
+                </span>
+
+                <span>
+                    <i class="fas fa-clock" title="Submittime:"></i>
+                    <span title="{{ submission.submittime | printtime('Y-m-d H:i:s (T)') }}">
+                        {{ submission.submittime | printtime(null, submission.contest) }}
+                    </span>
+                </span>
+
+                <span>
+                    <i class="fas fa-stopwatch" title="Allowed runtime:"></i>
+                    {{ submission.problem.timelimit * submission.language.timeFactor }}s
+                </span>
+
+                <span>
+                    <i class="fas fa-code" title="Source code:"></i>
+                    <a href="{{ path('jury_submission_source', {submission: submission.submitid}) }}">
+                        View {{ submission.files | printFiles }}
+                    </a>
+                </span>
+
+                {% if external_ccs_submission_url is not empty %}
+                    {% set externalSubmissionUrl = submission | externalCcsUrl %}
+                    {% if externalSubmissionUrl is not empty %}
+                        <span>
+                    <i class="fas fa-link" title="External link:"></i>
+                    <a href="{{ externalSubmissionUrl }}" target="_blank">
+                        View in external CCS
+                    </a>
+                </span>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
     </div>
+    <br />
 
     {% if not submission.valid %}
         <div class="alert alert-danger">This submission is not used during scoreboard calculations.</div>
@@ -139,86 +224,6 @@
             This submission is for a problem that is not part (anymore) of the contest of the submission.
         </div>
     {% endif %}
-
-    {# Condensed submission info on a single line with icons #}
-    <div class="submission-summary mb-2">
-        <span>
-            <i class="fas fa-users" title="Team:"></i>
-            <a href="{{ path('jury_team', {teamId: submission.team.teamid, cid: submission.contest.cid}) }}">
-                {{ submission.team.effectiveName }} {{ submission.team | entityIdBadge('t') }}
-            </a>
-        </span>
-
-        {% if submission.user %}
-            <span>
-                <i class="fas fa-user" title="User:"></i>
-                <a href="{{ path('jury_user', {userId: submission.user.userid, cid: submission.contest.cid}) }}">
-                    {{ submission.user.username }} {{ submission.user | entityIdBadge('u') }}
-                </a>
-            </span>
-        {% endif %}
-
-        {% if current_contest.cid != submission.contest.cid %}
-            <span>
-                <i class="fas fa-trophy" title="Contest:"></i>
-                <a href="{{ path('jury_contest', {'contestId': submission.contest.cid}) }}">
-                    {{ submission.contest.shortname }}
-                    {{ submission.contest | entityIdBadge('c') }}
-                </a>
-            </span>
-        {% endif %}
-
-        <span>
-            <i class="fas fa-book-open" title="Problem:"></i>
-            <a href="{{ path('jury_problem', {'probId': submission.problem.probid}) }}">
-                {% if submission.contestProblem %}
-                    {{ submission.contestProblem | problemBadge }}: {{ submission.problem.name }}
-                {% else %}
-                    {{ submission.problem.name }}
-                {% endif %}
-                {{ submission.problem | entityIdBadge('p') }}
-            </a>
-        </span>
-
-        <span>
-            <i class="fas fa-comments" title="Language:"></i>
-            <a href="{{ path('jury_language', {'langId': submission.language.langid}) }}">
-                {{ submission.language.name }}
-                {{ submission.language | entityIdBadge }}
-            </a>
-        </span>
-
-        <span>
-            <i class="fas fa-clock" title="Submittime:"></i>
-            <span title="{{ submission.submittime | printtime('Y-m-d H:i:s (T)') }}">
-                {{ submission.submittime | printtime(null, submission.contest) }}
-            </span>
-        </span>
-
-        <span>
-            <i class="fas fa-stopwatch" title="Allowed runtime:"></i>
-            {{ submission.problem.timelimit * submission.language.timeFactor }}s
-        </span>
-
-        <span>
-            <i class="fas fa-code" title="Source code:"></i>
-            <a href="{{ path('jury_submission_source', {submission: submission.submitid}) }}">
-                View {{ submission.files | printFiles }}
-            </a>
-        </span>
-
-        {% if external_ccs_submission_url is not empty %}
-            {% set externalSubmissionUrl = submission | externalCcsUrl %}
-            {% if externalSubmissionUrl is not empty %}
-                <span>
-                    <i class="fas fa-link" title="External link:"></i>
-                    <a href="{{ externalSubmissionUrl }}" target="_blank">
-                        View in external CCS
-                    </a>
-                </span>
-            {% endif %}
-        {% endif %}
-    </div>
 
     {% if shadowMode() and submission.externalid %}
         <div class="mb-2">
@@ -343,16 +348,11 @@
 
     {% if selectedJudging is not null or externalJudgement is not null %}
 
-        {% if (selectedJudging is not null and selectedJudging.result != 'compiler-error')
-              or (externalJudgement is not null and externalJudgement.result != 'compiler-error') %}
-            {% include 'jury/partials/submission_graph.html.twig' %}
-        {% endif %}
-
         {% if selectedJudging is not null %}
 
             {# Show judging information #}
             <div class="mb-2">
-                <h2 style="display: inline;">
+                <h3 style="display: inline;">
                     Judging j{{ selectedJudging.judgingid }}
                     {% if selectedJudging.rejudging %}
                         (rejudging
@@ -361,27 +361,81 @@
                     {% elseif not selectedJudging.valid %}
                         (Invalid)
                     {% endif %}
-                </h2>
-                &nbsp;
-                {% if selectedJudging.debugPackages | length > 0 %}
-                   {% for debug_package in selectedJudging.debugPackages %}
-                       <a href="{{ path('download_full_debug', {'debug_package_id': debug_package.debugPackageId }) }}">
-                           <button class="btn btn-sm btn-outline-secondary" >
-                               <i class="fas fa-download"></i>
-                               Debug Package ({{ debug_package.judgehost.hostname }})
-                           </button>
-                       </a>
-                   {% endfor %}
-                {% else %}
-                    {% if not requestedOutputCount %}
-                        <a href="{{ path('request_full_debug', {'jid': selectedJudging.judgingid}) }}">
-                            <button class="btn btn-sm btn-outline-secondary" >
-                                <i class="fas fa-upload"></i>
-                                Retrieve Full Debug Package
-                            </button>
-                        </a>
+
+                    <span style="font-size: 70%; font-weight: normal;">
+                        {% if not submission.importError %}
+                            {% if selectedJudging is null or selectedJudging.result is empty %}
+                                {%- if selectedJudging and selectedJudging.started %}
+                                    {{- '' | printValidJuryResult -}}
+                                {%- else %}
+                                    {{- 'queued' | printValidJuryResult -}}
+                                {%- endif %}
+                            {%- else %}
+                                {{- selectedJudging.result | printValidJuryResult -}}
+                            {%- endif %}
+                            {%- if submission.stillBusy -%}
+                                (&hellip;)
+                            {%- endif -%}
+                        {% endif %}
+                        {%- if lastJudging is not null -%}
+                            {% set lastSubmissionLink = path('jury_submission', {submitId: lastSubmission.submitid}) %}{#-
+                        -#}<span class="lastresult">
+                            (<a href="{{ lastSubmissionLink }}">s{{ lastSubmission.submitid }}</a>: {{ lastJudging.result | printResult }}){#-
+                        -#}</span>
+                        {%- endif -%}
+                        {%- if externalJudgement is not null %}
+                            {% if submission.importError %}
+                                External result: {{ externalJudgement.result | printValidJuryResult }}
+                            {% else %}
+                                (external: {{ externalJudgement.result | printValidJuryResult }})
+                            {% endif %}
+                        {%- endif %}
+                        {%- if selectedJudging is not null and judgehosts is not empty -%}
+                            , on {{ judgehosts | printHosts }}
+                            {% if selectedJudging.starttime %}
+                                {% if selectedJudging.endtime %}
+                                    , took <span title="started: {{ selectedJudging.starttime | printtime('H:i:s') }}, completed: {{ selectedJudging.endtime | printtime('H:i:s') }}">{{ selectedJudging.starttime | printHumanTimeDiff(selectedJudging.endtime) }}</span>
+                                {% elseif selectedJudging.valid or selectedJudging.rejudging %}
+                                    &nbsp;[still judging - busy {{ selectedJudging.starttime | printtimediff }}]
+                                {% else %}
+                                    &nbsp;[aborted]
+                                {% endif %}
+                            {% else %}
+                                , not started yet
+                            {% endif %}
+                        {% endif -%}
+                        {%- if externalJudgement is not null %}
+                            <span class="judgetime">(external judging started: {{ externalJudgement.starttime | printtime('H:i:s') }}
+                                {%- if externalJudgement.endtime -%}
+                                    , finished in {{ externalJudgement.starttime | printtimediff(externalJudgement.endtime) }}s
+                                {%- else -%}
+                                    &nbsp;[still judging - busy {{ externalJudgement.starttime | printtimediff }}]
+                                {%- endif -%}
+                            )</span>
+                        {%- endif -%}
+                    </span>
+                </h3>
+
+                <div style="float: right;">
+                    {% if selectedJudging.debugPackages | length > 0 %}
+                       {% for debug_package in selectedJudging.debugPackages %}
+                           <a href="{{ path('download_full_debug', {'debug_package_id': debug_package.debugPackageId }) }}">
+                               <button class="btn btn-sm btn-outline-secondary" >
+                                   <i class="fas fa-download"></i>
+                                   Debug Package ({{ debug_package.judgehost.hostname }})
+                               </button>
+                           </a>
+                       {% endfor %}
+                    {% else %}
+                        {% if not requestedOutputCount %}
+                            <a href="{{ path('request_full_debug', {'jid': selectedJudging.judgingid}) }}">
+                                <button class="btn btn-sm btn-outline-secondary" >
+                                    <i class="fas fa-upload"></i>
+                                    Retrieve Full Debug Package
+                                </button>
+                            </a>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
                 &nbsp;
                 {% if not selectedJudging.verified %}
                     <form action="{{ path('jury_submission', {submitId: submission.submitid, jid: selectedJudging.judgingid}) }}"
@@ -408,64 +462,62 @@
                         </a>
                     {%- endif %}
                 {%- endif %}
+                </div>
             </div>
         {% endif %}
 
-        <div class="mb-2">
-            <div>
-                {% if not submission.importError %}
-                    {% if selectedJudging is null or selectedJudging.result is empty %}
-                        {%- if selectedJudging and selectedJudging.started %}
-                            {{- '' | printValidJuryResult -}}
-                        {%- else %}
-                            {{- 'queued' | printValidJuryResult -}}
-                        {%- endif %}
-                    {%- else %}
-                        {{- selectedJudging.result | printValidJuryResult -}}
-                    {%- endif %}
-                    {%- if submission.stillBusy -%}
-                        (&hellip;)
-                    {%- endif -%}
+        {# Display compile output #}
+        {% set color = '#6666FF' %}
+        {% set message = 'not finished yet' %}
+        {% set output = null %}
+        {% if selectedJudging is not null %}
+            {% set output = selectedJudging.outputCompile(true) %}
+        {% endif %}
+        {% if output is not null %}
+            {% if selectedJudging.result == 'compiler-error' %}
+                {% set message = 'unsuccessful' %}
+            {% else %}
+                {% set message = 'successful' %}
+                {% if output is not empty %}
+                    {% set outputLines = output | lineCount %}
+                    {% if outputLines == 1 %}
+                        {% set message = message ~ ' (with 1 line of output)' %}
+                    {% else %}
+                        {% set message = message ~ ' (with ' ~ outputLines ~ ' lines of output)' %}
+                    {% endif %}
                 {% endif %}
-                {%- if lastJudging is not null -%}
-                    {% set lastSubmissionLink = path('jury_submission', {submitId: lastSubmission.submitid}) %}{#-
-                -#}<span class="lastresult">
-                    (<a href="{{ lastSubmissionLink }}">s{{ lastSubmission.submitid }}</a>: {{ lastJudging.result | printResult }}){#-
-                -#}</span>
-                {%- endif -%}
-                {%- if externalJudgement is not null %}
-                    {% if submission.importError %}
-                        External result: {{ externalJudgement.result | printValidJuryResult }}
-                    {% else %}
-                        (external: {{ externalJudgement.result | printValidJuryResult }})
-                    {% endif %}
-                {%- endif %}
-                {%- if selectedJudging is not null and judgehosts is not empty -%}
-                    , on {{ judgehosts | printHosts }}
-                    {% if selectedJudging.starttime %}
-                        {% if selectedJudging.endtime %}
-                            , took {{ selectedJudging.starttime | printHumanTimeDiff(selectedJudging.endtime) }}
-                        {% elseif selectedJudging.valid or selectedJudging.rejudging %}
-                            &nbsp;[still judging - busy {{ selectedJudging.starttime | printtimediff }}]
-                        {% else %}
-                            &nbsp;[aborted]
-                        {% endif %}
-                        <span class="judgetime">(started: {{ selectedJudging.starttime | printtime('H:i:s') }})</span>
-                    {% else %}
-                        , not started yet
-                    {% endif %}
-                {% endif -%}
-                {%- if externalJudgement is not null %}
-                    <span class="judgetime">(external judging started: {{ externalJudgement.starttime | printtime('H:i:s') }}
-                        {%- if externalJudgement.endtime -%}
-                            , finished in {{ externalJudgement.starttime | printtimediff(externalJudgement.endtime) }}s
-                        {%- else -%}
-                            &nbsp;[still judging - busy {{ externalJudgement.starttime | printtimediff }}]
-                        {%- endif -%}
-                    )</span>
-                {%- endif -%}
+            {% endif %}
+        {% endif %}
+        Compilation <span class="compile-{{ message }}">{{ message }}</span>
+        {% if selectedJudging is not null and selectedJudging.compileMetadata is not null %}
+            {{ selectedJudging.compileMetadata | printMetadata }}
+            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
+                    data-bs-target="#collapseExample-compilemeta"
+                    aria-expanded="false">
+                compilation metadata
+            </button>
+            <div class="collapse" id="collapseExample-compilemeta">
+                <div class="card card-body output_text">{{ selectedJudging.compileMetadata }}</div>
             </div>
+        {% endif %}
+        {% if selectedJudging is not null and selectedJudging.result != 'compiler-error' %}
+            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
+                    data-bs-target="#detailcompile"
+                    aria-expanded="false">
+                compilation output
+            </button>
+        {% endif %}
+        <div class="card mb-3 {% if selectedJudging is null or selectedJudging.result != 'compiler-error' %}collapse{% endif%}"
+             id="detailcompile">
+            <div class="card-header">Compilation output</div>
+            {% if output is empty %}
+                <div class="card-body nodata">There were no compiler errors or warnings.</div>
+            {% else %}
+                <div class="card-body"><pre class="output_text">{{ output }}</pre></div>
+            {% endif %}
+        </div>
 
+        <div class="mb-2">
             {# Display testcase results #}
             {% if externalJudgement is not null or (selectedJudging is not null and selectedJudging.result != 'compiler-error') %}
                 <table>
@@ -556,55 +608,13 @@
             <div class="alert alert-warning">Judging is not ready yet!</div>
         {% endif %}
 
-        {# Display compile output #}
-        {% set color = '#6666FF' %}
-        {% set message = 'not finished yet' %}
-        {% set output = null %}
-        {% if selectedJudging is not null %}
-            {% set output = selectedJudging.outputCompile(true) %}
+        {% if (selectedJudging is not null and selectedJudging.result != 'compiler-error')
+            or (externalJudgement is not null and externalJudgement.result != 'compiler-error') %}
+            {% include 'jury/partials/submission_graph.html.twig' %}
         {% endif %}
-        {% if output is not null %}
-            {% if selectedJudging.result == 'compiler-error' %}
-                {% set message = 'unsuccessful' %}
-            {% else %}
-                {% set message = 'successful' %}
-                {% if output is not empty %}
-                    {% set outputLines = output | lineCount %}
-                    {% if outputLines == 1 %}
-                        {% set message = message ~ ' (with 1 line of output)' %}
-                    {% else %}
-                        {% set message = message ~ ' (with ' ~ outputLines ~ ' lines of output)' %}
-                    {% endif %}
-                {% endif %}
-            {% endif %}
-        {% endif %}
-        <h3>
-            <a class="collapse-link" href="javascript:collapse('#detailcompile')">
-                Compilation <span class="compile-{{ message }}">{{ message }}</span>
-            </a>
-        </h3>
-        {% if selectedJudging is not null and selectedJudging.compileMetadata is not null %}
-            {{ selectedJudging.compileMetadata | printMetadata }}
-            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
-                    data-bs-target="#collapseExample-compilemeta"
-                    aria-expanded="false">
-                show complete compilation metadata
-            </button>
-            <div class="collapse" id="collapseExample-compilemeta">
-                <div class="card card-body output_text">{{ selectedJudging.compileMetadata }}</div>
-            </div>
-            <hr>
-            <br>
-        {% endif %}
-        <div class="card mb-3 {% if selectedJudging is null or selectedJudging.result != 'compiler-error' %}d-none{% endif%}"
-            id="detailcompile">
-            <div class="card-header">Compilation output</div>
-        {% if output is empty %}
-            <div class="card-body nodata">There were no compiler errors or warnings.</div>
-        {% else %}
-            <div class="card-body"><pre class="output_text">{{ output }}</pre></div>
-        {% endif %}
-        </div>
+
+        <hr>
+        <br>
 
         {% if externalJudgement is not null or (selectedJudging is not null and selectedJudging.result != 'compiler-error') %}
             {# Show run info. Only when compilation was successful or we have an external judgement #}
@@ -665,7 +675,7 @@
                           | <code>.../{{ runsOutput[runIdx].testcasedir | split('/') | last }}</code>{#-
                             -#}<button type="button" class="btn btn-link" onclick="navigator.clipboard.writeText('{{ runsOutput[runIdx].testcasedir }}')"><i class="fa-regular fa-copy"></i></button>
                         {% endif %}
-                        <span style="float: right;">
+                        <div style="float: right;">
                             <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.probid, 'rank': run.rank, 'type': 'input'}) }}">
                                 <button class="btn btn-sm btn-outline-secondary" >
                                     <i class="fas fa-download"></i>
@@ -697,7 +707,7 @@
                                     </a>
                                 {% endif %}
                             {% endif %}
-                        </span>
+                        </div>
                     </div>
                     <div class="card-body">
                     {% if run.firstJudgingRun is not null %}
