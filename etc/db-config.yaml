@@ -186,6 +186,12 @@
             default_value:
                 - No comment.
                 - Read the problem statement carefully.
+                - The hardware of the machines evaluating your submissions is identical to the team machines.
+                  They run the same operating system and base image but are tuned to make submission run times
+                  more consistent, for example we pin your submission to one core.
+                - DOMjudge does not define any special macros like ONLINE_JUDGE.
+                - For interactive problems, only your code runs inside of the sandbox and other processes
+                  including the interactive problem interactor do not count towards memory or time limits for the submission.
             public: false
             description: List of pre-defined clarification answers.
         -   name: clar_queues
