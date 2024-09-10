@@ -158,11 +158,11 @@ which problems you attempted and solved. Via the menu you can view the public
 scoreboard page with the scores of all teams. Many cells will show
 additional "title text" information when hovering over them. The
 score column lists the number of solved problems and the total time including
-penalty time, the first team to solve the problem will be in dark green. Each cell in a problem column lists the number of submissions,
-and if the problem was solved, the time of the first correct
-submission in minutes since contest start. This is included in your
-total time together with any penalty time incurred for previous
-incorrect submissions.
+penalty time, the first team to solve the problem will be in dark green. Each
+cell in a problem column lists the number of submissions, and if the problem
+was solved, the time of the first correct submission in minutes since contest
+start. This is included in your total time together with any penalty time
+incurred for previous incorrect submissions.
 
 Optionally the scoreboard can be 'frozen' some time before the end of the
 contest. The full scoreboard view will not be updated anymore, but your
