@@ -261,6 +261,8 @@ your program).
 On the contest control system your program enters a queue, awaiting compilation,
 execution and testing on one of the autojudges.
 
+Beware that if you submit multiple times in a short time interval the DOMjudge will determine which submission to judge based on both the submission time and how many other submission you have in queue to penalize spamming.
+
 Compilation
 ```````````
 
@@ -291,6 +293,12 @@ that you follow the output specifications. In case of problem
 statements which do not have unique output (e.g. with floating point
 answers), the system may use a modified comparison function.
 This will be documented in the problem description.
+
+DOMjudge will run your submissions on the test cases in a deterministic
+order, i.e. if your program fails on the fourth case with wrong answer
+and on the fifth case with run error, DOMjudge will report wrong
+answer. It will not report the number of the test case that failed.
+
 
 .. _runlimits:
 
