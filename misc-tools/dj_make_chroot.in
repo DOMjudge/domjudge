@@ -76,6 +76,9 @@ Options:
                to add to the chroot (comma separated). Signing keys for the
                repository will be imported if they exist as <filename>.gpg,
                <filename>.asc or <filename>.arm.
+  -H           Use repository lists from the host. Useful to make sure
+               compiler/runner versions will be the same when using a custom
+               image.
   -p <url>     HTTP(S) Proxy URL to use during package install.
   -m <url>     Debian or Ubuntu mirror URL to be used for package installation.
   -y           Force overwriting the chroot dir and installing debootstrap.
@@ -110,7 +113,7 @@ FORCEYES=0
 FORCEDOWNLOAD=0
 
 # Read command-line parameters:
-while getopts 'a:d:D:R:i:r:l:s:p:m:yfh' OPT ; do
+while getopts 'a:d:D:R:i:r:l:s:p:m:Hyfh' OPT ; do
     case $OPT in
         a) ARCH=$OPTARG ;;
         d) CHROOTDIR=$OPTARG ;;
@@ -122,6 +125,7 @@ while getopts 'a:d:D:R:i:r:l:s:p:m:yfh' OPT ; do
         s) REPOLISTS=$OPTARG ;;
         p) DEBPROXY=$OPTARG ;;
         m) DEBMIRROR=$OPTARG ;;
+        H) HOSTLISTS=1 ;;
         y) FORCEYES=1 ;;
         f) FORCEDOWNLOAD=1 ;;
         h) SHOWHELP=1 ;;
@@ -409,6 +413,14 @@ if [ "$DISTRO" = 'Ubuntu' ]; then
     # Refer to: http://ubuntuforums.org/showthread.php?t=1326721
     in_chroot "dpkg-divert --local --rename --add /sbin/initctl"
     in_chroot "ln -s /bin/true /sbin/initctl"
+fi
+
+# Use the repositories from the host
+if [ -n "$HOSTLISTS" ]; then
+    for files in 'sources.list' 'sources.list.d' 'keyrings' 'trusted.gpg.d'; do
+        cp -r "/etc/apt/${files}" "$CHROOTDIR/etc/apt/"
+    done
+    in_chroot "apt-get update && apt-get install ca-certificates"
 fi
 
 # Add additional repository lists to the chroot for upstream repos
