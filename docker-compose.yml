@@ -18,18 +18,50 @@ services:
     command: --max-connections=1000 --max-allowed-packet=512M
     volumes:
       - /var/lib/mysql
+    networks:
+      - domjudge
   domjudge:
     image: docker.io/domjudge/domjudge-contributor
     hostname: domjudge-contributor
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
-      - .:${PWD}:cached
+      - .:${PWD}
       - /chroot
-    links:
-      - mariadb:mariadb
     ports:
       - 12345:80
     privileged: true
     working_dir: ${PWD}
     environment:
       - PROJECT_DIR=${PWD}
+    networks:
+      - domjudge
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_HOST=mariadb
+      - PMA_USER=domjudge
+      - PMA_PASSWORD=domjudge
+    ports:
+      - 8080:80
+    networks:
+      - domjudge
+  # judgehost
+  judge-01:
+    depends_on:
+      - domjudge
+    image: domjudge/judgehost:8.3.0
+    restart: always
+    privileged: true
+    hostname: judgehost
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    environment:
+      DAEMON_ID: 0
+      DOMSERVER_BASEURL: http://domjudge:80/
+      JUDGEDAEMON_PASSWORD: q0NjumUdiIsvn1pSqqyeC/Cph5pnX0JF
+      CONTAINER_TIMEZONE: Asia/Taipei
+    networks:
+      - domjudge
+
+networks:
+  domjudge:

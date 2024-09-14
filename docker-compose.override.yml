@@ -1,0 +1,44 @@
+services:
+  domjudge:
+    volumes:
+      - domjudge-sync:/Users/as6325400/Project/domjudge_DS
+
+volumes:
+  domjudge-sync:
+
+x-mutagen:
+  sync:
+    defaults:
+      ignore:
+        paths:
+          - .idea
+          - .docker-sync
+          - output
+          - webapp/var/log
+          - webapp/var/cache/dev/twig
+          - webapp/var/cache/dev/profiler
+          - webapp/var/cache/dev/doctrine
+          - webapp/var/cache/dev/jms_serializer
+          - webapp/var/cache/dev/pools
+          - webapp/var/cache/prod/twig
+          - webapp/var/cache/prod/profiler
+          - webapp/var/cache/prod/doctrine
+          - webapp/var/cache/prod/jms_serializer
+          - webapp/var/cache/prod/pools
+          - webapp/var/cache/test
+          - webapp/var/cache/de_
+          - webapp/var/cache/de~
+          - webapp/var/cache/pro_
+          - webapp/var/cache/pro~
+          - webapp/var/cache/tes_
+          - webapp/var/cache/tes~
+    domjudge-sync:
+      alpha: '.'
+      beta: 'volume://domjudge-sync'
+      permissions:
+        defaultDirectoryMode: 0755
+        defaultFileMode: 0644
+      configurationBeta:
+        permissions:
+          defaultOwner: 'id:1000'
+          defaultGroup: 'id:1000'
