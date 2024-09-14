@@ -127,14 +127,12 @@ class MiscController extends BaseController
                 ->addOrderBy('c.clarid', 'DESC')
                 ->getQuery()
                 ->getResult();
-
             $data['clarifications']        = $clarifications;
             $data['clarificationRequests'] = $clarificationRequests;
             $data['categories']            = $this->config->get('clar_categories');
             $data['allowDownload']         = (bool)$this->config->get('allow_team_submission_download');
             $data['showTooLateResult']     = $this->config->get('show_too_late_result');
         }
-
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;
             return $this->render('team/partials/index_content.html.twig', $data);

@@ -506,7 +506,8 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getSingleScalarResult();
         }
-
+        // $test = [1321, 3123,3123];
+        // print_r($test);
         $twigData = [
             'submission' => $submission,
             'lastSubmission' => $lastSubmission,

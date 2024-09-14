@@ -185,12 +185,12 @@ class SubmissionController extends BaseController
 
         $actuallyShowCompile = $showCompile == self::ALWAYS_SHOW_COMPILE_OUTPUT
             || ($showCompile == self::ONLY_SHOW_COMPILE_OUTPUT_ON_ERROR && $judging->getResult() === 'compiler-error');
-
         $data = [
             'judging' => $judging,
             'verificationRequired' => $verificationRequired,
             'showCompile' => $actuallyShowCompile,
             'allowDownload' => $allowDownload,
+            'showTestResults' => (bool)$this->config->get('show_test_results'),
             'showSampleOutput' => $showSampleOutput,
             'runs' => $runs,
             'showTooLateResult' => $showTooLateResult,

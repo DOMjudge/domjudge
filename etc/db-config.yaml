@@ -228,6 +228,11 @@
             default_value: false
             public: true
             description: Show affiliation logos on the scoreboard?
+        -   name: show_test_results
+            type: bool
+            default_value: true
+            public: true
+            description: Team 是否能看到對錯哪些測資
         -   name: show_teams_submissions
             type: bool
             default_value: true

@@ -25,6 +25,10 @@
                 Language:
                 <b>{{ judging.submission.language.name }}</b>
             </div>
+            <div class="p-2">
+                show_test_results:
+                <b>{{ showTestResults }}</b>
+            </div>
             {% if not showCompile %}
                 <div class="p-2">
                     Compilation:
@@ -36,6 +40,11 @@
                 </div>
             {% endif %}
         </div>
+        
+        {% if showTestResults %}
+            <div> sucess </div>
+            <div> fail </div>
+        {% endif %}
 
         {% if judging.result != 'compiler-error' %}
             <div class="d-flex flex-row">
