@@ -237,7 +237,7 @@
             type: bool
             default_value: false
             public: true
-            description: 顯示第一筆錯誤測資
+            description: Display the first incorrect test case.
         -   name: show_teams_submissions
             type: bool
             default_value: true
