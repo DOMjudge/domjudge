@@ -1038,8 +1038,8 @@ class ContestController extends BaseController
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
-    #[Route(path: '/{contestId<\d+>}/scoreboard-zip/{type<public|unfrozen>}/contest.zip', name: 'jury_scoreboard_data_zip')]
-    public function publicScoreboardDataZipAction(
+    #[Route(path: '/{contestId<\d+>}/{type<public|unfrozen>}-scoreboard.zip', name: 'jury_scoreboard_data_zip')]
+    public function scoreboardDataZipAction(
         int $contestId,
         string $type,
         RequestStack $requestStack,
