@@ -71,18 +71,18 @@
                 <h2 class="text-danger"> {{ firstWrongTestcase.result }} </h2>
                 <div class="testcase-section mt-3">
                     <h4>Input</h4>
-                    <div class="input-section input-value">
-                        {{ firstWrongTestcase.input }}
+                    <div class="input-section input-value" >
+                        {{ firstWrongTestcase.input | nl2br }}
                     </div>
             
                     <h4 class="mt-3">Output</h4>
                     <div class="output-section">
-                        <div class="output-value text-danger">{{ firstWrongTestcase.teamoutput }}</div>
+                        <div class="output-value text-danger">{{ firstWrongTestcase.teamoutput | nl2br }}</div>
                     </div>
             
                     <h4 class="mt-3">Expected</h4>
                     <div class="expected-section">
-                        <div class="expected-value text-success">{{ firstWrongTestcase.judgeoutput }}</div>
+                        <div class="expected-value text-success">{{ firstWrongTestcase.judgeoutput | nl2br }}</div>
                     </div>
                 </div>
             </div>

@@ -232,21 +232,29 @@ class SubmissionController extends BaseController
                 $parts = explode('-', $inputString);
                 $capitalizedParts = array_map('ucfirst', $parts);
                 return implode(' ', $capitalizedParts);
-            };        
+            };     
+            
+            $limitStringSize = function ($input, $maxSizeInBytes = 12800) {
+                if (strlen($input) > $maxSizeInBytes) {
+                    $input = substr($input, 0, $maxSizeInBytes);
+                    $input .= "\n\nmore than {$maxSizeInBytes} bytes";
+                }
+                return $input;
+            };
             
             foreach ($testcases as $index => $testcase) {
                 $run = $testcase-> getFirstJudgingRun();
                 if($run){
                     $runResult = $run -> getRunresult();
-                    if($runResult != 'correct'){
+                    if($runResult != 'correct' && $runResult != null){
                         $results = $runResult;
                         $firstWrongTestcase['result'] = $transform($runResult);
                         $firstWrongTestcase['rank']   = $testcase -> getRank();
                         $firstWrongTestcase['totalTestCaseNums'] = count($testcases);
-                        $firstWrongTestcase['teamoutput']  = $alloutput[$index]['output_run'];
-                        $firstWrongTestcase['judgeoutput'] = $alloutput[$index]['output_reference'];
+                        $firstWrongTestcase['input'] = $limitStringSize(rtrim($alloutput[$index]['input']));
+                        $firstWrongTestcase['teamoutput']  = $limitStringSize(rtrim($alloutput[$index]['output_run']));
+                        $firstWrongTestcase['judgeoutput'] = $limitStringSize(rtrim($alloutput[$index]['output_reference']));
                         $firstWrongTestcase['testcaseid'] = $testcase -> getTestcaseid();
-                        $firstWrongTestcase['input'] = $alloutput[$index]['input'];
                         break;
                     }
                 }
