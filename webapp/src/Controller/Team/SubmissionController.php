@@ -226,6 +226,9 @@ class SubmissionController extends BaseController
                     ->getResult();
 
             $transform = function ($inputString) {
+                if (empty($inputString)) {
+                    return '';
+                }
                 $parts = explode('-', $inputString);
                 $capitalizedParts = array_map('ucfirst', $parts);
                 return implode(' ', $capitalizedParts);
