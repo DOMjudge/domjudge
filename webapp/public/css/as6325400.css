@@ -1,0 +1,32 @@
+.result-container {
+  border: 1px solid #ddd;
+  padding: 20px;
+  margin: 20px;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+
+.text-danger {
+  color: #d9534f;
+}
+
+.text-success {
+  color: #5cb85c;
+}
+
+.input-section, .output-section, .expected-section {
+  margin-top: 10px;
+}
+
+.input-item, .output-value, .expected-value {
+  font-size: 16px;
+  font-family: monospace;
+  padding: 5px;
+  background-color: #f5f5f5;
+  border-radius: 5px;
+}
+
+.visualization-note {
+  font-size: 14px;
+  color: #888;
+}

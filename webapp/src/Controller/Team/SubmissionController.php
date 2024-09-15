@@ -119,6 +119,7 @@ class SubmissionController extends BaseController
         $team                 = $user->getTeam();
         $contest              = $this->dj->getCurrentContest($team->getTeamid());
         $showTestResults      = (bool)$this->config->get('show_test_results');
+        $showFisrtWrongTest   = (bool)$this->config->get('show_first_wrong_testcase');
         /** @var Judging|null $judging */
         $judging = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
@@ -144,6 +145,7 @@ class SubmissionController extends BaseController
 
         $runs = [];
         $testcasesruns = [];
+        $firstWrongTestcase = [];
         if ($showSampleOutput && $judging && $judging->getResult() !== 'compiler-error') {
             $outputDisplayLimit    = (int)$this->config->get('output_display_limit');
             $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
@@ -186,19 +188,92 @@ class SubmissionController extends BaseController
         }
 
         if ($showTestResults){
-            $queryBuilder = $this->em->createQueryBuilder()
-                ->from(Testcase::class, 't')
-                ->join('t.content', 'tc')
-                ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
-                ->leftJoin('jr.output', 'jro')
-                ->select('t', 'jr', 'tc')
-                ->andWhere('t.problem = :problem')
-                ->setParameter('judging', $judging)
-                ->setParameter('problem', $judging->getSubmission()->getProblem())
-                ->orderBy('t.ranknumber');
-            $testcasesruns = $queryBuilder
+            
+            $testcasesruns = $this->em->createQueryBuilder()
+                    ->from(Testcase::class, 't')
+                    ->join('t.content', 'tc')
+                    ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
+                    ->leftJoin('jr.output', 'jro')
+                    ->select('t', 'jr', 'tc')
+                    ->andWhere('t.problem = :problem')
+                    ->setParameter('judging', $judging)
+                    ->setParameter('problem', $judging->getSubmission()->getProblem())
+                    ->orderBy('t.ranknumber')
                     ->getQuery()
                     ->getResult();
+        }
+
+        if ($showFisrtWrongTest){
+            $testcases = $testcasesruns;
+            $alloutput = $this->em->createQueryBuilder()
+                    ->from(Testcase::class, 't')
+                    ->join('t.content', 'tc')
+                    ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
+                    ->leftJoin('jr.output', 'jro')
+                    ->select('t', 'jr', 'tc')
+                    ->andWhere('t.problem = :problem')
+                    ->setParameter('judging', $judging)
+                    ->setParameter('problem', $judging->getSubmission()->getProblem())
+                    ->orderBy('t.ranknumber')
+                    ->addSelect('tc.output AS output_reference')
+                    ->addSelect('jro.output_run AS output_run')
+                    ->addSelect('jro.output_diff AS output_diff')
+                    ->addSelect('jro.output_error AS output_error')
+                    ->addSelect('jro.output_system AS output_system')
+                    ->addSelect('jro.team_message AS team_message')
+                    ->addSelect('tc.input AS input')
+                    ->getQuery()
+                    ->getResult();
+            foreach ($testcases as $index => $testcase) {
+                $run = $testcase-> getFirstJudgingRun();
+                if($run){
+                    $runResult = $run -> getRunresult();
+                    if($runResult != 'correct'){
+                        $results = $runResult;
+                        $firstWrongTestcase['result'] = $runResult;
+                        $firstWrongTestcase['rank']   = $testcase -> getRank();
+                        $firstWrongTestcase['totalTestCaseNums'] = count($testcases);
+                        $firstWrongTestcase['teamoutput']  = $alloutput[$index]['output_run'];
+                        $firstWrongTestcase['judgeoutput'] = $alloutput[$index]['output_reference'];
+                        $firstWrongTestcase['testcaseid'] = $testcase -> getTestcaseid();
+                        $firstWrongTestcase['input'] = $alloutput[$index]['input'];
+                        break;
+                    }
+                }
+            }
+            // $submission = $this->em->createQueryBuilder()
+            //         ->from(Submission::class, 's')
+            //         ->join('s.team', 't')
+            //         ->join('s.problem', 'p')
+            //         ->join('s.language', 'l')
+            //         ->join('s.contest', 'c')
+            //         ->leftJoin('s.files', 'f')
+            //         ->leftJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1')
+            //         ->leftJoin('s.contest_problem', 'cp')
+            //         ->select('s', 't', 'p', 'l', 'c', 'f', 'cp', 'ej')
+            //         ->andWhere('s.submitid = :submitid')
+            //         ->setParameter('submitid', $submitId)
+            //         ->getQuery()
+            //         ->getOneOrNullResult();
+            // $queryBuilder = $this->em->createQueryBuilder()
+            //         ->from(Testcase::class, 't')
+            //         ->join('t.content', 'tc')
+            //         ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
+            //         ->leftJoin('jr.output', 'jro')
+            //         ->select('t', 'jr', 'tc.image_thumb AS image_thumb', 'jro.metadata')
+            //         ->andWhere('t.problem = :problem')
+            //         ->setParameter('judging', 1)
+            //         ->setParameter('problem', $submission->getProblem())
+            //         ->orderBy('t.ranknumber')
+            //         ->addSelect('tc.output AS output_reference')
+            //         ->addSelect('jro.output_run AS output_run')
+            //         ->addSelect('jro.output_diff AS output_diff')
+            //         ->addSelect('jro.output_error AS output_error')
+            //         ->addSelect('jro.team_message As team_message')
+            //         ->addSelect('jro.output_system AS output_system');
+            // $firstWrongTestcase = $queryBuilder
+            //     ->getQuery()
+            //     ->getResult();
         }
 
         $actuallyShowCompile = $showCompile == self::ALWAYS_SHOW_COMPILE_OUTPUT
@@ -213,6 +288,8 @@ class SubmissionController extends BaseController
             'runs' => $runs,
             'testcasesruns' => $testcasesruns,
             'showTooLateResult' => $showTooLateResult,
+            'showFisrtWrongTest' => $showFisrtWrongTest,
+            'firstWrongTestcase' => $firstWrongTestcase
         ];
         if ($actuallyShowCompile) {
             $data['size'] = 'xl';
