@@ -1,0 +1,7 @@
+Component name	Pattern	Ignore in analysis
+Included standard libraries	/usr/include/.*	Yes
+External JS libraries	/webapp/web/js/(ace/.*|flot/.*|jquery\..*\.js)	No
+Generated cache files in var	/webapp/var/cache/.*	Yes
+Generated doc build files	/doc/manual/build/.*	Yes
+Symfony external resources	/webapp/resources/.*	Yes
+External PHP libraries	/webapp/vendor/.*	Yes
