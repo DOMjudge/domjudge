@@ -25,10 +25,6 @@
                 Language:
                 <b>{{ judging.submission.language.name }}</b>
             </div>
-            <div class="p-2">
-                show_test_results:
-                <b>{{ showTestResults }}</b>
-            </div>
             {% if not showCompile %}
                 <div class="p-2">
                     Compilation:
@@ -39,35 +35,37 @@
                     {% endif %}
                 </div>
             {% endif %}
+            {% if judging.result != 'compiler-error' %}
+                <div class="d-flex flex-row">
+                    <div class="p-2">
+                        Result: {{ judging.result | printResult }}
+                    </div>
+                    {% if judging.result == 'correct' and judging.submission.contest.getRuntimeAsScoreTiebreaker() %}
+                        <div class="p-2">
+                            Max. Runtime: <b>{{ "%0.3f s" | format(judging.getMaxRuntime()) }}</b>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
         
         {% if showTestResults %}
-            <div> sucess </div>
-            <div> fail </div>
+            <div class="p-2">
+                {{ testcasesruns | displayTestcaseResults(1) }}
+            <div>
         {% endif %}
 
-        {% if judging.result != 'compiler-error' %}
-            <div class="d-flex flex-row">
-                <div class="p-2">
-                    Result: {{ judging.result | printResult }}
-                </div>
-                {% if judging.result == 'correct' and judging.submission.contest.getRuntimeAsScoreTiebreaker() %}
+        {#
+            {% if allowDownload %}
+                <div class="d-flex flex-row">
                     <div class="p-2">
-                        Max. Runtime: <b>{{ "%0.3f s" | format(judging.getMaxRuntime()) }}</b>
+                        <a title="Download submission ZIP" aria-label="download submission zip" class="btn btn-primary" href="{{ path('team_submission_download', {'submitId': judging.submission.submitid}) }}">
+                            <i class="fa fa-file-archive"></i> Download submission ZIP
+                        </a>
                     </div>
-                {% endif %}
-            </div>
-        {% endif %}
-
-        {% if allowDownload %}
-            <div class="d-flex flex-row">
-                <div class="p-2">
-                    <a title="Download submission ZIP" aria-label="download submission zip" class="btn btn-primary" href="{{ path('team_submission_download', {'submitId': judging.submission.submitid}) }}">
-                        <i class="fa fa-file-archive"></i> Download submission ZIP
-                    </a>
                 </div>
-            </div>
-        {% endif %}
+            {% endif %}
+        #}
 
         {% if showCompile %}
             <hr/>

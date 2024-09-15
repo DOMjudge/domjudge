@@ -469,6 +469,7 @@
             {# Display testcase results #}
             {% if externalJudgement is not null or (selectedJudging is not null and selectedJudging.result != 'compiler-error') %}
                 <table>
+                    {# 轉移點 #}
                     {% if not submission.importError %}
                         <tr>
                             <td>

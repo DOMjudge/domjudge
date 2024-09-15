@@ -118,6 +118,7 @@ class SubmissionController extends BaseController
         $user                 = $this->dj->getUser();
         $team                 = $user->getTeam();
         $contest              = $this->dj->getCurrentContest($team->getTeamid());
+        $showTestResults      = (bool)$this->config->get('show_test_results');
         /** @var Judging|null $judging */
         $judging = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
@@ -142,6 +143,7 @@ class SubmissionController extends BaseController
         }
 
         $runs = [];
+        $testcasesruns = [];
         if ($showSampleOutput && $judging && $judging->getResult() !== 'compiler-error') {
             $outputDisplayLimit    = (int)$this->config->get('output_display_limit');
             $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
@@ -183,6 +185,22 @@ class SubmissionController extends BaseController
                 ->getResult();
         }
 
+        if ($showTestResults){
+            $queryBuilder = $this->em->createQueryBuilder()
+                ->from(Testcase::class, 't')
+                ->join('t.content', 'tc')
+                ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
+                ->leftJoin('jr.output', 'jro')
+                ->select('t', 'jr', 'tc')
+                ->andWhere('t.problem = :problem')
+                ->setParameter('judging', $judging)
+                ->setParameter('problem', $judging->getSubmission()->getProblem())
+                ->orderBy('t.ranknumber');
+            $testcasesruns = $queryBuilder
+                    ->getQuery()
+                    ->getResult();
+        }
+
         $actuallyShowCompile = $showCompile == self::ALWAYS_SHOW_COMPILE_OUTPUT
             || ($showCompile == self::ONLY_SHOW_COMPILE_OUTPUT_ON_ERROR && $judging->getResult() === 'compiler-error');
         $data = [
@@ -190,9 +208,10 @@ class SubmissionController extends BaseController
             'verificationRequired' => $verificationRequired,
             'showCompile' => $actuallyShowCompile,
             'allowDownload' => $allowDownload,
-            'showTestResults' => (bool)$this->config->get('show_test_results'),
+            'showTestResults' => $showTestResults,
             'showSampleOutput' => $showSampleOutput,
             'runs' => $runs,
+            'testcasesruns' => $testcasesruns,
             'showTooLateResult' => $showTooLateResult,
         ];
         if ($actuallyShowCompile) {

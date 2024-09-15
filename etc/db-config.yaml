@@ -232,7 +232,7 @@
             type: bool
             default_value: true
             public: true
-            description: Team 是否能看到對錯哪些測資
+            description: Can the team see which test cases are correct or incorrect?
         -   name: show_teams_submissions
             type: bool
             default_value: true
