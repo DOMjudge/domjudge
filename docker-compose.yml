@@ -17,7 +17,7 @@ services:
       - 127.0.0.1:13306:3306
     command: --max-connections=1000 --max-allowed-packet=512M
     volumes:
-      - /var/lib/mysql
+      - ./db-data:/var/lib/mysql
     networks:
       - domjudge
   domjudge:
