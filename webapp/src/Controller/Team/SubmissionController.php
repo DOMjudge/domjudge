@@ -224,13 +224,20 @@ class SubmissionController extends BaseController
                     ->addSelect('tc.input AS input')
                     ->getQuery()
                     ->getResult();
+
+            $transform = function ($inputString) {
+                $parts = explode('-', $inputString);
+                $capitalizedParts = array_map('ucfirst', $parts);
+                return implode(' ', $capitalizedParts);
+            };        
+            
             foreach ($testcases as $index => $testcase) {
                 $run = $testcase-> getFirstJudgingRun();
                 if($run){
                     $runResult = $run -> getRunresult();
                     if($runResult != 'correct'){
                         $results = $runResult;
-                        $firstWrongTestcase['result'] = $runResult;
+                        $firstWrongTestcase['result'] = $transform($runResult);
                         $firstWrongTestcase['rank']   = $testcase -> getRank();
                         $firstWrongTestcase['totalTestCaseNums'] = count($testcases);
                         $firstWrongTestcase['teamoutput']  = $alloutput[$index]['output_run'];
