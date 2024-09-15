@@ -282,6 +282,12 @@ class SubmissionService
             ->andWhere($countQueryExtras['queued'])
             ->getQuery()
             ->getSingleScalarResult();
+        $counts['inContest'] = (clone $queryBuilder)
+            ->select('COUNT(s.submitid)')
+            ->join('s.contest', 'c')
+            ->andWhere('s.submittime BETWEEN c.starttime AND c.endtime')
+            ->getQuery()
+            ->getSingleScalarResult();
 
         return [$submissions, $counts];
     }

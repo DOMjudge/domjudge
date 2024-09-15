@@ -41,6 +41,10 @@
         {% if submissionCounts.queued > 0 %}
             <span class="badge text-bg-danger">{{ submissionCounts.queued }} queued (from {{submissionCounts.perteam}} teams)</span>
         {% endif %}
+
+        {% if submissionCounts.inContest > 0 %}
+            <span class="badge text-bg-secondary">{{ submissionCounts.inContest }} in contest</span>
+        {% endif %}
     </div>
 
     <table class="data-table table table-hover table{% if showExternalResult and showExternalTestcases %}-3{% endif %}-striped table-sm submissions-table table-full-clickable-cell">
