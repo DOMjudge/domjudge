@@ -376,6 +376,7 @@ class UserController extends BaseController
             $user->setFirstLogin(null);
             $user->setLastLogin(null);
             $user->setLastIpAddress(null);
+            $user->setLastApiLogin(null);
             $count++;
         }
         $this->em->flush();
