@@ -28,7 +28,7 @@
     </style>
 {% endif %}
 
-<table class="d-none d-md-table scoreboard center {% if jury %}scoreboard_jury{% endif %}">
+<table class="d-none d-md-table d-print-table scoreboard center {% if jury %}scoreboard_jury{% endif %}">
 
     {# output table column groups (for the styles) #}
     <colgroup>
@@ -318,7 +318,7 @@
     </tbody>
 </table>
 
-<table class="d-md-none scoreboard center {% if jury %}scoreboard_jury{% endif %}">
+<table class="d-md-none d-print-none scoreboard center {% if jury %}scoreboard_jury{% endif %}">
     <thead>
     {# output table column groups (for the styles) #}
     <colgroup>
