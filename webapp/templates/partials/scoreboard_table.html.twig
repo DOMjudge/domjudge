@@ -257,10 +257,8 @@
                     {% elseif matrixItem.numSubmissions > 0 %}
                         {% set scoreCssClass = 'score_incorrect' %}
                     {% endif %}
-                    {% if jury and showPending and matrixItem.numSubmissionsPending > 0 %}
-                        {% if scoreCssClass == 'score_pending' %}
-                            {% set scoreCssClass = scoreCssClass ~ ' score_incorrect' %}
-                        {% else %}
+                    {% if jury and showPending and matrixItem.numSubmissionsInFreeze > 0 %}
+                        {% if scoreCssClass != 'score_pending' %}
                             {% set scoreCssClass = scoreCssClass ~ ' score_pending' %}
                         {% endif %}
                     {% endif %}
