@@ -126,7 +126,7 @@ def import_contest_problemset_document(cid: str):
             break
 
     if text_file:
-        if dj_utils.confirm(f'Import {text_file} for contest?', False):
+        if dj_utils.confirm(f'Import {text_file} for contest?', True):
             dj_utils.upload_file(f'contests/{cid}/problemset', 'problemset', text_file)
             print('Contest problemset imported.')
         else:
