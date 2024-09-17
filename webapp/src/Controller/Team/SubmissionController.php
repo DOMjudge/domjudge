@@ -116,10 +116,15 @@ class SubmissionController extends BaseController
                 $this->addFlash('danger', 'No active contest');
             } elseif (!$this->dj->checkrole('jury') && !$contest->getFreezeData()->started()) {
                 $this->addFlash('danger', 'Contest has not yet started');
-            } else {
+            } 
+            else {
                 $problem = $formPaste->get('problem')->getData();
                 $language = $formPaste->get('language')->getData();
                 $codeContent = $formPaste->get('code_content')->getData();
+                if($codeContent == null || empty(trim($codeContent))) {
+                    $this->addFlash('danger','No code content provided.');
+                    return $this->redirectToRoute('team_index');
+                }
                 $tempDir = sys_get_temp_dir();
                 $tempFileName = sprintf(
                     'submission_%s_%s_%s.%s',
