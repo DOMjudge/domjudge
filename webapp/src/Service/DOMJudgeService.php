@@ -881,7 +881,10 @@ class DOMJudgeService
 
         /** @var ContestProblem $problem */
         foreach ($contest->getProblems() as $problem) {
-            $this->addSamplesToZip($zip, $problem, $problem->getShortname());
+            // We don't include the samples for interactive problems.
+            if (!$problem->getProblem()->getCombinedRunCompare()) {
+                $this->addSamplesToZip($zip, $problem, $problem->getShortname());
+            }
 
             if ($problem->getProblem()->getProblemstatementType()) {
                 $filename    = sprintf('%s/statement.%s', $problem->getShortname(), $problem->getProblem()->getProblemstatementType());
