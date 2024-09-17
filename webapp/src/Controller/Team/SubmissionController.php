@@ -128,6 +128,7 @@ class SubmissionController extends BaseController
                     date('Y-m-d_H-i-s'),
                     $language->getExtensions()[0]
                 );
+                $tempFileName = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $tempFileName);
                 $tempFilePath = $tempDir . DIRECTORY_SEPARATOR . $tempFileName;
                 file_put_contents($tempFilePath, $codeContent);
 
