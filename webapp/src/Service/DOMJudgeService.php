@@ -892,6 +892,14 @@ class DOMJudgeService
             foreach ($problem->getProblem()->getAttachments() as $attachment) {
                 $filename = sprintf('%s/attachments/%s', $problem->getShortname(), $attachment->getName());
                 $zip->addFromString($filename, $attachment->getContent()->getContent());
+                if ($attachment->getContent()->isExecutable()) {
+                    // 100755 = regular file, executable
+                    $zip->setExternalAttributesName(
+                        $filename,
+                        ZipArchive::OPSYS_UNIX,
+                        octdec('100755') << 16
+                    );
+                }
             }
         }
 
