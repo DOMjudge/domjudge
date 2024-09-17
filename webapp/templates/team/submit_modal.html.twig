@@ -19,8 +19,7 @@
                     {% include 'partials/alert.html.twig' with {'type': 'danger', 'message': 'Submissions (temporarily) disabled.'} %}
                 </div>
             {% else %}
-                {% set active_tab = active_tab | default('upload') %}
-
+                {% set active_tab = defaultSubmissionCodeMode == 0 ? 'paste' : 'upload' %}
                 <!-- Bootstrap Nav Tabs for Switching -->
                 <div class="modal-body">
                     <ul class="nav nav-tabs container text-center" id="submissionTabs" role="tablist" style="width: 100%">

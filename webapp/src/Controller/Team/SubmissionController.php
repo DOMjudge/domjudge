@@ -178,7 +178,8 @@ class SubmissionController extends BaseController
         $data = [
             'formupload' => $formUpload->createView(),
             'formpaste' => $formPaste->createView(),
-            'problem' => $problem
+            'problem' => $problem,
+            'defaultSubmissionCodeMode' => (bool) $this->config->get('default_submission_code_mode'),
         ];
         $data['validFilenameRegex'] = SubmissionService::FILENAME_REGEX;
 
