@@ -623,7 +623,7 @@ class ExternalContestSourceService
 
         // Note the @vars here are to make PHPStan understand the correct types.
         $method = match ($event->type) {
-            EventType::ACCOUNTS, EventType::AWARDS, EventType::MAP_INFO, EventType::PERSONS, EventType::TEAM_MEMBERS => $this->ignoreEvent(...),
+            EventType::ACCOUNTS, EventType::AWARDS, EventType::MAP_INFO, EventType::PERSONS, EventType::START_STATUS, EventType::TEAM_MEMBERS => $this->ignoreEvent(...),
             EventType::STATE => $this->validateState(...),
             EventType::CONTESTS => $this->validateAndUpdateContest(...),
             EventType::JUDGEMENT_TYPES => $this->importJudgementType(...),
