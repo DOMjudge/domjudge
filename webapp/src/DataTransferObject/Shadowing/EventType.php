@@ -29,6 +29,11 @@ enum EventType: string
             return EventType::CONTESTS;
         }
 
+        // When encountering an error for an unknown event
+        // consider if we need to verify this as shadow or
+        // ignore it by adding the case in:
+        // webapp/src/DataTransferObject/Shadowing/EventType.php
+        // webapp/src/Service/ExternalContestSourceService.php
         return EventType::from($value);
     }
 
