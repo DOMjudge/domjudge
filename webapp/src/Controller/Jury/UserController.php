@@ -373,9 +373,11 @@ class UserController extends BaseController
         $count = 0;
         foreach ($teamRole->getUsers() as $user) {
             /** @var User $user */
-            $user->setFirstLogin(null);
-            $user->setLastLogin(null);
-            $user->setLastIpAddress(null);
+            $user
+                ->setFirstLogin(null)
+                ->setLastLogin(null)
+                ->setLastApiLogin(null)
+                ->setLastIpAddress(null);
             $count++;
         }
         $this->em->flush();
