@@ -9,6 +9,7 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Testcase;
 use App\Form\Type\SubmitProblemType;
+use App\Form\Type\SubmitProblemPasteType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\SubmissionService;
@@ -42,44 +43,62 @@ class SubmissionController extends BaseController
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly FormFactoryInterface $formFactory
-    ) {}
+    ) {
+    }
 
     #[Route(path: '/submit/{problem}', name: 'team_submit')]
     public function createAction(Request $request, ?Problem $problem = null): Response
     {
-        $user    = $this->dj->getUser();
-        $team    = $user->getTeam();
+        $user = $this->dj->getUser();
+        $team = $user->getTeam();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         $data = [];
         if ($problem !== null) {
             $data['problem'] = $problem;
         }
-        $form    = $this->formFactory
+        $formUpload = $this->formFactory
             ->createBuilder(SubmitProblemType::class, $data)
             ->setAction($this->generateUrl('team_submit'))
             ->getForm();
 
-        $form->handleRequest($request);
+        $formPaste = $this->formFactory
+            ->createBuilder(SubmitProblemPasteType::class, $data)
+            ->setAction($this->generateUrl('team_submit'))
+            ->getForm();
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        $formUpload->handleRequest($request);
+        $formPaste->handleRequest($request);
+
+        if ($formUpload->isSubmitted() && $formUpload->isValid()) {
             if ($contest === null) {
                 $this->addFlash('danger', 'No active contest');
             } elseif (!$this->dj->checkrole('jury') && !$contest->getFreezeData()->started()) {
                 $this->addFlash('danger', 'Contest has not yet started');
             } else {
                 /** @var Problem $problem */
-                $problem = $form->get('problem')->getData();
+                $problem = $formUpload->get('problem')->getData();
                 /** @var Language $language */
-                $language = $form->get('language')->getData();
+                $language = $formUpload->get('language')->getData();
                 /** @var UploadedFile[] $files */
-                $files      = $form->get('code')->getData();
+                $files = $formUpload->get('code')->getData();
                 if (!is_array($files)) {
                     $files = [$files];
                 }
-                $entryPoint = $form->get('entry_point')->getData() ?: null;
+                $entryPoint = $formUpload->get('entry_point')->getData() ?: null;
                 $submission = $this->submissionService->submitSolution(
-                    $team, $this->dj->getUser(), $problem->getProbid(), $contest, $language, $files, 'team page', null,
-                    null, $entryPoint, null, null, $message
+                    $team,
+                    $this->dj->getUser(),
+                    $problem->getProbid(),
+                    $contest,
+                    $language,
+                    $files,
+                    'team page',
+                    null,
+                    null,
+                    $entryPoint,
+                    null,
+                    null,
+                    $message
                 );
 
                 if ($submission) {
@@ -92,9 +111,69 @@ class SubmissionController extends BaseController
                 }
                 return $this->redirectToRoute('team_index');
             }
+        } elseif ($formPaste->isSubmitted() && $formPaste->isValid()) {
+            if ($contest === null) {
+                $this->addFlash('danger', 'No active contest');
+            } elseif (!$this->dj->checkrole('jury') && !$contest->getFreezeData()->started()) {
+                $this->addFlash('danger', 'Contest has not yet started');
+            } else {
+                $problem = $formPaste->get('problem')->getData();
+                $language = $formPaste->get('language')->getData();
+                $codeContent = $formPaste->get('code_content')->getData();
+                $tempDir = sys_get_temp_dir();
+                $tempFileName = sprintf(
+                    'submission_%s_%s_%s.%s',
+                    $user->getUsername(),
+                    $problem->getName(),
+                    date('Y-m-d_H-i-s'),
+                    $language->getExtensions()[0]
+                );
+                $tempFilePath = $tempDir . DIRECTORY_SEPARATOR . $tempFileName;
+                file_put_contents($tempFilePath, $codeContent);
+
+                $uploadedFile = new UploadedFile(
+                    $tempFilePath,
+                    $tempFileName,
+                    'application/octet-stream',
+                    null,
+                    true
+                );
+
+                $files = [$uploadedFile];
+                $entryPoint = $formPaste->get('entry_point')->getData() ?: null;
+                $submission = $this->submissionService->submitSolution(
+                    $team,
+                    $this->dj->getUser(),
+                    $problem,
+                    $contest,
+                    $language,
+                    $files,
+                    'team page',
+                    null,
+                    null,
+                    $entryPoint,
+                    null,
+                    null,
+                    $message
+                );
+                if ($submission) {
+                    $this->addFlash(
+                        'success',
+                        'Submission done! Watch for the verdict in the list below.'
+                    );
+                } else {
+                    $this->addFlash('danger', $message);
+                }
+
+                return $this->redirectToRoute('team_index');
+            }
         }
 
-        $data = ['form' => $form->createView(), 'problem' => $problem];
+        $data = [
+            'formupload' => $formUpload->createView(),
+            'formpaste' => $formPaste->createView(),
+            'problem' => $problem
+        ];
         $data['validFilenameRegex'] = SubmissionService::FILENAME_REGEX;
 
         if ($request->isXmlHttpRequest()) {
@@ -110,16 +189,16 @@ class SubmissionController extends BaseController
     #[Route(path: '/submission/{submitId<\d+>}', name: 'team_submission')]
     public function viewAction(Request $request, int $submitId): Response
     {
-        $verificationRequired = (bool)$this->config->get('verification_required');
-        $showCompile          = $this->config->get('show_compile');
-        $showSampleOutput     = $this->config->get('show_sample_output');
-        $allowDownload        = (bool)$this->config->get('allow_team_submission_download');
-        $showTooLateResult    = $this->config->get('show_too_late_result');
-        $user                 = $this->dj->getUser();
-        $team                 = $user->getTeam();
-        $contest              = $this->dj->getCurrentContest($team->getTeamid());
-        $showTestResults      = (bool)$this->config->get('show_test_results');
-        $showFisrtWrongTest   = (bool)$this->config->get('show_first_wrong_testcase');
+        $verificationRequired = (bool) $this->config->get('verification_required');
+        $showCompile = $this->config->get('show_compile');
+        $showSampleOutput = $this->config->get('show_sample_output');
+        $allowDownload = (bool) $this->config->get('allow_team_submission_download');
+        $showTooLateResult = $this->config->get('show_too_late_result');
+        $user = $this->dj->getUser();
+        $team = $user->getTeam();
+        $contest = $this->dj->getCurrentContest($team->getTeamid());
+        $showTestResults = (bool) $this->config->get('show_test_results');
+        $showFisrtWrongTest = (bool) $this->config->get('show_first_wrong_testcase');
         /** @var Judging|null $judging */
         $judging = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
@@ -137,8 +216,10 @@ class SubmissionController extends BaseController
             ->getOneOrNullResult();
 
         // Update seen status when viewing submission.
-        if ($judging && $judging->getSubmission()->getSubmittime() < $contest->getEndtime() &&
-            (!$verificationRequired || $judging->getVerified())) {
+        if (
+            $judging && $judging->getSubmission()->getSubmittime() < $contest->getEndtime() &&
+            (!$verificationRequired || $judging->getVerified())
+        ) {
             $judging->setSeen(true);
             $this->em->flush();
         }
@@ -147,7 +228,7 @@ class SubmissionController extends BaseController
         $testcasesruns = [];
         $firstWrongTestcase = [];
         if ($showSampleOutput && $judging && $judging->getResult() !== 'compiler-error') {
-            $outputDisplayLimit    = (int)$this->config->get('output_display_limit');
+            $outputDisplayLimit = (int) $this->config->get('output_display_limit');
             $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
 
             $queryBuilder = $this->em->createQueryBuilder()
@@ -187,43 +268,43 @@ class SubmissionController extends BaseController
                 ->getResult();
         }
 
-        if ($showTestResults){
-            
+        if ($showTestResults) {
+
             $testcasesruns = $this->em->createQueryBuilder()
-                    ->from(Testcase::class, 't')
-                    ->join('t.content', 'tc')
-                    ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
-                    ->leftJoin('jr.output', 'jro')
-                    ->select('t', 'jr', 'tc')
-                    ->andWhere('t.problem = :problem')
-                    ->setParameter('judging', $judging)
-                    ->setParameter('problem', $judging->getSubmission()->getProblem())
-                    ->orderBy('t.ranknumber')
-                    ->getQuery()
-                    ->getResult();
+                ->from(Testcase::class, 't')
+                ->join('t.content', 'tc')
+                ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
+                ->leftJoin('jr.output', 'jro')
+                ->select('t', 'jr', 'tc')
+                ->andWhere('t.problem = :problem')
+                ->setParameter('judging', $judging)
+                ->setParameter('problem', $judging->getSubmission()->getProblem())
+                ->orderBy('t.ranknumber')
+                ->getQuery()
+                ->getResult();
         }
 
-        if ($showFisrtWrongTest){
+        if ($showFisrtWrongTest) {
             $testcases = $testcasesruns;
             $alloutput = $this->em->createQueryBuilder()
-                    ->from(Testcase::class, 't')
-                    ->join('t.content', 'tc')
-                    ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
-                    ->leftJoin('jr.output', 'jro')
-                    ->select('t', 'jr', 'tc')
-                    ->andWhere('t.problem = :problem')
-                    ->setParameter('judging', $judging)
-                    ->setParameter('problem', $judging->getSubmission()->getProblem())
-                    ->orderBy('t.ranknumber')
-                    ->addSelect('tc.output AS output_reference')
-                    ->addSelect('jro.output_run AS output_run')
-                    ->addSelect('jro.output_diff AS output_diff')
-                    ->addSelect('jro.output_error AS output_error')
-                    ->addSelect('jro.output_system AS output_system')
-                    ->addSelect('jro.team_message AS team_message')
-                    ->addSelect('tc.input AS input')
-                    ->getQuery()
-                    ->getResult();
+                ->from(Testcase::class, 't')
+                ->join('t.content', 'tc')
+                ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
+                ->leftJoin('jr.output', 'jro')
+                ->select('t', 'jr', 'tc')
+                ->andWhere('t.problem = :problem')
+                ->setParameter('judging', $judging)
+                ->setParameter('problem', $judging->getSubmission()->getProblem())
+                ->orderBy('t.ranknumber')
+                ->addSelect('tc.output AS output_reference')
+                ->addSelect('jro.output_run AS output_run')
+                ->addSelect('jro.output_diff AS output_diff')
+                ->addSelect('jro.output_error AS output_error')
+                ->addSelect('jro.output_system AS output_system')
+                ->addSelect('jro.team_message AS team_message')
+                ->addSelect('tc.input AS input')
+                ->getQuery()
+                ->getResult();
 
             $transform = function ($inputString) {
                 if (empty($inputString)) {
@@ -232,8 +313,8 @@ class SubmissionController extends BaseController
                 $parts = explode('-', $inputString);
                 $capitalizedParts = array_map('ucfirst', $parts);
                 return implode(' ', $capitalizedParts);
-            };     
-            
+            };
+
             $limitStringSize = function ($input, $maxSizeInBytes = 12800) {
                 if (strlen($input) > $maxSizeInBytes) {
                     $input = substr($input, 0, $maxSizeInBytes);
@@ -241,20 +322,20 @@ class SubmissionController extends BaseController
                 }
                 return $input;
             };
-            
+
             foreach ($testcases as $index => $testcase) {
-                $run = $testcase-> getFirstJudgingRun();
-                if($run){
-                    $runResult = $run -> getRunresult();
-                    if($runResult != 'correct' && $runResult != null){
+                $run = $testcase->getFirstJudgingRun();
+                if ($run) {
+                    $runResult = $run->getRunresult();
+                    if ($runResult != 'correct' && $runResult != null) {
                         $results = $runResult;
                         $firstWrongTestcase['result'] = $transform($runResult);
-                        $firstWrongTestcase['rank']   = $testcase -> getRank();
+                        $firstWrongTestcase['rank'] = $testcase->getRank();
                         $firstWrongTestcase['totalTestCaseNums'] = count($testcases);
                         $firstWrongTestcase['input'] = $limitStringSize(rtrim($alloutput[$index]['input']));
-                        $firstWrongTestcase['teamoutput']  = $limitStringSize(rtrim($alloutput[$index]['output_run']));
+                        $firstWrongTestcase['teamoutput'] = $limitStringSize(rtrim($alloutput[$index]['output_run']));
                         $firstWrongTestcase['judgeoutput'] = $limitStringSize(rtrim($alloutput[$index]['output_reference']));
-                        $firstWrongTestcase['testcaseid'] = $testcase -> getTestcaseid();
+                        $firstWrongTestcase['testcaseid'] = $testcase->getTestcaseid();
                         break;
                     }
                 }
@@ -326,7 +407,7 @@ class SubmissionController extends BaseController
     #[Route(path: '/submission/{submitId<\d+>}/download', name: 'team_submission_download')]
     public function downloadAction(int $submitId): Response
     {
-        $allowDownload = (bool)$this->config->get('allow_team_submission_download');
+        $allowDownload = (bool) $this->config->get('allow_team_submission_download');
         if (!$allowDownload) {
             throw new NotFoundHttpException('Submission download not allowed');
         }
@@ -346,8 +427,10 @@ class SubmissionController extends BaseController
             ->getOneOrNullResult();
 
         if ($submission === null) {
-            throw new NotFoundHttpException(sprintf('Submission with ID \'%s\' not found',
-                $submitId));
+            throw new NotFoundHttpException(sprintf(
+                'Submission with ID \'%s\' not found',
+                $submitId
+            ));
         }
 
         return $this->submissionService->getSubmissionZipResponse($submission);

@@ -1,34 +1,58 @@
 .result-container {
-  border: 1px solid #ddd;
-  padding: 20px;
-  margin: 20px;
-  border-radius: 10px;
-  background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 10px;
+    background-color: #f9f9f9;
 }
 
 .text-danger {
-  color: #d9534f;
+    color: #d9534f;
 }
 
 .text-success {
-  color: #5cb85c;
+    color: #5cb85c;
 }
 
-.input-section, .output-section, .expected-section {
-  margin-top: 10px;
-  max-height: 200px !important;
-  overflow-y: auto !important;
+.input-section,
+.output-section,
+.expected-section {
+    margin-top: 10px;
+    max-height: 200px !important;
+    overflow-y: auto !important;
 }
 
-.input-item, .input-value, .output-value, .expected-value {
-  font-size: 16px;
-  font-family: monospace;
-  padding: 5px;
-  background-color: #f0f0f0;
-  border-radius: 5px;
+.input-item,
+.input-value,
+.output-value,
+.expected-value {
+    font-size: 16px;
+    font-family: monospace;
+    padding: 5px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
 }
 
 .visualization-note {
-  font-size: 14px;
-  color: #888;
+    font-size: 14px;
+    color: #888;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.editor-container {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #fafafa;
+    max-height: 400px;
+    overflow: auto;
+}
+
+.editor-container:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
