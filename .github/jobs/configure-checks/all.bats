@@ -210,7 +210,7 @@ compile_assertions_finished () {
 @test "cgroup library needed" {
    cgroup_init_find="checking for cgroup_init in -lcgroup... no"
    cgroup_init_error="configure: error: Linux cgroup library not found."
-   setup_user
+   setup
    repo-install gcc g++
    repo-remove libcgroup-dev
    run run_configure
