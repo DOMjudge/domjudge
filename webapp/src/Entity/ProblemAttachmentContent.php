@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity]
 #[ORM\Table(options: [
@@ -24,6 +25,10 @@ class ProblemAttachmentContent
 
     #[ORM\Column(type: 'blobtext', options: ['comment' => 'Attachment content'])]
     private string $content;
+
+    #[ORM\Column(options: ['comment' => 'Whether this file gets an executable bit.', 'default' => 0])]
+    #[Serializer\Exclude]
+    private bool $isExecutable = false;
 
     public function getAttachment(): ProblemAttachment
     {
@@ -47,5 +52,16 @@ class ProblemAttachmentContent
         $this->content = $content;
 
         return $this;
+    }
+
+    public function setIsExecutable(bool $isExecutable): ProblemAttachmentContent
+    {
+        $this->isExecutable = $isExecutable;
+        return $this;
+    }
+
+    public function isExecutable(): bool
+    {
+        return $this->isExecutable;
     }
 }
