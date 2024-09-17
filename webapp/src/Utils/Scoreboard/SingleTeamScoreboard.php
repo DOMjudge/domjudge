@@ -63,14 +63,14 @@ class SingleTeamScoreboard extends Scoreboard
             );
 
             $this->matrix[$scoreRow->getTeam()->getTeamid()][$scoreRow->getProblem()->getProbid()] = new ScoreboardMatrixItem(
-                $scoreRow->getIsCorrect($this->restricted),
-                $scoreRow->getIsCorrect($this->showRestrictedFts) && $scoreRow->getIsFirstToSolve(),
-                // When public scoreboard is frozen, also show "x + y tries" for jury
-                $scoreRow->getSubmissions($this->freezeData->showFrozen() ? false : $this->restricted),
-                $scoreRow->getPending($this->freezeData->showFrozen() ? false : $this->restricted),
-                $scoreRow->getSolveTime($this->restricted),
-                $penalty,
-                $scoreRow->getRuntime($this->restricted)
+                isCorrect: $scoreRow->getIsCorrect($this->restricted),
+                isFirst: $scoreRow->getIsCorrect($this->showRestrictedFts) && $scoreRow->getIsFirstToSolve(),
+                numSubmissions: $scoreRow->getSubmissions($this->restricted),
+                numSubmissionsPending: $scoreRow->getPending($this->restricted),
+                time: $scoreRow->getSolveTime($this->restricted),
+                penaltyTime: $penalty,
+                runtime: $scoreRow->getRuntime($this->restricted),
+                numSubmissionsInFreeze: $scoreRow->getPending(false),
             );
         }
 
@@ -80,7 +80,14 @@ class SingleTeamScoreboard extends Scoreboard
             $teamId    = $this->team->getTeamid();
             $problemId = $contestProblem->getProbid();
             if (!isset($this->matrix[$teamId][$problemId])) {
-                $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, false, 0, 0, 0, 0, 0);
+                $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(
+                    isCorrect: false,
+                    isFirst: false,
+                    numSubmissions: 0,
+                    numSubmissionsPending: 0,
+                    time: 0,
+                    penaltyTime: 0,
+                    runtime: 0);
             }
         }
     }

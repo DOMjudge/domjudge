@@ -11,6 +11,7 @@ class ScoreboardMatrixItem
         public int $numSubmissionsPending,
         public float|string $time,
         public int $penaltyTime,
-        public int $runtime
+        public int $runtime,
+        public ?int $numSubmissionsInFreeze = null,
     ) {}
 }

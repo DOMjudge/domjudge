@@ -152,13 +152,14 @@ class Scoreboard
             );
 
             $this->matrix[$teamId][$probId] = new ScoreboardMatrixItem(
-                $scoreRow->getIsCorrect($this->restricted),
-                $scoreRow->getIsCorrect($this->restricted) && $scoreRow->getIsFirstToSolve(),
-                $scoreRow->getSubmissions($this->restricted),
-                $scoreRow->getPending($this->restricted),
-                $scoreRow->getSolveTime($this->restricted),
-                $penalty,
-                $scoreRow->getRuntime($this->restricted)
+                isCorrect: $scoreRow->getIsCorrect($this->restricted),
+                isFirst: $scoreRow->getIsCorrect($this->restricted) && $scoreRow->getIsFirstToSolve(),
+                numSubmissions: $scoreRow->getSubmissions($this->restricted),
+                numSubmissionsPending: $scoreRow->getPending($this->restricted),
+                time: $scoreRow->getSolveTime($this->restricted),
+                penaltyTime: $penalty,
+                runtime: $scoreRow->getRuntime($this->restricted),
+                numSubmissionsInFreeze: $scoreRow->getPending(false),
             );
 
             if ($scoreRow->getIsCorrect($this->restricted)) {
@@ -216,7 +217,14 @@ class Scoreboard
                 $problemId = $contestProblem->getProbid();
                 // Provide default scores when nothing submitted for this team + problem yet
                 if (!isset($this->matrix[$teamId][$problemId])) {
-                    $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, false, 0, 0, 0, 0, 0);
+                    $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(
+                        isCorrect: false,
+                        isFirst: false,
+                        numSubmissions: 0,
+                        numSubmissionsPending: 0,
+                        time: 0,
+                        penaltyTime: 0,
+                        runtime: 0);
                 }
 
                 $problemMatrixItem = $this->matrix[$teamId][$problemId];
