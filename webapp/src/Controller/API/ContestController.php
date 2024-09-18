@@ -39,6 +39,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -654,6 +655,7 @@ class ContestController extends AbstractRestController
         $response->setCallback(function () use ($format, $cid, $contest, $request, $since_id, $types, $strict, $stream, $metadataFactory, $kernel) {
             $lastUpdate = 0;
             $lastIdSent = max(0, $since_id); // Don't try to look for event_id=0
+            $lastIdExists = $since_id === -1;
             $typeFilter = false;
             if ($types) {
                 $typeFilter = explode(',', $types);
@@ -721,18 +723,30 @@ class ContestController extends AbstractRestController
                 // Add missing state events that should have happened already.
                 $this->eventLogService->addMissingStateEvents($contest);
 
-                // We fetch *all* events after the last seen to check that
+                // We fetch *all* events from the last seen to check that
                 // we don't skip events that are committed out of order.
+                // This includes the last seen event itself, just to check
+                // that the database is consistent and, for example, has
+                // not been reloaded while this process is (long) running.
                 $q = $this->em->createQueryBuilder()
                     ->from(Event::class, 'e')
                     ->select('e')
-                    ->andWhere('e.eventid > :lastIdSent')
+                    ->andWhere('e.eventid >= :lastIdSent')
                     ->setParameter('lastIdSent', $lastIdSent)
                     ->orderBy('e.eventid', 'ASC')
                     ->getQuery();
 
                 /** @var Event[] $events */
                 $events = $q->getResult();
+
+                if ($lastIdExists) {
+                    if (count($events) == 0 || $events[0]->getEventid() !== $lastIdSent) {
+                        throw new HttpException(500, sprintf('Cannot find event %d in database anymore', $lastIdSent));
+                    }
+                    // Remove the previously last sent event. We just fetched
+                    // it to make sure it's there.
+                    unset($events[0]);
+                }
 
                 // Look for any missing sequential events and wait for them to
                 // be committed if so.
@@ -860,6 +874,7 @@ class ContestController extends AbstractRestController
                     flush();
                     $lastUpdate = Utils::now();
                     $lastIdSent = $event->getEventid();
+                    $lastIdExists = true;
                     $numEventsSent++;
 
                     if ($missingEvents && $event->getEventid() >= $lastFoundId) {
