@@ -7,8 +7,14 @@ distro_id=$(grep "^ID=" /etc/os-release)
 # Install everything for configure and testing
 case $distro_id in
     "ID=fedora")
+#        grep -E 'nginx|apache' /etc/passwd || true
+#        grep -E 'nginx|apache' /etc/group || true
+
         dnf install -y pkg-config make bats autoconf automake util-linux \
             httpd
+
+#        grep -E 'nginx|apache' /etc/passwd || true
+#        grep -E 'nginx|apache' /etc/group || true
         ;;
     *)
         apt-get update; apt-get full-upgrade -y
@@ -27,4 +33,4 @@ make configure
 cp submit/assert.bash .github/jobs/configure-checks/
 
 # Run the configure tests for this usecase
-test_path="/__w/domjudge/domjudge" bats .github/jobs/configure-checks/all.bats
+test_path="/__w/domjudge/domjudge" bats --trace .github/jobs/configure-checks/all.bats
