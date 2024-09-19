@@ -11,7 +11,7 @@ case $distro_id in
         grep -E 'nginx|apache' /etc/group || true
 
         dnf install -y pkg-config make bats autoconf automake util-linux \
-            php-fpm
+            httpd php-fpm
 
         grep -E 'nginx|apache' /etc/passwd || true
         grep -E 'nginx|apache' /etc/group || true
