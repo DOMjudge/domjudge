@@ -83,7 +83,7 @@ section_end mount
 
 section_start check_cgroup_v1 "Checking for cgroup v1 availability"
 
-if grep cgroup$ /proc/filesystems; then
+if grep -qs cgroup$ /proc/filesystems; then
     cgroupv1=1
 else
     echo "Skipping tests that rely on cgroup v1"
