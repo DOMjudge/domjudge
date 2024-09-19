@@ -1,7 +1,7 @@
 services:
   domjudge:
     volumes:
-      - domjudge-sync:/Users/as6325400/Project/domjudge_DS
+      - domjudge-sync:${PWD}
 
 volumes:
   domjudge-sync:
