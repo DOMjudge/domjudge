@@ -10,6 +10,7 @@
 # Abort when a single command fails:
 set -e
 
+# See https://github.com/koalaman/shellcheck/issues/2660
 # shellcheck disable=SC2317
 cleanup() {
     # Unmount things on cleanup
