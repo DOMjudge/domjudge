@@ -9,7 +9,8 @@ include $(TOPDIR)/Makefile.global
 TARGETS =
 OBJECTS =
 
-SUBST_DOMSERVER = fix_permissions configure-domjudge import-contest
+SUBST_DOMSERVER = fix_permissions configure-domjudge import-contest \
+                  export-contest
 
 SUBST_JUDGEHOST = dj_make_chroot dj_run_chroot dj_make_chroot_docker \
                   dj_judgehost_cleanup

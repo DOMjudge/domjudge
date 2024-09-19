@@ -44,17 +44,10 @@ def parse_api_response(name: str, response: requests.Response):
     if response.status_code == 204:
         return None
 
-    # We got a successful HTTP response. It worked. Return the full response
-    try:
-        result = json.loads(response.text)
-    except json.decoder.JSONDecodeError as e:
-        print(response.text)
-        raise RuntimeError(f'Failed to JSON decode the response for API request {name}')
-
-    return result
+    return response.text
 
 
-def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
+def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}, decode: bool = True):
     '''Perform an API call to the given endpoint and return its data.
 
     Based on whether `domjudge_webapp_folder_or_api_url` is a folder or URL this
@@ -64,16 +57,18 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
         name (str): the endpoint to call
         method (str): the method to use, GET or PUT are supported
         jsonData (dict): the JSON data to PUT. Only used when method is PUT
+        decode (bool): whether to decode the returned JSON data, default true
 
     Returns:
         The endpoint contents.
 
     Raises:
-        RuntimeError when the response is not JSON or the HTTP status code is non 2xx.
+        RuntimeError when the HTTP status code is non-2xx or the response
+        cannot be JSON decoded.
     '''
 
     if os.path.isdir(domjudge_webapp_folder_or_api_url):
-        return api_via_cli(name, method, {}, {}, jsonData)
+        result = api_via_cli(name, method, {}, {}, jsonData)
     else:
         global ca_check
         url = f'{domjudge_webapp_folder_or_api_url}/{name}'
@@ -97,7 +92,17 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
                 return do_api_request(name)
         except requests.exceptions.RequestException as e:
             raise RuntimeError(e)
-    return parse_api_response(name, response)
+        result = parse_api_response(name, response)
+
+    if decode:
+        try:
+            result = json.loads(result)
+        except json.decoder.JSONDecodeError as e:
+            print(result)
+            raise RuntimeError(f'Failed to JSON decode the response for API request {name}')
+
+    return result
+
 
 def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
     '''Upload the given file to the API at the given path with the given name.
@@ -118,7 +123,7 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
     '''
 
     if os.path.isdir(domjudge_webapp_folder_or_api_url):
-        return api_via_cli(name, 'POST', data, {apifilename: file})
+        response = api_via_cli(name, 'POST', data, {apifilename: file})
     else:
         global ca_check
         files = [(apifilename, open(file, 'rb'))]
@@ -152,7 +157,7 @@ def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {
         jsonData (dict): the JSON data to use. Only used when method is POST or PUT
 
     Returns:
-        The parsed endpoint contents.
+        The endpoint contents.
 
     Raises:
         RuntimeError when the command exit code is not 0.
@@ -183,4 +188,4 @@ def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {
         print(response)
         raise RuntimeError(f'API request {name} failed')
 
-    return json.loads(response)
+    return response
