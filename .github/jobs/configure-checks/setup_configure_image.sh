@@ -7,14 +7,14 @@ distro_id=$(grep "^ID=" /etc/os-release)
 # Install everything for configure and testing
 case $distro_id in
     "ID=fedora")
-#        grep -E 'nginx|apache' /etc/passwd || true
-#        grep -E 'nginx|apache' /etc/group || true
+        grep -E 'nginx|apache' /etc/passwd || true
+        grep -E 'nginx|apache' /etc/group || true
 
         dnf install -y pkg-config make bats autoconf automake util-linux \
             php-fpm
 
-#        grep -E 'nginx|apache' /etc/passwd || true
-#        grep -E 'nginx|apache' /etc/group || true
+        grep -E 'nginx|apache' /etc/passwd || true
+        grep -E 'nginx|apache' /etc/group || true
         ;;
     *)
         apt-get update; apt-get full-upgrade -y

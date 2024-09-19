@@ -178,8 +178,8 @@ compile_assertions_finished () {
         groupdel ${www_group} || true
     done
     repo-install httpd
-#    grep -E 'nginx|apache' /etc/passwd || true
-#    grep -E 'nginx|apache' /etc/group || true
+    grep -E 'nginx|apache' /etc/passwd || true
+    grep -E 'nginx|apache' /etc/group || true
     run ./configure --with-domjudge-user=$u
     assert_line "checking webserver-group... apache (detected)"
     assert_line " * webserver group.....: apache"
