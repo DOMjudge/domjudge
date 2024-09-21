@@ -93,11 +93,17 @@
                 {%- set link = path('jury_submission', {submitId: submission.submitid}) %}
             {%- endif %}
 
+            {% if submission.team.affiliation %}
+                {% set affilid = submission.team.affiliation.affilid %}
+            {% else %}
+                {% set affilid = '' %}
+            {% endif %}
+
             <tr class="{% if not submission.valid %}ignore{% endif %}"
                 data-problem-id="{{ submission.problem.probid }}"
                 data-team-id="{{ submission.team.teamid }}"
                 data-category-id="{{ submission.team.category.categoryid }}"
-                data-affiliation-id="{{ submission.team.affiliationId }}"
+                data-affiliation-id="{{ affilid }}"
                 data-language-id="{{ submission.language.langid }}"
                 data-submission-id="{{ submission.submitid }}"
                 data-result="{{ submission | printValidJurySubmissionResult(false) }}">
