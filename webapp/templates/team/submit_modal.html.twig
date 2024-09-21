@@ -19,21 +19,59 @@
                     {% include 'partials/alert.html.twig' with {'type': 'danger', 'message': 'Submissions (temporarily) disabled.'} %}
                 </div>
             {% else %}
-                {{ form_start(form) }}
                 <div class="modal-body">
-                    {{ form_row(form.code) }}
-                    <div class="alert d-none" id="files_selected"></div>
-                    {{ form_row(form.problem) }}
-                    {{ form_row(form.language) }}
-                    {{ form_row(form.entry_point) }}
+                    <ul class="nav nav-tabs container text-center" id="submissionTabs" role="tablist" style="width: 100%">
+                        <li class="nav-item" role="presentation" >
+                            <a class="nav-link {% if active_tab == 'upload' %}active{% endif %}" id="upload-tab" data-bs-toggle="tab" href="#upload" role="tab" aria-controls="upload" aria-selected="{% if active_tab == 'upload' %}true{% else %}false{% endif %}" onclick="setCookie('active_tab', 'upload')" >Upload File</a>
+                        </li>
+                        <li class="nav-item text-center" role="presentation">
+                            <a class="nav-link {% if active_tab == 'paste' %}active{% endif %}" id="paste-tab" data-bs-toggle="tab" href="#paste" role="tab" aria-controls="paste" aria-selected="{% if active_tab == 'paste' %}true{% else %}false{% endif %}" onclick="setCookie('active_tab', 'paste')">Paste Code</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="submissionTabsContent" style="margin-top: 20px;">
+                        <div class="tab-pane fade {% if active_tab == 'upload' %}show active{% endif %}" id="upload" role="tabpanel" aria-labelledby="upload-tab">
+                            {{ form_start(formupload) }}
+                            {{ form_row(formupload.code) }}
+                            <div class="alert d-none" id="files_selected"></div>
+                            {{ form_row(formupload.problem) }}
+                            {{ form_row(formupload.language) }}
+                            {{ form_row(formupload.entry_point) }}
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-cloud-upload-alt"></i> Submit Upload
+                                </button>
+                            </div>
+                            {{ form_end(formupload) }}
+                        </div>
+
+                        <div class="tab-pane fade {% if active_tab == 'paste' %}show active{% endif %}" id="paste" role="tabpanel" aria-labelledby="paste-tab">
+                            {{ form_start(formpaste) }}
+                            {{ form_widget(formpaste.code_content) }}
+                            <label for="codeInput">Paste your code here:</label>
+                            <div class="editor-container">
+                                {{ "" | codeEditor(
+                                    "_team_submission_code",
+                                    "c_cpp",
+                                    true,
+                                    formpaste.code_content.vars.id,
+                                    null,
+                                    formpaste.language.vars.value
+                                ) }}
+                            </div>
+                                {{ form_row(formpaste.problem) }}
+                                {{ form_row(formpaste.language) }}
+                                {{ form_row(formpaste.entry_point) }}
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paste"></i> Submit Paste
+                                </button>
+                            </div>
+                            {{ form_end(formpaste) }}
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn-success btn">
-                        <i class="fas fa-cloud-upload-alt"></i> Submit
-                    </button>
-                </div>
-                {{ form_end(form) }}
             {% endif %}
         </div>
     </div>
