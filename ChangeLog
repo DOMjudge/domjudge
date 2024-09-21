@@ -1,5 +1,10 @@
 DOMjudge Programming Contest Judging System
 
+Version 8.3.1 - 13 September 2024
+---------------------------------
+ - Create autoload_runtime.php as normal user to prevent a composer warning.
+ - Fix saving new problems with problem statement from web UI.
+
 Version 8.3.0 - 31 May 2024
 ---------------------------
  - [security] Close metadata file descriptor for the child in runguard.
