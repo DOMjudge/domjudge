@@ -105,7 +105,7 @@ class ImportExportServiceTest extends BaseTestCase
                 'start-time'               => '2020-01-01T12:34:56+02:00',
                 'scoreboard-freeze-length' => '30:00',
             ],
-            "Contest has errors:\n\nname: This value should not be blank.\nshortname: This value should not be blank."
+            "Contest has errors:\n\n  • `name`: This value should not be blank.\n  • `shortname`: This value should not be blank."
         ];
     }
 
@@ -501,7 +501,7 @@ EOF;
         // Remove the file, we don't need it anymore.
         unlink($fileName);
 
-        self::assertEquals(0, $importCount);
+        self::assertEquals(-1, $importCount);
         self::assertMatchesRegularExpression('/Only alphanumeric characters and _-@. are allowed/', $message);
 
         $postCount = $em->getRepository(User::class)->count([]);
@@ -870,8 +870,8 @@ EOF;
         // Remove the file, we don't need it anymore.
         unlink($fileName);
 
-        self::assertMatchesRegularExpression('/name: This value should not be blank./', $message);
-        self::assertEquals(0, $importCount);
+        self::assertMatchesRegularExpression('/.*`name`: This value should not be blank.*/', $message);
+        self::assertEquals(-1, $importCount);
 
         $postCount = $em->getRepository(Team::class)->count([]);
         self::assertEquals($preCount, $postCount);
@@ -908,8 +908,8 @@ EOF;
         // Remove the file, we don't need it anymore.
         unlink($fileName);
 
-        self::assertMatchesRegularExpression('/name: This value should not be blank./', $message);
-        self::assertEquals(0, $importCount);
+        self::assertMatchesRegularExpression('/.*`name`: This value should not be blank.*/', $message);
+        self::assertEquals(-1, $importCount);
 
         $postCount = $em->getRepository(Team::class)->count([]);
         self::assertEquals($preCount, $postCount);
@@ -1050,8 +1050,8 @@ EOF;
         // Remove the file, we don't need it anymore.
         unlink($fileName);
 
-        self::assertMatchesRegularExpression('/name: This value should not be blank/', $message);
-        self::assertEquals(0, $importCount);
+        self::assertMatchesRegularExpression('/.*`name`: This value should not be blank.*/', $message);
+        self::assertEquals(-1, $importCount);
 
         $postCount = $em->getRepository(TeamCategory::class)->count([]);
         self::assertEquals($preCount, $postCount);
@@ -1150,7 +1150,7 @@ EOF;
         unlink($fileName);
 
         self::assertMatchesRegularExpression('/ISO3166-1 alpha-3 values are allowed/', $message);
-        self::assertEquals(0, $importCount);
+        self::assertEquals(-1, $importCount);
 
         $postCount = $em->getRepository(TeamAffiliation::class)->count([]);
         self::assertEquals($preCount, $postCount);
