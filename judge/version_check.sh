@@ -67,7 +67,7 @@ if [ -e "$WORKDIR/version_check-script" ]; then
     mv "$WORKDIR/version_check-script" "$WORKDIR/version_check-script-old"
 fi
 mkdir -p "$WORKDIR/version_check-script"
-chmod 0777 -p "$WORKDIR/version_check-script"
+chmod 0777 "$WORKDIR/version_check-script"
 cp -a "$VERSION_CHECK_SCRIPT" "$PWD/version_check-script/"
 
 cd "$WORKDIR/version_check"
