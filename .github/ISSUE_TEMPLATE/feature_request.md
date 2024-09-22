@@ -31,12 +31,12 @@ Please elaborate on the (larger, higher level) goal you want to achieve with thi
 ### Expected behaviour
 <!--
 Replace this line with what you would expect to happen.
-Please describe the workflow how you want this feature to work with expected start URL
+For example describe the flow how you want this feature to work.
 1. Step 1
 2. Step 2
 -->
 
 ### Any other information that you want to share?
 <!--
-Screenshots may help in case of UI enhancements with annotated drawings.
+Screenshots with annotated drawings may help in case of UI enhancements.
 -->
