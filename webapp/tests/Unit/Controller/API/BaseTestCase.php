@@ -12,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 abstract class BaseTestCase extends BaseBaseTestCase
 {
     protected static array $rootEndpoints = ['contests', 'judgehosts', 'users'];
+    protected static string $testedRole = 'unset';
 
     /** @var KernelBrowser */
     protected KernelBrowser $client;
@@ -372,5 +373,11 @@ abstract class BaseTestCase extends BaseBaseTestCase
         foreach ($this->expectedAbsent as $id) {
             yield [$id];
         }
+    }
+
+    protected function provideAllowedUsers(): Generator
+    {
+        yield ['admin', ['admin']];
+        yield ['team', [static::$testedRole]];
     }
 }
