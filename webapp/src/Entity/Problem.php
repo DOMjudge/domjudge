@@ -109,6 +109,21 @@ class Problem extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ?string $problemstatement_type = null;
 
+    #[ORM\Column(options: [
+        'comment' => 'Whether this problem is a multi-pass problem.',
+        'default' => 0,
+    ])]
+    #[Serializer\Exclude]
+    private bool $isMultipassProblem = false;
+
+    #[ORM\Column(
+        nullable: true,
+        options: ['comment' => 'Optional limit on the number of rounds; defaults to 1 for traditional problems, 2 for multi-pass problems if not specified.', 'unsigned' => true]
+    )]
+    #[Assert\GreaterThan(0)]
+    #[Serializer\Exclude]
+    private ?int $multipassLimit = null;
+
     /**
      * @var Collection<int, Submission>
      */
@@ -271,6 +286,31 @@ class Problem extends BaseApiEntity implements
     public function getCombinedRunCompare(): bool
     {
         return $this->combined_run_compare;
+    }
+
+    public function setMultipassProblem(bool $isMultipassProblem): Problem
+    {
+        $this->isMultipassProblem = $isMultipassProblem;
+        return $this;
+    }
+
+    public function isMultipassProblem(): bool
+    {
+        return $this->isMultipassProblem;
+    }
+
+    public function setMultipassLimit(?int $multipassLimit): Problem
+    {
+        $this->multipassLimit = $multipassLimit;
+        return $this;
+    }
+
+    public function getMultipassLimit(): int
+    {
+        if ($this->isMultipassProblem) {
+            return $this->multipassLimit ?? 2;
+        }
+        return 1;
     }
 
     public function setProblemstatementFile(?UploadedFile $problemstatementFile): Problem

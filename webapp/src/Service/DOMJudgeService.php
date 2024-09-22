@@ -1442,6 +1442,7 @@ class DOMJudgeService
                 'output_limit' => $outputLimit,
                 'process_limit' => $this->config->get('process_limit'),
                 'entry_point' => $submission->getEntryPoint(),
+                'pass_limit' => $problem->getProblem()->getMultipassLimit(),
                 'hash' => $runExecutable->getHash(),
             ]
         );

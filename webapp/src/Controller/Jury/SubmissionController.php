@@ -532,6 +532,7 @@ class SubmissionController extends BaseController
             'combinedRunCompare' => $submission->getProblem()->getCombinedRunCompare(),
             'requestedOutputCount' => $requestedOutputCount,
             'version_warnings' => [],
+            'isMultiPassProblem' => $submission->getProblem()->isMultipassProblem(),
         ];
 
         if ($selectedJudging === null) {
