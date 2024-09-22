@@ -67,7 +67,6 @@ class SubmissionController extends BaseController
 
         $formUpload->handleRequest($request);
         $formPaste->handleRequest($request);
-
         if ($formUpload->isSubmitted() && $formUpload->isValid()) {
             if ($contest === null) {
                 $this->addFlash('danger', 'No active contest');
@@ -144,7 +143,7 @@ class SubmissionController extends BaseController
                 );
 
                 $files = [$uploadedFile];
-                $entryPoint = $formPaste->get('entry_point')->getData() ?: null;
+                $entryPoint = $tempFileName;
                 $submission = $this->submissionService->submitSolution(
                     $team,
                     $this->dj->getUser(),
