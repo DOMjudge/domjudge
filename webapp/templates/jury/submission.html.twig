@@ -711,6 +711,9 @@
                     </div>
                     <div class="card-body">
                     {% if run.firstJudgingRun is not null %}
+                        {% if run.firstJudgingRun.runresult != 'correct' and isMultiPassProblem %}
+                            <div class="alert alert-warning">Note that this is a multi-pass problem, and only data of the failing pass is presented.</div>
+                        {% endif %}
                         {{ runsOutput[runIdx].metadata | printMetadata }}
                         <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
                                 data-bs-target="#collapseExample-{{ runIdx }}"

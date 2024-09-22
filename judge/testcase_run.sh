@@ -26,7 +26,7 @@ cleanup ()
 {
 	# Remove some copied files to save disk space
 	if [ "$WORKDIR" ]; then
-		rm -f "$WORKDIR/../dj-bin/runpipe" 2> /dev/null || true
+		rm -f "$WORKDIR/../../dj-bin/runpipe" 2> /dev/null || true
 
 		# Replace testdata by symlinks to reduce disk usage
 		if [ -f "$WORKDIR/testdata.in" ]; then
@@ -157,7 +157,8 @@ fi
 
 cd "$WORKDIR"
 
-PREFIX="/$(basename "$PWD")"
+# Get the last two directory entries of $PWD
+PREFIX="/$(basename $(realpath "$PWD/.."))/$(basename "$PWD")"
 
 # Make testing/execute dir accessible for RUNUSER:
 chmod a+x "$WORKDIR" "$WORKDIR/execdir"
@@ -174,10 +175,10 @@ logmsg $LOG_INFO "setting up testing (chroot) environment"
 cp "$TESTIN" "$WORKDIR/testdata.in"
 
 # shellcheck disable=SC2174
-mkdir -p -m 0711 ../bin ../dj-bin ../dev
+mkdir -p -m 0711 ../../bin ../../dj-bin ../../dev
 # copy a support program for interactive problems:
-cp -pL "$RUNPIPE" ../dj-bin/runpipe
-chmod a+rx        ../dj-bin/runpipe
+cp -pL "$RUNPIPE" ../../dj-bin/runpipe
+chmod a+rx        ../../dj-bin/runpipe
 
 # If we need to create a writable temp directory, do so
 if [ "$CREATE_WRITABLE_TEMP_DIR" ]; then
@@ -203,7 +204,7 @@ exitcode=0
 # shellcheck disable=SC2153
 runcheck "$RUN_SCRIPT" $RUNARGS \
 	$GAINROOT "$RUNGUARD" ${DEBUG:+-v -V "DEBUG=$DEBUG"} ${TMPDIR:+ -V "TMPDIR=$TMPDIR"} $CPUSET_OPT \
-	-r "$PWD/.." \
+	-r "$PWD/../.." \
 	--nproc=$PROCLIMIT \
 	--no-core --streamsize=$FILELIMIT \
 	--user="$RUNUSER" --group="$RUNGROUP" \

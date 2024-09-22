@@ -109,6 +109,12 @@
                         <td class="filename">{{ problem.specialCompareArgs }}</td>
                     </tr>
                 {% endif %}
+                {% if type is not empty %}
+                    <tr>
+                        <th>Type</th>
+                        <td>{{ type }}</td>
+                    </tr>
+                {% endif %}
             </table>
         </div>
     </div>

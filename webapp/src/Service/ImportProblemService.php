@@ -283,9 +283,14 @@ class ImportProblemService
 
                 if (isset($yamlData['validation'])
                     && ($yamlData['validation'] == 'custom' ||
-                        $yamlData['validation'] == 'custom interactive')) {
+                        $yamlData['validation'] == 'custom interactive' ||
+                        $yamlData['validation'] == 'custom multi-pass')) {
                     if (!$this->searchAndAddValidator($zip, $messages, $externalId, $yamlData['validation'], $problem)) {
                         return null;
+                    }
+
+                    if ($yamlData['validation'] == 'custom multi-pass') {
+                        $problem->setMultipassProblem(true);
                     }
                 }
 
@@ -295,6 +300,9 @@ class ImportProblemService
                     }
                     if (isset($yamlData['limits']['output'])) {
                         $yamlProblemProperties['outputlimit'] = 1024 * $yamlData['limits']['output'];
+                    }
+                    if (isset($yamlData['limits']['validation_passes'])) {
+                        $problem->setMultipassLimit($yamlData['limits']['validation_passes']);
                     }
                 }
 

@@ -1342,21 +1342,6 @@ function judge(array $judgeTask): bool
         return false;
     }
 
-    // Copy program with all possible additional files to testcase
-    // dir. Use hardlinks to preserve space with big executables.
-    $programdir = $testcasedir . '/execdir';
-    system('mkdir -p ' . dj_escapeshellarg($programdir), $retval);
-    if ($retval!==0) {
-        error("Could not create directory '$programdir'");
-    }
-
-    foreach (glob("$workdir/compile/*") as $compile_file) {
-        system('cp -PRl ' . dj_escapeshellarg($compile_file) . ' ' . dj_escapeshellarg($programdir), $retval);
-        if ($retval!==0) {
-            error("Could not copy program to '$programdir'");
-        }
-    }
-
     // do the actual test-run
     $combined_run_compare = $compare_config['combined_run_compare'];
     [$run_runpath, $error] = fetch_executable(
@@ -1403,60 +1388,109 @@ function judge(array $judgeTask): bool
     putenv('SCRIPTMEMLIMIT='  . $compare_config['script_memory_limit']);
     putenv('SCRIPTFILELIMIT=' . $compare_config['script_filesize_limit']);
 
-    $test_run_cmd = LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt " .
-        implode(' ', array_map('dj_escapeshellarg', [
-            $tcfile['input'],
-            $tcfile['output'],
-            "$run_config[time_limit]:$hardtimelimit",
-            $testcasedir,
-            $run_runpath,
-            $compare_runpath,
-            $compare_config['compare_args']
-        ]));
-    system($test_run_cmd, $retval);
-
-    // What does the exitcode mean?
-    if (! isset($EXITCODES[$retval])) {
-        alert('error');
-        error("Unknown exitcode ($retval) from testcase_run.sh for s$judgeTask[submitid]");
-    }
-    $result = $EXITCODES[$retval];
-
-    // Try to read metadata from file
-    $runtime = null;
-    $metadata = read_metadata($testcasedir . '/program.meta');
-
-    if (isset($metadata['time-used'])) {
-        $runtime = @$metadata[$metadata['time-used']];
-    }
-
-    if ($result === 'compare-error') {
-        if ($combined_run_compare) {
-            logmsg(LOG_ERR, "comparing failed for combined run/compare script '" . $judgeTask['run_script_id'] . "'");
-            $description = 'combined run/compare script ' . $judgeTask['run_script_id'] . ' crashed';
-            disable('run_script', 'run_script_id', $judgeTask['run_script_id'], $description, $judgeTask['judgetaskid']);
-        } else {
-            logmsg(LOG_ERR, "comparing failed for compare script '" . $judgeTask['compare_script_id'] . "'");
-            $description = 'compare script ' . $judgeTask['compare_script_id'] . ' crashed';
-            disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
+    $input = $tcfile['input'];
+    $output = $tcfile['output'];
+    $passLimit = $run_config['pass_limit'];
+    for ($passCnt = 1; $passCnt <= $passLimit; $passCnt++) {
+        $nextPass = false;
+        if ($passLimit > 1) {
+            logmsg(LOG_INFO, "    🔄 Running pass $passCnt...");
         }
-        return false;
+
+        $passdir = $testcasedir . '/' . $passCnt;
+        mkdir($passdir, 0755, true);
+
+        // Copy program with all possible additional files to testcase
+        // dir. Use hardlinks to preserve space with big executables.
+        $programdir = $passdir . '/execdir';
+        system('mkdir -p ' . dj_escapeshellarg($programdir), $retval);
+        if ($retval!==0) {
+            error("Could not create directory '$programdir'");
+        }
+
+        foreach (glob("$workdir/compile/*") as $compile_file) {
+            system('cp -PRl ' . dj_escapeshellarg($compile_file) . ' ' . dj_escapeshellarg($programdir), $retval);
+            if ($retval!==0) {
+                error("Could not copy program to '$programdir'");
+            }
+        }
+
+        $test_run_cmd = LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt " .
+            implode(' ', array_map('dj_escapeshellarg', [
+                $input,
+                $output,
+                "$run_config[time_limit]:$hardtimelimit",
+                $passdir,
+                $run_runpath,
+                $compare_runpath,
+                $compare_config['compare_args']
+            ]));
+        system($test_run_cmd, $retval);
+
+        // What does the exitcode mean?
+        if (!isset($EXITCODES[$retval])) {
+            alert('error');
+            error("Unknown exitcode ($retval) from testcase_run.sh for s$judgeTask[submitid]");
+        }
+        $result = $EXITCODES[$retval];
+
+        // Try to read metadata from file
+        $runtime = null;
+        $metadata = read_metadata($passdir . '/program.meta');
+
+        if (isset($metadata['time-used'])) {
+            $runtime = @$metadata[$metadata['time-used']];
+        }
+
+        if ($result === 'compare-error') {
+            if ($combined_run_compare) {
+                logmsg(LOG_ERR, "comparing failed for combined run/compare script '" . $judgeTask['run_script_id'] . "'");
+                $description = 'combined run/compare script ' . $judgeTask['run_script_id'] . ' crashed';
+                disable('run_script', 'run_script_id', $judgeTask['run_script_id'], $description, $judgeTask['judgetaskid']);
+            } else {
+                logmsg(LOG_ERR, "comparing failed for compare script '" . $judgeTask['compare_script_id'] . "'");
+                $description = 'compare script ' . $judgeTask['compare_script_id'] . ' crashed';
+                disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
+            }
+            return false;
+        }
+
+        $new_judging_run = [
+            'runresult' => urlencode($result),
+            'runtime' => urlencode((string)$runtime),
+            'output_run' => rest_encode_file($passdir . '/program.out', $output_storage_limit),
+            'output_error' => rest_encode_file($passdir . '/program.err', $output_storage_limit),
+            'output_system' => rest_encode_file($passdir . '/system.out', $output_storage_limit),
+            'metadata' => rest_encode_file($passdir . '/program.meta', false),
+            'output_diff' => rest_encode_file($passdir . '/feedback/judgemessage.txt', $output_storage_limit),
+            'hostname' => $myhost,
+            'testcasedir' => $testcasedir,
+        ];
+
+        if (file_exists($passdir . '/feedback/teammessage.txt')) {
+            $new_judging_run['team_message'] = rest_encode_file($passdir . '/feedback/teammessage.txt', $output_storage_limit);
+        }
+
+        if ($passLimit > 1) {
+            $walltime = $metadata['wall-time'] ?? '?';
+            logmsg(LOG_INFO, ' ' . ($result === 'correct' ? "   \033[0;32m✔\033[0m" : "   \033[1;31m✗\033[0m")
+                . '  ...done in ' . $walltime . 's (CPU: ' . $runtime . 's), result: ' . $result);
+        }
+
+        if ($result !== 'correct') {
+            break;
+        }
+        if (file_exists($passdir . '/feedback/nextpass.in')) {
+            $input = $passdir . '/feedback/nextpass.in';
+            $nextPass = true;
+        } else {
+            break;
+        }
     }
-
-    $new_judging_run = [
-        'runresult' => urlencode($result),
-        'runtime' => urlencode((string)$runtime),
-        'output_run'   => rest_encode_file($testcasedir . '/program.out', $output_storage_limit),
-        'output_error' => rest_encode_file($testcasedir . '/program.err', $output_storage_limit),
-        'output_system' => rest_encode_file($testcasedir . '/system.out', $output_storage_limit),
-        'metadata' => rest_encode_file($testcasedir . '/program.meta', false),
-        'output_diff'  => rest_encode_file($testcasedir . '/feedback/judgemessage.txt', $output_storage_limit),
-        'hostname' => $myhost,
-        'testcasedir' => $testcasedir,
-    ];
-
-    if (file_exists($testcasedir . '/feedback/teammessage.txt')) {
-        $new_judging_run['team_message'] = rest_encode_file($testcasedir . '/feedback/teammessage.txt', $output_storage_limit);
+    if ($nextPass) {
+        $description = 'validator produced more passes than allowed ($passLimit)';
+        disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
+        return false;
     }
 
     $ret = true;
@@ -1485,9 +1519,11 @@ function judge(array $judgeTask): bool
         $ret = (bool)$needsMoreWork;
     }
 
-    $walltime = $metadata['wall-time'] ?? '?';
-    logmsg(LOG_INFO, ' ' . ($result === 'correct' ? " \033[0;32m✔\033[0m" : " \033[1;31m✗\033[0m")
-        . '  ...done in ' . $walltime . 's (CPU: ' . $runtime . 's), result: ' . $result);
+    if ($passLimit == 1) {
+        $walltime = $metadata['wall-time'] ?? '?';
+        logmsg(LOG_INFO, ' ' . ($result === 'correct' ? " \033[0;32m✔\033[0m" : " \033[1;31m✗\033[0m")
+            . '  ...done in ' . $walltime . 's (CPU: ' . $runtime . 's), result: ' . $result);
+    }
 
     // done!
     return $ret;
