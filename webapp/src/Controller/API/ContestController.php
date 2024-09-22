@@ -637,8 +637,9 @@ class ContestController extends AbstractRestController
             if ($event === null) {
                 throw new BadRequestHttpException(
                     sprintf(
-                        'Invalid parameter "%s" requested.',
-                        $request->query->has('since_token') ? 'since_token' : 'since_id'
+                        'Invalid parameter "%s" requested with value "%s".',
+                        $request->query->has('since_token') ? 'since_token' : 'since_id',
+                        $sinceToken ?? $sinceId
                     )
                 );
             }
