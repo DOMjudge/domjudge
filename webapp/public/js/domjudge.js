@@ -834,6 +834,10 @@ function initializeKeyboardShortcuts() {
         if (keysCookie != 1 && keysCookie != "") {
             return;
         }
+        // Do not trigger shortcuts if user is pressing Ctrl/Alt/Option/Meta key.
+        if (e.altKey || e.ctrlKey || e.metaKey) {
+            return;
+        }
         // Check if the user is not typing in an input field.
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
             return;
