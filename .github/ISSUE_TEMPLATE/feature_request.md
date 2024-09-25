@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 <!--
-NOTE: If this is a _discussion starter_, you need any _installation help, or have a _question_ on how to accomplish something,
+NOTE: If this is a _discussion starter_, you need any _installation help_, or have a _question_ on how to accomplish something,
 rather post at [our discussion channel](https://www.domjudge.org/chat) or send an email to our
 [DOMjudge-devel mailinglist](https://www.domjudge.org/mailman/postorius/lists/domjudge-devel.domjudge.org/).
 
@@ -20,7 +20,7 @@ not already a way to accomplish your goal with DOMjudge currently.
 
 ### Description of the enhancement request
 <!--
-Replace this line with a short description.
+Write here a short description.
 -->
 
 ### The goal you want to achieve
@@ -30,7 +30,7 @@ Please elaborate on the (larger, higher level) goal you want to achieve with thi
 
 ### Expected behaviour
 <!--
-Replace this line with what you would expect to happen.
+Write here what you would expect to happen.
 For example describe the flow how you want this feature to work.
 1. Step 1
 2. Step 2
