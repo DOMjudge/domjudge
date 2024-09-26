@@ -356,26 +356,55 @@ nv.addGraph(function() {
 // x-axis is contest time
 // y axis is # of submissions
 
+var max_submissions_per_minute = 0;
+
 var submission_stats = [
   {% for result in ['correct', 'wrong-answer', 'timelimit', 'run-error', 'compiler-error', 'no-output'] %}
   {
     key: "{{result}}",
     color: "{{colors[result]}}",
-    values: [
-      {# TODO: make sure these are actually ordered by submittime #}
-      {# TODO: also make sure these submissions are in the same contest #}
-      [0,0],
-      {% set count = 0 %}
-      {% for submission in submissions | filter(submission => submission.result) %}
-        {% if submission.result == result %}{% set count = count +1 %}{% endif %}
-        [ {{ (submission.submittime - current_contest.starttime)/60.0 }},
-          {{ count }}
-        ],
-        {% endfor %}
-    ]
+    values: []
   },
   {% endfor %}
 ];
+
+var submissions = [
+  {% for submission in submissions %}
+  {
+    result: "{{ submission.result }}",
+    submittime: {{ submission.submittime }},
+    starttime: {{ current_contest.starttime }}
+  }{{ loop.last ? '' : ',' }}
+  {% endfor %}
+];
+
+var contest_duration_minutes = Math.ceil(({{ current_contest.endtime }} - {{ current_contest.starttime }}) / 60);
+
+submission_stats.forEach(stat => {
+  stat.values = Array.from({ length: contest_duration_minutes }, (_, i) => [i, 0]);
+});
+
+const statMap = submission_stats.reduce((map, stat) => {
+  map[stat.key] = stat;
+  return map;
+}, {});
+
+submissions.forEach(submission => {
+  let submission_minute = Math.floor((submission.submittime - submission.starttime) / 60);
+  let stat = statMap[submission.result];
+  if (stat && submission_minute >= 0 && submission_minute < contest_duration_minutes) {
+    stat.values[submission_minute][1]++;
+  }
+});
+
+for (let minute = 0; minute < contest_duration_minutes; minute++) {
+  let this_minute_submission_nums = 0;
+  submission_stats.forEach(stat => {
+    this_minute_submission_nums += stat.values[minute][1];
+  });
+  max_submissions_per_minute = Math.max(max_submissions_per_minute, this_minute_submission_nums);
+}
+
 nv.addGraph(function() {
   var chart = nv.models.stackedAreaChart()
       // .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
@@ -388,7 +417,7 @@ nv.addGraph(function() {
       .showYAxis(true)        //Show the y-axis
       .showXAxis(true)        //Show the x-axis
       .forceX([0, {{ (current_contest.endtime - current_contest.starttime) / 60 }}])
-      .forceY([0, {{ submissions|length *1.10 }}])
+      .forceY([0, max_submissions_per_minute * 1.1 ])
       ;
   chart.xAxis     //Chart x-axis settings
       .axisLabel('Contest Time(minutes)')
