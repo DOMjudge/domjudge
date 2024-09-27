@@ -242,6 +242,10 @@ class SubmissionController extends BaseController
                 $submitId));
         }
 
+        if ($this->submissionService->getSubmissionFileCount($submission) === 1) {
+            return $this->submissionService->getSubmissionFileResponse($submission);
+        }
+
         return $this->submissionService->getSubmissionZipResponse($submission);
     }
 }

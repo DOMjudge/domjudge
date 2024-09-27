@@ -1557,7 +1557,7 @@ class DOMJudgeService
         }
         $zip->close();
 
-        return Utils::streamZipFile($tempFilename, 'contest.zip');
+        return Utils::streamZipFile($tempFilename, 'scoreboard.zip');
     }
 
     private function allowJudge(ContestProblem $problem, Submission $submission, Language $language, bool $manualRequest): bool

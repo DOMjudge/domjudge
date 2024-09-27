@@ -834,6 +834,10 @@ function initializeKeyboardShortcuts() {
         if (keysCookie != 1 && keysCookie != "") {
             return;
         }
+        // Do not trigger shortcuts if user is pressing Ctrl/Alt/Option/Meta key.
+        if (e.altKey || e.ctrlKey || e.metaKey) {
+            return;
+        }
         // Check if the user is not typing in an input field.
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
             return;
@@ -901,38 +905,40 @@ function initializeKeyboardShortcuts() {
                 if (e.key >= '0' && e.key <= '9') {
                     sequence += e.key;
                     box.text(type + sequence);
-                } else if (e.key === 'Enter') {
-                    ignore = false;
-                    switch (type) {
-                        case 's':
-                            type = 'submissions';
-                            break;
-                        case 't':
-                            type = 'teams';
-                            break;
-                        case 'p':
-                            type = 'problems';
-                            break;
-                        case 'c':
-                            type = 'clarifications';
-                            break;
-                        case 'j':
-                            window.location = domjudge_base_url + '/jury/submissions/by-judging-id/' + sequence;
-                            return;
-                    }
-                    var redirect_to = domjudge_base_url + '/jury/' + type;
-                    if (sequence) {
-                        redirect_to += '/' + sequence;
-                    }
-                    window.location = redirect_to;
                 } else {
                     ignore = false;
                     if (box) {
                         box.remove();
                     }
+                    // We want to reset the `sequence` variable before redirecting, but then we do need to save the value typed by the user
+                    var typedSequence = sequence;
                     sequence = '';
                     $body.off('keydown');
                     $body.on('keydown', oldFunc);
+                    if (e.key === 'Enter') {
+                        switch (type) {
+                            case 's':
+                                type = 'submissions';
+                                break;
+                            case 't':
+                                type = 'teams';
+                                break;
+                            case 'p':
+                                type = 'problems';
+                                break;
+                            case 'c':
+                                type = 'clarifications';
+                                break;
+                            case 'j':
+                                type = 'submissions/by-judging-id';
+                                break;
+                        }
+                        var redirect_to = domjudge_base_url + '/jury/' + type;
+                        if (typedSequence) {
+                            redirect_to += '/' + typedSequence;
+                        }
+                        window.location = redirect_to;
+                    }
                 }
             });
         }

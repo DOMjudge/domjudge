@@ -768,4 +768,31 @@ class SubmissionService
 
         return Utils::streamZipFile($tmpfname, 's' . $submission->getSubmitid() . '.zip');
     }
+
+    public function getSubmissionFileResponse(Submission $submission): StreamedResponse
+    {
+        /** @var SubmissionFile[] $files */
+        $files = $submission->getFiles();
+        
+        if (count($files) !== 1) {
+            throw new ServiceUnavailableHttpException(null, 'Submission does not contain exactly one file.');
+        }
+
+        $file = $files[0];
+        $filename = $file->getFilename();
+        $sourceCode = $file->getSourcecode();
+
+        return new StreamedResponse(function () use ($sourceCode) {
+            echo $sourceCode;
+        }, 200, [
+            'Content-Type'        => 'text/plain',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Length'      => strlen($sourceCode),
+        ]);
+    }
+
+    public function getSubmissionFileCount(Submission $submission): int
+    {
+        return count($submission->getFiles());
+    }
 }
