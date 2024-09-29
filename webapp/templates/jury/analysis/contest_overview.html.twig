@@ -406,18 +406,17 @@ for (let minute = 0; minute < contest_duration_minutes; minute++) {
 }
 
 nv.addGraph(function() {
-  var chart = nv.models.stackedAreaChart()
+  var chart = nv.models.multiBarChart()
       // .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
       // .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
       // .transitionDuration(350)  //how fast do you want the lines to transition?
       // .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
       .showControls(false)
+      .stacked(true)
       .x(function(d) { return d[0] })   //We can modify the data accessor functions...
       .y(function(d) { return d[1] })   //...in case your data is formatted differently.
       .showYAxis(true)        //Show the y-axis
       .showXAxis(true)        //Show the x-axis
-      .forceX([0, {{ (current_contest.endtime - current_contest.starttime) / 60 }}])
-      .forceY([0, max_submissions_per_minute * 1.1 ])
       ;
   chart.xAxis     //Chart x-axis settings
       .axisLabel('Contest Time(minutes)')
