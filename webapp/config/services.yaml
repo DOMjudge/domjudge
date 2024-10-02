@@ -53,4 +53,5 @@ services:
                 scriptSrc: "'self' 'unsafe-inline' https://*.googletagmanager.com https://*.hotjar.com https://*.hotjar.io wss://*.hotjar.com"
                 imgSrc: "'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com data: https://*.hotjar.com https://*.hotjar.io wss://*.hotjar.com"
                 connectSrc: "'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com https://*.hotjar.com https://*.hotjar.io wss://*.hotjar.com"
+                fontSrc: "'self' https://*.hotjar.com"
                 frameAncestors: "'self'"

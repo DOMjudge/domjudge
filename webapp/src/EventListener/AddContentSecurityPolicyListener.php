@@ -24,6 +24,7 @@ class AddContentSecurityPolicyListener
             $this->getScriptSrcCsp(),
             $this->getImageSrcCsp(),
             $this->getConnectSrcCsp(),
+            $this->getFontSrcScp(),
             $this->getFrameAncestorsCsp()
         ]);
 
@@ -56,6 +57,11 @@ class AddContentSecurityPolicyListener
     private function getConnectSrcCsp(): string
     {
         return "connect-src " . $this->cspConfig['connectSrc'];
+    }
+
+    private function getFontSrcScp(): string
+    {
+        return "font-src " . $this->cspConfig['fontSrc'];
     }
 
     private function getFrameAncestorsCsp(): string
