@@ -15,7 +15,7 @@ class ProblemControllerAdminTest extends ProblemControllerTest
     protected function setUp(): void
     {
         // When queried as admin, extra information is returned about each problem.
-        $this->expectedObjects['boolfind']['test_data_count'] = 1;
+        $this->expectedObjects['boolfind']['test_data_count'] = 10;
         $this->expectedObjects['fltcmp']['test_data_count'] = 1+3; // 1 sample, 3 secret cases
         $this->expectedObjects['hello']['test_data_count'] = 1;
         parent::setUp();
