@@ -526,6 +526,7 @@ class RejudgingController extends BaseController
                 'before'     => $formData['before'],
                 'after'      => $formData['after'],
                 'referer'    => $request->headers->get('referer'),
+                'overshoot'  => $formData['overshoot'],
             ];
             return $this->render('jury/rejudging_add.html.twig', [
                 'data'    => http_build_query($data),
@@ -639,7 +640,7 @@ class RejudgingController extends BaseController
 
                 $skipped = [];
                 $res     = $this->rejudgingService->createRejudging(
-                    $reason, (int)$data['priority'], $judgings, false, (int)($data['repeat'] ?? 1), null, $skipped, $progressReporter);
+                    $reason, (int)$data['priority'], $judgings, false, (int)($data['repeat'] ?? 1), (int) ($data['overshoot'] ?? 0), null, $skipped, $progressReporter);
                 $this->generateFlashMessagesForSkippedJudgings($skipped);
 
                 if ($res === null) {
@@ -670,6 +671,7 @@ class RejudgingController extends BaseController
         $autoApply  = (bool)$request->request->get('auto_apply');
         $repeat     = (int)$request->request->get('repeat');
         $priority   = $request->request->get('priority') ?: 'default';
+        $overshoot  = (int)$request->request->get('overshoot') ?: 0;
 
         if (empty($table) || empty($id)) {
             throw new BadRequestHttpException('No table or id passed for selection in rejudging');
@@ -723,7 +725,7 @@ class RejudgingController extends BaseController
             flush();
         };
 
-        return $this->streamResponse($this->requestStack, function () use ($priority, $progressReporter, $repeat, $reason, $request, $autoApply, $includeAll, $id, $table, $tablemap) {
+        return $this->streamResponse($this->requestStack, function () use ($priority, $progressReporter, $repeat, $reason, $overshoot, $request, $autoApply, $includeAll, $id, $table, $tablemap) {
             // Only rejudge submissions in active contests.
             $contests = $this->dj->getCurrentContests();
 
@@ -773,7 +775,7 @@ class RejudgingController extends BaseController
             }
 
             $skipped = [];
-            $res     = $this->rejudgingService->createRejudging($reason, JudgeTask::parsePriority($priority), $judgings, $autoApply, $repeat, null, $skipped, $progressReporter);
+            $res     = $this->rejudgingService->createRejudging($reason, JudgeTask::parsePriority($priority), $judgings, $autoApply, $repeat, $overshoot, null, $skipped, $progressReporter);
 
             if ($res === null) {
                 $prefix = sprintf('%s%s', $request->getSchemeAndHttpHost(), $request->getBasePath());

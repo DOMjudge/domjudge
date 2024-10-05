@@ -1168,7 +1168,7 @@ class DOMJudgeService
         }
     }
 
-    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = false): void
+    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = false, int $overshoot = 0): void
     {
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
@@ -1181,7 +1181,7 @@ class DOMJudgeService
             return;
         }
 
-        $this->actuallyCreateJudgetasks($priority, $judging);
+        $this->actuallyCreateJudgetasks($priority, $judging, $overshoot);
 
         $team = $submission->getTeam();
         $result = $this->em->createQueryBuilder()
@@ -1423,7 +1423,7 @@ class DOMJudgeService
         return $res;
     }
 
-    public function getRunConfig(ContestProblem $problem, Submission $submission): string
+    public function getRunConfig(ContestProblem $problem, Submission $submission, int $overshoot = 0): string
     {
         $memoryLimit = $problem->getProblem()->getMemlimit();
         $outputLimit = $problem->getProblem()->getOutputlimit();
@@ -1444,6 +1444,7 @@ class DOMJudgeService
                 'entry_point' => $submission->getEntryPoint(),
                 'pass_limit' => $problem->getProblem()->getMultipassLimit(),
                 'hash' => $runExecutable->getHash(),
+                'overshoot' => $overshoot,
             ]
         );
     }
@@ -1587,7 +1588,7 @@ class DOMJudgeService
         return !$evalOnDemand;
     }
 
-    private function actuallyCreateJudgetasks(int $priority, Judging $judging): void
+    private function actuallyCreateJudgetasks(int $priority, Judging $judging, int $overshoot = 0): void
     {
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
@@ -1606,7 +1607,7 @@ class DOMJudgeService
             ':compare_script_id' => $this->getImmutableCompareExecutable($problem)->getImmutableExecId(),
             ':run_script_id' => $this->getImmutableRunExecutable($problem)->getImmutableExecId(),
             ':compile_config' => $this->getCompileConfig($submission),
-            ':run_config' => $this->getRunConfig($problem, $submission),
+            ':run_config' => $this->getRunConfig($problem, $submission, $overshoot),
             ':compare_config' => $this->getCompareConfig($problem),
         ];
 

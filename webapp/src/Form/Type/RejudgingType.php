@@ -132,6 +132,12 @@ class RejudgingType extends AbstractType
             'constraints' => $relativeTimeConstraints,
             'help' => 'in form ±[HHH]H:MM[:SS[.uuuuuu]], contest relative time',
         ]);
+        $builder->add('overshoot', IntegerType::class, [
+            'label' => 'Additional grace time',
+            'required' => false,
+            'attr' => ['min' => 0, 'max' => 999],
+            'help' => 'in seconds',
+        ]);
 
         $builder->add('save', SubmitType::class);
 

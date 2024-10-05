@@ -187,6 +187,7 @@ class InternalErrorController extends BaseController
                             $affectedJudgings->getValues(),
                             false,
                             0,
+                            0,
                             null,
                             $skipped,
                             $progressReporter);
