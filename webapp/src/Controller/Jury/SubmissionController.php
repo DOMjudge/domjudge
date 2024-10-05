@@ -1258,7 +1258,9 @@ class SubmissionController extends BaseController
         $observedConfig = $this->dj->jsonDecode($observedConfigString);
         $errors = [];
         foreach (array_keys($expectedConfig) as $k) {
-            if ($expectedConfig[$k] != $observedConfig[$k]) {
+            if (!array_key_exists($k, $observedConfig)) {
+                $errors[] = '- ' . preg_replace('/_/', ' ', $k) . ': missing';
+            } elseif ($expectedConfig[$k] != $observedConfig[$k]) {
                 if ($k === 'hash') {
                     $errors[] = '- script has changed';
                 } elseif ($k === 'entry_point') {
@@ -1268,6 +1270,11 @@ class SubmissionController extends BaseController
                     $errors[] = '- ' . preg_replace('/_/', ' ', $k) . ': '
                         . $this->dj->jsonEncode($observedConfig[$k]) . ' → ' . $this->dj->jsonEncode($expectedConfig[$k]);
                 }
+            }
+        }
+        foreach (array_keys($observedConfig) as $k) {
+            if (!array_key_exists($k, $expectedConfig)) {
+                $errors[] = '- ' . preg_replace('/_/', ' ', $k) . ': unexpected';
             }
         }
         if (!empty($errors)) {
