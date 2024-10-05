@@ -748,6 +748,10 @@ class SubmissionController extends BaseController
         return Utils::streamAsBinaryFile($outputRun, $filename);
     }
 
+    private function allowEdit(): bool {
+        return $this->dj->getUser()->getTeam() && $this->dj->checkrole('team');
+    }
+
     /**
      * @throws NonUniqueResultException
      */
@@ -865,13 +869,14 @@ class SubmissionController extends BaseController
             'originalSubmission' => $originalSubmission,
             'originalFiles' => $originalFiles,
             'originalFileStats' => $originalFileStats,
+            'allowEdit' => $this->allowEdit(),
         ]);
     }
 
     #[Route(path: '/{submission}/edit-source', name: 'jury_submission_edit_source')]
     public function editSourceAction(Request $request, Submission $submission, #[MapQueryParameter] ?int $rank = null): Response
     {
-        if (!$this->dj->getUser()->getTeam() || !$this->dj->checkrole('team')) {
+        if (!$this->allowEdit()) {
             $this->addFlash('danger', 'You cannot re-submit code without being a team.');
             return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl(
                 'jury_submission',
