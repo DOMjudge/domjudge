@@ -1372,8 +1372,9 @@ function judge(array $judgeTask): bool
         }
     }
 
-    $hardtimelimit = $run_config['time_limit'] +
-                     overshoot_time($run_config['time_limit'], $overshoot);
+    $hardtimelimit = $run_config['time_limit']
+        +  overshoot_time($run_config['time_limit'], $overshoot)
+        + $run_config['overshoot'];
     if ($combined_run_compare) {
         // This accounts for wall time spent in the validator. We may likely
         // want to make this configurable in the future. The current factor is

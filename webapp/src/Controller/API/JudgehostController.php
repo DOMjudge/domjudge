@@ -1159,7 +1159,7 @@ class JudgehostController extends AbstractFOSRestController
                         ->getResult();
                     // TODO: Pick up priority from previous judgings?
                     $this->rejudgingService->createRejudging($rejudging->getReason(), JudgeTask::PRIORITY_DEFAULT, $judgings,
-                        false, $rejudging->getRepeat(), $rejudging->getRepeatedRejudging(), $skipped);
+                        false, $rejudging->getRepeat(), 0, $rejudging->getRepeatedRejudging(), $skipped);
                 }
             }
         }

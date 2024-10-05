@@ -53,6 +53,7 @@ class RejudgingService
         array $judgings,
         bool $autoApply,
         ?int $repeat,
+        ?int $overshoot,
         ?Rejudging $repeatedRejudging,
         array &$skipped,
         ?callable $progressReporter = null
@@ -153,7 +154,7 @@ class RejudgingService
                 ->getQuery()
                 ->getSingleResult();
 
-            $this->dj->maybeCreateJudgeTasks($newJudging, $priority);
+            $this->dj->maybeCreateJudgeTasks($newJudging, $priority, false, $overshoot);
 
             $this->em->getConnection()->commit();
 
