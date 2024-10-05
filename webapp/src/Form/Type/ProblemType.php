@@ -81,6 +81,15 @@ class ProblemType extends AbstractExternalIdEntityType
             'label' => 'Use run script as compare script.',
             'required' => false,
         ]);
+        $builder->add('multipassProblem', CheckboxType::class, [
+            'label' => 'Multi-pass problem',
+            'required' => false,
+        ]);
+        $builder->add('multipassLimit', IntegerType::class, [
+            'label' => 'Multi-pass limit',
+            'required' => false,
+            'help' => 'leave empty for default',
+        ]);
         $builder->add('save', SubmitType::class);
 
         // Remove clearProblemstatement field when we do not have a problem text.
