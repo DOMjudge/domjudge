@@ -155,15 +155,28 @@ class SubmissionController extends BaseController
             }
         }
         
-        $active_tab = (bool) $this->config->get('default_submission_code_mode') == 0 ? 'paste' : 'upload';
-        if ($this->dj->getCookie('active_tab') != null) {
-            $active_tab = $this->dj->getCookie('active_tab');
+        $active_tab_array = $this->config->get('default_submission_code_mode');
+        $active_tab = "";
+        if (count($active_tab_array) == 1) {
+            $active_tab = reset($active_tab_array);
+            $this->dj->setCookie('active_tab', $active_tab);
+        }
+        else if ($this->dj->getCookie('active_tab') != null) {
+            $cookie_active_tab = $this->dj->getCookie('active_tab');
+            if(in_array($cookie_active_tab, $active_tab_array)) {
+                $active_tab = $cookie_active_tab;
+            }
+            else {
+                $active_tab = reset($active_tab);
+                $this->dj->setCookie('active_tab', $active_tab);
+            }
         }
 
         $data = [
             'formupload' => $formUpload->createView(),
             'formpaste' => $formPaste->createView(),
             'active_tab' => $active_tab,
+            'active_tab_array' => $active_tab_array,
             'problem' => $problem,
         ];
         $data['validFilenameRegex'] = SubmissionService::FILENAME_REGEX;

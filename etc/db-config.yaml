@@ -202,13 +202,13 @@
     description: Options related to the DOMjudge user interface.
     items:
         -   name: default_submission_code_mode
-            type: int
-            default_value: 0
+            type: array_val
+            default_value: [upload]
             public: true
             description: Select the default submission method for the team
             options:
-                0: Paste
-                1: Upload
+                - paste
+                - upload
         -   name: output_display_limit
             type: int
             default_value: 2000
