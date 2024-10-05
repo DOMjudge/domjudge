@@ -212,7 +212,7 @@ class ProblemController extends BaseController
                 $type .= ' interactive';
             }
             if ($p->isMultipassProblem()) {
-                $type .= ' multi-pass';
+                $type .= ' multi-pass (max passes: ' . $p->getMultipassLimit() . ')';
             }
             $problemdata = array_merge($problemdata, [
                 'num_contests' => ['value' => (int)($contestCounts[$p->getProbid()] ?? 0)],
@@ -498,7 +498,7 @@ class ProblemController extends BaseController
             $type .= ' interactive';
         }
         if ($problem->isMultipassProblem()) {
-            $type .= ' multi-pass';
+            $type .= ' multi-pass (max passes: ' . $problem->getMultipassLimit() . ')';
         }
         $data = [
             'problem' => $problem,
