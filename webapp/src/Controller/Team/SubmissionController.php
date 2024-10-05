@@ -167,7 +167,7 @@ class SubmissionController extends BaseController
                 $active_tab = $cookie_active_tab;
             }
             else {
-                $active_tab = reset($active_tab);
+                $active_tab = reset($active_tab_array);
                 $this->dj->setCookie('active_tab', $active_tab);
             }
         }
