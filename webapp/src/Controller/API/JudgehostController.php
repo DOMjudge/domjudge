@@ -77,7 +77,7 @@ class JudgehostController extends AbstractFOSRestController
      *
      * @return Judgehost[]
      */
-    #[IsGranted('ROLE_JURY')]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Get('')]
     #[OA\Response(
         response: 200,
