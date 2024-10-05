@@ -381,7 +381,7 @@ var submissions = [
 var contest_duration_minutes = Math.ceil(({{ current_contest.endtime }} - {{ current_contest.starttime }}) / 60);
 
 submission_stats.forEach(stat => {
-  stat.values = Array.from({ length: contest_duration_minutes }, (_, i) => [i, 0]);
+  stat.values = Array.from({ length: contest_duration_minutes + 1 }, (_, i) => [i, 0]);
 });
 
 const statMap = submission_stats.reduce((map, stat) => {
@@ -397,13 +397,20 @@ submissions.forEach(submission => {
   }
 });
 
-for (let minute = 0; minute < contest_duration_minutes; minute++) {
+for (let minute = 0; minute <= contest_duration_minutes; minute++) {
   let this_minute_submission_nums = 0;
   submission_stats.forEach(stat => {
     this_minute_submission_nums += stat.values[minute][1];
   });
   max_submissions_per_minute = Math.max(max_submissions_per_minute, this_minute_submission_nums);
 }
+
+// Pick a nice round tickDelta and tickValues
+var tickDelta = 15;
+while (contest_duration_minutes / tickDelta > 15) {
+  tickDelta *= 2;
+}
+var tickValues = Array.from({ length: Math.ceil(contest_duration_minutes / tickDelta) + 1 }, (_, i) => i * tickDelta);
 
 nv.addGraph(function() {
   var chart = nv.models.multiBarChart()
@@ -417,11 +424,13 @@ nv.addGraph(function() {
       .y(function(d) { return d[1] })   //...in case your data is formatted differently.
       .showYAxis(true)        //Show the y-axis
       .showXAxis(true)        //Show the x-axis
+      .reduceXTicks(false)
       ;
   chart.xAxis     //Chart x-axis settings
       .axisLabel('Contest Time(minutes)')
+      .ticks(tickValues.length)
+      .tickValues(tickValues)
       .tickFormat(d3.format('d'));
-
   chart.yAxis     //Chart y-axis settings
       .axisLabel('Total Submissions')
       .tickFormat(d3.format('d'));
