@@ -3,14 +3,12 @@
 namespace App\Service;
 
 use App\Entity\BaseApiEntity;
-use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
 use App\Entity\HasExternalIdInterface;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
-use App\Entity\Submission;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;

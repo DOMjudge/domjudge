@@ -2,8 +2,6 @@
 
 namespace App\Entity;
 
-use App\Service\EventLogService;
-
 /**
  * Base entity class that entities should use to support getting their API ID.
  */

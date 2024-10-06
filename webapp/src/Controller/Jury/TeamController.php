@@ -17,15 +17,15 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
 #[Route(path: '/jury/teams')]

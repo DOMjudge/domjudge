@@ -11,11 +11,11 @@ use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
 #[Route(path: '/jury/analysis')]

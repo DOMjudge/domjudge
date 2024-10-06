@@ -5,8 +5,6 @@ namespace App\Controller\Team;
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Clarification;
-use App\Entity\Contest;
-use App\Entity\ContestProblem;
 use App\Entity\Language;
 use App\Form\Type\PrintType;
 use App\Service\ConfigurationService;
@@ -18,20 +16,19 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Symfony\Component\ExpressionLanguage\Expression;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_TEAM')]
 #[IsGranted(

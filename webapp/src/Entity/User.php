@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Controller\API\AbstractRestController;
 use App\Controller\API\AbstractRestController as ARC;
 use App\Utils\Utils;
 use DateTime;

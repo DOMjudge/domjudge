@@ -9,8 +9,8 @@ use Doctrine\ORM\NoResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Rest\Route('/contests/{cid}/access')]
 #[OA\Tag(name: 'Access')]

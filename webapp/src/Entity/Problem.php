@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Controller\API\AbstractRestController as ARC;
 use App\DataTransferObject\FileWithName;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;

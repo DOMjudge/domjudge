@@ -3,7 +3,6 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
-use App\DataTransferObject\ResultRow;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -31,15 +30,14 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\SubmitButton;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;

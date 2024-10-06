@@ -10,12 +10,11 @@ use App\Entity\Problem;
 use App\Entity\ScoreCache;
 use App\Entity\Submission;
 use App\Entity\Team;
-use App\Entity\TeamAffiliation;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 

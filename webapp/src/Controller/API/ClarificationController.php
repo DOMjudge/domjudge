@@ -6,7 +6,6 @@ use App\DataTransferObject\ClarificationPost;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
-use App\Entity\Problem;
 use App\Entity\Team;
 use App\Utils\Utils;
 use Doctrine\ORM\NonUniqueResultException;
