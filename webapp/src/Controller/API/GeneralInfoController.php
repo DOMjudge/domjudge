@@ -7,7 +7,6 @@ use App\DataTransferObject\ApiInfoProvider;
 use App\DataTransferObject\ApiVersion;
 use App\DataTransferObject\DomJudgeApiInfo;
 use App\DataTransferObject\ExtendedContestStatus;
-use App\Entity\Contest;
 use App\Entity\User;
 use App\Service\CheckConfigService;
 use App\Service\ConfigurationService;
@@ -17,7 +16,6 @@ use App\Service\ImportProblemService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use InvalidArgumentException;
@@ -25,15 +23,15 @@ use JMS\Serializer\SerializerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[OA\Tag(name: 'General')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]

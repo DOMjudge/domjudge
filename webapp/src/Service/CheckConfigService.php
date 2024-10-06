@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\DataTransferObject\ConfigCheckItem;
-use App\Entity\ContestProblem;
 use App\Entity\Executable;
 use App\Entity\HasExternalIdInterface;
 use App\Entity\Language;
@@ -18,9 +17,9 @@ use BadMethodCallException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class CheckConfigService
