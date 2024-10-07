@@ -442,7 +442,7 @@ void output_exit_time(int exitcode, double cpudiff)
 void check_remaining_procs()
 {
 	char path[1024];
-	snprintf(path, 1023, "/sys/fs/cgroup/cpuacct%scgroup.procs", cgroupname);
+	snprintf(path, 1023, "/sys/fs/cgroup/cpuacct/%s/cgroup.procs", cgroupname);
 
 	FILE *file = fopen(path, "r");
 	if (file == nullptr) {
@@ -1184,7 +1184,7 @@ int main(int argc, char **argv)
 	} else {
 		str[0] = 0;
 	}
-	snprintf(cgroupname, 255, "/domjudge/dj_cgroup_%d_%.16s_%d.%06d/",
+	snprintf(cgroupname, 255, "domjudge/dj_cgroup_%d_%.16s_%d.%06d",
 	         getpid(), str, (int)progstarttime.tv_sec, (int)progstarttime.tv_usec);
 
 	cgroup_create();
