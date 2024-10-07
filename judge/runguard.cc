@@ -144,7 +144,7 @@ bool is_cgroup_v2 = false;
 
 double walltimelimit[2], cputimelimit[2]; /* in seconds, soft and hard limits */
 int walllimit_reached, cpulimit_reached; /* 1=soft, 2=hard, 3=both limits reached */
-int64_t memsize;
+rlim_t memsize;
 rlim_t filesize;
 rlim_t nproc;
 size_t streamsize;
@@ -550,15 +550,15 @@ void cgroup_create()
 	if (is_cgroup_v2) {
 		// TODO: do we want to set cpu.weight here as well?
 		if (memsize != RLIM_INFINITY) {
-			cgroup_add_value(int64, "memory.max", memsize);
-			cgroup_add_value(int64, "memory.swap.max", 0);
+			cgroup_add_value(uint64, "memory.max", memsize);
+			cgroup_add_value(uint64, "memory.swap.max", 0);
 		} else {
 			cgroup_add_value(string, "memory.max", "max");
 			cgroup_add_value(string, "memory.swap.max", "max");
 		}
 	} else {
-		cgroup_add_value(int64, "memory.limit_in_bytes", memsize);
-		cgroup_add_value(int64, "memory.memsw.limit_in_bytes", memsize);
+		cgroup_add_value(uint64, "memory.limit_in_bytes", memsize);
+		cgroup_add_value(uint64, "memory.memsw.limit_in_bytes", memsize);
 	}
 
 	/* Set up cpu restrictions; we pin the task to a specific set of
@@ -613,11 +613,12 @@ void cgroup_attach()
 void cgroup_kill()
 {
 	/* kill any remaining tasks, and wait for them to be gone */
+	char mem_controller[10] = "memory";
 	if (is_cgroup_v2) {
 		int size;
 		do {
 			pid_t* pids;
-			int ret = cgroup_get_procs(cgroupname, "memory", &pids, &size);
+			int ret = cgroup_get_procs(cgroupname, mem_controller, &pids, &size);
 			if (ret != 0) error(ret, "cgroup_get_procs");
 			for(int i = 0; i < size; i++) {
 				kill(pids[i], SIGKILL);
@@ -628,7 +629,7 @@ void cgroup_kill()
 		while(1) {
 			void *handle = nullptr;
 			pid_t pid;
-			int ret = cgroup_get_task_begin(cgroupname, "memory", &handle, &pid);
+			int ret = cgroup_get_task_begin(cgroupname, mem_controller, &handle, &pid);
 			cgroup_get_task_end(&handle);
 			if (ret == ECGEOF) break;
 			kill(pid, SIGKILL);
