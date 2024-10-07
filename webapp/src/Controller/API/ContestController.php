@@ -655,8 +655,8 @@ class ContestController extends AbstractRestController
         $response->headers->set('Content-Type', 'application/x-ndjson');
         $response->setCallback(function () use ($format, $cid, $contest, $request, $since_id, $types, $strict, $stream, $metadataFactory, $kernel) {
             $lastUpdate = 0;
-            $lastIdSent = max(0, $since_id); // Don't try to look for event_id=0
-            $lastIdExists = $since_id === -1;
+            $lastIdSent = max(0, $since_id);
+            $lastIdExists = $since_id !== -1; // Don't try to look for event_id=0
             $typeFilter = false;
             if ($types) {
                 $typeFilter = explode(',', $types);
