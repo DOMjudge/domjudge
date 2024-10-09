@@ -75,26 +75,24 @@ class SubmitProblemPasteType extends AbstractType
                     $form = $context->getRoot();
                     /** @var Language $language */
                     $language = $form->get('language')->getData();
-                    if ($language) {
-                        $langId = strtolower($language->getExtensions()[0]); 
-                        if ($language->getRequireEntryPoint() && empty($value)) {
-                            $message = sprintf('%s required, but not specified',
-                                               $language->getEntryPointDescription() ?: 'Entry point');
-                            $context
-                                ->buildViolation($message)
-                                ->atPath('entry_point')
-                                ->addViolation();
-                        }
+                    $langId = strtolower($language->getExtensions()[0]); 
+                    if ($language->getRequireEntryPoint() && empty($value)) {
+                        $message = sprintf('%s required, but not specified',
+                                            $language->getEntryPointDescription() ?: 'Entry point');
+                        $context
+                            ->buildViolation($message)
+                            ->atPath('entry_point')
+                            ->addViolation();
+                    }
 
-                        if (in_array($langId, ['java', 'kt']) && empty($value)) {
-                            $message = sprintf('%s is required for %s language, but not specified',
-                                               $language->getEntryPointDescription() ?: 'Entry point',
-                                               ucfirst($langId));
-                            $context
-                                ->buildViolation($message)
-                                ->atPath('entry_point')
-                                ->addViolation();
-                        }
+                    if (in_array($langId, ['java', 'kt']) && empty($value)) {
+                        $message = sprintf('%s is required for %s language, but not specified',
+                                            $language->getEntryPointDescription() ?: 'Entry point',
+                                            ucfirst($langId));
+                        $context
+                            ->buildViolation($message)
+                            ->atPath('entry_point')
+                            ->addViolation();
                     }
                 }),
             ]
