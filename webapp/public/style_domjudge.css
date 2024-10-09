@@ -699,3 +699,25 @@ blockquote {
     padding: 3px;
     border-radius: 5px;
 }
+
+#submissionTabs.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    gap: 10px; 
+}
+
+.editor-container {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background-color: #fafafa;
+    max-height: 400px;
+    overflow: auto;
+}
+
+.editor-container:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
