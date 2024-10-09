@@ -68,7 +68,36 @@ class SubmitProblemPasteType extends AbstractType
             'label' => 'Entry point',
             'required' => false,
             'help' => 'The entry point for your code.',
-            'row_attr' => ['data-entry-point' => '']
+            'row_attr' => ['data-entry-point' => ''],
+            'constraints' => [
+                new Callback(function ($value, ExecutionContextInterface $context) {
+                    /** @var Form $form */
+                    $form = $context->getRoot();
+                    /** @var Language $language */
+                    $language = $form->get('language')->getData();
+                    if ($language) {
+                        $langId = strtolower($language->getExtensions()[0]); 
+                        if ($language->getRequireEntryPoint() && empty($value)) {
+                            $message = sprintf('%s required, but not specified',
+                                               $language->getEntryPointDescription() ?: 'Entry point');
+                            $context
+                                ->buildViolation($message)
+                                ->atPath('entry_point')
+                                ->addViolation();
+                        }
+
+                        if (in_array($langId, ['java', 'kt']) && empty($value)) {
+                            $message = sprintf('%s is required for %s language, but not specified',
+                                               $language->getEntryPointDescription() ?: 'Entry point',
+                                               ucfirst($langId));
+                            $context
+                                ->buildViolation($message)
+                                ->atPath('entry_point')
+                                ->addViolation();
+                        }
+                    }
+                }),
+            ]
         ]);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($problemConfig) {
             $data = $event->getData();

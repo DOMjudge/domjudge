@@ -112,6 +112,19 @@ class SubmissionController extends BaseController
                         $language->getExtensions()[0]
                     );
                     $tempFileName = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $tempFileName);
+
+                    if ($language->getExtensions()[0] == 'java' || $language->getExtensions()[0] == 'kt') {
+                        $entryPoint = $formPaste->get('entry_point')->getData() ?: null;
+                        // Check for invalid characters in entry point name
+                        $invalidChars = '/[<>:"\/\\|?*]/';
+                        if(preg_match($invalidChars, $entryPoint)) {
+                            $this->addFlash('danger', 'Invalid entry point name.');
+                            return $this->redirectToRoute('team_index');
+                        }
+                        $tempFileName = $entryPoint . '.' . $language->getExtensions()[0];
+                    }
+                    else $entryPoint = $tempFileName;
+
                     $tempFilePath = $tempDir . DIRECTORY_SEPARATOR . $tempFileName;
                     file_put_contents($tempFilePath, $codeContent);
         
@@ -122,9 +135,7 @@ class SubmissionController extends BaseController
                         null,
                         true
                     );
-        
                     $files = [$uploadedFile];
-                    $entryPoint = $tempFileName;
                 }
         
                 if ($problem && $language && !empty($files)) {
