@@ -180,8 +180,7 @@ any other tasks on the same CPU core the judgedaemon is using:
 ``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1 isolcpus=2"``
 
 You have now configured the system to use cgroups. To create
-the actual cgroups that DOMjudge will use, on systems with cgroups v1, you need
-to run::
+the actual cgroups that DOMjudge will use you need to run::
 
   sudo systemctl enable create-cgroups --now
 
