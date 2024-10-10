@@ -179,16 +179,8 @@ Optionally the timings can be made more stable by not letting the OS schedule
 any other tasks on the same CPU core the judgedaemon is using:
 ``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1 isolcpus=2"``
 
-On modern distros (e.g. Debian bullseye and Ubuntu Jammy Jellyfish) which have
-cgroup v2 enabled by default, you need to add ``systemd.unified_cgroup_hierarchy=0``
-as well. Then run ``update-grub`` and reboot.
-After rebooting check that ``/proc/cmdline`` actually contains the
-added kernel options. On VM hosting providers such as Google Cloud or
-DigitalOcean, ``GRUB_CMDLINE_LINUX_DEFAULT`` may be overwritten
-by other files in ``/etc/default/grub.d/``.
-
 You have now configured the system to use cgroups. To create
-the actual cgroups that DOMjudge will use, run::
+the actual cgroups that DOMjudge will use you need to run::
 
   sudo systemctl enable create-cgroups --now
 
@@ -197,7 +189,8 @@ Note that this service will automatically be started if you use the
 customize the script ``judge/create_cgroups`` as required and run it
 after each boot.
 
-The script `jvm_footprint` can be used to measure the memory overhead of the JVM for languages such as Kotlin and Java.
+The script `jvm_footprint` can be used to measure the memory overhead of the
+JVM for languages such as Kotlin and Java.
 
 
 REST API credentials

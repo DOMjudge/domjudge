@@ -30,6 +30,9 @@ services:
     ports:
       - 12345:80
     privileged: true
+    # Note that this requires Docker Compose > 2.15.
+    # If you have an older version upgrade it, or you can comment out this line
+    cgroup: host
     working_dir: ${PWD}
     environment:
       - PROJECT_DIR=${PWD}
