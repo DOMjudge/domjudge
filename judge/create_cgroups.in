@@ -9,23 +9,26 @@
 JUDGEHOSTUSER=@DOMJUDGE_USER@
 CGROUPBASE="/sys/fs/cgroup"
 
-# We do not need to do any of this with cgroup v2.
-fs_type=$(awk '$2 == "/sys/fs/cgroup" {print $3}' /proc/mounts)
-if [ "$fs_type" = "cgroup2" ]; then
-    echo "cgroup v2 detected, skipping cgroup creation" >&2
-    exit 0
-fi
-
 cgroup_error_and_usage () {
     echo "$1" >&2
     echo "To fix this, please make the following changes:
     1. In /etc/default/grub, add 'cgroup_enable=memory swapaccount=1' to GRUB_CMDLINE_LINUX_DEFAULT.
-       On modern distros (e.g. Debian bullseye and Ubuntu Jammy Jellyfish) which have cgroup v2 enabled by default,
-       you need to add 'systemd.unified_cgroup_hierarchy=0' as well.
     2. Run update-grub
     3. Reboot" >&2
     exit 1
 }
+
+# Check whether cgroup v2 is available.
+fs_type=$(awk '$2 == "/sys/fs/cgroup" {print $3}' /proc/mounts)
+if [ "$fs_type" = "cgroup2" ]; then
+    if ! echo "+memory" >> /sys/fs/cgroup/cgroup.subtree_control; then
+	    cgroup_error_and_usage "Error: Cannot add +memory to cgroup.subtree_control; check kernel params. Unable to continue."
+    fi
+    if ! echo "+cpuset" >> /sys/fs/cgroup/cgroup.subtree_control; then
+	    cgroup_error_and_usage "Error: Cannot add +cpuset to cgroup.subtree_control; check kernel params. Unable to continue."
+    fi
+    exit 0
+fi
 
 for i in cpuset memory; do
     mkdir -p $CGROUPBASE/$i
