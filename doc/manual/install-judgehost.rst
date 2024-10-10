@@ -179,8 +179,8 @@ Optionally the timings can be made more stable by not letting the OS schedule
 any other tasks on the same CPU core the judgedaemon is using:
 ``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1 isolcpus=2"``
 
-You have now configured the system to use cgroups. On systems with
-cgroups v1, you need to run::
+You have now configured the system to use cgroups. To create
+the actual cgroups that DOMjudge will use you need to run::
 
   sudo systemctl enable create-cgroups --now
 
