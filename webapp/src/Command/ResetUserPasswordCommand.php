@@ -33,6 +33,11 @@ class ResetUserPasswordCommand extends Command
                 'username',
                 InputArgument::REQUIRED,
                 'The username of the user to reset the password of'
+            )
+            ->addArgument(
+                'password',
+                InputArgument::OPTIONAL,
+                'The new password; if not provided a random password is generated'
             );
     }
 
@@ -50,7 +55,7 @@ class ResetUserPasswordCommand extends Command
             return Command::FAILURE;
         }
 
-        $password = Utils::generatePassword();
+        $password = $input->getArgument('password') ?? Utils::generatePassword();
 
         $user->setPassword(
             $this->passwordHasher->hashPassword($user, $password)
