@@ -72,7 +72,7 @@ class ImportProblemService
         $submission_file = 'submissions.json';
         $problemIsNew    = $problem === null;
 
-        $iniKeysProblem        = ['name', 'timelimit', 'special_run', 'special_compare', 'externalid'];
+        $iniKeysProblem        = ['name', 'timelimit', 'special_run', 'special_compare', 'special_output_visualizer', 'externalid'];
         $iniKeysContestProblem = ['allow_submit', 'allow_judge', 'points', 'color', 'short-name'];
 
         $defaultTimelimit = 10;
@@ -144,6 +144,11 @@ class ImportProblemService
                 $this->em->getRepository(Executable::class)->find($problemProperties['special_run']);
             unset($problemProperties['special_run']);
         }
+        if (isset($problemProperties['special_output_visualizer'])) {
+            $problemProperties['output_visualizer_executable'] =
+                $this->em->getRepository(Executable::class)->find($problemProperties['special_output_visualizer']);
+            unset($problemProperties['special_output_visualizer']);
+        }
 
         /** @var ContestProblem|null $contestProblem */
         $contestProblem = null;
@@ -208,6 +213,7 @@ class ImportProblemService
                 ->setSpecialCompareArgs('')
                 ->setRunExecutable()
                 ->setCombinedRunCompare(false)
+                ->setOutputVisualizerExecutable()
                 ->setMemlimit(null)
                 ->setOutputlimit(null)
                 ->setProblemStatementContent(null)
@@ -303,6 +309,12 @@ class ImportProblemService
                     }
                     if (isset($yamlData['limits']['validation_passes'])) {
                         $problem->setMultipassLimit($yamlData['limits']['validation_passes']);
+                    }
+                }
+
+                if (isset($yamlData['visualization'])) {
+                    if (!$this->searchAndAddOutputVisualizer($zip, $messages, $externalId, $yamlData['visualization'], $problem)) {
+                        return null;
                     }
                 }
 
