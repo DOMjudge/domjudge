@@ -142,6 +142,9 @@ class ExecutableController extends BaseController
                 case 'run':
                     $execdata['icon']['icon'] = 'person-running';
                     break;
+                case 'output_visualizer':
+                    $execdata['icon']['icon'] = 'paint-brush';
+                    break;
                 default:
                     $execdata['icon']['icon'] = 'question';
             }
