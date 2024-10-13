@@ -768,7 +768,7 @@ while (true) {
             $judgehosts = request('judgehosts', 'GET');
             if ($judgehosts !== null) {
                 $judgehosts = dj_json_decode($judgehosts);
-                $judgehost = array_filter($judgehosts, fn($j) => $j['hostname'] === $myhost);
+                $judgehost = array_values(array_filter($judgehosts, fn($j) => $j['hostname'] === $myhost))[0];
                 if (!isset($judgehost['enabled']) || !$judgehost['enabled']) {
                     logmsg(LOG_WARNING, "Judgehost needs to be enabled in web interface.");
                 }
