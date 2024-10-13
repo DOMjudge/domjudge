@@ -109,6 +109,20 @@
                         <td class="filename">{{ problem.specialCompareArgs }}</td>
                     </tr>
                 {% endif %}
+                {% if problem.getOutputVisualizerExecutable is not empty %}
+                    <tr>
+                        <th>Output visualizer</th>
+                        <td class="filename">
+                            <a href="{{ path('jury_executable', {'execId': problem.getOutputVisualizerExecutable.execid}) }}">{{ problem.getOutputVisualizerExecutable.execid }}</a>
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if problem.specialCompareArgs is not empty %}
+                    <tr>
+                        <th>Compare script arguments</th>
+                        <td class="filename">{{ problem.specialCompareArgs }}</td>
+                    </tr>
+                {% endif %}
                 {% if type is not empty %}
                     <tr>
                         <th>Type</th>
