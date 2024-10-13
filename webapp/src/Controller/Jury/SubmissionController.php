@@ -1013,6 +1013,23 @@ class SubmissionController extends BaseController
     /**
      * @throws DBALException
      */
+    #[Route(path: '/{judgingId<\d+>}/request-visualization', name: 'jury_submission_request_visualization', methods: ['POST'])]
+    public function requestVisualizationRuns(Request $request, int $judgingId): RedirectResponse
+    {
+        $judging = $this->em->getRepository(Judging::class)->find($judgingId);
+        if ($judging === null) {
+            throw new BadRequestHttpException("Unknown judging with '$judgingId' requested.");
+        }
+        $this->createVisualization([$judging]);
+
+        return $this->redirectToLocalReferrer($this->router, $request,
+            $this->generateUrl('jury_submission_by_judging', ['jid' => $judgingId])
+        );
+    }
+
+    /**
+     * @throws DBALException
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{submitId<\d+>}/update-status', name: 'jury_submission_update_status', methods: ['POST'])]
     public function updateStatusAction(
@@ -1280,6 +1297,72 @@ class SubmissionController extends BaseController
         if (!empty($errors)) {
             $allErrors[] = $type . ' changes:';
             array_push($allErrors, ...$errors);
+        }
+    }
+
+    /**
+     * @param Judging[] $judgings
+     */
+    protected function createVisualization(array $judgings): void
+    {
+        throw new BadRequestHttpException("Not yet implemented.");
+        $inProgress = [];
+        $alreadyRequested = [];
+        $invalidJudgings = [];
+        $numRequested = 0;
+        foreach ($judgings as $judging) {
+            $judgingId = $judging->getJudgingid();
+            if ($judging->getResult() === null) {
+                $inProgress[] = $judgingId;
+            } elseif ($judging->getJudgeCompletely()) {
+                $alreadyRequested[] = $judgingId;
+            } elseif (!$judging->getValid()) {
+                $invalidJudgings[] = $judgingId;
+            } else {
+                $numRequested = $this->em->getConnection()->executeStatement(
+                    'UPDATE judgetask SET valid=1'
+                    . ' WHERE jobid=:jobid'
+                    . ' AND judgehostid IS NULL',
+                    [
+                        'jobid' => $judgingId,
+                    ]
+                );
+                $judging->setJudgeCompletely(true);
+
+                $submission = $judging->getSubmission();
+
+                $queueTask = new QueueTask();
+                $queueTask->setJudging($judging)
+                    ->setPriority(JudgeTask::PRIORITY_LOW)
+                    ->setTeam($submission->getTeam())
+                    ->setTeamPriority((int)$submission->getSubmittime())
+                    ->setStartTime(null);
+                $this->em->persist($queueTask);
+            }
+        }
+        $this->em->flush();
+        if (count($judgings) === 1) {
+            if ($inProgress !== []) {
+                $this->addFlash('warning', 'Please be patient, this judging is still in progress.');
+            }
+            if ($alreadyRequested !== []) {
+                $this->addFlash('warning', 'This judging was already requested to be judged completely.');
+            }
+        } else {
+            if ($inProgress !== []) {
+                $this->addFlash('warning', sprintf('Please be patient, these judgings are still in progress: %s', implode(', ', $inProgress)));
+            }
+            if ($alreadyRequested !== []) {
+                $this->addFlash('warning', sprintf('These judgings were already requested to be judged completely: %s', implode(', ', $alreadyRequested)));
+            }
+            if ($invalidJudgings !== []) {
+                $this->addFlash('warning', sprintf('These judgings were skipped as they were superseded by other judgings: %s', implode(', ', $invalidJudgings)));
+            }
+        }
+        if ($numRequested === 0) {
+            $this->addFlash('warning', 'No more remaining runs to be judged.');
+        } else {
+            $this->addFlash('info', "Requested $numRequested remaining runs to be judged.");
         }
     }
 }
