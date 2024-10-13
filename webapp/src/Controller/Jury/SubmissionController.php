@@ -533,6 +533,7 @@ class SubmissionController extends BaseController
             'requestedOutputCount' => $requestedOutputCount,
             'version_warnings' => [],
             'isMultiPassProblem' => $submission->getProblem()->isMultipassProblem(),
+            'hasOutputVisualizer' => $submission->getProblem()->getOutputVisualizerExecutable() ?? false,
         ];
 
         if ($selectedJudging === null) {
