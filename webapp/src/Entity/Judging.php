@@ -113,6 +113,10 @@ class Judging extends BaseApiEntity
     #[Serializer\Exclude]
     private bool $judgeCompletely = false;
 
+    #[ORM\Column(options: ['comment' => 'Explicitly requested to visualize the output.', 'default' => 0])]
+    #[Serializer\Exclude]
+    private bool $visualization = false;
+
     #[ORM\Column(options: ['comment' => 'UUID, to make caching of compilation results safe.'])]
     #[Serializer\Exclude]
     private string $uuid;
@@ -348,6 +352,17 @@ class Judging extends BaseApiEntity
     public function getJudgeCompletely(): bool
     {
         return $this->judgeCompletely;
+    }
+
+    public function setVisualization(bool $visualization): Judging
+    {
+        $this->visualization = $visualization;
+        return $this;
+    }
+
+    public function getVisualization(): bool
+    {
+        return $this->visualization;
     }
 
     public function setSubmission(?Submission $submission = null): Judging

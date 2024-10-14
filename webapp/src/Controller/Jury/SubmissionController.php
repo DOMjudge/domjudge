@@ -21,6 +21,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
+use App\Entity\QueueTask;
 use App\Form\Type\SubmissionsFilterType;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
@@ -1306,7 +1307,6 @@ class SubmissionController extends BaseController
      */
     protected function createVisualization(array $judgings): void
     {
-        throw new BadRequestHttpException("Not yet implemented.");
         $inProgress = [];
         $alreadyRequested = [];
         $invalidJudgings = [];
@@ -1315,55 +1315,53 @@ class SubmissionController extends BaseController
             $judgingId = $judging->getJudgingid();
             if ($judging->getResult() === null) {
                 $inProgress[] = $judgingId;
-            } elseif ($judging->getJudgeCompletely()) {
+            } elseif (false and $judging->getVisualization()) {
                 $alreadyRequested[] = $judgingId;
             } elseif (!$judging->getValid()) {
                 $invalidJudgings[] = $judgingId;
             } else {
-                $numRequested = $this->em->getConnection()->executeStatement(
-                    'UPDATE judgetask SET valid=1'
-                    . ' WHERE jobid=:jobid'
-                    . ' AND judgehostid IS NULL',
-                    [
-                        'jobid' => $judgingId,
-                    ]
-                );
-                $judging->setJudgeCompletely(true);
-
-                $submission = $judging->getSubmission();
-
-                $queueTask = new QueueTask();
-                $queueTask->setJudging($judging)
-                    ->setPriority(JudgeTask::PRIORITY_LOW)
-                    ->setTeam($submission->getTeam())
-                    ->setTeamPriority((int)$submission->getSubmittime())
-                    ->setStartTime(null);
-                $this->em->persist($queueTask);
+                $outs = $judging->getRuns()->toArray();
+                $tmpRun = null;
+                $lowestId = count($outs);
+                foreach ($outs as $run) {
+                    if ($tmpRun !== null and $lowestId > $run->getRunId()) {
+                        continue;
+                    }
+                    if ($run->getRunResult() === 'correct' and $run->getRunId()<$lowestId) {
+                        $tmpRun = $run;
+                        $lowestId = $run->getRunId();
+                    }
+                }
+                $judgeTask = new JudgeTask();
+                $judgeTask->setType('output_visualization')
+                          ->setValid(true)
+                          ->setJobid($judgingId);
+                $numRequested += 1;
+                $this->em->flush();
             }
         }
-        $this->em->flush();
         if (count($judgings) === 1) {
             if ($inProgress !== []) {
-                $this->addFlash('warning', 'Please be patient, this judging is still in progress.');
+                $this->addFlash('warning', 'Please be patient, this visualization is still in progress.');
             }
             if ($alreadyRequested !== []) {
-                $this->addFlash('warning', 'This judging was already requested to be judged completely.');
+                $this->addFlash('warning', 'This visualization was already requested to be judged completely.');
             }
         } else {
             if ($inProgress !== []) {
-                $this->addFlash('warning', sprintf('Please be patient, these judgings are still in progress: %s', implode(', ', $inProgress)));
+                $this->addFlash('warning', sprintf('Please be patient, these visualizations are still in progress: %s', implode(', ', $inProgress)));
             }
             if ($alreadyRequested !== []) {
                 $this->addFlash('warning', sprintf('These judgings were already requested to be judged completely: %s', implode(', ', $alreadyRequested)));
             }
             if ($invalidJudgings !== []) {
-                $this->addFlash('warning', sprintf('These judgings were skipped as they were superseded by other judgings: %s', implode(', ', $invalidJudgings)));
+                $this->addFlash('warning', sprintf('These visualizations were skipped as the judgings were superseded by other judgings: %s', implode(', ', $invalidJudgings)));
             }
         }
         if ($numRequested === 0) {
             $this->addFlash('warning', 'No more remaining runs to be judged.');
         } else {
-            $this->addFlash('info', "Requested $numRequested remaining runs to be judged.");
+            $this->addFlash('info', "Requested $numRequested to be visualized.");
         }
     }
 }

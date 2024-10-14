@@ -29,6 +29,7 @@ trait JudgeRemainingTrait
                 $numRequested = $this->em->getConnection()->executeStatement(
                     'UPDATE judgetask SET valid=1'
                     . ' WHERE jobid=:jobid'
+                    . ' AND type="judging_run"'
                     . ' AND judgehostid IS NULL',
                     [
                         'jobid' => $judgingId,
