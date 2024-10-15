@@ -1344,16 +1344,16 @@ class SubmissionController extends BaseController
             if ($inProgress !== []) {
                 $this->addFlash('warning', 'Please be patient, this visualization is still in progress.');
             }
-            if ($alreadyRequested != []) {
+            /*if ($alreadyRequested != []) {
                 $this->addFlash('warning', 'This visualization was already requested to be judged completely.');
-            }
+            }*/
         } else {
             if ($inProgress !== []) {
                 $this->addFlash('warning', sprintf('Please be patient, these visualizations are still in progress: %s', implode(', ', $inProgress)));
             }
-            if ($alreadyRequested != []) {
+            /*if ($alreadyRequested != []) {
                 $this->addFlash('warning', sprintf('These judgings were already requested to be judged completely: %s', implode(', ', $alreadyRequested)));
-            }
+            }*/
             if ($invalidJudgings !== []) {
                 $this->addFlash('warning', sprintf('These visualizations were skipped as the judgings were superseded by other judgings: %s', implode(', ', $invalidJudgings)));
             }
