@@ -1317,7 +1317,7 @@ class SubmissionController extends BaseController
                 $inProgress[] = $judgingId;
             /*} elseif ($judging->getVisualization()) {
                 $alreadyRequested[] = $judgingId;
-            }*/ elseif (!$judging->getValid()) {
+            */}/ elseif (!$judging->getValid()) {
                 $invalidJudgings[] = $judgingId;
             } else {
                 $outs = $judging->getRuns()->toArray();
