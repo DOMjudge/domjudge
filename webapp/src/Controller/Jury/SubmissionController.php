@@ -1313,11 +1313,11 @@ class SubmissionController extends BaseController
         $numRequested = 0;
         foreach ($judgings as $judging) {
             $judgingId = $judging->getJudgingid();
+            /*elseif ($judging->getVisualization()) {
+                $alreadyRequested[] = $judgingId;*/
             if ($judging->getResult() === null) {
                 $inProgress[] = $judgingId;
-            /*} elseif ($judging->getVisualization()) {
-                $alreadyRequested[] = $judgingId;
-            */}/ elseif (!$judging->getValid()) {
+            } elseif (!$judging->getValid()) {
                 $invalidJudgings[] = $judgingId;
             } else {
                 $outs = $judging->getRuns()->toArray();
