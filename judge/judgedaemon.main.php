@@ -751,10 +751,12 @@ while (true) {
     // Request open submissions to judge. Any errors will be treated as
     // non-fatal: we will just keep on retrying in this loop.
     $judging = request('judgehosts/fetch-work', 'POST', ['hostname' => $myhost], false);
+    var_dump($judging);
     // If $judging is null, an error occurred; don't try to decode.
     if (!is_null($judging)) {
         $row = dj_json_decode($judging);
     }
+    var_dump("Working judging.");
 
     // nothing returned -> no open submissions for us
     if (empty($row)) {
@@ -776,6 +778,7 @@ while (true) {
         }
         continue;
     }
+    var_dump("Non empty.");
 
     // We have gotten a work packet.
     $endpoints[$endpointID]["waiting"] = false;
@@ -784,7 +787,9 @@ while (true) {
     logmsg(LOG_INFO,
         "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint $endpointID)");
 
+    var_dump($row);
     $jobId = $row[0]['jobid'];
+    var_dump($jobId);
 
     if ($type == 'prefetch') {
         if ($lastWorkdir !== null) {
@@ -815,9 +820,11 @@ while (true) {
         logmsg(LOG_INFO, "  🔥 Pre-heating judgehost completed.");
         continue;
     }
+    var_dump("Get here...");
 
     // Create workdir for judging.
     $workdir = judging_directory($workdirpath, $row[0]);
+    var_dump($workdir);
     logmsg(LOG_INFO, "  Working directory: $workdir");
 
     if ($type == 'debug_info') {
@@ -872,6 +879,59 @@ while (true) {
         continue;
     }
 
+    var_dump($row);
+    var_dump("Working on output_visual");
+    if ($type == 'output_visualization') {
+        if ($lastWorkdir !== null) {
+            cleanup_judging($lastWorkdir);
+            $lastWorkdir = null;
+        }
+        foreach ($row as $judgeTask) {
+            if (isset($judgeTask['output_visualizer_script_id'])) {
+                // Visualization of output which this host judged requested.
+                //$run_config = dj_json_decode($judgeTask['run_config']);
+                $tmpfile = tempnam(TMPDIR, 'output_visualization_');
+                [$runpath, $error] = fetch_executable_internal(
+                    $workdirpath,
+                    'output_visualization',
+                    $judgeTask['output_visualizer_script_id'],
+                    $run_config['hash']
+                );
+                if (isset($error)) {
+                    // FIXME
+                    continue;
+                }
+
+                $debug_cmd = implode(' ', array_map('dj_escapeshellarg',
+                    [$runpath, $workdir, $tmpfile]));
+                system($debug_cmd, $retval);
+                // FIXME: check retval
+
+                request(
+                    sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])),
+                    'POST',
+                    ['full_debug' => rest_encode_file($tmpfile, false)],
+                    false
+                );
+                unlink($tmpfile);
+
+                logmsg(LOG_INFO, "  ⇡ Uploading debug package of workdir $workdir.");
+            } else {
+                // Retrieving full team output for a particular testcase.
+                $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
+                request(
+                    sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])),
+                    'POST',
+                    ['output_run' => rest_encode_file($testcasedir . '/program.out', false)],
+                    false
+                );
+                logmsg(LOG_INFO, "  ⇡ Uploading full output of testcase $judgeTask[testcase_id].");
+            }
+        }
+        continue;
+    }
     $success_file = "$workdir/.uuid_pid";
     $expected_uuid_pid = $row[0]['uuid'] . '_' . (string)getmypid();
 
