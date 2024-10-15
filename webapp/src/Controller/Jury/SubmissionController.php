@@ -1332,11 +1332,20 @@ class SubmissionController extends BaseController
                         $lowestId = $run->getRunId();
                     }
                 }
+                $submission = $judging->getSubmission();
+                $executable = $submission->getProblem()->getOutputVisualizerExecutable()->getImmutableExecutable();
                 $judgeTask = new JudgeTask();
                 $judgeTask->setType('output_visualization')
                           ->setValid(true)
-                          ->setJobid($judgingId);
+                          ->setJobid($judgingId)
+                          // We need to get the Judging_run first.
+                          //->setJudgehost($judging->getJudgeTask()->getJudgehost())
+                          ->setSubmission($submission)
+                          ->setPriority(JudgeTask::PRIORITY_LOW)
+                          ->setOutputVisualizerScriptId($executable->getImmutableExecId())
+                          ->setRunConfig($this->dj->jsonEncode(['hash' => $executable->getHash()]));
                 $numRequested += 1;
+                $this->em->persist($judgeTask);
                 $this->em->flush();
             }
         }
