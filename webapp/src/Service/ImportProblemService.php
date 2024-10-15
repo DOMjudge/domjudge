@@ -1049,6 +1049,7 @@ class ImportProblemService
                     ->setImmutableExecutable($this->dj->createImmutableExecutable($zipArchive))
                     ->setDescription(sprintf('%s for %s', $programStrings['type'], $problem->getName()));
  
+                $combinedRunCompare = false;
                 if ($programStrings['type'] === 'output validator') {
                     $combinedRunCompare = $programMode == 'custom interactive';
                     $executable->setType($combinedRunCompare ? 'run' : 'compare');

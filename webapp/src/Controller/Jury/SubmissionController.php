@@ -1315,9 +1315,9 @@ class SubmissionController extends BaseController
             $judgingId = $judging->getJudgingid();
             if ($judging->getResult() === null) {
                 $inProgress[] = $judgingId;
-            } elseif (false and $judging->getVisualization()) {
+            /*} elseif ($judging->getVisualization()) {
                 $alreadyRequested[] = $judgingId;
-            } elseif (!$judging->getValid()) {
+            }*/ elseif (!$judging->getValid()) {
                 $invalidJudgings[] = $judgingId;
             } else {
                 $outs = $judging->getRuns()->toArray();
@@ -1344,14 +1344,14 @@ class SubmissionController extends BaseController
             if ($inProgress !== []) {
                 $this->addFlash('warning', 'Please be patient, this visualization is still in progress.');
             }
-            if ($alreadyRequested !== []) {
+            if ($alreadyRequested != []) {
                 $this->addFlash('warning', 'This visualization was already requested to be judged completely.');
             }
         } else {
             if ($inProgress !== []) {
                 $this->addFlash('warning', sprintf('Please be patient, these visualizations are still in progress: %s', implode(', ', $inProgress)));
             }
-            if ($alreadyRequested !== []) {
+            if ($alreadyRequested != []) {
                 $this->addFlash('warning', sprintf('These judgings were already requested to be judged completely: %s', implode(', ', $alreadyRequested)));
             }
             if ($invalidJudgings !== []) {
