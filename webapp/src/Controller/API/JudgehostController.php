@@ -1668,8 +1668,16 @@ class JudgehostController extends AbstractFOSRestController
         $submit_id = $judgeTasks[0]->getSubmission()?->getSubmitid();
         $judgetaskids = [];
         foreach ($judgeTasks as $judgeTask) {
-            if ($judgeTask->getSubmission()?->getSubmitid() == $submit_id) {
-                $judgetaskids[] = $judgeTask->getJudgetaskid();
+            if ($judgeTask->getType() == 'judging_run') {
+                if ($judgeTask->getSubmission()?->getSubmitid() == $submit_id) {
+                    $judgetaskids[] = $judgeTask->getJudgetaskid();
+                }
+            } else {
+                // Just pick everything assigned to the judgehost itself or unassigned for now
+                $assignedJudgehost = $judgeTask->getJudgehost();
+                if ($assignedJudgehost === $judgehost || $assignedJudgehost === null) {
+                    $judgetaskids[] = $judgeTask->getJudgetaskid();
+                }
             }
         }
 
