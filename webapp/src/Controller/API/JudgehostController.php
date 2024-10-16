@@ -1650,6 +1650,27 @@ class JudgehostController extends AbstractFOSRestController
             return $this->serializeJudgeTasks($judgetasks, $judgehost);
         }
 
+        // If there is nothing else, get visualization jobs that are assigned to this host.
+        /** @var JudgeTask[] $judgetasks */
+        $judgetasks = $this->em
+            ->createQueryBuilder()
+            ->from(JudgeTask::class, 'jt')
+            ->select('jt')
+            ->andWhere('jt.judgehost = :judgehost')
+            //->andWhere('jt.starttime IS NULL')
+            ->andWhere('jt.valid = 1')
+            ->andWhere('jt.type = :type')
+            ->setParameter('judgehost', $judgehost)
+            ->setParameter('type', JudgeTaskType::OUTPUT_VISUALIZATION)
+            ->addOrderBy('jt.priority')
+            ->addOrderBy('jt.judgetaskid')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getResult();
+        if (!empty($judgetasks)) {
+            return $this->serializeJudgeTasks($judgetasks, $judgehost);
+        }
+
         return [];
     }
 
