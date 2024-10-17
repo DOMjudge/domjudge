@@ -841,6 +841,11 @@
             </script>
         {% endif %} {# selectedJudging.result != 'compiler-error' #}
 
+        {% if visualization is defined %}
+            <h5>Team answer visualization</h5>
+            <img src={{ visualization.url }}>
+        {% endif %}
+
     {% endif %} {# selectedJudging is not null or externalJudgement is not null #}
 
 {% endblock %}

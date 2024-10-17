@@ -2,6 +2,12 @@
 
 namespace App\Controller\Jury;
 
+use App\Entity\Judgehost;
+use App\Entity\JudgeTask;
+use App\Entity\Testcase;
+use App\Doctrine\DBAL\Types\JudgeTaskType;
+use Doctrine\DBAL\ArrayParameterType;
+
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Role;
@@ -164,12 +170,13 @@ class UserController extends BaseController
         $hostname = 'Computer';
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
 
+        // If there is nothing else, get visualization jobs that are assigned to this host.
         /** @var JudgeTask[] $judgetasks */
         $judgetasks = $this->em
             ->createQueryBuilder()
             ->from(JudgeTask::class, 'jt')
             ->select('jt')
-            ->andWhere('jt.judgehost = :judgehost')
+            ->andWhere('jt.judgehost = :judgehost OR jt.judgehost IS NULL')
             //->andWhere('jt.starttime IS NULL')
             ->andWhere('jt.valid = 1')
             ->andWhere('jt.type = :type')
@@ -181,14 +188,117 @@ class UserController extends BaseController
             ->getQuery()
             ->getResult();
         dump($judgetasks);
-        /*if (!empty($judgetasks)) {
+        if (!empty($judgetasks)) {
             dump($this->serializeJudgeTasks($judgetasks, $judgehost));
-        }*/
+        }
+
+        dump($testcase = $this->em->getRepository(Testcase::class)->findOneBy(['testcaseid' => '6']));
 
         return $this->render('jury/users.html.twig', [
             'users' => $users_table,
             'table_fields' => $table_fields,
         ]);
+    }
+
+    /**
+     * @param JudgeTask[] $judgeTasks
+     * @return JudgeTask[]
+     * @throws Exception
+     */
+    private function serializeJudgeTasks(array $judgeTasks, Judgehost $judgehost): array
+    {
+        if (empty($judgeTasks)) {
+            return [];
+        }
+
+        // Filter by submit_id.
+        $submit_id = $judgeTasks[0]->getSubmission()?->getSubmitid();
+        $judgetaskids = [];
+        foreach ($judgeTasks as $judgeTask) {
+            if ($judgeTask->getType() == 'judging_run') {
+                if ($judgeTask->getSubmission()?->getSubmitid() == $submit_id) {
+                    $judgetaskids[] = $judgeTask->getJudgetaskid();
+                }
+            } else {
+                // Just pick everything assigned to the judgehost itself or unassigned for now
+                $assignedJudgehost = $judgeTask->getJudgehost();
+                if ($assignedJudgehost === $judgehost || $assignedJudgehost === null) {
+                    $judgetaskids[] = $judgeTask->getJudgetaskid();
+                }
+            }
+        }
+        dump($judgetaskids);
+
+        $now = Utils::now();
+        // We do need this, but for now it stops us from debugging.
+        /*$numUpdated = $this->em->getConnection()->executeStatement(
+            'UPDATE judgetask SET judgehostid = :judgehostid, starttime = :starttime WHERE starttime IS NULL AND valid = 1 AND judgetaskid IN (:ids)',
+            [
+                'judgehostid' => $judgehost->getJudgehostid(),
+                'starttime' => $now,
+                'ids' => $judgetaskids,
+            ],
+            [
+                'ids' => ArrayParameterType::INTEGER,
+            ]
+        );
+
+        dump($numUpdated);
+        if ($numUpdated == 0) {
+            // Bad luck, some other judgehost beat us to it.
+            return [];
+        }*/
+
+        // We got at least one, let's update the starttime of the corresponding judging if haven't done so in the past.
+        $starttime_set = $this->em->getConnection()->executeStatement(
+            'UPDATE judging SET starttime = :starttime WHERE judgingid = :jobid AND starttime IS NULL',
+            [
+                'starttime' => $now,
+                'jobid' => $judgeTasks[0]->getJobId(),
+            ]
+        );
+
+        if ($starttime_set && $judgeTasks[0]->getType() == JudgeTaskType::JUDGING_RUN) {
+            /** @var Submission $submission */
+            $submission = $this->em->getRepository(Submission::class)->findOneBy(['submitid' => $submit_id]);
+            $teamid = $submission->getTeam()->getTeamid();
+
+            $this->em->getConnection()->executeStatement(
+                'UPDATE team SET judging_last_started = :starttime WHERE teamid = :teamid',
+                [
+                    'starttime' => $now,
+                    'teamid' => $teamid,
+                ]
+            );
+        }
+
+        // Just return everything here
+        return $judgeTasks;
+        if ($numUpdated == sizeof($judgeTasks)) {
+            // We got everything, let's ship it!
+            return $judgeTasks;
+        }
+
+        // A bit unlucky, we only got partially the assigned work, so query what was assigned to us.
+        $queryBuilder = $this->em->createQueryBuilder();
+        $partialJudgeTaskIds = array_column(
+            $queryBuilder
+                ->from(JudgeTask::class, 'jt')
+                ->select('jt.judgetaskid')
+                ->andWhere('jt.judgehost = :judgehost')
+                ->setParameter('judgehost', $judgehost)
+                ->andWhere($queryBuilder->expr()->In('jt.judgetaskid', $judgetaskids))
+                ->getQuery()
+                ->getArrayResult(),
+            'judgetaskid');
+
+        $partialJudgeTasks = [];
+        foreach ($judgeTasks as $judgeTask) {
+            if (in_array($judgeTask->getJudgetaskid(), $partialJudgeTaskIds)) {
+                $partialJudgeTasks[] = $judgeTask;
+            }
+        }
+        return $partialJudgeTasks;
     }
 
     #[Route(path: '/{userId<\d+>}', name: 'jury_user')]

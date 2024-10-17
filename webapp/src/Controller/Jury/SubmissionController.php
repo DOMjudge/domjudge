@@ -16,13 +16,14 @@ use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Problem;
+use App\Entity\QueueTask;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
-use App\Entity\QueueTask;
+use App\Entity\Visualization;
 use App\Form\Type\SubmissionsFilterType;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
@@ -513,6 +514,14 @@ class SubmissionController extends BaseController
                 ->getSingleScalarResult();
         }
 
+        $visualization = null;
+        $createdVisualization = $this->em->getRepository(Visualization::class)->findOneBy([
+                'judging' => $selectedJudging,
+                ]);
+        if ($createdVisualization) {
+            $visualization = ['url' => $this->generateUrl('jury_submission_visual', ['visualId' => $createdVisualization->getVisualizationId()])];
+        }
+
         $twigData = [
             'submission' => $submission,
             'lastSubmission' => $lastSubmission,
@@ -536,6 +545,7 @@ class SubmissionController extends BaseController
             'version_warnings' => [],
             'isMultiPassProblem' => $submission->getProblem()->isMultipassProblem(),
             'hasOutputVisualizer' => $submission->getProblem()->getOutputVisualizerExecutable() ?? false,
+            'visualization' => $visualization,
         ];
 
         if ($selectedJudging === null) {
@@ -1385,6 +1395,7 @@ class SubmissionController extends BaseController
                           // We need to get the Judging_run first.
                           //->setJudgehost($judging->getJudgeTask()->getJudgehost())
                           ->setSubmission($submission)
+                          ->setTestcaseId($run->getTestcase()->getTestcaseId())
                           ->setPriority(JudgeTask::PRIORITY_LOW)
                           ->setOutputVisualizerScriptId($executable->getImmutableExecId())
                           ->setRunConfig($this->dj->jsonEncode(['hash' => $executable->getHash()]));
@@ -1416,5 +1427,19 @@ class SubmissionController extends BaseController
         } else {
             $this->addFlash('info', "Requested $numRequested to be visualized.");
         }
+    }
+
+    #[Route(path: '/visual/{visualId}', name: 'jury_submission_visual')]
+    public function visualAction(
+        Request $request,
+        ?string $visualId = null,
+    ): StreamedResponse {
+        
+        dump($visualId);
+        $visualization = $this->em->getRepository(Visualization::class)->findOneBy(['visualization_id' => $visualId]);
+        dump($visualization, $visualId);
+        $name = 'visual.j' . $visualization->getJudging()->getJudgingid()
+            . '.png';
+        return Utils::streamAsBinaryFile(file_get_contents($visualization->getFilename()), $name);
     }
 }

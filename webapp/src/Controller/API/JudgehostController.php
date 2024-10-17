@@ -2,6 +2,9 @@
 
 namespace App\Controller\API;
 
+use App\Entity\Visualization;
+use App\Entity\Testcase;
+
 use App\DataTransferObject\JudgehostFile;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Contest;
@@ -547,6 +550,60 @@ class JudgehostController extends AbstractFOSRestController
             $judgingRunOutput = $judgingRun->getOutput();
             $judgingRunOutput->setOutputRun($outputRun);
         }
+        $this->em->flush();
+    }
+
+    /**
+     * Add visual team output.
+     */
+    #[IsGranted('ROLE_JUDGEHOST')]
+    #[Rest\Post('/add-visual/{hostname}/{judgeTaskId<\d+>}')]
+    #[OA\Response(response: 200, description: 'When the visual output has been added')]
+    public function addVisualization(
+        Request $request,
+        #[OA\PathParameter(description: 'The hostname of the judgehost that wants to add the debug info')]
+        string $hostname,
+        #[OA\PathParameter(description: 'The ID of the judgetask to add', schema: new OA\Schema(type: 'integer'))]
+        int $judgeTaskId
+    ): void {
+        $judgeTask = $this->em->getRepository(JudgeTask::class)->find($judgeTaskId);
+        if ($judgeTask === null) {
+            throw new BadRequestHttpException(
+                'Inconsistent data, no judgetask known with judgetaskid = ' . $judgeTaskId . '.');
+        }
+
+        foreach (['visual_output', 'testcase_id'] as $argument) {
+            if (!$request->request->has($argument)) {
+                throw new BadRequestHttpException(
+                    sprintf("Argument '%s' is mandatory", $argument));
+            }
+        }
+
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
+        if (!$judgehost) {
+            throw new BadRequestHttpException("Who are you and why are you sending us any data?");
+        }
+
+        $judging = $this->em->getRepository(Judging::class)->find($judgeTask->getJobId());
+        if ($judging === null) {
+            throw new BadRequestHttpException(
+                'Inconsistent data, no judging known with judgingid = ' . $judgeTask->getJobId() . '.');
+        }
+        if ($tempFilename = tempnam($this->dj->getDomjudgeTmpDir(), "visual-")) {
+            $debug_package = base64_decode($request->request->get('visual_output'));
+            file_put_contents($tempFilename, $debug_package);
+            var_dump($debug_package);
+        }
+        // FIXME: error checking
+        var_dump("Received", $request->request->get('testcase_id'), "Processed" );
+        $testcase = $this->em->getRepository(Testcase::class)->findOneBy(['testcaseid' => $request->request->get('testcase_id')]);
+        $visualization = new Visualization();
+        $visualization
+            ->setJudgehost($judgehost)
+            ->setJudging($judging)
+            ->setTestcase($testcase)
+            ->setFilename($tempFilename);
+        $this->em->persist($visualization);
         $this->em->flush();
     }
 
@@ -1186,7 +1243,7 @@ class JudgehostController extends AbstractFOSRestController
         return match ($type) {
             'source' => $this->getSourceFiles($id),
             'testcase' => $this->getTestcaseFiles($id),
-            'compare', 'compile', 'debug', 'run' => $this->getExecutableFiles($id),
+            'compare', 'compile', 'debug', 'run', 'output_visualization' => $this->getExecutableFiles($id),
             default => throw new BadRequestHttpException('Unknown type requested.'),
         };
     }
@@ -1656,7 +1713,7 @@ class JudgehostController extends AbstractFOSRestController
             ->createQueryBuilder()
             ->from(JudgeTask::class, 'jt')
             ->select('jt')
-            ->andWhere('jt.judgehost = :judgehost')
+            ->andWhere('jt.judgehost = :judgehost OR jt.judgehost IS NULL')
             //->andWhere('jt.starttime IS NULL')
             ->andWhere('jt.valid = 1')
             ->andWhere('jt.type = :type')
@@ -1703,7 +1760,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $now = Utils::now();
-        $numUpdated = $this->em->getConnection()->executeStatement(
+        $numUpdated = sizeof($judgeTasks);/*$this->em->getConnection()->executeStatement(
             'UPDATE judgetask SET judgehostid = :judgehostid, starttime = :starttime WHERE starttime IS NULL AND valid = 1 AND judgetaskid IN (:ids)',
             [
                 'judgehostid' => $judgehost->getJudgehostid(),
@@ -1718,7 +1775,7 @@ class JudgehostController extends AbstractFOSRestController
         if ($numUpdated == 0) {
             // Bad luck, some other judgehost beat us to it.
             return [];
-        }
+        }*/
 
         // We got at least one, let's update the starttime of the corresponding judging if haven't done so in the past.
         $starttime_set = $this->em->getConnection()->executeStatement(
