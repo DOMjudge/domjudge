@@ -751,12 +751,10 @@ while (true) {
     // Request open submissions to judge. Any errors will be treated as
     // non-fatal: we will just keep on retrying in this loop.
     $judging = request('judgehosts/fetch-work', 'POST', ['hostname' => $myhost], false);
-    var_dump($judging);
     // If $judging is null, an error occurred; don't try to decode.
     if (!is_null($judging)) {
         $row = dj_json_decode($judging);
     }
-    var_dump("Working judging.");
 
     // nothing returned -> no open submissions for us
     if (empty($row)) {
@@ -778,7 +776,6 @@ while (true) {
         }
         continue;
     }
-    var_dump("Non empty.");
 
     // We have gotten a work packet.
     $endpoints[$endpointID]["waiting"] = false;
@@ -787,9 +784,7 @@ while (true) {
     logmsg(LOG_INFO,
         "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint $endpointID)");
 
-    var_dump($row);
     $jobId = $row[0]['jobid'];
-    var_dump($jobId);
 
     if ($type == 'prefetch') {
         if ($lastWorkdir !== null) {
@@ -820,11 +815,9 @@ while (true) {
         logmsg(LOG_INFO, "  🔥 Pre-heating judgehost completed.");
         continue;
     }
-    var_dump("Get here...");
 
     // Create workdir for judging.
     $workdir = judging_directory($workdirpath, $row[0]);
-    var_dump($workdir);
     logmsg(LOG_INFO, "  Working directory: $workdir");
 
     if ($type == 'debug_info') {
@@ -879,8 +872,6 @@ while (true) {
         continue;
     }
 
-    var_dump($row);
-    var_dump("Working on output_visual");
     if ($type == 'output_visualization') {
         if ($lastWorkdir !== null) {
             cleanup_judging($lastWorkdir);
@@ -903,14 +894,10 @@ while (true) {
                 }
 
                 $teamoutput = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']) . '/1/program.out';
-                //$feedbackoutput = $wVorkdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']) . '/1/feedback/visual.png';
-                var_dump("Working in", $teamoutput);
                 $visual_cmd = implode(' ', array_map('dj_escapeshellarg',
                     [$runpath, $teamoutput, $tmpfile]));
-                var_dump($visual_cmd);
                 system($visual_cmd, $retval);
                 // FIXME: check retval
-                var_dump("testcase", $judgeTask['testcase_id']);
 
                 request(
                     sprintf('judgehosts/add-visual/%s/%s', urlencode($myhost),
@@ -920,8 +907,6 @@ while (true) {
                      'testcase_id' => $judgeTask['testcase_id']],
                     false
                 );
-                $b = rest_encode_file($tmpfile, false);
-                var_dump($b);
                 unlink($tmpfile);
 
                 logmsg(LOG_INFO, "  ⇡ Uploading visual output of workdir $workdir.");
