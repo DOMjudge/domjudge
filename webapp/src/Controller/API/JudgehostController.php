@@ -1758,7 +1758,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $now = Utils::now();
-        $numUpdated = sizeof($judgeTasks);/*$this->em->getConnection()->executeStatement(
+        $numUpdated = $this->em->getConnection()->executeStatement(
             'UPDATE judgetask SET judgehostid = :judgehostid, starttime = :starttime WHERE starttime IS NULL AND valid = 1 AND judgetaskid IN (:ids)',
             [
                 'judgehostid' => $judgehost->getJudgehostid(),
