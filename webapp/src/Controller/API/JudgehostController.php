@@ -1529,7 +1529,7 @@ class JudgehostController extends AbstractFOSRestController
     )]
     public function getJudgeTasksAction(Request $request): array
     {
-        /*if (!$request->request->has('hostname')) {
+        if (!$request->request->has('hostname')) {
             throw new BadRequestHttpException('Argument \'hostname\' is mandatory');
         }
         $hostname = $request->request->get('hostname');
