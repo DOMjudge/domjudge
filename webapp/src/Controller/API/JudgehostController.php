@@ -1532,7 +1532,7 @@ class JudgehostController extends AbstractFOSRestController
         /*if (!$request->request->has('hostname')) {
             throw new BadRequestHttpException('Argument \'hostname\' is mandatory');
         }
-        $hostname = $request->request->get('hostname');*/
+        $hostname = $request->request->get('hostname');
         $hostname = 'Computer';
 
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
