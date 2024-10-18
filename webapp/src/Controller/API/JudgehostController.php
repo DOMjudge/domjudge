@@ -1773,7 +1773,7 @@ class JudgehostController extends AbstractFOSRestController
         if ($numUpdated == 0) {
             // Bad luck, some other judgehost beat us to it.
             return [];
-        }*/
+        }
 
         // We got at least one, let's update the starttime of the corresponding judging if haven't done so in the past.
         $starttime_set = $this->em->getConnection()->executeStatement(
