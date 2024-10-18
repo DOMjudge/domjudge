@@ -200,11 +200,10 @@ class UserController extends BaseController
                 }
             }
         }
-        dump($judgetaskids);
 
         $now = Utils::now();
         // We do need this, but for now it stops us from debugging.
-        /*$numUpdated = $this->em->getConnection()->executeStatement(
+        $numUpdated = $this->em->getConnection()->executeStatement(
             'UPDATE judgetask SET judgehostid = :judgehostid, starttime = :starttime WHERE starttime IS NULL AND valid = 1 AND judgetaskid IN (:ids)',
             [
                 'judgehostid' => $judgehost->getJudgehostid(),
@@ -216,11 +215,10 @@ class UserController extends BaseController
             ]
         );
 
-        dump($numUpdated);
         if ($numUpdated == 0) {
             // Bad luck, some other judgehost beat us to it.
             return [];
-        }*/
+        }
 
         // We got at least one, let's update the starttime of the corresponding judging if haven't done so in the past.
         $starttime_set = $this->em->getConnection()->executeStatement(
