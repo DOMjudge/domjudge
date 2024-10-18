@@ -246,7 +246,6 @@ class UserController extends BaseController
         }
 
         // Just return everything here
-        return $judgeTasks;
         if ($numUpdated == sizeof($judgeTasks)) {
             // We got everything, let's ship it!
             return $judgeTasks;
