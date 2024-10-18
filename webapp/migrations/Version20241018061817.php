@@ -46,7 +46,6 @@ final class Version20241018061817 extends AbstractMigration
         $this->addSql('ALTER TABLE problem DROP FOREIGN KEY FK_D7E7CCC819F5352E');
         $this->addSql('DROP INDEX special_output_visualizer ON problem');
         $this->addSql('ALTER TABLE problem DROP special_output_visualizer, CHANGE multipass_limit multipass_limit INT UNSIGNED DEFAULT NULL COMMENT \'Optional limit on the number of rounds for multi-pass problems; defaults to 2 if not specified.\'');
-
     }
 
     public function isTransactional(): bool
