@@ -613,49 +613,6 @@ class SubmissionController extends BaseController
         return $this->render('jury/submission.html.twig', $twigData);
     }
 
-    /**
-     * @return JudgeTask[]|null
-     */
-    private function getJudgetasks(string|int|null $jobId, int $max_batchsize, Judgehost $judgehost): ?array
-    {
-        if ($jobId === null) {
-            return null;
-        }
-        $queryBuilder = $this->em->createQueryBuilder();
-        /** @var JudgeTask[] $judgetasks */
-        $judgetasks = $queryBuilder
-            ->from(JudgeTask::class, 'jt')
-            ->select('jt')
-            ->andWhere('jt.judgehost IS NULL')
-            ->andWhere('jt.valid = 1')
-            ->andWhere('jt.jobid = :jobid')
-            ->andWhere('jt.type = :type')
-            ->addOrderBy('jt.priority')
-            ->addOrderBy('jt.judgetaskid')
-            ->setParameter('type', JudgeTaskType::JUDGING_RUN)
-            ->setParameter('jobid', $jobId)
-            ->setMaxResults($max_batchsize)
-            ->getQuery()
-            ->getResult();
-        if (empty($judgetasks)) {
-            // TODO: There is currently a race condition when a jury member requests the remaining test cases to be
-            // judged in the time between allocating the final batch and the next judgehost checking in and deleting
-            // the queuetask here.
-            $this->em->createQueryBuilder()
-                ->from(QueueTask::class, 'qt')
-                ->andWhere('qt.judging = :jobid')
-                ->setParameter('jobid', $jobId)
-                ->delete()
-                ->getQuery()
-                ->execute();
-            $this->em->flush();
-            $this->dj->auditlog('queuetask', $jobId, 'deleted');
-        } else {
-            return $this->serializeJudgeTasks($judgetasks, $judgehost);
-        }
-        return null;
-    }
-
     #[Route(path: '/request-full-debug/{jid}', name: 'request_full_debug')]
     public function requestFullDebug(Request $request, Judging $jid): RedirectResponse
     {

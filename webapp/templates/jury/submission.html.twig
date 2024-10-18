@@ -841,7 +841,7 @@
             </script>
         {% endif %} {# selectedJudging.result != 'compiler-error' #}
 
-        {% if visualization is defined %}
+        {% if visualization is defined and visualization %}
             <h5>Team answer visualization</h5>
             <img src={{ visualization.url }}>
         {% endif %}
