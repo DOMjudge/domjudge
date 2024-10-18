@@ -30,7 +30,6 @@ final class Version20241018061817 extends AbstractMigration
         $this->addSql('ALTER TABLE visualization ADD CONSTRAINT FK_E0936C405D5FEA72 FOREIGN KEY (judgingid) REFERENCES judging (judgingid) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE visualization ADD CONSTRAINT FK_E0936C40E0E4FC3E FOREIGN KEY (judgehostid) REFERENCES judgehost (judgehostid) ON DELETE SET NULL');
         $this->addSql('ALTER TABLE visualization ADD CONSTRAINT FK_E0936C40D360BB2B FOREIGN KEY (testcaseid) REFERENCES testcase (testcaseid) ON DELETE CASCADE');
-
     }
 
     public function down(Schema $schema): void
