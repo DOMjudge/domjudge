@@ -1349,7 +1349,7 @@ class SubmissionController extends BaseController
                 $judgeTask->setType('output_visualization')
                           ->setValid(true)
                           ->setJobid($judgingId)
-                          ->setJudgehost($judging->getJudgeTask()->getJudgehost())
+                          ->setJudgehost($tmpRun->getJudgeTask()->getJudgehost())
                           ->setSubmission($submission)
                           ->setTestcaseId($tmpRun->getTestcase()->getTestcaseId())
                           ->setPriority(JudgeTask::PRIORITY_LOW)
