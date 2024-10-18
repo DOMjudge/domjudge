@@ -73,7 +73,7 @@ class Visualization
         return $this;
     }
 
-    public function getTestcase(): Judgehost
+    public function getTestcase(): Testcase
     {
         return $this->testcase;
     }
