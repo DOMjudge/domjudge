@@ -592,10 +592,8 @@ class JudgehostController extends AbstractFOSRestController
         if ($tempFilename = tempnam($this->dj->getDomjudgeTmpDir(), "visual-")) {
             $debug_package = base64_decode($request->request->get('visual_output'));
             file_put_contents($tempFilename, $debug_package);
-            var_dump($debug_package);
         }
         // FIXME: error checking
-        var_dump("Received", $request->request->get('testcase_id'), "Processed" );
         $testcase = $this->em->getRepository(Testcase::class)->findOneBy(['testcaseid' => $request->request->get('testcase_id')]);
         $visualization = new Visualization();
         $visualization

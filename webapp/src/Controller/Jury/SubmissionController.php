@@ -1435,9 +1435,7 @@ class SubmissionController extends BaseController
         ?string $visualId = null,
     ): StreamedResponse {
         
-        dump($visualId);
         $visualization = $this->em->getRepository(Visualization::class)->findOneBy(['visualization_id' => $visualId]);
-        dump($visualization, $visualId);
         $name = 'visual.j' . $visualization->getJudging()->getJudgingid()
             . '.png';
         return Utils::streamAsBinaryFile(file_get_contents($visualization->getFilename()), $name);

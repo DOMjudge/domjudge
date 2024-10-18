@@ -167,33 +167,6 @@ class UserController extends BaseController
             ];
         }
 
-        $hostname = 'Computer';
-        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
-
-        // If there is nothing else, get visualization jobs that are assigned to this host.
-        /** @var JudgeTask[] $judgetasks */
-        $judgetasks = $this->em
-            ->createQueryBuilder()
-            ->from(JudgeTask::class, 'jt')
-            ->select('jt')
-            ->andWhere('jt.judgehost = :judgehost OR jt.judgehost IS NULL')
-            //->andWhere('jt.starttime IS NULL')
-            ->andWhere('jt.valid = 1')
-            ->andWhere('jt.type = :type')
-            ->setParameter('judgehost', $judgehost)
-            ->setParameter('type', JudgeTaskType::OUTPUT_VISUALIZATION)
-            ->addOrderBy('jt.priority')
-            ->addOrderBy('jt.judgetaskid')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getResult();
-        dump($judgetasks);
-        if (!empty($judgetasks)) {
-            dump($this->serializeJudgeTasks($judgetasks, $judgehost));
-        }
-
-        dump($testcase = $this->em->getRepository(Testcase::class)->findOneBy(['testcaseid' => '6']));
-
         return $this->render('jury/users.html.twig', [
             'users' => $users_table,
             'table_fields' => $table_fields,
