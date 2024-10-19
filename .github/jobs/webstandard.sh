@@ -92,6 +92,10 @@ if [ "$NUM_ERRORS" -ne 0 ]; then
 fi
 section_end
 
+if [ "$TEST" = "none" ]; then
+    exit $NUM_ERRORS
+fi
+
 if [ "$TEST" = "w3cval" ]; then
     section_start "Remove files from upstream with problems"
     rm -rf localhost/domjudge/doc
@@ -113,10 +117,10 @@ if [ "$TEST" = "w3cval" ]; then
     for typ in html css svg
     do
         section_start "Analyse with $typ"
-	# shellcheck disable=SC2086
+        # shellcheck disable=SC2086
         "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
-	# shellcheck disable=SC2086
-	NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | wc -l)
+        # shellcheck disable=SC2086
+        NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | wc -l)
         FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
         python3 -m "json.tool" < result.json > "$ARTIFACTS/w3c$typ$URL.json"
         trace_off; python3 gitlab/jsontogitlab.py "$ARTIFACTS/w3c$typ$URL.json"; trace_on
@@ -144,7 +148,7 @@ else
     do
         section_start "$file"
         su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r json -T $ACCEPTEDERR $FLTR $file" | python3 -m json.tool
-	ERR=$(su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r csv -T $ACCEPTEDERR $FLTR $file" | wc -l)
+        ERR=$(su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r csv -T $ACCEPTEDERR $FLTR $file" | wc -l)
         FOUNDERR=$((ERR+FOUNDERR-1)) # Remove header row
         section_end
     done
