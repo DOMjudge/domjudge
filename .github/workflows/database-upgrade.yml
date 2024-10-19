@@ -1,0 +1,39 @@
+name: Database Upgrade Test
+
+on:
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+
+jobs:
+  upgrade_test:
+    runs-on: ubuntu-latest
+    container:
+      image: domjudge/gitlabci:24.04
+    services:
+      sqlserver:
+        image: mariadb
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: domjudge
+          MYSQL_PASSWORD: domjudge
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import Database
+        run: mysql -hsqlserver -uroot -proot < .github/jobs/data/dj733.sql
+      - name: Upgrade DOMjudge
+        run: .github/jobs/baseinstall.sh default upgrade
+      - name: Setting initial Admin Password
+        run: echo "pass" > /opt/domjudge/domserver/etc/initial_admin_password.secret
+      - name: Check for Errors in the Upgrade
+        run: mysql -hsqlserver -uroot -proot -e "SHOW TABLES FROM domjudge;"
+      - name: Check for Errors in Domjudge Web
+        run: .github/jobs/webstandard.sh none admin

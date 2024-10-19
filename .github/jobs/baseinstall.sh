@@ -58,9 +58,15 @@ mysql_user "SELECT CURRENT_USER();"
 mysql_user "SELECT USER();"
 section_end
 
-section_start "Install DOMjudge database"
-/opt/domjudge/domserver/bin/dj_setup_database -uroot -proot bare-install
-section_end
+if [ "${db}" = "install" ]; then
+    section_start "Install DOMjudge database"
+    /opt/domjudge/domserver/bin/dj_setup_database -uroot -proot bare-install
+    section_end
+elif [ "${db}" = "upgrade" ]; then
+    section_start "Upgrade DOMjudge database"
+    /opt/domjudge/domserver/bin/dj_setup_database -uroot -proot upgrade
+    section_end
+fi
 
 section_start "Show PHP config"
 php -v | tee -a "$ARTIFACTS"/php.txt
