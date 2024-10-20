@@ -328,6 +328,7 @@ function fetch_executable_internal(
         $hash
     ]);
     global $langexts;
+    global $myhost;
     $execdeploypath  = $execdir . '/.deployed';
     $execbuilddir    = $execdir . '/build';
     $execbuildpath   = $execbuilddir . '/build';
@@ -335,10 +336,13 @@ function fetch_executable_internal(
     $execrunjurypath = $execbuilddir . '/runjury';
     if (!is_dir($execdir) || !file_exists($execdeploypath) ||
         ($combined_run_compare && file_get_contents(LIBJUDGEDIR . '/run-interactive.sh')!==file_get_contents($execrunpath))) {
-        system('rm -rf ' . dj_escapeshellarg($execdir) . ' ' . dj_escapeshellarg($execbuilddir));
+        system('rm -rf ' . dj_escapeshellarg($execdir) . ' ' . dj_escapeshellarg($execbuilddir), $retval);
+        if ($retval !== 0) {
+            disable('judgehost', 'hostname', $myhost, "Deleting '$execdir' or '$execbuilddir' was unsuccessful.");
+        }
         system('mkdir -p ' . dj_escapeshellarg($execbuilddir), $retval);
         if ($retval !== 0) {
-            error("Could not create directory '$execbuilddir'");
+            disable('judgehost', 'hostname', $myhost, "Could not create directory '$execbuilddir'");
         }
 
         logmsg(LOG_INFO, "  💾 Fetching new executable '$type/$execid' with hash '$hash'.");
@@ -387,7 +391,7 @@ function fetch_executable_internal(
                 $unescapedSource = "";
                 foreach ($langexts as $lang => $langext) {
                     if (($handle = opendir($execbuilddir)) === false) {
-                        error("Could not open $execbuilddir");
+                        disable('judgehost', 'hostname', $myhost, "Could not open $execbuilddir");
                     }
                     while (($file = readdir($handle)) !== false) {
                         $ext = pathinfo($file, PATHINFO_EXTENSION);
@@ -432,7 +436,7 @@ function fetch_executable_internal(
                         break;
                 }
                 if (file_put_contents($execbuildpath, $buildscript) === false) {
-                    error("Could not write file 'build' in $execbuilddir");
+                    disable('judgehost', 'hostname', $myhost, "Could not write file 'build' in $execbuilddir");
                 }
                 chmod($execbuildpath, 0755);
             }
@@ -464,10 +468,10 @@ function fetch_executable_internal(
             # team submission and runjury programs and connects their pipes.
             $runscript = file_get_contents(LIBJUDGEDIR . '/run-interactive.sh');
             if (rename($execrunpath, $execrunjurypath) === false) {
-                error("Could not move file 'run' to 'runjury' in $execbuilddir");
+                disable('judgehost', 'hostname', $myhost, "Could not move file 'run' to 'runjury' in $execbuilddir");
             }
             if (file_put_contents($execrunpath, $runscript) === false) {
-                error("Could not write file 'run' in $execbuilddir");
+                disable('judgehost', 'hostname', $myhost, "Could not write file 'run' in $execbuilddir");
             }
             chmod($execrunpath, 0755);
         }
@@ -831,21 +835,20 @@ while (true) {
                 // Full debug package requested.
                 $run_config = dj_json_decode($judgeTask['run_config']);
                 $tmpfile = tempnam(TMPDIR, 'full_debug_package_');
-                [$runpath, $error] = fetch_executable_internal(
+                [$runpath, $error] = fetch_executable(
                     $workdirpath,
                     'debug',
                     $judgeTask['run_script_id'],
-                    $run_config['hash']
+                    $run_config['hash'],
+                    $judgeTask['judgetaskid']
                 );
-                if (isset($error)) {
-                    // FIXME
-                    continue;
-                }
 
                 $debug_cmd = implode(' ', array_map('dj_escapeshellarg',
                     [$runpath, $workdir, $tmpfile]));
                 system($debug_cmd, $retval);
-                // FIXME: check retval
+                if ($retval !== 0) {
+                    disable('run_script', 'run_script_id', $judgeTask['run_script_id'], "Running '$runpath' failed.");
+                }
 
                 request(
                     sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
