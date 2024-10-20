@@ -840,8 +840,8 @@ while (true) {
                     $run_config['hash']
                 );
                 if (isset($error)) {
-                    // FIXME
-                    continue;
+                    $scriptId = $judgeTask['run_script_id'];
+                    error("Retrieving/storing debug script '$scriptId' failed.");
                 }
 
                 $debug_cmd = implode(' ', array_map('dj_escapeshellarg',
