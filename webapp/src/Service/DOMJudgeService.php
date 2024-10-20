@@ -605,6 +605,7 @@ class DOMJudgeService
                         $contestProblem->setAllowJudge($enabled);
                     }
                 }
+                // FIXME: Also disable debug scripts
                 $this->em->flush();
                 if ($enabled) {
                     foreach ($executable->getLanguages() as $language) {
