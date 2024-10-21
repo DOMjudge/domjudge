@@ -205,7 +205,7 @@
             type: array_val
             default_value: [upload]
             public: true
-            description: Select the default submission method for the team
+            description: Select the default submission method for the team in the webinterface
             options:
                 - paste
                 - upload
