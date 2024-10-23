@@ -97,21 +97,20 @@ class SubmissionController extends BaseController
                     $problem = $formPaste->get('problem')->getData();
                     $language = $formPaste->get('language')->getData();
                     $codeContent = $formPaste->get('code_content')->getData();
-        
+                    $problemShortName = $problem->getContestProblems()->first()->getShortName();
+
                     if ($codeContent == null || empty(trim($codeContent))) {
                         $this->addFlash('danger', 'No code content provided.');
                         return $this->redirectToRoute('team_index');
                     }
         
-                    $tempDir = sys_get_temp_dir();
-                    $tempFileName = sprintf(
-                        'submission_%s_%s_%s.%s',
-                        $user->getUsername(),
-                        $problem->getName(),
-                        date('Y-m-d_H-i-s'),
+                    $saveFileDir = sys_get_temp_dir();
+                    $saveFileName = sprintf(
+                        '%s.%s',
+                        $problemShortName,
                         $language->getExtensions()[0]
                     );
-                    $tempFileName = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $tempFileName);
+                    $saveFileName = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $saveFileName);
 
                     if ($language->getExtensions()[0] == 'java' || $language->getExtensions()[0] == 'kt') {
                         $entryPoint = $formPaste->get('entry_point')->getData() ?: null;
@@ -121,17 +120,17 @@ class SubmissionController extends BaseController
                             $this->addFlash('danger', 'Invalid entry point name.');
                             return $this->redirectToRoute('team_index');
                         }
-                        $tempFileName = $entryPoint . '.' . $language->getExtensions()[0];
+                        $saveFileName = $entryPoint . '.' . $language->getExtensions()[0];
                     } else {
-                        $entryPoint = $tempFileName;
+                        $entryPoint = $saveFileName;
                     }
 
-                    $tempFilePath = $tempDir . DIRECTORY_SEPARATOR . $tempFileName;
-                    file_put_contents($tempFilePath, $codeContent);
+                    $saveFilePath = $saveFileDir . DIRECTORY_SEPARATOR . $saveFileName;
+                    file_put_contents($saveFilePath, $codeContent);
         
                     $uploadedFile = new UploadedFile(
-                        $tempFilePath,
-                        $tempFileName,
+                        $saveFilePath,
+                        $saveFileName,
                         'application/octet-stream',
                         null,
                         true
