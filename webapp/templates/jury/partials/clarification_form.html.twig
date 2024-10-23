@@ -33,3 +33,16 @@
 
 </div>
 {{ form_end(form) }}
+<script>
+    $(function () {
+        var $body = $('body');
+        $body.on('submit', 'form[name=jury_clarification]', function () {
+            var jurymemberIsMe = {{ origclar.jurymember_is_me is defined ? (origclar.jurymember_is_me ? 1 : 0) : null }};
+            if (jurymemberIsMe === 0) {
+                var jurymember = {{ origclar.from_jurymember is defined ? origclar.from_jurymember | json_encode(constant('JSON_HEX_TAG')) | raw : null }};
+                var message = "You are now replying to a claification claimed by " + jurymember + "." + "Are you sure you want to send this message?";
+                return confirm(message);
+            }
+        });
+    });
+</script>
