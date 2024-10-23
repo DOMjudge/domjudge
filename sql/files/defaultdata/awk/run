@@ -13,7 +13,12 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
-# There is no portable way to test the syntax of an awk script.
+# Syntax check based on: https://stackoverflow.com/a/7212314
+for j in "$@" ; do
+	awk -f $j -- 'BEGIN { exit(0) } END { exit(0) }'
+	EXITCODE=$?
+	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+done
 
 # We construct here the list of source files to be passed to awk:
 FILEARGS=''

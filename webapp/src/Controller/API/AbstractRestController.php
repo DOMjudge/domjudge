@@ -39,25 +39,9 @@ abstract class AbstractRestController extends AbstractApiController
         // by internal requests.
         $this->em->clear();
 
-        // Special case for submissions and clarifications: they can have an external ID even if when running in
-        // full local mode, because one can use the API to upload one with an external ID.
-        $externalIdAlwaysAllowed = [
-            's.submitid',
-            'clar.clarid',
-        ];
-        $idField = $this->getIdField();
-        if (in_array($idField, $externalIdAlwaysAllowed)) {
-            $table        = explode('.', $idField)[0];
-            $queryBuilder = $this->getQueryBuilder($request)
-                ->andWhere(sprintf('(%s.externalid IS NULL AND %s = :id) OR %s.externalid = :id', $table, $idField, $table))
-                ->setParameter('id', $id);
-        } else {
-            $queryBuilder = $this->getQueryBuilder($request)
-                ->andWhere(sprintf('%s = :id', $idField))
-                ->setParameter('id', $id);
-        }
-
-        $object = $queryBuilder
+        $object = $this->getQueryBuilder($request)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -109,14 +93,12 @@ abstract class AbstractRestController extends AbstractApiController
 
     /**
      * Render the given create data using the correct groups.
-     *
-     * @param string|int $id
      */
     protected function renderCreateData(
         Request $request,
         mixed $data,
         string $routeType,
-        $id
+        int|string $id
     ): Response {
         $params = [
             'id' => $id,
@@ -161,29 +143,10 @@ abstract class AbstractRestController extends AbstractApiController
 
         if ($request->query->has('ids')) {
             $ids = $request->query->all('ids');
-
             $ids = array_unique($ids);
-
-            // Special case for submissions and clarifications: they can have an external ID even if when running in
-            // full local mode, because one can use the API to upload one with an external ID.
-            $externalIdAlwaysAllowed = [
-                's.submitid',
-                'clar.clarid',
-            ];
-            $idField = $this->getIdField();
-            if (in_array($idField, $externalIdAlwaysAllowed)) {
-                $table        = explode('.', $idField)[0];
-                $or = $queryBuilder->expr()->orX();
-                foreach ($ids as $index => $id) {
-                    $or->add(sprintf('(%s.externalid IS NULL AND %s = :id%s) OR %s.externalid = :id%s', $table, $idField, $index, $table, $index));
-                    $queryBuilder->setParameter(sprintf('id%s', $index), $id);
-                }
-                $queryBuilder->andWhere($or);
-            } else {
-                $queryBuilder
-                    ->andWhere(sprintf('%s IN (:ids)', $this->getIdField()))
-                    ->setParameter('ids', $ids);
-            }
+            $queryBuilder
+                ->andWhere(sprintf('%s IN (:ids)', $this->getIdField()))
+                ->setParameter('ids', $ids);
         }
 
         /** @var array<T> $objects */

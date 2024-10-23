@@ -11,11 +11,6 @@ class GeneralAvailabilityTest extends BaseTestCase
      */
     public function testPageIsSuccessful(string $url, int $code): void
     {
-        if ($url === '/api/contests/1' && !$this->dataSourceIsLocal()) {
-            // Use external ID for contest.
-            $url = '/api/contests/demo';
-        }
-
         $this->client->request('GET', $url);
 
         $response = $this->client->getResponse();
@@ -32,7 +27,7 @@ class GeneralAvailabilityTest extends BaseTestCase
         yield ['/api', 301]; // Gets redirected to /api/
         yield ['/api/', 200];
         yield ['/api/contests', 200];
-        yield ['/api/contests/1', 200];
+        yield ['/api/contests/demo', 200];
         // Note that the individual API endpoints are tested with check-api
         // and cannot easily be tested here since phpunit doesn't provide a
         // fully featured server environment.

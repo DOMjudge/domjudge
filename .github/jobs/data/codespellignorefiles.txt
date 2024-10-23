@@ -10,7 +10,7 @@
 ./config.guess
 ./gitlab/codespell.yml
 ./.github/jobs/uploadcodecov.sh
-./lib/vendor
+./webapp/vendor
 ./webapp/public/bundles
 ./webapp/public/js/ace
 ./webapp/templates/bundles
@@ -26,3 +26,4 @@ nv.d3.min*
 composer*
 ./doc/logos
 ./m4
+./webapp/tests/Unit/Fixtures

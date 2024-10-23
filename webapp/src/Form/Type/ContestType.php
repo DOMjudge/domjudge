@@ -208,7 +208,7 @@ class ContestType extends AbstractExternalIdEntityType
             $contest = $event->getData();
             $form = $event->getForm();
 
-            $id = $contest?->getApiId($this->eventLogService);
+            $id = $contest?->getExternalid();
 
             if (!$contest || !$this->dj->assetPath($id, 'contest')) {
                 $form->remove('clearBanner');

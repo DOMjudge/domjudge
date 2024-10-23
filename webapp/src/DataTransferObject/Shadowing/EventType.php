@@ -12,6 +12,7 @@ enum EventType: string
     case JUDGEMENTS = 'judgements';
     case JUDGEMENT_TYPES = 'judgement-types';
     case LANGUAGES = 'languages';
+    case MAP_INFO = 'map-info';
     case ORGANIZATIONS = 'organizations';
     case PERSONS = 'persons';
     case PROBLEMS = 'problems';

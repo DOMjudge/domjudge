@@ -49,8 +49,6 @@ abstract class JuryControllerTestCase extends BaseTestCase
     protected static array $addEntitiesCount          = [];
     protected static array $addEntitiesShown          = [];
     protected static array $addEntitiesFailure        = [];
-    protected static array $addEntitiesNonLocal       = [];
-    protected static array $addEntitiesFailureNonLocal = [];
     protected static ?string $defaultEditEntityName   = null;
     protected static array $specialFieldOnlyUpdate    = [];
     protected static array $editEntitiesSkipFields    = [];
@@ -455,9 +453,6 @@ abstract class JuryControllerTestCase extends BaseTestCase
     public function provideAddCorrectEntities(): Generator
     {
         $entities = static::$addEntities;
-        if (!$this->dataSourceIsLocal()) {
-            $entities = [...$entities, ...static::$addEntitiesNonLocal];
-        }
         foreach ($entities as $element) {
             [$combinedValues, $element] = $this->helperProvideMergeAddEntity($element);
             [$combinedValues, $element] = $this->helperProvideTranslateAddEntity($combinedValues, $element);
@@ -468,9 +463,6 @@ abstract class JuryControllerTestCase extends BaseTestCase
     public function provideAddFailureEntities(): Generator
     {
         $entities = static::$addEntitiesFailure;
-        if (!$this->dataSourceIsLocal()) {
-            $entities = [...$entities, ...static::$addEntitiesFailureNonLocal];
-        }
         foreach ($entities as $message => $elementList) {
             foreach ($elementList as $element) {
                 [$entity, $expected] = $this->helperProvideMergeAddEntity($element);
@@ -534,7 +526,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
                 if (in_array(array_key_first($element), static::$editEntitiesSkipFields)) {
                     continue;
                 }
-                if (key_exists('externalid', $element) && $this->dataSourceIsLocal()) {
+                if (key_exists('externalid', $element)) {
                     continue;
                 }
                 [$formdataKeys, $formdataValues] = $this->helperProvideMergeEditEntity($element);

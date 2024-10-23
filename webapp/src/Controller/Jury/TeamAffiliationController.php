@@ -25,13 +25,15 @@ use Symfony\Component\Routing\Attribute\Route;
 class TeamAffiliationController extends BaseController
 {
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly KernelInterface $kernel,
+        KernelInterface $kernel,
         protected readonly EventLogService $eventLogService,
-        protected readonly AssetUpdateService $assetUpdater
-    ) {}
+        protected readonly AssetUpdateService $assetUpdater,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_team_affiliations')]
     public function indexAction(
@@ -51,6 +53,7 @@ class TeamAffiliationController extends BaseController
 
         $table_fields = [
             'affilid' => ['title' => 'ID', 'sort' => true],
+            'externalid' => ['title' => 'external ID', 'sort' => true],
             'icpcid' => ['title' => 'ICPC ID', 'sort' => true],
             'shortname' => ['title' => 'shortname', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true, 'default_sort' => true],
@@ -62,13 +65,6 @@ class TeamAffiliationController extends BaseController
         }
 
         $table_fields['num_teams'] = ['title' => '# teams', 'sort' => true];
-
-        // Insert external ID field when configured to use it.
-        if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(TeamAffiliation::class)) {
-            $table_fields = array_slice($table_fields, 0, 1, true) +
-                [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
-                array_slice($table_fields, 1, null, true);
-        }
 
         $propertyAccessor        = PropertyAccess::createPropertyAccessor();
         $team_affiliations_table = [];
@@ -182,8 +178,7 @@ class TeamAffiliationController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->assetUpdater->updateAssets($teamAffiliation);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamAffiliation,
-                              $teamAffiliation->getAffilid(), false);
+            $this->saveEntity($teamAffiliation, $teamAffiliation->getAffilid(), false);
             return $this->redirectToRoute('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]);
         }
 
@@ -202,8 +197,7 @@ class TeamAffiliationController extends BaseController
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$teamAffiliation], $this->generateUrl('jury_team_affiliations'));
+        return $this->deleteEntities($request, [$teamAffiliation], $this->generateUrl('jury_team_affiliations'));
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -216,11 +210,17 @@ class TeamAffiliationController extends BaseController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->persist($teamAffiliation);
-            $this->assetUpdater->updateAssets($teamAffiliation);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamAffiliation, null, true);
-            return $this->redirectToRoute('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]);
+        if ($response = $this->processAddFormForExternalIdEntity(
+            $form, $teamAffiliation,
+            fn() => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]),
+            function () use ($teamAffiliation) {
+                $this->em->persist($teamAffiliation);
+                $this->assetUpdater->updateAssets($teamAffiliation);
+                $this->saveEntity($teamAffiliation, null, true);
+                return null;
+            }
+        )) {
+            return $response;
         }
 
         return $this->render('jury/team_affiliation_add.html.twig', [

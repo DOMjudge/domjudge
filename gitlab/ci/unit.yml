@@ -12,9 +12,9 @@
     - set -eux
     - if [ -z ${PHPVERSION+x} ]; then export PHPVERSION=8.1; fi
     - if [ -z ${TEST+x} ]; then export TEST="UNIT"; fi
-    - if [ "$TEST" = "UNIT" ] && [ "$CRAWL_DATASOURCES" != "0" ]; then exit 0; fi
-    - if [ "$TEST" = "E2E" ] && [ "$CRAWL_DATASOURCES" != "0" ] && [ "$CI_COMMIT_BRANCH" != "main" ]; then exit 0; fi
-    - export CRAWL_DATASOURCES
+    - if [ "$TEST" = "UNIT" ] && [ "$CRAWL_SHADOW_MODE" != "0" ]; then exit 0; fi
+    - if [ "$TEST" = "E2E" ] && [ "$CRAWL_SHADOW_MODE" != "0" ] && [ "$CI_COMMIT_BRANCH" != "main" ]; then exit 0; fi
+    - export CRAWL_SHADOW_MODE
     - ./gitlab/unit-tests.sh $PHPVERSION $TEST
   artifacts:
     when: always
@@ -48,4 +48,4 @@ run unit tests (MySQL):
   parallel:
     matrix:
       - TEST: ["E2E","Unit"]
-        CRAWL_DATASOURCES: ["0"]
+        CRAWL_SHADOW_MODE: ["0"]

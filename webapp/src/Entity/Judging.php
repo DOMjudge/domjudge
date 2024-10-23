@@ -23,7 +23,7 @@ use Ramsey\Uuid\Uuid;
 #[ORM\Index(columns: ['cid'], name: 'cid')]
 #[ORM\Index(columns: ['rejudgingid'], name: 'rejudgingid')]
 #[ORM\Index(columns: ['prevjudgingid'], name: 'prevjudgingid')]
-class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterface
+class Judging extends BaseApiEntity
 {
     final public const RESULT_CORRECT = 'correct';
     final public const RESULT_COMPILER_ERROR = 'compiler-error';
@@ -361,12 +361,16 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this->submission;
     }
 
-    #[Serializer\VirtualProperty]
-    #[Serializer\SerializedName('submission_id')]
-    #[Serializer\Type('string')]
     public function getSubmissionId(): int
     {
         return $this->getSubmission()->getSubmitid();
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('submission_id')]
+    public function getApiSubmissionId(): string
+    {
+        return $this->getSubmission()->getExternalid();
     }
 
     public function setContest(?Contest $contest = null): Judging
@@ -437,19 +441,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     public function getInternalError(): ?InternalError
     {
         return $this->internalError;
-    }
-
-    /**
-     * Get the entities to check for external ID's while serializing.
-     *
-     * This method should return an array with as keys the JSON field names and as values the actual entity
-     * objects that the SetExternalIdVisitor should check for applicable external ID's.
-     *
-     * @return array{submission_id: Submission}
-     */
-    public function getExternalRelationships(): array
-    {
-        return ['submission_id' => $this->getSubmission()];
     }
 
     /**

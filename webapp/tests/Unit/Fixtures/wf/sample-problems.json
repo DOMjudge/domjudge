@@ -1,0 +1,211 @@
+[
+    {
+        "ordinal": 0,
+        "probid": 1,
+        "short_name": "A",
+        "rgb": "#C0C0C0",
+        "color": "silver",
+        "label": "A",
+        "time_limit": 2.0,
+        "statement": [
+            {
+                "href": "contests/wf47_finals/problems/riddleofthesphinx/statement",
+                "mime": "application/pdf",
+                "filename": "A.pdf"
+            }
+        ],
+        "id": "riddleofthesphinx",
+        "name": "Riddle of the Sphinx",
+        "test_data_count": 50
+    },
+    {
+        "ordinal": 1,
+        "probid": 2,
+        "short_name": "B",
+        "rgb": "#32CD32",
+        "color": "limegreen",
+        "label": "B",
+        "time_limit": 2.0,
+        "statement": [
+            {
+                "href": "contests/wf47_finals/problems/schedule/statement",
+                "mime": "application/pdf",
+                "filename": "B.pdf"
+            }
+        ],
+        "id": "schedule",
+        "name": "Schedule",
+        "test_data_count": 32
+    },
+    {
+        "ordinal": 2,
+        "probid": 3,
+        "short_name": "C",
+        "rgb": "#000000",
+        "color": "black",
+        "label": "C",
+        "time_limit": 1.0,
+        "statement": [
+            {
+                "href": "contests/wf47_finals/problems/threekindsofdice/statement",
+                "mime": "application/pdf",
+                "filename": "C.pdf"
+            }
+        ],
+        "id": "threekindsofdice",
+        "name": "Three Kinds of Dice",
+        "test_data_count": 78
+    },
+    {
+        "ordinal": 3,
+        "probid": 4,
+        "short_name": "D",
+        "rgb": "#FFB6C1",
+        "color": "lightpink",
+        "label": "D",
+        "time_limit": 1.0,
+        "statement": [
+            {
+                "href": "contests/wf47_finals/problems/carlsvacation/statement",
+                "mime": "application/pdf",
+                "filename": "D.pdf"
+            }
+        ],
+        "id": "carlsvacation",
+        "name": "Carl's Vacation",
+        "test_data_count": 45
+    },
+    {
+        "ordinal": 4,
+        "probid": 5,
+        "short_name": "E",
+        "rgb": "#0000FF",
+        "color": "blue",
+        "label": "E",
+        "time_limit": 20.0,
+        "statement": [
+            {
+                "href": "contests/wf47_finals/problems/arecurringproblem/statement",
+                "mime": "application/pdf",
+                "filename": "E.pdf"
+            }
+        ],
+        "id": "arecurringproblem",
+        "name": "A Recurring Problem",
+        "test_data_count": 52
+    },
+    {
+        "ordinal": 5,
+        "probid": 6,
+        "short_name": "F",
+        "rgb": "#FF4500",
+        "color": "orangered",
+        "label": "F",
+        "time_limit": 3.0,
+        "statement": [
+            {
+                "href": "contests/wf47_finals/problems/tiltingtiles/statement",
+                "mime": "application/pdf",
+                "filename": "F.pdf"
+            }
+        ],
+        "id": "tiltingtiles",
+        "name": "Tilting Tiles",
+        "test_data_count": 55
+    },
+    {
+        "ordinal": 6,
+        "probid": 7,
+        "short_name": "G",
+        "rgb": "#00BFFF",
+        "color": "deepskyblue",
+        "label": "G",
+        "time_limit": 3.0,
+        "statement": [
+            {
+                "href": "contests/wf47_finals/problems/turningred/statement",
+                "mime": "application/pdf",
+                "filename": "G.pdf"
+            }
+        ],
+        "id": "turningred",
+        "name": "Turning Red",
+        "test_data_count": 33
+    },
+    {
+        "ordinal": 7,
+        "probid": 8,
+        "short_name": "H",
+        "rgb": "#FF8C00",
+        "color": "darkorange",
+        "label": "H",
+        "time_limit": 2.0,
+        "statement": [
+            {
+                "href": "contests/wf47_finals/problems/jetlag/statement",
+                "mime": "application/pdf",
+                "filename": "H.pdf"
+            }
+        ],
+        "id": "jetlag",
+        "name": "Jet Lag",
+        "test_data_count": 126
+    },
+    {
+        "ordinal": 8,
+        "probid": 9,
+        "short_name": "I",
+        "rgb": "#FFFF00",
+        "color": "yellow",
+        "label": "I",
+        "time_limit": 3.0,
+        "statement": [
+            {
+                "href": "contests/wf47_finals/problems/waterworld/statement",
+                "mime": "application/pdf",
+                "filename": "I.pdf"
+            }
+        ],
+        "id": "waterworld",
+        "name": "Waterworld",
+        "test_data_count": 49
+    },
+    {
+        "ordinal": 9,
+        "probid": 10,
+        "short_name": "J",
+        "rgb": "#9370DB",
+        "color": "mediumpurple",
+        "label": "J",
+        "time_limit": 4.0,
+        "statement": [
+            {
+                "href": "contests/wf47_finals/problems/bridgingthegap/statement",
+                "mime": "application/pdf",
+                "filename": "J.pdf"
+            }
+        ],
+        "id": "bridgingthegap",
+        "name": "Bridging the Gap",
+        "test_data_count": 104
+    },
+    {
+        "ordinal": 10,
+        "probid": 11,
+        "short_name": "K",
+        "rgb": "#D2B48C",
+        "color": "tan",
+        "label": "K",
+        "time_limit": 10.0,
+        "statement": [
+            {
+                "href": "contests/wf47_finals/problems/aleaiactaest/statement",
+                "mime": "application/pdf",
+                "filename": "K.pdf"
+            }
+        ],
+        "id": "aleaiactaest",
+        "name": "Alea Iacta Est",
+        "test_data_count": 27
+    }
+]

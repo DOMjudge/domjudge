@@ -2,7 +2,8 @@
 
 /*
  * A simply message processor for Monolog, that uses printf style argument
- * passing.
+ * passing. Only apply this if the message looks like a printf format string
+ * (aka contains at least one `%`) and the context is a plain list array.
  */
 
 namespace App\Logger;
@@ -17,7 +18,8 @@ class VarargsLogMessageProcessor implements ProcessorInterface
 {
     public function __invoke(LogRecord $record): LogRecord
     {
-        if (!str_contains($record->message, '%') || empty($record->context)) {
+        if (!str_contains($record->message, '%') ||
+            empty($record->context) || !array_is_list($record->context)) {
             return $record;
         }
 

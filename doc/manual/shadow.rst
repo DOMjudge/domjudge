@@ -19,11 +19,9 @@ Configuring DOMjudge
 
 In the DOMjudge admin interface, go to *Configuration settings* page and modify
 the settings to mimic the system to shadow from. Also make sure to set
-*data_source* to ``configuration and live data external``. This tells DOMjudge
+*shadow_mode* to ``true``. This tells DOMjudge
 that it will be a shadow for an external system. This will:
 
-* Expose external ID's in the API for both configuration and live data, i.e.
-  problems, teams, etc. as well as submissions, judgings and runs.
 * Add a *Shadow Differences* and *External Contest Sources* item to the jury
   menu and homepage for admins.
 * Expose additional information in the submission overview and detail pages.

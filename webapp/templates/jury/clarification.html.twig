@@ -24,7 +24,7 @@
                     <div class="row">
                         <div class="col-sm">
                             Clarification {{ clar.clarid }}
-                            {% if showExternalId %}
+                            {% if shadowMode() %}
                                 (external ID: {{ clar.externalid }})
                             {% endif %}
                         </div>

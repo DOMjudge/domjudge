@@ -19,6 +19,9 @@ final class Version20230508120033 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        // Cleanup judgetasks for removed submissions
+        // This can happen when a full contest has been removed and the full delete cascade has failed.
+        $this->addSql('DELETE from judgetask WHERE submitid not in (SELECT submitid FROM submission)');
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE judgetask ADD CONSTRAINT FK_83142B703605A691 FOREIGN KEY (submitid) REFERENCES submission (submitid) ON DELETE CASCADE');
     }

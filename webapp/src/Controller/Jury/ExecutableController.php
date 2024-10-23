@@ -34,12 +34,14 @@ use Symfony\Component\Routing\Attribute\Route;
 class ExecutableController extends BaseController
 {
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly KernelInterface $kernel,
-        protected readonly EventLogService $eventLogService
-    ) {}
+        KernelInterface $kernel,
+        protected readonly EventLogService $eventLogService,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_executables')]
     public function indexAction(Request $request): Response
@@ -357,8 +359,7 @@ class ExecutableController extends BaseController
             $executable->setImmutableExecutable(
                 $this->dj->createImmutableExecutable($zip)
             );
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $executable,
-                $executable->getExecid(), false);
+            $this->saveEntity($executable, $executable->getExecid(), false);
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }
 
@@ -482,8 +483,7 @@ class ExecutableController extends BaseController
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$executable], $this->generateUrl('jury_executables'));
+        return $this->deleteEntities($request, [$executable], $this->generateUrl('jury_executables'));
     }
 
     /**

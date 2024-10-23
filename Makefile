@@ -5,7 +5,8 @@
 export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
-            docs install-docs inplace-install inplace-uninstall
+            docs install-docs inplace-install inplace-uninstall maintainer-conf \
+            maintainer-install composer-dependencies composer-dependencies-dev
 
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
@@ -47,7 +48,7 @@ endif
 domserver: domserver-configure paths.mk config
 judgehost: judgehost-configure paths.mk config
 docs: paths.mk config
-install-domserver: domserver composer-dump-autoload domserver-create-dirs
+install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
 dist: configure composer-dependencies
@@ -64,27 +65,6 @@ ifneq "$(JUDGEHOST_BUILD_ENABLED)" "yes"
 	@exit 1
 endif
 
-# Install PHP dependencies
-composer-dependencies:
-ifeq (, $(shell command -v composer 2> /dev/null))
-	$(error "'composer' command not found in $(PATH), install it via your package manager or https://getcomposer.org/download/")
-endif
-# We use --no-scripts here because at this point the autoload.php file is
-# not generated yet, which is needed to run the post-install scripts.
-	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o -a --no-scripts --no-plugins
-
-composer-dependencies-dev:
-	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
-
-# Dump autoload dependencies (including plugins)
-# This is needed since symfony/runtime is a Composer plugin that runs while dumping
-# the autoload file
-composer-dump-autoload:
-	composer $(subst 1,-q,$(QUIET)) dump-autoload -o -a
-
-composer-dump-autoload-dev:
-	composer $(subst 1,-q,$(QUIET)) dump-autoload
-
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.
 distdocs:
@@ -100,19 +80,23 @@ build-scripts:
 	$(MAKE) -C sql build-scripts
 
 # List of SUBDIRS for recursive targets:
-build:             SUBDIRS=        lib           misc-tools
-domserver:         SUBDIRS=etc         sql       misc-tools webapp
-install-domserver: SUBDIRS=etc     lib sql       misc-tools webapp example_problems
-judgehost:         SUBDIRS=etc             judge misc-tools
-install-judgehost: SUBDIRS=etc     lib     judge misc-tools
-docs:              SUBDIRS=    doc
-install-docs:      SUBDIRS=    doc
-inplace-install:   SUBDIRS=    doc               misc-tools
-inplace-uninstall: SUBDIRS=    doc               misc-tools
-dist:              SUBDIRS=        lib sql       misc-tools
-clean:             SUBDIRS=etc doc lib sql judge misc-tools webapp
-distclean:         SUBDIRS=etc doc lib sql judge misc-tools webapp
-maintainer-clean:  SUBDIRS=etc doc lib sql judge misc-tools webapp
+build:                      SUBDIRS=        lib           misc-tools
+domserver:                  SUBDIRS=etc         sql       misc-tools webapp
+install-domserver:          SUBDIRS=etc     lib sql       misc-tools webapp example_problems
+judgehost:                  SUBDIRS=etc             judge misc-tools
+install-judgehost:          SUBDIRS=etc     lib     judge misc-tools
+docs:                       SUBDIRS=    doc
+install-docs:               SUBDIRS=    doc
+maintainer-conf:            SUBDIRS=                                 webapp
+maintainer-install:         SUBDIRS=                                 webapp
+inplace-install:            SUBDIRS=    doc               misc-tools
+inplace-uninstall:          SUBDIRS=    doc               misc-tools
+dist:                       SUBDIRS=        lib sql       misc-tools
+clean:                      SUBDIRS=etc doc lib sql judge misc-tools webapp
+distclean:                  SUBDIRS=etc doc lib sql judge misc-tools webapp
+maintainer-clean:           SUBDIRS=etc doc lib sql judge misc-tools webapp
+composer-dependencies:      SUBDIRS=                                 webapp
+composer-dependencies-dev:  SUBDIRS=                                 webapp
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(domserver_dirs))
@@ -167,6 +151,17 @@ endif
 # Fix permissions and ownership for password files:
 	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir) \
 		etc/restapi.secret
+	@echo ""
+	@echo "========== Judgehost Install Completed =========="
+	@echo ""
+	@echo "Optionally:"
+	@echo "    - Install the create-cgroup service to setup the secure judging restrictions:"
+	@echo "        cp judge/create-cgroups.service /etc/systemd/system/"
+	@echo "    - Install the judgehost service:"
+	@echo "        cp judge/domjudge-judgedaemon@.service /etc/systemd/system/"
+	@echo "    - You can enable the judgehost on CPU core 1 with:"
+	@echo "        systemctl enable domjudge-judgedaemon@1"
+	@echo ""
 
 check-root:
 	@if [ `id -u` -ne 0 -a -z "$(QUIET)" ]; then \
@@ -193,7 +188,7 @@ paths.mk:
 	@exit 1
 
 # Configure for running in source tree, not meant for normal use:
-maintainer-conf: inplace-conf-common composer-dependencies-dev webapp/.env.local
+maintainer-conf: inplace-conf-common composer-dependencies-dev
 inplace-conf: inplace-conf-common composer-dependencies
 inplace-conf-common: dist
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
@@ -211,18 +206,11 @@ inplace-conf-common: dist
 	            --with-baseurl='http://localhost/domjudge/' \
 	            $(CONFIGURE_FLAGS)
 
-# Run Symfony in dev mode (for maintainer-mode):
-webapp/.env.local:
-	@echo "Creating file '$@'..."
-	@echo "# This file was automatically created by 'make maintainer-conf' to run" > $@
-	@echo "# the DOMjudge Symfony application in developer mode. Adjust as needed." >> $@
-	@echo "APP_ENV=dev" >> $@
-
 # Install the system in place: don't really copy stuff, but create
 # symlinks where necessary to let it work from the source tree.
 # This stuff is a hack!
-maintainer-install: inplace-install composer-dump-autoload-dev
-inplace-install: build composer-dump-autoload domserver-create-dirs judgehost-create-dirs
+maintainer-install: inplace-install
+inplace-install: build domserver-create-dirs judgehost-create-dirs
 inplace-install-l:
 # Replace libjudgedir with symlink to prevent lots of symlinks:
 	-rmdir $(judgehost_libjudgedir)
@@ -240,7 +228,7 @@ inplace-install-l:
 	$(MKDIR_P) $(domserver_tmpdir)
 	chmod a+rwx $(domserver_tmpdir)
 # Make sure we're running from a clean state:
-	composer auto-scripts
+	(cd webapp && composer auto-scripts)
 	@echo ""
 	@echo "========== Maintainer Install Completed =========="
 	@echo ""
@@ -314,7 +302,7 @@ coverity-conf:
 coverity-build: paths.mk
 	$(MAKE) build build-scripts
 # Secondly, delete all upstream PHP libraries to not analyze those:
-	-rm -rf lib/vendor/*
+	-rm -rf webapp/vendor/*
 	@VERSION=` grep '^VERSION ='   paths.mk | sed 's/^VERSION = *//'` ; \
 	PUBLISHED=`grep '^PUBLISHED =' paths.mk | sed 's/^PUBLISHED = *//'` ; \
 	if [ "$$PUBLISHED" = release ]; then DESC="release" ; \
@@ -341,5 +329,4 @@ clean-autoconf:
         $(addprefix inplace-,conf conf-common install uninstall) \
         $(addprefix maintainer-,conf install) clean-autoconf config distdocs \
         composer-dependencies composer-dependencies-dev \
-        composer-dump-autoload composer-dump-autoload-dev \
         coverity-conf coverity-build

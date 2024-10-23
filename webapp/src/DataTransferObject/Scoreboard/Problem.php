@@ -9,7 +9,7 @@ class Problem
 {
     public function __construct(
         #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
-        public readonly string $label,
+        public readonly ?string $label,
         public readonly string $problemId,
         public readonly int $numJudged,
         public readonly int $numPending,

@@ -105,7 +105,7 @@ class SecurityController extends AbstractController
             $plainPass = $registration_form->get('plainPassword')->getData();
             $password  = $passwordHasher->hashPassword($user, $plainPass);
             $user->setPassword($password);
-            if ($user->getName() === null) {
+            if ((string)$user->getName() === '') {
                 $user->setName($user->getUsername());
             }
 

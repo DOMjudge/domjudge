@@ -66,7 +66,7 @@ class JudgingRun extends BaseApiEntity
     private Judging $judging;
 
     #[ORM\ManyToOne(inversedBy: 'judging_runs')]
-    #[ORM\JoinColumn(name: 'testcaseid', referencedColumnName: 'testcaseid')]
+    #[ORM\JoinColumn(name: 'testcaseid', referencedColumnName: 'testcaseid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private Testcase $testcase;
 
@@ -82,7 +82,7 @@ class JudgingRun extends BaseApiEntity
     private Collection $output;
 
     #[ORM\ManyToOne(inversedBy: 'judging_runs')]
-    #[ORM\JoinColumn(name: 'judgetaskid', referencedColumnName: 'judgetaskid')]
+    #[ORM\JoinColumn(name: 'judgetaskid', referencedColumnName: 'judgetaskid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private ?JudgeTask $judgetask = null;
 

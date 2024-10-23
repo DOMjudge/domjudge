@@ -37,6 +37,27 @@
         </div>
     </div>
 
+    {% if disabledLangs %}
+        <div class="alert alert-danger">
+            The following languages are currently not allowed to be judged:
+            <ul>
+                {% for id, name in disabledLangs %}
+                    <li>{{ name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    {% if disabledProbs %}
+        <div class="alert alert-danger">
+            The following problems are currently not allowed to be judged:
+            <ul>
+                {% for id, name in disabledProbs %}
+                    <li>{{ name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
     <div data-ajax-refresh-target data-ajax-refresh-after="process_submissions_filter">
         {%- include 'jury/partials/submission_list.html.twig' %}
     </div>

@@ -16,6 +16,7 @@ use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Ramsey\Uuid\Uuid;
 
 class RejudgingService
 {
@@ -82,50 +83,79 @@ class RejudgingService
         $index = 0;
         $first = true;
         foreach ($judgings as $judging) {
+            $submission = $judging->getSubmission();
+            $contestProblem = $submission->getContestProblem();
+            $language = $submission->getLanguage();
+
             $index++;
-            if ($judging->getSubmission()->getRejudging() !== null) {
-                // The submission is already part of another rejudging, record and skip it.
+            if (
+                // Record and skip submission/judging if it is already part of another judging or is not allowed
+                // to be judged.
+                $submission->getRejudging() !== null
+                || !$contestProblem->getAllowJudge()
+                || !$language->getAllowJudge()
+            ) {
                 $skipped[] = $judging;
                 continue;
             }
 
-            $this->em->wrapInTransaction(function () use (
-                $priority,
-                $singleJudging,
-                $judging,
-                $rejudging
-            ) {
-                $this->em->getConnection()->executeStatement(
-                    'UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid AND rejudgingid IS NULL',
-                    [
-                        'rejudgingid' => $rejudging->getRejudgingid(),
-                        'submitid' => $judging->getSubmissionId(),
-                    ]
-                );
 
-                if ($singleJudging) {
-                    $teamid = $judging->getSubmission()->getTeamId();
-                    if ($teamid) {
-                        $this->em->getConnection()->executeStatement(
-                            'UPDATE team SET judging_last_started = null WHERE teamid = :teamid',
-                            [ 'teamid' => $teamid ]
-                        );
-                    }
+            // $this->>em->wrapInTransaction flushes the entity manager, which is pretty slow.
+            // So use the direct connection transaction API here.
+            $this->em->getConnection()->beginTransaction();
+
+            $this->em->getConnection()->executeStatement(
+                'UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid AND rejudgingid IS NULL',
+                [
+                    'rejudgingid' => $rejudging->getRejudgingid(),
+                    'submitid' => $judging->getSubmissionId(),
+                ]
+            );
+
+            if ($singleJudging) {
+                $teamid = $judging->getSubmission()->getTeamId();
+                if ($teamid) {
+                    $this->em->getConnection()->executeStatement(
+                        'UPDATE team SET judging_last_started = null WHERE teamid = :teamid',
+                        [ 'teamid' => $teamid ]
+                    );
                 }
+            }
 
-                // Give back judging, create a new one.
-                $newJudging = new Judging();
-                $newJudging
-                    ->setContest($judging->getContest())
-                    ->setValid(false)
-                    ->setSubmission($judging->getSubmission())
-                    ->setOriginalJudging($judging)
-                    ->setRejudging($rejudging);
-                $this->em->persist($newJudging);
-                $this->em->flush();
+            // Give back judging, create a new one.
+            // Use a direct query to speed things up.
+            $this->em->getConnection()->executeStatement(
+                'INSERT INTO judging (cid, valid, submitid, prevjudgingid, rejudgingid, uuid)
+                    VALUES (:cid, 0, :submitid, :prevjudgingid, :rejudgingid, :uuid)',
+                [
+                    'cid' => $judging->getContest()->getCid(),
+                    'submitid' => $judging->getSubmissionId(),
+                    'prevjudgingid' => $judging->getJudgingId(),
+                    'rejudgingid' => $rejudging->getRejudgingid(),
+                    'uuid' => Uuid::uuid4()->toString(),
+                ]
+            );
+            $newJudgingId = $this->em->getConnection()->lastInsertId();
+            $newJudging = $this->em->getRepository(Judging::class)
+                ->createQueryBuilder('j')
+                ->join('j.submission', 's')
+                ->join('s.contest_problem', 'cp')
+                ->join('s.language', 'l')
+                ->join('l.compile_executable', 'e')
+                ->join('cp.problem', 'p')
+                ->leftJoin('p.compare_executable', 'ce')
+                ->leftJoin('ce.immutableExecutable', 'ice')
+                ->leftJoin('p.run_executable', 're')
+                ->leftJoin('re.immutableExecutable', 'ire')
+                ->select('j', 's', 'cp', 'l', 'e', 'p', 'ce', 'ice', 're', 'ire')
+                ->andWhere('j.judgingid = :judgingid')
+                ->setParameter('judgingid', $newJudgingId)
+                ->getQuery()
+                ->getSingleResult();
 
-                $this->dj->maybeCreateJudgeTasks($newJudging, $priority);
-            });
+            $this->dj->maybeCreateJudgeTasks($newJudging, $priority);
+
+            $this->em->getConnection()->commit();
 
             if (!$first) {
                 $log .= ', ';
@@ -380,31 +410,27 @@ class RejudgingService
     public function calculateTodo(Rejudging $rejudging): array
     {
         // Make sure we have the most recent data. This is necessary to
-        // guarantee that repeated rejugdings are scheduled correctly.
+        // guarantee that repeated rejudgings are scheduled correctly.
         $this->em->flush();
 
-        $todo = $this->em->createQueryBuilder()
-            ->from(Submission::class, 's')
-            ->select('COUNT(s)')
-            ->andWhere('s.rejudging = :rejudging')
-            ->setParameter('rejudging', $rejudging)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $done = $this->em->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->select('COUNT(j)')
             ->andWhere('j.rejudging = :rejudging')
-            ->andWhere('j.endtime IS NOT NULL')
-            // This is necessary for rejudgings which apply automatically.
-            // We remove the association of the submission with the rejudging,
-            // but not the one of the judging with the rejudging for accounting reasons.
-            ->andWhere('j.valid = 0')
-            ->setParameter('rejudging', $rejudging)
+            ->setParameter('rejudging', $rejudging);
+
+        $clonedQueryBuilder = clone $queryBuilder;
+
+        $todo = $queryBuilder
+            ->andWhere('j.endtime IS NULL')
             ->getQuery()
             ->getSingleScalarResult();
 
-        $todo -= $done;
+        $done = $clonedQueryBuilder
+            ->andWhere('j.endtime IS NOT NULL')
+            ->getQuery()
+            ->getSingleScalarResult();
+
         return ['todo' => $todo, 'done' => $done];
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\Entity\Team;
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 
 class TeamControllerTest extends JuryControllerTestCase
 {
@@ -91,4 +93,35 @@ class TeamControllerTest extends JuryControllerTestCase
                                                           'Only letters, numbers, dashes and underscores are allowed.' => [['icpcid' => '|viol', 'name' => 'icpcid violation-1'],
                                                                                                                            ['icpcid' => '&viol', 'name' => 'icpcid violation-2']],
                                                           'This value should not be blank.' => [['name' => '', 'displayName' => 'Teams should have a name']]];
+
+    /**
+     * Test that adding a team without a user and then editing it to add a user works.
+     */
+    public function testAddWithoutUserThenEdit(): void
+    {
+        $teamToAdd = static::$addEntities[0];
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        $this->helperSubmitFields($teamToAdd);
+        $viewPage = $this->client->followRedirect()->getUri();
+        $editPage = $viewPage . static::$edit;
+        $this->verifyPageResponse('GET', $editPage, 200);
+        $formFields = [
+            static::$addForm . 'addUserForTeam]' => Team::CREATE_NEW_USER,
+            static::$addForm . 'newUsername]' => 'somelinkeduser',
+        ];
+        $button = $this->client->getCrawler()->selectButton('Save');
+        $form = $button->form($formFields, 'POST');
+        $this->client->submit($form);
+        self::assertNotEquals(500, $this->client->getResponse()->getStatusCode());
+
+        /** @var EntityManagerInterface $em */
+        $em = $this->getContainer()->get(EntityManagerInterface::class);
+        $user = $em->getRepository(User::class)->findOneBy(['username' => 'somelinkeduser']);
+
+        static::assertNotNull($user);
+        static::assertEquals('New Team', $user->getTeam()->getName());
+    }
 }

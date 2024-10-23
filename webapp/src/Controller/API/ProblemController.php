@@ -102,10 +102,14 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         // Note: we read the JSON as YAML, since any JSON is also YAML and this allows us
         // to import files with YAML inside them that match the JSON format
         $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
-        if ($this->importExportService->importProblemsData($contest, $data, $ids)) {
+        if ($this->importExportService->importProblemsData($contest, $data, $ids, $messages)) {
             return $ids;
         }
-        throw new BadRequestHttpException("Error while adding problems");
+        $message = "Error while adding problems";
+        if (!empty($messages)) {
+            $message .= ': ' . $this->dj->jsonEncode($messages);
+        }
+        throw new BadRequestHttpException($message);
     }
 
     /**
@@ -154,8 +158,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
                 if ($contestProblem instanceof ContestProblemWrapper) {
                     $contestProblem = $contestProblem->getContestProblem();
                 }
-                $probid = $this->getIdField() === 'p.probid' ? $contestProblem->getProbid() : $contestProblem->getExternalId();
-                if (in_array($probid, $ids)) {
+                if (in_array($contestProblem->getExternalId(), $ids)) {
                     $objects[] = $item;
                 }
             }
@@ -379,8 +382,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             if ($contestProblem instanceof ContestProblemWrapper) {
                 $contestProblem = $contestProblem->getContestProblem();
             }
-            $probid                = $this->getIdField() === 'p.probid' ? $contestProblem->getProbid() : $contestProblem->getExternalId();
-            if ($probid == $id) {
+            if ($contestProblem->getExternalId() == $id) {
                 $object = $item;
                 break;
             }
@@ -459,7 +461,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     protected function getIdField(): string
     {
-        return sprintf('p.%s', $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid');
+        return 'p.externalid';
     }
 
     /**

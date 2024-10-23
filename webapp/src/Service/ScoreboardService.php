@@ -41,7 +41,6 @@ class ScoreboardService
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly LoggerInterface $logger,
-        protected readonly EventLogService $eventLogService
     ) {}
 
     /**
@@ -58,12 +57,13 @@ class ScoreboardService
         Contest $contest,
         bool $jury = false,
         ?Filter $filter = null,
-        bool $visibleOnly = false
+        bool $visibleOnly = false,
+        bool $forceUnfrozen = false,
     ): ?Scoreboard {
         $freezeData = new FreezeData($contest);
 
         // Don't leak information before start of contest.
-        if (!$freezeData->started() && !$jury) {
+        if (!$freezeData->started() && !$jury && !$forceUnfrozen) {
             return null;
         }
 
@@ -74,9 +74,9 @@ class ScoreboardService
 
         return new Scoreboard(
             $contest, $teams, $categories, $problems,
-            $scoreCache, $freezeData, $jury,
+            $scoreCache, $freezeData, $jury || $forceUnfrozen,
             (int)$this->config->get('penalty_time'),
-            (bool)$this->config->get('score_in_seconds')
+            (bool)$this->config->get('score_in_seconds'),
         );
     }
 
@@ -280,7 +280,7 @@ class ScoreboardService
         }
 
         // Determine whether we will use external judgements instead of judgings.
-        $useExternalJudgements = $this->config->get('data_source') == DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
+        $useExternalJudgements = $this->dj->shadowMode();
 
         // Note the clause 's.submittime < c.endtime': this is used to
         // filter out TOO-LATE submissions from pending, but it also means
@@ -777,7 +777,7 @@ class ScoreboardService
             foreach ($category->getTeams() as $team) {
                 if ($teamaffil = $team->getAffiliation()) {
                     $affiliations[$teamaffil->getName()] = [
-                        'id'   => $teamaffil->getApiId($this->eventLogService),
+                        'id'   => $teamaffil->getExternalid(),
                         'name' => $teamaffil->getName(),
                     ];
                 }
@@ -891,7 +891,7 @@ class ScoreboardService
              ],
              'static' => $static,
         ];
-        if ($static && $contest && $contest->getFreezeData()->showFinal()) {
+        if ($static && $contest && ($forceUnfrozen || $contest->getFreezeData()->showFinal())) {
             unset($data['refresh']);
             $data['refreshstop'] = true;
         }
@@ -903,14 +903,24 @@ class ScoreboardService
                 $scoreFilter = null;
             }
             if ($scoreboard === null) {
-                $scoreboard = $this->getScoreboard($contest, $jury, $scoreFilter);
+                $scoreboard = $this->getScoreboard(
+                    contest: $contest,
+                    jury: $jury,
+                    filter: $scoreFilter,
+                    forceUnfrozen: $forceUnfrozen
+                );
             }
 
             if ($forceUnfrozen) {
                 $scoreboard->getFreezeData()
                     ->setForceValue(FreezeData::KEY_SHOW_FROZEN, false)
                     ->setForceValue(FreezeData::KEY_SHOW_FINAL, true)
+                    ->setForceValue(FreezeData::KEY_SHOW_FINAL_JURY, true)
                     ->setForceValue(FreezeData::KEY_FINALIZED, true);
+
+                if (!$contest->getFinalizetime()) {
+                    $contest->setFinalizetime(Utils::now());
+                }
             }
 
             $data['contest']              = $contest;

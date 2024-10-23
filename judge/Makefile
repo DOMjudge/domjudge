@@ -13,13 +13,11 @@ judgehost: $(TARGETS) $(SUBST_FILES)
 $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 
-runguard: LDFLAGS := $(filter-out -pie,$(LDFLAGS))
-
-runguard: -lm $(LIBCGROUP)
-runguard$(OBJEXT): $(TOPDIR)/etc/runguard-config.h
-
 evict: evict.c $(LIBHEADERS) $(LIBSOURCES)
 	$(CC) $(CFLAGS) -o $@ $< $(LIBSOURCES)
+
+runguard: runguard.cc $(LIBHEADERS) $(LIBSOURCES) $(TOPDIR)/etc/runguard-config.h
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LIBSOURCES) $(LIBCGROUP)
 
 runpipe: runpipe.cc $(LIBHEADERS) $(LIBSOURCES)
 	$(CXX) $(CXXFLAGS) -static -o $@ $< $(LIBSOURCES)
@@ -32,11 +30,6 @@ install-judgehost:
 		judgedaemon.main.php run-interactive.sh
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) \
 		judgedaemon runguard runpipe create_cgroups
-ifneq ($(systemd_unitdir),)
-	$(INSTALL_DIR)     $(DESTDIR)$(systemd_unitdir)
-	$(INSTALL_DATA) -t $(DESTDIR)$(systemd_unitdir) \
-		create-cgroups.service domjudge-judgehost.target domjudge-judgedaemon@.service
-endif
 
 clean-l:
 	-rm -f $(TARGETS) $(TARGETS:%=%$(OBJEXT))

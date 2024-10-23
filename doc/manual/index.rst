@@ -26,3 +26,4 @@ Appendices
    problem-format
    shadow
    configuration-reference
+   install-language

@@ -288,7 +288,9 @@ class JudgehostController extends AbstractFOSRestController
     ): void {
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
-            throw new BadRequestHttpException("Who are you and why are you sending us any data?");
+            throw new BadRequestHttpException(
+                'Register yourself first. You (' . $hostname . ') are not known to us yet.'
+            );
         }
 
         $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgetaskid]);
@@ -381,15 +383,18 @@ class JudgehostController extends AbstractFOSRestController
                     }
                 }
             } else {
+                $compileMetadata = $request->request->get('compile_metadata');
                 $this->em->wrapInTransaction(function () use (
                     $judgehost,
                     $judging,
                     $query,
-                    $output_compile
+                    $output_compile,
+                    $compileMetadata
                 ) {
                     if ($judging->getOutputCompile() === null) {
                         $judging
                             ->setOutputCompile($output_compile)
+                            ->setCompileMetadata(base64_decode($compileMetadata))
                             ->setResult(Judging::RESULT_COMPILER_ERROR)
                             ->setEndtime(Utils::now());
                         $this->em->flush();
@@ -426,7 +431,7 @@ class JudgehostController extends AbstractFOSRestController
                             ->setJudging($judging)
                             ->setContest($judging->getContest())
                             ->setDescription('Compilation results are different for j' . $judging->getJudgingid())
-                            ->setJudgehostlog('New compilation output: ' . $output_compile)
+                            ->setJudgehostlog(base64_encode('New compilation output: ' . $output_compile))
                             ->setTime(Utils::now())
                             ->setDisabled($disabled);
                         $this->em->persist($error);

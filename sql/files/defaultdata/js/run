@@ -20,6 +20,15 @@ if [ -z "$ENTRY_POINT" ]; then
 	echo "Info: detected entry_point: $MAINSOURCE"
 fi
 
+# Run syntax check
+for file in "$@"; do
+	case $file in *.js)
+		nodejs --check "$file"
+		EXITCODE="$?"
+		[ "$EXITCODE" -ne 0 ] && exit $EXITCODE ;;
+	esac
+done
+
 # Write executing script:
 cat > "$DEST" <<EOF
 #!/bin/sh

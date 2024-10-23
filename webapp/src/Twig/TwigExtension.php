@@ -8,6 +8,7 @@ use App\Entity\ContestProblem;
 use App\Entity\ExternalJudgement;
 use App\Entity\ExternalRun;
 use App\Entity\ExternalSourceWarning;
+use App\Entity\HasExternalIdInterface;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Language;
@@ -22,6 +23,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
+use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -59,9 +61,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return [
             new TwigFunction('button', $this->button(...), ['is_safe' => ['html']]),
             new TwigFunction('calculatePenaltyTime', $this->calculatePenaltyTime(...)),
-            new TwigFunction('showExternalId', $this->showExternalId(...)),
             new TwigFunction('customAssetFiles', $this->customAssetFiles(...)),
             new TwigFunction('globalBannerAssetPath', $this->dj->globalBannerAssetPath(...)),
+            new TwigFunction('shadowMode', $this->shadowMode(...)),
         ];
     }
 
@@ -108,7 +110,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('tsvField', $this->toTsvField(...)),
             new TwigFilter('fileTypeIcon', $this->fileTypeIcon(...)),
             new TwigFilter('problemBadge', $this->problemBadge(...), ['is_safe' => ['html']]),
-            new TwigFilter('problemBadgeForProblemAndContest', $this->problemBadgeForProblemAndContest(...), ['is_safe' => ['html']]),
+            new TwigFilter('problemBadgeForContest', $this->problemBadgeForContest(...), ['is_safe' => ['html']]),
+            new TwigFilter('problemBadgeMaybe', $this->problemBadgeMaybe(...), ['is_safe' => ['html']]),
             new TwigFilter('printMetadata', $this->printMetadata(...), ['is_safe' => ['html']]),
             new TwigFilter('printWarningContent', $this->printWarningContent(...), ['is_safe' => ['html']]),
             new TwigFilter('entityIdBadge', $this->entityIdBadge(...), ['is_safe' => ['html']]),
@@ -153,7 +156,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             ),
             'show_shadow_differences'       => $this->tokenStorage->getToken() &&
                                                $this->authorizationChecker->isGranted('ROLE_ADMIN') &&
-                                               $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+                                               $this->dj->shadowMode(),
             'doc_links'                     => $this->dj->getDocLinks(),
             'allow_registration'            => $selfRegistrationCategoriesCount !== 0,
             'enable_ranking'                => $this->config->get('enable_ranking'),
@@ -215,26 +218,31 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
     }
 
-    public function printHumanTimeDiff(float|null $datetime): string
+    public function printHumanTimeDiff(float|null $startTime = null, float|null $endTime = null): string
     {
-        if ($datetime === null) {
+        if ($startTime === null) {
             return '';
         }
-        $diff = Utils::now() - $datetime;
+        $suffix = '';
+        if ($endTime === null) {
+            $suffix = ' ago';
+            $endTime = Utils::now();
+        }
+        $diff = $endTime - $startTime;
 
         if ($diff < 120) {
-            return (int)($diff) . ' seconds ago';
+            return (int)($diff) . ' seconds' . $suffix;
         }
         $diff /= 60;
         if ($diff < 120) {
-            return (int)($diff) . ' minutes ago';
+            return (int)($diff) . ' minutes' . $suffix;
         }
         $diff /= 60;
         if ($diff < 48) {
-            return (int)($diff) . ' hours ago';
+            return (int)($diff) . ' hours' . $suffix;
         }
         $diff /= 24;
-        return (int)($diff) . ' days ago';
+        return (int)($diff) . ' days' . $suffix;
     }
 
     /**
@@ -369,7 +377,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $externalJudgementId = $externalJudgement?->getExtjudgementid();
             $probId              = $submission->getProblem()->getProbid();
             $testcases           = $this->em->getConnection()->fetchAllAssociative(
-                'SELECT er.result as runresult, t.ranknumber, t.description
+                'SELECT er.result as runresult, t.ranknumber, t.description, t.sample
                   FROM testcase t
                   LEFT JOIN external_run er ON (er.testcaseid = t.testcaseid
                                               AND er.extjudgementid = :extjudgementid)
@@ -383,7 +391,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $judgingId = $judging ? $judging->getJudgingid() : null;
             $probId    = $submission->getProblem()->getProbid();
             $testcases = $this->em->getConnection()->fetchAllAssociative(
-                'SELECT r.runresult, jh.hostname, jt.valid, t.ranknumber, t.description
+                'SELECT r.runresult, jh.hostname, jt.valid, t.ranknumber, t.description, t.sample
                   FROM testcase t
                   LEFT JOIN judging_run r ON (r.testcaseid = t.testcaseid
                                               AND r.judgingid = :judgingid)
@@ -396,7 +404,12 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
 
         $results = '';
+        $lastTypeSample = true;
         foreach ($testcases as $key => $testcase) {
+            if ($testcase['sample'] != $lastTypeSample) {
+                $results        .= ' | ';
+                $lastTypeSample = $testcase['sample'];
+            }
             $class = $submissionDone ? 'secondary' : 'primary';
             $text  = '?';
 
@@ -575,16 +588,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     {
         $extCcsUrl = $this->config->get('external_ccs_submission_url');
         if (!empty($extCcsUrl)) {
-            $dataSource = $this->config->get('data_source');
-            if ($dataSource == 2 && $submission->getExternalid()) {
-                return str_replace(['[contest]', '[id]'],
-                                   [$submission->getContest()->getExternalid(), $submission->getExternalid()],
-                                   $extCcsUrl);
-            } elseif ($dataSource == 1) {
-                return str_replace(['[contest]', '[id]'],
-                                   [$submission->getContest()->getExternalid(), $submission->getSubmitid()],
-                                   $extCcsUrl);
-            }
+            return str_replace(['[contest]', '[id]'],
+                [$submission->getContest()->getExternalid(), $submission->getExternalid()],
+                $extCcsUrl);
         }
 
         return null;
@@ -662,6 +668,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      */
     public function printHosts(array $hostnames): string
     {
+        $hostnames = array_values($hostnames);
         if (empty($hostnames)) {
             return "";
         }
@@ -1002,12 +1009,9 @@ EOF;
         }
     }
 
-    /**
-     * @param object|string $entity
-     */
-    public function showExternalId($entity): bool
+    public function shadowMode(): bool
     {
-        return $this->eventLogService->externalIdFieldForEntity($entity) !== null;
+        return $this->dj->shadowMode();
     }
 
     public function wrapUnquoted(string $text, int $width = 75, string $quote = '>'): string
@@ -1021,8 +1025,8 @@ EOF;
         if (is_null($col)) {
             return $text;
         }
-        preg_match_all("/[0-9A-Fa-f]{2}/", $col, $m);
-        if (!count($m)) {
+        $ret = preg_match_all("/[0-9A-Fa-f]{2}/", $col, $m);
+        if (!($ret && count($m[0]))) {
             return $text;
         }
 
@@ -1059,9 +1063,12 @@ EOF;
         return 'fas fa-file-' . $iconName;
     }
 
-    public function problemBadge(ContestProblem $problem): string
+    public function problemBadge(ContestProblem $problem, bool $grayedOut = false): string
     {
         $rgb        = Utils::convertToHex($problem->getColor() ?? '#ffffff');
+        if ($grayedOut) {
+            $rgb = 'whitesmoke';
+        }
         $background = Utils::parseHexColor($rgb);
 
         // Pick a border that's a bit darker.
@@ -1073,8 +1080,12 @@ EOF;
 
         // Pick the foreground text color based on the background color.
         $foreground = ($background[0] + $background[1] + $background[2] > 450) ? '#000000' : '#ffffff';
+        if ($grayedOut) {
+            $foreground = 'silver';
+            $border = 'linen';
+        }
         return sprintf(
-            '<span class="badge problem-badge" style="background-color: %s; min-width: 28px; border: 1px solid %s"><span style="color: %s;">%s</span></span>',
+            '<span class="badge problem-badge" style="background-color: %s; border: 1px solid %s"><span style="color: %s;">%s</span></span>',
             $rgb,
             $border,
             $foreground,
@@ -1082,14 +1093,50 @@ EOF;
         );
     }
 
-    public function problemBadgeForProblemAndContest(Problem $problem, ?Contest $contest): string
+    public function problemBadgeMaybe(ContestProblem $problem, ScoreboardMatrixItem $matrixItem): string
     {
-        foreach ($problem->getContestProblems() as $contestProblem) {
-            if ($contestProblem->getContest() === $contest) {
-                return $this->problemBadge($contestProblem);
+        $rgb        = Utils::convertToHex($problem->getColor() ?? '#ffffff');
+        if (!$matrixItem->isCorrect) {
+            $rgb = 'whitesmoke';
+        }
+        $background = Utils::parseHexColor($rgb);
+
+        // Pick a border that's a bit darker.
+        $darker = $background;
+        $darker[0] = max($darker[0] - 64, 0);
+        $darker[1] = max($darker[1] - 64, 0);
+        $darker[2] = max($darker[2] - 64, 0);
+        $border    = Utils::rgbToHex($darker);
+
+        // Pick the foreground text color based on the background color.
+        $foreground = ($background[0] + $background[1] + $background[2] > 450) ? '#000000' : '#ffffff';
+        if (!$matrixItem->isCorrect) {
+            $foreground = 'silver';
+            $border = 'linen';
+        }
+
+        $ret = sprintf(
+            '<span class="badge problem-badge" style="font-size: x-small; background-color: %s; min-width: 18px; border: 1px solid %s;"><span style="color: %s;">%s</span></span>',
+            $rgb,
+            $border,
+            $foreground,
+            $problem->getShortname()
+        );
+        if (!$matrixItem->isCorrect) {
+            if ($matrixItem->numSubmissionsPending > 0) {
+                $ret = '<span><span class="mobile-pending">' . $ret . '</span></span>';
+            } else if ($matrixItem->numSubmissions > 0) {
+                $ret = '<span><span class="strike-diagonal">' . $ret . '</span></span>';
             }
         }
-        return '';
+        return $ret;
+    }
+
+    public function problemBadgeForContest(Problem $problem, ?Contest $contest = null): string
+    {
+        $contest ??= $this->dj->getCurrentContest();
+        $contestProblem = $contest?->getContestProblem($problem);
+        return $contestProblem === null ? '' : $this->problemBadge($contestProblem);
     }
 
     public function printMetadata(?string $metadata): string
@@ -1184,13 +1231,16 @@ EOF;
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $metadata = $this->em->getClassMetadata($entity::class);
         $primaryKeyColumn = $metadata->getIdentifierColumnNames()[0];
-        $externalIdField = $this->eventLogService->externalIdFieldForEntity($entity);
 
         $data = [
             'idPrefix' => $idPrefix,
             'id' => $propertyAccessor->getValue($entity, $primaryKeyColumn),
-            'externalId' => $externalIdField ? $propertyAccessor->getValue($entity, $externalIdField) : null,
+            'externalId' => null,
         ];
+
+        if ($entity instanceof HasExternalIdInterface) {
+            $data['externalId'] = $entity->getExternalid();
+        }
 
         if ($entity instanceof Team) {
             $data['label'] = $entity->getLabel();

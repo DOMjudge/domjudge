@@ -37,7 +37,7 @@ setup() {
     if [ "$distro_id" = "ID=fedora" ]; then
         repo-install httpd
     fi
-    repo-install gcc g++ libcgroup-dev
+    repo-install gcc g++ libcgroup-dev composer
 }
 
 run_configure () {
@@ -67,9 +67,9 @@ repo-remove () {
     assert_line "checking for gcc... no"
     assert_line "checking for cc... no"
     assert_line "checking for cl.exe... no"
-    assert_line "configure: error: in \`${test_path}':"
+    assert_regex "configure: error: in .${test_path}':"
     assert_line 'configure: error: no acceptable C compiler found in $PATH'
-    assert_line "See \`config.log' for more details"
+    assert_regex "See [\`']config.log' for more details"
 }
 
 compiler_assertions () {
@@ -231,7 +231,6 @@ compile_assertions_finished () {
    assert_line "    - bin..............: /opt/domjudge/domserver/bin"
    assert_line "    - etc..............: /opt/domjudge/domserver/etc"
    assert_line "    - lib..............: /opt/domjudge/domserver/lib"
-   assert_line "    - libvendor........: /opt/domjudge/domserver/lib/vendor"
    assert_line "    - log..............: /opt/domjudge/domserver/log"
    assert_line "    - run..............: /opt/domjudge/domserver/run"
    assert_line "    - sql..............: /opt/domjudge/domserver/sql"
@@ -248,7 +247,6 @@ compile_assertions_finished () {
    assert_line "    - tmp..............: /opt/domjudge/judgehost/tmp"
    assert_line "    - judge............: /opt/domjudge/judgehost/judgings"
    assert_line "    - chroot...........: /chroot/domjudge"
-   assert_line "    - cgroup...........: /sys/fs/cgroup"
 }
 
 @test "Prefix configured" {
@@ -258,7 +256,6 @@ compile_assertions_finished () {
    refute_line " * documentation.......: /opt/domjudge/doc"
    refute_line " * domserver...........: /opt/domjudge/domserver"
    refute_line "    - bin..............: /opt/domjudge/domserver/bin"
-   refute_line "    - libvendor........: /opt/domjudge/domserver/lib/vendor"
    refute_line "    - tmp..............: /opt/domjudge/domserver/tmp"
    refute_line "    - example_problems.: /opt/domjudge/domserver/example_problems"
    refute_line " * judgehost...........: /opt/domjudge/judgehost"
@@ -270,7 +267,6 @@ compile_assertions_finished () {
    assert_line " * prefix..............: /tmp"
    assert_line " * documentation.......: /tmp/doc"
    assert_line " * domserver...........: /tmp/domserver"
-   assert_line "    - libvendor........: /tmp/domserver/lib/vendor"
    assert_line " * judgehost...........: /tmp/judgehost"
    assert_line "    - judge............: /tmp/judgehost/judgings"
 }
@@ -292,7 +288,6 @@ compile_assertions_finished () {
    assert_line "    - bin..............: /usr/local/bin"
    assert_line "    - etc..............: /usr/local/etc/domjudge"
    assert_line "    - lib..............: /usr/local/lib/domjudge"
-   assert_line "    - libvendor........: /usr/local/lib/domjudge/vendor"
    assert_line "    - log..............: /usr/local/var/log/domjudge"
    assert_line "    - run..............: /usr/local/var/run/domjudge"
    assert_line "    - sql..............: /usr/local/share/domjudge/sql"
@@ -309,19 +304,17 @@ compile_assertions_finished () {
    assert_line "    - tmp..............: /tmp"
    assert_line "    - judge............: /usr/local/var/lib/domjudge/judgings"
    assert_line "    - chroot...........: /chroot/domjudge"
-   assert_line "    - cgroup...........: /sys/fs/cgroup"
 }
 
 @test "Alternative dirs together with FHS" {
    setup
-   run run_configure --enable-fhs --with-domserver_webappdir=/run/webapp --with-domserver_tmpdir=/tmp/domserver --with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot/domjudge --with-judgehost_cgroupdir=/sys/fs/altcgroup
+   run run_configure --enable-fhs --with-domserver_webappdir=/run/webapp --with-domserver_tmpdir=/tmp/domserver --with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot/domjudge
    assert_line " * prefix..............: /usr/local"
    assert_line " * documentation.......: /usr/local/share/doc/domjudge"
    assert_line " * domserver...........: "
    assert_line "    - bin..............: /usr/local/bin"
    assert_line "    - etc..............: /usr/local/etc/domjudge"
    assert_line "    - lib..............: /usr/local/lib/domjudge"
-   assert_line "    - libvendor........: /usr/local/lib/domjudge/vendor"
    assert_line "    - log..............: /usr/local/var/log/domjudge"
    assert_line "    - run..............: /usr/local/var/run/domjudge"
    assert_line "    - sql..............: /usr/local/share/domjudge/sql"
@@ -343,13 +336,11 @@ compile_assertions_finished () {
    assert_line "    - judge............: /srv/judgings"
    refute_line "    - chroot...........: /chroot/domjudge"
    assert_line "    - chroot...........: /srv/chroot/domjudge"
-   refute_line "    - cgroup...........: /sys/fs/cgroup"
-   assert_line "    - cgroup...........: /sys/fs/altcgroup"
 }
 
 @test "Alternative dirs together with defaults" {
    setup
-   run run_configure "--with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot --with-judgehost_cgroupdir=/sys/fs/altcgroup --with-domserver_logdir=/log"
+   run run_configure "--with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot --with-domserver_logdir=/log"
    assert_line " * prefix..............: /opt/domjudge"
    assert_line " * documentation.......: /opt/domjudge/doc"
    assert_line " * domserver...........: /opt/domjudge/domserver"
@@ -362,8 +353,6 @@ compile_assertions_finished () {
    assert_line "    - judge............: /srv/judgings"
    refute_line "    - chroot...........: /chroot/domjudge"
    assert_line "    - chroot...........: /srv/chroot"
-   refute_line "    - cgroup...........: /sys/fs/cgroup"
-   assert_line "    - cgroup...........: /sys/fs/altcgroup"
 }
 
 @test "Default URL not set, docs mention" {

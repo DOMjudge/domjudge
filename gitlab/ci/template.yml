@@ -27,16 +27,15 @@
 .cached_vendor:
   extends: [.clean_ordering]
   cache:
-    key: libvendor-260522
+    key: webappvendor-20240623
     paths:
-      - lib/vendor/
+      - webapp/vendor/
 
 .mysql_job:
   script:
     - /bin/true
   services:
     - name: mysql
-      command: ["--default-authentication-plugin=mysql_native_password"]
       alias: sqlserver
 
 .mariadb_job:
@@ -51,15 +50,15 @@
     - /bin/true
   parallel:
     matrix:
-      - PHPVERSION: ["8.1","8.2"]
+      - PHPVERSION: ["8.1","8.2","8.3"]
         TEST: ["E2E","Unit"]
-        CRAWL_DATASOURCES: ["0","1","2"]
+        CRAWL_SHADOW_MODE: ["0","1"]
 
 .phpsupported_job_pr:
   script:
     - /bin/true
   parallel:
     matrix:
-      - PHPVERSION: ["8.2"]
+      - PHPVERSION: ["8.3"]
         TEST: ["E2E","Unit"]
-        CRAWL_DATASOURCES: ["0"]
+        CRAWL_SHADOW_MODE: ["0"]

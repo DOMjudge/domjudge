@@ -49,6 +49,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -60,12 +61,16 @@ class SubmissionController extends BaseController
     use JudgeRemainingTrait;
 
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        protected readonly EventLogService $eventLogService,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly SubmissionService $submissionService,
-        protected readonly RouterInterface $router
-    ) {}
+        protected readonly RouterInterface $router,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_submissions')]
     public function indexAction(
@@ -118,6 +123,16 @@ class SubmissionController extends BaseController
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] =
             $this->submissionService->getSubmissionList($contests, $restrictions, $limit);
+        $disabledProblems = [];
+        $disabledLangs = [];
+        foreach ($submissions as $submission) {
+            if (!$submission->getContestProblem()->getAllowJudge()) {
+                $disabledProblems[$submission->getProblemId()] = $submission->getProblem()->getName();
+            }
+            if (!$submission->getLanguage()->getAllowJudge()) {
+                $disabledLangs[$submission->getLanguage()->getLangid()] = $submission->getLanguage()->getName();
+            }
+        }
 
         // Load preselected filters
         $filters = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
@@ -135,9 +150,10 @@ class SubmissionController extends BaseController
             'showContest' => count($contests) > 1,
             'hasFilters' => !empty($filters),
             'results' => $results,
-            'showExternalResult' => $this->config->get('data_source') ==
-                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+            'showExternalResult' => $this->dj->shadowMode(),
             'showTestcases' => count($submissions) <= $latestCount,
+            'disabledProbs' => $disabledProblems,
+            'disabledLangs' => $disabledLangs,
         ];
 
         // For ajax requests, only return the submission list partial.
@@ -390,9 +406,10 @@ class SubmissionController extends BaseController
                     $runResult['hostname'] = $firstJudgingRun->getJudgeTask()->getJudgehost()->getHostname();
                     $runResult['judgehostid'] = $firstJudgingRun->getJudgeTask()->getJudgehost()->getJudgehostid();
                 }
-                $runResult['is_output_run_truncated'] = $outputDisplayLimit >= 0 && preg_match(
+                $runResult['is_output_run_truncated_in_db'] = preg_match(
                     '/\[output storage truncated after \d* B\]/',
-                    (string)$runResult['output_run_last_bytes']
+                    $outputDisplayLimit >= 0 ?
+                        (string)$runResult['output_run_last_bytes'] : (string)$runResult['output_run']
                 );
                 if ($firstJudgingRun) {
                     $runResult['testcasedir'] = $firstJudgingRun->getTestcaseDir();
@@ -453,7 +470,7 @@ class SubmissionController extends BaseController
         }
 
         $unjudgableReasons = [];
-        if ($runsOutstanding) {
+        if ($runsOutstanding || $submission->getResult() == null) {
             // Determine if this submission is unjudgable.
 
             $numActiveJudgehosts = (int)$this->em->createQueryBuilder()
@@ -667,6 +684,29 @@ class SubmissionController extends BaseController
         ]);
     }
 
+    #[Route(path: '/by-contest-and-external-id/{externalContestId}/{externalId}', name: 'jury_submission_by_context_external_id')]
+    public function viewForContestExternalIdAction(string $externalContestId, string $externalId): Response
+    {
+        $contest = $this->em->getRepository(Contest::class)->findOneBy(['externalid' => $externalContestId]);
+        if ($contest === null) {
+            throw new NotFoundHttpException(sprintf('No contest found with external ID %s', $externalContestId));
+        }
+
+        $submission = $this->em->getRepository(Submission::class)
+            ->findOneBy([
+                'contest' => $contest,
+                'externalid' => $externalId
+            ]);
+
+        if (!$submission) {
+            throw new NotFoundHttpException(sprintf('No submission found with external ID %s', $externalId));
+        }
+
+        return $this->redirectToRoute('jury_submission', [
+            'submitId' => $submission->getSubmitid(),
+        ]);
+    }
+
     #[Route(path: '/by-external-id/{externalId}', name: 'jury_submission_by_external_id')]
     public function viewForExternalIdAction(string $externalId): RedirectResponse
     {
@@ -696,7 +736,7 @@ class SubmissionController extends BaseController
             throw new BadRequestHttpException('Integrity problem while fetching team output.');
         }
         if ($run->getOutput() === null) {
-            throw new BadRequestHttpException('No team output available (yet).');
+            throw new NotFoundHttpException('No team output available (yet).');
         }
 
         $filename = sprintf('p%d.t%d.%s.run%d.team%d.out', $submission->getProblem()->getProbid(), $run->getTestcase()->getRank(),

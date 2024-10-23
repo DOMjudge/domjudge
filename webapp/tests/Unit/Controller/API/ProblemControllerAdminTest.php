@@ -5,8 +5,6 @@ namespace App\Tests\Unit\Controller\API;
 use App\DataFixtures\Test\DummyProblemFixture;
 use App\DataFixtures\Test\LockedContestFixture;
 use App\Entity\Problem;
-use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -17,9 +15,9 @@ class ProblemControllerAdminTest extends ProblemControllerTest
     protected function setUp(): void
     {
         // When queried as admin, extra information is returned about each problem.
-        $this->expectedObjects[1]['test_data_count'] = 1;
-        $this->expectedObjects[2]['test_data_count'] = 1+3; // 1 sample, 3 secret cases
-        $this->expectedObjects[3]['test_data_count'] = 1;
+        $this->expectedObjects['boolfind']['test_data_count'] = 1;
+        $this->expectedObjects['fltcmp']['test_data_count'] = 1+3; // 1 sample, 3 secret cases
+        $this->expectedObjects['hello']['test_data_count'] = 1;
         parent::setUp();
     }
 
@@ -80,16 +78,8 @@ EOF;
         $addedProblems = [];
 
         // Now load the problems with the given IDs.
-        $config = static::getContainer()->get(ConfigurationService::class);
-        $dataSource = $config->get('data_source');
         foreach ($ids as $id) {
-            if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
-                /** @var Problem $problem */
-                $problem = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Problem::class)->find($id);
-            } else {
-                $problem = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Problem::class)->findOneBy(['externalid' => $id]);
-            }
-
+            $problem = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Problem::class)->findOneBy(['externalid' => $id]);
             $addedProblems[$problem->getContestProblems()->first()->getShortName()] = $problem->getExternalid();
         }
 
@@ -99,7 +89,7 @@ EOF;
     public function testDelete(): void
     {
         // Check that we can delete the problem
-        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/2';
+        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/fltcmp';
         $this->verifyApiJsonResponse('DELETE', $url, 204, $this->apiUser);
 
         // Check that we now have two problems left
@@ -128,6 +118,7 @@ EOF;
         ];
 
         $problemId = $this->resolveReference(DummyProblemFixture::class . ':0');
+        $problemId = $this->resolveEntityId(Problem::class, (string)$problemId);
 
         // Check that we can not add any problem
         $url             = $this->helperGetEndpointURL($this->apiEndpoint) . '/' . $problemId;
@@ -167,7 +158,7 @@ EOF;
         $this->loadFixture(DummyProblemFixture::class);
 
         // Check that we can not add a problem that is already added
-        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/2';
+        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/fltcmp';
         $response = $this->verifyApiJsonResponse('PUT', $url, 400, $this->apiUser, ['label' => 'dummy']);
         self::assertEquals('Problem already linked to contest', $response['message']);
     }
@@ -186,6 +177,7 @@ EOF;
         ];
 
         $problemId = $this->resolveReference(DummyProblemFixture::class . ':0');
+        $problemId = $this->resolveEntityId(Problem::class, (string)$problemId);
 
         $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/' . $problemId;
         $problemResponse = $this->verifyApiJsonResponse('PUT', $url, 403, $this->apiUser, $body);
@@ -197,7 +189,7 @@ EOF;
         $this->loadFixture(LockedContestFixture::class);
 
         // Check that we cannot delete the problem.
-        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/2';
+        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/fltcmp';
         $problemResponse = $this->verifyApiJsonResponse('DELETE', $url, 403, $this->apiUser);
         self::assertStringContainsString('Contest is locked', $problemResponse['message']);
     }

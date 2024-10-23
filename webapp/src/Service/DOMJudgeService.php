@@ -67,9 +67,6 @@ class DOMJudgeService
     protected ?Executable $defaultCompareExecutable = null;
     protected ?Executable $defaultRunExecutable = null;
 
-    final public const DATA_SOURCE_LOCAL = 0;
-    final public const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
-    final public const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
     final public const EVAL_DEFAULT = 0;
     final public const EVAL_LAZY = 1;
     final public const EVAL_FULL = 2;
@@ -99,7 +96,7 @@ class DOMJudgeService
         protected readonly Environment $twig,
         #[Autowire('%kernel.project_dir%')]
         protected string $projectDir,
-        #[Autowire('%domjudge.libvendordir%')]
+        #[Autowire('%domjudge.vendordir%')]
         protected string $vendorDir,
     ) {}
 
@@ -385,7 +382,7 @@ class DOMJudgeService
                 ->setParameter('status', 'open')
                 ->getQuery()->getResult();
 
-            if ($this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
+            if ($this->shadowMode()) {
                 if ($contest) {
                     $shadow_difference_count = $this->em->createQueryBuilder()
                         ->from(Submission::class, 's')
@@ -422,18 +419,18 @@ class DOMJudgeService
             }
         }
 
-        if ($this->checkrole('balloon')) {
+        if ($this->checkrole('balloon') && $contest) {
             $balloonsQuery = $this->em->createQueryBuilder()
-            ->select('b.balloonid', 't.name', 't.location', 'p.name AS pname')
-            ->from(Balloon::class, 'b')
-            ->leftJoin('b.submission', 's')
-            ->leftJoin('s.problem', 'p')
-            ->leftJoin('s.contest', 'co')
-            ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
-            ->leftJoin('s.team', 't')
-            ->andWhere('co.cid = :cid')
-            ->andWhere('b.done = 0')
-            ->setParameter('cid', $contest->getCid());
+                ->select('b.balloonid', 't.name', 't.location', 'p.name AS pname')
+                ->from(Balloon::class, 'b')
+                ->leftJoin('b.submission', 's')
+                ->leftJoin('s.problem', 'p')
+                ->leftJoin('s.contest', 'co')
+                ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
+                ->leftJoin('s.team', 't')
+                ->andWhere('co.cid = :cid')
+                ->andWhere('b.done = 0')
+                ->setParameter('cid', $contest->getCid());
 
             $freezetime = $contest->getFreezeTime();
             if ($freezetime !== null && !(bool)$this->config->get('show_balloons_postfreeze')) {
@@ -710,14 +707,18 @@ class DOMJudgeService
     public function openZipFile(string $filename): ZipArchive
     {
         $zip = new ZipArchive();
-        $res = $zip->open($filename, ZIPARCHIVE::CHECKCONS);
-        if ($res === ZIPARCHIVE::ER_NOZIP || $res === ZIPARCHIVE::ER_INCONS) {
-            throw new BadRequestHttpException('No valid zip archive given');
+        $res = $zip->open($filename, ZipArchive::CHECKCONS);
+        if ($res === ZipArchive::ER_NOZIP) {
+            throw new BadRequestHttpException('No valid ZIP archive given.');
+        } elseif ($res === ZipArchive::ER_INCONS) {
+            throw new BadRequestHttpException(
+                'ZIP archive is inconsistent; this can happen when using built-in graphical ZIP tools on Mac OS or Ubuntu,'
+            . ' use the command line zip tool instead, e.g.: zip -r ../problemarchive.zip *');
         } elseif ($res === ZIPARCHIVE::ER_MEMORY) {
-            throw new ServiceUnavailableHttpException(null, 'Not enough memory to extract zip archive');
+            throw new ServiceUnavailableHttpException(null, 'Not enough memory to extract ZIP archive.');
         } elseif ($res !== true) {
             throw new ServiceUnavailableHttpException(null,
-                'Unknown error while extracting zip archive: ' . print_r($res, true));
+                'Unknown error while extracting ZIP archive: ' . print_r($res, true));
         }
 
         return $zip;
@@ -1165,111 +1166,11 @@ class DOMJudgeService
         if ($submission->isImportError()) {
             return;
         }
-
-        $evalOnDemand = false;
-        // We have 2 cases, the problem picks the global value or the value is set.
-        if ($problem->determineOnDemand($this->config->get('lazy_eval_results'))) {
-            $evalOnDemand = true;
-
-            // Special case, we're shadow and someone submits on our side in that case
-            // we're not super lazy.
-            if ($this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL
-                && $submission->getExternalid() === null) {
-                    $evalOnDemand = false;
-            }
-            if ($manualRequest) {
-                // When explicitly requested, judge the submission.
-                $evalOnDemand = false;
-            }
-        }
-        if (!$problem->getAllowJudge() || !$language->getAllowJudge() || $evalOnDemand) {
+        if (!$this->allowJudge($problem, $submission, $language, $manualRequest)) {
             return;
         }
 
-        // We use a mass insert query, since that is way faster than doing a separate insert for each testcase.
-        // We first insert judgetasks, then select their ID's and finally insert the judging runs.
-
-        // Step 1: Create the template for the judgetasks.
-        $compileExecutable = $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable();
-        $judgetaskInsertParams = [
-            ':type'              => JudgeTaskType::JUDGING_RUN,
-            ':submitid'          => $submission->getSubmitid(),
-            ':priority'          => $priority,
-            ':jobid'             => $judging->getJudgingid(),
-            ':uuid'              => $judging->getUuid(),
-            ':compile_script_id' => $compileExecutable->getImmutableExecId(),
-            ':compare_script_id' => $this->getImmutableCompareExecutable($problem)->getImmutableExecId(),
-            ':run_script_id'     => $this->getImmutableRunExecutable($problem)->getImmutableExecId(),
-            ':compile_config'    => $this->getCompileConfig($submission),
-            ':run_config'        => $this->getRunConfig($problem, $submission),
-            ':compare_config'    => $this->getCompareConfig($problem),
-        ];
-
-        $judgetaskDefaultParamNames = array_keys($judgetaskInsertParams);
-
-        // Step 2: Create and insert the judgetasks.
-
-        $testcases = $problem->getProblem()->getTestcases();
-        if (count($testcases) < 1) {
-            throw new BadRequestHttpException("No testcases set for problem {$problem->getProbid()}");
-        }
-        $judgetaskInsertParts = [];
-        /** @var Testcase $testcase */
-        foreach ($testcases as $testcase) {
-            $judgetaskInsertParts[] = sprintf(
-                '(%s, :testcase_id%d, :testcase_hash%d)',
-                implode(', ', $judgetaskDefaultParamNames),
-                $testcase->getTestcaseid(),
-                $testcase->getTestcaseid()
-            );
-            $judgetaskInsertParams[':testcase_id' . $testcase->getTestcaseid()] = $testcase->getTestcaseid();
-            $judgetaskInsertParams[':testcase_hash' . $testcase->getTestcaseid()] = $testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput();
-        }
-        $judgetaskColumns = array_map(fn(string $column) => substr($column, 1), $judgetaskDefaultParamNames);
-        $judgetaskInsertQuery = sprintf(
-            'INSERT INTO judgetask (%s, testcase_id, testcase_hash) VALUES %s',
-            implode(', ', $judgetaskColumns),
-            implode(', ', $judgetaskInsertParts)
-        );
-
-        $judgetaskInsertParamsWithoutColon = [];
-        foreach ($judgetaskInsertParams as $key => $param) {
-            $key = str_replace(':', '', $key);
-            $judgetaskInsertParamsWithoutColon[$key] = $param;
-        }
-
-        $this->em->getConnection()->executeQuery($judgetaskInsertQuery, $judgetaskInsertParamsWithoutColon);
-
-        // Step 3: Fetch the judgetasks ID's per testcase.
-        $judgetaskData = $this->em->getConnection()->executeQuery(
-            'SELECT judgetaskid, testcase_id FROM judgetask WHERE jobid = :jobid ORDER BY judgetaskid',
-            ['jobid' => $judging->getJudgingid()]
-        )->fetchAllAssociative();
-
-        // Step 4: Create and insert the corresponding judging runs.
-        $judgingRunInsertParams = [':judgingid' => $judging->getJudgingid()];
-        $judgingRunInsertParts  = [];
-        foreach ($judgetaskData as $judgetaskItem) {
-            $judgingRunInsertParts[] = sprintf(
-                '(:judgingid, :testcaseid%d, :judgetaskid%d)',
-                $judgetaskItem['judgetaskid'],
-                $judgetaskItem['judgetaskid']
-            );
-            $judgingRunInsertParams[':testcaseid' . $judgetaskItem['judgetaskid']]  = $judgetaskItem['testcase_id'];
-            $judgingRunInsertParams[':judgetaskid' . $judgetaskItem['judgetaskid']] = $judgetaskItem['judgetaskid'];
-        }
-        $judgingRunInsertQuery = sprintf(
-            'INSERT INTO judging_run (judgingid, testcaseid, judgetaskid) VALUES %s',
-            implode(', ', $judgingRunInsertParts)
-        );
-
-        $judgingRunInsertParamsWithoutColon = [];
-        foreach ($judgingRunInsertParams as $key => $param) {
-            $key = str_replace(':', '', $key);
-            $judgingRunInsertParamsWithoutColon[$key] = $param;
-        }
-
-        $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParamsWithoutColon);
+        $this->actuallyCreateJudgetasks($priority, $judging);
 
         $team = $submission->getTeam();
         $result = $this->em->createQueryBuilder()
@@ -1301,14 +1202,17 @@ class DOMJudgeService
         // - the new submission would get X+5+60 (since there's only one of their submissions still to be worked on),
         //   but we want to judge submissions of this team in order, so we take the current max (X+120) and add 1.
         $teamPriority = (int)(max($result['max']+1, $submission->getSubmittime() + 60*$result['count']));
-        $queueTask = new QueueTask();
-        $queueTask->setJudging($judging)
-            ->setPriority($priority)
-            ->setTeam($team)
-            ->setTeamPriority($teamPriority)
-            ->setStartTime(null);
-        $this->em->persist($queueTask);
-        $this->em->flush();
+        // Use a direct query to speed things up
+        $this->em->getConnection()->executeQuery(
+            'INSERT INTO queuetask (judgingid, priority, teamid, teampriority, starttime)
+             VALUES (:judgingid, :priority, :teamid, :teampriority, null)',
+            [
+                'judgingid' => $judging->getJudgingid(),
+                'priority' => $priority,
+                'teamid' => $team->getTeamid(),
+                'teampriority' => $teamPriority,
+            ]
+        );
     }
 
     public function getImmutableCompareExecutable(ContestProblem $problem): ImmutableExecutable
@@ -1404,7 +1308,7 @@ class DOMJudgeService
      * @param bool $fullPath If true, get the full path. If false, get the webserver relative path
      * @param string|null $forceExtension If set, also return the asset path if it does not exist currently and use the given extension
      */
-    public function assetPath(string $name, string $type, bool $fullPath = false, ?string $forceExtension = null): ?string
+    public function assetPath(?string $name, string $type, bool $fullPath = false, ?string $forceExtension = null): ?string
     {
         $prefix = $fullPath ? ($this->getDomjudgeWebappDir() . '/public/') : '';
         switch ($type) {
@@ -1449,20 +1353,20 @@ class DOMJudgeService
     /**
      * Get the full asset path for the given entity and property.
      */
-    public function fullAssetPath(AssetEntityInterface $entity, string $property, bool $useExternalid, ?string $forceExtension = null): ?string
+    public function fullAssetPath(AssetEntityInterface $entity, string $property, ?string $forceExtension = null): ?string
     {
         if ($entity instanceof Team && $property == 'photo') {
-            return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getTeamid(), 'team', true, $forceExtension);
+            return $this->assetPath($entity->getExternalid(), 'team', true, $forceExtension);
         } elseif ($entity instanceof TeamAffiliation && $property == 'logo') {
-            return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getAffilid(), 'affiliation', true, $forceExtension);
+            return $this->assetPath($entity->getExternalid(), 'affiliation', true, $forceExtension);
         } elseif ($entity instanceof Contest && $property == 'banner') {
-            return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getCid(), 'contest', true, $forceExtension);
+            return $this->assetPath($entity->getExternalid(), 'contest', true, $forceExtension);
         }
 
         return null;
     }
 
-    public function loadTeam(string $idField, string $teamId, Contest $contest): Team
+    public function loadTeam(string $teamId, Contest $contest): Team
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't')
@@ -1470,7 +1374,7 @@ class DOMJudgeService
             ->leftJoin('t.category', 'tc')
             ->leftJoin('t.contests', 'c')
             ->leftJoin('tc.contests', 'cc')
-            ->andWhere(sprintf('t.%s = :team', $idField))
+            ->andWhere('t.externalid = :team')
             ->andWhere('t.enabled = 1')
             ->setParameter('team', $teamId);
 
@@ -1646,5 +1550,123 @@ class DOMJudgeService
         $zip->close();
 
         return Utils::streamZipFile($tempFilename, 'contest.zip');
+    }
+
+    private function allowJudge(ContestProblem $problem, Submission $submission, Language $language, bool $manualRequest): bool
+    {
+        if (!$problem->getAllowJudge() || !$language->getAllowJudge()) {
+            return false;
+        }
+        $evalOnDemand = false;
+        // We have 2 cases, the problem picks the global value or the value is set.
+        if ($problem->determineOnDemand($this->config->get('lazy_eval_results'))) {
+            $evalOnDemand = true;
+
+            // Special case, we're shadow and someone submits on our side in that case
+            // we're not super lazy.
+            if ($this->shadowMode() && $submission->getExternalid() === ('dj-' . $submission->getSubmitid())) {
+                $evalOnDemand = false;
+            }
+            if ($manualRequest) {
+                // When explicitly requested, judge the submission.
+                $evalOnDemand = false;
+            }
+        }
+        return !$evalOnDemand;
+    }
+
+    private function actuallyCreateJudgetasks(int $priority, Judging $judging): void
+    {
+        $submission = $judging->getSubmission();
+        $problem    = $submission->getContestProblem();
+        // We use a mass insert query, since that is way faster than doing a separate insert for each testcase.
+        // We first insert judgetasks, then select their ID's and finally insert the judging runs.
+
+        // Step 1: Create the template for the judgetasks.
+        $compileExecutable = $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable();
+        $judgetaskInsertParams = [
+            ':type' => JudgeTaskType::JUDGING_RUN,
+            ':submitid' => $submission->getSubmitid(),
+            ':priority' => $priority,
+            ':jobid' => $judging->getJudgingid(),
+            ':uuid' => $judging->getUuid(),
+            ':compile_script_id' => $compileExecutable->getImmutableExecId(),
+            ':compare_script_id' => $this->getImmutableCompareExecutable($problem)->getImmutableExecId(),
+            ':run_script_id' => $this->getImmutableRunExecutable($problem)->getImmutableExecId(),
+            ':compile_config' => $this->getCompileConfig($submission),
+            ':run_config' => $this->getRunConfig($problem, $submission),
+            ':compare_config' => $this->getCompareConfig($problem),
+        ];
+
+        $judgetaskDefaultParamNames = array_keys($judgetaskInsertParams);
+
+        // Step 2: Create and insert the judgetasks.
+
+        $testcases = $problem->getProblem()->getTestcases();
+        if (count($testcases) < 1) {
+            throw new BadRequestHttpException("No testcases set for problem {$problem->getProbid()}");
+        }
+        $judgetaskInsertParts = [];
+        /** @var Testcase $testcase */
+        foreach ($testcases as $testcase) {
+            $judgetaskInsertParts[] = sprintf(
+                '(%s, :testcase_id%d, :testcase_hash%d)',
+                implode(', ', $judgetaskDefaultParamNames),
+                $testcase->getTestcaseid(),
+                $testcase->getTestcaseid()
+            );
+            $judgetaskInsertParams[':testcase_id' . $testcase->getTestcaseid()] = $testcase->getTestcaseid();
+            $judgetaskInsertParams[':testcase_hash' . $testcase->getTestcaseid()] = $testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput();
+        }
+        $judgetaskColumns = array_map(fn(string $column) => substr($column, 1), $judgetaskDefaultParamNames);
+        $judgetaskInsertQuery = sprintf(
+            'INSERT INTO judgetask (%s, testcase_id, testcase_hash) VALUES %s',
+            implode(', ', $judgetaskColumns),
+            implode(', ', $judgetaskInsertParts)
+        );
+
+        $judgetaskInsertParamsWithoutColon = [];
+        foreach ($judgetaskInsertParams as $key => $param) {
+            $key = str_replace(':', '', $key);
+            $judgetaskInsertParamsWithoutColon[$key] = $param;
+        }
+
+        $this->em->getConnection()->executeQuery($judgetaskInsertQuery, $judgetaskInsertParamsWithoutColon);
+
+        // Step 3: Fetch the judgetasks ID's per testcase.
+        $judgetaskData = $this->em->getConnection()->executeQuery(
+            'SELECT judgetaskid, testcase_id FROM judgetask WHERE jobid = :jobid ORDER BY judgetaskid',
+            ['jobid' => $judging->getJudgingid()]
+        )->fetchAllAssociative();
+
+        // Step 4: Create and insert the corresponding judging runs.
+        $judgingRunInsertParams = [':judgingid' => $judging->getJudgingid()];
+        $judgingRunInsertParts = [];
+        foreach ($judgetaskData as $judgetaskItem) {
+            $judgingRunInsertParts[] = sprintf(
+                '(:judgingid, :testcaseid%d, :judgetaskid%d)',
+                $judgetaskItem['judgetaskid'],
+                $judgetaskItem['judgetaskid']
+            );
+            $judgingRunInsertParams[':testcaseid' . $judgetaskItem['judgetaskid']] = $judgetaskItem['testcase_id'];
+            $judgingRunInsertParams[':judgetaskid' . $judgetaskItem['judgetaskid']] = $judgetaskItem['judgetaskid'];
+        }
+        $judgingRunInsertQuery = sprintf(
+            'INSERT INTO judging_run (judgingid, testcaseid, judgetaskid) VALUES %s',
+            implode(', ', $judgingRunInsertParts)
+        );
+
+        $judgingRunInsertParamsWithoutColon = [];
+        foreach ($judgingRunInsertParams as $key => $param) {
+            $key = str_replace(':', '', $key);
+            $judgingRunInsertParamsWithoutColon[$key] = $param;
+        }
+
+        $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParamsWithoutColon);
+    }
+
+    public function shadowMode(): bool
+    {
+        return (bool)$this->config->get('shadow_mode');
     }
 }

@@ -61,6 +61,10 @@ start_time: '2021-03-27T09:00:00+00:00'
 end_time: '2021-03-27T11:00:00+00:00'
 duration: 2:00:00.000
 penalty_time: 20
+medals:
+    gold: 4
+    silver: 4
+    bronze: 4
 scoreboard_freeze_time: '2021-03-27T10:30:00+00:00'
 scoreboard_freeze_duration: 0:30:00
 EOF;
@@ -114,13 +118,7 @@ EOF;
     {
         // First clear the entity manager to have all data.
         static::getContainer()->get(EntityManagerInterface::class)->clear();
-        $config = static::getContainer()->get(ConfigurationService::class);
-        $dataSource = $config->get('data_source');
-        if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
-            return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
-        } else {
-            return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
-        }
+        return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
     }
 
     public function testBannerManagement(): void
@@ -177,7 +175,7 @@ EOF;
         self::assertArrayNotHasKey('problemset', $object);
 
         // Now upload a problemset
-        $problemsetFile = __DIR__ . '/../../../../../webapp/public/doc/logos/DOMjudgelogo.pdf';
+        $problemsetFile = __DIR__ . '/../../../../public/doc/logos/DOMjudgelogo.pdf';
         $problemset = new UploadedFile($problemsetFile, 'DOMjudgelogo.pdf');
         $this->verifyApiJsonResponse('POST', $url . '/problemset', 204, $this->apiUser, null, ['problemset' => $problemset]);
 
@@ -201,7 +199,7 @@ EOF;
         self::assertEquals(file_get_contents($problemsetFile), $callbackData);
 
         // Upload the problemset again, this time using PUT to also test that
-        $problemsetFile = __DIR__ . '/../../../../../webapp/public/doc/logos/DOMjudgelogo.pdf';
+        $problemsetFile = __DIR__ . '/../../../../public/doc/logos/DOMjudgelogo.pdf';
         $problemset = new UploadedFile($problemsetFile, 'DOMjudgelogo.pdf');
         $this->verifyApiJsonResponse('PUT', $url . '/problemset', 204, $this->apiUser, null, ['problemset' => $problemset]);
 
@@ -276,7 +274,7 @@ EOF;
 
         // General tests
         yield [[], 400, ''];
-        yield [['dummy' => 'dummy'], 400, "This value should be of type unknown."];
+        yield [['dummy' => 'dummy'], 400, "This value should be of type string."];
         yield [['id' => 1], 400, 'Missing \"start_time\" or \"scoreboard_thaw_time\" in request.'];
         yield [['id' => 1, 'start_time' => null, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 400, 'Setting both \"start_time\" and \"scoreboard_thaw_time\" at the same time is not allowed.'];
 

@@ -26,7 +26,11 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[ORM\UniqueConstraint(name: 'label', columns: ['label'])]
 #[UniqueEntity(fields: 'externalid')]
-class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface, AssetEntityInterface
+class Team extends BaseApiEntity implements
+    HasExternalIdInterface,
+    AssetEntityInterface,
+    ExternalIdFromInternalIdInterface,
+    PrefixedExternalIdInterface
 {
     final public const DONT_ADD_USER = 'dont-add-user';
     final public const CREATE_NEW_USER = 'create-new-user';
@@ -35,15 +39,15 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Team ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('id')]
-    #[Serializer\Type('string')]
+    #[Serializer\SerializedName('teamid')]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     protected ?int $teamid = null;
 
     #[ORM\Column(
         nullable: true,
         options: ['comment' => 'Team ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
-    #[Serializer\Exclude]
+    #[Serializer\SerializedName('id')]
     protected ?string $externalid = null;
 
     #[ORM\Column(
@@ -428,10 +432,9 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('organization_id')]
-    #[Serializer\Type('string')]
-    public function getAffiliationId(): ?int
+    public function getAffiliationId(): ?string
     {
-        return $this->getAffiliation()?->getAffilid();
+        return $this->getAffiliation()?->getExternalid();
     }
 
     public function setCategory(?TeamCategory $category = null): Team
@@ -567,7 +570,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[Serializer\Type('array<string>')]
     public function getGroupIds(): array
     {
-        return $this->getCategory() ? [$this->getCategory()->getCategoryid()] : [];
+        return $this->getCategory() ? [$this->getCategory()->getExternalid()] : [];
     }
 
     #[OA\Property(nullable: true)]
@@ -595,17 +598,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return (($clarification->getSender() && $clarification->getSender()->getTeamid() === $this->getTeamid()) ||
             ($clarification->getRecipient() && $clarification->getRecipient()->getTeamid() === $this->getTeamid()) ||
             ($clarification->getSender() === null && $clarification->getRecipient() === null));
-    }
-
-    /**
-     * @return array{organization_id: TeamAffiliation|null, group_ids: TeamCategory[]}
-     */
-    public function getExternalRelationships(): array
-    {
-        return [
-            'organization_id' => $this->getAffiliation(),
-            'group_ids'       => array_values(array_filter([$this->getCategory()])),
-        ];
     }
 
     #[Assert\Callback]

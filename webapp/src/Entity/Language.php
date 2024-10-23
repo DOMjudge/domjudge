@@ -25,7 +25,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[UniqueEntity(fields: 'langid')]
 #[UniqueEntity(fields: 'externalid')]
-class Language extends BaseApiEntity
+class Language extends BaseApiEntity implements
+    HasExternalIdInterface,
+    ExternalIdFromInternalIdInterface
 {
     #[ORM\Id]
     #[ORM\Column(length: 32, options: ['comment' => 'Language ID (string)'])]
@@ -259,7 +261,7 @@ class Language extends BaseApiEntity
         return $this->langid;
     }
 
-    public function setExternalid(string $externalid): Language
+    public function setExternalid(?string $externalid): Language
     {
         $this->externalid = $externalid;
         return $this;
@@ -403,14 +405,15 @@ class Language extends BaseApiEntity
     public function getAceLanguage(): string
     {
         return match ($this->getLangid()) {
-            'c', 'cpp', 'cxx' => 'c_cpp',
-            'pas' => 'pascal',
-            'hs' => 'haskell',
-            'pl' => 'perl',
-            'bash' => 'sh',
-            'py2', 'py3' => 'python',
             'adb' => 'ada',
+            'bash' => 'sh',
+            'c', 'cpp', 'cxx' => 'c_cpp',
+            'hs' => 'haskell',
+            'kt' => 'kotlin',
+            'pas' => 'pascal',
+            'pl' => 'perl',
             'plg' => 'prolog',
+            'py2', 'py3' => 'python',
             'rb' => 'ruby',
             'rs' => 'rust',
             default => $this->getLangid(),

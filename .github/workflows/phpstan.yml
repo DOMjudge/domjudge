@@ -13,11 +13,16 @@ jobs:
   phpstan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Install DOMjudge
-        run: .github/jobs/baseinstall.sh admin
+      - uses: actions/checkout@v4
+      - name: Setup composer dependencies
+        run: .github/jobs/composer_setup.sh
       - uses: php-actions/phpstan@v3
         with:
-          configuration: phpstan.dist.neon
+          configuration: webapp/phpstan.dist.neon
           path: webapp/src webapp/tests
           php_extensions: gd intl mysqli pcntl zip
+          autoload_file: webapp/vendor/autoload.php
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          path: /tmp/artifacts

@@ -4,7 +4,7 @@ framework:
     esi: false
     fragments: false
     http_method_override: true
-    annotations: true
+    annotations: false
     handle_all_throwables: true
     serializer:
         enabled: true

@@ -4,7 +4,7 @@
             <div class="col-sm">
                 Subject:
                 {% if clarification.problem %}
-                    Problem {{ clarification.problem.contestProblems.first.shortname }}: {{ clarification.problem.name }}
+                    Problem {{ clarification.contestProblem.shortname }}: {{ clarification.problem.name }}
                 {% elseif clarification.category %}
                     {{ categories[clarification.category]|default('general') }}
                 {% else %}

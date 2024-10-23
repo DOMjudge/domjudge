@@ -7,7 +7,6 @@ use App\DataTransferObject\ImageFile;
 use App\Entity\Contest;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
-use App\Service\EventLogService;
 use App\Utils\Utils;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
@@ -20,7 +19,6 @@ class ContestVisitor implements EventSubscriberInterface
     public function __construct(
         protected readonly ConfigurationService $config,
         protected readonly DOMJudgeService $dj,
-        protected readonly EventLogService $eventLogService
     ) {}
 
     /**
@@ -50,7 +48,7 @@ class ContestVisitor implements EventSubscriberInterface
         );
         $contest->setPenaltyTimeForApi((int)$this->config->get('penalty_time'));
 
-        $id = $contest->getApiId($this->eventLogService);
+        $id = $contest->getExternalid();
 
         // Banner
         if ($banner = $this->dj->assetPath($id, 'contest', true)) {
@@ -81,7 +79,7 @@ class ContestVisitor implements EventSubscriberInterface
             $route = $this->dj->apiRelativeUrl(
                 'v4_contest_problemset',
                 [
-                    'cid' => $contest->getApiId($this->eventLogService),
+                    'cid' => $id,
                 ]
             );
             $mimeType = match ($contest->getContestProblemsetType()) {

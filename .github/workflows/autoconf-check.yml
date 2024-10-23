@@ -22,6 +22,8 @@ jobs:
         include:
           - os: debian
             version: stable
+          - os: debian
+            version: testing
     runs-on: ubuntu-latest
     env:
       DEBIAN_FRONTEND: noninteractive
@@ -31,6 +33,6 @@ jobs:
     steps:
       - name: Install git so we get the .github directory
         run: apt-get update; apt-get install -y git
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup image and run bats tests
         run: .github/jobs/configure-checks/setup_configure_image.sh

@@ -5,10 +5,13 @@ namespace App\Controller\Team;
 use App\Controller\BaseController;
 use App\Entity\Language;
 use App\Service\ConfigurationService;
+use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -21,9 +24,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class LanguageController extends BaseController
 {
     public function __construct(
-        protected readonly ConfigurationService   $config,
-        protected readonly EntityManagerInterface $em
-    ) {}
+        protected readonly ConfigurationService $config,
+        EntityManagerInterface $em,
+        protected readonly EventLogService $eventLogService,
+        DOMJudgeService $dj,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'team_languages')]
     public function languagesAction(): Response

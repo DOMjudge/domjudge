@@ -107,7 +107,7 @@
                 <td class="{{ tdExtraClass }}">
                     <a href="{{ link }}">
                         s{{ submission.submitid }}
-                        {% if submission.externalid %}
+                        {% if shadowMode() and submission.externalid %}
                             ({{ submission.externalid }})
                         {% endif %}
                     </a>

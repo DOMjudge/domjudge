@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController as ARC;
 use App\DataTransferObject\ImageFile;
 use App\Validator\Constraints\Country;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -32,20 +33,24 @@ use Symfony\Component\Validator\Constraints as Assert;
     ]
 )]
 #[UniqueEntity(fields: 'externalid')]
-class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
+class TeamAffiliation extends BaseApiEntity implements
+    HasExternalIdInterface,
+    AssetEntityInterface,
+    ExternalIdFromInternalIdInterface,
+    PrefixedExternalIdInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Team affiliation ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('id')]
-    #[Serializer\Type('string')]
+    #[Serializer\SerializedName('affilid')]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     protected ?int $affilid = null;
 
     #[ORM\Column(
         nullable: true,
         options: ['comment' => 'Team affiliation ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
-    #[Serializer\Exclude]
+    #[Serializer\SerializedName('id')]
     protected ?string $externalid = null;
 
     #[ORM\Column(

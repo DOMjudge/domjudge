@@ -212,6 +212,12 @@ runcheck "$RUN_SCRIPT" $RUNARGS \
 	--stderr=program.err --outmeta=program.meta -- \
 	"$PREFIX/$PROGRAM" 2>runguard.err
 
+if [ "$CREATE_WRITABLE_TEMP_DIR" ]; then
+	# Revoke access to the TMPDIR as security measure
+	chown -R "$(id -un):" "$TMPDIR"
+	chmod -R go= "$TMPDIR"
+fi
+
 if [ $COMBINED_RUN_COMPARE -eq 0 ]; then
 	# We first compare the output, so that even if the submission gets a
 	# timelimit exceeded or runtime error verdict later, the jury can
