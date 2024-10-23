@@ -195,6 +195,9 @@ del {
     border-right: 1px solid silver;
     padding: 0;
 }
+.scoreboard td.no-border, .scoreboard th.no-border {
+    border: none;
+}
 .scoreboard td.score_cell {
     min-width: 4.2em;
     border-right: none;
