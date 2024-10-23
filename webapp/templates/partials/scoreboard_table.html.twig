@@ -354,10 +354,6 @@
     {% for score in scores %}
     {% set classes = [] %}
     {% if score.team.category.sortorder != previousSortOrder %}
-        {% if previousSortOrder != -1 %}
-            {# Output summary of previous sort order #}
-            {% include 'partials/scoreboard_summary.html.twig' with {sortOrder: previousSortOrder} %}
-        {% endif %}
         {% set classes = classes | merge(['sortorderswitch']) %}
         {% set previousSortOrder = score.team.category.sortorder %}
         {% set previousTeam = null %}
@@ -471,7 +467,7 @@
         <td class="scorenc" rowspan="2">{{ totalPoints }}<br/><span class="scorett" style="font-weight: normal;">{{ totalTime }}</span></td>
     </tr>
         <tr style="height: 32px;">
-            <td/>
+            <td class="no-border"/>
             <td colspan="2">
                 {% for problem in problems %}
                     {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
