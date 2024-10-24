@@ -334,7 +334,10 @@ function fetch_executable_internal(
     $execrunpath     = $execbuilddir . '/run';
     $execrunjurypath = $execbuilddir . '/runjury';
     if (!is_dir($execdir) || !file_exists($execdeploypath)) {
-        system('rm -rf ' . dj_escapeshellarg($execdir) . ' ' . dj_escapeshellarg($execbuilddir));
+        system('rm -rf ' . dj_escapeshellarg($execdir) . ' ' . dj_escapeshellarg($execbuilddir), $retval);
+        if ($retval !== 0) {
+            error("Deleting '$execdir' or '$execbuilddir' was unsuccessful.");
+        }
         system('mkdir -p ' . dj_escapeshellarg($execbuilddir), $retval);
         if ($retval !== 0) {
             error("Could not create directory '$execbuilddir'");
@@ -837,14 +840,16 @@ while (true) {
                     $run_config['hash']
                 );
                 if (isset($error)) {
-                    // FIXME
-                    continue;
+                    $scriptId = $judgeTask['run_script_id'];
+                    error("Retrieving/storing debug script '$scriptId' failed.");
                 }
 
                 $debug_cmd = implode(' ', array_map('dj_escapeshellarg',
                     [$runpath, $workdir, $tmpfile]));
                 system($debug_cmd, $retval);
-                // FIXME: check retval
+                if ($retval !== 0) {
+                    error("Running '$runpath' failed.");
+                }
 
                 request(
                     sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
