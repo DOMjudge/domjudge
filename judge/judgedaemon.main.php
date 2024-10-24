@@ -333,7 +333,8 @@ function fetch_executable_internal(
     $execbuildpath   = $execbuilddir . '/build';
     $execrunpath     = $execbuilddir . '/run';
     $execrunjurypath = $execbuilddir . '/runjury';
-    if (!is_dir($execdir) || !file_exists($execdeploypath)) {
+    if (!is_dir($execdir) || !file_exists($execdeploypath) ||
+        ($combined_run_compare && file_get_contents(LIBJUDGEDIR . '/run-interactive.sh')!==file_get_contents($execrunpath))) {
         system('rm -rf ' . dj_escapeshellarg($execdir) . ' ' . dj_escapeshellarg($execbuilddir));
         system('mkdir -p ' . dj_escapeshellarg($execbuilddir), $retval);
         if ($retval !== 0) {
@@ -1399,7 +1400,7 @@ function judge(array $judgeTask): bool
 
     $input = $tcfile['input'];
     $output = $tcfile['output'];
-    $passLimit = $run_config['pass_limit'];
+    $passLimit = $run_config['pass_limit'] ?? 1;
     for ($passCnt = 1; $passCnt <= $passLimit; $passCnt++) {
         $nextPass = false;
         if ($passLimit > 1) {
