@@ -1,3 +1,4 @@
 name: Boolean switch search
 
 validation: custom interactive
+visualization: default

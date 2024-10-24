@@ -2,6 +2,12 @@
 
 namespace App\Controller\Jury;
 
+use App\Entity\Judgehost;
+use App\Entity\JudgeTask;
+use App\Entity\Testcase;
+use App\Doctrine\DBAL\Types\JudgeTaskType;
+use Doctrine\DBAL\ArrayParameterType;
+
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Role;

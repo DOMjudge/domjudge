@@ -334,7 +334,10 @@ function fetch_executable_internal(
     $execrunpath     = $execbuilddir . '/run';
     $execrunjurypath = $execbuilddir . '/runjury';
     if (!is_dir($execdir) || !file_exists($execdeploypath)) {
-        system('rm -rf ' . dj_escapeshellarg($execdir) . ' ' . dj_escapeshellarg($execbuilddir));
+        system('rm -rf ' . dj_escapeshellarg($execdir) . ' ' . dj_escapeshellarg($execbuilddir), $retval);
+        if ($retval !== 0) {
+            logmsg(LOG_WARNING, "Deleting '$execdir' or '$execbuilddir' was unsuccessful.");
+        }
         system('mkdir -p ' . dj_escapeshellarg($execbuilddir), $retval);
         if ($retval !== 0) {
             error("Could not create directory '$execbuilddir'");
@@ -844,7 +847,9 @@ while (true) {
                 $debug_cmd = implode(' ', array_map('dj_escapeshellarg',
                     [$runpath, $workdir, $tmpfile]));
                 system($debug_cmd, $retval);
-                // FIXME: check retval
+                if ($retval !== 0) {
+                    error("Running '$runpath' failed.");
+                }
 
                 request(
                     sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
@@ -872,6 +877,50 @@ while (true) {
         continue;
     }
 
+    if ($type == 'output_visualization') {
+        if ($lastWorkdir !== null) {
+            cleanup_judging($lastWorkdir);
+            $lastWorkdir = null;
+        }
+        foreach ($row as $judgeTask) {
+            if (isset($judgeTask['output_visualizer_script_id'])) {
+                // Visualization of output which this host judged requested.
+                $run_config = dj_json_decode($judgeTask['run_config']);
+                $tmpfile = tempnam(TMPDIR, 'output_visualization_');
+                [$runpath, $error] = fetch_executable_internal(
+                    $workdirpath,
+                    'output_visualization',
+                    $judgeTask['output_visualizer_script_id'],
+                    $run_config['hash']
+                );
+                if (isset($error)) {
+                    // FIXME
+                    continue;
+                }
+
+                $teamoutput = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']) . '/1/program.out';
+                $visual_cmd = implode(' ', array_map('dj_escapeshellarg',
+                    [$runpath, $teamoutput, $tmpfile]));
+                system($visual_cmd, $retval);
+                if ($retval !== 0) {
+                    error("Running '$runpath' failed.");
+                }
+
+                request(
+                    sprintf('judgehosts/add-visual/%s/%s', urlencode($myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])),
+                    'POST',
+                    ['visual_output' => rest_encode_file($tmpfile, false),
+                     'testcase_id' => $judgeTask['testcase_id']],
+                    false
+                );
+                unlink($tmpfile);
+
+                logmsg(LOG_INFO, "  ⇡ Uploading visual output of workdir $workdir.");
+            }
+        }
+        continue;
+    }
     $success_file = "$workdir/.uuid_pid";
     $expected_uuid_pid = $row[0]['uuid'] . '_' . (string)getmypid();
 

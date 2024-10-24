@@ -59,6 +59,13 @@
                                 </a>
                                 {% set used = true %}
                             {% endfor %}
+                        {% elseif executable.type == 'output_visualizer' %}
+                            {% for problem in executable.problemsOutputVisualizer %}
+                                <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">
+                                    p{{ problem.probid }} {{ problem | problemBadgeForContest }}
+                                </a>
+                                {% set used = true %}
+                            {% endfor %}
                         {% elseif executable.type == 'compile' %}
                             {% for language in executable.languages %}
                                 <a href="{{ path('jury_language', {'langId': language.langid}) }}">

@@ -99,6 +99,10 @@ class JudgeTask
     #[Serializer\Type('string')]
     private ?int $compare_script_id = null;
 
+    #[ORM\Column(nullable: true, options: ['comment' => 'Output visualizer script ID', 'unsigned' => true])]
+    #[Serializer\Type('string')]
+    private ?int $output_visualizer_script_id = null;
+
     #[ORM\Column(nullable: true, options: ['comment' => 'Testcase ID', 'unsigned' => true])]
     #[Serializer\Type('string')]
     private ?int $testcase_id = null;
@@ -273,6 +277,17 @@ class JudgeTask
     public function getCompareScriptId(): int
     {
         return $this->compare_script_id;
+    }
+
+    public function setOutputVisualizerScriptId(int $output_visualizer_script_id): JudgeTask
+    {
+        $this->output_visualizer_script_id = $output_visualizer_script_id;
+        return $this;
+    }
+
+    public function getOutputVisualizerScriptId(): int
+    {
+        return $this->output_visualizer_script_id;
     }
 
     public function setTestcaseId(int $testcase_id): JudgeTask

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use Doctrine\DBAL\ArrayParameterType;
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
@@ -15,12 +16,14 @@ use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Problem;
+use App\Entity\QueueTask;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
+use App\Entity\Visualization;
 use App\Form\Type\SubmissionsFilterType;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
@@ -511,6 +514,14 @@ class SubmissionController extends BaseController
                 ->getSingleScalarResult();
         }
 
+        $visualization = null;
+        $createdVisualization = $this->em->getRepository(Visualization::class)->findOneBy([
+                'judging' => $selectedJudging,
+                ]);
+        if ($createdVisualization) {
+            $visualization = ['url' => $this->generateUrl('jury_submission_visual', ['visualId' => $createdVisualization->getVisualizationId()])];
+        }
+
         $twigData = [
             'submission' => $submission,
             'lastSubmission' => $lastSubmission,
@@ -533,6 +544,8 @@ class SubmissionController extends BaseController
             'requestedOutputCount' => $requestedOutputCount,
             'version_warnings' => [],
             'isMultiPassProblem' => $submission->getProblem()->isMultipassProblem(),
+            'hasOutputVisualizer' => $submission->getProblem()->getOutputVisualizerExecutable() ?? false,
+            'visualization' => $visualization,
         ];
 
         if ($selectedJudging === null) {
@@ -1013,6 +1026,23 @@ class SubmissionController extends BaseController
     /**
      * @throws DBALException
      */
+    #[Route(path: '/{judgingId<\d+>}/request-visualization', name: 'jury_submission_request_visualization', methods: ['POST'])]
+    public function requestVisualizationRuns(Request $request, int $judgingId): RedirectResponse
+    {
+        $judging = $this->em->getRepository(Judging::class)->find($judgingId);
+        if ($judging === null) {
+            throw new BadRequestHttpException("Unknown judging with '$judgingId' requested.");
+        }
+        $this->createVisualization([$judging]);
+
+        return $this->redirectToLocalReferrer($this->router, $request,
+            $this->generateUrl('jury_submission_by_judging', ['jid' => $judgingId])
+        );
+    }
+
+    /**
+     * @throws DBALException
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{submitId<\d+>}/update-status', name: 'jury_submission_update_status', methods: ['POST'])]
     public function updateStatusAction(
@@ -1281,5 +1311,89 @@ class SubmissionController extends BaseController
             $allErrors[] = $type . ' changes:';
             array_push($allErrors, ...$errors);
         }
+    }
+
+    /**
+     * @param Judging[] $judgings
+     */
+    protected function createVisualization(array $judgings): void
+    {
+        $inProgress = [];
+        $alreadyRequested = [];
+        $invalidJudgings = [];
+        $numRequested = 0;
+        foreach ($judgings as $judging) {
+            $judgingId = $judging->getJudgingid();
+            if ($judging->getResult() === null) {
+                $inProgress[] = $judgingId;
+            } elseif ($judging->getVisualization()) {
+                $alreadyRequested[] = $judgingId;
+            } elseif (!$judging->getValid()) {
+                $invalidJudgings[] = $judgingId;
+            } else {
+                $outs = $judging->getRuns()->toArray();
+                $tmpRun = null;
+                $lowestId = count($outs);
+                foreach ($outs as $run) {
+                    if ($tmpRun !== null and $lowestId > $run->getRunId()) {
+                        continue;
+                    }
+                    if ($run->getRunResult() === 'correct' and $run->getRunId()<$lowestId) {
+                        $tmpRun = $run;
+                        $lowestId = $run->getRunId();
+                    }
+                }
+                $submission = $judging->getSubmission();
+                $executable = $submission->getProblem()->getOutputVisualizerExecutable()->getImmutableExecutable();
+                $judgeTask = new JudgeTask();
+                $judgeTask->setType('output_visualization')
+                          ->setValid(true)
+                          ->setJobid($judgingId)
+                          ->setJudgehost($tmpRun->getJudgeTask()->getJudgehost())
+                          ->setSubmission($submission)
+                          ->setTestcaseId($tmpRun->getTestcase()->getTestcaseId())
+                          ->setPriority(JudgeTask::PRIORITY_LOW)
+                          ->setOutputVisualizerScriptId($executable->getImmutableExecId())
+                          ->setRunConfig($this->dj->jsonEncode(['hash' => $executable->getHash()]));
+                $numRequested += 1;
+                $this->em->persist($judgeTask);
+                $this->em->flush();
+            }
+        }
+        if (count($judgings) === 1) {
+            if ($inProgress !== []) {
+                $this->addFlash('warning', 'Please be patient, this visualization is still in progress.');
+            }
+            if ($alreadyRequested != []) {
+                $this->addFlash('warning', 'This visualization was already requested to be judged completely.');
+            }
+        } else {
+            if ($inProgress !== []) {
+                $this->addFlash('warning', sprintf('Please be patient, these visualizations are still in progress: %s', implode(', ', $inProgress)));
+            }
+            if ($alreadyRequested != []) {
+                $this->addFlash('warning', sprintf('These judgings were already requested to be judged completely: %s', implode(', ', $alreadyRequested)));
+            }
+            if ($invalidJudgings !== []) {
+                $this->addFlash('warning', sprintf('These visualizations were skipped as the judgings were superseded by other judgings: %s', implode(', ', $invalidJudgings)));
+            }
+        }
+        if ($numRequested === 0) {
+            $this->addFlash('warning', 'No more remaining runs to be judged.');
+        } else {
+            $this->addFlash('info', "Requested $numRequested to be visualized.");
+        }
+    }
+
+    #[Route(path: '/visual/{visualId}', name: 'jury_submission_visual')]
+    public function visualAction(
+        Request $request,
+        ?string $visualId = null,
+    ): StreamedResponse {
+        
+        $visualization = $this->em->getRepository(Visualization::class)->findOneBy(['visualization_id' => $visualId]);
+        $name = 'visual.j' . $visualization->getJudging()->getJudgingid()
+            . '.png';
+        return Utils::streamAsBinaryFile(file_get_contents($visualization->getFilename()), $name);
     }
 }

@@ -27,6 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\UniqueConstraint(columns: ['externalid'], name: 'externalid', options: ['lengths' => [190]])]
 #[ORM\Index(columns: ['special_run'], name: 'special_run')]
 #[ORM\Index(columns: ['special_compare'], name: 'special_compare')]
+#[ORM\Index(columns: ['special_output_visualizer'], name: 'special_output_visualizer')]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: 'externalid')]
 class Problem extends BaseApiEntity implements
@@ -153,6 +154,11 @@ class Problem extends BaseApiEntity implements
     #[ORM\JoinColumn(name: 'special_run', referencedColumnName: 'execid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Executable $run_executable = null;
+
+    #[ORM\ManyToOne(inversedBy: 'problems_output_visualizer')]
+    #[ORM\JoinColumn(name: 'special_output_visualizer', referencedColumnName: 'execid', onDelete: 'SET NULL')]
+    #[Serializer\Exclude]
+    private ?Executable $output_visualizer_executable = null;
 
     /**
      * @var Collection<int, Testcase>
@@ -376,6 +382,17 @@ class Problem extends BaseApiEntity implements
     public function getRunExecutable(): ?Executable
     {
         return $this->run_executable;
+    }
+
+    public function setOutputVisualizerExecutable(?Executable $outputVisualizerExecutable = null): Problem
+    {
+        $this->output_visualizer_executable = $outputVisualizerExecutable;
+        return $this;
+    }
+
+    public function getOutputVisualizerExecutable(): ?Executable
+    {
+        return $this->output_visualizer_executable;
     }
 
     public function __construct()

@@ -72,7 +72,7 @@ class ImportProblemService
         $submission_file = 'submissions.json';
         $problemIsNew    = $problem === null;
 
-        $iniKeysProblem        = ['name', 'timelimit', 'special_run', 'special_compare', 'externalid'];
+        $iniKeysProblem        = ['name', 'timelimit', 'special_run', 'special_compare', 'special_output_visualizer', 'externalid'];
         $iniKeysContestProblem = ['allow_submit', 'allow_judge', 'points', 'color', 'short-name'];
 
         $defaultTimelimit = 10;
@@ -144,6 +144,11 @@ class ImportProblemService
                 $this->em->getRepository(Executable::class)->find($problemProperties['special_run']);
             unset($problemProperties['special_run']);
         }
+        if (isset($problemProperties['special_output_visualizer'])) {
+            $problemProperties['output_visualizer_executable'] =
+                $this->em->getRepository(Executable::class)->find($problemProperties['special_output_visualizer']);
+            unset($problemProperties['special_output_visualizer']);
+        }
 
         /** @var ContestProblem|null $contestProblem */
         $contestProblem = null;
@@ -208,6 +213,7 @@ class ImportProblemService
                 ->setSpecialCompareArgs('')
                 ->setRunExecutable()
                 ->setCombinedRunCompare(false)
+                ->setOutputVisualizerExecutable()
                 ->setMemlimit(null)
                 ->setOutputlimit(null)
                 ->setProblemStatementContent(null)
@@ -303,6 +309,12 @@ class ImportProblemService
                     }
                     if (isset($yamlData['limits']['validation_passes'])) {
                         $problem->setMultipassLimit($yamlData['limits']['validation_passes']);
+                    }
+                }
+
+                if (isset($yamlData['visualization'])) {
+                    if (!$this->searchAndAddOutputVisualizer($zip, $messages, $externalId, $yamlData['visualization'], $problem)) {
+                        return null;
                     }
                 }
 
@@ -929,33 +941,58 @@ class ImportProblemService
     /**
      * @param array{danger: string[], info: string[]} $messages
      */
+    private function searchAndAddOutputVisualizer(ZipArchive $zip, ?array &$messages, string $externalId, string $visualizerMode, ?Problem $problem): bool
+    {
+        $programStrings = [];
+        $programStrings['package_dir'] = 'output_visualizer/';
+        $programStrings['type'] = 'output visualizer';
+        $programStrings['clash'] = 'visual';
+        return self::helperSearchAndAddProgram($zip, $messages, $externalId, $visualizerMode, $problem, $programStrings);
+    }
+
+    /**
+     * @param array{danger: string[], info: string[]} $messages
+     */
     private function searchAndAddValidator(ZipArchive $zip, ?array &$messages, string $externalId, string $validationMode, ?Problem $problem): bool
     {
-        $validatorFiles = [];
+        $programStrings = [];
+        $programStrings['package_dir'] = 'output_validators/';
+        $programStrings['type'] = 'output validator';
+        $programStrings['clash'] = 'cmp';
+        return self::helperSearchAndAddProgram($zip, $messages, $externalId, $validationMode, $problem, $programStrings);
+    }
+
+    /**
+     * @param array{danger: string[], info: string[]} $messages
+     * @param array<string, string> $programStrings
+     */
+    private function helperSearchAndAddProgram(ZipArchive $zip, ?array &$messages, string $externalId, string $programMode, ?Problem $problem, array $programStrings): bool
+    {
+        $programFiles = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $filename = $zip->getNameIndex($i);
-            if (Utils::startsWith($filename, 'output_validators/') &&
+            if (Utils::startsWith($filename, $programStrings['package_dir']) &&
                 !Utils::endsWith($filename, '/')) {
-                $validatorFiles[] = $filename;
+                $programFiles[] = $filename;
             }
         }
-        if (sizeof($validatorFiles) == 0) {
-            $messages['danger'][] = 'Custom validator specified but not found.';
+        if (sizeof($programFiles) == 0) {
+            $messages['danger'][] = 'Custom ' . $programStrings['type'] . ' specified but not found.';
             return false;
         } else {
             // File(s) have to share common directory.
-            $validatorDir = mb_substr($validatorFiles[0], 0, mb_strrpos($validatorFiles[0], '/')) . '/';
+            $programDir = mb_substr($programFiles[0], 0, mb_strrpos($programFiles[0], '/')) . '/';
             $sameDir = true;
-            foreach ($validatorFiles as $validatorFile) {
-                if (!Utils::startsWith($validatorFile, $validatorDir)) {
+            foreach ($programFiles as $programFile) {
+                if (!Utils::startsWith($programFile, $programDir)) {
                     $sameDir = false;
                     $messages['warning'][] = sprintf('%s does not start with %s.',
-                        $validatorFile, $validatorDir);
+                        $programFile, $programDir);
                     break;
                 }
             }
             if (!$sameDir) {
-                $messages['danger'][] = 'Found multiple custom output validators.';
+                $messages['danger'][] = 'Found multiple custom ' . $programStrings['type'] . 's.';
                 return false;
             } else {
                 $tmpzipfiledir = exec("mktemp -d --tmpdir=" .
@@ -967,9 +1004,9 @@ class ImportProblemService
                     );
                 }
                 chmod($tmpzipfiledir, 0700);
-                foreach ($validatorFiles as $validatorFile) {
-                    $content = $zip->getFromName($validatorFile);
-                    $filebase = basename($validatorFile);
+                foreach ($programFiles as $programFile) {
+                    $content = $zip->getFromName($programFile);
+                    $filebase = basename($programFile);
                     $newfilename = $tmpzipfiledir . "/" . $filebase;
                     file_put_contents($newfilename, $content);
                     if ($filebase === 'build' || $filebase === 'run') {
@@ -978,51 +1015,65 @@ class ImportProblemService
                     }
                 }
 
-                exec("zip -r -j '$tmpzipfiledir/outputvalidator.zip' '$tmpzipfiledir'",
+                $newZipFilename = $tmpzipfiledir . '/' . str_replace(' ', '', $programStrings['type']) . '.zip';
+                exec("zip -r -j '$newZipFilename' '$tmpzipfiledir'",
                     $dontcare, $retval);
                 if ($retval != 0) {
                     throw new ServiceUnavailableHttpException(
-                        null, 'Failed to create ZIP file for output validator.'
+                        null, 'Failed to create ZIP file for ' . $programStrings['type'] . '.'
                     );
                 }
 
-                $outputValidatorZip = file_get_contents($tmpzipfiledir . '/outputvalidator.zip');
-                $outputValidatorName = substr($externalId, 0, 20) . '_cmp';
-                if ($this->em->getRepository(Executable::class)->find($outputValidatorName)) {
+                $programZip = file_get_contents($newZipFilename);
+                $programName = substr($externalId, 0, 20) . '_' . $programStrings['clash'];
+                if ($this->em->getRepository(Executable::class)->find($programName)) {
                     // Avoid name clash.
                     $clashCount = 2;
                     while ($this->em->getRepository(Executable::class)->find(
-                        $outputValidatorName . '_' . $clashCount)) {
+                        $programName . '_' . $clashCount)) {
                         $clashCount++;
                     }
-                    $outputValidatorName = $outputValidatorName . "_" . $clashCount;
+                    $programName = $programName . "_" . $clashCount;
                 }
-
-                $combinedRunCompare = $validationMode == 'custom interactive';
 
                 if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
                     throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file.');
                 }
-                file_put_contents($tempzipFile, $outputValidatorZip);
+                file_put_contents($tempzipFile, $programZip);
                 $zipArchive = new ZipArchive();
                 $zipArchive->open($tempzipFile, ZipArchive::CREATE);
 
                 $executable = new Executable();
                 $executable
-                    ->setExecid($outputValidatorName)
+                    ->setExecid($programName)
                     ->setImmutableExecutable($this->dj->createImmutableExecutable($zipArchive))
-                    ->setDescription(sprintf('output validator for %s', $problem->getName()))
-                    ->setType($combinedRunCompare ? 'run' : 'compare');
+                    ->setDescription(sprintf('%s for %s', $programStrings['type'], $problem->getName()));
+ 
+                $combinedRunCompare = false;
+                if ($programStrings['type'] === 'output validator') {
+                    $combinedRunCompare = $programMode == 'custom interactive';
+                    $executable->setType($combinedRunCompare ? 'run' : 'compare');
+                } else {
+                    $executable->setType(str_replace(' ', '_', $programStrings['type']));
+                }
                 $this->em->persist($executable);
 
-                if ($combinedRunCompare) {
-                    $problem->setCombinedRunCompare(true);
-                    $problem->setRunExecutable($executable);
+                if ($programStrings['type'] === 'output validator') {
+                    if ($combinedRunCompare) {
+                        $problem->setCombinedRunCompare(true);
+                        $problem->setRunExecutable($executable);
+                    } else {
+                        $problem->setCompareExecutable($executable);
+                    }
+                } elseif ($programStrings['type'] === 'output visualizer') {
+                    $problem->setOutputVisualizerExecutable($executable);
                 } else {
-                    $problem->setCompareExecutable($executable);
+                    $messages['danger'][] = "Unknown type '" . $programStrings['type'] . "'.";
+                    return false;
                 }
 
-                $messages['info'][] = "Added output validator '$outputValidatorName'.";
+                $newMessage = "Added " . $programStrings['type'] . " '$programName'.";
+                $messages['info'][] = $newMessage;
             }
         }
         return true;
