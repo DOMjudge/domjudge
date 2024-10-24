@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3ffb9ae6009d6e668f77b90a4c6d5cf5",
+    "content-hash": "9a2c75b38993b7d6e38f664285680489",
     "packages": [
         {
             "name": "apalfrey/select2-bootstrap-5-theme",
@@ -1939,10 +1939,10 @@
         },
         {
             "name": "fortawesome/font-awesome",
-            "version": "6.5.2",
+            "version": "6.6.0",
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/FortAwesome/Font-Awesome/releases/download/6.5.2/fontawesome-free-6.5.2-web.zip"
+                "url": "https://github.com/FortAwesome/Font-Awesome/releases/download/6.6.0/fontawesome-free-6.6.0-web.zip"
             },
             "type": "library"
         },
