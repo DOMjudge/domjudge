@@ -9,6 +9,7 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Testcase;
 use App\Form\Type\SubmitProblemType;
+use App\Form\Type\SubmitProblemPasteType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -60,47 +61,135 @@ class SubmissionController extends BaseController
         if ($problem !== null) {
             $data['problem'] = $problem;
         }
-        $form    = $this->formFactory
+        $formUpload = $this->formFactory
             ->createBuilder(SubmitProblemType::class, $data)
             ->setAction($this->generateUrl('team_submit'))
             ->getForm();
 
-        $form->handleRequest($request);
+        $formPaste = $this->formFactory
+            ->createBuilder(SubmitProblemPasteType::class, $data)
+            ->setAction($this->generateUrl('team_submit'))
+            ->getForm();
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        $formUpload->handleRequest($request);
+        $formPaste->handleRequest($request);
+        if ($formUpload->isSubmitted() || $formPaste->isSubmitted()) {
             if ($contest === null) {
                 $this->addFlash('danger', 'No active contest');
             } elseif (!$this->dj->checkrole('jury') && !$contest->getFreezeData()->started()) {
                 $this->addFlash('danger', 'Contest has not yet started');
             } else {
-                /** @var Problem $problem */
-                $problem = $form->get('problem')->getData();
-                /** @var Language $language */
-                $language = $form->get('language')->getData();
-                /** @var UploadedFile[] $files */
-                $files      = $form->get('code')->getData();
-                if (!is_array($files)) {
-                    $files = [$files];
-                }
-                $entryPoint = $form->get('entry_point')->getData() ?: null;
-                $submission = $this->submissionService->submitSolution(
-                    $team, $this->dj->getUser(), $problem->getProbid(), $contest, $language, $files, 'team page', null,
-                    null, $entryPoint, null, null, $message
-                );
+                $problem = null;
+                $language = null;
+                $files = [];
+                $entryPoint = null;
+                $message = '';
+        
+                if ($formUpload->isSubmitted() && $formUpload->isValid()) {
+                    $problem = $formUpload->get('problem')->getData();
+                    $language = $formUpload->get('language')->getData();
+                    $files = $formUpload->get('code')->getData();
+                    if (!is_array($files)) {
+                        $files = [$files];
+                    }
+                    $entryPoint = $formUpload->get('entry_point')->getData() ?: null;
+                } elseif ($formPaste->isSubmitted() && $formPaste->isValid()) {
+                    $problem = $formPaste->get('problem')->getData();
+                    $language = $formPaste->get('language')->getData();
+                    $codeContent = $formPaste->get('code_content')->getData();
+                    $problemShortName = $problem->getContestProblems()->first()->getShortName();
 
-                if ($submission) {
-                    $this->addFlash(
-                        'success',
-                        'Submission done! Watch for the verdict in the list below.'
+                    if ($codeContent == null || empty(trim($codeContent))) {
+                        $this->addFlash('danger', 'No code content provided.');
+                        return $this->redirectToRoute('team_index');
+                    }
+        
+                    $saveFileDir = sys_get_temp_dir();
+                    $saveFileName = sprintf(
+                        '%s.%s',
+                        $problemShortName,
+                        $language->getExtensions()[0]
                     );
-                } else {
-                    $this->addFlash('danger', $message);
+                    $saveFileName = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $saveFileName);
+
+                    if ($language->getExtensions()[0] == 'java' || $language->getExtensions()[0] == 'kt') {
+                        $entryPoint = $formPaste->get('entry_point')->getData() ?: null;
+                        // Check for invalid characters in entry point name
+                        $invalidChars = '/[<>:"\/\\|?*]/';
+                        if (preg_match($invalidChars, $entryPoint)) {
+                            $this->addFlash('danger', 'Invalid entry point name.');
+                            return $this->redirectToRoute('team_index');
+                        }
+                        $saveFileName = $entryPoint . '.' . $language->getExtensions()[0];
+                    } else {
+                        $entryPoint = $saveFileName;
+                    }
+
+                    $saveFilePath = $saveFileDir . DIRECTORY_SEPARATOR . $saveFileName;
+                    file_put_contents($saveFilePath, $codeContent);
+        
+                    $uploadedFile = new UploadedFile(
+                        $saveFilePath,
+                        $saveFileName,
+                        'application/octet-stream',
+                        null,
+                        true
+                    );
+                    $files = [$uploadedFile];
                 }
-                return $this->redirectToRoute('team_index');
+        
+                if ($problem && $language && !empty($files)) {
+                    $submission = $this->submissionService->submitSolution(
+                        $team,
+                        $this->dj->getUser(),
+                        $problem->getProbid(),
+                        $contest,
+                        $language,
+                        $files,
+                        'team page',
+                        null,
+                        null,
+                        $entryPoint,
+                        null,
+                        null,
+                        $message
+                    );
+        
+                    if ($submission) {
+                        $this->addFlash('success', 'Submission done! Watch for the verdict in the list below.');
+                    } else {
+                        $this->addFlash('danger', $message);
+                    }
+        
+                    return $this->redirectToRoute('team_index');
+                }
+            }
+        }
+        
+        $active_tab_array = $this->config->get('default_submission_code_mode');
+        $active_tab = "";
+        if (count($active_tab_array) == 1) {
+            $active_tab = reset($active_tab_array);
+            $this->dj->setCookie('active_tab', $active_tab);
+        }
+        else if ($this->dj->getCookie('active_tab') != null) {
+            $cookie_active_tab = $this->dj->getCookie('active_tab');
+            if(in_array($cookie_active_tab, $active_tab_array)) {
+                $active_tab = $cookie_active_tab;
+            }
+            else {
+                $active_tab = reset($active_tab_array);
+                $this->dj->setCookie('active_tab', $active_tab);
             }
         }
 
-        $data = ['form' => $form->createView(), 'problem' => $problem];
+        $data = [
+            'formupload' => $formUpload->createView(),
+            'formpaste' => $formPaste->createView(),
+            'active_tab' => $active_tab,
+            'active_tab_array' => $active_tab_array,
+            'problem' => $problem,
+        ];
         $data['validFilenameRegex'] = SubmissionService::FILENAME_REGEX;
 
         if ($request->isXmlHttpRequest()) {

@@ -14,16 +14,16 @@
                 </div>
             {% else %}
 
-                {{ form_start(form) }}
-                {{ form_row(form.code) }}
-                {{ form_row(form.problem) }}
-                {{ form_row(form.language) }}
-                {{ form_row(form.entry_point) }}
+                {{ form_start(formupload) }}
+                {{ form_row(formupload.code) }}
+                {{ form_row(formupload.problem) }}
+                {{ form_row(formupload.language) }}
+                {{ form_row(formupload.entry_point) }}
                 <div class="mb-3">
                     <button type="submit" class="btn-success btn"><i class="fas fa-cloud-upload-alt"></i> Submit
                     </button>
                 </div>
-                {{ form_end(form) }}
+                {{ form_end(formupload) }}
 
             {% endif %}
         {% endif %}

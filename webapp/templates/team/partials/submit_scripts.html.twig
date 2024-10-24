@@ -55,6 +55,43 @@
         }
     }
 
+    function maybeShowEntryPointByPasteCode() {
+        var langid = $('#submit_problem_paste_language').val();
+        console.log($('#submit_problem_paste_problem'));
+        if (langid === "") {
+            return;
+        }
+        
+        var $entryPoint = $('[data-entry-point]');
+        var $entryPointLabel = $entryPoint.find('label');
+        var $entryPointInput = $entryPoint.find('input');
+        var entryPointDescription = getEntryPoint(langid);
+    
+        if (langid === 'java' || langid === 'kt') {
+            $entryPoint.show();
+            $entryPointInput.attr('required', 'required');
+        } else if (entryPointDescription) {
+            $entryPoint.show();
+            $entryPointInput.attr('required', 'required');
+        } else {
+            $entryPoint.hide();
+            $entryPointInput.attr('required', null);
+        }
+    
+        if (entryPointDescription) {
+            var $labelChildren = $entryPointLabel.children();
+            $entryPointLabel.text(entryPointDescription).append($labelChildren);
+        }
+    
+        if (langid === 'java') {
+            $entryPointInput.val(entryPointDetectJava('main.java'));
+        } else if (langid === 'kt') {
+            $entryPointInput.val(entryPointDetectKt('main.kt'));
+        } else {
+            $entryPointInput.val('');
+        }
+    }
+
     $(function () {
         var $entryPoint = $('[data-entry-point]');
         $entryPoint.hide();
@@ -102,6 +139,14 @@
         $body.on('change', '#submit_problem_code', processFile);
         $body.on('change', '#submit_problem_language', function () {
             maybeShowEntryPoint();
+        });
+
+        $body.on('change', '#submit_problem_paste_language', function () {
+            maybeShowEntryPointByPasteCode();
+        });
+
+        $body.on('change', '#submit_problem_paste_problem', function () {
+            maybeShowEntryPointByPasteCode();
         });
 
         $body.on('submit', 'form[name=submit_problem]', function () {
