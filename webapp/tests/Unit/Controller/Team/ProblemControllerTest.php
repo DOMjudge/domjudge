@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Controller\Team;
 
 use App\Entity\Problem;
 use App\Entity\Testcase;
+use App\Entity\Contest;
 use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
@@ -182,5 +183,41 @@ class ProblemControllerTest extends BaseTestCase
         $this->client->request('GET', '/team/' . $problem->getProbid() . '/samples.zip');
         $response = $this->client->getResponse();
         self::assertEquals(404, $response->getStatusCode());
+    }
+
+    /**
+     * Test that the problems page does not show page, statement, sample data before contest start.
+     */
+    public function testAccessProblemBeforeContestStarts(): void
+    {
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        $originalStartTime = $contest->getStarttimeString();
+
+        $lastSpacePosition = strrpos($originalStartTime, ' ');
+        $datetime = substr($originalStartTime, 0, $lastSpacePosition);
+        $timezone = substr($originalStartTime, $lastSpacePosition + 1);
+
+        $date = new \DateTime($datetime, new \DateTimeZone($timezone));
+        $date->modify('+1 hour');
+        $newTimeString = $date->format('Y-m-d H:i:s') . ' ' . $timezone;
+        $contest->setStarttimeString($newTimeString)->updateTimes();
+        
+        $this->withChangedConfiguration('public_access_before_contest', true, function () {
+            $this->client->request('GET', '/public/problems');
+            static::assertSelectorTextContains('.nav-item .nav-link.disabled', 'Problems');
+            static::assertSelectorTextContains('.alert.alert-secondary', 'No problem texts available at this point.');
+
+            $this->client->request('GET', '/team/problems/2/statement');
+            $statusCode = $this->client->getResponse()->getStatusCode();
+            static::assertSame(404, $statusCode, 'Expected status code 404, got ' . $statusCode);
+
+            $this->client->request('GET', '/team/problems/2/samples.zip');
+            $statusCode = $this->client->getResponse()->getStatusCode();
+            static::assertSame(404, $statusCode, 'Expected status code 404, got ' . $statusCode);
+        });
+        $contest->setStarttimeString($originalStartTime)->updateTimes();
     }
 }
