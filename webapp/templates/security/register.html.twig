@@ -14,6 +14,15 @@
     <div style="text-align: center;">
         <img class="mb-4" src="{{ asset('images/DOMjudgelogo.svg') }}" alt="DOMjudge" width="72">
     </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                {% block messages %}
+                    {% include 'partials/messages.html.twig' %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
         {{ form_start(registration_form, { 'attr': {'class': 'form-signin'} }) }}
         <h1 class="h3 mb-3 fw-normal">Register Account</h1>
         <div class="mb-2">
