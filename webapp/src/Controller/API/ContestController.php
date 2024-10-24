@@ -75,7 +75,7 @@ class ContestController extends AbstractRestController
      * Add a new contest.
      * @throws BadRequestHttpException
      */
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_API_CONTEST_EDITOR')]
     #[Rest\Post('')]
     #[OA\RequestBody(
         required: true,
@@ -201,7 +201,7 @@ class ContestController extends AbstractRestController
     /**
      * Delete the banner for the given contest.
      */
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_API_CONTEST_EDITOR')]
     #[Rest\Delete('/{cid}/banner', name: 'delete_contest_banner')]
     #[OA\Response(response: 204, description: 'Deleting banner succeeded')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
@@ -221,7 +221,7 @@ class ContestController extends AbstractRestController
     /**
      * Set the banner for the given contest.
      */
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_API_CONTEST_EDITOR')]
     #[Rest\Post("/{cid}/banner", name: 'post_contest_banner')]
     #[Rest\Put("/{cid}/banner", name: 'put_contest_banner')]
     #[OA\RequestBody(
@@ -269,7 +269,7 @@ class ContestController extends AbstractRestController
     /**
      * Delete the problemset document for the given contest.
      */
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_API_CONTEST_EDITOR')]
     #[Rest\Delete('/{cid}/problemset', name: 'delete_contest_problemset')]
     #[OA\Response(response: 204, description: 'Deleting problemset document succeeded')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
@@ -289,7 +289,7 @@ class ContestController extends AbstractRestController
     /**
      * Set the problemset document for the given contest.
      */
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_API_CONTEST_EDITOR')]
     #[Rest\Post("/{cid}/problemset", name: 'post_contest_problemset')]
     #[Rest\Put("/{cid}/problemset", name: 'put_contest_problemset')]
     #[OA\RequestBody(
@@ -385,7 +385,7 @@ class ContestController extends AbstractRestController
      * Change the start time or unfreeze (thaw) time of the given contest.
      * @throws NonUniqueResultException
      */
-    #[IsGranted('ROLE_API_WRITER')]
+    #[IsGranted(new Expression("is_granted('ROLE_API_WRITER') or is_granted('ROLE_API_CONTEST_EDITOR')"))]
     #[Rest\Patch('/{cid}')]
     #[OA\RequestBody(
         required: true,
