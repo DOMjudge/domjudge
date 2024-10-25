@@ -95,6 +95,9 @@ class ConfigController extends AbstractController
                     if ($category === 'Judging') {
                         $needsRejudging = true;
                     }
+                    if ($key === 'cache_full_scoreboard') {
+                        $needsRefresh = true;
+                    }
                 }
 
                 if ($needsRefresh) {

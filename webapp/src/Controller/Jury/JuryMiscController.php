@@ -14,6 +14,7 @@ use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Service\ScoreboardCacheService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
@@ -188,13 +189,16 @@ class JuryMiscController extends BaseController
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/refresh-cache', name: 'jury_refresh_cache')]
-    public function refreshCacheAction(Request $request, ScoreboardService $scoreboardService): Response
-    {
+    public function refreshCacheAction(
+        Request $request,
+        ScoreboardService $scoreboardService,
+        ScoreboardCacheService $cache,
+    ): Response {
         // Note: we use a XMLHttpRequest here as Symfony does not support
         // streaming Twig output.
 
         $contests = $this->dj->getCurrentContests();
-        if ($cid = $request->request->get('cid')) {
+        if ($cid = $request->get('cid')) {
             if (!isset($contests[$cid])) {
                 throw new BadRequestHttpException(sprintf('Contest %s not found', $cid));
             }
@@ -204,17 +208,29 @@ class JuryMiscController extends BaseController
             $contests = [$contest->getCid() => $contest];
         }
 
+        $onlyFullCache = $request->get('only_full_cache');
+
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             $progressReporter = function (int $progress, string $log, ?string $message = null) {
                 echo $this->dj->jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]);
                 ob_flush();
                 flush();
             };
-            return $this->streamResponse($this->requestStack, function () use ($contests, $progressReporter, $scoreboardService) {
+            return $this->streamResponse($this->requestStack, function () use (
+                $contests,
+                $progressReporter,
+                $scoreboardService,
+                $onlyFullCache,
+                $cache
+            ) {
                 $timeStart = microtime(true);
 
                 foreach ($contests as $contest) {
-                    $scoreboardService->refreshCache($contest, $progressReporter);
+                    if ($onlyFullCache) {
+                        $cache->invalidate($contest);
+                    } else {
+                        $scoreboardService->refreshCache($contest, $progressReporter);
+                    }
                 }
 
                 $timeEnd = microtime(true);

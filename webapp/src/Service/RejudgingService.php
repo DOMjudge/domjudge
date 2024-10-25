@@ -32,7 +32,8 @@ class RejudgingService
         protected readonly DOMJudgeService $dj,
         protected readonly ScoreboardService $scoreboardService,
         protected readonly EventLogService $eventLogService,
-        protected readonly BalloonService $balloonService
+        protected readonly BalloonService $balloonService,
+        protected readonly ScoreboardCacheService $cache,
     ) {}
 
     /**
@@ -381,6 +382,7 @@ class RejudgingService
                     }
                     $this->scoreboardService->updateRankCache($contest, $team);
                 }
+                $this->cache->invalidate($contest);
             }
         }
 

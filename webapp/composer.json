@@ -105,6 +105,7 @@
 		"symfony/web-profiler-bundle": "6.4.*",
 		"symfony/yaml": "6.4.*",
 		"twbs/bootstrap": "^5.2.0",
+		"twig/cache-extra": "^3.11",
 		"twig/extra-bundle": "^3.5",
 		"twig/markdown-extra": "^3.5",
 		"twig/string-extra": "^3.5",

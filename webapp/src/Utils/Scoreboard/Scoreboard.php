@@ -40,7 +40,8 @@ class Scoreboard
         protected readonly FreezeData $freezeData,
         bool $jury,
         protected readonly int $penaltyTime,
-        protected readonly bool $scoreIsInSeconds
+        protected readonly bool $scoreIsInSeconds,
+        protected readonly string $cacheKeyPostfix,
     ) {
         $this->restricted = $jury || $freezeData->showFinal($jury);
 
@@ -111,7 +112,13 @@ class Scoreboard
      */
     public function getProgress(): int
     {
+        dump('progress');
         return $this->getFreezeData()->getProgress();
+    }
+
+    public function getCacheKeyPostfix(): string
+    {
+        return $this->cacheKeyPostfix;
     }
 
     /**

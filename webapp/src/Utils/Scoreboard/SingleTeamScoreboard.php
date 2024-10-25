@@ -35,8 +35,17 @@ class SingleTeamScoreboard extends Scoreboard
         bool $scoreIsInSeconds
     ) {
         $this->showRestrictedFts = $showFtsInFreeze || $freezeData->showFinal();
+        $cacheKeyPostFix = sprintf(
+            '%d:%d:%s:%d:%d:%d',
+            false,
+            $freezeData->showFinal(false),
+            $this->team->getTeamid(),
+            false,
+            false,
+            $contest->getCid(),
+        );
         parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $freezeData, true,
-            $penaltyTime, $scoreIsInSeconds);
+            $penaltyTime, $scoreIsInSeconds, $cacheKeyPostFix);
     }
 
     protected function calculateScoreboard(): void

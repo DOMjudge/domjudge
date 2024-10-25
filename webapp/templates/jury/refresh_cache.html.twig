@@ -6,6 +6,7 @@
 {% block extrahead %}
     {{ parent() }}
     {{ macros.table_extrahead() }}
+    {{ macros.toggle_extrahead() }}
 {% endblock %}
 
 {% block content %}
@@ -34,6 +35,12 @@
                 {% if current_contest is not empty %}
                     <input type="hidden" name="cid" value="{{ current_contest.cid }}"/>
                 {% endif %}
+                {% if cache_full_scoreboard %}
+                    <fieldset class="mb-3">
+                        <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No" id="only_full_cache" name="only_full_cache" class="form-check-input">
+                        Only clear full scoreboard cache
+                    </fieldset>
+               {% endif %}
                 <button type="submit" class="btn btn-danger" name="refresh">
                     <i class="fas fa-sync-alt"></i> Refresh now!
                 </button>
@@ -47,6 +54,9 @@
         {% set progressUrl = path('jury_refresh_cache') %}
         {% if current_contest is not empty %}
             {% set progressUrl = progressUrl ~ '?cid=' ~ current_contest.cid %}
+        {% endif %}
+        {% if app.request.request.has('only_full_cache') %}
+            {% set progressUrl = progressUrl ~ '&only_full_cache=1' %}
         {% endif %}
         {{ macros.progress_loader(progressUrl) }}
     {% endif %}

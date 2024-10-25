@@ -38,4 +38,15 @@ class Filter
 
         return implode(', ', $filteredOn);
     }
+
+    public function getHash(): string
+    {
+        return sprintf(
+            '%s#%s#%s#%s',
+            implode('_', $this->affiliations),
+            implode('_', $this->countries),
+            implode('_', $this->categories),
+            implode('_', $this->teams),
+        );
+    }
 }

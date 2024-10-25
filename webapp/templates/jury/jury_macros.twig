@@ -297,7 +297,7 @@
                     return consume(responseReader);
                 });
             };
-            fetch('{{ url }}', {
+            fetch('{{ url | raw }}', {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',

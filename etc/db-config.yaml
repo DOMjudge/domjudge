@@ -323,6 +323,14 @@
             default_value: true
             public: true
             description: If disabled, no ranking information is shown to contestants.
+        -   name: cache_full_scoreboard
+            type: bool
+            default_value: false
+            public: false
+            description: |
+                If enabled, will cache the whole scoreboard.
+                Make sure to clear the scoreboard cache after making changes to data
+                like teams, categories, affiliations or the contest when enabled.
 -   category: Authentication
     description: Options related to authentication.
     items:

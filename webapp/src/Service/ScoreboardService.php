@@ -29,6 +29,7 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class ScoreboardService
 {
@@ -41,6 +42,7 @@ class ScoreboardService
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly LoggerInterface $logger,
+        protected readonly ScoreboardCacheService $cache
     ) {}
 
     /**
@@ -67,17 +69,39 @@ class ScoreboardService
             return null;
         }
 
-        $teams      = $this->getTeams($contest, $jury && !$visibleOnly, $filter);
-        $problems   = $this->getProblems($contest);
-        $categories = $this->getCategories($jury && !$visibleOnly);
-        $scoreCache = $this->getScorecache($contest);
-
-        return new Scoreboard(
-            $contest, $teams, $categories, $problems,
-            $scoreCache, $freezeData, $jury || $forceUnfrozen,
-            (int)$this->config->get('penalty_time'),
-            (bool)$this->config->get('score_in_seconds'),
+        $scoreboardDataCachePostfix = sprintf(
+            '%d:%d:%d:%s:%d:%d:%d',
+            $forceUnfrozen,
+            $freezeData->showFinal($jury),
+            $freezeData->showFrozen(),
+            $filter?->getHash(),
+            $visibleOnly,
+            $jury,
+            $contest->getCid(),
         );
+
+        return $this->cache->cacheScoreboardData($contest, 'scoreboard_data:' . $scoreboardDataCachePostfix, function () use (
+            $scoreboardDataCachePostfix,
+            $forceUnfrozen,
+            $freezeData,
+            $filter,
+            $visibleOnly,
+            $jury,
+            $contest
+        ) {
+            $teams = $this->getTeams($contest, $jury && !$visibleOnly, $filter);
+            $problems = $this->getProblems($contest);
+            $categories = $this->getCategories($jury && !$visibleOnly);
+            $scoreCache = $this->getScorecache($contest);
+
+            return new Scoreboard(
+                $contest, $teams, $categories, $problems,
+                $scoreCache, $freezeData, $jury || $forceUnfrozen,
+                (int)$this->config->get('penalty_time'),
+                (bool)$this->config->get('score_in_seconds'),
+                $scoreboardDataCachePostfix,
+            );
+        });
     }
 
     /**
@@ -499,6 +523,8 @@ class ScoreboardService
         if ($updateRankCache && ($correctJury || $correctPubl)) {
             $this->updateRankCache($contest, $team);
         }
+
+        $this->cache->invalidate($contest);
     }
 
     /**
@@ -703,6 +729,8 @@ class ScoreboardService
             'DELETE FROM rankcache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
             $params, $types);
 
+        $this->cache->invalidate($contest);
+
         $progressReporter(100, '');
     }
 
@@ -806,61 +834,64 @@ class ScoreboardService
      */
     public function getFilterValues(Contest $contest, bool $jury): array
     {
-        $filters = [
-            'affiliations' => [],
-            'countries'    => [],
-            'categories'   => [],
-        ];
-        $showFlags        = $this->config->get('show_flags');
-        $showAffiliations = $this->config->get('show_affiliations');
+        $cacheKey = sprintf('scoreboard_filter_values:%d', $jury);
+        return $this->cache->cacheScoreboardData($contest, $cacheKey, function() use ($contest, $jury) {
+            $filters = [
+                'affiliations' => [],
+                'countries' => [],
+                'categories' => [],
+            ];
+            $showFlags = $this->config->get('show_flags');
+            $showAffiliations = $this->config->get('show_affiliations');
 
-        $queryBuilder = $this->em->createQueryBuilder()
-            ->from(TeamCategory::class, 'c')
-            ->select('c');
-        if (!$jury) {
-            $queryBuilder->andWhere('c.visible = 1');
-        }
-
-        /** @var TeamCategory[] $categories */
-        $categories = $queryBuilder->getQuery()->getResult();
-        foreach ($categories as $category) {
-            $filters['categories'][$category->getCategoryid()] = $category->getName();
-        }
-
-        // Show only affiliations / countries with visible teams.
-        if (empty($categories) || !$showAffiliations) {
-            $filters['affiliations'] = [];
-        } else {
             $queryBuilder = $this->em->createQueryBuilder()
-                ->from(TeamAffiliation::class, 'a')
-                ->select('a')
-                ->join('a.teams', 't')
-                ->andWhere('t.category IN (:categories)')
-                ->setParameter('categories', $categories);
-            if (!$contest->isOpenToAllTeams()) {
-                $queryBuilder
-                    ->leftJoin('t.contests', 'c')
-                    ->join('t.category', 'cat')
-                    ->leftJoin('cat.contests', 'cc')
-                    ->andWhere('c = :contest OR cc = :contest')
-                    ->setParameter('contest', $contest);
+                ->from(TeamCategory::class, 'c')
+                ->select('c');
+            if (!$jury) {
+                $queryBuilder->andWhere('c.visible = 1');
             }
 
-            /** @var TeamAffiliation[] $affiliations */
-            $affiliations = $queryBuilder->getQuery()->getResult();
-            foreach ($affiliations as $affiliation) {
-                $filters['affiliations'][$affiliation->getAffilid()] = $affiliation->getName();
-                if ($showFlags && $affiliation->getCountry() !== null) {
-                    $filters['countries'][] = $affiliation->getCountry();
+            /** @var TeamCategory[] $categories */
+            $categories = $queryBuilder->getQuery()->getResult();
+            foreach ($categories as $category) {
+                $filters['categories'][$category->getCategoryid()] = $category->getName();
+            }
+
+            // Show only affiliations / countries with visible teams.
+            if (empty($categories) || !$showAffiliations) {
+                $filters['affiliations'] = [];
+            } else {
+                $queryBuilder = $this->em->createQueryBuilder()
+                    ->from(TeamAffiliation::class, 'a')
+                    ->select('a')
+                    ->join('a.teams', 't')
+                    ->andWhere('t.category IN (:categories)')
+                    ->setParameter('categories', $categories);
+                if (!$contest->isOpenToAllTeams()) {
+                    $queryBuilder
+                        ->leftJoin('t.contests', 'c')
+                        ->join('t.category', 'cat')
+                        ->leftJoin('cat.contests', 'cc')
+                        ->andWhere('c = :contest OR cc = :contest')
+                        ->setParameter('contest', $contest);
+                }
+
+                /** @var TeamAffiliation[] $affiliations */
+                $affiliations = $queryBuilder->getQuery()->getResult();
+                foreach ($affiliations as $affiliation) {
+                    $filters['affiliations'][$affiliation->getAffilid()] = $affiliation->getName();
+                    if ($showFlags && $affiliation->getCountry() !== null) {
+                        $filters['countries'][] = $affiliation->getCountry();
+                    }
                 }
             }
-        }
 
-        $filters['countries'] = array_unique($filters['countries']);
-        sort($filters['countries']);
-        asort($filters['affiliations'], SORT_FLAG_CASE);
+            $filters['countries'] = array_unique($filters['countries']);
+            sort($filters['countries']);
+            asort($filters['affiliations'], SORT_FLAG_CASE);
 
-        return $filters;
+            return $filters;
+        });
     }
 
     /**
