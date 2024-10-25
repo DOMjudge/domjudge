@@ -345,6 +345,15 @@ nv.addGraph(function() {
   d3.select('#graph_problems svg')
       .datum(problem_stats)
       .call(chart);
+  // Hide bars with 0 height after rendering
+  chart.dispatch.on('renderEnd', function() {
+    d3.selectAll('#graph_problems .nv-bar').each(function(d) {
+      if (d.value === 0) {
+        d3.select(this).attr('height', 0);
+        d3.select(this).attr('y', chart.yAxis.scale()(0)); 
+      }
+    });
+  });
   nv.utils.windowResize(chart.update);
   return chart;
 });
