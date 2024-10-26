@@ -219,37 +219,43 @@ class CheckConfigService
         $max_inout = max($max_inout, $output_limit);
 
         $result = 'O';
-        $desc = '';
+        $desc = sprintf("max_connections is set to %s.\n", $vars['max_connections']);
         if ($vars['max_connections'] < 300) {
             $result = 'W';
-            $desc .= sprintf("MySQL's max_connections is set to %s. In our experience you need at least 300, but better 1000 connections to prevent connection refusal during the contest.\n", $vars['max_connections']);
+            $desc .= sprintf("In our experience you need at least 300, but better 1000 connections to prevent connection refusal during the contest.\n");
         }
 
         if ($vars['innodb_log_file_size'] < 10 * $max_inout) {
             $result = 'W';
-            $desc .= sprintf("MySQL's innodb_log_file_size is set to %s. You may want to raise this to 10x the maximum of the test case size and output (storage) limit (now %s).\n", Utils::printsize((int)$vars['innodb_log_file_size']), Utils::printsize($max_inout));
+            $desc .= sprintf("innodb_log_file_size is set to %s. You may want to raise this to 10x the maximum of the test case size and output (storage) limit (now %s).\n", Utils::printsize((int)$vars['innodb_log_file_size']), Utils::printsize($max_inout));
+        } else {
+            $desc .= sprintf("innodb_log_file_size is set to %s. \n", Utils::printsize((int)$vars['innodb_log_file_size']));
         }
 
         $tx = ['REPEATABLE-READ', 'SERIALIZABLE'];
         if (!in_array($vars['tx_isolation'], $tx)) {
             $result = 'W';
-            $desc .= sprintf("MySQL's transaction isolation level is set to %s. You should set this to %s to prevent data inconsistencies.\n", $vars['tx_isolation'], implode(' or ', $tx));
+            $desc .= sprintf("transaction isolation level is set to %s. You should set this to %s to prevent data inconsistencies.\n", $vars['tx_isolation'], implode(' or ', $tx));
+        } else {
+            $desc .= sprintf("transaction isolation level is set to %s.\n", $vars['tx_isolation']);
         }
 
         $recommended_max_allowed_packet = 16*1024*1024;
         if ($vars['max_allowed_packet'] < 2*$max_inout) {
             $result = 'E';
-            $desc .= sprintf("MySQL's max_allowed_packet is set to %s. You may want to raise this to about twice the maximum of the test case size and output (storage) limit (currently %s).\n", Utils::printsize((int)$vars['max_allowed_packet']), Utils::printsize($max_inout));
+            $desc .= sprintf("max_allowed_packet is set to %s. You may want to raise this to about twice the maximum of the test case size and output (storage) limit (currently %s).\n", Utils::printsize((int)$vars['max_allowed_packet']), Utils::printsize($max_inout));
         } elseif ($vars['max_allowed_packet'] < $recommended_max_allowed_packet) {
             $result = 'W';
-            $desc .= sprintf("MySQL's max_allowed_packet is set to %s. We recommend at least 16MB.\n", Utils::printsize((int)$vars['max_allowed_packet']));
+            $desc .= sprintf("max_allowed_packet is set to %s. We recommend at least 16MB.\n", Utils::printsize((int)$vars['max_allowed_packet']));
+        } else {
+            $desc .= sprintf("max_allowed_packet is set to %s.\n", Utils::printsize((int)$vars['max_allowed_packet']));
         }
 
         $this->stopwatch->stop(__FUNCTION__);
         return new ConfigCheckItem(
             caption: 'MySQL settings',
             result: $result,
-            desc: $desc ?: 'MySQL settings are all ok'
+            desc: $desc
         );
     }
 
