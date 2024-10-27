@@ -36,6 +36,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -639,8 +640,9 @@ class SubmissionController extends BaseController
     }
 
     #[Route(path: '/download-full-debug/{debug_package_id}', name: 'download_full_debug')]
-    public function downloadFullDebug(DebugPackage $debugPackage): StreamedResponse
-    {
+    public function downloadFullDebug(
+        #[MapEntity(id: 'debug_package_id')] DebugPackage $debugPackage
+    ): StreamedResponse {
         $name = 'debug_package.j' . $debugPackage->getJudging()->getJudgingid()
             . '.db' . $debugPackage->getDebugPackageId()
             . '.jh' . $debugPackage->getJudgehost()->getJudgehostid()
