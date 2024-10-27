@@ -232,4 +232,4 @@ the judgedaemon.
 
 The judgedaemon can also be run as a service by running::
 
-  sudo systemctl enable --now domjudge-judgehost
+  sudo systemctl enable --now domjudge-judgehost.target
