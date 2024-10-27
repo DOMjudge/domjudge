@@ -54,6 +54,17 @@ assert_partial() {
 	fail "$expected"
 }
 
+refute_partial() {
+	local -r unexpected="$1"
+	for (( idx = 0; idx < ${#lines[@]}; ++idx )); do
+		if [[ ${lines[$idx]} == *"$unexpected"* ]]; then
+			echo "Unexpected string '$unexpected' found."
+			return 1
+		fi
+	done
+	return 0
+}
+
 assert_success() {
 	if (( status != 0 )); then
 		echo "Expected success, status=$status."
