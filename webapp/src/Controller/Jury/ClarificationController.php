@@ -346,6 +346,25 @@ class ClarificationController extends AbstractController
         return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
     }
 
+    #[Route('/check-claimed', name: 'check_if_claimed', methods: ['GET'])]
+    public function checkIfClaimed(Request $request): Response
+    {
+        $clarid = $request->query->get('clarid');
+        $currentUserName = $this->getUser()->getUserIdentifier();
+
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->select('clar.jury_member')
+            ->from(Clarification::class, 'clar')
+            ->where('clar.clarid = :clarid')
+            ->setParameter('clarid', $clarid);
+        $claimedJuryMember = $queryBuilder->getQuery()->getSingleResult();
+
+        return $this->json([
+            'isClaimedByOther' => $claimedJuryMember['jury_member'] !== null && $claimedJuryMember['jury_member'] !== $currentUserName,
+            'ClaimedBy' => $claimedJuryMember['jury_member'],
+        ]);
+    }
+
     protected function processSubmittedClarification(
         FormInterface $form,
         ?Clarification $inReplTo = null

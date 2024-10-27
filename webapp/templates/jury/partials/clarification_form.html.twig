@@ -33,3 +33,30 @@
 
 </div>
 {{ form_end(form) }}
+
+<script>
+    $(function () {
+        var $body = $('body');
+
+        $body.on('submit', 'form[name=jury_clarification]', function () {
+            var clarid = {{ origclar | json_encode(constant('JSON_HEX_TAG')) | raw }}.clarid;
+
+            fetch(`/jury/clarifications/check-claimed?clarid=${clarid}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isClaimedByOther === true) {
+                    confirm(`This clarification has been claimed by ${data.ClaimedBy}. Are you sure you want to send this message?`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while checking claim status.');
+            });
+        });
+    });
+</script>
