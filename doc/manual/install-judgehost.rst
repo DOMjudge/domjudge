@@ -164,7 +164,8 @@ any other tasks on the same CPU core the judgedaemon is using:
 
 On modern distros (e.g. Debian bullseye and Ubuntu Jammy Jellyfish) which have
 cgroup v2 enabled by default, you need to add ``systemd.unified_cgroup_hierarchy=0``
-as well. Then run ``update-grub`` and reboot.
+as well. If you are running systemd v257, you also need to add `SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1`.
+Then run ``update-grub`` and reboot.
 After rebooting check that ``/proc/cmdline`` actually contains the
 added kernel options. On VM hosting providers such as Google Cloud or
 DigitalOcean, ``GRUB_CMDLINE_LINUX_DEFAULT`` may be overwritten
