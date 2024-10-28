@@ -45,7 +45,7 @@ run_user_stderr () {
 }
 
 run_stderr () {
-    "$*" 2>&1
+    run "$* 2>&1"
 }
 
 run_configure () {
