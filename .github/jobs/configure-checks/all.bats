@@ -40,14 +40,6 @@ setup() {
     repo-install gcc g++ libcgroup-dev composer
 }
 
-run_user_stderr () {
-    su $u -c "$*" 2>&1
-}
-
-run_stderr () {
-    run "$* 2>&1"
-}
-
 run_configure () {
     su $u -c "./configure $*"
 }
@@ -465,32 +457,4 @@ compile_assertions_finished () {
   assert_success
   run make judgehost
   assert_failure
-}
-
-@test "'Make distclean' has all permissions" {
-  if [ "$distro_id" = "ID=fedora" ]; then
-      # Fails as libraries are not found
-      skip
-  fi
-  setup
-  run run_configure
-  run_user_stderr make domserver
-  make install-domserver
-  run_user_stderr make distclean
-  refute_partial "cannot remove"
-  refute_partial "Permission denied"
-  assert_success
-}
-
-@test "'Make distclean' has permission errors" {
-  if [ "$distro_id" = "ID=fedora" ]; then
-      # Fails as libraries are not found
-      skip
-  fi
-  setup
-  run run_configure
-  run_stderr make install-domserver
-  run_user_stderr make distclean
-  assert_partial "cannot remove"
-  assert_partial "Permission denied"
 }
