@@ -10,7 +10,7 @@ case $distro_id in
         dnf install pkg-config make bats autoconf automake util-linux -y ;;
     *)
         apt-get update; apt-get full-upgrade -y
-        apt-get install pkg-config make bats autoconf ;;
+        apt-get install pkg-config make bats autoconf -y ;;
 esac
 
 # Build the configure file
