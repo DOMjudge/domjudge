@@ -679,6 +679,7 @@ EOF;
 File_Version	2
 11	447047	24	¡i¡i¡	Lund University	LU	SWE	INST-42
 12	447837	25	Pleading not FAUlty	Friedrich-Alexander-University Erlangen-Nuremberg	FAU	DEU	INST-43
+13	447057	24	Another team from Lund	Lund University	LU	SWE	INST-42
 EOF;
 
         $expectedTeams = [
@@ -709,6 +710,20 @@ EOF;
                     'shortname' => 'FAU',
                     'name' => 'Friedrich-Alexander-University Erlangen-Nuremberg',
                     'country' => 'DEU',
+                ],
+            ], [
+                'externalid' => '13',
+                'icpcid' => '447057',
+                'label' => null,
+                'name' => 'Another team from Lund',
+                'category' => [
+                    'externalid' => '24',
+                ],
+                'affiliation' => [
+                    'externalid' => '42',
+                    'shortname' => 'LU',
+                    'name' => 'Lund University',
+                    'country' => 'SWE',
                 ],
             ],
         ];
