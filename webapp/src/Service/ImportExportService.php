@@ -1127,7 +1127,9 @@ class ImportExportService
      */
     protected function importTeamData(array $teamData, ?string &$message, ?array &$saved = null): int
     {
+        /** @var TeamAffiliation[] $createdAffiliations */
         $createdAffiliations = [];
+        /** @var TeamCategory[] $createdCategories */
         $createdCategories   = [];
         $createdTeams        = [];
         $updatedTeams        = [];
@@ -1140,6 +1142,14 @@ class ImportExportService
             if (!empty($teamItem['team_affiliation']['shortname'])) {
                 // First look up if the affiliation already exists.
                 $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['shortname' => $teamItem['team_affiliation']['shortname']]);
+                if (!$teamAffiliation) {
+                    foreach ($createdAffiliations as $createdAffiliation) {
+                        if ($createdAffiliation->getShortname() === $teamItem['team_affiliation']['shortname']) {
+                            $teamAffiliation = $createdAffiliation;
+                            break;
+                        }
+                    }
+                }
                 if (!$teamAffiliation) {
                     $teamAffiliation  = new TeamAffiliation();
                     $propertyAccessor = PropertyAccess::createPropertyAccessor();
@@ -1166,6 +1176,15 @@ class ImportExportService
                 }
             } elseif (!empty($teamItem['team_affiliation']['externalid'])) {
                 $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $teamItem['team_affiliation']['externalid']]);
+                if (!$teamAffiliation) {
+                    foreach ($createdAffiliations as $createdAffiliation) {
+                        if ($createdAffiliation->getExternalid() === $teamItem['team_affiliation']['externalid']) {
+                            $teamAffiliation = $createdAffiliation;
+                            break;
+                        }
+                    }
+                }
+
                 if (!$teamAffiliation) {
                     $teamAffiliation = new TeamAffiliation();
                     $teamAffiliation
@@ -1196,6 +1215,14 @@ class ImportExportService
 
             if (!empty($teamItem['team']['categoryid'])) {
                 $teamCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $teamItem['team']['categoryid']]);
+                if (!$teamCategory) {
+                    foreach ($createdCategories as $createdCategory) {
+                        if ($createdCategory->getExternalid() === $teamItem['team']['categoryid']) {
+                            $teamCategory = $createdCategory;
+                            break;
+                        }
+                    }
+                }
                 if (!$teamCategory) {
                     $teamCategory = new TeamCategory();
                     $teamCategory
