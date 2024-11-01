@@ -111,6 +111,10 @@ compile_assertions_finished () {
 }
 
 @test "Install GNU C only" {
+    if [ "$distro_id" = "ID=fedora" ]; then
+        # Fedora ships with a gcc with enough C++ support
+        skip
+    fi
     repo-remove clang g++
     repo-install gcc libcgroup-dev
     compiler_assertions gcc ''
