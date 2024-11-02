@@ -378,6 +378,9 @@ class SubmissionController extends BaseController
                 ->getScalarResult();
 
             $cnt = 0;
+            if (count($judgingRunTestcaseIdsInOrder) !== count($runResults)) {
+                $sameTestcaseIds = false;
+            }
             foreach ($runResults as $runResult) {
                 /** @var Testcase $testcase */
                 $testcase = $runResult[0];
