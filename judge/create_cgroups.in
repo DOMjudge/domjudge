@@ -21,11 +21,17 @@ cgroup_error_and_usage () {
 # Check whether cgroup v2 is available.
 fs_type=$(awk '$2 == "/sys/fs/cgroup" {print $3}' /proc/mounts)
 if [ "$fs_type" = "cgroup2" ]; then
+    kernel_version=$(uname -r)
+    major=$(echo "$kernel_version" | cut -d '.' -f 1)
+    minor=$(echo "$kernel_version" | cut -d '.' -f 2)
+    if [ "$major" -lt 5 ] || { [ "$major" -eq 5 ] && [ "$minor" -lt 19 ]; }; then
+        echo "WARNING: Kernel ($kernel_version) is too old to record peak RAM usage" >&2
+    fi
     if ! echo "+memory" >> /sys/fs/cgroup/cgroup.subtree_control; then
-	    cgroup_error_and_usage "Error: Cannot add +memory to cgroup.subtree_control; check kernel params. Unable to continue."
+        cgroup_error_and_usage "Error: Cannot add +memory to cgroup.subtree_control; check kernel params. Unable to continue."
     fi
     if ! echo "+cpuset" >> /sys/fs/cgroup/cgroup.subtree_control; then
-	    cgroup_error_and_usage "Error: Cannot add +cpuset to cgroup.subtree_control; check kernel params. Unable to continue."
+        cgroup_error_and_usage "Error: Cannot add +cpuset to cgroup.subtree_control; check kernel params. Unable to continue."
     fi
     exit 0
 fi
