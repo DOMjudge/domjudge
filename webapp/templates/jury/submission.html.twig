@@ -392,18 +392,18 @@
                         {%- endif %}
                         {%- if selectedJudging is not null and judgehosts is not empty -%}
                             , on {{ judgehosts | printHosts }}
-                            {% if selectedJudging.starttime %}
-                                {% if selectedJudging.endtime %}
+                            {%- if selectedJudging.starttime -%}
+                                {%- if selectedJudging.endtime -%}
                                     , took <span title="started: {{ selectedJudging.starttime | printtime('H:i:s') }}, completed: {{ selectedJudging.endtime | printtime('H:i:s') }}">{{ selectedJudging.starttime | printHumanTimeDiff(selectedJudging.endtime) }}</span>
-                                {% elseif selectedJudging.valid or selectedJudging.rejudging %}
+                                {%- elseif selectedJudging.valid or selectedJudging.rejudging -%}
                                     &nbsp;[still judging - busy {{ selectedJudging.starttime | printtimediff }}]
-                                {% else %}
+                                {%- else -%}
                                     &nbsp;[aborted]
-                                {% endif %}
-                            {% else %}
+                                {%- endif -%}
+                            {%- else -%}
                                 , not started yet
-                            {% endif %}
-                        {% endif -%}
+                            {%- endif -%}
+                        {%- endif -%}
                         {%- if externalJudgement is not null %}
                             <span class="judgetime">(external judging started: {{ externalJudgement.starttime | printtime('H:i:s') }}
                                 {%- if externalJudgement.endtime -%}
