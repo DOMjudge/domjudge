@@ -504,7 +504,7 @@ void output_cgroup_stats_v2(double *cputime)
 	int64_t max_usage = 0;
 	ret = cgroup_get_value_int64(cg_controller, "memory.peak", &max_usage);
 	if ( ret == ECGROUPVALUENOTEXIST ) {
-		write_meta("internal-warning", "Kernel too old and does not support memory.peak");
+		error(ret, "kernel too old and does not support memory.peak");
 	} else if ( ret!=0 ) {
 		error(ret,"get cgroup value memory.peak");
 	}

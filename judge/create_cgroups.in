@@ -25,7 +25,8 @@ if [ "$fs_type" = "cgroup2" ]; then
     major=$(echo "$kernel_version" | cut -d '.' -f 1)
     minor=$(echo "$kernel_version" | cut -d '.' -f 2)
     if [ "$major" -lt 5 ] || { [ "$major" -eq 5 ] && [ "$minor" -lt 19 ]; }; then
-        echo "WARNING: Kernel ($kernel_version) is too old to record peak RAM usage" >&2
+        cgroup_error_and_usage "Error: kernel ($kernel_version) is too old to record peak RAM usage with cgroup V2.
+You can try using cgroup V1 by adding systemd.unified_cgroup_hierarchy=0 to the kernel params."
     fi
     if ! echo "+memory" >> /sys/fs/cgroup/cgroup.subtree_control; then
         cgroup_error_and_usage "Error: Cannot add +memory to cgroup.subtree_control; check kernel params. Unable to continue."
@@ -33,8 +34,9 @@ if [ "$fs_type" = "cgroup2" ]; then
     if ! echo "+cpuset" >> /sys/fs/cgroup/cgroup.subtree_control; then
         cgroup_error_and_usage "Error: Cannot add +cpuset to cgroup.subtree_control; check kernel params. Unable to continue."
     fi
-    exit 0
 fi
+
+# Trying cgroup V1:
 
 for i in cpuset memory; do
     mkdir -p $CGROUPBASE/$i
