@@ -179,6 +179,12 @@ Optionally the timings can be made more stable by not letting the OS schedule
 any other tasks on the same CPU core the judgedaemon is using:
 ``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1 isolcpus=2"``
 
+On modern systems where cgroup v2 is available, DOMjudge will try to
+use that. This requires kernel versions 5.19 or 6.0 or later to
+support reporting peak memory usage. If not found, the system will try
+to fall back to cgroup v1, but this might require you to add
+``systemd.unified_cgroup_hierarchy=0`` to the boot options as well.
+
 You have now configured the system to use cgroups. To create
 the actual cgroups that DOMjudge will use you need to run::
 
