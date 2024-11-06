@@ -1027,8 +1027,11 @@ class ExternalContestSourceService
 
         $toCheckProblem = [
             'name'      => $data->name,
-            'timelimit' => $data->timeLimit,
         ];
+
+        if ($data->timeLimit) {
+            $toCheckProblem['timelimit'] = $data->timeLimit;
+        }
 
         if ($contestProblem->getShortname() !== $data->label) {
             $this->logger->warning(
@@ -1097,7 +1100,10 @@ class ExternalContestSourceService
         if (!empty($data->organizationId)) {
             $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $data->organizationId]);
             if (!$affiliation) {
+                // Affiliation does not exist. Create one with a dummy name so we can continue.
                 $affiliation = new TeamAffiliation();
+                $affiliation->setName($data->organizationId);
+                $affiliation->setShortname($data->organizationId);
                 $this->em->persist($affiliation);
             }
             $team->setAffiliation($affiliation);
@@ -1106,7 +1112,9 @@ class ExternalContestSourceService
         if (!empty($data->groupIds[0])) {
             $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $data->groupIds[0]]);
             if (!$category) {
+                // Category does not exist. Create one with a dummy name so we can continue.
                 $category = new TeamCategory();
+                $category->setName($data->groupIds[0]);
                 $this->em->persist($category);
             }
             $team->setCategory($category);

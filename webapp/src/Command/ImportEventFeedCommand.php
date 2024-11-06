@@ -223,10 +223,12 @@ class ImportEventFeedCommand extends Command
         $ourId   = $contest->getExternalid();
         $theirId = $this->sourceService->getContestId();
         if ($ourId !== $theirId) {
-            $this->style->error(
+            $this->style->warning(
                 "Contest ID in external system $theirId does not match external ID in DOMjudge ($ourId)."
             );
-            return false;
+            if (!$this->style->confirm('Do you want to continue anyway?', default: false)) {
+                return false;
+            }
         }
 
         return true;
