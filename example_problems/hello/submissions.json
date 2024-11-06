@@ -1,0 +1,17 @@
+{
+    "submissions/accepted/multifile-js/": {
+        "entry_point": "main.mjs"
+    },
+    "submissions/accepted/multifile-js-2/": {
+        "entry_point": "hello.js"
+    },
+    "submissions/accepted/multifile-py/": {
+        "entry_point": "main.py"
+    },
+    "submissions/accepted/multifile-py-2/": {
+        "entry_point": "main.py"
+    },
+    "submissions/accepted/multifile-sh/": {
+        "entry_point": "main.sh"
+    }
+}
