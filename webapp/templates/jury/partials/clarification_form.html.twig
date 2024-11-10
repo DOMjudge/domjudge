@@ -39,8 +39,7 @@
         var $body = $('body');
 
         $body.on('submit', 'form[name=jury_clarification]', function () {
-            var clarid = {{ origclar | json_encode(constant('JSON_HEX_TAG')) | raw }}.clarid;
-
+            var clarid = {{ origclar.clarid }};
             fetch(`/jury/clarifications/check-claimed?clarid=${clarid}`, {
                 method: 'GET',
                 headers: {
