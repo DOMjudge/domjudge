@@ -1103,7 +1103,7 @@ class ExternalContestSourceService
                 // Affiliation does not exist. Create one with a dummy name so we can continue.
                 $affiliation = new TeamAffiliation();
                 $affiliation->setName($data->organizationId);
-                $affiliation->setShortname($data->organizationId);
+                $affiliation->setShortname(substr($data->organizationId, 0, 32));
                 $this->em->persist($affiliation);
             }
             $team->setAffiliation($affiliation);
