@@ -21,3 +21,4 @@ jobs:
           configuration: phpstan.dist.neon
           path: webapp/src webapp/tests
           php_extensions: gd intl mysqli pcntl zip
+          version: composer
