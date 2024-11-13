@@ -394,9 +394,12 @@ class JudgehostController extends AbstractFOSRestController
                     if ($judging->getOutputCompile() === null) {
                         $judging
                             ->setOutputCompile($output_compile)
-                            ->setCompileMetadata(base64_decode($compileMetadata))
                             ->setResult(Judging::RESULT_COMPILER_ERROR)
                             ->setEndtime(Utils::now());
+
+                        if ($compileMetadata !== null) {
+                            $judging->setCompileMetadata(base64_decode($compileMetadata));
+                        }
                         $this->em->flush();
 
                         if ($judging->getValid()) {
