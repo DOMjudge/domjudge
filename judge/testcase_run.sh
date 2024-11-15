@@ -195,7 +195,7 @@ if [ $COMBINED_RUN_COMPARE -eq 1 ]; then
 	# A combined run and compare script may now already need the
 	# feedback directory, and perhaps access to the test answers (but
 	# only the original that lives outside the chroot).
-	mkdir feedback
+	mkdir -p feedback
 	RUNARGS="$RUNARGS $TESTOUT compare.meta feedback"
 fi
 
@@ -232,8 +232,8 @@ if [ $COMBINED_RUN_COMPARE -eq 0 ]; then
 
 	exitcode=0
 	# Create dir for feedback files and make it writable for $RUNUSER
-	mkdir feedback
-	chmod a+w feedback
+	mkdir -p feedback
+	chmod -R a+w feedback
 
 	runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
 		-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT --no-core \

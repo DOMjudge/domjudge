@@ -1410,6 +1410,15 @@ function judge(array $judgeTask): bool
         $passdir = $testcasedir . '/' . $passCnt;
         mkdir($passdir, 0755, true);
 
+        if ($passCnt > 1) {
+            $cpcmd = 'cp -R ' . $passdir . '/../' . ($passCnt - 1) . '/feedback ' . $passdir . '/';
+            system($cpcmd);
+            logmsg(LOG_INFO, "    Copying feedback dir from pass " . ($passCnt - 1) . ': ' . $cpcmd);
+            $rmcmd = 'rm ' . $passdir . '/feedback/nextpass.in';
+            system($rmcmd);
+            logmsg(LOG_INFO, "    Executing " . $rmcmd);
+        }
+
         // Copy program with all possible additional files to testcase
         // dir. Use hardlinks to preserve space with big executables.
         $programdir = $passdir . '/execdir';
