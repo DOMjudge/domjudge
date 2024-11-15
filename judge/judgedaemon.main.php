@@ -1451,6 +1451,16 @@ function judge(array $judgeTask): bool
         $passdir = $testcasedir . '/' . $passCnt;
         mkdir($passdir, 0755, true);
 
+        // In multi-pass problems, all files in the feedback directory
+        // are guaranteed to persist between passes, except `nextpass.in`.
+        // So, we recursively copy the feedback directory for every pass
+        // after the first (note that $passCnt starts at 1).
+        if ($passCnt > 1) {
+            $prevPassdir = $testcasedir . '/' . ($passCnt - 1) . '/feedback';
+            system('cp -R ' . dj_escapeshellarg($prevPassdir) . ' ' . dj_escapeshellarg($passdir . '/'));
+            system('rm ' . dj_escapeshellarg($passdir . '/feedback/nextpass.in'));
+        }
+
         // Copy program with all possible additional files to testcase
         // dir. Use hardlinks to preserve space with big executables.
         $programdir = $passdir . '/execdir';
