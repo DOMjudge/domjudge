@@ -22,6 +22,7 @@ import os.path
 import re
 import subprocess
 import sys
+import time
 import yaml
 
 sys.path.append('@domserver_libdir@')
@@ -240,10 +241,13 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
 
             if ((not confirmIndividually) or dj_utils.confirm(f'Ready to import problem \'{problem}\' to problem={problem}. Continue?', True)):
                 print(f'Uploading problem \'{problem}\', please be patient, this may take a while.')
+                before = time.time()
                 response = dj_utils.upload_file(
                     f'contests/{cid}/problems', 'zip', f'{problem}.zip', {'problem': problem})
+                after = time.time()
                 if response and 'problem_id' in response:
-                    print(f'Problem imported with ID {response["problem_id"]}:')
+                    upload_time = after - before
+                    print(f'Problem imported with ID {response["problem_id"]} (took {upload_time:.2f}s):')
                     if 'messages' in response:
                         messages = response['messages']
                         types = {'info': '🛈 ', 'warning': '⚠️ ', 'danger': '🚨'}
