@@ -140,7 +140,7 @@ class ContestController extends AbstractRestController
         name: 'onlyActive',
         description: 'Whether to only return data pertaining to contests that are active',
         in: 'query',
-        schema: new OA\Schema(type: 'boolean', default: false)
+        schema: new OA\Schema(type: 'boolean', default: true)
     )]
     public function listAction(Request $request): Response
     {
@@ -953,7 +953,7 @@ class ContestController extends AbstractRestController
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         try {
-            return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
+            return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', true));
         } catch (TypeError) {
             throw new BadRequestHttpException('\'onlyActive\' must be a boolean.');
         }
