@@ -75,7 +75,7 @@ class SubmitProblemPasteType extends AbstractType
                     $form = $context->getRoot();
                     /** @var Language $language */
                     $language = $form->get('language')->getData();
-                    $langId = strtolower($language->getExtensions()[0]); 
+                    $langId = strtolower($language->getExtensions()[0]);
                     if ($language->getRequireEntryPoint() && empty($value)) {
                         $message = sprintf('%s required, but not specified',
                                             $language->getEntryPointDescription() ?: 'Entry point');
