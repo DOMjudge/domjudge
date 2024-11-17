@@ -213,10 +213,11 @@ test_envvars() {
 	expect_stdout "USER="
 	expect_stdout "SHELL="
 
-	exec_check_success sudo $RUNGUARD -u domjudge-run-0 -V"DOMjudgeA=A;DOMjudgeB=BB" ./print_envvars.py
-	expect_stdout "COUNT: 4."
+	exec_check_success sudo $RUNGUARD -u domjudge-run-0 -V"DOMjudgeA=A;DOMjudgeB=BB" -V"DOMjudgeC=CCC" ./print_envvars.py
+	expect_stdout "COUNT: 5."
 	expect_stdout "DOMjudgeA=A"
 	expect_stdout "DOMjudgeB=BB"
+	expect_stdout "DOMjudgeC=CCC"
 	not_expect_stdout "HOME="
 	not_expect_stdout "USER="
 	not_expect_stdout "SHELL="
