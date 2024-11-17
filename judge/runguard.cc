@@ -62,6 +62,8 @@
 #include <libcgroup.h>
 #include <sched.h>
 #include <sys/sysinfo.h>
+#include <vector>
+#include <string>
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
@@ -106,7 +108,7 @@ char  *rootchdir;
 char  *stdoutfilename;
 char  *stderrfilename;
 char  *metafilename;
-char  *environment_variables;
+std::vector<std::string> environment_variables;
 FILE  *metafile;
 
 char  cgroupname[255];
@@ -363,7 +365,8 @@ Run COMMAND with restrictions.\n\
   -s, --streamsize=SIZE  truncate COMMAND stdout/stderr streams at SIZE kB\n\
   -E, --environment      preserve environment variables (default only PATH)\n\
   -V, --variable         add additional environment variables\n\
-                           (in form KEY=VALUE;KEY2=VALUE2)\n\
+                           (in form KEY=VALUE;KEY2=VALUE2); may be passed\n\
+                           multiple times\n\
   -M, --outmeta=FILE     write metadata (runtime, exitcode, etc.) to FILE\n\
   -U, --runpipepid=PID   process ID of runpipe to send SIGUSR1 signal when\n\
                            timelimit is reached\n");
@@ -802,8 +805,8 @@ void setrestrictions()
 	}
 
 	/* Set additional environment variables. */
-	if (environment_variables != nullptr) {
-		char *token = strtok(environment_variables, ";");
+	for (const auto &tokens : environment_variables) {
+		char *token = strtok(strdup(tokens.c_str()), ";");
 		while (token != nullptr) {
 			verbose("setting environment variable: %s", token);
 			putenv(token);
@@ -1175,7 +1178,7 @@ int main(int argc, char **argv)
 			preserve_environment = 1;
 			break;
 		case 'V': /* set environment variable */
-			environment_variables = strdup(optarg);
+			environment_variables.push_back(std::string(optarg));
 			break;
 		case 'M': /* outputmeta option */
 			outputmeta = 1;
