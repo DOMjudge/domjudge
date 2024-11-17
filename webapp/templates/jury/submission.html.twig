@@ -500,7 +500,7 @@
                 <div class="card card-body output_text">{{ selectedJudging.compileMetadata }}</div>
             </div>
         {% endif %}
-        {% if selectedJudging is not null and selectedJudging.result != 'compiler-error' %}
+        {% if output and selectedJudging is not null and selectedJudging.result != 'compiler-error' %}
             <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
                     data-bs-target="#detailcompile"
                     aria-expanded="false">
