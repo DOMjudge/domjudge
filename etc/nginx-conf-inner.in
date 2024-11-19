@@ -8,6 +8,9 @@ server_name _default_;
 # set max upload size to infinite since PHP has a setting for this
 client_max_body_size 0;
 
+# Prevent indexing by robots
+add_header X-Robots-Tag "none" always;
+
 # Variables used in the nginx configuration
 set $domjudgeRoot @domserver_webappdir@/public;
 # Set this to '' instead of /domjudge when running in the root of your system
