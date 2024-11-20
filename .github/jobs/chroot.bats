@@ -3,8 +3,8 @@
 load 'assert'
 
 CHROOT="/chroot/domjudge"
-if [ -n "${CI_JOB_ID+x}" ]; then
-    CHROOT="/builds/DOMjudge/domjudge${CHROOT}"
+if [ -n "${GITHUB_REPOSITORY+x}" ]; then
+    CHROOT="/__w/domjudge/domjudge${CHROOT}"
 fi
 # Cleanup old dir
 rm -rf $CHROOT
