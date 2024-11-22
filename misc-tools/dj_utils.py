@@ -79,7 +79,7 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
         url = f'{domjudge_webapp_folder_or_api_url}/{name}'
         parsed = urlparse(domjudge_webapp_folder_or_api_url)
         auth = None
-        if parsed.username or parsed.password:
+        if parsed.username and parsed.password:
             auth = (parsed.username, parsed.password)
 
         try:
