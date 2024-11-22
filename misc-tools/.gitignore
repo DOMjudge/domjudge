@@ -5,3 +5,4 @@
 /dj_make_chroot_docker
 /dj_run_chroot
 /dj_judgehost_cleanup
+/force-passwords
