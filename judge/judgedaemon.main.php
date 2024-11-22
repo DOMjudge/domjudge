@@ -60,6 +60,7 @@ function read_credentials(): void
             "waiting" => false,
             "errorred" => false,
             "last_attempt" => -1,
+            "retrying" => false,
         ];
     }
     if (count($endpoints) <= 0) {
@@ -784,8 +785,19 @@ while (true) {
 
     // We have gotten a work packet.
     $endpoints[$endpointID]["waiting"] = false;
+
     // All tasks are guaranteed to be of the same type.
     $type = $row[0]['type'];
+
+    if ($type == 'try_again') {
+        if (!$endpoints[$endpointID]['retrying']) {
+            logmsg(LOG_INFO, "API indicated to retry fetching work (this might take a while to clean up).");
+        }
+        $endpoints[$endpointID]['retrying'] = true;
+        continue;
+    }
+    $endpoints[$endpointID]['retrying'] = false;
+
     logmsg(LOG_INFO,
         "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint $endpointID)");
 

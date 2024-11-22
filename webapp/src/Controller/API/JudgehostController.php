@@ -1594,8 +1594,16 @@ class JudgehostController extends AbstractFOSRestController
                 ->setMaxResults(1)
                 ->getQuery()
                 ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
+            if ($jobid === null) {
+                return;
+            }
             $judgetasks = $this->getJudgetasks($jobid, $max_batchsize, $judgehost);
-            if ($judgetasks !== null) {
+            if (empty($judgetasks)) {
+                // Somehow we got ourselves in a situation that there was a queue task without remaining judge tasks.
+                // This should not happen, but if it does, we need to clean up. Each of the fetch-work calls will clean
+                // up one queue task. We need to signal to the judgehost that there might be more work to do.
+                $judgetasks = [['type' => 'try_again']];
+            } else {
                 // Mark it as being worked on.
                 $this->em->createQueryBuilder()
                     ->update(QueueTask::class, 'qt')
