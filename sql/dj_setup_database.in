@@ -254,7 +254,7 @@ create_db_users_helper()
 }
 
 create_database_dump () {
-	sudo mysqldump $(mysql_options) --opt --skip-lock-tables domjudge | pv | gzip > "$DATABASEDUMPDIR/${1}.sql.gz"
+	mysqldump $(mysql_options) --opt --skip-lock-tables "$DBNAME" | pv | gzip > "$DATABASEDUMPDIR/${1}.sql.gz"
 }
 
 ### Script starts here ###
@@ -392,8 +392,7 @@ dump)
 			esac
 		done
 	fi
-	create_database_dump $DUMPNAME
-	exit 0
+	create_database_dump "$DUMPNAME"
 	;;
 
 load)
@@ -434,9 +433,10 @@ load)
 		exit 1
 	fi
 
+	read_dbpasswords
 	uninstall_helper
 	create_db_users_helper
-	pv "${FILE}" | gunzip | mysql domjudge
+	pv "${FILE}" | gunzip | mysql "$DBNAME"
 	;;
 
 *)
