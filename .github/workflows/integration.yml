@@ -11,6 +11,9 @@ jobs:
   integration:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    strategy:
+      matrix:
+        SQL_ISOLATION: ['REPEATABLE-READ', 'SERIALIZABLE']
     container:
       image: domjudge/gitlabci:24.04
       options: --privileged --cgroupns=host --init
@@ -39,6 +42,8 @@ jobs:
         run: pstree -p
       - name: Install DOMjudge
         run: .github/jobs/baseinstall.sh all
+      - name: Set SQL isolation
+        run: echo "SET GLOBAL transaction_isolation=${{ matrix.SQL_ISOLATION }};" mysql -uroot -proot -hsqlserver
       - name: Set up chroot
         run: sudo misc-tools/dj_make_chroot -a amd64
       - name: Check nginx
@@ -81,13 +86,13 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: DB-dump
+          name: DB-dump-${{ matrix.SQL_ISOLATION }}
           path: /tmp/db.sql
       - name: Upload all logs/artifacts
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: Logs
+          name: Logs-${{ matrix.SQL_ISOLATION }}
           path: |
             /var/log/nginx
             /opt/domjudge/domserver/webapp/var/log/*.log
