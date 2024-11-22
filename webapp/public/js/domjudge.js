@@ -200,7 +200,7 @@ function getCookie(name)
 
 function getSelectedTeams()
 {
-    var cookieVal = getCookie("domjudge_teamselection");
+    var cookieVal = localStorage.getItem("domjudge_teamselection");
     if (cookieVal === null || cookieVal === "") {
         return new Array();
     }
@@ -284,10 +284,15 @@ function toggle(id, show)
     }
 
     var cookieVal = JSON.stringify(favTeams);
-    setCookie("domjudge_teamselection", cookieVal);
+    localStorage.setItem("domjudge_teamselection", cookieVal);
 
 
     $('.loading-indicator').addClass('ajax-loader');
+    // If we are on a local file system, reload the window
+    if (window.location.protocol === 'file:') {
+        window.location.reload();
+        return;
+    }
     $.ajax({
         url: scoreboardUrl,
         cache: false
