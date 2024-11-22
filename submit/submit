@@ -17,6 +17,7 @@ import requests.utils
 import stat
 import sys
 import time
+from typing import NoReturn
 try:
     import magic
 except ModuleNotFoundError:
@@ -40,11 +41,13 @@ num_warnings = 0
 
 headers = {'user-agent': f'domjudge-submit-client ({requests.utils.default_user_agent()})'}
 
+
 def confirm(message: str) -> bool:
     answer = ''
     while answer not in ['y', 'n']:
         answer = input(f'{message} (y/n) ').lower()
     return answer == 'y'
+
 
 def warn_user(msg: str):
     global num_warnings
@@ -54,18 +57,21 @@ def warn_user(msg: str):
     else:
         print(f'WARNING: {msg}!')
 
-def usage(msg: str):
+
+def usage(msg: str) -> NoReturn:
     logging.error(f'error: {msg}')
     print(f"Type '{sys.argv[0]} --help' to get help.")
     exit(1)
 
-def error(msg: str):
+
+def error(msg: str) -> NoReturn:
     logging.error(msg)
     exit(-1)
 
+
 def read_contests() -> list:
     '''Read all contests from the API.
-    
+
     Returns:
         The contests or None if an error occurred.
     '''
@@ -74,28 +80,29 @@ def read_contests() -> list:
         data = do_api_request('contests')
     except RuntimeError as e:
         logging.warning(e)
-        return None
+        return []
 
     if not isinstance(data, list):
         logging.warning("DOMjudge's API returned unexpected JSON data for endpoint 'contests'.")
-        return None
+        return []
 
     contests = []
     for contest in data:
         if ('id' not in contest
-            or 'shortname' not in contest
-            or not contest['id']
-            or not contest['shortname']):
+                or 'shortname' not in contest
+                or not contest['id']
+                or not contest['shortname']):
             logging.warning("DOMjudge's API returned unexpected JSON data for 'contests'.")
-            return None
+            return []
         contests.append(contest)
 
     logging.info(f'Read {len(contests)} contest(s) from the API.')
     return contests
 
+
 def read_languages() -> list:
     '''Read all languages for the current contest from the API.
-    
+
     Returns:
         The languages or None if an error occurred.
     '''
@@ -105,22 +112,22 @@ def read_languages() -> list:
         data = do_api_request(endpoint)
     except RuntimeError as e:
         logging.warning(e)
-        return None
+        return []
 
     if not isinstance(data, list):
         logging.warning("DOMjudge's API returned unexpected JSON data for endpoint 'languages'.")
-        return None
+        return []
 
     languages = []
 
     for item in data:
         if ('id' not in item
-            or 'extensions' not in item
-            or not item['id']
-            or not isinstance(item['extensions'], list)
-            or len(item['extensions']) == 0):
+                or 'extensions' not in item
+                or not item['id']
+                or not isinstance(item['extensions'], list)
+                or len(item['extensions']) == 0):
             logging.warning("DOMjudge's API returned unexpected JSON data for 'languages'.")
-            return None
+            return []
         language = {
             'id': item['id'],
             'name': item['name'],
@@ -134,9 +141,10 @@ def read_languages() -> list:
 
     return languages
 
+
 def read_problems() -> list:
     '''Read all problems for the current contest from the API.
-    
+
     Returns:
         The problems or None if an error occurred.
     '''
@@ -146,30 +154,31 @@ def read_problems() -> list:
         data = do_api_request(endpoint)
     except RuntimeError as e:
         logging.warning(e)
-        return None
+        return []
 
     if not isinstance(data, list):
         logging.warning("DOMjudge's API returned unexpected JSON data for endpoint 'problems'.")
-        return None
+        return []
 
     problems = []
 
     for problem in data:
         if ('id' not in problem
-            or 'label' not in problem
-            or not problem['id']
-            or not problem['label']):
+                or 'label' not in problem
+                or not problem['id']
+                or not problem['label']):
             logging.warning("DOMjudge's API returned unexpected JSON data for 'problems'.")
-            return None
+            return []
         problems.append(problem)
 
     logging.info(f'Read {len(problems)} problem(s) from the API.')
 
     return problems
 
+
 def do_api_request(name: str):
     '''Perform an API call to the given endpoint and return its data.
-    
+
     Parameters:
         name (str): the endpoint to call
 
@@ -184,7 +193,7 @@ def do_api_request(name: str):
         raise RuntimeError('No baseurl set')
 
     url = f'{baseurl}api/{api_version}{name}'
-    
+
     logging.info(f'Connecting to {url}')
 
     try:
@@ -203,6 +212,7 @@ def do_api_request(name: str):
 
     return json.loads(response.text)
 
+
 def kotlin_base_entry_point(filebase: str) -> str:
     if filebase == "":
         return "_"
@@ -218,6 +228,7 @@ def kotlin_base_entry_point(filebase: str) -> str:
         filebase = "_" + "".join(chars)
 
     return filebase
+
 
 def get_epilog():
     '''Get the epilog for the help text.'''
@@ -248,7 +259,7 @@ drop-down box in the web interface.'''
         language_part = 'For LANGUAGE use the ID or a common extension.'
     else:
         language_part = 'For LANGUAGE use one of the following IDs or extensions:'
-        max_length = max([len(l['name']) for l in languages])
+        max_length = max([len(L['name']) for L in languages])
         for language in languages:
             sorted_exts = ', '.join(sorted(language['extensions']))
             language_part += f"\n    {language['name']:<{max_length}} - {sorted_exts}"
@@ -287,6 +298,7 @@ Submit multiple files (the problem and language are taken from the first):
 
     return "\n\n".join(part for part in epilog_parts if part)
 
+
 def do_api_submit():
     '''Submit to the API with the given data.'''
 
@@ -323,14 +335,15 @@ def do_api_submit():
         error(f'Parsing DOMjudge\'s API output failed: {e}')
 
     if (not isinstance(submission, dict)
-        or not 'id' in submission
-        or not isinstance(submission['id'], str)):
+            or 'id' not in submission
+            or not isinstance(submission['id'], str)):
         error('DOMjudge\'s API returned unexpected JSON data.')
 
     time = datetime.datetime.fromisoformat(submission['time']).strftime('%H:%M:%S')
     sid = submission['id']
     print(f"Submission received: id = s{sid}, time = {time}")
     print(f"Check {baseurl}team/submission/{sid} for the result.")
+
 
 version_text = '''
 submit -- part of DOMjudge
@@ -364,7 +377,8 @@ parser.add_argument('-c', '--contest', help='''submit for contest with ID or sho
 parser.add_argument('-p', '--problem', help='submit for problem with ID or label PROBLEM', default='')
 parser.add_argument('-l', '--language', help='submit in language with ID LANGUAGE', default='')
 parser.add_argument('-e', '--entry_point', help='set an explicit entry_point, e.g. the java main class')
-parser.add_argument('-v', '--verbose', help='increase verbosity', choices=loglevels.keys(), nargs='?', const='INFO', default='WARNING')
+parser.add_argument('-v', '--verbose',
+                    help='increase verbosity', choices=loglevels.keys(), nargs='?', const='INFO', default='WARNING')
 parser.add_argument('-q', '--quiet', help='suppress warning/info messages', action='store_true')
 parser.add_argument('-y', '--assume-yes', help='suppress user input and assume yes', action='store_true')
 parser.add_argument('-u', '--url', help='''submit to server with base address URL
@@ -377,7 +391,7 @@ verbosity = args.verbose
 if args.quiet:
     verbosity = 'ERROR'
 
-logging.basicConfig(format=f'%(message)s', level=loglevels[verbosity])
+logging.basicConfig(format='%(message)s', level=loglevels[verbosity])
 logging.info(f'set verbosity to {verbosity}')
 
 problem_id = args.problem
@@ -403,9 +417,9 @@ contests = read_contests() if baseurl else None
 if not contests and not args.help:
     logging.warning('Could not obtain active contests.')
 
-my_contest = None
-my_language = None
-my_problem = None
+my_contest: dict = {}
+my_language: dict = {}
+my_problem: dict = {}
 
 if not contest_id:
     if not contests:
@@ -423,8 +437,8 @@ elif contests:
             my_contest = contest
             break
 
-languages = None
-problems = None
+languages: list = []
+problems: list = []
 if my_contest and baseurl:
     if 'allow_submit' in my_contest and not my_contest['allow_submit']:
         warn_user('Submissions for contest (temporarily) disabled')
@@ -470,7 +484,7 @@ for index, filename in enumerate(args.filename, 1):
         st = os.stat(filename)
     except FileNotFoundError:
         usage(f"Cannot find file `{filename}'.")
-    
+
     logging.debug(f"submission file {index}: `{filename}'")
 
     # Do some checks on submission file and warn user
@@ -496,6 +510,7 @@ for index, filename in enumerate(args.filename, 1):
 
 filebase = os.path.basename(filenames[0])
 
+ext = ""
 if '.' in filebase:
     dot = filebase.rfind('.')
     ext = filebase[dot+1:]
@@ -527,7 +542,7 @@ for problem in problems:
         break
 
 if not my_problem:
-     usage('No known problem specified or detected.')
+    usage('No known problem specified or detected.')
 
 # Guess entry point if not already specified.
 if not entry_point and my_language['entry_point_required']:
