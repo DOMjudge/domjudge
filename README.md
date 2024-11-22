@@ -93,3 +93,11 @@ https://www.domjudge.org/mailman/postorius/lists/domjudge-devel.domjudge.org/
 DOMjudge has a Slack workspace where a number of developers and
 users of DOMjudge linger. More information can be found at
 https://www.domjudge.org/chat
+
+Special thanks
+--------------
+
+[Blackfire](https://blackfire.io) for providing a free license for their
+  profiling tool.
+
+[<img src="https://platform.sh/blackfire-logos/full/color/BFlogo_aPSHproduct_Color_H.png" height="75">](https://blackfire.io)
