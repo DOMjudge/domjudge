@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # @configure_input@
 
 # This script allows one to perform DOMjudge database setup actions.
@@ -52,30 +52,48 @@ not have to pass any of the options above.
 EOF
 }
 
+urlencode()
+{
+	# Redirect via stdin to prevent ugly escaping hacks.
+	echo -n "$1" | php -r "echo rawurlencode(file_get_contents('php://stdin'));"
+}
+
+# This is global variable to be able to return the output from
+# mysql_options() below as an array, which is not possible otherwise.
+declare -a _mysql_options
+
 mysql_options()
 {
+	local user pass
+	_mysql_options=()
+
 	# shellcheck disable=SC2153
 	if [ -n "$DBUSER" ]; then
-		_user="-u $DBUSER"
-	else
-		_user="${DBA_USER:+-u ${DBA_USER}}"
+		_mysql_options+=('-u' "$DBUSER")
+	elif [ -n "$DBA_USER" ]; then
+		_mysql_options+=('-u' "$DBA_USER")
 	fi
 	# shellcheck disable=SC2153
 	if [ -n "$PASSWD" ]; then
-		_pass="-p$PASSWD"
-	else
-		[ -n "$PROMPT_PASSWD" ] && _pass="-p"
-		[ -n "$DBA_PASSWD" ]    && _pass="-p$DBA_PASSWD"
+		_mysql_options+=("-p$PASSWD")
+	elif [ -n "$DBA_PASSWD" ]; then
+		_mysql_options+=("-p$DBA_PASSWD")
+	elif [ -n "$PROMPT_PASSWD" ]; then
+		_mysql_options+=('-p')
 	fi
 
-	[ -z "$USE_SOCKET" ] && port="-P$DBPORT"
-	echo $_user ${_pass:+"$_pass"} -h "$DBHOST" ${port:+"$port"}
+	_mysql_options+=('-h' "$DBHOST")
+
+	if [ -z "$USE_SOCKET" ]; then
+		_mysql_options+=("-P$DBPORT")
+	fi
 }
 
 # Wrapper around mysql command to allow setting options, user, etc.
 mysql()
 {
-	command mysql $(mysql_options) --silent --skip-column-names "$@"
+	mysql_options
+	command mysql "${_mysql_options[@]}" --silent --skip-column-names "$@"
 }
 
 # Quick shell hack to get a key from an INI file.
@@ -126,10 +144,13 @@ symfony_console()
 		fi
 
 		if [ -n "$DBA_USER" ]; then
+			user=$(urlencode "${DBA_USER}")
+			host=$(urlencode "${domjudge_DBHOST}")
+			db=$(urlencode "${domjudge_DBNAME}")
 			if [ -n "$DBA_PASSWD" ]; then
-				DATABASE_URL=mysql://${DBA_USER}:${DBA_PASSWD}@${domjudge_DBHOST}:${domjudge_DBPORT}/${domjudge_DBNAME}
+				DATABASE_URL="mysql://$user:$(urlencode "${DBA_PASSWD}")@$host:${domjudge_DBPORT}/$db"
 			else
-				DATABASE_URL=mysql://${DBA_USER}@${domjudge_DBHOST}:${domjudge_DBPORT}/${domjudge_DBNAME}
+				DATABASE_URL="mysql://$user@$host:${domjudge_DBPORT}/$db"
 			fi
 		fi
 	fi
@@ -356,7 +377,7 @@ upgrade)
 		# shellcheck disable=SC2016,SC2028
 		echo 'INSERT INTO `doctrine_migration_versions`
 			(version, executed_at, execution_time)
-			SELECT concat("DoctrineMigrations\\\\Version", version), executed_at, 1
+			SELECT concat("DoctrineMigrations\\Version", version), executed_at, 1
 			FROM migration_versions;' | mysql "$DBNAME"
 		echo "DROP TABLE \`migration_versions\`" | mysql "$DBNAME"
 	fi
