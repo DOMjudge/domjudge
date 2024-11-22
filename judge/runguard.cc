@@ -923,9 +923,7 @@ void setrestrictions()
 	/* Set group-id (must be root for this, so before setting user). */
 	if ( use_group ) {
 		if ( setgid(rungid) ) error(errno,"cannot set group ID to `%d'",rungid);
-		gid_t aux_groups[1];
-		aux_groups[0] = rungid;
-		if ( setgroups(1, aux_groups) ) error(errno,"cannot clear auxiliary groups");
+		if ( setgroups(0, NULL) ) error(errno,"cannot clear auxiliary groups");
 
 		verbose("using group ID `%d'",rungid);
 	}
