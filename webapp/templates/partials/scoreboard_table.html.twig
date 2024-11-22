@@ -30,6 +30,11 @@
 
 <table class="d-none d-md-table scoreboard center {% if jury %}scoreboard_jury{% endif %}">
 
+    {% set teamColspan = 2 %}
+    {% if showAffiliationLogos %}
+        {% set teamColspan = teamColspan + 1 %}
+    {% endif %}
+
     {# output table column groups (for the styles) #}
     <colgroup>
         {% if enable_ranking %}
@@ -58,12 +63,6 @@
             {% endfor %}
         {% endif %}
     </colgroup>
-
-    {% set teamColspan = 2 %}
-    {% if showAffiliationLogos %}
-        {% set teamColspan = teamColspan + 1 %}
-    {% endif %}
-
     <thead>
     <tr class="scoreheader" data-static="{{ static }}">
         {% if enable_ranking %}
@@ -317,7 +316,6 @@
 </table>
 
 <table class="d-md-none scoreboard center {% if jury %}scoreboard_jury{% endif %}">
-    <thead>
     {# output table column groups (for the styles) #}
     <colgroup>
         {% if enable_ranking %}
@@ -338,6 +336,7 @@
             <col id="scoresolv"/>
         </colgroup>
     {% endif %}
+    <thead>
 
     {% set teamColspan = 2 %}
     {% if showAffiliationLogos %}
