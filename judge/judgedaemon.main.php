@@ -790,8 +790,6 @@ while (true) {
     logmsg(LOG_INFO,
         "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint $endpointID)");
 
-    $jobId = $row[0]['jobid'];
-
     if ($type == 'prefetch') {
         if ($lastWorkdir !== null) {
             cleanup_judging($lastWorkdir);
