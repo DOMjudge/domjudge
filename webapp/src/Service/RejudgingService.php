@@ -335,6 +335,8 @@ class RejudgingService
                             SET result = :aborted
                             WHERE judgingid = :judgingid
                             AND result IS NULL', ['aborted' => 'aborted', 'judgingid' => $submission['judgingid']]);
+                $this->em->getConnection()->executeQuery(
+                    'DELETE FROM queuetask WHERE judgingid = :judgingid', ['judgingid' => $submission['judgingid']]);
             } else {
                 $error = "Unknown action '$action' specified.";
                 throw new BadMethodCallException($error);
