@@ -479,8 +479,12 @@
         {% endif %}
     </tr>
         <tr style="height: 32px;">
-            <td class="no-border"/>
-            <td colspan="2">
+            {% if showAffiliationLogos %}
+                {% set problemSpan = 3 %}
+            {% else %}
+            {% set problemSpan = 2 %}
+            {% endif %}
+            <td colspan="{{ problemSpan }}">
                 {% for problem in problems %}
                     {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
                     {{ problem | problemBadgeMaybe(matrixItem) }}
