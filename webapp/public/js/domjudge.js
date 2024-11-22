@@ -246,9 +246,7 @@ function getHeartCol(row) {
 
 function getTeamname(row)
 {
-    var res = row.getAttribute("id");
-    if ( res === null ) return res;
-    return res.replace(/^team:/, '');
+    return row.getAttribute("data-team-id");
 }
 
 function toggle(id, show)
