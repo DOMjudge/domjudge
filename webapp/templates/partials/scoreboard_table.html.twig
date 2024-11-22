@@ -320,7 +320,9 @@
     <thead>
     {# output table column groups (for the styles) #}
     <colgroup>
-        <col id="scorerank"/>
+        {% if enable_ranking %}
+            <col id="scorerank"/>
+        {% endif %}
         {% if showFlags %}
             <col id="scoreflags"/>
         {% else %}
@@ -331,9 +333,11 @@
         {% endif %}
         <col id="scoreteamname"/>
     </colgroup>
-    <colgroup>
-        <col id="scoresolv"/>
-    </colgroup>
+    {% if enable_ranking %}
+        <colgroup>
+            <col id="scoresolv"/>
+        </colgroup>
+    {% endif %}
 
     {% set teamColspan = 2 %}
     {% if showAffiliationLogos %}
@@ -341,9 +345,13 @@
     {% endif %}
 
     <tr class="scoreheader" data-static="{{ static }}" style="font-size: 75%;">
-        <th title="rank" scope="col">rank</th>
+        {% if enable_ranking %}
+            <th title="rank" scope="col">rank</th>
+        {% endif %}
         <th title="team name" scope="col" colspan="{{ teamColspan }}">team</th>
-        <th title="# solved / penalty time" colspan="1" scope="col">score</th>
+        {% if enable_ranking %}
+            <th title="# solved / penalty time" colspan="1" scope="col">score</th>
+        {% endif %}
     </tr>
     </thead>
     <tbody>
@@ -373,16 +381,18 @@
         {% set color = score.team.category.color %}
     {% endif %}
     <tr class="{{ classes | join(' ') }}" id="team:{{ score.team.teamid }}" style="border-bottom-width: 0; height: 28px;">
-        <td class="scorepl {{medalColor}}" rowspan="2">
-            {# Only print rank when score is different from the previous team #}
-            {% if not displayRank %}
-                ?
-            {% elseif previousTeam is null or scoreboard.scores[previousTeam.teamid].rank != score.rank %}
-                {{ score.rank }}
-            {% else %}
-            {% endif %}
-            {% set previousTeam = score.team %}
-        </td>
+        {% if enable_ranking %}
+            <td class="scorepl {{medalColor}}" rowspan="2">
+                {# Only print rank when score is different from the previous team #}
+                {% if not displayRank %}
+                    ?
+                {% elseif previousTeam is null or scoreboard.scores[previousTeam.teamid].rank != score.rank %}
+                    {{ score.rank }}
+                {% else %}
+                {% endif %}
+                {% set previousTeam = score.team %}
+            </td>
+        {% endif %}
         <td class="scoreaf">
             {% if showFlags %}
                 {% if score.team.affiliation %}
@@ -459,12 +469,14 @@
             {% endif %}
         </a>
         </td>
-        {% set totalTime = score.totalTime %}
-        {% if scoreInSeconds %}
-            {% set totalTime = totalTime | printTimeRelative %}
+        {% if enable_ranking %}
+            {% set totalTime = score.totalTime %}
+            {% if scoreInSeconds %}
+                {% set totalTime = totalTime | printTimeRelative %}
+            {% endif %}
+            {% set totalPoints = score.numPoints %}
+            <td class="scorenc" rowspan="2">{{ totalPoints }}<br/><span class="scorett" style="font-weight: normal;">{{ totalTime }}</span></td>
         {% endif %}
-        {% set totalPoints = score.numPoints %}
-        <td class="scorenc" rowspan="2">{{ totalPoints }}<br/><span class="scorett" style="font-weight: normal;">{{ totalTime }}</span></td>
     </tr>
         <tr style="height: 32px;">
             <td class="no-border"/>
