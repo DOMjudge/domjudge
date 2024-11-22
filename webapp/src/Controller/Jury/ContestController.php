@@ -346,12 +346,15 @@ class ContestController extends BaseController
             ->getQuery()
             ->getResult();
 
+        $languages = $this->dj->getAllowedLanguagesForContest($contest);
+
         return $this->render('jury/contest.html.twig', [
             'contest' => $contest,
             'allowRemovedIntervals' => $this->getParameter('removed_intervals'),
             'removedIntervalForm' => $form,
             'removedIntervals' => $removedIntervals,
             'problems' => $problems,
+            'languages' => $languages,
         ]);
     }
 

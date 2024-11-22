@@ -2,6 +2,7 @@
 
 namespace App\Form\Type;
 
+use App\Entity\Contest;
 use App\Entity\Executable;
 use App\Entity\Language;
 use Doctrine\ORM\EntityRepository;
@@ -87,6 +88,16 @@ class LanguageType extends AbstractExternalIdEntityType
         $builder->add('runnerVersionCommand', TextType::class, [
             'label' => 'Runner version command',
             'required' => false,
+        ]);
+        $builder->add('contests', EntityType::class, [
+            'class'         => Contest::class,
+            'required'      => false,
+            'choice_label'  => 'name',
+            'multiple'      => true,
+            'by_reference'  => false,
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('c')
+                ->orderBy('c.name'),
         ]);
         $builder->add('save', SubmitType::class);
 

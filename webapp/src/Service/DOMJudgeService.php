@@ -1001,11 +1001,13 @@ class DOMJudgeService
         $defaultMemoryLimit = (int)$this->config->get('memory_limit');
         $timeFactorDiffers  = false;
         if ($showLimits) {
+            $languages = $this->getAllowedLanguagesForContest($contest);
             $timeFactorDiffers = $this->em->createQueryBuilder()
                     ->from(Language::class, 'l')
                     ->select('COUNT(l)')
-                    ->andWhere('l.allowSubmit = true')
                     ->andWhere('l.timeFactor <> 1')
+                    ->andWhere('l IN (:languages)')
+                    ->setParameter('languages', $languages)
                     ->getQuery()
                     ->getSingleScalarResult() > 0;
         }
@@ -1682,5 +1684,21 @@ class DOMJudgeService
     public function shadowMode(): bool
     {
         return (bool)$this->config->get('shadow_mode');
+    }
+
+    /** @return Language[] */
+    public function getAllowedLanguagesForContest(?Contest $contest) : array {
+        if ($contest) {
+            $languages = $contest->getLanguages();
+            if (!$languages->isEmpty()) {
+                return $languages->toArray();
+            }
+        }
+        return $this->em->createQueryBuilder(Language::class)
+            ->select('l')
+            ->from(Language::class, 'l')
+            ->where('l.allowSubmit = 1')
+            ->getQuery()
+            ->getResult();
     }
 }

@@ -150,6 +150,13 @@ class Language extends BaseApiEntity implements
     private ?string $runnerVersionCommand = null;
 
     /**
+     * @var Collection<int, Contest>
+     */
+    #[ORM\ManyToMany(targetEntity: Contest::class, mappedBy: 'languages')]
+    #[Serializer\Exclude]
+    private Collection $contests;
+
+    /**
      * @param Collection<int, Version> $versions
      */
     public function setVersions(Collection $versions): Language
@@ -386,6 +393,7 @@ class Language extends BaseApiEntity implements
     {
         $this->submissions = new ArrayCollection();
         $this->versions = new ArrayCollection();
+        $this->contests = new ArrayCollection();
     }
 
     public function addSubmission(Submission $submission): Language
@@ -415,5 +423,24 @@ class Language extends BaseApiEntity implements
             'rs' => 'rust',
             default => $this->getLangid(),
         };
+    }
+
+    public function addContest(Contest $contest): Language
+    {
+        $this->contests[] = $contest;
+        $contest->addLanguage($this);
+        return $this;
+    }
+
+    public function removeContest(Contest $contest): Language
+    {
+        $this->contests->removeElement($contest);
+        $contest->removeLanguage($this);
+        return $this;
+    }
+
+    public function getContests(): Collection
+    {
+        return $this->contests;
     }
 }

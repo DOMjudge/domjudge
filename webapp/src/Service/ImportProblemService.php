@@ -653,12 +653,7 @@ class ImportProblemService
 
             // First find all submittable languages:
             /** @var Language[] $allowedLanguages */
-            $allowedLanguages = $this->em->createQueryBuilder()
-                ->from(Language::class, 'l', 'l.langid')
-                ->select('l')
-                ->andWhere('l.allowSubmit = true')
-                ->getQuery()
-                ->getResult();
+            $allowedLanguages = $this->dj->getAllowedLanguagesForContest($contest);
 
             // Read submission details from optional file.
             $submission_file_string = $zip->getFromName($submission_file);
@@ -708,9 +703,9 @@ class ImportProblemService
                         continue;
                     }
                     $extension = end($parts);
-                    foreach ($allowedLanguages as $key => $language) {
+                    foreach ($allowedLanguages as $language) {
                         if (in_array($extension, $language->getExtensions())) {
-                            $languageToUse = $key;
+                            $languageToUse = $language->getLangid();
                             break 2;
                         }
                     }

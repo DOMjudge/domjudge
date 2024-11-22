@@ -453,9 +453,10 @@ class SubmissionService
             throw new BadRequestHttpException('Submissions for contest (temporarily) disabled');
         }
 
-        if (!$language->getAllowSubmit()) {
+        $allowedLanguages = $this->dj->getAllowedLanguagesForContest($contest);
+        if (!in_array($language, $allowedLanguages, true)) {
             throw new BadRequestHttpException(
-                sprintf("Language '%s' not found in database or not submittable.", $language->getLangid()));
+                sprintf("Language '%s' not allowed for contest [c%d].", $language->getLangid(), $contest->getCid()));
         }
 
         if ($language->getRequireEntryPoint() && empty($entryPoint)) {
@@ -781,7 +782,7 @@ class SubmissionService
     {
         /** @var SubmissionFile[] $files */
         $files = $submission->getFiles();
-        
+
         if (count($files) !== 1) {
             throw new ServiceUnavailableHttpException(null, 'Submission does not contain exactly one file.');
         }

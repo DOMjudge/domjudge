@@ -194,6 +194,23 @@
                     <td></td>
                 </tr>
                 <tr>
+                    <th>Languages</th>
+                    <td>
+                        {% if contest.languages is empty %}
+                            <em>all globally enabled languages:</em>
+                            {% set allowedLanguages = languages %}
+                        {% else %}
+                            {% set allowedLanguages = contest.languages %}
+                        {% endif %}
+                        <ul>
+                            {% for language in allowedLanguages %}
+                                <li><a href="{{ path('jury_language', {"langId": language.langid}) }}">{{ language.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
                     <th>Public static scoreboard ZIP</th>
                     <td>
                         <a class="btn btn-sm btn-secondary" href="{{ path('jury_scoreboard_data_zip', {contestId: contest.cid, type: 'public'}) }}">

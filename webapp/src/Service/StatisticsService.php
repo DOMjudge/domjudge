@@ -25,7 +25,7 @@ class StatisticsService
         'all' => 'All teams',
     ];
 
-    public function __construct(private readonly EntityManagerInterface $em)
+    public function __construct(private readonly EntityManagerInterface $em, private readonly DOMJudgeService $dj)
     {
     }
 
@@ -544,15 +544,9 @@ class StatisticsService
     public function getLanguagesStats(Contest $contest, string $view): array
     {
         /** @var Language[] $languages */
-        $languages = $this->em->getRepository(Language::class)
-            ->createQueryBuilder('l')
-            ->andWhere('l.allowSubmit = 1')
-            ->orderBy('l.name')
-            ->getQuery()
-            ->getResult();
+        $languages = $this->dj->getAllowedLanguagesForContest($contest);
 
         $languageStats = [];
-
         foreach ($languages as $language) {
             $languageStats[$language->getLangid()] = [
                 'name' => $language->getName(),
