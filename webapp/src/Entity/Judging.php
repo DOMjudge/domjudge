@@ -57,6 +57,16 @@ class Judging extends BaseApiEntity
     private string|float|null $endtime = null;
 
     #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: true,
+        options: ['comment' => 'The maximum runtime for all runs that resulted in the verdict', 'unsigned' => true]
+    )]
+    #[Serializer\Exclude]
+    private string|float|null $maxRuntimeForVerdict = null;
+
+    #[ORM\Column(
         length: 32,
         nullable: true,
         options: ['comment' => 'Result string as defined in config.php']
@@ -248,6 +258,26 @@ class Judging extends BaseApiEntity
     public function getRelativeEndTime(): ?string
     {
         return $this->getEndtime() ? Utils::relTime($this->getEndtime() - $this->getContest()->getStarttime()) : null;
+    }
+
+    public function setMaxRuntimeForVerdict(string|float $maxRuntimeForVerdict): Judging
+    {
+        $this->maxRuntimeForVerdict = $maxRuntimeForVerdict;
+        return $this;
+    }
+
+    public function getMaxRuntimeForVerdict(): string|float|null
+    {
+        return $this->maxRuntimeForVerdict;
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('max_run_time')]
+    #[Serializer\Type('float')]
+    #[OA\Property(nullable: true)]
+    public function getRoundedMaxRuntimeForVerdict(): ?float
+    {
+        return $this->maxRuntimeForVerdict ? Utils::roundedFloat((float)$this->maxRuntimeForVerdict) : null;
     }
 
     public function setResult(?string $result): Judging
