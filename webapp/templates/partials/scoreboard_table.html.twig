@@ -28,7 +28,7 @@
     </style>
 {% endif %}
 
-<table class="d-none d-md-table scoreboard center {% if jury %}scoreboard_jury{% endif %}">
+<table class="d-none d-md-table scoreboard desktop-scoreboard center {% if jury %}scoreboard_jury{% endif %}">
 
     {% set teamColspan = 2 %}
     {% if showAffiliationLogos %}
@@ -38,22 +38,22 @@
     {# output table column groups (for the styles) #}
     <colgroup>
         {% if enable_ranking %}
-            <col id="scorerankmobile"/>
+            <col id="scorerank"/>
         {% endif %}
         {% if showFlags %}
-            <col id="scoreflagsmobile"/>
+            <col id="scoreflags"/>
         {% else %}
             <col/>
         {% endif %}
         {% if showAffiliationLogos %}
-            <col id="scorelogosmobile"/>
+            <col id="scorelogos"/>
         {% endif %}
-        <col id="scoreteamnamemobile"/>
+        <col id="scoreteamname"/>
     </colgroup>
     {% if enable_ranking %}
         <colgroup>
-            <col id="scoresolvmobile"/>
-            <col id="scoretotalmobile"/>
+            <col id="scoresolv"/>
+            <col id="scoretotal"/>
         </colgroup>
     {% endif %}
     <colgroup>
@@ -106,7 +106,7 @@
     <tbody>
     {% set previousSortOrder = -1 %}
     {% set previousTeam = null %}
-    {% set backgroundColors = {"#FFFFFF": 1} %}
+    {% set backgroundColors = {"#FFFFFF": 1, '#FFFFE0': 1} %}
     {% set medalCount = 0 %}
     {% for score in scores %}
         {% set classes = [] %}
@@ -315,25 +315,25 @@
     </tbody>
 </table>
 
-<table class="d-md-none scoreboard center {% if jury %}scoreboard_jury{% endif %}">
+<table class="d-md-none scoreboard mobile-scoreboard center {% if jury %}scoreboard_jury{% endif %}">
     {# output table column groups (for the styles) #}
     <colgroup>
         {% if enable_ranking %}
-            <col id="scorerank"/>
+            <col id="scorerankmobile"/>
         {% endif %}
         {% if showFlags %}
-            <col id="scoreflags"/>
+            <col id="scoreflagsmobile"/>
         {% else %}
             <col/>
         {% endif %}
         {% if showAffiliationLogos %}
-            <col id="scorelogos"/>
+            <col id="scorelogosmobile"/>
         {% endif %}
-        <col id="scoreteamname"/>
+        <col id="scoreteamnamemobile"/>
     </colgroup>
     {% if enable_ranking %}
         <colgroup>
-            <col id="scoresolv"/>
+            <col id="scoresolvmobile"/>
         </colgroup>
     {% endif %}
     <thead>
@@ -356,7 +356,6 @@
     <tbody>
     {% set previousSortOrder = -1 %}
     {% set previousTeam = null %}
-    {% set backgroundColors = {"#FFFFFF": 1} %}
     {% set medalCount = 0 %}
     {% for score in scores %}
     {% set classes = [] %}
@@ -431,7 +430,6 @@
             {% set colorClass = "_FFFFFF" %}
         {% else %}
             {% set colorClass = color | replace({"#": "_"}) %}
-            {% set backgroundColors = backgroundColors | merge({(color): 1}) %}
         {% endif %}
         <td class="scoretn cl{{ colorClass }}" title="{{ score.team.effectiveName }}">
         {% set link = null %}
