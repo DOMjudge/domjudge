@@ -2,9 +2,6 @@
     "brick/math": {
         "version": "0.9.3"
     },
-    "clue/stream-filter": {
-        "version": "v1.6.0"
-    },
     "components/flag-icon-css": {
         "version": "3.5.0"
     },
@@ -134,14 +131,8 @@
     "guzzlehttp/guzzle": {
         "version": "6.5.5"
     },
-    "guzzlehttp/promises": {
-        "version": "1.5.1"
-    },
     "guzzlehttp/psr7": {
         "version": "1.8.3"
-    },
-    "http-interop/http-factory-guzzle": {
-        "version": "1.2.0"
     },
     "ircmaxell/password-compat": {
         "version": "v1.0.4"
@@ -228,24 +219,6 @@
     "phar-io/version": {
         "version": "2.0.1"
     },
-    "php-http/client-common": {
-        "version": "2.5.0"
-    },
-    "php-http/discovery": {
-        "version": "1.14.1"
-    },
-    "php-http/httplug": {
-        "version": "2.3.0"
-    },
-    "php-http/message": {
-        "version": "1.13.0"
-    },
-    "php-http/message-factory": {
-        "version": "v1.0.2"
-    },
-    "php-http/promise": {
-        "version": "1.1.0"
-    },
     "phpdocumentor/reflection-common": {
         "version": "1.0.1"
     },
@@ -310,9 +283,6 @@
     },
     "psr/event-dispatcher": {
         "version": "1.0.0"
-    },
-    "psr/http-client": {
-        "version": "1.0.1"
     },
     "psr/http-factory": {
         "version": "1.0.1"
@@ -382,9 +352,6 @@
     },
     "select2/select2": {
         "version": "4.0.7"
-    },
-    "sentry/sdk": {
-        "version": "3.1.1"
     },
     "sentry/sentry": {
         "version": "3.4.0"
