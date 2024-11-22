@@ -259,7 +259,7 @@ drop-down box in the web interface.'''
         language_part = 'For LANGUAGE use the ID or a common extension.'
     else:
         language_part = 'For LANGUAGE use one of the following IDs or extensions:'
-        max_length = max([len(L['name']) for L in languages])
+        max_length = max([len(lang['name']) for lang in languages])
         for language in languages:
             sorted_exts = ', '.join(sorted(language['extensions']))
             language_part += f"\n    {language['name']:<{max_length}} - {sorted_exts}"
@@ -377,8 +377,7 @@ parser.add_argument('-c', '--contest', help='''submit for contest with ID or sho
 parser.add_argument('-p', '--problem', help='submit for problem with ID or label PROBLEM', default='')
 parser.add_argument('-l', '--language', help='submit in language with ID LANGUAGE', default='')
 parser.add_argument('-e', '--entry_point', help='set an explicit entry_point, e.g. the java main class')
-parser.add_argument('-v', '--verbose',
-                    help='increase verbosity', choices=loglevels.keys(), nargs='?', const='INFO', default='WARNING')
+parser.add_argument('-v', '--verbose', help='increase verbosity', choices=loglevels.keys(), nargs='?', const='INFO', default='WARNING')  # NOQA
 parser.add_argument('-q', '--quiet', help='suppress warning/info messages', action='store_true')
 parser.add_argument('-y', '--assume-yes', help='suppress user input and assume yes', action='store_true')
 parser.add_argument('-u', '--url', help='''submit to server with base address URL
