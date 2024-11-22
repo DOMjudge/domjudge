@@ -97,6 +97,11 @@ https://www.domjudge.org/chat
 Special thanks
 --------------
 
+[Jetbrains](https://www.jetbrains.com) for providing a free license for their
+  IDEs.
+
+[<img src="https://www.jetbrains.com/company/brand/img/jetbrains_logo.png" height="75">](https://www.jetbrains.com)
+
 [Blackfire](https://blackfire.io) for providing a free license for their
   profiling tool.
 
