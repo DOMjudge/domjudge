@@ -488,7 +488,8 @@ function fetch_executable_internal(
 }
 
 $options = getopt("dv:n:hVe:j:t:", ["diskspace-error"]);
-// FIXME: getopt doesn't return FALSE on parse failure as documented!
+// We can't fully trust the output of getopt, it has outstanding bugs:
+// https://bugs.php.net/search.php?cmd=display&search_for=getopt&x=0&y=0
 if ($options===false) {
     echo "Error: parsing options failed.\n";
     usage();
