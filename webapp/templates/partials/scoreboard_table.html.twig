@@ -38,22 +38,22 @@
     {# output table column groups (for the styles) #}
     <colgroup>
         {% if enable_ranking %}
-            <col id="scorerank"/>
+            <col id="scorerankmobile"/>
         {% endif %}
         {% if showFlags %}
-            <col id="scoreflags"/>
+            <col id="scoreflagsmobile"/>
         {% else %}
             <col/>
         {% endif %}
         {% if showAffiliationLogos %}
-            <col id="scorelogos"/>
+            <col id="scorelogosmobile"/>
         {% endif %}
-        <col id="scoreteamname"/>
+        <col id="scoreteamnamemobile"/>
     </colgroup>
     {% if enable_ranking %}
         <colgroup>
-            <col id="scoresolv"/>
-            <col id="scoretotal"/>
+            <col id="scoresolvmobile"/>
+            <col id="scoretotalmobile"/>
         </colgroup>
     {% endif %}
     <colgroup>
