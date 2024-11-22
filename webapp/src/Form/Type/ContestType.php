@@ -4,6 +4,7 @@ namespace App\Form\Type;
 
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Language;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
@@ -199,6 +200,13 @@ class ContestType extends AbstractExternalIdEntityType
             'allow_add' => true,
             'allow_delete' => true,
             'label' => false,
+        ]);
+        $builder->add('languages', EntityType::class, [
+            'required' => false,
+            'class' => Language::class,
+            'multiple' => true,
+            'choice_label' => fn(Language $language) => sprintf('%s (%s)', $language->getName(), $language->getExternalid()),
+            'help' => 'List of languages that can be used in this contest. Leave empty to allow all languages that are enabled globally.',
         ]);
 
         $builder->add('save', SubmitType::class);

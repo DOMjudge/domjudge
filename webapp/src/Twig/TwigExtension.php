@@ -128,9 +128,10 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
         $selfRegistrationCategoriesCount = $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
         // These variables mostly exist for the header template.
+        $currentContest = $this->dj->getCurrentContest();
         return [
             'current_contest_id'            => $this->dj->getCurrentContestCookie(),
-            'current_contest'               => $this->dj->getCurrentContest(),
+            'current_contest'               => $currentContest,
             'current_contests'              => $this->dj->getCurrentContests(),
             'current_public_contest'        => $this->dj->getCurrentContest(onlyPublic: true),
             'current_public_contests'       => $this->dj->getCurrentContests(onlyPublic: true),
@@ -141,12 +142,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'external_ccs_submission_url'   => $this->config->get('external_ccs_submission_url'),
             'current_team_contest'          => $team ? $this->dj->getCurrentContest($team->getTeamid()) : null,
             'current_team_contests'         => $team ? $this->dj->getCurrentContests($team->getTeamid()) : null,
-            'submission_languages'          => $this->em->createQueryBuilder()
-                                                        ->from(Language::class, 'l')
-                                                        ->select('l')
-                                                        ->andWhere('l.allowSubmit = 1')
-                                                        ->getQuery()
-                                                        ->getResult(),
+            'submission_languages'          => $this->dj->getAllowedLanguagesForContest($currentContest),
             'alpha3_countries'              => Countries::getAlpha3Names(),
             'alpha3_alpha2_country_mapping' => array_combine(
                 Countries::getAlpha3Codes(),

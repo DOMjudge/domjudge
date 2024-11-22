@@ -344,6 +344,16 @@ class Contest extends BaseApiEntity implements
     private Collection $teams;
 
     /**
+     * @var Collection<int, Language>
+     */
+    #[ORM\ManyToMany(targetEntity: Language::class, inversedBy: 'contests')]
+    #[ORM\JoinTable(name: 'contestlanguage')]
+    #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'langid', referencedColumnName: 'langid', onDelete: 'CASCADE')]
+    #[Serializer\Exclude]
+    private Collection $languages;
+
+    /**
      * @var Collection<int, TeamCategory>
      */
     #[ORM\ManyToMany(targetEntity: TeamCategory::class, inversedBy: 'contests')]
@@ -437,6 +447,7 @@ class Contest extends BaseApiEntity implements
     {
         $this->problems                 = new ArrayCollection();
         $this->teams                    = new ArrayCollection();
+        $this->languages                = new ArrayCollection();
         $this->removedIntervals         = new ArrayCollection();
         $this->clarifications           = new ArrayCollection();
         $this->submissions              = new ArrayCollection();
@@ -894,6 +905,22 @@ class Contest extends BaseApiEntity implements
     public function getTeams(): Collection
     {
         return $this->teams;
+    }
+
+    public function addLanguage(Language $language): Contest
+    {
+        $this->languages[] = $language;
+        return $this;
+    }
+
+    public function removeLanguage(Language $language): void
+    {
+        $this->languages->removeElement($language);
+    }
+
+    public function getLanguages(): Collection
+    {
+        return $this->languages;
     }
 
     public function addProblem(ContestProblem $problem): Contest

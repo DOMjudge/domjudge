@@ -8,6 +8,7 @@ use App\Entity\CalculatedExternalIdBasedOnRelatedFieldInterface;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\ExternalIdFromInternalIdInterface;
+use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\RankCache;
 use App\Entity\ScoreCache;
@@ -16,6 +17,7 @@ use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
@@ -520,6 +522,10 @@ abstract class BaseController extends AbstractController
             $contests = $entity->getContests();
         } else {
             $contests = $this->dj->getCurrentContests();
+        }
+
+        if ($contests instanceof Collection) {
+            $contests = $contests->toArray();
         }
 
         return $contests;

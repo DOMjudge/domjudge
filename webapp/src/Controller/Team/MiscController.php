@@ -195,13 +195,9 @@ class MiscController extends BaseController
             ]);
         }
 
+        $currentContest = $this->dj->getCurrentContest();
         /** @var Language[] $languages */
-        $languages = $this->em->createQueryBuilder()
-            ->from(Language::class, 'l')
-            ->select('l')
-            ->andWhere('l.allowSubmit = 1')
-            ->getQuery()
-            ->getResult();
+        $languages = $this->dj->getAllowedLanguagesForContest($currentContest);
 
         return $this->render('team/print.html.twig', [
             'form' => $form,

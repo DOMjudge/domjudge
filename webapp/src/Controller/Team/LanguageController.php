@@ -40,13 +40,9 @@ class LanguageController extends BaseController
         if (!$languagesEnabled) {
             throw new BadRequestHttpException("You are not allowed to view this page.");
         }
+        $currentContest = $this->dj->getCurrentContest();
         /** @var Language[] $languages */
-        $languages = $this->em->createQueryBuilder()
-            ->select('l')
-            ->from(Language::class, 'l')
-            ->andWhere('l.allowSubmit = 1')
-            ->orderBy('l.langid')
-            ->getQuery()->getResult();
+        $languages = $this->dj->getAllowedLanguagesForContest($currentContest);
         return $this->render('team/languages.html.twig', ['languages' => $languages]);
     }
 }
