@@ -78,12 +78,22 @@ jobs:
             grep "No submissions in queue" /opt/domjudge/judgehost/log/judge*-0.log && break
           done
       - name: dump the db
+        if: ${{ !cancelled() }}
         run: mysqldump -uroot -proot domjudge > /tmp/db.sql
-      - name: Upload artifact for debugging
+      - name: Upload database dump for debugging
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v3
         with:
           name: DB-dump
           path: /tmp/db.sql
+      - name: Upload all logs/artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs
+          path: |
+            /var/log/nginx
+            /opt/domjudge/domserver/webapp/var/log/*.log
       - name: Verifying submissions
         shell: bash
         run: |
