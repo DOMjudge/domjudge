@@ -1125,7 +1125,7 @@ EOF;
         if (!$matrixItem->isCorrect) {
             if ($matrixItem->numSubmissionsPending > 0) {
                 $ret = '<span><span class="mobile-pending">' . $ret . '</span></span>';
-            } else if ($matrixItem->numSubmissions > 0) {
+            } elseif ($matrixItem->numSubmissions > 0) {
                 $ret = '<span><span class="strike-diagonal">' . $ret . '</span></span>';
             }
         }
