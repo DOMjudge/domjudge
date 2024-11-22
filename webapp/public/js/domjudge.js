@@ -207,13 +207,29 @@ function getSelectedTeams()
     return JSON.parse(cookieVal);
 }
 
-function getScoreboard()
+function getScoreboards(mobile)
 {
-    var scoreboard = document.getElementsByClassName("scoreboard");
-    if (scoreboard === null || scoreboard[0] === null || scoreboard[0] === undefined) {
+    const scoreboards = document.getElementsByClassName("scoreboard");
+    if (scoreboards === null || scoreboards[0] === null || scoreboards[0] === undefined) {
         return null;
     }
-    return scoreboard[0].rows;
+    let scoreboardRows = {};
+    const mobileScoreboardClass = 'mobile-scoreboard';
+    const desktopScoreboardClass = 'desktop-scoreboard';
+    for (let i = 0; i < scoreboards.length; i++) {
+        if (scoreboards[i].classList.contains(mobileScoreboardClass)) {
+            scoreboardRows.mobile = scoreboards[i].rows;
+        } else if (scoreboards[i].classList.contains(desktopScoreboardClass)) {
+            scoreboardRows.desktop = scoreboards[i].rows;
+        }
+    }
+    if (mobile === undefined) {
+        return scoreboardRows;
+    } else if (mobile) {
+        return scoreboardRows.mobile;
+    } else {
+        return scoreboardRows.desktop;
+    }
 }
 
 function getRank(row)
@@ -226,7 +242,7 @@ function getHeartCol(row) {
     var td = null;
     // search for td before the team name
     for (var i = 1; i < 4; i++) {
-        if (tds[i].className == "scoretn") {
+        if (tds[i].classList.contains("scoretn")) {
             td = tds[i - 1];
             break;
         }
@@ -249,16 +265,28 @@ function getTeamname(row)
     return row.getAttribute("data-team-id");
 }
 
-function toggle(id, show)
+function toggle(id, show, mobile)
 {
-    var scoreboard = getScoreboard();
+    var scoreboard = getScoreboards(mobile);
     if (scoreboard === null) return;
+
+    // Filter out all rows that do not have a data-team-id attribute or have
+    // the class `scoreheader`.
+    // The mobile scoreboard has them, and we need to ignore them.
+    scoreboard = Array.from(scoreboard)
+        .filter(
+            row => row.getAttribute("data-team-id")
+                || row.classList.contains("scoreheader")
+        );
 
     var favTeams = getSelectedTeams();
     // count visible favourite teams (if filtered)
     var visCnt = 0;
     for (var i = 0; i < favTeams.length; i++) {
         for (var j = 0; j < scoreboard.length; j++) {
+            if (!scoreboard[j].getAttribute("data-team-id")) {
+                continue;
+            }
             var scoreTeamname = getTeamname(scoreboard[j]);
             if (scoreTeamname === null) {
                 continue;
@@ -297,69 +325,99 @@ function toggle(id, show)
     });
 }
 
-function addHeart(rank, row, id, isFav)
+function addHeart(rank, row, id, isFav, mobile)
 {
     var heartCol = getHeartCol(row);
     var iconClass = isFav ? "fas fa-heart" : "far fa-heart";
-    return heartCol.innerHTML + "<span class=\"heart " + iconClass + "\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\"></span>";
+    return heartCol.innerHTML + "<span class=\"heart " + iconClass + "\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + "," + mobile + ")\"></span>";
 }
 
 function initFavouriteTeams()
 {
-    var scoreboard = getScoreboard();
-    if (scoreboard === null) {
+    const scoreboards = getScoreboards();
+    if (scoreboards === null) {
         return;
     }
 
     var favTeams = getSelectedTeams();
-    var toAdd = new Array();
-    var cntFound = 0;
-    var lastRank = 0;
-    for (var j = 0; j < scoreboard.length; j++) {
-        var found = false;
-        var teamname = getTeamname(scoreboard[j]);
-        if (teamname === null) {
-            continue;
-        }
-        var firstCol = getRank(scoreboard[j]);
-        var heartCol = getHeartCol(scoreboard[j]);
-        var rank = firstCol.innerHTML;
-        for (var i = 0; i < favTeams.length; i++) {
-            if (teamname === favTeams[i]) {
-                found = true;
-                heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
-                toAdd[cntFound] = scoreboard[j].cloneNode(true);
-                if (rank.trim().length === 0) {
-                    // make rank explicit in case of tie
-                    getRank(toAdd[cntFound]).innerHTML += lastRank;
+    Object.keys(scoreboards).forEach(function(key) {
+        var toAdd = new Array();
+        var toAddMobile = new Array();
+        var cntFound = 0;
+        var lastRank = 0;
+        const scoreboard = scoreboards[key];
+        const mobile = key === 'mobile';
+        let teamIndex = 1;
+        for (var j = 0; j < scoreboard.length; j++) {
+            var found = false;
+            var teamname = getTeamname(scoreboard[j]);
+            if (teamname === null) {
+                continue;
+            }
+            var firstCol = getRank(scoreboard[j]);
+            var heartCol = getHeartCol(scoreboard[j]);
+            var rank = firstCol.innerHTML;
+            for (var i = 0; i < favTeams.length; i++) {
+                if (teamname === favTeams[i]) {
+                    found = true;
+                    heartCol.innerHTML = addHeart(rank, scoreboard[j], teamIndex, found, mobile);
+                    toAdd[cntFound] = scoreboard[j].cloneNode(true);
+                    if (mobile) {
+                        toAddMobile[cntFound] = scoreboard[j + 1].cloneNode(true);
+                    }
+                    if (rank.trim().length === 0) {
+                        // make rank explicit in case of tie
+                        getRank(toAdd[cntFound]).innerHTML += lastRank;
+                    }
+                    scoreboard[j].style.background = "lightyellow";
+                    const scoretn = scoreboard[j].querySelector('.scoretn');
+                    if (scoretn && scoretn.classList.contains('cl_FFFFFF')) {
+                        scoretn.classList.remove('cl_FFFFFF');
+                        scoretn.classList.add('cl_FFFFE0');
+                    }
+                    if (mobile) {
+                        scoreboard[j + 1].style.background = "lightyellow";
+                    }
+                    cntFound++;
+                    break;
                 }
-                scoreboard[j].style.background = "lightyellow";
-                cntFound++;
-                break;
+            }
+            if (!found) {
+                heartCol.innerHTML = addHeart(rank, scoreboard[j], teamIndex, found, mobile);
+            }
+            if (rank !== "") {
+                lastRank = rank;
+            }
+
+            teamIndex++;
+        }
+
+        let addCounter = 1;
+        const copyRow = function (i, copy, addTopBorder, addBottomBorder, noMiddleBorder) {
+            let style = "";
+            if (noMiddleBorder) {
+                style += "border-bottom-width: 0;";
+            }
+            if (addTopBorder && i === 0) {
+                style += "border-top: 2px solid black;";
+            }
+            if (addBottomBorder && i === cntFound - 1) {
+                style += "border-bottom: thick solid black;";
+            }
+            copy.setAttribute("style", style);
+            const tbody = scoreboard[1].parentNode;
+            tbody.insertBefore(copy, scoreboard[addCounter]);
+            addCounter++;
+        }
+
+        // copy favourite teams to the top of the scoreboard
+        for (let i = 0; i < cntFound; i++) {
+            copyRow(i, toAdd[i], true, !mobile, mobile);
+            if (mobile) {
+                copyRow(i, toAddMobile[i], false, true, false);
             }
         }
-        if (!found) {
-            heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
-        }
-        if (rank !== "") {
-            lastRank = rank;
-        }
-    }
-
-    // copy favourite teams to the top of the scoreboard
-    for (var i = 0; i < cntFound; i++) {
-        var copy = toAdd[i];
-        var style = "";
-        if (i === 0) {
-            style += "border-top: 2px solid black;";
-        }
-        if (i === cntFound - 1) {
-            style += "border-bottom: thick solid black;";
-        }
-        copy.setAttribute("style", style);
-        var tbody = scoreboard[1].parentNode;
-        tbody.insertBefore(copy, scoreboard[i + 1]);
-    }
+    });
 }
 
 // This function is a specific addition for using DOMjudge within a
