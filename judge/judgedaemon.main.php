@@ -16,6 +16,52 @@ require(LIBDIR . '/lib.misc.php');
 $endpoints = [];
 $domjudge_config = [];
 
+function dj_getopt(string $short_options, array $long_options = []): array
+{
+    global $argv;
+    define('GETOPT_REGEX', "/^([a-zA-Z0-9]:{0,2})*$/");
+    if (preg_match(GETOPT_REGEX, $short_options) !== 1) {
+        echo "Error: short options format specified is invalid.\n";
+        usage();
+    }
+    $options = getopt($short_options, $long_options);
+    if ($options===false || !is_array($argv)) {
+        echo "Error: parsing options failed.\nPlease check: `register_argc_arg` in php.ini.\n";
+        usage();
+    }
+    $unknown_option = false;
+    foreach (array_slice($argv, 1) as $arg) {
+        if ($arg === '--') {
+            // By convention we can stop processing arguments.
+            break;
+        }
+        if (str_starts_with($arg, '--')) {
+            foreach($long_options as $long_option) {
+                $stripped_arg = substr($arg, 2);
+                if (str_starts_with($long_option, $stripped_arg) && $stripped_arg !== $long_option) {
+                    echo "Error: Shorten long options is not supported: $arg\n";
+                    $unknown_option = true;
+                } elseif (!array_key_exists($stripped_arg, $options)) {
+                    echo "Error: Unknown option: $arg\n";
+                    $unknown_option = true;
+                }
+            }
+        } elseif (str_starts_with($arg, '-')) {
+            foreach (str_split(ltrim($arg, '-')) as $c) {
+                if (!array_key_exists($c, $options)) {
+                    echo "Error: Unknown option: $arg\n";
+                    $unknown_option = true;
+                }
+            }
+        }
+    }
+    if ($unknown_option) {
+        echo "\n";
+        usage();
+    }
+    return $options;
+}
+
 function judging_directory(string $workdirpath, array $judgeTask) : string
 {
     if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_INT) === false ||
@@ -487,12 +533,7 @@ function fetch_executable_internal(
     return [$execrunpath, null, null];
 }
 
-$options = getopt("dv:n:hVe:j:t:", ["diskspace-error"]);
-// FIXME: getopt doesn't return FALSE on parse failure as documented!
-if ($options===false) {
-    echo "Error: parsing options failed.\n";
-    usage();
-}
+$options = dj_getopt("dv:n:hVe:j:t:", ["diskspace-error"]);
 if (isset($options['v'])) {
     $options['verbose'] = $options['v'];
 }
