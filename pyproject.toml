@@ -1,0 +1,2 @@
+[tool.pyright]
+exclude = ["./doc/", "./example_problems/", "./webapp/vendor/", "./webapp/public/doc/manual/"]
