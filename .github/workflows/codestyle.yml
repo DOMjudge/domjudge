@@ -66,3 +66,24 @@ jobs:
           webapp/public
           webapp/config
 
+  pycodestyle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download pycodestyle python file
+        run: >
+          curl -L -o /tmp/pycodestyle.py 'https://github.com/PyCQA/pycodestyle/raw/refs/tags/2.12.1/pycodestyle.py'
+      - name: Check codestyle in python files
+        run: >
+          python3 /tmp/pycodestyle.py \
+            --exclude='./example_problems/,./doc/,./gitlab/,./webapp/vendor/' \
+            --max-line-length 120 \
+            --show-pep8 --show-source \
+            .
+
+  pyright:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: jakebailey/pyright-action@v2
+      with:
+        version: 1.1.311
