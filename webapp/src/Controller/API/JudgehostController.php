@@ -1023,10 +1023,25 @@ class JudgehostController extends AbstractFOSRestController
             if (!$hasNullResults || $lazyEval !== DOMJudgeService::EVAL_FULL) {
                 // NOTE: setting endtime here determines in testcases_GET
                 // whether a next testcase will be handed out.
-                $this->logger->error('Judging %d is done, setting endtime, it had %d', [ $judging->getJudgingid(), $judging->getEndtime() ]);
-                $this->logger->error('Verdict is %s', [$result]);
-                $sendJudgingEvent = !$judging->getEndtime();
-                $judging->setEndtime(Utils::now());
+                // We want to set the endtime and max runtime only once (once the verdict is known),
+                // so that the API doesn't update these values once they are set.
+                // We also don't want to send judging events after the verdict is known.
+                if (!$judging->getEndtime()) {
+                    $sendJudgingEvent = true;
+                    $judging->setEndtime(Utils::now());
+
+                    // Also calculate the max run time and set it
+                    $maxRunTime = $this->em->createQueryBuilder()
+                        ->from(Judging::class, 'j')
+                        ->select('MAX(jr.runtime) AS maxruntime')
+                        ->leftJoin('j.runs', 'jr')
+                        ->andWhere('j.judgingid = :judgingid')
+                        ->andWhere('jr.runtime IS NOT NULL')
+                        ->setParameter('judgingid', $judging->getJudgingid())
+                        ->getQuery()
+                        ->getSingleScalarResult();
+                    $judging->setMaxRuntimeForVerdict($maxRunTime);
+                }
                 $this->maybeUpdateActiveJudging($judging);
             }
             $this->em->flush();
