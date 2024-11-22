@@ -133,7 +133,7 @@
         {% else %}
             {% set color = score.team.category.color %}
         {% endif %}
-        <tr class="{{ classes | join(' ') }}" id="team:{{ score.team.teamid }}">
+        <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}">
             {% if enable_ranking %}
                 <td class="scorepl {{medalColor}}">
                     {# Only print rank when score is different from the previous team #}
@@ -379,7 +379,7 @@
     {% else %}
         {% set color = score.team.category.color %}
     {% endif %}
-    <tr class="{{ classes | join(' ') }}" id="team:{{ score.team.teamid }}" style="border-bottom-width: 0; height: 28px;">
+    <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}" style="border-bottom-width: 0; height: 28px;">
         {% if enable_ranking %}
             <td class="scorepl {{medalColor}}" rowspan="2">
                 {# Only print rank when score is different from the previous team #}
