@@ -284,7 +284,7 @@ img.affiliation-logo {
 .silver-medal { background-color: #aaa }
 .bronze-medal { background-color: #c08e55 }
 
-#scoresolv,#scoretotal { width: 2.5em; }
+#scoresolv,#scoretotal,#scoresolvmobile,#scoretotalmobile { width: 2.5em; }
 .scorenc,.scorett,.scorepl { text-align: center; width: 2ex; }
 .scorenc { font-weight: bold; }
 td.scorenc { border-color: silver; border-right: 0; }
