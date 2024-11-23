@@ -40,7 +40,7 @@ setup() {
 @test "display basic usage information" {
     run ./submit --help
     assert_success
-    assert_line "usage: submit [--version] [-h] [-c CONTEST] [-p PROBLEM] [-l LANGUAGE] [-e ENTRY_POINT]"
+    assert_line "usage: submit [--version] [-h] [-c CONTEST] [-P] [-p PROBLEM] [-l LANGUAGE] [-e ENTRY_POINT]"
     assert_line "              [-v [{DEBUG,INFO,WARNING,ERROR,CRITICAL}]] [-q] [-y] [-u URL]"
     # The help printer does print this differently on versions of argparse for nargs=*.
     assert_regex "              (filename )?[filename ...]"
