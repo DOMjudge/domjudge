@@ -176,18 +176,12 @@ class MiscController extends BaseController
             $realfile         = $file->getRealPath();
             $originalfilename = $file->getClientOriginalName();
 
-            $langid   = $data['langid'];
-            $username = $this->getUser()->getUserIdentifier();
-
-            $propertyAccessor = PropertyAccess::createPropertyAccessor();
-            $team = $this->dj->getUser()->getTeam();
-            if ($team->getLabel()) {
-                $teamId = $team->getLabel();
-            } else {
-                $teamId = $team->getExternalid();
-            }
-            $ret  = $this->dj->printFile($realfile, $originalfilename, $langid,
-                $username, $team->getEffectiveName(), $teamId, $team->getLocation());
+            $langid = $data['langid'];
+            $ret = $this->dj->printUserFile(
+                $realfile,
+                $originalfilename,
+                $langid
+            );
 
             return $this->render('team/print_result.html.twig', [
                 'success' => $ret[0],
