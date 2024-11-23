@@ -240,23 +240,6 @@ install_examples()
 	( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
 }
 
-uninstall_helper()
-{
-	read_dbpasswords
-	remove_db_users
-}
-
-create_db_users_helper()
-{
-	read_dbpasswords
-	create_db_users
-	verbose "Created empty database and users."
-}
-
-create_database_dump () {
-	mysqldump $(mysql_options) --opt --skip-lock-tables "$DBNAME" | pv | gzip > "$DATABASEDUMPDIR/${1}.sql.gz"
-}
-
 ### Script starts here ###
 
 # Parse command-line options:
@@ -313,7 +296,8 @@ genpass)
 	;;
 
 uninstall)
-	uninstall_helper
+	read_dbpasswords
+	remove_db_users
 	;;
 
 install-examples)
@@ -332,7 +316,8 @@ install-loadtest)
 	;;
 
 create-db-users)
-	create_db_users_helper
+	read_dbpasswords
+	create_db_users
 	;;
 
 bare-install|install)
@@ -377,7 +362,8 @@ dump)
 		exit 1
 	fi
 
-	if [ -f "${DATABASEDUMPDIR}/${DUMPNAME}.sql.gz" ]; then
+	DUMPFILE="${DATABASEDUMPDIR}/${DUMPNAME}.sql.gz"
+	if [ -f "$DUMPFILE" ]; then
 		while true; do
 			printf "Overwrite existing database dump (y/N)? "
 			read -r yn
@@ -387,7 +373,7 @@ dump)
 			esac
 		done
 	fi
-	create_database_dump "$DUMPNAME"
+	mysqldump $(mysql_options) --opt --skip-lock-tables "$DBNAME" | pv | gzip > "$DUMPFILE"
 	;;
 
 load)
@@ -429,8 +415,8 @@ load)
 	fi
 
 	read_dbpasswords
-	uninstall_helper
-	create_db_users_helper
+	remove_db_users
+	create_db_users
 	pv "${FILE}" | gunzip | mysql "$DBNAME"
 	;;
 
