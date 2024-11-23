@@ -49,6 +49,13 @@ class JuryMiscController extends BaseController
     #[Route(path: '', name: 'jury_index')]
     public function indexAction(ConfigurationService $config): Response
     {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $innodbSnapshotIsolation = $this->em->getConnection()->query('SHOW VARIABLES LIKE "innodb_snapshot_isolation"')->fetchAssociative();
+            if ($innodbSnapshotIsolation && $innodbSnapshotIsolation['Value'] === 'ON') {
+                $this->addFlash('danger', 'InnoDB snapshot isolation is enabled. Set --innodb_snapshot_isolation=OFF in your MariaDB configuration. See https://github.com/DOMjudge/domjudge/issues/2848 for more information.');
+            }
+        }
+
         return $this->render('jury/index.html.twig', [
             'adminer_enabled' => $config->get('adminer_enabled'),
             'CCS_SPEC_API_URL' => GI::CCS_SPEC_API_URL,

@@ -198,11 +198,15 @@ class CheckConfigService
         $r = $this->em->getConnection()->fetchAllAssociative(
             'SHOW variables WHERE Variable_name IN
                  ("innodb_log_file_size", "max_connections", "max_allowed_packet",
-                  "tx_isolation", "transaction_isolation")'
+                  "tx_isolation", "transaction_isolation", "innodb_snapshot_isolation")'
         );
+
         $vars = [];
         foreach ($r as $row) {
             $vars[$row['Variable_name']] = $row['Value'];
+        }
+        if (!isset($vars['innodb_snapshot_isolation'])) {
+            $vars['innodb_snapshot_isolation'] = false;
         }
         # MySQL 8 has "transaction_isolation" instead of "tx_isolation".
         if (isset($vars['transaction_isolation'])) {
@@ -249,6 +253,13 @@ class CheckConfigService
             $desc .= sprintf("max_allowed_packet is set to %s. We recommend at least 16MB.\n", Utils::printsize((int)$vars['max_allowed_packet']));
         } else {
             $desc .= sprintf("max_allowed_packet is set to %s.\n", Utils::printsize((int)$vars['max_allowed_packet']));
+        }
+
+        if ($vars['innodb_snapshot_isolation'] === 'ON') {
+            $result = 'E';
+            $desc .= 'InnoDB snapshot isolation is enabled. Set --innodb_snapshot_isolation=OFF in your MariaDB configuration. See https://github.com/DOMjudge/domjudge/issues/2848 for more information.';
+        } else {
+            $desc .= "InnoDB snapshot isolation is disabled.\n";
         }
 
         $this->stopwatch->stop(__FUNCTION__);
