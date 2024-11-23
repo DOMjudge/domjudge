@@ -42,6 +42,12 @@ jobs:
         run: sudo misc-tools/dj_make_chroot -a amd64
       - name: Check nginx
         run: curl -v https://localhost/domjudge/
+      - name: Configure print command
+        working-directory: submit
+        run: |
+          curl --fail -u 'admin:password' -X 'GET' 'http://localhost/domjudge/api/v4/config?strict=false' \
+            | jq '.print_command |= "cp [file] /tmp/dj-printfile"' \
+            | curl --fail -u 'admin:password' -X 'PUT' -T - 'http://localhost/domjudge/api/v4/config?strict=false' \
       - name: Testing submit client
         working-directory: submit
         run: make check-full
