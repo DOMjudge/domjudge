@@ -71,6 +71,59 @@ function disableKeys()
     $("#keys_disable").hide();
 }
 
+function getEditorThemes()
+{
+    const element = document.querySelector('[data-editor-themes]');
+    return JSON.parse(element.dataset.editorThemes);
+}
+
+function getCurrentEditorTheme()
+{
+    const theme = localStorage.getItem('domjudge_editor_theme');
+    if (theme === null) {
+        return Object.keys(getEditorThemes())[0];
+    }
+    return theme;
+}
+
+function applyEditorTheme(theme = undefined, isExternal = false)
+{
+    if (theme === undefined) {
+        theme = getCurrentEditorTheme();
+        const themes = getEditorThemes();
+        for (const key in themes) {
+            if (key === theme) {
+                isExternal = themes[key].external || false;
+                break;
+            }
+        }
+    }
+
+    localStorage.setItem('domjudge_editor_theme', theme);
+    const themeElements = document.querySelectorAll('[data-editor-theme]');
+    themeElements.forEach(element => {
+        const themeForElement = element.dataset.editorTheme;
+        if (themeForElement === theme) {
+            element.classList.add('active');
+        } else {
+            element.classList.remove('active');
+        }
+    });
+
+    require(['vs/editor/editor.main'], function () {
+        if (isExternal) {
+            fetch(`${window.editorThemeFolder}/${theme}.json`)
+                .then(data => data.json())
+                .then(data => {
+                    monaco.editor.defineTheme(theme, data);
+                    monaco.editor.setTheme(theme);
+                })
+        } else {
+            monaco.editor.setTheme(theme);
+        }
+    });
+}
+
 // Send a notification if notifications have been enabled.
 // The options argument is passed to the Notification constructor,
 // except that the following tags (if found) are interpreted and
@@ -1055,4 +1108,26 @@ $(function() {
         window.addEventListener('resize', resizeMobileTeamNamesAndProblemBadges);
         resizeMobileTeamNamesAndProblemBadges();
     }
+
+    // For dropdown menus inside dropdown menus we need to make sure the outer
+    // dropdown stays open when the inner dropdown is opened.
+    const dropdowns = document.querySelectorAll('.dropdown-item.dropdown-toggle')
+    dropdowns.forEach((dd) => {
+        dd.addEventListener('click', function (e) {
+            // Find the parent dropdown
+            let parent = e.target;
+            while (parent && !parent.classList.contains('dropdown-menu')) {
+                parent = parent.parentElement;
+            }
+
+            // Also get the `a` element belonging to the menu
+            const a = parent.parentElement.querySelector('.dropdown-toggle');
+
+            setTimeout(() => {
+                parent.classList.add('show');
+                parent.dataset.bsPopper = 'static';
+                a.classList.add('show');
+            });
+        });
+    });
 });

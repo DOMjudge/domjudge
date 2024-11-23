@@ -402,17 +402,14 @@ class Language extends BaseApiEntity implements
         return $this->submissions;
     }
 
-    public function getAceLanguage(): string
+    public function getEditorLanguage(): string
     {
         return match ($this->getLangid()) {
-            'adb' => 'ada',
-            'bash' => 'sh',
-            'c', 'cpp', 'cxx' => 'c_cpp',
-            'hs' => 'haskell',
+            'bash' => 'shell',
+            'cxx' => 'cpp',
             'kt' => 'kotlin',
             'pas' => 'pascal',
             'pl' => 'perl',
-            'plg' => 'prolog',
             'py2', 'py3' => 'python',
             'rb' => 'ruby',
             'rs' => 'rust',

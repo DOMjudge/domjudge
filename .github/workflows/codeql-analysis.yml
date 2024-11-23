@@ -68,7 +68,7 @@ jobs:
 
     - name: Remove upstream code
       run: |
-        rm -rf webapp/public/js/ace doc/manual/_static
+        rm -rf webapp/public/js/monaco doc/manual/_static
 
     - name: Chown everything to the current runner user
       if: ${{ contains(env.COMPILED, matrix.language) }}

@@ -12,7 +12,7 @@
 ./.github/jobs/uploadcodecov.sh
 ./webapp/vendor
 ./webapp/public/bundles
-./webapp/public/js/ace
+./webapp/public/js/monaco
 ./webapp/templates/bundles
 ./webapp/var/cache
 ./webapp/migrations/Version20230122090005.php

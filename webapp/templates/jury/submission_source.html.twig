@@ -1,10 +1,10 @@
 {% extends "jury/base.html.twig" %}
+{% import "jury/jury_macros.twig" as macros %}
 
 {% block title %}Source s{{ submission.submitid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
-    <script src="{{ asset('js/ace/ace.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -70,7 +70,7 @@
                     {% endif %}
                 </div>
 
-                {{ file.sourcecode | codeEditor(file.rank, submission.language.aceLanguage) }}
+                {{ file.sourcecode | codeEditor(file.rank, submission.language.editorLanguage) }}
             </div>
         {%- endfor %}
 

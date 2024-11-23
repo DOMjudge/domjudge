@@ -27,7 +27,6 @@ use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
-use SebastianBergmann\Diff\Differ;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Exception\MissingResourceException;
@@ -37,6 +36,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
+use Twig\Runtime\EscaperRuntime;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
@@ -64,6 +64,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('customAssetFiles', $this->customAssetFiles(...)),
             new TwigFunction('globalBannerAssetPath', $this->dj->globalBannerAssetPath(...)),
             new TwigFunction('shadowMode', $this->shadowMode(...)),
+            new TwigFunction('showDiff', $this->showDiff(...), ['is_safe' => ['html']]),
         ];
     }
 
@@ -95,7 +96,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('runDiff', $this->runDiff(...), ['is_safe' => ['html']]),
             new TwigFilter('interactiveLog', $this->interactiveLog(...), ['is_safe' => ['html']]),
             new TwigFilter('codeEditor', $this->codeEditor(...), ['is_safe' => ['html']]),
-            new TwigFilter('showDiff', $this->showDiff(...), ['is_safe' => ['html']]),
             new TwigFilter('printContestStart', $this->printContestStart(...)),
             new TwigFilter('assetPath', $this->dj->assetPath(...)),
             new TwigFilter('printTimeRelative', $this->printTimeRelative(...)),
@@ -160,6 +160,19 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'doc_links'                     => $this->dj->getDocLinks(),
             'allow_registration'            => $selfRegistrationCategoriesCount !== 0,
             'enable_ranking'                => $this->config->get('enable_ranking'),
+            'editor_themes'                 => [
+                'vs'                        => ['name' => 'Visual Studio (light)'],
+                'vs-dark'                   => ['name' => 'Visual Studio (dark)'],
+                'Solarized-dark'            => ['name' => 'Solarized (dark)', 'external' => true],
+                'Solarized-light'           => ['name' => 'Solarized (light)', 'external' => true],
+                'Tomorrow-Night-Blue'       => ['name' => 'Tomorrow Night Blue', 'external' => true],
+                'Tomorrow-Night-Bright'     => ['name' => 'Tomorrow Night Bright', 'external' => true],
+                'Tomorrow-Night-Eighties'   => ['name' => 'Tomorrow Night Eighties', 'external' => true],
+                'Tomorrow-Night'            => ['name' => 'Tomorrow Night', 'external' => true],
+                'Tomorrow'                  => ['name' => 'Tomorrow', 'external' => true],
+                'hc-light'                  => ['name' => 'High contrast (light)'],
+                'hc-black'                  => ['name' => 'High contrast (dark)'],
+            ],
         ];
     }
 
@@ -819,7 +832,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Output a (optionally readonly) code editor for the given submission file.
-     * @param string|null $language Ace language to use
+     * @param string|null $language Editor language to use
      * @param bool $editable Whether to allow editing
      * @param string $elementToUpdate HTML element to update when input changes
      * @param string|null $filename If $language is null, filename to use to determine language
@@ -835,13 +848,26 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $editor = <<<HTML
 <div class="editor" id="__EDITOR__">%s</div>
 <script>
-var __EDITOR__ = ace.edit("__EDITOR__");
-__EDITOR__.setTheme("ace/theme/eclipse");
-__EDITOR__.setOptions({ maxLines: Infinity });
-__EDITOR__.setReadOnly(%s);
-%s
-document.getElementById("__EDITOR__").editor = __EDITOR__;
-%s
+$(function() {
+    require(['vs/editor/editor.main'], function () {
+        const element = document.getElementById('__EDITOR__');
+        const content = element.textContent;
+        element.textContent = '';
+        const editor = monaco.editor.create(element, {
+            value: content,
+            scrollbar: {
+                vertical: 'auto',
+                horizontal: 'auto'
+            },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            readOnly: %s,
+            theme: getCurrentEditorTheme(),
+        });
+        %s
+        %s
+    });
+});
 </script>
 HTML;
         $rank   = $index;
@@ -849,9 +875,10 @@ HTML;
         $code   = htmlspecialchars($code);
         if ($elementToUpdate) {
             $extraForEdit = <<<JS
-__EDITOR__.getSession().on('change', function() {
-    var textarea = document.getElementById("$elementToUpdate");
-    textarea.value = __EDITOR__.getSession().getValue();
+editor.getModel().onDidChangeContent(() => {
+    const newValue = editor.getValue();
+    const textarea = document.getElementById("$elementToUpdate");
+    textarea.value = newValue;
 });
 JS;
         } else {
@@ -859,13 +886,15 @@ JS;
         }
 
         if ($language !== null) {
-            $mode = sprintf('__EDITOR__.getSession().setMode("ace/mode/%s");', $language);
+            $mode = <<<JS
+const model = editor.getModel();
+model.setLanguage("$language");
+JS;
         } elseif ($filename !== null) {
             $modeTemplate = <<<JS
-var modelist = ace.require('ace/ext/modelist');
-var filePath = "%s";
-var mode = modelist.getModeForPath(filePath).mode;
-__EDITOR__.getSession().setMode(mode);
+const filePath = "%s";
+const model = monaco.editor.createModel(content, undefined, monaco.Uri.file(filePath));
+editor.setModel(model);
 JS;
             $mode         = sprintf($modeTemplate, htmlspecialchars($filename));
         } else {
@@ -901,10 +930,50 @@ JS;
         return $return;
     }
 
-    public function showDiff(SubmissionFile $newFile, SubmissionFile $oldFile): string
+    public function showDiff(string $id, SubmissionFile $newFile, SubmissionFile $oldFile): string
     {
-        $differ = new Differ;
-        return $this->parseSourceDiff($differ->diff($oldFile->getSourcecode(), $newFile->getSourcecode()));
+        $editor = <<<HTML
+<div class="editor" id="__EDITOR__"></div>
+<script>
+$(function() {
+    require(['vs/editor/editor.main'], function () {
+        const originalModel = monaco.editor.createModel(
+            "%s",
+            undefined,
+            monaco.Uri.parse("diff-old/%s")
+        );
+        const modifiedModel = monaco.editor.createModel(
+            "%s",
+            undefined,
+            monaco.Uri.parse("diff-new/%s")
+        );
+        const diffEditor = monaco.editor.createDiffEditor(
+            document.getElementById("__EDITOR__"), {
+            scrollbar: {
+                vertical: 'auto',
+                horizontal: 'auto'
+            },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            readOnly: true,
+            theme: getCurrentEditorTheme(),
+        });
+        diffEditor.setModel({
+            original: originalModel,
+            modified: modifiedModel,
+        });
+    });
+});
+</script>
+HTML;
+
+        return sprintf(
+            str_replace('__EDITOR__', $id, $editor),
+            $this->twig->getRuntime(EscaperRuntime::class)->escape($oldFile->getSourcecode(), 'js'),
+            $oldFile->getFilename(),
+            $this->twig->getRuntime(EscaperRuntime::class)->escape($newFile->getSourcecode(), 'js'),
+            $newFile->getFilename(),
+        );
     }
 
     public function printContestStart(Contest $contest): string
