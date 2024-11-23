@@ -151,7 +151,7 @@ class ClarificationController extends AbstractController
         $lastClarification = end($clarificationList);
         $formData['message'] = "> " . str_replace("\n", "\n> ", Utils::wrapUnquoted($lastClarification->getBody())) . "\n\n";
 
-        $form = $this->createForm(JuryClarificationType::class, $formData, ['limit_to_team' => $clarification->getSender()]);
+        $form = $this->createForm(JuryClarificationType::class, $formData, ['limit_to_team' => $clarification->getSender(), 'clarid' => $id]);
 
         $form->handleRequest($request);
 
@@ -224,6 +224,13 @@ class ClarificationController extends AbstractController
 
         $parameters['queues'] = $queues;
         $parameters['answers'] = $clarificationAnswers;
+        $parameters['jurymember'] = $this->em->createQueryBuilder()
+            ->select('clar.jury_member')
+            ->from(Clarification::class, 'clar')
+            ->where('clar.clarid = :clarid')
+            ->setParameter('clarid', $id)
+            ->getQuery()
+            ->getSingleResult()['jury_member'];
 
         return $this->render('jury/clarification.html.twig', $parameters);
     }
