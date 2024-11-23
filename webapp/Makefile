@@ -62,8 +62,7 @@ install-domserver:
 		$(call install_tree,$(DESTDIR)$(domserver_webappdir),$$d) ; \
 	done
 # Change webapp/public/doc symlink
-	rm $(DESTDIR)$(domserver_webappdir)/public/doc
-	ln -s $(domjudge_docdir) $(DESTDIR)$(domserver_webappdir)/public/doc
+	ln -sf $(domjudge_docdir) $(DESTDIR)$(domserver_webappdir)/public/doc
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
 
 maintainer-conf: .env.local
