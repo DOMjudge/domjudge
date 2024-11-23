@@ -302,7 +302,7 @@ class ExecutableController extends BaseController
             foreach ($editorData['filenames'] as $idx => $filename) {
                 $newContent = str_replace("\r\n", "\n", $submittedData['source' . $idx]);
                 if (!str_ends_with($newContent, "\n")) {
-                    // Ace swallows the newline at the end of file. Let's re-add it like most editors do.
+                    // The editor might swallow the newline at the end of file. Let's re-add it like most editors do.
                     $newContent .= "\n";
                 }
 
@@ -491,19 +491,19 @@ class ExecutableController extends BaseController
      *
      * @return array{'executable': Executable, 'filenames': string[],
      *               'skippedBinary': array<array{filename: string, execfileid: int}>,
-     *               'aceFilenames': string[], 'ranks': int[],
+     *               'editorFilenames': string[], 'ranks': int[],
      *               'files': string[], 'executableBits': bool[]}
      */
     protected function dataForEditor(Executable $executable): array
     {
         $immutable_executable = $executable->getImmutableExecutable();
 
-        $filenames      = [];
-        $file_contents  = [];
-        $aceFilenames   = [];
-        $skippedBinary  = [];
-        $executableBits = [];
-        $ranks          = [];
+        $filenames       = [];
+        $file_contents   = [];
+        $editorFilenames = [];
+        $skippedBinary   = [];
+        $executableBits  = [];
+        $ranks           = [];
 
         $files = $immutable_executable->getFiles()->toArray();
         usort($files, fn($a, $b) => $a->getFilename() <=> $b->getFilename());
@@ -523,28 +523,28 @@ class ExecutableController extends BaseController
             $ranks[] = $rank;
             $file_contents[] = $content;
             $executableBits[] = $file->isExecutable();
-            $aceFilenames[] = $this->getAceFilename($filename, $content);
+            $editorFilenames[] = $this->getEditorFilename($filename, $content);
         }
 
         return [
             'executable' => $executable,
             'skippedBinary' => $skippedBinary,
             'filenames' => $filenames,
-            'aceFilenames' => $aceFilenames,
+            'editorFilenames' => $editorFilenames,
             'ranks' => $ranks,
             'files' => $file_contents,
             'executableBits' => $executableBits,
         ];
     }
 
-    private function getAceFilename(string $filename, string $content): string
+    private function getEditorFilename(string $filename, string $content): string
     {
         if (!str_contains($filename, '.')) {
             // If the file does not contain a dot, see if we have a shebang which we can use as filename.
-            // We do this to hint the ACE editor to use a specific language.
+            // We do this to hint the editor to use a specific language.
             [$firstLine] = explode("\n", $content, 2);
             if (preg_match('/^#!.*\/([^\/]+)$/', $firstLine, $matches)) {
-                return sprintf('temp.%s', $matches[1]);
+                return sprintf('%s.%s', $filename, $matches[1]);
             }
         }
         return $filename;

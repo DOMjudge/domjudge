@@ -21,6 +21,12 @@
     {% include 'jury/menu.html.twig' %}
 {% endblock %}
 {% block footer %}
+    <script src="{{ asset('js/monaco/vs/loader.js') }}"></script>
+    <script>
+        {# A bit ugly to do the replace, but Symfony adds a version to any asset URLs so remove it again #}
+        require.config({ paths: { vs: '{{ asset('js/monaco/vs') }}'.replace(/\?.*/, '') } });
+        window.editorThemeFolder = '{{ asset('js/monaco/themes') }}'.replace(/\?.*/, '');
+    </script>
     <script>
         $(function () {
             /* Show the notification options if the browser supports it */
@@ -47,6 +53,8 @@
             setInterval(updateMenuAlerts, 20000);
 
             $('[data-bs-toggle="tooltip"]').tooltip();
+
+            applyEditorTheme();
         });
 
         initializeKeyboardShortcuts();

@@ -63,7 +63,7 @@ DOMjudge manual.
 
 The following JavaScript libraries/snippets are included:
 - coloris: Momo Bassit, licensed under the MIT license, see COPYING.MIT.
-- Ace editor: licensed under the BSD licence, see COPYING.BSD.
+- Monaco editor: licensed under the MIT license, see COPYING.MIT.
 
 The default validator from the Kattis problemtools package is
 included, licensed under the MIT licence, see COPYING.MIT.
