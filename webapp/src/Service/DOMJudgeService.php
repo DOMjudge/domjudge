@@ -1647,36 +1647,13 @@ class DOMJudgeService
 
         $this->em->getConnection()->executeQuery($judgetaskInsertQuery, $judgetaskInsertParamsWithoutColon);
 
-        // Step 3: Fetch the judgetasks ID's per testcase.
-        $judgetaskData = $this->em->getConnection()->executeQuery(
-            'SELECT judgetaskid, testcase_id FROM judgetask WHERE jobid = :jobid ORDER BY judgetaskid',
-            ['jobid' => $judging->getJudgingid()]
-        )->fetchAllAssociative();
-
-        // Step 4: Create and insert the corresponding judging runs.
-        $judgingRunInsertParams = [':judgingid' => $judging->getJudgingid()];
-        $judgingRunInsertParts = [];
-        foreach ($judgetaskData as $judgetaskItem) {
-            $judgingRunInsertParts[] = sprintf(
-                '(:judgingid, :testcaseid%d, :judgetaskid%d)',
-                $judgetaskItem['judgetaskid'],
-                $judgetaskItem['judgetaskid']
-            );
-            $judgingRunInsertParams[':testcaseid' . $judgetaskItem['judgetaskid']] = $judgetaskItem['testcase_id'];
-            $judgingRunInsertParams[':judgetaskid' . $judgetaskItem['judgetaskid']] = $judgetaskItem['judgetaskid'];
-        }
-        $judgingRunInsertQuery = sprintf(
-            'INSERT INTO judging_run (judgingid, testcaseid, judgetaskid) VALUES %s',
-            implode(', ', $judgingRunInsertParts)
+        // Step 3: Insert the corresponding judging runs.
+        $this->em->getConnection()->executeQuery(
+            'INSERT INTO judging_run (judgingid, judgetaskid, testcaseid)
+                    SELECT :judgingid, judgetaskid, testcase_id FROM judgetask
+                    WHERE jobid = :judgingid ORDER BY judgetaskid',
+            ['judgingid' => $judging->getJudgingid()]
         );
-
-        $judgingRunInsertParamsWithoutColon = [];
-        foreach ($judgingRunInsertParams as $key => $param) {
-            $key = str_replace(':', '', $key);
-            $judgingRunInsertParamsWithoutColon[$key] = $param;
-        }
-
-        $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParamsWithoutColon);
     }
 
     public function shadowMode(): bool
