@@ -1065,9 +1065,9 @@ EOF;
 
     public function problemBadge(ContestProblem $problem, bool $grayedOut = false): string
     {
-        $rgb        = Utils::convertToHex($problem->getColor() ?? '#ffffff');
+        $rgb = Utils::convertToHex($problem->getColor() ?? '#ffffff');
         if ($grayedOut) {
-            $rgb = 'whitesmoke';
+            $rgb = Utils::convertToHex('whitesmoke');
         }
         $background = Utils::parseHexColor($rgb);
 
@@ -1095,9 +1095,9 @@ EOF;
 
     public function problemBadgeMaybe(ContestProblem $problem, ScoreboardMatrixItem $matrixItem): string
     {
-        $rgb        = Utils::convertToHex($problem->getColor() ?? '#ffffff');
+        $rgb = Utils::convertToHex($problem->getColor() ?? '#ffffff');
         if (!$matrixItem->isCorrect) {
-            $rgb = 'whitesmoke';
+            $rgb = Utils::convertToHex('whitesmoke');
         }
         $background = Utils::parseHexColor($rgb);
 
