@@ -165,9 +165,6 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
                     ": http status code: " . $status .
                     ", request size = " . strlen(print_r($data, true)) .
                     ", response: " . $response;
-                if ($status == 500) {
-                    break;
-                }
             } else {
                 $succeeded = true;
                 break;
@@ -757,9 +754,12 @@ while (true) {
 
     // Request open submissions to judge. Any errors will be treated as
     // non-fatal: we will just keep on retrying in this loop.
+    $row = [];
     $judging = request('judgehosts/fetch-work', 'POST', ['hostname' => $myhost], false);
-    // If $judging is null, an error occurred; don't try to decode.
-    if (!is_null($judging)) {
+    // If $judging is null, an error occurred; we marked the endpoint already as errorred above.
+    if (is_null($judging)) {
+        continue;
+    } else {
         $row = dj_json_decode($judging);
     }
 
