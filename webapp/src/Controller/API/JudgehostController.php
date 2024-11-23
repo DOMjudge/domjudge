@@ -1600,40 +1600,42 @@ class JudgehostController extends AbstractFOSRestController
         // This is case 2.a) from above: start something new.
         // This runs transactional to prevent a queue task being picked up twice.
         $judgetasks = null;
-        $this->em->wrapInTransaction(function () use ($judgehost, $max_batchsize, &$judgetasks) {
-            $jobid = $this->em->createQueryBuilder()
-                ->from(QueueTask::class, 'qt')
-                ->innerJoin('qt.judging', 'j')
-                ->select('j.judgingid')
+        $jobid = $this->em->createQueryBuilder()
+            ->from(QueueTask::class, 'qt')
+            ->innerJoin('qt.judging', 'j')
+            ->select('j.judgingid')
+            ->andWhere('qt.startTime IS NULL')
+            ->addOrderBy('qt.priority')
+            ->addOrderBy('qt.teamPriority')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
+        if ($jobid !== null) {
+            // Mark it as being worked on.
+            $result = $this->em->createQueryBuilder()
+                ->update(QueueTask::class, 'qt')
+                ->set('qt.startTime', Utils::now())
+                ->andWhere('qt.judging = :jobid')
                 ->andWhere('qt.startTime IS NULL')
-                ->addOrderBy('qt.priority')
-                ->addOrderBy('qt.teamPriority')
-                ->setMaxResults(1)
+                ->setParameter('jobid', $jobid)
                 ->getQuery()
-                ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
-            if ($jobid === null) {
-                return;
-            }
-            $judgetasks = $this->getJudgetasks($jobid, $max_batchsize, $judgehost);
-            if (empty($judgetasks)) {
-                // Somehow we got ourselves in a situation that there was a queue task without remaining judge tasks.
-                // This should not happen, but if it does, we need to clean up. Each of the fetch-work calls will clean
-                // up one queue task. We need to signal to the judgehost that there might be more work to do.
+                ->execute();
+
+            if ($result == 0) {
+                // Another judgehost beat us to it.
                 $judgetasks = [['type' => 'try_again']];
             } else {
-                // Mark it as being worked on.
-                $this->em->createQueryBuilder()
-                    ->update(QueueTask::class, 'qt')
-                    ->set('qt.startTime', Utils::now())
-                    ->andWhere('qt.judging = :jobid')
-                    ->andWhere('qt.startTime IS NULL')
-                    ->setParameter('jobid', $jobid)
-                    ->getQuery()
-                    ->execute();
+                $judgetasks = $this->getJudgetasks($jobid, $max_batchsize, $judgehost);
+                if (empty($judgetasks)) {
+                    // Somehow we got ourselves in a situation that there was a queue task without remaining judge tasks.
+                    // This should not happen, but if it does, we need to clean up. Each of the fetch-work calls will clean
+                    // up one queue task. We need to signal to the judgehost that there might be more work to do.
+                    $judgetasks = [['type' => 'try_again']];
+                }
             }
-        });
-        if (!empty($judgetasks)) {
-            return $judgetasks;
+            if (!empty($judgetasks)) {
+                return $judgetasks;
+            }
         }
 
         if ($this->config->get('enable_parallel_judging')) {
