@@ -67,11 +67,9 @@ password=${MYSQL_ROOT_PASSWORD}
 EOF
 cat ~/.my.cnf
 
-mysql_log "CREATE DATABASE IF NOT EXISTS \`$DATABASE_NAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql_log "CREATE USER IF NOT EXISTS \`domjudge\`@'%' IDENTIFIED BY 'domjudge';"
-mysql_log "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DATABASE_NAME\`.* TO 'domjudge'@'%';"
-mysql_log "FLUSH PRIVILEGES;"
 echo 'unused:sqlserver:$DATABASE_NAME:domjudge:domjudge_db-pw+% #$*)@(!/;,.:3306' > /opt/domjudge/domserver/etc/dbpasswords.secret
+
+/opt/domjudge/domserver/bin/dj_setup_database create-db-users
 
 # Show some MySQL debugging
 mysql_log "show databases"
