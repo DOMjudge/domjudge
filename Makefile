@@ -223,6 +223,7 @@ inplace-install-l:
 	ln -sf $(CURDIR)/judge/runpipe  $(judgehost_bindir)
 	ln -sf $(CURDIR)/judge/create_cgroups  $(judgehost_bindir)
 	ln -sf $(CURDIR)/sql/dj_setup_database $(domserver_bindir)
+	ln -sf $(CURDIR)/webapp/bin/console $(domserver_bindir)/dj_console
 # Create tmpdir and make tmpdir writable for webserver,
 # because judgehost-create-dirs sets wrong permissions:
 	$(MKDIR_P) $(domserver_tmpdir)

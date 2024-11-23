@@ -61,6 +61,8 @@ install-domserver:
 	for d in bin config migrations public resources src templates tests vendor; do \
 		$(call install_tree,$(DESTDIR)$(domserver_webappdir),$$d) ; \
 	done
+# Add Symlink to Symfony console that is in the standard path
+	ln -s $(domserver_webappdir)/bin/console $(DESTDIR)$(domserver_bindir)/dj_console
 # Change webapp/public/doc symlink
 	ln -sf $(domjudge_docdir) $(DESTDIR)$(domserver_webappdir)/public/doc
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
