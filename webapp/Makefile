@@ -64,15 +64,6 @@ install-domserver:
 # Change webapp/public/doc symlink
 	rm $(DESTDIR)$(domserver_webappdir)/public/doc
 	ln -s $(domjudge_docdir) $(DESTDIR)$(domserver_webappdir)/public/doc
-# Now change all relative symlinks in webapp/public to their correct paths
-	for link in $$(find $(DESTDIR)$(domserver_webappdir)/public/$$dir -maxdepth 2 -type l); do \
-		target=$$(readlink $$link) ; \
-		case $${target} in *../vendor*) \
-			rm $$link ; \
-			realtarget=$(domserver_webappdir)/vendor$${target#*../vendor} ; \
-			ln -s $$realtarget $$link ; \
-		esac \
-	done
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
 
 maintainer-conf: .env.local
