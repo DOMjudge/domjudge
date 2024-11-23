@@ -8,6 +8,7 @@
 #
 
 import argparse
+import base64
 import datetime
 import json
 import logging
@@ -299,6 +300,56 @@ Submit multiple files (the problem and language are taken from the first):
     return "\n\n".join(part for part in epilog_parts if part)
 
 
+def do_api_print():
+    '''Submit to the API for printing with the given data.'''
+
+    if len(filenames) != 1:
+        error('You can only print a single file')
+    filename = filenames[0]
+
+    with open(filename, 'rb') as file:
+        data = {
+            'original_name': filename,
+            'file_contents': base64.b64encode(file.read()),
+        }
+    if my_language:
+        data['language'] = my_language['name']
+    if entry_point:
+        data['entry_point'] = entry_point
+
+    url = f"{baseurl}api/{api_version}printing/team"
+    logging.info(f'connecting to {url}')
+
+    response = requests.post(url, data=data, headers=headers)
+
+    logging.debug(f"API call 'printing' returned:\n{response.text}")
+
+    # The connection worked, but we may have received an HTTP error
+    if response.status_code >= 300:
+        print(response.text)
+        if response.status_code == 401:
+            raise RuntimeError('Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
+        else:
+            raise RuntimeError(f'Printing failed (code {response.status_code})')
+
+    # We got a successful HTTP response. It worked.
+    # But check that we indeed received a success response.
+
+    try:
+        result = json.loads(response.text)
+    except json.decoder.JSONDecodeError as e:
+        error(f'Parsing DOMjudge\'s API output failed: {e}')
+
+    if not isinstance(result, dict) or 'success' not in result:
+        error('DOMjudge\'s API returned unexpected JSON data.')
+
+    if result['success']:
+        print("DOMjudge reported a successful print job.")
+    else:
+        # Should not happen, as the status code should've been >= 300
+        print(f"DOMjudge reported a printing error: {result['output']}")
+
+
 def do_api_submit():
     '''Submit to the API with the given data.'''
 
@@ -374,6 +425,7 @@ parser.add_argument('-c', '--contest', help='''submit for contest with ID or sho
     Defaults to the value of the
     environment variable 'SUBMITCONTEST'.
     Mandatory when more than one contest is active.''')
+parser.add_argument('-P', '--print', help='submit the file for printing instead of submission', action='store_true')
 parser.add_argument('-p', '--problem', help='submit for problem with ID or label PROBLEM', default='')
 parser.add_argument('-l', '--language', help='submit in language with ID LANGUAGE', default='')
 parser.add_argument('-e', '--entry_point', help='set an explicit entry_point, e.g. the java main class')
@@ -530,7 +582,7 @@ for language in languages:
     if my_language:
         break
 
-if not my_language:
+if not my_language and not args.print:
     usage('No known language specified or detected.')
 
 # Check for problem matching ID or label.
@@ -540,7 +592,7 @@ for problem in problems:
         my_problem = problem
         break
 
-if not my_problem:
+if not my_problem and not args.print:
     usage('No known problem specified or detected.')
 
 # Guess entry point if not already specified.
@@ -556,10 +608,15 @@ if not entry_point and my_language['entry_point_required']:
     error('Entry point required but not specified nor detected.')
 
 logging.debug(f"contest is `{my_contest['shortname']}'")
-logging.debug(f"problem is `{my_problem['label']}'")
+if not args.print:
+    logging.debug(f"problem is `{my_problem['label']}'")
 logging.debug(f"language is `{my_language['name']}'")
 logging.debug(f"entry_point is `{entry_point or '<None>'}'")
 logging.debug(f"url is `{baseurl}'")
+
+if args.print:
+    do_api_print()
+    exit(0)
 
 if not args.assume_yes:
     print('Submission information:')
