@@ -1049,6 +1049,12 @@ class JudgehostController extends AbstractFOSRestController
             // Only update if the current result is different from what we had before.
             // This should only happen when the old result was NULL.
             if ($oldResult !== $result) {
+                if ($oldResult === 'aborted') {
+                    // This judging was cancelled while we worked on it,
+                    // probably as part of a cancelled rejudging.
+                    // Throw away our work, and return that we're done.
+                    return false;
+                }
                 if ($oldResult !== null) {
                     throw new BadMethodCallException('internal bug: the evaluated result changed during judging');
                 }
