@@ -10,6 +10,7 @@
         </div>
     </div>
 </div>
+{{ form_errors(form) }}
 <div class="row">
     <div class="col-sm">
         <div class="mb-3">
@@ -32,4 +33,7 @@
     </div>
 
 </div>
+{% if jurymember is defined %}
+    <input type="hidden" name="{{ field_name(form.jurymember) }}" value="{{ jurymember }}">
+{% endif %}
 {{ form_end(form) }}
