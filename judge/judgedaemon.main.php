@@ -20,7 +20,7 @@ function judging_directory(string $workdirpath, array $judgeTask) : string
 {
     if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_INT) === false ||
         filter_var($judgeTask['jobid'], FILTER_VALIDATE_INT) === false) {
-        error("Malformed data returned in judgeTask IDs");
+        error("Malformed data returned in judgeTask IDs: " . var_export($judgeTask, true));
     }
 
     return $workdirpath . '/'
