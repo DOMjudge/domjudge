@@ -734,6 +734,32 @@ class DOMJudgeService
      * @param string      $filename The on-disk file to be printed out
      * @param string      $origname The original filename as submitted by the team
      * @param string|null $language Langid of the programming language this file is in
+     * @param bool        $asTeam   Print the file as the team associated with the user
+     */
+    public function printUserFile(
+        string $filename,
+        string $origname,
+        ?string $language,
+        ?bool $asTeam = false,
+    ): array {
+        $user = $this->getUser();
+        $team = $user->getTeam();
+        if ($asTeam && $team !== null) {
+            $teamid = $team->getLabel() ?? $team->getExternalid();
+            return $this->printFile($filename, $origname, $language, $user->getUserIdentifier(), $team->getEffectiveName(), $teamid, $team->getLocation());
+        }
+        return $this->printFile($filename, $origname, $language, $user->getUserIdentifier());
+    }
+
+    /**
+     * Print the given file using the print command.
+     *
+     * Returns array with two elements: first a boolean indicating
+     * overall success, and second the data returned from the print command.
+     *
+     * @param string      $filename The on-disk file to be printed out
+     * @param string      $origname The original filename as submitted by the team
+     * @param string|null $language Langid of the programming language this file is in
      * @param string      $username Username of the print job submitter
      * @param string|null $teamname Teamname of the team this user belongs to, if any
      * @param string|null $teamid   Teamid of the team this user belongs to, if any
