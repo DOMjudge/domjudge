@@ -6,6 +6,8 @@
 
 set -e
 
+set -x
+
 BINDIR="@domserver_bindir@"
 ETCDIR="@domserver_etcdir@"
 WEBAPPDIR="@domserver_webappdir@"
