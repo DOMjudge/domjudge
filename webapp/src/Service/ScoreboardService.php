@@ -950,7 +950,7 @@ class ScoreboardService
      * Get the teams to display on the scoreboard.
      * @return Team[]
      */
-    protected function getTeams(Contest $contest, bool $jury = false, Filter $filter = null): array
+    protected function getTeams(Contest $contest, bool $jury = false, ?Filter $filter = null): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')

@@ -83,7 +83,7 @@ class JudgementTypeController extends AbstractApiController
      *
      * @return JudgementType[]
      */
-    protected function getJudgementTypes(array $filteredOn = null): array
+    protected function getJudgementTypes(?array $filteredOn = null): array
     {
         $verdicts = $this->dj->getVerdicts(mergeExternal: true);
 

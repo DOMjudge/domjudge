@@ -102,6 +102,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         // Note: we read the JSON as YAML, since any JSON is also YAML and this allows us
         // to import files with YAML inside them that match the JSON format
         $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
+        $messages = [];
         if ($this->importExportService->importProblemsData($contest, $data, $ids, $messages)) {
             return $ids;
         }

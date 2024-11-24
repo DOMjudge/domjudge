@@ -43,7 +43,7 @@ class ImportEventFeedCommand extends Command
         protected readonly TokenStorageInterface $tokenStorage,
         protected readonly ?Profiler $profiler,
         protected readonly ExternalContestSourceService $sourceService,
-        string $name = null
+        ?string $name = null
     ) {
         parent::__construct($name);
     }

@@ -139,7 +139,7 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
         return null;
     }
 
-    public function start(Request $request, AuthenticationException $authException = null): Response
+    public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
         // If this is the guard that fails/is configured to allow access as the entry_point
         // send the user a basic auth dialog, as that's probably what they're expecting.
