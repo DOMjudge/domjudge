@@ -551,11 +551,11 @@
                                 {{ externalRuns | displayTestcaseResults(externalJudgement.endtime is not empty, true) }}
                             </td>
                             <td>
-                                {% if externalSubmissionUrl and externalSubmissionUrl is not empty %}
+                                {% if externalSubmissionUrl is defined and externalSubmissionUrl is not empty %}
                                 <a href="{{ externalSubmissionUrl }}">
                                     {% endif %}
                                     external {{ externalJudgement.extjudgementid }}
-                                    {% if externalSubmissionUrl and externalSubmissionUrl is not empty %}
+                                    {% if externalSubmissionUrl is defined and externalSubmissionUrl is not empty %}
                                 </a>
                                 {% endif %}
                             </td>
