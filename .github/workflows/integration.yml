@@ -14,18 +14,20 @@ jobs:
     strategy:
       matrix:
         SQL_ISOLATION: ['REPEATABLE-READ', 'SERIALIZABLE']
+        SQL: [mariadb, mysql]
         include:
-          - sql: mariadb
-            sql_options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
-          - sql: mysql
-            sql_options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+          - SQL: mysql
+            SQL_options: --health-cmd="mysqladmin ping"
+          - SQL: mariadb
+            SQL_options: --health-cmd="healthcheck.sh --connect --innodb_initialized"
+            SQL_ISOLATION: 'REPEATABLE-READ'
     container:
       image: domjudge/gitlabci:24.04
       options: --privileged --cgroupns=host --init
     services:
       sqlserver:
-        image: ${{ matrix.sql }}
-        options: ${{ matrix.sql_options }}
+        image: ${{ matrix.SQL }}
+        options: ${{ matrix.SQL_options }} --health-interval=10s --health-timeout=5s --health-retries=3
         ports:
           - 3306:3306
         env:
@@ -91,13 +93,13 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: DB-dump-${{ matrix.SQL_ISOLATION }}-${{ matrix.sql }}
+          name: DB-dump-${{ matrix.SQL_ISOLATION }}-${{ matrix.SQL }}
           path: /tmp/db.sql
       - name: Upload all logs/artifacts
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: Logs-${{ matrix.SQL_ISOLATION }}-${{ matrix.sql }}
+          name: Logs-${{ matrix.SQL_ISOLATION }}-${{ matrix.SQL }}
           path: |
             /var/log/nginx
             /opt/domjudge/domserver/webapp/var/log/*.log
