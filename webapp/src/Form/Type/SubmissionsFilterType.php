@@ -115,10 +115,7 @@ class SubmissionsFilterType extends AbstractType
             "attr" => ["data-filter-field" => "team-id"],
         ]);
 
-        $verdicts = array_keys($this->dj->getVerdicts());
-        $verdicts[] = "judging";
-        $verdicts[] = "queued";
-        $verdicts[] = "import-error";
+        $verdicts = array_keys($this->dj->getVerdicts(['final', 'error', 'in_progress']));
         $builder->add("result", ChoiceType::class, [
             "label" => "Filter on result(s)",
             "multiple" => true,

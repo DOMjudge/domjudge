@@ -1485,14 +1485,19 @@ class DOMJudgeService
     /**
      * @return array<string, string>
      */
-    public function getVerdicts(bool $mergeExternal = false): array
+    public function getVerdicts(array $groups = ['final']): array
     {
         $verdictsConfig = $this->getDomjudgeEtcDir() . '/verdicts.php';
-        $verdicts       = include $verdictsConfig;
+        $verdictGroups  = include $verdictsConfig;
 
-        if ($mergeExternal) {
-            foreach ($this->config->get('external_judgement_types') as $id => $name) {
-                $verdicts[$name] = $id;
+        $verdicts = [];
+        foreach( $groups as $group ) {
+            if ( $group === 'external' ) {
+                foreach ($this->config->get('external_judgement_types') as $id => $name) {
+                    $verdicts[$name] = $id;
+                }
+            } else {
+                $verdicts = array_merge($verdicts, $verdictGroups[$group]);
             }
         }
 

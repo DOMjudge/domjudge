@@ -269,7 +269,7 @@ class ExternalContestSourceService
     public function import(bool $fromStart, array $eventsToSkip, ?callable $progressReporter = null): bool
     {
         // We need the verdicts to validate judgement-types.
-        $this->verdicts = $this->dj->getVerdicts(mergeExternal: true);
+        $this->verdicts = $this->dj->getVerdicts(['final', 'external']);
 
         if (!$this->isValidContestSource()) {
             throw new LogicException('The contest source is not valid');
@@ -799,7 +799,7 @@ class ExternalContestSourceService
             $customVerdicts = $this->config->get('external_judgement_types');
             $customVerdicts[$verdict] = str_replace(' ', '-', $data->name);
             $this->config->saveChanges(['external_judgement_types' => $customVerdicts], $this->eventLog, $this->dj);
-            $this->verdicts = $this->dj->getVerdicts(mergeExternal: true);
+            $this->verdicts = $this->dj->getVerdicts(['final', 'external']);
             $penalty = true;
             $solved = false;
             $this->logger->warning('Judgement type %s not found locally, importing as external verdict', [$verdict]);
