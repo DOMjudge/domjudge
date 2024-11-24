@@ -417,7 +417,7 @@ class Team extends BaseApiEntity implements
         return $this;
     }
 
-    public function setAffiliation(TeamAffiliation $affiliation = null): Team
+    public function setAffiliation(?TeamAffiliation $affiliation = null): Team
     {
         $this->affiliation = $affiliation;
         return $this;

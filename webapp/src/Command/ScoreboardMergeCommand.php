@@ -52,7 +52,7 @@ class ScoreboardMergeCommand extends Command
         protected readonly RouterInterface $router,
         #[Autowire('%kernel.project_dir%')]
         protected readonly string $projectDir,
-        string $name = null
+        ?string $name = null
     ) {
         parent::__construct($name);
     }

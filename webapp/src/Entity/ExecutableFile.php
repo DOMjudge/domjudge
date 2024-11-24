@@ -89,7 +89,7 @@ class ExecutableFile
         return $this->rank;
     }
 
-    public function setImmutableExecutable(ImmutableExecutable $immutableExecutable = null): ExecutableFile
+    public function setImmutableExecutable(?ImmutableExecutable $immutableExecutable = null): ExecutableFile
     {
         $this->immutableExecutable = $immutableExecutable;
         return $this;
