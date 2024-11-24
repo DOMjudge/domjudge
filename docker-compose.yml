@@ -15,7 +15,7 @@ services:
     ports:
       # Useful to connect a local MySQL client / GUI
       - 127.0.0.1:13306:3306
-    command: --max-connections=1000 --max-allowed-packet=512M
+    command: --max-connections=1000 --max-allowed-packet=512M --innodb_snapshot_isolation=OFF
     volumes:
       - /var/lib/mysql
   domjudge:
