@@ -50,6 +50,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\Exception\UninitializedPropertyException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
@@ -107,7 +109,7 @@ class ExternalContestSourceService
         protected readonly EventLogService $eventLog,
         protected readonly SubmissionService $submissionService,
         protected readonly ScoreboardService $scoreboardService,
-        protected readonly SerializerInterface $serializer,
+        protected readonly SerializerInterface&DenormalizerInterface&NormalizerInterface $serializer,
         #[Autowire('%domjudge.version%')]
         string $domjudgeVersion
     ) {
@@ -1886,7 +1888,8 @@ class ExternalContestSourceService
             objectId: $id,
             data: [$data],
         );
-        $dependencies[$type . '-' . $id] = ['type' => $type, 'id' => $id, 'event' => $event];
+        $normalizedEvent = $this->serializer->normalize($event, Event::class, ['api_version' => $this->getApiVersion()]);
+        $dependencies[$type . '-' . $id] = ['type' => $type, 'id' => $id, 'event' => $normalizedEvent];
         $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_DEPENDENCY_MISSING, [
             'dependencies' => $dependencies,
         ]);
@@ -1917,7 +1920,7 @@ class ExternalContestSourceService
 
                 $type  = $dependency['type'];
                 $id    = $dependency['id'];
-                $event = $dependency['event'];
+                $event = $this->serializer->denormalize($dependency['event'], Event::class, 'json', ['api_version' => $this->getApiVersion()]);
 
                 if (!isset($this->pendingEvents[$type][$id])) {
                     $this->pendingEvents[$type][$id] = [];
