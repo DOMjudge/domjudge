@@ -79,7 +79,7 @@ jobs:
         run: mysqldump -uroot -proot --quick --max_allowed_packet=512M domjudge > /tmp/db.sql
       - name: Upload database dump for debugging
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: DB-dump
           path: /tmp/db.sql
