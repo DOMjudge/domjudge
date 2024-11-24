@@ -89,7 +89,9 @@ class SubmissionService
         }
 
         if ($restrictions->withExternalId ?? false) {
-            $queryBuilder->andWhere('s.externalid IS NOT NULL');
+            $queryBuilder
+                ->andWhere('s.externalid IS NOT NULL')
+                ->andWhere('s.expected_results IS NULL');
         }
 
         if (isset($restrictions->rejudgingId)) {
@@ -163,7 +165,16 @@ class SubmissionService
 
         if (isset($restrictions->externalDifference)) {
             if ($restrictions->externalDifference) {
-                $queryBuilder->andWhere('j.result != ej.result');
+                if ($restrictions->result === 'judging' || $restrictions->externalResult === 'judging') {
+                    // When either the local or external result is set to judging explicitly,
+                    // coalesce the result with a known non-null value, because in MySQL
+                    // 'correct' <> null is not true. By coalescing with '-' we prevent this.
+                    $queryBuilder
+                        ->andWhere('COALESCE(j.result, :dash) != COALESCE(ej.result, :dash)')
+                        ->setParameter('dash', '-');
+                } else {
+                    $queryBuilder->andWhere('j.result != ej.result');
+                }
             } else {
                 $queryBuilder->andWhere('j.result = ej.result');
             }
