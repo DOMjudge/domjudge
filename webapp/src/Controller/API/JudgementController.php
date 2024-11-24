@@ -44,9 +44,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
 
-        $verdicts = $this->dj->getVerdicts();
-        $verdicts['aborted'] = 'JE'; /* happens for aborted judgings */
-        $this->verdicts = $verdicts;
+        $this->verdicts = $this->dj->getVerdicts(['final', 'error']);
     }
 
     /**

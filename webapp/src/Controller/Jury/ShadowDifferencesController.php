@@ -83,9 +83,7 @@ class ShadowDifferencesController extends BaseController
         $this->requestStack->getSession()->save();
 
         $contest  = $this->dj->getCurrentContest();
-        $verdicts = array_merge(['judging' => 'JU'], $this->dj->getVerdicts(mergeExternal: true));
-
-        $verdicts['import-error'] = 'IE';
+        $verdicts = $this->dj->getVerdicts(['final', 'error', 'external', 'in_progress']);
 
         $used         = [];
         $verdictTable = [];

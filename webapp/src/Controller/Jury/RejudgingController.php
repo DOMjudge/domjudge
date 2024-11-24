@@ -241,9 +241,8 @@ class RejudgingController extends BaseController
         }
         $todo = $this->rejudgingService->calculateTodo($rejudging)['todo'];
 
-        $verdicts = $this->dj->getVerdicts();
+        $verdicts = $this->dj->getVerdicts(['final', 'error']);
         $verdicts[''] = 'JE'; /* happens for aborted judgings */
-        $verdicts['aborted'] = 'JE'; /* happens for aborted judgings */
 
         $used         = [];
         $verdictTable = [];
