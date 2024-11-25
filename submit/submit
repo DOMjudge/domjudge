@@ -70,6 +70,15 @@ def error(msg: str) -> NoReturn:
     exit(-1)
 
 
+def print_if_json(text: str):
+    '''Print the text if it is valid JSON, and ignore otherwise'''
+    try:
+        data = json.loads(text)
+        print(json.dumps(data, indent=2))
+    except json.decoder.JSONDecodeError:
+        pass
+
+
 def read_contests() -> list:
     '''Read all contests from the API.
 
@@ -202,14 +211,13 @@ def do_api_request(name: str):
     except requests.exceptions.RequestException as e:
         raise RuntimeError(e)
 
+    logging.debug(f"API call '{name}' returned:\n{response.text}")
     if response.status_code >= 300:
-        print(response.text)
+        print_if_json(response.text)
         if response.status_code == 401:
             raise RuntimeError('Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
         else:
             raise RuntimeError(f'API request {name} failed (code {response.status_code}).')
-
-    logging.debug(f"API call '{name}' returned:\n{response.text}")
 
     return json.loads(response.text)
 
@@ -322,11 +330,10 @@ def do_api_print():
 
     response = requests.post(url, data=data, headers=headers)
 
-    logging.debug(f"API call 'printing' returned:\n{response.text}")
-
     # The connection worked, but we may have received an HTTP error
+    logging.debug(f"API printing call returned:\n{response.text}")
     if response.status_code >= 300:
-        print(response.text)
+        print_if_json(response.text)
         if response.status_code == 401:
             raise RuntimeError('Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
         else:
@@ -367,11 +374,10 @@ def do_api_submit():
 
     response = requests.post(url, data=data, files=files, headers=headers)
 
-    logging.debug(f"API call 'submissions' returned:\n{response.text}")
-
     # The connection worked, but we may have received an HTTP error
+    logging.debug(f"API submitting call returned:\n{response.text}")
     if response.status_code >= 300:
-        print(response.text)
+        print_if_json(response.text)
         if response.status_code == 401:
             raise RuntimeError('Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
         else:
