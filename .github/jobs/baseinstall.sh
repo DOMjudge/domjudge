@@ -67,7 +67,7 @@ password=${MYSQL_ROOT_PASSWORD}
 EOF
 cat ~/.my.cnf
 
-echo 'unused:sqlserver:$DATABASE_NAME:domjudge:domjudge_db-pw+% #$*)@(!/;,.:3306' > /opt/domjudge/domserver/etc/dbpasswords.secret
+echo 'unused:sqlserver:$DATABASE_NAME:domjudge:djdb-pw:3306' > /opt/domjudge/domserver/etc/dbpasswords.secret
 
 /opt/domjudge/domserver/bin/dj_setup_database create-db-users
 
