@@ -139,7 +139,9 @@ class RejudgingType extends AbstractType
             'help' => 'in seconds',
         ]);
 
-        $builder->add('save', SubmitType::class);
+        $builder->add('save', SubmitType::class, [
+            'label' => 'Add',
+        ]);
 
         $formProblemModifier = function (FormInterface $form, $contests = []) {
             /** @var Contest[] $contests */
