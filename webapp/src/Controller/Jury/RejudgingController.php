@@ -239,7 +239,9 @@ class RejudgingController extends BaseController
         if (!$rejudging) {
             throw new NotFoundHttpException(sprintf('Rejudging with ID %s not found', $rejudgingId));
         }
-        $todo = $this->rejudgingService->calculateTodo($rejudging)['todo'];
+        $todoAndDone = $this->rejudgingService->calculateTodo($rejudging);
+        $todo = $todoAndDone['todo'];
+        $done = $todoAndDone['done'];
 
         $verdicts = $this->dj->getVerdicts(['final', 'error']);
         $verdicts[''] = 'JE'; /* happens for aborted judgings */
@@ -389,6 +391,7 @@ class RejudgingController extends BaseController
         $data = [
             'rejudging' => $rejudging,
             'todo' => $todo,
+            'done' => $done,
             'verdicts' => $verdicts,
             'used' => $used,
             'verdictTable' => $verdictTable,
