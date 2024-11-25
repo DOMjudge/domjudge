@@ -153,6 +153,8 @@ symfony_console()
 				DATABASE_URL="mysql://$user@$host:${domjudge_DBPORT}/$db"
 			fi
 		fi
+	else
+		DATABASE_URL="mysql://$DBUSER:$(urlencode "${PASSWD}")@$host:${domjudge_DBPORT}/$db"
 	fi
 
 	if [ -n "$DATABASE_URL" ]; then
@@ -267,7 +269,7 @@ update_password()
 
 install_examples()
 {
-	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-example-data
+	symfony_console domjudge:load-example-data
 	"$EXAMPLEPROBDIR"/generate-contest-yaml
 	( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
 }
@@ -341,8 +343,8 @@ install-loadtest)
 	read_dbpasswords
 	create_db_users
 	symfony_console doctrine:migrations:migrate -n
-	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
-	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-gatling-data
+	symfony_console domjudge:load-default-data
+	symfony_console domjudge:load-gatling-data
 	;;
 
 create-db-users)
@@ -359,7 +361,7 @@ bare-install|install)
 	read_dbpasswords
 	create_db_users
 	symfony_console doctrine:migrations:migrate -n
-	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
+	symfony_console domjudge:load-default-data
 	if [ "$1" = "install" ]; then
 		install_examples
 		verbose "SQL structure and default/example data installed."
@@ -383,9 +385,8 @@ upgrade)
 	fi
 
 	symfony_console doctrine:migrations:migrate -n
-	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
-
 	symfony_console domjudge:refresh-cache
+	symfony_console domjudge:load-default-data
 	verbose "DOMjudge database upgrade completed."
 	;;
 
