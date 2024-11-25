@@ -320,9 +320,7 @@ install-examples)
 install-loadtest)
 	read_dbpasswords
 	create_db_users
-	export DB_FIRST_INSTALL=1
 	symfony_console doctrine:migrations:migrate -n
-	unset DB_FIRST_INSTALL
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-gatling-data
 	;;
@@ -339,9 +337,7 @@ update-password)
 bare-install|install)
 	read_dbpasswords
 	create_db_users
-	export DB_FIRST_INSTALL=1
 	symfony_console doctrine:migrations:migrate -n
-	unset DB_FIRST_INSTALL
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
 	if [ "$1" = "install" ]; then
 		install_examples
