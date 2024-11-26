@@ -82,7 +82,7 @@ class AnalysisController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/team/{teamid}', name: 'analysis_team')]
+    #[Route(path: '/team/{team}', name: 'analysis_team')]
     public function teamAction(Team $team): Response
     {
         $contest = $this->dj->getCurrentContest();
