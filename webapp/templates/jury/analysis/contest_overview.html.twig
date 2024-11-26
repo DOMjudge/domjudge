@@ -171,7 +171,7 @@ $(function() {
             {% for t in teams %}
               {% set id=t.teamid %}
               <tr>
-                {% set link = path('analysis_team', {'teamid':id}) %}
+                {% set link = path('analysis_team', {'team':id}) %}
                 <td scope="row" style="text-align: right;"><a href="{{ link }}">{{ t | entityIdBadge('t') }}</a></td>
                 <td><a href="{{ link }}">{% if t.affiliation %}{{ t.affiliation.name }}{% else %}-{% endif %}</a></td>
                 <td class="truncate" style="max-width: 200px"><a href="{{ link }}">{{ t.effectiveName }}</a></td>
