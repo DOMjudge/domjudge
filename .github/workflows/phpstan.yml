@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install DOMjudge
         run: .github/jobs/baseinstall.sh admin
-      - uses: php-actions/phpstan@v3
+      - uses: php-actions/phpstan@v3.0.2
         with:
           configuration: phpstan.dist.neon
           path: webapp/src webapp/tests
