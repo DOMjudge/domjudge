@@ -50,7 +50,7 @@
     - /bin/true
   parallel:
     matrix:
-      - PHPVERSION: ["8.1","8.2","8.3"]
+      - PHPVERSION: ["8.1","8.2","8.3", "8.4"]
         TEST: ["E2E","Unit"]
         CRAWL_SHADOW_MODE: ["0","1"]
 
