@@ -50,7 +50,7 @@ class JuryMiscController extends BaseController
     public function indexAction(ConfigurationService $config): Response
     {
         if ($this->isGranted('ROLE_ADMIN')) {
-            $innodbSnapshotIsolation = $this->em->getConnection()->query('SHOW VARIABLES LIKE "innodb_snapshot_isolation"')->fetchAssociative();
+            $innodbSnapshotIsolation = $this->em->getConnection()->executeQuery('SHOW VARIABLES LIKE "innodb_snapshot_isolation"')->fetchAssociative();
             if ($innodbSnapshotIsolation && $innodbSnapshotIsolation['Value'] === 'ON') {
                 $this->addFlash('danger', 'InnoDB snapshot isolation is enabled. Set --innodb_snapshot_isolation=OFF in your MariaDB configuration. See https://github.com/DOMjudge/domjudge/issues/2848 for more information.');
             }
