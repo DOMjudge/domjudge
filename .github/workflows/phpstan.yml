@@ -13,7 +13,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup composer dependencies
         run: .github/jobs/composer_setup.sh
-      - uses: php-actions/phpstan@v3
+      - name: Show the phpstan version
+        run: webapp/vendor/phpstan/phpstan/phpstan --version
+      - uses: php-actions/phpstan@v3.0.2
         with:
           configuration: webapp/phpstan.dist.neon
           path: webapp/src webapp/tests
