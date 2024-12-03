@@ -46,7 +46,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
         parent::__construct($entityManager, $DOMJudgeService, $config,
             $eventLogService);
 
-        $this->verdicts = $this->dj->getVerdicts();
+        $this->verdicts = $this->config->getVerdicts();
     }
 
     /**

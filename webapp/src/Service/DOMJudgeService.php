@@ -1481,28 +1481,6 @@ class DOMJudgeService
         );
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public function getVerdicts(array $groups = ['final']): array
-    {
-        $verdictsConfig = $this->getDomjudgeEtcDir() . '/verdicts.php';
-        $verdictGroups  = include $verdictsConfig;
-
-        $verdicts = [];
-        foreach( $groups as $group ) {
-            if ( $group === 'external' ) {
-                foreach ($this->config->get('external_judgement_types') as $id => $name) {
-                    $verdicts[$name] = $id;
-                }
-            } else {
-                $verdicts = array_merge($verdicts, $verdictGroups[$group]);
-            }
-        }
-
-        return $verdicts;
-    }
-
     public function getScoreboardZip(
         Request $request,
         RequestStack $requestStack,

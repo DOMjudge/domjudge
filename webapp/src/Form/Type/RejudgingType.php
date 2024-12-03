@@ -107,7 +107,7 @@ class RejudgingType extends AbstractType
                 ->orderBy('j.hostname'),
         ]);
 
-        $verdicts = array_keys($this->dj->getVerdicts());
+        $verdicts = array_keys($this->config->getVerdicts());
         $builder->add('verdicts', ChoiceType::class, [
             'label' => 'Verdict',
             'multiple' => true,

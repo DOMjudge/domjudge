@@ -44,7 +44,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
 
-        $this->verdicts = $this->dj->getVerdicts(['final', 'error']);
+        $this->verdicts = $this->config->getVerdicts(['final', 'error']);
     }
 
     /**

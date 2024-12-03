@@ -243,7 +243,7 @@ class RejudgingController extends BaseController
         $todo = $todoAndDone['todo'];
         $done = $todoAndDone['done'];
 
-        $verdicts = $this->dj->getVerdicts(['final', 'error']);
+        $verdicts = $this->config->getVerdicts(['final', 'error']);
         $verdicts[''] = 'JE'; /* happens for aborted judgings */
 
         $used         = [];

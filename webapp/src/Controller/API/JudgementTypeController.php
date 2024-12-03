@@ -85,7 +85,7 @@ class JudgementTypeController extends AbstractApiController
      */
     protected function getJudgementTypes(?array $filteredOn = null): array
     {
-        $verdicts = $this->dj->getVerdicts(['final', 'external']);
+        $verdicts = $this->config->getVerdicts(['final', 'external']);
 
         $result = [];
         foreach ($verdicts as $name => $label) {
