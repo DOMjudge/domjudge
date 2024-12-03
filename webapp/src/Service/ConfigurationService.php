@@ -371,8 +371,7 @@ EOF;
                 break;
             case 'results_prio':
             case 'results_remap':
-                $verdictsConfig      = $this->etcDir . '/verdicts.php';
-                $verdicts            = include $verdictsConfig;
+                $verdicts = $this->getVerdicts(['final']);
                 $item->keyOptions = ['' => ''];
                 foreach (array_keys($verdicts) as $verdict) {
                     $item->keyOptions[$verdict] = $verdict;
