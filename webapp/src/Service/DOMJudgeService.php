@@ -450,7 +450,7 @@ class DOMJudgeService
     }
 
     /**
-     * Run the given callable with all roles.
+     * Run the given callable with all roles enabled.
      *
      * This will result in all calls to checkrole() to return true.
      */
