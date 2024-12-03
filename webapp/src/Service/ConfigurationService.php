@@ -396,4 +396,39 @@ EOF;
         }
         return $item;
     }
+
+    /**
+     * Returns all possible judgement (run) verdicts, both internally
+     * hardcoded and from configured judgement types. Depending on the
+     * requirements of the context, the following groups of verdicts can be
+     * requests:
+     * - final: final verdicts supported by the system
+     * - error: error states that must be resolved by an admin
+     * - in_progress: states reported when a judging is pending a final verdict
+     * - external: configured verdicts when importing from an external system
+     *
+     * Verdicts are returned as an associative array of name/2-3 letter
+     * identifier key/value pairs. The identifiers try to adhere to
+     * https://ccs-specs.icpc.io/draft/contest_api#known-judgement-types
+     *
+     * @return array<string, string>
+     */
+    public function getVerdicts(array $groups = ['final']): array
+    {
+        $verdictsConfig = $this->etcDir . '/verdicts.php';
+        $verdictGroups  = include $verdictsConfig;
+
+        $verdicts = [];
+        foreach( $groups as $group ) {
+            if ( $group === 'external' ) {
+                foreach ($this->get('external_judgement_types') as $id => $name) {
+                    $verdicts[$name] = $id;
+                }
+            } else {
+                $verdicts = array_merge($verdicts, $verdictGroups[$group]);
+            }
+        }
+
+        return $verdicts;
+    }
 }

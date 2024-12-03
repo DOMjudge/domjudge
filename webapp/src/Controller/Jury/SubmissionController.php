@@ -138,7 +138,7 @@ class SubmissionController extends BaseController
         // Load preselected filters
         $filters = Utils::jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
 
-        $results = array_keys($this->dj->getVerdicts(['final', 'in_progress']));
+        $results = array_keys($this->config->getVerdicts(['final', 'in_progress']));
 
         $data = [
             'refresh' => $refresh,

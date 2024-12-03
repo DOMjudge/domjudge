@@ -7,6 +7,7 @@ use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
@@ -18,9 +19,11 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class SubmissionsFilterType extends AbstractType
 {
-    public function __construct(protected readonly DOMJudgeService $dj, protected readonly EntityManagerInterface $em)
-    {
-    }
+    public function __construct(
+        protected readonly ConfigurationService $config,
+        protected readonly DOMJudgeService $dj,
+        protected readonly EntityManagerInterface $em,
+    ) {}
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -115,7 +118,7 @@ class SubmissionsFilterType extends AbstractType
             "attr" => ["data-filter-field" => "team-id"],
         ]);
 
-        $verdicts = array_keys($this->dj->getVerdicts(['final', 'error', 'in_progress']));
+        $verdicts = array_keys($this->config->getVerdicts(['final', 'error', 'in_progress']));
         $builder->add("result", ChoiceType::class, [
             "label" => "Filter on result(s)",
             "multiple" => true,

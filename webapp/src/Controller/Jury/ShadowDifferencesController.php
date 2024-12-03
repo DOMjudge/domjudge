@@ -83,7 +83,7 @@ class ShadowDifferencesController extends BaseController
         $this->requestStack->getSession()->save();
 
         $contest  = $this->dj->getCurrentContest();
-        $verdicts = $this->dj->getVerdicts(['final', 'error', 'external', 'in_progress']);
+        $verdicts = $this->config->getVerdicts(['final', 'error', 'external', 'in_progress']);
 
         $used         = [];
         $verdictTable = [];
