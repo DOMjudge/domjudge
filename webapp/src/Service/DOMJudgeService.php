@@ -100,11 +100,6 @@ class DOMJudgeService
         protected string $vendorDir,
     ) {}
 
-    public function getEntityManager(): EntityManagerInterface
-    {
-        return $this->em;
-    }
-
     /**
      * Return all the contests that are currently active indexed by contest ID.
      *
@@ -454,11 +449,6 @@ class DOMJudgeService
         ];
     }
 
-    public function getHttpKernel(): HttpKernelInterface
-    {
-        return $this->httpKernel;
-    }
-
     /**
      * Run the given callable with all roles.
      *
@@ -654,7 +644,7 @@ class DOMJudgeService
         if ($this->requestStack->getCurrentRequest() && $this->requestStack->getCurrentRequest()->hasSession()) {
             $request->setSession($this->requestStack->getSession());
         }
-        $response = $this->getHttpKernel()->handle($request, HttpKernelInterface::SUB_REQUEST);
+        $response = $this->httpKernel->handle($request, HttpKernelInterface::SUB_REQUEST);
 
         $status = $response->getStatusCode();
         if ($status < 200 || $status >= 300) {
