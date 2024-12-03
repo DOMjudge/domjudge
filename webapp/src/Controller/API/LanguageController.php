@@ -5,6 +5,7 @@ namespace App\Controller\API;
 use App\Entity\ExecutableFile;
 use App\Entity\ImmutableExecutable;
 use App\Entity\Language;
+use App\Utils\Utils;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -139,7 +140,7 @@ class LanguageController extends AbstractRestController
         if (!$jsonFile) {
             throw new BadRequestHttpException('No JSON file supplied.');
         }
-        $newLanguages = $this->dj->jsonDecode(file_get_contents($jsonFile->getRealPath()));
+        $newLanguages = Utils::jsonDecode(file_get_contents($jsonFile->getRealPath()));
 
         // Disable submission for all current languages, we will enable it for all new languages below.
         $curLanguages = $this->em->getRepository(Language::class)->findAll();

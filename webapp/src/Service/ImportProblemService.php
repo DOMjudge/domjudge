@@ -658,7 +658,7 @@ class ImportProblemService
             // Read submission details from optional file.
             $submission_file_string = $zip->getFromName($submission_file);
             $submission_details = $submission_file_string===false ? [] :
-                $this->dj->jsonDecode($submission_file_string);
+                Utils::jsonDecode($submission_file_string);
 
             $numJurySolutions = 0;
             for ($j = 0; $j < $zip->numFiles; $j++) {
@@ -913,7 +913,7 @@ class ImportProblemService
             $zip?->close();
         }
         if (!empty($errors)) {
-            throw new BadRequestHttpException($this->dj->jsonEncode($errors));
+            throw new BadRequestHttpException(Utils::jsonEncode($errors));
         }
         return [
             'problem_id' => $probId,

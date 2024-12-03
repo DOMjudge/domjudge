@@ -949,4 +949,21 @@ class Utils
 
         return $response;
     }
+
+    /**
+     * Decode a JSON string with our preferred settings.
+     * @return mixed
+     */
+    public static function jsonDecode(string $str)
+    {
+        return json_decode($str, true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * Encode a JSON string with our preferred settings.
+     */
+    public static function jsonEncode(mixed $data): string
+    {
+        return json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+    }
 }

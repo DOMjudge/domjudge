@@ -114,7 +114,7 @@ class ContestController extends AbstractRestController
                 return $cid;
             }
         } elseif ($jsonFile) {
-            $data = $this->dj->jsonDecode(file_get_contents($jsonFile->getRealPath()));
+            $data = Utils::jsonDecode(file_get_contents($jsonFile->getRealPath()));
             if ($this->importExportService->importContestData($data, $message, $cid)) {
                 return $cid;
             }
@@ -870,7 +870,7 @@ class ContestController extends AbstractRestController
                         $result['time'] = Utils::absTime($event->getEventtime());
                     }
 
-                    echo $this->dj->jsonEncode($result) . "\n";
+                    echo Utils::jsonEncode($result) . "\n";
                     ob_flush();
                     flush();
                     $lastUpdate = Utils::now();

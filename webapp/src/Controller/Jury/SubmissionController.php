@@ -136,7 +136,7 @@ class SubmissionController extends BaseController
         }
 
         // Load preselected filters
-        $filters = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
+        $filters = Utils::jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
 
         $results = array_keys($this->dj->getVerdicts(['final', 'in_progress']));
 
@@ -257,7 +257,7 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getResult();
             $timelimits = array_map(function (JudgeTask $task) {
-                return $this->dj->jsonDecode($task->getRunConfig())['time_limit'];
+                return Utils::jsonDecode($task->getRunConfig())['time_limit'];
             }, $judgeTasks);
         }
 
@@ -626,7 +626,7 @@ class SubmissionController extends BaseController
                     ->setJobId($jid->getJudgingid())
                     ->setUuid($jid->getUuid())
                     ->setRunScriptId($executable->getImmutableExecId())
-                    ->setRunConfig($this->dj->jsonEncode(['hash' => $executable->getHash()]));
+                    ->setRunConfig(Utils::jsonEncode(['hash' => $executable->getHash()]));
                 $this->em->persist($judgeTask);
             }
             $this->em->flush();
@@ -1257,8 +1257,8 @@ class SubmissionController extends BaseController
      */
     private function maybeGetErrors(string $type, string $expectedConfigString, string $observedConfigString, array &$allErrors): void
     {
-        $expectedConfig = $this->dj->jsonDecode($expectedConfigString);
-        $observedConfig = $this->dj->jsonDecode($observedConfigString);
+        $expectedConfig = Utils::jsonDecode($expectedConfigString);
+        $observedConfig = Utils::jsonDecode($observedConfigString);
         $errors = [];
         foreach (array_keys($expectedConfig) as $k) {
             if (!array_key_exists($k, $observedConfig)) {
@@ -1271,7 +1271,7 @@ class SubmissionController extends BaseController
                     // Silently ignore.
                 } else {
                     $errors[] = '- ' . preg_replace('/_/', ' ', $k) . ': '
-                        . $this->dj->jsonEncode($observedConfig[$k]) . ' → ' . $this->dj->jsonEncode($expectedConfig[$k]);
+                        . Utils::jsonEncode($observedConfig[$k]) . ' → ' . Utils::jsonEncode($expectedConfig[$k]);
                 }
             }
         }
