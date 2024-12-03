@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\User;
 use App\Service\DOMJudgeService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -114,7 +115,7 @@ class CallApiActionCommand extends Command
             }
 
             if ($json = $input->getOption('json')) {
-                $data = array_merge($data, $this->dj->jsonDecode($json));
+                $data = array_merge($data, Utils::jsonDecode($json));
             }
 
             foreach ($input->getOption('file') as $fileItem) {

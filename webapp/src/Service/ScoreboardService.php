@@ -713,7 +713,7 @@ class ScoreboardService
     {
         $scoreFilter = [];
         if ($this->dj->getCookie('domjudge_scorefilter')) {
-            $scoreFilter = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_scorefilter'));
+            $scoreFilter = Utils::jsonDecode((string)$this->dj->getCookie('domjudge_scorefilter'));
         }
 
         if ($request->query->has('clear')) {
@@ -731,7 +731,7 @@ class ScoreboardService
 
         $this->dj->setCookie(
             'domjudge_scorefilter',
-            $this->dj->jsonEncode($scoreFilter),
+            Utils::jsonEncode($scoreFilter),
             0, null, '', false, false, $response
         );
 

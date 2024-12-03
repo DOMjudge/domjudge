@@ -7,6 +7,7 @@ use App\DataTransferObject\ConfigurationSpecification;
 use App\Entity\Configuration;
 use App\Entity\Executable;
 use App\Entity\Judging;
+use App\Utils\Utils;
 use BackedEnum;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -269,7 +270,7 @@ EOF;
             }
             if (!isset($errors[$specName])) {
                 if ($optionToSet->getValue() != $oldValue) {
-                    $valJson = $dj->jsonEncode($optionToSet->getValue());
+                    $valJson = Utils::jsonEncode($optionToSet->getValue());
                     $dj->auditlog('configuration', $specName, 'updated', $valJson);
                     if ($optionIsNew) {
                         $this->em->persist($optionToSet);

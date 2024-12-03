@@ -708,7 +708,7 @@ class ContestController extends BaseController
                 // TODO: dedup here?
                 $compareExec = $this->dj->getImmutableCompareExecutable($contestProblem);
                 $runExec     = $this->dj->getImmutableRunExecutable($contestProblem);
-                $runConfig = $this->dj->jsonEncode(
+                $runConfig = Utils::jsonEncode(
                     [
                         'hash' => $runExec->getHash(),
                         'combined_run_compare' => $problem->getCombinedRunCompare(),
@@ -720,7 +720,7 @@ class ContestController extends BaseController
                     ->setJudgehost($judgehost)
                     ->setPriority(JudgeTask::PRIORITY_DEFAULT)
                     ->setCompareScriptId($compareExec->getImmutableExecId())
-                    ->setCompareConfig($this->dj->jsonEncode(['hash' => $compareExec->getHash()]))
+                    ->setCompareConfig(Utils::jsonEncode(['hash' => $compareExec->getHash()]))
                     ->setRunScriptId($runExec->getImmutableExecId())
                     ->setRunConfig($runConfig);
                 $this->em->persist($judgeTask);
@@ -741,7 +741,7 @@ class ContestController extends BaseController
                     ->setJudgehost($judgehost)
                     ->setPriority(JudgeTask::PRIORITY_DEFAULT)
                     ->setCompileScriptId($compileExec->getImmutableExecId())
-                    ->setCompileConfig($this->dj->jsonEncode(['hash' => $compileExec->getHash()]));
+                    ->setCompileConfig(Utils::jsonEncode(['hash' => $compileExec->getHash()]));
                 $this->em->persist($judgeTask);
                 $cnt++;
             }

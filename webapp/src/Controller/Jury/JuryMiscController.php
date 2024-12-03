@@ -15,6 +15,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -213,7 +214,7 @@ class JuryMiscController extends BaseController
 
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             $progressReporter = function (int $progress, string $log, ?string $message = null) {
-                echo $this->dj->jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]);
+                echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]);
                 ob_flush();
                 flush();
             };

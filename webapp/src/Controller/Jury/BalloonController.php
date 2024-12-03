@@ -9,6 +9,7 @@ use App\Service\BalloonService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
@@ -77,7 +78,7 @@ class BalloonController extends AbstractController
         }
 
         // Load preselected filters
-        $filters              = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_balloonsfilter') ?: '[]');
+        $filters              = Utils::jsonDecode((string)$this->dj->getCookie('domjudge_balloonsfilter') ?: '[]');
         $haveFilters          = $this->dj->getCookie('domjudge_balloonsfilter') != null;
         $filteredAffiliations = [];
         $filteredLocations    = [];

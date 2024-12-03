@@ -102,7 +102,7 @@ class ExternalContestController extends BaseController
         $this->sourceService->setSource($externalContestSource);
 
         // Load preselected filters
-        $filters = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_external_source_filter') ?: '[]');
+        $filters = Utils::jsonDecode((string)$this->dj->getCookie('domjudge_external_source_filter') ?: '[]');
 
         // Build the filter form.
         $form = $this->createForm(ExternalSourceWarningsFilterType::class, $filters);

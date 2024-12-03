@@ -523,23 +523,6 @@ class DOMJudgeService
     }
 
     /**
-     * Decode a JSON string with our preferred settings.
-     * @return mixed
-     */
-    public function jsonDecode(string $str)
-    {
-        return json_decode($str, true, 512, JSON_THROW_ON_ERROR);
-    }
-
-    /**
-     * Encode a JSON string with our preferred settings.
-     */
-    public function jsonEncode(mixed $data): string
-    {
-        return json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
-    }
-
-    /**
      * Dis- or re-enable what caused an internal error.
      *
      * @param array{kind: string, probid?: string, hostname?: string, langid?: string,
@@ -664,7 +647,7 @@ class DOMJudgeService
             return null;
         }
 
-        return $this->jsonDecode($content);
+        return Utils::jsonDecode($content);
     }
 
     public function getDomjudgeEtcDir(): string
@@ -1454,7 +1437,7 @@ class DOMJudgeService
         }
         $runExecutable = $this->getImmutableRunExecutable($problem);
 
-        return $this->jsonEncode(
+        return Utils::jsonEncode(
             [
                 'time_limit' => $problem->getProblem()->getTimelimit() * $submission->getLanguage()->getTimeFactor(),
                 'memory_limit' => $memoryLimit,
@@ -1471,7 +1454,7 @@ class DOMJudgeService
     public function getCompareConfig(ContestProblem $problem): string
     {
         $compareExecutable = $this->getImmutableCompareExecutable($problem);
-        return $this->jsonEncode(
+        return Utils::jsonEncode(
             [
                 'script_timelimit' => $this->config->get('script_timelimit'),
                 'script_memory_limit' => $this->config->get('script_memory_limit'),
@@ -1486,7 +1469,7 @@ class DOMJudgeService
     public function getCompileConfig(Submission $submission): string
     {
         $compileExecutable = $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable();
-        return $this->jsonEncode(
+        return Utils::jsonEncode(
             [
                 'script_timelimit' => $this->config->get('script_timelimit'),
                 'script_memory_limit' => $this->config->get('script_memory_limit'),

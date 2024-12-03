@@ -734,7 +734,7 @@ class JudgehostController extends AbstractFOSRestController
             }
         }
 
-        $disabled = $this->dj->jsonDecode($disabled);
+        $disabled = Utils::jsonDecode($disabled);
 
         /** @var Contest|null $contest */
         $contest = null;
@@ -770,7 +770,7 @@ class JudgehostController extends AbstractFOSRestController
             ->andWhere('e.disabled = :disabled')
             ->andWhere('e.status = :status')
             ->setParameter('description', $description)
-            ->setParameter('disabled', $this->dj->jsonEncode($disabled))
+            ->setParameter('disabled', Utils::jsonEncode($disabled))
             ->setParameter('status', 'open')
             ->setMaxResults(1);
 

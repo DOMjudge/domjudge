@@ -665,7 +665,7 @@ class ImportExportService
     {
         $content = file_get_contents($file->getRealPath());
         try {
-            $data = $this->dj->jsonDecode($content);
+            $data = Utils::jsonDecode($content);
         } catch (JsonException $e) {
             // Check if we can parse it as YAML
             try {
