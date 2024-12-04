@@ -1407,24 +1407,6 @@ class DOMJudgeService
         return $team;
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public function parseMetadata(string $raw_metadata): array
-    {
-        // TODO: Reduce duplication with judgedaemon code.
-        $contents = explode("\n", $raw_metadata);
-        $res = [];
-        foreach ($contents as $line) {
-            if (str_contains($line, ":")) {
-                [$key, $value] = explode(":", $line, 2);
-                $res[$key] = trim($value);
-            }
-        }
-
-        return $res;
-    }
-
     public function getRunConfig(ContestProblem $problem, Submission $submission, int $overshoot = 0): string
     {
         $memoryLimit = $problem->getProblem()->getMemlimit();

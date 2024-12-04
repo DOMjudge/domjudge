@@ -1209,7 +1209,7 @@ EOF;
         if ($metadata === null) {
             return '';
         }
-        $metadata = $this->dj->parseMetadata($metadata);
+        $metadata = Utils::parseMetadata($metadata);
         return '<span style="display:inline; margin-left: 5px;">'
             . '<i class="fas fa-stopwatch" title="runtime"></i> '
             . $metadata['cpu-time'] . 's CPU, '
