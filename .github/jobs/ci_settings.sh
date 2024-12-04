@@ -34,6 +34,15 @@ mysql_user () {
     echo "$1" | mysql -udomjudge -pdomjudge ${2:-} | tee -a "$ARTIFACTS"/mysql.txt
 }
 
+show_phpinfo() {
+    phpversion=$1
+    section_start "Show the new PHP info"
+    update-alternatives --set php /usr/bin/php"${phpversion}"
+    php -v
+    php -m
+    section_end
+}
+
 section_start () {
     if [ "$#" -ne 1 ]; then
         echo "Only 1 argument is needed for GHA, 2 was needed for GitLab."
