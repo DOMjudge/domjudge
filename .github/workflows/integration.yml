@@ -88,6 +88,13 @@ jobs:
         with:
           name: DB-dump
           path: /tmp/db.sql
+      - name: Get SQL logs
+        run: docker logs "${{ job.services.sqlserver.id }}"
+      - name: Collect docker logs on failure
+        if: ${{ !cancelled() }}
+        uses: jwalton/gh-docker-logs@v1
+        with:
+          dest: '/tmp/docker-logs'
       - name: Upload all logs/artifacts
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -96,6 +103,8 @@ jobs:
           path: |
             /var/log/nginx
             /opt/domjudge/domserver/webapp/var/log/*.log
+            /tmp/docker-logs
+            /tmp/artifacts
       - name: Verifying submissions
         shell: bash
         run: |

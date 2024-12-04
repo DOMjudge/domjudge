@@ -64,6 +64,7 @@ mysql_root "show databases"
 mysql_root "SELECT CURRENT_USER();"
 mysql_root "SELECT USER();"
 mysql_root "SELECT user,host FROM mysql.user"
+mysql_root "SET max_allowed_packet=1073741824"
 echo "unused:sqlserver:domjudge:domjudge:domjudge:3306" > /opt/domjudge/domserver/etc/dbpasswords.secret
 mysql_user "SELECT CURRENT_USER();"
 mysql_user "SELECT USER();"
