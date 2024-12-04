@@ -397,7 +397,7 @@ class SubmissionController extends BaseController
                 $runs[] = $runResult[0];
                 unset($runResult[0]);
                 if (!empty($runResult['metadata'])) {
-                    $metadata = $this->dj->parseMetadata($runResult['metadata']);
+                    $metadata = Utils::parseMetadata($runResult['metadata']);
                     $runResult['output_limit'] = $metadata['output-truncated'] ?? 'n/a';
                 }
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',

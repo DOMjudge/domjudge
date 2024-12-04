@@ -966,4 +966,22 @@ class Utils
     {
         return json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function parseMetadata(string $raw_metadata): array
+    {
+        // TODO: Reduce duplication with judgedaemon code.
+        $contents = explode("\n", $raw_metadata);
+        $res = [];
+        foreach ($contents as $line) {
+            if (str_contains($line, ":")) {
+                [$key, $value] = explode(":", $line, 2);
+                $res[$key] = trim($value);
+            }
+        }
+
+        return $res;
+    }
 }
