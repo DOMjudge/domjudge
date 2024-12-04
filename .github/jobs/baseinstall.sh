@@ -67,6 +67,8 @@ mysql_root "SELECT CURRENT_USER();"
 mysql_root "SELECT USER();"
 mysql_root "SELECT user,host FROM mysql.user"
 mysql_root "SET GLOBAL max_allowed_packet=1073741824"
+mysql_root "SHOW GLOBAL STATUS LIKE 'Connection_errors_%'"
+mysql_root "SHOW VARIABLES LIKE '%_timeout'"
 echo "unused:sqlserver:domjudge:domjudge:domjudge:3306" > /opt/domjudge/domserver/etc/dbpasswords.secret
 mysql_user "SELECT CURRENT_USER();"
 mysql_user "SELECT USER();"
