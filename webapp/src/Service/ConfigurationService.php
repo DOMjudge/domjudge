@@ -418,8 +418,8 @@ EOF;
         $verdictGroups  = include $verdictsConfig;
 
         $verdicts = [];
-        foreach( $groups as $group ) {
-            if ( $group === 'external' ) {
+        foreach ($groups as $group) {
+            if ($group === 'external') {
                 foreach ($this->get('external_judgement_types') as $id => $name) {
                     $verdicts[$name] = $id;
                 }
