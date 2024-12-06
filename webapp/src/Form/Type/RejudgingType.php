@@ -8,7 +8,7 @@ use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\User;
-use App\Service\DOMJudgeService;
+use App\Service\ConfigurationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 class RejudgingType extends AbstractType
 {
-    public function __construct(protected readonly DOMJudgeService $dj, protected readonly EntityManagerInterface $em)
+    public function __construct(protected readonly ConfigurationService $config, protected readonly EntityManagerInterface $em)
     {
     }
 
