@@ -332,8 +332,7 @@ class ConfigurationServiceTest extends KernelTestCase
     public function testAddOptionsResults(string $item): void
     {
         $verdictOptions = ['' => ''];
-        $verdictsConfig      = self::getContainer()->getParameter('domjudge.etcdir') . '/verdicts.php';
-        $verdicts            = include $verdictsConfig;
+        $verdicts = $this->config->getVerdicts(['final']);
         foreach (array_keys($verdicts) as $verdict) {
             $verdictOptions[$verdict] = $verdict;
         }
