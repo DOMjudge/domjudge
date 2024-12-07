@@ -141,10 +141,10 @@ jobs:
           curl $CURLOPTS http://localhost/domjudge/jury/contests/1/freeze/doNow || true
           curl $CURLOPTS http://localhost/domjudge/jury/contests/1/end/doNow || true
           curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/1/finalize
-      - name: Verify no errors in prod.log
+      - name: Verify no errors in symfony {prod,test,dev}.log
         shell: bash
         run: |
-          if cat /opt/domjudge/domserver/webapp/var/log/prod.log | egrep '(CRITICAL|ERROR):'; then
+          if cat /opt/domjudge/domserver/webapp/var/log/*.log | egrep '(CRITICAL|ERROR):'; then
              exit 1
           fi
       - name: Download and perform API check
