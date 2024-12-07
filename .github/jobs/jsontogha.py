@@ -10,10 +10,10 @@ def cleanHash(toHash):
     return hashlib.sha224(toHash).hexdigest()
 
 def sec_start(job,header):
-    print('section_start:{}:{}{}{}'.format(int(time.time()),cleanHash(job),'\r\033[0K',header))
+    print('section_start\r\033[0K'+header)
 
 def sec_end(job):
-    print('section_end:{}:{}'.format(int(time.time()),cleanHash(job)+'\r\033[0K'))
+    print('section_end\r\033[0K')
 
 with open(sys.argv[1],'r') as f:
     data = json.load(f)

@@ -123,7 +123,7 @@ if [ "$TEST" = "w3cval" ]; then
         NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | wc -l)
         FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
         python3 -m "json.tool" < result.json > "$ARTIFACTS/w3c$typ$URL.json"
-        trace_off; python3 gitlab/jsontogitlab.py "$ARTIFACTS/w3c$typ$URL.json"; trace_on
+        trace_off; python3 .github/jobs/jsontogha.py "$ARTIFACTS/w3c$typ$URL.json"; trace_on
         section_end
     done
 else
