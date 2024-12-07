@@ -10,14 +10,6 @@ export APP_ENV="${1:-prod}"
 
 lsb_release -a
 
-cat > ~/.my.cnf <<EOF
-[client]
-host=sqlserver
-user=root
-password=${MYSQL_ROOT_PASSWORD}
-EOF
-cat ~/.my.cnf
-
 # FIXME: This chicken-egg problem is annoying but let us bootstrap for now.
 echo "CREATE DATABASE IF NOT EXISTS \`${DATABASE_NAME}\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" | mysql
 echo "CREATE USER 'domjudge'@'%' IDENTIFIED BY 'domjudge';" | mysql
