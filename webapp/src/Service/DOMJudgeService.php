@@ -27,6 +27,7 @@ use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
+use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\FreezeData;
@@ -1530,6 +1531,15 @@ class DOMJudgeService
         $zip->close();
 
         return Utils::streamZipFile($tempFilename, 'scoreboard.zip');
+    }
+
+    /**
+     * @return array{'backgroundColors', array<TeamCategory>}
+     */
+    public function getScoreboardCategoryColorCss(): array {
+        $backgroundColors = array_map(fn($x) => ( $x->getColor() ?? '#FFFFFF' ), $this->em->getRepository(TeamCategory::class)->findAll());
+        $backgroundColors = array_merge($backgroundColors, ['#FFFF99']);
+        return ['backgroundColors' => $backgroundColors];
     }
 
     private function allowJudge(ContestProblem $problem, Submission $submission, Language $language, bool $manualRequest): bool
