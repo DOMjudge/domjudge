@@ -100,6 +100,19 @@ class PublicController extends BaseController
         return $this->dj->getScoreboardZip($request, $requestStack, $contest, $this->scoreboardService);
     }
 
+    #[Route(path: '/scoreboard-category-color.css', name: 'scoreboard_category_color_css')]
+    public function scoreboardCategoryColorCss(Request $request): Response {
+        $content = $this->renderView('public/scoreboard_category_color.css.twig', $this->dj->getScoreboardCategoryColorCss());
+        $response = new Response();
+        $response->headers->set('Content-Type', 'text/css');
+        // See: https://symfony.com/doc/current/http_cache/validation.html
+        $response->setEtag(md5($content));
+        $response->setPublic();
+        $response->isNotModified($request);
+        $response->setContent($content);
+        return $response;
+    }
+
     /**
      * Get the contest from the request, if any
      */

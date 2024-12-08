@@ -1,0 +1,18 @@
+{% autoescape false %}
+{% for i,color in backgroundColors %}
+    {% set colorClass = color | replace({"#": "_"}) %}
+
+    .cl{{ colorClass }} {
+        background-color: {{ color }};
+    }
+
+    {% set cMin = color|hexColorToRGBA(0) %}
+    {% set cMax = color|hexColorToRGBA(1) %}
+
+    .cl{{ colorClass }} .forceWidth.toolong:after {
+        background: linear-gradient(to right,
+            {{ cMin }} 0%,
+            {{ cMax }} 96%);
+    }
+{% endfor %}
+{% endautoescape %}
