@@ -100,6 +100,14 @@ class PublicController extends BaseController
         return $this->dj->getScoreboardZip($request, $requestStack, $contest, $this->scoreboardService);
     }
 
+    #[Route(path: '/dynamic-css', name: 'get_dynamic_css')]
+    public function dynamicCSS(): Response {
+        $response = new Response();
+        $response->headers->set('Content-Type', 'text/css');
+        $response->setContent($this->renderView('public/dynamic.css.twig', $this->dj->getDynamicCSS()));
+	return $response;
+    }
+
     /**
      * Get the contest from the request, if any
      */
