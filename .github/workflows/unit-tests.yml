@@ -1,9 +1,7 @@
 name: Unit tests
+# We can speedup with: https://github.com/actions/cache
 on:
-  push:
-    branches:
-      - main
-      - '[0-9]+.[0-9]+'
+  merge_group:
   pull_request:
     branches:
       - main
@@ -11,11 +9,73 @@ on:
 
 jobs:
   check-static-codecov:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Download latest codecov upload script
         run: wget https://codecov.io/bash -O newcodecov
       - name: Detect changes to manually verify
         run: diff newcodecov .github/jobs/uploadcodecov.sh
 
+  unit-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container:
+      image: domjudge/gitlabci:24.04
+    services:
+      sqlserver:
+        image: mariadb
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: domjudge
+          MYSQL_PASSWORD: domjudge
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+    strategy:
+      matrix:
+        PHPVERSION: [8.1, 8.4]
+        TEST: [Unit, E2E]
+    steps:
+      - uses: actions/checkout@v4
+      - name: info
+        run: |
+          cat /proc/cmdline && echo &&
+          cat /proc/mounts && echo &&
+          ls -al /sys/fs/cgroup && echo &&
+          uname -a && echo &&
+          stat -fc %T /sys/fs/cgroup && echo &&
+          cat /proc/self/cgroup && echo &&
+          cat /proc/cpuinfo
+      - name: pstree
+        run: pstree -p
+      - name: Install DOMjudge
+        run: .github/jobs/baseinstall.sh unit install ${{ matrix.PHPVERSION }} test
+      - name: Check nginx
+        run: curl -v https://localhost/domjudge/
+      - name: Run the unit-tests
+        run: .github/jobs/unit-tests.sh ${{ matrix.PHPVERSION }} ${{ matrix.TEST }}
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: ${{ !cancelled() }}
+        with:
+          comment_mode: changes in failures
+          check_name: unit-tests-${{ matrix.PHPVERSION }}-${{ matrix.TEST }}.xml
+          files: unit-tests-${{ matrix.PHPVERSION }}-${{ matrix.TEST }}.xml
+      - name: Get SQL logs
+        run: docker logs "${{ job.services.sqlserver.id }}"
+      - name: Collect docker logs on failure
+        if: ${{ !cancelled() }}
+        uses: jwalton/gh-docker-logs@v1
+        with:
+          dest: '/tmp/docker-logs'
+      - name: Upload all logs/artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-${{ matrix.PHPVERSION }}-${{ matrix.TEST }}
+          path: |
+            /var/log/nginx
+            /opt/domjudge/domserver/webapp/var/log/*.log
+            /tmp/docker-logs
+            /tmp/artifacts
