@@ -14,13 +14,13 @@ jobs:
       - name: Setup composer dependencies
         run: .github/jobs/composer_setup.sh
       - name: Show the phpstan version
-        run: webapp/vendor/phpstan/phpstan/phpstan --version
+        run: lib/vendor/phpstan/phpstan/phpstan --version
       - uses: php-actions/phpstan@v3.0.2
         with:
           configuration: webapp/phpstan.dist.neon
           path: webapp/src webapp/tests
           php_extensions: gd intl mysqli pcntl zip
-          autoload_file: webapp/vendor/autoload.php
+          autoload_file: lib/vendor/autoload.php
           version: composer
       - uses: actions/upload-artifact@v4
         if: always()
