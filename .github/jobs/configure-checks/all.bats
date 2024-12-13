@@ -309,7 +309,6 @@ compile_assertions_finished () {
    assert_line "    - tmp..............: /tmp/domserver"
    refute_line "    - webapp...........: /usr/local/share/domjudge/webapp"
    assert_line "    - webapp...........: /run/webapp"
-   assert_line "    - example_problems.: /usr/local/share/domjudge/example_problems"
    assert_line " * judgehost...........: "
    assert_line "    - bin..............: /usr/local/bin"
    assert_line "    - etc..............: /usr/local/etc/domjudge"
