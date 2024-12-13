@@ -929,6 +929,10 @@ JS;
     public function showDiff(string $id, SubmissionFile $newFile, SubmissionFile $oldFile): string
     {
         $editor = <<<HTML
+<div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" id="__EDITOR__SBS">
+    <label class="form-check-label" for="__EDITOR__SBS">Use side-by-side diff viewer</label>
+</div>
 <div class="editor" id="__EDITOR__"></div>
 <script>
 $(function() {
@@ -943,6 +947,17 @@ $(function() {
             undefined,
             monaco.Uri.parse("diff-new/%s")
         );
+
+        const sideBySide = isDiffSideBySide()
+        sideBySideSwitch = $("#__EDITOR__SBS");
+        sideBySideSwitch.prop('checked', sideBySide);
+        sideBySideSwitch.change(function(e) {
+            setDiffSideBySide(e.target.checked);
+            diffEditor.updateOptions({
+                renderSideBySide: e.target.checked,
+            });
+        });
+
         const diffEditor = monaco.editor.createDiffEditor(
             document.getElementById("__EDITOR__"), {
             scrollbar: {
@@ -952,6 +967,7 @@ $(function() {
             scrollBeyondLastLine: false,
             automaticLayout: true,
             readOnly: true,
+            renderSideBySide: sideBySide,
             theme: getCurrentEditorTheme(),
         });
         diffEditor.setModel({

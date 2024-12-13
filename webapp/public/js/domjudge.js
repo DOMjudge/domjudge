@@ -124,6 +124,20 @@ function applyEditorTheme(theme = undefined, isExternal = false)
     });
 }
 
+function isDiffSideBySide()
+{
+    let sideBySide = localStorage.getItem('domjudge_editor_side_by_side');
+    if (sideBySide === undefined) {
+        return true;
+    }
+    return sideBySide == 'true';
+}
+
+function setDiffSideBySide(value)
+{
+    localStorage.setItem('domjudge_editor_side_by_side', value);
+}
+
 // Send a notification if notifications have been enabled.
 // The options argument is passed to the Notification constructor,
 // except that the following tags (if found) are interpreted and
