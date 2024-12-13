@@ -168,7 +168,7 @@ compile_assertions_finished () {
         groupdel ${www_group} || true
     done
     run ./configure --with-domjudge-user=$u
-    assert_line "checking webserver-group... configure: error: webserver group could not be detected, use --with-webserver-group=GROUP"
+    assert_line "checking webserver-group... configure: error: webserver group could not be detected, use --with-webserver-group=GROUP)"
 }
 
 @test "Check for newly added webserver group (Apache)" {
