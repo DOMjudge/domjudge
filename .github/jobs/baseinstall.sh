@@ -23,9 +23,7 @@ show_phpinfo "$phpversion"
 
 section_start "Run composer"
 export APP_ENV="dev"
-cd lib/vendor
 composer install --no-scripts |tee "$ARTIFACTS"/composer_out.txt
-cd ..
 section_end
 
 section_start "Set simple admin password"
