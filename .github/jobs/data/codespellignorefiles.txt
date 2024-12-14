@@ -13,6 +13,7 @@
 ./webapp/vendor
 ./webapp/public/bundles
 ./webapp/public/js/monaco
+./webapp/public/js/ace
 ./webapp/templates/bundles
 ./webapp/var/cache
 ./webapp/migrations/Version20230122090005.php
