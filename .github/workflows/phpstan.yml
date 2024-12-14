@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup composer dependencies
         run: .github/jobs/composer_setup.sh
-      - run: find lib/vendor --name phpstan
+      - run: find lib/vendor -name phpstan
       - name: Show the phpstan version
         run: lib/vendor/phpstan/phpstan/phpstan --version
       - uses: php-actions/phpstan@v3.0.2
