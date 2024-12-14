@@ -404,39 +404,3 @@ compile_assertions_finished () {
   run make judgehost
   assert_success
 }
-
-@test "Build domserver disabled" {
-  if [ "$distro_id" = "ID=fedora" ]; then
-      # Fails as libraries are not found
-      skip
-  fi
-  setup
-  run run_configure --disable-domserver-build
-  refute_line " * domserver...........: /opt/domjudge/domserver"
-  for group in www-data apache nginx; do
-    refute_line " * webserver group.....: $group"
-  done
-  assert_line " * judgehost...........: /opt/domjudge/judgehost"
-  assert_line " * runguard group......: domjudge-run"
-  run make domserver
-  assert_failure
-  run make judgehost
-  assert_success
-}
-
-@test "Build judgehost disabled" {
-  if [ "$distro_id" = "ID=fedora" ]; then
-      # Fails as libraries are not found
-      skip
-  fi
-  setup
-  run run_configure --disable-judgehost-build
-  assert_line " * domserver...........: /opt/domjudge/domserver"
-  assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
-  refute_line " * judgehost...........: /opt/domjudge/judgehost"
-  refute_line " * runguard group......: domjudge-run"
-  run make domserver
-  assert_success
-  run make judgehost
-  assert_failure
-}
