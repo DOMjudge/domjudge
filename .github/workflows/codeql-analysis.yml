@@ -39,7 +39,6 @@ jobs:
     - name: Install composer files
       if: ${{ contains(env.COMPILED, matrix.language) }}
       run: |
-        cd webapp
         composer install --no-scripts
 
     - name: Configure Makefile
