@@ -2,6 +2,8 @@
 
 . .github/jobs/ci_settings.sh
 
+set -euxo pipefail
+
 DIR="$PWD"
 
 export version=$1
