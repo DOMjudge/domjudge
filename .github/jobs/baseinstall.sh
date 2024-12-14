@@ -23,6 +23,7 @@ show_phpinfo "$phpversion"
 
 section_start "Run composer"
 export APP_ENV="dev"
+pwd
 composer install --no-scripts |tee "$ARTIFACTS"/composer_out.txt
 section_end
 
