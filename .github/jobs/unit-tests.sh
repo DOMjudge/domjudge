@@ -19,7 +19,7 @@ echo "UPDATE user SET teamid = 1 WHERE userid = 1;" | mysql domjudge_test
 cp webapp/.env.test /opt/domjudge/domserver/webapp/
 
 # We also need the composer.json for PHPunit to detect the correct directory.
-cp webapp/composer.json /opt/domjudge/domserver/webapp/
+cp composer.json /opt/domjudge/domserver/webapp/
 
 cd /opt/domjudge/domserver
 
