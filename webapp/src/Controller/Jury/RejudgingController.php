@@ -26,6 +26,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -330,7 +331,7 @@ class RejudgingController extends BaseController
             $verdictTable[$originalVerdict->getResult()][$newVerdict->getResult()][] = $submitid;
         }
 
-        $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'diff', 4 => 'all'];
+        $viewTypes = [0 => 'unverified', 1 => 'unjudged', 2 => 'diff', 3 => 'all'];
         $defaultView = 'diff';
         $onlyAHandfulOfSubmissions = $rejudging->getSubmissions()->count() <= 5;
         if ($onlyAHandfulOfSubmissions) {
@@ -362,10 +363,11 @@ class RejudgingController extends BaseController
             $restrictions->result = $newverdict;
         }
 
-        /** @var Submission[] $submissions */
+        /** @var PaginationInterface<int, Submission> $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
-            $restrictions
+            $restrictions,
+            page: $request->query->getInt('page', 1),
         );
 
         $repetitions = $this->em->createQueryBuilder()
