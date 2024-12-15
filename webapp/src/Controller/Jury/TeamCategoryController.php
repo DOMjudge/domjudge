@@ -16,6 +16,7 @@ use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -125,10 +126,11 @@ class TeamCategoryController extends BaseController
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
 
-        /** @var Submission[] $submissions */
+        /** @var PaginationInterface<int, Submission> $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
-            new SubmissionRestriction(categoryId: $teamCategory->getCategoryid())
+            new SubmissionRestriction(categoryId: $teamCategory->getCategoryid()),
+            page: $request->query->getInt('page', 1),
         );
 
         $data = [

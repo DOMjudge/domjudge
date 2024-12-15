@@ -102,7 +102,8 @@ class MetricsController extends AbstractFOSRestController
             /** @var Submission[] $submissions */
             [$submissions, $submissionCounts] = $this->submissionService->getSubmissionList(
                 [$contest->getCid() => $contest],
-                new SubmissionRestriction(visible: true)
+                new SubmissionRestriction(visible: true),
+                paginated: false
             );
             foreach ($submissionCounts as $kind => $count) {
                 if (!array_key_exists('submissions_' . $kind, $m)) {

@@ -205,6 +205,7 @@ class ShadowDifferencesController extends BaseController
         [$submissions, $submissionCounts] = $this->submissions->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
             $restrictions,
+            page: $request->query->getInt('page', 1),
             showShadowUnverified: true
         );
 

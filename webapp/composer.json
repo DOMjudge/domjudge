@@ -67,6 +67,7 @@
 		"friendsofsymfony/rest-bundle": "^3.5",
 		"ircmaxell/password-compat": "*",
 		"jms/serializer-bundle": "^5.2",
+		"knplabs/knp-paginator-bundle": "^6.6",
 		"league/commonmark": "^2.3",
 		"mbostock/d3": "^3.5",
 		"nelmio/api-doc-bundle": "^4.11",

@@ -15,6 +15,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 
 class SubmissionsFilterType extends AbstractType
@@ -39,7 +40,7 @@ class SubmissionsFilterType extends AbstractType
             ->addOrderBy("p.name")
             ->getQuery()
             ->getResult();
-        $builder->add("problem-id", EntityType::class, [
+        $builder->add("problem_id", EntityType::class, [
             "multiple" => true,
             "label" => "Filter on problem(s)",
             "class" => Problem::class,
@@ -48,7 +49,7 @@ class SubmissionsFilterType extends AbstractType
             "choices" => $problems,
             "attr" => ["data-filter-field" => "problem-id"],
         ]);
-        $builder->add("language-id", EntityType::class, [
+        $builder->add("language_id", EntityType::class, [
             "multiple" => true,
             "label" => "Filter on language(s)",
             "class" => Language::class,
@@ -60,7 +61,7 @@ class SubmissionsFilterType extends AbstractType
                 ->orderBy("l.name"),
             "attr" => ["data-filter-field" => "language-id"],
         ]);
-        $builder->add("category-id", EntityType::class, [
+        $builder->add("category_id", EntityType::class, [
             "multiple" => true,
             "label" => "Filter on category(s)",
             "class" => TeamCategory::class,
@@ -71,7 +72,7 @@ class SubmissionsFilterType extends AbstractType
                 ->orderBy("tc.name"),
             "attr" => ["data-filter-field" => "category-id"],
         ]);
-        $builder->add("affiliation-id", EntityType::class, [
+        $builder->add("affiliation_id", EntityType::class, [
             "multiple" => true,
             "label" => "Filter on affiliation(s)",
             "class" => TeamAffiliation::class,
@@ -108,7 +109,7 @@ class SubmissionsFilterType extends AbstractType
         }
 
         $teams = $teamsQueryBuilder->getQuery()->getResult();
-        $builder->add("team-id", EntityType::class, [
+        $builder->add("team_id", EntityType::class, [
             "multiple" => true,
             "label" => "Filter on team(s)",
             "class" => Team::class,
@@ -127,7 +128,12 @@ class SubmissionsFilterType extends AbstractType
             "attr" => ["data-filter-field" => "result"],
         ]);
 
-        $builder->add("clear", ButtonType::class, [
+        $builder->add("apply", SubmitType::class, [
+            "label" => "Apply filters",
+
+        ]);
+
+        $builder->add("clear", SubmitType::class, [
             "label" => "Clear all filters",
             "attr" => ["class" => "btn-secondary"],
         ]);

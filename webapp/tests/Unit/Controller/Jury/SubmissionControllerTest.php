@@ -33,7 +33,7 @@ class SubmissionControllerTest extends BaseTestCase
     public function provideViews(): Generator
     {
         foreach ([[], [SampleSubmissionsFixture::class]] as $fixtures) {
-            foreach (['all', 'unjudged', 'unverified', 'newest'] as $view) {
+            foreach (['all', 'unjudged', 'unverified'] as $view) {
                 yield [$view, $fixtures];
             }
         }
