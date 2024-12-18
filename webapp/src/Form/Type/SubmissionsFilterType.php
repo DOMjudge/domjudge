@@ -130,7 +130,6 @@ class SubmissionsFilterType extends AbstractType
 
         $builder->add("apply", SubmitType::class, [
             "label" => "Apply filters",
-
         ]);
 
         $builder->add("clear", SubmitType::class, [
