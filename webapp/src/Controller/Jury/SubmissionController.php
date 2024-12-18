@@ -36,6 +36,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -79,7 +80,7 @@ class SubmissionController extends BaseController
         #[MapQueryParameter(name: 'view')]
         ?string $viewFromRequest = null,
     ): Response {
-        $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'judging', 4 => 'all'];
+        $viewTypes = [0 => 'all', 1 => 'unverified', 2 => 'unjudged', 3 => 'judging'];
         $view      = 0;
         if (($submissionViewCookie = $this->dj->getCookie('domjudge_submissionview')) &&
             isset($viewTypes[$submissionViewCookie])) {
@@ -117,13 +118,68 @@ class SubmissionController extends BaseController
             $contests = [$contest->getCid() => $contest];
         }
 
-        $latestCount = 50;
+        // Load preselected filters
+        $filtersFromCookie = Utils::jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
 
-        $limit = $viewTypes[$view] == 'newest' ? $latestCount : 0;
+        $formAssociationFields = [
+            'problem_id' => [Problem::class, 'probid'],
+            'language_id' => [Language::class, 'langid'],
+            'team_id' => [Team::class, 'teamid'],
+            'category_id' => [TeamCategory::class, 'categoryid'],
+            'affiliation_id' => [TeamAffiliation::class, 'affilid'],
+        ];
 
-        /** @var Submission[] $submissions */
+        // Build the filter form.
+        $filtersForForm = ['result' => $filtersFromCookie['result'] ?? []];
+        $hasFilters = !empty($filtersForForm['result']);
+        foreach ($formAssociationFields as $field => [$entityClass, $idField]) {
+            $filtersForForm[$field] = $this->em->getRepository($entityClass)->findBy([$idField => $filtersFromCookie[$field] ?? []]);
+            $hasFilters = $hasFilters || !empty($filtersForForm[$field]);
+        }
+        $appliedFilters = $filtersForForm;
+        $form = $this->createForm(SubmissionsFilterType::class, array_merge($filtersForForm, [
+            "contests" => $contests,
+        ]));
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $filtersForCookie = ['result' => $form->get('result')->getData()];
+            $hasFilters = !empty($filtersForCookie['result']);
+            foreach ($formAssociationFields as $field => [$entityClass, $idField]) {
+                $method = 'get' . ucfirst($idField);
+                $filtersForCookie[$field] = array_map(fn($entity) => $entity->$method(), $form->get($field)->getData());
+                $hasFilters = $hasFilters || !empty($filtersForCookie[$field]);
+            }
+            $response = $this->dj->setCookie('domjudge_submissionsfilter', Utils::jsonEncode($filtersForCookie), response: $response);
+            $appliedFilters = $filtersForCookie;
+        }
+
+        if (!empty($appliedFilters['result'])) {
+            $restrictions->results = $appliedFilters['result'];
+        }
+        if (!empty($appliedFilters['problem_id'])) {
+            $restrictions->problemIds = $appliedFilters['problem_id'];
+        }
+        if (!empty($appliedFilters['language_id'])) {
+            $restrictions->languageIds = $appliedFilters['language_id'];
+        }
+        if (!empty($appliedFilters['team_id'])) {
+            $restrictions->teamIds = $appliedFilters['team_id'];
+        }
+        if (!empty($appliedFilters['category_id'])) {
+            $restrictions->categoryIds = $appliedFilters['category_id'];
+        }
+        if (!empty($appliedFilters['affiliation_id'])) {
+            $restrictions->affiliationIds = $appliedFilters['affiliation_id'];
+        }
+
+        /** @var PaginationInterface<int, Submission> $submissions */
         [$submissions, $submissionCounts] =
-            $this->submissionService->getSubmissionList($contests, $restrictions, $limit);
+            $this->submissionService->getSubmissionList(
+                $contests,
+                $restrictions,
+                page: $request->query->getInt('page', 1),
+            );
         $disabledProblems = [];
         $disabledLangs = [];
         foreach ($submissions as $submission) {
@@ -135,9 +191,6 @@ class SubmissionController extends BaseController
             }
         }
 
-        // Load preselected filters
-        $filters = Utils::jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
-
         $results = array_keys($this->config->getVerdicts(['final', 'in_progress']));
 
         $data = [
@@ -147,10 +200,10 @@ class SubmissionController extends BaseController
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($contests) > 1,
-            'hasFilters' => !empty($filters),
+            'hasFilters' => $hasFilters,
             'results' => $results,
             'showExternalResult' => $this->dj->shadowMode(),
-            'showTestcases' => count($submissions) <= $latestCount,
+            'showTestcases' => true,
             'disabledProbs' => $disabledProblems,
             'disabledLangs' => $disabledLangs,
         ];
@@ -160,16 +213,6 @@ class SubmissionController extends BaseController
             return $this->render('jury/partials/submission_list.html.twig', $data);
         }
 
-        // Build the filter form.
-        $filtersForForm                = $filters;
-        $filtersForForm['problem-id']  = $this->em->getRepository(Problem::class)->findBy(['probid' => $filtersForForm['problem-id'] ?? []]);
-        $filtersForForm['language-id'] = $this->em->getRepository(Language::class)->findBy(['langid' => $filtersForForm['language-id'] ?? []]);
-        $filtersForForm['team-id']     = $this->em->getRepository(Team::class)->findBy(['teamid' => $filtersForForm['team-id'] ?? []]);
-        $filtersForForm['category-id'] = $this->em->getRepository(TeamCategory::class)->findBy(['categoryid' => $filtersForForm['category-id'] ?? []]);
-        $filtersForForm['affiliation-id'] = $this->em->getRepository(TeamAffiliation::class)->findBy(['affilid' => $filtersForForm['affiliation-id'] ?? []]);
-        $form = $this->createForm(SubmissionsFilterType::class, array_merge($filtersForForm, [
-            "contests" => $contests,
-        ]));
         $data["form"] = $form->createView();
 
         return $this->render('jury/submissions.html.twig', $data, $response);

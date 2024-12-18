@@ -29,6 +29,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -487,10 +488,11 @@ class ProblemController extends BaseController
             return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
         }
 
-        /** @var Submission[] $submissions */
+        /** @var PaginationInterface<int, Submission> $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
             new SubmissionRestriction(problemId: $problem->getProbid()),
+            page: $request->query->getInt('page', 1),
         );
 
         $type = '';

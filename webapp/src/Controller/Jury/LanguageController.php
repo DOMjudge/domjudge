@@ -195,7 +195,8 @@ class LanguageController extends BaseController
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
-            new SubmissionRestriction(languageId: $language->getLangid())
+            new SubmissionRestriction(languageId: $language->getLangid()),
+            page: $request->query->getInt('submissions_page', 1),
         );
 
         $data = [

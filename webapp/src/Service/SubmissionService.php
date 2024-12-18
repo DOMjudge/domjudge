@@ -21,6 +21,8 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use InvalidArgumentException;
+use Knp\Component\Pager\Pagination\PaginationInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -49,7 +51,8 @@ class SubmissionService
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService,
-        protected readonly ScoreboardService $scoreboardService
+        protected readonly ScoreboardService $scoreboardService,
+        protected readonly PaginatorInterface $paginator,
     ) {}
 
     /**
@@ -58,8 +61,8 @@ class SubmissionService
      *
      * @param Contest[] $contests
      *
-     * @return array{Submission[], array<string, int>} array An array with
-     *           two elements: the first one is the list of submissions
+     * @return array{Submission[], array<string, int>}|array{PaginationInterface<int, Submission>, array<string, int>} array An array with
+     *           two elements: the first one is the list of submissions or the paginated results
      *           and the second one is an array with counts.
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -67,10 +70,14 @@ class SubmissionService
     public function getSubmissionList(
         array $contests,
         SubmissionRestriction $restrictions,
-        int $limit = 0,
-        bool $showShadowUnverified = false
+        bool $paginated = true,
+        ?int $page = null,
+        bool $showShadowUnverified = false,
     ): array {
         if (empty($contests)) {
+            if ($paginated) {
+                return [$this->paginator->paginate([], page: 1), []];
+            }
             return [[], []];
         }
 
@@ -83,10 +90,6 @@ class SubmissionService
             ->setParameter('contests', array_keys($contests))
             ->orderBy('s.submittime', 'DESC')
             ->addOrderBy('s.submitid', 'DESC');
-
-        if ($limit > 0) {
-            $queryBuilder->setMaxResults($limit);
-        }
 
         if ($restrictions->withExternalId ?? false) {
             $queryBuilder
@@ -196,6 +199,12 @@ class SubmissionService
                 ->setParameter('teamid', $restrictions->teamId);
         }
 
+        if (!empty($restrictions->teamIds)) {
+            $queryBuilder
+                ->andWhere('s.team IN (:teamids)')
+                ->setParameter('teamids', $restrictions->teamIds);
+        }
+
         if (isset($restrictions->userId)) {
             $queryBuilder
                 ->andWhere('s.user = :userid')
@@ -206,6 +215,24 @@ class SubmissionService
             $queryBuilder
                 ->andWhere('t.category = :categoryid')
                 ->setParameter('categoryid', $restrictions->categoryId);
+        }
+
+        if (!empty($restrictions->categoryIds)) {
+            $queryBuilder
+                ->andWhere('t.category IN (:categoryids)')
+                ->setParameter('categoryids', $restrictions->categoryIds);
+        }
+
+        if (isset($restrictions->affiliationId)) {
+            $queryBuilder
+                ->andWhere('t.affiliation = :affiliationid')
+                ->setParameter('affiliationid', $restrictions->affiliationId);
+        }
+
+        if (!empty($restrictions->affiliationIds)) {
+            $queryBuilder
+                ->andWhere('t.affiliation IN (:affiliationids)')
+                ->setParameter('affiliationids', $restrictions->affiliationIds);
         }
 
         if (isset($restrictions->visible)) {
@@ -220,10 +247,22 @@ class SubmissionService
                 ->setParameter('probid', $restrictions->problemId);
         }
 
+        if (!empty($restrictions->problemIds)) {
+            $queryBuilder
+                ->andWhere('s.problem IN (:probids)')
+                ->setParameter('probids', $restrictions->problemIds);
+        }
+
         if (isset($restrictions->languageId)) {
             $queryBuilder
                 ->andWhere('s.language = :langid')
                 ->setParameter('langid', $restrictions->languageId);
+        }
+
+        if (!empty($restrictions->languageIds)) {
+            $queryBuilder
+                ->andWhere('s.language IN (:langids)')
+                ->setParameter('langids', $restrictions->languageIds);
         }
 
         if (isset($restrictions->judgehost)) {
@@ -246,6 +285,26 @@ class SubmissionService
             }
         }
 
+        if (!empty($restrictions->results)) {
+            $resultsContainJudging = in_array('judging', $restrictions->results, true);
+            $resultsContainQueued = in_array('queued', $restrictions->results, true);
+            $resultsContainImportError = in_array('import-error', $restrictions->results, true);
+            $resultsQuery = 'j.result IN (:results)';
+            if ($resultsContainJudging) {
+                $resultsQuery .= ' OR (j.result IS NULL AND j.starttime IS NOT NULL AND s.importError IS NULL)';
+            }
+            if ($resultsContainQueued) {
+                $resultsQuery .= ' OR (j.result IS NULL AND j.starttime IS NULL AND s.importError IS NULL)';
+            }
+            if ($resultsContainImportError) {
+                $resultsQuery .= ' OR s.importError IS NOT NULL';
+            }
+
+            $queryBuilder
+                ->andWhere($resultsQuery)
+                ->setParameter('results', $restrictions->results);
+        }
+
         if ($this->dj->shadowMode()) {
             // When we are shadow, also load the external results
             $queryBuilder
@@ -253,8 +312,16 @@ class SubmissionService
                 ->addSelect('ej');
         }
 
-        $submissions = $queryBuilder->getQuery()->getResult();
+        if ($paginated) {
+            $submissions = $this->paginator->paginate($queryBuilder, page: $page ?? 1);
+        } else {
+            $submissions = $queryBuilder->getQuery()->getResult();
+        }
         if (isset($restrictions->rejudgingId)) {
+            $paginatedSubmissions = $submissions;
+            if ($paginated) {
+                $submissions = $submissions->getItems();
+            }
             // Doctrine will return an array for each item. At index '0' will
             // be the submission and at index 'oldresult' will be the old
             // result. Remap this.
@@ -264,6 +331,10 @@ class SubmissionService
                 $submission->setOldResult($submissionData['oldresult']);
                 return $submission;
             }, $submissions);
+            if ($paginated) {
+                $paginatedSubmissions->setItems($submissions);
+                $submissions = $paginatedSubmissions;
+            }
         }
 
         $counts           = [];

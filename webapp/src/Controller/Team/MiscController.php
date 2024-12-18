@@ -89,7 +89,8 @@ class MiscController extends BaseController
             $this->em->clear();
             $data['submissions'] = $this->submissionService->getSubmissionList(
                 [$contest->getCid() => $contest],
-                new SubmissionRestriction(teamId: $teamId)
+                new SubmissionRestriction(teamId: $teamId),
+                paginated: false
             )[0];
 
             /** @var Clarification[] $clarifications */

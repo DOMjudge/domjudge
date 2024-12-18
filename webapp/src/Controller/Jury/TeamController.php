@@ -286,7 +286,11 @@ class TeamController extends BaseController
         }
         $restrictions->teamId = $teamId;
         [$submissions, $submissionCounts] =
-            $submissionService->getSubmissionList($this->dj->getCurrentContests(honorCookie: true), $restrictions);
+            $submissionService->getSubmissionList(
+                $this->dj->getCurrentContests(honorCookie: true),
+                $restrictions,
+                page: $request->query->getInt('page', 1),
+            );
 
         $data['restrictionText']    = $restrictionText;
         $data['submissions']        = $submissions;

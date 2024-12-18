@@ -171,7 +171,7 @@ class UserController extends BaseController
     }
 
     #[Route(path: '/{userId<\d+>}', name: 'jury_user')]
-    public function viewAction(int $userId, SubmissionService $submissionService): Response
+    public function viewAction(Request $request, int $userId, SubmissionService $submissionService): Response
     {
         $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
@@ -182,6 +182,7 @@ class UserController extends BaseController
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
             new SubmissionRestriction(userId: $user->getUserid()),
+            page: $request->query->getInt('page', 1),
         );
 
         return $this->render('jury/user.html.twig', [
