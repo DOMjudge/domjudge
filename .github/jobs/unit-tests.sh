@@ -36,7 +36,7 @@ php $phpcov webapp/bin/phpunit -c webapp/phpunit.xml.dist webapp/tests/$unittest
 UNITSUCCESS=$?
 
 # Store the unit tests also in the root for the GHA
-cp $ARTIFACTS/unit-tests.xml $DIR/
+cp $ARTIFACTS/unit-tests.xml $DIR/unit-tests-${version}-${unittest}.xml
 
 # Make sure the log exists before copy
 touch ${DIR}/webapp/var/log/test.log

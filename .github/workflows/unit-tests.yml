@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - '[0-9]+.[0-9]+'
+      - fix_unit_test_upload_gha
 
 jobs:
   check-static-codecov:
@@ -18,6 +19,8 @@ jobs:
         run: diff newcodecov .github/jobs/uploadcodecov.sh
 
   unit-tests:
+    permissions:
+      checks: write
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     container:
@@ -79,3 +82,13 @@ jobs:
             /opt/domjudge/domserver/webapp/var/log/*.log
             /tmp/docker-logs
             /tmp/artifacts
+
+  event_file:
+    name: "Post results assuming forks"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: Event File
+          path: ${{ github.event_path }}
