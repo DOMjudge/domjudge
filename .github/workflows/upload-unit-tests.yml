@@ -1,4 +1,4 @@
-name: Publish Unittest Results
+name: Publish unit test results
 
 on:
   workflow_run:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   test-results:
-    name: Test Results
+    name: Process test results
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion != 'skipped'
     permissions:
