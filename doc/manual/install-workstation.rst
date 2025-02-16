@@ -84,7 +84,7 @@ When DOMjudge is configured and site-specific configuration set,
 the team manual can be generated with the command ``make docs``.
 The following should do it on a Debian-like system::
 
-  sudo apt install python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig python3-yaml
+  sudo apt install python3-sphinx python3-sphinx-rtd-theme fontconfig python3-yaml
   cd <INSTALL_PATH>/doc/
   make docs
 
