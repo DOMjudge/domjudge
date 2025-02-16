@@ -44,7 +44,7 @@ https://github.com/DOMjudge/domjudge/wiki
 Copyright & Licensing
 ---------------------
 
-DOMjudge is Copyright (c) 2004 - 2024 by the DOMjudge developers and
+DOMjudge is Copyright (c) 2004 - 2025 by the DOMjudge developers and
 all respective contributors. The current DOMjudge developers are Jaap
 Eldering, Nicky Gerritsen, Keith Johnson, Thijs Kinkhorst, Mart
 Pluijmaekers, Michael Vasseur and Tobias Werth; see the manual for
