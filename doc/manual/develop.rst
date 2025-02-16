@@ -40,7 +40,7 @@ already listed under
 :ref:`submit client <submit_client_requirements>` requirements)::
 
   sudo apt install autoconf automake bats \
-    python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig python3-yaml \
+    python3-sphinx python3-sphinx-rtd-theme fontconfig python3-yaml \
     latexmk texlive-latex-recommended texlive-latex-extra tex-gyre
 
 When this software is present, bootstrapping can be done by running
