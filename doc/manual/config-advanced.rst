@@ -233,7 +233,7 @@ selected in the ``special_run`` and/or ``special_compare``
 fields of the problem (an empty value means that the default run and
 compare scripts should be used; the defaults can be set in the global
 configuration settings). When creating custom run and compare
-programs, we recommend re-using wrapper scripts that handle the
+programs, we recommend reusing wrapper scripts that handle the
 tedious, standard part. See the boolfind example for details.
 
 Compare programs
