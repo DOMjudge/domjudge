@@ -551,6 +551,9 @@
             <tbody>
             {% for color, description in cellColors %}
                 {% if color != 'pending' or showPending %}
+                    {% if color == 'first' %}
+                        {% set color = "correct score_first" %}
+                    {% endif %}
                     <tr class="score_{{ color }}">
                         <td>{{ description }}</td>
                     </tr>
