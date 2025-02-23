@@ -13,7 +13,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download latest codecov upload script
-        run: wget https://codecov.io/bash -O newcodecov
+        run: |
+          exit=1
+          while [ "$exit" -ne 0 ]; do
+            wget https://codecov.io/bash -O newcodecov
+            exit="$?"
+            if [ "$exit" -ne 0 ]; then
+              sleep 30
+            fi
+          done
       - name: Detect changes to manually verify
         run: diff newcodecov .github/jobs/uploadcodecov.sh
 
