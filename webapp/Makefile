@@ -53,8 +53,6 @@ clean-l:
 	-rm -rf public/bundles/nelmioapidoc
 	-rm -f vendor/autoload_runtime.php
 
-domserver-l: public/bundles/nelmioapidoc
-
 install-domserver:
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
 	for d in bin config migrations public resources src templates tests vendor; do \
