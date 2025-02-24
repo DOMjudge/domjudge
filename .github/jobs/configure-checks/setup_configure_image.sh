@@ -2,6 +2,8 @@
 
 set -eux
 
+shopt -s extglob globstar
+
 distro_id=$(grep "^ID=" /etc/os-release)
 
 # Install everything for configure and testing
