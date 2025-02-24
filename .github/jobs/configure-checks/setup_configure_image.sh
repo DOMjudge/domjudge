@@ -6,7 +6,7 @@ distro_id=$(grep "^ID=" /etc/os-release)
 
 # Install everything for configure and testing
 shared="pkg-config make rst2pdf autoconf composer bats latexmk"
-shared2="$shared python3-{yaml,sphinx} php{,-{fpm,gd,cli,intl,mbstrin,mysql,curl,jsonxml,zip}
+shared2="$shared python3-{yaml,sphinx} php{,-{fpm,gd,cli,intl,mbstrin,mysql,curl,jsonxml,zip}"
 
 case $distro_id in
     "ID=fedora")
