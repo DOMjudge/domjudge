@@ -15,7 +15,8 @@ case $distro_id in
         dnf install $shared2 automake util-linux \
                     python3-sphinx_rtd_theme texlive-cmap -y ;;
     *)
-        apt-get update; apt-get full-upgrade -y
+        apt-get update; apt-get full-upgrade -y ;
+	echo $shared2 ; \
         apt-get install $shared2  \
                         python3-sphinx-rtd-theme texlive-latex-{recommended,extra} tex-gyre -y ;;
 esac
