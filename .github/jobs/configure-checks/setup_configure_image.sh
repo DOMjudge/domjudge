@@ -2,13 +2,14 @@
 
 set -eux
 
-shopt -s extglob globstar
+shopt -s extglob
 
 distro_id=$(grep "^ID=" /etc/os-release)
 
 # Install everything for configure and testing
-shared="pkg-config make rst2pdf autoconf composer bats latexmk"
-shared2="$shared python3-{yaml,sphinx} php{,-{fpm,gd,cli,intl,mbstrin,mysql,curl,jsonxml,zip}"
+shared1="pkg-config make rst2pdf autoconf composer bats latexmk"
+shared2="$shared1 python3-{yaml,sphinx} php{,-{fpm,gd,cli,intl,mbstrin,mysql,curl,jsonxml,zip}"
+shared=$(eval echo $shared2)
 
 case $distro_id in
     "ID=fedora")
@@ -16,8 +17,8 @@ case $distro_id in
                     python3-sphinx_rtd_theme texlive-cmap -y ;;
     *)
         apt-get update; apt-get full-upgrade -y ;
-	echo $shared2 ; \
-        apt-get install $shared2  \
+	echo $shared ; \
+        apt-get install $shared  \
                         python3-sphinx-rtd-theme texlive-latex-{recommended,extra} tex-gyre -y ;;
 esac
 
