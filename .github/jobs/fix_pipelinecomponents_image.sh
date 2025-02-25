@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# We can't convert this script to bash as GHA doesn't have bash installed
+#
+# The current script doesn't use a piped command so the "benefit" of using
+# pipefail is not there over the hassle of maintaining another container.
 set -eux
 
 echo "Set plugin config for version detection"

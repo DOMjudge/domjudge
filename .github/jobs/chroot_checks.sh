@@ -3,7 +3,9 @@
 . .github/jobs/ci_settings.sh
 
 if [ -n "$1" ] && [ "$1" != "default" ]; then
-export ARCH="$1"
+    export ARCH_OPTION="-a $1"
+else
+    export ARCH_OPTION=""
 fi
 
 function finish() {
@@ -19,6 +21,8 @@ function finish() {
 FAILED=0
 
 trap finish EXIT
+
+set -euo pipefail
 
 DIR=$PWD
 section_start "Debug info"
@@ -44,7 +48,7 @@ cd /opt/domjudge/judgehost/bin || exit 1
 section_end chroot
 
 section_start "Show minimal chroot"
-./dj_make_chroot -a "$ARCH" | tee -a "$ARTIFACTS"/chroot.log
+./dj_make_chroot $ARCH_OPTION | tee -a "$ARTIFACTS"/chroot.log
 section_end
 
 section_start "Test chroot contents"

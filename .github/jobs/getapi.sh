@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-set -eux 
+set -euxo pipefail
 
 # Ignore the CLICS API strict mode
 sudo sed -i "s/'strict'/'ignore-clics'/g" /opt/domjudge/domserver/webapp/src/Controller/API/AbstractRestController.php
