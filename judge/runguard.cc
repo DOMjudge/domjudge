@@ -806,12 +806,14 @@ void setrestrictions()
 
 	/* Set additional environment variables. */
 	for (const auto &tokens : environment_variables) {
-		char *token = strtok(strdup(tokens.c_str()), ";");
+		char *tokens_dup = strdup(tokens.c_str());
+		char *token = strtok(tokens_dup, ";");
 		while (token != nullptr) {
 			verbose("setting environment variable: %s", token);
 			putenv(token);
 			token = strtok(nullptr, ";");
 		}
+		free(tokens_dup);
 	}
 
 	/* Set resource limits: must be root to raise hard limits.
