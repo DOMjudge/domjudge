@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 . .github/jobs/ci_settings.sh
 
@@ -13,7 +13,7 @@ export APP_ENV="${4:-prod}"
 
 MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
 
-set -eux
+set -euxo pipefail
 
 if [ -z "$phpversion" ]; then
 phpversion=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION."\n";')
