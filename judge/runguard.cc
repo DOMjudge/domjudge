@@ -806,6 +806,8 @@ void setrestrictions()
 
 	/* Set additional environment variables. */
 	for (const auto &tokens : environment_variables) {
+		// Note that we explicitly *do not* free the string created by
+		// strdup as putenv does not copy that string, but uses it as is.
 		char *token = strtok(strdup(tokens.c_str()), ";");
 		while (token != nullptr) {
 			verbose("setting environment variable: %s", token);
