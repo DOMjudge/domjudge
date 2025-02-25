@@ -2,6 +2,8 @@
 
 . .github/jobs/ci_settings.sh
 
+set -euo pipefail
+
 DIR="$PWD"
 
 if [ "$#" -ne "2" ]; then

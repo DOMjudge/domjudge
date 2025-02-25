@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-set -eux
+set -euxo pipefail
 
 . .github/jobs/ci_settings.sh
 
