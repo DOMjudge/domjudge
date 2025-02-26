@@ -280,9 +280,9 @@ img.affiliation-logo {
 .score_incorrect           { background: #e87272; }
 .score_pending             { background: #6666ff; }
 
-.gold-medal   { background-color: #eec710 }
-.silver-medal { background-color: #aaa }
-.bronze-medal { background-color: #c08e55 }
+.gold-medal   { color: #eec710 }
+.silver-medal { color: #aaa }
+.bronze-medal { color: #c08e55 }
 
 #scoresolv,#scoretotal,#scoresolvmobile,#scoretotalmobile { width: 2.5em; }
 .scorenc,.scorett,.scorepl { text-align: center; width: 2ex; }

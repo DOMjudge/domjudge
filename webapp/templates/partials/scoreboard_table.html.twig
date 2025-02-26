@@ -135,7 +135,10 @@
         {% endif %}
         <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}">
             {% if enable_ranking %}
-                <td class="scorepl {{medalColor}}">
+                <td class="scorepl">
+                    {% if medalColor != '' %}
+                        <i class="fa fa-medal {{medalColor}}" style="font-size: 1.5rem;"></i>
+                    {% endif %}
                     {# Only print rank when score is different from the previous team #}
                     {% if not displayRank %}
                         ?
@@ -559,23 +562,6 @@
                     </tr>
                 {% endif %}
             {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
-
-    {% if medalsEnabled %}
-        <table class="d-none d-md-table scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
-            <thead>
-            <tr>
-                <th scope="col">Medals {% if not scoreboard.freezeData.showFinal %}(tentative){% endif %}</th>
-            </tr>
-            </thead>
-            <tbody>
-                {% for medalType in ['Gold', 'Silver', 'Bronze'] %}
-                    <tr class="{{ medalType | lower }}-medal">
-                        <td>{{ medalType }} Medal</td>
-                    </tr>
-                {% endfor %}
             </tbody>
         </table>
     {% endif %}
