@@ -49,6 +49,7 @@ use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -627,6 +628,8 @@ class DOMJudgeService
         $request  = Request::create('/api' . $url, $method, $queryOrPostData, [], $files);
         if ($this->requestStack->getCurrentRequest() && $this->requestStack->getCurrentRequest()->hasSession()) {
             $request->setSession($this->requestStack->getSession());
+        } else {
+            $request->setSession(new Session());
         }
         $response = $this->httpKernel->handle($request, HttpKernelInterface::SUB_REQUEST);
 
