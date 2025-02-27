@@ -25,6 +25,7 @@ jobs:
         with:
           run_id: ${{ github.event.workflow_run.id }}
           path: artifacts
+      - run: find / -name unit-tests.xml
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
