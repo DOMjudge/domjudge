@@ -28,6 +28,7 @@ jobs:
   unit-tests:
     permissions:
       checks: write
+      pull-request: write
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     container:
