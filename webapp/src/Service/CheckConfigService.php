@@ -472,16 +472,23 @@ class CheckConfigService
             foreach ($contest->getProblems() as $cp) {
                 if (empty($cp->getColor())) {
                     $result = ($result === 'E' ? 'E' : 'W');
-                    $cperrors[$cid] .= "No color for problem " . $cp->getShortname() . " in contest c" . $cid . "\n";
+                    $cperrors[$cid] .= "  - No color for problem " . $cp->getShortname() . " in contest c" . $cid . "\n";
                 }
             }
         }
 
         $desc = '';
         foreach ($contesterrors as $cid => $errors) {
-            $desc .= "Contest: c$cid: " .
-                /* @phpstan-ignore-next-line */
-                    (count($errors) == 0 ? 'no errors' : (string)$errors) ."\n" .$cperrors[$cid];
+            $desc .= "Contest: c$cid: ";
+            if (count($errors) == 0 && empty($cperrors[$cid])) {
+                $desc .= "no errors\n";
+            } else {
+                $desc .= "errors:\n";
+                foreach ($errors as $error) {
+                    $desc .= "  - " . $error->getPropertyPath() . ": " . $error->getMessage() . "\n";
+                }
+                $desc .= $cperrors[$cid];
+            }
         }
 
         $this->stopwatch->stop(__FUNCTION__);
