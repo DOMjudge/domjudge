@@ -299,7 +299,7 @@ class PublicController extends BaseController
         }
 
         if (!$team) {
-            throw $this->createNotFoundException('Team not found');
+            throw $this->createNotFoundException('Team not found.');
         }
 
         /** @var ContestProblem|null $problem */
