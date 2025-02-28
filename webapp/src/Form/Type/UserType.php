@@ -27,8 +27,7 @@ class UserType extends AbstractExternalIdEntityType
         EventLogService $eventLogService,
         #[Autowire(param: 'min_password_length')]
         private readonly int $minimumPasswordLength,
-    )
-    {
+    ) {
         parent::__construct($eventLogService);
     }
 
