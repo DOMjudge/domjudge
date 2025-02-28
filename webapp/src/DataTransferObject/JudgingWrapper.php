@@ -3,7 +3,6 @@
 namespace App\DataTransferObject;
 
 use App\Entity\Judging;
-use App\Utils\Utils;
 use JMS\Serializer\Annotation as Serializer;
 
 class JudgingWrapper

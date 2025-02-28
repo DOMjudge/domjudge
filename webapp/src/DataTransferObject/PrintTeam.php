@@ -2,7 +2,6 @@
 
 namespace App\DataTransferObject;
 
-use JMS\Serializer\Annotation as Serializer;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(required: ['name'])]

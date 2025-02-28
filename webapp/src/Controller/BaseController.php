@@ -8,7 +8,6 @@ use App\Entity\CalculatedExternalIdBasedOnRelatedFieldInterface;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\ExternalIdFromInternalIdInterface;
-use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\RankCache;
 use App\Entity\ScoreCache;
