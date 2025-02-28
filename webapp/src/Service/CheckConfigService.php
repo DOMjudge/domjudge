@@ -227,7 +227,7 @@ class CheckConfigService
         $desc = sprintf("  - `max_connections` is set to `%s`.\n", $vars['max_connections']);
         if ($vars['max_connections'] < 300) {
             $result = 'W';
-            $desc .= sprintf("In our experience you need at least `300`, but better `1000` connections to prevent connection refusal during the contest.\n");
+            $desc .= "In our experience you need at least `300`, but better `1000` connections to prevent connection refusal during the contest.\n";
         }
 
         if ($vars['innodb_log_file_size'] < 10 * $max_inout) {
