@@ -98,7 +98,10 @@ class SubmissionController extends BaseController
 
         $refresh = [
             'after' => 15,
-            'url' => $this->generateUrl('jury_submissions', ['view' => $viewTypes[$view]]),
+            'url' => $this->generateUrl('jury_submissions', [
+                'view' => $viewTypes[$view],
+                'page' => $request->query->getInt('page', 1),
+            ]),
             'ajax' => true,
         ];
 
