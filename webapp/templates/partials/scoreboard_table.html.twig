@@ -302,15 +302,21 @@
                         {% endif %}
                     {% endif %}
 
-                    {% set link = null %}
+                    {% set extra = null %}
                     {% if jury %}
                         {% set restrict = {problemId: problem.probid} %}
                         {% set link = path('jury_team', {teamId: score.team.teamid, restrict: restrict}) %}
+                    {% elseif static %}
+                        {% set link = '#' %}
+                        {% set extra = 'data-bs-toggle="modal" data-bs-target="#team-submissions-modal-' ~ score.team.teamid ~ '-' ~ problem.probid ~ '"' %}
+                    {% else %}
+                        {% set link = path('public_submissions', {teamId: score.team.teamid, problemId: problem.probid}) %}
+                        {% set extra = 'data-ajax-modal' %}
                     {% endif %}
 
                     <td class="score_cell">
                         {% if numSubmissions != '0' %}
-                            <a {% if link %}href="{{ link }}"{% endif %}>
+                            <a {% if link %}href="{{ link }}"{% endif %} {% if extra %}{{ extra | raw }}{% endif %}>
                                 <div class="{{ scoreCssClass }}">
                                     {% if matrixItem.isCorrect %}{{ time }}{% else %}&nbsp;{% endif %}
                                     <span>
@@ -538,6 +544,16 @@
                 {% include 'partials/team.html.twig' with {size: 6, team: score.team} %}
             {% endblock %}
         {% endembed %}
+        {% for problem in problems %}
+            {% embed 'partials/modal.html.twig' with {'modalId': 'team-submissions-modal-' ~ score.team.teamid ~ '-' ~ problem.probid} %}
+                {% block title %}
+                    Submissions for team {{ score.team.effectiveName }} and problem {{ problem | problemBadge }} {{ problem.problem.name }}
+                {% endblock %}
+                {% block content %}
+                    {% include 'public/partials/submission_list.html.twig' with {size: 6, team: score.team, submissions: submissionsPerTeamAndProblem[score.team.teamid][problem.probid] ?? []} %}
+                {% endblock %}
+            {% endembed %}
+        {% endfor %}
     {% endfor %}
 {% endif %}
 

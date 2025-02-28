@@ -306,6 +306,12 @@ class SubmissionService
                 ->setParameter('results', $restrictions->results);
         }
 
+        if (isset($restrictions->valid)) {
+            $queryBuilder
+                ->andWhere('s.valid = :valid')
+                ->setParameter('valid', $restrictions->valid);
+        }
+
         if ($this->dj->shadowMode()) {
             // When we are shadow, also load the external results
             $queryBuilder
