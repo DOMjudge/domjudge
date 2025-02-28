@@ -535,10 +535,22 @@ class SubmissionService
             throw new BadRequestHttpException('Submissions for contest (temporarily) disabled');
         }
 
-        $allowedLanguages = $this->dj->getAllowedLanguagesForContest($contest);
-        if (!in_array($language, $allowedLanguages, true)) {
-            throw new BadRequestHttpException(
-                sprintf("Language '%s' not allowed for contest [c%d].", $language->getLangid(), $contest->getCid()));
+        // If there is a set of languages configured for the problem, it overrides the languages configured for the
+        // contest / globally. This is useful for restricting problems to be solved in specific languages, e.g.
+        // output-only problems.
+        $allowedLanguages = $problem->getProblem()->getLanguages();
+        if ($allowedLanguages->isEmpty()) {
+            $allowedLanguages = $this->dj->getAllowedLanguagesForContest($contest);
+            if (!in_array($language, $allowedLanguages, strict: true)) {
+                throw new BadRequestHttpException(
+                    sprintf("Language '%s' not allowed for contest [c%d].", $language->getLangid(), $contest->getCid()));
+            }
+        } else {
+            $allowedLanguages = $allowedLanguages->toArray();
+            if (!in_array($language, $allowedLanguages, strict: true)) {
+                throw new BadRequestHttpException(
+                    sprintf("Language '%s' not allowed for problem [p%d].", $language->getLangid(), $problem->getProbid()));
+            }
         }
 
         if ($language->getRequireEntryPoint() && empty($entryPoint)) {

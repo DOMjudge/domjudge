@@ -191,6 +191,17 @@ class Problem extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ?FileWithName $statementForApi = null;
 
+
+    /**
+     * @var Collection<int, Language>
+     */
+    #[ORM\ManyToMany(targetEntity: Language::class, inversedBy: 'problems')]
+    #[ORM\JoinTable(name: 'problemlanguage')]
+    #[ORM\JoinColumn(name: 'probid', referencedColumnName: 'probid', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'langid', referencedColumnName: 'langid', onDelete: 'CASCADE')]
+    #[Serializer\Exclude]
+    private Collection $languages;
+
     public function setProbid(int $probid): Problem
     {
         $this->probid = $probid;
@@ -385,6 +396,7 @@ class Problem extends BaseApiEntity implements
         $this->clarifications     = new ArrayCollection();
         $this->contest_problems   = new ArrayCollection();
         $this->attachments        = new ArrayCollection();
+        $this->languages          = new ArrayCollection();
         $this->problemStatementContent = new ArrayCollection();
     }
 
@@ -540,5 +552,25 @@ class Problem extends BaseApiEntity implements
     public function getStatementForApi(): array
     {
         return array_filter([$this->statementForApi]);
+    }
+
+    public function addLanguage(Language $language): Problem
+    {
+        $this->languages[] = $language;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Language>
+     */
+    public function getLanguages(): Collection
+    {
+        return $this->languages;
+    }
+
+    public function removeLanguage(Language $language): Problem
+    {
+        $this->languages->removeElement($language);
+        return $this;
     }
 }

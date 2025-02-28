@@ -157,6 +157,13 @@ class Language extends BaseApiEntity implements
     private Collection $contests;
 
     /**
+     * @var Collection<int, Problem>
+     */
+    #[ORM\ManyToMany(targetEntity: Problem::class, mappedBy: 'languages')]
+    #[Serializer\Exclude]
+    private Collection $problems;
+
+    /**
      * @param Collection<int, Version> $versions
      */
     public function setVersions(Collection $versions): Language
@@ -394,6 +401,7 @@ class Language extends BaseApiEntity implements
         $this->submissions = new ArrayCollection();
         $this->versions = new ArrayCollection();
         $this->contests = new ArrayCollection();
+        $this->problems = new ArrayCollection();
     }
 
     public function addSubmission(Submission $submission): Language
@@ -442,5 +450,24 @@ class Language extends BaseApiEntity implements
     public function getContests(): Collection
     {
         return $this->contests;
+    }
+
+    public function addProblem(Problem $problem): Language
+    {
+        $this->problems[] = $problem;
+        $problem->addLanguage($this);
+        return $this;
+    }
+
+    public function removeProblem(Problem $problem): Language
+    {
+        $this->problems->removeElement($problem);
+        $problem->removeLanguage($this);
+        return $this;
+    }
+
+    public function getProblems(): Collection
+    {
+        return $this->problems;
     }
 }
