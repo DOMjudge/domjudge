@@ -38,6 +38,9 @@
     {# output table column groups (for the styles) #}
     <colgroup>
         {% if enable_ranking %}
+            {% if medalsEnabled %}
+                <col id="scorerank"/>
+            {% endif %}
             <col id="scorerank"/>
         {% endif %}
         {% if showFlags %}
@@ -66,7 +69,7 @@
     <thead>
     <tr class="scoreheader" data-static="{{ static }}">
         {% if enable_ranking %}
-            <th title="rank" scope="col">rank</th>
+            <th title="rank" scope="col" {% if medalsEnabled %}colspan="2"{% endif %}>rank</th>
         {% endif %}
         <th title="team name" scope="col" colspan="{{ teamColspan }}">team</th>
         {% if enable_ranking %}
@@ -135,10 +138,14 @@
         {% endif %}
         <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}">
             {% if enable_ranking %}
+                {% if medalsEnabled %}
+                    <td class="no-border">
+                        {% if medalColor != '' %}
+                            <i class="fa fa-medal {{medalColor}}" style="font-size: 1.5rem;"></i>
+                        {% endif %}
+                    </td>
+                {% endif %}
                 <td class="scorepl">
-                    {% if medalColor != '' %}
-                        <i class="fa fa-medal {{medalColor}}" style="font-size: 1.5rem;"></i>
-                    {% endif %}
                     {# Only print rank when score is different from the previous team #}
                     {% if not displayRank %}
                         ?
