@@ -16,7 +16,7 @@ class ConfigControllerTest extends BaseTestCase
         $this->verifyPageResponse('GET', '/jury/config/check', 200);
         self::assertSelectorExists(sprintf('div.card-body:contains("You have PHP version %s.")', PHP_VERSION));
         self::assertSelectorExists('a:contains("Languages validation")');
-        self::assertSelectorExists('div.card-body:contains("Validated all languages:")');
+        self::assertSelectorExists('div.card-body:contains("Validated all languages.")');
 
         // We've reached the end of the page.
         self::assertSelectorExists('div:contains("All checks complete.")');

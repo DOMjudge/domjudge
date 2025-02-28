@@ -131,7 +131,7 @@ class CheckConfigService
         foreach ($required as $ext) {
             if (!extension_loaded($ext)) {
                 $state = 'E';
-                $remark .= sprintf("Required PHP extension '%s' not loaded.\n", $ext);
+                $remark .= sprintf("Required PHP extension `%s` not loaded.\n", $ext);
             }
         }
         $remark = ($remark ?: 'All required and recommended extensions present.');
@@ -161,7 +161,7 @@ class CheckConfigService
         } elseif ($max_files < 100) {
             $result = 'W';
         }
-        $desc = sprintf("PHP 'max_file_uploads' set to %s. This must be set strictly higher than the maximum number of test cases per problem and the DOMjudge configuration setting 'sourcefiles_limit' (now set to %s)", $max_files, $sourcefiles_limit);
+        $desc = sprintf("  - PHP `max_file_uploads` set to `%s`. This must be set strictly higher than the maximum number of test cases per problem and the DOMjudge configuration setting `sourcefiles_limit` (now set to `%s`).\n", $max_files, $sourcefiles_limit);
 
         $sizes = [];
         $postmaxvars = ['post_max_size', 'memory_limit', 'upload_max_filesize'];
@@ -177,10 +177,11 @@ class CheckConfigService
             $result = 'W';
         }
 
-        $desc .= "\n\n" . sprintf('PHP POST/upload filesize is limited to %s.', Utils::printsize(min($sizes)));
-        $desc .= "\n\nThis limit needs to be larger than the testcases you want to upload and than the amount of program output you expect the judgedaemons to post back to DOMjudge. We recommend at least 50 MB.\n\nNote that you need to ensure that all of the following php.ini parameters are at minimum the desired size:\n";
+        $desc .= sprintf('  - PHP POST/upload filesize is limited to `%s`. ', Utils::printsize(min($sizes)));
+        $desc .= "This limit needs to be larger than the testcases you want to upload and than the amount of program output you expect the judgedaemons to post back to DOMjudge. We recommend at least `50 MB`.\n";
+        $desc .= "\nNote that you need to ensure that all of the following `php.ini` parameters are at minimum the desired size:\n";
         foreach ($postmaxvars as $var) {
-            $desc .= sprintf("%s (now set to %s)\n", $var,
+            $desc .= sprintf("  - `%s` (now set to `%s`)\n", $var,
                     (isset($sizes[$var]) ? Utils::printsize($sizes[$var]) : "unlimited"));
         }
 
@@ -223,43 +224,43 @@ class CheckConfigService
         $max_inout = max($max_inout, $output_limit);
 
         $result = 'O';
-        $desc = sprintf("max_connections is set to %s.\n", $vars['max_connections']);
+        $desc = sprintf("  - `max_connections` is set to `%s`.\n", $vars['max_connections']);
         if ($vars['max_connections'] < 300) {
             $result = 'W';
-            $desc .= sprintf("In our experience you need at least 300, but better 1000 connections to prevent connection refusal during the contest.\n");
+            $desc .= sprintf("In our experience you need at least `300`, but better `1000` connections to prevent connection refusal during the contest.\n");
         }
 
         if ($vars['innodb_log_file_size'] < 10 * $max_inout) {
             $result = 'W';
-            $desc .= sprintf("innodb_log_file_size is set to %s. You may want to raise this to 10x the maximum of the test case size and output (storage) limit (now %s).\n", Utils::printsize((int)$vars['innodb_log_file_size']), Utils::printsize($max_inout));
+            $desc .= sprintf("  - `innodb_log_file_size` is set to `%s`. You may want to raise this to 10x the maximum of the test case size and output (storage) limit (now `%s`).\n", Utils::printsize((int)$vars['innodb_log_file_size']), Utils::printsize($max_inout));
         } else {
-            $desc .= sprintf("innodb_log_file_size is set to %s. \n", Utils::printsize((int)$vars['innodb_log_file_size']));
+            $desc .= sprintf("  - `innodb_log_file_size` is set to `%s`. \n", Utils::printsize((int)$vars['innodb_log_file_size']));
         }
 
         $tx = ['REPEATABLE-READ', 'SERIALIZABLE'];
         if (!in_array($vars['tx_isolation'], $tx)) {
             $result = 'W';
-            $desc .= sprintf("transaction isolation level is set to %s. You should set this to %s to prevent data inconsistencies.\n", $vars['tx_isolation'], implode(' or ', $tx));
+            $desc .= sprintf("  - transaction isolation level is set to `%s`. You should set this to `%s` to prevent data inconsistencies.\n", $vars['tx_isolation'], implode(' or ', $tx));
         } else {
-            $desc .= sprintf("transaction isolation level is set to %s.\n", $vars['tx_isolation']);
+            $desc .= sprintf("  - transaction isolation level is set to `%s`.\n", $vars['tx_isolation']);
         }
 
         $recommended_max_allowed_packet = 16*1024*1024;
         if ($vars['max_allowed_packet'] < 2*$max_inout) {
             $result = 'E';
-            $desc .= sprintf("max_allowed_packet is set to %s. You may want to raise this to about twice the maximum of the test case size and output (storage) limit (currently %s).\n", Utils::printsize((int)$vars['max_allowed_packet']), Utils::printsize($max_inout));
+            $desc .= sprintf("  - `max_allowed_packet` is set to `%s`. You may want to raise this to about twice the maximum of the test case size and output (storage) limit (currently `%s`).\n", Utils::printsize((int)$vars['max_allowed_packet']), Utils::printsize($max_inout));
         } elseif ($vars['max_allowed_packet'] < $recommended_max_allowed_packet) {
             $result = 'W';
-            $desc .= sprintf("max_allowed_packet is set to %s. We recommend at least 16MB.\n", Utils::printsize((int)$vars['max_allowed_packet']));
+            $desc .= sprintf("  - `max_allowed_packet` is set to `%s`. We recommend at least `16MB`.\n", Utils::printsize((int)$vars['max_allowed_packet']));
         } else {
-            $desc .= sprintf("max_allowed_packet is set to %s.\n", Utils::printsize((int)$vars['max_allowed_packet']));
+            $desc .= sprintf("  - `max_allowed_packet` is set to `%s`.\n", Utils::printsize((int)$vars['max_allowed_packet']));
         }
 
         if ($vars['innodb_snapshot_isolation'] === 'ON') {
             $result = 'E';
-            $desc .= 'InnoDB snapshot isolation is enabled. Set --innodb_snapshot_isolation=OFF in your MariaDB configuration. See https://github.com/DOMjudge/domjudge/issues/2848 for more information.';
+            $desc .= '  - InnoDB snapshot isolation is enabled. Set `--innodb_snapshot_isolation=OFF` in your MariaDB configuration. See [#2848](https://github.com/DOMjudge/domjudge/issues/2848) for more information.';
         } else {
-            $desc .= "InnoDB snapshot isolation is disabled.\n";
+            $desc .= "  - InnoDB snapshot isolation is disabled.\n";
         }
 
         $this->stopwatch->stop(__FUNCTION__);
@@ -274,12 +275,12 @@ class CheckConfigService
     {
         $this->stopwatch->start(__FUNCTION__);
         $res = 'O';
-        $desc = 'Password for "admin" has been changed from the default.';
+        $desc = 'Password for `admin` has been changed from the default.';
 
         $user = $this->em->getRepository(User::class)->findOneBy(['username' => 'admin']);
         if ($user && password_verify('admin', $user->getPassword())) {
             $res = 'E';
-            $desc = 'The "admin" user still has the default password. You should change it immediately.';
+            $desc = 'The `admin` user still has the default password. You should change it immediately.';
         }
 
         $this->stopwatch->stop(__FUNCTION__);
@@ -301,9 +302,9 @@ class CheckConfigService
             $scriptid = $this->config->get('default_' . $type);
             if (!$this->em->getRepository(Executable::class)->find($scriptid)) {
                 $res = 'E';
-                $desc .= sprintf("The default %s script '%s' does not exist.\n", $type, $scriptid);
+                $desc .= sprintf("  - The default `%s` script `%s` does not exist.\n", $type, $scriptid);
             } else {
-                $desc .= sprintf("The default %s script '%s' exists.\n", $type, $scriptid);
+                $desc .= sprintf("  - The default `%s` script `%s` exists.\n", $type, $scriptid);
             }
         }
 
@@ -331,8 +332,8 @@ class CheckConfigService
             desc: 'If the script filesize limit is lower than the memory limit, then ' .
             'compilation of sources that statically allocate memory may fail. We ' .
             'recommend to include a margin to be on the safe side. The current ' .
-            '"script_filesize_limit" = ' . $this->config->get('script_filesize_limit') . ' ' .
-            'while "memory_limit" = ' . $this->config->get('memory_limit') . '.'
+            '`script_filesize_limit` = `' . $this->config->get('script_filesize_limit') . '` ' .
+            'while `memory_limit` = `' . $this->config->get('memory_limit') . '`.'
         );
     }
 
@@ -364,7 +365,7 @@ class CheckConfigService
             return new ConfigCheckItem(
                 caption: 'TMPDIR writable',
                 result: 'O',
-                desc: sprintf('TMPDIR (%s) can be used to store temporary ' .
+                desc: sprintf('TMPDIR (`%s`) can be used to store temporary ' .
                     'files for submission diffs and edits.',
                     $tmpdir)
             );
@@ -373,7 +374,7 @@ class CheckConfigService
         return new ConfigCheckItem(
             caption: 'TMPDIR writable',
             result: 'W',
-            desc: sprintf('TMPDIR (%s) is not writable by the webserver; ' .
+            desc: sprintf('TMPDIR (`%s`) is not writable by the webserver; ' .
                 'Showing diffs and editing of submissions may not work.',
                 $tmpdir)
         );
@@ -441,14 +442,14 @@ class CheckConfigService
             );
         }
         $this->stopwatch->stop(__FUNCTION__);
+        $desc = '';
+        foreach ($contests as $contest) {
+            $desc .= '  - c' . $contest->getCid() . ' (' . $contest->getShortname() . ")\n";
+        }
         return new ConfigCheckItem(
             caption: 'Active contests',
             result: 'O',
-            desc: 'Currently active contests: ' .
-                implode(', ', array_map(
-                    fn($contest) => 'c' . $contest->getCid() . ' (' . $contest->getShortname() . ')',
-                    $contests
-                ))
+            desc: $desc,
         );
     }
 
@@ -472,7 +473,7 @@ class CheckConfigService
             foreach ($contest->getProblems() as $cp) {
                 if (empty($cp->getColor())) {
                     $result = ($result === 'E' ? 'E' : 'W');
-                    $cperrors[$cid] .= "  - No color for problem " . $cp->getShortname() . " in contest c" . $cid . "\n";
+                    $cperrors[$cid] .= "  - No color for problem `" . $cp->getShortname() . "` in contest c" . $cid . "\n";
                 }
             }
         }
@@ -485,7 +486,7 @@ class CheckConfigService
             } else {
                 $desc .= "errors:\n";
                 foreach ($errors as $error) {
-                    $desc .= "  - " . $error->getPropertyPath() . ": " . $error->getMessage() . "\n";
+                    $desc .= "  - `" . $error->getPropertyPath() . "`: " . $error->getMessage() . "\n";
                 }
                 $desc .= $cperrors[$cid];
             }
@@ -495,7 +496,7 @@ class CheckConfigService
         return new ConfigCheckItem(
             caption: 'Contests validation',
             result: $result,
-            desc: "Validated all active and future contests:\n\n" .
+            desc: "Validated all active and future contests.\n\n" .
                 ($desc ?: 'No problems found.')
         );
     }
@@ -515,15 +516,15 @@ class CheckConfigService
                 if ($bannerpath) {
                     if (($filesize = filesize($bannerpath)) > 2 * 1024 * 1024) {
                         $result = 'W';
-                        $desc .= sprintf("Banner for %s bigger than 2mb (size is %.2fMb)\n", $contestName, $filesize / 1024 / 1024);
+                        $desc .= sprintf("  - Banner for `%s` bigger than `2MB` (size is `%.2fMB`)\n", $contestName, $filesize / 1024 / 1024);
                     } else {
                         [$width, $height, $ratio] = Utils::getImageSize($bannerpath);
                         if (mime_content_type($bannerpath) !== 'image/svg+xml' && $width > 1920) {
                             $result = 'W';
-                            $desc .= sprintf("Banner for %s is wider than 1920\n", $contestName);
+                            $desc .= sprintf("  - Banner for `%s` is wider than `1920`\n", $contestName);
                         } elseif ($ratio < 3 || $ratio > 6) {
                             $result = 'W';
-                            $desc .= sprintf("Banner for %s is has a ratio of 1:%.2f, between 1:3 and 1:6 recommended\n", $contestName, $ratio);
+                            $desc .= sprintf("  - Banner for `%s` is has a ratio of `1:%.2f`, between `1:3` and `1:6` recommended\n", $contestName, $ratio);
                         }
                     }
                 }
@@ -562,27 +563,27 @@ class CheckConfigService
                 $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $special_compare->getExecid()]);
                 if (!$exec) {
                     $result = 'E';
-                    $moreproblemerrors[$probid] .= sprintf("Special compare script %s not found for p%s\n", $special_compare->getExecid(), $probid);
+                    $moreproblemerrors[$probid] .= sprintf("  - Special compare script `%s` not found for `p%s`\n", $special_compare->getExecid(), $probid);
                 } elseif ($exec->getType() !== "compare") {
                     $result = 'E';
-                    $moreproblemerrors[$probid] .= sprintf("Special compare script %s exists but is of wrong type (%s instead of compare) for p%s\n", $special_compare->getExecid(), $exec->getType(), $probid);
+                    $moreproblemerrors[$probid] .= sprintf("  - Special compare script `%s` exists but is of wrong type (`%s` instead of compare) for `p%s`\n", $special_compare->getExecid(), $exec->getType(), $probid);
                 }
             }
             if ($special_run = $problem->getRunExecutable()) {
                 $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $special_run->getExecid()]);
                 if (!$exec) {
                     $result = 'E';
-                    $moreproblemerrors[$probid] .= sprintf("Special run script %s not found for p%s\n", $special_run->getExecid(), $probid);
+                    $moreproblemerrors[$probid] .= sprintf("  - Special run script `%s` not found for `p%s`\n", $special_run->getExecid(), $probid);
                 } elseif ($exec->getType() !== "run") {
                     $result = 'E';
-                    $moreproblemerrors[$probid] .= sprintf("Special run script %s exists but is of wrong type (%s instead of run) for p%s\n", $special_run->getExecid(), $exec->getType(), $probid);
+                    $moreproblemerrors[$probid] .= sprintf("  - Special run script `%s` exists but is of wrong type (`%s` instead of run) for `p%s`\n", $special_run->getExecid(), $exec->getType(), $probid);
                 }
             }
 
             $memlimit = $problem->getMemlimit();
             if ($memlimit !== null && $memlimit > $script_filesize_limit) {
                 $result = 'E';
-                $moreproblemerrors[$probid] .= sprintf("problem-specific memory limit %s is larger than global script filesize limit (%s).\n", $memlimit, $script_filesize_limit);
+                $moreproblemerrors[$probid] .= sprintf("  - problem-specific memory limit `%s` is larger than global script filesize limit (`%s`).\n", $memlimit, $script_filesize_limit);
             }
 
             /** @var Testcase[] $tcs_size */
@@ -596,14 +597,14 @@ class CheckConfigService
                 ->getResult();
             if (count($tcs_size) === 0) {
                 $result = 'E';
-                $moreproblemerrors[$probid] .= sprintf("No testcases for p%s\n", $probid);
+                $moreproblemerrors[$probid] .= sprintf("  - No testcases for `p%s`\n", $probid);
             } else {
                 $problem_output_limit = 1024 * ($problem->getOutputLimit() ?: $output_limit);
                 foreach ($tcs_size as $row) {
                     if ($row['output_size'] > $problem_output_limit) {
                         $result = 'E';
                         $moreproblemerrors[$probid] .= sprintf(
-                            "Testcase %s for p%s exceeds output limit of %s\n",
+                            "  - Testcase `%s` for `p%s` exceeds output limit of `%s`\n",
                             $row['rank'], $probid, $problem_output_limit
                         );
                     }
@@ -614,7 +615,7 @@ class CheckConfigService
                 if (!$contestProblem->getAllowJudge()) {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf(
-                        "p%s is disabled in contest '%s'\n",
+                        "  - `p%s` is disabled in contest `%s`\n",
                         $probid, $contestProblem->getContest()->getName()
                     );
                 }
@@ -623,7 +624,7 @@ class CheckConfigService
 
         $desc = '';
         foreach ($problemerrors as $probid => $errors) {
-            $desc .= "Problem p$probid: ";
+            $desc .= "  - Problem `p$probid`:\n";
             if (count($errors) > 0 || !empty($moreproblemerrors[$probid])) {
                 /* @phpstan-ignore-next-line */
                 $desc .= (string)$errors . " " .
@@ -637,7 +638,7 @@ class CheckConfigService
         return new ConfigCheckItem(
             caption: 'Problems validation',
             result: $result,
-            desc: "Validated all problems:\n\n" .
+            desc: "Validated all problems.\n\n" .
                 ($desc ?: 'No problems with problems found.')
         );
     }
@@ -661,27 +662,27 @@ class CheckConfigService
             $compileExecutable = $language->getCompileExecutable();
             if (null === $compileExecutable) {
                 $result = 'E';
-                $morelanguageerrors[$langid] .= sprintf("No compile script found for %s\n", $langid);
+                $morelanguageerrors[$langid] .= sprintf("    - No compile script found for `%s`\n", $langid);
             } elseif ($compile = $language->getCompileExecutable()->getExecid()) {
                 $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $compile]);
                 if (!$exec) {
                     $result = 'E';
-                    $morelanguageerrors[$langid] .= sprintf("Compile script %s not found for %s\n", $compile, $langid);
+                    $morelanguageerrors[$langid] .= sprintf("    - Compile script `%s` not found for `%s`\n", $compile, $langid);
                 } elseif ($exec->getType() !== "compile") {
                     $result = 'E';
-                    $morelanguageerrors[$langid] .= sprintf("Compile script %s exists but is of wrong type (%s instead of compile) for %s\n", $compile, $exec->getType(), $langid);
+                    $morelanguageerrors[$langid] .= sprintf("    - Compile script `%s` exists but is of wrong type (`%s` instead of compile) for `%s`\n", $compile, $exec->getType(), $langid);
                 }
             }
 
             if ($language->getAllowSubmit() && !$language->getAllowJudge()) {
                 $result = 'E';
-                $morelanguageerrors[$langid] .= sprintf("Language '%s' is allowed to be submit, but not judged.\n", $langid);
+                $morelanguageerrors[$langid] .= sprintf("    - Language `%s` is allowed to be submit, but not judged.\n", $langid);
             }
         }
 
         $desc = '';
         foreach ($languageerrors as $langid => $errors) {
-            $desc .= "Language $langid: ";
+            $desc .= "  - Language `$langid`: ";
             if (count($errors) > 0 || !empty($morelanguageerrors[$langid])) {
                 /* @phpstan-ignore-next-line */
                 $desc .= (string)$errors . " " .
@@ -695,7 +696,7 @@ class CheckConfigService
         return new ConfigCheckItem(
             caption: 'Languages validation',
             result: $result,
-            desc: "Validated all languages:\n\n" .
+            desc: "Validated all languages.\n\n" .
                 ($desc ?: 'No languages with problems found.')
         );
     }
@@ -713,7 +714,7 @@ class CheckConfigService
                 $photopath = $this->dj->assetPath($tid, 'team', true);
                 if ($photopath && ($filesize = filesize($photopath)) > 5 * 1024 * 1024) {
                     $result = 'W';
-                    $desc .= sprintf("Photo for t%d (%s) bigger than 5mb (size is %.2fMb)\n", $team->getTeamid(), $team->getName(), $filesize / 1024 / 1024);
+                    $desc .= sprintf("  - Photo for `t%d` (%s) bigger than `5MB` (size is `%.2fMB`)\n", $team->getTeamid(), $team->getName(), $filesize / 1024 / 1024);
                 }
             }
         }
@@ -758,23 +759,23 @@ class CheckConfigService
                 $logopathMask = str_replace('.jpg', '.{jpg,png,svg}', $this->dj->assetPath($aid, 'affiliation', true, 'jpg'));
                 if (!$logopath) {
                     $result = 'W';
-                    $desc   .= sprintf("Logo for %s does not exist (looking for %s)\n", $affiliation->getShortname(), $logopathMask);
+                    $desc   .= sprintf("  - Logo for `%s` does not exist (looking for `%s`)\n", $affiliation->getShortname(), $logopathMask);
                 } elseif (!is_readable($logopath)) {
                     $result = 'W';
-                    $desc .= sprintf("Logo for %s not readable (looking for %s)\n", $affiliation->getShortname(), $logopathMask);
+                    $desc .= sprintf("  - Logo for `%s` not readable (looking for `%s`)\n", $affiliation->getShortname(), $logopathMask);
                 } elseif (($filesize = filesize($logopath)) > 500 * 1024) {
                     $result = 'W';
-                    $desc .= sprintf("Logo for %s bigger than 500Kb (size is %.2fKb)\n", $affiliation->getShortname(), $filesize / 1024);
+                    $desc .= sprintf("  - Logo for `%s` bigger than `500Kb` (size is `%.2fKb`)\n", $affiliation->getShortname(), $filesize / 1024);
                 } else {
                     [$width, $height, $ratio] = Utils::getImageSize($logopath);
                     if (mime_content_type($logopath) === 'image/svg+xml') {
                         // For SVG's we check the ratio
                         $result = 'W';
-                        $desc   .= sprintf("Logo for %s has a ratio of 1:%.2f, should be 1:1\n", $affiliation->getShortname(), $ratio);
+                        $desc   .= sprintf("  - Logo for `%s` has a ratio of `1:%.2f`, should be `1:1`\n", $affiliation->getShortname(), $ratio);
                     } elseif ($width !== 64 || $height !== 64) {
                         // For other images we check the size
                         $result = 'W';
-                        $desc   .= sprintf("Logo for %s is not 64x64 but %dx%d\n", $affiliation->getShortname(), $width, $height);
+                        $desc   .= sprintf("  - Logo for `%s` is not `64x64` but `%dx%d`\n", $affiliation->getShortname(), $width, $height);
                     }
                 }
             }
@@ -803,7 +804,7 @@ class CheckConfigService
         foreach ($seen as $teamname => $teams) {
             if (count($teams) > 1) {
                 $result = 'W';
-                $desc .= sprintf("Team name '%s' in use by multiple teams: %s",
+                $desc .= sprintf("  - Team name `%s` in use by multiple teams: `%s`",
                          $teamname, implode(',', $teams) . "\n");
             }
         }
@@ -836,10 +837,10 @@ class CheckConfigService
                     $selfRegistrationCategories[0]->getName());
             } else {
                 $selfRegistrationCategoryNames = array_map(fn($category) => $category->getName(), $selfRegistrationCategories);
-                $desc .= sprintf(
-                    "Team categories allowed for self-registered teams: %s.\n",
-                    implode(', ', $selfRegistrationCategoryNames)
-                );
+                $desc .= "Team categories allowed for self-registered teams:\n";
+                foreach ($selfRegistrationCategories as $category) {
+                    $desc .= sprintf("  - %s\n", $category->getName());
+                }
             }
         }
 
@@ -921,10 +922,10 @@ class CheckConfigService
                     $getter              = sprintf('get%s', ucfirst($column));
                     $routeParams[$param] = $entity->{$getter}();
                 }
-                $description .= sprintf("<a href=\"%s\">%s %s</a> does not have an external ID\n",
-                                        $this->router->generate($route, $routeParams),
+                $description .= sprintf("  - [%s %s](%s) does not have an external ID\n",
                                         ucfirst(str_replace('_', ' ', $inflector->tableize($entityType))),
-                                        htmlspecialchars(implode(', ', $metadata->getIdentifierValues($entity)))
+                                        htmlspecialchars(implode(', ', $metadata->getIdentifierValues($entity))),
+                                        $this->router->generate($route, $routeParams)
                 );
             }
         } else {
