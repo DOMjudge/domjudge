@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
@@ -11,6 +12,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\StatisticsService;
+use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -33,6 +35,7 @@ class PublicController extends BaseController
         protected readonly ConfigurationService $config,
         protected readonly ScoreboardService $scoreboardService,
         protected readonly StatisticsService $stats,
+        protected readonly SubmissionService $submissionService,
         EntityManagerInterface $em,
         EventLogService $eventLog,
         KernelInterface $kernel,
@@ -79,6 +82,18 @@ class PublicController extends BaseController
 
         if ($static) {
             $data['hide_menu'] = true;
+            $submissions = $this->submissionService->getSubmissionList(
+                [$contest->getCid() => $contest],
+                new SubmissionRestriction(valid: true),
+                paginated: false
+            )[0];
+
+            $submissionsPerTeamAndProblem = [];
+            foreach ($submissions as $submission) {
+                $submissionsPerTeamAndProblem[$submission->getTeam()->getTeamid()][$submission->getProblem()->getProbid()][] = $submission;
+            }
+            $data['submissionsPerTeamAndProblem'] = $submissionsPerTeamAndProblem;
+            $data['verificationRequired'] = $this->config->get('verification_required');
         }
 
         $data['current_contest'] = $contest;
@@ -266,5 +281,55 @@ class PublicController extends BaseController
         }
 
         return $response($probId, $contest, $contestProblem);
+    }
+
+    #[Route(path: '/submissions/team/{teamId<\d+>}/problem/{problemId<\d+>}', name: 'public_submissions')]
+    public function submissionsAction(Request $request, int $teamId, int $problemId): Response
+    {
+        $contest = $this->dj->getCurrentContest(onlyPublic: true);
+
+        if (!$contest) {
+            throw $this->createNotFoundException('No active contest found');
+        }
+
+        /** @var Team|null $team */
+        $team             = $this->em->getRepository(Team::class)->find($teamId);
+        if ($team && $team->getCategory() && !$team->getCategory()->getVisible()) {
+            $team = null;
+        }
+
+        if (!$team) {
+            throw $this->createNotFoundException('Team not found');
+        }
+
+        /** @var ContestProblem|null $problem */
+        $problem = $this->em->getRepository(ContestProblem::class)->find([
+            'problem' => $problemId,
+            'contest' => $contest,
+        ]);
+
+        if (!$problem) {
+            throw $this->createNotFoundException('Problem not found');
+        }
+
+        $submissions = $this->submissionService->getSubmissionList(
+            [$contest->getCid() => $contest],
+            new SubmissionRestriction(teamId: $teamId, problemId: $problemId, valid: true),
+            paginated: false
+        )[0];
+
+        $data = [
+            'contest' => $contest,
+            'problem' => $problem,
+            'team' => $team,
+            'submissions' => $submissions,
+            'verificationRequired' => $this->config->get('verification_required'),
+        ];
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('public/team_submissions_modal.html.twig', $data);
+        }
+
+        return $this->render('public/team_submissions.html.twig', $data);
     }
 }
