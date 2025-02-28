@@ -293,7 +293,7 @@ class PublicController extends BaseController
         }
 
         /** @var Team|null $team */
-        $team             = $this->em->getRepository(Team::class)->find($teamId);
+        $team = $this->em->getRepository(Team::class)->find($teamId);
         if ($team && $team->getCategory() && !$team->getCategory()->getVisible()) {
             $team = null;
         }
