@@ -22,9 +22,9 @@ def sec_end(job):
 with open(sys.argv[1], 'r') as f:
     data = json.load(f)
     for message in data['messages']:
-        mtyp = message['type'].encode('utf-8', 'ignore')
-        murl = message['url'].encode('utf-8', 'ignore')
-        mmes = message['message'].encode('utf-8', 'ignore')
+        mtyp = str(message['type'])
+        murl = str(message['url'])
+        mmes = str(message['message'])
         if mtyp not in storage1.keys():
             storage1[mtyp] = {"messages": {}, "cnt": 0}
             storage2[mtyp] = {"urls": {}, "cnt": 0}
