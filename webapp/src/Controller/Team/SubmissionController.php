@@ -250,10 +250,4 @@ class SubmissionController extends BaseController
 
         return $this->submissionService->getSubmissionZipResponse($submission);
     }
-
-    #[Route(path: '/submissions/team/{teamId<\d+>}/problem/{problemId<\d+>}', name: 'team_submissions')]
-    public function listAction(int $probId): Response
-    {
-
-    }
 }
