@@ -142,6 +142,7 @@ class TeamAffiliationController extends BaseController
                 'ajax' => true,
             ],
             'maxWidth' => $this->config->get('team_column_width'),
+            'public' => false,
         ];
 
         if ($currentContest = $this->dj->getCurrentContest()) {

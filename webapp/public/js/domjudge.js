@@ -301,30 +301,20 @@ function getScoreboards(mobile)
 
 function getRank(row)
 {
-    return row.getElementsByTagName("td")[0];
+    return row.querySelector('.rank');
 }
 
 function getHeartCol(row) {
-    var tds = row.getElementsByTagName("td");
-    var td = null;
-    // search for td before the team name
-    for (var i = 1; i < 4; i++) {
-        if (tds[i].classList.contains("scoretn")) {
-            td = tds[i - 1];
+    const tds = row.getElementsByTagName("td");
+    let td = null;
+    // search for td to store the hearts
+    for (let i = 1; i < 5; i++) {
+        if (tds[i] && tds[i].classList.contains("heart")) {
+            td = tds[i];
             break;
         }
     }
-    if (td === null) {
-        td = tds[1];
-    }
-    if (td !== null) {
-        if (td.children.length) {
-            return td.children[0];
-        }
-        return td;
-    }
-
-    return null;
+    return td;
 }
 
 function getTeamname(row)
@@ -397,11 +387,10 @@ function toggle(id, show, mobile)
     });
 }
 
-function addHeart(rank, row, id, isFav, mobile)
+function getHeart(rank, row, id, isFav, mobile)
 {
-    var heartCol = getHeartCol(row);
     var iconClass = isFav ? "fas fa-heart" : "far fa-heart";
-    return heartCol.innerHTML + "<span class=\"heart " + iconClass + "\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + "," + mobile + ")\"></span>";
+    return "<span class=\"heart " + iconClass + "\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + "," + mobile + ")\"></span>";
 }
 
 function initFavouriteTeams()
@@ -426,20 +415,32 @@ function initFavouriteTeams()
             if (teamname === null) {
                 continue;
             }
-            var firstCol = getRank(scoreboard[j]);
+            let rankElement;
+            if (mobile) {
+                rankElement = getRank(scoreboard[j + 1]);
+            } else {
+                rankElement = getRank(scoreboard[j]);
+            }
             var heartCol = getHeartCol(scoreboard[j]);
-            var rank = firstCol.innerHTML;
+            if (!heartCol) {
+                continue;
+            }
+            var rank = rankElement.innerHTML.trim();
             for (var i = 0; i < favTeams.length; i++) {
                 if (teamname === favTeams[i]) {
                     found = true;
-                    heartCol.innerHTML = addHeart(rank, scoreboard[j], teamIndex, found, mobile);
+                    heartCol.innerHTML = getHeart(rank, scoreboard[j], teamIndex, found, mobile);
                     toAdd[cntFound] = scoreboard[j].cloneNode(true);
                     if (mobile) {
                         toAddMobile[cntFound] = scoreboard[j + 1].cloneNode(true);
                     }
-                    if (rank.trim().length === 0) {
+                    if (rank.length === 0) {
                         // make rank explicit in case of tie
-                        getRank(toAdd[cntFound]).innerHTML += lastRank;
+                        if (mobile) {
+                            getRank(toAddMobile[cntFound]).innerHTML += lastRank;
+                        } else {
+                            getRank(toAdd[cntFound]).innerHTML += lastRank;
+                        }
                     }
                     scoreboard[j].style.background = "lightyellow";
                     const scoretn = scoreboard[j].querySelector('.scoretn');
@@ -455,7 +456,7 @@ function initFavouriteTeams()
                 }
             }
             if (!found) {
-                heartCol.innerHTML = addHeart(rank, scoreboard[j], teamIndex, found, mobile);
+                heartCol.innerHTML = getHeart(rank, scoreboard[j], teamIndex, found, mobile);
             }
             if (rank !== "") {
                 lastRank = rank;
