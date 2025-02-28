@@ -38,7 +38,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
-use http\Exception\InvalidArgumentException;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
