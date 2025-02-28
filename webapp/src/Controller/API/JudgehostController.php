@@ -912,37 +912,22 @@ class JudgehostController extends AbstractFOSRestController
      */
     protected function giveBackJudging(int $judgingId, ?Judgehost $judgehost): void
     {
+        // Reset the judgings without using Doctrine, it has no support for update queries containing a join.
+        // Both databases supported by DOMjudge (MariaDB, MySQL) support these types of queries.
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ($judging) {
-            $this->em->wrapInTransaction(function () use ($judging, $judgehost) {
-                /** @var JudgingRun $run */
-                foreach ($judging->getRuns() as $run) {
-                    if ($judgehost === null) {
-                        // This is coming from internal errors, reset the whole judging.
-                        $run->getJudgetask()
-                            ->setValid(false);
-                        continue;
-                    }
-
-                    // We do not have to touch any finished runs
-                    if ($run->getRunresult() !== null) {
-                        continue;
-                    }
-
-                    // For the other runs, we need to reset the judge task if it belongs to the current judgehost.
-                    if ($run->getJudgetask()->getJudgehost() && $run->getJudgetask()->getJudgehost()->getHostname() === $judgehost->getHostname()) {
-                        $run->getJudgetask()
-                            ->setJudgehost(null)
-                            ->setStarttime(null);
-                    }
-                }
-
-                $this->em->flush();
-            });
-
             if ($judgehost === null) {
                 // Invalidate old judging and create a new one - but without judgetasks yet since this was triggered by
                 // an internal error.
+                $this->em->getConnection()->executeStatement(
+                    'UPDATE judging_run jr ' .
+                    'JOIN judgetask jt ON jt.judgetaskid = jr.judgetaskid ' .
+                    'SET jt.valid = 0 ' .
+                    'WHERE jr.judgingid = :judgingid',
+                    [
+                        'judgingid' => $judgingId,
+                    ]);
+
                 $judging->setValid(false);
                 $newJudging = new Judging();
                 $newJudging
@@ -952,6 +937,19 @@ class JudgehostController extends AbstractFOSRestController
                     ->setOriginalJudging($judging);
                 $this->em->persist($newJudging);
                 $this->em->flush();
+            } else {
+                // Hand back the non-completed work of this judgehost within this judgetask.
+                $this->em->getConnection()->executeStatement(
+                    'UPDATE judging_run jr ' .
+                    'JOIN judgetask jt ON jt.judgetaskid = jr.judgetaskid ' .
+                    'SET jt.judgehostid = null, jt.starttime = null ' .
+                    'WHERE jr.judgingid = :judgingid ' .
+                    '  AND jr.runresult IS NOT NULL ' .
+                    '  AND jt.judgehostid = :judgehost',
+                    [
+                        'judgingid' => $judgingId,
+                        'judgehost' => $judgehost->getJudgehostid(),
+                    ]);
             }
 
             $this->dj->auditlog('judging', $judgingId, 'given back'
