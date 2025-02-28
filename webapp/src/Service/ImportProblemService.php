@@ -427,6 +427,15 @@ class ImportProblemService
                         break;
                     }
                 }
+                // Handle SVG differently, as a lot of the above concepts do not make sense in this context.
+                $imageFileName = $baseFileName . '.svg';
+                if (($imageFile = $zip->getFromName($imageFileName)) !== false) {
+                    if (($imageFile = Utils::sanitizeSvg($imageFile)) === false) {
+                        $messages['warning'][] = sprintf("Contents of '%s' is not safe.", $imageFileName);
+                    }
+                    $imageType = 'svg';
+                    $imageThumb = $imageFile;
+                }
 
                 if (str_contains($testInput, "\r")) {
                     $messages['warning'][] = "Testcase file '$baseFileName.in' contains Windows newlines.";

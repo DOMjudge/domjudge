@@ -85,6 +85,12 @@ class DOMJudgeService
         'image/svg+xml' => 'svg',
     ];
 
+    final public const EXTENSION_TO_MIMETYPE = [
+        'png' => 'image/png',
+        'jpg' => 'image/jpeg',
+        'svg' => 'image/svg+xml',
+    ];
+
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly LoggerInterface $logger,
