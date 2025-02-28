@@ -19,7 +19,7 @@ class ProblemControllerTest extends JuryControllerTestCase
     protected static string  $getIDFunc                = 'getProbid';
     protected static string  $className                = Problem::class;
     protected static array   $DOM_elements             = [
-        'h1'                            => ['Problems'],
+        'h1'                            => ['Problems in contest Demo contest'],
         'a.btn[title="Import problem"]' => ['admin' => [" Import problem"], 'jury' => []]
     ];
     protected static string  $identifyingEditAttribute = 'name';
