@@ -898,31 +898,26 @@ class JudgehostController extends AbstractFOSRestController
     {
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ($judging) {
-            $this->em->wrapInTransaction(function () use ($judging, $judgehost) {
-                /** @var JudgingRun $run */
-                foreach ($judging->getRuns() as $run) {
-                    if ($judgehost === null) {
-                        // This is coming from internal errors, reset the whole judging.
-                        $run->getJudgetask()
-                            ->setValid(false);
-                        continue;
-                    }
+            $q = $this->em->createQueryBuilder()
+                ->update(JudgingRun::class)
+                ->join(JudgeTask::class, 'jt')
+                ->where('jr.runresult IS NOT NULL')
+                ->where('jr.judgingid = :judgingid')
+                ->setParameter('judgingid', $judgingId);
 
-                    // We do not have to touch any finished runs
-                    if ($run->getRunresult() !== null) {
-                        continue;
-                    }
+            if ($judgehost === null) {
+                // This is coming from internal errors, reset the whole judging.
+                $q->set('jt.valid', 0);
+            } else {
+                $q->andWhere('jr.run_result IS NOT NULL')
+                    ->join(JudgeHost::class, 'jh')
+                    ->set('jt.judgehostid', null)
+                    ->set('jt.starttime', null)
+                    ->andWhere('jh.hostname = :judgehost')
+                    ->setParameter('judgehost', $judgehost->getHostname());
+            }
 
-                    // For the other runs, we need to reset the judge task if it belongs to the current judgehost.
-                    if ($run->getJudgetask()->getJudgehost() && $run->getJudgetask()->getJudgehost()->getHostname() === $judgehost->getHostname()) {
-                        $run->getJudgetask()
-                            ->setJudgehost(null)
-                            ->setStarttime(null);
-                    }
-                }
-
-                $this->em->flush();
-            });
+            $q->getQuery()->execute();
 
             if ($judgehost === null) {
                 // Invalidate old judging and create a new one - but without judgetasks yet since this was triggered by
