@@ -2,7 +2,6 @@
 
 namespace App\Form\Type;
 
-use App\Controller\Jury\UserController;
 use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
