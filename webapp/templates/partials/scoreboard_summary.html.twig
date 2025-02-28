@@ -11,6 +11,9 @@
                     {% set summaryColspan = summaryColspan + 1 %}
                 {% endif %}
             {% endif %}
+            {% if public %}
+                {% set summaryColspan = summaryColspan + 1 %}
+            {% endif %}
             <td class="scoresummary" title="Summary" colspan="{{ summaryColspan }}">Summary</td>
             {% if enable_ranking %}
                 {% if scoreboard.showPoints %}

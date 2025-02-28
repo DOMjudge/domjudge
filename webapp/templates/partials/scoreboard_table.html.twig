@@ -30,9 +30,12 @@
 
 <table class="d-none d-md-table scoreboard desktop-scoreboard center {% if jury %}scoreboard_jury{% endif %}">
 
-    {% set teamColspan = 2 %}
+    {% set teamColspan = 3 %}
     {% if showAffiliationLogos %}
         {% set teamColspan = teamColspan + 1 %}
+    {% endif %}
+    {% if not public %}
+        {% set teamColspan = teamColspan - 1 %}
     {% endif %}
 
     {# output table column groups (for the styles) #}
@@ -50,6 +53,9 @@
         {% endif %}
         {% if showAffiliationLogos %}
             <col id="scorelogos"/>
+        {% endif %}
+        {% if public %}
+            <col id="scorehearts"/>
         {% endif %}
         <col id="scoreteamname"/>
     </colgroup>
@@ -189,6 +195,9 @@
                         </a>
                     {% endif %}
                 </td>
+            {% endif %}
+            {% if public %}
+                <td class="scoreaf heart"></td>
             {% endif %}
             {% if color is null %}
                 {% set color = "#FFFFFF" %}
@@ -339,6 +348,9 @@
         {% if showAffiliationLogos %}
             <col id="scorelogosmobile"/>
         {% endif %}
+        {% if public %}
+            <col id="scoreheartmobile"/>
+        {% endif %}
         <col id="scoreteamnamemobile"/>
     </colgroup>
     {% if enable_ranking %}
@@ -350,6 +362,9 @@
 
     {% set teamColspan = 2 %}
     {% if showAffiliationLogos %}
+        {% set teamColspan = teamColspan + 1 %}
+    {% endif %}
+    {% if public %}
         {% set teamColspan = teamColspan + 1 %}
     {% endif %}
 
@@ -430,6 +445,9 @@
                 {% endif %}
             </td>
         {% endif %}
+        {% if public %}
+            <td class="scoreaf heart"></td>
+        {% endif %}
         {% if color is null %}
             {% set color = "#FFFFFF" %}
             {% set colorClass = "_FFFFFF" %}
@@ -483,7 +501,7 @@
         <tr style="height: 32px;">
             <td>
                 {# Only print rank when score is different from the previous team #}
-                <span class="d-block me-2">
+                <span class="d-block me-2 rank">
                     {% if not displayRank %}
                         ?
                     {% elseif previousTeam is null or scoreboard.scores[previousTeam.teamid].rank != score.rank %}
@@ -496,7 +514,10 @@
             {% if showAffiliationLogos %}
                 {% set problemSpan = 3 %}
             {% else %}
-            {% set problemSpan = 2 %}
+                {% set problemSpan = 2 %}
+            {% endif %}
+            {% if public %}
+                {% set problemSpan = problemSpan + 1 %}
             {% endif %}
             <td colspan="{{ problemSpan }}">
                 {% for problem in problems %}
