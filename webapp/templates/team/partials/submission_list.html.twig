@@ -51,11 +51,11 @@
                 </td>
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>
-                        {%- if submission.submittime > submission.contest.endtime %}
-                            {{ 'too-late' | printResult }} 
+                        {%- if submission.submittime >= submission.contest.endtime %}
+                            {{ 'too-late' | printResult }}
                         {%- endif %}
-                        {%- if submission.submittime <= submission.contest.endtime or showTooLateResult %}
-                            {%- if submission.submittime > submission.contest.endtime %}
+                        {%- if submission.submittime < submission.contest.endtime or showTooLateResult %}
+                            {%- if submission.submittime >= submission.contest.endtime %}
                                 /
                             {% endif %}
                             {%- if submission.judgings.first is empty or submission.judgings.first.result is empty %}
