@@ -713,6 +713,55 @@ class UtilsTest extends TestCase
         yield [__DIR__ . '/../../../public/images/DOMjudgelogo.svg', 510, 1122];
     }
 
+    public function testSanitizeSvg(): void
+    {
+        // SVG source: https://svg.enshrined.co.uk/
+        $dirty = <<<EOF
+            <?xml version="1.0" encoding="utf-8" ?>
+            <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+            <rect fill="url('http://example.com/benis.svg')" x="0" y="0" width="1000" height="1000"></rect>
+            <rect fill="url('https://example.com/benis.svg')" x="0" y="0" width="1000" height="1000"></rect>
+            <rect fill="  url(  ' https://example.com/benis.svg '  ) " x="0" y="0" width="1000" height="1000"></rect>
+            <rect fill="url('ftp://192.168.2.1/benis.svg')" x="0" y="0" width="1000" height="1000"></rect>
+            <rect fill="url('//example.com/benis.svg')" x="0" y="0" width="1000" height="1000"></rect>
+            <rect fill="url('/benis.svg')" x="0" y="0" width="1000" height="1000"></rect>
+            <rect fill="url('#benis.svg')" x="0" y="0" width="1000" height="1000"></rect>
+            <g id="righteye" class="eye">
+                <path id="iris-2" data-name="iris" class="cls-4" d="M241.4,143.6s18.5,11.9,36,7.1,29.6-15.8,27.2-24.6c-1.7-6-9.8-9.4-20.3-9.4a59.21,59.21,0,0,0-15.6,2.2,37.44,37.44,0,0,0-12.4,6.4,60.14,60.14,0,0,0-14.9,18.3" transform="translate(-9.7 -9.3)"/>
+                <path id="lid" class="cls-11" d="M304.5,124.4c-1.7-6-9.8-9.4-20.3-9.4a59.21,59.21,0,0,0-15.6,2.2,37.44,37.44,0,0,0-12.4,6.4,61.21,61.21,0,0,0-14.9,18.1" transform="translate(-9.7 -9.3)"/>
+                <path id="pupil-2" data-name="pupil" class="cls-12" d="M256.7,126.1c2.5,9.2,11,14.8,18.9,12.6s12.3-11.4,9.8-20.6a16.59,16.59,0,0,0-1.2-3.1,59.21,59.21,0,0,0-15.6,2.2,37.44,37.44,0,0,0-12.4,6.4,9.23,9.23,0,0,0,.5,2.5" transform="translate(-9.7 -9.3)"/>
+                <path id="eyelash-2" data-name="eyelash" class="cls-13" d="M302.9,122.3c7.7,2.5,17-5,20.8-16.8M292,115.7c7.6,2.8,17.2-4.4,21.4-16M277,115.1c8.1-.3,14.3-10.5,13.9-22.8" transform="translate(-9.7 -9.3)"/>
+                <path id="reflection-2" data-name="reflection" class="cls-14" d="M271.1,127.1c0,3.6-2.6,6.5-5.8,6.5s-5.8-2.9-5.8-6.5,2.6-6.4,5.8-6.4,5.8,2.9,5.8,6.4" transform="translate(-9.7 -9.3)"/>
+            </g>
+                <a href="javascript:alert(2)">test 1</a>
+                <a xlink:href="javascript:alert(2)">test 2</a>
+                <a href="#test3">test 3</a>
+                <a xlink:href="#test">test 4</a>
+            
+                <a href="data:data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' onload='alert(88)'%3E%3C/svg%3E">test 5</a>
+                <a xlink:href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' onload='alert(88)'%3E%3C/svg%3E">test 6</a>
+                <use xlink:href="defs.svg#icon-1"/>
+                <line onload="alert(2)" fill="none" stroke="#000000" stroke-miterlimit="10" x1="119" y1="84.5" x2="454" y2="84.5"/>
+            <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="111.212" y1="102.852" x2="112.032" y2="476.623"/>
+            <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="198.917" y1="510.229" x2="486.622" y2="501.213"/>
+            <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="484.163" y1="442.196" x2="89.901" y2="60.229"/>
+            <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="101.376" y1="478.262" x2="443.18" y2="75.803"/>
+            <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="457.114" y1="126.623" x2="458.753" y2="363.508"/>
+            <this>shouldn't be here</this>
+            <script>alert(1);</script>
+            <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="541.54" y1="299.573" x2="543.179" y2="536.458"/>
+            
+            </svg>
+            EOF;
+        $clean = Utils::sanitizeSvg($dirty);
+        self::assertFalse(str_contains($clean, "script"));
+        self::assertFalse(str_contains($clean, "alert"));
+        self::assertFalse(str_contains($clean, "shouldn't be here"));
+        self::assertFalse(str_contains($clean, "example.com"));
+        self::assertTrue(str_contains($clean, '</svg>'));
+    }
+
     /**
      * Test that the wrapUnquoted function returns the correct result
      */
