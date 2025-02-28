@@ -868,32 +868,24 @@ class JudgehostController extends AbstractFOSRestController
 
         if ($field_name !== null) {
             // Disable any outstanding judgetasks with the same script that have not been claimed yet.
-            $this->em->wrapInTransaction(function (EntityManager $em) use ($field_name, $disabled_id, $error) {
-                $judgingids = $em->getConnection()->executeQuery(
-                    'SELECT DISTINCT jobid'
-                    . ' FROM judgetask'
-                    . ' WHERE ' . $field_name . ' = :id'
-                    . ' AND judgehostid IS NULL'
-                    . ' AND valid = 1',
-                    [
-                        'id' => $disabled_id,
-                    ]
-                )->fetchFirstColumn();
-                $judgings = $em->getRepository(Judging::class)->findBy(['judgingid' => $judgingids]);
-                foreach ($judgings as $judging) {
-                    /** @var Judging $judging */
-                    $judging->setInternalError($error);
-                }
-                $em->flush();
-                $em->getConnection()->executeStatement(
-                    'UPDATE judgetask SET valid=0'
-                    . ' WHERE ' . $field_name . ' = :id'
-                    . ' AND judgehostid IS NULL',
-                    [
-                        'id' => $disabled_id,
-                    ]
-                );
-            });
+            $rows = $this->em->createQueryBuilder()
+                ->update(Judging::class, 'j')
+                ->leftJoin(JudgeTask::class, 'jt')
+                ->set('j.internal_error', ':error')
+                ->set('jt.valid', 0)
+                ->andWhere('jt.' . $field_name . ' = :id')
+                ->andWhere('j.internal_error IS NULL')
+                ->andWhere('jt.judgehost_id IS NULL')
+                ->andWhere('jt.valid = 1')
+                ->setParameter('error', $error)
+                ->setParameter('id', $disabled_id)
+                ->distinct()
+                ->getQuery()
+                ->getArrayResult();
+
+            if ($rows == 0) {
+                // TODO, handle this case. Nothing was updated.
+            }
         }
 
         $this->dj->setInternalError($disabled, $contest, false);
