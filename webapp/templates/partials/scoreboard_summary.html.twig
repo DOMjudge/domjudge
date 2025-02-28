@@ -1,12 +1,15 @@
 {% if limitToTeamIds is null %}
     {% if showTeamSubmissions or jury %}
         <tr style="border-top: 2px solid black;">
-            {% set summaryColspan = 3 %}
+            {% set summaryColspan = 2 %}
             {% if showAffiliationLogos %}
                 {% set summaryColspan = summaryColspan + 1 %}
             {% endif %}
-            {% if not enable_ranking %}
-                {% set summaryColspan = summaryColspan - 1 %}
+            {% if enable_ranking %}
+                {% set summaryColspan = summaryColspan + 1 %}
+                {% if medalsEnabled %}
+                    {% set summaryColspan = summaryColspan + 1 %}
+                {% endif %}
             {% endif %}
             <td class="scoresummary" title="Summary" colspan="{{ summaryColspan }}">Summary</td>
             {% if enable_ranking %}
