@@ -32,6 +32,7 @@ use BadMethodCallException;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Exception as DBALException;
+use Doctrine\DBAL\TransactionIsolationLevel;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -313,33 +314,89 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         if ($request->request->has('output_compile')) {
+            $output_compile = base64_decode($request->request->get('output_compile'));
+
             // Note: we use ->get here instead of ->has since entry_point can be the empty string and then we do not
             // want to update the submission or send out an update event
             if ($request->request->get('entry_point')) {
-                $this->em->wrapInTransaction(function () use ($query, $request, &$judging) {
-                    $submission = $judging->getSubmission();
-                    if ($submission->getEntryPoint() === $request->request->get('entry_point')) {
-                        return;
-                    }
-                    $submission->setEntryPoint($request->request->get('entry_point'));
-                    $this->em->flush();
-                    $submissionId = $submission->getSubmitid();
-                    $contestId    = $submission->getContest()->getCid();
-                    $this->eventLogService->log('submission', $submissionId,
-                                                EventLogService::ACTION_UPDATE, $contestId);
+                // Lock-free setting of, and detection of mismatched entry_point.
+                $submission = $judging->getSubmission();
 
-                    // As EventLogService::log() will clear the entity manager, so the judging has
-                    // now become detached. We will have to reload it.
+                // Retrieve, and update the current entrypoint.
+                $oldEntryPoint = $submission->getEntryPoint();
+                $newEntryPoint = $request->request->get('entry_point');
+
+
+                if ($oldEntryPoint === $newEntryPoint) {
+                    // Nothing to do
+                } elseif (!empty($oldEntryPoint)) {
+                    // Conflict detected disable the judgehost.
+                    $disabled = [
+                        'kind' => 'judgehost',
+                        'hostname' => $judgehost->getHostname(),
+                    ];
+                    $error = new InternalError();
+                    $error
+                        ->setJudging($judging)
+                        ->setContest($judging->getContest())
+                        ->setDescription('Reported EntryPoint conflict difference for j' . $judging->getJudgingid().'. Expected: "' . $oldEntryPoint. '", received: "' . $newEntryPoint . '".')
+                        ->setJudgehostlog(base64_encode('New compilation output: ' . $output_compile))
+                        ->setTime(Utils::now())
+                        ->setDisabled($disabled);
+                    $this->em->persist($error);
+                } else {
+                    // Update needed. Note, conflicts might still be possible.
+
+                    $rowsAffected = $this->em->createQueryBuilder()
+                        ->update(Submission::class, 's')
+                        ->set('s.entry_point', ':entrypoint')
+                        ->andWhere('s.submitid = :id')
+                        ->andWhere('s.entry_point IS NULL')
+                        ->setParameter('entrypoint', $newEntryPoint)
+                        ->setParameter('id', $submission->getSubmitid())
+                        ->getQuery()
+                        ->execute();
+
+                    if ($rowsAffected == 0) {
+                        // There is a potential conflict, two options.
+                        // The new entry point is either the same (no issue) or different (conflict).
+                        // Read the entrypoint and check.
+                        $this->em->clear();
+                        $currentEntryPoint = $query->getOneOrNullResult()->getSubmission()->getEntryPoint();
+                        if ($newEntryPoint !== $currentEntryPoint) {
+                            // Conflict detected disable the judgehost.
+                            $disabled = [
+                                'kind' => 'judgehost',
+                                'hostname' => $judgehost->getHostname(),
+                            ];
+                            $error = new InternalError();
+                            $error
+                                ->setJudging($judging)
+                                ->setContest($judging->getContest())
+                                ->setDescription('Reported EntryPoint conflict difference for j' . $judging->getJudgingid().'. Expected: "' . $oldEntryPoint. '", received: "' . $newEntryPoint . '".')
+                                ->setJudgehostlog(base64_encode('New compilation output: ' . $output_compile))
+                                ->setTime(Utils::now())
+                                ->setDisabled($disabled);
+                            $this->em->persist($error);
+                        }
+                    } else {
+                        $submissionId = $submission->getSubmitid();
+                        $contestId    = $submission->getContest()->getCid();
+                        $this->eventLogService->log('submission', $submissionId,
+                            EventLogService::ACTION_UPDATE, $contestId);
+                    }
+
+                    // As EventLogService::log() will clear the entity manager, both branches clear the entity manager.
+                    // The judging is now detached, reload it.
                     /** @var Judging $judging */
                     $judging = $query->getOneOrNullResult();
-                });
+                }
             }
 
             // Reload judgehost just in case it got cleared above.
             /** @var Judgehost $judgehost */
             $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
 
-            $output_compile = base64_decode($request->request->get('output_compile'));
             if ($request->request->getBoolean('compile_success')) {
                 if ($judging->getOutputCompile() === null) {
                     $judging
