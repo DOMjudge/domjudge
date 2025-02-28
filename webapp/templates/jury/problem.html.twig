@@ -116,6 +116,20 @@
                         <td>{{ type }}</td>
                     </tr>
                 {% endif %}
+                <tr>
+                    <th>Languages</th>
+                    <td>
+                        {% if problem.languages is empty %}
+                            <em>all languages enabled for the corresponding contest</em>
+                        {% else %}
+                            <ul>
+                                {% for language in problem.languages %}
+                                    <li><a href="{{ path('jury_language', {'langId': language.langid}) }}">{{ language.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </td>
+                </tr>
             </table>
         </div>
     </div>
