@@ -75,16 +75,11 @@ class ProblemController extends BaseController
             ->groupBy('p.probid')
             ->getQuery()->getResult();
 
-        $badgeTitle = '';
-        $currentContest = $this->dj->getCurrentContest();
-        if ($currentContest !== null) {
-            $badgeTitle = 'in ' . $currentContest->getShortname();
-        }
         $table_fields = [
             'probid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
             'externalid' => ['title' => 'external ID', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true],
-            'badges' => ['title' => $badgeTitle, 'sort' => false],
+            'badges' => ['title' => '', 'sort' => false],
             'num_contests' => ['title' => '# contests', 'sort' => true],
             'timelimit' => ['title' => 'time limit', 'sort' => true],
             'memlimit' => ['title' => 'memory limit', 'sort' => true],
@@ -107,7 +102,8 @@ class ProblemController extends BaseController
         }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $problems_table   = [];
+        $problems_table_current = [];
+        $problems_table_other   = [];
         foreach ($problems as $row) {
             /** @var Problem $p */
             $p              = $row[0];
@@ -221,15 +217,20 @@ class ProblemController extends BaseController
                 'type' => ['value' => $type],
             ]);
 
-            // Save this to our list of rows
-            $problems_table[] = [
+            $data_to_add = [
                 'data' => $problemdata,
                 'actions' => $problemactions,
                 'link' => $this->generateUrl('jury_problem', ['probId' => $p->getProbid()]),
             ];
+            if ($badges) {
+                $problems_table_current[] = $data_to_add;
+            } else {
+                $problems_table_other[] = $data_to_add;
+            }
         }
         $data = [
-            'problems' => $problems_table,
+            'problems_current' => $problems_table_current,
+            'problems_other' => $problems_table_other,
             'table_fields' => $table_fields,
         ];
 
