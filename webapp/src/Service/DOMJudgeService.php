@@ -1648,7 +1648,7 @@ class DOMJudgeService
                 return $languages->toArray();
             }
         }
-        return $this->em->createQueryBuilder(Language::class)
+        return $this->em->createQueryBuilder()
             ->select('l')
             ->from(Language::class, 'l')
             ->where('l.allowSubmit = 1')
