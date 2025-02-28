@@ -1,0 +1,9 @@
+{% extends "partials/modal.html.twig" %}
+
+{% block title %}
+    Submissions for team {{ team.effectiveName }} and problem {{ problem | problemBadge }} {{ problem.problem.name }}
+{% endblock %}
+
+{% block content %}
+    {% include 'public/partials/submission_list.html.twig' %}
+{% endblock %}
