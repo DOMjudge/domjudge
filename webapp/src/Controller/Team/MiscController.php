@@ -181,7 +181,8 @@ class MiscController extends BaseController
             $ret = $this->dj->printUserFile(
                 $realfile,
                 $originalfilename,
-                $langid
+                $langid,
+                true
             );
 
             return $this->render('team/print_result.html.twig', [
