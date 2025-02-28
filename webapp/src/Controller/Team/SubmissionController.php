@@ -200,6 +200,7 @@ class SubmissionController extends BaseController
             'showSampleOutput' => $showSampleOutput,
             'runs' => $runs,
             'showTooLateResult' => $showTooLateResult,
+            'thumbnailSize' => $this->config->get('thumbnail_size'),
         ];
         if ($actuallyShowCompile) {
             $data['size'] = 'xl';
