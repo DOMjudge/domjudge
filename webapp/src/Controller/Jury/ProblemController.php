@@ -605,16 +605,26 @@ class ProblemController extends BaseController
                         }
                         $content = file_get_contents($file->getRealPath());
                         if ($type === 'image') {
-                            $imageType = Utils::getImageType($content, $error);
-                            if ($imageType === false) {
-                                $this->addFlash('danger', sprintf('image: %s', $error));
-                                return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
-                            }
-                            $thumb = Utils::getImageThumb($content, $thumbnailSize,
-                                                          $this->dj->getDomjudgeTmpDir(), $error);
-                            if ($thumb === false) {
-                                $this->addFlash('danger', sprintf('image: %s', $error));
-                                return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                            if (mime_content_type($file->getRealPath()) === 'image/svg+xml') {
+                                $content = Utils::sanitizeSvg($content);
+                                if ($content === false) {
+                                    $this->addFlash('danger', sprintf('image: %s', $error));
+                                    return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                                }
+                                $thumb = $content;
+                                $imageType = 'svg';
+                            } else {
+                                $imageType = Utils::getImageType($content, $error);
+                                if ($imageType === false) {
+                                    $this->addFlash('danger', sprintf('image: %s', $error));
+                                    return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                                }
+                                $thumb = Utils::getImageThumb($content, $thumbnailSize,
+                                                            $this->dj->getDomjudgeTmpDir(), $error);
+                                if ($thumb === false) {
+                                    $this->addFlash('danger', sprintf('image: %s', $error));
+                                    return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                                }
                             }
 
                             $testcase->setImageType($imageType);

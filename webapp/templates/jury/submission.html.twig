@@ -742,7 +742,7 @@
                         <span style="float:right; border: 3px solid #438ec3; margin: 5px; padding: 5px;">
                             {% set imgUrl = path('jury_problem_testcase_fetch', {'probId': submission.problem.probid, 'rank': run.rank, 'type': 'image'}) %}
                             <a href="{{ imgUrl }}">
-                                <img src="data:image/{{ run.imageType }};base64,{{ runsOutput[runIdx].image_thumb | base64 }}"/>
+                                <img src="data:{{ run.imageType | extensionToMime }};base64,{{ runsOutput[runIdx].image_thumb | base64 }}"/>
                             </a>
                         </span>
                     {% endif %}

@@ -117,6 +117,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('entityIdBadge', $this->entityIdBadge(...), ['is_safe' => ['html']]),
             new TwigFilter('medalType', $this->awards->medalType(...)),
             new TwigFilter('numTableActions', $this->numTableActions(...)),
+            new TwigFilter('extensionToMime', $this->extensionToMime(...)),
         ];
     }
 
@@ -1345,5 +1346,10 @@ EOF;
             $maxNumActions = max($maxNumActions, count($item['actions'] ?? []));
         }
         return $maxNumActions;
+    }
+
+    public function extensionToMime(string $extension): string
+    {
+        return DOMJudgeService::EXTENSION_TO_MIMETYPE[$extension];
     }
 }
