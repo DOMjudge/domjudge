@@ -198,6 +198,10 @@ del {
 .scoreboard td.no-border, .scoreboard th.no-border {
     border: none;
 }
+.scoreboard td.rank {
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+}
 .scoreboard td.score_cell {
     min-width: 4.2em;
     border-right: none;
