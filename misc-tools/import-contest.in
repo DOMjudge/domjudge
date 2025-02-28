@@ -151,7 +151,7 @@ if import_file('organizations', ['organizations.json']):
     # Also import logos if we have any
     # We prefer the 64x64 logo. If it doesn't exist, accept a generic logo (which might be a SVG)
     # We also prefer PNG/SVG before JPG
-    import_images('organizations', 'logo', ['^logo\\.64x\\d+\\.png$', '^logo\\.(png|svg)$', '^logo\\.64x\\d+\\.jpg$', '^logo\\.jpg$'])
+    import_images('organizations', 'logo', ['^logo\\.64(x\\d+)?\\.png$', '^logo\\.(png|svg)$', '^logo\\.64(x\\d+)?\\.jpg$', '^logo\\.jpg$'])
 if import_file('teams', ['teams.json', 'teams2.tsv']):
     # Also import photos if we have any, but prefer JPG over SVG and PNG
     import_images('teams', 'photo', ['^photo\\.jpg$', '^photo\\.(png|svg)$'])
