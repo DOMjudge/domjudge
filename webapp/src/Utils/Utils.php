@@ -3,6 +3,7 @@ namespace App\Utils;
 
 use DateTime;
 use Doctrine\Inflector\InflectorFactory;
+use enshrined\svgSanitize\Sanitizer as SvgSanitizer;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -715,6 +716,15 @@ class Utils
         }
 
         return [$width, $height, $width / $height];
+    }
+
+    public static function sanitizeSvg(string $svgContents): string | false
+    {
+        $sanitizer = new SvgSanitizer();
+        $sanitizer->removeRemoteReferences(true);
+        $sanitizer->minify(true);
+        
+        return $sanitizer->sanitize($svgContents);
     }
 
     /**

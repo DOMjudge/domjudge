@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6401b4bdcb1db7464a2e9e4bcbf894b2",
+    "content-hash": "106fc22e21c1d0fbfb208159951d1736",
     "packages": [
         {
             "name": "apalfrey/select2-bootstrap-5-theme",
@@ -1866,6 +1866,51 @@
                 "url": "https://github.com/eligrey/FileSaver.js/archive/v2.0.4.zip"
             },
             "type": "library"
+        },
+        {
+            "name": "enshrined/svg-sanitize",
+            "version": "0.21.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/darylldoyle/svg-sanitizer.git",
+                "reference": "5e477468fac5c5ce933dce53af3e8e4e58dcccc9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/darylldoyle/svg-sanitizer/zipball/5e477468fac5c5ce933dce53af3e8e4e58dcccc9",
+                "reference": "5e477468fac5c5ce933dce53af3e8e4e58dcccc9",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-libxml": "*",
+                "php": "^7.1 || ^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.5 || ^8.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "enshrined\\svgSanitize\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Daryll Doyle",
+                    "email": "daryll@enshrined.co.uk"
+                }
+            ],
+            "description": "An SVG sanitizer for PHP",
+            "support": {
+                "issues": "https://github.com/darylldoyle/svg-sanitizer/issues",
+                "source": "https://github.com/darylldoyle/svg-sanitizer/tree/0.21.0"
+            },
+            "time": "2025-01-13T09:32:25+00:00"
         },
         {
             "name": "fortawesome/font-awesome",
