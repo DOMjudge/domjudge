@@ -581,6 +581,7 @@ class SubmissionController extends BaseController
             'requestedOutputCount' => $requestedOutputCount,
             'version_warnings' => [],
             'isMultiPassProblem' => $submission->getProblem()->isMultipassProblem(),
+            'thumbnailSize' => $this->config->get('thumbnail_size'),
         ];
 
         if ($selectedJudging === null) {
