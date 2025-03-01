@@ -34,6 +34,11 @@ if [ "$CODECOVERAGE" -eq 1 ]; then
 fi
 set +e
 echo "unused:sqlserver:domjudge:domjudge:domjudge:3306" > /opt/domjudge/domserver/etc/dbpasswords.secret
+
+# Do not clutter the output with deprecation notices that we are not interested
+# in when running unit tests.
+export SYMFONY_DEPRECATIONS_HELPER=disabled=1
+
 php $phpcov webapp/bin/phpunit -c webapp/phpunit.xml.dist webapp/tests/$unittest --log-junit ${ARTIFACTS}/unit-tests.xml --colors=never $pcov | tee "$ARTIFACTS"/phpunit.out
 UNITSUCCESS=$?
 
