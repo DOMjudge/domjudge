@@ -67,7 +67,13 @@
                             <div class="card-body">
                                 <ul class="list-group list-group-flush">
                                     {% for affiliation in affiliations %}
-                                        <li class="list-group-item">
+                                        {% if affiliation.color is null %}
+                                            {% set color = "#FFFFFF" %}
+                                            {% set colorClass = "_FFFFFF" %}
+                                        {% else %}
+                                            {% set colorClass = affiliation.color | replace({"#": "_"}) %}
+                                        {% endif %}
+                                        <li class="list-group-item cl{{ colorClass }}">
                                             {% if showFlags %}
                                                 {{ affiliation.country|countryFlag }}
                                             {% endif %}
