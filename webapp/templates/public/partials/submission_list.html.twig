@@ -10,9 +10,6 @@
             <th scope="col">time</th>
             <th scope="col">language</th>
             <th scope="col">result</th>
-            {% if contest.getRuntimeAsScoreTiebreaker() %}
-                <th scope="col">runtime</th>
-            {% endif %}
         </tr>
         </thead>
         <tbody>
@@ -35,19 +32,10 @@
                         {% elseif verificationRequired and not submission.judgings.first.verified %}
                             {{ '' | printResult }}
                         {% else %}
-                            {{ submission.judgings.first.result | printResult }}
+                            {{ submission.judgings.first.result | printResult(true, false, true) }}
                         {% endif %}
                     {% endif %}
                 </td>
-                {% if contest.getRuntimeAsScoreTiebreaker() %}
-                    <td>
-                        {% if link and submission.getResult() == 'correct' %}
-                            {{ "%0.3f s" | format(submission.judgings.first.getMaxRuntime()) }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                {% endif %}
             </tr>
         {% endfor %}
         </tbody>

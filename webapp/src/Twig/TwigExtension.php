@@ -513,7 +513,12 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return $results;
     }
 
-    public function printResult(?string $result, bool $valid = true, bool $jury = false): string
+    public function printResult(
+        ?string $result,
+        bool $valid = true,
+        bool $jury = false,
+        bool $onlyAcceptedAndRejected = false,
+    ): string
     {
         $result = strtolower($result ?? '');
         switch ($result) {
@@ -536,9 +541,15 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 break;
             case 'correct':
                 $style = 'sol_correct';
+                if ($onlyAcceptedAndRejected) {
+                    $result = 'accepted';
+                }
                 break;
             default:
                 $style = 'sol_incorrect';
+                if ($onlyAcceptedAndRejected) {
+                    $result = 'rejected';
+                }
         }
 
         return sprintf('<span class="sol %s">%s</span>', $valid ? $style : 'disabled', $result);
