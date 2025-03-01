@@ -780,6 +780,7 @@ class ScoreboardService
                         'id'   => $teamaffil->getExternalid(),
                         'name' => $teamaffil->getName(),
                         'country' => $teamaffil->getCountry(),
+                        'color' => $category->getColor(),
                     ];
                 }
             }
