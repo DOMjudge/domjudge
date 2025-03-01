@@ -1,12 +1,12 @@
 {% extends "public/base.html.twig" %}
 
 {% block title %}
-    {% if team is not empty %}Submissions for team {{ team.effectiveName }} and problem {{ problem.problem.name }} - {% endif %}{{ parent() }}
+    {% if team is not empty %}Submissions for team {{ team.effectiveName }} on problem {{ problem.problem.name }} - {% endif %}{{ parent() }}
 {% endblock %}
 
 {% block content %}
     <h1 class="mt-3">
-        Submissions for team {{ team.effectiveName }} and problem {{ problem | problemBadge }} {{ problem.problem.name }}
+        Submissions for team {{ team.effectiveName }} on problem {{ problem | problemBadge }} {{ problem.problem.name }}
     </h1>
 
     {% include 'public/partials/submission_list.html.twig' %}
