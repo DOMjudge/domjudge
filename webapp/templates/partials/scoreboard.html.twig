@@ -68,6 +68,9 @@
                                 <ul class="list-group list-group-flush">
                                     {% for affiliation in affiliations %}
                                         <li class="list-group-item">
+                                            {% if showFlags %}
+                                                {{ affiliation.country|countryFlag }}
+                                            {% endif %}
                                             {% set affiliationLogo = affiliation.id | assetPath('affiliation') %}
                                             {% if affiliationLogo %}
                                                 <img loading="lazy" class="affiliation-logo"

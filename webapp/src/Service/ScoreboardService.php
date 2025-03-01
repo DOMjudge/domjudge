@@ -779,6 +779,7 @@ class ScoreboardService
                     $affiliations[$teamaffil->getName()] = [
                         'id'   => $teamaffil->getExternalid(),
                         'name' => $teamaffil->getName(),
+                        'country' => $teamaffil->getCountry(),
                     ];
                 }
             }
