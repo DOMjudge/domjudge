@@ -2,7 +2,7 @@
 
 . .github/jobs/ci_settings.sh
 
-set -euo pipefail
+set -euxo pipefail
 
 DIR="$PWD"
 
@@ -34,7 +34,7 @@ if [ "$CODECOVERAGE" -eq 1 ]; then
 fi
 set +e
 echo "unused:sqlserver:domjudge:domjudge:domjudge:3306" > /opt/domjudge/domserver/etc/dbpasswords.secret
-php $phpcov webapp/bin/phpunit -c webapp/phpunit.xml.dist webapp/tests/$unittest --log-junit ${ARTIFACTS}/unit-tests.xml --colors=never $pcov > "$ARTIFACTS"/phpunit.out
+php $phpcov webapp/bin/phpunit -c webapp/phpunit.xml.dist webapp/tests/$unittest --log-junit ${ARTIFACTS}/unit-tests.xml --colors=never $pcov | tee "$ARTIFACTS"/phpunit.out
 UNITSUCCESS=$?
 
 # Store the unit tests also in the root for the GHA
