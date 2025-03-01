@@ -547,7 +547,7 @@
         {% for problem in problems %}
             {% embed 'partials/modal.html.twig' with {'modalId': 'team-submissions-modal-' ~ score.team.teamid ~ '-' ~ problem.probid} %}
                 {% block title %}
-                    Submissions for team {{ score.team.effectiveName }} and problem {{ problem | problemBadge }} {{ problem.problem.name }}
+                    Submissions for team {{ score.team.effectiveName }} on problem {{ problem | problemBadge }} {{ problem.problem.name }}
                 {% endblock %}
                 {% block content %}
                     {% include 'public/partials/submission_list.html.twig' with {size: 6, team: score.team, submissions: submissionsPerTeamAndProblem[score.team.teamid][problem.probid] ?? []} %}
