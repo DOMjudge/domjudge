@@ -390,15 +390,10 @@
     {% endif %}
     <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}" style="border-bottom-width: 0; height: 28px;">
         {% if enable_ranking %}
-            <td class="scorepl {{medalColor}}" rowspan="2">
-                {# Only print rank when score is different from the previous team #}
-                {% if not displayRank %}
-                    ?
-                {% elseif previousTeam is null or scoreboard.scores[previousTeam.teamid].rank != score.rank %}
-                    {{ score.rank }}
-                {% else %}
+            <td class="scorepl">
+                {% if medalsEnabled and medalColor != '' %}
+                    <i class="fa fa-medal {{medalColor}} d-block me-2" style="font-size: 1.5rem;"></i>
                 {% endif %}
-                {% set previousTeam = score.team %}
             </td>
         {% endif %}
         <td class="scoreaf">
@@ -486,6 +481,18 @@
         {% endif %}
     </tr>
         <tr style="height: 32px;">
+            <td>
+                {# Only print rank when score is different from the previous team #}
+                <span class="d-block me-2">
+                    {% if not displayRank %}
+                        ?
+                    {% elseif previousTeam is null or scoreboard.scores[previousTeam.teamid].rank != score.rank %}
+                        {{ score.rank }}
+                    {% else %}
+                    {% endif %}
+                </span>
+                {% set previousTeam = score.team %}
+            </td>
             {% if showAffiliationLogos %}
                 {% set problemSpan = 3 %}
             {% else %}
