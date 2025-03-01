@@ -14,9 +14,9 @@
         <h1>Problems in contest {{ current_contest.name }}</h1>
         {% if problems_current is empty %}
             <em>There are no problems in this contest.</em>
+        {% else %}
+            {{ macros.table(problems_current, table_fields) }}
         {% endif %}
-
-        {{ macros.table(problems_current, table_fields) }}
     {% endif %}
 
     {% if problems_other is not empty %}
