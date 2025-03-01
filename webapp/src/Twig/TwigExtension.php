@@ -849,6 +849,10 @@ $(function() {
         const element = document.getElementById('__EDITOR__');
         const content = element.textContent;
         element.textContent = '';
+        // Adjust editor height to fit window.
+        const height = $(window).height() - 400;
+        element.style.height = height + 'px';
+
         const editor = monaco.editor.create(element, {
             value: content,
             scrollbar: {
