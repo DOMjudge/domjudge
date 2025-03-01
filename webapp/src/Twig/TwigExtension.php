@@ -518,8 +518,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         bool $valid = true,
         bool $jury = false,
         bool $onlyAcceptedAndRejected = false,
-    ): string
-    {
+    ): string {
         $result = strtolower($result ?? '');
         switch ($result) {
             case 'too-late':
