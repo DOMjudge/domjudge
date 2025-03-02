@@ -245,16 +245,21 @@ def get_epilog():
     contests_part_one = None
     contests_part_two = None
 
-    if not contests or len(contests) <= 1:
+    if contest_id:
         contests_part_one = '''For CONTEST use the ID or short name as shown in the top-right contest
-drop-down box in the web interface.'''
-        if contests and len(contests) == 1:
-            contests_part_two = f"Currently this defaults to the only active contest '{contests[0]['shortname']}'"
+    drop-down box in the web interface.'''
+        contests_part_two = f"Currently defaults to '{contest_id}', pass '-c <contest_id>' to override."
     else:
-        contests_part_one = 'For CONTEST use one of the following:'
-        max_length = max([len(c['shortname']) for c in contests])
-        for contest in contests:
-            contests_part_one += f"\n    {contest['shortname']:<{max_length}} - {contest['name']}"
+        if not contests or len(contests) <= 1:
+            contests_part_one = '''For CONTEST use the ID or short name as shown in the top-right contest
+    drop-down box in the web interface.'''
+            if contests and len(contests) == 1:
+                contests_part_two = f"Currently this defaults to the only active contest '{contests[0]['shortname']}'"
+        else:
+            contests_part_one = 'For CONTEST use one of the following:'
+            max_length = max([len(c['shortname']) for c in contests])
+            for contest in contests:
+                contests_part_one += f"\n    {contest['shortname']:<{max_length}} - {contest['name']}"
 
     if not problems:
         problem_part = 'For PROBLEM use the label as on the scoreboard.'
@@ -459,6 +464,8 @@ if args.url:
     baseurl = args.url
 elif 'SUBMITBASEURL' in os.environ:
     baseurl = os.environ['SUBMITBASEURL']
+    logging.warning(f"Using '{baseurl}' as defined in the 'SUBMITBASEURL' environment variable. "
+                    + "Pass '-u <url>' to override.")
 # Make sure that baseurl terminates with a '/' for later concatenation.
 if baseurl and baseurl[-1:] != '/':
     baseurl += '/'
@@ -467,6 +474,8 @@ if args.contest:
     contest_id = args.contest
 elif 'SUBMITCONTEST' in os.environ:
     contest_id = os.environ['SUBMITCONTEST']
+    logging.warning(f"Using '{contest_id}' as defined in the 'SUBMITCONTEST' environment variable. "
+                    + "Pass '-c <contest_id>' to override.")
 else:
     contest_id = ''
 
