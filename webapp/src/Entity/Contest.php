@@ -43,11 +43,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
     exp: 'object.getName()',
     options: [new Serializer\Type('string')]
 )]
-#[Serializer\VirtualProperty(
-    name: 'scoreboard_type',
-    exp: '"pass-fail"',
-    options: [new Serializer\Type('string')]
-)]
 #[UniqueEntity(fields: 'shortname')]
 #[UniqueEntity(fields: 'externalid')]
 class Contest extends BaseApiEntity implements
@@ -160,6 +155,18 @@ class Contest extends BaseApiEntity implements
     )]
     #[Serializer\Exclude]
     private ?int $b = 0;
+
+    #[ORM\Column(type: 'string', enumType: ScoreboardType::class, options: ['default' => 'pass-fail'])]
+    #[Serializer\Exclude]
+    private ScoreboardType $scoreboardType = ScoreboardType::PASS_FAIL;
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('scoreboard_type')]
+    #[Serializer\Type('string')]
+    public function getScoreboardTypeString(): string
+    {
+        return $this->scoreboardType->value;
+    }
 
     #[ORM\Column(
         options: ['default' => 0]
@@ -859,6 +866,17 @@ class Contest extends BaseApiEntity implements
     public function getPublic(): bool
     {
         return $this->public;
+    }
+
+    public function setScoreboardType(ScoreboardType $scoreboardType): Contest
+    {
+        $this->scoreboardType = $scoreboardType;
+        return $this;
+    }
+
+    public function getScoreboardType(): ScoreboardType
+    {
+        return $this->scoreboardType;
     }
 
     public function setOpenToAllTeams(bool $openToAllTeams): Contest

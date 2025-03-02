@@ -52,6 +52,11 @@
                     <td>{{ contest.shortname }}</td>
                     <td></td>
                 </tr>
+                <tr>
+                    <th>Scoreboard type</th>
+                    <td>{{ contest.scoreboardType.value }}</td>
+                    <td></td>
+                </tr>
                 {% for type, data in contest.dataForJuryInterface %}
                     <tr>
                         <td class="{{ data.class|default('') }}"><b>{{ data.label }}:</b></td>
