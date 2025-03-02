@@ -43,6 +43,35 @@
                         </td>
                     </tr>
                 {% endif %}
+                {% if internalError.judgingRun is not null %}
+                    <tr>
+                        <th>Related judging run / testcase</th>
+                        <td>
+                            {% set tc = internalError.judgingRun.testcase %}
+                            <ul>
+                                <li>
+                                    <a href="{{ path('jury_submission_by_judging', {jid: internalError.judging.judgingid}) }}#run-{{ tc.rank }}">
+                                        tc{{ tc.testcaseid }}
+                                    </a>
+                                </li>
+                                <li>
+                                    rank: {{ tc.rank }}
+                                </li>
+                                {% if tc.description is not empty %}
+                                    <li>
+                                        description: {{ tc.description }}
+                                    </li>
+                                {% endif %}
+                                <li>
+                                    original filename: <code>{{ tc.origInputFilename }}.in</code>
+                                </li>
+                                <li>
+                                    testcase group: {{ (tc.sample) ? 'sample' : 'secret' }}
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                {% endif %}
                 {% if internalError.affectedJudgings is not null %}
                     <tr>
                         <th>Additional affected judgings</th>
