@@ -162,7 +162,14 @@
                     {% set previousTeam = score.team %}
                 </td>
             {% endif %}
-            <td class="scoreaf">
+            {% if color is null %}
+                {% set color = "#FFFFFF" %}
+                {% set colorClass = "_FFFFFF" %}
+            {% else %}
+                {% set colorClass = color | replace({"#": "_"}) %}
+                {% set backgroundColors = backgroundColors | merge({(color): 1}) %}
+            {% endif %}
+            <td class="scoreaf cl{{ colorClass }}">
                 {% if showFlags %}
                     {% if score.team.affiliation %}
                         {% set link = null %}
@@ -176,7 +183,7 @@
                 {% endif %}
             </td>
             {% if showAffiliationLogos %}
-                <td class="scoreaf">
+                <td class="scoreaf cl{{ colorClass }}">
                     {% if score.team.affiliation %}
                         {% set link = null %}
                         {% if jury %}
@@ -197,14 +204,7 @@
                 </td>
             {% endif %}
             {% if public %}
-                <td class="scoreaf heart"></td>
-            {% endif %}
-            {% if color is null %}
-                {% set color = "#FFFFFF" %}
-                {% set colorClass = "_FFFFFF" %}
-            {% else %}
-                {% set colorClass = color | replace({"#": "_"}) %}
-                {% set backgroundColors = backgroundColors | merge({(color): 1}) %}
+                <td class="scoreaf heart cl{{ colorClass }}"></td>
             {% endif %}
             <td class="scoretn cl{{ colorClass }}" title="{{ score.team.effectiveName }}">
                 {% set link = null %}
@@ -411,7 +411,13 @@
                 {% endif %}
             </td>
         {% endif %}
-        <td class="scoreaf">
+        {% if color is null %}
+            {% set color = "#FFFFFF" %}
+            {% set colorClass = "_FFFFFF" %}
+        {% else %}
+            {% set colorClass = color | replace({"#": "_"}) %}
+        {% endif %}
+        <td class="scoreaf cl{{ colorClass }}">
             {% if showFlags %}
                 {% if score.team.affiliation %}
                     {% set link = null %}
@@ -425,7 +431,7 @@
             {% endif %}
         </td>
         {% if showAffiliationLogos %}
-            <td class="scoreaf">
+            <td class="scoreaf cl{{ colorClass }}">
                 {% if score.team.affiliation %}
                     {% set link = null %}
                     {% if jury %}
@@ -446,13 +452,7 @@
             </td>
         {% endif %}
         {% if public %}
-            <td class="scoreaf heart"></td>
-        {% endif %}
-        {% if color is null %}
-            {% set color = "#FFFFFF" %}
-            {% set colorClass = "_FFFFFF" %}
-        {% else %}
-            {% set colorClass = color | replace({"#": "_"}) %}
+            <td class="scoreaf heart cl{{ colorClass }}"></td>
         {% endif %}
         <td class="scoretn cl{{ colorClass }}" title="{{ score.team.effectiveName }}">
         {% set link = null %}

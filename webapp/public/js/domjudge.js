@@ -443,10 +443,11 @@ function initFavouriteTeams()
                         }
                     }
                     scoreboard[j].style.background = "lightyellow";
-                    const scoretn = scoreboard[j].querySelector('.scoretn');
-                    if (scoretn && scoretn.classList.contains('cl_FFFFFF')) {
-                        scoretn.classList.remove('cl_FFFFFF');
-                        scoretn.classList.add('cl_FFFFE0');
+                    const whiteCells = scoreboard[j].querySelectorAll('.cl_FFFFFF');
+                    for (let k = 0; k < whiteCells.length; k++) {
+                        const whiteCell = whiteCells[k];
+                        whiteCell.classList.remove('cl_FFFFFF');
+                        whiteCell.classList.add('cl_FFFFE0');
                     }
                     if (mobile) {
                         scoreboard[j + 1].style.background = "lightyellow";
