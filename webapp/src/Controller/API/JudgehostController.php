@@ -608,7 +608,12 @@ class JudgehostController extends AbstractFOSRestController
                     ),
                     new OA\Property(
                         property: 'metadata',
-                        description: 'The (base64-encoded) metadata',
+                        description: 'The (base64-encoded) metadata of the run',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'compare_metadata',
+                        description: 'The (base64-encoded) metadata of the validator',
                         type: 'string'
                     ),
                 ]
@@ -647,6 +652,7 @@ class JudgehostController extends AbstractFOSRestController
         $teamMessage  = $request->request->get('team_message');
         $metadata     = $request->request->get('metadata');
         $testcasedir  = $request->request->get('testcasedir');
+        $compareMeta = $request->request->get('compare_metadata');
 
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
@@ -654,7 +660,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
-            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir);
+            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
@@ -910,16 +916,17 @@ class JudgehostController extends AbstractFOSRestController
      */
     private function addSingleJudgingRun(
         int $judgeTaskId,
-        string $hostname,
-        string $runResult,
-        string $runTime,
-        string $outputSystem,
-        string $outputError,
-        string $outputDiff,
-        string $outputRun,
+        string  $hostname,
+        string  $runResult,
+        string  $runTime,
+        string  $outputSystem,
+        string  $outputError,
+        string  $outputDiff,
+        string  $outputRun,
         ?string $teamMessage,
-        string $metadata,
-        ?string $testcasedir
+        string  $metadata,
+        ?string $testcasedir,
+        ?string $compareMeta,
     ): bool {
         $resultsRemap = $this->config->get('results_remap');
         $resultsPrio  = $this->config->get('results_prio');
@@ -940,7 +947,8 @@ class JudgehostController extends AbstractFOSRestController
             $outputRun,
             $teamMessage,
             $metadata,
-            $testcasedir
+            $testcasedir,
+            $compareMeta
         ) {
             $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
                 ['judgetaskid' => $judgeTaskId]);
@@ -961,6 +969,10 @@ class JudgehostController extends AbstractFOSRestController
                 ->setOutputError(base64_decode($outputError))
                 ->setOutputSystem(base64_decode($outputSystem))
                 ->setMetadata(base64_decode($metadata));
+
+            if ($compareMeta) {
+                $judgingRunOutput->setValidatorMetadata(base64_decode($compareMeta));
+            }
 
             if ($teamMessage) {
                 $judgingRunOutput->setTeamMessage(base64_decode($teamMessage));

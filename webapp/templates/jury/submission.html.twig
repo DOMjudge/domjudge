@@ -822,6 +822,21 @@
 {{  runsOutput[runIdx].team_message }}</pre>
                             {%  endif %}
                         {% endif %}
+
+                        {% if runsOutput[runIdx].validatorMetadata is not empty %}
+                            <hr/>
+                            <h5>Validator metadata</h5>
+                            {{ runsOutput[runIdx].validatorMetadata | printMetadata }}
+                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseValMeta-{{ runIdx }}"
+                                    aria-expanded="false">
+                                show complete validator metadata
+                            </button>
+                            <div class="collapse" id="collapseValMeta-{{ runIdx }}">
+                                <div class="card card-body output_text">{{ runsOutput[runIdx].validatorMetadata  }}</div>
+                            </div>
+
+                        {% endif %}
                     {% endif %}
 
                     </div>

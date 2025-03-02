@@ -1228,16 +1228,31 @@ EOF;
             return '';
         }
         $metadata = Utils::parseMetadata($metadata);
-        return '<span style="display:inline; margin-left: 5px;">'
-            . '<i class="fas fa-stopwatch" title="runtime"></i> '
-            . $metadata['cpu-time'] . 's CPU, '
-            . $metadata['wall-time'] . 's wall, '
-            . '<i class="fas fa-memory" title="RAM"></i> '
-            . Utils::printsize((int)($metadata['memory-bytes'])) . ', '
-            . '<i class="far fa-question-circle" title="exit-status"></i> '
-            . 'exit-code: ' . $metadata['exitcode']
-            . (($metadata['signal'] ?? -1) > 0 ? ' signal: ' . $metadata['signal'] : '')
-            . '</span>';
+        $result = '<span style="display:inline; margin-left: 5px;">';
+
+        if (isset($metadata['cpu-time']) || isset($metadata['wall-time'])) {
+            $result .= '<i class="fas fa-stopwatch" title="runtime"></i> ';
+        }
+
+        if (isset($metadata['cpu-time'])) {
+            $result .= $metadata['cpu-time'] . 's CPU, ';
+        }
+        if (isset($metadata['wall-time'])) {
+            $result .= $metadata['wall-time'] . 's wall, ';
+        }
+        if (isset($metadata['memory-bytes'])) {
+            $result .= '<i class="fas fa-memory" title="RAM"></i> '
+                . Utils::printsize((int)($metadata['memory-bytes'])) . ', ';
+        }
+        if (isset($metadata['exitcode'])) {
+            $result .= '<i class="far fa-question-circle" title="exit-status"></i> '
+                . 'exit-code: ' . $metadata['exitcode'];
+        }
+        if (isset($metadata['signal'])) {
+            $result .= ' signal: ' . $metadata['signal'];
+        }
+        $result .= '</span>';
+        return $result;
     }
 
     public function printWarningContent(ExternalSourceWarning $warning): string
