@@ -183,8 +183,8 @@ class StatisticsService
                 $misc['problem_stats']['teams_attempted'][$s->getProblem()->getProbId()][$team->getTeamId()] = $team->getTeamId();
 
                 static::setOrIncrement($misc['language_stats']['total_submissions'],
-                    $s->getLanguage()->getLangid());
-                $misc['language_stats']['teams_attempted'][$s->getLanguage()->getLangid()][$team->getTeamId()] = $team->getTeamId();
+                    $s->getLanguage()->getName());
+                $misc['language_stats']['teams_attempted'][$s->getLanguage()->getName()][$team->getTeamId()] = $team->getTeamId();
 
                 if ($s->getResult() != 'correct') {
                     continue;
@@ -197,9 +197,9 @@ class StatisticsService
                     $s->getProblem()->getProbId());
                 $misc['problem_stats']['teams_solved'][$s->getProblem()->getProbId()][$team->getTeamId()] = $team->getTeamId();
 
-                $misc['language_stats']['teams_solved'][$s->getLanguage()->getLangid()][$team->getTeamId()] = $team->getTeamId();
+                $misc['language_stats']['teams_solved'][$s->getLanguage()->getName()][$team->getTeamId()] = $team->getTeamId();
                 static::setOrIncrement($misc['language_stats']['total_solutions'],
-                    $s->getLanguage()->getLangid());
+                    $s->getLanguage()->getName());
 
                 if ($lastSubmission == null || $s->getSubmitTime() > $lastSubmission->getSubmitTime()) {
                     $lastSubmission = $s;

@@ -54,26 +54,6 @@ $(function() {
           # Submissions: {{ misc.total_submissions }}<br>
           # Accepted Submissions: {{ misc.total_accepted }} <span class="text-muted">(~{{ (misc.total_submissions>0 ? (misc.total_accepted/misc.total_submissions)*100:0)|number_format(0) }}%)</span><br>
           # of Teams: {{ misc.num_teams }}<br>
-
-<!--
-          # of Teams solving n problems<br>
-          <table class="table table-sm">
-            <thead>
-              <tr>
-                {% for x in range(0, problems|length) %}
-                <th>{{x}}</th>
-                {% endfor %}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                {% for n in range(0, problems|length ) %}
-                <td>{{ misc['teams_solved_n_problems'][n]|default(' ') }}</td>
-                {% endfor %}
-              </tr>
-            </tbody>
-          </table>
--->
         </div>
       </div>
     </div>
@@ -350,7 +330,7 @@ nv.addGraph(function() {
     d3.selectAll('#graph_problems .nv-bar').each(function(d) {
       if (d.value === 0) {
         d3.select(this).attr('height', 0);
-        d3.select(this).attr('y', chart.yAxis.scale()(0)); 
+        d3.select(this).attr('y', chart.yAxis.scale()(0));
       }
     });
   });
