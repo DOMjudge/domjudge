@@ -365,8 +365,6 @@ nv.addGraph(function() {
 // x-axis is contest time
 // y axis is # of submissions
 
-var max_submissions_per_minute = 0;
-
 var submission_stats = [
   {% for result in ['correct', 'wrong-answer', 'timelimit', 'run-error', 'compiler-error', 'no-output'] %}
   {
@@ -377,20 +375,44 @@ var submission_stats = [
   {% endfor %}
 ];
 
-var submissions = [
+const contest_start_time = {{ current_contest.starttime }};
+const submissions = [
   {% for submission in submissions %}
   {
     result: "{{ submission.result }}",
     submittime: {{ submission.submittime }},
-    starttime: {{ current_contest.starttime }}
   }{{ loop.last ? '' : ',' }}
   {% endfor %}
 ];
 
-var contest_duration_minutes = Math.ceil(({{ current_contest.endtime }} - {{ current_contest.starttime }}) / 60);
+const min_bucket_count = 30;
+const max_bucket_count = 301;
+const units = [
+  {'name': 'seconds', 'convert': 1, 'step': 60},
+  {'name': 'minutes', 'convert': 60, 'step': 15},
+  {'name': 'hours', 'convert': 60*60, 'step': 6},
+  {'name': 'days', 'convert': 60*60*24, 'step': 7},
+  {'name': 'weeks', 'convert': 60*60*24*7, 'step': 1},
+  {'name': 'years', 'convert': 60*60*24*365, 'step': 1}
+];
+let unit = units[0];
+
+let contest_duration = {{ (current_contest.endtime - current_contest.starttime) | round(0, 'ceil') }};
+for (let u of units) {
+  const new_duration = Math.ceil(contest_duration / u.convert);
+  if (new_duration > min_bucket_count) {
+    unit = u;
+  } else {
+    break;
+  }
+}
+contest_duration = Math.ceil(contest_duration / unit.convert);
+const bucket_count = Math.min(contest_duration + 1, max_bucket_count);
+// Make sure buckets have whole unit
+const seconds_per_bucket = Math.ceil(contest_duration / (bucket_count - 1)) * unit.convert;
 
 submission_stats.forEach(stat => {
-  stat.values = Array.from({ length: contest_duration_minutes + 1 }, (_, i) => [i, 0]);
+  stat.values = Array.from({ length: bucket_count }, (_, i) => [i * seconds_per_bucket / unit.convert, 0]);
 });
 
 const statMap = submission_stats.reduce((map, stat) => {
@@ -399,27 +421,30 @@ const statMap = submission_stats.reduce((map, stat) => {
 }, {});
 
 submissions.forEach(submission => {
-  let submission_minute = Math.floor((submission.submittime - submission.starttime) / 60);
-  let stat = statMap[submission.result];
-  if (stat && submission_minute >= 0 && submission_minute < contest_duration_minutes) {
-    stat.values[submission_minute][1]++;
+  const submission_bucket = Math.floor((submission.submittime - contest_start_time) / seconds_per_bucket);
+  const stat = statMap[submission.result];
+  if (stat && submission_bucket >= 0 && submission_bucket < bucket_count) {
+    stat.values[submission_bucket][1]++;
   }
 });
 
-for (let minute = 0; minute <= contest_duration_minutes; minute++) {
-  let this_minute_submission_nums = 0;
+let max_submissions_per_bucket = 1
+for (let bucket = 0; bucket < bucket_count; bucket++) {
+  let sum = 0;
   submission_stats.forEach(stat => {
-    this_minute_submission_nums += stat.values[minute][1];
+    sum += stat.values[bucket][1];
   });
-  max_submissions_per_minute = Math.max(max_submissions_per_minute, this_minute_submission_nums);
+  max_submissions_per_bucket = Math.max(max_submissions_per_bucket, sum);
 }
 
-// Pick a nice round tickDelta and tickValues
-var tickDelta = 15;
-while (contest_duration_minutes / tickDelta > 15) {
-  tickDelta *= 2;
-}
-var tickValues = Array.from({ length: Math.ceil(contest_duration_minutes / tickDelta) + 1 }, (_, i) => i * tickDelta);
+// Pick a nice round tickDelta and tickValues based on the step size of units.
+// We want whole values in the unit, and the ticks MUST match a corresponding bucket otherwise the resulting
+// coordinate will be NaN.
+const convert_factor = seconds_per_bucket / unit.convert;
+const maxTicks = Math.min(bucket_count, contest_duration / unit.step, min_bucket_count)
+const tickDelta = convert_factor * Math.ceil(contest_duration / (maxTicks * convert_factor));
+const ticks = Math.floor(contest_duration / tickDelta) + 1;
+const tickValues = Array.from({ length: ticks }, (_, i) => i * tickDelta);
 
 nv.addGraph(function() {
   var chart = nv.models.multiBarChart()
@@ -436,7 +461,7 @@ nv.addGraph(function() {
       .reduceXTicks(false)
       ;
   chart.xAxis     //Chart x-axis settings
-      .axisLabel('Contest Time(minutes)')
+      .axisLabel(`Contest Time (${unit.name})`)
       .ticks(tickValues.length)
       .tickValues(tickValues)
       .tickFormat(d3.format('d'));
