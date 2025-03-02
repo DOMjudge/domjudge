@@ -427,6 +427,7 @@ compile_assertions_finished () {
   assert_line " * judgehost...........: /opt/domjudge/judgehost"
   assert_line " * runguard group......: domjudge-run"
   run make domserver
+  assert_regex "^.*cp -a vendor/nelmio/api-doc-bundle/public/\* public/bundles/nelmioapidoc.*$"
   assert_success
   run make judgehost
   assert_success
