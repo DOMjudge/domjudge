@@ -1467,13 +1467,19 @@ function judge(array $judgeTask): bool
         }
 
         if ($result === 'compare-error') {
+            $compareMeta = read_metadata($passdir . '/compare.meta');
+            $compareExitCode = 'n/a';
+            if (isset($compareMeta['exitcode'])) {
+                $compareExitCode = $compareMeta['exitcode'];
+            }
             if ($combined_run_compare) {
                 logmsg(LOG_ERR, "comparing failed for combined run/compare script '" . $judgeTask['run_script_id'] . "'");
-                $description = 'combined run/compare script ' . $judgeTask['run_script_id'] . ' crashed';
+                $description = 'combined run/compare script ' . $judgeTask['run_script_id'] . ' crashed with exit code ' . $compareExitCode . ", expected one of 42/43";
                 disable('run_script', 'run_script_id', $judgeTask['run_script_id'], $description, $judgeTask['judgetaskid']);
             } else {
                 logmsg(LOG_ERR, "comparing failed for compare script '" . $judgeTask['compare_script_id'] . "'");
-                $description = 'compare script ' . $judgeTask['compare_script_id'] . ' crashed';
+                logmsg(LOG_ERR, "compare script meta data:\n" . dj_file_get_contents($passdir . '/compare.meta'));
+                $description = 'compare script ' . $judgeTask['compare_script_id'] . ' crashed with exit code ' . $compareExitCode . ", expected one of 42/43";
                 disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
             }
             return false;
