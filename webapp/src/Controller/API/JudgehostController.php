@@ -729,6 +729,7 @@ class JudgehostController extends AbstractFOSRestController
         $judging = null;
         $judgingId = null;
         $cid = null;
+        $judgingRun = null;
         if ($judgeTaskId) {
             /** @var JudgeTask $judgeTask */
             $judgeTask = $this->em->getRepository(JudgeTask::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
@@ -738,6 +739,7 @@ class JudgehostController extends AbstractFOSRestController
                 $judging = $this->em->getRepository(Judging::class)->findOneBy(['judgingid' => $judgingId]);
                 $cid = $judging->getContest()->getCid();
             }
+            $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
         }
 
         $disabled = Utils::jsonDecode($disabled);
@@ -796,6 +798,9 @@ class JudgehostController extends AbstractFOSRestController
             ->setJudgehostlog($judgehostlog)
             ->setTime(Utils::now())
             ->setDisabled($disabled);
+        if ($judgingRun) {
+            $error->setJudgingRun($judgingRun);
+        }
         $this->em->persist($error);
         // Even if there are no remaining judge tasks for this judging open (which is covered by the transaction below),
         // we need to mark this judging as internal error.
