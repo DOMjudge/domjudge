@@ -383,7 +383,7 @@ class SubmissionController extends BaseController
                 ->join('t.content', 'tc')
                 ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
                 ->leftJoin('jr.output', 'jro')
-                ->select('t', 'jr', 'tc.image_thumb AS image_thumb', 'jro.metadata')
+                ->select('t', 'jr', 'tc.image_thumb AS image_thumb', 'jro.metadata', 'jro.validatorMetadata')
                 ->andWhere('t.problem = :problem')
                 ->setParameter('judging', $selectedJudging)
                 ->setParameter('problem', $submission->getProblem())

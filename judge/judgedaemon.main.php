@@ -1489,6 +1489,7 @@ function judge(array $judgeTask): bool
             'output_diff' => rest_encode_file($passdir . '/feedback/judgemessage.txt', $output_storage_limit),
             'hostname' => $myhost,
             'testcasedir' => $testcasedir,
+            'compare_metadata' => rest_encode_file($passdir . '/compare.meta', false),
         ];
 
         if (file_exists($passdir . '/feedback/teammessage.txt')) {
