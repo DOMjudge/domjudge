@@ -81,14 +81,15 @@ class ContestController extends BaseController
             ->getQuery()->getResult();
 
         $table_fields = [
-            'cid'          => ['title' => 'CID', 'sort' => true],
-            'externalid'   => ['title' => "external ID", 'sort' => true],
-            'shortname'    => ['title' => 'shortname', 'sort' => true],
-            'name'         => ['title' => 'name', 'sort' => true],
-            'activatetime' => ['title' => 'activate', 'sort' => true],
-            'starttime'    => ['title' => 'start', 'sort' => true,
-                               'default_sort' => true, 'default_sort_order' => 'desc'],
-            'endtime'      => ['title' => 'end', 'sort' => true],
+            'cid'             => ['title' => 'CID', 'sort' => true],
+            'externalid'      => ['title' => "external ID", 'sort' => true],
+            'shortname'       => ['title' => 'shortname', 'sort' => true],
+            'name'            => ['title' => 'name', 'sort' => true],
+            'scoreboard_type' => ['title' => 'scoreboard type', 'sort' => true],
+            'activatetime'    => ['title' => 'activate', 'sort' => true],
+            'starttime'       => ['title' => 'start', 'sort' => true,
+                                  'default_sort' => true, 'default_sort_order' => 'desc'],
+            'endtime'         => ['title' => 'end', 'sort' => true],
         ];
 
         $currentContests = $this->dj->getCurrentContests();
@@ -137,7 +138,9 @@ class ContestController extends BaseController
             $contestactions = [];
             // Get whatever fields we can from the contest object itself
             foreach ($table_fields as $k => $v) {
-                if ($propertyAccessor->isReadable($contest, $k)) {
+                if ($k == 'scoreboard_type') {
+                    $contestdata[$k] = ['value' => $contest->getScoreboardType()->value];
+                } elseif ($propertyAccessor->isReadable($contest, $k)) {
                     $contestdata[$k] = ['value' => $propertyAccessor->getValue($contest, $k)];
                 }
             }
