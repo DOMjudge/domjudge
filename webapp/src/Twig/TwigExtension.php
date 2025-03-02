@@ -517,7 +517,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         ?string $result,
         bool $valid = true,
         bool $jury = false,
-        bool $onlyAcceptedAndRejected = false,
+        bool $onlyRejectedForIncorrect = false,
     ): string {
         $result = strtolower($result ?? '');
         switch ($result) {
@@ -540,13 +540,10 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 break;
             case 'correct':
                 $style = 'sol_correct';
-                if ($onlyAcceptedAndRejected) {
-                    $result = 'accepted';
-                }
                 break;
             default:
                 $style = 'sol_incorrect';
-                if ($onlyAcceptedAndRejected) {
+                if ($onlyRejectedForIncorrect) {
                     $result = 'rejected';
                 }
         }
