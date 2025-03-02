@@ -72,9 +72,9 @@
                         </td>
                     </tr>
                 {% endif %}
-                {% if internalError.affectedJudgings is not null %}
+                {% if internalError.affectedJudgings is not null and internalError.affectedJudgings | length > 1 %}
                     <tr>
-                        <th>Additional affected judgings</th>
+                        <th>All affected judgings</th>
                         <td>
                             <ul>
                             {%- for judging in internalError.affectedJudgings -%}
