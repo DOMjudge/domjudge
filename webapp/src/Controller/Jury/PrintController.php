@@ -62,17 +62,8 @@ class PrintController extends BaseController
             ]);
         }
 
-        /** @var Language[] $languages */
-        $languages = $this->em->createQueryBuilder()
-            ->from(Language::class, 'l')
-            ->select('l')
-            ->andWhere('l.allowSubmit = 1')
-            ->getQuery()
-            ->getResult();
-
         return $this->render('jury/print.html.twig', [
             'form' => $form,
-            'languages' => $languages,
         ]);
     }
 }
