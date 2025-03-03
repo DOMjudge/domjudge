@@ -1,6 +1,6 @@
 DOMjudge Programming Contest Judging System
 
-Version 8.4.0DEV
+Version 9.0.0DEV
 ---------------------------
  - Get rid of 'internal' data source mode, always requiring - but auto
    generating - external ID's for all entities to simplify event logic.
