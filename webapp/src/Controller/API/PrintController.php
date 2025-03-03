@@ -83,14 +83,10 @@ class PrintController extends AbstractFOSRestController
                 ->createQueryBuilder()
                 ->from(Language::class, "l")
                 ->select("l.langid")
-                ->andWhere("l.allowSubmit = 1")
                 ->andWhere("l.name = :name")
                 ->setParameter("name", $print->language)
                 ->getQuery()
                 ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
-            if ($langid === null) {
-                throw new BadRequestHttpException("Programming language not found.");
-            }
         }
 
         $decodedFile = base64_decode($print->fileContents, true);
