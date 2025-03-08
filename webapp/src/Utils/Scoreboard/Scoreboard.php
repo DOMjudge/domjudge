@@ -136,9 +136,9 @@ class Scoreboard
     {
         // Calculate matrix and update scores.
         $this->matrix = [];
-        foreach ($this->scoreCache as $scoreRow) {
-            $teamId = $scoreRow->getTeam()->getTeamid();
-            $probId = $scoreRow->getProblem()->getProbid();
+        foreach ($this->scoreCache as $scoreCell) {
+            $teamId = $scoreCell->getTeam()->getTeamid();
+            $probId = $scoreCell->getProblem()->getProbid();
             // Skip this row if the team or problem is not known by us.
             if (!array_key_exists($teamId, $this->teams) ||
                 !array_key_exists($probId, $this->problems)) {
@@ -146,30 +146,30 @@ class Scoreboard
             }
 
             $penalty = Utils::calcPenaltyTime(
-                $scoreRow->getIsCorrect($this->restricted),
-                $scoreRow->getSubmissions($this->restricted),
+                $scoreCell->getIsCorrect($this->restricted),
+                $scoreCell->getSubmissions($this->restricted),
                 $this->penaltyTime, $this->scoreIsInSeconds
             );
 
             $this->matrix[$teamId][$probId] = new ScoreboardMatrixItem(
-                isCorrect: $scoreRow->getIsCorrect($this->restricted),
-                isFirst: $scoreRow->getIsCorrect($this->restricted) && $scoreRow->getIsFirstToSolve(),
-                numSubmissions: $scoreRow->getSubmissions($this->restricted),
-                numSubmissionsPending: $scoreRow->getPending($this->restricted),
-                time: $scoreRow->getSolveTime($this->restricted),
+                isCorrect: $scoreCell->getIsCorrect($this->restricted),
+                isFirst: $scoreCell->getIsCorrect($this->restricted) && $scoreCell->getIsFirstToSolve(),
+                numSubmissions: $scoreCell->getSubmissions($this->restricted),
+                numSubmissionsPending: $scoreCell->getPending($this->restricted),
+                time: $scoreCell->getSolveTime($this->restricted),
                 penaltyTime: $penalty,
-                runtime: $scoreRow->getRuntime($this->restricted),
-                numSubmissionsInFreeze: $scoreRow->getPending(false),
+                runtime: $scoreCell->getRuntime($this->restricted),
+                numSubmissionsInFreeze: $scoreCell->getPending(false),
             );
 
-            if ($scoreRow->getIsCorrect($this->restricted)) {
-                $solveTime      = Utils::scoretime($scoreRow->getSolveTime($this->restricted),
+            if ($scoreCell->getIsCorrect($this->restricted)) {
+                $solveTime      = Utils::scoretime($scoreCell->getSolveTime($this->restricted),
                                                    $this->scoreIsInSeconds);
-                $contestProblem = $this->problems[$scoreRow->getProblem()->getProbid()];
+                $contestProblem = $this->problems[$scoreCell->getProblem()->getProbid()];
                 $this->scores[$teamId]->numPoints += $contestProblem->getPoints();
                 $this->scores[$teamId]->solveTimes[] = $solveTime;
                 $this->scores[$teamId]->totalTime += $solveTime + $penalty;
-                $this->scores[$teamId]->totalRuntime += $scoreRow->getRuntime($this->restricted);
+                $this->scores[$teamId]->totalRuntime += $scoreCell->getRuntime($this->restricted);
             }
         }
 
