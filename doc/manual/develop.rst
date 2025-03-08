@@ -180,3 +180,9 @@ To debug failing Unit tests the fixtures can be loaded with:
 
 .. _CCS Contest API specification: https://ccs-specs.icpc.io/2021-11/contest_api
 .. _OpenAPI Specification ver. 3: https://swagger.io/specification/
+
+
+Additional developer documentation
+----------------------------------
+
+  - :ref:`Scoring <scoring>`
