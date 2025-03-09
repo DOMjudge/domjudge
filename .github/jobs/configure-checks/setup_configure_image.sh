@@ -7,7 +7,7 @@ distro_id=$(grep "^ID=" /etc/os-release)
 # Install everything for configure and testing
 case $distro_id in
     "ID=arch")
-        pacman -Sy --noconfirm make bats autoconf automake
+        pacman -Sy --noconfirm make bats autoconf automake tar
     "ID=fedora")
         dnf install make npm autoconf automake -y
         npm install -g bats ;;
