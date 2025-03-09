@@ -44,8 +44,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: test-tarball
-      - name: Install git so we get the .github directory
-        run: zypper install -y git
+      - name: Install needed unpack tools
+        run: zypper install -y tar
       - name: Unpack the "Release" tarball
         run: tar xvf release.tar.gz
       - name: Setup image and run bats tests
@@ -66,8 +66,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: test-tarball
-      - name: Install git so we get the .github directory
-        run: pacman -Sy --noconfirm git
       - name: Unpack the "Release" tarball
         run: tar xvf release.tar.gz
       - name: Setup image and run bats tests
@@ -88,8 +86,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: test-tarball
-      - name: Install git so we get the .github directory
-        run: dnf install -y git
       - name: Unpack the "Release" tarball
         run: tar xvf release.tar.gz
       - name: Setup image and run bats tests
@@ -122,10 +118,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: test-tarball
-      - name: Install git so we get the .github directory
-        run: |
-          apt-get update
-          apt-get install -y git
       - name: Unpack the "Release" tarball
         run: |
           ls -atrl
