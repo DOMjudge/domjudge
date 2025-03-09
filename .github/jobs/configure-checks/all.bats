@@ -52,7 +52,11 @@ run_configure () {
 
 repo-install () {
     args=$(translate $@)
-    ${cmd} install $args -y >/dev/null
+    if [ "$distro_id" = "ID=arch" ]; then
+        ${cmd} $args -Sy --noconfirm >/dev/null
+    else
+        ${cmd} install $args -y >/dev/null
+    fi
 }
 
 repo-remove () {
