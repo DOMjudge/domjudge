@@ -4,6 +4,7 @@ namespace App\Utils\Scoreboard;
 
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\RankCache;
 use App\Entity\ScoreCache;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
@@ -33,10 +34,12 @@ class Scoreboard
      */
     public function __construct(
         protected readonly Contest $contest,
+        // TODO: document somewhere that this is already sorted.
         protected readonly array $teams,
         protected readonly array $categories,
         protected readonly array $problems,
         protected readonly array $scoreCache,
+        protected readonly array $rankCache,
         protected readonly FreezeData $freezeData,
         bool $jury,
         protected readonly int $penaltyTime,
@@ -122,10 +125,15 @@ class Scoreboard
         // Initialize summary
         $this->summary = new Summary($this->problems);
 
+        $teamToRankCache = [];
+        foreach ($this->rankCache as $rc) {
+            $teamToRankCache[$rc->getTeam()->getTeamid()] = $rc;
+        }
+
         // Initialize scores
         $this->scores = [];
         foreach ($this->teams as $team) {
-            $this->scores[$team->getTeamid()] = new TeamScore($team);
+            $this->scores[$team->getTeamid()] = new TeamScore($team, $teamToRankCache[$team->getTeamid()], $this->restricted);
         }
     }
 
@@ -139,7 +147,7 @@ class Scoreboard
         foreach ($this->scoreCache as $scoreCell) {
             $teamId = $scoreCell->getTeam()->getTeamid();
             $probId = $scoreCell->getProblem()->getProbid();
-            // Skip this row if the team or problem is not known by us.
+            // Skip this cell if the team or problem is not known by us.
             if (!array_key_exists($teamId, $this->teams) ||
                 !array_key_exists($probId, $this->problems)) {
                 continue;
@@ -161,20 +169,7 @@ class Scoreboard
                 runtime: $scoreCell->getRuntime($this->restricted),
                 numSubmissionsInFreeze: $scoreCell->getPending(false),
             );
-
-            if ($scoreCell->getIsCorrect($this->restricted)) {
-                $solveTime      = Utils::scoretime($scoreCell->getSolveTime($this->restricted),
-                                                   $this->scoreIsInSeconds);
-                $contestProblem = $this->problems[$scoreCell->getProblem()->getProbid()];
-                $this->scores[$teamId]->numPoints += $contestProblem->getPoints();
-                $this->scores[$teamId]->solveTimes[] = $solveTime;
-                $this->scores[$teamId]->totalTime += $solveTime + $penalty;
-                $this->scores[$teamId]->totalRuntime += $scoreCell->getRuntime($this->restricted);
-            }
         }
-
-        // Now sort the scores using the scoreboard sort function.
-        uasort($this->scores, $this->scoreboardCompare(...));
 
         // Loop over all teams to calculate ranks and totals.
         $prevSortOrder  = -1;
@@ -193,7 +188,7 @@ class Scoreboard
 
             // Use previous team rank when scores are equal.
             if (isset($previousTeamId) &&
-                $this->scoreCompare($this->scores[$previousTeamId], $teamScore) == 0) {
+                $this->scores[$previousTeamId]->getSortKey($this->restricted) === $teamScore->getSortKey($this->restricted)) {
                 $teamScore->rank = $this->scores[$previousTeamId]->rank;
             } else {
                 $teamScore->rank = $rank;
@@ -247,93 +242,6 @@ class Scoreboard
         }
     }
 
-    /**
-     * Scoreboard sorting function. It uses the following
-     * criteria:
-     * - First, use the sortorder override from the team_category table
-     *   (e.g. score regular contestants always over spectators);
-     * - Then, use the scoreCompare function to determine the actual ordering
-     *   based on number of problems solved and the time it took;
-     * - If still equal, order on team name alphabetically.
-     */
-    protected function scoreboardCompare(TeamScore $a, TeamScore $b): int
-    {
-        // First order by our predefined sortorder based on category.
-        $a_sortorder = $a->team->getCategory()->getSortorder();
-        $b_sortorder = $b->team->getCategory()->getSortorder();
-        if ($a_sortorder != $b_sortorder) {
-            return $a_sortorder <=> $b_sortorder;
-        }
-
-        // Then compare scores.
-        $scoreCompare = $this->scoreCompare($a, $b);
-        if ($scoreCompare != 0) {
-            return $scoreCompare;
-        }
-
-        // Else, order by teamname alphabetically.
-        if ($a->team->getEffectiveName() != $b->team->getEffectiveName()) {
-            $collator = new Collator('en');
-            return $collator->compare($a->team->getEffectiveName(), $b->team->getEffectiveName());
-        }
-        // Undecided, should never happen in practice.
-        return 0;
-    }
-
-    /**
-     * Main score comparison function, called from the 'scoreboardCompare' wrapper
-     * above. Scores based on the following criteria:
-     * - highest points from correct solutions;
-     * - least amount of total time spent on these solutions; (or lowest total runtime)
-     * - the tie-breaker function below.
-     */
-    protected function scoreCompare(TeamScore $a, TeamScore $b): int
-    {
-        // More correctness points than someone else means higher rank.
-        if ($a->numPoints != $b->numPoints) {
-            return $b->numPoints <=> $a->numPoints;
-        }
-        // Else, less time spent means higher rank.
-        if ($this->getRuntimeAsScoreTiebreaker()) { // runtime ordering
-            if ($a->totalRuntime != $b->totalRuntime) {
-                return $a->totalRuntime <=> $b->totalRuntime;
-            }
-        } else { // solvetime ordering
-            if ($a->totalTime != $b->totalTime) {
-                return $a->totalTime <=> $b->totalTime;
-            }
-        }
-        // Else tie-breaker rule.
-        return static::scoreTiebreaker($a, $b);
-    }
-
-    /**
-     * Tie-breaker comparison function, called from the 'scoreCompare' function
-     * above. Scores based on the following criterion:
-     * - fastest submission time for latest correct problem
-     */
-    public static function scoreTiebreaker(TeamScore $a, TeamScore $b): int
-    {
-        $atimes = $a->solveTimes;
-        $btimes = $b->solveTimes;
-        rsort($atimes);
-        rsort($btimes);
-
-        if (isset($atimes[0]) && isset($btimes[0])) {
-            return $atimes[0] <=> $btimes[0];
-        }
-        if (!isset($atimes[0]) && !isset($btimes[0])) {
-            return 0;
-        }
-        if (!isset($atimes[0])) {
-            return -1;
-        }
-        if (!isset($btimes[0])) {
-            return 1;
-        }
-
-        throw new Exception('Unhandled tie breaker case.');
-    }
 
     /**
      * Return whether to show points for this scoreboard.

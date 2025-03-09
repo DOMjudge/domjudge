@@ -27,7 +27,7 @@ class SingleTeamScoreboard extends Scoreboard
         protected readonly Team $team,
         protected readonly int $teamRank,
         array $problems,
-        protected readonly ?RankCache $rankCache,
+        protected readonly array $rankCache,
         array $scoreCache,
         FreezeData $freezeData,
         bool $showFtsInFreeze,
@@ -35,7 +35,7 @@ class SingleTeamScoreboard extends Scoreboard
         bool $scoreIsInSeconds
     ) {
         $this->showRestrictedFts = $showFtsInFreeze || $freezeData->showFinal();
-        parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $freezeData, true,
+        parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $rankCache, $freezeData, true,
             $penaltyTime, $scoreIsInSeconds);
     }
 
