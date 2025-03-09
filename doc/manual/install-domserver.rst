@@ -37,14 +37,14 @@ GNU/Linux, or one of its derivative distributions like Ubuntu::
 
   sudo apt install libcgroup-dev make acl zip unzip pv mariadb-server apache2 \
         php php-fpm php-gd php-cli php-intl php-mbstring php-mysql \
-        php-curl php-json php-xml php-zip composer ntp python3-yaml
+        php-curl php-json php-xml php-zip composer ntp python3-yaml php-bcmath
 
 The following command can be used on Fedora, and related distributions like
 Red Hat Enterprise Linux and Rocky Linux (before V9)::
 
   sudo dnf install libcgroup-devel make acl zip unzip pv mariadb-server httpd \
         php-gd php-cli php-intl php-mbstring php-mysqlnd php-fpm \
-        php-xml php-zip composer chronyd python3-pyyaml
+        php-xml php-zip composer chronyd python3-pyyaml php-bcmath
 
 `nginx` can be used as an alternate web server.
 
