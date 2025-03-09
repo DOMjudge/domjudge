@@ -45,7 +45,7 @@ jobs:
         with:
           name: test-tarball
       - name: Install needed unpack tools
-        run: zypper install -y tar
+        run: zypper install -y tar gzip
       - name: Unpack the "Release" tarball
         run: tar xvf release.tar.gz
       - name: Setup image and run bats tests
