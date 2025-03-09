@@ -554,8 +554,8 @@ class ScoreboardService
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
 
         // Now fetch the ScoreCache entries.
-        /** @var ScoreCache[] $scoreCacheRows */
-        $scoreCacheRows = $this->em->createQueryBuilder()
+        /** @var ScoreCache[] $scoreCacheCells */
+        $scoreCacheCells = $this->em->createQueryBuilder()
             ->from(ScoreCache::class, 's')
             ->select('s')
             ->andWhere('s.contest = :contest')
@@ -565,21 +565,21 @@ class ScoreboardService
             ->getQuery()
             ->getResult();
 
-        // Process all score cache rows.
-        foreach ($scoreCacheRows as $scoreCache) {
+        // Process all score cache cells.
+        foreach ($scoreCacheCells as $scoreCacheCell) {
             foreach ($variants as $variant => $isRestricted) {
-                $probId = $scoreCache->getProblem()->getProbid();
-                if (isset($contestProblems[$probId]) && $scoreCache->getIsCorrect($isRestricted)) {
-                    $penalty = Utils::calcPenaltyTime($scoreCache->getIsCorrect($isRestricted),
-                                                      $scoreCache->getSubmissions($isRestricted),
+                $probId = $scoreCacheCell->getProblem()->getProbid();
+                if (isset($contestProblems[$probId]) && $scoreCacheCell->getIsCorrect($isRestricted)) {
+                    $penalty = Utils::calcPenaltyTime($scoreCacheCell->getIsCorrect($isRestricted),
+                                                      $scoreCacheCell->getSubmissions($isRestricted),
                                                       $penaltyTime, $scoreIsInSeconds);
 
                     $numPoints[$variant] += $contestProblems[$probId]->getPoints();
                     $totalTime[$variant] += Utils::scoretime(
-                        (float)$scoreCache->getSolveTime($isRestricted),
+                        (float)$scoreCacheCell->getSolveTime($isRestricted),
                         $scoreIsInSeconds
                     ) + $penalty;
-                    $totalRuntime[$variant] += $scoreCache->getRuntime($isRestricted);
+                    $totalRuntime[$variant] += $scoreCacheCell->getRuntime($isRestricted);
                 }
             }
         }
