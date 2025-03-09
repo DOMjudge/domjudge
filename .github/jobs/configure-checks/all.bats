@@ -48,12 +48,21 @@ repo-install () {
     args=$(translate $@)
     ${cmd} install $args -y >/dev/null
 }
+
 repo-remove () {
     args=$(translate $@)
     ${cmd} remove $args -y #>/dev/null
     if [ "$distro_id" != "ID=fedora" ]; then
         apt-get autoremove -y 2>/dev/null
     fi
+}
+
+run_user_stderr () {
+    su $u -c "$*" 2>&1
+}
+ 
+run_stderr () {
+    run "$* 2>&1"
 }
 
 @test "Default empty configure" {
