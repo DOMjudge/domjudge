@@ -7,7 +7,53 @@ on:
       - '[0-9]+.[0-9]+'
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: domjudge/gitlabci:24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Create the distribution tarball
+        run: |
+          make dist
+          cd ..
+          mv domjudge release
+          mkdir domjudge #Workdir for next steps
+          tar -cf release.tar release
+          gzip -9 release.tar
+          mv release.tar.gz domjudge/
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          compression-level: 0
+          name: test-tarball
+          path: ${{ github.workspace }}/release.tar.gz
+
+  redhat-family:
+    needs: build
+    strategy:
+      matrix:
+        version: [latest]
+        os: [fedora]
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.os }}:${{ matrix.version }}
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test-tarball
+      - name: Install git so we get the .github directory
+        run: dnf install -y git
+      - name: Unpack the "Release" tarball
+        run: tar xvf release.tar.gz
+      - name: Setup image and run bats tests
+        working-directory: release
+        run: .github/jobs/configure-checks/setup_configure_image.sh
+
   debian-family:
+    needs: build
     strategy:
       matrix:
         version: [jammy, focal, rolling]
@@ -28,8 +74,19 @@ jobs:
     container:
       image: ${{ matrix.os }}:${{ matrix.version }}
     steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test-tarball
       - name: Install git so we get the .github directory
-        run: apt-get update; apt-get install -y git
-      - uses: actions/checkout@v4
+        run: |
+          apt-get update
+          apt-get install -y git
+      - name: Unpack the "Release" tarball
+        run: |
+          ls -atrl
+          tar xvf release.tar.gz
       - name: Setup image and run bats tests
+        working-directory: release
         run: .github/jobs/configure-checks/setup_configure_image.sh
+
