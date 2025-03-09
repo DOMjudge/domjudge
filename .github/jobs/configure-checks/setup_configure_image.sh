@@ -7,10 +7,12 @@ distro_id=$(grep "^ID=" /etc/os-release)
 # Install everything for configure and testing
 case $distro_id in
     "ID=fedora")
-        dnf install pkg-config make bats autoconf automake util-linux -y ;;
+        dnf install make bats autoconf automake -y ;;
+    'ID="opensuse-leap"')
+        zypper install -y  make bats autoconf automake ;;
     *)
         apt-get update; apt-get full-upgrade -y
-        apt-get install pkg-config make bats autoconf -y ;;
+        apt-get install make bats autoconf -y ;;
 esac
 
 # Build the configure file
