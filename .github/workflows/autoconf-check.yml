@@ -156,3 +156,82 @@ jobs:
         working-directory: release
         run: .github/jobs/configure-checks/setup_configure_image.sh
 
+#  debian-family:
+#    needs: build
+#    strategy:
+#      matrix:
+#        version: [jammy, focal, rolling]
+#        os: [ubuntu]
+#        releaseBranch:
+#          - ${{ contains(github.ref, 'gh-readonly-queue') }}
+#        exclude:
+#          - releaseBranch: false
+#        include:
+#          - os: debian
+#            version: stable
+#          - os: debian
+#            version: testing
+#    runs-on: ubuntu-latest
+#    env:
+#      DEBIAN_FRONTEND: noninteractive
+#      TZ: Etc/UTC
+#    container:
+#      image: ${{ matrix.os }}:${{ matrix.version }}
+#    steps:
+#      - name: Download Artifact
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: test-tarball
+#      - name: Install git so we get the .github directory
+#        run: |
+#          apt-get update
+#          apt-get install -y git
+#      - name: Unpack the "Release" tarball
+#        run: |
+#          ls -atrl
+#          tar xvf release.tar.gz
+#      - name: Setup image and run bats tests
+#        working-directory: domjudge
+#        run: .github/jobs/configure-checks/setup_configure_image.sh
+#
+## Copy the fedora stuff here and use:
+## if: github.event_name != 'merge_group' on the job level
+##name: Build and Trigger Workflows
+### Either just filter the fedora stuff in onther build step (and run on main but skip) or trigger 2 workflows. I don't work enough with GHA to see which one I prefer for now.
+##
+##on:
+##  push:
+##    branches:
+##      - main
+##
+##jobs:
+##  build:
+##    name: Build Artifact
+##    runs-on: ubuntu-latest
+##
+##    steps:
+##      - name: Checkout code
+##        uses: actions/checkout@v4
+##
+##      - name: Build project
+##        run: |
+##          # Example build command
+##          mkdir -p build
+##          echo "Artifact content" > build/artifact.txt
+##
+##      - name: Upload artifact
+##        uses: actions/upload-artifact@v4
+##        with:
+##          name: my-artifact
+##          path: build/artifact.txt
+##
+##
+##      - name: Trigger workflow 2
+##        run: |
+##          curl -X POST \
+##            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+##            -H "Accept: application/vnd.github+json" \
+##            https://api.github.com/repos/${{ github.repository }}/actions/workflows/workflow_2.yml/dispatches \
+##            -d '{"ref":"main"}'
+##
+##
