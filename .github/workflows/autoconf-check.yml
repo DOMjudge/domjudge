@@ -40,12 +40,12 @@ jobs:
     container:
       image: ${{ matrix.os }}:${{ matrix.version }}
     steps:
+      - name: Install git so we get the .github directory
+        run: emerge dev-vcs/git sys-libs/glibc
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           name: test-tarball
-      - name: Install git so we get the .github directory
-        run: emerge dev-vcs/git
       - name: Unpack the "Release" tarball
         run: tar xvf release.tar.gz
       - name: Setup image and run bats tests
