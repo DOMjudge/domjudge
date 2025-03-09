@@ -60,7 +60,7 @@ repo-remove () {
 run_user_stderr () {
     su $u -c "$*" 2>&1
 }
- 
+
 run_stderr () {
     run "$* 2>&1"
 }
