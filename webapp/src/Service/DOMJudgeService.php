@@ -766,7 +766,7 @@ class DOMJudgeService
         $replaces = [
             '[file]' => escapeshellarg($filename),
             '[original]' => escapeshellarg($origname),
-            '[language]' => escapeshellarg($language),
+            '[language]' => escapeshellarg($language ?? ''),
             '[username]' => escapeshellarg($username),
             '[teamname]' => escapeshellarg($teamname ?? ''),
             '[teamid]' => escapeshellarg($teamid ?? ''),

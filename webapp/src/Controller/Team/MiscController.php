@@ -190,13 +190,8 @@ class MiscController extends BaseController
             ]);
         }
 
-        $currentContest = $this->dj->getCurrentContest();
-        /** @var Language[] $languages */
-        $languages = $this->dj->getAllowedLanguagesForContest($currentContest);
-
         return $this->render('team/print.html.twig', [
             'form' => $form,
-            'languages' => $languages,
         ]);
     }
 
