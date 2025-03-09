@@ -10,6 +10,12 @@ cmd="apt-get"
 if [ "$distro_id" = "ID=fedora" ]; then
     cmd=dnf
 fi
+if [ "$distro_id" = "ID=arch" ]; then
+    cmd=pacman
+fi
+if [ "$distro_id" = 'ID="opensuse-leap"' ]; then
+    cmd=zypper
+fi
 
 translate () {
     args="$@"
