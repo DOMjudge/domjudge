@@ -6,6 +6,8 @@ distro_id=$(grep "^ID=" /etc/os-release)
 
 # Install everything for configure and testing
 case $distro_id in
+    "ID=arch")
+        pacman -Sy --noconfirm make bats autoconf automake
     "ID=fedora")
         dnf install make bats autoconf automake -y ;;
     'ID="opensuse-leap"')
