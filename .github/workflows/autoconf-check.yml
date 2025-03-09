@@ -57,7 +57,7 @@ jobs:
     strategy:
       matrix:
         version: [latest]
-        os: [opensuse/tumbleweed]
+        os: [opensuse/leap]
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.os }}:${{ matrix.version }}
