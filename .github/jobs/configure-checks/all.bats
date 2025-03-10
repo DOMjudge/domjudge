@@ -10,11 +10,20 @@ cmd="apt-get"
 if [ "$distro_id" = "ID=fedora" ]; then
     cmd=dnf
 fi
+if [ "$distro_id" = "ID=arch" ]; then
+    cmd=pacman
+fi
+if [ "$distro_id" = 'ID="opensuse-leap"' ]; then
+    cmd=zypper --non-interactive
+fi
 
 translate () {
     args="$@"
-    if [ "$distro_id" = "ID=fedora" ]; then
+    if [ "$distro_id" = "ID=fedora" ] || [ "$distro_id" = 'ID="opensuse-leap"' ]; then
         args=${args/libcgroup-dev/libcgroup-devel}
+    fi
+    if [ "$distro_id" = "ID=arch" ]; then
+        args=${args/libcgroup-dev/}
     fi
     echo "$args"
 }
@@ -46,14 +55,27 @@ run_configure () {
 
 repo-install () {
     args=$(translate $@)
-    ${cmd} install $args -y >/dev/null
+    if [ "$distro_id" = "ID=arch" ]; then
+        ${cmd} $args -Sy --noconfirm >/dev/null
+    else
+        ${cmd} install $args -y >/dev/null
+    fi
 }
+
 repo-remove () {
     args=$(translate $@)
     ${cmd} remove $args -y #>/dev/null
     if [ "$distro_id" != "ID=fedora" ]; then
         apt-get autoremove -y 2>/dev/null
     fi
+}
+
+run_user_stderr () {
+    su $u -c "$*" 2>&1
+}
+
+run_stderr () {
+    run "$* 2>&1"
 }
 
 @test "Default empty configure" {
@@ -111,7 +133,7 @@ compile_assertions_finished () {
 }
 
 @test "Install GNU C only" {
-    if [ "$distro_id" = "ID=fedora" ]; then
+    if [ "$distro_id" = "ID=fedora" ] || [ "$distro_id" = "ID=arch" ]; then
         # Fedora ships with a gcc with enough C++ support
         skip
     fi
@@ -418,6 +440,7 @@ compile_assertions_finished () {
   assert_line " * judgehost...........: /opt/domjudge/judgehost"
   assert_line " * runguard group......: domjudge-run"
   run make domserver
+  assert_regex "^.*cp -a vendor/nelmio/api-doc-bundle/public/\* public/bundles/nelmioapidoc.*$"
   assert_success
   run make judgehost
   assert_success
@@ -458,3 +481,84 @@ compile_assertions_finished () {
   run make judgehost
   assert_failure
 }
+
+#@test "'Make distclean' has all permissions" {
+#
+# 
+#
+#  if [ "$distro_id" = "ID=fedora" ]; then
+# 
+#
+#      # Fails as libraries are not found
+# 
+#
+#      skip
+# 
+#
+#  fi
+# 
+#
+#  setup
+# 
+#
+#  run run_configure
+# 
+#
+#  run_user_stderr make domserver
+# 
+#
+#  make install-domserver
+# 
+#
+#  run_user_stderr make distclean
+# 
+#
+#  refute_partial "cannot remove"
+# 
+#
+#  refute_partial "Permission denied"
+# 
+#
+#  assert_success
+# 
+#
+#}
+# 
+#
+#
+# 
+#
+#@test "'Make distclean' has permission errors" {
+# 
+#
+#  if [ "$distro_id" = "ID=fedora" ]; then
+# 
+#
+#      # Fails as libraries are not found
+# 
+#
+#      skip
+# 
+#
+#  fi
+# 
+#
+#  setup
+# 
+#
+#  run run_configure
+# 
+#
+#  run_stderr make install-domserver
+# 
+#
+#  run_user_stderr make distclean
+# 
+#
+#  assert_partial "cannot remove"
+# 
+#
+#  assert_partial "Permission denied"
+# 
+#
+#}
