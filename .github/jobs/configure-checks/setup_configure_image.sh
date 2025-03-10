@@ -9,7 +9,7 @@ case $distro_id in
     "ID=arch")
         pacman -Sy --noconfirm make bats autoconf automake tar ;;
     "ID=fedora")
-        dnf install make autoconf automake bats -y
+        dnf install make autoconf automake bats -y ;;
     'ID="opensuse-leap"')
         zypper install -y  make bats autoconf automake ;;
     *)
