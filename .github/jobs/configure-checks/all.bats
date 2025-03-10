@@ -19,7 +19,7 @@ fi
 
 translate () {
     args="$@"
-    if [ "$distro_id" = "ID=fedora" ]; then
+    if [ "$distro_id" = "ID=fedora" ] || [ "$distro_id" = 'ID="opensuse-leap"' ]; then
         args=${args/libcgroup-dev/libcgroup-devel}
     fi
     if [ "$distro_id" = "ID=arch" ]; then
