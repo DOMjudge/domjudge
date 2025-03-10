@@ -22,6 +22,9 @@ translate () {
     if [ "$distro_id" = "ID=fedora" ]; then
         args=${args/libcgroup-dev/libcgroup-devel}
     fi
+    if [ "$distro_id" = "ID=arch" ]; then
+        args=${args/libcgroup-dev/}
+    fi
     echo "$args"
 }
 
@@ -130,7 +133,7 @@ compile_assertions_finished () {
 }
 
 @test "Install GNU C only" {
-    if [ "$distro_id" = "ID=fedora" ]; then
+    if [ "$distro_id" = "ID=fedora" ] || [ "$distro_id" = "ID=arch" ]; then
         # Fedora ships with a gcc with enough C++ support
         skip
     fi
