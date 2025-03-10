@@ -14,7 +14,7 @@ if [ "$distro_id" = "ID=arch" ]; then
     cmd=pacman
 fi
 if [ "$distro_id" = 'ID="opensuse-leap"' ]; then
-    cmd=zypper
+    cmd=zypper --non-interactive
 fi
 
 translate () {
