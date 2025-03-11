@@ -11,10 +11,10 @@ if [ "$distro_id" = "ID=fedora" ]; then
     cmd=dnf
 fi
 if [ "$distro_id" = "ID=arch" ]; then
-    cmd=pacman
+    cmd=pacman  --non-interactive
 fi
 if [ "$distro_id" = 'ID="opensuse-leap"' ]; then
-    cmd=zypper --non-interactive
+    cmd=zypper
 fi
 
 translate () {
