@@ -77,6 +77,7 @@ repo-remove () {
         fi
     else
         ${cmd} remove -y $args #>/dev/null
+    fi
     if [ "$distro_id" != "ID=fedora" ]; then
         apt-get autoremove -y 2>/dev/null
     fi
