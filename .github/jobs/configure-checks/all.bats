@@ -19,6 +19,9 @@ fi
 
 translate () {
     args="$@"
+    if [ "$distro_id" = 'ID="opensuse-leap"' ]; then
+        args=${args/g++/gcc-c++}
+    fi
     if [ "$distro_id" = "ID=fedora" ] || [ "$distro_id" = 'ID="opensuse-leap"' ]; then
         args=${args/libcgroup-dev/libcgroup-devel}
     fi
@@ -46,6 +49,9 @@ setup() {
     if [ "$distro_id" = "ID=fedora" ]; then
         repo-install httpd
     fi
+    if [ "$distro_id" = 'ID="opensuse-leap"' ]; then
+        repo-install apache2
+    fi
     repo-install gcc g++ libcgroup-dev composer
 }
 
@@ -58,13 +64,19 @@ repo-install () {
     if [ "$distro_id" = "ID=arch" ]; then
         ${cmd} $args -Sy --noconfirm >/dev/null
     else
-        ${cmd} install $args -y >/dev/null
+        ${cmd} install -y $args >/dev/null
     fi
 }
 
 repo-remove () {
     args=$(translate $@)
-    ${cmd} remove $args -y #>/dev/null
+    if [ "$distro_id" = 'ID="opensuse-leap"' ]; then
+        ${cmd} remove -y $args >/dev/null || ret="$?"
+        if [ "$ret" -ne "104" ]; then
+            return $?
+        fi
+    else
+        ${cmd} remove -y $args #>/dev/null
     if [ "$distro_id" != "ID=fedora" ]; then
         apt-get autoremove -y 2>/dev/null
     fi
