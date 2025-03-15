@@ -331,8 +331,10 @@ echo "Summary:"
 echo " * project.............: $PACKAGE_NAME $PACKAGE_VERSION"
 echo " * prefix..............: $prefix"
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
+echo " * CPP.................: $CPP"
 echo " * CPPFLAGS............: $CPPFLAGS"
 echo " * CFLAGS..............: $CFLAGS"
+echo " * CXX.................: $CXX"
 echo " * CXXFLAGS............: $CXXFLAGS"
 echo " * LDFLAGS.............: $LDFLAGS"
 fi
