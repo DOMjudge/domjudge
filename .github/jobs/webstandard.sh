@@ -67,14 +67,20 @@ RET=$?
 section_end
 
 section_start "Archive downloaded site"
+set +e
 cp -r localhost $ARTIFACTS/
+set -e
 section_end
 
 section_start "Analyse failures"
-#https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
+# https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
 # Exit code 4 is network error which we can ignore
-# Exit code 8 can also be because of HTTP404 or 400
-if [ $RET -ne 4 ] && [ $RET -ne 0 ] && [ $RET -ne 8 ]; then
+# Exit code 8 can also be because of HTTP 400 or 404
+if [ $RET -ne 0 ] && [ $RET -ne 4 ] && [ $RET -ne 8 ]; then
+    echo "Server log"
+    tail -n1000 /opt/domjude/domserver/webapp/var/log/prod.log
+    section_end
+
     exit $RET
 fi
 
