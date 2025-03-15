@@ -60,7 +60,7 @@
         </div>
       </div>
     </div>
-    <div class="col-lg-5 col-sm-12 mt-3" id="submission_times">
+    <div class="col-lg-5 col-sm-12 mt-3" id="graph_submissions">
       <div class="card">
         <div class="card-header">
           Submissions over Time
@@ -214,68 +214,29 @@ $(function(){
       return chart;
     });
 
-
     //////////////////////////////////////
     // Submissions over time
-    // stacked graph of correct, runtime-error, wrong-answer, compiler-error, timelimit, etc
-    // x-axis is contest time
-    // y axis is # of submissions
 
-    var submission_stats = [
+    const submission_stats = [
       {% for result in ['correct', 'wrong-answer', 'timelimit', 'run-error', 'compiler-error', 'no-output'] %}
       {
         key: "{{result}}",
         color: "{{colors[result]}}",
-        values: [
-          {# TODO: make sure these are actually ordered by submittime #}
-          {# TODO: also make sure these submissions are in the same contest #}
-          [0,0],
-          {% set count = 0 %}
-          {% for submission in submissions | filter(submission => submission.result) %}
-            {% if submission.result == result %}{% set count = count +1 %}{% endif %}
-            [ {{ (submission.submittime - current_contest.starttime)/60.0 }},
-              {{ count }}
-            ],
-            {% endfor %}
-        ]
+        values: []
       },
       {% endfor %}
     ];
-    nv.addGraph(function() {
-      var chart = nv.models.stackedAreaChart()
-          // .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
-          // .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
-          // .transitionDuration(350)  //how fast do you want the lines to transition?
-          // .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
-          .showControls(false)
-          .x(function(d) { return d[0] })   //We can modify the data accessor functions...
-          .y(function(d) { return d[1] })   //...in case your data is formatted differently.
-          .showYAxis(true)        //Show the y-axis
-          .showXAxis(true)        //Show the x-axis
-          .forceX([0, {{ (current_contest.endtime - current_contest.starttime) / 60 }}])
-          .forceY([0, {{ submissions|length *1.10 }}])
-          ;
-      chart.xAxis     //Chart x-axis settings
-          .axisLabel('Contest Time(minutes)')
-          .tickFormat(d3.format('d'));
-
-      chart.yAxis     //Chart y-axis settings
-          .axisLabel('Total Submissions')
-          .tickFormat(d3.format('d'));
-
-      d3.select('#submission_times svg')
-          .datum(submission_stats)
-          .call(chart);
-      nv.utils.windowResize(chart.update);
-      return chart;
-    });
-
-
-
-
-
-
-
+    const contest_start_time = {{ current_contest.starttime }};
+    const contest_duration_seconds = {{ (current_contest.endtime - current_contest.starttime) | round(0, 'ceil') }};
+    const submissions = [
+      {% for submission in submissions %}
+      {
+        result: "{{ submission.result }}",
+        submittime: {{ submission.submittime }},
+      }{{ loop.last ? '' : ',' }}
+      {% endfor %}
+    ];
+    createSubmissionGraph(submission_stats, contest_start_time, contest_duration_seconds, submissions);
 })
 </script>
 {% include 'jury/analysis/download_graphs.html.twig' %}
