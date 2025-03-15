@@ -1119,6 +1119,94 @@ function resizeMobileTeamNamesAndProblemBadges() {
     });
 }
 
+function createSubmissionGraph(submissionStats, contestStartTime, contestDurationSeconds, submissions) {
+    const minBucketCount = 30;
+    const maxBucketCount = 301;
+    const units = [
+        { 'name': 'seconds', 'convert': 1, 'step': 60 },
+        { 'name': 'minutes', 'convert': 60, 'step': 15 },
+        { 'name': 'hours', 'convert': 60 * 60, 'step': 6 },
+        { 'name': 'days', 'convert': 60 * 60 * 24, 'step': 7 },
+        { 'name': 'weeks', 'convert': 60 * 60 * 24 * 7, 'step': 1 },
+        { 'name': 'years', 'convert': 60 * 60 * 24 * 365, 'step': 1 }
+    ];
+    let unit = units[0];
+
+    for (let u of units) {
+        const newDuration = Math.ceil(contestDurationSeconds / u.convert);
+        if (newDuration > minBucketCount) {
+            unit = u;
+        } else {
+            break;
+        }
+    }
+    const contestDuration = Math.ceil(contestDurationSeconds / unit.convert);
+    const bucketCount = Math.min(contestDuration + 1, maxBucketCount);
+    // Make sure buckets have whole unit
+    const secondsPerBucket = Math.ceil(contestDuration / (bucketCount - 1)) * unit.convert;
+
+    submissionStats.forEach(stat => {
+        stat.values = Array.from({ length: bucketCount }, (_, i) => [i * secondsPerBucket / unit.convert, 0]);
+    });
+
+    const statMap = submissionStats.reduce((map, stat) => {
+        map[stat.key] = stat;
+        return map;
+    }, {});
+
+    submissions.forEach(submission => {
+        const submissionBucket = Math.floor((submission.submittime - contestStartTime) / secondsPerBucket);
+        const stat = statMap[submission.result];
+        if (stat && submissionBucket >= 0 && submissionBucket < bucketCount) {
+            stat.values[submissionBucket][1]++;
+        }
+    });
+
+    let maxSubmissionsPerBucket = 1
+    for (let bucket = 0; bucket < bucketCount; bucket++) {
+        let sum = 0;
+        submissionStats.forEach(stat => {
+            sum += stat.values[bucket][1];
+        });
+        maxSubmissionsPerBucket = Math.max(maxSubmissionsPerBucket, sum);
+    }
+
+    // Pick a nice round tickDelta and tickValues based on the step size of units.
+    // We want whole values in the unit, and the ticks MUST match a corresponding bucket otherwise the resulting
+    // coordinate will be NaN.
+    const convertFactor = secondsPerBucket / unit.convert;
+    const maxTicks = Math.min(bucketCount, contestDuration / unit.step, minBucketCount)
+    const tickDelta = convertFactor * Math.ceil(contestDuration / (maxTicks * convertFactor));
+    const ticks = Math.floor(contestDuration / tickDelta) + 1;
+    const tickValues = Array.from({ length: ticks }, (_, i) => i * tickDelta);
+
+    nv.addGraph(function () {
+        var chart = nv.models.multiBarChart()
+            .showControls(false)
+            .stacked(true)
+            .x(function (d) { return d[0] })
+            .y(function (d) { return d[1] })
+            .showYAxis(true)
+            .showXAxis(true)
+            .reduceXTicks(false)
+            ;
+        chart.xAxis     //Chart x-axis settings
+            .axisLabel(`Contest Time (${unit.name})`)
+            .ticks(tickValues.length)
+            .tickValues(tickValues)
+            .tickFormat(d3.format('d'));
+        chart.yAxis     //Chart y-axis settings
+            .axisLabel('Total Submissions')
+            .tickFormat(d3.format('d'));
+
+        d3.select('#graph_submissions svg')
+            .datum(submissionStats)
+            .call(chart);
+        nv.utils.windowResize(chart.update);
+        return chart;
+    });
+}
+
 $(function() {
     if (document.querySelector('.mobile-scoreboard')) {
         window.addEventListener('resize', resizeMobileTeamNamesAndProblemBadges);

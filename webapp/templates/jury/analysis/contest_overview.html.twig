@@ -338,14 +338,10 @@ nv.addGraph(function() {
   return chart;
 });
 
-
 //////////////////////////////////////
 // Submissions over time
-// stacked graph of correct, runtime-error, wrong-answer, compiler-error, timelimit, etc
-// x-axis is contest time
-// y axis is # of submissions
 
-var submission_stats = [
+const submission_stats = [
   {% for result in ['correct', 'wrong-answer', 'timelimit', 'run-error', 'compiler-error', 'no-output'] %}
   {
     key: "{{result}}",
@@ -354,8 +350,8 @@ var submission_stats = [
   },
   {% endfor %}
 ];
-
 const contest_start_time = {{ current_contest.starttime }};
+const contest_duration_seconds = {{ (current_contest.endtime - current_contest.starttime) | round(0, 'ceil') }};
 const submissions = [
   {% for submission in submissions %}
   {
@@ -364,98 +360,7 @@ const submissions = [
   }{{ loop.last ? '' : ',' }}
   {% endfor %}
 ];
-
-const min_bucket_count = 30;
-const max_bucket_count = 301;
-const units = [
-  {'name': 'seconds', 'convert': 1, 'step': 60},
-  {'name': 'minutes', 'convert': 60, 'step': 15},
-  {'name': 'hours', 'convert': 60*60, 'step': 6},
-  {'name': 'days', 'convert': 60*60*24, 'step': 7},
-  {'name': 'weeks', 'convert': 60*60*24*7, 'step': 1},
-  {'name': 'years', 'convert': 60*60*24*365, 'step': 1}
-];
-let unit = units[0];
-
-let contest_duration = {{ (current_contest.endtime - current_contest.starttime) | round(0, 'ceil') }};
-for (let u of units) {
-  const new_duration = Math.ceil(contest_duration / u.convert);
-  if (new_duration > min_bucket_count) {
-    unit = u;
-  } else {
-    break;
-  }
-}
-contest_duration = Math.ceil(contest_duration / unit.convert);
-const bucket_count = Math.min(contest_duration + 1, max_bucket_count);
-// Make sure buckets have whole unit
-const seconds_per_bucket = Math.ceil(contest_duration / (bucket_count - 1)) * unit.convert;
-
-submission_stats.forEach(stat => {
-  stat.values = Array.from({ length: bucket_count }, (_, i) => [i * seconds_per_bucket / unit.convert, 0]);
-});
-
-const statMap = submission_stats.reduce((map, stat) => {
-  map[stat.key] = stat;
-  return map;
-}, {});
-
-submissions.forEach(submission => {
-  const submission_bucket = Math.floor((submission.submittime - contest_start_time) / seconds_per_bucket);
-  const stat = statMap[submission.result];
-  if (stat && submission_bucket >= 0 && submission_bucket < bucket_count) {
-    stat.values[submission_bucket][1]++;
-  }
-});
-
-let max_submissions_per_bucket = 1
-for (let bucket = 0; bucket < bucket_count; bucket++) {
-  let sum = 0;
-  submission_stats.forEach(stat => {
-    sum += stat.values[bucket][1];
-  });
-  max_submissions_per_bucket = Math.max(max_submissions_per_bucket, sum);
-}
-
-// Pick a nice round tickDelta and tickValues based on the step size of units.
-// We want whole values in the unit, and the ticks MUST match a corresponding bucket otherwise the resulting
-// coordinate will be NaN.
-const convert_factor = seconds_per_bucket / unit.convert;
-const maxTicks = Math.min(bucket_count, contest_duration / unit.step, min_bucket_count)
-const tickDelta = convert_factor * Math.ceil(contest_duration / (maxTicks * convert_factor));
-const ticks = Math.floor(contest_duration / tickDelta) + 1;
-const tickValues = Array.from({ length: ticks }, (_, i) => i * tickDelta);
-
-nv.addGraph(function() {
-  var chart = nv.models.multiBarChart()
-      // .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
-      // .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
-      // .transitionDuration(350)  //how fast do you want the lines to transition?
-      // .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
-      .showControls(false)
-      .stacked(true)
-      .x(function(d) { return d[0] })   //We can modify the data accessor functions...
-      .y(function(d) { return d[1] })   //...in case your data is formatted differently.
-      .showYAxis(true)        //Show the y-axis
-      .showXAxis(true)        //Show the x-axis
-      .reduceXTicks(false)
-      ;
-  chart.xAxis     //Chart x-axis settings
-      .axisLabel(`Contest Time (${unit.name})`)
-      .ticks(tickValues.length)
-      .tickValues(tickValues)
-      .tickFormat(d3.format('d'));
-  chart.yAxis     //Chart y-axis settings
-      .axisLabel('Total Submissions')
-      .tickFormat(d3.format('d'));
-
-  d3.select('#graph_submissions svg')
-      .datum(submission_stats)
-      .call(chart);
-  nv.utils.windowResize(chart.update);
-  return chart;
-});
-
+createSubmissionGraph(submission_stats, contest_start_time, contest_duration_seconds, submissions);
 
 </script>
 {% include 'jury/analysis/download_graphs.html.twig' %}
