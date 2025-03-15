@@ -328,6 +328,8 @@ class ScoreboardService
         $runtimeJury     = PHP_INT_MAX;
         $runtimePubl     = PHP_INT_MAX;
 
+        $contestStartTime = $contest->getStarttime();
+
         foreach ($submissions as $submission) {
             /** @var Judging|ExternalJudgement|null $judging */
             if ($useExternalJudgements) {
@@ -402,6 +404,8 @@ class ScoreboardService
 
             // STEP 3:
             $absSubmitTime = (float)$submission->getSubmittime();
+            // Negative numbers don't make sense on the scoreboard, cap them to the contest start.
+            $absSubmitTime = max($absSubmitTime, $contestStartTime);
             $submitTime    = $contest->getContestTime($absSubmitTime);
 
             if ($judging->getResult() == Judging::RESULT_CORRECT) {
