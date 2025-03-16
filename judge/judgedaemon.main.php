@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 /**
- * Request a yet unjudged submission from the domserver, judge it, and pass
+ * Requests a batch of judge tasks the domserver, executes them and reports
  * the results back to the domserver.
  *
  * Part of the DOMjudge Programming Contest Jury System and licensed
@@ -89,19 +89,26 @@ function close_curl_handles(): void
     }
 }
 
+// $lastrequest is used to avoid spamming the log with irrelevant log messages.
+$lastrequest = '';
+
 /**
  * Perform a request to the REST API and handle any errors.
+ *
  * $url is the part appended to the base DOMjudge $resturl.
  * $verb is the HTTP method to use: GET, POST, PUT, or DELETE
  * $data is the urlencoded data passed as GET or POST parameters.
+ *
  * When $failonerror is set to false, any error will be turned into a
  * warning and null is returned.
- * This function retries request on transient network errors.
+ *
+ * This function retries requests on transient network errors.
  * To deal with the transient errors while avoiding overloads,
- * this function uses exponential backoff algorithm.
- * Every error except HTTP 401, 500 is considered transient.
+ * this function uses exponential backoff algorithm with jitter.
+ *
+ * Every error except authentication failures (HTTP 401) is
+ * considered transient, even internal server errors (HTTP 5xx).
  */
-$lastrequest = '';
 function request(string $url, string $verb = 'GET', $data = '', bool $failonerror = true)
 {
     global $endpoints, $endpointID, $lastrequest;
@@ -155,6 +162,7 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
             if ($status == 401) {
                 $errstr = "Authentication failed (error $status) while contacting $url. " .
                     "Check credentials in restapi.secret.";
+                // Do not retry on authentication failures.
                 break;
             } elseif ($status < 200 || $status >= 300) {
                 $json = dj_json_try_decode($response);
@@ -213,21 +221,27 @@ function djconfig_refresh(): void
 }
 
 /**
- * Retrieve a value from the DOMjudge configuration.
+ * Retrieve a specific value from the DOMjudge configuration.
  */
 function djconfig_get_value(string $name)
 {
     global $domjudge_config;
     if (empty($domjudge_config)) {
-        error("DOMjudge config not initialised before call to djconfig_get_value()");
+        djconfig_refresh();
+    }
+
+    if (!array_key_exists($name, $domjudge_config)) {
+        error("Configuration value '$name' not found in config.");
     }
     return $domjudge_config[$name];
 }
 
 /**
  * Encode file contents for POST-ing to REST API.
+ *
  * Returns contents of $file (optionally limited in size, see
  * dj_file_get_contents) as encoded string.
+ *
  * $sizelimit can be set to the following values:
  * - TRUE: use the 'output_storage_limit' configuration setting
  * - positive integer: limit to this many bytes
@@ -260,7 +274,8 @@ function usage(): never
     echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
         "Start the judgedaemon.\n\n" .
         "  -n <id>           bind to CPU <id> and user " . RUNUSER . "-<id>\n" .
-        "  --diskspace-error send internal error on low diskspace\n" .
+        "  --diskspace-error send internal error on low diskspace; if not set,\n" .
+        "                      the judgedaemon will try to clean up and continue\n" .
         "  -v <level>        set verbosity to <level>; these are syslog levels:\n" .
         "                      default is LOG_INFO = 5, max is LOG_DEBUG = 7\n" .
         "  -h                display this help and exit\n" .
@@ -268,15 +283,17 @@ function usage(): never
     exit;
 }
 
-function read_judgehostlog(int $n = 20) : string
+function read_judgehostlog(int $numLines = 20) : string
 {
     ob_start();
-    passthru("tail -n $n " . dj_escapeshellarg(LOGFILE));
+    passthru("tail -n $numLines " . dj_escapeshellarg(LOGFILE));
     return trim(ob_get_clean());
 }
 
-// Fetches new executable from database if necessary, and runs build script to compile executable.
-// Returns an array with absolute path to run script and possibly an error message.
+// Fetches a new executable from database if not cached already, and runs build script to compile executable.
+// Returns an array with
+// - absolute path to run script
+// - optional error message.
 function fetch_executable(
     string $workdirpath,
     string $type,
@@ -306,7 +323,7 @@ function fetch_executable(
     return [$execrunpath, $error];
 }
 
-// Internal function to fetch new executable from database if necessary, and run build script to compile executable.
+// Internal function to fetch a new executable from database if necessary, and run build script to compile executable.
 // Returns an array with
 // - absolute path to run script (null if unsuccessful)
 // - an error message (null if successful)
@@ -629,7 +646,7 @@ if (!empty($options['e'])) {
     exit(0);
 }
 
-// Set umask to allow group,other access, as this is needed for the
+// Set umask to allow group and other access, as this is needed for the
 // unprivileged user.
 umask(0022);
 
@@ -663,12 +680,12 @@ foreach ($domserver_languages as $language) {
     }
 }
 
-// Constantly check API for unjudged submissions
+// Constantly check API for outstanding judgetasks, cycling through all configured endpoints.
 $endpointIDs = array_keys($endpoints);
 $currentEndpoint = 0;
 $lastWorkdir = null;
 while (true) {
-    // If all endpoints are waiting, sleep for a bit
+    // If all endpoints are waiting, sleep for a bit.
     $dosleep = true;
     foreach ($endpoints as $id => $endpoint) {
         if ($endpoint['errorred']) {
@@ -681,13 +698,13 @@ while (true) {
             break;
         }
     }
-    // Sleep only if everything is "waiting" and only if we're looking at the first endpoint again
+    // Sleep only if everything is "waiting" and only if we're looking at the first endpoint again.
     if ($dosleep && $currentEndpoint==0) {
         dj_sleep($waittime);
         $waittime = min($waittime*2, MAXIMAL_WAITTIME_SEC);
     }
 
-    // Increment our currentEndpoint pointer
+    // Cycle through endpoints.
     $currentEndpoint = ($currentEndpoint + 1) % count($endpoints);
     $endpointID = $endpointIDs[$currentEndpoint];
     $workdirpath = JUDGEDIR . "/$myhost/endpoint-$endpointID";
@@ -752,8 +769,8 @@ while (true) {
         }
     }
 
-    // Request open submissions to judge. Any errors will be treated as
-    // non-fatal: we will just keep on retrying in this loop.
+    // Request open judge tasks to be executed.
+    // Any errors will be treated as non-fatal: we will just keep on retrying in this loop.
     $row = [];
     $judging = request('judgehosts/fetch-work', 'POST', ['hostname' => $myhost], false);
     // If $judging is null, an error occurred; we marked the endpoint already as errorred above.
@@ -763,7 +780,7 @@ while (true) {
         $row = dj_json_decode($judging);
     }
 
-    // nothing returned -> no open submissions for us
+    // Nothing returned -> no open work for us.
     if (empty($row)) {
         if (! $endpoints[$endpointID]["waiting"]) {
             $endpoints[$endpointID]["waiting"] = true;
@@ -1011,7 +1028,7 @@ function registerJudgehost(string $myhost): void
 
     // Auto-register judgehost.
     // If there are any unfinished judgings in the queue in my name,
-    // they will not be finished. Give them back.
+    // they have and will not be finished. Give them back.
     $unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost), false);
     if ($unfinished === null) {
         logmsg(LOG_WARNING, "Registering judgehost on endpoint $endpointID failed.");
@@ -1352,8 +1369,6 @@ function judge(array $judgeTask): bool
             logmsg(LOG_WARNING, "Aborted judging task " . $jud['judgetaskid'] .
                    " due to signal");
         }
-
-        // Break, not exit so we cleanup nicely.
         return false;
     }
 
