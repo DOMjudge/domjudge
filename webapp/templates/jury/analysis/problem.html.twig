@@ -16,11 +16,6 @@
 .card {
   height: 100%;
 }
-
-/* Don't show x-axis ticks/ticklines for max runtimes chart. */
-#maxruntime .nv-x.nv-axis .tick {
-  display: none;
-}
 </style>
 {% endblock %}
 
@@ -133,7 +128,10 @@ $(function(){
       chart.yAxis
         .tickFormat(d3.format('.3f'))
         .axisLabel('Runtime(in s)');
-      chart.xAxis.axisLabel("Judgings");
+      chart.xAxis
+        .ticks(0)
+        .tickValues([])
+        .axisLabel("Judgings");
       d3.select('#maxruntime svg')
           .datum(run_max_times)
           .call(chart);
