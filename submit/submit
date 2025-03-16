@@ -50,7 +50,7 @@ def confirm(message: str) -> bool:
     return answer == 'y'
 
 
-def warn_user(msg: str):
+def warn_user(msg: str) -> None:
     global num_warnings
     num_warnings += 1
     if args.quiet:
@@ -67,11 +67,11 @@ def usage(msg: str) -> NoReturn:
 
 def error(msg: str) -> NoReturn:
     logging.error(msg)
-    exit(-1)
+    exit(1)
 
 
-def print_if_json(text: str):
-    '''Print the text if it is valid JSON, and ignore otherwise'''
+def print_if_json(text: str) -> None:
+    """Print the text if it is valid JSON, and ignore otherwise"""
     try:
         data = json.loads(text)
         print(json.dumps(data, indent=2))
@@ -80,11 +80,11 @@ def print_if_json(text: str):
 
 
 def read_contests() -> list:
-    '''Read all contests from the API.
+    """Read all contests from the API.
 
     Returns:
         The contests or None if an error occurred.
-    '''
+    """
 
     try:
         data = do_api_request('contests')
@@ -111,11 +111,11 @@ def read_contests() -> list:
 
 
 def read_languages() -> list:
-    '''Read all languages for the current contest from the API.
+    """Read all languages for the current contest from the API.
 
     Returns:
         The languages or None if an error occurred.
-    '''
+    """
 
     try:
         endpoint = 'contests/' + my_contest['id'] + '/languages'
@@ -153,11 +153,11 @@ def read_languages() -> list:
 
 
 def read_problems() -> list:
-    '''Read all problems for the current contest from the API.
+    """Read all problems for the current contest from the API.
 
     Returns:
         The problems or None if an error occurred.
-    '''
+    """
 
     try:
         endpoint = 'contests/' + my_contest['id'] + '/problems'
@@ -187,7 +187,7 @@ def read_problems() -> list:
 
 
 def do_api_request(endpoint: str, data=None, files=None):
-    '''Perform an API call to the given endpoint and return its data.
+    """Perform an API call to the given endpoint and return its data.
 
     Parameters:
         endpoint (str): the endpoint to call
@@ -199,7 +199,7 @@ def do_api_request(endpoint: str, data=None, files=None):
 
     Raises:
         RuntimeError when the response is not JSON or the HTTP status code is non 2xx.
-    '''
+    """
 
     if not baseurl:
         raise RuntimeError('No baseurl set')
@@ -249,8 +249,8 @@ def kotlin_base_entry_point(filebase: str) -> str:
     return filebase
 
 
-def get_epilog():
-    '''Get the epilog for the help text.'''
+def get_epilog() -> str:
+    """Get the epilog for the help text."""
 
     contests_part_one = None
     contests_part_two = None
@@ -323,8 +323,8 @@ Submit multiple files (the problem and language are taken from the first):
     return "\n\n".join(part for part in epilog_parts if part)
 
 
-def do_api_print():
-    '''Submit to the API for printing with the given data.'''
+def do_api_print() -> None:
+    """Submit to the API for printing with the given data."""
 
     if len(filenames) != 1:
         error('You can only print a single file')
@@ -353,8 +353,8 @@ def do_api_print():
         print(f"DOMjudge reported a printing error: {result['output']}")
 
 
-def do_api_submit():
-    '''Submit to the API with the given data.'''
+def do_api_submit() -> None:
+    """Submit to the API with the given data."""
 
     data = {
         'problem': my_problem['id'],
