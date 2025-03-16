@@ -186,14 +186,16 @@ def read_problems() -> list:
     return problems
 
 
-def do_api_request(name: str):
+def do_api_request(endpoint: str, data=None, files=None):
     '''Perform an API call to the given endpoint and return its data.
 
     Parameters:
-        name (str): the endpoint to call
+        endpoint (str): the endpoint to call
+        data (dict): optional data to send in the POST request
+        files (list): optional files to send in the POST request
 
     Returns:
-        The endpoint contents.
+        The decoded endpoint contents.
 
     Raises:
         RuntimeError when the response is not JSON or the HTTP status code is non 2xx.
@@ -202,24 +204,32 @@ def do_api_request(name: str):
     if not baseurl:
         raise RuntimeError('No baseurl set')
 
-    url = f'{baseurl}api/{api_version}{name}'
+    url = f'{baseurl}api/{api_version}{endpoint}'
 
     logging.info(f'Connecting to {url}')
 
     try:
-        response = requests.get(url, headers=headers)
+        if data or files:
+            response = requests.post(url, data=data, files=files, headers=headers)
+        else:
+            response = requests.get(url, headers=headers)
     except requests.exceptions.RequestException as e:
         raise RuntimeError(e)
 
-    logging.debug(f"API call '{name}' returned:\n{response.text}")
+    logging.debug(f"API call '{endpoint}' returned:\n{response.text}")
     if response.status_code >= 300:
         print_if_json(response.text)
         if response.status_code == 401:
             raise RuntimeError('Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
         else:
-            raise RuntimeError(f'API request {name} failed (code {response.status_code}).')
+            raise RuntimeError(f'API request {endpoint} failed (code {response.status_code}).')
 
-    return json.loads(response.text)
+    try:
+        decoded_response = json.loads(response.text)
+    except json.decoder.JSONDecodeError as e:
+        raise RuntimeError(f'Parsing DOMjudge\'s API output failed: {e}')
+
+    return decoded_response
 
 
 def kotlin_base_entry_point(filebase: str) -> str:
@@ -330,27 +340,8 @@ def do_api_print():
     if entry_point:
         data['entry_point'] = entry_point
 
-    url = f"{baseurl}api/{api_version}printing/team"
-    logging.info(f'connecting to {url}')
-
-    response = requests.post(url, data=data, headers=headers)
-
-    # The connection worked, but we may have received an HTTP error
-    logging.debug(f"API printing call returned:\n{response.text}")
-    if response.status_code >= 300:
-        print_if_json(response.text)
-        if response.status_code == 401:
-            raise RuntimeError('Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
-        else:
-            raise RuntimeError(f'Printing failed (code {response.status_code})')
-
-    # We got a successful HTTP response. It worked.
-    # But check that we indeed received a success response.
-
-    try:
-        result = json.loads(response.text)
-    except json.decoder.JSONDecodeError as e:
-        error(f'Parsing DOMjudge\'s API output failed: {e}')
+    endpoint = f"printing/team"
+    result = do_api_request(endpoint, data)
 
     if not isinstance(result, dict) or 'success' not in result:
         error('DOMjudge\'s API returned unexpected JSON data.')
@@ -374,27 +365,8 @@ def do_api_submit():
 
     files = [('code[]', open(filename, 'rb')) for filename in filenames]
 
-    url = f"{baseurl}api/{api_version}contests/{my_contest['id']}/submissions"
-    logging.info(f'connecting to {url}')
-
-    response = requests.post(url, data=data, files=files, headers=headers)
-
-    # The connection worked, but we may have received an HTTP error
-    logging.debug(f"API submitting call returned:\n{response.text}")
-    if response.status_code >= 300:
-        print_if_json(response.text)
-        if response.status_code == 401:
-            raise RuntimeError('Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
-        else:
-            raise RuntimeError(f'Submission failed (code {response.status_code})')
-
-    # We got a successful HTTP response. It worked.
-    # But check that we indeed received a submission ID.
-
-    try:
-        submission = json.loads(response.text)
-    except json.decoder.JSONDecodeError as e:
-        error(f'Parsing DOMjudge\'s API output failed: {e}')
+    endpoint = f"contests/{my_contest['id']}/submissions"
+    submission = do_api_request(endpoint, data, files)
 
     if (not isinstance(submission, dict)
             or 'id' not in submission
