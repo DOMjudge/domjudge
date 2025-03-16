@@ -1139,75 +1139,51 @@ class ImportExportService
             // It is legitimate that a team has no affiliation. Do not add it then.
             $teamAffiliation = null;
             $teamCategory    = null;
-            if (!empty($teamItem['team_affiliation']['shortname'])) {
-                // First look up if the affiliation already exists.
-                $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['shortname' => $teamItem['team_affiliation']['shortname']]);
-                if (!$teamAffiliation) {
-                    foreach ($createdAffiliations as $createdAffiliation) {
-                        if ($createdAffiliation->getShortname() === $teamItem['team_affiliation']['shortname']) {
-                            $teamAffiliation = $createdAffiliation;
-                            break;
+            foreach (['shortname', 'externalid'] as $key) {
+                if (!empty($teamItem['team_affiliation'][$key])) {
+                    // First look up if the affiliation already exists.
+                    $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy([$key => $teamItem['team_affiliation'][$key]]);
+                    if (!$teamAffiliation) {
+                        foreach ($createdAffiliations as $createdAffiliation) {
+                            $value = $key === 'shortname' ? $createdAffiliation->getShortname() : $createdAffiliation->getExternalid();
+                            if ($value === $teamItem['team_affiliation'][$key]) {
+                                $teamAffiliation = $createdAffiliation;
+                                break;
+                            }
                         }
                     }
-                }
-                if (!$teamAffiliation) {
-                    $teamAffiliation  = new TeamAffiliation();
-                    $propertyAccessor = PropertyAccess::createPropertyAccessor();
-                    foreach ($teamItem['team_affiliation'] as $field => $value) {
-                        $propertyAccessor->setValue($teamAffiliation, $field, $value);
-                    }
-
-                    $errors = $this->validator->validate($teamAffiliation);
-                    if ($errors->count()) {
-                        $messages = [];
-                        /** @var ConstraintViolationInterface $error */
-                        foreach ($errors as $error) {
-                            $messages[] = sprintf('  • `%s`: %s', $error->getPropertyPath(), $error->getMessage());
+                    if (!$teamAffiliation) {
+                        $teamAffiliation = new TeamAffiliation();
+                        if ($key === 'shortname') {
+                            $propertyAccessor = PropertyAccess::createPropertyAccessor();
+                            foreach ($teamItem['team_affiliation'] as $field => $value) {
+                                $propertyAccessor->setValue($teamAffiliation, $field, $value);
+                            }
+                        } else {
+                            $teamAffiliation
+                                ->setExternalid($teamItem['team_affiliation']['externalid'])
+                                ->setName($teamItem['team_affiliation']['externalid'] . ' - auto-create during import')
+                                ->setShortname($teamItem['team_affiliation']['externalid'] . ' - auto-create during import');
                         }
 
-                        $message .= sprintf("Organization for team at index %d (%s) has errors:\n%s\n\n",
-                            $index,
-                            json_encode($teamItem),
-                            implode("\n", $messages));
-                        $anyErrors = true;
-                    } else {
-                        $createdAffiliations[] = $teamAffiliation;
-                    }
-                }
-            } elseif (!empty($teamItem['team_affiliation']['externalid'])) {
-                $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $teamItem['team_affiliation']['externalid']]);
-                if (!$teamAffiliation) {
-                    foreach ($createdAffiliations as $createdAffiliation) {
-                        if ($createdAffiliation->getExternalid() === $teamItem['team_affiliation']['externalid']) {
-                            $teamAffiliation = $createdAffiliation;
-                            break;
+                        $errors = $this->validator->validate($teamAffiliation);
+                        if ($errors->count()) {
+                            $messages = [];
+                            /** @var ConstraintViolationInterface $error */
+                            foreach ($errors as $error) {
+                                $messages[] = sprintf('  • `%s`: %s', $error->getPropertyPath(), $error->getMessage());
+                            }
+
+                            $message .= sprintf("Organization for team at index %d (%s) has errors:\n%s\n\n",
+                                $index,
+                                json_encode($teamItem),
+                                implode("\n", $messages));
+                            $anyErrors = true;
+                        } else {
+                            $createdAffiliations[] = $teamAffiliation;
                         }
                     }
-                }
-
-                if (!$teamAffiliation) {
-                    $teamAffiliation = new TeamAffiliation();
-                    $teamAffiliation
-                        ->setExternalid($teamItem['team_affiliation']['externalid'])
-                        ->setName($teamItem['team_affiliation']['externalid'] . ' - auto-create during import')
-                        ->setShortname($teamItem['team_affiliation']['externalid'] . ' - auto-create during import');
-
-                    $errors = $this->validator->validate($teamAffiliation);
-                    if ($errors->count()) {
-                        $messages = [];
-                        /** @var ConstraintViolationInterface $error */
-                        foreach ($errors as $error) {
-                            $messages[] = sprintf('  • `%s`: %s', $error->getPropertyPath(), $error->getMessage());
-                        }
-
-                        $message .= sprintf("Organization for team at index %d (%s) has errors:\n%s\n\n",
-                            $index,
-                            json_encode($teamItem),
-                            implode("\n", $messages));
-                        $anyErrors = true;
-                    } else {
-                        $createdAffiliations[] = $teamAffiliation;
-                    }
+                    break;
                 }
             }
             $teamItem['team']['affiliation'] = $teamAffiliation;
