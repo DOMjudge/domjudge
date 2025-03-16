@@ -22,13 +22,16 @@ class RejudgingFirstToSolveFixture extends AbstractTestDataFixture
 
         $manager->persist($team2);
 
+        $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        // Two submissions, one for each team, the incorrect one before the correct one.
+        // Later, in the test, we will flip the 'wrong-answer' to correct in
+        // order to produce a new first to solve.
         $submissionData = [
-            // team, submittime,            result]
-            [$team1, '2021-01-01 12:34:56', 'correct'],
-            [$team2, '2021-01-01 12:33:56', 'wrong-answer'],
+            // team, submittime,                     result]
+            [$team2, $contest->getStarttime() + 300, 'wrong-answer'],
+            [$team1, $contest->getStarttime() + 400, 'correct'],
         ];
 
-        $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         $language = $manager->getRepository(Language::class)->find('cpp');
         $problem = $contest->getProblems()->filter(fn(ContestProblem $problem) => $problem->getShortname() === 'A')->first();
 
@@ -39,11 +42,11 @@ class RejudgingFirstToSolveFixture extends AbstractTestDataFixture
                 ->setContestProblem($problem)
                 ->setLanguage($language)
                 ->setValid(true)
-                ->setSubmittime(Utils::toEpochFloat($submissionItem[1]));
+                ->setSubmittime($submissionItem[1]);
             $judging = (new Judging())
                 ->setContest($contest)
-                ->setStarttime(Utils::toEpochFloat($submissionItem[1]))
-                ->setEndtime(Utils::toEpochFloat($submissionItem[1]) + 5)
+                ->setStarttime($submissionItem[1])
+                ->setEndtime($submissionItem[1] + 5)
                 ->setValid(true)
                 ->setResult($submissionItem[2]);
             $judging->setSubmission($submission);
