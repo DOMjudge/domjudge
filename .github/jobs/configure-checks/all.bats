@@ -29,7 +29,7 @@ setup_user() {
     chown -R $u:$u ./
 }
 
-setup() {
+setup_helper() {
     setup_user
     for shared_file in config.log confdefs.h conftest.err; do
         chmod a+rw $shared_file || true
@@ -149,7 +149,7 @@ compile_assertions_finished () {
 }
 
 @test "Run as root discouraged" {
-    setup
+    setup_helper
     run su root -c "./configure"
     discourage_root="checking domjudge-user... configure: error: installing/running as root is STRONGLY DISCOURAGED, use --with-domjudge-user=root to override."
     assert_line "$discourage_root"
@@ -204,7 +204,7 @@ compile_assertions_finished () {
 }
 
 @test "Run as normal user" {
-    setup
+    setup_helper
     run ./configure --with-domjudge-user=$u
     assert_line "checking domjudge-user... $u"
     run su $u -c "./configure"
@@ -227,7 +227,7 @@ compile_assertions_finished () {
 }
 
 @test "/opt configured" {
-    setup
+    setup_helper
     run run_configure
     assert_line " * prefix..............: /opt/domjudge"
     assert_line " * documentation.......: /opt/domjudge/doc"
@@ -254,7 +254,7 @@ compile_assertions_finished () {
 }
 
 @test "Prefix configured" {
-    setup
+    setup_helper
     run run_configure --prefix=/tmp
     refute_line " * prefix..............: /opt/domjudge"
     refute_line " * documentation.......: /opt/domjudge/doc"
@@ -276,7 +276,7 @@ compile_assertions_finished () {
 }
 
 @test "Check FHS" {
-    setup
+    setup_helper
     run run_configure --enable-fhs
     refute_line " * prefix..............: /opt/domjudge"
     refute_line " * documentation.......: /opt/domjudge/doc"
@@ -311,7 +311,7 @@ compile_assertions_finished () {
 }
 
 @test "Alternative dirs together with FHS" {
-    setup
+    setup_helper
     run run_configure --enable-fhs --with-domserver_webappdir=/run/webapp --with-domserver_tmpdir=/tmp/domserver --with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot/domjudge
     assert_line " * prefix..............: /usr/local"
     assert_line " * documentation.......: /usr/local/share/doc/domjudge"
@@ -343,7 +343,7 @@ compile_assertions_finished () {
 }
 
 @test "Alternative dirs together with defaults" {
-    setup
+    setup_helper
     run run_configure "--with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot --with-domserver_logdir=/log"
     assert_line " * prefix..............: /opt/domjudge"
     assert_line " * documentation.......: /opt/domjudge/doc"
@@ -360,7 +360,7 @@ compile_assertions_finished () {
 }
 
 @test "Default URL not set, docs mention" {
-    setup
+    setup_helper
     run run_configure
     assert_line "checking baseurl... https://example.com/domjudge/"
     assert_line "Warning: base URL is unconfigured; generating team documentation will"
@@ -377,7 +377,7 @@ compile_assertions_finished () {
 }
 
 @test "Change users" {
-    setup
+    setup_helper
     run run_configure
     assert_line " * default user........: domjudge-bats-user"
     assert_line " * runguard user.......: domjudge-run"
@@ -397,7 +397,7 @@ compile_assertions_finished () {
 }
 
 @test "No docs" {
-    setup
+    setup_helper
     run run_configure
     assert_line " * documentation.......: /opt/domjudge/doc"
     run run_configure --enable-doc-build
@@ -411,7 +411,7 @@ compile_assertions_finished () {
         # Fails as libraries are not found
         skip
     fi
-    setup
+    setup_helper
     run run_configure
     assert_line " * domserver...........: /opt/domjudge/domserver"
     assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
@@ -428,7 +428,7 @@ compile_assertions_finished () {
         # Fails as libraries are not found
         skip
     fi
-    setup
+    setup_helper
     run run_configure --disable-domserver-build
     refute_line " * domserver...........: /opt/domjudge/domserver"
     for group in www-data apache nginx; do
@@ -447,7 +447,7 @@ compile_assertions_finished () {
         # Fails as libraries are not found
         skip
     fi
-    setup
+    setup_helper
     run run_configure --disable-judgehost-build
     assert_line " * domserver...........: /opt/domjudge/domserver"
     assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
