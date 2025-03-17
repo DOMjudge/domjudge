@@ -73,6 +73,14 @@ class UtilsTest extends TestCase
     }
 
     /**
+     * Test that the relTime function returns the plus sign
+     */
+    public function testRelTimeWithPlus(): void
+    {
+        self::assertEquals('+1:18:31.000', Utils::relTime(4711, includePlus: true));
+    }
+
+    /**
      * Test that the relTime function returns the correct data when using a
      * time with millisecond precision
      */
@@ -124,6 +132,30 @@ class UtilsTest extends TestCase
     public function testNegativeRelTimeWithMillisFloored(): void
     {
         self::assertEquals('-3:25:45', Utils::relTime(-12345.6789, true));
+    }
+
+    /**
+     * Test the relTimeToSeconds function with basic data.
+     */
+    public function testRelTimeToSeconds(): void
+    {
+        self::assertEquals(1*3600 + 2*60 + 3, Utils::relTimeToSeconds('1:02:03'));
+    }
+
+    /**
+     * Test the relTimeToSeconds function with millisecond precision.
+     */
+    public function testRelTimeToSecondsWithMillis(): void
+    {
+        self::assertEquals(10.123, Utils::relTimeToSeconds('0:00:10.123'));
+    }
+
+    /**
+     * Test the relTimeToSeconds function with negative reltime.
+     */
+    public function testRelTimeToSecondsWithNegative(): void
+    {
+        self::assertEquals(-(1*3600 + 2*60 + 3), Utils::relTimeToSeconds('-1:02:03'));
     }
 
     /**
