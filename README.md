@@ -11,6 +11,9 @@ This is the Programming Contest Jury System "DOMjudge" version 9.0.0DEV
 DOMjudge is a system for running a programming contest, like the
 ICPC regional and world championship programming contests.
 
+Installation
+------------
+We provide [stable releases](https://www.domjudge.org/download) and [daily snapshots](https://www.domjudge.org/snapshot/) of the latest code. Bootstrapping from git is an advanced use case and mostly needed for development. Installing DOMjudge is almost never done via a `git clone`, except for development use cases or testing the latest code. 
 
 Documentation
 -------------
