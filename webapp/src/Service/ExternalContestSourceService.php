@@ -690,41 +690,16 @@ class ExternalContestSourceService
             ->getRepository(Contest::class)
             ->find($this->getSourceContestId());
 
-        // We need to convert the freeze to a value from the start instead of
-        // the end so perform some regex magic.
-        $duration     = $data->duration;
-        $freeze       = $data->scoreboardFreezeDuration;
-        $reltimeRegex = '/^(-)?(\d+):(\d{2}):(\d{2})(?:\.(\d{3}))?$/';
-        preg_match($reltimeRegex, $duration, $durationData);
-
-        $durationNegative = ($durationData[1] === '-');
-        $fullDuration     = $durationNegative ? $duration : ('+' . $duration);
+        // We need to convert the freeze to a value from the start instead of the end.
+        $duration          = $data->duration;
+        $durationInSeconds = Utils::relTimeToSeconds($duration);
+        $fullDuration      = Utils::relTime($durationInSeconds, includePlus: true);
+        $freeze            = $data->scoreboardFreezeDuration;
 
         if ($freeze !== null) {
-            preg_match($reltimeRegex, $freeze, $freezeData);
-            $freezeNegative     = ($freezeData[1] === '-');
-            $freezeHourModifier = $freezeNegative ? -1 : 1;
-            $freezeInSeconds    = $freezeHourModifier * (int)$freezeData[2] * 3600
-                + 60 * (int)$freezeData[3]
-                + (double)sprintf('%d.%03d', $freezeData[4], $freezeData[5] ?? 0);
-            $durationHourModifier = $durationNegative ? -1 : 1;
-            $durationInSeconds    = $durationHourModifier * (int)$durationData[2] * 3600
-                                    + 60 * (int)$durationData[3]
-                                    + (double)sprintf('%d.%03d', $durationData[4], $durationData[5] ?? 0);
-            $freezeStartSeconds   = $durationInSeconds - $freezeInSeconds;
-            $freezeHour           = floor($freezeStartSeconds / 3600);
-            $freezeMinutes        = floor(($freezeStartSeconds % 3600) / 60);
-            $freezeSeconds        = floor(($freezeStartSeconds % 60) / 60);
-            $freezeMilliseconds   = $freezeStartSeconds - floor($freezeStartSeconds);
-
-            $fullFreeze = sprintf(
-                '%s%d:%02d:%02d.%03d',
-                $freezeHour < 0 ? '' : '+',
-                $freezeHour,
-                $freezeMinutes,
-                $freezeSeconds,
-                $freezeMilliseconds
-            );
+            $freezeInSeconds    = Utils::relTimeToSeconds($freeze);
+            $freezeStartSeconds = $durationInSeconds - $freezeInSeconds;
+            $fullFreeze         = Utils::relTime($freezeStartSeconds, includePlus: true);
         } else {
             $fullFreeze = null;
         }
