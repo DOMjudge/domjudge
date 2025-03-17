@@ -213,9 +213,10 @@ class Utils
         preg_match(self::RELTIME_REGEX, $reltime, $data);
         $negative = ($data[1] === '-');
         $modifier = $negative ? -1 : 1;
-        $seconds  = $modifier * (int)$data[2] * 3600
+        $seconds  = $modifier * (
+                      (int)$data[2] * 3600
                     + (int)$data[3] * 60
-                    + (float)sprintf('%d.%03d', $data[4], $data[5] ?? 0);
+                    + (float)sprintf('%d.%03d', $data[4], $data[5] ?? 0));
         return $seconds;
     }
 
