@@ -11,6 +11,11 @@ if [ "$distro_id" = "ID=fedora" ]; then
     cmd=dnf
 fi
 
+if [ -z ${test_path+x} ]; then
+    test_path="/domjudge"
+    # Used in the CI
+fi
+
 translate () {
     args="$@"
     if [ "$distro_id" = "ID=fedora" ]; then
@@ -18,11 +23,6 @@ translate () {
     fi
     echo "$args"
 }
-
-if [ -z ${test_path+x} ]; then
-    test_path="/domjudge"
-    # Used in the CI
-fi
 
 setup_user() {
     id -u $u || (useradd $u ; groupadd $u || true )>/dev/null
