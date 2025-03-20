@@ -313,33 +313,88 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         if ($request->request->has('output_compile')) {
+            $output_compile = base64_decode($request->request->get('output_compile'));
+
             // Note: we use ->get here instead of ->has since entry_point can be the empty string and then we do not
             // want to update the submission or send out an update event
             if ($request->request->get('entry_point')) {
-                $this->em->wrapInTransaction(function () use ($query, $request, &$judging) {
-                    $submission = $judging->getSubmission();
-                    if ($submission->getEntryPoint() === $request->request->get('entry_point')) {
-                        return;
-                    }
-                    $submission->setEntryPoint($request->request->get('entry_point'));
-                    $this->em->flush();
-                    $submissionId = $submission->getSubmitid();
-                    $contestId    = $submission->getContest()->getCid();
-                    $this->eventLogService->log('submission', $submissionId,
-                                                EventLogService::ACTION_UPDATE, $contestId);
+                // Lock-free setting of, and detection of mismatched entry_point.
+                $submission = $judging->getSubmission();
 
-                    // As EventLogService::log() will clear the entity manager, so the judging has
-                    // now become detached. We will have to reload it.
+                // Retrieve, and update the current entrypoint.
+                $oldEntryPoint = $submission->getEntryPoint();
+                $newEntryPoint = $request->request->get('entry_point');
+
+
+                if ($oldEntryPoint === $newEntryPoint) {
+                    // Nothing to do
+                } elseif (!empty($oldEntryPoint)) {
+                    // Conflict detected disable the judgehost.
+                    $disabled = [
+                        'kind' => 'judgehost',
+                        'hostname' => $judgehost->getHostname(),
+                    ];
+                    $error = new InternalError();
+                    $error
+                        ->setJudging($judging)
+                        ->setContest($judging->getContest())
+                        ->setDescription('Reported EntryPoint conflict difference for j' . $judging->getJudgingid().'. Expected: "' . $oldEntryPoint. '", received: "' . $newEntryPoint . '".')
+                        ->setJudgehostlog(base64_encode('New compilation output: ' . $output_compile))
+                        ->setTime(Utils::now())
+                        ->setDisabled($disabled);
+                    $this->em->persist($error);
+                } else {
+                    // Update needed. Note, conflicts might still be possible.
+
+                    $rowsAffected = $this->em->createQueryBuilder()
+                        ->update(Submission::class, 's')
+                        ->set('entry_point', $newEntryPoint)
+                        ->where('submitid = :id')
+                        ->andWhere('entry_point IS NULL')
+                        ->setParameter('id', $submission->getSubmitid())
+                        ->getQuery()
+                        ->execute();
+
+                    if ($rowsAffected == 0) {
+                        // There is a potential conflict, two options.
+                        // The new entry point is either the same (no issue) or different (conflict).
+                        // Read the entrypoint and check.
+                        $this->em->clear();
+                        $currentEntryPoint = $query->getOneOrNullResult()->getSubmission()->getEntryPoint();
+                        if ($newEntryPoint !== $currentEntryPoint) {
+                            // Conflict detected disable the judgehost.
+                            $disabled = [
+                                'kind' => 'judgehost',
+                                'hostname' => $judgehost->getHostname(),
+                            ];
+                            $error = new InternalError();
+                            $error
+                                ->setJudging($judging)
+                                ->setContest($judging->getContest())
+                                ->setDescription('Reported EntryPoint conflict difference for j' . $judging->getJudgingid().'. Expected: "' . $oldEntryPoint. '", received: "' . $newEntryPoint . '".')
+                                ->setJudgehostlog(base64_encode('New compilation output: ' . $output_compile))
+                                ->setTime(Utils::now())
+                                ->setDisabled($disabled);
+                            $this->em->persist($error);
+                        }
+                    } else {
+                        $submissionId = $submission->getSubmitid();
+                        $contestId    = $submission->getContest()->getCid();
+                        $this->eventLogService->log('submission', $submissionId,
+                            EventLogService::ACTION_UPDATE, $contestId);
+                    }
+
+                    // As EventLogService::log() will clear the entity manager, both branches clear the entity manager.
+                    // The judging is now detached, reload it.
                     /** @var Judging $judging */
                     $judging = $query->getOneOrNullResult();
-                });
+                }
             }
 
             // Reload judgehost just in case it got cleared above.
             /** @var Judgehost $judgehost */
             $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
 
-            $output_compile = base64_decode($request->request->get('output_compile'));
             if ($request->request->getBoolean('compile_success')) {
                 if ($judging->getOutputCompile() === null) {
                     $judging
@@ -809,32 +864,23 @@ class JudgehostController extends AbstractFOSRestController
 
         if ($field_name !== null) {
             // Disable any outstanding judgetasks with the same script that have not been claimed yet.
-            $this->em->wrapInTransaction(function (EntityManager $em) use ($field_name, $disabled_id, $error) {
-                $judgingids = $em->getConnection()->executeQuery(
-                    'SELECT DISTINCT jobid'
-                    . ' FROM judgetask'
-                    . ' WHERE ' . $field_name . ' = :id'
-                    . ' AND judgehostid IS NULL'
-                    . ' AND valid = 1',
-                    [
-                        'id' => $disabled_id,
-                    ]
-                )->fetchFirstColumn();
-                $judgings = $em->getRepository(Judging::class)->findBy(['judgingid' => $judgingids]);
-                foreach ($judgings as $judging) {
-                    /** @var Judging $judging */
-                    $judging->setInternalError($error);
-                }
-                $em->flush();
-                $em->getConnection()->executeStatement(
-                    'UPDATE judgetask SET valid=0'
-                    . ' WHERE ' . $field_name . ' = :id'
-                    . ' AND judgehostid IS NULL',
-                    [
-                        'id' => $disabled_id,
-                    ]
-                );
-            });
+            $rows = $this->em->createQueryBuilder()
+                ->update(Judging::class, 'j')
+                ->leftJoin(JudgeTask::class, 'jt')
+                ->set('j.internal_error', $error)
+                ->set('jt.valid', 0)
+                ->where('jt.' . $field_name . ' = :id')
+                ->andWhere('j.internal_error IS NULL')
+                ->andWhere('jt.judgehost_id IS NULL')
+                ->andWhere('jt.valid = 1')
+                ->setParameter('id', $disabled_id)
+                ->distinct()
+                ->getQuery()
+                ->getArrayResult();
+
+            if ($rows == 0) {
+                // TODO, handle this case. Nothing was updated.
+            }
         }
 
         $this->dj->setInternalError($disabled, $contest, false);
@@ -863,31 +909,26 @@ class JudgehostController extends AbstractFOSRestController
     {
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ($judging) {
-            $this->em->wrapInTransaction(function () use ($judging, $judgehost) {
-                /** @var JudgingRun $run */
-                foreach ($judging->getRuns() as $run) {
-                    if ($judgehost === null) {
-                        // This is coming from internal errors, reset the whole judging.
-                        $run->getJudgetask()
-                            ->setValid(false);
-                        continue;
-                    }
+            $q = $this->em->createQueryBuilder()
+                ->update(JudgingRun::class)
+                ->join(JudgeTask::class, 'jt')
+                ->where('jr.runresult IS NOT NULL')
+                ->where('jr.judgingid = :judgingid')
+                ->setParameter('judgingid', $judgingId);
 
-                    // We do not have to touch any finished runs
-                    if ($run->getRunresult() !== null) {
-                        continue;
-                    }
+            if ($judgehost === null) {
+                // This is coming from internal errors, reset the whole judging.
+                $q->set('jt.valid', 0);
+            } else {
+                $q->andWhere('jr.run_result IS NOT NULL')
+                    ->join(JudgeHost::class, 'jh')
+                    ->set('jt.judgehostid', null)
+                    ->set('jt.starttime', null)
+                    ->andWhere('jh.hostname = :judgehost')
+                    ->setParameter('judgehost', $judgehost->getHostname());
+            }
 
-                    // For the other runs, we need to reset the judge task if it belongs to the current judgehost.
-                    if ($run->getJudgetask()->getJudgehost() && $run->getJudgetask()->getJudgehost()->getHostname() === $judgehost->getHostname()) {
-                        $run->getJudgetask()
-                            ->setJudgehost(null)
-                            ->setStarttime(null);
-                    }
-                }
-
-                $this->em->flush();
-            });
+            $q->getQuery()->execute();
 
             if ($judgehost === null) {
                 // Invalidate old judging and create a new one - but without judgetasks yet since this was triggered by
