@@ -17,9 +17,6 @@ transferring the configuration settings from the old version.
 After upgrading the files, you can run ``dj_setup_database upgrade``
 to migrate the database.
 
-If you have any active contests, we recommend to run "Refresh
-scoreboard cache" from the DOMjudge web interface after the upgrade.
-
 Upgrading from pre-7.0 versions
 -------------------------------
 The upgrade procedure described above works from DOMjudge 7.0

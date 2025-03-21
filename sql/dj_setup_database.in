@@ -363,6 +363,8 @@ upgrade)
 
 	symfony_console doctrine:migrations:migrate -n
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
+
+	symfony_console domjudge:refresh-cache
 	verbose "DOMjudge database upgrade completed."
 	;;
 
