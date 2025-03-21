@@ -10,6 +10,7 @@ use App\Entity\ExternalSourceWarning;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Language;
+use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Testcase;
@@ -124,6 +125,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('tsvField', [$this, 'toTsvField']),
             new TwigFilter('fileTypeIcon', [$this, 'fileTypeIcon']),
             new TwigFilter('problemBadge', [$this, 'problemBadge'], ['is_safe' => ['html']]),
+            new TwigFilter('problemBadgeForContest', [$this, 'problemBadgeForContest'], ['is_safe' => ['html']]),
             new TwigFilter('printMetadata', [$this, 'printMetadata'], ['is_safe' => ['html']]),
             new TwigFilter('printWarningContent', [$this, 'printWarningContent'], ['is_safe' => ['html']]),
             new TwigFilter('entityIdBadge', [$this, 'entityIdBadge'], ['is_safe' => ['html']]),
@@ -1104,6 +1106,13 @@ EOF;
             $foreground,
             $problem->getShortname()
         );
+    }
+
+    public function problemBadgeForContest(Problem $problem, ?Contest $contest = null): string
+    {
+        $contest ??= $this->dj->getCurrentContest();
+        $contestProblem = $contest !== null ? $contest->getContestProblem($problem) : null;
+        return $contestProblem === null ? '' : $this->problemBadge($contestProblem);
     }
 
     public function printMetadata(?string $metadata): string

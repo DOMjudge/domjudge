@@ -71,7 +71,7 @@
 
             <td><a href="{{ link }}">
                     {%- if clarification.problem -%}
-                        problem {{ clarification.problem.contestProblems.first | problemBadge -}}
+                        problem {{ clarification.contestProblem | problemBadge -}}
                     {%- elseif clarification.category -%}
                         {{- categories[clarification.category]|default('general') -}}
                     {%- else -%}
