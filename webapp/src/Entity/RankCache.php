@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -18,6 +19,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['cid', 'points_public', 'totaltime_public', 'totalruntime_public'], name: 'order_public')]
 #[ORM\Index(columns: ['cid'], name: 'cid')]
 #[ORM\Index(columns: ['teamid'], name: 'teamid')]
+#[ORM\Index(columns: ['sort_key_public'], name: 'sortKeyPublic')]
+#[ORM\Index(columns: ['sort_key_restricted'], name: 'sortKeyRestricted')]
 class RankCache
 {
     #[ORM\Column(options: [
@@ -61,6 +64,20 @@ class RankCache
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'teamid', referencedColumnName: 'teamid', onDelete: 'CASCADE')]
     private Team $team;
+
+    #[ORM\Column(
+        type: 'text',
+        length: AbstractMySQLPlatform::LENGTH_LIMIT_TEXT,
+        options: ['comment' => 'Opaque sort key for public audience.', 'default' => '']
+    )]
+    private string $sortKeyPublic = '';
+
+    #[ORM\Column(
+        type: 'text',
+        length: AbstractMySQLPlatform::LENGTH_LIMIT_TEXT,
+        options: ['comment' => 'Opaque sort key for restricted audience.', 'default' => '']
+    )]
+    private string $sortKeyRestricted = '';
 
     public function setPointsRestricted(int $pointsRestricted): RankCache
     {
@@ -148,5 +165,27 @@ class RankCache
     public function getTeam(): Team
     {
         return $this->team;
+    }
+
+    public function setSortKeyPublic(string $sortKeyPublic): RankCache
+    {
+        $this->sortKeyPublic = $sortKeyPublic;
+        return $this;
+    }
+
+    public function getSortKeyPublic(): string
+    {
+        return $this->sortKeyPublic;
+    }
+
+    public function setSortKeyRestricted(string $sortKeyRestricted): RankCache
+    {
+        $this->sortKeyRestricted = $sortKeyRestricted;
+        return $this;
+    }
+
+    public function getSortKeyRestricted(): string
+    {
+        return $this->sortKeyRestricted;
     }
 }

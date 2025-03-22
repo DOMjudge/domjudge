@@ -411,7 +411,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $matrix = $scoreboard->getMatrix();
         $teams = [];
         $probs = [];
-        foreach ($scoreboard->getTeams() as $team) {
+        foreach ($scoreboard->getTeamsInDescendingOrder() as $team) {
             $teams[$team->getTeamid()] = $team;
         }
         foreach ($scoreboard->getProblems() as $prob) {

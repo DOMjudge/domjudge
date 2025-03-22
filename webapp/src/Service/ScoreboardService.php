@@ -19,6 +19,7 @@ use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
+use Doctrine\Common\Collections\Order;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -67,14 +68,15 @@ class ScoreboardService
             return null;
         }
 
-        $teams      = $this->getTeams($contest, $jury && !$visibleOnly, $filter);
+        $teams      = $this->getTeamsInOrder($contest, $jury && !$visibleOnly, $filter);
         $problems   = $this->getProblems($contest);
         $categories = $this->getCategories($jury && !$visibleOnly);
         $scoreCache = $this->getScorecache($contest);
+        $rankCache  = $this->getRankcache($contest);
 
         return new Scoreboard(
             $contest, $teams, $categories, $problems,
-            $scoreCache, $freezeData, $jury || $forceUnfrozen,
+            $scoreCache, $rankCache, $freezeData, $jury || $forceUnfrozen,
             (int)$this->config->get('penalty_time'),
             (bool)$this->config->get('score_in_seconds'),
         );
@@ -93,7 +95,7 @@ class ScoreboardService
     {
         $freezeData = new FreezeData($contest);
 
-        $teams = $this->getTeams($contest, true, new Filter([], [], [], [$teamId]));
+        $teams = $this->getTeamsInOrder($contest, true, new Filter([], [], [], [$teamId]));
         if (empty($teams)) {
             return null;
         }
@@ -101,7 +103,7 @@ class ScoreboardService
         $problems   = $this->getProblems($contest);
         $rankCache  = $this->getRankcache($contest, $team);
         $scoreCache = $this->getScorecache($contest, $team);
-        $teamRank   = $this->calculateTeamRank($contest, $team, $rankCache, $freezeData, true);
+        $teamRank   = $this->calculateTeamRank($contest, $team, $freezeData, true);
 
         return new SingleTeamScoreboard(
             $contest, $team, $teamRank, $problems,
@@ -120,121 +122,47 @@ class ScoreboardService
     public function calculateTeamRank(
         Contest $contest,
         Team $team,
-        ?RankCache $rankCache = null,
         ?FreezeData $freezeData = null,
         bool $jury = false
     ): int {
         if ($freezeData === null) {
             $freezeData = new FreezeData($contest);
         }
-        if ($rankCache === null) {
-            $rankCache = $this->getRankcache($contest, $team);
-        }
         $restricted = ($jury || $freezeData->showFinal(false));
-        $variant    = $restricted ? 'restricted' : 'public';
-        $points     = $rankCache ? $rankCache->getPointsRestricted() : 0;
-        $totalTime  = 0;
-        if ($rankCache) {
-            $totalTime  = $contest->getRuntimeAsScoreTiebreaker() ? $rankCache->getTotalruntimeRestricted() : $rankCache->getTotaltimeRestricted();
-        }
-        $timeType   = $contest->getRuntimeAsScoreTiebreaker() ? 'runtime' : 'time';
+        $variant    = $restricted ? 'Restricted' : 'Public';
         $sortOrder  = $team->getCategory()->getSortorder();
 
-        // Number of teams that definitely ranked higher.
+        $sortKey = $this->em->createQueryBuilder()
+            ->from(RankCache::class, 'r')
+            ->select('r.sortKey'.$variant)
+            ->andWhere('r.contest = :contest')
+            ->andWhere('r.team = :team')
+            ->setParameter('contest', $contest)
+            ->setParameter('team', $team)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($sortKey === null) {
+            // '.' sorts before any digit, so this team will be ranked last (which may be actually rank 1 if no team
+            // solved anything yet).
+            $sortKey = ".";
+        }
+
         $better = $this->em->createQueryBuilder()
             ->from(RankCache::class, 'r')
             ->join('r.team', 't')
             ->join('t.category', 'tc')
             ->select('COUNT(t.teamid)')
+            ->andWhere('r.sortKey'.$variant.' > :sortKey')
             ->andWhere('r.contest = :contest')
             ->andWhere('tc.sortorder = :sortorder')
-            ->andWhere('t.enabled = 1')
-            ->andWhere(sprintf('r.points_%s > :points OR '.
-                               '(r.points_%s = :points AND r.total%s_%s < :totaltime)',
-                               $variant, $variant, $timeType, $variant))
+            ->setParameter('sortKey', $sortKey)
             ->setParameter('contest', $contest)
             ->setParameter('sortorder', $sortOrder)
-            ->setParameter('points', $points)
-            ->setParameter('totaltime', $totalTime)
             ->getQuery()
             ->getSingleScalarResult();
 
         $rank = $better + 1;
-
-        // Resolve ties based on latest correctness points, only necessary
-        // when we actually solved at least one problem, so this list should
-        // usually be short.
-        if ($points > 0) {
-            /** @var RankCache[] $tied */
-            $tied = $this->em->createQueryBuilder()
-                ->from(RankCache::class, 'r')
-                ->join('r.team', 't')
-                ->join('t.category', 'tc')
-                ->select('r, t')
-                ->andWhere('r.contest = :contest')
-                ->andWhere('tc.sortorder = :sortorder')
-                ->andWhere('t.enabled = 1')
-                ->andWhere(sprintf('r.points_%s = :points AND r.total%s_%s = :totaltime',
-                                   $variant, $timeType, $variant))
-                ->setParameter('contest', $contest)
-                ->setParameter('sortorder', $sortOrder)
-                ->setParameter('points', $points)
-                ->setParameter('totaltime', $totalTime)
-                ->getQuery()
-                ->getResult();
-
-            // All teams that are tied for this position. In most cases this
-            // will only be the team we are finding the rank for, only
-            // retrieve rest of the data when there are actual ties.
-            if (count($tied) > 1) {
-                // Initialize team scores for each team.
-                /** @var TeamScore[] $teamScores */
-                $teamScores = [];
-                $teams      = [];
-                foreach ($tied as $rankCache) {
-                    $tiedteam = $rankCache->getTeam();
-                    $teamScores[$tiedteam->getTeamid()] = new TeamScore($tiedteam);
-                    $teams[] = $tiedteam;
-                }
-
-                // Get submission times for each of the teams.
-                /** @var ScoreCache[] $tiedScores */
-                $tiedScores = $this->em->createQueryBuilder()
-                    ->from(ScoreCache::class, 's')
-                    ->join('s.problem', 'p')
-                    ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
-                    ->select('s')
-                    ->andWhere('s.contest = :contest')
-                    ->andWhere(sprintf('s.is_correct_%s = 1', $variant))
-                    ->andWhere('cp.allowSubmit = 1')
-                    ->andWhere('s.team IN (:teams)')
-                    ->setParameter('contest', $contest)
-                    ->setParameter('teams', $teams)
-                    ->getQuery()
-                    ->getResult();
-
-                foreach ($tiedScores as $tiedScore) {
-                    $teamScores[$tiedScore->getTeam()->getTeamid()]->solveTimes[] =
-                        Utils::scoretime(
-                            $tiedScore->getSolveTime($restricted),
-                            (bool)$this->config->get('score_in_seconds')
-                        );
-                }
-
-                // Now check for each team if it is ranked higher than $teamid.
-                foreach ($tied as $rankCache) {
-                    $tiedteam = $rankCache->getTeam();
-                    if ($tiedteam->getTeamid() == $team->getTeamid()) {
-                        continue;
-                    }
-                    if (Scoreboard::scoreTiebreaker($teamScores[$tiedteam->getTeamid()],
-                                                    $teamScores[$team->getTeamid()]) < 0) {
-                        $rank++;
-                    }
-                }
-            }
-        }
-
         return $rank;
     }
 
@@ -548,10 +476,12 @@ class ScoreboardService
         $numPoints = [];
         $totalTime = [];
         $totalRuntime = [];
+        $timeOfLastCorrect = [];
         foreach ($variants as $variant => $isRestricted) {
             $numPoints[$variant] = 0;
             $totalTime[$variant] = $team->getPenalty();
             $totalRuntime[$variant] = 0;
+            $timeOfLastCorrect[$variant] = 0;
         }
 
         $penaltyTime      = (int) $this->config->get('penalty_time');
@@ -579,13 +509,23 @@ class ScoreboardService
                                                       $penaltyTime, $scoreIsInSeconds);
 
                     $numPoints[$variant] += $contestProblems[$probId]->getPoints();
-                    $totalTime[$variant] += Utils::scoretime(
+                    $solveTimeForProblem = Utils::scoretime(
                         (float)$scoreCacheCell->getSolveTime($isRestricted),
                         $scoreIsInSeconds
-                    ) + $penalty;
+                    );
+                    $timeOfLastCorrect[$variant] = max($timeOfLastCorrect[$variant], $solveTimeForProblem);
+                    $totalTime[$variant] += $solveTimeForProblem + $penalty;
                     $totalRuntime[$variant] += $scoreCacheCell->getRuntime($isRestricted);
                 }
             }
+        }
+
+        foreach ($variants as $variant => $isRestricted) {
+            $scoreKey[$variant] = self::getICPCScoreKey(
+                $numPoints[$variant],
+                $totalTime[$variant],
+                $timeOfLastCorrect[$variant]
+            );
         }
 
         // Use a direct REPLACE INTO query to drastically speed this up.
@@ -598,16 +538,62 @@ class ScoreboardService
             'pointsPublic' => $numPoints['public'],
             'totalTimePublic' => $totalTime['public'],
             'totalRuntimePublic' => $totalRuntime['public'],
+            'sortKeyRestricted' => $scoreKey['restricted'],
+            'sortKeyPublic' => $scoreKey['public'],
         ];
         $this->em->getConnection()->executeQuery('REPLACE INTO rankcache (cid, teamid,
             points_restricted, totaltime_restricted, totalruntime_restricted,
-            points_public, totaltime_public, totalruntime_public)
-            VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :totalRuntimeRestricted, :pointsPublic, :totalTimePublic, :totalRuntimePublic)', $params);
+            points_public, totaltime_public, totalruntime_public, sort_key_restricted, sort_key_public)
+            VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :totalRuntimeRestricted,
+            :pointsPublic, :totalTimePublic, :totalRuntimePublic, :sortKeyRestricted, :sortKeyPublic)', $params);
 
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                                                     ['lock' => $lockString]) != 1) {
             throw new Exception('ScoreboardService::updateRankCache failed to release lock');
         }
+    }
+
+    const SCALE = 9;
+
+    // Converts integer or bcmath floats to a string that can be used as a key in a score cache.
+    // The resulting key will be a string with 33 characters, 23 before the decimal dot and 9 after.
+    // The keys are left-padded with zeros to ensure they have the same length and are lexicographically sortable.
+    // If the sort order is descending, the keys are inverted by subtracting them from a large number.
+    // Assumes that the input is a non-negative number, smaller than 10^23.
+    //
+    // Example:
+    // input: 42
+    // output: "00000000000000000000042.000000000"
+    public static function convertToScoreKeyElement(int|string $value, Order $order = Order::Descending): string
+    {
+        // Ensure we have a fixed precision number with 9 decimals.
+        $value = bcadd("$value", "0", scale: self::SCALE);
+
+        $ALMOST_INFINITE = "99999999999999999999999";
+        if (bccomp($value, $ALMOST_INFINITE, scale: self::SCALE) > 0) {
+            throw new Exception("Value $value is too large to convert to a score key element.");
+        }
+        if (str_starts_with($value, '-')) {
+            throw new Exception("No negative values allowed in score key element, got $value.");
+        }
+
+        // If ascending, we need to subtract it from a large high value.
+        if ($order === Order::Ascending) {
+            $value = bcsub($ALMOST_INFINITE, $value, scale: self::SCALE);
+        }
+
+        // Left pad it so it has always the same number of characters.
+        return str_pad($value, 33, "0", STR_PAD_LEFT);
+    }
+
+    public static function getICPCScoreKey(int $numSolved, int $totalTime, int $timeOfLastSolved): string
+    {
+        $scoreKeyArray = [
+            self::convertToScoreKeyElement($numSolved),
+            self::convertToScoreKeyElement($totalTime, Order::Ascending),
+            self::convertToScoreKeyElement($timeOfLastSolved, Order::Ascending),
+        ];
+        return implode(',', $scoreKeyArray);
     }
 
     /**
@@ -955,17 +941,19 @@ class ScoreboardService
     }
 
     /**
-     * Get the teams to display on the scoreboard.
+     * Get the teams to display on the scoreboard, returns them in order.
      * @return Team[]
      */
-    protected function getTeams(Contest $contest, bool $jury = false, ?Filter $filter = null): array
+    protected function getTeamsInOrder(Contest $contest, bool $jury = false, ?Filter $filter = null): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
             ->innerJoin('t.category', 'tc')
+            ->leftJoin(RankCache::class, 'r', Join::WITH, 'r.team = t AND r.contest = :rcid')
             ->leftJoin('t.affiliation', 'ta')
-            ->select('t, tc, ta')
-            ->andWhere('t.enabled = 1');
+            ->select('t, tc, ta', 'COALESCE(t.display_name, t.name) AS HIDDEN effectivename')
+            ->andWhere('t.enabled = 1')
+            ->setParameter('rcid', $contest->getCid());
 
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
@@ -1015,7 +1003,12 @@ class ScoreboardService
             }
         }
 
-        return $queryBuilder->getQuery()->getResult();
+        $ret = $queryBuilder
+            ->addOrderBy('tc.sortorder')
+            ->addOrderBy('r.sortKey' . ($jury ? 'Restricted' : 'Public'), 'DESC')
+            ->addOrderBy('effectivename')
+            ->getQuery()->getResult();
+        return $ret;
     }
 
     /**
@@ -1102,17 +1095,22 @@ class ScoreboardService
     /**
      * Get the rank cache for the given team.
      * @throws NonUniqueResultException
+     * @return RankCache[]
      */
-    protected function getRankcache(Contest $contest, Team $team): ?RankCache
+    protected function getRankcache(Contest $contest, ?Team $team = null): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(RankCache::class, 'r')
             ->select('r')
             ->andWhere('r.contest = :contest')
-            ->andWhere('r.team = :team')
-            ->setParameter('contest', $contest)
-            ->setParameter('team', $team);
+            ->setParameter('contest', $contest);
 
-        return $queryBuilder->getQuery()->getOneOrNullResult();
+        if ($team !== null) {
+            $queryBuilder
+                ->andWhere('r.team = :team')
+                ->setParameter('team', $team);
+        }
+
+        return $queryBuilder->getQuery()->getResult();
     }
 }

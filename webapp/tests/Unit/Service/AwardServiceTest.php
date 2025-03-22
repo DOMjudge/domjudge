@@ -6,12 +6,15 @@ use App\DataTransferObject\Award;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
+use App\Entity\RankCache;
 use App\Entity\ScoreCache;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Service\AwardService;
 use App\Service\EventLogService;
+use App\Service\ScoreboardService;
 use App\Utils\Scoreboard\Scoreboard;
+use Doctrine\Common\Collections\Order;
 use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -142,7 +145,11 @@ class AwardServiceTest extends KernelTestCase
             ],
         ];
         $scoreCache = [];
+        $rankCache = [];
         foreach ($scores as $teamLabel => $scoresForTeam) {
+            $sumMinutes = 0;
+            $numSolved = 0;
+            $lastCorrect = 0;
             foreach ($scoresForTeam as $problemLabel => $minute) {
                 $firstToSolve = in_array(
                     $teamLabel . $problemLabel,
@@ -156,7 +163,22 @@ class AwardServiceTest extends KernelTestCase
                     ->setSolvetimeRestricted(60 * $minute)
                     ->setIsCorrectRestricted(true)
                     ->setIsFirstToSolve($firstToSolve);
+                $sumMinutes += $minute;
+                $numSolved++;
+                $lastCorrect = max($lastCorrect, $minute);
             }
+            $sortKey =
+                implode(',', [
+                    ScoreboardService::convertToScoreKeyElement($numSolved),
+                    ScoreboardService::convertToScoreKeyElement($sumMinutes, Order::Ascending),
+                    ScoreboardService::convertToScoreKeyElement($lastCorrect, Order::Ascending),
+                ]);
+            $rankCache[] = (new RankCache())
+                ->setContest($this->contest)
+                ->setTeam($teams[ord($teamLabel) - ord('A')])
+                ->setPointsRestricted($numSolved)
+                ->setTotaltimeRestricted(60 * $sumMinutes)
+                ->setSortKeyRestricted($sortKey);
         }
 
         $this->scoreboard = new Scoreboard(
@@ -165,6 +187,7 @@ class AwardServiceTest extends KernelTestCase
             $categories,
             $problems,
             $scoreCache,
+            $rankCache,
             $this->contest->getFreezeData(),
             true,
             20,
@@ -252,7 +275,7 @@ class AwardServiceTest extends KernelTestCase
     public function testMedalType(int $teamIndex, ?string $expectedMedalType): void
     {
         $awardsService = $this->getAwardService();
-        $team = $this->scoreboard->getTeams()[$teamIndex];
+        $team = $this->scoreboard->getTeamsInDescendingOrder()[$teamIndex];
         static::assertEquals($expectedMedalType, $awardsService->medalType($team, $this->contest, $this->scoreboard));
     }
 

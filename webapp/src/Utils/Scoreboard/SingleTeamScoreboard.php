@@ -27,7 +27,7 @@ class SingleTeamScoreboard extends Scoreboard
         protected readonly Team $team,
         protected readonly int $teamRank,
         array $problems,
-        protected readonly ?RankCache $rankCache,
+        array $rankCache,
         array $scoreCache,
         FreezeData $freezeData,
         bool $showFtsInFreeze,
@@ -35,17 +35,22 @@ class SingleTeamScoreboard extends Scoreboard
         bool $scoreIsInSeconds
     ) {
         $this->showRestrictedFts = $showFtsInFreeze || $freezeData->showFinal();
-        parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $freezeData, true,
+        parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $rankCache, $freezeData, true,
             $penaltyTime, $scoreIsInSeconds);
     }
 
     protected function calculateScoreboard(): void
     {
+        $rankCacheForTeam = null;
+        if ($this->rankCache !== null && count($this->rankCache) > 0) {
+            $rankCacheForTeam = $this->rankCache[0];
+        }
+
         $teamScore = $this->scores[$this->team->getTeamid()];
-        if ($this->rankCache !== null) {
-            $teamScore->numPoints += $this->rankCache->getPointsRestricted();
-            $teamScore->totalTime += $this->rankCache->getTotaltimeRestricted();
-            $teamScore->totalRuntime += $this->rankCache->getTotalruntimeRestricted();
+        if ($rankCacheForTeam !== null) {
+            $teamScore->numPoints += $rankCacheForTeam->getPointsRestricted();
+            $teamScore->totalTime += $rankCacheForTeam->getTotaltimeRestricted();
+            $teamScore->totalRuntime += $rankCacheForTeam->getTotalruntimeRestricted();
         }
         $teamScore->rank = $this->teamRank;
 

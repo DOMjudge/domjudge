@@ -16,7 +16,7 @@ class AwardService
     {
         $group_winners = $problem_winners = $problem_shortname = [];
         $groups = [];
-        foreach ($scoreboard->getTeams() as $team) {
+        foreach ($scoreboard->getTeamsInDescendingOrder() as $team) {
             $teamid = $team->getExternalid();
             if ($scoreboard->isBestInCategory($team)) {
                 $catId = $team->getCategory()->getExternalid();

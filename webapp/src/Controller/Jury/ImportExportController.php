@@ -412,7 +412,7 @@ class ImportExportController extends BaseController
         $filter           = new Filter();
         $filter->categories = $categoryIds;
         $scoreboard = $this->scoreboardService->getScoreboard($contest, true, $filter);
-        $teams      = $scoreboard->getTeams();
+        $teams      = $scoreboard->getTeamsInDescendingOrder();
 
         $teamNames = [];
         foreach ($teams as $team) {
