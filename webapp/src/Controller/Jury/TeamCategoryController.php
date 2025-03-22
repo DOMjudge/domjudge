@@ -238,24 +238,7 @@ class TeamCategoryController extends BaseController
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
         $contestId = $this->dj->getCurrentContest()->getCid();
-        $query = $this->em->createQueryBuilder()
-                          ->from(Judging::class, 'j')
-                          ->select('j')
-                          ->join('j.submission', 's')
-                          ->join('s.team', 't')
-                          ->join('t.category', 'tc')
-                          ->andWhere('j.valid = true')
-                          ->andWhere('j.result != :compiler_error')
-                          ->andWhere('tc.categoryid = :categoryId')
-                          ->setParameter('compiler_error', 'compiler-error')
-                          ->setParameter('categoryId', $categoryId);
-        if ($contestId > -1) {
-            $query->andWhere('s.contest = :contestId')
-                  ->setParameter('contestId', $contestId);
-        }
-        $judgings = $query->getQuery()
-                          ->getResult();
-        $this->judgeRemaining($judgings);
+        $this->judgeRemaining(contestId: $contestId, categoryId: $categoryId);
         return $this->redirectToRoute('jury_team_category', ['categoryId' => $categoryId]);
     }
 }
