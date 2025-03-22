@@ -1156,23 +1156,7 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
         $contestId = $this->dj->getCurrentContest()->getCid();
-        $query = $this->em->createQueryBuilder()
-                          ->from(Judging::class, 'j')
-                          ->select('j')
-                          ->join('j.submission', 's')
-                          ->join('s.team', 't')
-                          ->andWhere('j.valid = true')
-                          ->andWhere('j.result != :compiler_error')
-                          ->andWhere('s.problem = :probId')
-                          ->setParameter('compiler_error', 'compiler-error')
-                          ->setParameter('probId', $probId);
-        if ($contestId > -1) {
-            $query->andWhere('s.contest = :contestId')
-                  ->setParameter('contestId', $contestId);
-        }
-        $judgings = $query->getQuery()
-                          ->getResult();
-        $this->judgeRemaining($judgings);
+        $this->judgeRemaining(contestId: $contestId, probId: $probId);
         return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
     }
 

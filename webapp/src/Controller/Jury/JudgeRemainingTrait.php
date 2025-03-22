@@ -11,7 +11,7 @@ trait JudgeRemainingTrait
     /**
      * @param Judging[] $judgings
      */
-    protected function judgeRemaining(array $judgings): void
+    protected function judgeRemainingJudgings(array $judgings): void
     {
         $inProgress = [];
         $alreadyRequested = [];
@@ -71,5 +71,40 @@ trait JudgeRemainingTrait
         } else {
             $this->addFlash('info', "Requested $numRequested remaining runs to be judged.");
         }
+    }
+
+    public function judgeRemaining(int $contestId = -1, string $categoryId = '', string|int $probId = '', string $langId = ''): void
+    {
+        $query = $this->em->createQueryBuilder()
+            ->from(Judging::class, 'j')
+            ->select('j')
+            ->join('j.submission', 's')
+            ->join('s.team', 't')
+            ->join('t.category', 'tc')
+            ->andWhere('j.valid = true')
+            ->andWhere('j.result != :compiler_error')
+            ->setParameter('compiler_error', 'compiler-error');
+        if ($contestId > -1) {
+            $query
+                ->andWhere('s.contest = :contestId')
+                ->setParameter('contestId', $contestId);
+        }
+        if ($categoryId > -1) {
+            $query
+                ->andWhere('tc.categoryid = :categoryId')
+                ->setParameter('categoryId', $categoryId);
+        }
+        if ($probId !== '') {
+            $query
+                ->andWhere('s.problem = :probId')
+                ->setParameter('probId', $probId);
+        }
+        if ($langId !== '') {
+            $query
+                ->andWhere('s.language = :langId')
+                ->setParameter('langId', $langId);
+        }
+        $judgings = $query->getQuery()->getResult();
+        $this->judgeRemainingJudgings($judgings);
     }
 }
