@@ -1053,7 +1053,7 @@ class SubmissionController extends BaseController
         if ($judging === null) {
             throw new BadRequestHttpException("Unknown judging with '$judgingId' requested.");
         }
-        $this->judgeRemaining([$judging]);
+        $this->judgeRemainingJudgings([$judging]);
 
         return $this->redirectToLocalReferrer($this->router, $request,
             $this->generateUrl('jury_submission_by_judging', ['jid' => $judgingId])

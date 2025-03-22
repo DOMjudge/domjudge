@@ -926,21 +926,7 @@ class ContestController extends BaseController
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
-        $judgings = $this->em->createQueryBuilder()
-                             ->from(Judging::class, 'j')
-                             ->select('j')
-                             ->join('j.submission', 's')
-                             ->join('s.team', 't')
-                             ->join('t.category', 'tc')
-                             ->andWhere('tc.visible = true')
-                             ->andWhere('j.valid = true')
-                             ->andWhere('j.result != :compiler_error')
-                             ->andWhere('s.contest = :contestId')
-                             ->setParameter('compiler_error', 'compiler-error')
-                             ->setParameter('contestId', $contestId)
-                             ->getQuery()
-                             ->getResult();
-        $this->judgeRemaining($judgings);
+        $this->judgeRemaining(contestId: $contestId);
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
@@ -958,21 +944,7 @@ class ContestController extends BaseController
             );
         }
 
-        $judgings = $this->em->createQueryBuilder()
-                             ->from(Judging::class, 'j')
-                             ->select('j')
-                             ->join('j.submission', 's')
-                             ->join('s.team', 't')
-                             ->andWhere('s.problem = :problemId')
-                             ->andWhere('j.valid = true')
-                             ->andWhere('j.result != :compiler_error')
-                             ->andWhere('s.contest = :contestId')
-                             ->setParameter('problemId', $probId)
-                             ->setParameter('contestId', $contestId)
-                             ->setParameter('compiler_error', 'compiler-error')
-                             ->getQuery()
-                             ->getResult();
-        $this->judgeRemaining($judgings);
+        $this->judgeRemaining(contestId: $contestId, probId: $probId);
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
