@@ -23,7 +23,7 @@ while [ $# -gt 0 ]; do
     if [ "x${1%.swift}" != "x$1" ]; then
         SOURCE="$1"
         [ -z "$MAINSOURCE" ] && MAINSOURCE="$1"
-        if [ "x$SOURCE" = "x$MAINSOURCE" ] && [ "x$MAINSOURCE" != "xmain.swift" ]; then
+        if [ "$SOURCE" = "$MAINSOURCE" ] && [ "$MAINSOURCE" != "main.swift" ]; then
             if [ -f "main.swift" ]; then
                 echo "main.swift exists but is not the main source; not allowed by Swift compiler"
                 exit 1

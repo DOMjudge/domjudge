@@ -3,27 +3,29 @@
 
 set -euo pipefail
 # shellcheck disable=SC2242
-cd "$(dirname "$0")" || exit -1
+
+# Change directory to the root of the repo relative to this script file
+cd "$(dirname "$0")/../../" || exit 1
 
 PHP=$(command -v php)
 if [ ! -x "$PHP" ]; then
 	echo "PHP ($PHP) not found or not executable"
 	# shellcheck disable=SC2242
-	exit -1
+	exit 1
 fi
 if [ ! -x /usr/bin/checkbashisms ]; then
 	echo "/usr/bin/checkbashisms not found or not executable"
 	# shellcheck disable=SC2242
-	exit -1
+	exit 1
 fi
 if [ ! -x /usr/bin/shellcheck ]; then
 	echo "/usr/bin/shellcheck not found or not executable"
 	# shellcheck disable=SC2242
-	exit -1
+	exit 1
 fi
 
 find . \( \
-       -path ./lib/vendor        -prune \
+       -path ./webapp/vendor     -prune \
 	-o -path ./webapp/var        -prune \
 	-o -path ./output            -prune \
 	-o -path ./.git              -prune \
@@ -32,7 +34,8 @@ find . \( \
     -o -type f \) \
 	-a -type f |  \
 while read -r i ; do
-	if [[ "$i" == *\.php ]] || grep -q "^#\\!.*php" "$i"; then
+	if [[ "$i" == *\.php ]] || grep -q "^#\\!.*php" "$i" && \
+		echo "$i" | grep -qvE '(^\./(webapp/resources/adminer)\.php)'; then
 		$PHP -l "$i" | sed -e 's|No syntax errors detected in ./|check PHP syntax: |'
 		if [[ "$i" == *\.php ]] && [ "$i" != "./webapp/config/bundles.php" ] && ! head -1 "$i"|grep -q "strict_types"; then
 			echo "PHP file missing strict types declaration: $i"
@@ -41,14 +44,14 @@ while read -r i ; do
 	fi
 	if grep -q "^#\\!.*/bin/sh" "$i" && \
 		[ "${i##*.}" != "zip" ] && \
-		echo "$i" | grep -qvE '(^\./(misc-tools/dj_judgehost_cleanup.in|misc-tools/dj_make_chroot.in|config|autom4te|install-sh|sql/files/defaultdata/hs/run|sql/files/defaultdata/kt/run|lib/vendor/|output|judge/judgedaemon))'; then
+		echo "$i" | grep -qvE '(^\./(misc-tools/dj_judgehost_cleanup.in|misc-tools/dj_make_chroot.in|config|autom4te|install-sh|sql/files/defaultdata/hs/run|sql/files/defaultdata/kt/run|webapp/vendor/|output|judge/judgedaemon))'; then
 		# shellcheck disable=SC2001
 		echo "$i" | sed -e 's|^./|check for bashisms: |'
 		checkbashisms "$i"
 	fi
 	if grep -qE "^#\\!.*/bin/(ba)?sh" "$i" && \
 		[ "${i##*.}" != "zip" ] && \
-		echo "$i" | grep -qvE '(^\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output|judge/judgedaemon))'; then
+		echo "$i" | grep -qvE '(^\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|webapp/vendor/|output|judge/judgedaemon))'; then
 		# We ignore the following shellcheck warnings, for more details see:
 		# https://github.com/koalaman/shellcheck/wiki/<code>
 		#
