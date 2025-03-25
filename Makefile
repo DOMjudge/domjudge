@@ -316,7 +316,7 @@ clean-l:
 # Remove Coverity scan data:
 	-rm -rf cov-int domjudge-scan.t* coverity-scan.tar.xz cov-submit-data-version.sh
 
-distclean-l: clean-autoconf
+distclean-l: clean-autoconf clean
 	-rm -f paths.mk
 
 maintainer-clean: inplace-uninstall
