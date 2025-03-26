@@ -7,20 +7,78 @@ on:
       - '[0-9]+.[0-9]+'
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: domjudge/gitlabci:24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Create the distribution tarball
+        run: |
+          make dist
+          make distclean
+          cd ..
+          mv domjudge release
+          mkdir domjudge #Workdir for next steps
+          tar -cf release.tar release
+          gzip -9 release.tar
+          mv release.tar.gz domjudge/
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          compression-level: 0
+          name: test-tarball
+          path: ${{ github.workspace }}/release.tar.gz
+
   debian-family:
+    needs: build
     strategy:
       matrix:
         version: [jammy, focal, rolling]
         os: [ubuntu]
+        ghtest: [gcc, g++, clang, libcgroup, distclean]
         releaseBranch:
           - ${{ contains(github.ref, 'gh-readonly-queue') }}
         exclude:
           - releaseBranch: false
         include:
+          # We seem to always need this duplication as we only want to run
+          # the ubuntu tests in the mergequeue and loop over multiple versions
+          # So: We can't bundle debian/ubuntu as we use the versions
+          # We can't put ubuntu in the other group as we can't add multiple
+          #   versions as include can't duplicate jobs so we could only add 1
+          #   ubuntu version.
           - os: debian
             version: stable
+            ghtest: gcc
+          - os: debian
+            version: stable
+            ghtest: g++
+          - os: debian
+            version: stable
+            ghtest: clang
+          - os: debian
+            version: stable
+            ghtest: libcgroup
+          - os: debian
+            version: stable
+            ghtest: distclean
           - os: debian
             version: testing
+            ghtest: gcc
+          - os: debian
+            version: testing
+            ghtest: g++
+          - os: debian
+            version: testing
+            ghtest: clang
+          - os: debian
+            version: testing
+            ghtest: libcgroup
+          - os: debian
+            version: testing
+            ghtest: distclean
     runs-on: ubuntu-latest
     env:
       DEBIAN_FRONTEND: noninteractive
@@ -28,8 +86,50 @@ jobs:
     container:
       image: ${{ matrix.os }}:${{ matrix.version }}
     steps:
-      - name: Install git so we get the .github directory
-        run: apt-get update; apt-get install -y git
-      - uses: actions/checkout@v4
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test-tarball
+      - name: Unpack the "Release" tarball
+        run: tar xvf release.tar.gz
       - name: Setup image and run bats tests
-        run: .github/jobs/configure-checks/setup_configure_image.sh
+        working-directory: release
+        run: |
+          echo "${{ matrix.ghtest }}"
+          .github/jobs/configure-checks/setup_configure_image.sh "${{ matrix.ghtest }}"
+
+  other-distros:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        # Alternatives alpine & arch are non-trivial
+        # alpine has issues with running bats,
+        # arch needs AUR for some dependencies (libcgroup)
+        # opensuse/leap shows errors with our g++ detection
+        os: [fedora]
+        ghtest: [gcc, g++, clang, libcgroup, distclean]
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.os }}:${{ matrix.version || 'latest' }}
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test-tarball
+      - name: Install needed shell tools
+        run: |
+          distro_id=$(grep "^ID=" /etc/os-release)
+          # Install everything for configure and testing
+          case $distro_id in
+            "ID=fedora")
+              dnf install make bats -y ;;
+            *)
+              exit 10
+          esac
+      - name: Unpack the "Release" tarball
+        run: tar xvf release.tar.gz
+      - name: Setup image and run bats tests
+        working-directory: release
+        shell: bash
+        run: .github/jobs/configure-checks/setup_configure_image.sh "${{ matrix.ghtest }}"

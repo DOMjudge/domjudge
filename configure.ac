@@ -101,7 +101,7 @@ if test "x$DOMSERVER_BUILD_ENABLED" = xyes; then
 	if test "x$with_webserver_group" = x; then
 		# Try a number of group names and choose first one found
 		found=0
-		for g in www-data apache httpd nginx ; do
+		for g in www-data apache httpd nginx wwwrun www ; do
 			if getent group $g >/dev/null 2>&1 ; then
 			   found=1
 			   break
@@ -331,8 +331,10 @@ echo "Summary:"
 echo " * project.............: $PACKAGE_NAME $PACKAGE_VERSION"
 echo " * prefix..............: $prefix"
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
+echo " * CPP.................: $CPP"
 echo " * CPPFLAGS............: $CPPFLAGS"
 echo " * CFLAGS..............: $CFLAGS"
+echo " * CXX.................: $CXX"
 echo " * CXXFLAGS............: $CXXFLAGS"
 echo " * LDFLAGS.............: $LDFLAGS"
 fi
