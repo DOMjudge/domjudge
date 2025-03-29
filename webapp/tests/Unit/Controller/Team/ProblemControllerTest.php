@@ -80,7 +80,8 @@ class ProblemControllerTest extends BaseTestCase
                             $card->filter('h4.card-subtitle')->text(null, true)
                         );
                     } else {
-                        static::assertSame(0,
+                        // The problem type is displayed on the page, so we expect one heading.
+                        static::assertSame(1,
                             $card->filter('h4.card-subtitle')->count());
                     }
 
@@ -210,7 +211,7 @@ class ProblemControllerTest extends BaseTestCase
         $this->client->request('GET', '/public/problems');
         static::assertSelectorTextContains('.nav-item .nav-link.disabled', 'Problems');
         static::assertSelectorTextContains('.alert.alert-secondary', 'No problem texts available at this point.');
-        
+
         foreach ($probids as $id) {
             $endpoints = [
                 "/team/problems/{$id}",

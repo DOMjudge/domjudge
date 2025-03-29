@@ -791,7 +791,7 @@ class DOMJudgeService
      */
     public function getSamplesZipContent(ContestProblem $contestProblem): string
     {
-        if ($contestProblem->getProblem()->getCombinedRunCompare()) {
+        if ($contestProblem->getProblem()->isInteractiveProblem()) {
             throw new NotFoundHttpException(sprintf('Problem p%d has no downloadable samples', $contestProblem->getProbid()));
         }
 
@@ -892,7 +892,7 @@ class DOMJudgeService
         /** @var ContestProblem $problem */
         foreach ($contest->getProblems() as $problem) {
             // We don't include the samples for interactive problems.
-            if (!$problem->getProblem()->getCombinedRunCompare()) {
+            if (!$problem->getProblem()->isInteractiveProblem()) {
                 $this->addSamplesToZip($zip, $problem, $problem->getShortname());
             }
 
@@ -1452,7 +1452,7 @@ class DOMJudgeService
                 'script_memory_limit' => $this->config->get('script_memory_limit'),
                 'script_filesize_limit' => $this->config->get('script_filesize_limit'),
                 'compare_args' => $problem->getProblem()->getSpecialCompareArgs(),
-                'combined_run_compare' => $problem->getProblem()->getCombinedRunCompare(),
+                'combined_run_compare' => $problem->getProblem()->isInteractiveProblem(),
                 'hash' => $compareExecutable->getHash(),
             ]
         );

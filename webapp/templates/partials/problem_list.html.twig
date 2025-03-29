@@ -32,7 +32,7 @@
             {% for problem in problems %}
                 <div class="col">
                                 {% set numsamples = samples[problem.probid] %}
-                                {% if problem.problem.combinedRunCompare %}
+                                {% if problem.problem.interactiveProblem %}
                                     {% set numsamples = 0 %}
                                 {% endif %}
                                 <div class="card">
@@ -55,6 +55,9 @@
                                                 {{ ((problem.problem.memlimit | default(defaultMemoryLimit)) * 1024) | printSize }}
                                             </h4>
                                         {% endif %}
+                                        <h4 class="card-subtitle mb-2 text-muted">
+                                            Type: {{ problem.problem.typesAsString }}
+                                        </h4>
 
                                         {% if stats is defined %}
                                             <div class="mt-3">

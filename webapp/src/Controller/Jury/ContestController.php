@@ -714,7 +714,7 @@ class ContestController extends BaseController
                 $runConfig = Utils::jsonEncode(
                     [
                         'hash' => $runExec->getHash(),
-                        'combined_run_compare' => $problem->getCombinedRunCompare(),
+                        'combined_run_compare' => $problem->isInteractiveProblem(),
                     ]
                 );
                 $judgeTask = new JudgeTask();

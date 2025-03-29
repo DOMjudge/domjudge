@@ -8,6 +8,7 @@ use App\Entity\Problem;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -78,13 +79,16 @@ class ProblemType extends AbstractExternalIdEntityType
             'label' => 'Compare script arguments',
             'required' => false,
         ]);
-        $builder->add('combinedRunCompare', CheckboxType::class, [
-            'label' => 'Use run script as compare script.',
-            'required' => false,
-        ]);
-        $builder->add('multipassProblem', CheckboxType::class, [
-            'label' => 'Multi-pass problem',
-            'required' => false,
+        $builder->add('types', ChoiceType::class, [
+            'choices' => [
+                'pass-fail' => Problem::TYPE_PASS_FAIL,
+                'interactive' => Problem::TYPE_INTERACTIVE,
+                'multipass' => Problem::TYPE_MULTI_PASS,
+                'scoring' => Problem::TYPE_SCORING,
+                'submit-answer' => Problem::TYPE_SUBMIT_ANSWER,
+            ],
+            'multiple' => true,
+            'required' => true,
         ]);
         $builder->add('multipassLimit', IntegerType::class, [
             'label' => 'Multi-pass limit',

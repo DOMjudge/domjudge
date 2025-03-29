@@ -577,7 +577,7 @@ class SubmissionController extends BaseController
             'unjudgableReasons' => $unjudgableReasons,
             'verificationRequired' => (bool)$this->config->get('verification_required'),
             'claimWarning' => $claimWarning,
-            'combinedRunCompare' => $submission->getProblem()->getCombinedRunCompare(),
+            'combinedRunCompare' => $submission->getProblem()->isInteractiveProblem(),
             'requestedOutputCount' => $requestedOutputCount,
             'version_warnings' => [],
             'isMultiPassProblem' => $submission->getProblem()->isMultipassProblem(),
