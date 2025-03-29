@@ -86,13 +86,6 @@ class Problem extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ?string $special_compare_args = null;
 
-    #[ORM\Column(options: [
-        'comment' => 'Use the exit code of the run script to compute the verdict',
-        'default' => 0,
-    ])]
-    #[Serializer\Exclude]
-    private bool $combined_run_compare = false;
-
     #[Assert\File]
     #[Serializer\Exclude]
     private ?UploadedFile $problemstatementFile = null;
@@ -108,12 +101,24 @@ class Problem extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ?string $problemstatement_type = null;
 
-    #[ORM\Column(options: [
-        'comment' => 'Whether this problem is a multi-pass problem.',
-        'default' => 0,
-    ])]
+    // These types are encoded as bitset - if you add a new type, use the next power of 2.
+    public const TYPE_PASS_FAIL = 1;
+    public const TYPE_SCORING = 2;
+    public const TYPE_MULTI_PASS = 4;
+    public const TYPE_INTERACTIVE = 8;
+    public const TYPE_SUBMIT_ANSWER = 16;
+
+    private array $typesToString = [
+        self::TYPE_PASS_FAIL => 'pass-fail',
+        self::TYPE_SCORING => 'scoring',
+        self::TYPE_MULTI_PASS => 'multi-pass',
+        self::TYPE_INTERACTIVE => 'interactive',
+        self::TYPE_SUBMIT_ANSWER => 'submit-answer',
+    ];
+
+    #[ORM\Column(options: ['comment' => 'Bitmask of problem types, default is pass-fail.'])]
     #[Serializer\Exclude]
-    private bool $isMultipassProblem = false;
+    private int $types = self::TYPE_PASS_FAIL;
 
     #[ORM\Column(
         nullable: true,
@@ -287,26 +292,84 @@ class Problem extends BaseApiEntity implements
         return $this->special_compare_args;
     }
 
-    public function setCombinedRunCompare(bool $combinedRunCompare): Problem
+    public function setTypesAsString(array $types): Problem
     {
-        $this->combined_run_compare = $combinedRunCompare;
+        $stringToTypes = array_flip($this->typesToString);
+        $typeConstants = [];
+        foreach ($types as $type) {
+            if (!isset($stringToTypes[$type])) {
+                throw new Exception("Unknown problem type: '$type', must be one of " . implode(', ', array_keys($stringToTypes)));
+            }
+            $typeConstants[$type] = $stringToTypes[$type];
+        }
+        $this->setTypes($typeConstants);
+
         return $this;
     }
 
-    public function getCombinedRunCompare(): bool
+    public function getTypesAsString(): string
     {
-        return $this->combined_run_compare;
+        $typeConstants = $this->getTypes();
+        $typeStrings = [];
+        foreach ($typeConstants as $type) {
+            if (!isset($this->typesToString[$type])) {
+                throw new Exception("Unknown problem type: '$type'");
+            }
+            $typeStrings[] = $this->typesToString[$type];
+        }
+        return implode(', ', $typeStrings);
     }
 
-    public function setMultipassProblem(bool $isMultipassProblem): Problem
+    public function getTypes(): array
     {
-        $this->isMultipassProblem = $isMultipassProblem;
+        $ret = [];
+        foreach (array_keys($this->typesToString) as $type) {
+            if ($this->types & $type) {
+                $ret[] = $type;
+            }
+        }
+        return $ret;
+    }
+
+    public function setTypes(array $types): Problem
+    {
+        $types = array_unique($types);
+        $this->types = 0;
+        foreach ($types as $type) {
+            $this->types |= $type;
+        }
+        if (!($this->types & self::TYPE_PASS_FAIL) xor ($this->types & self::TYPE_SCORING)) {
+            throw new Exception("Invalid problem type: must be exactly one of 'pass-fail' or 'scoring'.");
+        }
+        if ($this->types & self::TYPE_SUBMIT_ANSWER) {
+            if ($this->types & self::TYPE_MULTI_PASS) {
+                throw new Exception("Invalid problem type: 'submit-answer' and 'multi-pass' are mutually exclusive.");
+            }
+            if ($this->types & self::TYPE_INTERACTIVE) {
+                throw new Exception("Invalid problem type: 'submit-answer' and 'interactive' are mutually exclusive.");
+            }
+        }
         return $this;
+    }
+
+    public function isInteractiveProblem(): bool
+    {
+        return (bool)($this->types & self::TYPE_INTERACTIVE);
     }
 
     public function isMultipassProblem(): bool
     {
-        return $this->isMultipassProblem;
+        return (bool)($this->types & self::TYPE_MULTI_PASS);
+    }
+
+    public function isPassFailProblem(): bool
+    {
+        return (bool)($this->types & self::TYPE_PASS_FAIL);
+    }
+
+    public function isScoringProblem(): bool
+    {
+        return (bool)($this->types & self::TYPE_SCORING);
     }
 
     public function setMultipassLimit(?int $multipassLimit): Problem
@@ -317,7 +380,7 @@ class Problem extends BaseApiEntity implements
 
     public function getMultipassLimit(): int
     {
-        if ($this->isMultipassProblem) {
+        if ($this->isMultipassProblem()) {
             return $this->multipassLimit ?? 2;
         }
         return 1;

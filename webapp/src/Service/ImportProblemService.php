@@ -204,10 +204,10 @@ class ImportProblemService
         // The same holds for the timelimit of the problem.
         if ($problem->getProbid()) {
             $problem
+                ->setTypesAsString(['pass-fail'])
                 ->setCompareExecutable()
                 ->setSpecialCompareArgs('')
                 ->setRunExecutable()
-                ->setCombinedRunCompare(false)
                 ->setMemlimit(null)
                 ->setOutputlimit(null)
                 ->setProblemStatementContent(null)
@@ -277,6 +277,15 @@ class ImportProblemService
                         $yamlProblemProperties['name'] = $yamlData['name'];
                     }
                 }
+
+                if (isset($yamlData['type'])) {
+                    $types = explode(' ', $yamlData['type']);
+                    // Validation happens later when we set the properties.
+                    $yamlProblemProperties['typesAsString'] = $types;
+                } else {
+                    $yamlProblemProperties['typesAsString'] = ['pass-fail'];
+                }
+
                 if (isset($yamlData['validator_flags'])) {
                     $yamlProblemProperties['special_compare_args'] = $yamlData['validator_flags'];
                 }
@@ -290,7 +299,10 @@ class ImportProblemService
                     }
 
                     if ($yamlData['validation'] == 'custom multi-pass') {
-                        $problem->setMultipassProblem(true);
+                        $yamlProblemProperties['typesAsString'][] = 'multi-pass';
+                    }
+                    if ($yamlData['validation'] == 'custom interactive') {
+                        $yamlProblemProperties['typesAsString'][] = 'interactive';
                     }
                 }
 
@@ -307,7 +319,12 @@ class ImportProblemService
                 }
 
                 foreach ($yamlProblemProperties as $key => $value) {
-                    $propertyAccessor->setValue($problem, $key, $value);
+                    try {
+                        $propertyAccessor->setValue($problem, $key, $value);
+                    } catch (Exception $e) {
+                        $messages['danger'][] = sprintf('Error: problem.%s: %s', $key, $e->getMessage());
+                        return null;
+                    }
                 }
             }
         }
@@ -1020,7 +1037,6 @@ class ImportProblemService
                 $this->em->persist($executable);
 
                 if ($combinedRunCompare) {
-                    $problem->setCombinedRunCompare(true);
                     $problem->setRunExecutable($executable);
                 } else {
                     $problem->setCompareExecutable($executable);

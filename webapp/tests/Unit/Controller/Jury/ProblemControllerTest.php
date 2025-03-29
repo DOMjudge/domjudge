@@ -40,7 +40,6 @@ class ProblemControllerTest extends JuryControllerTestCase
                                                   'problemstatementFile' => '',
                                                   'runExecutable'        => 'boolfind_cmp',
                                                   'compareExecutable'    => '',
-                                                  'combinedRunCompare'   => true,
                                                   'specialCompareArgs'   => ''],
                                                  ['name'                 => '🙃 Unicode in name'],
                                                  ['name'                 => 'Long time',
@@ -52,8 +51,7 @@ class ProblemControllerTest extends JuryControllerTestCase
                                                   'specialCompareArgs'   => 'args'],
                                                  ['name'                 => 'Args with Unicode',
                                                   'specialCompareArgs'   => '🙃 #Should not happen'],
-                                                 ['name'                 => 'Split Run/Compare',
-                                                  'combinedRunCompare'   => false],
+                                                 ['name'                 => 'Split Run/Compare'],
                                                  ['externalid'           => '._-3xternal1']];
     protected static array  $addEntitiesFailure = ['This value should not be blank.' => [['name' => '']],
                                                    'Only letters, numbers, dashes, underscores and dots are allowed.' => [['externalid' => 'limited_special_chars!']],

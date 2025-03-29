@@ -204,17 +204,10 @@ class ProblemController extends BaseController
             $problemdata['badges'] = ['value' => $badges];
 
             // merge in the rest of the data
-            $type = '';
-            if ($p->getCombinedRunCompare()) {
-                $type .= ' interactive';
-            }
-            if ($p->isMultipassProblem()) {
-                $type .= ' multi-pass (max passes: ' . $p->getMultipassLimit() . ')';
-            }
             $problemdata = array_merge($problemdata, [
                 'num_contests' => ['value' => (int)($contestCounts[$p->getProbid()] ?? 0)],
                 'num_testcases' => ['value' => (int)$row['testdatacount']],
-                'type' => ['value' => $type],
+                'type' => ['value' => $p->getTypesAsString()],
             ]);
 
             $data_to_add = [
@@ -304,7 +297,7 @@ class ProblemController extends BaseController
         $yaml = ['name' => $problem->getName()];
         if (!empty($problem->getCompareExecutable())) {
             $yaml['validation'] = 'custom';
-        } elseif ($problem->getCombinedRunCompare() && !empty($problem->getRunExecutable())) {
+        } elseif ($problem->isInteractiveProblem() && !empty($problem->getRunExecutable())) {
             $yaml['validation'] = 'custom interactive';
         }
 
@@ -340,7 +333,7 @@ class ProblemController extends BaseController
         $compareExecutable = null;
         if ($problem->getCompareExecutable()) {
             $compareExecutable = $problem->getCompareExecutable();
-        } elseif ($problem->getCombinedRunCompare()) {
+        } elseif ($problem->isInteractiveProblem()) {
             $compareExecutable = $problem->getRunExecutable();
         }
         if ($compareExecutable) {
@@ -496,13 +489,6 @@ class ProblemController extends BaseController
             page: $request->query->getInt('page', 1),
         );
 
-        $type = '';
-        if ($problem->getCombinedRunCompare()) {
-            $type .= ' interactive';
-        }
-        if ($problem->isMultipassProblem()) {
-            $type .= ' multi-pass (max passes: ' . $problem->getMultipassLimit() . ')';
-        }
         $data = [
             'problem' => $problem,
             'problemAttachmentForm' => $problemAttachmentForm->createView(),
@@ -512,7 +498,7 @@ class ProblemController extends BaseController
             'defaultOutputLimit' => (int)$this->config->get('output_limit'),
             'defaultRunExecutable' => (string)$this->config->get('default_run'),
             'defaultCompareExecutable' => (string)$this->config->get('default_compare'),
-            'type' => $type,
+            'type' => $problem->getTypesAsString(),
             'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
             'showExternalResult' => $this->dj->shadowMode(),
             'lockedProblem' => $lockedProblem,
