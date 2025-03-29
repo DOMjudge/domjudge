@@ -1122,27 +1122,46 @@ class ProblemController extends BaseController
 
     /**
      * @param Testcase[] $testcases
+     *
+     * Assumes testcases are in order of their rank.
      */
     private function addTestcasesToZip(array $testcases, ZipArchive $zip, bool $isSample): void
     {
+
+        // Verify whether order of original filenames matches order of testcases by rank.
+        // If so, prefer their original name, otherwise replace the name with the rank to ensure same order.
+        $prev = null;
+        $isStillSorted = true;
+        foreach ($testcases as $testcase) {
+            if ($prev !== null && $prev >= $testcase->getOrigInputFilename()) {
+                $isStillSorted = false;
+                break;
+            }
+            $prev = $testcase->getOrigInputFilename();
+        }
+
         $formatString = sprintf('data/%%s/%%0%dd', ceil(log10(count($testcases) + 1)));
         $rankInGroup = 0;
         foreach ($testcases as $testcase) {
             $rankInGroup++;
-            $filename = sprintf($formatString, $isSample ? 'sample' : 'secret', $rankInGroup);
-            $zip->addFromString($filename . '.in', $testcase->getContent()->getInput());
-            $zip->addFromString($filename . '.ans', $testcase->getContent()->getOutput());
+            if ($isStillSorted) {
+                $filenamePrefix = sprintf("data/%s/%s", $isSample ? 'sample' : 'secret', $testcase->getOrigInputFilename());
+            } else {
+                $filenamePrefix = sprintf($formatString, $isSample ? 'sample' : 'secret', $rankInGroup);
+            }
+            $zip->addFromString($filenamePrefix . '.in', $testcase->getContent()->getInput());
+            $zip->addFromString($filenamePrefix . '.ans', $testcase->getContent()->getOutput());
 
             if (!empty($testcase->getDescription(true))) {
                 $description = $testcase->getDescription(true);
                 if (!str_contains($description, "\n")) {
                     $description .= "\n";
                 }
-                $zip->addFromString($filename . '.desc', $description);
+                $zip->addFromString($filenamePrefix . '.desc', $description);
             }
 
             if (!empty($testcase->getImageType())) {
-                $zip->addFromString($filename . '.' . $testcase->getImageType(),
+                $zip->addFromString($filenamePrefix . '.' . $testcase->getImageType(),
                                     $testcase->getContent()->getImage());
             }
         }
