@@ -86,13 +86,6 @@ class Problem extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ?string $special_compare_args = null;
 
-    #[ORM\Column(options: [
-        'comment' => 'Use the exit code of the run script to compute the verdict',
-        'default' => 0,
-    ])]
-    #[Serializer\Exclude]
-    private bool $combined_run_compare = false;
-
     #[Assert\File]
     #[Serializer\Exclude]
     private ?UploadedFile $problemstatementFile = null;
@@ -108,12 +101,15 @@ class Problem extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ?string $problemstatement_type = null;
 
-    #[ORM\Column(options: [
-        'comment' => 'Whether this problem is a multi-pass problem.',
-        'default' => 0,
-    ])]
+    public const TYPE_PASS_FAIL = 1;
+    public const TYPE_SCORING = 2;
+    public const TYPE_MULTI_PASS = 4;
+    public const TYPE_INTERACTIVE = 8;
+    public const TYPE_SUBMIT_ANSWER = 16;
+
+    #[ORM\Column(options: ['comment' => 'Bitmask of problem types, default is pass-fail.'])]
     #[Serializer\Exclude]
-    private bool $isMultipassProblem = false;
+    private int $types = self::TYPE_PASS_FAIL;
 
     #[ORM\Column(
         nullable: true,
@@ -287,26 +283,82 @@ class Problem extends BaseApiEntity implements
         return $this->special_compare_args;
     }
 
-    public function setCombinedRunCompare(bool $combinedRunCompare): Problem
+    public function setTypes(array $types): Problem
     {
-        $this->combined_run_compare = $combinedRunCompare;
+        $types = array_unique($types);
+
+        $this->types = 0;
+        foreach ($types as $type) {
+            if ($type === 'pass-fail') {
+                $this->types |= self::TYPE_PASS_FAIL;
+            } elseif ($type === 'scoring') {
+                $this->types |= self::TYPE_SCORING;
+            } elseif ($type === 'multi-pass') {
+                $this->types |= self::TYPE_MULTI_PASS;
+            } elseif ($type === 'interactive') {
+                $this->types |= self::TYPE_INTERACTIVE;
+            }
+        }
         return $this;
     }
 
-    public function getCombinedRunCompare(): bool
+    public function getTypes(): array
     {
-        return $this->combined_run_compare;
+        $types = [];
+        if ($this->isPassFailProblem()) {
+            $types[] = 'pass-fail';
+        }
+        if ($this->isScoringProblem()) {
+            $types[] = 'scoring';
+        }
+        if ($this->isMultipassProblem()) {
+            $types[] = 'multi-pass';
+        }
+        if ($this->isInteractiveProblem()) {
+            $types[] = 'interactive';
+        }
+
+        return $types;
     }
 
-    public function setMultipassProblem(bool $isMultipassProblem): Problem
+    public function getTypesForForm(): array
     {
-        $this->isMultipassProblem = $isMultipassProblem;
+        $ret = [];
+        foreach ([self::TYPE_PASS_FAIL, self::TYPE_SCORING, self::TYPE_MULTI_PASS, self::TYPE_INTERACTIVE, self::TYPE_SUBMIT_ANSWER] as $type) {
+            if ($this->types & $type) {
+                $ret[] = $type;
+            }
+        }
+        return $ret;
+    }
+
+    public function setTypesForForm(array $types): Problem
+    {
+        $this->types = 0;
+        foreach ($types as $type) {
+            $this->types |= $type;
+        }
         return $this;
+    }
+
+    public function isInteractiveProblem(): bool
+    {
+        return (bool)($this->types & self::TYPE_INTERACTIVE);
     }
 
     public function isMultipassProblem(): bool
     {
-        return $this->isMultipassProblem;
+        return (bool)($this->types & self::TYPE_MULTI_PASS);
+    }
+
+    public function isPassFailProblem(): bool
+    {
+        return (bool)($this->types & self::TYPE_PASS_FAIL);
+    }
+
+    public function isScoringProblem(): bool
+    {
+        return (bool)($this->types & self::TYPE_SCORING);
     }
 
     public function setMultipassLimit(?int $multipassLimit): Problem
@@ -317,7 +369,7 @@ class Problem extends BaseApiEntity implements
 
     public function getMultipassLimit(): int
     {
-        if ($this->isMultipassProblem) {
+        if ($this->isMultipassProblem()) {
             return $this->multipassLimit ?? 2;
         }
         return 1;
