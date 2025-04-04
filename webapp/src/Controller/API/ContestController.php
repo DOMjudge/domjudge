@@ -364,7 +364,7 @@ class ContestController extends AbstractRestController
 
         $hasAccess = $this->dj->checkrole('jury') ||
             $this->dj->checkrole('api_reader') ||
-            $contest->getFreezeData()->started();
+            $contest?->getFreezeData()->started();
 
         if (!$hasAccess) {
             throw new AccessDeniedHttpException();
