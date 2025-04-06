@@ -15,7 +15,7 @@ source .github/jobs/configure-checks/functions.sh
         groupdel ${www_group} || true
     done
     repo-install httpd
-    run ./configure --with-domjudge-user=$u
+    run ./configure --with-domjudge-user=$u --enable-judgehost-build --enable-domserver-build
     assert_line "checking webserver-group... apache (detected)"
     assert_line " * webserver group.....: apache"
 }
