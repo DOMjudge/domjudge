@@ -7,5 +7,6 @@ class SubmissionFile
     public function __construct(
         public readonly string $href,
         public readonly ?string $mime,
+        public readonly ?string $filename,
     ) {}
 }
