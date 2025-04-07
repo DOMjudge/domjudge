@@ -200,7 +200,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData->version;
+        return $this->cachedApiInfoData?->version;
     }
 
     public function getApiVersionUrl(): ?string
@@ -209,7 +209,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData->versionUrl;
+        return $this->cachedApiInfoData?->versionUrl;
     }
 
     public function getApiProviderName(): ?string
@@ -218,7 +218,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData->provider?->name ?? $this->cachedApiInfoData->name;
+        return $this->cachedApiInfoData?->provider?->name ?? $this->cachedApiInfoData?->name;
     }
 
     public function getApiProviderVersion(): ?string
@@ -227,7 +227,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData->provider?->version ?? $this->cachedApiInfoData->domjudge?->version;
+        return $this->cachedApiInfoData?->provider?->version ?? $this->cachedApiInfoData?->domjudge?->version;
     }
 
     public function getApiProviderBuildDate(): ?string
@@ -236,7 +236,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData->provider?->buildDate;
+        return $this->cachedApiInfoData?->provider?->buildDate;
     }
 
     public function getLoadingError(): string
@@ -1433,6 +1433,14 @@ class ExternalContestSourceService
                 if (preg_match('/^https?:\/\//', $zipUrl) === 0) {
                     // Relative URL, prepend the base URL.
                     $zipUrl = ($this->basePath ?? '') . $zipUrl;
+                }
+
+                if ($this->source->getType() === ExternalContestSource::TYPE_CONTEST_PACKAGE && $data->files[0]->filename) {
+                    $zipUrl = $this->source->getSource() . '/submissions/' . $data->id . '/' . $data->files[0]->filename;
+                    if (!file_exists($zipUrl)) {
+                        // Common case: submissions are in submissions/<id>.zip
+                        $zipUrl = $this->source->getSource() . '/submissions/' . $data->id . '.zip';
+                    }
                 }
 
                 $tmpdir = $this->dj->getDomjudgeTmpDir();
