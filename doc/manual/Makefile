@@ -47,6 +47,10 @@ inplace-uninstall-l:
 clean-l:
 	rm -rf build/doctrees build/team/.doctrees
 	-$(MAKE) -C build/team clean
+	-rm -f build/html/*.html build/html/.buildinfo build/html/objects.inv build/html/searchindex.js
+	-rm -rf build/html/_*
+	-rm -f build/team/*.sty build/team/*.png build/team/*.cls build/team/*.tex build/team/*.xdy
+	-rm -f DOMjudgelogo.pdf latexmkjarc latexmkrc make.bat python.ist
 
 maintainer-clean-l:
 	rm -rf build conf_ref.rst
