@@ -67,8 +67,9 @@ class ScoreboardService
         if (!$freezeData->started() && !$jury && !$forceUnfrozen) {
             return null;
         }
+        $restricted = ($jury || $freezeData->showFinal(false));
 
-        $teams      = $this->getTeamsInOrder($contest, $jury && !$visibleOnly, $filter);
+        $teams      = $this->getTeamsInOrder($contest, $jury && !$visibleOnly, $filter, $restricted);
         $problems   = $this->getProblems($contest);
         $categories = $this->getCategories($jury && !$visibleOnly);
         $scoreCache = $this->getScorecache($contest);
@@ -95,7 +96,7 @@ class ScoreboardService
     {
         $freezeData = new FreezeData($contest);
 
-        $teams = $this->getTeamsInOrder($contest, true, new Filter([], [], [], [$teamId]));
+        $teams = $this->getTeamsInOrder($contest, true, new Filter([], [], [], [$teamId]), true);
         if (empty($teams)) {
             return null;
         }
@@ -944,7 +945,7 @@ class ScoreboardService
      * Get the teams to display on the scoreboard, returns them in order.
      * @return Team[]
      */
-    protected function getTeamsInOrder(Contest $contest, bool $jury = false, ?Filter $filter = null): array
+    protected function getTeamsInOrder(Contest $contest, bool $jury = false, ?Filter $filter = null, bool $restricted = false): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
@@ -1005,7 +1006,7 @@ class ScoreboardService
 
         $ret = $queryBuilder
             ->addOrderBy('tc.sortorder')
-            ->addOrderBy('r.sortKey' . ($jury ? 'Restricted' : 'Public'), 'DESC')
+            ->addOrderBy('r.sortKey' . ($restricted ? 'Restricted' : 'Public'), 'DESC')
             ->addOrderBy('effectivename')
             ->getQuery()->getResult();
         return $ret;
