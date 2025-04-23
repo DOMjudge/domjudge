@@ -16,8 +16,8 @@ jobs:
     container:
       image: ${{ matrix.os }}:${{ matrix.version }}
     steps:
-      - name: Install git so we get the .github directory
-        run: dnf install -y git
+      - name: Install necessary tools
+        run: dnf install -y awk git
       - uses: actions/checkout@v4
       - name: Setup image and run bats tests
         run: .github/jobs/configure-checks/setup_configure_image.sh
