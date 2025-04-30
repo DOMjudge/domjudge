@@ -1468,26 +1468,31 @@ class ExternalContestSourceService
                     }
 
                     if ($submissionDownloadSucceeded) {
-                        try {
-                            $response = $this->httpClient->request('GET', $zipUrl);
-                            $ziphandler = fopen($zipFile, 'w');
-                            if ($response->getStatusCode() !== 200) {
-                                // TODO: Retry a couple of times.
+                        $tries = 1;
+                        do {
+                            try {
+                                $response = $this->httpClient->request('GET', $zipUrl);
+                                $ziphandler = fopen($zipFile, 'w');
+                                if ($response->getStatusCode() !== 200) {
+                                    $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
+                                        'message' => "Cannot download ZIP from $zipUrl after trying $tries times",
+                                    ]);
+                                    $submissionDownloadSucceeded = false;
+                                    // Sleep a bit before retrying
+                                    sleep(3);
+                                }
+                                $tries++;
+                            } catch (TransportExceptionInterface $e) {
                                 $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
-                                    'message' => 'Cannot download ZIP from ' . $zipUrl,
+                                    'message' => "Cannot download ZIP from $zipUrl after trying $tries times: " . $e->getMessage(),
                                 ]);
+                                if (isset($ziphandler)) {
+                                    fclose($ziphandler);
+                                }
+                                unlink($zipFile);
                                 $submissionDownloadSucceeded = false;
                             }
-                        } catch (TransportExceptionInterface $e) {
-                            $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
-                                'message' => 'Cannot download ZIP from ' . $zipUrl . ': ' . $e->getMessage(),
-                            ]);
-                            if (isset($ziphandler)) {
-                                fclose($ziphandler);
-                            }
-                            unlink($zipFile);
-                            $submissionDownloadSucceeded = false;
-                        }
+                        } while ($tries <= 3 && !$submissionDownloadSucceeded);
                     }
 
                     if (isset($response, $ziphandler) && $submissionDownloadSucceeded) {
