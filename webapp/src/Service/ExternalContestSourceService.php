@@ -381,11 +381,10 @@ class ExternalContestSourceService
             };
 
             while (true) {
-                // A timeout of 0.0 means we get chunks immediately and the user
-                // can cancel at any time.
                 try {
                     $receivedData = false;
-                    foreach ($this->httpClient->stream($response, 0.0) as $chunk) {
+                    // Get a timeout chunk after 1 second so we don't hang indefinitely.
+                    foreach ($this->httpClient->stream($response, 1.0) as $chunk) {
                         // We first need to check for timeouts, as we can not call
                         // ->isLast() or ->getContent() on them.
                         if (!$chunk->isTimeout()) {
