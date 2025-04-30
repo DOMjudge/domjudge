@@ -833,6 +833,10 @@ class ExternalContestSourceService
             ]);
         } else {
             $this->removeWarning($event->type, $data->id, ExternalSourceWarning::TYPE_DATA_MISMATCH);
+
+            $toCheck = ['extensions' => $data->extensions];
+
+            $this->compareOrCreateValues($event, $data->id, $language, $toCheck);
         }
     }
 
