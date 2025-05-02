@@ -36,7 +36,11 @@ function get_db_url(): string
         break;
     }
 
-    return sprintf('mysql://%s:%s@%s:%d/%s?serverVersion=5.7.0', $user, $pass, $host, $port ?? 3306, $db);
+    return sprintf(
+        'mysql://%s:%s@%s:%d/%s?serverVersion=5.7.0',
+        rawurlencode($user), rawurlencode($pass), rawurlencode($host),
+        $port ?? 3306, rawurlencode($db)
+    );
 }
 
 function get_app_secret(): string
