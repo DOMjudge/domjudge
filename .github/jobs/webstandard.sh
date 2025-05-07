@@ -146,7 +146,8 @@ else
         STAN="-s $TEST"
         FLTR0="-E '#DataTables_Table_0 > tbody > tr > td > a','#menuDefault > a','#filter-card > div > div > div > span > span:nth-child(1) > span > ul > li > input',.problem-badge"
         FLTR1="'html > body > div > div > div > div > div > div > table > tbody > tr > td > a > span','html > body > div > div > div > div > div > div > form > div > div > div > label'"
-        FLTR="$FLTR0,$FLTR1"
+        FLTR2="'#menuDefault > ul:nth-child(1) > li > a.disabled'"
+        FLTR="$FLTR0,$FLTR1,$FLTR2"
     fi
     chown -R domjudge:domjudge "$DIR"
     cd "$DIR"
