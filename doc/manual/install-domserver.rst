@@ -65,7 +65,7 @@ After installing the required software as described above, run configure.
 In this example to install DOMjudge in the directory ``domjudge`` under
 `/opt`::
 
-  ./configure --prefix=/opt/domjudge
+  ./configure --enable-domserver-build --prefix=/opt/domjudge
   make domserver
   sudo make install-domserver
 
