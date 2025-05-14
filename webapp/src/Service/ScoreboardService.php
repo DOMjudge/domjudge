@@ -750,7 +750,8 @@ class ScoreboardService
             ->leftJoin('t.affiliation', 'affil')
             ->andWhere('cat.visible = 1')
             ->orderBy('cat.name')
-            ->addOrderBy('affil.name');
+            ->addOrderBy('affil.name')
+            ->addOrderBy('t.name');
 
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
