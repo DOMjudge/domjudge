@@ -133,6 +133,7 @@ class SubmissionController extends BaseController
             ->setParameter('team', $team)
             ->getQuery()
             ->getOneOrNullResult();
+        $showTestResults      = (bool)$this->config->get('show_test_results');
 
         // Update seen status when viewing submission.
         if ($judging && $judging->getSubmission()->getSubmittime() < $contest->getEndtime() &&
@@ -183,6 +184,23 @@ class SubmissionController extends BaseController
                 ->getResult();
         }
 
+        $testcasesruns = [];
+        if ($showTestResults){
+            $queryBuilder = $this->em->createQueryBuilder()
+                ->from(Testcase::class, 't')
+                ->join('t.content', 'tc')
+                ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
+                ->leftJoin('jr.output', 'jro')
+                ->select('t', 'jr', 'tc')
+                ->andWhere('t.problem = :problem')
+                ->setParameter('judging', $judging)
+                ->setParameter('problem', $judging->getSubmission()->getProblem())
+                ->orderBy('t.ranknumber');
+            $testcasesruns = $queryBuilder
+                    ->getQuery()
+                    ->getResult();
+        }
+
         $actuallyShowCompile = $showCompile == self::ALWAYS_SHOW_COMPILE_OUTPUT
             || ($showCompile == self::ONLY_SHOW_COMPILE_OUTPUT_ON_ERROR && $judging->getResult() === 'compiler-error');
 
@@ -194,6 +212,8 @@ class SubmissionController extends BaseController
             'showSampleOutput' => $showSampleOutput,
             'runs' => $runs,
             'showTooLateResult' => $showTooLateResult,
+            'showTestResults' => $showTestResults,
+            'testcasesruns' => $testcasesruns,
         ];
         if ($actuallyShowCompile) {
             $data['size'] = 'xl';

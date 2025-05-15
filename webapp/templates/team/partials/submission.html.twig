@@ -35,19 +35,24 @@
                     {% endif %}
                 </div>
             {% endif %}
+            {% if judging.result != 'compiler-error' %}
+                <div class="d-flex flex-row">
+                    <div class="p-2">
+                        Result: {{ judging.result | printResult }}
+                    </div>
+                    {% if judging.result == 'correct' and judging.submission.contest.getRuntimeAsScoreTiebreaker() %}
+                        <div class="p-2">
+                            Max. Runtime: <b>{{ "%0.3f s" | format(judging.getMaxRuntime()) }}</b>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
 
-        {% if judging.result != 'compiler-error' %}
-            <div class="d-flex flex-row">
-                <div class="p-2">
-                    Result: {{ judging.result | printResult }}
-                </div>
-                {% if judging.result == 'correct' and judging.submission.contest.getRuntimeAsScoreTiebreaker() %}
-                    <div class="p-2">
-                        Max. Runtime: <b>{{ "%0.3f s" | format(judging.getMaxRuntime()) }}</b>
-                    </div>
-                {% endif %}
-            </div>
+        {% if showTestResults and judging.result != 'compiler-error' %}
+            <div class="p-2">
+                Testcase Runs: {{ testcasesruns | displayTestcaseResults(1) }}
+            <div>
         {% endif %}
 
         {% if allowDownload %}
