@@ -20,9 +20,9 @@
         {{ form_row(form.allowSubmit) }}
         {{ form_row(form.processBalloons) }}
         {{ form_row(form.runtimeAsScoreTiebreaker) }}
-        {{ form_row(form.similarityAsScoreTiebreaker) }}
-        <div data-similarity-field>
-            {{ form_row(form.similarityOrder) }}
+        {{ form_row(form.optScoreAsScoreTiebreaker) }}
+        <div data-opt-score-field>
+            {{ form_row(form.optScoreOrder) }}
         </div>
         {{ form_row(form.medalsEnabled) }}
         <div data-medals-field>
@@ -162,16 +162,15 @@
         $('#contest_medalsEnabled_1, #contest_medalsEnabled_0').on('change', showHideMedals);
         showHideMedals();
 
-        function showHideSimilarity() {
-            if ($('#contest_similarityAsScoreTiebreaker_0').is(':checked')) { // Yes = index 0
-                $('[data-similarity-field]').show();
+        function showHideOptScore() {
+            if ($('#contest_optScoreAsScoreTiebreaker_0').is(':checked')) {
+                $('[data-opt-score-field]').show();
             } else {
-                $('[data-similarity-field]').hide();
+                $('[data-opt-score-field]').hide();
             }
         }
-
-        $('#contest_similarityAsScoreTiebreaker_0, #contest_similarityAsScoreTiebreaker_1')
-            .on('change', showHideSimilarity);
-        showHideSimilarity();
+        $('#contest_optScoreAsScoreTiebreaker_0, #contest_optScoreAsScoreTiebreaker_1')
+            .on('change', showHideOptScore);
+        showHideOptScore();
     })
 </script>

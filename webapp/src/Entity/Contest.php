@@ -282,10 +282,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private bool $runtime_as_score_tiebreaker = false;
 
     #[ORM\Column(
-        options: ['comment' => 'Use similarity-based scoring instead of exact match', 'default' => 0]
+    options: ['comment' => 'Use optimization score ranking instead of exact match', 'default' => 0]
     )]
     #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
-    private bool $similarity_as_score_tiebreaker = false;
+    private bool $opt_score_as_score_tiebreaker = false;
 
     #[ORM\Column(
         type: 'string',
@@ -293,11 +293,11 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         nullable: false,
         options: [
             'default' => 'asc',
-            'comment' => 'Order to apply for similarity-based scoring: asc or desc'
+            'comment' => 'Order to apply for objective score: asc(smaller-better) or desc(larger-better)'
         ]
     )]
     #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
-    private ?string $similarity_order = null;
+    private string $opt_score_order = 'asc';
 
     #[ORM\Column(
         options: ['comment' => 'Is this contest visible for the public?', 'default' => 1]
@@ -785,26 +785,26 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->runtime_as_score_tiebreaker;
     }
 
-    public function setSimilarityAsScoreTiebreaker(bool $similarityAsScoreTiebreaker): Contest
+    public function setOptScoreAsScoreTiebreaker(bool $optScoreAsScoreTiebreaker): Contest
     {
-        $this->similarity_as_score_tiebreaker = $similarityAsScoreTiebreaker;
+        $this->opt_score_as_score_tiebreaker = $optScoreAsScoreTiebreaker;
         return $this;
     }
 
-    public function getSimilarityAsScoreTiebreaker(): bool
+    public function getOptScoreAsScoreTiebreaker(): bool
     {
-        return $this->similarity_as_score_tiebreaker;
+        return $this->opt_score_as_score_tiebreaker;
     }
 
-    public function setSimilarityOrder(?string $order): Contest
+    public function setOptScoreOrder(string $order): Contest
     {
-        $this->similarity_order = $order;
+        $this->opt_score_order = $order;
         return $this;
     }
 
-    public function getSimilarityOrder(): ?string
+    public function getOptScoreOrder(): string
     {
-        return $this->similarity_order;
+        return $this->opt_score_order;
     }
 
     public function setMedalsEnabled(bool $medalsEnabled): Contest
@@ -1342,10 +1342,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             }
         }
 
-        if ($this->runtime_as_score_tiebreaker && $this->similarity_as_score_tiebreaker) {
-            $context->buildViolation('You cannot enable both runtime and similarity scoring at the same time.')
-                ->atPath('similarityAsScoreTiebreaker')
-                ->addViolation();
+        if ($this->runtime_as_score_tiebreaker && $this->opt_score_as_score_tiebreaker) {
+            $context->buildViolation('Cannot enable both runtime and optimization score tiebreakers at the same time.')
+                    ->atPath('optScoreAsScoreTiebreaker')
+                    ->addViolation();
         }
 
         /** @var ContestProblem $problem */
