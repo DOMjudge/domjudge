@@ -20,6 +20,10 @@
         {{ form_row(form.allowSubmit) }}
         {{ form_row(form.processBalloons) }}
         {{ form_row(form.runtimeAsScoreTiebreaker) }}
+        {{ form_row(form.similarityAsScoreTiebreaker) }}
+        <div data-similarity-field>
+            {{ form_row(form.similarityOrder) }}
+        </div>
         {{ form_row(form.medalsEnabled) }}
         <div data-medals-field>
             {{ form_row(form.medalCategories) }}
@@ -157,5 +161,17 @@
 
         $('#contest_medalsEnabled_1, #contest_medalsEnabled_0').on('change', showHideMedals);
         showHideMedals();
+
+        function showHideSimilarity() {
+            if ($('#contest_similarityAsScoreTiebreaker_0').is(':checked')) { // Yes = index 0
+                $('[data-similarity-field]').show();
+            } else {
+                $('[data-similarity-field]').hide();
+            }
+        }
+
+        $('#contest_similarityAsScoreTiebreaker_0, #contest_similarityAsScoreTiebreaker_1')
+            .on('change', showHideSimilarity);
+        showHideSimilarity();
     })
 </script>

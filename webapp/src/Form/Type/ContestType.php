@@ -101,6 +101,23 @@ class ContestType extends AbstractExternalIdEntityType
             ],
             'help' => 'Enable this to show runtimes in seconds on scoreboard and use them as tiebreaker instead of penalty. The runtime of a submission is the maximum over all testcases.',
         ]);
+        $builder->add('similarityAsScoreTiebreaker', ChoiceType::class, [
+            'expanded' => true,
+            'choices' => [
+                'Yes' => true,
+                'No' => false,
+            ],
+            'help' => 'Enable this to score submissions based on output similarity.',
+        ]);
+        $builder->add('similarityOrder', ChoiceType::class, [
+            'label'    => 'Similarity scoring order',
+            'choices'  => [
+                'Smaller is better (asc)' => 'asc',
+                'Larger is better (desc)' => 'desc',
+            ],
+            'required' => false,
+            'disabled' => false,
+        ]);
         $builder->add('medalsEnabled', ChoiceType::class, [
             'expanded' => true,
             'choices' => [

@@ -282,6 +282,24 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private bool $runtime_as_score_tiebreaker = false;
 
     #[ORM\Column(
+        options: ['comment' => 'Use similarity-based scoring instead of exact match', 'default' => 0]
+    )]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    private bool $similarity_as_score_tiebreaker = false;
+
+    #[ORM\Column(
+        type: 'string',
+        length: 10,
+        nullable: false,
+        options: [
+            'default' => 'asc',
+            'comment' => 'Order to apply for similarity-based scoring: asc or desc'
+        ]
+    )]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    private ?string $similarity_order = null;
+
+    #[ORM\Column(
         options: ['comment' => 'Is this contest visible for the public?', 'default' => 1]
     )]
     #[Serializer\Exclude]
@@ -765,6 +783,28 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     public function getRuntimeAsScoreTiebreaker(): bool
     {
         return $this->runtime_as_score_tiebreaker;
+    }
+
+    public function setSimilarityAsScoreTiebreaker(bool $similarityAsScoreTiebreaker): Contest
+    {
+        $this->similarity_as_score_tiebreaker = $similarityAsScoreTiebreaker;
+        return $this;
+    }
+
+    public function getSimilarityAsScoreTiebreaker(): bool
+    {
+        return $this->similarity_as_score_tiebreaker;
+    }
+
+    public function setSimilarityOrder(?string $order): Contest
+    {
+        $this->similarity_order = $order;
+        return $this;
+    }
+
+    public function getSimilarityOrder(): ?string
+    {
+        return $this->similarity_order;
     }
 
     public function setMedalsEnabled(bool $medalsEnabled): Contest
@@ -1300,6 +1340,12 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
                     ->atPath('medalCategories')
                     ->addViolation();
             }
+        }
+
+        if ($this->runtime_as_score_tiebreaker && $this->similarity_as_score_tiebreaker) {
+            $context->buildViolation('You cannot enable both runtime and similarity scoring at the same time.')
+                ->atPath('similarityAsScoreTiebreaker')
+                ->addViolation();
         }
 
         /** @var ContestProblem $problem */
