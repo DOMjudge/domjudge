@@ -608,6 +608,12 @@ class JudgehostController extends AbstractFOSRestController
                         description: 'The (base64-encoded) metadata',
                         type: 'string'
                     ),
+                    new OA\Property(
+                        property: 'optscore',
+                        description: 'Optional optimisation score (float)',
+                        type: 'number',
+                        format: 'float'
+                    ),
                 ]
             )
         )
@@ -644,6 +650,7 @@ class JudgehostController extends AbstractFOSRestController
         $teamMessage  = $request->request->get('team_message');
         $metadata     = $request->request->get('metadata');
         $testcasedir  = $request->request->get('testcasedir');
+        $optScore     = $request->request->get('optscore');
 
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
@@ -651,7 +658,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
-            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir);
+            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $optScore);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
@@ -916,7 +923,8 @@ class JudgehostController extends AbstractFOSRestController
         string $outputRun,
         ?string $teamMessage,
         string $metadata,
-        ?string $testcasedir
+        ?string $testcasedir,
+        ?string $optScore
     ): bool {
         $resultsRemap = $this->config->get('results_remap');
         $resultsPrio  = $this->config->get('results_prio');
@@ -937,7 +945,8 @@ class JudgehostController extends AbstractFOSRestController
             $outputRun,
             $teamMessage,
             $metadata,
-            $testcasedir
+            $testcasedir,
+            $optScore
         ) {
             $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
                 ['judgetaskid' => $judgeTaskId]);
@@ -961,6 +970,10 @@ class JudgehostController extends AbstractFOSRestController
 
             if ($teamMessage) {
                 $judgingRunOutput->setTeamMessage(base64_decode($teamMessage));
+            }
+
+            if ($optScore !== null) {
+                $judgingRun->setOptScore((float)$optScore);
             }
 
             $judging = $judgingRun->getJudging();

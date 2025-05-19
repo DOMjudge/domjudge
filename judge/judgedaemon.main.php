@@ -1424,10 +1424,17 @@ function judge(array $judgeTask): bool
 
     // Try to read metadata from file
     $runtime = null;
+    $optscore = null;
     $metadata = read_metadata($testcasedir . '/program.meta');
+    $compareMeta = read_metadata($testcasedir.'/compare.meta');
 
     if (isset($metadata['time-used'])) {
         $runtime = @$metadata[$metadata['time-used']];
+    }
+
+    logmsg(LOG_INFO, '[DEBUG] compareMeta = '.var_export($compareMeta, true));
+    if (isset($compareMeta['opt-score'])) {
+       $optscore = @$compareMeta['opt-score'];
     }
 
     if ($result === 'compare-error') {
@@ -1446,6 +1453,7 @@ function judge(array $judgeTask): bool
     $new_judging_run = [
         'runresult' => urlencode($result),
         'runtime' => urlencode((string)$runtime),
+        'optscore'  => urlencode((string)$optscore),
         'output_run'   => rest_encode_file($testcasedir . '/program.out', $output_storage_limit),
         'output_error' => rest_encode_file($testcasedir . '/program.err', $output_storage_limit),
         'output_system' => rest_encode_file($testcasedir . '/system.out', $output_storage_limit),

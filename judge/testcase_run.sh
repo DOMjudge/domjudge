@@ -233,6 +233,19 @@ if [ $COMBINED_RUN_COMPARE -eq 0 ]; then
 		-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
 		"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
 				  >compare.tmp 2>&1
+	
+	# match optscore 
+	if grep -q '^OPT_SCORE=' compare.tmp ; then
+		score="$(grep -m1 '^OPT_SCORE=' compare.tmp | cut -d= -f2-)"
+		case "$score" in
+				''|*[!0-9.-]*|*.*.*|*.-*)
+						echo "Invalid OPT_SCORE value: $score" >&2
+						;;
+				*)
+						echo "opt-score: $score" >> compare.meta
+						;;
+		esac
+	fi
 fi
 
 # Make sure that all feedback files are owned by the current
