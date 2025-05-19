@@ -328,6 +328,10 @@ class ScoreboardService
         $correctPubl     = false;
         $runtimeJury     = PHP_INT_MAX;
         $runtimePubl     = PHP_INT_MAX;
+        $optmaxJury = null;
+        $optmaxPubl = null;
+        $optminJury = null;
+        $optminPubl = null;
 
         foreach ($submissions as $submission) {
             /** @var Judging|ExternalJudgement|null $judging */
@@ -349,6 +353,27 @@ class ScoreboardService
                 $runtimeJury = min($runtimeJury, $runtime);
                 if (!$submission->isAfterFreeze()) {
                     $runtimePubl = min($runtimePubl, $runtime);
+                }
+            }
+
+            if ($judging !== null && $judging->getResult() == Judging::RESULT_CORRECT) {
+                $opt = $judging->getSumOptScore();
+                if ($opt !== null) {
+                    // Max and Min
+                    if ($optmaxJury === null || $opt > $optmaxJury) {
+                        $optmaxJury = $opt;
+                    }
+                    if ($optminJury === null || $opt < $optminJury) {
+                        $optminJury = $opt;
+                    }
+                    if (!$submission->isAfterFreeze()) {
+                        if ($optmaxPubl === null || $opt > $optmaxPubl) {
+                            $optmaxPubl = $opt;
+                        }
+                        if ($optminPubl === null || $opt < $optminPubl) {
+                            $optminPubl = $opt;
+                        }
+                    }
                 }
             }
 
@@ -483,13 +508,19 @@ class ScoreboardService
             'runtimePublic' => $runtimePubl === PHP_INT_MAX ? 0 : $runtimePubl,
             'isCorrectPublic' => (int)$correctPubl,
             'isFirstToSolve' => (int)$firstToSolve,
+            'optScoreMaxRestricted' => $optmaxJury,
+            'optScoreMaxPublic' => $optmaxPubl,
+            'optScoreMinRestricted' => $optminJury,
+            'optScoreMinPublic' => $optminPubl,
         ];
         $this->em->getConnection()->executeQuery('REPLACE INTO scorecache
             (cid, teamid, probid,
              submissions_restricted, pending_restricted, solvetime_restricted, runtime_restricted, is_correct_restricted,
-             submissions_public, pending_public, solvetime_public, runtime_public, is_correct_public, is_first_to_solve)
+             submissions_public, pending_public, solvetime_public, runtime_public, is_correct_public, is_first_to_solve, 
+             optscore_max_restricted, optscore_max_public, optscore_min_restricted, optscore_min_public)
             VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :runtimeRestricted, :isCorrectRestricted,
-            :submissionsPublic, :pendingPublic, :solvetimePublic, :runtimePublic, :isCorrectPublic, :isFirstToSolve)', $params);
+            :submissionsPublic, :pendingPublic, :solvetimePublic, :runtimePublic, :isCorrectPublic, :isFirstToSolve,
+            :optScoreMaxRestricted, :optScoreMaxPublic, :optScoreMinRestricted, :optScoreMinPublic)', $params);
 
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                                                     ['lock' => $lockString]) != 1) {
