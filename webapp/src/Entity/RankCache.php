@@ -55,14 +55,14 @@ class RankCache
     #[ORM\Column(options: ['comment' => 'Total max optscore (restricted audience)', 'default' => 0])]
     private float $totaloptscore_max_restricted = 0;
 
-    #[ORM\Column(options: ['comment' => 'Max optscore (public audience)', 'default' => 0])]
-    private float $optscore_max_public = 0;
+    #[ORM\Column(options: ['comment' => 'Total max optscore (public audience)', 'default' => 0])]
+    private float $totaloptscore_max_public = 0;
 
-    #[ORM\Column(options: ['comment' => 'Min optscore (restricted audience)', 'default' => 0])]
-    private float $optscore_min_restricted = 0;
+    #[ORM\Column(options: ['comment' => 'Total min optscore (restricted audience)', 'default' => 0])]
+    private float $totaloptscore_min_restricted = 0;
 
-    #[ORM\Column(options: ['comment' => 'Min optscore (public audience)', 'default' => 0])]
-    private float $optscore_min_public = 0;
+    #[ORM\Column(options: ['comment' => 'Total min optscore (public audience)', 'default' => 0])]
+    private float $totaloptscore_min_public = 0;
 
     #[ORM\Id]
     #[ORM\ManyToOne]
@@ -151,37 +151,37 @@ class RankCache
         return $this->totaloptscore_max_restricted;
     }
 
-    public function setOptscoreMaxPublic(float $optscoreMaxPublic): RankCache
+    public function setTotalOptscoreMaxPublic(float $totalOptscoreMaxPublic): RankCache
     {
-        $this->optscore_max_public = $optscoreMaxPublic;
+        $this->totaloptscore_max_public = $totalOptscoreMaxPublic;
         return $this;
     }
 
-    public function getOptscoreMaxPublic(): float
+    public function getTotalOptscoreMaxPublic(): float
     {
-        return $this->optscore_max_public;
+        return $this->totaloptscore_max_public;
     }
 
-    public function setOptscoreMinRestricted(float $optscoreMinRestricted): RankCache
+    public function setTotalOptscoreMinRestricted(float $totalOptscoreMinRestricted): RankCache
     {
-        $this->optscore_min_restricted = $optscoreMinRestricted;
+        $this->totaloptscore_min_restricted = $totalOptscoreMinRestricted;
         return $this;
     }
 
-    public function getOptscoreMinRestricted(): float
+    public function getTotalOptscoreMinRestricted(): float
     {
-        return $this->optscore_min_restricted;
+        return $this->totaloptscore_min_restricted;
     }
 
-    public function setOptscoreMinPublic(float $optscoreMinPublic): RankCache
+    public function setTotalOptscoreMinPublic(float $totalOptscoreMinPublic): RankCache
     {
-        $this->optscore_min_public = $optscoreMinPublic;
+        $this->totaloptscore_min_public = $totalOptscoreMinPublic;
         return $this;
     }
 
-    public function getOptscoreMinPublic(): float
+    public function getTotalOptscoreMinPublic(): float
     {
-        return $this->optscore_min_public;
+        return $this->totaloptscore_min_public;
     }
 
     public function setContest(?Contest $contest = null): RankCache
