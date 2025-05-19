@@ -57,29 +57,45 @@ class ScoreCache
     ])]
     private int $runtime_restricted = 0;
 
-    #[ORM\Column(options: [
-        'comment' => 'Max optscore (restricted audience)',
-        'default' => 0,
-    ])]
-    private float $optscore_max_restricted = 0;
+    #[ORM\Column(
+        type: 'float',
+        nullable: true,
+        options: [
+            'comment' => 'Max optscore (restricted audience)',
+            'default' => 0,
+        ]
+    )]
+    private ?float $optscore_max_restricted = null;
 
-    #[ORM\Column(options: [
-        'comment' => 'Max optscore (public audience)',
-        'default' => 0,
-    ])]
-    private float $optscore_max_public = 0;
+    #[ORM\Column(
+        type: 'float',
+        nullable: true,
+        options: [
+            'comment' => 'Max optscore (public audience)',
+            'default' => 0,
+        ]
+    )]
+    private ?float $optscore_max_public = null;
 
-    #[ORM\Column(options: [
-        'comment' => 'Min optscore (restricted audience)',
-        'default' => 0,
-    ])]
-    private float $optscore_min_restricted = 0;
+    #[ORM\Column(
+        type: 'float',
+        nullable: true,
+        options: [
+            'comment' => 'Min optscore (restricted audience)',
+            'default' => 0,
+        ]
+    )]
+    private ?float $optscore_min_restricted = null;
 
-    #[ORM\Column(options: [
-        'comment' => 'Min optscore (public audience)',
-        'default' => 0,
-    ])]
-    private float $optscore_min_public = 0;
+    #[ORM\Column(
+        type: 'float',
+        nullable: true,
+        options: [
+            'comment' => 'Min optscore (public audience)',
+            'default' => 0,
+        ]
+    )]
+    private ?float $optscore_min_public = null;
 
     #[ORM\Column(options: [
         'comment' => 'Number of submissions made (public)',
