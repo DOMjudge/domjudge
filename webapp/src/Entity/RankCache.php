@@ -52,6 +52,18 @@ class RankCache
     #[ORM\Column(options: ['comment' => 'Total runtime in milliseconds (public)', 'default' => 0])]
     private int $totalruntime_public = 0;
 
+    #[ORM\Column(options: ['comment' => 'Total max optscore (restricted audience)', 'default' => 0])]
+    private float $totaloptscore_max_restricted = 0;
+
+    #[ORM\Column(options: ['comment' => 'Max optscore (public audience)', 'default' => 0])]
+    private float $optscore_max_public = 0;
+
+    #[ORM\Column(options: ['comment' => 'Min optscore (restricted audience)', 'default' => 0])]
+    private float $optscore_min_restricted = 0;
+
+    #[ORM\Column(options: ['comment' => 'Min optscore (public audience)', 'default' => 0])]
+    private float $optscore_min_public = 0;
+
     #[ORM\Id]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
@@ -126,6 +138,50 @@ class RankCache
     public function getTotalruntimePublic(): int
     {
         return $this->totalruntime_public;
+    }
+
+    public function setTotaloptscoreMaxRestricted(float $totaloptscoreMaxRestricted): RankCache
+    {
+        $this->totaloptscore_max_restricted = $totaloptscoreMaxRestricted;
+        return $this;
+    }
+
+    public function getTotaloptscoreMaxRestricted(): float
+    {
+        return $this->totaloptscore_max_restricted;
+    }
+
+    public function setOptscoreMaxPublic(float $optscoreMaxPublic): RankCache
+    {
+        $this->optscore_max_public = $optscoreMaxPublic;
+        return $this;
+    }
+
+    public function getOptscoreMaxPublic(): float
+    {
+        return $this->optscore_max_public;
+    }
+
+    public function setOptscoreMinRestricted(float $optscoreMinRestricted): RankCache
+    {
+        $this->optscore_min_restricted = $optscoreMinRestricted;
+        return $this;
+    }
+
+    public function getOptscoreMinRestricted(): float
+    {
+        return $this->optscore_min_restricted;
+    }
+
+    public function setOptscoreMinPublic(float $optscoreMinPublic): RankCache
+    {
+        $this->optscore_min_public = $optscoreMinPublic;
+        return $this;
+    }
+
+    public function getOptscoreMinPublic(): float
+    {
+        return $this->optscore_min_public;
     }
 
     public function setContest(?Contest $contest = null): RankCache
