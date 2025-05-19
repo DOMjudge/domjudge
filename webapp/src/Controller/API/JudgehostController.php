@@ -972,7 +972,7 @@ class JudgehostController extends AbstractFOSRestController
                 $judgingRunOutput->setTeamMessage(base64_decode($teamMessage));
             }
 
-            if ($optScore !== null) {
+            if ($optScore !== null and $optScore !== '') {
                 $judgingRun->setOptScore((float)$optScore);
             }
 
