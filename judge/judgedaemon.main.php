@@ -1432,7 +1432,6 @@ function judge(array $judgeTask): bool
         $runtime = @$metadata[$metadata['time-used']];
     }
 
-    logmsg(LOG_INFO, '[DEBUG] compareMeta = '.var_export($compareMeta, true));
     if (isset($compareMeta['opt-score'])) {
        $optscore = @$compareMeta['opt-score'];
     }
