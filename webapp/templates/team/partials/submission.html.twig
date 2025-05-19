@@ -45,6 +45,11 @@
                             Max. Runtime: <b>{{ "%0.3f s" | format(judging.getMaxRuntime()) }}</b>
                         </div>
                     {% endif %}
+                    {% if judging.result == 'correct' and judging.submission.contest.getOptScoreAsScoreTiebreaker() %}
+                        <div class="p-2">
+                            Opt. Score: <b>{{ judging.SumOptScore  | formatOptScore }}</b>
+                        </div>
+                    {% endif %}
                 </div>
             {% endif %}
         </div>

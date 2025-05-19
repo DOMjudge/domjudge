@@ -6,10 +6,12 @@
                 <span id="graphs" style="font-weight: bold;">testcase CPU times
                     <span style="font-weight: normal;">
                             {%- if selectedJudging.result != 'compiler-error' -%}
-                                | max:
-                                {{ selectedJudging.maxRuntime | number_format(3, '.', '') }}s
-                                | sum: {{ selectedJudging.sumRuntime | number_format(3, '.', '') }}s
-                            {% endif %}
+                                | max: {{ selectedJudging.maxRuntime | number_format(3, '.', '') }}s
+                                | sum: {{ selectedJudging.sumRuntime | number_format(3, '.', '') }}s&nbsp
+                                {%- if selectedJudging.SumOptScore is not null -%}
+                                    | <span>opt score:</span> {{ selectedJudging.SumOptScore | formatOptScore }}
+                                {%- endif %}
+                            {%- endif %}
                     </span>
                 </span>
             </div>

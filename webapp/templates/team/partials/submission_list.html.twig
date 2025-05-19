@@ -14,6 +14,9 @@
             {% if contest.getRuntimeAsScoreTiebreaker() %}
                 <th scope="col">runtime</th>
             {% endif %}
+            {% if contest.getOptScoreAsScoreTiebreaker() %}
+                <th scope="col">optscore</th>
+            {% endif %}
             {% if allowDownload %}
                 <th scope="col"></th>
             {% endif %}
@@ -73,6 +76,17 @@
                     <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>
                         {% if link and submission.getResult()=='correct' %}
                             {{ "%0.3f s" | format(submission.judgings.first.getMaxRuntime()) }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </a>
+                </td>
+        {% endif %}
+        {% if contest.getOptScoreAsScoreTiebreaker() %}
+                <td>
+                    <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>
+                        {% if link and submission.getResult()=='correct' %}
+                            {{ submission.judgings.first.SumOptScore | formatOptScore }}
                         {% else %}
                             -
                         {% endif %}
