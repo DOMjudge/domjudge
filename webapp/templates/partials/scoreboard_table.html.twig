@@ -235,6 +235,8 @@
                 <td class="scorenc">{{ totalPoints }}</td>
                 {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
                     <td class="scorett">{{ "%0.3f s" | format(score.totalRuntime/1000.0) }}</td>
+                {% elseif contest.getOptScoreAsScoreTiebreaker() %}
+                    <td class="scorett">{{ score.totalOptscore | formatOptScore }}</td>
                 {% else %}
                     <td class="scorett">{{ totalTime }}</td>
                 {% endif %}
@@ -270,7 +272,9 @@
                     {% set time = '' %}
                     {% if matrixItem.isCorrect %}
                         {% set time = matrixItem.time %}
-                        {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
+                        {% if scoreboard.getOptScoreAsScoreTiebreaker() %}
+                            {% set time = matrixItem.optscore %}
+                        {% elseif scoreboard.getRuntimeAsScoreTiebreaker() %}
                             {% set time = "%0.3f s" | format(matrixItem.runtime / 1000.0) %}
                         {% elseif scoreInSeconds %}
                             {% set time = time | scoreTime | printTimeRelative %}

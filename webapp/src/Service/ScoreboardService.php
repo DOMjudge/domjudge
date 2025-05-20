@@ -139,24 +139,44 @@ class ScoreboardService
             $totalTime  = $contest->getRuntimeAsScoreTiebreaker() ? $rankCache->getTotalruntimeRestricted() : $rankCache->getTotaltimeRestricted();
         }
         $timeType   = $contest->getRuntimeAsScoreTiebreaker() ? 'runtime' : 'time';
+        $useOpt     = $contest->getOptScoreAsScoreTiebreaker();
+        $optMode    = $contest->getOptScoreOrder() === 'asc' ? 'min' : 'max';
         $sortOrder  = $team->getCategory()->getSortorder();
 
+        if ($useOpt) {
+            $tieField = "r.totaloptscore_{$optMode}_{$variant}";
+            $tieOp    = $optMode === 'min' ? '<' : '>';
+            $tieValue = $rankCache
+                ? $rankCache->getTotalOptscore($restricted)
+                : 0;
+            $tieValue = $tieValue ?? 0;
+        } else {
+            $type     = $contest->getRuntimeAsScoreTiebreaker() ? 'runtime' : 'time';
+            $tieField = "r.total{$type}_{$variant}";
+            $tieOp    = '<';
+            $tieValue = $totalTime;
+        }
+
         // Number of teams that definitely ranked higher.
-        $better = $this->em->createQueryBuilder()
+        $better = (int) $this->em->createQueryBuilder()
+            ->select('COUNT(t.teamid)')
             ->from(RankCache::class, 'r')
             ->join('r.team', 't')
             ->join('t.category', 'tc')
-            ->select('COUNT(t.teamid)')
-            ->andWhere('r.contest = :contest')
+            ->andWhere('r.contest   = :contest')
             ->andWhere('tc.sortorder = :sortorder')
-            ->andWhere('t.enabled = 1')
-            ->andWhere(sprintf('r.points_%s > :points OR '.
-                               '(r.points_%s = :points AND r.total%s_%s < :totaltime)',
-                               $variant, $variant, $timeType, $variant))
-            ->setParameter('contest', $contest)
-            ->setParameter('sortorder', $sortOrder)
-            ->setParameter('points', $points)
-            ->setParameter('totaltime', $totalTime)
+            ->andWhere('t.enabled   = 1')
+            ->andWhere(sprintf(
+                'r.points_%1$s >  :points
+                OR (r.points_%1$s = :points AND %2$s %3$s :tiebreaker)',
+                $variant,
+                $tieField,
+                $tieOp
+            ))
+            ->setParameter('contest',    $contest)
+            ->setParameter('sortorder',  $sortOrder)
+            ->setParameter('points',     $points)
+            ->setParameter('tiebreaker', $tieValue)
             ->getQuery()
             ->getSingleScalarResult();
 
@@ -175,12 +195,15 @@ class ScoreboardService
                 ->andWhere('r.contest = :contest')
                 ->andWhere('tc.sortorder = :sortorder')
                 ->andWhere('t.enabled = 1')
-                ->andWhere(sprintf('r.points_%s = :points AND r.total%s_%s = :totaltime',
-                                   $variant, $timeType, $variant))
+                ->andWhere(sprintf(
+                    'r.points_%1$s = :points AND %2$s = :tiebreaker',
+                    $variant,
+                    $tieField
+                ))
                 ->setParameter('contest', $contest)
                 ->setParameter('sortorder', $sortOrder)
                 ->setParameter('points', $points)
-                ->setParameter('totaltime', $totalTime)
+                ->setParameter('tiebreaker', $tieValue)
                 ->getQuery()
                 ->getResult();
 
@@ -576,10 +599,14 @@ class ScoreboardService
         $numPoints = [];
         $totalTime = [];
         $totalRuntime = [];
+        $totalMaxOpt = [];
+        $totalMinOpt = [];
         foreach ($variants as $variant => $isRestricted) {
             $numPoints[$variant] = 0;
             $totalTime[$variant] = $team->getPenalty();
             $totalRuntime[$variant] = 0;
+            $totalMaxOpt[$variant] = 0;
+            $totalMinOpt[$variant] = 0;
         }
 
         $penaltyTime      = (int) $this->config->get('penalty_time');
@@ -612,6 +639,8 @@ class ScoreboardService
                         $scoreIsInSeconds
                     ) + $penalty;
                     $totalRuntime[$variant] += $scoreCache->getRuntime($isRestricted);
+                    $totalMaxOpt[$variant] += $scoreCache->getMaxOptscore($isRestricted);
+                    $totalMinOpt[$variant] += $scoreCache->getMinOptscore($isRestricted);
                 }
             }
         }
@@ -623,14 +652,30 @@ class ScoreboardService
             'pointsRestricted' => $numPoints['restricted'],
             'totalTimeRestricted' => $totalTime['restricted'],
             'totalRuntimeRestricted' => $totalRuntime['restricted'],
+            'totalMaxOptRestricted' => $totalMaxOpt['restricted'],
+            'totalMinOptRestricted' => $totalMinOpt['restricted'],
             'pointsPublic' => $numPoints['public'],
             'totalTimePublic' => $totalTime['public'],
             'totalRuntimePublic' => $totalRuntime['public'],
+            'totalMaxOptPublic' => $totalMaxOpt['public'],
+            'totalMinOptPublic' => $totalMinOpt['public']
         ];
-        $this->em->getConnection()->executeQuery('REPLACE INTO rankcache (cid, teamid,
-            points_restricted, totaltime_restricted, totalruntime_restricted,
-            points_public, totaltime_public, totalruntime_public)
-            VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :totalRuntimeRestricted, :pointsPublic, :totalTimePublic, :totalRuntimePublic)', $params);
+        $this->em->getConnection()->executeQuery(
+            'REPLACE INTO rankcache (
+                cid, teamid,
+                points_restricted, totaltime_restricted, totalruntime_restricted,
+                totaloptscore_max_restricted, totaloptscore_min_restricted,
+                totaloptscore_max_public, totaloptscore_min_public,
+                points_public, totaltime_public, totalruntime_public
+            ) VALUES (
+                :cid, :teamid,
+                :pointsRestricted, :totalTimeRestricted, :totalRuntimeRestricted,
+                :totalMaxOptRestricted, :totalMinOptRestricted,
+                :totalMaxOptPublic, :totalMinOptPublic,
+                :pointsPublic, :totalTimePublic, :totalRuntimePublic
+            )',
+            $params
+        );
 
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                                                     ['lock' => $lockString]) != 1) {

@@ -158,7 +158,8 @@ class Scoreboard
                 $scoreRow->getPending($this->restricted),
                 $scoreRow->getSolveTime($this->restricted),
                 $penalty,
-                $scoreRow->getRuntime($this->restricted)
+                $scoreRow->getRuntime($this->restricted),
+                $scoreRow->getOptscore($this->restricted)
             );
 
             if ($scoreRow->getIsCorrect($this->restricted)) {
@@ -169,6 +170,7 @@ class Scoreboard
                 $this->scores[$teamId]->solveTimes[] = $solveTime;
                 $this->scores[$teamId]->totalTime += $solveTime + $penalty;
                 $this->scores[$teamId]->totalRuntime += $scoreRow->getRuntime($this->restricted);
+                $this->scores[$teamId]->totalOptscore += $scoreRow->getOptscore($this->restricted);
             }
         }
 
@@ -216,7 +218,7 @@ class Scoreboard
                 $problemId = $contestProblem->getProbid();
                 // Provide default scores when nothing submitted for this team + problem yet
                 if (!isset($this->matrix[$teamId][$problemId])) {
-                    $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, false, 0, 0, 0, 0, 0);
+                    $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, false, 0, 0, 0, 0, 0, 0);
                 }
 
                 $problemMatrixItem = $this->matrix[$teamId][$problemId];
@@ -457,5 +459,14 @@ class Scoreboard
     public function getRuntimeAsScoreTiebreaker(): bool
     {
         return $this->contest->getRuntimeAsScoreTiebreaker();
+    }
+
+    /**
+     * Determine whether to order by optscore instead of solvetime
+     * @return bool
+     */
+    public function getOptScoreAsScoreTiebreaker(): bool
+    {
+        return $this->contest->getOptScoreAsScoreTiebreaker();
     }
 }
