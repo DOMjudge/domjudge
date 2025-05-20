@@ -184,6 +184,28 @@ class RankCache
         return $this->totaloptscore_min_public;
     }
 
+    public function getTotalOptscore(bool $restricted): float
+    {
+        if ($this->contest->getOptScoreOrder() == 'asc') return $restricted
+                        ? $this->getTotalOptscoreMinRestricted()
+                        : $this->getTotalOptscoreMinPublic();
+        else return $restricted
+                        ? $this->getTotalOptscoreMaxRestricted()
+                        : $this->getTotalOptscoreMaxPublic();
+    }
+
+    public function getTotalOptscoreRestricted(): float
+    {
+        if ($this->contest->getOptScoreOrder() == 'asc') return $this->getTotalOptscoreMinRestricted();
+        else return $this->getTotalOptscoreMaxRestricted();
+    }
+
+    public function getTotalOptscorePublic(): float
+    {
+        if ($this->contest->getOptScoreOrder() == 'asc') return $this->getTotalOptscoreMinPublic();
+        else return $this->getTotalOptscoreMaxPublic();
+    }
+
     public function setContest(?Contest $contest = null): RankCache
     {
         $this->contest = $contest;
