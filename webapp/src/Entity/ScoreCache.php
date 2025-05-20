@@ -212,7 +212,7 @@ class ScoreCache
 
     public function getOptScoreMaxRestricted(): float
     {
-        return $this->optscore_max_restricted;
+        return $this->optscore_max_restricted ?? 0;
     }
 
     public function setOptScoreMaxPublic(float $optscoreMaxPublic): ScoreCache
@@ -223,7 +223,7 @@ class ScoreCache
 
     public function getOptScoreMaxPublic(): float
     {
-        return $this->optscore_max_public;
+        return $this->optscore_max_public ?? 0;
     }
 
     public function setOptScoreMinRestricted(float $optscoreMinRestricted): ScoreCache
@@ -234,7 +234,7 @@ class ScoreCache
 
     public function getOptScoreMinRestricted(): float
     {
-        return $this->optscore_min_restricted;
+        return $this->optscore_min_restricted ?? 0;
     }
 
     public function setOptScoreMinPublic(float $optscoreMinPublic): ScoreCache
@@ -245,7 +245,7 @@ class ScoreCache
 
     public function getOptScoreMinPublic(): float
     {
-        return $this->optscore_min_public;
+        return $this->optscore_min_public ?? 0;
     }
 
     public function setSubmissionsPublic(int $submissionsPublic): ScoreCache
@@ -370,5 +370,21 @@ class ScoreCache
     public function getIsCorrect(bool $restricted): bool
     {
         return $restricted ? $this->getIsCorrectRestricted() : $this->getIsCorrectPublic();
+    }
+
+    public function getMaxOptscore(bool $restricted): float
+    {
+        return $restricted ? $this->getOptScoreMaxRestricted() : $this->getOptScoreMaxPublic();
+    }
+
+    public function getMinOptscore(bool $restricted): float
+    {
+        return $restricted ? $this->getOptScoreMinRestricted() : $this->getOptScoreMinPublic();
+    }
+
+    public function getOptscore(bool $restricted): float
+    {
+        if ($this->contest->getOptScoreOrder() == 'asc') return $this->getMinOptscore($restricted);
+        else return $this->getMaxOptscore($restricted);
     }
 }
