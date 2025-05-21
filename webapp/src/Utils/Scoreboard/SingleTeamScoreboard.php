@@ -46,6 +46,7 @@ class SingleTeamScoreboard extends Scoreboard
             $teamScore->numPoints += $this->rankCache->getPointsRestricted();
             $teamScore->totalTime += $this->rankCache->getTotaltimeRestricted();
             $teamScore->totalRuntime += $this->rankCache->getTotalruntimeRestricted();
+            $teamScore->totalOptscore +=  $this->rankCache->getTotalOptscoreRestricted();
         }
         $teamScore->rank = $this->teamRank;
 
@@ -69,7 +70,8 @@ class SingleTeamScoreboard extends Scoreboard
                 $scoreRow->getPending($this->restricted),
                 $scoreRow->getSolveTime($this->restricted),
                 $penalty,
-                $scoreRow->getRuntime($this->restricted)
+                $scoreRow->getRuntime($this->restricted),
+                $scoreRow->getOptscore($this->restricted)
             );
         }
 
@@ -79,7 +81,7 @@ class SingleTeamScoreboard extends Scoreboard
             $teamId    = $this->team->getTeamid();
             $problemId = $contestProblem->getProbid();
             if (!isset($this->matrix[$teamId][$problemId])) {
-                $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, false, 0, 0, 0, 0, 0);
+                $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, false, 0, 0, 0, 0, 0, 0);
             }
         }
     }

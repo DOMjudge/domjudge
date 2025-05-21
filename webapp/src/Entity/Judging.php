@@ -179,6 +179,21 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $max;
     }
 
+    public function getSumOptScore(): ?float
+    {   
+        if ($this->runs->isEmpty()) {
+            return null;
+        }
+        $sum = 0;
+        foreach ($this->runs as $run) {
+            if ($run->getOptscore() === null) {
+                return null;
+            }
+            $sum      += $run->getOptscore();
+        }
+        return $sum;
+    }
+
     public function getSumRuntime(): float
     {
         $sum = 0;

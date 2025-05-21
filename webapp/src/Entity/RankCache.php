@@ -52,6 +52,18 @@ class RankCache
     #[ORM\Column(options: ['comment' => 'Total runtime in milliseconds (public)', 'default' => 0])]
     private int $totalruntime_public = 0;
 
+    #[ORM\Column(options: ['comment' => 'Total max optscore (restricted audience)', 'default' => 0])]
+    private float $totaloptscore_max_restricted = 0;
+
+    #[ORM\Column(options: ['comment' => 'Total max optscore (public audience)', 'default' => 0])]
+    private float $totaloptscore_max_public = 0;
+
+    #[ORM\Column(options: ['comment' => 'Total min optscore (restricted audience)', 'default' => 0])]
+    private float $totaloptscore_min_restricted = 0;
+
+    #[ORM\Column(options: ['comment' => 'Total min optscore (public audience)', 'default' => 0])]
+    private float $totaloptscore_min_public = 0;
+
     #[ORM\Id]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
@@ -126,6 +138,72 @@ class RankCache
     public function getTotalruntimePublic(): int
     {
         return $this->totalruntime_public;
+    }
+
+    public function setTotaloptscoreMaxRestricted(float $totaloptscoreMaxRestricted): RankCache
+    {
+        $this->totaloptscore_max_restricted = $totaloptscoreMaxRestricted;
+        return $this;
+    }
+
+    public function getTotaloptscoreMaxRestricted(): float
+    {
+        return $this->totaloptscore_max_restricted;
+    }
+
+    public function setTotalOptscoreMaxPublic(float $totalOptscoreMaxPublic): RankCache
+    {
+        $this->totaloptscore_max_public = $totalOptscoreMaxPublic;
+        return $this;
+    }
+
+    public function getTotalOptscoreMaxPublic(): float
+    {
+        return $this->totaloptscore_max_public;
+    }
+
+    public function setTotalOptscoreMinRestricted(float $totalOptscoreMinRestricted): RankCache
+    {
+        $this->totaloptscore_min_restricted = $totalOptscoreMinRestricted;
+        return $this;
+    }
+
+    public function getTotalOptscoreMinRestricted(): float
+    {
+        return $this->totaloptscore_min_restricted;
+    }
+
+    public function setTotalOptscoreMinPublic(float $totalOptscoreMinPublic): RankCache
+    {
+        $this->totaloptscore_min_public = $totalOptscoreMinPublic;
+        return $this;
+    }
+
+    public function getTotalOptscoreMinPublic(): float
+    {
+        return $this->totaloptscore_min_public;
+    }
+
+    public function getTotalOptscore(bool $restricted): float
+    {
+        if ($this->contest->getOptScoreOrder() == 'asc') return $restricted
+                        ? $this->getTotalOptscoreMinRestricted()
+                        : $this->getTotalOptscoreMinPublic();
+        else return $restricted
+                        ? $this->getTotalOptscoreMaxRestricted()
+                        : $this->getTotalOptscoreMaxPublic();
+    }
+
+    public function getTotalOptscoreRestricted(): float
+    {
+        if ($this->contest->getOptScoreOrder() == 'asc') return $this->getTotalOptscoreMinRestricted();
+        else return $this->getTotalOptscoreMaxRestricted();
+    }
+
+    public function getTotalOptscorePublic(): float
+    {
+        if ($this->contest->getOptScoreOrder() == 'asc') return $this->getTotalOptscoreMinPublic();
+        else return $this->getTotalOptscoreMaxPublic();
     }
 
     public function setContest(?Contest $contest = null): RankCache
