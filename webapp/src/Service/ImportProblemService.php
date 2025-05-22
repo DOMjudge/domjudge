@@ -27,6 +27,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -261,72 +262,12 @@ class ImportProblemService
             return null;
         }
 
-        if ($problemYaml !== false) {
-            $yamlData = Yaml::parse($problemYaml);
-
-            if (!empty($yamlData)) {
-                $yamlProblemProperties = [];
-                if (isset($yamlData['name'])) {
-                    if (is_array($yamlData['name'])) {
-                        foreach ($yamlData['name'] as $name) {
-                            // TODO: select a specific instead of the first language.
-                            $yamlProblemProperties['name'] = $name;
-                            break;
-                        }
-                    } else {
-                        $yamlProblemProperties['name'] = $yamlData['name'];
-                    }
-                }
-
-                if (isset($yamlData['type'])) {
-                    $types = explode(' ', $yamlData['type']);
-                    // Validation happens later when we set the properties.
-                    $yamlProblemProperties['typesAsString'] = $types;
-                } else {
-                    $yamlProblemProperties['typesAsString'] = ['pass-fail'];
-                }
-
-                if (isset($yamlData['validator_flags'])) {
-                    $yamlProblemProperties['special_compare_args'] = $yamlData['validator_flags'];
-                }
-
-                if (isset($yamlData['validation'])
-                    && ($yamlData['validation'] == 'custom' ||
-                        $yamlData['validation'] == 'custom interactive' ||
-                        $yamlData['validation'] == 'custom multi-pass')) {
-                    if (!$this->searchAndAddValidator($zip, $messages, $externalId, $yamlData['validation'], $problem)) {
-                        return null;
-                    }
-
-                    if ($yamlData['validation'] == 'custom multi-pass') {
-                        $yamlProblemProperties['typesAsString'][] = 'multi-pass';
-                    }
-                    if ($yamlData['validation'] == 'custom interactive') {
-                        $yamlProblemProperties['typesAsString'][] = 'interactive';
-                    }
-                }
-
-                if (isset($yamlData['limits'])) {
-                    if (isset($yamlData['limits']['memory'])) {
-                        $yamlProblemProperties['memlimit'] = 1024 * $yamlData['limits']['memory'];
-                    }
-                    if (isset($yamlData['limits']['output'])) {
-                        $yamlProblemProperties['outputlimit'] = 1024 * $yamlData['limits']['output'];
-                    }
-                    if (isset($yamlData['limits']['validation_passes'])) {
-                        $problem->setMultipassLimit($yamlData['limits']['validation_passes']);
-                    }
-                }
-
-                foreach ($yamlProblemProperties as $key => $value) {
-                    try {
-                        $propertyAccessor->setValue($problem, $key, $value);
-                    } catch (Exception $e) {
-                        $messages['danger'][] = sprintf('Error: problem.%s: %s', $key, $e->getMessage());
-                        return null;
-                    }
-                }
-            }
+        $validationMode = 'default';
+        if (!$this->parseYaml($problemYaml, $messages, $validationMode, $propertyAccessor, $problem)) {
+            return null;
+        }
+        if ($validationMode != 'default' && !$this->searchAndAddValidator($zip, $messages, $externalId, $validationMode, $problem)) {
+            return null;
         }
 
         // Add problem statement, also look in obsolete location.
@@ -1045,6 +986,84 @@ class ImportProblemService
                 $messages['info'][] = "Added output validator '$outputValidatorName'.";
             }
         }
+        return true;
+    }
+
+    // Returns true iff the yaml could be parsed correctly.
+    public static function parseYaml(bool|string $problemYaml, array &$messages, string &$validationMode, PropertyAccessor $propertyAccessor, Problem $problem): bool
+    {
+        if ($problemYaml === false) {
+            // While there was no problem.yaml, there was also no error in parsing.
+            return true;
+        }
+
+        $yamlData = Yaml::parse($problemYaml);
+        if (empty($yamlData)) {
+            // Empty yaml is OK.
+            return true;
+        }
+
+        $yamlProblemProperties = [];
+        if (isset($yamlData['name'])) {
+            if (is_array($yamlData['name'])) {
+                foreach ($yamlData['name'] as $name) {
+                    // TODO: select a specific instead of the first language.
+                    $yamlProblemProperties['name'] = $name;
+                    break;
+                }
+            } else {
+                $yamlProblemProperties['name'] = $yamlData['name'];
+            }
+        }
+
+        if (isset($yamlData['type'])) {
+            $types = explode(' ', $yamlData['type']);
+            // Validation happens later when we set the properties.
+            $yamlProblemProperties['typesAsString'] = $types;
+        } else {
+            $yamlProblemProperties['typesAsString'] = ['pass-fail'];
+        }
+
+        if (isset($yamlData['validator_flags'])) {
+            $yamlProblemProperties['special_compare_args'] = $yamlData['validator_flags'];
+        }
+
+        $validationMode = 'default';
+        if (isset($yamlData['validation'])
+            && ($yamlData['validation'] == 'custom' ||
+                $yamlData['validation'] == 'custom interactive' ||
+                $yamlData['validation'] == 'custom multi-pass')) {
+            $validationMode = $yamlData['validation'];
+
+            if ($yamlData['validation'] == 'custom multi-pass') {
+                $yamlProblemProperties['typesAsString'][] = 'multi-pass';
+            }
+            if ($yamlData['validation'] == 'custom interactive') {
+                $yamlProblemProperties['typesAsString'][] = 'interactive';
+            }
+        }
+
+        if (isset($yamlData['limits'])) {
+            if (isset($yamlData['limits']['memory'])) {
+                $yamlProblemProperties['memlimit'] = 1024 * $yamlData['limits']['memory'];
+            }
+            if (isset($yamlData['limits']['output'])) {
+                $yamlProblemProperties['outputlimit'] = 1024 * $yamlData['limits']['output'];
+            }
+            if (isset($yamlData['limits']['validation_passes'])) {
+                $yamlProblemProperties['multipassLimit'] = $yamlData['limits']['validation_passes'];
+            }
+        }
+
+        foreach ($yamlProblemProperties as $key => $value) {
+            try {
+                $propertyAccessor->setValue($problem, $key, $value);
+            } catch (Exception $e) {
+                $messages['danger'][] = sprintf('Error: problem.%s: %s', $key, $e->getMessage());
+                return false;
+            }
+        }
+
         return true;
     }
 }
