@@ -1006,11 +1006,14 @@ class ImportProblemService
         $yamlProblemProperties = [];
         if (isset($yamlData['name'])) {
             if (is_array($yamlData['name'])) {
-                foreach ($yamlData['name'] as $name) {
-                    // TODO: select a specific instead of the first language.
-                    $yamlProblemProperties['name'] = $name;
-                    break;
+                // Prefer english name, but if not available, use first name.
+                $englishOrFirstName = null;
+                foreach ($yamlData['name'] as $lang => $name) {
+                    if ($englishOrFirstName === null || $lang === 'en') {
+                        $englishOrFirstName = $name;
+                    }
                 }
+                $yamlProblemProperties['name'] = $englishOrFirstName;
             } else {
                 $yamlProblemProperties['name'] = $yamlData['name'];
             }

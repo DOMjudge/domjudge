@@ -52,7 +52,7 @@ class Problem extends BaseApiEntity implements
 
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]
     #[Assert\NotBlank]
-    private string $name;
+    private string $name = 'Unknown name';
 
     #[ORM\Column(options: [
         'comment' => 'Maximum run time (in seconds) for this problem',
