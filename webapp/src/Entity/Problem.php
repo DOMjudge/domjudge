@@ -338,7 +338,11 @@ class Problem extends BaseApiEntity implements
         foreach ($types as $type) {
             $this->types |= $type;
         }
-        if (!($this->types & self::TYPE_PASS_FAIL) xor ($this->types & self::TYPE_SCORING)) {
+        if (!($this->types & self::TYPE_SCORING)) {
+            // In case the problem is not explicitly a scoring problem, default to pass-fail.
+            $this->types |= self::TYPE_PASS_FAIL;
+        }
+        if (($this->types & self::TYPE_PASS_FAIL) && ($this->types & self::TYPE_SCORING)) {
             throw new Exception("Invalid problem type: must be exactly one of 'pass-fail' or 'scoring'.");
         }
         if ($this->types & self::TYPE_SUBMIT_ANSWER) {
