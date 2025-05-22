@@ -23,7 +23,7 @@ class ImportProblemServiceTest extends BaseTestCase
 
         $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
         $this->assertTrue($ret);
-        $this->assertEquals('', $problem->getName());
+        $this->assertEquals('Unknown name', $problem->getName());
     }
 
     public function testMinimalYamlTest()
@@ -247,5 +247,56 @@ YAML;
         $this->assertEquals(42*1024, $problem->getOutputlimit());
         $this->assertEquals(3, $problem->getMultipassLimit());
         $this->assertEquals('special flags', $problem->getSpecialCompareArgs());
+    }
+
+    public function testMultipleLanguages() {
+        $yaml = <<<YAML
+name:
+    de: deutsch
+    en: english
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $this->assertEquals('english', $problem->getName());
+    }
+
+    public function testKattisExample()
+    {
+        $yaml = <<<YAML
+problem_format_version: 2023-07-draft
+uuid: 5ca6ba5b-36d5-4eff-8aa7-d967cbc4375e
+source: Kattis
+license: cc by-sa
+
+type: interactive
+name:
+  en: Guess the Number
+  sv: Gissa talet
+
+# Override standard limits: say that the TLE solutions provided should
+# be at least 4 times above the time limit in order for us to be
+# happy.
+limits:
+  time_multipliers:
+    time_limit_to_tle: 4
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $this->assertEquals('Guess the Number', $problem->getName());
+        $this->assertEquals('pass-fail, interactive', $problem->getTypesAsString());
+        $this->assertEquals('default', $validationMode);
+        $this->assertEquals(0, $problem->getTimelimit());
+        $this->assertEquals(null, $problem->getMemlimit());
+        $this->assertEquals(null, $problem->getOutputlimit());
     }
 }
