@@ -58,6 +58,9 @@ YAML;
         foreach ([
                      'pass-fail',
                      'scoring',
+                     'multi-pass',
+                     'interactive',
+                     'submit-answer',
                      'pass-fail multi-pass',
                      'pass-fail interactive',
                      'pass-fail submit-answer',
@@ -77,6 +80,10 @@ YAML;
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $messageString = var_export($messages, true);
             $this->assertTrue($ret, 'Parsing failed for type: ' . $type . ', messages: ' . $messageString);
+            if (in_array($type, ['interactive', 'multi-pass', 'submit-answer'])) {
+                // Default to pass-fail if not explicitly set.
+                $type = 'pass-fail ' . $type;
+            }
             $typesString = str_replace(' ', ', ', $type);
             $this->assertEquals($typesString, $problem->getTypesAsString());
         }
@@ -100,11 +107,9 @@ YAML;
 
     public function testInvalidProblemType() {
         foreach ([
-                     'interactive',
-                     'multi-pass',
-                     'submit-answer',
-                     'pass-fail submit-answer multi-pass',
-                     'pass-fail submit-answer interactive',
+                     'pass-fail scoring',
+                     'submit-answer multi-pass',
+                     'submit-answer interactive',
                  ] as $type) {
             $yaml = <<<YAML
 name: test
