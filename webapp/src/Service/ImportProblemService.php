@@ -896,9 +896,11 @@ class ImportProblemService
         $validatorFiles = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $filename = $zip->getNameIndex($i);
-            if (Utils::startsWith($filename, 'output_validators/') &&
-                !Utils::endsWith($filename, '/')) {
-                $validatorFiles[] = $filename;
+            foreach (['output_validators/', 'output_validator'] as $dir) {
+                if (Utils::startsWith($filename, $dir) &&
+                    !Utils::endsWith($filename, '/')) {
+                    $validatorFiles[] = $filename;
+                }
             }
         }
         if (sizeof($validatorFiles) == 0) {
