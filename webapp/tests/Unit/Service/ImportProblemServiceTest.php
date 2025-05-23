@@ -294,7 +294,7 @@ YAML;
         $this->assertEmpty($messages);
         $this->assertEquals('Guess the Number', $problem->getName());
         $this->assertEquals('pass-fail, interactive', $problem->getTypesAsString());
-        $this->assertEquals('default', $validationMode);
+        $this->assertEquals('custom interactive', $validationMode);
         $this->assertEquals(0, $problem->getTimelimit());
         $this->assertEquals(null, $problem->getMemlimit());
         $this->assertEquals(null, $problem->getOutputlimit());
