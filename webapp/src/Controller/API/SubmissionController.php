@@ -100,6 +100,41 @@ class SubmissionController extends AbstractRestController
     }
 
     /**
+     * Get the given submission by external ID
+     * @throws NonUniqueResultException
+     */
+    #[IsGranted(new Expression("is_granted('ROLE_JUDGEHOST')"))]
+    #[Rest\Get('submissions/by-internal-id/{internalId}')]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given submission for this contest by internal ID',
+        content: new OA\JsonContent(ref: new Model(type: Submission::class))
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
+    public function singleByExternalIdAction(Request $request, string $internalId): Response
+    {
+        // Make sure we clear the entity manager class, for when this method is called multiple times
+        // by internal requests.
+        $this->em->clear();
+
+        $object = $this->getQueryBuilder($request)
+            ->andWhere('s.submitid = :id')
+            ->setParameter('id', $internalId)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($object === null) {
+            throw new NotFoundHttpException(sprintf('Object with internal ID \'%s\' not found', $internalId));
+        }
+
+        if ($this instanceof QueryObjectTransformer) {
+            $object = $this->transformObject($object);
+        }
+
+        return $this->renderData($request, $object);
+    }
+
+    /**
      * Add a submission to this contest.
      * @throws NonUniqueResultException
      */
