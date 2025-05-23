@@ -286,6 +286,11 @@ class ImportProblemService
                     $yamlProblemProperties['typesAsString'] = ['pass-fail'];
                 }
 
+                if (!in_array('pass-fail', $yamlProblemProperties['typesAsString']) &&
+                    !in_array('scoring', $yamlProblemProperties['typesAsString'])) {
+                    $yamlProblemProperties['typesAsString'][] = 'pass-fail';
+                }
+
                 if (isset($yamlData['validator_flags'])) {
                     $yamlProblemProperties['special_compare_args'] = $yamlData['validator_flags'];
                 }
