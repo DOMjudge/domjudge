@@ -1025,10 +1025,14 @@ class ImportProblemService
             }
         }
 
+        $validationMode = 'default';
         if (isset($yamlData['type'])) {
             $types = explode(' ', $yamlData['type']);
             // Validation happens later when we set the properties.
             $yamlProblemProperties['typesAsString'] = $types;
+            if (in_array('interactive', $types)) {
+                $validationMode = 'custom interactive';
+            }
         } else {
             $yamlProblemProperties['typesAsString'] = ['pass-fail'];
         }
@@ -1037,7 +1041,6 @@ class ImportProblemService
             $yamlProblemProperties['special_compare_args'] = $yamlData['validator_flags'];
         }
 
-        $validationMode = 'default';
         if (isset($yamlData['validation'])
             && ($yamlData['validation'] == 'custom' ||
                 $yamlData['validation'] == 'custom interactive' ||
