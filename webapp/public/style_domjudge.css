@@ -647,6 +647,14 @@ tr.ignore td, td.ignore, span.ignore {
     min-width: 2em;
 }
 
+h5 .problem-badge {
+    font-size: 1rem;
+}
+
+h1 .problem-badge {
+    font-size: 2rem;
+}
+
 .tooltip .tooltip-inner {
     max-width: 500px;
 }
