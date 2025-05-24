@@ -772,7 +772,11 @@ class ExternalContestSourceService
             // Verdict not found, import it as a custom verdict; assume it has a penalty.
             $customVerdicts = $this->config->get('external_judgement_types');
             $customVerdicts[$verdict] = str_replace(' ', '-', $data->name);
-            $this->config->saveChanges(['external_judgement_types' => $customVerdicts], $this->eventLog, $this->dj);
+            $this->config->saveChanges(
+                array_merge($this->config->all(), ['external_judgement_types' => $customVerdicts]),
+                $this->eventLog,
+                $this->dj
+            );
             $this->verdicts = $this->config->getVerdicts(['final', 'external']);
             $penalty = true;
             $solved = false;
