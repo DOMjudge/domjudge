@@ -8,9 +8,9 @@
 			"type": "package",
 			"package": {
 				"name": "fortawesome/font-awesome",
-				"version": "6.5.2",
+				"version": "6.7.2",
 				"dist": {
-					"url": "https://github.com/FortAwesome/Font-Awesome/releases/download/6.5.2/fontawesome-free-6.5.2-web.zip",
+					"url": "https://github.com/FortAwesome/Font-Awesome/releases/download/6.7.2/fontawesome-free-6.7.2-web.zip",
 					"type": "zip"
 				}
 			}
