@@ -292,6 +292,14 @@ class Scoreboard
             if ($a->totalRuntime != $b->totalRuntime) {
                 return $a->totalRuntime <=> $b->totalRuntime;
             }
+        } else if ($this->getOptscoreAsScoreTiebreaker()) {
+            if ($a->totalRuntime != $b->totalRuntime) {
+                if ($this->getOptScoreOrder() === "asc") {
+                    return $a->totalOptscore <=> $b->totalOptscore;
+                } else {
+                    return $b->totalOptscore <=> $a->totalOptscore;
+                }
+            }
         } else { // solvetime ordering
             if ($a->totalTime != $b->totalTime) {
                 return $a->totalTime <=> $b->totalTime;
@@ -468,5 +476,14 @@ class Scoreboard
     public function getOptScoreAsScoreTiebreaker(): bool
     {
         return $this->contest->getOptScoreAsScoreTiebreaker();
+    }
+
+    /**
+     * Determine order by optscore 
+     * @return string
+     */
+    public function getOptScoreOrder(): string
+    {
+        return $this->contest->getOptScoreOrder();
     }
 }
