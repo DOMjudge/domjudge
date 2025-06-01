@@ -114,6 +114,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('entityIdBadge', $this->entityIdBadge(...), ['is_safe' => ['html']]),
             new TwigFilter('medalType', $this->awards->medalType(...)),
             new TwigFilter('numTableActions', $this->numTableActions(...)),
+            new TwigFilter('formatOptScore', $this->formatOptScore(...)),
         ];
     }
 
@@ -1221,5 +1222,29 @@ EOF;
             $maxNumActions = max($maxNumActions, count($item['actions'] ?? []));
         }
         return $maxNumActions;
+    }
+
+    /**
+     * Format the given optScore:
+     * - If it's an integer, display without decimal places
+     * - Otherwise, display up to the specified number of decimal places
+     *
+     * @param float|null $optScore     The value to format (nullable)
+     * @param int        $maxDecimals  Maximum number of decimal places to show (default = 3)
+     * @return string                  Formatted string representation of the score
+     */
+    protected function formatOptScore(?float $optScore, int $maxDecimals = 3): string
+    {
+        if ($optScore === null) {
+            return '-';
+        }
+
+        // If the value is an integer, format without decimal places
+        if ($optScore == floor($optScore)) {
+            return number_format($optScore, 0, '.', '');
+        }
+
+        // Otherwise, format with specified decimal precision
+        return number_format($optScore, $maxDecimals, '.', '');
     }
 }

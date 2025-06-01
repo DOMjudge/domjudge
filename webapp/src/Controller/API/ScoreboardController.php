@@ -180,6 +180,11 @@ class ScoreboardController extends AbstractApiController
                     numSolved: $teamScore->numPoints,
                     totalRuntime: $teamScore->totalRuntime,
                 );
+            } else if($contest->getOptScoreAsScoreTiebreaker()) {
+                $score = new Score(
+                    numSolved: $teamScore->numPoints,
+                    optMaxScore: $teamScore->$totalOptscore,
+                );
             } else {
                 $score = new Score(
                     numSolved: $teamScore->numPoints,

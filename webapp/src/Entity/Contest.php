@@ -282,6 +282,24 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private bool $runtime_as_score_tiebreaker = false;
 
     #[ORM\Column(
+    options: ['comment' => 'Use optimization score ranking instead of exact match', 'default' => 0]
+    )]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    private bool $opt_score_as_score_tiebreaker = false;
+
+    #[ORM\Column(
+        type: 'string',
+        length: 10,
+        nullable: false,
+        options: [
+            'default' => 'asc',
+            'comment' => 'Order to apply for objective score: asc(smaller-better) or desc(larger-better)'
+        ]
+    )]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    private string $opt_score_order = 'asc';
+
+    #[ORM\Column(
         options: ['comment' => 'Is this contest visible for the public?', 'default' => 1]
     )]
     #[Serializer\Exclude]
@@ -765,6 +783,28 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     public function getRuntimeAsScoreTiebreaker(): bool
     {
         return $this->runtime_as_score_tiebreaker;
+    }
+
+    public function setOptScoreAsScoreTiebreaker(bool $optScoreAsScoreTiebreaker): Contest
+    {
+        $this->opt_score_as_score_tiebreaker = $optScoreAsScoreTiebreaker;
+        return $this;
+    }
+
+    public function getOptScoreAsScoreTiebreaker(): bool
+    {
+        return $this->opt_score_as_score_tiebreaker;
+    }
+
+    public function setOptScoreOrder(string $order): Contest
+    {
+        $this->opt_score_order = $order;
+        return $this;
+    }
+
+    public function getOptScoreOrder(): string
+    {
+        return $this->opt_score_order;
     }
 
     public function setMedalsEnabled(bool $medalsEnabled): Contest
@@ -1300,6 +1340,12 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
                     ->atPath('medalCategories')
                     ->addViolation();
             }
+        }
+
+        if ($this->runtime_as_score_tiebreaker && $this->opt_score_as_score_tiebreaker) {
+            $context->buildViolation('Cannot enable both runtime and optimization score tiebreakers at the same time.')
+                    ->atPath('optScoreAsScoreTiebreaker')
+                    ->addViolation();
         }
 
         /** @var ContestProblem $problem */

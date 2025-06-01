@@ -51,6 +51,13 @@ class JudgingRun extends BaseApiEntity
     private ?float $runtime = null;
 
     #[ORM\Column(
+        nullable: true,
+        options: ['comment' => 'optimization score']
+    )]
+    #[Serializer\Exclude]
+    private ?float $optscore = null;
+
+    #[ORM\Column(
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -149,6 +156,20 @@ class JudgingRun extends BaseApiEntity
     public function getRuntime(): ?float
     {
         return Utils::roundedFloat($this->runtime);
+    }
+
+    public function setOptscore(float $optscore): JudgingRun
+    {
+        $this->optscore = $optscore;
+        return $this;
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('opt_score')]
+    #[Serializer\Type('float')]
+    public function getOptscore(): ?float
+    {
+        return Utils::roundedFloat($this->optscore);
     }
 
     public function setEndtime(string|float $endtime): JudgingRun

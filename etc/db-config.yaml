@@ -244,6 +244,11 @@
                 2: always
             regex: /^\d+$/
             error_message: A value between 0 and 2 is required.
+        -   name: show_test_results
+            type: bool
+            default_value: false
+            public: true
+            description: Show what kinds of testcases to user?
         -   name: show_sample_output
             type: bool
             default_value: false

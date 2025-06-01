@@ -20,6 +20,10 @@
         {{ form_row(form.allowSubmit) }}
         {{ form_row(form.processBalloons) }}
         {{ form_row(form.runtimeAsScoreTiebreaker) }}
+        {{ form_row(form.optScoreAsScoreTiebreaker) }}
+        <div data-opt-score-field>
+            {{ form_row(form.optScoreOrder) }}
+        </div>
         {{ form_row(form.medalsEnabled) }}
         <div data-medals-field>
             {{ form_row(form.medalCategories) }}
@@ -157,5 +161,16 @@
 
         $('#contest_medalsEnabled_1, #contest_medalsEnabled_0').on('change', showHideMedals);
         showHideMedals();
+
+        function showHideOptScore() {
+            if ($('#contest_optScoreAsScoreTiebreaker_0').is(':checked')) {
+                $('[data-opt-score-field]').show();
+            } else {
+                $('[data-opt-score-field]').hide();
+            }
+        }
+        $('#contest_optScoreAsScoreTiebreaker_0, #contest_optScoreAsScoreTiebreaker_1')
+            .on('change', showHideOptScore);
+        showHideOptScore();
     })
 </script>

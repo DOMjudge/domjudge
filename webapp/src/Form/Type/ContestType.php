@@ -101,6 +101,19 @@ class ContestType extends AbstractExternalIdEntityType
             ],
             'help' => 'Enable this to show runtimes in seconds on scoreboard and use them as tiebreaker instead of penalty. The runtime of a submission is the maximum over all testcases.',
         ]);
+        $builder->add('optScoreAsScoreTiebreaker', ChoiceType::class, [
+            'expanded' => true,
+            'choices'  => ['Yes' => true, 'No' => false],
+            'help'     => 'Enable this to rank submissions by optimization score instead of penalty.',
+        ]);
+        $builder->add('optScoreOrder', ChoiceType::class, [
+            'label'    => 'optimization score ranking order',
+            'choices'  => [
+                'Smaller is better (asc)' => 'asc',
+                'Larger is better (desc)' => 'desc',
+            ],
+            'required' => false,
+        ]);
         $builder->add('medalsEnabled', ChoiceType::class, [
             'expanded' => true,
             'choices' => [
