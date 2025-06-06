@@ -562,7 +562,7 @@ if (isset($options['daemonid'])) {
 if ($runuser === posix_getpwuid(posix_geteuid())['name'] ||
     RUNGROUP === posix_getgrgid(posix_getegid())['name']
 ) {
-    error("Do not run the judgedaemon as the runser or rungroup.");
+    error("Do not run the judgedaemon as the runuser or rungroup.");
 }
 
 // Set static environment variables for passing path configuration
