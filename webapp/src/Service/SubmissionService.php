@@ -569,7 +569,7 @@ class SubmissionService
 
         if (!empty($entryPoint) && !preg_match(self::FILENAME_REGEX, $entryPoint)) {
             $message = sprintf("Entry point '%s' contains illegal characters.", $entryPoint);
-            if ($forceImportInvalid) {
+            if ($forceImportInvalid || $source === 'shadowing') {
                 $importError = $message;
             } else {
                 return null;
@@ -610,7 +610,7 @@ class SubmissionService
             }
             if (!preg_match(self::FILENAME_REGEX, $file->getClientOriginalName())) {
                 $message = sprintf("Illegal filename '%s'.", $file->getClientOriginalName());
-                if ($forceImportInvalid) {
+                if ($forceImportInvalid || $source === 'shadowing') {
                     $importError = $message;
                 } else {
                     return null;
@@ -647,7 +647,7 @@ class SubmissionService
 
         if ($totalSize > $sourceSize * 1024) {
             $message = sprintf("Submission file(s) are larger than %d kB.", $sourceSize);
-            if ($forceImportInvalid) {
+            if ($forceImportInvalid || $source === 'shadowing') {
                 $importError = $message;
             } else {
                 return null;
