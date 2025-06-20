@@ -66,7 +66,7 @@ class Submission extends BaseApiEntity implements
         options: ['comment' => 'Time submitted', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float|null $submittime = null;
+    private ?float $submittime = null;
 
     #[ORM\Column(options: [
         'comment' => 'If false ignore this submission in all scoreboard calculations',
@@ -104,6 +104,7 @@ class Submission extends BaseApiEntity implements
 
     #[ORM\Column(options: [
         'comment' => 'Where did we receive this submission from?',
+        'default' => SubmissionSource::UNKNOWN,
     ])]
     #[Serializer\Exclude]
     private SubmissionSource $source = SubmissionSource::UNKNOWN;
@@ -231,13 +232,13 @@ class Submission extends BaseApiEntity implements
         return $this->getLanguage()->getExternalid();
     }
 
-    public function setSubmittime(string|float $submittime): Submission
+    public function setSubmittime(float $submittime): Submission
     {
         $this->submittime = $submittime;
         return $this;
     }
 
-    public function getSubmittime(): string|float
+    public function getSubmittime(): float
     {
         return $this->submittime;
     }

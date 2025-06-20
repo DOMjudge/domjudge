@@ -42,7 +42,7 @@ class Judgehost
         options: ['comment' => 'Time of last poll by autojudger', 'unsigned' => true]
     )]
     #[OA\Property(nullable: true)]
-    private string|float|null $polltime = null;
+    private ?float $polltime = null;
 
     /**
      * @var Collection<int, JudgeTask>
@@ -91,13 +91,13 @@ class Judgehost
         return $this->enabled;
     }
 
-    public function setPolltime(string|float $polltime): Judgehost
+    public function setPolltime(float $polltime): Judgehost
     {
         $this->polltime = $polltime;
         return $this;
     }
 
-    public function getPolltime(): string|float|null
+    public function getPolltime(): float|null
     {
         return $this->polltime;
     }

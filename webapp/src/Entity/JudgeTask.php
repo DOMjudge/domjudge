@@ -152,7 +152,7 @@ class JudgeTask
         options: ['comment' => 'Time the judgetask was started', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float|null $starttime = null;
+    private ?float $starttime = null;
 
     /**
      * @var Collection<int, JudgingRun>
@@ -341,13 +341,13 @@ class JudgeTask
         return $this->valid;
     }
 
-    public function setStarttime(string|float|null $starttime): JudgeTask
+    public function setStarttime(?float $starttime): JudgeTask
     {
         $this->starttime = $starttime;
         return $this;
     }
 
-    public function getStarttime(): string|float|null
+    public function getStarttime(): float|null
     {
         return $this->starttime;
     }

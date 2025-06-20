@@ -52,7 +52,7 @@ class Version
         options: ['comment' => 'Time this version command output was last updated', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float|null $lastChangedTime = null;
+    private ?float $lastChangedTime = null;
 
     #[ORM\Column(options: [
         'comment' => 'True if this version is active for this judgehost/language combination.',

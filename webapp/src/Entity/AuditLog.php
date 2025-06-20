@@ -29,7 +29,7 @@ class AuditLog
         scale: 9,
         options: ['comment' => 'Timestamp of the logentry', 'unsigned' => true]
     )]
-    private string|float $logtime;
+    private float $logtime;
 
     #[ORM\Column(
         nullable: true,
@@ -70,13 +70,13 @@ class AuditLog
         return $this->logid;
     }
 
-    public function setLogtime(string|float $logtime): AuditLog
+    public function setLogtime(float $logtime): AuditLog
     {
         $this->logtime = $logtime;
         return $this;
     }
 
-    public function getLogtime(): string|float
+    public function getLogtime(): float
     {
         return $this->logtime;
     }

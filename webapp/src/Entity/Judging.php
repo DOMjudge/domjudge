@@ -43,7 +43,7 @@ class Judging extends BaseApiEntity
         options: ['comment' => 'Time judging started', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float|null $starttime = null;
+    private ?float $starttime = null;
 
     #[ORM\Column(
         type: 'decimal',
@@ -54,7 +54,7 @@ class Judging extends BaseApiEntity
     )]
     #[OA\Property(nullable: true)]
     #[Serializer\Exclude]
-    private string|float|null $endtime = null;
+    private ?float $endtime = null;
 
     #[ORM\Column(
         type: 'decimal',
@@ -64,7 +64,7 @@ class Judging extends BaseApiEntity
         options: ['comment' => 'The maximum runtime for all runs that resulted in the verdict', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float|null $maxRuntimeForVerdict = null;
+    private ?float $maxRuntimeForVerdict = null;
 
     #[ORM\Column(
         length: 32,
@@ -203,13 +203,13 @@ class Judging extends BaseApiEntity
         return $this->judgingid;
     }
 
-    public function setStarttime(string|float $starttime): Judging
+    public function setStarttime(float $starttime): Judging
     {
         $this->starttime = $starttime;
         return $this;
     }
 
-    public function getStarttime(): string|float|null
+    public function getStarttime(): float|null
     {
         return $this->starttime;
     }
@@ -231,13 +231,13 @@ class Judging extends BaseApiEntity
         return Utils::relTime($this->getStarttime() - $this->getContest()->getStarttime());
     }
 
-    public function setEndtime(string|float $endtime): Judging
+    public function setEndtime(float $endtime): Judging
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    public function getEndtime(): string|float|null
+    public function getEndtime(): float|null
     {
         return $this->endtime;
     }
@@ -260,13 +260,13 @@ class Judging extends BaseApiEntity
         return $this->getEndtime() ? Utils::relTime($this->getEndtime() - $this->getContest()->getStarttime()) : null;
     }
 
-    public function setMaxRuntimeForVerdict(string|float $maxRuntimeForVerdict): Judging
+    public function setMaxRuntimeForVerdict(float $maxRuntimeForVerdict): Judging
     {
         $this->maxRuntimeForVerdict = $maxRuntimeForVerdict;
         return $this;
     }
 
-    public function getMaxRuntimeForVerdict(): string|float|null
+    public function getMaxRuntimeForVerdict(): float|null
     {
         return $this->maxRuntimeForVerdict;
     }
