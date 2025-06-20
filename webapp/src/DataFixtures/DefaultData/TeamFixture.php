@@ -23,7 +23,7 @@ class TeamFixture extends AbstractDefaultDataFixture implements DependentFixture
                 ->setName('DOMjudge')
                 ->setExternalid('domjudge')
                 ->setLabel('domjudge')
-                ->setCategory($this->getReference(TeamCategoryFixture::SYSTEM_REFERENCE, TeamCategory::class));
+                ->addCategory($this->getReference(TeamCategoryFixture::SYSTEM_REFERENCE, TeamCategory::class));
             $manager->persist($team);
         } else {
             $this->logger->info('Team DOMjudge already exists, not created');

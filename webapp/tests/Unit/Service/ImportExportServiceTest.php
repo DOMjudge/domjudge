@@ -699,8 +699,8 @@ EOF;
                     self::assertEquals($data['team']['name'], $team->getName());
                 }
                 if (isset($data['team']['category'])) {
-                    self::assertNotNull($team->getCategory());
-                    self::assertEquals($data['team']['category'], $team->getCategory()->getName());
+                    self::assertNotNull($team->getCategories()->first());
+                    self::assertEquals($data['team']['category'], $team->getCategories()->first()->getName());
                 }
                 if (isset($data['team']['members'])) {
                     self::assertEquals($data['team']['members'], $team->getPublicDescription());
@@ -795,7 +795,7 @@ EOF;
             self::assertEquals($data['label'], $team->getLabel());
             self::assertEquals($data['name'], $team->getName());
             self::assertNull($team->getLocation());
-            self::assertEquals($data['category']['externalid'], $team->getCategory()->getExternalid());
+            self::assertEquals($data['category']['externalid'], $team->getCategories()->first()->getExternalid());
             self::assertEquals($data['affiliation']['externalid'], $team->getAffiliation()->getExternalid());
             self::assertEquals($data['affiliation']['shortname'], $team->getAffiliation()->getShortname());
             self::assertEquals($data['affiliation']['name'], $team->getAffiliation()->getName());
@@ -827,9 +827,20 @@ EOF;
     "id": "13",
     "icpc_id": "123456",
     "label": "0",
-    "group_ids": ["26"],
+    "group_ids": ["24", "26"],
     "name": "Team with label 0",
     "organization_id": "INST-44"
+}, {
+    "id": "14",
+    "icpc_id": "112233",
+    "group_ids": [],
+    "name": "Team with empty groups",
+    "organization_id": "INST-45"
+}, {
+    "id": "15",
+    "icpc_id": "445566",
+    "name": "Team with no groups",
+    "organization_id": "INST-46"
 }]
 EOF;
 
@@ -840,36 +851,40 @@ EOF;
                 'label' => 'team1',
                 'name' => '¡i¡i¡',
                 'location' => 'AUD 10',
-                'category' => [
-                    'externalid' => '24',
-                ],
-                'affiliation' => [
-                    'externalid' => 'INST-42',
-                ],
+                'categories' => ['24'],
+                'affiliation' => 'INST-42',
             ], [
                 'externalid' => '12',
                 'icpcid' => '447837',
                 'label' => null,
                 'name' => 'Pleading not FAUlty',
                 'location' => null,
-                'category' => [
-                    'externalid' => '25',
-                ],
-                'affiliation' => [
-                    'externalid' => 'INST-43',
-                ],
+                'categories' => ['25'],
+                'affiliation' => 'INST-43',
             ], [
                 'externalid' => '13',
                 'icpcid' => '123456',
                 'label' => '0',
                 'name' => 'Team with label 0',
                 'location' => null,
-                'category' => [
-                    'externalid' => '26',
-                ],
-                'affiliation' => [
-                    'externalid' => 'INST-44',
-                ],
+                'categories' => ['24', '26'],
+                'affiliation' => 'INST-44',
+            ], [
+                'externalid' => '14',
+                'icpcid' => '112233',
+                'label' => null,
+                'name' => 'Team with empty groups',
+                'location' => null,
+                'categories' => [],
+                'affiliation' => 'INST-45',
+            ], [
+                'externalid' => '15',
+                'icpcid' => '445566',
+                'label' => null,
+                'name' => 'Team with no groups',
+                'location' => null,
+                'categories' => [],
+                'affiliation' => 'INST-46',
             ],
         ];
 
@@ -895,8 +910,9 @@ EOF;
             self::assertEquals($data['label'], $team->getLabel());
             self::assertEquals($data['location'], $team->getLocation());
             self::assertEquals($data['name'], $team->getName());
-            self::assertEquals($data['category']['externalid'], $team->getCategory()->getExternalid());
-            self::assertEquals($data['affiliation']['externalid'], $team->getAffiliation()->getExternalid());
+            $categoryIds = $team->getCategories()->map(fn(TeamCategory $category) => $category->getExternalid())->toArray();
+            self::assertEquals($data['categories'], $categoryIds);
+            self::assertEquals($data['affiliation'], $team->getAffiliation()->getExternalid());
         }
     }
 
@@ -1277,7 +1293,7 @@ EOF;
                 ->setIcpcid($teamData['icpc_id'])
                 ->setName($teamData['name'])
                 ->setDisplayName($teamData['display_name'])
-                ->setCategory($groupsById[$teamData['group_ids'][0]]);
+                ->addCategory($groupsById[$teamData['group_ids'][0]]);
             $em->persist($team);
             $em->flush();
             $teamsById[$team->getExternalid()] = $team;

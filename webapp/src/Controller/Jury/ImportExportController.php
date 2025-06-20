@@ -487,7 +487,7 @@ class ImportExportController extends BaseController
                 'rank' => null,
             ];
             foreach ($teams as $team) {
-                if (!isset($categories[$team->getCategory()->getCategoryid()]) || $team->getCategory()->getSortorder() !== $sortOrder) {
+                if ($team->getHidden() || $team->getSortorder() !== $sortOrder) {
                     continue;
                 }
 

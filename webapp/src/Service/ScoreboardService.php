@@ -131,7 +131,7 @@ class ScoreboardService
         }
         $restricted = ($jury || $freezeData->showFinal(false));
         $variant    = $restricted ? 'Restricted' : 'Public';
-        $sortOrder  = $team->getCategory()->getSortorder();
+        $sortOrder  = $team->getSortOrder();
 
         $sortKey = $this->em->createQueryBuilder()
             ->from(RankCache::class, 'r')
@@ -152,7 +152,8 @@ class ScoreboardService
         $better = $this->em->createQueryBuilder()
             ->from(RankCache::class, 'r')
             ->join('r.team', 't')
-            ->join('t.category', 'tc')
+            // TODO: category type
+            ->join('t.categories', 'tc')
             ->select('COUNT(t.teamid)')
             ->andWhere('r.sortKey'.$variant.' > :sortKey')
             ->andWhere('r.contest = :contest')
@@ -190,7 +191,7 @@ class ScoreboardService
             [ $contest->getCid(), $team->getTeamid(), $problem->getProbid() ]
         );
 
-        if (!$team->getCategory()) {
+        if (!$team->getSortOrderCategory()) {
             $this->logger->warning(
                 "Team '%d' has no category, skipping",
                 [ $team->getTeamid() ]
@@ -354,7 +355,7 @@ class ScoreboardService
             $params = [
                 'cid' => $contest->getCid(),
                 'probid' => $problem->getProbid(),
-                'teamSortOrder' => $team->getCategory()->getSortorder(),
+                'teamSortOrder' => $team->getSortorder(),
                 /** @phpstan-ignore-next-line $absSubmitTime is always set when $correctJury is true */
                 'submitTime' => $absSubmitTime,
                 'correctResult' => Judging::RESULT_CORRECT,
@@ -377,6 +378,8 @@ class ScoreboardService
                     LEFT JOIN external_judgement ej USING (submitid)
                     LEFT JOIN external_judgement ej2 ON ej2.submitid = s.submitid AND ej2.starttime > ej.starttime
                     LEFT JOIN team t USING(teamid)
+                    # TODO: category type
+                    LEFT JOIN team_category_team tcc USING (teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
                     (ej.result IS NULL OR ej.result = :correctResult '.
@@ -389,6 +392,8 @@ class ScoreboardService
                 SELECT count(*) FROM submission s
                     LEFT JOIN judging j ON (s.submitid=j.submitid AND j.valid=1)
                     LEFT JOIN team t USING (teamid)
+                    # TODO: category type
+                    LEFT JOIN team_category_team tcc USING (teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
                     (j.judgingid IS NULL OR j.result IS NULL OR j.result = :correctResult '.
@@ -621,7 +626,7 @@ class ScoreboardService
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
                 ->leftJoin('t.contests', 'c')
-                ->join('t.category', 'cat')
+                ->join('t.categories', 'cat')
                 ->leftJoin('cat.contests', 'cc')
                 ->andWhere('c.cid = :cid OR cc.cid = :cid')
                 ->setParameter('cid', $contest->getCid());
@@ -831,12 +836,13 @@ class ScoreboardService
                 ->from(TeamAffiliation::class, 'a')
                 ->select('a')
                 ->join('a.teams', 't')
-                ->andWhere('t.category IN (:categories)')
+                ->join('t.categories', 'tc')
+                ->andWhere('tc.categoryid IN (:categories)')
                 ->setParameter('categories', $categories);
             if (!$contest->isOpenToAllTeams()) {
                 $queryBuilder
                     ->leftJoin('t.contests', 'c')
-                    ->join('t.category', 'cat')
+                    ->join('t.categories', 'cat')
                     ->leftJoin('cat.contests', 'cc')
                     ->andWhere('c = :contest OR cc = :contest')
                     ->setParameter('contest', $contest);
@@ -951,7 +957,8 @@ class ScoreboardService
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
-            ->innerJoin('t.category', 'tc')
+            // TODO: category type
+            ->innerJoin('t.categories', 'tc')
             ->leftJoin(RankCache::class, 'r', Join::WITH, 'r.team = t AND r.contest = :rcid')
             ->leftJoin('t.affiliation', 'ta')
             ->select('t, tc, ta', 'COALESCE(t.display_name, t.name) AS HIDDEN effectivename')
@@ -961,7 +968,7 @@ class ScoreboardService
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
                 ->leftJoin('t.contests', 'c')
-                ->join('t.category', 'cat')
+                ->join('t.categories', 'cat')
                 ->leftJoin('cat.contests', 'cc')
                 ->andWhere('c.cid = :cid OR cc.cid = :cid')
                 ->setParameter('cid', $contest->getCid());
@@ -989,7 +996,7 @@ class ScoreboardService
 
             if ($filter->categories) {
                 $queryBuilder
-                    ->andWhere('t.category IN (:categories)')
+                    ->andWhere('tc.categoryid IN (:categories)')
                     ->setParameter('categories', $filter->categories);
             }
 
