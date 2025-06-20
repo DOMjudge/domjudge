@@ -51,7 +51,7 @@ class TeamController extends BaseController
             ->from(Team::class, 't')
             ->leftJoin('t.contests', 'c')
             ->leftJoin('t.affiliation', 'a')
-            ->leftJoin('t.category', 'cat')
+            ->leftJoin('t.categories', 'cat')
             ->leftJoin('cat.contests', 'cc')
             ->orderBy('cat.sortorder', 'ASC')
             ->addOrderBy('t.name', 'ASC')
@@ -93,7 +93,8 @@ class TeamController extends BaseController
             'externalid' => ['title' => 'external ID', 'sort' => true],
             'label' => ['title' => 'label', 'sort' => true,],
             'effective_name' => ['title' => 'name', 'sort' => true,],
-            'category' => ['title' => 'category', 'sort' => true,],
+            'category' => ['title' => 'sort order category', 'sort' => true,],
+            'num_categories' => ['title' => '# categories', 'sort' => true,],
             'affiliation' => ['title' => 'affiliation', 'sort' => true,],
             'num_contests' => ['title' => '# contests', 'sort' => true,],
             'ip_address' => ['title' => 'last IP', 'sort' => true,],
@@ -126,6 +127,9 @@ class TeamController extends BaseController
                     $teamdata[$k] = ['value' => $propertyAccessor->getValue($t, $k)];
                 }
             }
+
+            $teamdata['category'] = ['value' => $t->getScoringCategory()];
+            $teamdata['num_categories'] = ['value' => $t->getCategories()->count()];
 
             // Add some elements for the solved status.
             $num_solved    = 0;
@@ -194,8 +198,8 @@ class TeamController extends BaseController
             foreach ($t->getContests() as $c) {
                 $teamContests[$c->getCid()] = true;
             }
-            if ($t->getCategory()) {
-                foreach ($t->getCategory()->getContests() as $c) {
+            foreach ($t->getCategories() as $category) {
+                foreach ($category->getContests() as $c) {
                     $teamContests[$c->getCid()] = true;
                 }
             }
@@ -217,8 +221,7 @@ class TeamController extends BaseController
                 'data' => $teamdata,
                 'actions' => $teamactions,
                 'link' => $this->generateUrl('jury_team', ['teamId' => $t->getTeamId()]),
-                'cssclass' => ($t->getCategory() ? ("category" . $t->getCategory()->getCategoryId()) : '') .
-                    ($t->getEnabled() ? '' : ' disabled'),
+                'cssclass' => ($t->getEnabled() ? '' : ' disabled'),
             ];
         }
         return $this->render('jury/teams.html.twig', [

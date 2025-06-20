@@ -15,7 +15,7 @@
 {% endif %}
 {% set showPoints = scoreboard.showPoints %}
 {% set scoringScoreboard = scoreboard.isScoring %}
-{% set usedCategories = scoreboard.usedCategories(limitToTeamIds) %}
+{% set colorCategories = scoreboard.colorCategories(limitToTeamIds) %}
 {% set hasDifferentCategoryColors = scoreboard.categoryColors(limitToTeamIds) %}
 {% set scores = scoreboard.scores | filter(score => limitToTeams is null or score.team.teamid in limitToTeamIds) %}
 {% set problems = scoreboard.problems %}
@@ -133,13 +133,13 @@
     {% set medalCount = 0 %}
     {% for score in scores %}
         {% set classes = [] %}
-        {% if score.team.category.sortorder != previousSortOrder %}
+        {% if score.team.sortorder != previousSortOrder %}
             {% if previousSortOrder != -1 %}
                 {# Output summary of previous sort order #}
                 {% include 'partials/scoreboard_summary.html.twig' with {sortOrder: previousSortOrder} %}
             {% endif %}
             {% set classes = classes | merge(['sortorderswitch']) %}
-            {% set previousSortOrder = score.team.category.sortorder %}
+            {% set previousSortOrder = score.team.sortorder %}
             {% set previousTeam = null %}
         {% endif %}
 
@@ -154,8 +154,11 @@
             {% set classes = classes | merge(['scorethisisme']) %}
             {% set color = '#FFFF99' %}
         {% else %}
-            {% set color = score.team.category.color %}
+            {% set color = score.team.backgroundColorCategory.color|default(null) %}
         {% endif %}
+        {% for category in score.team.cssClassCategories %}
+            {% set classes = classes | merge([category.cssClass]) %}
+        {% endfor %}
         <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}" data-team-external-id="{{ score.team.externalid }}" data-team-name="{{ score.team.effectiveName | escape('html_attr') }}">
             {% if enable_ranking %}
                 {% if medalsEnabled %}
@@ -239,11 +242,26 @@
                 {% endif %}
                 <a {% if extra is not null %}{{ extra | raw }}{% endif %} {% if link is not null %}href="{{ link }}"{% endif %}>
                     <span class="forceWidth">
-                        {% if usedCategories | length > 1 and scoreboard.bestInCategory(score.team, limitToTeamIds) %}
-                            <span class="badge text-bg-warning category-best">
-                            {{ score.team.category.name }}
-                        </span>
-                        {% endif %}
+                        {% set hasBadges = score.team.badgeCategories | length > 0 %}
+                        {% for category in score.team.topBadgeCategories %}
+                            {% if scoreboard.bestInCategory(score.team, category, limitToTeamIds) %}
+                                {% set hasBadges = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if hasBadges %}<span class="category-badges">{% endif %}
+                        {% for category in score.team.badgeCategories %}
+                            <span class="badge text-bg-warning category-badge">
+                                {{ category.name }}
+                            </span>
+                        {% endfor %}
+                        {% for category in score.team.topBadgeCategories %}
+                            {% if scoreboard.bestInCategory(score.team, category, limitToTeamIds) %}
+                                <span class="badge text-bg-warning category-best">
+                                {{ category.name }}
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                        {% if hasBadges %}</span>{% endif %}
                         {{ score.team.effectiveName }}
                     </span>
                     {% if showAffiliations %}
@@ -420,9 +438,9 @@
     {% set medalCount = 0 %}
     {% for score in scores %}
     {% set classes = [] %}
-    {% if score.team.category.sortorder != previousSortOrder %}
+    {% if score.team.sortorder != previousSortOrder %}
         {% set classes = classes | merge(['sortorderswitch']) %}
-        {% set previousSortOrder = score.team.category.sortorder %}
+        {% set previousSortOrder = score.team.sortorder %}
         {% set previousTeam = null %}
     {% endif %}
 
@@ -437,8 +455,11 @@
         {% set classes = classes | merge(['scorethisisme']) %}
         {% set color = '#FFFF99' %}
     {% else %}
-        {% set color = score.team.category.color %}
+        {% set color = score.team.backgroundColorCategory.color|default(null) %}
     {% endif %}
+    {% for category in score.team.cssClassCategories %}
+        {% set classes = classes | merge([category.cssClass]) %}
+    {% endfor %}
     <tr
         class="{{ classes | join(' ') }}"
         data-team-id="{{ score.team.teamid }}"
@@ -514,11 +535,26 @@
         {% endif %}
         <a {% if extra is not null %}{{ extra | raw }}{% endif %} {% if link is not null %}href="{{ link }}"{% endif %}>
                     <span class="forceWidth">
-                        {% if false and usedCategories | length > 1 and scoreboard.bestInCategory(score.team, limitToTeamIds) %}
-                            <span class="badge text-bg-warning category-best">
-                            {{ score.team.category.name }}
+                        {% set hasBadges = score.team.badgeCategories | length > 0 %}
+                        {% for category in score.team.topBadgeCategories %}
+                            {% if scoreboard.bestInCategory(score.team, category, limitToTeamIds) %}
+                                {% set hasBadges = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if hasBadges %}<span class="category-badges">{% endif %}
+                        {% for category in score.team.badgeCategories %}
+                            <span class="badge text-bg-warning category-badge">
+                            {{ category.name }}
                         </span>
-                        {% endif %}
+                        {% endfor %}
+                        {% for category in score.team.topBadgeCategories %}
+                            {% if scoreboard.bestInCategory(score.team, category, limitToTeamIds) %}
+                                <span class="badge text-bg-warning category-best">
+                                    {{ category.name }}
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                        {% if hasBadges %}</span>{% endif %}
                         {{ score.team.effectiveName }}
                     </span>
             {% if showAffiliations %}
@@ -585,8 +621,7 @@
 {% if showLegends %}
     <p><br/><br/></p>
 
-    {# only print legend when there's more than one category #}
-    {% if limitToTeamIds is null and usedCategories | length > 1 and hasDifferentCategoryColors %}
+    {% if limitToTeamIds is null and colorCategories | length > 0 and hasDifferentCategoryColors %}
         <table id="categ_legend" class="scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
             <thead>
             <tr>
@@ -600,7 +635,7 @@
             </tr>
             </thead>
             <tbody>
-            {% for category in scoreboard.categories | filter(category => usedCategories[category.categoryid] is defined) %}
+            {% for category in colorCategories %}
                 <tr {% if category.color %}class="cl{{ category.color | replace({"#": "_"}) }}"{% endif %}>
                     <td>
                         {% set link = null %}

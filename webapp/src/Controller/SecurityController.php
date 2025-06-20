@@ -133,7 +133,7 @@ class SecurityController extends AbstractController
                 ->setExternalid(Uuid::uuid4()->toString())
                 ->addUser($user)
                 ->setName($teamName)
-                ->setCategory($teamCategory)
+                ->addCategory($teamCategory)
                 ->setInternalComments('Registered by ' . $this->dj->getClientIp() . ' on ' . date('r'));
 
             if ($this->config->get('show_affiliations')) {

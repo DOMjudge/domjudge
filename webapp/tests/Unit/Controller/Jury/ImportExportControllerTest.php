@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\ClarificationFixture;
 use App\DataFixtures\Test\DemoPreStartContestFixture;
+use App\DataFixtures\Test\NonSortOrderTeamCategoryFixture;
 use App\Tests\Unit\BaseTestCase;
 use Generator;
 
@@ -53,6 +54,19 @@ class ImportExportControllerTest extends BaseTestCase
      * Test that submit buttons show an icon.
      */
     public function testIndexButtonsHaveIcons(): void
+    {
+        $this->loadFixture(NonSortOrderTeamCategoryFixture::class);
+
+        $this->verifyPageResponse('GET', '/jury/import-export', 200);
+
+        self::assertSelectorExists('select#export_results_sortorder > option[data-categories*="Participants"]');
+        self::assertSelectorNotExists('select#export_results_sortorder > option[data-categories*="Category for color"]');
+    }
+
+    /**
+     * Test that only scoring categories appear in the export results type
+     */
+    public function testIndexCategoriesScoringOnly(): void
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
 

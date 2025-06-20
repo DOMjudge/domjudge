@@ -3,6 +3,8 @@ DOMjudge Programming Contest Judging System
 Version 10.0.0DEV
 ---------------------------
 
+ - Allow teams to be in more than one category and add more category types.
+
 Version 9.0.0 - 5 October 2025
 ---------------------------
  - API and integration:

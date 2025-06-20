@@ -121,7 +121,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
             $this->teams[$i] = new Team();
             $this->teams[$i]
                 ->setName(self::CONTEST_NAME.' team '.$i)
-                ->setCategory($category);
+                ->addCategory($category);
             $this->em->persist($this->teams[$i]);
         }
 
