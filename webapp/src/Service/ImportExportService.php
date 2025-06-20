@@ -506,7 +506,8 @@ class ImportExportService
         /** @var Team[] $teams */
         $teams = $this->em->createQueryBuilder()
             ->from(Team::class, 't')
-            ->join('t.category', 'c')
+            // TODO: category type
+            ->join('t.categories', 'c')
             ->select('t')
             ->where('c.visible = 1')
             ->getQuery()
@@ -517,7 +518,7 @@ class ImportExportService
             $data[] = [
                 $team->getExternalid(),
                 $team->getIcpcId(),
-                $team->getCategory()->getExternalid(),
+                $team->getSortOrderCategory()?->getExternalid(),
                 $team->getEffectiveName(),
                 $team->getAffiliation() ? $team->getAffiliation()->getName() : '',
                 $team->getAffiliation() ? $team->getAffiliation()->getShortname() : '',
@@ -590,7 +591,7 @@ class ImportExportService
         $skippedTeams     = 0;
 
         foreach ($scoreboard->getScores() as $teamScore) {
-            if ($teamScore->team->getCategory()->getSortorder() !== $sortOrder) {
+            if ($teamScore->team->getSortorder() !== $sortOrder) {
                 continue;
             }
             $maxTime = -1;
@@ -603,7 +604,7 @@ class ImportExportService
             $numPoints = $teamScore->numPoints;
             $skip      = false;
 
-            if (!$contest->getMedalCategories()->contains($teamScore->team->getCategory())) {
+            if (!$teamScore->team->getSortOrderCategory() || !$contest->getMedalCategories()->contains($teamScore->team->getSortOrderCategory())) {
                 $skip = true;
                 $skippedTeams++;
             }
@@ -658,12 +659,12 @@ class ImportExportService
                 $rank        = null;
             }
 
-            $categoryId  = $teamScore->team->getCategory()->getCategoryid();
-            if (isset($groupWinners[$categoryId])) {
+            $categoryId  = $teamScore->team->getSortOrderCategory()?->getCategoryid();
+            if ($categoryId && isset($groupWinners[$categoryId])) {
                 $groupWinner = null;
             } else {
                 $groupWinners[$categoryId] = true;
-                $groupWinner               = $teamScore->team->getCategory()->getName();
+                $groupWinner               = $teamScore->team->getSortOrderCategory()?->getName();
             }
 
             $data[] = new ResultRow(
@@ -1060,7 +1061,7 @@ class ImportExportService
                 'team' => [
                     'teamid' => $teamId,
                     'icpcid' => $teamIcpcId,
-                    'categoryid' => @$line[2],
+                    'categoryids' => isset($line[2]) ? [$line[2]] : [],
                     'name' => @$line[3],
                 ],
                 'team_affiliation' => [
@@ -1091,7 +1092,7 @@ class ImportExportService
                     'teamid' => $team['id'] ?? null,
                     'icpcid' => $team['icpc_id'] ?? null,
                     'label' => $team['label'] ?? null,
-                    'categoryid' => $team['group_ids'][0] ?? null,
+                    'categoryids' => $team['group_ids'] ?? [],
                     'name' => $team['name'] ?? '',
                     'display_name' => $team['display_name'] ?? null,
                     'publicdescription' => $team['public_description'] ?? $team['members'] ?? '',
@@ -1264,11 +1265,12 @@ class ImportExportService
             $teamItem['team']['affiliation'] = $teamAffiliation;
             unset($teamItem['team']['affilid']);
 
-            if (!empty($teamItem['team']['categoryid'])) {
-                $teamCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $teamItem['team']['categoryid']]);
+            $teamCategories = [];
+            foreach ($teamItem['team']['categoryids'] ?? [] as $categoryid) {
+                $teamCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $categoryid]);
                 if (!$teamCategory) {
                     foreach ($createdCategories as $createdCategory) {
-                        if ($createdCategory->getExternalid() === $teamItem['team']['categoryid']) {
+                        if ($createdCategory->getExternalid() === $categoryid) {
                             $teamCategory = $createdCategory;
                             break;
                         }
@@ -1277,8 +1279,8 @@ class ImportExportService
                 if (!$teamCategory) {
                     $teamCategory = new TeamCategory();
                     $teamCategory
-                        ->setExternalid($teamItem['team']['categoryid'])
-                        ->setName($teamItem['team']['categoryid'] . ' - auto-create during import');
+                        ->setExternalid($categoryid)
+                        ->setName($categoryid . ' - auto-create during import');
 
                     $errors = $this->validator->validate($teamCategory);
                     if ($errors->count()) {
@@ -1297,9 +1299,10 @@ class ImportExportService
                         $createdCategories[] = $teamCategory;
                     }
                 }
+                $teamCategories[] = $teamCategory;
             }
-            $teamItem['team']['category'] = $teamCategory;
-            unset($teamItem['team']['categoryid']);
+            $teamItem['team']['categories'] = $teamCategories;
+            unset($teamItem['team']['categoryids']);
 
             // Determine if we need to set the team ID manually or automatically
             if (empty($teamItem['team']['teamid'])) {
@@ -1424,15 +1427,21 @@ class ImportExportService
         $allUsers     = [];
         foreach ($accountData as $index => $accountItem) {
             if (!empty($accountItem['team'])) {
-                $team = $this->em->getRepository(Team::class)->findOneBy([
-                    'name' => $accountItem['team']['name'],
-                    'category' => $accountItem['team']['category'],
-                ]);
+                $team = $this->em->createQueryBuilder()
+                    ->select('t')
+                    ->from(Team::class, 't')
+                    ->join('t.categories', 'c')
+                    ->andWhere('t.name = :name')
+                    ->andWhere('c.categoryid = :category')
+                    ->setParameter('name', $accountItem['team']['name'])
+                    ->setParameter('category', $accountItem['team']['category'])
+                    ->getQuery()
+                    ->getOneOrNullResult();
                 if ($team === null) {
                     $team = new Team();
                     $team
                         ->setName($accountItem['team']['name'])
-                        ->setCategory($accountItem['team']['category'])
+                        ->addCategory($accountItem['team']['category'])
                         ->setExternalid($accountItem['team']['externalid'])
                         ->setPublicDescription($accountItem['team']['publicdescription'] ?? null);
                     $action = EventLogService::ACTION_CREATE;

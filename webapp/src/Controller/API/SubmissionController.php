@@ -463,7 +463,8 @@ class SubmissionController extends AbstractRestController
         if (!$this->dj->checkrole('api_reader') &&
             !$this->dj->checkrole('judgehost')) {
             $queryBuilder
-                ->join('t.category', 'cat');
+                // TODO: category type
+                ->join('t.categories', 'cat');
             if ($this->dj->checkrole('team')) {
                 $queryBuilder
                     ->andWhere('cat.visible = 1 OR s.team = :team')

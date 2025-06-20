@@ -12,8 +12,18 @@
                     <td>{{ team.effectiveName }}</td>
                 </tr>
                 <tr>
-                    <th>Category</th>
-                    <td>{{ team.category.name }}</td>
+                    <th>Categories</th>
+                    <td>
+                        {% if team.categories.empty %}
+                        -
+                        {% else %}
+                            <ul>
+                                {% for category in team.categories %}
+                                    <li>{{ category.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% if team.publicdescription is not empty %}
                     <tr>

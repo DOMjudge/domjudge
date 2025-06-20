@@ -189,7 +189,7 @@ class Scoreboard
         $previousTeamId = null;
         foreach ($this->scores as $teamScore) {
             $teamId = $teamScore->team->getTeamid();
-            $teamSortOrder = $teamScore->team->getCategory()->getSortorder();
+            $teamSortOrder = $teamScore->team->getSortorder();
             // rank, team name, total correct, total time
             if ($teamSortOrder != $prevSortOrder) {
                 $prevSortOrder  = $teamSortOrder;
@@ -209,7 +209,7 @@ class Scoreboard
 
             // Keep summary statistics for the bottom row of our table.
             // The numberOfPoints summary is useful only if they're all 1-point problems.
-            $sortOrder = $teamScore->team->getCategory()->getSortorder();
+            $sortOrder = $teamScore->team->getSortorder();
             $this->summary->addNumberOfPoints($sortOrder, $teamScore->numPoints);
             $teamAffiliation = $teamScore->team->getAffiliation();
             if ($teamAffiliation) {
@@ -290,7 +290,7 @@ class Scoreboard
                 continue;
             }
 
-            $category = $score->team->getCategory();
+            $category = $score->team->getSortOrderCategory();
             if ($category) {
                 $usedCategories[$category->getCategoryid()] = $category;
             }
@@ -314,9 +314,9 @@ class Scoreboard
                 continue;
             }
 
-            if ($score->team->getCategory() &&
-                $score->team->getCategory()->getColor()) {
-                $colors[$score->team->getCategory()->getColor()] = 1;
+            // TODO: category type
+            if ($score->team->getSortOrderCategory()?->getColor()) {
+                $colors[$score->team->getSortOrderCategory()->getColor()] = 1;
             } else {
                 $colors['transparent'] = 1;
             }
@@ -341,16 +341,16 @@ class Scoreboard
                     continue;
                 }
 
-                $categoryId = $score->team->getCategory()->getCategoryid();
-                if (!isset($this->bestInCategoryData[$categoryId])) {
+                $categoryId = $score->team->getSortOrderCategory()?->getCategoryid();
+                if ($categoryId && !isset($this->bestInCategoryData[$categoryId])) {
                     $this->bestInCategoryData[$categoryId] = $score->team->getTeamid();
                 }
             }
         }
 
-        $categoryId = $team->getCategory()->getCategoryid();
+        $categoryId = $team->getSortOrderCategory()?->getCategoryid();
         // Only check the scores when the team has points.
-        if ($this->scores[$team->getTeamid()]->numPoints > 0) {
+        if ($categoryId && $this->scores[$team->getTeamid()]->numPoints > 0) {
             // If the rank of this team is equal to the best team for this
             // category, this team is best in that category.
             return $this->scores[$this->bestInCategoryData[$categoryId]]->rank ===
@@ -378,7 +378,7 @@ class Scoreboard
         if (!$item->isCorrect) {
             return false;
         }
-        $sortorder = $team->getCategory()->getSortorder();
+        $sortorder = $team->getSortorder();
         $bestTime = $this->summary->getProblem($problem->getProbid())->getBestRuntime($sortorder);
         return $item->runtime == $bestTime;
     }

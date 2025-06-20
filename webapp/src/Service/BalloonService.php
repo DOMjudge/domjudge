@@ -110,7 +110,8 @@ class BalloonService
             ->leftJoin('b.contest', 'co')
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
             ->leftJoin('b.team', 't')
-            ->leftJoin('t.category', 'c')
+            // TODO: category type
+            ->leftJoin('t.categories', 'c')
             ->leftJoin('t.affiliation', 'a')
             ->andWhere('co.cid = :cid')
             ->setParameter('cid', $contest->getCid())
