@@ -175,7 +175,7 @@ class PublicController extends BaseController
     {
         /** @var Team|null $team */
         $team             = $this->em->getRepository(Team::class)->find($teamId);
-        if ($team && $team->getCategory() && !$team->getCategory()->getVisible()) {
+        if ($team?->getHidden()) {
             $team = null;
         }
         $showFlags        = (bool)$this->config->get('show_flags');
