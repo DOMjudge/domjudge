@@ -79,7 +79,8 @@ class MetricsController extends AbstractFOSRestController
             ->select('t', 'u')
             ->from(Team::class, 't')
             ->leftJoin('t.users', 'u')
-            ->join('t.category', 'cat')
+            // TODO: category type
+            ->join('t.categories', 'cat')
             ->andWhere('cat.visible = true')
             ->getQuery()
             ->getResult();
@@ -89,7 +90,8 @@ class MetricsController extends AbstractFOSRestController
             ->select('u')
             ->from(User::class, 'u')
             ->leftJoin('u.team', 't')
-            ->join('t.category', 'cat')
+            // TODO: category type
+            ->join('t.categories', 'cat')
             ->andWhere('cat.visible = true')
             ->getQuery()
             ->getResult();
@@ -134,7 +136,8 @@ class MetricsController extends AbstractFOSRestController
                     ->from(Team::class, 't')
                     ->leftJoin('t.users', 'u')
                     ->leftJoin('t.contests', 'c')
-                    ->join('t.category', 'cat')
+                    // TODO: category type
+                    ->join('t.categories', 'cat')
                     ->leftJoin('cat.contests', 'cc')
                     ->andWhere('c.cid = :cid OR cc.cid = :cid')
                     ->andWhere('cat.visible = true')
@@ -154,7 +157,8 @@ class MetricsController extends AbstractFOSRestController
                     ->from(User::class, 'u')
                     ->leftJoin('u.team', 't')
                     ->leftJoin('t.contests', 'c')
-                    ->join('t.category', 'cat')
+                    // TODO: category type
+                    ->join('t.categories', 'cat')
                     ->leftJoin('cat.contests', 'cc')
                     ->andWhere('c.cid = :cid OR cc.cid = :cid')
                     ->andWhere('cat.visible = true')
@@ -227,7 +231,8 @@ class MetricsController extends AbstractFOSRestController
                 ->join('b.submission', 's')
                 ->join('s.contest', 'c')
                 ->join('s.team', 't')
-                ->join('t.category', 'cat')
+                // TODO: category type
+                ->join('t.categories', 'cat')
                 ->andWhere('b.done = false')
                 ->andWhere('c.cid = :cid')
                 ->andWhere('cat.visible = true')

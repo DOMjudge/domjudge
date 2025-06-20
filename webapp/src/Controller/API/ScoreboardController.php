@@ -171,7 +171,7 @@ class ScoreboardController extends AbstractApiController
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
 
         foreach ($scoreboard->getScores() as $teamScore) {
-            if ($teamScore->team->getCategory()->getSortorder() !== $sortorder) {
+            if ($teamScore->team->getSortorder() !== $sortorder) {
                 continue;
             }
 

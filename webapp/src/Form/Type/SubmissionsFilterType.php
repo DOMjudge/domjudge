@@ -101,7 +101,7 @@ class SubmissionsFilterType extends AbstractType
         if (!$selectAllTeams) {
             $teamsQueryBuilder
                 ->leftJoin("t.contests", "c")
-                ->join("t.category", "cat")
+                ->join("t.categories", "cat")
                 ->leftJoin("cat.contests", "cc")
                 ->andWhere("c IN (:contests) OR cc IN (:contests)")
                 ->setParameter(":contests", $contests);

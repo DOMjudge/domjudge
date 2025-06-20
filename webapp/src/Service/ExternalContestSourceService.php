@@ -1102,7 +1102,7 @@ class ExternalContestSourceService
                 $category->setName($data->groupIds[0]);
                 $this->em->persist($category);
             }
-            $team->setCategory($category);
+            $team->addCategory($category);
         }
 
         $this->removeWarning($event->type, $data->id, ExternalSourceWarning::TYPE_ENTITY_NOT_FOUND);

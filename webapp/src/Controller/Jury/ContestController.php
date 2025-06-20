@@ -216,7 +216,7 @@ class ContestController extends BaseController
                     ->select('COUNT(DISTINCT t.teamid)')
                     ->from(Team::class, 't')
                     ->leftJoin('t.contests', 'c')
-                    ->join('t.category', 'cat')
+                    ->join('t.categories', 'cat')
                     ->leftJoin('cat.contests', 'cc')
                     ->andWhere('c.cid = :cid OR cc.cid = :cid')
                     ->setParameter('cid', $contest->getCid())

@@ -110,14 +110,20 @@
         <div class="col">
             <table class="table table-sm table-striped">
                 <tr>
-                    <th>Category</th>
+                    <th>Categories</th>
                     <td>
-                        {% if team.category %}
-                            <a href="{{ path('jury_team_category', {'categoryId': team.category.categoryid}) }}">
-                                {{ team.category.name }}
-                            </a>
-                        {% else %}
+                        {% if team.categories.empty %}
                             -
+                        {% else %}
+                            <ul>
+                                {% for category in team.categories %}
+                                    <li>
+                                        <a href="{{ path('jury_team_category', {'categoryId': category.categoryid}) }}">
+                                            {{ category.name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         {% endif %}
                     </td>
                 </tr>

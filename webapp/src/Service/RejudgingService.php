@@ -369,7 +369,7 @@ class RejudgingService
                 if (!$contest->isOpenToAllTeams()) {
                     $queryBuilder
                         ->leftJoin('t.contests', 'c')
-                        ->join('t.category', 'cat')
+                        ->join('t.categories', 'cat')
                         ->leftJoin('cat.contests', 'cc')
                         ->andWhere('c.cid = :cid OR cc.cid = :cid')
                         ->setParameter('cid', $contest->getCid());
