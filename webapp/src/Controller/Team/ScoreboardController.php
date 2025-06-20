@@ -67,8 +67,16 @@ class ScoreboardController extends BaseController
         }
 
         /** @var Team|null $team */
-        $team             = $this->em->getRepository(Team::class)->find($teamId);
-        if ($team && $team->getCategory() && !$team->getCategory()->getVisible() && $teamId !== $this->dj->getUser()->getTeamId()) {
+        $team = $this->em->createQueryBuilder()
+                         ->from(Team::class, 't')
+                         ->innerJoin('t.categories', 'tc')
+                         ->select('t, tc')
+                         ->andWhere('tc.visible = 1')
+                         ->andWhere('t.teamid = :teamId')
+                         ->setParameter('teamId', $teamId)
+                         ->getQuery()
+                         ->getOneOrNullResult();
+        if ($team?->getHidden() && $teamId !== $this->dj->getUser()->getTeamId()) {
             $team = null;
         }
         $showFlags        = (bool)$this->config->get('show_flags');

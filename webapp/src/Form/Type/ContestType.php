@@ -10,6 +10,7 @@ use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -125,6 +126,11 @@ class ContestType extends AbstractExternalIdEntityType
             'multiple' => true,
             'choice_label' => fn(TeamCategory $category) => $category->getName(),
             'help' => 'List of team categories that will receive medals for this contest.',
+            'query_builder' => function (EntityRepository $er) {
+                return $er->createQueryBuilder('c')
+                    ->andWhere('BIT_AND(c.types, :scoring) = :scoring')
+                    ->setParameter('scoring', TeamCategory::TYPE_SCORING);
+            }
         ]);
         foreach (['gold', 'silver', 'bronze'] as $medalType) {
             $help = "The number of $medalType medals for this contest.";

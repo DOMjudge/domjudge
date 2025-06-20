@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\AddLocationToTeamFixture;
+use App\DataFixtures\Test\CreateTeamWithTwoTeamAffiliationsFixture;
 use App\Entity\Team;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -25,9 +26,23 @@ class TeamControllerTest extends BaseTestCase
             'photo'           => null,
             'location'        => ['description' => 'Utrecht'],
         ],
+        'teamwithtwogroups' => [
+            'group_ids'       => ['participants', 'observers'],
+            'affiliation'     => 'Utrecht University',
+            'nationality'     => 'NLD',
+            'id'              => 'teamwithtwogroups',
+            'icpc_id'         => 'teamwithtwogroups',
+            'name'            => 'Team with two groups',
+            'display_name'    => null,
+            'members'         => null,
+            'photo'           => null,
+        ],
     ];
 
-    protected static array $fixtures = [AddLocationToTeamFixture::class];
+    protected static array $fixtures = [
+        AddLocationToTeamFixture::class,
+        CreateTeamWithTwoTeamAffiliationsFixture::class,
+    ];
 
     protected array $expectedAbsent = ['4242', 'nonexistent'];
 

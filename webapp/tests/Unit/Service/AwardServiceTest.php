@@ -65,7 +65,7 @@ class AwardServiceTest extends KernelTestCase
             $team = (new Team())
                 ->setName('Team ' . $teamLetter)
                 ->setExternalid('team_' . $teamLetter)
-                ->setCategory($category)
+                ->addCategory($category)
                 ->setAffiliation(); // No affiliation needed
             $reflectedProblem = new ReflectionClass(Team::class);
             $teamIdProperty = $reflectedProblem->getProperty('teamid');

@@ -1497,7 +1497,7 @@ class DOMJudgeService
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't')
             ->select('t')
-            ->leftJoin('t.category', 'tc')
+            ->leftJoin('t.categories', 'tc')
             ->leftJoin('t.contests', 'c')
             ->leftJoin('tc.contests', 'cc')
             ->andWhere('t.externalid = :team')

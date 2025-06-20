@@ -56,11 +56,12 @@ class TeamCategoryController extends BaseController
             ->groupBy('c.categoryid')
             ->getQuery()->getResult();
         $table_fields   = [
-            'categoryid' => ['title' => 'ID', 'sort' => true],
+            'categoryid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
             'externalid' => ['title' => 'external ID', 'sort' => true],
             'icpcid' => ['title' => 'ICPC ID', 'sort' => true],
-            'sortorder' => ['title' => 'sort', 'sort' => true, 'default_sort' => true],
+            'sortorder' => ['title' => 'sort', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true],
+            'types' => ['title' => 'types', 'sort' => false],
             'num_teams' => ['title' => '# teams', 'sort' => true],
             'visible' => ['title' => 'visible', 'sort' => true],
             'allow_self_registration' => ['title' => 'self-registration', 'sort' => true],
@@ -103,6 +104,7 @@ class TeamCategoryController extends BaseController
                 ];
             }
 
+            $categorydata['types']                   = ['value' => implode(', ', $teamCategory->getTypeHumanNames()) ?: '-'];
             $categorydata['num_teams']               = ['value' => $teamCategoryData['num_teams']];
             $categorydata['visible']                 = ['value' => $teamCategory->getVisible() ? 'yes' : 'no'];
             $categorydata['allow_self_registration'] = ['value' => $teamCategory->getAllowSelfRegistration() ? 'yes' : 'no'];

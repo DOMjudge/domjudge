@@ -21,7 +21,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\Entity]
 #[ORM\Table(options: ['collation' => 'utf8mb4_unicode_ci', 'charset' => 'utf8mb4'])]
 #[ORM\Index(columns: ['affilid'], name: 'affilid')]
-#[ORM\Index(columns: ['categoryid'], name: 'categoryid')]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[ORM\UniqueConstraint(name: 'label', columns: ['label'])]
 #[UniqueEntity(fields: 'externalid')]
@@ -142,10 +141,12 @@ class Team extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ?TeamAffiliation $affiliation = null;
 
-    #[ORM\ManyToOne(inversedBy: 'teams')]
-    #[ORM\JoinColumn(name: 'categoryid', referencedColumnName: 'categoryid', onDelete: 'CASCADE')]
+    /**
+     * @var Collection<int, TeamCategory>
+     */
+    #[ORM\ManyToMany(targetEntity: TeamCategory::class, mappedBy: 'teams', cascade: ['persist'])]
     #[Serializer\Exclude]
-    private ?TeamCategory $category = null;
+    private Collection $categories;
 
     /**
      * @var Collection<int, Contest>
@@ -436,15 +437,25 @@ class Team extends BaseApiEntity implements
         return $this->getAffiliation()?->getExternalid();
     }
 
-    public function setCategory(?TeamCategory $category = null): Team
+    public function addCategory(TeamCategory $category): Team
     {
-        $this->category = $category;
+        $this->categories[] = $category;
+        $category->addTeam($this);
         return $this;
     }
 
-    public function getCategory(): ?TeamCategory
+    public function removeCategory(TeamCategory $category): void
     {
-        return $this->category;
+        $this->categories->removeElement($category);
+        $category->removeTeam($this);
+    }
+
+    /**
+     * @return Collection<int, TeamCategory>
+     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
     }
 
     #[Serializer\VirtualProperty]
@@ -452,12 +463,18 @@ class Team extends BaseApiEntity implements
     #[Serializer\Type('bool')]
     public function getHidden(): bool
     {
-        return !$this->getCategory() || !$this->getCategory()->getVisible();
+        foreach ($this->getCategories() as $category) {
+            if ($category->getVisible()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public function __construct()
     {
         $this->contests                = new ArrayCollection();
+        $this->categories              = new ArrayCollection();
         $this->users                   = new ArrayCollection();
         $this->submissions             = new ArrayCollection();
         $this->sent_clarifications     = new ArrayCollection();
@@ -569,7 +586,7 @@ class Team extends BaseApiEntity implements
     #[Serializer\Type('array<string>')]
     public function getGroupIds(): array
     {
-        return $this->getCategory() ? [$this->getCategory()->getExternalid()] : [];
+        return $this->categories->map(fn(TeamCategory $category) => $category->getExternalid())->toArray();
     }
 
     #[OA\Property(nullable: true)]
@@ -602,6 +619,12 @@ class Team extends BaseApiEntity implements
     #[Assert\Callback]
     public function validate(ExecutionContextInterface $context): void
     {
+        $this->validateUserCreation($context);
+        $this->validateCategoryTypes($context);
+    }
+
+    private function validateUserCreation(ExecutionContextInterface $context): void
+    {
         if ($this->getAddUserForTeam() === static::CREATE_NEW_USER) {
             if (empty($this->getNewUsername())) {
                 $context
@@ -617,11 +640,53 @@ class Team extends BaseApiEntity implements
         }
     }
 
+    private function validateCategoryTypes(ExecutionContextInterface $context): void
+    {
+        $exclusiveTypes = [
+            TeamCategory::TYPE_SCORING => 'scoring',
+            TeamCategory::TYPE_BACKGROUND => 'background',
+        ];
+        $requiredTypes = [
+            TeamCategory::TYPE_SCORING => 'scoring',
+        ];
+
+        foreach ($exclusiveTypes as $typeFlag => $typeName) {
+            $categoriesWithType = [];
+            foreach ($this->getCategories() as $category) {
+                if ($category->hasType($typeFlag)) {
+                    $categoriesWithType[] = $category->getName();
+                }
+            }
+
+            $teamName = $this->getDisplayName() ?? $this->getName();
+            if (isset($requiredTypes[$typeFlag]) && count($categoriesWithType) !== 1) {
+                $context
+                    ->buildViolation("Team $teamName must be in exactly one $typeName category")
+                    ->atPath('categories')
+                    ->addViolation();
+            } elseif (!isset($requiredTypes[$typeFlag]) && count($categoriesWithType) > 1) {
+                $context
+                    ->buildViolation("Team $teamName can be in at most one $typeName category")
+                    ->atPath('categories')
+                    ->addViolation();
+            }
+        }
+    }
+
     public function inContest(Contest $contest): bool
     {
-        return $contest->isOpenToAllTeams() ||
-            $this->getContests()->contains($contest) ||
-            ($this->getCategory() !== null && $this->getCategory()->inContest($contest));
+        if ($contest->isOpenToAllTeams()) {
+            return true;
+        }
+        if ($this->getContests()->contains($contest)) {
+            return true;
+        }
+        foreach ($this->getCategories() as $category) {
+            if ($category->inContest($contest)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function getAssetProperties(): array
@@ -662,6 +727,58 @@ class Team extends BaseApiEntity implements
         return array_filter([$this->photoForApi]);
     }
 
+    public function getCategoryOfType(int $type): ?TeamCategory
+    {
+        return $this->categories->findFirst(fn(int $key, TeamCategory $category) => $category->hasType($type));
+    }
+
+    /**
+     * @return Collection<int, TeamCategory>
+     */
+    public function getCategoriesOfType(int $type): Collection
+    {
+        return $this->categories->filter(fn(TeamCategory $category) => $category->hasType($type));
+    }
+
+    public function getScoringCategory(): ?TeamCategory
+    {
+        return $this->getCategoryOfType(TeamCategory::TYPE_SCORING);
+    }
+
+    public function getBackgroundColorCategory(): ?TeamCategory
+    {
+        return $this->getCategoryOfType(TeamCategory::TYPE_BACKGROUND);
+    }
+
+    /**
+     * @return Collection<int, TeamCategory>
+     */
+    public function getCssClassCategories(): Collection
+    {
+        return $this->getCategoriesOfType(TeamCategory::TYPE_CSS_CLASS);
+    }
+
+    /**
+     * @return Collection<int, TeamCategory>
+     */
+    public function getTopBadgeCategories(): Collection
+    {
+        return $this->getCategoriesOfType(TeamCategory::TYPE_BADGE_TOP);
+    }
+
+    /**
+     * @return Collection<int, TeamCategory>
+     */
+    public function getBadgeCategories(): Collection
+    {
+        return $this->getCategoriesOfType(TeamCategory::TYPE_BADGE_ALL);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        return $this->getScoringCategory()?->getSortorder();
+    }
+
     public function isLocked(): bool
     {
         foreach ($this->getContests() as $contest) {
@@ -669,8 +786,8 @@ class Team extends BaseApiEntity implements
                 return true;
             }
         }
-        if ($this->getCategory()) {
-            foreach ($this->getCategory()->getContests() as $contest) {
+        foreach ($this->getCategories() as $category) {
+            foreach ($category->getContests() as $contest) {
                 if ($contest->isLocked()) {
                     return true;
                 }

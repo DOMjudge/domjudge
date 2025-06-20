@@ -86,7 +86,7 @@ trait JudgeRemainingTrait
             ->select('j')
             ->join('j.submission', 's')
             ->join('s.team', 't')
-            ->join('t.category', 'tc')
+            ->join('t.categories', 'tc')
             ->andWhere('j.valid = true')
             ->andWhere('j.result != :compiler_error')
             ->setParameter('compiler_error', 'compiler-error');

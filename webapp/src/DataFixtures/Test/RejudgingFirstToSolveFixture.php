@@ -17,8 +17,10 @@ class RejudgingFirstToSolveFixture extends AbstractTestDataFixture
     {
         $team1 = $manager->getRepository(Team::class)->findOneBy(['name' => 'Example teamname']);
         $team2 = (new Team())
-            ->setName('Another team')
-            ->setCategory($team1->getCategory());
+            ->setName('Another team');
+        foreach ($team1->getCategories() as $category) {
+            $team2->addCategory($category);
+        }
 
         $manager->persist($team2);
 

@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Service;
 
+use App\DataFixtures\Test\NonSortOrderTeamCategoryFixture;
 use App\DataFixtures\Test\TeamWithExternalIdEqualsOneFixture;
 use App\DataFixtures\Test\TeamWithExternalIdEqualsTwoFixture;
 use App\DataTransferObject\ResultRow;
@@ -699,8 +700,8 @@ EOF;
                     self::assertEquals($data['team']['name'], $team->getName());
                 }
                 if (isset($data['team']['category'])) {
-                    self::assertNotNull($team->getCategory());
-                    self::assertEquals($data['team']['category'], $team->getCategory()->getName());
+                    self::assertNotFalse($team->getCategories()->first());
+                    self::assertEquals($data['team']['category'], $team->getCategories()->first()->getName());
                 }
                 if (isset($data['team']['members'])) {
                     self::assertEquals($data['team']['members'], $team->getPublicDescription());
@@ -795,7 +796,7 @@ EOF;
             self::assertEquals($data['label'], $team->getLabel());
             self::assertEquals($data['name'], $team->getName());
             self::assertNull($team->getLocation());
-            self::assertEquals($data['category']['externalid'], $team->getCategory()->getExternalid());
+            self::assertEquals($data['category']['externalid'], $team->getCategories()->first()->getExternalid());
             self::assertEquals($data['affiliation']['externalid'], $team->getAffiliation()->getExternalid());
             self::assertEquals($data['affiliation']['shortname'], $team->getAffiliation()->getShortname());
             self::assertEquals($data['affiliation']['name'], $team->getAffiliation()->getName());
@@ -805,6 +806,8 @@ EOF;
 
     public function testImportTeamsJson(): void
     {
+        $this->loadFixture(NonSortOrderTeamCategoryFixture::class);
+
         // Example from the manual, but we have changed the ID's to not mix them with fixtures and
         // we explicitly use a different label for the first team and no label for the second
         // Also we explicitly test for the label '0', since that is a special case
@@ -827,7 +830,7 @@ EOF;
     "id": "13",
     "icpc_id": "123456",
     "label": "0",
-    "group_ids": ["26"],
+    "group_ids": ["24", "colorcat"],
     "name": "Team with label 0",
     "organization_id": "INST-44"
 }]
@@ -840,36 +843,24 @@ EOF;
                 'label' => 'team1',
                 'name' => '¡i¡i¡',
                 'location' => 'AUD 10',
-                'category' => [
-                    'externalid' => '24',
-                ],
-                'affiliation' => [
-                    'externalid' => 'INST-42',
-                ],
+                'categories' => ['24'],
+                'affiliation' => 'INST-42',
             ], [
                 'externalid' => '12',
                 'icpcid' => '447837',
                 'label' => null,
                 'name' => 'Pleading not FAUlty',
                 'location' => null,
-                'category' => [
-                    'externalid' => '25',
-                ],
-                'affiliation' => [
-                    'externalid' => 'INST-43',
-                ],
+                'categories' => ['25'],
+                'affiliation' => 'INST-43',
             ], [
                 'externalid' => '13',
                 'icpcid' => '123456',
                 'label' => '0',
                 'name' => 'Team with label 0',
                 'location' => null,
-                'category' => [
-                    'externalid' => '26',
-                ],
-                'affiliation' => [
-                    'externalid' => 'INST-44',
-                ],
+                'categories' => ['24', 'colorcat'],
+                'affiliation' => 'INST-44',
             ],
         ];
 
@@ -895,8 +886,9 @@ EOF;
             self::assertEquals($data['label'], $team->getLabel());
             self::assertEquals($data['location'], $team->getLocation());
             self::assertEquals($data['name'], $team->getName());
-            self::assertEquals($data['category']['externalid'], $team->getCategory()->getExternalid());
-            self::assertEquals($data['affiliation']['externalid'], $team->getAffiliation()->getExternalid());
+            $categoryIds = $team->getCategories()->map(fn(TeamCategory $category) => $category->getExternalid())->toArray();
+            self::assertEqualsCanonicalizing($data['categories'], $categoryIds);
+            self::assertEquals($data['affiliation'], $team->getAffiliation()->getExternalid());
         }
     }
 
@@ -916,6 +908,17 @@ EOF;
     "group_ids": ["25"],
     "name": "Pleading not FAUlty",
     "organization_id": "INST-43"
+}, {
+    "id": "14",
+    "icpc_id": "112233",
+    "group_ids": [],
+    "name": "Team with empty groups",
+    "organization_id": "INST-45"
+}, {
+    "id": "15",
+    "icpc_id": "445566",
+    "name": "Team with no groups",
+    "organization_id": "INST-46"
 }]
 EOF;
         $em = static::getContainer()->get(EntityManagerInterface::class);
@@ -931,6 +934,8 @@ EOF;
         unlink($fileName);
 
         self::assertMatchesRegularExpression('/.*`name`: This value should not be blank.*/', $message);
+        self::assertMatchesRegularExpression('/.*`categories`: Team Team with empty groups must be in exactly one scoring category.*/', $message);
+        self::assertMatchesRegularExpression('/.*`categories`: Team Team with no groups must be in exactly one scoring category.*/', $message);
         self::assertEquals(-1, $importCount);
 
         $postCount = $em->getRepository(Team::class)->count([]);
@@ -1039,6 +1044,16 @@ EOF;
 }, {
     "id": "23",
     "name": "Spectators"
+}, {
+    "id": "24",
+    "name": "Color",
+    "types": ["background"],
+    "color": "#123123"
+}, {
+    "id": "25",
+    "name": "CSS",
+    "types": ["css-class"],
+    "css_class": "test"
 }]
 EOF;
 
@@ -1047,15 +1062,32 @@ EOF;
                 'externalid' => '13337',
                 'name' => 'Companies',
                 'icpcid' => '123',
+                'sortorder' => 0,
                 'visible' => false,
             ], [
                 'externalid' => '47',
                 'name' => 'Participants',
+                'sortorder' => 0,
                 'visible' => true,
             ], [
                 'externalid' => '23',
                 'name' => 'Spectators',
+                'sortorder' => 0,
                 'visible' => true,
+            ], [
+                'externalid' => '24',
+                'name' => 'Color',
+                'types' => [TeamCategory::TYPE_BACKGROUND],
+                'sortorder' => null,
+                'visible' => true,
+                'color' => '#123123',
+            ], [
+                'externalid' => '25',
+                'name' => 'CSS',
+                'types' => [TeamCategory::TYPE_CSS_CLASS],
+                'sortorder' => null,
+                'visible' => true,
+                'cssClass' => 'test',
             ],
         ];
 
@@ -1079,7 +1111,11 @@ EOF;
             self::assertNotNull($category, "Team cagegory $data[name] does not exist");
             self::assertEquals($data['icpcid'] ?? null, $category->getIcpcId());
             self::assertEquals($data['name'], $category->getName());
+            self::assertEquals($data['types'] ?? [TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BADGE_TOP], $category->getTypes());
             self::assertEquals($data['visible'], $category->getVisible());
+            self::assertEquals($data['sortorder'] ?? null, $category->getSortorder());
+            self::assertEquals($data['color'] ?? null, $category->getColor());
+            self::assertEquals($data['cssClass'] ?? null, $category->getCssClass());
         }
     }
 
@@ -1277,7 +1313,7 @@ EOF;
                 ->setIcpcid($teamData['icpc_id'])
                 ->setName($teamData['name'])
                 ->setDisplayName($teamData['display_name'])
-                ->setCategory($groupsById[$teamData['group_ids'][0]]);
+                ->addCategory($groupsById[$teamData['group_ids'][0]]);
             $em->persist($team);
             $em->flush();
             $teamsById[$team->getExternalid()] = $team;

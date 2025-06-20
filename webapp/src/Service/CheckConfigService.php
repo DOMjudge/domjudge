@@ -99,6 +99,7 @@ class CheckConfigService
         $teams = [
             'photos' => $this->checkTeamPhotos(),
             'affiliations' => $this->checkAffiliations(),
+            'categories' => $this->checkCategories(),
             'teamdupenames' => $this->checkTeamDuplicateNames(),
             'selfregistration' => $this->checkSelfRegistration(),
         ];
@@ -830,6 +831,37 @@ class CheckConfigService
         $this->stopwatch->stop(__FUNCTION__);
         return new ConfigCheckItem(
             caption: 'Team affiliations',
+            result: $result,
+            desc: $desc
+        );
+    }
+
+    public function checkCategories(): ConfigCheckItem
+    {
+        $this->stopwatch->start(__FUNCTION__);
+        /** @var Team[] $teams */
+        $teams = $this->em->getRepository(Team::class)
+            ->createQueryBuilder('t')
+            ->leftJoin('t.categories', 'c', 'WITH', 'BIT_AND(c.types, :scoring) = :scoring')
+            ->select('t, c')
+            ->setParameter('scoring', TeamCategory::TYPE_SCORING)
+            ->getQuery()
+            ->getResult();
+
+        $desc = '';
+        $result = 'O';
+        foreach ($teams as $team) {
+            if (!$team->getScoringCategory()) {
+                $result = 'E';
+                $desc .= sprintf("  - Team `t%d` (%s) does not belong to any scoring category\n", $team->getTeamid(), $team->getName());
+            }
+        }
+
+        $desc = $desc ?: 'Everything OK';
+
+        $this->stopwatch->stop(__FUNCTION__);
+        return new ConfigCheckItem(
+            caption: 'Team categories',
             result: $result,
             desc: $desc
         );

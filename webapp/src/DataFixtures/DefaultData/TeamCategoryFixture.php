@@ -26,6 +26,7 @@ class TeamCategoryFixture extends AbstractDefaultDataFixture
             if (!($category = $manager->getRepository(TeamCategory::class)->findOneBy(['externalid' => $item[4]]))) {
                 $category = (new TeamCategory())
                     ->setName($item[0])
+                    ->setTypes([TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BADGE_TOP, TeamCategory::TYPE_BACKGROUND])
                     ->setSortorder($item[1])
                     ->setColor($item[2])
                     ->setVisible($item[3])

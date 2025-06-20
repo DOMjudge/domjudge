@@ -11,6 +11,7 @@ use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\SubmissionSource;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -19,6 +20,7 @@ use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -463,7 +465,8 @@ class SubmissionController extends AbstractRestController
         if (!$this->dj->checkrole('api_reader') &&
             !$this->dj->checkrole('judgehost')) {
             $queryBuilder
-                ->join('t.category', 'cat');
+                ->join('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
+                ->setParameter('scoring', TeamCategory::TYPE_SCORING);
             if ($this->dj->checkrole('team')) {
                 $queryBuilder
                     ->andWhere('cat.visible = 1 OR s.team = :team')
