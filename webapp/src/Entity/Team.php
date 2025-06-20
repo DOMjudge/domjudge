@@ -21,7 +21,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\Entity]
 #[ORM\Table(options: ['collation' => 'utf8mb4_unicode_ci', 'charset' => 'utf8mb4'])]
 #[ORM\Index(columns: ['affilid'], name: 'affilid')]
-#[ORM\Index(columns: ['categoryid'], name: 'categoryid')]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[ORM\UniqueConstraint(name: 'label', columns: ['label'])]
 #[UniqueEntity(fields: 'externalid')]
@@ -142,10 +141,12 @@ class Team extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ?TeamAffiliation $affiliation = null;
 
-    #[ORM\ManyToOne(inversedBy: 'teams')]
-    #[ORM\JoinColumn(name: 'categoryid', referencedColumnName: 'categoryid', onDelete: 'CASCADE')]
+    /**
+     * @var Collection<int, TeamCategory>
+     */
+    #[ORM\ManyToMany(targetEntity: TeamCategory::class, mappedBy: 'teams', cascade: ['persist'])]
     #[Serializer\Exclude]
-    private ?TeamCategory $category = null;
+    private Collection $categories;
 
     /**
      * @var Collection<int, Contest>
@@ -436,15 +437,25 @@ class Team extends BaseApiEntity implements
         return $this->getAffiliation()?->getExternalid();
     }
 
-    public function setCategory(?TeamCategory $category = null): Team
+    public function addCategory(TeamCategory $category): Team
     {
-        $this->category = $category;
+        $this->categories[] = $category;
+        $category->addTeam($this);
         return $this;
     }
 
-    public function getCategory(): ?TeamCategory
+    public function removeCategory(TeamCategory $category): void
     {
-        return $this->category;
+        $this->categories->removeElement($category);
+        $category->removeTeam($this);
+    }
+
+    /**
+     * @return Collection<int, TeamCategory>
+     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
     }
 
     #[Serializer\VirtualProperty]
@@ -452,12 +463,18 @@ class Team extends BaseApiEntity implements
     #[Serializer\Type('bool')]
     public function getHidden(): bool
     {
-        return !$this->getCategory() || !$this->getCategory()->getVisible();
+        foreach ($this->getCategories() as $category) {
+            if ($category->getVisible()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public function __construct()
     {
         $this->contests                = new ArrayCollection();
+        $this->categories              = new ArrayCollection();
         $this->users                   = new ArrayCollection();
         $this->submissions             = new ArrayCollection();
         $this->sent_clarifications     = new ArrayCollection();
@@ -569,7 +586,7 @@ class Team extends BaseApiEntity implements
     #[Serializer\Type('array<string>')]
     public function getGroupIds(): array
     {
-        return $this->getCategory() ? [$this->getCategory()->getExternalid()] : [];
+        return $this->categories->map(fn(TeamCategory $category) => $category->getExternalid())->toArray();
     }
 
     #[OA\Property(nullable: true)]
@@ -619,9 +636,18 @@ class Team extends BaseApiEntity implements
 
     public function inContest(Contest $contest): bool
     {
-        return $contest->isOpenToAllTeams() ||
-            $this->getContests()->contains($contest) ||
-            ($this->getCategory() !== null && $this->getCategory()->inContest($contest));
+        if ($contest->isOpenToAllTeams()) {
+            return true;
+        }
+        if ($this->getContests()->contains($contest)) {
+            return true;
+        }
+        foreach ($this->getCategories() as $category) {
+            if ($category->inContest($contest)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function getAssetProperties(): array
@@ -660,6 +686,17 @@ class Team extends BaseApiEntity implements
     public function getPhotoForApi(): array
     {
         return array_filter([$this->photoForApi]);
+    }
+
+    public function getSortOrderCategory(): ?TeamCategory
+    {
+        // TODO: category type
+        return $this->categories->first() ?: null;
+    }
+
+    public function getSortOrder(): ?int
+    {
+        return $this->getSortOrderCategory()?->getSortorder();
     }
 
     public function isLocked(): bool
