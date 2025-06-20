@@ -91,7 +91,9 @@ class TeamCategory extends BaseApiEntity implements
     /**
      * @var Collection<int, Team>
      */
-    #[ORM\OneToMany(mappedBy: 'category', targetEntity: Team::class)]
+    #[ORM\ManyToMany(targetEntity: Team::class, inversedBy: 'categories', cascade: ['persist'])]
+    #[ORM\JoinColumn(name: 'categoryid', referencedColumnName: 'categoryid', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'teamid', referencedColumnName: 'teamid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private Collection $teams;
 
@@ -218,6 +220,11 @@ class TeamCategory extends BaseApiEntity implements
     {
         $this->teams[] = $team;
         return $this;
+    }
+
+    public function removeTeam(Team $team): void
+    {
+        $this->teams->removeElement($team);
     }
 
     /**

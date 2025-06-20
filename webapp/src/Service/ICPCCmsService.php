@@ -110,7 +110,7 @@ class ICPCCmsService
                     $team = new Team();
                     $team
                         ->setName($teamData['teamName'])
-                        ->setCategory($participants)
+                        ->addCategory($participants)
                         ->setAffiliation($affiliation)
                         ->setEnabled($enabled)
                         ->setInternalComments('Status: ' . $teamData['status'])
@@ -132,7 +132,7 @@ class ICPCCmsService
                     $username = sprintf("team%04d", $team->getTeamid());
                     $team
                         ->setName($teamData['teamName'])
-                        ->setCategory($participants)
+                        ->addCategory($participants)
                         ->setAffiliation($affiliation)
                         ->setEnabled($enabled)
                         ->setInternalComments('Status: ' . $teamData['status'])

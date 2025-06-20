@@ -305,7 +305,8 @@ class TeamController extends AbstractRestController
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't')
             ->leftJoin('t.affiliation', 'ta')
-            ->leftJoin('t.category', 'tc')
+            // TODO: category type
+            ->leftJoin('t.categories', 'tc')
             ->leftJoin('t.contests', 'c')
             ->leftJoin('tc.contests', 'cc')
             ->select('t, ta')
@@ -313,7 +314,7 @@ class TeamController extends AbstractRestController
 
         if ($request->query->has('category')) {
             $queryBuilder
-                ->andWhere('t.category = :category')
+                ->andWhere('tc.categoryid = :category')
                 ->setParameter('category', $request->query->get('category'));
         }
 
