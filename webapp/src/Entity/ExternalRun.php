@@ -45,7 +45,7 @@ class ExternalRun
         scale: 9,
         options: ['comment' => 'Time run ended', 'unsigned' => true]
     )]
-    private string|float $endtime;
+    private float $endtime;
 
     #[ORM\Column(options: ['comment' => 'Running time on this testcase'])]
     private float $runtime;
@@ -89,13 +89,13 @@ class ExternalRun
         return $this->result;
     }
 
-    public function setEndtime(string|float $endtime): ExternalRun
+    public function setEndtime(float $endtime): ExternalRun
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    public function getEndtime(): string|float
+    public function getEndtime(): float
     {
         return $this->endtime;
     }

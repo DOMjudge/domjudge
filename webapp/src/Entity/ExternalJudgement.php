@@ -68,7 +68,7 @@ class ExternalJudgement
         scale: 9,
         options: ['comment' => 'Time judging started', 'unsigned' => true]
     )]
-    private string|float $starttime;
+    private float $starttime;
 
     #[ORM\Column(
         type: 'decimal',
@@ -77,7 +77,7 @@ class ExternalJudgement
         nullable: true,
         options: ['comment' => 'Time judging ended, null = still busy', 'unsigned' => true]
     )]
-    private string|float|null $endtime = null;
+    private ?float $endtime = null;
 
     #[ORM\Column(
         options: ['comment' => 'Old external judgement is marked as invalid when receiving a new one', 'default' => 1]
@@ -163,24 +163,24 @@ class ExternalJudgement
         return $this->verify_comment;
     }
 
-    public function setStarttime(string|float $starttime): ExternalJudgement
+    public function setStarttime(float $starttime): ExternalJudgement
     {
         $this->starttime = $starttime;
         return $this;
     }
 
-    public function getStarttime(): string|float
+    public function getStarttime(): float
     {
         return $this->starttime;
     }
 
-    public function setEndtime(string|float|null $endtime): ExternalJudgement
+    public function setEndtime(?float $endtime): ExternalJudgement
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    public function getEndtime(): string|float|null
+    public function getEndtime(): float|null
     {
         return $this->endtime;
     }

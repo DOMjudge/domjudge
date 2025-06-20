@@ -61,7 +61,7 @@ class Clarification extends BaseApiEntity implements
         options: ['comment' => 'Time sent', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float $submittime;
+    private float $submittime;
 
     #[ORM\Column(nullable: true, options: ['comment' => 'Name of jury member who answered this'])]
     #[Serializer\Exclude]
@@ -145,13 +145,13 @@ class Clarification extends BaseApiEntity implements
         return $this->externalid;
     }
 
-    public function setSubmittime(string|float $submittime): Clarification
+    public function setSubmittime(float $submittime): Clarification
     {
         $this->submittime = $submittime;
         return $this;
     }
 
-    public function getSubmittime(): string|float
+    public function getSubmittime(): float
     {
         return $this->submittime;
     }

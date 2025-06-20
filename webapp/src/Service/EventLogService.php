@@ -334,9 +334,9 @@ class EventLogService
             }
         }
 
-        // Explicitly construct the time as string to prevent float
-        // representation issues.
-        $now = sprintf('%.3f', microtime(true));
+        // Explicitly construct the time as string and then cast to float
+        // to prevent float representation issues.
+        $now = (float)sprintf('%.3f', microtime(true));
 
         if ($jsonPassed) {
             $json = Utils::jsonDecode($json);

@@ -114,7 +114,7 @@ class Team extends BaseApiEntity implements
         options: ['comment' => 'Start time of last judging for prioritization', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float|null $judging_last_started = null;
+    private ?float $judging_last_started = null;
 
     #[ORM\Column(options: ['comment' => 'Additional penalty time in minutes', 'default' => 0])]
     #[Serializer\Exclude]
@@ -327,13 +327,13 @@ class Team extends BaseApiEntity implements
         return $this->internalComments;
     }
 
-    public function setJudgingLastStarted(string|float $judgingLastStarted): Team
+    public function setJudgingLastStarted(float $judgingLastStarted): Team
     {
         $this->judging_last_started = $judgingLastStarted;
         return $this;
     }
 
-    public function getJudgingLastStarted(): string|float
+    public function getJudgingLastStarted(): float
     {
         return $this->judging_last_started;
     }

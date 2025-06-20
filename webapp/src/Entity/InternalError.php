@@ -43,7 +43,7 @@ class InternalError
         scale: 9,
         options: ['comment' => 'Timestamp of the internal error', 'unsigned' => true]
     )]
-    private string|float $time;
+    private float $time;
 
     /**
      * @var array{kind: string, hostname?: string, execid?: string, probid: string, langid: string}
@@ -118,13 +118,13 @@ class InternalError
         return $this->judgehostlog;
     }
 
-    public function setTime(string|float $time): InternalError
+    public function setTime(float $time): InternalError
     {
         $this->time = $time;
         return $this;
     }
 
-    public function getTime(): string|float
+    public function getTime(): float
     {
         return $this->time;
     }
