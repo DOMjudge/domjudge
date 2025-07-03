@@ -23,7 +23,9 @@
                         {{ scoreboard.summary.numberOfPoints(sortOrder) }}
                     </td>
                 {% endif %}
-                <td></td>
+                {% if not scoringScoreboard %}
+                    <td></td>
+                {% endif %}
             {% endif %}
             {% for problem in scoreboard.problems %}
                 {% set summary = scoreboard.summary.problem(problem.probid) %}
