@@ -737,7 +737,7 @@ class Utils
         $sanitizer = new SvgSanitizer();
         $sanitizer->removeRemoteReferences(true);
         $sanitizer->minify(true);
-        
+
         return $sanitizer->sanitize($svgContents);
     }
 
@@ -1007,5 +1007,13 @@ class Utils
         }
 
         return $res;
+    }
+
+    public static function extendMaxExecutionTime(int $minimumMaxExecutionTime): void
+    {
+        $maxExecutionTime = (int)ini_get('max_execution_time');
+        if ($maxExecutionTime !== 0 && $maxExecutionTime < $minimumMaxExecutionTime) {
+            ini_set('max_execution_time', $minimumMaxExecutionTime);
+        }
     }
 }

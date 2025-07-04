@@ -604,7 +604,7 @@ class ScoreboardService
      */
     public function refreshCache(Contest $contest, ?callable $progressReporter = null): void
     {
-        ini_set('max_execution_time', 300);
+        Utils::extendMaxExecutionTime(300);
 
         $this->dj->auditlog('contest', $contest->getCid(), 'refresh scoreboard cache');
 

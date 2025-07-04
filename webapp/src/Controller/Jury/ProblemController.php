@@ -262,7 +262,7 @@ class ProblemController extends BaseController
     public function exportAction(int $problemId): StreamedResponse
     {
         // This might take a while.
-        ini_set('max_execution_time', '300');
+        Utils::extendMaxExecutionTime(300);
         /** @var Problem $problem */
         $problem = $this->em->createQueryBuilder()
             ->from(Problem::class, 'p')
