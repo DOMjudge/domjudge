@@ -24,7 +24,7 @@ use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use Metadata\MetadataFactoryInterface;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -418,7 +418,7 @@ class ContestController extends AbstractRestController
         if (!$request->request->has('start_time') && !$request->request->has('scoreboard_thaw_time')) {
             throw new BadRequestHttpException('Missing "start_time" or "scoreboard_thaw_time" in request.');
         }
-        if ($request->request->get('id') != $contest->getExternalid()) {
+        if ($request->request->get('id') !== $contest->getExternalid()) {
             throw new BadRequestHttpException('Invalid "id" in request.');
         }
         if ($request->request->has('start_time') && $request->request->has('scoreboard_thaw_time')) {

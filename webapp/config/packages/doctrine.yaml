@@ -30,6 +30,7 @@ doctrine:
         auto_mapping: true
         controller_resolver:
             auto_mapping: false
+        enable_lazy_ghost_objects: true
         mappings:
             App:
                 type: attribute

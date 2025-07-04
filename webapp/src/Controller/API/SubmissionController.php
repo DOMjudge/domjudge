@@ -22,7 +22,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -159,7 +159,7 @@ class SubmissionController extends AbstractRestController
             if ($this->isGranted('ROLE_API_WRITER')) {
                 // Load the user.
                 /** @var User|null $user */
-                $user = $this->em->getRepository(User::class)->find($userId);
+                $user = $this->em->getRepository(User::class)->findOneBy(['externalid' => $userId]);
 
                 if (!$user) {
                     throw new BadRequestHttpException("User not found.");

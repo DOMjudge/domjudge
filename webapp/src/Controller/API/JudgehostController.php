@@ -42,7 +42,7 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
