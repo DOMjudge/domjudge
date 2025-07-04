@@ -62,7 +62,7 @@ class ImportProblemService
         ?array &$messages = []
     ): ?Problem {
         // This might take a while.
-        ini_set('max_execution_time', '300');
+        Utils::extendMaxExecutionTime(300);
 
         foreach (['info', 'warning', 'danger'] as $type) {
             $messages[$type] = [];
