@@ -996,7 +996,11 @@ class ImportProblemService
         return true;
     }
 
-    // Returns true iff the yaml could be parsed correctly.
+    /**
+     * Returns true iff the yaml could be parsed correctly.
+     *
+     * @param array{danger: string[], info: string[]} $messages
+     */
     public static function parseYaml(bool|string $problemYaml, array &$messages, string &$validationMode, PropertyAccessor $propertyAccessor, Problem $problem): bool
     {
         if ($problemYaml === false) {

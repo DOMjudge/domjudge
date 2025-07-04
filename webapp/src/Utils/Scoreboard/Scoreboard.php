@@ -31,6 +31,7 @@ class Scoreboard
      * @param TeamCategory[]   $categories
      * @param ContestProblem[] $problems
      * @param ScoreCache[]     $scoreCache
+     * @param RankCache[]      $rankCache
      */
     public function __construct(
         protected readonly Contest    $contest,
