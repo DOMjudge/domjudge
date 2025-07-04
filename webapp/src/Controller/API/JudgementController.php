@@ -44,9 +44,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
 
-        $verdicts = $this->dj->getVerdicts();
-        $verdicts['aborted'] = 'JE'; /* happens for aborted judgings */
-        $this->verdicts = $verdicts;
+        $this->verdicts = $this->config->getVerdicts(['final', 'error']);
     }
 
     /**
@@ -104,7 +102,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
-            ->select('j, c, s, MAX(jr.runtime) AS maxruntime')
+            ->select('j, c, s')
             ->leftJoin('j.contest', 'c')
             ->leftJoin('j.submission', 's')
             ->leftJoin('j.rejudging', 'r')
@@ -161,12 +159,10 @@ class JudgementController extends AbstractRestController implements QueryObjectT
         return 'j.judgingid';
     }
 
-    public function transformObject($object): JudgingWrapper
+    public function transformObject($judging): JudgingWrapper
     {
         /** @var Judging $judging */
-        $judging         = $object[0];
-        $maxRunTime      = $object['maxruntime'] === null ? null : (float)$object['maxruntime'];
         $judgementTypeId = $judging->getResult() ? $this->verdicts[$judging->getResult()] : null;
-        return new JudgingWrapper($judging, $maxRunTime, $judgementTypeId);
+        return new JudgingWrapper($judging, $judgementTypeId);
     }
 }

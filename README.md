@@ -6,11 +6,14 @@ DOMjudge
 [![Coverity Scan Status](https://img.shields.io/coverity/scan/671.svg)](https://scan.coverity.com/projects/domjudge)
 [![CodeQL alerts](https://github.com/DOMjudge/domjudge/actions/workflows/codeql-analysis.yml/badge.svg?branch=main&event=push)](https://github.com/DOMjudge/domjudge/actions/workflows/codeql-analysis.yml)
 
-This is the Programming Contest Jury System "DOMjudge" version 8.4.0DEV
+This is the Programming Contest Jury System "DOMjudge" version 9.0.0DEV
 
 DOMjudge is a system for running a programming contest, like the
 ICPC regional and world championship programming contests.
 
+Installation
+------------
+We provide [stable releases](https://www.domjudge.org/download) and [daily snapshots](https://www.domjudge.org/snapshot/) of the latest code. Bootstrapping from git is an advanced use case and mostly needed for development. Installing DOMjudge is almost never done via a `git clone`, except for development use cases or testing the latest code. 
 
 Documentation
 -------------
@@ -44,7 +47,7 @@ https://github.com/DOMjudge/domjudge/wiki
 Copyright & Licensing
 ---------------------
 
-DOMjudge is Copyright (c) 2004 - 2024 by the DOMjudge developers and
+DOMjudge is Copyright (c) 2004 - 2025 by the DOMjudge developers and
 all respective contributors. The current DOMjudge developers are Jaap
 Eldering, Nicky Gerritsen, Keith Johnson, Thijs Kinkhorst, Mart
 Pluijmaekers, Michael Vasseur and Tobias Werth; see the manual for
@@ -63,7 +66,7 @@ DOMjudge manual.
 
 The following JavaScript libraries/snippets are included:
 - coloris: Momo Bassit, licensed under the MIT license, see COPYING.MIT.
-- Ace editor: licensed under the BSD licence, see COPYING.BSD.
+- Monaco editor: licensed under the MIT license, see COPYING.MIT.
 
 The default validator from the Kattis problemtools package is
 included, licensed under the MIT licence, see COPYING.MIT.
@@ -93,3 +96,16 @@ https://www.domjudge.org/mailman/postorius/lists/domjudge-devel.domjudge.org/
 DOMjudge has a Slack workspace where a number of developers and
 users of DOMjudge linger. More information can be found at
 https://www.domjudge.org/chat
+
+Special thanks
+--------------
+
+[Jetbrains](https://www.jetbrains.com) for providing a free license for their
+  IDEs.
+
+[<img src="https://www.jetbrains.com/company/brand/img/jetbrains_logo.png" height="75">](https://www.jetbrains.com)
+
+[Blackfire](https://blackfire.io) for providing a free license for their
+  profiling tool.
+
+[<img src="https://platform.sh/blackfire-logos/full/color/BFlogo_aPSHproduct_Color_H.png" height="75">](https://blackfire.io)

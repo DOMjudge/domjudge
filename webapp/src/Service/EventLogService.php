@@ -3,14 +3,12 @@
 namespace App\Service;
 
 use App\Entity\BaseApiEntity;
-use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
 use App\Entity\HasExternalIdInterface;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
-use App\Entity\Submission;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
@@ -185,8 +183,8 @@ class EventLogService
         $jsonPassed = isset($json);
 
         // Make a combined string to keep track of the data ID's
-        $dataidsCombined = $this->dj->jsonEncode($dataIds);
-        $idsCombined     = $ids === null ? null : (is_array($ids) ? $this->dj->jsonEncode($ids) : $ids);
+        $dataidsCombined = Utils::jsonEncode($dataIds);
+        $idsCombined     = $ids === null ? null : (is_array($ids) ? Utils::jsonEncode($ids) : $ids);
 
         $this->logger->debug(
             "EventLogService::log arguments: '%s' '%s' '%s' '%s' '%s' '%s'",
@@ -226,7 +224,7 @@ class EventLogService
         }
 
         if ($ids === [null] && $json !== null) {
-            $data = $this->dj->jsonDecode($json);
+            $data = Utils::jsonDecode($json);
             if (!empty($data['id'])) {
                 $ids = [$data['id']];
             }
@@ -236,14 +234,14 @@ class EventLogService
             $ids = [$ids];
         }
 
-        $idsCombined = $this->dj->jsonEncode($ids);
+        $idsCombined = Utils::jsonEncode($ids);
 
         // State is a special case, as it works without an ID
         if ($type !== 'state' && count(array_filter($ids)) !== count($dataIds)) {
             $this->logger->warning(
                 "EventLogService::log API ID not specified or inferred ".
                 "from data for type %s and data ID's '%s'",
-                [ $type, $this->dj->jsonEncode($dataIds) ]
+                [ $type, Utils::jsonEncode($dataIds) ]
             );
             return;
         }
@@ -339,7 +337,7 @@ class EventLogService
         $now = sprintf('%.3f', microtime(true));
 
         if ($jsonPassed) {
-            $json = $this->dj->jsonDecode($json);
+            $json = Utils::jsonDecode($json);
         } elseif (!in_array($type, ['contests', 'state'])) {
             // Re-index JSON so we can look up the elements by ID.
             $tmp  = $json;
@@ -559,8 +557,8 @@ class EventLogService
             $existingEvent = $existingEvents[$event->getEndpointid()] ?? null;
             $existingData = $existingEvent === null ?
                 null :
-                $this->dj->jsonEncode($existingEvent->getContent());
-            $data = $this->dj->jsonEncode($event->getContent());
+                Utils::jsonEncode($existingEvent->getContent());
+            $data = Utils::jsonEncode($event->getContent());
             if ($existingEvent === null || $existingData !== $data) {
                 // Special case for state: this is always an update event
                 if ($endpointType === 'state') {

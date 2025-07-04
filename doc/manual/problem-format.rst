@@ -44,14 +44,16 @@ interface):
  - ``special_compare`` - executable id of a special compare script
  - ``points`` - number of points for this problem (defaults to 1)
  - ``color`` - CSS color specification for this problem
+ - ``externalid`` - the external id of the problem
+ - ``short-name`` - the short name of the problem 
 
-The basename of the ZIP-file will be used as the problem short name (e.g. "A").
-All keys are optional. If they are present, the respective value will be
-overwritten; if not present, then the value will not be changed or a default
-chosen when creating a new problem. Test data files are added to set of test
-cases already present. Thus, one can easily add test cases to a configured
-problem by uploading a zip file that contains only testcase files. Any jury
-solutions present will be automatically submitted when ``allow_submit`` is
-``1`` and there's a team associated with the uploading user.
+The basename of the ZIP-file will be used as the problem external id and short
+name (e.g. "A"). All keys are optional. If they are present, the respective
+value will be overwritten; if not present, then the value will not be changed
+or a default chosen when creating a new problem. Test data files are added to
+set of test cases already present. Thus, one can easily add test cases to a
+configured problem by uploading a zip file that contains only testcase files.
+Any jury solutions present will be automatically submitted when ``allow_submit``
+is ``1`` and there's a team associated with the uploading user.
 
-.. _ICPC problem package specification: https://icpc.io/problem-package-format/spec/problem_package_format
+.. _ICPC problem package specification: https://icpc.io/problem-package-format/spec/legacy-icpc

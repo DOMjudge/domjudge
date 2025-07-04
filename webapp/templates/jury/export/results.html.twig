@@ -27,25 +27,35 @@
         </tbody>
     </table>
 
-    <h2>Other ranked teams</h2>
-    <table class="table">
-        <thead>
-        <tr>
-            <th scope="col">Rank</th>
-            <th scope="col">Team</th>
-            <th scope="col">Solved problems</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for row in ranked %}
-            <tr>
-                <th scope="row">{{ row.rank }}</th>
-                <th scope="row">{{ row.team }}</th>
-                <td>{{ row.solved }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    {% for award in ['Ranked', 'Highest Honors', 'High Honors', 'Honors'] %}
+        {% if ranked[award] is defined %}
+            <h2>
+                {% if award == 'Ranked' %}
+                    Other ranked teams
+                {% else %}
+                    {{ award }}
+                {% endif %}
+            </h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Rank</th>
+                    <th scope="col">Team</th>
+                    <th scope="col">Solved problems</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for row in ranked[award] %}
+                    <tr>
+                        <th scope="row">{{ row.rank }}</th>
+                        <th scope="row">{{ row.team }}</th>
+                        <td>{{ row.solved }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    {% endfor %}
 
     <h2>Honorable mentions</h2>
     <table class="table">

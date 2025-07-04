@@ -1,10 +1,10 @@
 {% extends "jury/base.html.twig" %}
+{% import "jury/jury_macros.twig" as macros %}
 
 {% block title %}Source s{{ submission.submitid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
-    <script src="{{ asset('js/ace/ace.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -25,69 +25,60 @@
             )
         {% endif %}
 
-    </h1>
-
-    {%- if submission.entryPoint %}
-
-        <p><b>Entry point</b>: {{ submission.entryPoint }}</p>
-    {%- endif %}
-
-    {%- if oldSubmission is not null %}
-
-        <p><a href="#diff">Go to diff to previous submission</a></p>
-    {%- endif %}
-
-    {%- if submission.originalSubmission %}
-
-        <p><a href="#origdiff">Go to diff to original submission</a></p>
-    {%- endif %}
-
-    <ul class="nav nav-tabs source-tab-nav">
-        {%- for file in files %}
-
-            <li class="nav-item">
-                <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
-                   href="#source-{{ file.rank }}" role="tab">{{ file.filename }}</a>
-            </li>
-        {%- endfor %}
-
-    </ul>
-    <div class="tab-content source-tab">
-        {%- for file in files %}
-
-            <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="source-{{ file.rank }}"
-                 role="tabpanel">
-                <div class="mb-1">
-                    <a class="btn btn-secondary btn-sm"
-                       href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: file.rank}) }}">
-                        <i class="fas fa-download"></i> Download
-                    </a>
-                    <a class="btn btn-secondary btn-sm"
-                       href="{{ path('jury_submission_edit_source', {submission: submission.submitid, rank: file.rank}) }}">
-                        <i class="fas fa-pencil-alt"></i> Edit
-                    </a>
-                </div>
-
-                {{ file.sourcecode | codeEditor(file.rank, submission.language.aceLanguage) }}
-            </div>
-        {%- endfor %}
-
-    </div>
-
-    {%- if oldSubmission is not null %}
-
-        <h2 id="diff" class="mt-3">
-            Diff to submission
+        {% if oldSubmission %}
+            and diff to previous submission
             <a href="{{ path('jury_submission', {submitId: oldSubmission.submitid}) }}">
                 s{{ oldSubmission.submitid }}
             </a>
-        </h2>
+        {% endif %}
+    </h1>
 
+    {%- if submission.entryPoint %}
+        <p><b>Entry point</b>: {{ submission.entryPoint }}</p>
+    {%- endif %}
+
+    {%- if submission.originalSubmission %}
+        <p><a href="#origdiff">Go to diff to original submission</a></p>
+    {%- endif %}
+
+    {% if not oldSubmission %}
+        <ul class="nav nav-tabs source-tab-nav">
+            {%- for file in files %}
+                <li class="nav-item">
+                    <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
+                       href="#source-{{ file.rank }}" role="tab">{{ file.filename }}</a>
+                </li>
+            {%- endfor %}
+
+        </ul>
+        <div class="tab-content source-tab">
+            {%- for file in files %}
+                <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="source-{{ file.rank }}"
+                     role="tabpanel">
+                    <div class="mb-1">
+                        <a class="btn btn-secondary btn-sm"
+                           href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: file.rank}) }}">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                        {% if allowEdit %}
+                            <a class="btn btn-secondary btn-sm"
+                               href="{{ path('jury_submission_edit_source', {submission: submission.submitid, rank: file.rank}) }}">
+                                <i class="fas fa-pencil-alt"></i> Edit
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    {{ file.sourcecode | codeEditor(file.rank, submission.language.editorLanguage) }}
+                </div>
+            {%- endfor %}
+        </div>
+    {% endif %}
+
+    {%- if oldSubmission is not null %}
         {%- include 'jury/partials/submission_diff.html.twig' with {oldSubmission: oldSubmission, oldFiles: oldFiles, oldFileStats: oldFileStats} %}
     {%- endif %}
 
     {%- if originalSubmission is not null %}
-
         <h2 id="origdiff" class="mt-3">
             Diff to original submission
             <a href="{{ path('jury_submission', {submitId: originalSubmission.submitid}) }}">

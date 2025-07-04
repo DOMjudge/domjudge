@@ -69,6 +69,10 @@ class InternalError
     #[ORM\JoinColumn(name: 'judgingid', referencedColumnName: 'judgingid', onDelete: 'SET NULL')]
     private ?Judging $judging = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'runid', referencedColumnName: 'runid', onDelete: 'SET NULL')]
+    private ?JudgingRun $judgingRun = null;
+
     /**
      * @var Collection<int, Judging>
      */
@@ -181,5 +185,16 @@ class InternalError
     public function getAffectedJudgings(): Collection
     {
         return $this->affectedJudgings;
+    }
+
+    public function getJudgingRun(): ?JudgingRun
+    {
+        return $this->judgingRun;
+    }
+
+    public function setJudgingRun(?JudgingRun $judgingRun = null): InternalError
+    {
+        $this->judgingRun = $judgingRun;
+        return $this;
     }
 }

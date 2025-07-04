@@ -27,7 +27,7 @@ class SingleTeamScoreboard extends Scoreboard
         protected readonly Team $team,
         protected readonly int $teamRank,
         array $problems,
-        protected readonly ?RankCache $rankCache,
+        array $rankCache,
         array $scoreCache,
         FreezeData $freezeData,
         bool $showFtsInFreeze,
@@ -35,18 +35,13 @@ class SingleTeamScoreboard extends Scoreboard
         bool $scoreIsInSeconds
     ) {
         $this->showRestrictedFts = $showFtsInFreeze || $freezeData->showFinal();
-        parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $freezeData, true,
+        parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $rankCache, $freezeData, true,
             $penaltyTime, $scoreIsInSeconds);
     }
 
     protected function calculateScoreboard(): void
     {
         $teamScore = $this->scores[$this->team->getTeamid()];
-        if ($this->rankCache !== null) {
-            $teamScore->numPoints += $this->rankCache->getPointsRestricted();
-            $teamScore->totalTime += $this->rankCache->getTotaltimeRestricted();
-            $teamScore->totalRuntime += $this->rankCache->getTotalruntimeRestricted();
-        }
         $teamScore->rank = $this->teamRank;
 
         // Loop all info the scoreboard cache and put it in our own data structure.
@@ -63,14 +58,14 @@ class SingleTeamScoreboard extends Scoreboard
             );
 
             $this->matrix[$scoreRow->getTeam()->getTeamid()][$scoreRow->getProblem()->getProbid()] = new ScoreboardMatrixItem(
-                $scoreRow->getIsCorrect($this->restricted),
-                $scoreRow->getIsCorrect($this->showRestrictedFts) && $scoreRow->getIsFirstToSolve(),
-                // When public scoreboard is frozen, also show "x + y tries" for jury
-                $scoreRow->getSubmissions($this->freezeData->showFrozen() ? false : $this->restricted),
-                $scoreRow->getPending($this->freezeData->showFrozen() ? false : $this->restricted),
-                $scoreRow->getSolveTime($this->restricted),
-                $penalty,
-                $scoreRow->getRuntime($this->restricted)
+                isCorrect: $scoreRow->getIsCorrect($this->restricted),
+                isFirst: $scoreRow->getIsCorrect($this->showRestrictedFts) && $scoreRow->getIsFirstToSolve(),
+                numSubmissions: $scoreRow->getSubmissions($this->restricted),
+                numSubmissionsPending: $scoreRow->getPending($this->restricted),
+                time: $scoreRow->getSolveTime($this->restricted),
+                penaltyTime: $penalty,
+                runtime: $scoreRow->getRuntime($this->restricted),
+                numSubmissionsInFreeze: $scoreRow->getPending(false),
             );
         }
 
@@ -80,7 +75,14 @@ class SingleTeamScoreboard extends Scoreboard
             $teamId    = $this->team->getTeamid();
             $problemId = $contestProblem->getProbid();
             if (!isset($this->matrix[$teamId][$problemId])) {
-                $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, false, 0, 0, 0, 0, 0);
+                $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(
+                    isCorrect: false,
+                    isFirst: false,
+                    numSubmissions: 0,
+                    numSubmissionsPending: 0,
+                    time: 0,
+                    penaltyTime: 0,
+                    runtime: 0);
             }
         }
     }

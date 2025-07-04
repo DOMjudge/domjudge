@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Controller\API\AbstractRestController as ARC;
 use App\DataTransferObject\FileWithName;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -53,7 +52,7 @@ class Problem extends BaseApiEntity implements
 
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]
     #[Assert\NotBlank]
-    private string $name;
+    private string $name = 'Unknown name';
 
     #[ORM\Column(options: [
         'comment' => 'Maximum run time (in seconds) for this problem',
@@ -87,13 +86,6 @@ class Problem extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ?string $special_compare_args = null;
 
-    #[ORM\Column(options: [
-        'comment' => 'Use the exit code of the run script to compute the verdict',
-        'default' => 0,
-    ])]
-    #[Serializer\Exclude]
-    private bool $combined_run_compare = false;
-
     #[Assert\File]
     #[Serializer\Exclude]
     private ?UploadedFile $problemstatementFile = null;
@@ -108,6 +100,33 @@ class Problem extends BaseApiEntity implements
     )]
     #[Serializer\Exclude]
     private ?string $problemstatement_type = null;
+
+    // These types are encoded as bitset - if you add a new type, use the next power of 2.
+    public const TYPE_PASS_FAIL = 1;
+    public const TYPE_SCORING = 2;
+    public const TYPE_MULTI_PASS = 4;
+    public const TYPE_INTERACTIVE = 8;
+    public const TYPE_SUBMIT_ANSWER = 16;
+
+    private array $typesToString = [
+        self::TYPE_PASS_FAIL => 'pass-fail',
+        self::TYPE_SCORING => 'scoring',
+        self::TYPE_MULTI_PASS => 'multi-pass',
+        self::TYPE_INTERACTIVE => 'interactive',
+        self::TYPE_SUBMIT_ANSWER => 'submit-answer',
+    ];
+
+    #[ORM\Column(options: ['comment' => 'Bitmask of problem types, default is pass-fail.'])]
+    #[Serializer\Exclude]
+    private int $types = self::TYPE_PASS_FAIL;
+
+    #[ORM\Column(
+        nullable: true,
+        options: ['comment' => 'Optional limit on the number of rounds; defaults to 1 for traditional problems, 2 for multi-pass problems if not specified.', 'unsigned' => true]
+    )]
+    #[Assert\GreaterThan(0)]
+    #[Serializer\Exclude]
+    private ?int $multipassLimit = null;
 
     /**
      * @var Collection<int, Submission>
@@ -176,6 +195,17 @@ class Problem extends BaseApiEntity implements
     // object that represents the problem statement.
     #[Serializer\Exclude]
     private ?FileWithName $statementForApi = null;
+
+
+    /**
+     * @var Collection<int, Language>
+     */
+    #[ORM\ManyToMany(targetEntity: Language::class, inversedBy: 'problems')]
+    #[ORM\JoinTable(name: 'problemlanguage')]
+    #[ORM\JoinColumn(name: 'probid', referencedColumnName: 'probid', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'langid', referencedColumnName: 'langid', onDelete: 'CASCADE')]
+    #[Serializer\Exclude]
+    private Collection $languages;
 
     public function setProbid(int $probid): Problem
     {
@@ -262,15 +292,102 @@ class Problem extends BaseApiEntity implements
         return $this->special_compare_args;
     }
 
-    public function setCombinedRunCompare(bool $combinedRunCompare): Problem
+    public function setTypesAsString(array $types): Problem
     {
-        $this->combined_run_compare = $combinedRunCompare;
+        $stringToTypes = array_flip($this->typesToString);
+        $typeConstants = [];
+        foreach ($types as $type) {
+            if (!isset($stringToTypes[$type])) {
+                throw new Exception("Unknown problem type: '$type', must be one of " . implode(', ', array_keys($stringToTypes)));
+            }
+            $typeConstants[$type] = $stringToTypes[$type];
+        }
+        $this->setTypes($typeConstants);
+
         return $this;
     }
 
-    public function getCombinedRunCompare(): bool
+    public function getTypesAsString(): string
     {
-        return $this->combined_run_compare;
+        $typeConstants = $this->getTypes();
+        $typeStrings = [];
+        foreach ($typeConstants as $type) {
+            if (!isset($this->typesToString[$type])) {
+                throw new Exception("Unknown problem type: '$type'");
+            }
+            $typeStrings[] = $this->typesToString[$type];
+        }
+        return implode(', ', $typeStrings);
+    }
+
+    public function getTypes(): array
+    {
+        $ret = [];
+        foreach (array_keys($this->typesToString) as $type) {
+            if ($this->types & $type) {
+                $ret[] = $type;
+            }
+        }
+        return $ret;
+    }
+
+    public function setTypes(array $types): Problem
+    {
+        $types = array_unique($types);
+        $this->types = 0;
+        foreach ($types as $type) {
+            $this->types |= $type;
+        }
+        if (!($this->types & self::TYPE_SCORING)) {
+            // In case the problem is not explicitly a scoring problem, default to pass-fail.
+            $this->types |= self::TYPE_PASS_FAIL;
+        }
+        if (($this->types & self::TYPE_PASS_FAIL) && ($this->types & self::TYPE_SCORING)) {
+            throw new Exception("Invalid problem type: must be exactly one of 'pass-fail' or 'scoring'.");
+        }
+        if ($this->types & self::TYPE_SUBMIT_ANSWER) {
+            if ($this->types & self::TYPE_MULTI_PASS) {
+                throw new Exception("Invalid problem type: 'submit-answer' and 'multi-pass' are mutually exclusive.");
+            }
+            if ($this->types & self::TYPE_INTERACTIVE) {
+                throw new Exception("Invalid problem type: 'submit-answer' and 'interactive' are mutually exclusive.");
+            }
+        }
+        return $this;
+    }
+
+    public function isInteractiveProblem(): bool
+    {
+        return (bool)($this->types & self::TYPE_INTERACTIVE);
+    }
+
+    public function isMultipassProblem(): bool
+    {
+        return (bool)($this->types & self::TYPE_MULTI_PASS);
+    }
+
+    public function isPassFailProblem(): bool
+    {
+        return (bool)($this->types & self::TYPE_PASS_FAIL);
+    }
+
+    public function isScoringProblem(): bool
+    {
+        return (bool)($this->types & self::TYPE_SCORING);
+    }
+
+    public function setMultipassLimit(?int $multipassLimit): Problem
+    {
+        $this->multipassLimit = $multipassLimit;
+        return $this;
+    }
+
+    public function getMultipassLimit(): int
+    {
+        if ($this->isMultipassProblem()) {
+            return $this->multipassLimit ?? 2;
+        }
+        return 1;
     }
 
     public function setProblemstatementFile(?UploadedFile $problemstatementFile): Problem
@@ -346,6 +463,7 @@ class Problem extends BaseApiEntity implements
         $this->clarifications     = new ArrayCollection();
         $this->contest_problems   = new ArrayCollection();
         $this->attachments        = new ArrayCollection();
+        $this->languages          = new ArrayCollection();
         $this->problemStatementContent = new ArrayCollection();
     }
 
@@ -501,5 +619,25 @@ class Problem extends BaseApiEntity implements
     public function getStatementForApi(): array
     {
         return array_filter([$this->statementForApi]);
+    }
+
+    public function addLanguage(Language $language): Problem
+    {
+        $this->languages[] = $language;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Language>
+     */
+    public function getLanguages(): Collection
+    {
+        return $this->languages;
+    }
+
+    public function removeLanguage(Language $language): Problem
+    {
+        $this->languages->removeElement($language);
+        return $this;
     }
 }

@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 namespace App\Security;
 
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
@@ -71,7 +71,7 @@ class DOMJudgeBasicAuthenticator extends AbstractAuthenticator
             if (!$request->isXmlHttpRequest()) {
                 $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
             }
-  
+
             return $resp;
         }
 

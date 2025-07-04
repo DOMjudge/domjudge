@@ -7,6 +7,7 @@
     {{ parent() }}
     {{ macros.table_extrahead() }}
     {{ macros.toggle_extrahead() }}
+    {{ knp_pagination_rel_links(submissions) }}
 {% endblock %}
 
 {% block content %}
@@ -85,7 +86,7 @@
                         {% endif %}
                     </td>
                 </tr>
-                {% if problem.combinedRunCompare %}
+                {% if problem.isInteractiveProblem %}
                     <tr>
                         <th>Compare script</th>
                         <td>Run script combines run and compare script.</td>
@@ -109,6 +110,26 @@
                         <td class="filename">{{ problem.specialCompareArgs }}</td>
                     </tr>
                 {% endif %}
+                {% if type is not empty %}
+                    <tr>
+                        <th>Type</th>
+                        <td>{{ type }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Languages</th>
+                    <td>
+                        {% if problem.languages is empty %}
+                            <em>all languages enabled for the corresponding contest</em>
+                        {% else %}
+                            <ul>
+                                {% for language in problem.languages %}
+                                    <li><a href="{{ path('jury_language', {'langId': language.langid}) }}">{{ language.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </td>
+                </tr>
             </table>
         </div>
     </div>

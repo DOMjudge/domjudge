@@ -3,13 +3,15 @@
 
     {# Display verification data: verified, by whom, and comment #}
     <p>
-        {{ label }}: <strong>{% if judging.verified %}yes{% else %}no{% endif %}</strong>
-        {%- if judging.verified and judging.juryMember is not empty -%}
-            , by {{ judging.juryMember }}
-            {%- if judging.verifyComment is not empty %}
+        {% if judging.verified %}
+            Judging verified
+            {% if judging.juryMember is not empty %}
+                by <code>{{ judging.juryMember }}</code>
+            {% endif %}
+            {% if judging.verifyComment is not empty %}
                 with comment "{{ judging.verifyComment }}"
-            {%- endif -%}
-        {%- endif -%}
+            {% endif %}
+        {% endif %}
         {% if show_form %}
             <input type="submit" value="{% if judging.verified %}un{% endif %}mark verified"
                    class="btn btn-outline-secondary btn-sm"/>

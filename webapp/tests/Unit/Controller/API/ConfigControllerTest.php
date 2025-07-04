@@ -183,8 +183,8 @@ class ConfigControllerTest extends BaseTestCase
         static::assertArrayHasKey('caption', $response['Problems and languages']['languages']);
         static::assertEquals('Languages validation', $response['Problems and languages']['languages']['caption']);
         static::assertArrayHasKey('desc', $response['Problems and languages']['languages']);
-        static::assertStringStartsWith('Validated all languages:', $response['Problems and languages']['languages']['desc']);
-        static::assertStringContainsString('Language java: OK', $response['Problems and languages']['languages']['desc']);
+        static::assertStringStartsWith('Validated all languages.', $response['Problems and languages']['languages']['desc']);
+        static::assertStringContainsString('Language `java`: OK', $response['Problems and languages']['languages']['desc']);
         static::assertArrayHasKey('result', $response['Problems and languages']['languages']);
         static::assertEquals('O', $response['Problems and languages']['languages']['result']);
     }

@@ -54,11 +54,10 @@ class SubmitProblemType extends AbstractType
         ];
         $builder->add('problem', EntityType::class, $problemConfig);
 
+        $languages = $this->dj->getAllowedLanguagesForContest($contest);
         $builder->add('language', EntityType::class, [
             'class' => Language::class,
-            'query_builder' => fn(EntityRepository $er) => $er
-                ->createQueryBuilder('l')
-                ->andWhere('l.allowSubmit = 1'),
+            'choices' => $languages,
             'choice_label' => 'name',
             'placeholder' => 'Select a language',
         ]);

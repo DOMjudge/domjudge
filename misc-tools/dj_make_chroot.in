@@ -34,6 +34,11 @@ RELEASE=""
 DEBIAN_ARCHLIST="amd64,arm64,armel,armhf,i386,mips,mips64el,mipsel,ppc64el,s390x"
 UBUNTU_ARCHLIST="amd64,arm64,armhf,i386,powerpc,ppc64el,s390x"
 
+if ! command -v lsb_release; then
+    echo "Please install `lsb_release`."
+    exit 1
+fi
+
 # If host system is Debian or Ubuntu, use its release and architecture by default
 if [ "$(lsb_release -i -s || true)" = 'Debian' ] || \
    [ "$(lsb_release -i -s || true)" = 'Ubuntu' ]; then
@@ -71,6 +76,9 @@ Options:
                to add to the chroot (comma separated). Signing keys for the
                repository will be imported if they exist as <filename>.gpg,
                <filename>.asc or <filename>.arm.
+  -H           Use repository lists from the host. Useful to make sure
+               compiler/runner versions will be the same when using a custom
+               image.
   -p <url>     HTTP(S) Proxy URL to use during package install.
   -m <url>     Debian or Ubuntu mirror URL to be used for package installation.
   -y           Force overwriting the chroot dir and installing debootstrap.
@@ -105,7 +113,7 @@ FORCEYES=0
 FORCEDOWNLOAD=0
 
 # Read command-line parameters:
-while getopts 'a:d:D:R:i:r:l:s:p:m:yfh' OPT ; do
+while getopts 'a:d:D:R:i:r:l:s:p:m:Hyfh' OPT ; do
     case $OPT in
         a) ARCH=$OPTARG ;;
         d) CHROOTDIR=$OPTARG ;;
@@ -117,6 +125,7 @@ while getopts 'a:d:D:R:i:r:l:s:p:m:yfh' OPT ; do
         s) REPOLISTS=$OPTARG ;;
         p) DEBPROXY=$OPTARG ;;
         m) DEBMIRROR=$OPTARG ;;
+        H) HOSTLISTS=1 ;;
         y) FORCEYES=1 ;;
         f) FORCEDOWNLOAD=1 ;;
         h) SHOWHELP=1 ;;
@@ -178,7 +187,7 @@ if [ "$DISTRO" = 'Debian' ]; then
     REMOVEDEBS=""
 
     # Which debootstrap package to install on non-Debian systems:
-    DEBOOTDEB="debootstrap_1.0.128+nmu2+deb12u1_all.deb"
+    DEBOOTDEB="debootstrap_1.0.128+nmu2+deb12u2_all.deb"
 
     # The Debian mirror/proxy below can be passed as environment
     # variables; if none are given the following defaults are used.
@@ -225,7 +234,7 @@ if [ "$DISTRO" = 'Ubuntu' ]; then
         # x86(_64) can use the main Ubuntu repo's, other
         # architectures need to use a mirror from ubuntu-ports.
         MAINSTREAM="amd64 i386"
-        if [ -z "${MAINSTREAM##*$ARCH*}" ]; then
+        if [ -z "${MAINSTREAM##*"$ARCH"*}" ]; then
             DEBMIRROR="http://us.archive.ubuntu.com/ubuntu/"
         else
             DEBMIRROR="http://ports.ubuntu.com/ubuntu-ports/"
@@ -312,6 +321,7 @@ fi
 
 # Add indication to interactive shell that the user is in the chroot
 for bashrc in "root/.bashrc" "etc/bash.bashrc"; do
+    # shellcheck disable=SC2016
 	echo 'PS1=(chroot)$PS1' >> "$CHROOTDIR/$bashrc"
 done
 
@@ -404,6 +414,14 @@ if [ "$DISTRO" = 'Ubuntu' ]; then
     # Refer to: http://ubuntuforums.org/showthread.php?t=1326721
     in_chroot "dpkg-divert --local --rename --add /sbin/initctl"
     in_chroot "ln -s /bin/true /sbin/initctl"
+fi
+
+# Use the repositories from the host
+if [ -n "$HOSTLISTS" ]; then
+    for files in 'sources.list' 'sources.list.d' 'keyrings' 'trusted.gpg.d'; do
+        cp -r "/etc/apt/${files}" "$CHROOTDIR/etc/apt/"
+    done
+    in_chroot "apt-get update && apt-get install ca-certificates"
 fi
 
 # Add additional repository lists to the chroot for upstream repos

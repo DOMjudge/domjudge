@@ -15,12 +15,14 @@ Part of the DOMjudge Programming Contest Jury System and licensed
 under the GNU GPL. See README and COPYING for details.
 '''
 
-import json
 from os import listdir
+from typing import List
+import json
 import os.path
 import re
+import subprocess
 import sys
-from typing import List
+import time
 import yaml
 
 sys.path.append('@domserver_libdir@')
@@ -117,7 +119,7 @@ def import_contest_banner(cid: str):
 def import_contest_problemset_document(cid: str):
     """Import the contest problemset document"""
 
-    files = ['contest.pdf', 'contest-web.pdf', 'contest.html', 'contest.txt']
+    files = ['problemset.pdf', 'contest.pdf', 'contest-web.pdf', 'contest.html', 'contest.txt']
 
     text_file = None
     for file in files:
@@ -126,7 +128,7 @@ def import_contest_problemset_document(cid: str):
             break
 
     if text_file:
-        if dj_utils.confirm(f'Import {text_file} for contest?', False):
+        if dj_utils.confirm(f'Import {text_file} for contest?', True):
             dj_utils.upload_file(f'contests/{cid}/problemset', 'problemset', text_file)
             print('Contest problemset imported.')
         else:
@@ -149,7 +151,7 @@ if import_file('organizations', ['organizations.json']):
     # Also import logos if we have any
     # We prefer the 64x64 logo. If it doesn't exist, accept a generic logo (which might be a SVG)
     # We also prefer PNG/SVG before JPG
-    import_images('organizations', 'logo', ['^logo\\.64x\\d+\\.png$', '^logo\\.(png|svg)$', '^logo\\.64x\\d+\\.jpg$', '^logo\\.jpg$'])
+    import_images('organizations', 'logo', ['^logo\\.64(x\\d+)?\\.png$', '^logo\\.(png|svg)$', '^logo\\.64(x\\d+)?\\.jpg$', '^logo\\.jpg$'])
 if import_file('teams', ['teams.json', 'teams2.tsv']):
     # Also import photos if we have any, but prefer JPG over SVG and PNG
     import_images('teams', 'photo', ['^photo\\.jpg$', '^photo\\.(png|svg)$'])
@@ -213,19 +215,49 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
 
         confirmIndividually = dj_utils.confirm("Confirm individually for every problem", False)
         for problem in problems:
-            print(f'Preparing problem \'{problem}\'.')
+            print(f'\nPreparing problem \'{problem}\'.')
             if os.path.exists(f'{problem}.zip'):
                 os.unlink(f'{problem}.zip')
             if not os.path.isdir(problem) or not os.path.isfile(f'{problem}/problem.yaml'):
                 print('Problem directory not found or doesn\'t contain a problem.yaml.')
                 exit(3)
-            os.system(f'cd {problem} && zip -r \'../{problem}\' -- .timelimit *')
+            zip_command = f"zip -r '../{problem}' -- .timelimit *"
+            process = subprocess.Popen(zip_command, cwd=problem, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True)
+
+            lastLine = None
+            for line in process.stdout:
+                if lastLine:
+                    sys.stdout.write("\r" + " " * len(lastLine))
+                sys.stdout.write(f"\r{line.strip()}")
+                sys.stdout.flush()
+                lastLine = line
+
+            exit_code = process.wait()
+            if exit_code == 0:
+                if lastLine:
+                    sys.stdout.write("\r" + " " * len(lastLine) + "\r")
+            else:
+                print(f"\nZipping problem failed with exit code: {exit_code}")
 
             if ((not confirmIndividually) or dj_utils.confirm(f'Ready to import problem \'{problem}\' to problem={problem}. Continue?', True)):
                 print(f'Uploading problem \'{problem}\', please be patient, this may take a while.')
+                before = time.time()
                 response = dj_utils.upload_file(
                     f'contests/{cid}/problems', 'zip', f'{problem}.zip', {'problem': problem})
-                print(json.dumps(response, indent=4))
+                after = time.time()
+                if response and 'problem_id' in response:
+                    upload_time = after - before
+                    print(f'Problem imported with ID {response["problem_id"]} (took {upload_time:.2f}s):')
+                    if 'messages' in response:
+                        messages = response['messages']
+                        types = {'info': '🛈 ', 'warning': '⚠️ ', 'danger': '🚨'}
+                        for t,e in types.items():
+                            if t in messages and messages[t]:
+                                print(f'  {e} {t.capitalize()}:')
+                                for message in messages[t]:
+                                    print(f'    - {message}')
+                else:
+                    print(json.dumps(response, indent=4))
     else:
         print('Skipping contest import.')
 else:

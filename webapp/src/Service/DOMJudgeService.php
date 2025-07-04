@@ -27,6 +27,7 @@ use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
+use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\FreezeData;
@@ -37,7 +38,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
-use http\Exception\InvalidArgumentException;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -48,6 +49,7 @@ use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -83,6 +85,12 @@ class DOMJudgeService
         'image/svg+xml' => 'svg',
     ];
 
+    final public const EXTENSION_TO_MIMETYPE = [
+        'png' => 'image/png',
+        'jpg' => 'image/jpeg',
+        'svg' => 'image/svg+xml',
+    ];
+
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly LoggerInterface $logger,
@@ -99,11 +107,6 @@ class DOMJudgeService
         #[Autowire('%domjudge.vendordir%')]
         protected string $vendorDir,
     ) {}
-
-    public function getEntityManager(): EntityManagerInterface
-    {
-        return $this->em;
-    }
 
     /**
      * Return all the contests that are currently active indexed by contest ID.
@@ -419,18 +422,18 @@ class DOMJudgeService
             }
         }
 
-        if ($this->checkrole('balloon')) {
+        if ($this->checkrole('balloon') && $contest) {
             $balloonsQuery = $this->em->createQueryBuilder()
-            ->select('b.balloonid', 't.name', 't.location', 'p.name AS pname')
-            ->from(Balloon::class, 'b')
-            ->leftJoin('b.submission', 's')
-            ->leftJoin('s.problem', 'p')
-            ->leftJoin('s.contest', 'co')
-            ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
-            ->leftJoin('s.team', 't')
-            ->andWhere('co.cid = :cid')
-            ->andWhere('b.done = 0')
-            ->setParameter('cid', $contest->getCid());
+                ->select('b.balloonid', 't.name', 't.location', 'p.name AS pname')
+                ->from(Balloon::class, 'b')
+                ->leftJoin('b.submission', 's')
+                ->leftJoin('s.problem', 'p')
+                ->leftJoin('s.contest', 'co')
+                ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
+                ->leftJoin('s.team', 't')
+                ->andWhere('co.cid = :cid')
+                ->andWhere('b.done = 0')
+                ->setParameter('cid', $contest->getCid());
 
             $freezetime = $contest->getFreezeTime();
             if ($freezetime !== null && !(bool)$this->config->get('show_balloons_postfreeze')) {
@@ -454,13 +457,8 @@ class DOMJudgeService
         ];
     }
 
-    public function getHttpKernel(): HttpKernelInterface
-    {
-        return $this->httpKernel;
-    }
-
     /**
-     * Run the given callable with all roles.
+     * Run the given callable with all roles enabled.
      *
      * This will result in all calls to checkrole() to return true.
      */
@@ -533,23 +531,6 @@ class DOMJudgeService
     }
 
     /**
-     * Decode a JSON string with our preferred settings.
-     * @return mixed
-     */
-    public function jsonDecode(string $str)
-    {
-        return json_decode($str, true, 512, JSON_THROW_ON_ERROR);
-    }
-
-    /**
-     * Encode a JSON string with our preferred settings.
-     */
-    public function jsonEncode(mixed $data): string
-    {
-        return json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
-    }
-
-    /**
      * Dis- or re-enable what caused an internal error.
      *
      * @param array{kind: string, probid?: string, hostname?: string, langid?: string,
@@ -605,6 +586,7 @@ class DOMJudgeService
                         $contestProblem->setAllowJudge($enabled);
                     }
                 }
+                // FIXME: Also disable debug scripts
                 $this->em->flush();
                 if ($enabled) {
                     foreach ($executable->getLanguages() as $language) {
@@ -652,8 +634,10 @@ class DOMJudgeService
         $request  = Request::create('/api' . $url, $method, $queryOrPostData, [], $files);
         if ($this->requestStack->getCurrentRequest() && $this->requestStack->getCurrentRequest()->hasSession()) {
             $request->setSession($this->requestStack->getSession());
+        } else {
+            $request->setSession(new Session());
         }
-        $response = $this->getHttpKernel()->handle($request, HttpKernelInterface::SUB_REQUEST);
+        $response = $this->httpKernel->handle($request, HttpKernelInterface::SUB_REQUEST);
 
         $status = $response->getStatusCode();
         if ($status < 200 || $status >= 300) {
@@ -673,7 +657,7 @@ class DOMJudgeService
             return null;
         }
 
-        return $this->jsonDecode($content);
+        return Utils::jsonDecode($content);
     }
 
     public function getDomjudgeEtcDir(): string
@@ -733,6 +717,32 @@ class DOMJudgeService
      * @param string      $filename The on-disk file to be printed out
      * @param string      $origname The original filename as submitted by the team
      * @param string|null $language Langid of the programming language this file is in
+     * @param bool        $asTeam   Print the file as the team associated with the user
+     */
+    public function printUserFile(
+        string $filename,
+        string $origname,
+        ?string $language,
+        ?bool $asTeam = false,
+    ): array {
+        $user = $this->getUser();
+        $team = $user->getTeam();
+        if ($asTeam && $team !== null) {
+            $teamid = $team->getLabel() ?? $team->getExternalid();
+            return $this->printFile($filename, $origname, $language, $user->getUserIdentifier(), $team->getEffectiveName(), $teamid, $team->getLocation());
+        }
+        return $this->printFile($filename, $origname, $language, $user->getUserIdentifier());
+    }
+
+    /**
+     * Print the given file using the print command.
+     *
+     * Returns array with two elements: first a boolean indicating
+     * overall success, and second the data returned from the print command.
+     *
+     * @param string      $filename The on-disk file to be printed out
+     * @param string      $origname The original filename as submitted by the team
+     * @param string|null $language Langid of the programming language this file is in
      * @param string      $username Username of the print job submitter
      * @param string|null $teamname Teamname of the team this user belongs to, if any
      * @param string|null $teamid   Teamid of the team this user belongs to, if any
@@ -756,7 +766,7 @@ class DOMJudgeService
         $replaces = [
             '[file]' => escapeshellarg($filename),
             '[original]' => escapeshellarg($origname),
-            '[language]' => escapeshellarg($language),
+            '[language]' => escapeshellarg($language ?? ''),
             '[username]' => escapeshellarg($username),
             '[teamname]' => escapeshellarg($teamname ?? ''),
             '[teamid]' => escapeshellarg($teamid ?? ''),
@@ -781,7 +791,7 @@ class DOMJudgeService
      */
     public function getSamplesZipContent(ContestProblem $contestProblem): string
     {
-        if ($contestProblem->getProblem()->getCombinedRunCompare()) {
+        if ($contestProblem->getProblem()->isInteractiveProblem()) {
             throw new NotFoundHttpException(sprintf('Problem p%d has no downloadable samples', $contestProblem->getProbid()));
         }
 
@@ -881,7 +891,10 @@ class DOMJudgeService
 
         /** @var ContestProblem $problem */
         foreach ($contest->getProblems() as $problem) {
-            $this->addSamplesToZip($zip, $problem, $problem->getShortname());
+            // We don't include the samples for interactive problems.
+            if (!$problem->getProblem()->isInteractiveProblem()) {
+                $this->addSamplesToZip($zip, $problem, $problem->getShortname());
+            }
 
             if ($problem->getProblem()->getProblemstatementType()) {
                 $filename    = sprintf('%s/statement.%s', $problem->getShortname(), $problem->getProblem()->getProblemstatementType());
@@ -892,6 +905,14 @@ class DOMJudgeService
             foreach ($problem->getProblem()->getAttachments() as $attachment) {
                 $filename = sprintf('%s/attachments/%s', $problem->getShortname(), $attachment->getName());
                 $zip->addFromString($filename, $attachment->getContent()->getContent());
+                if ($attachment->getContent()->isExecutable()) {
+                    // 100755 = regular file, executable
+                    $zip->setExternalAttributesName(
+                        $filename,
+                        ZipArchive::OPSYS_UNIX,
+                        octdec('100755') << 16
+                    );
+                }
             }
         }
 
@@ -989,11 +1010,13 @@ class DOMJudgeService
         $defaultMemoryLimit = (int)$this->config->get('memory_limit');
         $timeFactorDiffers  = false;
         if ($showLimits) {
+            $languages = $this->getAllowedLanguagesForContest($contest);
             $timeFactorDiffers = $this->em->createQueryBuilder()
                     ->from(Language::class, 'l')
                     ->select('COUNT(l)')
-                    ->andWhere('l.allowSubmit = true')
                     ->andWhere('l.timeFactor <> 1')
+                    ->andWhere('l IN (:languages)')
+                    ->setParameter('languages', $languages)
                     ->getQuery()
                     ->getSingleScalarResult() > 0;
         }
@@ -1157,7 +1180,7 @@ class DOMJudgeService
         }
     }
 
-    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = false): void
+    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = false, int $overshoot = 0): void
     {
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
@@ -1170,7 +1193,7 @@ class DOMJudgeService
             return;
         }
 
-        $this->actuallyCreateJudgetasks($priority, $judging);
+        $this->actuallyCreateJudgetasks($priority, $judging, $overshoot);
 
         $team = $submission->getTeam();
         $result = $this->em->createQueryBuilder()
@@ -1202,14 +1225,17 @@ class DOMJudgeService
         // - the new submission would get X+5+60 (since there's only one of their submissions still to be worked on),
         //   but we want to judge submissions of this team in order, so we take the current max (X+120) and add 1.
         $teamPriority = (int)(max($result['max']+1, $submission->getSubmittime() + 60*$result['count']));
-        $queueTask = new QueueTask();
-        $queueTask->setJudging($judging)
-            ->setPriority($priority)
-            ->setTeam($team)
-            ->setTeamPriority($teamPriority)
-            ->setStartTime(null);
-        $this->em->persist($queueTask);
-        $this->em->flush();
+        // Use a direct query to speed things up
+        $this->em->getConnection()->executeQuery(
+            'INSERT INTO queuetask (judgingid, priority, teamid, teampriority, starttime)
+             VALUES (:judgingid, :priority, :teamid, :teampriority, null)',
+            [
+                'judgingid' => $judging->getJudgingid(),
+                'priority' => $priority,
+                'teamid' => $team->getTeamid(),
+                'teampriority' => $teamPriority,
+            ]
+        );
     }
 
     public function getImmutableCompareExecutable(ContestProblem $problem): ImmutableExecutable
@@ -1391,25 +1417,7 @@ class DOMJudgeService
         return $team;
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public function parseMetadata(string $raw_metadata): array
-    {
-        // TODO: Reduce duplication with judgedaemon code.
-        $contents = explode("\n", $raw_metadata);
-        $res = [];
-        foreach ($contents as $line) {
-            if (str_contains($line, ":")) {
-                [$key, $value] = explode(":", $line, 2);
-                $res[$key] = trim($value);
-            }
-        }
-
-        return $res;
-    }
-
-    public function getRunConfig(ContestProblem $problem, Submission $submission): string
+    public function getRunConfig(ContestProblem $problem, Submission $submission, int $overshoot = 0): string
     {
         $memoryLimit = $problem->getProblem()->getMemlimit();
         $outputLimit = $problem->getProblem()->getOutputlimit();
@@ -1421,14 +1429,16 @@ class DOMJudgeService
         }
         $runExecutable = $this->getImmutableRunExecutable($problem);
 
-        return $this->jsonEncode(
+        return Utils::jsonEncode(
             [
                 'time_limit' => $problem->getProblem()->getTimelimit() * $submission->getLanguage()->getTimeFactor(),
                 'memory_limit' => $memoryLimit,
                 'output_limit' => $outputLimit,
                 'process_limit' => $this->config->get('process_limit'),
                 'entry_point' => $submission->getEntryPoint(),
+                'pass_limit' => $problem->getProblem()->getMultipassLimit(),
                 'hash' => $runExecutable->getHash(),
+                'overshoot' => $overshoot,
             ]
         );
     }
@@ -1436,13 +1446,13 @@ class DOMJudgeService
     public function getCompareConfig(ContestProblem $problem): string
     {
         $compareExecutable = $this->getImmutableCompareExecutable($problem);
-        return $this->jsonEncode(
+        return Utils::jsonEncode(
             [
                 'script_timelimit' => $this->config->get('script_timelimit'),
                 'script_memory_limit' => $this->config->get('script_memory_limit'),
                 'script_filesize_limit' => $this->config->get('script_filesize_limit'),
                 'compare_args' => $problem->getProblem()->getSpecialCompareArgs(),
-                'combined_run_compare' => $problem->getProblem()->getCombinedRunCompare(),
+                'combined_run_compare' => $problem->getProblem()->isInteractiveProblem(),
                 'hash' => $compareExecutable->getHash(),
             ]
         );
@@ -1451,7 +1461,7 @@ class DOMJudgeService
     public function getCompileConfig(Submission $submission): string
     {
         $compileExecutable = $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable();
-        return $this->jsonEncode(
+        return Utils::jsonEncode(
             [
                 'script_timelimit' => $this->config->get('script_timelimit'),
                 'script_memory_limit' => $this->config->get('script_memory_limit'),
@@ -1461,23 +1471,6 @@ class DOMJudgeService
                 'hash' => $compileExecutable->getHash(),
             ]
         );
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public function getVerdicts(bool $mergeExternal = false): array
-    {
-        $verdictsConfig = $this->getDomjudgeEtcDir() . '/verdicts.php';
-        $verdicts       = include $verdictsConfig;
-
-        if ($mergeExternal) {
-            foreach ($this->config->get('external_judgement_types') as $id => $name) {
-                $verdicts[$name] = $id;
-            }
-        }
-
-        return $verdicts;
     }
 
     public function getScoreboardZip(
@@ -1546,7 +1539,16 @@ class DOMJudgeService
         }
         $zip->close();
 
-        return Utils::streamZipFile($tempFilename, 'contest.zip');
+        return Utils::streamZipFile($tempFilename, 'scoreboard.zip');
+    }
+
+    /**
+     * @return array{'backgroundColors', array<TeamCategory>}
+     */
+    public function getScoreboardCategoryColorCss(): array {
+        $backgroundColors = array_map(fn($x) => ( $x->getColor() ?? '#FFFFFF' ), $this->em->getRepository(TeamCategory::class)->findAll());
+        $backgroundColors = array_merge($backgroundColors, ['#FFFF99']);
+        return ['backgroundColors' => $backgroundColors];
     }
 
     private function allowJudge(ContestProblem $problem, Submission $submission, Language $language, bool $manualRequest): bool
@@ -1572,7 +1574,7 @@ class DOMJudgeService
         return !$evalOnDemand;
     }
 
-    private function actuallyCreateJudgetasks(int $priority, Judging $judging): void
+    private function actuallyCreateJudgetasks(int $priority, Judging $judging, int $overshoot = 0): void
     {
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
@@ -1591,7 +1593,7 @@ class DOMJudgeService
             ':compare_script_id' => $this->getImmutableCompareExecutable($problem)->getImmutableExecId(),
             ':run_script_id' => $this->getImmutableRunExecutable($problem)->getImmutableExecId(),
             ':compile_config' => $this->getCompileConfig($submission),
-            ':run_config' => $this->getRunConfig($problem, $submission),
+            ':run_config' => $this->getRunConfig($problem, $submission, $overshoot),
             ':compare_config' => $this->getCompareConfig($problem),
         ];
 
@@ -1630,40 +1632,33 @@ class DOMJudgeService
 
         $this->em->getConnection()->executeQuery($judgetaskInsertQuery, $judgetaskInsertParamsWithoutColon);
 
-        // Step 3: Fetch the judgetasks ID's per testcase.
-        $judgetaskData = $this->em->getConnection()->executeQuery(
-            'SELECT judgetaskid, testcase_id FROM judgetask WHERE jobid = :jobid ORDER BY judgetaskid',
-            ['jobid' => $judging->getJudgingid()]
-        )->fetchAllAssociative();
-
-        // Step 4: Create and insert the corresponding judging runs.
-        $judgingRunInsertParams = [':judgingid' => $judging->getJudgingid()];
-        $judgingRunInsertParts = [];
-        foreach ($judgetaskData as $judgetaskItem) {
-            $judgingRunInsertParts[] = sprintf(
-                '(:judgingid, :testcaseid%d, :judgetaskid%d)',
-                $judgetaskItem['judgetaskid'],
-                $judgetaskItem['judgetaskid']
-            );
-            $judgingRunInsertParams[':testcaseid' . $judgetaskItem['judgetaskid']] = $judgetaskItem['testcase_id'];
-            $judgingRunInsertParams[':judgetaskid' . $judgetaskItem['judgetaskid']] = $judgetaskItem['judgetaskid'];
-        }
-        $judgingRunInsertQuery = sprintf(
-            'INSERT INTO judging_run (judgingid, testcaseid, judgetaskid) VALUES %s',
-            implode(', ', $judgingRunInsertParts)
+        // Step 3: Insert the corresponding judging runs.
+        $this->em->getConnection()->executeQuery(
+            'INSERT INTO judging_run (judgingid, judgetaskid, testcaseid)
+                    SELECT :judgingid, judgetaskid, testcase_id FROM judgetask
+                    WHERE jobid = :judgingid ORDER BY judgetaskid',
+            ['judgingid' => $judging->getJudgingid()]
         );
-
-        $judgingRunInsertParamsWithoutColon = [];
-        foreach ($judgingRunInsertParams as $key => $param) {
-            $key = str_replace(':', '', $key);
-            $judgingRunInsertParamsWithoutColon[$key] = $param;
-        }
-
-        $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParamsWithoutColon);
     }
 
     public function shadowMode(): bool
     {
         return (bool)$this->config->get('shadow_mode');
+    }
+
+    /** @return Language[] */
+    public function getAllowedLanguagesForContest(?Contest $contest) : array {
+        if ($contest) {
+            $languages = $contest->getLanguages();
+            if (!$languages->isEmpty()) {
+                return $languages->toArray();
+            }
+        }
+        return $this->em->createQueryBuilder()
+            ->select('l')
+            ->from(Language::class, 'l')
+            ->where('l.allowSubmit = 1')
+            ->getQuery()
+            ->getResult();
     }
 }

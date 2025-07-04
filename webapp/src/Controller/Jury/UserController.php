@@ -16,18 +16,19 @@ use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
 #[Route(path: '/jury/users')]
@@ -42,6 +43,8 @@ class UserController extends BaseController
         KernelInterface $kernel,
         protected readonly EventLogService $eventLogService,
         protected readonly TokenStorageInterface $tokenStorage,
+        #[Autowire(param: 'min_password_length')]
+        private readonly int $minimumPasswordLength,
     ) {
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
@@ -168,7 +171,7 @@ class UserController extends BaseController
     }
 
     #[Route(path: '/{userId<\d+>}', name: 'jury_user')]
-    public function viewAction(int $userId, SubmissionService $submissionService): Response
+    public function viewAction(Request $request, int $userId, SubmissionService $submissionService): Response
     {
         $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
@@ -179,6 +182,7 @@ class UserController extends BaseController
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
             new SubmissionRestriction(userId: $user->getUserid()),
+            page: $request->query->getInt('page', 1),
         );
 
         return $this->render('jury/user.html.twig', [
@@ -197,12 +201,12 @@ class UserController extends BaseController
 
     public function checkPasswordLength(User $user, FormInterface $form): ?Response
     {
-        if ($user->getPlainPassword() && strlen($user->getPlainPassword()) < static::MIN_PASSWORD_LENGTH) {
-            $this->addFlash('danger', "Password should be " . static::MIN_PASSWORD_LENGTH . "+ chars.");
+        if ($user->getPlainPassword() && strlen($user->getPlainPassword()) < $this->minimumPasswordLength) {
+            $this->addFlash('danger', "Password should be " . $this->minimumPasswordLength . "+ chars.");
             return $this->render('jury/user_edit.html.twig', [
                 'user' => $user,
                 'form' => $form,
-                'min_password_length' => static::MIN_PASSWORD_LENGTH,
+                'min_password_length' => $this->minimumPasswordLength,
             ]);
         }
 
@@ -245,7 +249,6 @@ class UserController extends BaseController
         return $this->render('jury/user_edit.html.twig', [
             'user'                => $user,
             'form'                => $form,
-            'min_password_length' => static::MIN_PASSWORD_LENGTH,
         ]);
     }
 
@@ -295,7 +298,6 @@ class UserController extends BaseController
         return $this->render('jury/user_add.html.twig', [
             'user' => $user,
             'form' => $form,
-            'min_password_length' => static::MIN_PASSWORD_LENGTH,
         ]);
     }
 
@@ -373,9 +375,11 @@ class UserController extends BaseController
         $count = 0;
         foreach ($teamRole->getUsers() as $user) {
             /** @var User $user */
-            $user->setFirstLogin(null);
-            $user->setLastLogin(null);
-            $user->setLastIpAddress(null);
+            $user
+                ->setFirstLogin(null)
+                ->setLastLogin(null)
+                ->setLastApiLogin(null)
+                ->setLastIpAddress(null);
             $count++;
         }
         $this->em->flush();

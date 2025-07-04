@@ -19,6 +19,7 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -79,7 +80,8 @@ class QueuetaskIntegrationTest extends KernelTestCase
             $dj,
             $this->config,
             self::getContainer()->get(EventLogService::class),
-            $this->scoreboardService
+            $this->scoreboardService,
+            self::getContainer()->get(PaginatorInterface::class)
         );
 
         // Create a contest, problems and teams for which to test the

@@ -15,7 +15,7 @@ services:
     ports:
       # Useful to connect a local MySQL client / GUI
       - 127.0.0.1:13306:3306
-    command: --max-connections=1000 --max-allowed-packet=512M
+    command: --max-connections=1000 --max-allowed-packet=512M --innodb_snapshot_isolation=OFF
     volumes:
       - /var/lib/mysql
   domjudge:
@@ -25,11 +25,12 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup
       - .:${PWD}:cached
       - /chroot
-    links:
-      - mariadb:mariadb
     ports:
       - 12345:80
     privileged: true
+    # Note that this requires Docker Compose > 2.15.
+    # If you have an older version upgrade it, or you can comment out this line
+    cgroup: host
     working_dir: ${PWD}
     environment:
       - PROJECT_DIR=${PWD}

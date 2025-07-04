@@ -4,7 +4,6 @@ namespace App\Controller\Jury;
 
 use App\Entity\Clarification;
 use App\Entity\Contest;
-use App\Entity\ContestProblem;
 use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\User;
@@ -15,14 +14,14 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_CLARIFICATION_RW')]
 #[Route(path: '/jury/clarifications')]
@@ -152,7 +151,7 @@ class ClarificationController extends AbstractController
         $lastClarification = end($clarificationList);
         $formData['message'] = "> " . str_replace("\n", "\n> ", Utils::wrapUnquoted($lastClarification->getBody())) . "\n\n";
 
-        $form = $this->createForm(JuryClarificationType::class, $formData, ['limit_to_team' => $clarification->getSender()]);
+        $form = $this->createForm(JuryClarificationType::class, $formData, ['limit_to_team' => $clarification->getSender(), 'clarid' => $id]);
 
         $form->handleRequest($request);
 
@@ -225,6 +224,13 @@ class ClarificationController extends AbstractController
 
         $parameters['queues'] = $queues;
         $parameters['answers'] = $clarificationAnswers;
+        $parameters['jurymember'] = $this->em->createQueryBuilder()
+            ->select('clar.jury_member')
+            ->from(Clarification::class, 'clar')
+            ->where('clar.clarid = :clarid')
+            ->setParameter('clarid', $id)
+            ->getQuery()
+            ->getSingleResult()['jury_member'];
 
         return $this->render('jury/clarification.html.twig', $parameters);
     }

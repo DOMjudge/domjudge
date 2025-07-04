@@ -13,28 +13,47 @@ cgroup_error_and_usage () {
     echo "$1" >&2
     echo "To fix this, please make the following changes:
     1. In /etc/default/grub, add 'cgroup_enable=memory swapaccount=1' to GRUB_CMDLINE_LINUX_DEFAULT.
-       On modern distros (e.g. Debian bullseye and Ubuntu Jammy Jellyfish) which have cgroup v2 enabled by default,
-       you need to add 'systemd.unified_cgroup_hierarchy=0' as well.
     2. Run update-grub
     3. Reboot" >&2
     exit 1
 }
 
-for i in cpuset memory; do
-    mkdir -p $CGROUPBASE/$i
-    if [ ! -d $CGROUPBASE/$i/ ]; then
-        if ! mount -t cgroup -o$i $i $CGROUPBASE/$i/; then
-            cgroup_error_and_usage "Error: Can not mount $i cgroup. Probably cgroup support is missing from running kernel. Unable to continue."
-        fi
+# Check whether cgroup v2 is enabled.
+fs_type=$(awk '$2 == "/sys/fs/cgroup" {print $3}' /proc/mounts)
+if [ "$fs_type" = "cgroup2" ]; then
+    kernel_version=$(uname -r)
+    major=$(echo "$kernel_version" | cut -d '.' -f 1)
+    minor=$(echo "$kernel_version" | cut -d '.' -f 2)
+    if [ "$major" -lt 5 ] || { [ "$major" -eq 5 ] && [ "$minor" -lt 19 ]; }; then
+        cgroup_error_and_usage "Error: kernel ($kernel_version) is too old to record peak RAM usage with cgroup V2.
+You can try using cgroup V1 by adding systemd.unified_cgroup_hierarchy=0 to the kernel params."
     fi
-    mkdir -p $CGROUPBASE/$i/domjudge
-done
+    if ! echo "+memory" >> /sys/fs/cgroup/cgroup.subtree_control; then
+        cgroup_error_and_usage "Error: Cannot add +memory to cgroup.subtree_control; check kernel params. Unable to continue."
+    fi
+    if ! echo "+cpuset" >> /sys/fs/cgroup/cgroup.subtree_control; then
+        cgroup_error_and_usage "Error: Cannot add +cpuset to cgroup.subtree_control; check kernel params. Unable to continue."
+    fi
 
-if [ ! -f $CGROUPBASE/memory/memory.limit_in_bytes ] || [ ! -f $CGROUPBASE/memory/memory.memsw.limit_in_bytes ]; then
-    cgroup_error_and_usage "Error: cgroup support missing memory features in running kernel. Unable to continue."
-fi
+else # Trying cgroup V1:
 
-chown -R $JUDGEHOSTUSER $CGROUPBASE/*/domjudge
+    for i in cpuset memory; do
+        mkdir -p $CGROUPBASE/$i
+        if [ ! -d $CGROUPBASE/$i/ ]; then
+            if ! mount -t cgroup -o$i $i $CGROUPBASE/$i/; then
+                cgroup_error_and_usage "Error: Can not mount $i cgroup. Probably cgroup support is missing from running kernel. Unable to continue."
+            fi
+        fi
+        mkdir -p $CGROUPBASE/$i/domjudge
+    done
 
-cat $CGROUPBASE/cpuset/cpuset.cpus > $CGROUPBASE/cpuset/domjudge/cpuset.cpus
-cat $CGROUPBASE/cpuset/cpuset.mems > $CGROUPBASE/cpuset/domjudge/cpuset.mems
+    if [ ! -f $CGROUPBASE/memory/memory.limit_in_bytes ] || [ ! -f $CGROUPBASE/memory/memory.memsw.limit_in_bytes ]; then
+        cgroup_error_and_usage "Error: cgroup support missing memory features in running kernel. Unable to continue."
+    fi
+
+    chown -R $JUDGEHOSTUSER $CGROUPBASE/*/domjudge
+
+    cat $CGROUPBASE/cpuset/cpuset.cpus > $CGROUPBASE/cpuset/domjudge/cpuset.cpus
+    cat $CGROUPBASE/cpuset/cpuset.mems > $CGROUPBASE/cpuset/domjudge/cpuset.mems
+
+fi # cgroup V1

@@ -17,14 +17,14 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\ExpressionLanguage\Expression;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_TEAM')]
 #[IsGranted(
@@ -200,6 +200,7 @@ class SubmissionController extends BaseController
             'showSampleOutput' => $showSampleOutput,
             'runs' => $runs,
             'showTooLateResult' => $showTooLateResult,
+            'thumbnailSize' => $this->config->get('thumbnail_size'),
         ];
         if ($actuallyShowCompile) {
             $data['size'] = 'xl';
@@ -240,6 +241,10 @@ class SubmissionController extends BaseController
         if ($submission === null) {
             throw new NotFoundHttpException(sprintf('Submission with ID \'%s\' not found',
                 $submitId));
+        }
+
+        if ($this->submissionService->getSubmissionFileCount($submission) === 1) {
+            return $this->submissionService->getSubmissionFileResponse($submission);
         }
 
         return $this->submissionService->getSubmissionZipResponse($submission);

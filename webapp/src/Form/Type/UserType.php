@@ -2,13 +2,13 @@
 
 namespace App\Form\Type;
 
-use App\Controller\Jury\UserController;
 use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -21,8 +21,12 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class UserType extends AbstractExternalIdEntityType
 {
-    public function __construct(protected readonly EntityManagerInterface $em, EventLogService $eventLogService)
-    {
+    public function __construct(
+        protected readonly EntityManagerInterface $em,
+        EventLogService $eventLogService,
+        #[Autowire(param: 'min_password_length')]
+        private readonly int $minimumPasswordLength,
+    ) {
         parent::__construct($eventLogService);
     }
 
@@ -100,10 +104,10 @@ class UserType extends AbstractExternalIdEntityType
             $form->add('plainPassword', PasswordType::class, [
                 'required' => false,
                 'label' => 'Password',
-                'help' => sprintf('Currently %s - fill to change. Any current login session of the user will be terminated.', $set),
+                'help' => sprintf('Currently %s - fill to change. Any current login session of the user will be terminated. Minimum length: %d characters', $set, $this->minimumPasswordLength),
                 'attr' => [
                     'autocomplete' => 'new-password',
-                    'minlength' => UserController::MIN_PASSWORD_LENGTH,
+                    'minlength' => $this->minimumPasswordLength,
                 ],
             ]);
         });

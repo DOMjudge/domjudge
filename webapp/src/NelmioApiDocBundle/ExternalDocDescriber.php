@@ -24,6 +24,6 @@ class ExternalDocDescriber implements DescriberInterface
         // Inject the correct server for the API docs
         $request = $this->requestStack->getCurrentRequest();
         $this->decorated->describe($api);
-        Util::merge($api->servers[0], ['url' => $request->getSchemeAndHttpHost(),], true);
+        Util::merge($api->servers[0], ['url' => $request->getSchemeAndHttpHost() . $request->getBaseUrl(),], true);
     }
 }

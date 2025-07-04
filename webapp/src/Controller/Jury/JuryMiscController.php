@@ -15,22 +15,23 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\ExpressionLanguage\Expression;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route(path: '/jury')]
 class JuryMiscController extends BaseController
@@ -49,6 +50,13 @@ class JuryMiscController extends BaseController
     #[Route(path: '', name: 'jury_index')]
     public function indexAction(ConfigurationService $config): Response
     {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $innodbSnapshotIsolation = $this->em->getConnection()->executeQuery('SHOW VARIABLES LIKE "innodb_snapshot_isolation"')->fetchAssociative();
+            if ($innodbSnapshotIsolation && $innodbSnapshotIsolation['Value'] === 'ON') {
+                $this->addFlash('danger', 'InnoDB snapshot isolation is enabled. Set --innodb_snapshot_isolation=OFF in your MariaDB configuration. See https://github.com/DOMjudge/domjudge/issues/2848 for more information.');
+            }
+        }
+
         return $this->render('jury/index.html.twig', [
             'adminer_enabled' => $config->get('adminer_enabled'),
             'CCS_SPEC_API_URL' => GI::CCS_SPEC_API_URL,
@@ -206,7 +214,7 @@ class JuryMiscController extends BaseController
 
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             $progressReporter = function (int $progress, string $log, ?string $message = null) {
-                echo $this->dj->jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]);
+                echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]);
                 ob_flush();
                 flush();
             };

@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
-use App\DataTransferObject\FileWithName;
 use App\DataTransferObject\ImageFile;
 use App\DataTransferObject\TeamLocation;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -418,7 +417,7 @@ class Team extends BaseApiEntity implements
         return $this;
     }
 
-    public function setAffiliation(TeamAffiliation $affiliation = null): Team
+    public function setAffiliation(?TeamAffiliation $affiliation = null): Team
     {
         $this->affiliation = $affiliation;
         return $this;

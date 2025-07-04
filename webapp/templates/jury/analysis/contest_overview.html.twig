@@ -24,6 +24,14 @@ table tr a {
     color: inherit;
 }
 </style>
+<script>
+$(function() {
+    $('[data-bs-toggle="popover"]').popover({
+      trigger: 'hover',
+      html: true
+    })
+})
+</script>
 {% endblock %}
 
 {% block content %}
@@ -36,7 +44,7 @@ table tr a {
           Contest Stats
         </div>
         <div class="card-body">
-          <abbr data-bs-toggle="popover" data-placement="bottom" data-bs-title="Misery Index" data-bs-content="
+          <abbr data-bs-toggle="popover" data-bs-placement="bottom" data-bs-title="Misery Index" data-bs-content="
             This is a measure of how 'bored' contestants are. It is the average number of
             people-minutes spent fruitlessly trying to solve problems at the end of the contest.
             <br>
@@ -46,26 +54,6 @@ table tr a {
           # Submissions: {{ misc.total_submissions }}<br>
           # Accepted Submissions: {{ misc.total_accepted }} <span class="text-muted">(~{{ (misc.total_submissions>0 ? (misc.total_accepted/misc.total_submissions)*100:0)|number_format(0) }}%)</span><br>
           # of Teams: {{ misc.num_teams }}<br>
-
-<!--
-          # of Teams solving n problems<br>
-          <table class="table table-sm">
-            <thead>
-              <tr>
-                {% for x in range(0, problems|length) %}
-                <th>{{x}}</th>
-                {% endfor %}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                {% for n in range(0, problems|length ) %}
-                <td>{{ misc['teams_solved_n_problems'][n]|default(' ') }}</td>
-                {% endfor %}
-              </tr>
-            </tbody>
-          </table>
--->
         </div>
       </div>
     </div>
@@ -73,6 +61,10 @@ table tr a {
       <div class="card">
         <div class="card-header">
           Language Stats
+            <a href="{{ path('analysis_languages', {'view': view}) }}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-list"></i>
+                Details
+            </a>
         </div>
         <div class="card-body">
           <svg style="height: 300px"></svg>
@@ -159,7 +151,7 @@ table tr a {
             {% for t in teams %}
               {% set id=t.teamid %}
               <tr>
-                {% set link = path('analysis_team', {'teamid':id}) %}
+                {% set link = path('analysis_team', {'team':id}) %}
                 <td scope="row" style="text-align: right;"><a href="{{ link }}">{{ t | entityIdBadge('t') }}</a></td>
                 <td><a href="{{ link }}">{% if t.affiliation %}{{ t.affiliation.name }}{% else %}-{% endif %}</a></td>
                 <td class="truncate" style="max-width: 200px"><a href="{{ link }}">{{ t.effectiveName }}</a></td>
@@ -333,66 +325,42 @@ nv.addGraph(function() {
   d3.select('#graph_problems svg')
       .datum(problem_stats)
       .call(chart);
+  // Hide bars with 0 height after rendering
+  chart.dispatch.on('renderEnd', function() {
+    d3.selectAll('#graph_problems .nv-bar').each(function(d) {
+      if (d.value === 0) {
+        d3.select(this).attr('height', 0);
+        d3.select(this).attr('y', chart.yAxis.scale()(0));
+      }
+    });
+  });
   nv.utils.windowResize(chart.update);
   return chart;
 });
 
-
 //////////////////////////////////////
 // Submissions over time
-// stacked graph of correct, runtime-error, wrong-answer, compiler-error, timelimit, etc
-// x-axis is contest time
-// y axis is # of submissions
 
-var submission_stats = [
+const submission_stats = [
   {% for result in ['correct', 'wrong-answer', 'timelimit', 'run-error', 'compiler-error', 'no-output'] %}
   {
     key: "{{result}}",
     color: "{{colors[result]}}",
-    values: [
-      {# TODO: make sure these are actually ordered by submittime #}
-      {# TODO: also make sure these submissions are in the same contest #}
-      [0,0],
-      {% set count = 0 %}
-      {% for submission in submissions | filter(submission => submission.result) %}
-        {% if submission.result == result %}{% set count = count +1 %}{% endif %}
-        [ {{ (submission.submittime - current_contest.starttime)/60.0 }},
-          {{ count }}
-        ],
-        {% endfor %}
-    ]
+    values: []
   },
   {% endfor %}
 ];
-nv.addGraph(function() {
-  var chart = nv.models.stackedAreaChart()
-      // .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
-      // .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
-      // .transitionDuration(350)  //how fast do you want the lines to transition?
-      // .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
-      .showControls(false)
-      .x(function(d) { return d[0] })   //We can modify the data accessor functions...
-      .y(function(d) { return d[1] })   //...in case your data is formatted differently.
-      .showYAxis(true)        //Show the y-axis
-      .showXAxis(true)        //Show the x-axis
-      .forceX([0, {{ (current_contest.endtime - current_contest.starttime) / 60 }}])
-      .forceY([0, {{ submissions|length *1.10 }}])
-      ;
-  chart.xAxis     //Chart x-axis settings
-      .axisLabel('Contest Time(minutes)')
-      .tickFormat(d3.format('d'));
-
-  chart.yAxis     //Chart y-axis settings
-      .axisLabel('Total Submissions')
-      .tickFormat(d3.format('d'));
-
-  d3.select('#graph_submissions svg')
-      .datum(submission_stats)
-      .call(chart);
-  nv.utils.windowResize(chart.update);
-  return chart;
-});
-
+const contest_start_time = {{ current_contest.starttime }};
+const contest_duration_seconds = {{ (current_contest.endtime - current_contest.starttime) | round(0, 'ceil') }};
+const submissions = [
+  {% for submission in submissions %}
+  {
+    result: "{{ submission.result }}",
+    submittime: {{ submission.submittime }},
+  }{{ loop.last ? '' : ',' }}
+  {% endfor %}
+];
+createSubmissionGraph(submission_stats, contest_start_time, contest_duration_seconds, submissions);
 
 </script>
 {% include 'jury/analysis/download_graphs.html.twig' %}

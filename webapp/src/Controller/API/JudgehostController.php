@@ -30,14 +30,14 @@ use App\Service\SubmissionService;
 use App\Utils\Utils;
 use BadMethodCallException;
 use Doctrine\DBAL\ArrayParameterType;
-use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -46,12 +46,12 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Rest\Route('/judgehosts')]
 #[OA\Tag(name: 'Judgehosts')]
@@ -77,7 +77,7 @@ class JudgehostController extends AbstractFOSRestController
      *
      * @return Judgehost[]
      */
-    #[IsGranted('ROLE_JURY')]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Get('')]
     #[OA\Response(
         response: 200,
@@ -394,9 +394,12 @@ class JudgehostController extends AbstractFOSRestController
                     if ($judging->getOutputCompile() === null) {
                         $judging
                             ->setOutputCompile($output_compile)
-                            ->setCompileMetadata(base64_decode($compileMetadata))
                             ->setResult(Judging::RESULT_COMPILER_ERROR)
                             ->setEndtime(Utils::now());
+
+                        if ($compileMetadata !== null) {
+                            $judging->setCompileMetadata(base64_decode($compileMetadata));
+                        }
                         $this->em->flush();
 
                         if ($judging->getValid()) {
@@ -431,7 +434,7 @@ class JudgehostController extends AbstractFOSRestController
                             ->setJudging($judging)
                             ->setContest($judging->getContest())
                             ->setDescription('Compilation results are different for j' . $judging->getJudgingid())
-                            ->setJudgehostlog('New compilation output: ' . $output_compile)
+                            ->setJudgehostlog(base64_encode('New compilation output: ' . $output_compile))
                             ->setTime(Utils::now())
                             ->setDisabled($disabled);
                         $this->em->persist($error);
@@ -605,7 +608,12 @@ class JudgehostController extends AbstractFOSRestController
                     ),
                     new OA\Property(
                         property: 'metadata',
-                        description: 'The (base64-encoded) metadata',
+                        description: 'The (base64-encoded) metadata of the run',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'compare_metadata',
+                        description: 'The (base64-encoded) metadata of the validator',
                         type: 'string'
                     ),
                 ]
@@ -644,6 +652,7 @@ class JudgehostController extends AbstractFOSRestController
         $teamMessage  = $request->request->get('team_message');
         $metadata     = $request->request->get('metadata');
         $testcasedir  = $request->request->get('testcasedir');
+        $compareMeta = $request->request->get('compare_metadata');
 
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
@@ -651,7 +660,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
-            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir);
+            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
@@ -720,6 +729,7 @@ class JudgehostController extends AbstractFOSRestController
         $judging = null;
         $judgingId = null;
         $cid = null;
+        $judgingRun = null;
         if ($judgeTaskId) {
             /** @var JudgeTask $judgeTask */
             $judgeTask = $this->em->getRepository(JudgeTask::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
@@ -729,9 +739,10 @@ class JudgehostController extends AbstractFOSRestController
                 $judging = $this->em->getRepository(Judging::class)->findOneBy(['judgingid' => $judgingId]);
                 $cid = $judging->getContest()->getCid();
             }
+            $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
         }
 
-        $disabled = $this->dj->jsonDecode($disabled);
+        $disabled = Utils::jsonDecode($disabled);
 
         /** @var Contest|null $contest */
         $contest = null;
@@ -767,7 +778,7 @@ class JudgehostController extends AbstractFOSRestController
             ->andWhere('e.disabled = :disabled')
             ->andWhere('e.status = :status')
             ->setParameter('description', $description)
-            ->setParameter('disabled', $this->dj->jsonEncode($disabled))
+            ->setParameter('disabled', Utils::jsonEncode($disabled))
             ->setParameter('status', 'open')
             ->setMaxResults(1);
 
@@ -787,6 +798,9 @@ class JudgehostController extends AbstractFOSRestController
             ->setJudgehostlog($judgehostlog)
             ->setTime(Utils::now())
             ->setDisabled($disabled);
+        if ($judgingRun) {
+            $error->setJudgingRun($judgingRun);
+        }
         $this->em->persist($error);
         // Even if there are no remaining judge tasks for this judging open (which is covered by the transaction below),
         // we need to mark this judging as internal error.
@@ -907,16 +921,17 @@ class JudgehostController extends AbstractFOSRestController
      */
     private function addSingleJudgingRun(
         int $judgeTaskId,
-        string $hostname,
-        string $runResult,
-        string $runTime,
-        string $outputSystem,
-        string $outputError,
-        string $outputDiff,
-        string $outputRun,
+        string  $hostname,
+        string  $runResult,
+        string  $runTime,
+        string  $outputSystem,
+        string  $outputError,
+        string  $outputDiff,
+        string  $outputRun,
         ?string $teamMessage,
-        string $metadata,
-        ?string $testcasedir
+        string  $metadata,
+        ?string $testcasedir,
+        ?string $compareMeta,
     ): bool {
         $resultsRemap = $this->config->get('results_remap');
         $resultsPrio  = $this->config->get('results_prio');
@@ -937,7 +952,8 @@ class JudgehostController extends AbstractFOSRestController
             $outputRun,
             $teamMessage,
             $metadata,
-            $testcasedir
+            $testcasedir,
+            $compareMeta
         ) {
             $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
                 ['judgetaskid' => $judgeTaskId]);
@@ -958,6 +974,10 @@ class JudgehostController extends AbstractFOSRestController
                 ->setOutputError(base64_decode($outputError))
                 ->setOutputSystem(base64_decode($outputSystem))
                 ->setMetadata(base64_decode($metadata));
+
+            if ($compareMeta) {
+                $judgingRunOutput->setValidatorMetadata(base64_decode($compareMeta));
+            }
 
             if ($teamMessage) {
                 $judgingRunOutput->setTeamMessage(base64_decode($teamMessage));
@@ -1020,15 +1040,38 @@ class JudgehostController extends AbstractFOSRestController
             if (!$hasNullResults || $lazyEval !== DOMJudgeService::EVAL_FULL) {
                 // NOTE: setting endtime here determines in testcases_GET
                 // whether a next testcase will be handed out.
-                $judging->setEndtime(Utils::now());
+                // We want to set the endtime and max runtime only once (once the verdict is known),
+                // so that the API doesn't update these values once they are set.
+                // We also don't want to send judging events after the verdict is known.
+                if (!$judging->getEndtime()) {
+                    $sendJudgingEvent = true;
+                    $judging->setEndtime(Utils::now());
+
+                    // Also calculate the max run time and set it
+                    $maxRunTime = $this->em->createQueryBuilder()
+                        ->from(Judging::class, 'j')
+                        ->select('MAX(jr.runtime) AS maxruntime')
+                        ->leftJoin('j.runs', 'jr')
+                        ->andWhere('j.judgingid = :judgingid')
+                        ->andWhere('jr.runtime IS NOT NULL')
+                        ->setParameter('judgingid', $judging->getJudgingid())
+                        ->getQuery()
+                        ->getSingleScalarResult();
+                    $judging->setMaxRuntimeForVerdict($maxRunTime);
+                }
                 $this->maybeUpdateActiveJudging($judging);
-                $sendJudgingEvent = true;
             }
             $this->em->flush();
 
             // Only update if the current result is different from what we had before.
             // This should only happen when the old result was NULL.
             if ($oldResult !== $result) {
+                if ($oldResult === 'aborted') {
+                    // This judging was cancelled while we worked on it,
+                    // probably as part of a cancelled rejudging.
+                    // Throw away our work, and return that we're done.
+                    return false;
+                }
                 if ($oldResult !== null) {
                     throw new BadMethodCallException('internal bug: the evaluated result changed during judging');
                 }
@@ -1159,7 +1202,7 @@ class JudgehostController extends AbstractFOSRestController
                         ->getResult();
                     // TODO: Pick up priority from previous judgings?
                     $this->rejudgingService->createRejudging($rejudging->getReason(), JudgeTask::PRIORITY_DEFAULT, $judgings,
-                        false, $rejudging->getRepeat(), $rejudging->getRepeatedRejudging(), $skipped);
+                        false, $rejudging->getRepeat(), 0, $rejudging->getRepeatedRejudging(), $skipped);
                 }
             }
         }
@@ -1580,32 +1623,42 @@ class JudgehostController extends AbstractFOSRestController
         // This is case 2.a) from above: start something new.
         // This runs transactional to prevent a queue task being picked up twice.
         $judgetasks = null;
-        $this->em->wrapInTransaction(function () use ($judgehost, $max_batchsize, &$judgetasks) {
-            $jobid = $this->em->createQueryBuilder()
-                ->from(QueueTask::class, 'qt')
-                ->innerJoin('qt.judging', 'j')
-                ->select('j.judgingid')
+        $jobid = $this->em->createQueryBuilder()
+            ->from(QueueTask::class, 'qt')
+            ->innerJoin('qt.judging', 'j')
+            ->select('j.judgingid')
+            ->andWhere('qt.startTime IS NULL')
+            ->addOrderBy('qt.priority')
+            ->addOrderBy('qt.teamPriority')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
+        if ($jobid !== null) {
+            // Mark it as being worked on.
+            $result = $this->em->createQueryBuilder()
+                ->update(QueueTask::class, 'qt')
+                ->set('qt.startTime', Utils::now())
+                ->andWhere('qt.judging = :jobid')
                 ->andWhere('qt.startTime IS NULL')
-                ->addOrderBy('qt.priority')
-                ->addOrderBy('qt.teamPriority')
-                ->setMaxResults(1)
+                ->setParameter('jobid', $jobid)
                 ->getQuery()
-                ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
-            $judgetasks = $this->getJudgetasks($jobid, $max_batchsize, $judgehost);
-            if ($judgetasks !== null) {
-                // Mark it as being worked on.
-                $this->em->createQueryBuilder()
-                    ->update(QueueTask::class, 'qt')
-                    ->set('qt.startTime', Utils::now())
-                    ->andWhere('qt.judging = :jobid')
-                    ->andWhere('qt.startTime IS NULL')
-                    ->setParameter('jobid', $jobid)
-                    ->getQuery()
-                    ->execute();
+                ->execute();
+
+            if ($result == 0) {
+                // Another judgehost beat us to it.
+                $judgetasks = [['type' => 'try_again']];
+            } else {
+                $judgetasks = $this->getJudgetasks($jobid, $max_batchsize, $judgehost);
+                if (empty($judgetasks)) {
+                    // Somehow we got ourselves in a situation that there was a queue task without remaining judge tasks.
+                    // This should not happen, but if it does, we need to clean up. Each of the fetch-work calls will clean
+                    // up one queue task. We need to signal to the judgehost that there might be more work to do.
+                    $judgetasks = [['type' => 'try_again']];
+                }
             }
-        });
-        if (!empty($judgetasks)) {
-            return $judgetasks;
+            if (!empty($judgetasks)) {
+                return $judgetasks;
+            }
         }
 
         if ($this->config->get('enable_parallel_judging')) {

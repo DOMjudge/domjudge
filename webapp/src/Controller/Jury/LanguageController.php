@@ -195,7 +195,8 @@ class LanguageController extends BaseController
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
-            new SubmissionRestriction(languageId: $language->getLangid())
+            new SubmissionRestriction(languageId: $language->getLangid()),
+            page: $request->query->getInt('page', 1),
         );
 
         $data = [
@@ -333,23 +334,7 @@ class LanguageController extends BaseController
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
         $contestId = $this->dj->getCurrentContest()->getCid();
-        $query = $this->em->createQueryBuilder()
-                          ->from(Judging::class, 'j')
-                          ->select('j')
-                          ->join('j.submission', 's')
-                          ->join('s.team', 't')
-                          ->andWhere('j.valid = true')
-                          ->andWhere('j.result != :compiler_error')
-                          ->andWhere('s.language = :langId')
-                          ->setParameter('compiler_error', 'compiler-error')
-                          ->setParameter('langId', $langId);
-        if ($contestId > -1) {
-            $query->andWhere('s.contest = :contestId')
-                  ->setParameter('contestId', $contestId);
-        }
-        $judgings = $query->getQuery()
-                          ->getResult();
-        $this->judgeRemaining($judgings);
+        $this->judgeRemaining(contestId: $contestId, langId: $langId);
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
 }

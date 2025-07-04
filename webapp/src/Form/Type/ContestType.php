@@ -4,6 +4,8 @@ namespace App\Form\Type;
 
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Language;
+use App\Entity\ScoreboardType;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
@@ -13,9 +15,9 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -74,6 +76,14 @@ class ContestType extends AbstractExternalIdEntityType
             'label' => 'Deactivate time',
             'required' => false,
             'help' => 'Time when the contest and scoreboard are hidden again. Usually a few hours/days after the contest ends.',
+        ]);
+        $builder->add('scoreboardType', ChoiceType::class, [
+            'label' => 'Scoreboard type',
+            'choices' => [
+                'pass-fail' => ScoreboardType::PASS_FAIL,
+                'scoring' => ScoreboardType::SCORING,
+            ],
+            'help' => 'The type of scoreboard to use for this contest.',
         ]);
         $builder->add('allowSubmit', ChoiceType::class, [
             'expanded' => true,
@@ -199,6 +209,13 @@ class ContestType extends AbstractExternalIdEntityType
             'allow_add' => true,
             'allow_delete' => true,
             'label' => false,
+        ]);
+        $builder->add('languages', EntityType::class, [
+            'required' => false,
+            'class' => Language::class,
+            'multiple' => true,
+            'choice_label' => fn(Language $language) => sprintf('%s (%s)', $language->getName(), $language->getExternalid()),
+            'help' => 'List of languages that can be used in this contest. Leave empty to allow all languages that are enabled globally.',
         ]);
 
         $builder->add('save', SubmitType::class);

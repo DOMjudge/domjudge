@@ -41,6 +41,10 @@
         {% if submissionCounts.queued > 0 %}
             <span class="badge text-bg-danger">{{ submissionCounts.queued }} queued (from {{submissionCounts.perteam}} teams)</span>
         {% endif %}
+
+        {% if submissionCounts.inContest > 0 %}
+            <span class="badge text-bg-secondary">{{ submissionCounts.inContest }} in contest</span>
+        {% endif %}
     </div>
 
     <table class="data-table table table-hover table{% if showExternalResult and showExternalTestcases %}-3{% endif %}-striped table-sm submissions-table table-full-clickable-cell">
@@ -89,14 +93,13 @@
                 {%- set link = path('jury_submission', {submitId: submission.submitid}) %}
             {%- endif %}
 
-            <tr class="{% if not submission.valid %}ignore{% endif %}"
-                data-problem-id="{{ submission.problem.probid }}"
-                data-team-id="{{ submission.team.teamid }}"
-                data-category-id="{{ submission.team.category.categoryid }}"
-                data-affiliation-id="{{ submission.team.affiliationId }}"
-                data-language-id="{{ submission.language.langid }}"
-                data-submission-id="{{ submission.submitid }}"
-                data-result="{{ submission | printValidJurySubmissionResult(false) }}">
+            {% if submission.team.affiliation %}
+                {% set affilid = submission.team.affiliation.affilid %}
+            {% else %}
+                {% set affilid = '' %}
+            {% endif %}
+
+            <tr class="{% if not submission.valid %}ignore{% endif %}">
                 {% if showExternalResult and showExternalTestcases %}
                     <td class="{{ tdExtraClass }}">
                         <a href="{{ link }}">
@@ -281,4 +284,6 @@
 
         </tbody>
     </table>
+
+    {{ knp_pagination_render(submissions) }}
 {% endif %}

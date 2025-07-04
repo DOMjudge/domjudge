@@ -11,22 +11,21 @@ use App\Entity\ExternalSourceWarning;
 use App\Entity\HasExternalIdInterface;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
-use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
-use App\Entity\TeamCategory;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Service\AwardService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
+use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
-use SebastianBergmann\Diff\Differ;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Exception\MissingResourceException;
@@ -36,6 +35,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
+use Twig\Runtime\EscaperRuntime;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
@@ -63,6 +63,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('customAssetFiles', $this->customAssetFiles(...)),
             new TwigFunction('globalBannerAssetPath', $this->dj->globalBannerAssetPath(...)),
             new TwigFunction('shadowMode', $this->shadowMode(...)),
+            new TwigFunction('showDiff', $this->showDiff(...), ['is_safe' => ['html']]),
         ];
     }
 
@@ -94,7 +95,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('runDiff', $this->runDiff(...), ['is_safe' => ['html']]),
             new TwigFilter('interactiveLog', $this->interactiveLog(...), ['is_safe' => ['html']]),
             new TwigFilter('codeEditor', $this->codeEditor(...), ['is_safe' => ['html']]),
-            new TwigFilter('showDiff', $this->showDiff(...), ['is_safe' => ['html']]),
             new TwigFilter('printContestStart', $this->printContestStart(...)),
             new TwigFilter('assetPath', $this->dj->assetPath(...)),
             new TwigFilter('printTimeRelative', $this->printTimeRelative(...)),
@@ -110,11 +110,13 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('fileTypeIcon', $this->fileTypeIcon(...)),
             new TwigFilter('problemBadge', $this->problemBadge(...), ['is_safe' => ['html']]),
             new TwigFilter('problemBadgeForContest', $this->problemBadgeForContest(...), ['is_safe' => ['html']]),
+            new TwigFilter('problemBadgeMaybe', $this->problemBadgeMaybe(...), ['is_safe' => ['html']]),
             new TwigFilter('printMetadata', $this->printMetadata(...), ['is_safe' => ['html']]),
             new TwigFilter('printWarningContent', $this->printWarningContent(...), ['is_safe' => ['html']]),
             new TwigFilter('entityIdBadge', $this->entityIdBadge(...), ['is_safe' => ['html']]),
             new TwigFilter('medalType', $this->awards->medalType(...)),
             new TwigFilter('numTableActions', $this->numTableActions(...)),
+            new TwigFilter('extensionToMime', $this->extensionToMime(...)),
         ];
     }
 
@@ -128,9 +130,10 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
         $selfRegistrationCategoriesCount = $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
         // These variables mostly exist for the header template.
+        $currentContest = $this->dj->getCurrentContest();
         return [
             'current_contest_id'            => $this->dj->getCurrentContestCookie(),
-            'current_contest'               => $this->dj->getCurrentContest(),
+            'current_contest'               => $currentContest,
             'current_contests'              => $this->dj->getCurrentContests(),
             'current_public_contest'        => $this->dj->getCurrentContest(onlyPublic: true),
             'current_public_contests'       => $this->dj->getCurrentContests(onlyPublic: true),
@@ -141,12 +144,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'external_ccs_submission_url'   => $this->config->get('external_ccs_submission_url'),
             'current_team_contest'          => $team ? $this->dj->getCurrentContest($team->getTeamid()) : null,
             'current_team_contests'         => $team ? $this->dj->getCurrentContests($team->getTeamid()) : null,
-            'submission_languages'          => $this->em->createQueryBuilder()
-                                                        ->from(Language::class, 'l')
-                                                        ->select('l')
-                                                        ->andWhere('l.allowSubmit = 1')
-                                                        ->getQuery()
-                                                        ->getResult(),
+            'submission_languages'          => $this->dj->getAllowedLanguagesForContest($currentContest),
             'alpha3_countries'              => Countries::getAlpha3Names(),
             'alpha3_alpha2_country_mapping' => array_combine(
                 Countries::getAlpha3Codes(),
@@ -158,6 +156,19 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'doc_links'                     => $this->dj->getDocLinks(),
             'allow_registration'            => $selfRegistrationCategoriesCount !== 0,
             'enable_ranking'                => $this->config->get('enable_ranking'),
+            'editor_themes'                 => [
+                'vs'                        => ['name' => 'Visual Studio (light)'],
+                'vs-dark'                   => ['name' => 'Visual Studio (dark)'],
+                'Solarized-dark'            => ['name' => 'Solarized (dark)', 'external' => true],
+                'Solarized-light'           => ['name' => 'Solarized (light)', 'external' => true],
+                'Tomorrow-Night-Blue'       => ['name' => 'Tomorrow Night Blue', 'external' => true],
+                'Tomorrow-Night-Bright'     => ['name' => 'Tomorrow Night Bright', 'external' => true],
+                'Tomorrow-Night-Eighties'   => ['name' => 'Tomorrow Night Eighties', 'external' => true],
+                'Tomorrow-Night'            => ['name' => 'Tomorrow Night', 'external' => true],
+                'Tomorrow'                  => ['name' => 'Tomorrow', 'external' => true],
+                'hc-light'                  => ['name' => 'High contrast (light)'],
+                'hc-black'                  => ['name' => 'High contrast (dark)'],
+            ],
         ];
     }
 
@@ -817,7 +828,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Output a (optionally readonly) code editor for the given submission file.
-     * @param string|null $language Ace language to use
+     * @param string|null $language Editor language to use
      * @param bool $editable Whether to allow editing
      * @param string $elementToUpdate HTML element to update when input changes
      * @param string|null $filename If $language is null, filename to use to determine language
@@ -833,13 +844,27 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $editor = <<<HTML
 <div class="editor" id="__EDITOR__">%s</div>
 <script>
-var __EDITOR__ = ace.edit("__EDITOR__");
-__EDITOR__.setTheme("ace/theme/eclipse");
-__EDITOR__.setOptions({ maxLines: Infinity });
-__EDITOR__.setReadOnly(%s);
-%s
-document.getElementById("__EDITOR__").editor = __EDITOR__;
-%s
+$(function() {
+    require(['vs/editor/editor.main'], function () {
+        const element = document.getElementById('__EDITOR__');
+        const content = element.textContent;
+        element.textContent = '';
+
+        const editor = monaco.editor.create(element, {
+            value: content,
+            scrollbar: {
+                vertical: 'auto',
+                horizontal: 'auto'
+            },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            readOnly: %s,
+            theme: getCurrentEditorTheme(),
+        });
+        %s
+        %s
+    });
+});
 </script>
 HTML;
         $rank   = $index;
@@ -847,9 +872,10 @@ HTML;
         $code   = htmlspecialchars($code);
         if ($elementToUpdate) {
             $extraForEdit = <<<JS
-__EDITOR__.getSession().on('change', function() {
-    var textarea = document.getElementById("$elementToUpdate");
-    textarea.value = __EDITOR__.getSession().getValue();
+editor.getModel().onDidChangeContent(() => {
+    const newValue = editor.getValue();
+    const textarea = document.getElementById("$elementToUpdate");
+    textarea.value = newValue;
 });
 JS;
         } else {
@@ -857,13 +883,15 @@ JS;
         }
 
         if ($language !== null) {
-            $mode = sprintf('__EDITOR__.getSession().setMode("ace/mode/%s");', $language);
+            $mode = <<<JS
+const model = editor.getModel();
+model.setLanguage("$language");
+JS;
         } elseif ($filename !== null) {
             $modeTemplate = <<<JS
-var modelist = ace.require('ace/ext/modelist');
-var filePath = "%s";
-var mode = modelist.getModeForPath(filePath).mode;
-__EDITOR__.getSession().setMode(mode);
+const filePath = "%s";
+const model = monaco.editor.createModel(content, undefined, monaco.Uri.file(filePath));
+editor.setModel(model);
 JS;
             $mode         = sprintf($modeTemplate, htmlspecialchars($filename));
         } else {
@@ -899,10 +927,66 @@ JS;
         return $return;
     }
 
-    public function showDiff(SubmissionFile $newFile, SubmissionFile $oldFile): string
+    public function showDiff(string $id, SubmissionFile $newFile, SubmissionFile $oldFile): string
     {
-        $differ = new Differ;
-        return $this->parseSourceDiff($differ->diff($oldFile->getSourcecode(), $newFile->getSourcecode()));
+        $editor = <<<HTML
+<div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" id="__EDITOR__SBS">
+    <label class="form-check-label" for="__EDITOR__SBS">Use side-by-side diff viewer</label>
+</div>
+<div class="editor" id="__EDITOR__"></div>
+<script>
+$(function() {
+    require(['vs/editor/editor.main'], function () {
+        const originalModel = monaco.editor.createModel(
+            "%s",
+            undefined,
+            monaco.Uri.parse("diff-old/%s")
+        );
+        const modifiedModel = monaco.editor.createModel(
+            "%s",
+            undefined,
+            monaco.Uri.parse("diff-new/%s")
+        );
+
+        const sideBySide = isDiffSideBySide()
+        sideBySideSwitch = $("#__EDITOR__SBS");
+        sideBySideSwitch.prop('checked', sideBySide);
+        sideBySideSwitch.change(function(e) {
+            setDiffSideBySide(e.target.checked);
+            diffEditor.updateOptions({
+                renderSideBySide: e.target.checked,
+            });
+        });
+
+        const diffEditor = monaco.editor.createDiffEditor(
+            document.getElementById("__EDITOR__"), {
+            scrollbar: {
+                vertical: 'auto',
+                horizontal: 'auto'
+            },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            readOnly: true,
+            renderSideBySide: sideBySide,
+            theme: getCurrentEditorTheme(),
+        });
+        diffEditor.setModel({
+            original: originalModel,
+            modified: modifiedModel,
+        });
+    });
+});
+</script>
+HTML;
+
+        return sprintf(
+            str_replace('__EDITOR__', $id, $editor),
+            $this->twig->getRuntime(EscaperRuntime::class)->escape($oldFile->getSourcecode(), 'js'),
+            $oldFile->getFilename(),
+            $this->twig->getRuntime(EscaperRuntime::class)->escape($newFile->getSourcecode(), 'js'),
+            $newFile->getFilename(),
+        );
     }
 
     public function printContestStart(Contest $contest): string
@@ -1023,8 +1107,8 @@ EOF;
         if (is_null($col)) {
             return $text;
         }
-        preg_match_all("/[0-9A-Fa-f]{2}/", $col, $m);
-        if (!count($m)) {
+        $ret = preg_match_all("/[0-9A-Fa-f]{2}/", $col, $m);
+        if (!($ret && count($m[0]))) {
             return $text;
         }
 
@@ -1061,9 +1145,38 @@ EOF;
         return 'fas fa-file-' . $iconName;
     }
 
-    public function problemBadge(ContestProblem $problem): string
+    private function relativeLuminance(string $rgb): float
     {
-        $rgb        = Utils::convertToHex($problem->getColor() ?? '#ffffff');
+        // See https://en.wikipedia.org/wiki/Relative_luminance
+        [$r, $g, $b] = Utils::parseHexColor($rgb);
+
+        [$lr, $lg, $lb] = [
+            pow($r / 255, 2.4),
+            pow($g / 255, 2.4),
+            pow($b / 255, 2.4),
+        ];
+
+        return 0.2126 * $lr + 0.7152 * $lg + 0.0722 * $lb;
+    }
+
+    private function apcaContrast(string $fgColor, string $bgColor): float
+    {
+        // Based on WCAG 3.x (https://www.w3.org/TR/wcag-3.0/)
+        $luminanceForeground = $this->relativeLuminance($fgColor);
+        $luminanceBackground = $this->relativeLuminance($bgColor);
+
+        $contrast = ($luminanceBackground > $luminanceForeground)
+            ? (pow($luminanceBackground, 0.56) - pow($luminanceForeground, 0.57)) * 1.14
+            : (pow($luminanceBackground, 0.65) - pow($luminanceForeground, 0.62)) * 1.14;
+
+        return round($contrast * 100, 2);
+    }
+
+    /**
+     * @return array{string, string}
+     */
+    private function hexToForegroundAndBorder(string $rgb): array
+    {
         $background = Utils::parseHexColor($rgb);
 
         // Pick a border that's a bit darker.
@@ -1073,8 +1186,28 @@ EOF;
         $darker[2] = max($darker[2] - 64, 0);
         $border    = Utils::rgbToHex($darker);
 
-        // Pick the foreground text color based on the background color.
-        $foreground = ($background[0] + $background[1] + $background[2] > 450) ? '#000000' : '#ffffff';
+        // Pick the text color with the biggest absolute contrast.
+        $contrastWithWhite = $this->apcaContrast('#ffffff', $rgb);
+        $contrastWithBlack = $this->apcaContrast('#000000', $rgb);
+
+        $foreground = (abs($contrastWithBlack) > abs($contrastWithWhite)) ? '#000000' : '#ffffff';
+
+        return [$foreground, $border];
+    }
+
+    public function problemBadge(ContestProblem $problem, bool $grayedOut = false): string
+    {
+        $rgb = Utils::convertToHex($problem->getColor() ?? '#ffffff');
+        if ($grayedOut || empty($rgb)) {
+            $rgb = Utils::convertToHex('whitesmoke');
+        }
+
+        [$foreground, $border] = $this->hexToForegroundAndBorder($rgb);
+
+        if ($grayedOut) {
+            $foreground = 'silver';
+            $border = 'linen';
+        }
         return sprintf(
             '<span class="badge problem-badge" style="background-color: %s; border: 1px solid %s"><span style="color: %s;">%s</span></span>',
             $rgb,
@@ -1082,6 +1215,37 @@ EOF;
             $foreground,
             $problem->getShortname()
         );
+    }
+
+    public function problemBadgeMaybe(ContestProblem $problem, ScoreboardMatrixItem $matrixItem): string
+    {
+        $rgb = Utils::convertToHex($problem->getColor() ?? '#ffffff');
+        if (!$matrixItem->isCorrect || empty($rgb)) {
+            $rgb = Utils::convertToHex('whitesmoke');
+        }
+
+        [$foreground, $border] = $this->hexToForegroundAndBorder($rgb);
+
+        if (!$matrixItem->isCorrect) {
+            $foreground = 'silver';
+            $border = 'linen';
+        }
+
+        $ret = sprintf(
+            '<span class="badge problem-badge" style="font-size: x-small; background-color: %s; min-width: 18px; border: 1px solid %s;"><span style="color: %s;">%s</span></span>',
+            $rgb,
+            $border,
+            $foreground,
+            $problem->getShortname()
+        );
+        if (!$matrixItem->isCorrect) {
+            if ($matrixItem->numSubmissionsPending > 0) {
+                $ret = '<span><span class="mobile-pending">' . $ret . '</span></span>';
+            } elseif ($matrixItem->numSubmissions > 0) {
+                $ret = '<span><span class="strike-diagonal">' . $ret . '</span></span>';
+            }
+        }
+        return $ret;
     }
 
     public function problemBadgeForContest(Problem $problem, ?Contest $contest = null): string
@@ -1096,16 +1260,32 @@ EOF;
         if ($metadata === null) {
             return '';
         }
-        $metadata = $this->dj->parseMetadata($metadata);
-        return '<span style="display:inline; margin-left: 5px;">'
-            . '<i class="fas fa-stopwatch" title="runtime"></i> '
-            . $metadata['cpu-time'] . 's CPU, '
-            . $metadata['wall-time'] . 's wall, '
-            . '<i class="fas fa-memory" title="RAM"></i> '
-            . Utils::printsize((int)($metadata['memory-bytes'])) . ', '
-            . '<i class="far fa-question-circle" title="exit-status"></i> '
-            . 'exit-code: ' . $metadata['exitcode']
-            . (($metadata['signal'] ?? -1) > 0 ? ' signal: ' . $metadata['signal'] : '');
+        $metadata = Utils::parseMetadata($metadata);
+        $result = '<span style="display:inline; margin-left: 5px;">';
+
+        if (isset($metadata['cpu-time']) || isset($metadata['wall-time'])) {
+            $result .= '<i class="fas fa-stopwatch" title="runtime"></i> ';
+        }
+
+        if (isset($metadata['cpu-time'])) {
+            $result .= $metadata['cpu-time'] . 's CPU, ';
+        }
+        if (isset($metadata['wall-time'])) {
+            $result .= $metadata['wall-time'] . 's wall, ';
+        }
+        if (isset($metadata['memory-bytes'])) {
+            $result .= '<i class="fas fa-memory" title="RAM"></i> '
+                . Utils::printsize((int)($metadata['memory-bytes'])) . ', ';
+        }
+        if (isset($metadata['exitcode'])) {
+            $result .= '<i class="far fa-question-circle" title="exit-status"></i> '
+                . 'exit-code: ' . $metadata['exitcode'];
+        }
+        if (isset($metadata['signal'])) {
+            $result .= ' signal: ' . $metadata['signal'];
+        }
+        $result .= '</span>';
+        return $result;
     }
 
     public function printWarningContent(ExternalSourceWarning $warning): string
@@ -1215,5 +1395,10 @@ EOF;
             $maxNumActions = max($maxNumActions, count($item['actions'] ?? []));
         }
         return $maxNumActions;
+    }
+
+    public function extensionToMime(string $extension): string
+    {
+        return DOMJudgeService::EXTENSION_TO_MIMETYPE[$extension];
     }
 }

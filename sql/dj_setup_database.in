@@ -29,6 +29,7 @@ Commands:
   status           check database installation status
   genpass          generate DB,API,Symfony,admin password files
   create-db-users  create (empty) database and users
+  update-password  update DB user database to that in 'etc/dbpasswords.secret'
   install          create database, example contest and users if not existing
   bare-install     create database, setup defaults if not existing
   uninstall        remove database users and database, INCLUDING ALL DATA!
@@ -53,24 +54,22 @@ EOF
 
 mysql_options()
 {
-	local user pass
-
 	# shellcheck disable=SC2153
 	if [ -n "$DBUSER" ]; then
-		user="-u $DBUSER"
+		_user="-u $DBUSER"
 	else
-		user="${DBA_USER:+-u ${DBA_USER}}"
+		_user="${DBA_USER:+-u ${DBA_USER}}"
 	fi
 	# shellcheck disable=SC2153
 	if [ -n "$PASSWD" ]; then
-		pass="-p$PASSWD"
+		_pass="-p$PASSWD"
 	else
-		[ -n "$PROMPT_PASSWD" ] && pass="-p"
-		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
+		[ -n "$PROMPT_PASSWD" ] && _pass="-p"
+		[ -n "$DBA_PASSWD" ]    && _pass="-p$DBA_PASSWD"
 	fi
 
 	[ -z "$USE_SOCKET" ] && port="-P$DBPORT"
-	echo $user ${pass:+"$pass"} -h "$DBHOST" ${port:+"$port"}
+	echo $_user ${_pass:+"$_pass"} -h "$DBHOST" ${port:+"$port"}
 }
 
 # Wrapper around mysql command to allow setting options, user, etc.
@@ -235,28 +234,22 @@ remove_db_users()
 	verbose "DOMjudge database and user(s) removed."
 }
 
+update_password()
+{
+	read_dbpasswords
+	(
+    echo "ALTER USER '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+	echo "FLUSH PRIVILEGES;"
+	) | mysql
+    verbose "ALTER USER '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+	verbose "Database user password updated from credentials file."
+}
+
 install_examples()
 {
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-example-data
 	"$EXAMPLEPROBDIR"/generate-contest-yaml
 	( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
-}
-
-uninstall_helper()
-{
-	read_dbpasswords
-	remove_db_users
-}
-
-create_db_users_helper()
-{
-	read_dbpasswords
-	create_db_users
-	verbose "Created empty database and users."
-}
-
-create_database_dump () {
-	sudo mysqldump $(mysql_options) --opt --skip-lock-tables domjudge | pv | gzip > "$DATABASEDUMPDIR/${1}.sql.gz"
 }
 
 ### Script starts here ###
@@ -315,7 +308,8 @@ genpass)
 	;;
 
 uninstall)
-	uninstall_helper
+	read_dbpasswords
+	remove_db_users
 	;;
 
 install-examples)
@@ -326,23 +320,24 @@ install-examples)
 install-loadtest)
 	read_dbpasswords
 	create_db_users
-	export DB_FIRST_INSTALL=1
 	symfony_console doctrine:migrations:migrate -n
-	unset DB_FIRST_INSTALL
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-gatling-data
 	;;
 
 create-db-users)
-	create_db_users_helper
+	read_dbpasswords
+	create_db_users
+	;;
+
+update-password)
+	update_password
 	;;
 
 bare-install|install)
 	read_dbpasswords
 	create_db_users
-	export DB_FIRST_INSTALL=1
 	symfony_console doctrine:migrations:migrate -n
-	unset DB_FIRST_INSTALL
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
 	if [ "$1" = "install" ]; then
 		install_examples
@@ -353,17 +348,12 @@ bare-install|install)
 	;;
 
 upgrade)
-	# check for legacy dbpasswords.secret content
-	if grep -Eq ^team: $PASSWDFILE >/dev/null 2>&1 ; then
-		echo "Warning: please remove all non-jury users from $PASSWDFILE"
-		echo "You may also remove those users from MySQL."
-	fi
 	read_dbpasswords
 
 	# Check if we need to upgrade the Doctrine migrations table
 	if ! echo "SHOW CREATE TABLE \`doctrine_migration_versions\`" | mysql "$DBNAME" >/dev/null 2>&1; then
 		symfony_console doctrine:migrations:sync-metadata-storage -n
-		# shellcheck disable=SC2016
+		# shellcheck disable=SC2016,SC2028
 		echo 'INSERT INTO `doctrine_migration_versions`
 			(version, executed_at, execution_time)
 			SELECT concat("DoctrineMigrations\\\\Version", version), executed_at, 1
@@ -373,6 +363,8 @@ upgrade)
 
 	symfony_console doctrine:migrations:migrate -n
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
+
+	symfony_console domjudge:refresh-cache
 	verbose "DOMjudge database upgrade completed."
 	;;
 
@@ -384,17 +376,18 @@ dump)
 		exit 1
 	fi
 
-	if [ -f "${DATABASEDUMPDIR}/${DUMPNAME}.sql.gz" ]; then
+	DUMPFILE="${DATABASEDUMPDIR}/${DUMPNAME}.sql.gz"
+	if [ -f "$DUMPFILE" ]; then
 		while true; do
-			read -p "Overwrite existing database dump (y/N)? " yn
+			printf "Overwrite existing database dump (y/N)? "
+			read -r yn
 			case $yn in
 				[Yy]* ) break ;;
 				''|[Nn]* ) exit 0;;
 			esac
 		done
 	fi
-	create_database_dump $DUMPNAME
-	exit 0
+	mysqldump $(mysql_options) --opt --skip-lock-tables "$DBNAME" | pv | gzip > "$DUMPFILE"
 	;;
 
 load)
@@ -407,19 +400,20 @@ load)
 			exit 1
 		fi
 		ind=1
-		for i in "$databases"; do
+		for i in $databases; do
 			echo "$ind) $i"
-			: $((ind+=1))
+			ind=$((ind+1))
 		done
 		while true; do
-			read -p "Which database should be loaded? " db
+			printf "Which database should be loaded? "
+			read -r db
 			ind=1
-			for i in "$databases"; do
+			for i in $databases; do
 				if [ "$ind" = "$db" ]; then
 					FILE="$i"
 					break
 				fi
-				: $((ind+=1))
+				ind=$((ind+1))
 			done
 			if [ -n "$FILE" ]; then
 				break
@@ -434,9 +428,10 @@ load)
 		exit 1
 	fi
 
-	uninstall_helper
-	create_db_users_helper
-	pv "${FILE}" | gunzip | mysql domjudge
+	read_dbpasswords
+	remove_db_users
+	create_db_users
+	pv "${FILE}" | gunzip | mysql "$DBNAME"
 	;;
 
 *)

@@ -26,19 +26,20 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
 #[Route(path: '/jury/rejudgings')]
@@ -239,11 +240,12 @@ class RejudgingController extends BaseController
         if (!$rejudging) {
             throw new NotFoundHttpException(sprintf('Rejudging with ID %s not found', $rejudgingId));
         }
-        $todo = $this->rejudgingService->calculateTodo($rejudging)['todo'];
+        $todoAndDone = $this->rejudgingService->calculateTodo($rejudging);
+        $todo = $todoAndDone['todo'];
+        $done = $todoAndDone['done'];
 
-        $verdicts = $this->dj->getVerdicts();
+        $verdicts = $this->config->getVerdicts(['final', 'error']);
         $verdicts[''] = 'JE'; /* happens for aborted judgings */
-        $verdicts['aborted'] = 'JE'; /* happens for aborted judgings */
 
         $used         = [];
         $verdictTable = [];
@@ -329,7 +331,7 @@ class RejudgingController extends BaseController
             $verdictTable[$originalVerdict->getResult()][$newVerdict->getResult()][] = $submitid;
         }
 
-        $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'diff', 4 => 'all'];
+        $viewTypes = [0 => 'unverified', 1 => 'unjudged', 2 => 'diff', 3 => 'all'];
         $defaultView = 'diff';
         $onlyAHandfulOfSubmissions = $rejudging->getSubmissions()->count() <= 5;
         if ($onlyAHandfulOfSubmissions) {
@@ -361,10 +363,11 @@ class RejudgingController extends BaseController
             $restrictions->result = $newverdict;
         }
 
-        /** @var Submission[] $submissions */
+        /** @var PaginationInterface<int, Submission> $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
-            $restrictions
+            $restrictions,
+            page: $request->query->getInt('page', 1),
         );
 
         $repetitions = $this->em->createQueryBuilder()
@@ -390,6 +393,7 @@ class RejudgingController extends BaseController
         $data = [
             'rejudging' => $rejudging,
             'todo' => $todo,
+            'done' => $done,
             'verdicts' => $verdicts,
             'used' => $used,
             'verdictTable' => $verdictTable,
@@ -447,7 +451,7 @@ class RejudgingController extends BaseController
 
         if ($request->isXmlHttpRequest()) {
             $progressReporter = function (int $progress, string $log, ?string $message = null) {
-                echo $this->dj->jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => htmlspecialchars($message ?? '')]);
+                echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => htmlspecialchars($message ?? '')]);
                 ob_flush();
                 flush();
             };
@@ -526,6 +530,7 @@ class RejudgingController extends BaseController
                 'before'     => $formData['before'],
                 'after'      => $formData['after'],
                 'referer'    => $request->headers->get('referer'),
+                'overshoot'  => $formData['overshoot'],
             ];
             return $this->render('jury/rejudging_add.html.twig', [
                 'data'    => http_build_query($data),
@@ -534,7 +539,7 @@ class RejudgingController extends BaseController
         }
         if ($isCreateRejudgingAjax) {
             $progressReporter = function (int $progress, string $log, ?string $redirect = null) {
-                echo $this->dj->jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'redirect' => $redirect]);
+                echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'redirect' => $redirect]);
                 ob_flush();
                 flush();
             };
@@ -639,7 +644,7 @@ class RejudgingController extends BaseController
 
                 $skipped = [];
                 $res     = $this->rejudgingService->createRejudging(
-                    $reason, (int)$data['priority'], $judgings, false, (int)($data['repeat'] ?? 1), null, $skipped, $progressReporter);
+                    $reason, (int)$data['priority'], $judgings, false, (int)($data['repeat'] ?? 1), (int) ($data['overshoot'] ?? 0), null, $skipped, $progressReporter);
                 $this->generateFlashMessagesForSkippedJudgings($skipped);
 
                 if ($res === null) {
@@ -670,6 +675,7 @@ class RejudgingController extends BaseController
         $autoApply  = (bool)$request->request->get('auto_apply');
         $repeat     = (int)$request->request->get('repeat');
         $priority   = $request->request->get('priority') ?: 'default';
+        $overshoot  = (int)$request->request->get('overshoot') ?: 0;
 
         if (empty($table) || empty($id)) {
             throw new BadRequestHttpException('No table or id passed for selection in rejudging');
@@ -718,12 +724,12 @@ class RejudgingController extends BaseController
         }
 
         $progressReporter = function (int $progress, string $log, ?string $redirect = null) {
-            echo $this->dj->jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'redirect' => $redirect]);
+            echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'redirect' => $redirect]);
             ob_flush();
             flush();
         };
 
-        return $this->streamResponse($this->requestStack, function () use ($priority, $progressReporter, $repeat, $reason, $request, $autoApply, $includeAll, $id, $table, $tablemap) {
+        return $this->streamResponse($this->requestStack, function () use ($priority, $progressReporter, $repeat, $reason, $overshoot, $request, $autoApply, $includeAll, $id, $table, $tablemap) {
             // Only rejudge submissions in active contests.
             $contests = $this->dj->getCurrentContests();
 
@@ -773,7 +779,7 @@ class RejudgingController extends BaseController
             }
 
             $skipped = [];
-            $res     = $this->rejudgingService->createRejudging($reason, JudgeTask::parsePriority($priority), $judgings, $autoApply, $repeat, null, $skipped, $progressReporter);
+            $res     = $this->rejudgingService->createRejudging($reason, JudgeTask::parsePriority($priority), $judgings, $autoApply, $repeat, $overshoot, null, $skipped, $progressReporter);
 
             if ($res === null) {
                 $prefix = sprintf('%s%s', $request->getSchemeAndHttpHost(), $request->getBasePath());

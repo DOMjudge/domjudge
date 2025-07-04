@@ -195,6 +195,17 @@ del {
     border-right: 1px solid silver;
     padding: 0;
 }
+.scoreboard td.no-border, .scoreboard th.no-border {
+    border: none;
+}
+.scoreboard td.heart {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+.scoreboard td.rank {
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+}
 .scoreboard td.score_cell {
     min-width: 4.2em;
     border-right: none;
@@ -219,6 +230,13 @@ del {
     display: block;
     overflow: hidden;
 }
+
+.mobile-problem-badges {
+    position: relative;
+    display: block;
+    white-space: nowrap;
+}
+
 .toolong:after {
     content: "";
     width: 30%;
@@ -229,6 +247,11 @@ del {
 }
 .scoreboard .scoreaf { white-space: nowrap; border: 0; padding-left: 2px; text-align: center; }
 .scoreboard .scoreaf img { vertical-align: middle; }
+.mobile-scoreboard .countryflag {
+    height: 1rem;
+    width: 1.33rem;
+    border-radius: 0.1875rem;
+}
 .univ {
     font-size: 80%;
     font-weight: normal;
@@ -236,8 +259,8 @@ del {
 }
 
 img.affiliation-logo {
-    height: 32px;
-    width: 32px;
+    max-height: 32px;
+    max-width: 32px;
     padding-left: 2px;
 }
 
@@ -270,11 +293,11 @@ img.affiliation-logo {
 .score_incorrect           { background: #e87272; }
 .score_pending             { background: #6666ff; }
 
-.gold-medal   { background-color: #eec710 }
-.silver-medal { background-color: #aaa }
-.bronze-medal { background-color: #c08e55 }
+.gold-medal   { color: #eec710 }
+.silver-medal { color: #aaa }
+.bronze-medal { color: #c08e55 }
 
-#scoresolv,#scoretotal { width: 2.5em; }
+#scoresolv,#scoretotal,#scoresolvmobile,#scoretotalmobile { width: 2.5em; }
 .scorenc,.scorett,.scorepl { text-align: center; width: 2ex; }
 .scorenc { font-weight: bold; }
 td.scorenc { border-color: silver; border-right: 0; }
@@ -698,4 +721,31 @@ blockquote {
     background-color: black;
     padding: 3px;
     border-radius: 5px;
+}
+
+.strike-diagonal {
+    position: relative;
+    text-align: center;
+}
+
+.strike-diagonal:before {
+    position: absolute;
+    content: "";
+    left: 0;
+    top: 50%;
+    right: 0;
+    border-top: 2px solid;
+    border-color: firebrick;
+
+    -webkit-transform:rotate(-35deg);
+    -moz-transform:rotate(-35deg);
+    -ms-transform:rotate(-35deg);
+    -o-transform:rotate(-35deg);
+    transform:rotate(-35deg);
+}
+
+.editor {
+    width: 100%;
+    height: 80vh;
+    border: 1px solid grey;
 }

@@ -89,7 +89,7 @@ class PublicController extends BaseController
         return $this->render('public/scoreboard.html.twig', $data, $response);
     }
 
-    #[Route(path: '/scoreboard-zip/contest.zip', name: 'public_scoreboard_data_zip')]
+    #[Route(path: '/scoreboard.zip', name: 'public_scoreboard_data_zip')]
     public function scoreboardDataZipAction(
         RequestStack $requestStack,
         Request $request,
@@ -98,6 +98,19 @@ class PublicController extends BaseController
     ): Response {
         $contest = $this->getContestFromRequest($contestId) ?? $this->dj->getCurrentContest(onlyPublic: true);
         return $this->dj->getScoreboardZip($request, $requestStack, $contest, $this->scoreboardService);
+    }
+
+    #[Route(path: '/scoreboard-category-color.css', name: 'scoreboard_category_color_css')]
+    public function scoreboardCategoryColorCss(Request $request): Response {
+        $content = $this->renderView('public/scoreboard_category_color.css.twig', $this->dj->getScoreboardCategoryColorCss());
+        $response = new Response();
+        $response->headers->set('Content-Type', 'text/css');
+        // See: https://symfony.com/doc/current/http_cache/validation.html
+        $response->setEtag(md5($content));
+        $response->setPublic();
+        $response->isNotModified($request);
+        $response->setContent($content);
+        return $response;
     }
 
     /**

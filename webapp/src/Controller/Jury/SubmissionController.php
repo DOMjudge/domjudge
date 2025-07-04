@@ -36,6 +36,8 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Knp\Component\Pager\Pagination\PaginationInterface;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -78,7 +80,7 @@ class SubmissionController extends BaseController
         #[MapQueryParameter(name: 'view')]
         ?string $viewFromRequest = null,
     ): Response {
-        $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'judging', 4 => 'all'];
+        $viewTypes = [0 => 'all', 1 => 'unverified', 2 => 'unjudged', 3 => 'judging'];
         $view      = 0;
         if (($submissionViewCookie = $this->dj->getCookie('domjudge_submissionview')) &&
             isset($viewTypes[$submissionViewCookie])) {
@@ -96,7 +98,10 @@ class SubmissionController extends BaseController
 
         $refresh = [
             'after' => 15,
-            'url' => $this->generateUrl('jury_submissions', ['view' => $viewTypes[$view]]),
+            'url' => $this->generateUrl('jury_submissions', [
+                'view' => $viewTypes[$view],
+                'page' => $request->query->getInt('page', 1),
+            ]),
             'ajax' => true,
         ];
 
@@ -116,13 +121,68 @@ class SubmissionController extends BaseController
             $contests = [$contest->getCid() => $contest];
         }
 
-        $latestCount = 50;
+        // Load preselected filters
+        $filtersFromCookie = Utils::jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
 
-        $limit = $viewTypes[$view] == 'newest' ? $latestCount : 0;
+        $formAssociationFields = [
+            'problem_id' => [Problem::class, 'probid'],
+            'language_id' => [Language::class, 'langid'],
+            'team_id' => [Team::class, 'teamid'],
+            'category_id' => [TeamCategory::class, 'categoryid'],
+            'affiliation_id' => [TeamAffiliation::class, 'affilid'],
+        ];
 
-        /** @var Submission[] $submissions */
+        // Build the filter form.
+        $filtersForForm = ['result' => $filtersFromCookie['result'] ?? []];
+        $hasFilters = !empty($filtersForForm['result']);
+        foreach ($formAssociationFields as $field => [$entityClass, $idField]) {
+            $filtersForForm[$field] = $this->em->getRepository($entityClass)->findBy([$idField => $filtersFromCookie[$field] ?? []]);
+            $hasFilters = $hasFilters || !empty($filtersForForm[$field]);
+        }
+        $appliedFilters = $filtersForForm;
+        $form = $this->createForm(SubmissionsFilterType::class, array_merge($filtersForForm, [
+            "contests" => $contests,
+        ]));
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $filtersForCookie = ['result' => $form->get('result')->getData()];
+            $hasFilters = !empty($filtersForCookie['result']);
+            foreach ($formAssociationFields as $field => [$entityClass, $idField]) {
+                $method = 'get' . ucfirst($idField);
+                $filtersForCookie[$field] = array_map(fn($entity) => $entity->$method(), $form->get($field)->getData());
+                $hasFilters = $hasFilters || !empty($filtersForCookie[$field]);
+            }
+            $response = $this->dj->setCookie('domjudge_submissionsfilter', Utils::jsonEncode($filtersForCookie), response: $response);
+            $appliedFilters = $filtersForCookie;
+        }
+
+        if (!empty($appliedFilters['result'])) {
+            $restrictions->results = $appliedFilters['result'];
+        }
+        if (!empty($appliedFilters['problem_id'])) {
+            $restrictions->problemIds = $appliedFilters['problem_id'];
+        }
+        if (!empty($appliedFilters['language_id'])) {
+            $restrictions->languageIds = $appliedFilters['language_id'];
+        }
+        if (!empty($appliedFilters['team_id'])) {
+            $restrictions->teamIds = $appliedFilters['team_id'];
+        }
+        if (!empty($appliedFilters['category_id'])) {
+            $restrictions->categoryIds = $appliedFilters['category_id'];
+        }
+        if (!empty($appliedFilters['affiliation_id'])) {
+            $restrictions->affiliationIds = $appliedFilters['affiliation_id'];
+        }
+
+        /** @var PaginationInterface<int, Submission> $submissions */
         [$submissions, $submissionCounts] =
-            $this->submissionService->getSubmissionList($contests, $restrictions, $limit);
+            $this->submissionService->getSubmissionList(
+                $contests,
+                $restrictions,
+                page: $request->query->getInt('page', 1),
+            );
         $disabledProblems = [];
         $disabledLangs = [];
         foreach ($submissions as $submission) {
@@ -134,12 +194,7 @@ class SubmissionController extends BaseController
             }
         }
 
-        // Load preselected filters
-        $filters = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
-
-        $results = array_keys($this->dj->getVerdicts());
-        $results[] = 'judging';
-        $results[] = 'queued';
+        $results = array_keys($this->config->getVerdicts(['final', 'in_progress']));
 
         $data = [
             'refresh' => $refresh,
@@ -148,10 +203,10 @@ class SubmissionController extends BaseController
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($contests) > 1,
-            'hasFilters' => !empty($filters),
+            'hasFilters' => $hasFilters,
             'results' => $results,
             'showExternalResult' => $this->dj->shadowMode(),
-            'showTestcases' => count($submissions) <= $latestCount,
+            'showTestcases' => true,
             'disabledProbs' => $disabledProblems,
             'disabledLangs' => $disabledLangs,
         ];
@@ -161,16 +216,6 @@ class SubmissionController extends BaseController
             return $this->render('jury/partials/submission_list.html.twig', $data);
         }
 
-        // Build the filter form.
-        $filtersForForm                = $filters;
-        $filtersForForm['problem-id']  = $this->em->getRepository(Problem::class)->findBy(['probid' => $filtersForForm['problem-id'] ?? []]);
-        $filtersForForm['language-id'] = $this->em->getRepository(Language::class)->findBy(['langid' => $filtersForForm['language-id'] ?? []]);
-        $filtersForForm['team-id']     = $this->em->getRepository(Team::class)->findBy(['teamid' => $filtersForForm['team-id'] ?? []]);
-        $filtersForForm['category-id'] = $this->em->getRepository(TeamCategory::class)->findBy(['categoryid' => $filtersForForm['category-id'] ?? []]);
-        $filtersForForm['affiliation-id'] = $this->em->getRepository(TeamAffiliation::class)->findBy(['affilid' => $filtersForForm['affiliation-id'] ?? []]);
-        $form = $this->createForm(SubmissionsFilterType::class, array_merge($filtersForForm, [
-            "contests" => $contests,
-        ]));
         $data["form"] = $form->createView();
 
         return $this->render('jury/submissions.html.twig', $data, $response);
@@ -258,7 +303,7 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getResult();
             $timelimits = array_map(function (JudgeTask $task) {
-                return $this->dj->jsonDecode($task->getRunConfig())['time_limit'];
+                return Utils::jsonDecode($task->getRunConfig())['time_limit'];
             }, $judgeTasks);
         }
 
@@ -338,7 +383,7 @@ class SubmissionController extends BaseController
                 ->join('t.content', 'tc')
                 ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
                 ->leftJoin('jr.output', 'jro')
-                ->select('t', 'jr', 'tc.image_thumb AS image_thumb', 'jro.metadata')
+                ->select('t', 'jr', 'tc.image_thumb AS image_thumb', 'jro.metadata', 'jro.validatorMetadata')
                 ->andWhere('t.problem = :problem')
                 ->setParameter('judging', $selectedJudging)
                 ->setParameter('problem', $submission->getProblem())
@@ -378,6 +423,9 @@ class SubmissionController extends BaseController
                 ->getScalarResult();
 
             $cnt = 0;
+            if (count($judgingRunTestcaseIdsInOrder) !== count($runResults)) {
+                $sameTestcaseIds = false;
+            }
             foreach ($runResults as $runResult) {
                 /** @var Testcase $testcase */
                 $testcase = $runResult[0];
@@ -395,7 +443,7 @@ class SubmissionController extends BaseController
                 $runs[] = $runResult[0];
                 unset($runResult[0]);
                 if (!empty($runResult['metadata'])) {
-                    $metadata = $this->dj->parseMetadata($runResult['metadata']);
+                    $metadata = Utils::parseMetadata($runResult['metadata']);
                     $runResult['output_limit'] = $metadata['output-truncated'] ?? 'n/a';
                 }
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
@@ -529,9 +577,11 @@ class SubmissionController extends BaseController
             'unjudgableReasons' => $unjudgableReasons,
             'verificationRequired' => (bool)$this->config->get('verification_required'),
             'claimWarning' => $claimWarning,
-            'combinedRunCompare' => $submission->getProblem()->getCombinedRunCompare(),
+            'combinedRunCompare' => $submission->getProblem()->isInteractiveProblem(),
             'requestedOutputCount' => $requestedOutputCount,
             'version_warnings' => [],
+            'isMultiPassProblem' => $submission->getProblem()->isMultipassProblem(),
+            'thumbnailSize' => $this->config->get('thumbnail_size'),
         ];
 
         if ($selectedJudging === null) {
@@ -623,7 +673,7 @@ class SubmissionController extends BaseController
                     ->setJobId($jid->getJudgingid())
                     ->setUuid($jid->getUuid())
                     ->setRunScriptId($executable->getImmutableExecId())
-                    ->setRunConfig($this->dj->jsonEncode(['hash' => $executable->getHash()]));
+                    ->setRunConfig(Utils::jsonEncode(['hash' => $executable->getHash()]));
                 $this->em->persist($judgeTask);
             }
             $this->em->flush();
@@ -635,8 +685,9 @@ class SubmissionController extends BaseController
     }
 
     #[Route(path: '/download-full-debug/{debug_package_id}', name: 'download_full_debug')]
-    public function downloadFullDebug(DebugPackage $debugPackage): StreamedResponse
-    {
+    public function downloadFullDebug(
+        #[MapEntity(id: 'debug_package_id')] DebugPackage $debugPackage
+    ): StreamedResponse {
         $name = 'debug_package.j' . $debugPackage->getJudging()->getJudgingid()
             . '.db' . $debugPackage->getDebugPackageId()
             . '.jh' . $debugPackage->getJudgehost()->getJudgehostid()
@@ -745,6 +796,10 @@ class SubmissionController extends BaseController
 
         $outputRun = $run->getOutput()->getOutputRun();
         return Utils::streamAsBinaryFile($outputRun, $filename);
+    }
+
+    private function allowEdit(): bool {
+        return $this->dj->getUser()->getTeam() && $this->dj->checkrole('team');
     }
 
     /**
@@ -864,13 +919,14 @@ class SubmissionController extends BaseController
             'originalSubmission' => $originalSubmission,
             'originalFiles' => $originalFiles,
             'originalFileStats' => $originalFileStats,
+            'allowEdit' => $this->allowEdit(),
         ]);
     }
 
     #[Route(path: '/{submission}/edit-source', name: 'jury_submission_edit_source')]
     public function editSourceAction(Request $request, Submission $submission, #[MapQueryParameter] ?int $rank = null): Response
     {
-        if (!$this->dj->getUser()->getTeam() || !$this->dj->checkrole('team')) {
+        if (!$this->allowEdit()) {
             $this->addFlash('danger', 'You cannot re-submit code without being a team.');
             return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl(
                 'jury_submission',
@@ -997,7 +1053,7 @@ class SubmissionController extends BaseController
         if ($judging === null) {
             throw new BadRequestHttpException("Unknown judging with '$judgingId' requested.");
         }
-        $this->judgeRemaining([$judging]);
+        $this->judgeRemainingJudgings([$judging]);
 
         return $this->redirectToLocalReferrer($this->router, $request,
             $this->generateUrl('jury_submission_by_judging', ['jid' => $judgingId])
@@ -1248,11 +1304,13 @@ class SubmissionController extends BaseController
      */
     private function maybeGetErrors(string $type, string $expectedConfigString, string $observedConfigString, array &$allErrors): void
     {
-        $expectedConfig = $this->dj->jsonDecode($expectedConfigString);
-        $observedConfig = $this->dj->jsonDecode($observedConfigString);
+        $expectedConfig = Utils::jsonDecode($expectedConfigString);
+        $observedConfig = Utils::jsonDecode($observedConfigString);
         $errors = [];
         foreach (array_keys($expectedConfig) as $k) {
-            if ($expectedConfig[$k] != $observedConfig[$k]) {
+            if (!array_key_exists($k, $observedConfig)) {
+                $errors[] = '- ' . preg_replace('/_/', ' ', $k) . ': missing';
+            } elseif ($expectedConfig[$k] != $observedConfig[$k]) {
                 if ($k === 'hash') {
                     $errors[] = '- script has changed';
                 } elseif ($k === 'entry_point') {
@@ -1260,8 +1318,13 @@ class SubmissionController extends BaseController
                     // Silently ignore.
                 } else {
                     $errors[] = '- ' . preg_replace('/_/', ' ', $k) . ': '
-                        . $this->dj->jsonEncode($observedConfig[$k]) . ' → ' . $this->dj->jsonEncode($expectedConfig[$k]);
+                        . Utils::jsonEncode($observedConfig[$k]) . ' → ' . Utils::jsonEncode($expectedConfig[$k]);
                 }
+            }
+        }
+        foreach (array_keys($observedConfig) as $k) {
+            if (!array_key_exists($k, $expectedConfig)) {
+                $errors[] = '- ' . preg_replace('/_/', ' ', $k) . ': unexpected';
             }
         }
         if (!empty($errors)) {

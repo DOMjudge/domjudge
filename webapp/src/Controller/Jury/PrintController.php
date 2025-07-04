@@ -51,11 +51,10 @@ class PrintController extends BaseController
             $originalfilename = $file->getClientOriginalName();
 
             $langid   = $data['langid'];
-            $username = $this->getUser()->getUserIdentifier();
 
             // Since this is the Jury interface, there's not necessarily a
             // team involved; do not set a teamname or location.
-            $ret = $this->dj->printFile($realfile, $originalfilename, $langid, $username);
+            $ret = $this->dj->printUserFile($realfile, $originalfilename, $langid);
 
             return $this->render('jury/print_result.html.twig', [
                 'success' => $ret[0],
@@ -63,17 +62,8 @@ class PrintController extends BaseController
             ]);
         }
 
-        /** @var Language[] $languages */
-        $languages = $this->em->createQueryBuilder()
-            ->from(Language::class, 'l')
-            ->select('l')
-            ->andWhere('l.allowSubmit = 1')
-            ->getQuery()
-            ->getResult();
-
         return $this->render('jury/print.html.twig', [
             'form' => $form,
-            'languages' => $languages,
         ]);
     }
 }

@@ -27,3 +27,4 @@ Appendices
    shadow
    configuration-reference
    install-language
+   scoring

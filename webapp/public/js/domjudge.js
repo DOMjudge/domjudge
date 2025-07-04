@@ -71,6 +71,73 @@ function disableKeys()
     $("#keys_disable").hide();
 }
 
+function getEditorThemes()
+{
+    const element = document.querySelector('[data-editor-themes]');
+    return JSON.parse(element.dataset.editorThemes);
+}
+
+function getCurrentEditorTheme()
+{
+    const theme = localStorage.getItem('domjudge_editor_theme');
+    if (theme === null) {
+        return Object.keys(getEditorThemes())[0];
+    }
+    return theme;
+}
+
+function applyEditorTheme(theme = undefined, isExternal = false)
+{
+    if (theme === undefined) {
+        theme = getCurrentEditorTheme();
+        const themes = getEditorThemes();
+        for (const key in themes) {
+            if (key === theme) {
+                isExternal = themes[key].external || false;
+                break;
+            }
+        }
+    }
+
+    localStorage.setItem('domjudge_editor_theme', theme);
+    const themeElements = document.querySelectorAll('[data-editor-theme]');
+    themeElements.forEach(element => {
+        const themeForElement = element.dataset.editorTheme;
+        if (themeForElement === theme) {
+            element.classList.add('active');
+        } else {
+            element.classList.remove('active');
+        }
+    });
+
+    require(['vs/editor/editor.main'], function () {
+        if (isExternal) {
+            fetch(`${window.editorThemeFolder}/${theme}.json`)
+                .then(data => data.json())
+                .then(data => {
+                    monaco.editor.defineTheme(theme, data);
+                    monaco.editor.setTheme(theme);
+                })
+        } else {
+            monaco.editor.setTheme(theme);
+        }
+    });
+}
+
+function isDiffSideBySide()
+{
+    let sideBySide = localStorage.getItem('domjudge_editor_side_by_side');
+    if (sideBySide === undefined) {
+        return true;
+    }
+    return sideBySide == 'true';
+}
+
+function setDiffSideBySide(value)
+{
+    localStorage.setItem('domjudge_editor_side_by_side', value);
+}
+
 // Send a notification if notifications have been enabled.
 // The options argument is passed to the Notification constructor,
 // except that the following tags (if found) are interpreted and
@@ -200,67 +267,83 @@ function getCookie(name)
 
 function getSelectedTeams()
 {
-    var cookieVal = getCookie("domjudge_teamselection");
+    var cookieVal = localStorage.getItem("domjudge_teamselection");
     if (cookieVal === null || cookieVal === "") {
         return new Array();
     }
     return JSON.parse(cookieVal);
 }
 
-function getScoreboard()
+function getScoreboards(mobile)
 {
-    var scoreboard = document.getElementsByClassName("scoreboard");
-    if (scoreboard === null || scoreboard[0] === null || scoreboard[0] === undefined) {
+    const scoreboards = document.getElementsByClassName("scoreboard");
+    if (scoreboards === null || scoreboards[0] === null || scoreboards[0] === undefined) {
         return null;
     }
-    return scoreboard[0].rows;
+    let scoreboardRows = {};
+    const mobileScoreboardClass = 'mobile-scoreboard';
+    const desktopScoreboardClass = 'desktop-scoreboard';
+    for (let i = 0; i < scoreboards.length; i++) {
+        if (scoreboards[i].classList.contains(mobileScoreboardClass)) {
+            scoreboardRows.mobile = scoreboards[i].rows;
+        } else if (scoreboards[i].classList.contains(desktopScoreboardClass)) {
+            scoreboardRows.desktop = scoreboards[i].rows;
+        }
+    }
+    if (mobile === undefined) {
+        return scoreboardRows;
+    } else if (mobile) {
+        return scoreboardRows.mobile;
+    } else {
+        return scoreboardRows.desktop;
+    }
 }
 
 function getRank(row)
 {
-    return row.getElementsByTagName("td")[0];
+    return row.querySelector('.rank');
 }
 
 function getHeartCol(row) {
-    var tds = row.getElementsByTagName("td");
-    var td = null;
-    // search for td before the team name
-    for (var i = 1; i < 4; i++) {
-        if (tds[i].className == "scoretn") {
-            td = tds[i - 1];
+    const tds = row.getElementsByTagName("td");
+    let td = null;
+    // search for td to store the hearts
+    for (let i = 1; i < 5; i++) {
+        if (tds[i] && tds[i].classList.contains("heart")) {
+            td = tds[i];
             break;
         }
     }
-    if (td === null) {
-        td = tds[1];
-    }
-    if (td !== null) {
-        if (td.children.length) {
-            return td.children[0];
-        }
-        return td;
-    }
-
-    return null;
+    return td;
 }
 
 function getTeamname(row)
 {
-    var res = row.getAttribute("id");
-    if ( res === null ) return res;
-    return res.replace(/^team:/, '');
+    return row.getAttribute("data-team-id");
 }
 
-function toggle(id, show)
+function toggle(id, show, mobile)
 {
-    var scoreboard = getScoreboard();
+    var scoreboard = getScoreboards(mobile);
     if (scoreboard === null) return;
+
+    // Filter out all rows that do not have a data-team-id attribute or have
+    // the class `scoreheader`.
+    // The mobile scoreboard has them, and we need to ignore them.
+    scoreboard = Array.from(scoreboard)
+        .filter(
+            row => row.getAttribute("data-team-id")
+                || row.classList.contains("scoreheader")
+        );
 
     var favTeams = getSelectedTeams();
     // count visible favourite teams (if filtered)
     var visCnt = 0;
     for (var i = 0; i < favTeams.length; i++) {
         for (var j = 0; j < scoreboard.length; j++) {
+            if (!scoreboard[j].getAttribute("data-team-id")) {
+                continue;
+            }
             var scoreTeamname = getTeamname(scoreboard[j]);
             if (scoreTeamname === null) {
                 continue;
@@ -286,10 +369,15 @@ function toggle(id, show)
     }
 
     var cookieVal = JSON.stringify(favTeams);
-    setCookie("domjudge_teamselection", cookieVal);
+    localStorage.setItem("domjudge_teamselection", cookieVal);
 
 
     $('.loading-indicator').addClass('ajax-loader');
+    // If we are on a local file system, reload the window
+    if (window.location.protocol === 'file:') {
+        window.location.reload();
+        return;
+    }
     $.ajax({
         url: scoreboardUrl,
         cache: false
@@ -299,69 +387,111 @@ function toggle(id, show)
     });
 }
 
-function addHeart(rank, row, id, isFav)
+function getHeart(rank, row, id, isFav, mobile)
 {
-    var heartCol = getHeartCol(row);
     var iconClass = isFav ? "fas fa-heart" : "far fa-heart";
-    return heartCol.innerHTML + "<span class=\"heart " + iconClass + "\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\"></span>";
+    return "<span class=\"heart " + iconClass + "\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + "," + mobile + ")\"></span>";
 }
 
 function initFavouriteTeams()
 {
-    var scoreboard = getScoreboard();
-    if (scoreboard === null) {
+    const scoreboards = getScoreboards();
+    if (scoreboards === null) {
         return;
     }
 
     var favTeams = getSelectedTeams();
-    var toAdd = new Array();
-    var cntFound = 0;
-    var lastRank = 0;
-    for (var j = 0; j < scoreboard.length; j++) {
-        var found = false;
-        var teamname = getTeamname(scoreboard[j]);
-        if (teamname === null) {
-            continue;
-        }
-        var firstCol = getRank(scoreboard[j]);
-        var heartCol = getHeartCol(scoreboard[j]);
-        var rank = firstCol.innerHTML;
-        for (var i = 0; i < favTeams.length; i++) {
-            if (teamname === favTeams[i]) {
-                found = true;
-                heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
-                toAdd[cntFound] = scoreboard[j].cloneNode(true);
-                if (rank.trim().length === 0) {
-                    // make rank explicit in case of tie
-                    getRank(toAdd[cntFound]).innerHTML += lastRank;
+    Object.keys(scoreboards).forEach(function(key) {
+        var toAdd = new Array();
+        var toAddMobile = new Array();
+        var cntFound = 0;
+        var lastRank = 0;
+        const scoreboard = scoreboards[key];
+        const mobile = key === 'mobile';
+        let teamIndex = 1;
+        for (var j = 0; j < scoreboard.length; j++) {
+            var found = false;
+            var teamname = getTeamname(scoreboard[j]);
+            if (teamname === null) {
+                continue;
+            }
+            let rankElement;
+            if (mobile) {
+                rankElement = getRank(scoreboard[j + 1]);
+            } else {
+                rankElement = getRank(scoreboard[j]);
+            }
+            var heartCol = getHeartCol(scoreboard[j]);
+            if (!heartCol) {
+                continue;
+            }
+            var rank = rankElement.innerHTML.trim();
+            for (var i = 0; i < favTeams.length; i++) {
+                if (teamname === favTeams[i]) {
+                    found = true;
+                    heartCol.innerHTML = getHeart(rank, scoreboard[j], teamIndex, found, mobile);
+                    toAdd[cntFound] = scoreboard[j].cloneNode(true);
+                    if (mobile) {
+                        toAddMobile[cntFound] = scoreboard[j + 1].cloneNode(true);
+                    }
+                    if (rank.length === 0) {
+                        // make rank explicit in case of tie
+                        if (mobile) {
+                            getRank(toAddMobile[cntFound]).innerHTML += lastRank;
+                        } else {
+                            getRank(toAdd[cntFound]).innerHTML += lastRank;
+                        }
+                    }
+                    scoreboard[j].style.background = "lightyellow";
+                    const whiteCells = scoreboard[j].querySelectorAll('.cl_FFFFFF');
+                    for (let k = 0; k < whiteCells.length; k++) {
+                        const whiteCell = whiteCells[k];
+                        whiteCell.classList.remove('cl_FFFFFF');
+                        whiteCell.classList.add('cl_FFFFE0');
+                    }
+                    if (mobile) {
+                        scoreboard[j + 1].style.background = "lightyellow";
+                    }
+                    cntFound++;
+                    break;
                 }
-                scoreboard[j].style.background = "lightyellow";
-                cntFound++;
-                break;
+            }
+            if (!found) {
+                heartCol.innerHTML = getHeart(rank, scoreboard[j], teamIndex, found, mobile);
+            }
+            if (rank !== "") {
+                lastRank = rank;
+            }
+
+            teamIndex++;
+        }
+
+        let addCounter = 1;
+        const copyRow = function (i, copy, addTopBorder, addBottomBorder, noMiddleBorder) {
+            let style = "";
+            if (noMiddleBorder) {
+                style += "border-bottom-width: 0;";
+            }
+            if (addTopBorder && i === 0) {
+                style += "border-top: 2px solid black;";
+            }
+            if (addBottomBorder && i === cntFound - 1) {
+                style += "border-bottom: thick solid black;";
+            }
+            copy.setAttribute("style", style);
+            const tbody = scoreboard[1].parentNode;
+            tbody.insertBefore(copy, scoreboard[addCounter]);
+            addCounter++;
+        }
+
+        // copy favourite teams to the top of the scoreboard
+        for (let i = 0; i < cntFound; i++) {
+            copyRow(i, toAdd[i], true, !mobile, mobile);
+            if (mobile) {
+                copyRow(i, toAddMobile[i], false, true, false);
             }
         }
-        if (!found) {
-            heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
-        }
-        if (rank !== "") {
-            lastRank = rank;
-        }
-    }
-
-    // copy favourite teams to the top of the scoreboard
-    for (var i = 0; i < cntFound; i++) {
-        var copy = toAdd[i];
-        var style = "";
-        if (i === 0) {
-            style += "border-top: 2px solid black;";
-        }
-        if (i === cntFound - 1) {
-            style += "border-bottom: thick solid black;";
-        }
-        copy.setAttribute("style", style);
-        var tbody = scoreboard[1].parentNode;
-        tbody.insertBefore(copy, scoreboard[i + 1]);
-    }
+    });
 }
 
 // This function is a specific addition for using DOMjudge within a
@@ -823,7 +953,7 @@ function setupPreviewClarification($input, $previewDiv, previewInitial) {
 }
 
 $(function () {
-    $('[data-toggle="tooltip"]').tooltip();
+    $('[data-bs-toggle="tooltip"]').tooltip();
 });
 
 function initializeKeyboardShortcuts() {
@@ -832,6 +962,10 @@ function initializeKeyboardShortcuts() {
     $body.on('keydown', function(e) {
         var keysCookie = getCookie('domjudge_keys');
         if (keysCookie != 1 && keysCookie != "") {
+            return;
+        }
+        // Do not trigger shortcuts if user is pressing Ctrl/Alt/Option/Meta key.
+        if (e.altKey || e.ctrlKey || e.metaKey) {
             return;
         }
         // Check if the user is not typing in an input field.
@@ -901,40 +1035,203 @@ function initializeKeyboardShortcuts() {
                 if (e.key >= '0' && e.key <= '9') {
                     sequence += e.key;
                     box.text(type + sequence);
-                } else if (e.key === 'Enter') {
-                    ignore = false;
-                    switch (type) {
-                        case 's':
-                            type = 'submissions';
-                            break;
-                        case 't':
-                            type = 'teams';
-                            break;
-                        case 'p':
-                            type = 'problems';
-                            break;
-                        case 'c':
-                            type = 'clarifications';
-                            break;
-                        case 'j':
-                            window.location = domjudge_base_url + '/jury/submissions/by-judging-id/' + sequence;
-                            return;
-                    }
-                    var redirect_to = domjudge_base_url + '/jury/' + type;
-                    if (sequence) {
-                        redirect_to += '/' + sequence;
-                    }
-                    window.location = redirect_to;
                 } else {
                     ignore = false;
                     if (box) {
                         box.remove();
                     }
+                    // We want to reset the `sequence` variable before redirecting, but then we do need to save the value typed by the user
+                    var typedSequence = sequence;
                     sequence = '';
                     $body.off('keydown');
                     $body.on('keydown', oldFunc);
+                    if (e.key === 'Enter') {
+                        switch (type) {
+                            case 's':
+                                type = 'submissions';
+                                break;
+                            case 't':
+                                type = 'teams';
+                                break;
+                            case 'p':
+                                type = 'problems';
+                                break;
+                            case 'c':
+                                type = 'clarifications';
+                                break;
+                            case 'j':
+                                type = 'submissions/by-judging-id';
+                                break;
+                        }
+                        var redirect_to = domjudge_base_url + '/jury/' + type;
+                        if (typedSequence) {
+                            redirect_to += '/' + typedSequence;
+                        }
+                        window.location = redirect_to;
+                    }
                 }
             });
         }
     });
 }
+
+// Make sure the items in the desktop scoreboard fit
+document.querySelectorAll(".desktop-scoreboard .forceWidth:not(.toolong)").forEach(el => {
+    if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
+        el.classList.add("toolong");
+    }
+});
+
+/**
+ * Helper method to resize mobile team names and problem badges
+ */
+function resizeMobileTeamNamesAndProblemBadges() {
+    // Make team names fit on the screen, but only when the mobile
+    // scoreboard is visible
+    const mobileScoreboard = document.querySelector('.mobile-scoreboard');
+    if (mobileScoreboard.offsetWidth === 0) {
+        return;
+    }
+    const windowWidth = document.body.offsetWidth;
+    const teamNameMaxWidth = Math.max(10, windowWidth - 150);
+    const problemBadgesMaxWidth = Math.max(10, windowWidth - 78);
+    document.querySelectorAll(".mobile-scoreboard .forceWidth:not(.toolong)").forEach(el => {
+        el.classList.remove("toolong");
+        el.style.maxWidth = teamNameMaxWidth + 'px';
+        if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
+            el.classList.add("toolong");
+        } else {
+            el.classList.remove("toolong");
+        }
+    });
+    document.querySelectorAll(".mobile-scoreboard .mobile-problem-badges:not(.toolong)").forEach(el => {
+        el.classList.remove("toolong");
+        el.style.maxWidth = problemBadgesMaxWidth + 'px';
+        if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
+            el.classList.add("toolong");
+            const scale = el.offsetWidth / el.scrollWidth;
+            const offset = -1 * (el.scrollWidth - el.offsetWidth) / 2;
+            el.style.transform = `scale(${scale}) translateX(${offset}px)`;
+        } else {
+            el.classList.remove("toolong");
+            el.style.transform = null;
+        }
+    });
+}
+
+function createSubmissionGraph(submissionStats, contestStartTime, contestDurationSeconds, submissions) {
+    const minBucketCount = 30;
+    const maxBucketCount = 301;
+    const units = [
+        { 'name': 'seconds', 'convert': 1, 'step': 60 },
+        { 'name': 'minutes', 'convert': 60, 'step': 15 },
+        { 'name': 'hours', 'convert': 60 * 60, 'step': 6 },
+        { 'name': 'days', 'convert': 60 * 60 * 24, 'step': 7 },
+        { 'name': 'weeks', 'convert': 60 * 60 * 24 * 7, 'step': 1 },
+        { 'name': 'years', 'convert': 60 * 60 * 24 * 365, 'step': 1 }
+    ];
+    let unit = units[0];
+
+    for (let u of units) {
+        const newDuration = Math.ceil(contestDurationSeconds / u.convert);
+        if (newDuration > minBucketCount) {
+            unit = u;
+        } else {
+            break;
+        }
+    }
+    const contestDuration = Math.ceil(contestDurationSeconds / unit.convert);
+    const bucketCount = Math.min(contestDuration + 1, maxBucketCount);
+    // Make sure buckets have whole unit
+    const secondsPerBucket = Math.ceil(contestDuration / (bucketCount - 1)) * unit.convert;
+
+    submissionStats.forEach(stat => {
+        stat.values = Array.from({ length: bucketCount }, (_, i) => [i * secondsPerBucket / unit.convert, 0]);
+    });
+
+    const statMap = submissionStats.reduce((map, stat) => {
+        map[stat.key] = stat;
+        return map;
+    }, {});
+
+    submissions.forEach(submission => {
+        const submissionBucket = Math.floor((submission.submittime - contestStartTime) / secondsPerBucket);
+        const stat = statMap[submission.result];
+        if (stat && submissionBucket >= 0 && submissionBucket < bucketCount) {
+            stat.values[submissionBucket][1]++;
+        }
+    });
+
+    let maxSubmissionsPerBucket = 1
+    for (let bucket = 0; bucket < bucketCount; bucket++) {
+        let sum = 0;
+        submissionStats.forEach(stat => {
+            sum += stat.values[bucket][1];
+        });
+        maxSubmissionsPerBucket = Math.max(maxSubmissionsPerBucket, sum);
+    }
+
+    // Pick a nice round tickDelta and tickValues based on the step size of units.
+    // We want whole values in the unit, and the ticks MUST match a corresponding bucket otherwise the resulting
+    // coordinate will be NaN.
+    const convertFactor = secondsPerBucket / unit.convert;
+    const maxTicks = Math.min(bucketCount, contestDuration / unit.step, minBucketCount)
+    const tickDelta = convertFactor * Math.ceil(contestDuration / (maxTicks * convertFactor));
+    const ticks = Math.floor(contestDuration / tickDelta) + 1;
+    const tickValues = Array.from({ length: ticks }, (_, i) => i * tickDelta);
+
+    nv.addGraph(function () {
+        var chart = nv.models.multiBarChart()
+            .showControls(false)
+            .stacked(true)
+            .x(function (d) { return d[0] })
+            .y(function (d) { return d[1] })
+            .showYAxis(true)
+            .showXAxis(true)
+            .reduceXTicks(false)
+            ;
+        chart.xAxis     //Chart x-axis settings
+            .axisLabel(`Contest Time (${unit.name})`)
+            .ticks(tickValues.length)
+            .tickValues(tickValues)
+            .tickFormat(d3.format('d'));
+        chart.yAxis     //Chart y-axis settings
+            .axisLabel('Total Submissions')
+            .tickFormat(d3.format('d'));
+
+        d3.select('#graph_submissions svg')
+            .datum(submissionStats)
+            .call(chart);
+        nv.utils.windowResize(chart.update);
+        return chart;
+    });
+}
+
+$(function() {
+    if (document.querySelector('.mobile-scoreboard')) {
+        window.addEventListener('resize', resizeMobileTeamNamesAndProblemBadges);
+        resizeMobileTeamNamesAndProblemBadges();
+    }
+
+    // For dropdown menus inside dropdown menus we need to make sure the outer
+    // dropdown stays open when the inner dropdown is opened.
+    const dropdowns = document.querySelectorAll('.dropdown-item.dropdown-toggle')
+    dropdowns.forEach((dd) => {
+        dd.addEventListener('click', function (e) {
+            // Find the parent dropdown
+            let parent = e.target;
+            while (parent && !parent.classList.contains('dropdown-menu')) {
+                parent = parent.parentElement;
+            }
+
+            // Also get the `a` element belonging to the menu
+            const a = parent.parentElement.querySelector('.dropdown-toggle');
+
+            setTimeout(() => {
+                parent.classList.add('show');
+                parent.dataset.bsPopper = 'static';
+                a.classList.add('show');
+            });
+        });
+    });
+});

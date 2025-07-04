@@ -14,7 +14,7 @@ use Symfony\Component\Config\Resource\SelfCheckingResourceInterface;
  * @see FileResource
  * @see FileExistenceResource
  */
-class OptionalFileResource implements SelfCheckingResourceInterface, Stringable
+class OptionalFileResource implements SelfCheckingResourceInterface
 {
     private readonly bool $exists;
 

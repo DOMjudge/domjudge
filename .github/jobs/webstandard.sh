@@ -2,6 +2,8 @@
 
 . .github/jobs/ci_settings.sh
 
+set -euo pipefail
+
 DIR="$PWD"
 
 if [ "$#" -ne "2" ]; then
@@ -14,7 +16,7 @@ ROLE="$2"
 cd /opt/domjudge/domserver
 
 section_start "Setup pa11y"
-pa11y --version
+/home/domjudge/node_modules/.bin/pa11y --version
 section_end
 
 section_start "Setup the test user"
@@ -65,14 +67,20 @@ RET=$?
 section_end
 
 section_start "Archive downloaded site"
+set +e
 cp -r localhost $ARTIFACTS/
+set -e
 section_end
 
 section_start "Analyse failures"
-#https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
+# https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
 # Exit code 4 is network error which we can ignore
-# Exit code 8 can also be because of HTTP404 or 400
-if [ $RET -ne 4 ] && [ $RET -ne 0 ] && [ $RET -ne 8 ]; then
+# Exit code 8 can also be because of HTTP 400 or 404
+if [ $RET -ne 0 ] && [ $RET -ne 4 ] && [ $RET -ne 8 ]; then
+    echo "Server log"
+    tail -n1000 /opt/domjude/domserver/webapp/var/log/prod.log
+    section_end
+
     exit $RET
 fi
 
@@ -92,6 +100,10 @@ if [ "$NUM_ERRORS" -ne 0 ]; then
 fi
 section_end
 
+if [ "$TEST" = "none" ]; then
+    exit $NUM_ERRORS
+fi
+
 if [ "$TEST" = "w3cval" ]; then
     section_start "Remove files from upstream with problems"
     rm -rf localhost/domjudge/doc
@@ -109,17 +121,17 @@ if [ "$TEST" = "w3cval" ]; then
     unzip -q vnu.linux.zip
     section_end
 
-    FLTR='--filterpattern .*autocomplete.*|.*style.*|.*role=tab.*|.*descendant.*|.*Stray.*|.*attribute.*|.*Forbidden.*|.*stream.*|.*obsolete.*'
+    FLTR='--filterpattern .*autocomplete.*|.*role=tab.*|.*descendant.*|.*Stray.*|.*attribute.*|.*Forbidden.*|.*stream.*|.*obsolete.*'
     for typ in html css svg
     do
         section_start "Analyse with $typ"
-	# shellcheck disable=SC2086
+        # shellcheck disable=SC2086
         "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
-	# shellcheck disable=SC2086
-	NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | wc -l)
+        # shellcheck disable=SC2086
+        NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | wc -l)
         FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
         python3 -m "json.tool" < result.json > "$ARTIFACTS/w3c$typ$URL.json"
-        trace_off; python3 gitlab/jsontogitlab.py "$ARTIFACTS/w3c$typ$URL.json"; trace_on
+        trace_off; python3 .github/jobs/jsontogha.py "$ARTIFACTS/w3c$typ$URL.json"; trace_on
         section_end
     done
 else
@@ -143,8 +155,8 @@ else
     for file in $(find $URL -name "*.html")
     do
         section_start "$file"
-        su domjudge -c "pa11y --config .github/jobs/pa11y_config.json $STAN -r json -T $ACCEPTEDERR $FLTR $file" | python3 -m json.tool
-	ERR=$(su domjudge -c "pa11y --config .github/jobs/pa11y_config.json $STAN -r csv -T $ACCEPTEDERR $FLTR $file" | wc -l)
+        su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r json -T $ACCEPTEDERR $FLTR $file" | python3 -m json.tool
+        ERR=$(su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r csv -T $ACCEPTEDERR $FLTR $file" | wc -l)
         FOUNDERR=$((ERR+FOUNDERR-1)) # Remove header row
         section_end
     done

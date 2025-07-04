@@ -28,7 +28,7 @@ class DebugPackage
     private string $filename;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'judgehostid', referencedColumnName: 'judgehostid')]
+    #[ORM\JoinColumn(name: 'judgehostid', referencedColumnName: 'judgehostid', onDelete: 'SET NULL')]
     private Judgehost $judgehost;
 
     public function getDebugPackageId(): int

@@ -12,6 +12,7 @@ use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -25,7 +26,9 @@ class SecurityController extends AbstractController
     public function __construct(
         private readonly DOMJudgeService $dj,
         private readonly ConfigurationService $config,
-        private readonly EntityManagerInterface $em
+        private readonly EntityManagerInterface $em,
+        #[Autowire(param: 'min_password_length')]
+        private readonly int $minimumPasswordLength,
     ) {}
 
     #[Route(path: '/login', name: 'login')]
@@ -103,9 +106,14 @@ class SecurityController extends AbstractController
         $registration_form->handleRequest($request);
         if ($registration_form->isSubmitted() && $registration_form->isValid()) {
             $plainPass = $registration_form->get('plainPassword')->getData();
-            $password  = $passwordHasher->hashPassword($user, $plainPass);
+            if (strlen($plainPass) < $this->minimumPasswordLength) {
+                $this->addFlash('danger', "Password should be " . $this->minimumPasswordLength . "+ chars.");
+                return $this->redirectToRoute('register');
+            }
+
+            $password = $passwordHasher->hashPassword($user, $plainPass);
             $user->setPassword($password);
-            if ($user->getName() === null) {
+            if ((string)$user->getName() === '') {
                 $user->setName($user->getUsername());
             }
 

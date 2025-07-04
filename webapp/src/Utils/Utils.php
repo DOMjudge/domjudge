@@ -3,6 +3,7 @@ namespace App\Utils;
 
 use DateTime;
 use Doctrine\Inflector\InflectorFactory;
+use enshrined\svgSanitize\Sanitizer as SvgSanitizer;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -166,6 +167,8 @@ class Utils
 
     final public const DAY_IN_SECONDS = 60*60*24;
 
+    final public const RELTIME_REGEX = '/^(-)?(\d+):(\d{2}):(\d{2})(?:\.(\d{3}))?$/';
+
     /**
      * Returns the milliseconds part of a time stamp truncated at three digits.
      */
@@ -190,12 +193,12 @@ class Utils
     }
 
     /**
-     * Prints a time diff as relative time as (-)?(h)*h:mm:ss(.uuu)?
-     * (with millis if $floored is false).
+     * Prints a time diff as relative time as ([-+])?(h)*h:mm:ss(.uuu)?
+     * (with millis if $floored is false and with + sign only if $includePlus is true).
      */
-    public static function relTime(float $seconds, bool $floored = false): string
+    public static function relTime(float $seconds, bool $floored = false, bool $includePlus = false): string
     {
-        $sign = ($seconds < 0) ? '-' : '';
+        $sign = ($seconds < 0) ? '-' : ($includePlus ? '+' : '');
         $seconds = abs($seconds);
         $hours = (int)($seconds / 3600);
         $minutes = (int)(($seconds - $hours*3600)/60);
@@ -203,6 +206,18 @@ class Utils
         $seconds = $seconds - $hours*3600 - $minutes*60;
         return $sign . sprintf("%d:%02d:%02d", $hours, $minutes, $seconds)
             . ($floored ? '' : $millis);
+    }
+
+    public static function relTimeToSeconds(string $reltime): float
+    {
+        preg_match(self::RELTIME_REGEX, $reltime, $data);
+        $negative = ($data[1] === '-');
+        $modifier = $negative ? -1 : 1;
+        $seconds  = $modifier * (
+                      (int)$data[2] * 3600
+                    + (int)$data[3] * 60
+                    + (float)sprintf('%d.%03d', $data[4], $data[5] ?? 0));
+        return $seconds;
     }
 
     /**
@@ -441,7 +456,7 @@ class Utils
 
         $exact = true;
         for ($i = 0; $i < count($units) && $display >= $factor; $i++) {
-            if (($display % $factor)!=0) {
+            if (((int)$display % $factor)!=0) {
                 $exact = false;
             }
             $display /= $factor;
@@ -717,6 +732,15 @@ class Utils
         return [$width, $height, $width / $height];
     }
 
+    public static function sanitizeSvg(string $svgContents): string | false
+    {
+        $sanitizer = new SvgSanitizer();
+        $sanitizer->removeRemoteReferences(true);
+        $sanitizer->minify(true);
+        
+        return $sanitizer->sanitize($svgContents);
+    }
+
     /**
      * Returns TRUE iff string $haystack starts with string $needle.
      */
@@ -948,5 +972,40 @@ class Utils
         $response->headers->set('Content-Length', (string)strlen($text));
 
         return $response;
+    }
+
+    /**
+     * Decode a JSON string with our preferred settings.
+     * @return mixed
+     */
+    public static function jsonDecode(string $str)
+    {
+        return json_decode($str, true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * Encode a JSON string with our preferred settings.
+     */
+    public static function jsonEncode(mixed $data): string
+    {
+        return json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function parseMetadata(string $raw_metadata): array
+    {
+        // TODO: Reduce duplication with judgedaemon code.
+        $contents = explode("\n", $raw_metadata);
+        $res = [];
+        foreach ($contents as $line) {
+            if (str_contains($line, ":")) {
+                [$key, $value] = explode(":", $line, 2);
+                $res[$key] = trim($value);
+            }
+        }
+
+        return $res;
     }
 }

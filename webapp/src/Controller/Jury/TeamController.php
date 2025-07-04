@@ -17,15 +17,15 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
 #[Route(path: '/jury/teams')]
@@ -247,6 +247,7 @@ class TeamController extends BaseController
             'showFlags' => (bool)$this->config->get('show_flags'),
             'showContest' => count($this->dj->getCurrentContests()) > 1,
             'maxWidth' => $this->config->get("team_column_width"),
+            'public' => false,
         ];
 
         $currentContest = $this->dj->getCurrentContest();
@@ -286,7 +287,11 @@ class TeamController extends BaseController
         }
         $restrictions->teamId = $teamId;
         [$submissions, $submissionCounts] =
-            $submissionService->getSubmissionList($this->dj->getCurrentContests(honorCookie: true), $restrictions);
+            $submissionService->getSubmissionList(
+                $this->dj->getCurrentContests(honorCookie: true),
+                $restrictions,
+                page: $request->query->getInt('page', 1),
+            );
 
         $data['restrictionText']    = $restrictionText;
         $data['submissions']        = $submissions;

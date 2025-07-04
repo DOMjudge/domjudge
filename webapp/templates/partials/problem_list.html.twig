@@ -32,7 +32,7 @@
             {% for problem in problems %}
                 <div class="col">
                                 {% set numsamples = samples[problem.probid] %}
-                                {% if problem.problem.combinedRunCompare %}
+                                {% if problem.problem.interactiveProblem %}
                                     {% set numsamples = 0 %}
                                 {% endif %}
                                 <div class="card">
@@ -55,6 +55,9 @@
                                                 {{ ((problem.problem.memlimit | default(defaultMemoryLimit)) * 1024) | printSize }}
                                             </h4>
                                         {% endif %}
+                                        <h4 class="card-subtitle mb-2 text-muted">
+                                            Type: {{ problem.problem.typesAsString }}
+                                        </h4>
 
                                         {% if stats is defined %}
                                             <div class="mt-3">
@@ -92,9 +95,9 @@
                                                             <div
                                                                 class="problem-stats-item {{ itemClass }}"
                                                                 data-bs-toggle="tooltip"
-                                                                data-placement="top"
-                                                                data-html="true"
-                                                                title="Between {{ stat.start.timestamp | printtime(null, contest) }} and {{ stat.end.timestamp | printtime(null, contest) }}:{{ '\n' }}{{ label }}">
+                                                                data-bs-placement="top"
+                                                                data-bs-html="true"
+                                                                title="Between {{ stat.start.timestamp | printtime(null, contest) }} and {{ stat.end.timestamp | printtime(null, contest) }}:<br/>{{ label }}">
                                                             </div>
                                                         {% endfor %}
                                                     </div>

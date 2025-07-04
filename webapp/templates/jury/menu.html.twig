@@ -135,6 +135,26 @@
                             <i class="fas fa-keyboard fa-fw"></i> Enable keyboard shortcuts
                         </a>
 
+                        <div class="dropdown">
+                            <div class="dropstart">
+                                <div class="dropdown-menu" aria-labelledby="themeDropdown">
+                                    {% for theme, config in editor_themes %}
+                                        <a class="dropdown-item" href="#" data-editor-theme="{{ theme }}" onclick="applyEditorTheme('{{ theme }}', {{ config.external | default(false) }})">{{ config.name }}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <a
+                                class="dropdown-item dropdown-toggle"
+                                href="#"
+                                data-editor-themes="{{ editor_themes | json_encode | escape('html_attr') }}"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                                id="themeDropdown">
+                                <i class="fas fa-palette fa-fw"></i> Change editor theme
+                            </a>
+                        </div>
+
                         <a class="dropdown-item" href="{{ path('logout') }}"><i class="fas fa-sign-out-alt fa-fw"></i>Logout </a>
                     </div>
                 </li>

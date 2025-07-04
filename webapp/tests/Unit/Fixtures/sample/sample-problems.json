@@ -1,0 +1,78 @@
+[
+    {
+        "ordinal": 0,
+        "probid": 1,
+        "short_name": "A",
+        "rgb": "#FF0000",
+        "color": "red",
+        "label": "A",
+        "time_limit": 1.0,
+        "statement": [
+            {
+                "href": "contests/sample_contests/problems/sample-problem-a/statement",
+                "mime": "application/pdf",
+                "filename": "A.pdf"
+            }
+        ],
+        "id": "sample-problem-a",
+        "name": "Sample Problem A",
+        "test_data_count": 50
+    },
+    {
+        "ordinal": 1,
+        "probid": 2,
+        "short_name": "B",
+        "rgb": "#00FF00",
+        "color": "lime",
+        "label": "B",
+        "time_limit": 2.0,
+        "statement": [
+            {
+                "href": "contests/sample_contests/problems/sample-problem-b/statement",
+                "mime": "application/pdf",
+                "filename": "B.pdf"
+            }
+        ],
+        "id": "sample-problem-b",
+        "name": "Sample Problem B",
+        "test_data_count": 32
+    },
+    {
+        "ordinal": 2,
+        "probid": 3,
+        "short_name": "C",
+        "rgb": "#0000FF",
+        "color": "blue",
+        "label": "C",
+        "time_limit": 3.0,
+        "statement": [
+            {
+                "href": "contests/sample_contests/problems/sample-problem-c/statement",
+                "mime": "application/pdf",
+                "filename": "C.pdf"
+            }
+        ],
+        "id": "sample-problem-c",
+        "name": "Sample Problem C",
+        "test_data_count": 78
+    },
+    {
+        "ordinal": 3,
+        "probid": 4,
+        "short_name": "D",
+        "rgb": "#FFFF00",
+        "color": "yellow",
+        "label": "D",
+        "time_limit": 4.0,
+        "statement": [
+            {
+                "href": "contests/sample_contests/problems/sample-problem-d/statement",
+                "mime": "application/pdf",
+                "filename": "D.pdf"
+            }
+        ],
+        "id": "sample-problem-d",
+        "name": "Sample Problem D",
+        "test_data_count": 100
+    }
+]

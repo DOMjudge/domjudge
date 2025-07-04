@@ -10,12 +10,14 @@ use App\Entity\ContestProblem;
 use App\Entity\ExternalIdFromInternalIdInterface;
 use App\Entity\Problem;
 use App\Entity\RankCache;
+use App\Entity\ScoreboardType;
 use App\Entity\ScoreCache;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
@@ -167,7 +169,7 @@ abstract class BaseController extends AbstractController
             $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
             $class = sprintf('App\\Entity\\%s', $shortClass);
             if (class_exists($class) && !in_array($class,
-                    [RankCache::class, ScoreCache::class, BaseApiEntity::class])) {
+                    [RankCache::class, ScoreCache::class, BaseApiEntity::class, ScoreboardType::class])) {
                 $metadata = $this->em->getClassMetadata($class);
 
                 $tableRelations = [];
@@ -522,6 +524,10 @@ abstract class BaseController extends AbstractController
             $contests = $this->dj->getCurrentContests();
         }
 
+        if ($contests instanceof Collection) {
+            $contests = $contests->toArray();
+        }
+
         return $contests;
     }
 
@@ -561,7 +567,6 @@ abstract class BaseController extends AbstractController
                         return $response;
                     }
                 } else {
-                    $this->em->persist($entity);
                     $this->saveEntity($entity, null, true);
                 }
                 return $this->redirect($urlGenerator());

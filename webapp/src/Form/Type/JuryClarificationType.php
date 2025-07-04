@@ -2,22 +2,28 @@
 
 namespace App\Form\Type;
 
+use App\Entity\Clarification;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
-use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotEqualTo;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class JuryClarificationType extends AbstractType
 {
     public const RECIPIENT_MUST_SELECT = 'domjudge-must-select';
+
+    /** @var int The clarification entity id if the entity exists in the database */
+    private $clarid;
 
     public function __construct(
         private readonly EntityManagerInterface $em,
@@ -27,6 +33,7 @@ class JuryClarificationType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->clarid = $options['clarid'];
         $recipientOptions = [
             '(select...)' => static::RECIPIENT_MUST_SELECT,
             'ALL' => '',
@@ -105,11 +112,18 @@ class JuryClarificationType extends AbstractType
                 'cols' => 85,
             ],
         ]);
+
+        $builder->add('jurymember', HiddenType::class, [
+            'constraints' => [
+                new Callback([$this, 'checkJuryMember'])
+            ]
+        ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefault('limit_to_team', null);
+        $resolver->setDefault('clarid', null);
     }
 
     private function getTeamLabel(Team $team): string
@@ -119,5 +133,26 @@ class JuryClarificationType extends AbstractType
         }
 
         return sprintf('%s (%s)', $team->getEffectiveName(), $team->getExternalId());
+    }
+
+    public function checkJuryMember(mixed $value, ExecutionContextInterface $context, mixed $payload): void
+    {
+        if ($this->clarid) {
+            $juryMember = $this->em->createQueryBuilder()
+                ->select('clar.jury_member')
+                ->from(Clarification::class, 'clar')
+                ->where('clar.clarid = :clarid')
+                ->setParameter('clarid', $this->clarid)
+                ->getQuery()
+                ->getSingleResult()['jury_member'];
+
+            // If jury member changed, and we are not currently assigned, warn.
+            if ($value !== $juryMember && $this->dj->getUser()->getUserIdentifier() !== $juryMember) {
+                $context->buildViolation("Jury Member '%jury%' claimed this clarification in the meantime.
+                                          Please resubmit if you want to continue.")
+                        ->setParameter('%jury%', $juryMember)
+                        ->addViolation();
+            }
+        }
     }
 }

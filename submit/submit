@@ -8,6 +8,7 @@
 #
 
 import argparse
+import base64
 import datetime
 import json
 import logging
@@ -17,6 +18,7 @@ import requests.utils
 import stat
 import sys
 import time
+from typing import NoReturn
 try:
     import magic
 except ModuleNotFoundError:
@@ -40,13 +42,15 @@ num_warnings = 0
 
 headers = {'user-agent': f'domjudge-submit-client ({requests.utils.default_user_agent()})'}
 
+
 def confirm(message: str) -> bool:
     answer = ''
     while answer not in ['y', 'n']:
         answer = input(f'{message} (y/n) ').lower()
     return answer == 'y'
 
-def warn_user(msg: str):
+
+def warn_user(msg: str) -> None:
     global num_warnings
     num_warnings += 1
     if args.quiet:
@@ -54,73 +58,86 @@ def warn_user(msg: str):
     else:
         print(f'WARNING: {msg}!')
 
-def usage(msg: str):
+
+def usage(msg: str) -> NoReturn:
     logging.error(f'error: {msg}')
     print(f"Type '{sys.argv[0]} --help' to get help.")
     exit(1)
 
-def error(msg: str):
+
+def error(msg: str) -> NoReturn:
     logging.error(msg)
-    exit(-1)
+    exit(1)
+
+
+def print_if_json(text: str) -> None:
+    """Print the text if it is valid JSON, and ignore otherwise"""
+    try:
+        data = json.loads(text)
+        print(json.dumps(data, indent=2))
+    except json.decoder.JSONDecodeError:
+        pass
+
 
 def read_contests() -> list:
-    '''Read all contests from the API.
-    
+    """Read all contests from the API.
+
     Returns:
         The contests or None if an error occurred.
-    '''
+    """
 
     try:
         data = do_api_request('contests')
     except RuntimeError as e:
         logging.warning(e)
-        return None
+        return []
 
     if not isinstance(data, list):
         logging.warning("DOMjudge's API returned unexpected JSON data for endpoint 'contests'.")
-        return None
+        return []
 
     contests = []
     for contest in data:
         if ('id' not in contest
-            or 'shortname' not in contest
-            or not contest['id']
-            or not contest['shortname']):
+                or 'shortname' not in contest
+                or not contest['id']
+                or not contest['shortname']):
             logging.warning("DOMjudge's API returned unexpected JSON data for 'contests'.")
-            return None
+            return []
         contests.append(contest)
 
     logging.info(f'Read {len(contests)} contest(s) from the API.')
     return contests
 
+
 def read_languages() -> list:
-    '''Read all languages for the current contest from the API.
-    
+    """Read all languages for the current contest from the API.
+
     Returns:
         The languages or None if an error occurred.
-    '''
+    """
 
     try:
         endpoint = 'contests/' + my_contest['id'] + '/languages'
         data = do_api_request(endpoint)
     except RuntimeError as e:
         logging.warning(e)
-        return None
+        return []
 
     if not isinstance(data, list):
         logging.warning("DOMjudge's API returned unexpected JSON data for endpoint 'languages'.")
-        return None
+        return []
 
     languages = []
 
     for item in data:
         if ('id' not in item
-            or 'extensions' not in item
-            or not item['id']
-            or not isinstance(item['extensions'], list)
-            or len(item['extensions']) == 0):
+                or 'extensions' not in item
+                or not item['id']
+                or not isinstance(item['extensions'], list)
+                or len(item['extensions']) == 0):
             logging.warning("DOMjudge's API returned unexpected JSON data for 'languages'.")
-            return None
+            return []
         language = {
             'id': item['id'],
             'name': item['name'],
@@ -134,74 +151,86 @@ def read_languages() -> list:
 
     return languages
 
+
 def read_problems() -> list:
-    '''Read all problems for the current contest from the API.
-    
+    """Read all problems for the current contest from the API.
+
     Returns:
         The problems or None if an error occurred.
-    '''
+    """
 
     try:
         endpoint = 'contests/' + my_contest['id'] + '/problems'
         data = do_api_request(endpoint)
     except RuntimeError as e:
         logging.warning(e)
-        return None
+        return []
 
     if not isinstance(data, list):
         logging.warning("DOMjudge's API returned unexpected JSON data for endpoint 'problems'.")
-        return None
+        return []
 
     problems = []
 
     for problem in data:
         if ('id' not in problem
-            or 'label' not in problem
-            or not problem['id']
-            or not problem['label']):
+                or 'label' not in problem
+                or not problem['id']
+                or not problem['label']):
             logging.warning("DOMjudge's API returned unexpected JSON data for 'problems'.")
-            return None
+            return []
         problems.append(problem)
 
     logging.info(f'Read {len(problems)} problem(s) from the API.')
 
     return problems
 
-def do_api_request(name: str):
-    '''Perform an API call to the given endpoint and return its data.
-    
+
+def do_api_request(endpoint: str, data=None, files=None):
+    """Perform an API call to the given endpoint and return its data.
+
     Parameters:
-        name (str): the endpoint to call
+        endpoint (str): the endpoint to call
+        data (dict): optional data to send in the POST request
+        files (list): optional files to send in the POST request
 
     Returns:
-        The endpoint contents.
+        The decoded endpoint contents.
 
     Raises:
         RuntimeError when the response is not JSON or the HTTP status code is non 2xx.
-    '''
+    """
 
     if not baseurl:
         raise RuntimeError('No baseurl set')
 
-    url = f'{baseurl}api/{api_version}{name}'
-    
+    url = f'{baseurl}api/{api_version}{endpoint}'
+
     logging.info(f'Connecting to {url}')
 
     try:
-        response = requests.get(url, headers=headers)
+        if data or files:
+            response = requests.post(url, data=data, files=files, headers=headers)
+        else:
+            response = requests.get(url, headers=headers)
     except requests.exceptions.RequestException as e:
         raise RuntimeError(e)
 
+    logging.debug(f"API call '{endpoint}' returned:\n{response.text}")
     if response.status_code >= 300:
-        print(response.text)
+        print_if_json(response.text)
         if response.status_code == 401:
             raise RuntimeError('Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
         else:
-            raise RuntimeError(f'API request {name} failed (code {response.status_code}).')
+            raise RuntimeError(f'API request {endpoint} failed (code {response.status_code}).')
 
-    logging.debug(f"API call '{name}' returned:\n{response.text}")
+    try:
+        decoded_response = json.loads(response.text)
+    except json.decoder.JSONDecodeError as e:
+        raise RuntimeError(f'Parsing DOMjudge\'s API output failed: {e}')
 
-    return json.loads(response.text)
+    return decoded_response
+
 
 def kotlin_base_entry_point(filebase: str) -> str:
     if filebase == "":
@@ -219,22 +248,28 @@ def kotlin_base_entry_point(filebase: str) -> str:
 
     return filebase
 
-def get_epilog():
-    '''Get the epilog for the help text.'''
+
+def get_epilog() -> str:
+    """Get the epilog for the help text."""
 
     contests_part_one = None
     contests_part_two = None
 
-    if not contests or len(contests) <= 1:
+    if contest_id:
         contests_part_one = '''For CONTEST use the ID or short name as shown in the top-right contest
-drop-down box in the web interface.'''
-        if contests and len(contests) == 1:
-            contests_part_two = f"Currently this defaults to the only active contest '{contests[0]['shortname']}'"
+    drop-down box in the web interface.'''
+        contests_part_two = f"Currently defaults to '{contest_id}', pass '-c <contest_id>' to override."
     else:
-        contests_part_one = 'For CONTEST use one of the following:'
-        max_length = max([len(c['shortname']) for c in contests])
-        for contest in contests:
-            contests_part_one += f"\n    {contest['shortname']:<{max_length}} - {contest['name']}"
+        if not contests or len(contests) <= 1:
+            contests_part_one = '''For CONTEST use the ID or short name as shown in the top-right contest
+    drop-down box in the web interface.'''
+            if contests and len(contests) == 1:
+                contests_part_two = f"Currently this defaults to the only active contest '{contests[0]['shortname']}'"
+        else:
+            contests_part_one = 'For CONTEST use one of the following:'
+            max_length = max([len(c['shortname']) for c in contests])
+            for contest in contests:
+                contests_part_one += f"\n    {contest['shortname']:<{max_length}} - {contest['name']}"
 
     if not problems:
         problem_part = 'For PROBLEM use the label as on the scoreboard.'
@@ -248,7 +283,7 @@ drop-down box in the web interface.'''
         language_part = 'For LANGUAGE use the ID or a common extension.'
     else:
         language_part = 'For LANGUAGE use one of the following IDs or extensions:'
-        max_length = max([len(l['name']) for l in languages])
+        max_length = max([len(lang['name']) for lang in languages])
         for language in languages:
             sorted_exts = ', '.join(sorted(language['extensions']))
             language_part += f"\n    {language['name']:<{max_length}} - {sorted_exts}"
@@ -287,8 +322,39 @@ Submit multiple files (the problem and language are taken from the first):
 
     return "\n\n".join(part for part in epilog_parts if part)
 
-def do_api_submit():
-    '''Submit to the API with the given data.'''
+
+def do_api_print() -> None:
+    """Submit to the API for printing with the given data."""
+
+    if len(filenames) != 1:
+        error('You can only print a single file')
+    filename = filenames[0]
+
+    with open(filename, 'rb') as file:
+        data = {
+            'original_name': filename,
+            'file_contents': base64.b64encode(file.read()),
+        }
+    if my_language:
+        data['language'] = my_language['name']
+    if entry_point:
+        data['entry_point'] = entry_point
+
+    endpoint = f"printing/team"
+    result = do_api_request(endpoint, data)
+
+    if not isinstance(result, dict) or 'success' not in result:
+        error('DOMjudge\'s API returned unexpected JSON data.')
+
+    if result['success']:
+        print("DOMjudge reported a successful print job.")
+    else:
+        # Should not happen, as the status code should've been >= 300
+        print(f"DOMjudge reported a printing error: {result['output']}")
+
+
+def do_api_submit() -> None:
+    """Submit to the API with the given data."""
 
     data = {
         'problem': my_problem['id'],
@@ -299,38 +365,19 @@ def do_api_submit():
 
     files = [('code[]', open(filename, 'rb')) for filename in filenames]
 
-    url = f"{baseurl}api/{api_version}contests/{my_contest['id']}/submissions"
-    logging.info(f'connecting to {url}')
-
-    response = requests.post(url, data=data, files=files, headers=headers)
-
-    logging.debug(f"API call 'submissions' returned:\n{response.text}")
-
-    # The connection worked, but we may have received an HTTP error
-    if response.status_code >= 300:
-        print(response.text)
-        if response.status_code == 401:
-            raise RuntimeError('Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
-        else:
-            raise RuntimeError(f'Submission failed (code {response.status_code})')
-
-    # We got a successful HTTP response. It worked.
-    # But check that we indeed received a submission ID.
-
-    try:
-        submission = json.loads(response.text)
-    except json.decoder.JSONDecodeError as e:
-        error(f'Parsing DOMjudge\'s API output failed: {e}')
+    endpoint = f"contests/{my_contest['id']}/submissions"
+    submission = do_api_request(endpoint, data, files)
 
     if (not isinstance(submission, dict)
-        or not 'id' in submission
-        or not isinstance(submission['id'], str)):
+            or 'id' not in submission
+            or not isinstance(submission['id'], str)):
         error('DOMjudge\'s API returned unexpected JSON data.')
 
     time = datetime.datetime.fromisoformat(submission['time']).strftime('%H:%M:%S')
     sid = submission['id']
     print(f"Submission received: id = s{sid}, time = {time}")
     print(f"Check {baseurl}team/submission/{sid} for the result.")
+
 
 version_text = '''
 submit -- part of DOMjudge
@@ -361,10 +408,11 @@ parser.add_argument('-c', '--contest', help='''submit for contest with ID or sho
     Defaults to the value of the
     environment variable 'SUBMITCONTEST'.
     Mandatory when more than one contest is active.''')
+parser.add_argument('-P', '--print', help='submit the file for printing instead of submission', action='store_true')
 parser.add_argument('-p', '--problem', help='submit for problem with ID or label PROBLEM', default='')
 parser.add_argument('-l', '--language', help='submit in language with ID LANGUAGE', default='')
 parser.add_argument('-e', '--entry_point', help='set an explicit entry_point, e.g. the java main class')
-parser.add_argument('-v', '--verbose', help='increase verbosity', choices=loglevels.keys(), nargs='?', const='INFO', default='WARNING')
+parser.add_argument('-v', '--verbose', help='increase verbosity', choices=loglevels.keys(), nargs='?', const='INFO', default='WARNING')  # NOQA
 parser.add_argument('-q', '--quiet', help='suppress warning/info messages', action='store_true')
 parser.add_argument('-y', '--assume-yes', help='suppress user input and assume yes', action='store_true')
 parser.add_argument('-u', '--url', help='''submit to server with base address URL
@@ -377,7 +425,7 @@ verbosity = args.verbose
 if args.quiet:
     verbosity = 'ERROR'
 
-logging.basicConfig(format=f'%(message)s', level=loglevels[verbosity])
+logging.basicConfig(format='%(message)s', level=loglevels[verbosity])
 logging.info(f'set verbosity to {verbosity}')
 
 problem_id = args.problem
@@ -388,6 +436,8 @@ if args.url:
     baseurl = args.url
 elif 'SUBMITBASEURL' in os.environ:
     baseurl = os.environ['SUBMITBASEURL']
+    logging.warning(f"Using '{baseurl}' as defined in the 'SUBMITBASEURL' environment variable. "
+                    + "Pass '-u <url>' to override.")
 # Make sure that baseurl terminates with a '/' for later concatenation.
 if baseurl and baseurl[-1:] != '/':
     baseurl += '/'
@@ -396,6 +446,8 @@ if args.contest:
     contest_id = args.contest
 elif 'SUBMITCONTEST' in os.environ:
     contest_id = os.environ['SUBMITCONTEST']
+    logging.warning(f"Using '{contest_id}' as defined in the 'SUBMITCONTEST' environment variable. "
+                    + "Pass '-c <contest_id>' to override.")
 else:
     contest_id = ''
 
@@ -403,9 +455,9 @@ contests = read_contests() if baseurl else None
 if not contests and not args.help:
     logging.warning('Could not obtain active contests.')
 
-my_contest = None
-my_language = None
-my_problem = None
+my_contest: dict = {}
+my_language: dict = {}
+my_problem: dict = {}
 
 if not contest_id:
     if not contests:
@@ -423,10 +475,10 @@ elif contests:
             my_contest = contest
             break
 
-languages = None
-problems = None
+languages: list = []
+problems: list = []
 if my_contest and baseurl:
-    if 'allow_submit' in my_contest and not my_contest['allow_submit']:
+    if not args.print and 'allow_submit' in my_contest and not my_contest['allow_submit']:
         warn_user('Submissions for contest (temporarily) disabled')
         exit(1)
     languages = read_languages()
@@ -470,7 +522,7 @@ for index, filename in enumerate(args.filename, 1):
         st = os.stat(filename)
     except FileNotFoundError:
         usage(f"Cannot find file `{filename}'.")
-    
+
     logging.debug(f"submission file {index}: `{filename}'")
 
     # Do some checks on submission file and warn user
@@ -496,6 +548,7 @@ for index, filename in enumerate(args.filename, 1):
 
 filebase = os.path.basename(filenames[0])
 
+ext = ""
 if '.' in filebase:
     dot = filebase.rfind('.')
     ext = filebase[dot+1:]
@@ -516,7 +569,7 @@ for language in languages:
     if my_language:
         break
 
-if not my_language:
+if not my_language and not args.print:
     usage('No known language specified or detected.')
 
 # Check for problem matching ID or label.
@@ -526,26 +579,33 @@ for problem in problems:
         my_problem = problem
         break
 
-if not my_problem:
-     usage('No known problem specified or detected.')
+if not my_problem and not args.print:
+    usage('No known problem specified or detected.')
 
-# Guess entry point if not already specified.
-if not entry_point and my_language['entry_point_required']:
-    if my_language['name'] == 'Java':
-        entry_point = filebase
-    elif my_language['name'] == 'Kotlin':
-        entry_point = kotlin_base_entry_point(filebase) + "Kt"
-    elif my_language['name'] == 'Python 3':
-        entry_point = filebase + "." + ext
+if not args.print:
+    # Guess entry point if not already specified.
+    if not entry_point and my_language['entry_point_required']:
+        if my_language['name'] == 'Java':
+            entry_point = filebase
+        elif my_language['name'] == 'Kotlin':
+            entry_point = kotlin_base_entry_point(filebase) + "Kt"
+        elif my_language['name'] == 'Python 3':
+            entry_point = filebase + "." + ext
 
-if not entry_point and my_language['entry_point_required']:
-    error('Entry point required but not specified nor detected.')
+    if not entry_point and my_language['entry_point_required']:
+        error('Entry point required but not specified nor detected.')
 
 logging.debug(f"contest is `{my_contest['shortname']}'")
-logging.debug(f"problem is `{my_problem['label']}'")
-logging.debug(f"language is `{my_language['name']}'")
-logging.debug(f"entry_point is `{entry_point or '<None>'}'")
+if not args.print:
+    logging.debug(f"problem is `{my_problem['label']}'")
+logging.debug(f"language is `{my_language.get('name', '<None>')}'")
+if not args.print:
+    logging.debug(f"entry_point is `{entry_point or '<None>'}'")
 logging.debug(f"url is `{baseurl}'")
+
+if args.print:
+    do_api_print()
+    exit(0)
 
 if not args.assume_yes:
     print('Submission information:')

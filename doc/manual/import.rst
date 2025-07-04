@@ -407,11 +407,11 @@ and click `Import`.
 
 To import the file using the API run the following commands::
 
-    http --check-status -b -f POST "<API_URL>/contests/<CID>/problems" data@problems.yaml
+    http --check-status -b -f POST "<API_URL>/contests/<CID>/problems/add-data" data@problems.yaml
 
 To import the file using the CLI run the following command::
 
-    <WEBAPP_DIR>/bin/console api:call -m POST -f data=problems.yaml contests/<CID>/problems
+    <WEBAPP_DIR>/bin/console api:call -m POST -f data=problems.yaml contests/<CID>/problems/add-data
 
 Replace ``<CID>`` with the contest ID that was returned when importing the
 contest metadata.

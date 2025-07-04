@@ -122,8 +122,8 @@ chmod a+rwx "$WORKDIR/compile"
 touch compile.out compile.meta
 
 # Copy compile script into chroot
-# shellcheck disable=SC2174
-mkdir -m 0777 -p "$WORKDIR/compile-script"
+mkdir -p "$WORKDIR/compile-script"
+chmod 0777 "$WORKDIR/compile-script"
 cp -a "$(dirname "$COMPILE_SCRIPT")"/* "$WORKDIR/compile-script/"
 
 cd "$WORKDIR/compile"

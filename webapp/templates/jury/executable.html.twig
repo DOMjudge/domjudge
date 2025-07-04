@@ -5,8 +5,6 @@
 
 {% block extrahead %}
     {{ parent() }}
-    <script src="{{ asset('js/ace/ace.js') }}"></script>
-    <script src="{{ asset('js/ace/ext-modelist.js') }}"></script>
     {{ macros.table_extrahead() }}
 {% endblock %}
 
@@ -120,7 +118,7 @@
                         {% endif %}
                     </div>
 
-                    {{ files[idx] | codeEditor(idx, null, is_granted('ROLE_ADMIN'), 'form_source' ~ idx, aceFilenames[idx]) }}
+                    {{ files[idx] | codeEditor(idx, null, is_granted('ROLE_ADMIN'), 'form_source' ~ idx, editorFilenames[idx]) }}
                     <script>
                         $(function () {
                             $('#form_source{{ idx }}').closest('div.mb-3').hide();
@@ -135,8 +133,8 @@
                 {{ form_widget(form) }}
             </div>
         </div>
-        {{ form_end(form) }}
     {% endif %}
+    {{ form_end(form) }}
 
     {% if is_granted('ROLE_ADMIN') %}
         <hr>

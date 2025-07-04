@@ -6,7 +6,7 @@ export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
             docs install-docs inplace-install inplace-uninstall maintainer-conf \
-            composer-dependencies composer-dependencies-dev
+            maintainer-install composer-dependencies composer-dependencies-dev
 
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
@@ -89,7 +89,7 @@ docs:                       SUBDIRS=    doc
 install-docs:               SUBDIRS=    doc
 maintainer-conf:            SUBDIRS=                                 webapp
 maintainer-install:         SUBDIRS=                                 webapp
-inplace-install:            SUBDIRS=    doc               misc-tools webapp
+inplace-install:            SUBDIRS=    doc               misc-tools
 inplace-uninstall:          SUBDIRS=    doc               misc-tools
 dist:                       SUBDIRS=        lib sql       misc-tools
 clean:                      SUBDIRS=etc doc lib sql judge misc-tools webapp
@@ -151,6 +151,17 @@ endif
 # Fix permissions and ownership for password files:
 	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(judgehost_etcdir) \
 		etc/restapi.secret
+	@echo ""
+	@echo "========== Judgehost Install Completed =========="
+	@echo ""
+	@echo "Optionally:"
+	@echo "    - Install the create-cgroup service to setup the secure judging restrictions:"
+	@echo "        cp judge/create-cgroups.service /etc/systemd/system/"
+	@echo "    - Install the judgehost service:"
+	@echo "        cp judge/domjudge-judgedaemon@.service /etc/systemd/system/"
+	@echo "    - You can enable the judgehost on CPU core 1 with:"
+	@echo "        systemctl enable domjudge-judgedaemon@1"
+	@echo ""
 
 check-root:
 	@if [ `id -u` -ne 0 -a -z "$(QUIET)" ]; then \
@@ -198,7 +209,7 @@ inplace-conf-common: dist
 # Install the system in place: don't really copy stuff, but create
 # symlinks where necessary to let it work from the source tree.
 # This stuff is a hack!
-maintainer-install: inplace-install composer-dump-autoload-dev
+maintainer-install: inplace-install
 inplace-install: build domserver-create-dirs judgehost-create-dirs
 inplace-install-l:
 # Replace libjudgedir with symlink to prevent lots of symlinks:
@@ -212,10 +223,13 @@ inplace-install-l:
 	ln -sf $(CURDIR)/judge/runpipe  $(judgehost_bindir)
 	ln -sf $(CURDIR)/judge/create_cgroups  $(judgehost_bindir)
 	ln -sf $(CURDIR)/sql/dj_setup_database $(domserver_bindir)
+	ln -sf $(CURDIR)/webapp/bin/console $(domserver_bindir)/dj_console
 # Create tmpdir and make tmpdir writable for webserver,
 # because judgehost-create-dirs sets wrong permissions:
 	$(MKDIR_P) $(domserver_tmpdir)
 	chmod a+rwx $(domserver_tmpdir)
+# Make sure we're running from a clean state:
+	(cd webapp && composer auto-scripts)
 	@echo ""
 	@echo "========== Maintainer Install Completed =========="
 	@echo ""
@@ -289,7 +303,7 @@ coverity-conf:
 coverity-build: paths.mk
 	$(MAKE) build build-scripts
 # Secondly, delete all upstream PHP libraries to not analyze those:
-	-rm -rf lib/vendor/*
+	-rm -rf webapp/vendor/*
 	@VERSION=` grep '^VERSION ='   paths.mk | sed 's/^VERSION = *//'` ; \
 	PUBLISHED=`grep '^PUBLISHED =' paths.mk | sed 's/^PUBLISHED = *//'` ; \
 	if [ "$$PUBLISHED" = release ]; then DESC="release" ; \
@@ -316,5 +330,4 @@ clean-autoconf:
         $(addprefix inplace-,conf conf-common install uninstall) \
         $(addprefix maintainer-,conf install) clean-autoconf config distdocs \
         composer-dependencies composer-dependencies-dev \
-        composer-dump-autoload-dev \
         coverity-conf coverity-build

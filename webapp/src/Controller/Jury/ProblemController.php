@@ -29,6 +29,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -74,21 +75,17 @@ class ProblemController extends BaseController
             ->groupBy('p.probid')
             ->getQuery()->getResult();
 
-        $badgeTitle = '';
-        $currentContest = $this->dj->getCurrentContest();
-        if ($currentContest !== null) {
-            $badgeTitle = 'in ' . $currentContest->getShortname();
-        }
         $table_fields = [
             'probid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
             'externalid' => ['title' => 'external ID', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true],
-            'badges' => ['title' => $badgeTitle, 'sort' => false],
+            'badges' => ['title' => '', 'sort' => false],
             'num_contests' => ['title' => '# contests', 'sort' => true],
             'timelimit' => ['title' => 'time limit', 'sort' => true],
             'memlimit' => ['title' => 'memory limit', 'sort' => true],
             'outputlimit' => ['title' => 'output limit', 'sort' => true],
             'num_testcases' => ['title' => '# test cases', 'sort' => true],
+            'type' => ['title' => 'type', 'sort' => true],
         ];
 
         $contestCountData = $this->em->createQueryBuilder()
@@ -105,7 +102,8 @@ class ProblemController extends BaseController
         }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $problems_table   = [];
+        $problems_table_current = [];
+        $problems_table_other   = [];
         foreach ($problems as $row) {
             /** @var Problem $p */
             $p              = $row[0];
@@ -209,17 +207,23 @@ class ProblemController extends BaseController
             $problemdata = array_merge($problemdata, [
                 'num_contests' => ['value' => (int)($contestCounts[$p->getProbid()] ?? 0)],
                 'num_testcases' => ['value' => (int)$row['testdatacount']],
+                'type' => ['value' => $p->getTypesAsString()],
             ]);
 
-            // Save this to our list of rows
-            $problems_table[] = [
+            $data_to_add = [
                 'data' => $problemdata,
                 'actions' => $problemactions,
                 'link' => $this->generateUrl('jury_problem', ['probId' => $p->getProbid()]),
             ];
+            if ($badges) {
+                $problems_table_current[] = $data_to_add;
+            } else {
+                $problems_table_other[] = $data_to_add;
+            }
         }
         $data = [
-            'problems' => $problems_table,
+            'problems_current' => $problems_table_current,
+            'problems_other' => $problems_table_other,
             'table_fields' => $table_fields,
         ];
 
@@ -293,7 +297,7 @@ class ProblemController extends BaseController
         $yaml = ['name' => $problem->getName()];
         if (!empty($problem->getCompareExecutable())) {
             $yaml['validation'] = 'custom';
-        } elseif ($problem->getCombinedRunCompare() && !empty($problem->getRunExecutable())) {
+        } elseif ($problem->isInteractiveProblem() && !empty($problem->getRunExecutable())) {
             $yaml['validation'] = 'custom interactive';
         }
 
@@ -329,7 +333,7 @@ class ProblemController extends BaseController
         $compareExecutable = null;
         if ($problem->getCompareExecutable()) {
             $compareExecutable = $problem->getCompareExecutable();
-        } elseif ($problem->getCombinedRunCompare()) {
+        } elseif ($problem->isInteractiveProblem()) {
             $compareExecutable = $problem->getRunExecutable();
         }
         if ($compareExecutable) {
@@ -478,10 +482,11 @@ class ProblemController extends BaseController
             return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
         }
 
-        /** @var Submission[] $submissions */
+        /** @var PaginationInterface<int, Submission> $submissions */
         [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(honorCookie: true),
             new SubmissionRestriction(problemId: $problem->getProbid()),
+            page: $request->query->getInt('page', 1),
         );
 
         $data = [
@@ -493,6 +498,7 @@ class ProblemController extends BaseController
             'defaultOutputLimit' => (int)$this->config->get('output_limit'),
             'defaultRunExecutable' => (string)$this->config->get('default_run'),
             'defaultCompareExecutable' => (string)$this->config->get('default_compare'),
+            'type' => $problem->getTypesAsString(),
             'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
             'showExternalResult' => $this->dj->shadowMode(),
             'lockedProblem' => $lockedProblem,
@@ -586,16 +592,26 @@ class ProblemController extends BaseController
                         }
                         $content = file_get_contents($file->getRealPath());
                         if ($type === 'image') {
-                            $imageType = Utils::getImageType($content, $error);
-                            if ($imageType === false) {
-                                $this->addFlash('danger', sprintf('image: %s', $error));
-                                return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
-                            }
-                            $thumb = Utils::getImageThumb($content, $thumbnailSize,
-                                                          $this->dj->getDomjudgeTmpDir(), $error);
-                            if ($thumb === false) {
-                                $this->addFlash('danger', sprintf('image: %s', $error));
-                                return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                            if (mime_content_type($file->getRealPath()) === 'image/svg+xml') {
+                                $content = Utils::sanitizeSvg($content);
+                                if ($content === false) {
+                                    $this->addFlash('danger', sprintf('image: %s', $error));
+                                    return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                                }
+                                $thumb = $content;
+                                $imageType = 'svg';
+                            } else {
+                                $imageType = Utils::getImageType($content, $error);
+                                if ($imageType === false) {
+                                    $this->addFlash('danger', sprintf('image: %s', $error));
+                                    return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                                }
+                                $thumb = Utils::getImageThumb($content, $thumbnailSize,
+                                                            $this->dj->getDomjudgeTmpDir(), $error);
+                                if ($thumb === false) {
+                                    $this->addFlash('danger', sprintf('image: %s', $error));
+                                    return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                                }
                             }
 
                             $testcase->setImageType($imageType);
@@ -1092,27 +1108,46 @@ class ProblemController extends BaseController
 
     /**
      * @param Testcase[] $testcases
+     *
+     * Assumes testcases are in order of their rank.
      */
     private function addTestcasesToZip(array $testcases, ZipArchive $zip, bool $isSample): void
     {
+
+        // Verify whether order of original filenames matches order of testcases by rank.
+        // If so, prefer their original name, otherwise replace the name with the rank to ensure same order.
+        $prev = null;
+        $isStillSorted = true;
+        foreach ($testcases as $testcase) {
+            if ($prev !== null && $prev >= $testcase->getOrigInputFilename()) {
+                $isStillSorted = false;
+                break;
+            }
+            $prev = $testcase->getOrigInputFilename();
+        }
+
         $formatString = sprintf('data/%%s/%%0%dd', ceil(log10(count($testcases) + 1)));
         $rankInGroup = 0;
         foreach ($testcases as $testcase) {
             $rankInGroup++;
-            $filename = sprintf($formatString, $isSample ? 'sample' : 'secret', $rankInGroup);
-            $zip->addFromString($filename . '.in', $testcase->getContent()->getInput());
-            $zip->addFromString($filename . '.ans', $testcase->getContent()->getOutput());
+            if ($isStillSorted) {
+                $filenamePrefix = sprintf("data/%s/%s", $isSample ? 'sample' : 'secret', $testcase->getOrigInputFilename());
+            } else {
+                $filenamePrefix = sprintf($formatString, $isSample ? 'sample' : 'secret', $rankInGroup);
+            }
+            $zip->addFromString($filenamePrefix . '.in', $testcase->getContent()->getInput());
+            $zip->addFromString($filenamePrefix . '.ans', $testcase->getContent()->getOutput());
 
             if (!empty($testcase->getDescription(true))) {
                 $description = $testcase->getDescription(true);
                 if (!str_contains($description, "\n")) {
                     $description .= "\n";
                 }
-                $zip->addFromString($filename . '.desc', $description);
+                $zip->addFromString($filenamePrefix . '.desc', $description);
             }
 
             if (!empty($testcase->getImageType())) {
-                $zip->addFromString($filename . '.' . $testcase->getImageType(),
+                $zip->addFromString($filenamePrefix . '.' . $testcase->getImageType(),
                                     $testcase->getContent()->getImage());
             }
         }
@@ -1126,23 +1161,7 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
         $contestId = $this->dj->getCurrentContest()->getCid();
-        $query = $this->em->createQueryBuilder()
-                          ->from(Judging::class, 'j')
-                          ->select('j')
-                          ->join('j.submission', 's')
-                          ->join('s.team', 't')
-                          ->andWhere('j.valid = true')
-                          ->andWhere('j.result != :compiler_error')
-                          ->andWhere('s.problem = :probId')
-                          ->setParameter('compiler_error', 'compiler-error')
-                          ->setParameter('probId', $probId);
-        if ($contestId > -1) {
-            $query->andWhere('s.contest = :contestId')
-                  ->setParameter('contestId', $contestId);
-        }
-        $judgings = $query->getQuery()
-                          ->getResult();
-        $this->judgeRemaining($judgings);
+        $this->judgeRemaining(contestId: $contestId, probId: $probId);
         return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
     }
 

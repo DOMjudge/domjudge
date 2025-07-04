@@ -50,6 +50,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\Exception\UninitializedPropertyException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
@@ -107,7 +109,7 @@ class ExternalContestSourceService
         protected readonly EventLogService $eventLog,
         protected readonly SubmissionService $submissionService,
         protected readonly ScoreboardService $scoreboardService,
-        protected readonly SerializerInterface $serializer,
+        protected readonly SerializerInterface&DenormalizerInterface&NormalizerInterface $serializer,
         #[Autowire('%domjudge.version%')]
         string $domjudgeVersion
     ) {
@@ -198,7 +200,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData->version;
+        return $this->cachedApiInfoData?->version;
     }
 
     public function getApiVersionUrl(): ?string
@@ -207,7 +209,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData->versionUrl;
+        return $this->cachedApiInfoData?->versionUrl;
     }
 
     public function getApiProviderName(): ?string
@@ -216,7 +218,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData->provider?->name ?? $this->cachedApiInfoData->name;
+        return $this->cachedApiInfoData?->provider?->name ?? $this->cachedApiInfoData?->name;
     }
 
     public function getApiProviderVersion(): ?string
@@ -225,7 +227,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData->provider?->version ?? $this->cachedApiInfoData->domjudge?->version;
+        return $this->cachedApiInfoData?->provider?->version ?? $this->cachedApiInfoData?->domjudge?->version;
     }
 
     public function getApiProviderBuildDate(): ?string
@@ -234,7 +236,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData->provider?->buildDate;
+        return $this->cachedApiInfoData?->provider?->buildDate;
     }
 
     public function getLoadingError(): string
@@ -267,7 +269,7 @@ class ExternalContestSourceService
     public function import(bool $fromStart, array $eventsToSkip, ?callable $progressReporter = null): bool
     {
         // We need the verdicts to validate judgement-types.
-        $this->verdicts = $this->dj->getVerdicts(mergeExternal: true);
+        $this->verdicts = $this->config->getVerdicts(['final', 'external']);
 
         if (!$this->isValidContestSource()) {
             throw new LogicException('The contest source is not valid');
@@ -379,11 +381,10 @@ class ExternalContestSourceService
             };
 
             while (true) {
-                // A timeout of 0.0 means we get chunks immediately and the user
-                // can cancel at any time.
                 try {
                     $receivedData = false;
-                    foreach ($this->httpClient->stream($response, 0.0) as $chunk) {
+                    // Get a timeout chunk after 1 second so we don't hang indefinitely.
+                    foreach ($this->httpClient->stream($response, 1.0) as $chunk) {
                         // We first need to check for timeouts, as we can not call
                         // ->isLast() or ->getContent() on them.
                         if (!$chunk->isTimeout()) {
@@ -623,7 +624,7 @@ class ExternalContestSourceService
 
         // Note the @vars here are to make PHPStan understand the correct types.
         $method = match ($event->type) {
-            EventType::ACCOUNTS, EventType::AWARDS, EventType::MAP_INFO, EventType::PERSONS, EventType::TEAM_MEMBERS => $this->ignoreEvent(...),
+            EventType::ACCOUNTS, EventType::AWARDS, EventType::MAP_INFO, EventType::PERSONS, EventType::START_STATUS, EventType::TEAM_MEMBERS => $this->ignoreEvent(...),
             EventType::STATE => $this->validateState(...),
             EventType::CONTESTS => $this->validateAndUpdateContest(...),
             EventType::JUDGEMENT_TYPES => $this->importJudgementType(...),
@@ -688,41 +689,16 @@ class ExternalContestSourceService
             ->getRepository(Contest::class)
             ->find($this->getSourceContestId());
 
-        // We need to convert the freeze to a value from the start instead of
-        // the end so perform some regex magic.
-        $duration     = $data->duration;
-        $freeze       = $data->scoreboardFreezeDuration;
-        $reltimeRegex = '/^(-)?(\d+):(\d{2}):(\d{2})(?:\.(\d{3}))?$/';
-        preg_match($reltimeRegex, $duration, $durationData);
-
-        $durationNegative = ($durationData[1] === '-');
-        $fullDuration     = $durationNegative ? $duration : ('+' . $duration);
+        // We need to convert the freeze to a value from the start instead of the end.
+        $duration          = $data->duration;
+        $durationInSeconds = Utils::relTimeToSeconds($duration);
+        $fullDuration      = Utils::relTime($durationInSeconds, includePlus: true);
+        $freeze            = $data->scoreboardFreezeDuration;
 
         if ($freeze !== null) {
-            preg_match($reltimeRegex, $freeze, $freezeData);
-            $freezeNegative     = ($freezeData[1] === '-');
-            $freezeHourModifier = $freezeNegative ? -1 : 1;
-            $freezeInSeconds    = $freezeHourModifier * (int)$freezeData[2] * 3600
-                + 60 * (int)$freezeData[3]
-                + (double)sprintf('%d.%03d', $freezeData[4], $freezeData[5] ?? 0);
-            $durationHourModifier = $durationNegative ? -1 : 1;
-            $durationInSeconds    = $durationHourModifier * (int)$durationData[2] * 3600
-                                    + 60 * (int)$durationData[3]
-                                    + (double)sprintf('%d.%03d', $durationData[4], $durationData[5] ?? 0);
-            $freezeStartSeconds   = $durationInSeconds - $freezeInSeconds;
-            $freezeHour           = floor($freezeStartSeconds / 3600);
-            $freezeMinutes        = floor(($freezeStartSeconds % 3600) / 60);
-            $freezeSeconds        = floor(($freezeStartSeconds % 60) / 60);
-            $freezeMilliseconds   = $freezeStartSeconds - floor($freezeStartSeconds);
-
-            $fullFreeze = sprintf(
-                '%s%d:%02d:%02d.%03d',
-                $freezeHour < 0 ? '' : '+',
-                $freezeHour,
-                $freezeMinutes,
-                $freezeSeconds,
-                $freezeMilliseconds
-            );
+            $freezeInSeconds    = Utils::relTimeToSeconds($freeze);
+            $freezeStartSeconds = $durationInSeconds - $freezeInSeconds;
+            $fullFreeze         = Utils::relTime($freezeStartSeconds, includePlus: true);
         } else {
             $fullFreeze = null;
         }
@@ -797,7 +773,7 @@ class ExternalContestSourceService
             $customVerdicts = $this->config->get('external_judgement_types');
             $customVerdicts[$verdict] = str_replace(' ', '-', $data->name);
             $this->config->saveChanges(['external_judgement_types' => $customVerdicts], $this->eventLog, $this->dj);
-            $this->verdicts = $this->dj->getVerdicts(mergeExternal: true);
+            $this->verdicts = $this->config->getVerdicts(['final', 'external']);
             $penalty = true;
             $solved = false;
             $this->logger->warning('Judgement type %s not found locally, importing as external verdict', [$verdict]);
@@ -856,6 +832,10 @@ class ExternalContestSourceService
             ]);
         } else {
             $this->removeWarning($event->type, $data->id, ExternalSourceWarning::TYPE_DATA_MISMATCH);
+
+            $toCheck = ['extensions' => $data->extensions];
+
+            $this->compareOrCreateValues($event, $data->id, $language, $toCheck);
         }
     }
 
@@ -1027,8 +1007,11 @@ class ExternalContestSourceService
 
         $toCheckProblem = [
             'name'      => $data->name,
-            'timelimit' => $data->timeLimit,
         ];
+
+        if ($data->timeLimit) {
+            $toCheckProblem['timelimit'] = $data->timeLimit;
+        }
 
         if ($contestProblem->getShortname() !== $data->label) {
             $this->logger->warning(
@@ -1097,7 +1080,10 @@ class ExternalContestSourceService
         if (!empty($data->organizationId)) {
             $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $data->organizationId]);
             if (!$affiliation) {
+                // Affiliation does not exist. Create one with a dummy name so we can continue.
                 $affiliation = new TeamAffiliation();
+                $affiliation->setName($data->organizationId);
+                $affiliation->setShortname(substr($data->organizationId, 0, 32));
                 $this->em->persist($affiliation);
             }
             $team->setAffiliation($affiliation);
@@ -1106,7 +1092,9 @@ class ExternalContestSourceService
         if (!empty($data->groupIds[0])) {
             $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $data->groupIds[0]]);
             if (!$category) {
+                // Category does not exist. Create one with a dummy name so we can continue.
                 $category = new TeamCategory();
+                $category->setName($data->groupIds[0]);
                 $this->em->persist($category);
             }
             $team->setCategory($category);
@@ -1447,7 +1435,19 @@ class ExternalContestSourceService
                 $zipUrl = $data->files[0]->href;
                 if (preg_match('/^https?:\/\//', $zipUrl) === 0) {
                     // Relative URL, prepend the base URL.
+                    // If the base URL ends with a slash and the zip URL starts with one, remove the slash.
+                    if (str_ends_with($this->basePath, '/') && str_starts_with($zipUrl, '/')) {
+                        $zipUrl = substr($zipUrl, 1);
+                    }
                     $zipUrl = ($this->basePath ?? '') . $zipUrl;
+                }
+
+                if ($this->source->getType() === ExternalContestSource::TYPE_CONTEST_PACKAGE && $data->files[0]->filename) {
+                    $zipUrl = $this->source->getSource() . '/submissions/' . $data->id . '/' . $data->files[0]->filename;
+                    if (!file_exists($zipUrl)) {
+                        // Common case: submissions are in submissions/<id>.zip
+                        $zipUrl = $this->source->getSource() . '/submissions/' . $data->id . '.zip';
+                    }
                 }
 
                 $tmpdir = $this->dj->getDomjudgeTmpDir();
@@ -1468,26 +1468,31 @@ class ExternalContestSourceService
                     }
 
                     if ($submissionDownloadSucceeded) {
-                        try {
-                            $response = $this->httpClient->request('GET', $zipUrl);
-                            $ziphandler = fopen($zipFile, 'w');
-                            if ($response->getStatusCode() !== 200) {
-                                // TODO: Retry a couple of times.
+                        $tries = 1;
+                        do {
+                            try {
+                                $response = $this->httpClient->request('GET', $zipUrl);
+                                $ziphandler = fopen($zipFile, 'w');
+                                if ($response->getStatusCode() !== 200) {
+                                    $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
+                                        'message' => "Cannot download ZIP from $zipUrl after trying $tries times",
+                                    ]);
+                                    $submissionDownloadSucceeded = false;
+                                    // Sleep a bit before retrying
+                                    sleep(3);
+                                }
+                                $tries++;
+                            } catch (TransportExceptionInterface $e) {
                                 $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
-                                    'message' => 'Cannot download ZIP from ' . $zipUrl,
+                                    'message' => "Cannot download ZIP from $zipUrl after trying $tries times: " . $e->getMessage(),
                                 ]);
+                                if (isset($ziphandler)) {
+                                    fclose($ziphandler);
+                                }
+                                unlink($zipFile);
                                 $submissionDownloadSucceeded = false;
                             }
-                        } catch (TransportExceptionInterface $e) {
-                            $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
-                                'message' => 'Cannot download ZIP from ' . $zipUrl . ': ' . $e->getMessage(),
-                            ]);
-                            if (isset($ziphandler)) {
-                                fclose($ziphandler);
-                            }
-                            unlink($zipFile);
-                            $submissionDownloadSucceeded = false;
-                        }
+                        } while ($tries <= 3 && !$submissionDownloadSucceeded);
                     }
 
                     if (isset($response, $ziphandler) && $submissionDownloadSucceeded) {
@@ -1878,7 +1883,8 @@ class ExternalContestSourceService
             objectId: $id,
             data: [$data],
         );
-        $dependencies[$type . '-' . $id] = ['type' => $type, 'id' => $id, 'event' => $event];
+        $normalizedEvent = $this->serializer->normalize($event, Event::class, ['api_version' => $this->getApiVersion()]);
+        $dependencies[$type . '-' . $id] = ['type' => $type, 'id' => $id, 'event' => $normalizedEvent];
         $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_DEPENDENCY_MISSING, [
             'dependencies' => $dependencies,
         ]);
@@ -1909,7 +1915,7 @@ class ExternalContestSourceService
 
                 $type  = $dependency['type'];
                 $id    = $dependency['id'];
-                $event = $dependency['event'];
+                $event = $this->serializer->denormalize($dependency['event'], Event::class, 'json', ['api_version' => $this->getApiVersion()]);
 
                 if (!isset($this->pendingEvents[$type][$id])) {
                     $this->pendingEvents[$type][$id] = [];

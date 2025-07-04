@@ -15,7 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class CheckDatabaseConfigurationDefaultValuesCommand extends Command
 {
-    public function __construct(protected readonly ConfigurationService $config, string $name = null)
+    public function __construct(protected readonly ConfigurationService $config, ?string $name = null)
     {
         parent::__construct($name);
     }

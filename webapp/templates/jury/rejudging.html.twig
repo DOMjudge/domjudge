@@ -7,6 +7,7 @@
     {{ parent() }}
     {{ macros.table_extrahead() }}
     {{ macros.select2_extrahead() }}
+    {{ knp_pagination_rel_links(submissions) }}
 {% endblock %}
 
 {% block content %}
@@ -78,7 +79,14 @@
                 </tr>
                 <tr {% if todo <= 0 %}class="d-none"{% endif %}>
                     <th>Queued</th>
-                    <td><span data-todo>{{ todo }}</span> unfinished judgings</td>
+                    <td>
+                        <span data-todo>{{ todo }}</span> unfinished judgings (out of {{ todo + done }})
+                        <br/>
+                        {% set percent = (done / (todo + done)) * 100 | number_format %}
+                        <div class="progress" style="height: 15px;">
+                            <div class="progress-bar" role="progressbar" style="width: {{ percent }}%;" aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </td>
                 </tr>
                 {% if repetitions %}
                     <tr>

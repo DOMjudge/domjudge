@@ -84,9 +84,9 @@ class UserControllerTest extends JuryControllerTestCase
                                                                                                                   ['username' => 'usérname', 'name' => 'NonPrintable'],
                                                                                                                   ['username' => 'username⚠', 'name' => 'SpecialSymbol']],
                                                           'This value should not be blank.' => [['username' => '', 'name' => 'Empty']],
-                                                          'This is not a valid IP address.' => [['ipAddress' => '1.1.1'],
-                                                                                                ['ipAddress' => '256.1.1.1'],
-                                                                                                ['ipAddress' => '1.1.1.256'],
-                                                                                                ['ipAddress' => '1.1.1.1.1'],
-                                                                                                ['ipAddress' => '::g']]];
+                                                          'This value is not a valid IP address.' => [['ipAddress' => '1.1.1'],
+                                                                                                      ['ipAddress' => '256.1.1.1'],
+                                                                                                      ['ipAddress' => '1.1.1.256'],
+                                                                                                      ['ipAddress' => '1.1.1.1.1'],
+                                                                                                      ['ipAddress' => '::g']]];
 }

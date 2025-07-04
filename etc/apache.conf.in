@@ -99,6 +99,17 @@ RewriteRule Makefile$ - [F]
     RewriteEngine Off
 </Directory>
 
+<IfModule proxy_fcgi_module>
+    # Configure the Apache FastCGI proxy module to flush chunks of data after
+    # 500ms even if the buffer is not full. This prevents delayed events and
+    # half-flushed event objects in a streaming event feed.
+    # Related: https://svn.apache.org/viewvc?view=revision&revision=1802040
+    <Proxy "fcgi://localhost">
+        ProxySet flushpackets=auto
+        ProxySet flushwait=500
+    </Proxy>
+</IfModule>
+
 # When running a proxy or loadbalancer in front of this apache instance,
 # you can use these directives to trust the proxy / loadbalancer and let
 # this apache instance use the correct client IP. Note that if you use a

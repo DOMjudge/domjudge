@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-set -eux
+set -euxo pipefail
 
 distro_id=$(grep "^ID=" /etc/os-release)
 

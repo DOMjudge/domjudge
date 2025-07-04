@@ -64,9 +64,16 @@ class JudgingRunOutput
     #[ORM\Column(
         type: 'blobtext',
         nullable: true,
-        options: ['comment' => 'Judging metadata']
+        options: ['comment' => 'Judging metadata of the run']
     )]
     private ?string $metadata = null;
+
+    #[ORM\Column(
+        type: 'blobtext',
+        nullable: true,
+        options: ['comment' => 'Judging metadata of the validator']
+    )]
+    private ?string $validatorMetadata = null;
 
     public function setRun(JudgingRun $run): JudgingRunOutput
     {
@@ -142,6 +149,17 @@ class JudgingRunOutput
     public function setMetadata(?string $metadata): self
     {
         $this->metadata = $metadata;
+        return $this;
+    }
+
+    public function getValidatorMetadata(): string
+    {
+        return $this->validatorMetadata;
+    }
+
+    public function setValidatorMetadata(?string $validatorMetadata): self
+    {
+        $this->validatorMetadata = $validatorMetadata;
         return $this;
     }
 }

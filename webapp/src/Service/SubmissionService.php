@@ -21,6 +21,8 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use InvalidArgumentException;
+use Knp\Component\Pager\Pagination\PaginationInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -49,7 +51,8 @@ class SubmissionService
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService,
-        protected readonly ScoreboardService $scoreboardService
+        protected readonly ScoreboardService $scoreboardService,
+        protected readonly PaginatorInterface $paginator,
     ) {}
 
     /**
@@ -58,8 +61,8 @@ class SubmissionService
      *
      * @param Contest[] $contests
      *
-     * @return array{Submission[], array<string, int>} array An array with
-     *           two elements: the first one is the list of submissions
+     * @return array{Submission[], array<string, int>}|array{PaginationInterface<int, Submission>, array<string, int>} array An array with
+     *           two elements: the first one is the list of submissions or the paginated results
      *           and the second one is an array with counts.
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -67,10 +70,14 @@ class SubmissionService
     public function getSubmissionList(
         array $contests,
         SubmissionRestriction $restrictions,
-        int $limit = 0,
-        bool $showShadowUnverified = false
+        bool $paginated = true,
+        ?int $page = null,
+        bool $showShadowUnverified = false,
     ): array {
         if (empty($contests)) {
+            if ($paginated) {
+                return [$this->paginator->paginate([], page: 1), []];
+            }
             return [[], []];
         }
 
@@ -84,12 +91,10 @@ class SubmissionService
             ->orderBy('s.submittime', 'DESC')
             ->addOrderBy('s.submitid', 'DESC');
 
-        if ($limit > 0) {
-            $queryBuilder->setMaxResults($limit);
-        }
-
         if ($restrictions->withExternalId ?? false) {
-            $queryBuilder->andWhere('s.externalid IS NOT NULL');
+            $queryBuilder
+                ->andWhere('s.externalid IS NOT NULL')
+                ->andWhere('s.expected_results IS NULL');
         }
 
         if (isset($restrictions->rejudgingId)) {
@@ -163,7 +168,16 @@ class SubmissionService
 
         if (isset($restrictions->externalDifference)) {
             if ($restrictions->externalDifference) {
-                $queryBuilder->andWhere('j.result != ej.result');
+                if ($restrictions->result === 'judging' || $restrictions->externalResult === 'judging') {
+                    // When either the local or external result is set to judging explicitly,
+                    // coalesce the result with a known non-null value, because in MySQL
+                    // 'correct' <> null is not true. By coalescing with '-' we prevent this.
+                    $queryBuilder
+                        ->andWhere('COALESCE(j.result, :dash) != COALESCE(ej.result, :dash)')
+                        ->setParameter('dash', '-');
+                } else {
+                    $queryBuilder->andWhere('j.result != ej.result');
+                }
             } else {
                 $queryBuilder->andWhere('j.result = ej.result');
             }
@@ -185,6 +199,12 @@ class SubmissionService
                 ->setParameter('teamid', $restrictions->teamId);
         }
 
+        if (!empty($restrictions->teamIds)) {
+            $queryBuilder
+                ->andWhere('s.team IN (:teamids)')
+                ->setParameter('teamids', $restrictions->teamIds);
+        }
+
         if (isset($restrictions->userId)) {
             $queryBuilder
                 ->andWhere('s.user = :userid')
@@ -195,6 +215,24 @@ class SubmissionService
             $queryBuilder
                 ->andWhere('t.category = :categoryid')
                 ->setParameter('categoryid', $restrictions->categoryId);
+        }
+
+        if (!empty($restrictions->categoryIds)) {
+            $queryBuilder
+                ->andWhere('t.category IN (:categoryids)')
+                ->setParameter('categoryids', $restrictions->categoryIds);
+        }
+
+        if (isset($restrictions->affiliationId)) {
+            $queryBuilder
+                ->andWhere('t.affiliation = :affiliationid')
+                ->setParameter('affiliationid', $restrictions->affiliationId);
+        }
+
+        if (!empty($restrictions->affiliationIds)) {
+            $queryBuilder
+                ->andWhere('t.affiliation IN (:affiliationids)')
+                ->setParameter('affiliationids', $restrictions->affiliationIds);
         }
 
         if (isset($restrictions->visible)) {
@@ -209,10 +247,22 @@ class SubmissionService
                 ->setParameter('probid', $restrictions->problemId);
         }
 
+        if (!empty($restrictions->problemIds)) {
+            $queryBuilder
+                ->andWhere('s.problem IN (:probids)')
+                ->setParameter('probids', $restrictions->problemIds);
+        }
+
         if (isset($restrictions->languageId)) {
             $queryBuilder
                 ->andWhere('s.language = :langid')
                 ->setParameter('langid', $restrictions->languageId);
+        }
+
+        if (!empty($restrictions->languageIds)) {
+            $queryBuilder
+                ->andWhere('s.language IN (:langids)')
+                ->setParameter('langids', $restrictions->languageIds);
         }
 
         if (isset($restrictions->judgehost)) {
@@ -235,6 +285,26 @@ class SubmissionService
             }
         }
 
+        if (!empty($restrictions->results)) {
+            $resultsContainJudging = in_array('judging', $restrictions->results, true);
+            $resultsContainQueued = in_array('queued', $restrictions->results, true);
+            $resultsContainImportError = in_array('import-error', $restrictions->results, true);
+            $resultsQuery = 'j.result IN (:results)';
+            if ($resultsContainJudging) {
+                $resultsQuery .= ' OR (j.result IS NULL AND j.starttime IS NOT NULL AND s.importError IS NULL)';
+            }
+            if ($resultsContainQueued) {
+                $resultsQuery .= ' OR (j.result IS NULL AND j.starttime IS NULL AND s.importError IS NULL)';
+            }
+            if ($resultsContainImportError) {
+                $resultsQuery .= ' OR s.importError IS NOT NULL';
+            }
+
+            $queryBuilder
+                ->andWhere($resultsQuery)
+                ->setParameter('results', $restrictions->results);
+        }
+
         if ($this->dj->shadowMode()) {
             // When we are shadow, also load the external results
             $queryBuilder
@@ -242,8 +312,16 @@ class SubmissionService
                 ->addSelect('ej');
         }
 
-        $submissions = $queryBuilder->getQuery()->getResult();
+        if ($paginated) {
+            $submissions = $this->paginator->paginate($queryBuilder, page: $page ?? 1);
+        } else {
+            $submissions = $queryBuilder->getQuery()->getResult();
+        }
         if (isset($restrictions->rejudgingId)) {
+            $paginatedSubmissions = $submissions;
+            if ($paginated) {
+                $submissions = $submissions->getItems();
+            }
             // Doctrine will return an array for each item. At index '0' will
             // be the submission and at index 'oldresult' will be the old
             // result. Remap this.
@@ -253,6 +331,10 @@ class SubmissionService
                 $submission->setOldResult($submissionData['oldresult']);
                 return $submission;
             }, $submissions);
+            if ($paginated) {
+                $paginatedSubmissions->setItems($submissions);
+                $submissions = $paginatedSubmissions;
+            }
         }
 
         $counts           = [];
@@ -280,6 +362,14 @@ class SubmissionService
         $counts['perteam'] = (clone $queryBuilder)
             ->select('COUNT(DISTINCT s.team) AS cnt')
             ->andWhere($countQueryExtras['queued'])
+            ->getQuery()
+            ->getSingleScalarResult();
+        $counts['inContest'] = (clone $queryBuilder)
+            ->select('COUNT(s.submitid)')
+            ->join('s.contest', 'c')
+            ->join('t.category', 'tc')
+            ->andWhere('s.submittime BETWEEN c.starttime AND c.endtime')
+            ->andWhere('tc.visible = true')
             ->getQuery()
             ->getSingleScalarResult();
 
@@ -445,9 +535,22 @@ class SubmissionService
             throw new BadRequestHttpException('Submissions for contest (temporarily) disabled');
         }
 
-        if (!$language->getAllowSubmit()) {
-            throw new BadRequestHttpException(
-                sprintf("Language '%s' not found in database or not submittable.", $language->getLangid()));
+        // If there is a set of languages configured for the problem, it overrides the languages configured for the
+        // contest / globally. This is useful for restricting problems to be solved in specific languages, e.g.
+        // output-only problems.
+        $allowedLanguages = $problem->getProblem()->getLanguages();
+        if ($allowedLanguages->isEmpty()) {
+            $allowedLanguages = $this->dj->getAllowedLanguagesForContest($contest);
+            if (!in_array($language, $allowedLanguages, strict: true)) {
+                throw new BadRequestHttpException(
+                    sprintf("Language '%s' not allowed for contest [c%d].", $language->getLangid(), $contest->getCid()));
+            }
+        } else {
+            $allowedLanguages = $allowedLanguages->toArray();
+            if (!in_array($language, $allowedLanguages, strict: true)) {
+                throw new BadRequestHttpException(
+                    sprintf("Language '%s' not allowed for problem [p%d].", $language->getLangid(), $problem->getProbid()));
+            }
         }
 
         if ($language->getRequireEntryPoint() && empty($entryPoint)) {
@@ -767,5 +870,32 @@ class SubmissionService
         $zip->close();
 
         return Utils::streamZipFile($tmpfname, 's' . $submission->getSubmitid() . '.zip');
+    }
+
+    public function getSubmissionFileResponse(Submission $submission): StreamedResponse
+    {
+        /** @var SubmissionFile[] $files */
+        $files = $submission->getFiles();
+
+        if (count($files) !== 1) {
+            throw new ServiceUnavailableHttpException(null, 'Submission does not contain exactly one file.');
+        }
+
+        $file = $files[0];
+        $filename = $file->getFilename();
+        $sourceCode = $file->getSourcecode();
+
+        return new StreamedResponse(function () use ($sourceCode) {
+            echo $sourceCode;
+        }, 200, [
+            'Content-Type'        => 'text/plain',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Length'      => strlen($sourceCode),
+        ]);
+    }
+
+    public function getSubmissionFileCount(Submission $submission): int
+    {
+        return count($submission->getFiles());
     }
 }

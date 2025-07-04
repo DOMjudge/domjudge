@@ -7,6 +7,7 @@
     {{ parent() }}
     {{ macros.table_extrahead() }}
     {{ macros.toggle_extrahead() }}
+    {{ knp_pagination_rel_links(submissions) }}
 {% endblock %}
 
 {% block content %}

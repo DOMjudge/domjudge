@@ -52,6 +52,11 @@
                     <td>{{ contest.shortname }}</td>
                     <td></td>
                 </tr>
+                <tr>
+                    <th>Scoreboard type</th>
+                    <td>{{ contest.scoreboardType.value }}</td>
+                    <td></td>
+                </tr>
                 {% for type, data in contest.dataForJuryInterface %}
                     <tr>
                         <td class="{{ data.class|default('') }}"><b>{{ data.label }}:</b></td>
@@ -190,6 +195,23 @@
                                 <br>
                             {% endfor %}
                         {% endif %}
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Languages</th>
+                    <td>
+                        {% if contest.languages is empty %}
+                            <em>All globally enabled languages:</em>
+                            {% set allowedLanguages = languages %}
+                        {% else %}
+                            {% set allowedLanguages = contest.languages %}
+                        {% endif %}
+                        <ul>
+                            {% for language in allowedLanguages %}
+                                <li><a href="{{ path('jury_language', {"langId": language.langid}) }}">{{ language.name }}</a></li>
+                            {% endfor %}
+                        </ul>
                     </td>
                     <td></td>
                 </tr>

@@ -2,8 +2,10 @@
 
 namespace App\Form\Type;
 
+use App\Entity\Contest;
 use App\Entity\Executable;
 use App\Entity\Language;
+use App\Entity\Problem;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -87,6 +89,26 @@ class LanguageType extends AbstractExternalIdEntityType
         $builder->add('runnerVersionCommand', TextType::class, [
             'label' => 'Runner version command',
             'required' => false,
+        ]);
+        $builder->add('contests', EntityType::class, [
+            'class'         => Contest::class,
+            'required'      => false,
+            'choice_label'  => 'name',
+            'multiple'      => true,
+            'by_reference'  => false,
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('c')
+                ->orderBy('c.name'),
+        ]);
+        $builder->add('problems', EntityType::class, [
+            'class'         => Problem::class,
+            'required'      => false,
+            'choice_label'  => 'name',
+            'multiple'      => true,
+            'by_reference'  => false,
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('p')
+                ->orderBy('p.name'),
         ]);
         $builder->add('save', SubmitType::class);
 

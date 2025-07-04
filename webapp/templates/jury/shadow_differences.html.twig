@@ -7,6 +7,7 @@
     {{ parent() }}
     {{ macros.table_extrahead() }}
     {{ macros.select2_extrahead() }}
+    {{ knp_pagination_rel_links(submissions) }}
 {% endblock %}
 
 {% block content %}
@@ -36,7 +37,7 @@
                     <input type="radio" autocomplete="off" class="btn-check"
                         name="verificationviewtype" id="verificationviewtype{{idx}}" value="{{ type }}"
                         {% if idx == verificationView %}checked{% endif %}>
-                <label class="btn btn-secondary" for="verificationviewttype{{idx}}">{{ type }}</label>
+                <label class="btn btn-secondary" for="verificationviewtype{{idx}}">{{ type }}</label>
             {%- endfor %}
         </div>
 

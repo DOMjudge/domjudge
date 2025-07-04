@@ -3,10 +3,12 @@
 namespace App\Form\Type;
 
 use App\Entity\Executable;
+use App\Entity\Language;
 use App\Entity\Problem;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -77,9 +79,28 @@ class ProblemType extends AbstractExternalIdEntityType
             'label' => 'Compare script arguments',
             'required' => false,
         ]);
-        $builder->add('combinedRunCompare', CheckboxType::class, [
-            'label' => 'Use run script as compare script.',
+        $builder->add('types', ChoiceType::class, [
+            'choices' => [
+                'pass-fail' => Problem::TYPE_PASS_FAIL,
+                'interactive' => Problem::TYPE_INTERACTIVE,
+                'multipass' => Problem::TYPE_MULTI_PASS,
+                'scoring' => Problem::TYPE_SCORING,
+                'submit-answer' => Problem::TYPE_SUBMIT_ANSWER,
+            ],
+            'multiple' => true,
+            'required' => true,
+        ]);
+        $builder->add('multipassLimit', IntegerType::class, [
+            'label' => 'Multi-pass limit',
             'required' => false,
+            'help' => 'leave empty for default',
+        ]);
+        $builder->add('languages', EntityType::class, [
+            'required' => false,
+            'class' => Language::class,
+            'multiple' => true,
+            'choice_label' => fn(Language $language) => sprintf('%s (%s)', $language->getName(), $language->getExternalid()),
+            'help' => 'List of languages that can be used for this problem. Leave empty to allow all languages that are enabled for this contest.',
         ]);
         $builder->add('save', SubmitType::class);
 

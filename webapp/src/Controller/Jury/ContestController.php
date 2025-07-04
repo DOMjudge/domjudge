@@ -38,7 +38,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -82,14 +81,15 @@ class ContestController extends BaseController
             ->getQuery()->getResult();
 
         $table_fields = [
-            'cid'          => ['title' => 'CID', 'sort' => true],
-            'externalid'   => ['title' => "external ID", 'sort' => true],
-            'shortname'    => ['title' => 'shortname', 'sort' => true],
-            'name'         => ['title' => 'name', 'sort' => true],
-            'activatetime' => ['title' => 'activate', 'sort' => true],
-            'starttime'    => ['title' => 'start', 'sort' => true,
-                               'default_sort' => true, 'default_sort_order' => 'desc'],
-            'endtime'      => ['title' => 'end', 'sort' => true],
+            'cid'             => ['title' => 'CID', 'sort' => true],
+            'externalid'      => ['title' => "external ID", 'sort' => true],
+            'shortname'       => ['title' => 'shortname', 'sort' => true],
+            'name'            => ['title' => 'name', 'sort' => true],
+            'scoreboard_type' => ['title' => 'scoreboard type', 'sort' => true],
+            'activatetime'    => ['title' => 'activate', 'sort' => true],
+            'starttime'       => ['title' => 'start', 'sort' => true,
+                                  'default_sort' => true, 'default_sort_order' => 'desc'],
+            'endtime'         => ['title' => 'end', 'sort' => true],
         ];
 
         $currentContests = $this->dj->getCurrentContests();
@@ -138,7 +138,9 @@ class ContestController extends BaseController
             $contestactions = [];
             // Get whatever fields we can from the contest object itself
             foreach ($table_fields as $k => $v) {
-                if ($propertyAccessor->isReadable($contest, $k)) {
+                if ($k == 'scoreboard_type') {
+                    $contestdata[$k] = ['value' => $contest->getScoreboardType()->value];
+                } elseif ($propertyAccessor->isReadable($contest, $k)) {
                     $contestdata[$k] = ['value' => $propertyAccessor->getValue($contest, $k)];
                 }
             }
@@ -347,12 +349,15 @@ class ContestController extends BaseController
             ->getQuery()
             ->getResult();
 
+        $languages = $this->dj->getAllowedLanguagesForContest($contest);
+
         return $this->render('jury/contest.html.twig', [
             'contest' => $contest,
             'allowRemovedIntervals' => $this->getParameter('removed_intervals'),
             'removedIntervalForm' => $form,
             'removedIntervals' => $removedIntervals,
             'problems' => $problems,
+            'languages' => $languages,
         ]);
     }
 
@@ -706,10 +711,10 @@ class ContestController extends BaseController
                 // TODO: dedup here?
                 $compareExec = $this->dj->getImmutableCompareExecutable($contestProblem);
                 $runExec     = $this->dj->getImmutableRunExecutable($contestProblem);
-                $runConfig = $this->dj->jsonEncode(
+                $runConfig = Utils::jsonEncode(
                     [
                         'hash' => $runExec->getHash(),
-                        'combined_run_compare' => $problem->getCombinedRunCompare(),
+                        'combined_run_compare' => $problem->isInteractiveProblem(),
                     ]
                 );
                 $judgeTask = new JudgeTask();
@@ -718,7 +723,7 @@ class ContestController extends BaseController
                     ->setJudgehost($judgehost)
                     ->setPriority(JudgeTask::PRIORITY_DEFAULT)
                     ->setCompareScriptId($compareExec->getImmutableExecId())
-                    ->setCompareConfig($this->dj->jsonEncode(['hash' => $compareExec->getHash()]))
+                    ->setCompareConfig(Utils::jsonEncode(['hash' => $compareExec->getHash()]))
                     ->setRunScriptId($runExec->getImmutableExecId())
                     ->setRunConfig($runConfig);
                 $this->em->persist($judgeTask);
@@ -739,7 +744,7 @@ class ContestController extends BaseController
                     ->setJudgehost($judgehost)
                     ->setPriority(JudgeTask::PRIORITY_DEFAULT)
                     ->setCompileScriptId($compileExec->getImmutableExecId())
-                    ->setCompileConfig($this->dj->jsonEncode(['hash' => $compileExec->getHash()]));
+                    ->setCompileConfig(Utils::jsonEncode(['hash' => $compileExec->getHash()]));
                 $this->em->persist($judgeTask);
                 $cnt++;
             }
@@ -921,21 +926,7 @@ class ContestController extends BaseController
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
-        $judgings = $this->em->createQueryBuilder()
-                             ->from(Judging::class, 'j')
-                             ->select('j')
-                             ->join('j.submission', 's')
-                             ->join('s.team', 't')
-                             ->join('t.category', 'tc')
-                             ->andWhere('tc.visible = true')
-                             ->andWhere('j.valid = true')
-                             ->andWhere('j.result != :compiler_error')
-                             ->andWhere('s.contest = :contestId')
-                             ->setParameter('compiler_error', 'compiler-error')
-                             ->setParameter('contestId', $contestId)
-                             ->getQuery()
-                             ->getResult();
-        $this->judgeRemaining($judgings);
+        $this->judgeRemaining(contestId: $contestId);
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
@@ -953,21 +944,7 @@ class ContestController extends BaseController
             );
         }
 
-        $judgings = $this->em->createQueryBuilder()
-                             ->from(Judging::class, 'j')
-                             ->select('j')
-                             ->join('j.submission', 's')
-                             ->join('s.team', 't')
-                             ->andWhere('s.problem = :problemId')
-                             ->andWhere('j.valid = true')
-                             ->andWhere('j.result != :compiler_error')
-                             ->andWhere('s.contest = :contestId')
-                             ->setParameter('problemId', $probId)
-                             ->setParameter('contestId', $contestId)
-                             ->setParameter('compiler_error', 'compiler-error')
-                             ->getQuery()
-                             ->getResult();
-        $this->judgeRemaining($judgings);
+        $this->judgeRemaining(contestId: $contestId, probId: $probId);
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
@@ -1038,8 +1015,8 @@ class ContestController extends BaseController
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
-    #[Route(path: '/{contestId<\d+>}/scoreboard-zip/{type<public|unfrozen>}/contest.zip', name: 'jury_scoreboard_data_zip')]
-    public function publicScoreboardDataZipAction(
+    #[Route(path: '/{contestId<\d+>}/{type<public|unfrozen>}-scoreboard.zip', name: 'jury_scoreboard_data_zip')]
+    public function scoreboardDataZipAction(
         int $contestId,
         string $type,
         RequestStack $requestStack,

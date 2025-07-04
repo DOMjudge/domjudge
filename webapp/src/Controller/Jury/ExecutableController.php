@@ -14,8 +14,6 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException as PHPInvalidArgumentException;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -24,10 +22,12 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
 #[Route(path: '/jury/executables')]
@@ -302,7 +302,7 @@ class ExecutableController extends BaseController
             foreach ($editorData['filenames'] as $idx => $filename) {
                 $newContent = str_replace("\r\n", "\n", $submittedData['source' . $idx]);
                 if (!str_ends_with($newContent, "\n")) {
-                    // Ace swallows the newline at the end of file. Let's re-add it like most editors do.
+                    // The editor might swallow the newline at the end of file. Let's re-add it like most editors do.
                     $newContent .= "\n";
                 }
 
@@ -491,19 +491,19 @@ class ExecutableController extends BaseController
      *
      * @return array{'executable': Executable, 'filenames': string[],
      *               'skippedBinary': array<array{filename: string, execfileid: int}>,
-     *               'aceFilenames': string[], 'ranks': int[],
+     *               'editorFilenames': string[], 'ranks': int[],
      *               'files': string[], 'executableBits': bool[]}
      */
     protected function dataForEditor(Executable $executable): array
     {
         $immutable_executable = $executable->getImmutableExecutable();
 
-        $filenames      = [];
-        $file_contents  = [];
-        $aceFilenames   = [];
-        $skippedBinary  = [];
-        $executableBits = [];
-        $ranks          = [];
+        $filenames       = [];
+        $file_contents   = [];
+        $editorFilenames = [];
+        $skippedBinary   = [];
+        $executableBits  = [];
+        $ranks           = [];
 
         $files = $immutable_executable->getFiles()->toArray();
         usort($files, fn($a, $b) => $a->getFilename() <=> $b->getFilename());
@@ -523,28 +523,28 @@ class ExecutableController extends BaseController
             $ranks[] = $rank;
             $file_contents[] = $content;
             $executableBits[] = $file->isExecutable();
-            $aceFilenames[] = $this->getAceFilename($filename, $content);
+            $editorFilenames[] = $this->getEditorFilename($filename, $content);
         }
 
         return [
             'executable' => $executable,
             'skippedBinary' => $skippedBinary,
             'filenames' => $filenames,
-            'aceFilenames' => $aceFilenames,
+            'editorFilenames' => $editorFilenames,
             'ranks' => $ranks,
             'files' => $file_contents,
             'executableBits' => $executableBits,
         ];
     }
 
-    private function getAceFilename(string $filename, string $content): string
+    private function getEditorFilename(string $filename, string $content): string
     {
         if (!str_contains($filename, '.')) {
             // If the file does not contain a dot, see if we have a shebang which we can use as filename.
-            // We do this to hint the ACE editor to use a specific language.
+            // We do this to hint the editor to use a specific language.
             [$firstLine] = explode("\n", $content, 2);
             if (preg_match('/^#!.*\/([^\/]+)$/', $firstLine, $matches)) {
-                return sprintf('temp.%s', $matches[1]);
+                return sprintf('%s.%s', $filename, $matches[1]);
             }
         }
         return $filename;

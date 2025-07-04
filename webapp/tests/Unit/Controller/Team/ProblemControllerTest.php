@@ -2,6 +2,9 @@
 
 namespace App\Tests\Unit\Controller\Team;
 
+use App\DataFixtures\Test\DemoAboutToStartContestFixture;
+use App\Entity\Contest;
+use App\Entity\ContestProblem;
 use App\Entity\Problem;
 use App\Entity\Testcase;
 use App\Tests\Unit\BaseTestCase;
@@ -77,7 +80,8 @@ class ProblemControllerTest extends BaseTestCase
                             $card->filter('h4.card-subtitle')->text(null, true)
                         );
                     } else {
-                        static::assertSame(0,
+                        // The problem type is displayed on the page, so we expect one heading.
+                        static::assertSame(1,
                             $card->filter('h4.card-subtitle')->count());
                     }
 
@@ -182,5 +186,44 @@ class ProblemControllerTest extends BaseTestCase
         $this->client->request('GET', '/team/' . $problem->getProbid() . '/samples.zip');
         $response = $this->client->getResponse();
         self::assertEquals(404, $response->getStatusCode());
+    }
+
+    /**
+     * Test that the problems page does not show page, statement, sample data before contest start.
+     */
+    public function testAccessProblemBeforeContestStarts(): void
+    {
+        $this->loadFixtures([DemoAboutToStartContestFixture::class]);
+
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        $problems = $em->createQueryBuilder()
+            ->select('p.probid')
+            ->from(ContestProblem::class, 'cp')
+            ->join('cp.problem', 'p')
+            ->join('cp.contest', 'c')
+            ->where('c.shortname = :shortname')
+            ->setParameter('shortname', 'demo')
+            ->getQuery()
+            ->getResult();
+        $probids = array_column($problems, 'probid');
+
+        $this->client->request('GET', '/public/problems');
+        static::assertSelectorTextContains('.nav-item .nav-link.disabled', 'Problems');
+        static::assertSelectorTextContains('.alert.alert-secondary', 'No problem texts available at this point.');
+
+        foreach ($probids as $id) {
+            $endpoints = [
+                "/team/problems/{$id}",
+                "/team/problems/{$id}/statement",
+                "/team/problems/{$id}/samples.zip"
+            ];
+
+            foreach ($endpoints as $endpoint) {
+                $this->client->request('GET', $endpoint);
+                $statusCode = $this->client->getResponse()->getStatusCode();
+                static::assertSame(404, $statusCode, "Expected status code 404, got {$statusCode} for {$endpoint}");
+            }
+        }
     }
 }

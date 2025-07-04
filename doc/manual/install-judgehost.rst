@@ -68,6 +68,15 @@ example to install DOMjudge in the directory ``domjudge`` under `/opt`::
   make judgehost
   sudo make install-judgehost
 
+Example service files for the judgehost and the judgedaemon are provided in
+``judge/create-cgroups.service`` and ``judge/domjudge-judgedaemon@.service``. The rest of the manual assumes you install those
+in a location which is picked up by ``systemd``, for example ``/etc/systemd/system``.
+
+.. parsed-literal::
+
+     cp judge/domjudge-judgedaemon@.service /etc/systemd/system/
+     cp judge/create-cgroups.service /etc/systemd/system/
+
 The judgedaemon can be run on various hardware configurations;
 
 - A virtual machine, typically these have 1 or 2 cores and no hyperthreading, because the kernel will schedule its own tasks on CPU 0, we advice CPU 1,
@@ -170,16 +179,14 @@ Optionally the timings can be made more stable by not letting the OS schedule
 any other tasks on the same CPU core the judgedaemon is using:
 ``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1 isolcpus=2"``
 
-On modern distros (e.g. Debian bullseye and Ubuntu Jammy Jellyfish) which have
-cgroup v2 enabled by default, you need to add ``systemd.unified_cgroup_hierarchy=0``
-as well. Then run ``update-grub`` and reboot.
-After rebooting check that ``/proc/cmdline`` actually contains the
-added kernel options. On VM hosting providers such as Google Cloud or
-DigitalOcean, ``GRUB_CMDLINE_LINUX_DEFAULT`` may be overwritten
-by other files in ``/etc/default/grub.d/``.
+On modern systems where cgroup v2 is available, DOMjudge will try to
+use that. This requires kernel versions 5.19 or 6.0 or later to
+support reporting peak memory usage. If not found, the system will try
+to fall back to cgroup v1, but this might require you to add
+``systemd.unified_cgroup_hierarchy=0`` to the boot options as well.
 
 You have now configured the system to use cgroups. To create
-the actual cgroups that DOMjudge will use, run::
+the actual cgroups that DOMjudge will use you need to run::
 
   sudo systemctl enable create-cgroups --now
 
@@ -188,7 +195,8 @@ Note that this service will automatically be started if you use the
 customize the script ``judge/create_cgroups`` as required and run it
 after each boot.
 
-The script `jvm_footprint` can be used to measure the memory overhead of the JVM for languages such as Kotlin and Java.
+The script `jvm_footprint` can be used to measure the memory overhead of the
+JVM for languages such as Kotlin and Java.
 
 
 REST API credentials
@@ -230,4 +238,4 @@ the judgedaemon.
 
 The judgedaemon can also be run as a service by running::
 
-  sudo systemctl enable --now domjudge-judgehost
+  sudo systemctl enable --now domjudge-judgehost.target

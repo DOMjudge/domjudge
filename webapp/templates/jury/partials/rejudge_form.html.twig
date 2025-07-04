@@ -92,6 +92,10 @@
                             <option value="high">high</option>
                         </select>
                     </div>
+                    <div id="rejudge-overshoot" class="mb-3">
+                        <label for="overshoot">Additional grace time (in s)</label>
+                        <input type="number" class="form-control" name="overshoot" id="overshoot" value="0" min="0" max="999" step="1">
+                    </div>
                     {% endif %}
                 </div>
                 <div class="modal-footer">

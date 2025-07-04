@@ -4,11 +4,11 @@
 use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 
-if (!is_file(dirname(__DIR__, 2) . '/webapp/vendor/autoload_runtime.php')) {
+if (!is_file(dirname(__DIR__) . '/vendor/autoload_runtime.php')) {
     throw new LogicException('Symfony Runtime is missing. Try running "composer require symfony/runtime".');
 }
 
-require_once dirname(__DIR__, 2) . '/webapp/vendor/autoload_runtime.php';
+require_once dirname(__DIR__) . '/vendor/autoload_runtime.php';
 require_once dirname(__DIR__) . '/config/load_db_secrets.php';
 
 set_time_limit(0);

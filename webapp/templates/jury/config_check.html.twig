@@ -93,13 +93,13 @@
       </a>
     </h6>
 
-    <div id="collapse{{ test }}" class="collapse collapsed" role="tabpanel" aria-labelledby="heading{{ test }}">
+    <div id="collapse{{ test }}" class="collapse {{ ( testresult.result == 'E' ) ? 'show' : '' }}" role="tabpanel" aria-labelledby="heading{{ test }}">
       <div class="card-body">
         {% set description = testresult.desc %}
         {% if testresult.escape is not defined or testresult.escape %}
           {% set description = description | escape %}
         {% endif %}
-        {{ description | replace({"\n":"<br />\n"}) | raw }}
+        {{ description | markdown_to_html }}
       </div>
     </div>
   </div>

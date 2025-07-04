@@ -210,17 +210,17 @@ class PublicControllerTest extends BaseTestCase
                     continue;
                 }
                 yield[['username'=>'minimaluser', 'teamName'=>'NewTeam','affiliation'=>'none'],'shirt-recognize-bar-together', $fixtures, $category];
-                yield[['username'=>'bruteforce', 'teamName'=>'Fib(4)','affiliation'=>'none'],'0112', $fixtures, $category];
-                yield[['username'=>'fullUser', 'name'=>'Full User', 'email'=>'email@domain.com','teamName'=>'Trial','affiliation'=>'none'],'.', $fixtures, $category];
+                yield[['username'=>'bruteforce', 'teamName'=>'Fib(9)','affiliation'=>'none'],'01123581321', $fixtures, $category];
+                yield[['username'=>'fullUser', 'name'=>'Full User', 'email'=>'email@domain.com','teamName'=>'Trial','affiliation'=>'none'],'..........', $fixtures, $category];
                 yield[['username'=>'student@', 'teamName'=>'Student@Uni',
                        'affiliation'=>'new','affiliationName'=>'NewUni','affiliationShortName'=>'nu'],'p@ssword_Is_long', $fixtures, $category];
                 yield[['username'=>'winner@', 'teamName'=>'FunnyTeamname',
                        'affiliation'=>'new','affiliationName'=>'SomeUni','affiliationShortName'=>'su','affiliationCountry'=>'SUR'],'p@ssword_Is_long', $fixtures, $category];
                 yield[['username'=>'klasse', 'teamName'=>'Klasse', 'affiliation'=>'existing','existingAffiliation'=>'1'],'p@ssword_Is_long', $fixtures, $category];
                 yield[['username'=>'newinstsamecountry', 'name'=>'CompetingDutchTeam', 'teamName'=>'SupperT3@m','affiliation'=>'new','affiliationName'=>'Vrije Universiteit',
-                       'affiliationShortName'=>'vu','affiliationCountry'=>'NLD'],'demo', $fixtures, $category];
+                       'affiliationShortName'=>'vu','affiliationCountry'=>'NLD'],'demodemodemo', $fixtures, $category];
                 if (count($fixtures)===1) {
-                    yield[['username'=>'reusevaluesofexistinguser', 'name'=>'selfregistered user for example team','email'=>'electronic@mail.tld','teamName'=>'EasyEnough','affiliation'=>'none'],'demo', [...$fixtures, SelfRegisteredUserFixture::class],''];
+                    yield[['username'=>'reusevaluesofexistinguser', 'name'=>'selfregistered user for example team','email'=>'electronic@mail.tld','teamName'=>'EasyEnough','affiliation'=>'none'],'demodemodemo', [...$fixtures, SelfRegisteredUserFixture::class],''];
                 }
             }
         }

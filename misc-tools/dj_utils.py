@@ -47,7 +47,7 @@ def parse_api_response(name: str, response: requests.Response):
     # We got a successful HTTP response. It worked. Return the full response
     try:
         result = json.loads(response.text)
-    except json.decoder.JSONDecodeError as e:
+    except json.decoder.JSONDecodeError:
         print(response.text)
         raise RuntimeError(f'Failed to JSON decode the response for API request {name}')
 
@@ -79,7 +79,7 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
         url = f'{domjudge_webapp_folder_or_api_url}/{name}'
         parsed = urlparse(domjudge_webapp_folder_or_api_url)
         auth = None
-        if parsed.username or parsed.password:
+        if parsed.username and parsed.password:
             auth = (parsed.username, parsed.password)
 
         try:
@@ -87,7 +87,9 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
                 response = requests.get(url, headers=headers, verify=ca_check, auth=auth)
             elif method == 'PUT':
                 response = requests.put(url, headers=headers, verify=ca_check, json=jsonData, auth=auth)
-        except requests.exceptions.SSLError as e:
+            else:
+                raise RuntimeError("Method not supported")
+        except requests.exceptions.SSLError:
             ca_check = not confirm(
                 "Can not verify certificate, ignore certificate check?", False)
             if ca_check:
@@ -98,6 +100,7 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
         except requests.exceptions.RequestException as e:
             raise RuntimeError(e)
     return parse_api_response(name, response)
+
 
 def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
     '''Upload the given file to the API at the given path with the given name.
@@ -128,7 +131,7 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
         try:
             response = requests.post(
                 url, files=files, headers=headers, data=data, verify=ca_check)
-        except requests.exceptions.SSLError as e:
+        except requests.exceptions.SSLError:
             ca_check = not confirm(
                 "Can not verify certificate, ignore certificate check?", False)
             if ca_check:

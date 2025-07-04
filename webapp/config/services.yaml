@@ -11,6 +11,8 @@ parameters:
     # Enable this to support removing time intervals from the contest.
     # This code is rarely tested and we discourage using it.
     removed_intervals: false
+    # Minimum password length for users
+    min_password_length: 10
 
 services:
     # default configuration for services in *this* file

@@ -5,8 +5,6 @@ namespace App\Controller\Team;
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Clarification;
-use App\Entity\Contest;
-use App\Entity\ContestProblem;
 use App\Entity\Language;
 use App\Form\Type\PrintType;
 use App\Service\ConfigurationService;
@@ -18,20 +16,18 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Symfony\Component\ExpressionLanguage\Expression;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_TEAM')]
 #[IsGranted(
@@ -92,7 +88,8 @@ class MiscController extends BaseController
             $this->em->clear();
             $data['submissions'] = $this->submissionService->getSubmissionList(
                 [$contest->getCid() => $contest],
-                new SubmissionRestriction(teamId: $teamId)
+                new SubmissionRestriction(teamId: $teamId),
+                paginated: false
             )[0];
 
             /** @var Clarification[] $clarifications */
@@ -179,18 +176,13 @@ class MiscController extends BaseController
             $realfile         = $file->getRealPath();
             $originalfilename = $file->getClientOriginalName();
 
-            $langid   = $data['langid'];
-            $username = $this->getUser()->getUserIdentifier();
-
-            $propertyAccessor = PropertyAccess::createPropertyAccessor();
-            $team = $this->dj->getUser()->getTeam();
-            if ($team->getLabel()) {
-                $teamId = $team->getLabel();
-            } else {
-                $teamId = $team->getExternalid();
-            }
-            $ret  = $this->dj->printFile($realfile, $originalfilename, $langid,
-                $username, $team->getEffectiveName(), $teamId, $team->getLocation());
+            $langid = $data['langid'];
+            $ret = $this->dj->printUserFile(
+                $realfile,
+                $originalfilename,
+                $langid,
+                true
+            );
 
             return $this->render('team/print_result.html.twig', [
                 'success' => $ret[0],
@@ -198,17 +190,8 @@ class MiscController extends BaseController
             ]);
         }
 
-        /** @var Language[] $languages */
-        $languages = $this->em->createQueryBuilder()
-            ->from(Language::class, 'l')
-            ->select('l')
-            ->andWhere('l.allowSubmit = 1')
-            ->getQuery()
-            ->getResult();
-
         return $this->render('team/print.html.twig', [
             'form' => $form,
-            'languages' => $languages,
         ]);
     }
 

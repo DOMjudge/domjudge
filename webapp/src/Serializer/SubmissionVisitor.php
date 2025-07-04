@@ -2,7 +2,6 @@
 
 namespace App\Serializer;
 
-use App\DataTransferObject\BaseFile;
 use App\DataTransferObject\FileWithName;
 use App\Entity\Submission;
 use App\Service\DOMJudgeService;

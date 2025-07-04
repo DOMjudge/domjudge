@@ -4,8 +4,6 @@ namespace App\Controller\API;
 
 use App\DataTransferObject\JudgementType;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\QueryBuilder;
-use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
@@ -85,9 +83,9 @@ class JudgementTypeController extends AbstractApiController
      *
      * @return JudgementType[]
      */
-    protected function getJudgementTypes(array $filteredOn = null): array
+    protected function getJudgementTypes(?array $filteredOn = null): array
     {
-        $verdicts = $this->dj->getVerdicts(mergeExternal: true);
+        $verdicts = $this->config->getVerdicts(['final', 'external']);
 
         $result = [];
         foreach ($verdicts as $name => $label) {

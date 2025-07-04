@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Controller\API\AbstractRestController;
 use App\Controller\API\AbstractRestController as ARC;
 use App\Utils\Utils;
 use DateTime;
@@ -250,7 +249,7 @@ class User extends BaseApiEntity implements
         return $this->getLastLogin() ? new DateTime(Utils::absTime($this->getLastLogin())) : null;
     }
 
-    public function setLastApiLogin(string|float $lastApiLogin): User
+    public function setLastApiLogin(string|float|null $lastApiLogin): User
     {
         $this->last_api_login = $lastApiLogin;
         return $this;

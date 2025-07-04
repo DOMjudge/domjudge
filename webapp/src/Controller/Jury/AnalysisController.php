@@ -10,11 +10,12 @@ use App\Service\DOMJudgeService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
 #[Route(path: '/jury/analysis')]
@@ -81,7 +82,7 @@ class AnalysisController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/team/{teamid}', name: 'analysis_team')]
+    #[Route(path: '/team/{team}', name: 'analysis_team')]
     public function teamAction(Team $team): Response
     {
         $contest = $this->dj->getCurrentContest();
@@ -99,6 +100,7 @@ class AnalysisController extends AbstractController
 
     #[Route(path: '/problem/{probid}', name: 'analysis_problem')]
     public function problemAction(
+        #[MapEntity(id: 'probid')]
         Problem $problem,
         #[MapQueryParameter]
         ?string $view = null
@@ -116,6 +118,27 @@ class AnalysisController extends AbstractController
 
         return $this->render('jury/analysis/problem.html.twig',
             $this->stats->getProblemStats($contest, $problem, $view)
+        );
+    }
+
+    #[Route(path: '/languages', name: 'analysis_languages')]
+    public function languagesAction(
+        #[MapQueryParameter]
+        ?string $view = null
+    ): Response {
+        $contest = $this->dj->getCurrentContest();
+
+        if ($contest === null) {
+            return $this->render('jury/error.html.twig', [
+                'error' => 'No contest selected',
+            ]);
+        }
+
+        $filterKeys = array_keys(StatisticsService::FILTERS);
+        $view = $view ?: reset($filterKeys);
+
+        return $this->render('jury/analysis/languages.html.twig',
+            $this->stats->getLanguagesStats($contest, $view)
         );
     }
 }

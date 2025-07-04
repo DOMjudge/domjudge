@@ -38,18 +38,16 @@ class RejudgingServiceTest extends BaseTestCase
         $problem = $entityManager->getRepository(Problem::class)->findOneBy(['externalid' => 'hello']);
         $contestProblem = $problem->getContestProblems()->first();
 
-        // Get the initial scoreboard. team 1 should have the FTS for the problem, team 2 shouldn't
-        foreach ([$team1, $team2] as $team) {
-            $scoreboardService->calculateScoreRow($contest, $team, $problem);
-            $scoreboardService->calculateTeamRank($contest, $team);
-        }
+        // Get the initial scoreboard.
+        $scoreboardService->refreshCache($contest);
+        $scoreboard = $scoreboardService->getScoreboard($contest, jury: true);
 
-        $scoreboard = $scoreboardService->getScoreboard($contest, true);
-
+        // The fixture above sets up that $team1 solved the problem, $team2 didn't.
+        // So $team1 also solved it first.
         static::assertTrue($scoreboard->solvedFirst($team1, $contestProblem));
         static::assertFalse($scoreboard->solvedFirst($team2, $contestProblem));
 
-        // Now create a rejudging: it will apply a new judging for the submission of $team2 that is correct
+        // Now create a rejudging: it will apply a new fake judging for the submission of $team2 that is correct
         $rejudging = (new Rejudging())
             ->setStarttime(Utils::now())
             ->setReason(__METHOD__);
@@ -72,9 +70,12 @@ class RejudgingServiceTest extends BaseTestCase
         // Now apply the rejudging
         $rejudgingService->finishRejudging($rejudging, RejudgingService::ACTION_APPLY);
 
-        // Finally, get the scoreboard again and test if the first to solve changed
-        $scoreboard = $scoreboardService->getScoreboard($contest, true);
+        // Retrieve the scoreboard again.
+        // Note that there is no manual scoreboard refresh necessary here as the rejudging service does all
+        // necessary updates.
+        $scoreboard = $scoreboardService->getScoreboard($contest, jury: true);
 
+        // Now both teams solved the problem, but $team2 solved it first.
         static::assertFalse($scoreboard->solvedFirst($team1, $contestProblem));
         static::assertTrue($scoreboard->solvedFirst($team2, $contestProblem));
     }

@@ -67,9 +67,9 @@ repo-remove () {
     assert_line "checking for gcc... no"
     assert_line "checking for cc... no"
     assert_line "checking for cl.exe... no"
-    assert_line "configure: error: in \`${test_path}':"
+    assert_regex "configure: error: in .${test_path}':"
     assert_line 'configure: error: no acceptable C compiler found in $PATH'
-    assert_line "See \`config.log' for more details"
+    assert_regex "See [\`']config.log' for more details"
 }
 
 compiler_assertions () {
@@ -111,6 +111,10 @@ compile_assertions_finished () {
 }
 
 @test "Install GNU C only" {
+    if [ "$distro_id" = "ID=fedora" ]; then
+        # Fedora ships with a gcc with enough C++ support
+        skip
+    fi
     repo-remove clang g++
     repo-install gcc libcgroup-dev
     compiler_assertions gcc ''

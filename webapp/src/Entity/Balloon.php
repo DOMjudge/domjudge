@@ -60,7 +60,7 @@ class Balloon
         return $this->done;
     }
 
-    public function setSubmission(Submission $submission = null): Balloon
+    public function setSubmission(?Submission $submission = null): Balloon
     {
         $this->submission = $submission;
         return $this;

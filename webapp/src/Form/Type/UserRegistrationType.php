@@ -12,6 +12,7 @@ use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -35,7 +36,9 @@ class UserRegistrationType extends AbstractType
     public function __construct(
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly EntityManagerInterface $em
+        protected readonly EntityManagerInterface $em,
+        #[Autowire(param: 'min_password_length')]
+        private readonly int $minimumPasswordLength,
     ) {}
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -174,7 +177,9 @@ class UserRegistrationType extends AbstractType
                         'placeholder' => 'Password',
                         'autocomplete' => 'new-password',
                         'spellcheck' => 'false',
+                        'minlength' => $this->minimumPasswordLength,
                     ],
+                    'help' => sprintf('Minimum length: %d characters', $this->minimumPasswordLength),
                 ],
                 'second_options' => [
                     'label' => false,
@@ -182,6 +187,7 @@ class UserRegistrationType extends AbstractType
                         'placeholder' => 'Repeat Password',
                         'autocomplete' => 'new-password',
                         'spellcheck' => 'false',
+                        'minlength' => $this->minimumPasswordLength,
                     ],
                 ],
                 'mapped' => false,

@@ -7,8 +7,8 @@ use App\Validator\Constraints\Identifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use OpenApi\Attributes as OA;
 use JMS\Serializer\Annotation as Serializer;
+use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -148,6 +148,20 @@ class Language extends BaseApiEntity implements
     #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Runner version command'])]
     #[Serializer\Exclude]
     private ?string $runnerVersionCommand = null;
+
+    /**
+     * @var Collection<int, Contest>
+     */
+    #[ORM\ManyToMany(targetEntity: Contest::class, mappedBy: 'languages')]
+    #[Serializer\Exclude]
+    private Collection $contests;
+
+    /**
+     * @var Collection<int, Problem>
+     */
+    #[ORM\ManyToMany(targetEntity: Problem::class, mappedBy: 'languages')]
+    #[Serializer\Exclude]
+    private Collection $problems;
 
     /**
      * @param Collection<int, Version> $versions
@@ -386,6 +400,8 @@ class Language extends BaseApiEntity implements
     {
         $this->submissions = new ArrayCollection();
         $this->versions = new ArrayCollection();
+        $this->contests = new ArrayCollection();
+        $this->problems = new ArrayCollection();
     }
 
     public function addSubmission(Submission $submission): Language
@@ -402,21 +418,56 @@ class Language extends BaseApiEntity implements
         return $this->submissions;
     }
 
-    public function getAceLanguage(): string
+    public function getEditorLanguage(): string
     {
         return match ($this->getLangid()) {
-            'adb' => 'ada',
-            'bash' => 'sh',
-            'c', 'cpp', 'cxx' => 'c_cpp',
-            'hs' => 'haskell',
+            'bash' => 'shell',
+            'cxx' => 'cpp',
             'kt' => 'kotlin',
             'pas' => 'pascal',
             'pl' => 'perl',
-            'plg' => 'prolog',
             'py2', 'py3' => 'python',
             'rb' => 'ruby',
             'rs' => 'rust',
             default => $this->getLangid(),
         };
+    }
+
+    public function addContest(Contest $contest): Language
+    {
+        $this->contests[] = $contest;
+        $contest->addLanguage($this);
+        return $this;
+    }
+
+    public function removeContest(Contest $contest): Language
+    {
+        $this->contests->removeElement($contest);
+        $contest->removeLanguage($this);
+        return $this;
+    }
+
+    public function getContests(): Collection
+    {
+        return $this->contests;
+    }
+
+    public function addProblem(Problem $problem): Language
+    {
+        $this->problems[] = $problem;
+        $problem->addLanguage($this);
+        return $this;
+    }
+
+    public function removeProblem(Problem $problem): Language
+    {
+        $this->problems->removeElement($problem);
+        $problem->removeLanguage($this);
+        return $this;
+    }
+
+    public function getProblems(): Collection
+    {
+        return $this->problems;
     }
 }

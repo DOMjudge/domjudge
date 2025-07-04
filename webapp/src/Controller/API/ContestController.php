@@ -29,19 +29,20 @@ use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\ExpressionLanguage\Expression;
-use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
 use TypeError;
@@ -113,7 +114,7 @@ class ContestController extends AbstractRestController
                 return $cid;
             }
         } elseif ($jsonFile) {
-            $data = $this->dj->jsonDecode(file_get_contents($jsonFile->getRealPath()));
+            $data = Utils::jsonDecode(file_get_contents($jsonFile->getRealPath()));
             if ($this->importExportService->importContestData($data, $message, $cid)) {
                 return $cid;
             }
@@ -139,7 +140,7 @@ class ContestController extends AbstractRestController
         name: 'onlyActive',
         description: 'Whether to only return data pertaining to contests that are active',
         in: 'query',
-        schema: new OA\Schema(type: 'boolean', default: false)
+        schema: new OA\Schema(type: 'boolean', default: true)
     )]
     public function listAction(Request $request): Response
     {
@@ -363,7 +364,7 @@ class ContestController extends AbstractRestController
 
         $hasAccess = $this->dj->checkrole('jury') ||
             $this->dj->checkrole('api_reader') ||
-            $contest->getFreezeData()->started();
+            $contest?->getFreezeData()->started();
 
         if (!$hasAccess) {
             throw new AccessDeniedHttpException();
@@ -637,8 +638,9 @@ class ContestController extends AbstractRestController
             if ($event === null) {
                 throw new BadRequestHttpException(
                     sprintf(
-                        'Invalid parameter "%s" requested.',
-                        $request->query->has('since_token') ? 'since_token' : 'since_id'
+                        'Invalid parameter "%s" requested with value "%s".',
+                        $request->query->has('since_token') ? 'since_token' : 'since_id',
+                        $sinceToken ?? $sinceId
                     )
                 );
             }
@@ -653,7 +655,8 @@ class ContestController extends AbstractRestController
         $response->headers->set('Content-Type', 'application/x-ndjson');
         $response->setCallback(function () use ($format, $cid, $contest, $request, $since_id, $types, $strict, $stream, $metadataFactory, $kernel) {
             $lastUpdate = 0;
-            $lastIdSent = max(0, $since_id); // Don't try to look for event_id=0
+            $lastIdSent = max(0, $since_id);
+            $lastIdExists = $since_id !== -1; // Don't try to look for event_id=0
             $typeFilter = false;
             if ($types) {
                 $typeFilter = explode(',', $types);
@@ -721,18 +724,30 @@ class ContestController extends AbstractRestController
                 // Add missing state events that should have happened already.
                 $this->eventLogService->addMissingStateEvents($contest);
 
-                // We fetch *all* events after the last seen to check that
+                // We fetch *all* events from the last seen to check that
                 // we don't skip events that are committed out of order.
+                // This includes the last seen event itself, just to check
+                // that the database is consistent and, for example, has
+                // not been reloaded while this process is (long) running.
                 $q = $this->em->createQueryBuilder()
                     ->from(Event::class, 'e')
                     ->select('e')
-                    ->andWhere('e.eventid > :lastIdSent')
+                    ->andWhere('e.eventid >= :lastIdSent')
                     ->setParameter('lastIdSent', $lastIdSent)
                     ->orderBy('e.eventid', 'ASC')
                     ->getQuery();
 
                 /** @var Event[] $events */
                 $events = $q->getResult();
+
+                if ($lastIdExists) {
+                    if (count($events) == 0 || $events[0]->getEventid() !== $lastIdSent) {
+                        throw new HttpException(500, sprintf('Cannot find event %d in database anymore', $lastIdSent));
+                    }
+                    // Remove the previously last sent event. We just fetched
+                    // it to make sure it's there.
+                    unset($events[0]);
+                }
 
                 // Look for any missing sequential events and wait for them to
                 // be committed if so.
@@ -855,11 +870,12 @@ class ContestController extends AbstractRestController
                         $result['time'] = Utils::absTime($event->getEventtime());
                     }
 
-                    echo $this->dj->jsonEncode($result) . "\n";
+                    echo Utils::jsonEncode($result) . "\n";
                     ob_flush();
                     flush();
                     $lastUpdate = Utils::now();
                     $lastIdSent = $event->getEventid();
+                    $lastIdExists = true;
                     $numEventsSent++;
 
                     if ($missingEvents && $event->getEventid() >= $lastFoundId) {
@@ -937,7 +953,7 @@ class ContestController extends AbstractRestController
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         try {
-            return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
+            return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', true));
         } catch (TypeError) {
             throw new BadRequestHttpException('\'onlyActive\' must be a boolean.');
         }

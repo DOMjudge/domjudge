@@ -13,6 +13,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use App\Service\ImportProblemService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
@@ -102,12 +103,13 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         // Note: we read the JSON as YAML, since any JSON is also YAML and this allows us
         // to import files with YAML inside them that match the JSON format
         $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
+        $messages = [];
         if ($this->importExportService->importProblemsData($contest, $data, $ids, $messages)) {
             return $ids;
         }
         $message = "Error while adding problems";
         if (!empty($messages)) {
-            $message .= ': ' . $this->dj->jsonEncode($messages);
+            $message .= ': ' . Utils::jsonEncode($messages);
         }
         throw new BadRequestHttpException($message);
     }
