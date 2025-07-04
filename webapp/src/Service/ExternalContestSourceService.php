@@ -30,6 +30,7 @@ use App\Entity\ExternalSourceWarning;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
+use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
@@ -1551,7 +1552,7 @@ class ExternalContestSourceService
                 contest: $contest,
                 language: $language,
                 files: $filesToSubmit,
-                source: 'shadowing',
+                source: SubmissionSource::SHADOWING,
                 entryPoint: $entryPoint,
                 externalId: $submissionId,
                 submitTime: $submitTime,

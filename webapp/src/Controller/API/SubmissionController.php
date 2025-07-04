@@ -9,6 +9,7 @@ use App\Entity\ContestProblem;
 use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
+use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Service\ConfigurationService;
@@ -331,7 +332,7 @@ class SubmissionController extends AbstractRestController
         // Now submit the solution.
         $submission = $this->submissionService->submitSolution(
             $team, $user, $problem, $problem->getContest(), $language,
-            $files, 'API', null, null, $entryPoint, $submissionId, $time, $message
+            $files, SubmissionSource::API, null, null, $entryPoint, $submissionId, $time, $message
         );
 
         // Clean up temporary if needed.

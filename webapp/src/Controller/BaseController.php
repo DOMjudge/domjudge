@@ -10,7 +10,6 @@ use App\Entity\ContestProblem;
 use App\Entity\ExternalIdFromInternalIdInterface;
 use App\Entity\Problem;
 use App\Entity\RankCache;
-use App\Entity\ScoreboardType;
 use App\Entity\ScoreCache;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
@@ -168,8 +167,9 @@ abstract class BaseController extends AbstractController
             $parts = explode('/', $file);
             $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
             $class = sprintf('App\\Entity\\%s', $shortClass);
-            if (class_exists($class) && !in_array($class,
-                    [RankCache::class, ScoreCache::class, BaseApiEntity::class, ScoreboardType::class])) {
+            if (class_exists($class) &&
+                !in_array($class, [RankCache::class, ScoreCache::class, BaseApiEntity::class]) &&
+                !enum_exists($class)) {
                 $metadata = $this->em->getClassMetadata($class);
 
                 $tableRelations = [];

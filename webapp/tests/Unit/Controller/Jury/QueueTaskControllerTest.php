@@ -10,6 +10,7 @@ use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\QueueTask;
 use App\Entity\Submission;
+use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -196,7 +197,7 @@ class QueueTaskControllerTest extends BaseTestCase
         return $this->submissionService->submitSolution(
             $team, null, $problem, $contest, 'c',
             [new UploadedFile(__FILE__, "foo.c", null, null, true)],
-            null, null, null, null, null, null, $msg
+            SubmissionSource::UNKNOWN, null, null, null, null, null, $msg
         );
     }
 
