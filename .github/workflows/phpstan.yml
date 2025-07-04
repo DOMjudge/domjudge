@@ -15,10 +15,16 @@ jobs:
         run: .github/jobs/composer_setup.sh
       - name: Show the phpstan version
         run: webapp/vendor/phpstan/phpstan/phpstan --version
+      - name: Run PHPStan in the classic way
+        run: |
+          set -euo pipefail
+          webapp/vendor/bin/phpstan \
+            --configuration=webapp/phpstan.dist.neon \
+          | tee /tmp/artifacts/phpstan.out
+      # Run the test again for GHA annotations
       - uses: php-actions/phpstan@v3.0.2
         with:
           configuration: webapp/phpstan.dist.neon
-          path: webapp/src webapp/tests
           php_extensions: gd intl mysqli pcntl zip
           autoload_file: webapp/vendor/autoload.php
           version: composer
