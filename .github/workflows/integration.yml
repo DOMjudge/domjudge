@@ -96,7 +96,7 @@ jobs:
         with:
           dest: '/tmp/docker-logs'
       - name: Upload all logs/artifacts
-        if: ${{ !cancelled() }}
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Logs
