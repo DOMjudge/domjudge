@@ -11,6 +11,7 @@ use App\Entity\ProblemAttachment;
 use App\Entity\ProblemAttachmentContent;
 use App\Entity\ProblemStatementContent;
 use App\Entity\Submission;
+use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
@@ -757,7 +758,7 @@ class ImportProblemService
                             ]
                         );
                         $submission     = $this->submissionService->submitSolution(
-                            $team, $jury_user, $contestProblem, $contest, $languageToUse, $filesToSubmit, 'problem import', null,
+                            $team, $jury_user, $contestProblem, $contest, $languageToUse, $filesToSubmit, SubmissionSource::PROBLEM_IMPORT, null,
                             null, $entry_point, null, null, $submissionMessage
                         );
 

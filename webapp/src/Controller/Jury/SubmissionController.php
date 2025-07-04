@@ -17,6 +17,7 @@ use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
+use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
@@ -1014,7 +1015,7 @@ class SubmissionController extends BaseController
                 $submission->getContest(),
                 $language,
                 $filesToSubmit,
-                'edit/resubmit',
+                SubmissionSource::EDIT_RESUBMIT,
                 $this->getUser()->getUserIdentifier(),
                 $submission->getOriginalSubmission() ?? $submission,
                 $entryPoint,
