@@ -87,11 +87,14 @@ abstract class BaseTestCase extends WebTestCase
     /**
      * Resolve any references in the given ID.
      */
-    protected function resolveReference(int|string $id, ?string $class = null): int|string
+    protected function resolveReference(int|string $id, ?string $class = null, bool $preferExternalId = false): int|string
     {
         // If the object ID contains a :, it is a reference to a fixture item, so get it.
         if (is_string($id) && str_contains($id, ':')) {
             $referenceObject = $this->fixtureExecutor->getReferenceRepository()->getReference($id, $class ?? $this->entityClass);
+            if ($preferExternalId && method_exists($referenceObject, 'getExternalid')) {
+                return $referenceObject->getExternalid();
+            }
             $metadata = static::getContainer()->get(EntityManagerInterface::class)->getClassMetadata($referenceObject::class);
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             return $propertyAccessor->getValue($referenceObject, $metadata->getSingleIdentifierColumnName());

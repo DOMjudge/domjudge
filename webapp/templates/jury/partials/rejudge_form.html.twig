@@ -1,46 +1,44 @@
 {# Output a rejudge form #}
 
-{% apply spaceless %}
-    {% set buttonText = 'Rejudge all for ' ~ table ~ ' ' ~ id %}
-    {% set questionText = 'Rejudge all submissions for this ' ~ table ~ '?' %}
-    {% set buttonDisabled = false %}
-    {% set isRestart = false %}
+{% set buttonText = 'Rejudge all for ' ~ table ~ ' ' ~ id %}
+{% set questionText = 'Rejudge all submissions for this ' ~ table ~ '?' %}
+{% set buttonDisabled = false %}
+{% set isRestart = false %}
+{% if is_granted('ROLE_ADMIN') %}
+    {% set includeAllButton = true %}
+{% else %}
+    {% set includeAllButton = false %}
+{% endif %}
+{% if buttonClass is not defined %}
+    {% set buttonClass = 'btn-outline-primary btn-sm' %}
+{% endif %}
+
+{% if table == 'submission' and submission is defined and judgings is defined %}
+    {% set buttonText = 'Rejudge this submission' %}
+    {% set questionText = 'Rejudge submission s' ~ id ~ '?' %}
+    {% set includeAllButton = false %}
+    {# Check if we have a valid result #}
+    {% set validResult = false %}
+    {% for judging in judgings %}
+        {% if judging.valid %}
+            {% set validResult = judging.result %}
+        {% endif %}
+    {% endfor %}
+
     {% if is_granted('ROLE_ADMIN') %}
-        {% set includeAllButton = true %}
+        {% if not validResult %}
+            {% set questionText = 'Restart judging of PENDING submission s' ~ id ~ ', are you sure?' %}
+            {% set buttonText = 'Restart judging' %}
+            {% set isRestart = true %}
+        {% elseif validResult == 'correct' %}
+            {% set questionText = 'Rejudge CORRECT submission s' ~ id ~ ', are you sure?' %}
+        {% endif %}
     {% else %}
-        {% set includeAllButton = false %}
-    {% endif %}
-    {% if buttonClass is not defined %}
-        {% set buttonClass = 'btn-outline-primary btn-sm' %}
-    {% endif %}
-
-    {% if table == 'submission' and submission is defined and judgings is defined %}
-        {% set buttonText = 'Rejudge this submission' %}
-        {% set questionText = 'Rejudge submission s' ~ id ~ '?' %}
-        {% set includeAllButton = false %}
-        {# Check if we have a valid result #}
-        {% set validResult = false %}
-        {% for judging in judgings %}
-            {% if judging.valid %}
-                {% set validResult = judging.result %}
-            {% endif %}
-        {% endfor %}
-
-        {% if is_granted('ROLE_ADMIN') %}
-            {% if not validResult %}
-                {% set questionText = 'Restart judging of PENDING submission s' ~ id ~ ', are you sure?' %}
-                {% set buttonText = 'Restart judging' %}
-                {% set isRestart = true %}
-            {% elseif validResult == 'correct' %}
-                {% set questionText = 'Rejudge CORRECT submission s' ~ id ~ ', are you sure?' %}
-            {% endif %}
-        {% else %}
-            {% if not validResult or validResult == 'correct' %}
-                {% set buttonDisabled = true %}
-            {% endif %}
+        {% if not validResult or validResult == 'correct' %}
+            {% set buttonDisabled = true %}
         {% endif %}
     {% endif %}
-{% endapply %}
+{% endif %}
 
 <button type="button" class="btn {{ buttonClass }}" data-bs-toggle="modal" data-bs-target="#rejudge-modal">
     <i class="fas fa-sync"></i> Rejudge
