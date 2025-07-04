@@ -12,7 +12,7 @@ class ClarificationControllerTest extends BaseTestCase
     {
         $this->verifyPageResponse('GET', '/team', 200);
 
-        $link = $this->verifyLinkToURL('request clarification', 'http://localhost/team/clarifications/add');
+        $link = $this->verifyLinkToURL('Request clarification', 'http://localhost/team/clarifications/add');
         $this->client->click($link);
 
         $this->client->submitForm('Send', [
