@@ -14,7 +14,7 @@ class ImportProblemServiceTest extends BaseTestCase
         self::bootKernel();
     }
 
-    public function testEmptyYaml()
+    public function testEmptyYaml(): void
     {
         $yaml = '';
         $messages = [];
@@ -26,7 +26,7 @@ class ImportProblemServiceTest extends BaseTestCase
         $this->assertEquals('Unknown name', $problem->getName());
     }
 
-    public function testMinimalYamlTest()
+    public function testMinimalYamlTest(): void
     {
         $yaml = <<<YAML
 name: test
@@ -53,7 +53,7 @@ YAML;
         $this->assertEquals(null, $problem->getSpecialCompareArgs());
     }
 
-    public function testTypesYamlTest()
+    public function testTypesYamlTest(): void
     {
         foreach ([
                      'pass-fail',
@@ -89,7 +89,7 @@ YAML;
         }
     }
 
-    public function testUnknownProblemType()
+    public function testUnknownProblemType(): void
     {
         $yaml = <<<YAML
 name: test
@@ -105,7 +105,8 @@ YAML;
         $this->assertStringContainsString('Unknown problem type', $messagesString);
     }
 
-    public function testInvalidProblemType() {
+    public function testInvalidProblemType(): void
+    {
         foreach ([
                      'pass-fail scoring',
                      'submit-answer multi-pass',
@@ -126,7 +127,7 @@ YAML;
         }
     }
 
-    public function testValidatorFlags()
+    public function testValidatorFlags(): void
     {
         $yaml = <<<YAML
 name: test
@@ -143,7 +144,7 @@ YAML;
         $this->assertEquals('float_tolerance 1E-6', $problem->getSpecialCompareArgs());
     }
 
-    public function testCustomValidation()
+    public function testCustomValidation(): void
     {
         foreach (['custom', 'custom interactive', 'custom multi-pass'] as $mode) {
             $yaml = <<<YAML
@@ -169,7 +170,7 @@ YAML;
         }
     }
 
-    public function testMemoryLimit()
+    public function testMemoryLimit(): void
     {
         $yaml = <<<YAML
 name: test
@@ -187,7 +188,7 @@ YAML;
         $this->assertEquals(1234*1024, $problem->getMemlimit());
     }
 
-    public function testOutputLimit()
+    public function testOutputLimit(): void
     {
         $yaml = <<<YAML
 name: test
@@ -205,7 +206,7 @@ YAML;
         $this->assertEquals(4223*1024, $problem->getOutputlimit());
     }
 
-    public function testMultipassLimit()
+    public function testMultipassLimit(): void
     {
         $yaml = <<<YAML
 name: test
@@ -223,7 +224,8 @@ YAML;
         $this->assertEquals(7, $problem->getMultipassLimit());
     }
 
-    public function testMaximalProblem() {
+    public function testMaximalProblem(): void
+    {
         $yaml = <<<YAML
 name: test
 type: pass-fail
@@ -249,7 +251,8 @@ YAML;
         $this->assertEquals('special flags', $problem->getSpecialCompareArgs());
     }
 
-    public function testMultipleLanguages() {
+    public function testMultipleLanguages(): void
+    {
         $yaml = <<<YAML
 name:
     de: deutsch
@@ -265,7 +268,7 @@ YAML;
         $this->assertEquals('english', $problem->getName());
     }
 
-    public function testKattisExample()
+    public function testKattisExample(): void
     {
         $yaml = <<<YAML
 problem_format_version: 2023-07-draft

@@ -936,6 +936,9 @@ class Contest extends BaseApiEntity implements
         $this->languages->removeElement($language);
     }
 
+    /**
+     * @return Collection<int, Language>
+     */
     public function getLanguages(): Collection
     {
         return $this->languages;

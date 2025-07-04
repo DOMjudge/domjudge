@@ -718,6 +718,7 @@ class DOMJudgeService
      * @param string      $origname The original filename as submitted by the team
      * @param string|null $language Langid of the programming language this file is in
      * @param bool        $asTeam   Print the file as the team associated with the user
+     * @return array{0: bool, 1: string}
      */
     public function printUserFile(
         string $filename,
@@ -1543,7 +1544,7 @@ class DOMJudgeService
     }
 
     /**
-     * @return array{'backgroundColors', array<TeamCategory>}
+     * @return array{backgroundColors: array<string>}
      */
     public function getScoreboardCategoryColorCss(): array {
         $backgroundColors = array_map(fn($x) => ( $x->getColor() ?? '#FFFFFF' ), $this->em->getRepository(TeamCategory::class)->findAll());

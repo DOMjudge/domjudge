@@ -410,6 +410,7 @@ EOF;
      * identifier key/value pairs. The identifiers try to adhere to
      * https://ccs-specs.icpc.io/draft/contest_api#known-judgement-types
      *
+     * @param list<string> $groups
      * @return array<string, string>
      */
     public function getVerdicts(array $groups = ['final']): array

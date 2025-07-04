@@ -21,6 +21,7 @@ class SingleTeamScoreboard extends Scoreboard
     /**
      * @param ContestProblem[] $problems
      * @param ScoreCache[]     $scoreCache
+     * @param RankCache[]      $rankCache
      */
     public function __construct(
         Contest $contest,

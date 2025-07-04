@@ -108,6 +108,9 @@ class Problem extends BaseApiEntity implements
     public const TYPE_INTERACTIVE = 8;
     public const TYPE_SUBMIT_ANSWER = 16;
 
+    /**
+     * @var array<int, string>
+     */
     private array $typesToString = [
         self::TYPE_PASS_FAIL => 'pass-fail',
         self::TYPE_SCORING => 'scoring',
@@ -292,8 +295,12 @@ class Problem extends BaseApiEntity implements
         return $this->special_compare_args;
     }
 
+    /**
+     * @param list<string> $types
+     */
     public function setTypesAsString(array $types): Problem
     {
+        /** @var array<string, int> $stringToTypes */
         $stringToTypes = array_flip($this->typesToString);
         $typeConstants = [];
         foreach ($types as $type) {
@@ -320,6 +327,9 @@ class Problem extends BaseApiEntity implements
         return implode(', ', $typeStrings);
     }
 
+    /**
+     * @return list<int>
+     */
     public function getTypes(): array
     {
         $ret = [];
@@ -331,6 +341,9 @@ class Problem extends BaseApiEntity implements
         return $ret;
     }
 
+    /**
+     * @param array<int> $types
+     */
     public function setTypes(array $types): Problem
     {
         $types = array_unique($types);

@@ -447,6 +447,9 @@ class Language extends BaseApiEntity implements
         return $this;
     }
 
+    /**
+     * @return Collection<int, Contest>
+     */
     public function getContests(): Collection
     {
         return $this->contests;
@@ -466,6 +469,9 @@ class Language extends BaseApiEntity implements
         return $this;
     }
 
+    /**
+     * @return Collection<int, Problem>
+     */
     public function getProblems(): Collection
     {
         return $this->problems;

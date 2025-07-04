@@ -1656,9 +1656,7 @@ class JudgehostController extends AbstractFOSRestController
                     $judgetasks = [['type' => 'try_again']];
                 }
             }
-            if (!empty($judgetasks)) {
-                return $judgetasks;
-            }
+            return $judgetasks;
         }
 
         if ($this->config->get('enable_parallel_judging')) {
