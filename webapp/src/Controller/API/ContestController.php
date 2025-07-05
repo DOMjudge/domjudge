@@ -179,7 +179,7 @@ class ContestController extends AbstractRestController
     public function bannerAction(Request $request, string $cid): Response
     {
         /** @var Contest|null $contest */
-        $contest = $this->getQueryBuilder($request)
+        $contest = $this->getQueryBuilder($request, filterBeforeContest: false)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $cid)
             ->getQuery()
@@ -934,10 +934,10 @@ class ContestController extends AbstractRestController
         return $this->dj->getSamplesZipForContest($contest);
     }
 
-    protected function getQueryBuilder(Request $request): QueryBuilder
+    protected function getQueryBuilder(Request $request, bool $filterBeforeContest = true): QueryBuilder
     {
         try {
-            return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
+            return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false), $filterBeforeContest);
         } catch (TypeError) {
             throw new BadRequestHttpException('\'onlyActive\' must be a boolean.');
         }
@@ -954,7 +954,7 @@ class ContestController extends AbstractRestController
      */
     protected function getContestWithId(Request $request, string $id): Contest
     {
-        $queryBuilder = $this->getQueryBuilder($request)
+        $queryBuilder = $this->getQueryBuilder($request, filterBeforeContest: false)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $id);
 
@@ -971,7 +971,7 @@ class ContestController extends AbstractRestController
     private function getContestAndCheckIfLocked(Request $request, string $cid): Contest
     {
         /** @var Contest|null $contest */
-        $contest = $this->getQueryBuilder($request)
+        $contest = $this->getQueryBuilder($request, filterBeforeContest: false)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $cid)
             ->getQuery()
