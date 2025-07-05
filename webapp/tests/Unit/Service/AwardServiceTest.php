@@ -82,6 +82,7 @@ class AwardServiceTest extends KernelTestCase
                 )
                 ->setContest($this->contest)
                 ->setShortname($problemLabel);
+            $this->contest->addProblem($problem);
             $reflectedProblem = new ReflectionClass(Problem::class);
             $probIdProperty = $reflectedProblem->getProperty('probid');
             $probIdProperty->setAccessible(true);
