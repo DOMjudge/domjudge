@@ -19,6 +19,10 @@ System requirements
 * A TCP/IP network which connects the DOMserver and the judgehosts.
   The machines only need HTTP(S) access to the DOMserver.
 
+For constistent timing, we strongly recommend to only run a single
+judgedaemon per physical machine.
+Running too many judgehost VMs on a single machine can also cause Linux kernel issues,
+see `issue #2277 <https://github.com/DOMjudge/domjudge/issues/2277>`_.
 
 .. _judgehost_software:
 
