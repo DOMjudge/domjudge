@@ -338,8 +338,11 @@ systemd, then edit the ``domjudge-judgehost.target`` unit file and add
 more judgedaemons there.
 
 Although each judgedaemon process will be bound to one single CPU
-core, shared use of other resources such as disk I/O might
-still have effect on run times.
+core, shared use of other resources such as disk I/O typically
+still has an effect on run times.
+Therefore we recommend running a single judgedaemon per physical
+machine for contests where precise timing is important.
+
 
 Multi-site contests
 -------------------
