@@ -19,6 +19,8 @@ System requirements
 * A TCP/IP network which connects the DOMserver and the judgehosts.
   The machines only need HTTP(S) access to the DOMserver.
 
+We recommend running a single judgedaemon per physical machine.
+For more details see the section :ref:`multiple-judgedaemons`.
 
 .. _judgehost_software:
 
