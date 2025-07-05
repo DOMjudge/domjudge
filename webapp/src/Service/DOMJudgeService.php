@@ -323,6 +323,53 @@ class DOMJudgeService
     }
 
     /**
+     * @return array<array{submissionid: int, judgingid: int, result: string}>
+     */
+
+    public function getUnreadJudgements(): array
+    {
+        $user = $this->getUser();
+        $team = $user->getTeam();
+        $contest = $this->getCurrentContest($team->getTeamId());
+        $unreadJudgements = [];
+        if ($contest === null) {
+            return $unreadJudgements;
+        }
+
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->from(Judging::class, 'j')
+            ->select('j, c, s')
+            ->leftJoin('j.contest', 'c')
+            ->leftJoin('j.submission', 's')
+            ->groupBy('j.judgingid')
+            ->orderBy('j.judgingid')
+            ->andWhere('j.contest = :cid')
+            ->setParameter('cid', $contest->getCid())
+            ->andWhere('j.result IS NOT NULL')
+            ->andWhere('s.team = :team')
+            ->setParameter('team', $team)
+            ->andWhere('s.submittime < c.endtime')
+            ->andWhere('j.valid = 1')
+            ->andWhere('j.seen = 0');
+
+        if ($this->config->get('verification_required')) {
+            $queryBuilder->andWhere('j.verified = 1');
+        }
+
+        /** @var Judging[] $judgings */
+        $judgings = $queryBuilder->getQuery()->getResult();
+
+        foreach ($judgings as $j) {
+            $unreadJudgements[] = [
+                'submissionid' => $j->getSubmissionId(),
+                'judgingid' => $j->getJudgingid(),
+                'result' => $j->getResult()
+            ];
+        }
+        return $unreadJudgements;
+    }
+
+    /**
      * @return array{clarifications: array<array{clarid: int, body: string}>,
      *               judgehosts: array<array{hostname: string, polltime: float}>,
      *               rejudgings: array<array{rejudgingid: int, starttime: string, endtime: string|float}>,
