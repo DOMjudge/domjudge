@@ -152,9 +152,6 @@ class QueuetaskIntegrationTest extends KernelTestCase
         // Using the TestBrowserToken is the easiest way to do this.
         $user  = $this->em->getRepository(User::class)->findAll()[0];
         $token = new TestBrowserToken([], $user, 'main');
-        if (method_exists($token, 'setAuthenticated')) {
-            $token->setAuthenticated(true, false);
-        }
         self::getContainer()->get('security.untracked_token_storage')->setToken($token);
     }
 

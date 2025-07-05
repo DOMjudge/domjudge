@@ -58,7 +58,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     /**
      * Add one or more problems.
      *
-     * @return int[]
+     * @return string[]
      * @throws BadRequestHttpException
      * @throws NonUniqueResultException
      */
@@ -105,7 +105,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
         $messages = [];
         if ($this->importExportService->importProblemsData($contest, $data, $ids, $messages)) {
-            return $ids;
+            return $ids ?? [];
         }
         $message = "Error while adding problems";
         if (!empty($messages)) {

@@ -120,7 +120,7 @@ class PublicControllerTest extends BaseTestCase
             }
         }
 
-        /** @var User $user */
+        /** @var User|null $user */
         $user = static::getContainer()
             ->get(EntityManagerInterface::class)
             ->getRepository(User::class)

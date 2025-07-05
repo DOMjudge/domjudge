@@ -44,8 +44,35 @@ class ImportExportService
     /**
      * Get the YAML data for a given contest.
      *
-     * @return array<string, int|string|array<array{id: string, label: string, letter: string,
-     *                                              name: string, color: string, rgb: string}>> $contest
+     * @return array{
+     *     id: string,
+     *     formal_name: string,
+     *     name: string,
+     *     start_time: string,
+     *     end_time: string,
+     *     duration: string,
+     *     penalty_time: int,
+     *     activate_time: string,
+     *     warning_message?: string,
+     *     medals: array{
+     *         gold: int,
+     *         silver: int,
+     *         bronze: int
+     *     },
+     *     scoreboard_freeze_time?: string,
+     *     scoreboard_freeze_duration?: string,
+     *     scoreboard_thaw_time?: string,
+     *     finalize_time?: string,
+     *     deactivate_time?: string,
+     *     problems?: list<array{
+     *         id: string,
+     *         label: string,
+     *         letter: string,
+     *         name: string,
+     *         color: string|null,
+     *         rgb: string|null,
+     *     }>
+     * }
      */
     public function getContestYamlData(Contest $contest, bool $includeProblems = true): array
     {
@@ -390,7 +417,9 @@ class ImportExportService
             $this->em->persist($contestProblem);
             $this->em->flush();
 
-            $ids[] = $problem->getExternalid();
+            if ($problem->getExternalid()) {
+                $ids[] = $problem->getExternalid();
+            }
         }
 
         $this->em->flush();
@@ -862,7 +891,7 @@ class ImportExportService
     /**
      * Import organization data from the given array.
      *
-     * @param array<array{externalid: string, shortname?: string, icpc_id?: string, name: string, country: string}> $organizationData
+     * @param array<array{externalid: string|null, shortname?: string, icpc_id?: string, name: string, country: string}> $organizationData
      * @param TeamAffiliation[]|null $saved The saved groups
      *
      * @throws NonUniqueResultException
@@ -993,7 +1022,7 @@ class ImportExportService
                     'name' => @$line[4],
                     'country' => @$line[6],
                     'externalid' => $affiliationExternalid,
-                ]
+                ],
             ];
         }
         return $this->importTeamData($teamData, $message);
@@ -1024,7 +1053,7 @@ class ImportExportService
                 ],
                 'team_affiliation' => [
                     'externalid' => $team['organization_id'] ?? null,
-                ]
+                ],
             ];
         }
 
@@ -1158,6 +1187,7 @@ class ImportExportService
                             $propertyAccessor = PropertyAccess::createPropertyAccessor();
                             foreach ($teamItem['team_affiliation'] as $field => $value) {
                                 $propertyAccessor->setValue($teamAffiliation, $field, $value);
+                                assert($teamAffiliation instanceof TeamAffiliation);
                             }
                         } else {
                             $teamAffiliation
@@ -1255,6 +1285,7 @@ class ImportExportService
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             foreach ($teamItem['team'] as $field => $value) {
                 $propertyAccessor->setValue($team, $field, $value);
+                assert($team instanceof Team);
             }
 
             $errors = $this->validator->validate($team);
@@ -1333,7 +1364,7 @@ class ImportExportService
      * @param User[]|null $saved The saved users
      * @param array<array{user: array{name: string|null, externalid: string, username: string,
      *                           plain_password: string|null, teamid?: string|null,
-     *                           team?: array{name: string, category: string, externalid: string}|null,
+     *                           team?: Team|null,
      *                           user_roles: Role[], ip_address: string|null},
      *               team?: array{name: string, externalid: string, category: TeamCategory,
      *                           publicdescription?: string}}> $accountData
@@ -1351,7 +1382,7 @@ class ImportExportService
             if (!empty($accountItem['team'])) {
                 $team = $this->em->getRepository(Team::class)->findOneBy([
                     'name' => $accountItem['team']['name'],
-                    'category' => $accountItem['team']['category']
+                    'category' => $accountItem['team']['category'],
                 ]);
                 if ($team === null) {
                     $team = new Team();
@@ -1414,6 +1445,7 @@ class ImportExportService
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             foreach ($accountItem['user'] as $field => $value) {
                 $propertyAccessor->setValue($user, $field, $value);
+                assert($user instanceof User);
             }
 
             $errors = $this->validator->validate($user);

@@ -45,7 +45,7 @@ class RejudgingStatesFixture extends AbstractTestDataFixture
             $manager->flush();
             // One rejudging can consist of submissions of multiple contests
             foreach ($rejudgingStage[4] as $contestName) {
-                /** @var Contest $contest */
+                /** @var Contest|null $contest */
                 $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => $contestName]);
                 /** @var Team $team */
                 $team = $manager->getRepository(Team::class)->findOneBy(['name' => 'Example teamname']);

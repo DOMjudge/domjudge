@@ -224,6 +224,7 @@ class ImportProblemService
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($problemProperties as $key => $value) {
             $propertyAccessor->setValue($problem, $key, $value);
+            assert($problem instanceof Problem);
         }
 
         $hasErrors = false;
@@ -243,6 +244,7 @@ class ImportProblemService
         if ($contestProblem !== null) {
             foreach ($contestProblemProperties as $key => $value) {
                 $propertyAccessor->setValue($contestProblem, $key, $value);
+                assert($contestProblem instanceof ContestProblem);
             }
 
             $errors = $this->validator->validate($contestProblem);
@@ -763,7 +765,9 @@ class ImportProblemService
                         );
 
                         if (!$submission) {
-                            $messages['danger'][] = $submissionMessage;
+                            if ($submissionMessage) {
+                                $messages['danger'][] = $submissionMessage;
+                            }
                         } else {
                             $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
                             $submission->setExpectedResults($results);
@@ -890,7 +894,7 @@ class ImportProblemService
     }
 
     /**
-     * @param array{danger: string[], info: string[]} $messages
+     * @param array{danger?: string[], info?: string[]} $messages
      */
     private function searchAndAddValidator(ZipArchive $zip, ?array &$messages, string $externalId, string $validationMode, ?Problem $problem): bool
     {
@@ -999,7 +1003,7 @@ class ImportProblemService
     /**
      * Returns true iff the yaml could be parsed correctly.
      *
-     * @param array{danger: string[], info: string[]} $messages
+     * @param array{danger?: string[], info?: string[]} $messages
      */
     public static function parseYaml(bool|string $problemYaml, array &$messages, string &$validationMode, PropertyAccessor $propertyAccessor, Problem $problem): bool
     {
@@ -1075,6 +1079,7 @@ class ImportProblemService
         foreach ($yamlProblemProperties as $key => $value) {
             try {
                 $propertyAccessor->setValue($problem, $key, $value);
+                assert($problem instanceof Problem);
             } catch (Exception $e) {
                 $messages['danger'][] = sprintf('Error: problem.%s: %s', $key, $e->getMessage());
                 return false;
