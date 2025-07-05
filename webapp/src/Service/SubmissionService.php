@@ -854,7 +854,6 @@ class SubmissionService
      */
     public function getSubmissionZipResponse(Submission $submission): StreamedResponse
     {
-        /** @var SubmissionFile[] $files */
         $files = $submission->getFiles();
         $zip   = new ZipArchive;
         if (!($tmpfname = tempnam($this->dj->getDomjudgeTmpDir(), "submission_file-"))) {
@@ -875,10 +874,9 @@ class SubmissionService
 
     public function getSubmissionFileResponse(Submission $submission): StreamedResponse
     {
-        /** @var SubmissionFile[] $files */
         $files = $submission->getFiles();
 
-        if (count($files) !== 1) {
+        if ($files->count() !== 1) {
             throw new ServiceUnavailableHttpException(null, 'Submission does not contain exactly one file.');
         }
 

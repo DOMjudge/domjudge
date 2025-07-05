@@ -152,6 +152,8 @@ class ICPCCmsService
 
     /**
      * Upload standings to the ICPC CMS
+     *
+     * @param-out string $message
      */
     public function uploadStandings(string $token, string $contest, ?string &$message = null): bool
     {

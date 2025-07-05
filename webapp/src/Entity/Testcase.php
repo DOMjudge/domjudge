@@ -94,7 +94,7 @@ class Testcase
     private Collection $judging_runs;
 
     /**
-     * @var Collection<int, ExternalRun>>
+     * @var Collection<int, ExternalRun>
      */
     #[ORM\OneToMany(mappedBy: 'testcase', targetEntity: ExternalRun::class)]
     #[Serializer\Exclude]

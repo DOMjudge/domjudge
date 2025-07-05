@@ -122,8 +122,7 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'ipaddress') {
             // Use target URL from session if set.
-            if ($firewallName !== null &&
-                $targetUrl = $this->getTargetPath($request->getSession(), $firewallName)) {
+            if ($targetUrl = $this->getTargetPath($request->getSession(), $firewallName)) {
                 $this->removeTargetPath($request->getSession(), $firewallName);
                 return new RedirectResponse($targetUrl);
             }

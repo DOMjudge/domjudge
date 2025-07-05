@@ -111,7 +111,7 @@ class ConfigurationService
     /**
      * Get all configuration specifications.
      *
-     * @return ConfigurationSpecification[]
+     * @return array<string, ConfigurationSpecification>
      */
     public function getConfigSpecification(): array
     {
@@ -160,6 +160,7 @@ EOF;
      *
      * @throws NonUniqueResultException
      * @param array<string, Configuration>|null $options
+     * @param-out array<string, Configuration> $options
      * @param array<string, string|array<int|string, string>> $dataToSet
      * @return array<string,string> Error per item
      */
@@ -176,7 +177,7 @@ EOF;
         }
         unset($spec);
 
-        /** @var Configuration[] $options */
+        /** @var array<string, Configuration> $options */
         $options = $options ?? $this->em->createQueryBuilder()
             ->from(Configuration::class, 'c', 'c.name')
             ->select('c')

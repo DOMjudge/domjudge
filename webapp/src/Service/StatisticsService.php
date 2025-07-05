@@ -636,7 +636,7 @@ class StatisticsService
     }
 
     /**
-     * @param array<string, int> $array
+     * @param array<string|int, int> $array
      */
     protected static function setOrIncrement(array &$array, int|string $index): void
     {

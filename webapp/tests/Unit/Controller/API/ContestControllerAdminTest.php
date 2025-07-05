@@ -77,7 +77,6 @@ EOF;
         self::assertIsString($cid);
         unlink($tempYamlFile);
 
-        self::assertIsString($cid);
         self::assertSame('NWERC 2020 Practice Session', $this->getContest($cid)->getName());
         $url = $this->helperGetEndpointURL('contest-yaml', null, $cid);
         $exportContestYaml = $this->verifyApiResponse('GET', $url, 200, $this->apiUser, null, [], true);
@@ -342,7 +341,6 @@ EOF;
         $activate = Utils::toEpochFloat($activateTime);
         $start = Utils::toEpochFloat($startTime);
 
-        self::assertIsString($cid);
         self::assertSame('New Contest to check Activation', $this->getContest($cid)->getName());
         self::assertSame($start, $this->getContest($cid)->getStarttime());
 

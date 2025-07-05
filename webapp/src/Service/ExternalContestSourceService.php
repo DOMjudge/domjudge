@@ -219,7 +219,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData?->provider?->name ?? $this->cachedApiInfoData?->name;
+        return $this->cachedApiInfoData?->provider->name ?? $this->cachedApiInfoData?->name;
     }
 
     public function getApiProviderVersion(): ?string
@@ -228,7 +228,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->cachedApiInfoData?->provider?->version ?? $this->cachedApiInfoData?->domjudge?->version;
+        return $this->cachedApiInfoData?->provider->version ?? $this->cachedApiInfoData?->domjudge?->version;
     }
 
     public function getApiProviderBuildDate(): ?string
@@ -1426,7 +1426,7 @@ class ExternalContestSourceService
             }
         } else {
             // First, check if we actually have the source for this submission in the data.
-            if (empty($data->files[0]?->href)) {
+            if (empty($data->files[0]->href)) {
                 $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
                     'message' => 'No source files in event',
                 ]);

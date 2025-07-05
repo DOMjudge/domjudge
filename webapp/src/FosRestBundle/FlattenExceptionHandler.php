@@ -39,7 +39,7 @@ class FlattenExceptionHandler implements SubscribingHandlerInterface
     }
 
     /**
-     * @param array{params: string[]} $type
+     * @param array{name: string, params: string[]} $type
      *
      * @return array{code: int, message: string}
      */
@@ -49,8 +49,7 @@ class FlattenExceptionHandler implements SubscribingHandlerInterface
         array $type,
         Context $context
     ): array {
-        return $visitor->visitArray($this->convertToArray($exception, $context),
-            $type);
+        return $visitor->visitArray($this->convertToArray($exception, $context), $type);
     }
 
     /**

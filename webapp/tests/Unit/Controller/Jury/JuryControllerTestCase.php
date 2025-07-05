@@ -593,7 +593,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
             self::assertSelectorNotExists('body:contains("' . static::$deleteExtra['selector'] . '")');
             $this->verifyPageResponse('GET', static::$deleteExtra['deleteurl'], 404);
         } else {
-            self::assertTrue(true, "Test skipped");
+            self::markTestSkipped('Test skipped');
         }
     }
 
