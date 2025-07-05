@@ -143,7 +143,10 @@ class MiscController extends BaseController
     #[Route(path: '/updates', methods: ['GET'], name: 'team_ajax_updates')]
     public function updatesAction(): JsonResponse
     {
-        return $this->json(['unread_clarifications' => $this->dj->getUnreadClarifications()]);
+        return $this->json([
+            'unread_clarifications' => $this->dj->getUnreadClarifications(),
+            'unread_submissions' => $this->dj->getUnreadJudgements(),
+        ]);
     }
 
     #[Route(path: '/change-contest/{contestId<-?\d+>}', name: 'team_change_contest')]
