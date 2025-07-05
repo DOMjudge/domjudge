@@ -257,7 +257,6 @@ remove_db_users()
 
 update_password()
 {
-	read_dbpasswords
 	(
     echo "ALTER USER '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
 	echo "FLUSH PRIVILEGES;"
@@ -352,6 +351,7 @@ create-db-users)
 	;;
 
 update-password)
+	read_dbpasswords
 	update_password
 	;;
 
