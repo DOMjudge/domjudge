@@ -98,7 +98,13 @@
                         {% endif %}
                     {% endif %}
                 {% endif %}
-                <th title="problem {{ problem.problem.name }}" scope="col">
+                <th
+                    title="problem {{ problem.problem.name }}"
+                    scope="col"
+                    data-problem-external-id="{{ problem.externalid }}"
+                    data-problem-name="{{ problem.problem.name | escape('html_attr') }}"
+                    data-problem-badge="{{ problem | problemBadge | escape('html_attr') }}"
+                >
                     <a {% if link %}href="{{ link }}"{% endif %} target="{{ target }}">
                         {{  problem | problemBadge }}
                         {% if showPoints %}
@@ -142,7 +148,7 @@
         {% else %}
             {% set color = score.team.category.color %}
         {% endif %}
-        <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}">
+        <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}" data-team-external-id="{{ score.team.externalid }}" data-team-name="{{ score.team.effectiveName | escape('html_attr') }}">
             {% if enable_ranking %}
                 {% if medalsEnabled %}
                     <td class="no-border">
@@ -308,10 +314,14 @@
                         {% set link = path('jury_team', {teamId: score.team.teamid, restrict: restrict}) %}
                     {% elseif static %}
                         {% set link = '#' %}
-                        {% set extra = 'data-bs-toggle="modal" data-bs-target="#team-submissions-modal-' ~ score.team.teamid ~ '-' ~ problem.probid ~ '"' %}
+                        {% set extra = 'data-submissions-url="' ~ path('public_submissions_data') ~ '"' %}
+                        {% set extra = extra ~ ' data-team-id="' ~ score.team.externalid ~ '"' %}
+                        {% set extra = extra ~ ' data-problem-id="' ~ problem.externalid ~ '"' %}
                     {% else %}
-                        {% set link = path('public_submissions', {teamId: score.team.teamid, problemId: problem.probid}) %}
-                        {% set extra = 'data-ajax-modal' %}
+                        {% set link = path('public_submissions', {teamId: score.team.externalid, problemId: problem.externalid}) %}
+                        {% set extra = 'data-submissions-url="' ~ path('public_submissions_data_cell', {teamId: score.team.externalid, problemId: problem.externalid}) ~ '"' %}
+                        {% set extra = extra ~ ' data-team-id="' ~ score.team.externalid ~ '"' %}
+                        {% set extra = extra ~ ' data-problem-id="' ~ problem.externalid ~ '"' %}
                     {% endif %}
 
                     <td class="score_cell">
@@ -409,7 +419,12 @@
     {% else %}
         {% set color = score.team.category.color %}
     {% endif %}
-    <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}" style="border-bottom-width: 0; height: 28px;">
+    <tr
+        class="{{ classes | join(' ') }}"
+        data-team-id="{{ score.team.teamid }}"
+        data-team-external-id="{{ score.team.externalid }}"
+        data-team-name="{{ score.team.effectiveName | escape('html_attr') }}"
+        style="border-bottom-width: 0; height: 28px;">
         {% if enable_ranking %}
             <td class="scorepl">
                 {% if medalsEnabled and medalColor != '' %}
@@ -528,7 +543,7 @@
             <td colspan="{{ problemSpan }}">
                 {% for problem in problems %}
                     {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
-                    {{ problem | problemBadgeMaybe(matrixItem) }}
+                    {{ problem | problemBadgeMaybe(matrixItem, score, static) }}
                 {% endfor %}
             </td>
         </tr>
@@ -544,16 +559,6 @@
                 {% include 'partials/team.html.twig' with {size: 6, team: score.team} %}
             {% endblock %}
         {% endembed %}
-        {% for problem in problems %}
-            {% embed 'partials/modal.html.twig' with {'modalId': 'team-submissions-modal-' ~ score.team.teamid ~ '-' ~ problem.probid} %}
-                {% block title %}
-                    Submissions for team {{ score.team.effectiveName }} on problem {{ problem | problemBadge }} {{ problem.problem.name }}
-                {% endblock %}
-                {% block content %}
-                    {% include 'public/partials/submission_list.html.twig' with {size: 6, team: score.team, submissions: submissionsPerTeamAndProblem[score.team.teamid][problem.probid] ?? []} %}
-                {% endblock %}
-            {% endembed %}
-        {% endfor %}
     {% endfor %}
 {% endif %}
 

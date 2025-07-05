@@ -46,6 +46,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\InputBag;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -1507,6 +1508,7 @@ class DOMJudgeService
         $assetRegex = '|/CHANGE_ME/([/a-z0-9_\-\.]*)(\??[/a-z0-9_\-\.=]*)|i';
         preg_match_all($assetRegex, $contestPage, $assetMatches);
         $contestPage = preg_replace($assetRegex, '$1$2', $contestPage);
+        $contestPage = str_replace('/public/submissions-data.json', 'submissions-data.json', $contestPage);
 
         $zip = new ZipArchive();
         if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "contest-"))) {
@@ -1518,6 +1520,13 @@ class DOMJudgeService
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary zip file.');
         }
         $zip->addFromString('index.html', $contestPage);
+
+        $submissionsDataRequest  = Request::create('/public/submissions-data.json', Request::METHOD_GET);
+        $submissionsDataRequest->setSession($this->requestStack->getSession());
+        /** @var JsonResponse $response */
+        $response = $this->httpKernel->handle($submissionsDataRequest, HttpKernelInterface::SUB_REQUEST);
+        $submissionsData = $response->getContent();
+        $zip->addFromString('submissions-data.json', $submissionsData);
 
         $publicPath = realpath(sprintf('%s/public/', $this->projectDir));
         foreach ($assetMatches[1] as $file) {

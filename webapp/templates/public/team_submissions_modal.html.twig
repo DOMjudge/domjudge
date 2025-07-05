@@ -1,9 +1,15 @@
 {% extends "partials/modal.html.twig" %}
 
 {% block title %}
-    Submissions for team {{ team.effectiveName }} on problem {{ problem | problemBadge }} {{ problem.problem.name }}
+    Submissions for team
+    <span data-team></span>
+    on problem
+    <span data-problem-badge></span>
+    <span data-problem-name></span>
 {% endblock %}
 
 {% block content %}
-    {% include 'public/partials/submission_list.html.twig' %}
+    <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
 {% endblock %}
