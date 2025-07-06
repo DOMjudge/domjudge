@@ -652,13 +652,15 @@ class DOMJudgeService
             return null;
         }
 
-        $content = $response->getContent();
-
-        if ($content === '') {
-            return null;
+        if ($response instanceof StreamedResponse) {
+            ob_start(flags: PHP_OUTPUT_HANDLER_REMOVABLE);
+            $response->sendContent();
+            $content = ob_get_clean();
+        } else {
+            $content = $response->getContent();
         }
 
-        return Utils::jsonDecode($content);
+        return $content;
     }
 
     public function getDomjudgeEtcDir(): string
