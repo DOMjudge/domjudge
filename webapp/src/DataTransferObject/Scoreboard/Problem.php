@@ -15,7 +15,7 @@ class Problem
         public readonly int $numPending,
         public readonly bool $solved,
         #[Serializer\Exclude(if: 'object.time === null')]
-        public ?int $time = null,
+        public int|string|null $time = null,
         #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
         #[Serializer\Exclude(if: 'object.firstToSolve === null')]
         public ?bool $firstToSolve = null,

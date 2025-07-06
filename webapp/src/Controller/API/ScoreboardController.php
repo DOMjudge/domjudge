@@ -13,6 +13,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
+use App\Utils\CcsApiVersion;
 use App\Utils\Scoreboard\Filter;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,6 +21,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -39,7 +41,7 @@ class ScoreboardController extends AbstractApiController
         DOMJudgeService $DOMJudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected readonly ScoreboardService $scoreboardService
+        protected readonly ScoreboardService $scoreboardService,
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
     }
@@ -169,6 +171,8 @@ class ScoreboardController extends AbstractApiController
         }
 
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
 
         foreach ($scoreboard->getScores() as $teamScore) {
             if ($teamScore->team->getCategory()->getSortorder() !== $sortorder) {
@@ -183,9 +187,11 @@ class ScoreboardController extends AbstractApiController
             } else {
                 $score = new Score(
                     numSolved: $teamScore->numPoints,
-                    totalTime: $teamScore->totalTime,
+                    totalTime: $this->formatTime($teamScore->totalTime, $ccsApiVersion, $scoreIsInSeconds),
                 );
             }
+
+            $lastProblemTime = null;
 
             $problems = [];
             foreach ($scoreboard->getMatrix()[$teamScore->team->getTeamid()] as $problemId => $matrixItem) {
@@ -206,11 +212,17 @@ class ScoreboardController extends AbstractApiController
                 } else {
                     $problem->firstToSolve = $matrixItem->isCorrect && $scoreboard->solvedFirst($teamScore->team, $contestProblem);
                     if ($matrixItem->isCorrect) {
-                        $problem->time = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
+                        $problemTime = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
+                        $problem->time = $this->formatTime($problemTime, $ccsApiVersion, $scoreIsInSeconds);
+                        $lastProblemTime = max($lastProblemTime, $problemTime);
                     }
                 }
 
                 $problems[] = $problem;
+            }
+
+            if ($lastProblemTime !== null) {
+                $score->time = $this->formatTime($lastProblemTime, $ccsApiVersion, $scoreIsInSeconds);
             }
 
             usort($problems, fn(Problem $a, Problem $b) => $a->label <=> $b->label);
@@ -226,5 +238,17 @@ class ScoreboardController extends AbstractApiController
         }
 
         return $results;
+    }
+
+    protected function formatTime(
+        int $time,
+        CcsApiVersion $ccsApiVersion,
+        bool $scoreIsInSeconds
+    ): int|string {
+        if ($ccsApiVersion->useRelTimes()) {
+            return $scoreIsInSeconds ? Utils::relTime($time) : Utils::relTime($time * 60);
+        } else {
+            return $time;
+        }
     }
 }

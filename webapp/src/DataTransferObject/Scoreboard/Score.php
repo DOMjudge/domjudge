@@ -10,7 +10,9 @@ class Score
     public function __construct(
         public readonly int $numSolved,
         #[Serializer\Exclude(if: 'object.totalTime === null')]
-        public readonly ?int $totalTime = null,
+        public readonly int|string|null $totalTime = null,
+        #[Serializer\Exclude(if: 'object.time === null')]
+        public int|string|null $time = null,
         #[Serializer\Exclude(if: 'object.totalRuntime === null')]
         #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
         public readonly ?int $totalRuntime = null,
