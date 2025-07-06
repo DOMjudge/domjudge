@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+
+'''
+export-contest -- Convenience script to export a contest (including metadata,
+teams and problems) from the command line. Defaults to using the CLI interface;
+Specify a DOMjudge API URL as to use that.
+
+Reads credentials from ~/.netrc when using the API.
+
+Part of the DOMjudge Programming Contest Jury System and licensed
+under the GNU GPL. See README and COPYING for details.
+'''
+
+import json
+import sys
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+sys.path.append('@domserver_libdir@')
+import dj_utils
+
+cid = None
+webappdir = '@domserver_webappdir@'
+
+
+def usage():
+    print(f'Usage: {sys.argv[0]} [<domjudge-api-url>]')
+    exit(1)
+
+
+def api_to_file(endpoint: str, filename: str):
+    print(f"Fetching '{endpoint}' to '{filename}'")
+    data = dj_utils.do_api_request(endpoint, decode=False)
+    with open(filename, 'wb') as f:
+        f.write(data)
+
+    return data
+
+
+def download_submission(submission):
+    d = f'submissions/{submission["id"]}'
+    Path(d).mkdir(parents=True, exist_ok=True)
+    for f in submission['files']:
+        if f['mime'] == 'application/zip':
+            print(f"Downloading '{f['href']}'")
+            data = dj_utils.do_api_request(f['href'], decode=False)
+            with open(f'{d}/files.zip', 'wb') as f:
+                f.write(data)
+
+
+if len(sys.argv) == 1:
+    dj_utils.domjudge_webapp_folder_or_api_url = webappdir
+elif len(sys.argv) == 2:
+    dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[1]
+else:
+    usage()
+
+
+user_data = dj_utils.do_api_request('user')
+if 'admin' not in user_data['roles']:
+    print('Your user does not have the \'admin\' role, can not export.')
+    exit(1)
+
+
+contest_id = 'wf48_finals'
+
+for endpoint in [
+        'accounts',
+        'awards',
+        'balloons',
+        'clarifications',
+        'groups',
+        'judgements',
+        'languages',
+        'organizations',
+        'problems',
+#        'runs',
+        'scoreboard',
+        'submissions',
+        'teams',
+        ]:
+    data = api_to_file(f'contests/{contest_id}/{endpoint}', f'{endpoint}.json')
+    if endpoint == 'submissions':
+        submissions = json.loads(data)
+
+api_to_file(f'contests/{contest_id}/event-feed?stream=false', 'event-feed.ndjson')
+
+with ThreadPoolExecutor(20) as executor:
+    for submission in submissions[:10]:
+        executor.submit(download_submission, submission)
