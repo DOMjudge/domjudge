@@ -399,7 +399,8 @@
                             , on {{ judgehosts | printHosts }}
                             {%- if selectedJudging.starttime -%}
                                 {%- if selectedJudging.endtime -%}
-                                    , took <span title="started: {{ selectedJudging.starttime | printtime('H:i:s') }}, completed: {{ selectedJudging.endtime | printtime('H:i:s') }}">{{ selectedJudging.starttime | printHumanTimeDiff(selectedJudging.endtime) }}</span>
+                                    , started at <span title="{{ selectedJudging.starttime | printtime('Y-m-d H:i:s (T)') }}">{{ selectedJudging.starttime | printtime('H:i') }}</span>
+                                    , took <span title="completed: {{ selectedJudging.endtime | printtime('Y-m-d H:i:s (T)') }}">{{ selectedJudging.starttime | printHumanTimeDiff(selectedJudging.endtime) }}</span>
                                 {%- elseif selectedJudging.valid or selectedJudging.rejudging -%}
                                     &nbsp;[still judging - busy {{ selectedJudging.starttime | printtimediff }}]
                                 {%- else -%}
