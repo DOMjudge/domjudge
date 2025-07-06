@@ -350,12 +350,12 @@
             public: true
             description: If set, enable teams and jury to send source code to this command. See admin manual for allowed arguments.
             docdescription: See :ref:`printing` for more information.
-        -   name: event_feed_format
+        -   name: ccs_api_version
             type: enum
-            default_value: 2022-07
-            enum_class: App\Utils\EventFeedFormat
+            default_value: 2025-draft
+            enum_class: App\Utils\CcsApiVersion
             public: false
-            description: Format of the event feed to use. See [current draft](https://ccs-specs.icpc.io/draft/contest_api#event-feed) and [versions available](https://ccs-specs.icpc.io/).
+            description: Version of the CCS API to use for the API and event feed. See [current draft](https://ccs-specs.icpc.io/draft/contest_api#event-feed) and [versions available](https://ccs-specs.icpc.io/).
         -   name: shadow_mode
             type: bool
             default_value: false

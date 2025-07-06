@@ -6,7 +6,7 @@ use App\DataTransferObject\Shadowing\Event;
 use App\DataTransferObject\Shadowing\EventData;
 use App\DataTransferObject\Shadowing\EventType;
 use App\DataTransferObject\Shadowing\Operation;
-use App\Utils\EventFeedFormat;
+use App\Utils\CcsApiVersion;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Exception\LogicException;
@@ -50,7 +50,23 @@ class EventDenormalizer implements DenormalizerInterface, SerializerAwareInterfa
         }
 
         $eventType = EventType::fromString($data['type']);
-        if ($this->getEventFeedFormat($data, $context) === EventFeedFormat::Format_2022_07) {
+        if ($this->getCcsApiVersion($data, $context) === CcsApiVersion::Format_2020_03) {
+            $operation = Operation::from($data['op']);
+            if ($operation === Operation::DELETE) {
+                $eventData = [];
+            } elseif ($eventType->getEventClass() === null) {
+                $eventData = [];
+            } else {
+                $eventData = [$this->serializer->denormalize($data['data'], EventData::class, $format, $context + ['event_type' => $eventType])];
+            }
+            return new Event(
+                $data['id'] ?? null,
+                $eventType,
+                $operation,
+                $data['data']['id'] ?? null,
+                $eventData,
+            );
+        } else {
             $operation = isset($data['data']) ? Operation::CREATE : Operation::DELETE;
             if (isset($data['data']) && !isset($data['data'][0])) {
                 $data['data'] = [$data['data']];
@@ -72,22 +88,6 @@ class EventDenormalizer implements DenormalizerInterface, SerializerAwareInterfa
                 $eventType,
                 $operation,
                 $id,
-                $eventData,
-            );
-        } else {
-            $operation = Operation::from($data['op']);
-            if ($operation === Operation::DELETE) {
-                $eventData = [];
-            } elseif ($eventType->getEventClass() === null) {
-                $eventData = [];
-            } else {
-                $eventData = [$this->serializer->denormalize($data['data'], EventData::class, $format, $context + ['event_type' => $eventType])];
-            }
-            return new Event(
-                $data['id'] ?? null,
-                $eventType,
-                $operation,
-                $data['data']['id'] ?? null,
                 $eventData,
             );
         }
@@ -124,12 +124,13 @@ class EventDenormalizer implements DenormalizerInterface, SerializerAwareInterfa
      * @param array{op?: string}          $event
      * @param array{api_version?: string} $context
      */
-    protected function getEventFeedFormat(array $event, array $context): EventFeedFormat
+    protected function getCcsApiVersion(array $event, array $context): CcsApiVersion
     {
         return match ($context['api_version']) {
-            '2020-03', '2021-11' => EventFeedFormat::Format_2020_03,
-            '2022-07', '2023-06' => EventFeedFormat::Format_2022_07,
-            default => isset($event['op']) ? EventFeedFormat::Format_2020_03 : EventFeedFormat::Format_2022_07,
+            '2020-03' => CcsApiVersion::Format_2020_03,
+            '2021-11', '2022-07', '2023-06' => CcsApiVersion::Format_2023_06,
+            '2025-draft' => CcsApiVersion::Format_2025_DRAFT,
+            default => isset($event['op']) ? CcsApiVersion::Format_2020_03 : CcsApiVersion::Format_2025_DRAFT,
         };
     }
 }
