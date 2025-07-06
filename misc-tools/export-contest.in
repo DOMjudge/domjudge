@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+
+'''
+export-contest -- Convenience script to export a contest (including metadata,
+teams and problems) from the command line. Defaults to using the CLI interface;
+Specify a DOMjudge API URL as to use that.
+
+Reads credentials from ~/.netrc when using the API.
+
+Part of the DOMjudge Programming Contest Jury System and licensed
+under the GNU GPL. See README and COPYING for details.
+'''
+
+import datetime
+import json
+import os
+import sys
+import time
+from argparse import ArgumentParser
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+sys.path.append('@domserver_libdir@')
+import dj_utils
+
+mime_to_extension = {
+    'application/pdf': 'pdf',
+    'application/zip': 'zip',
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/svg+xml': 'svg',
+    'text/plain': 'txt',
+    'video/mp4': 'mp4',
+    'video/mpeg': 'mpg',
+    'video/webm': 'webm',
+}
+
+def get_default_contest():
+    c_default = None
+
+    contests = dj_utils.do_api_request('contests')
+    if len(contests)>0:
+        now = int(time.time())
+        for c in contests:
+            if 'start_time' not in c or c['start_time'] is None:
+                # Assume that a contest with start time unset will start soon.
+                c['start_epoch'] = now + 1
+            else:
+                c['start_epoch'] = datetime.datetime.fromisoformat(c['start_time']).timestamp()
+
+        c_default = contests[0]
+        for c in contests:
+            if c_default['start_epoch']<=now:
+                if c['start_epoch']<=now and c['start_epoch']>c_default['start_epoch']:
+                    c_default = c
+            else:
+                if c['start_epoch']<c_default['start_epoch']:
+                    c_default = c
+
+    return c_default
+
+
+def download_file(file: dict, dir: str, default_name: str):
+    print(f"Downloading '{file['href']}'")
+    os.makedirs(dir, exist_ok=True)
+    filename = file['filename'] if 'filename' in file else default_name
+    dj_utils.do_api_request(file['href'], decode=False, output_file=f'{dir}/{filename}')
+
+
+def is_file(data) -> bool:
+    '''
+    Check whether API `data` represents a FILE object. This is heuristic because
+    no property is strictly required, but we need at least `href` to download
+    the file, so if also we find one other property, we announce a winner.
+    '''
+    if not isinstance(data, dict):
+        return false
+    return 'href' in data and ('mime' in data or 'filename' in data or 'hash' in data)
+
+
+files_to_download = []
+
+def recurse_find_files(data, store_path: str, default_name: str = None):
+    '''
+    Find all objects of FILE type in `data` representing a single Contest API
+    entity, download these from their `href` and save them locally on disk at
+    `store_path`. If the file object does not have a `filename` specified,
+    then use `default_name`, which gets recursively constructed from the JSON
+    path where the file object is located.
+
+    For example, if an organizations contains a single logo file, it will be
+    stored at <store_path>/logo.jpg, but if it has multiple, then they will
+    be stored at <store_path>/logo.<i>.jpg.
+    '''
+    if isinstance(data, list):
+        # Special case single element list for simpler default_name
+        if len(data) == 1:
+            recurse_find_files(data[0], store_path, default_name)
+        else:
+            default_name = '' if default_name is None else default_name + '.'
+            for i, item in enumerate(data):
+                recurse_find_files(item, store_path, default_name + str(i))
+    elif isinstance(data, dict):
+        if is_file(data):
+            if 'mime' in data and data['mime'] in mime_to_extension:
+                default_name += '.' + mime_to_extension[data['mime']]
+            files_to_download.append((data, store_path, default_name))
+        else:
+            default_name = '' if default_name is None else default_name + '.'
+            for key, item in data.items():
+                recurse_find_files(item, store_path, default_name + key)
+
+
+def download_endpoint(name: str, path: str):
+    '''
+    Download endpoint `name` from `path` relative to the base URL of the API.
+    The name is determines the local filename to store it, and directory under
+    which to store any related files
+    '''
+    ext = '.ndjson' if name == 'event-feed' else '.json'
+    filename = name + ext
+
+    print(f"Fetching '{path}' to '{filename}'")
+    data = dj_utils.do_api_request(path, decode=False)
+    with open(filename, 'wb') as f:
+        f.write(data)
+
+    if ext == '.json':
+        # All data in the event feed should already be in the other
+        # API endpoints. Also, we can't directly load it as JSON.
+        data = json.loads(data)
+        if isinstance(data, list):
+            for elem in data:
+                recurse_find_files(elem, f"{name}/{elem['id']}")
+        else:
+            recurse_find_files(data, name)
+
+
+cid = None
+dir = None
+
+parser = ArgumentParser(description='Export a contest archive from DOMjudge via the API.')
+parser.add_argument('-c', '--cid',  help="contest ID to export, defaults to last started, or else first non-started active contest")
+parser.add_argument('-d', '--dir',  help="directory to write the contest archive to, defaults to contest ID in current directory")
+parser.add_argument('-u', '--url',  help="DOMjudge API URL to use, if not specified use the CLI interface")
+args = parser.parse_args()
+
+if args.cid:
+    cid = args.cid
+else:
+    c = get_default_contest()
+    if c is None:
+        print("No contest specified nor an active contest found.")
+        exit(1)
+    else:
+        cid = c['id']
+
+if args.dir:
+    dir = args.dir
+else:
+    dir = cid
+
+if args.url:
+    dj_utils.domjudge_api_url = args.url
+
+user_data = dj_utils.do_api_request('user')
+if 'admin' not in user_data['roles']:
+    print('Your user does not have the \'admin\' role, can not export.')
+    exit(1)
+
+if os.path.exists(dir):
+    print(f'Export directory \'{dir}\' already exists, will not overwrite.')
+    exit(1)
+
+os.makedirs(dir)
+os.chdir(dir)
+
+contest_path = f'contests/{cid}'
+
+# Custom endpoints:
+download_endpoint('api', '')
+download_endpoint('contest', contest_path)
+download_endpoint('event-feed', f'{contest_path}/event-feed?stream=false')
+
+for endpoint in [
+        'access',
+        'accounts',
+        'awards',
+#        'balloons', This is a DOMjudge specific endpoint
+        'clarifications',
+#        'commentary', Not implemented in DOMjudge
+        'groups',
+        'judgement-types',
+        'judgements',
+        'languages',
+        'organizations',
+#        'persons', Not implemented in DOMjudge
+        'problems',
+        'runs',
+        'scoreboard',
+        'state',
+        'submissions',
+        'teams',
+        ]:
+    download_endpoint(endpoint, f"{contest_path}/{endpoint}")
+
+with ThreadPoolExecutor(20) as executor:
+    futures = [executor.submit(download_file, *item) for item in files_to_download]
+    for future in as_completed(futures):
+        future.result() # So it can throw any exception
