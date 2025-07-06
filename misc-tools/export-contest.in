@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+
+'''
+export-contest -- Convenience script to export a contest (including metadata,
+teams and problems) from the command line. Defaults to using the CLI interface;
+Specify a DOMjudge API URL as to use that.
+
+Reads credentials from ~/.netrc when using the API.
+
+Part of the DOMjudge Programming Contest Jury System and licensed
+under the GNU GPL. See README and COPYING for details.
+'''
+
+import json
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+
+sys.path.append('@domserver_libdir@')
+import dj_utils
+
+mime_to_extension = {
+    'application/pdf': 'pdf',
+    'application/zip': 'zip',
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/svg+xml': 'svg',
+    'text/plain': 'txt',
+    'video/mp4': 'mp4',
+    'video/mpeg': 'mpg',
+    'video/webm': 'webm',
+}
+
+
+def usage():
+    print(f'Usage: {sys.argv[0]} [<domjudge-api-url>]')
+    exit(1)
+
+
+def download_file(file: dict, dir: str, default_name: str):
+    print(f"Downloading '{file['href']}'")
+    Path(dir).mkdir(parents=True, exist_ok=True)
+    filename = file['filename'] if 'filename' in file else default_name
+    dj_utils.do_api_request(file['href'], decode=False, output_file=f'{dir}/{filename}')
+
+
+def is_file(data) -> bool:
+    '''
+    Check whether API data represents a FILE object. This is heuristic because
+    no property is strictly required, but we need at least `href` to download
+    the file, so if also we find one other property, we announce a winner.
+    '''
+    if not isinstance(data, dict):
+        return false
+    return 'href' in data and ('mime' in data or 'filename' in data or 'hash' in data)
+
+
+files_to_download = []
+
+def recurse_find_files(data, store_path: str, default_name: str):
+    if isinstance(data, list):
+        # Special case single element list for simpler default_name
+        if len(data) == 1:
+            recurse_find_files(data[0], store_path, default_name)
+        else:
+            for i, item in enumerate(data):
+                recurse_find_files(item, store_path, f"{default_name}.{i}")
+    elif isinstance(data, dict):
+        if is_file(data):
+            if 'mime' in data and data['mime'] in mime_to_extension:
+                default_name += '.' + mime_to_extension[data['mime']]
+            files_to_download.append((data, store_path, default_name))
+        else:
+            for key, item in data.items():
+                recurse_find_files(item, store_path, f"{default_name}.{key}")
+
+
+def download_endpoint(name: str, path: str):
+    ext = '.ndjson' if name == 'event-feed' else '.json'
+    filename = name + ext
+
+    print(f"Fetching '{path}' to '{filename}'")
+    data = dj_utils.do_api_request(path, decode=False)
+    with open(filename, 'wb') as f:
+        f.write(data)
+
+    if ext == '.json':
+        data = json.loads(data)
+        store_path = name
+        if isinstance(data, list):
+            for elem in data:
+                recurse_find_files(elem, f"{store_path}/{elem['id']}", '')
+        else:
+            recurse_find_files(data, store_path, '')
+
+
+if len(sys.argv) == 2:
+    dj_utils.domjudge_api_url = sys.argv[1]
+elif len(sys.argv) != 1:
+    usage()
+
+
+user_data = dj_utils.do_api_request('user')
+if 'admin' not in user_data['roles']:
+    print('Your user does not have the \'admin\' role, can not export.')
+    exit(1)
+
+
+contest_id = 'wf48_finals'
+contest_path = f'contests/{contest_id}'
+
+# Custom endpoints:
+download_endpoint('api', '')
+download_endpoint('contest', contest_path)
+download_endpoint('event-feed', f'{contest_path}/event-feed?stream=false')
+
+for endpoint in [
+        'access',
+        'accounts',
+        'awards',
+#        'balloons', This is a DOMjudge specific endpoint
+        'clarifications',
+#        'commentary', Not implemented in DOMjudge
+        'groups',
+        'judgement-types',
+        'judgements',
+        'languages',
+        'organizations',
+#        'persons', Not implemented in DOMjudge
+        'problems',
+        'runs',
+        'scoreboard',
+        'state',
+        'submissions',
+        'teams',
+        ]:
+    download_endpoint(endpoint, f"{contest_path}/{endpoint}")
+
+with ThreadPoolExecutor(20) as executor:
+    futures = [executor.submit(download_file, *item) for item in files_to_download]
+    for future in as_completed(futures):
+        future.result() # So it can throw any exception
