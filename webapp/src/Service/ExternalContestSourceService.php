@@ -44,8 +44,13 @@ use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use InvalidArgumentException;
 use LogicException;
+use Monolog\Handler\StreamHandler;
+use Monolog\Level;
+use Monolog\Logger;
+use Monolog\Processor\ProcessorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
@@ -58,6 +63,7 @@ use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Traversable;
 use ZipArchive;
 
 class ExternalContestSourceService
@@ -65,6 +71,8 @@ class ExternalContestSourceService
     protected HttpClientInterface $httpClient;
 
     protected ?ExternalContestSource $source = null;
+
+    protected LoggerInterface $logger;
 
     protected bool $contestLoaded = false;
     protected ?ContestData $cachedContestData = null;
@@ -100,19 +108,28 @@ class ExternalContestSourceService
         'submission'    => [],
     ];
 
+    /**
+     * @param Traversable<ProcessorInterface> $logProcessors
+     */
     public function __construct(
         HttpClientInterface $httpClient,
         protected readonly DOMJudgeService $dj,
         protected readonly EntityManagerInterface $em,
-        #[Autowire(service: 'monolog.logger.event-feed-importer')]
-        protected readonly LoggerInterface $logger,
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLog,
         protected readonly SubmissionService $submissionService,
         protected readonly ScoreboardService $scoreboardService,
         protected readonly SerializerInterface&DenormalizerInterface&NormalizerInterface $serializer,
+        #[AutowireIterator(tag: 'monolog.processor')]
+        protected readonly Traversable $logProcessors,
+        #[Autowire(service: 'monolog.processor.psr_log_message')]
+        protected readonly ProcessorInterface $psrLogMessageProcessor,
+        #[Autowire(param: 'kernel.logs_dir')]
+        protected readonly string $logDir,
+        #[Autowire(param: 'kernel.environment')]
+        protected readonly string $env,
         #[Autowire('%domjudge.version%')]
-        string $domjudgeVersion
+        string $domjudgeVersion,
     ) {
         $clientOptions = [
             'headers' => [
@@ -269,6 +286,8 @@ class ExternalContestSourceService
      */
     public function import(bool $fromStart, array $eventsToSkip, ?callable $progressReporter = null): bool
     {
+        $this->configureLogger();
+
         // We need the verdicts to validate judgement-types.
         $this->verdicts = $this->config->getVerdicts(['final', 'external']);
 
@@ -2086,5 +2105,20 @@ class ExternalContestSourceService
             $this->em->remove($warning);
             $this->em->flush();
         }
+    }
+
+    protected function configureLogger(): void
+    {
+        // Configure a logger to use a file per contest.
+        // For this we need to create our own logger.
+        // This code is based on what Symfony does with their default loggers.
+        $name = sprintf('event-feed-importer-%s', $this->getSourceContestId());
+        $logFile = sprintf('%s/%s.log', $this->logDir, $name);
+        $handler = new StreamHandler(
+            $logFile,
+            $this->env === 'dev' ? Level::Debug : Level::Info,
+        );
+        $handler->pushProcessor($this->psrLogMessageProcessor);
+        $this->logger = new Logger($name, [$handler], iterator_to_array($this->logProcessors));
     }
 }
