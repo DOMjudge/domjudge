@@ -161,6 +161,11 @@ class Testcase
         return $this->ranknumber;
     }
 
+    public function getTestcaseHash(): string
+    {
+        return $this->getMd5sumInput() . '_' . $this->getMd5sumOutput();
+    }
+
     /**
      * @param resource|string $description
      */
