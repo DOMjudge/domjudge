@@ -61,6 +61,21 @@
                 </a>
             </div>
         </div>
+        <div class="card mb-3">
+            <div class="card-header">
+                Clarification Requests
+                <a style="float: right;" href="{{ path('team_clarification_add') }}" class="btn btn-secondary btn-sm" data-ajax-modal data-ajax-modal-after="initModalClarificationPreviewAdd">
+                    Request clarification
+                </a>
+            </div>
+            <div class="card-body">
+                {% if clarificationRequests is empty %}
+                    <p class="nodata">No clarification request.</p>
+                {% else %}
+                    {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarificationRequests} %}
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 <div>    
