@@ -757,3 +757,11 @@ blockquote {
     height: 80vh;
     border: 1px solid grey;
 }
+
+#pop-out-button {
+    display: none;
+}
+
+#no-picture-in-picture {
+    display: none;
+}

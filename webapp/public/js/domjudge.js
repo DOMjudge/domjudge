@@ -1292,3 +1292,22 @@ function initScoreboardSubmissions() {
         });
     });
 }
+
+$(function () {
+    function checkExperimentalFeature() {
+        if ("documentPictureInPicture" in window) {
+            // Only the team interface has this button.
+            const togglePipButton = document.querySelector("#pop-out-button");
+            if (togglePipButton) {
+                togglePipButton.style.display = 'inline';
+                togglePipButton.addEventListener("click", togglePictureInPicture, false);
+            }
+        } else {
+            const pipMessage = document.querySelector("#no-picture-in-picture");
+            if (pipMessage) {
+                pipMessage.style.display = 'inline';
+            }
+        }
+    }
+    checkExperimentalFeature();
+});
