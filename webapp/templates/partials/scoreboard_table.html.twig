@@ -308,6 +308,7 @@
                         {% endif %}
                     {% endif %}
 
+                    {% set link = null %}
                     {% set extra = null %}
                     {% if jury %}
                         {% set restrict = {problemId: problem.probid} %}
@@ -317,7 +318,7 @@
                         {% set extra = 'data-submissions-url="' ~ path('public_submissions_data') ~ '"' %}
                         {% set extra = extra ~ ' data-team-id="' ~ score.team.externalid ~ '"' %}
                         {% set extra = extra ~ ' data-problem-id="' ~ problem.externalid ~ '"' %}
-                    {% else %}
+                    {% elseif public %}
                         {% set link = path('public_submissions', {teamId: score.team.externalid, problemId: problem.externalid}) %}
                         {% set extra = 'data-submissions-url="' ~ path('public_submissions_data_cell', {teamId: score.team.externalid, problemId: problem.externalid}) ~ '"' %}
                         {% set extra = extra ~ ' data-team-id="' ~ score.team.externalid ~ '"' %}
