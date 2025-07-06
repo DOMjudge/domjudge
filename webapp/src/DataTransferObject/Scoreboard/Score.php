@@ -5,17 +5,19 @@ namespace App\DataTransferObject\Scoreboard;
 use App\Controller\API\AbstractRestController as ARC;
 use JMS\Serializer\Annotation as Serializer;
 
-readonly class Score
+class Score
 {
     public function __construct(
-        public int  $numSolved,
+        public readonly int $numSolved,
         #[Serializer\Exclude(if: 'object.totalTime === null')]
-        public ?int $totalTime = null,
+        public readonly int|string|null $totalTime = null,
+        #[Serializer\Exclude(if: 'object.time === null')]
+        public int|string|null $time = null,
         #[Serializer\Exclude(if: 'object.totalRuntime === null')]
         #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
-        public ?int $totalRuntime = null,
+        public readonly ?int $totalRuntime = null,
         #[Serializer\Exclude(if: 'object.totalScore === null')]
         #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
-        public ?float $totalScore = null,
+        public readonly ?float $totalScore = null,
     ) {}
 }

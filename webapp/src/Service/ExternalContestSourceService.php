@@ -893,7 +893,11 @@ class ExternalContestSourceService
         }
 
         $toCheck['name'] = $data->name;
-        $toCheck['penalty_time'] = $data->penaltyTime ?? 0;
+        $penaltyTime = $data->penaltyTime ?? 0;
+        if (is_string($penaltyTime) && Utils::isRelTime($penaltyTime)) {
+            $penaltyTime = (int)floor(Utils::relTimeToSeconds($penaltyTime) / 60);
+        }
+        $toCheck['penalty_time'] = $penaltyTime;
 
         $this->compareOrCreateValues($event, $data->id, $contest, $toCheck);
 
