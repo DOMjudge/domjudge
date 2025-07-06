@@ -167,7 +167,9 @@ class Utils
 
     final public const DAY_IN_SECONDS = 60*60*24;
 
-    final public const RELTIME_REGEX = '/^([+-])?(\d+):(\d{2})(?::(\d{2})(?:\.(\d{3}))?)?$/';
+    // Regex to parse relative times. Note that these are our own relative times, which allows
+    // more than the CLICS spec does
+    final public const RELTIME_REGEX = '/^([+-])?(\d+):(\d{2})(?::(\d{2})(?:\.(\d+))?)?$/';
 
     /**
      * Returns the milliseconds part of a time stamp truncated at three digits.

@@ -1049,20 +1049,8 @@ class Contest extends BaseApiEntity implements
     {
         if ($time_string === null) {
             return null;
-        } elseif (preg_match('/^[+-][0-9]+:[0-9]{2}(:[0-9]{2}(\.[0-9]{0,6})?)?$/', $time_string)) {
-            $sign           = ($time_string[0] == '-' ? -1 : +1);
-            $time_string[0] = 0;
-            $times          = explode(':', $time_string, 3);
-            $hours          = (int)$times[0];
-            $minutes        = (int)$times[1];
-            if (count($times) == 2) {
-                $seconds = 0;
-            } else {
-                $seconds = (float)$times[2];
-            }
-            $seconds      = $seconds + 60 * ($minutes + 60 * $hours);
-            $seconds      *= $sign;
-            $absoluteTime = $this->starttime + $seconds;
+        } elseif (Utils::isRelTime($time_string)) {
+            $absoluteTime = $this->starttime + Utils::relTimeToSeconds($time_string);
 
             // Take into account the removed intervals.
             /** @var RemovedInterval[] $removedIntervals */
