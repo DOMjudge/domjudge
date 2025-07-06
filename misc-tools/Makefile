@@ -10,7 +10,7 @@ TARGETS =
 OBJECTS =
 
 SUBST_DOMSERVER = fix_permissions configure-domjudge dj_utils.py \
-                  import-contest force-passwords
+                  import-contest export-contest force-passwords
 
 SUBST_JUDGEHOST = dj_make_chroot dj_run_chroot dj_make_chroot_docker \
                   dj_judgehost_cleanup
