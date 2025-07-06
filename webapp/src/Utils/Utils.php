@@ -1023,4 +1023,16 @@ class Utils
             ini_set('max_execution_time', $minimumMaxExecutionTime);
         }
     }
+
+    /**
+     * Call ob_flush() unless the top-level output buffer does not allow it.
+     */
+    public static function ob_flush_if_possible(): bool
+    {
+        $status = ob_get_status();
+        if ( empty($status) || ($status['flags'] & PHP_OUTPUT_HANDLER_CLEANABLE) ) {
+            return ob_flush();
+        }
+        return false;
+    }
 }
