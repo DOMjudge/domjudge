@@ -30,7 +30,7 @@ def confirm(message: str, default: bool) -> bool:
     return answer == 'y'
 
 
-def parse_api_response(name: str, response: requests.Response):
+def parse_api_response(name: str, response: requests.Response) -> bytes:
     # The connection worked, but we may have received an HTTP error
     if response.status_code >= 300:
         print(response.text)
@@ -44,17 +44,10 @@ def parse_api_response(name: str, response: requests.Response):
     if response.status_code == 204:
         return None
 
-    # We got a successful HTTP response. It worked. Return the full response
-    try:
-        result = json.loads(response.text)
-    except json.decoder.JSONDecodeError:
-        print(response.text)
-        raise RuntimeError(f'Failed to JSON decode the response for API request {name}')
-
-    return result
+    return response.content
 
 
-def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
+def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}, decode: bool = True):
     '''Perform an API call to the given endpoint and return its data.
 
     Based on whether `domjudge_webapp_folder_or_api_url` is a folder or URL this
@@ -64,16 +57,18 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
         name (str): the endpoint to call
         method (str): the method to use, GET or PUT are supported
         jsonData (dict): the JSON data to PUT. Only used when method is PUT
+        decode (bool): whether to decode the returned JSON data, default true
 
     Returns:
-        The endpoint contents.
+        The endpoint contents, either as raw bytes or JSON decoded.
 
     Raises:
-        RuntimeError when the response is not JSON or the HTTP status code is non 2xx.
+        RuntimeError when the HTTP status code is non-2xx or the response
+        cannot be JSON decoded.
     '''
 
     if os.path.isdir(domjudge_webapp_folder_or_api_url):
-        return api_via_cli(name, method, {}, {}, jsonData)
+        result = api_via_cli(name, method, {}, {}, jsonData)
     else:
         global ca_check
         url = f'{domjudge_webapp_folder_or_api_url}/{name}'
@@ -86,7 +81,7 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
             if method == 'GET':
                 response = requests.get(url, headers=headers, verify=ca_check, auth=auth)
             elif method == 'PUT':
-                response = requests.put(url, headers=headers, verify=ca_check, json=jsonData, auth=auth)
+                response = requests.put(url, headers=headers, verify=ca_check, auth=auth, json=jsonData)
             else:
                 raise RuntimeError("Method not supported")
         except requests.exceptions.SSLError:
@@ -99,7 +94,16 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
                 return do_api_request(name)
         except requests.exceptions.RequestException as e:
             raise RuntimeError(e)
-    return parse_api_response(name, response)
+        result = parse_api_response(name, response)
+
+    if decode:
+        try:
+            result = json.loads(result)
+        except json.decoder.JSONDecodeError as e:
+            print(result)
+            raise RuntimeError(f'Failed to JSON decode the response for API request {name}')
+
+    return result
 
 
 def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
@@ -121,7 +125,7 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
     '''
 
     if os.path.isdir(domjudge_webapp_folder_or_api_url):
-        return api_via_cli(name, 'POST', data, {apifilename: file})
+        result = api_via_cli(name, 'POST', data, {apifilename: file})
     else:
         global ca_check
         files = [(apifilename, open(file, 'rb'))]
@@ -141,7 +145,15 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
                 response = requests.post(
                     url, files=files, headers=headers, data=data, verify=ca_check)
 
-    return parse_api_response(name, response)
+        result = parse_api_response(name, response)
+
+    try:
+        result = json.loads(result)
+    except json.decoder.JSONDecodeError as e:
+        print(result)
+        raise RuntimeError(f'Failed to JSON decode the response for API file upload request {name}')
+
+    return result
 
 
 def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {}, jsonData: dict = {}):
@@ -155,7 +167,7 @@ def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {
         jsonData (dict): the JSON data to use. Only used when method is POST or PUT
 
     Returns:
-        The parsed endpoint contents.
+        The raw endpoint contents.
 
     Raises:
         RuntimeError when the command exit code is not 0.
@@ -180,10 +192,14 @@ def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {
     command.append(name)
 
     result = subprocess.run(command, capture_output=True)
-    response = result.stdout.decode('ascii')
 
     if result.returncode != 0:
-        print(response)
+        print(
+            f"Command: {command}\nOutput:\n" +
+            result.stdout.decode('utf-8') +
+            result.stderr.decode('utf-8'),
+            file=sys.stderr
+        )
         raise RuntimeError(f'API request {name} failed')
 
-    return json.loads(response)
+    return result.stdout
