@@ -27,6 +27,7 @@ use App\Entity\ExternalContestSource;
 use App\Entity\ExternalJudgement;
 use App\Entity\ExternalRun;
 use App\Entity\ExternalSourceWarning;
+use App\Entity\JudgeTask;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
@@ -1777,13 +1778,13 @@ class ExternalContestSourceService
         }
 
         // First, load the external run.
+        $persist = false;
         $run     = $this->em
             ->getRepository(ExternalRun::class)
             ->findOneBy([
                             'contest'    => $this->getSourceContest(),
                             'externalid' => $runId,
                         ]);
-        $persist = false;
         if (!$run) {
             $run = new ExternalRun();
             $run
@@ -1858,7 +1859,48 @@ class ExternalContestSourceService
         if ($persist) {
             $this->em->persist($run);
         }
+
+        $lazyEval = $this->config->get('lazy_eval_results');
+        if ($lazyEval === DOMJudgeService::EVAL_ANALYST) {
+            // Check if we want to judge this testcase locally to provide useful information for analysts
+            $priority = $this->getAnalystRunPriority($run);
+            if ($priority !== null) {
+                // Make the judgetask valid and assign running priority if no judgehost has picked it up yet.
+                $this->em->createQueryBuilder()
+                        ->update(JudgeTask::class, 'jt')
+                        ->set('jt.valid', true)
+                        ->set('jt.priority', $priority)
+                        ->andWhere('jt.testcase_id = :testcase_id')
+                        ->andWhere('jt.submission = :submission')
+                        ->andWhere('jt.judgehost IS NULL')
+                        ->setParameter('testcase_id', $testcase->getTestcaseid())
+                        ->setParameter('submission', $externalJudgement->getSubmission())
+                        ->getQuery()
+                        ->execute();
+            }
+        }
+
         $this->em->flush();
+    }
+
+    /**
+     * Checks if this run is interesting to judge locally for more analysis results.
+     * @param ExternalRun $run
+     * @return int The judging priority if it should be run locally, null otherwise.
+     */
+    protected function getAnalystRunPriority(ExternalRun $run): int | null {
+        return match ($run->getResult()) {
+            // We will not get any new useful information for TLE testcases, while they take a lot of judgedaemon time.
+            'timelimit' => null,
+            // We often do not get new useful information for judging correct testcases.
+            'correct' => null,
+            // Wrong answers are interesting for the analysts, assign a high priority but below manual judging.
+            'wrong-answer' => -9,
+            // Compile errors could be interesting to see what went wrong, assign a low priority.
+            'compiler-error' => 9,
+            // Otherwise, judge with normal priority.
+            default => 0,
+        };
     }
 
     protected function processPendingEvents(string $type, string|int $id): void
