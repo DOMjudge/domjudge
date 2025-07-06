@@ -765,3 +765,7 @@ blockquote {
 #no-picture-in-picture {
     display: none;
 }
+
+#pop-out-container {
+    display: none;
+}
