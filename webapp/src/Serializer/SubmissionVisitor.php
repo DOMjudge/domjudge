@@ -45,11 +45,6 @@ class SubmissionVisitor implements EventSubscriberInterface
                     'id'  => $submission->getExternalid(),
                 ]
             );
-            $property = new StaticPropertyMetadata(
-                Submission::class,
-                'files',
-                null
-            );
             $submission->setFileForApi(new FileWithName(
                 href: $route,
                 mime: 'application/zip',

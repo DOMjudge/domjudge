@@ -7,6 +7,7 @@ use App\DataTransferObject\Shadowing\EventType;
 use App\DataTransferObject\Shadowing\LanguageEvent;
 use App\DataTransferObject\Shadowing\Operation;
 use App\DataTransferObject\Shadowing\SubmissionEvent;
+use App\Utils\CcsApiVersion;
 use Generator;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -57,84 +58,86 @@ class EventDenormalizerTest extends KernelTestCase
 
     public function provideDenormalize(): Generator
     {
-        yield '2022-07 format, create/update single' => [
-            [
-                'type' => 'submissions',
-                'token' => 'sometoken',
-                'data' => [
-                    'id' => '123',
-                    'language_id' => 'cpp',
-                    'problem_id' => 'A',
-                    'team_id' => '1',
-                    'time' => '456',
-                    'files' => [],
+        foreach ([CcsApiVersion::Format_2023_06, CcsApiVersion::Format_2025_DRAFT] as $version) {
+            yield $version->value . ' format, create/update single' => [
+                [
+                    'type' => 'submissions',
+                    'token' => 'sometoken',
+                    'data' => [
+                        'id' => '123',
+                        'language_id' => 'cpp',
+                        'problem_id' => 'A',
+                        'team_id' => '1',
+                        'time' => '456',
+                        'files' => [],
+                    ],
                 ],
-            ],
-            ['api_version' => '2022-07'],
-            'sometoken',
-            EventType::SUBMISSIONS,
-            Operation::CREATE,
-            '123',
-            [
-                new SubmissionEvent(
-                    id: '123',
-                    languageId: 'cpp',
-                    problemId: 'A',
-                    teamId: '1',
-                    time: '456',
-                    entryPoint: null,
-                    files: []
-                ),
-            ],
-        ];
-        yield '2022-07 format, create/update unknown class' => [
-            [
-                'type' => 'team-members',
-                'token' => 'sometoken',
-                'data' => [
-                    ['id' => '123'],
+                ['api_version' => $version],
+                'sometoken',
+                EventType::SUBMISSIONS,
+                Operation::CREATE,
+                '123',
+                [
+                    new SubmissionEvent(
+                        id: '123',
+                        languageId: 'cpp',
+                        problemId: 'A',
+                        teamId: '1',
+                        time: '456',
+                        entryPoint: null,
+                        files: []
+                    ),
                 ],
-            ],
-            ['api_version' => '2022-07'],
-            'sometoken',
-            EventType::TEAM_MEMBERS,
-            Operation::CREATE,
-            '123',
-            [],
-        ];
-        yield '2022-07 format, create/update multiple' => [
-            [
-                'type' => 'languages',
-                'token' => 'anothertoken',
-                'data' => [
-                    ['id' => 'cpp'],
-                    ['id' => 'java'],
+            ];
+            yield $version->value . ' format, create/update unknown class' => [
+                [
+                    'type' => 'team-members',
+                    'token' => 'sometoken',
+                    'data' => [
+                        ['id' => '123'],
+                    ],
                 ],
-            ],
-            ['api_version' => '2022-07'],
-            'anothertoken',
-            EventType::LANGUAGES,
-            Operation::CREATE,
-            null,
-            [
-                new LanguageEvent(id: 'cpp'),
-                new LanguageEvent(id: 'java'),
-            ],
-        ];
-        yield '2022-07 format, delete' => [
-            [
-                'type' => 'problems',
-                'id' => '987',
-                'token' => 'yetanothertoken',
-                'data' => null,
-            ],
-            ['api_version' => '2022-07'],
-            'yetanothertoken',
-            EventType::PROBLEMS,
-            Operation::DELETE,
-            '987',
-            [],
-        ];
+                ['api_version' => $version],
+                'sometoken',
+                EventType::TEAM_MEMBERS,
+                Operation::CREATE,
+                '123',
+                [],
+            ];
+            yield $version->value . ' format, create/update multiple' => [
+                [
+                    'type' => 'languages',
+                    'token' => 'anothertoken',
+                    'data' => [
+                        ['id' => 'cpp'],
+                        ['id' => 'java'],
+                    ],
+                ],
+                ['api_version' => $version],
+                'anothertoken',
+                EventType::LANGUAGES,
+                Operation::CREATE,
+                null,
+                [
+                    new LanguageEvent(id: 'cpp'),
+                    new LanguageEvent(id: 'java'),
+                ],
+            ];
+            yield $version->value . ' format, delete' => [
+                [
+                    'type' => 'problems',
+                    'id' => '987',
+                    'token' => 'yetanothertoken',
+                    'data' => null,
+                ],
+                ['api_version' => $version->value],
+                'yetanothertoken',
+                EventType::PROBLEMS,
+                Operation::DELETE,
+                '987',
+                [],
+            ];
+        }
         yield '2020-03 format, create' => [
             [
                 'id' => 'sometoken',
@@ -149,7 +152,7 @@ class EventDenormalizerTest extends KernelTestCase
                     'files' => [],
                 ],
             ],
-            ['api_version' => '2020-03'],
+            ['api_version' => CcsApiVersion::Format_2020_03->value],
             'sometoken',
             EventType::SUBMISSIONS,
             Operation::CREATE,
@@ -175,7 +178,7 @@ class EventDenormalizerTest extends KernelTestCase
                     'id' => 'cpp',
                 ],
             ],
-            ['api_version' => '2020-03'],
+            ['api_version' => CcsApiVersion::Format_2020_03->value],
             'anothertoken',
             EventType::LANGUAGES,
             Operation::UPDATE,
@@ -193,7 +196,7 @@ class EventDenormalizerTest extends KernelTestCase
                     'id' => '987',
                 ],
             ],
-            ['api_version' => '2020-03'],
+            ['api_version' => CcsApiVersion::Format_2020_03->value],
             'yetanothertoken',
             EventType::PROBLEMS,
             Operation::DELETE,

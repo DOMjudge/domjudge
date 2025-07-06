@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use App\Controller\API\GeneralInfoController as GI;
 use App\Entity\Contest;
 use App\Entity\ExternalContestSource;
 use App\Entity\User;
@@ -53,7 +52,6 @@ class ImportEventFeedCommand extends Command
         $this
             ->setHelp(
                 'Import contest data from an event feed following the Contest API specification:' . PHP_EOL .
-                GI::CCS_SPEC_API_URL . ' or any version starting from "2021-11"' . PHP_EOL . PHP_EOL .
                 'Note the following assumptions and caveats:' . PHP_EOL .
                 '- Configuration data will only be verified.' . PHP_EOL .
                 '- Team members will not be imported.' . PHP_EOL .

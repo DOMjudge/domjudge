@@ -7,6 +7,7 @@ use App\DataTransferObject\ImageFile;
 use App\Entity\Contest;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
@@ -41,12 +42,14 @@ class ContestVisitor implements EventSubscriberInterface
         /** @var Contest $contest */
         $contest = $event->getObject();
 
-        $property = new StaticPropertyMetadata(
-            Contest::class,
-            'penalty_time',
-            null
-        );
-        $contest->setPenaltyTimeForApi((int)$this->config->get('penalty_time'));
+        $penaltyTime = $this->config->get('penalty_time');
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+        if ($ccsApiVersion->useRelTimes()) {
+            $contest->setPenaltyTimeForApi(Utils::relTime((int)$penaltyTime * 60, true));
+        } else {
+            $contest->setPenaltyTimeForApi((int)$penaltyTime);
+        }
 
         $id = $contest->getExternalid();
 

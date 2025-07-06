@@ -9,7 +9,7 @@ class ContestEvent implements EventData
         public readonly string $name,
         public readonly string $duration,
         public readonly ?string $scoreboardType,
-        public readonly int $penaltyTime,
+        public readonly int|string $penaltyTime,
         public readonly ?string $formalName,
         public readonly ?string $startTime,
         public readonly ?string $countdownPauseTime,
