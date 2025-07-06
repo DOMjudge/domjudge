@@ -74,6 +74,7 @@ class DOMJudgeService
     final public const EVAL_LAZY = 1;
     final public const EVAL_FULL = 2;
     final public const EVAL_DEMAND = 3;
+    final public const EVAL_ANALYST = 4;
 
     // Regex external identifiers must adhere to. Note that we are not checking whether it
     // does not start with a dot or dash or ends with a dot. We could but it would make the
@@ -1184,7 +1185,7 @@ class DOMJudgeService
         }
     }
 
-    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = false, int $overshoot = 0): void
+    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = false, int $overshoot = 0, bool $valid = true): void
     {
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
@@ -1197,7 +1198,7 @@ class DOMJudgeService
             return;
         }
 
-        $this->actuallyCreateJudgetasks($priority, $judging, $overshoot);
+        $this->actuallyCreateJudgetasks($priority, $judging, $overshoot, $valid);
 
         $team = $submission->getTeam();
         $result = $this->em->createQueryBuilder()
@@ -1215,7 +1216,7 @@ class DOMJudgeService
 
         // Teams that submit frequently slow down the judge queue but should not be able to starve other teams of their
         // deserved and timely judgement.
-        // For every "recent" pending job in the queue by that team, add a penalty (60s). Our definiition of "recent"
+        // For every "recent" pending job in the queue by that team, add a penalty (60s). Our definition of "recent"
         // includes all submissions that have been placed at a virtual time (including penalty) more recent than 60s
         // ago. This is done in order to avoid punishing teams who submit while their submissions are stuck in the queue
         // for other reasons, for example an internal error for a problem or language.
@@ -1586,12 +1587,12 @@ class DOMJudgeService
         return !$evalOnDemand;
     }
 
-    private function actuallyCreateJudgetasks(int $priority, Judging $judging, int $overshoot = 0): void
+    private function actuallyCreateJudgetasks(int $priority, Judging $judging, int $overshoot = 0, bool $valid = true): void
     {
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
         // We use a mass insert query, since that is way faster than doing a separate insert for each testcase.
-        // We first insert judgetasks, then select their ID's and finally insert the judging runs.
+        // We first insert judgetasks, then select their IDs and finally insert the judging runs.
 
         // Step 1: Create the template for the judgetasks.
         $compileExecutable = $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable();
@@ -1599,6 +1600,7 @@ class DOMJudgeService
             ':type' => JudgeTaskType::JUDGING_RUN,
             ':submitid' => $submission->getSubmitid(),
             ':priority' => $priority,
+            ':valid' => $valid ? 1 : 0,
             ':jobid' => $judging->getJudgingid(),
             ':uuid' => $judging->getUuid(),
             ':compile_script_id' => $compileExecutable->getImmutableExecId(),
