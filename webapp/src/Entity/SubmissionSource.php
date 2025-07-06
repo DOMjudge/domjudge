@@ -10,5 +10,4 @@ enum SubmissionSource: string
     case SHADOWING = 'shadowing';
     case TEAM_PAGE = 'team page';
     case UNKNOWN = 'unknown';
-
 }

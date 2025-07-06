@@ -16,8 +16,10 @@ use App\Entity\User;
 use App\Utils\Scoreboard\Filter;
 use App\Utils\Utils;
 use Collator;
+use DateInterval;
 use DateTime;
 use DateTimeImmutable;
+use DateTimeInterface;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -83,10 +85,14 @@ class ImportExportService
             'formal_name' => $contest->getName(),
             'name' => $contest->getShortname(),
             'start_time' => Utils::absTime($contest->getStarttime(), true),
-            'end_time' => Utils::absTime($contest->getEndtime(), true),
+            'end_time' => Utils::isRelTime($contest->getEndtimeString())
+                ? $contest->getEndtimeString()
+                : Utils::absTime($contest->getEndtime(), true),
             'duration' => Utils::relTime($contest->getContestTime((float)$contest->getEndtime())),
             'penalty_time' => $this->config->get('penalty_time'),
-            'activate_time' => Utils::absTime($contest->getActivatetime(), true),
+            'activate_time' => Utils::isRelTime($contest->getActivatetimeString())
+                ? $contest->getActivatetimeString()
+                : Utils::absTime($contest->getActivatetime(), true),
         ];
         if ($warnMsg = $contest->getWarningMessage()) {
             $data['warning_message'] = $warnMsg;
@@ -100,13 +106,17 @@ class ImportExportService
         }
 
         if ($contest->getFreezetime() !== null) {
-            $data['scoreboard_freeze_time'] = Utils::absTime($contest->getFreezetime(), true);
+            $data['scoreboard_freeze_time'] = Utils::isRelTime($contest->getFreezetimeString())
+                ? $contest->getFreezetimeString()
+                : Utils::absTime($contest->getFreezetime(), true);
             $data['scoreboard_freeze_duration'] = Utils::relTime(
                 $contest->getContestTime((float)$contest->getEndtime()) - $contest->getContestTime((float)$contest->getFreezetime()),
                 true,
             );
             if ($contest->getUnfreezetime() !== null) {
-                $data['scoreboard_thaw_time'] = Utils::absTime($contest->getUnfreezetime(), true);
+                $data['scoreboard_thaw_time'] = Utils::isRelTime($contest->getUnfreezetimeString())
+                    ? $contest->getUnfreezetimeString()
+                    : Utils::absTime($contest->getUnfreezetime(), true);
             }
         }
         if ($contest->getFinalizetime() !== null) {
@@ -114,7 +124,9 @@ class ImportExportService
         }
 
         if ($contest->getDeactivatetime() !== null) {
-            $data['deactivate_time'] = Utils::absTime($contest->getDeactivatetime(), true);
+            $data['deactivate_time'] = Utils::isRelTime($contest->getDeactivatetimeString())
+                ? $contest->getDeactivatetimeString()
+                : Utils::absTime($contest->getDeactivatetime(), true);
         }
 
         if ($includeProblems) {
@@ -146,9 +158,15 @@ class ImportExportService
      *
      * @param array<string> $fields
      * @param array<string, string|DateTime|DateTimeImmutable> $data
+     * @return array{time: DateTimeImmutable|null, isRelative: bool|null, relativeTime: string|null}
      */
-    protected function convertImportedTime(array $fields, array $data, ?string &$errorMessage = null): ?DateTimeImmutable
-    {
+    protected function convertImportedTime(
+        array $fields,
+        array $data,
+        bool $allowRelative = true,
+        ?DateTimeInterface $startTime = null,
+        ?string &$errorMessage = null
+    ): array {
         $timeValue = null;
         $usedField = null;
         foreach ($fields as $field) {
@@ -160,10 +178,22 @@ class ImportExportService
             }
         }
 
+        $isRelative = false;
+
         if (is_string($timeValue)) {
-            $time = date_create_from_format(DateTime::ISO8601, $timeValue) ?:
-                // Make sure ISO 8601 but with the T replaced with a space also works.
-                date_create_from_format('Y-m-d H:i:sO', $timeValue);
+            if ($allowRelative && ($isRelative = Utils::isRelTime($timeValue)) && $startTime) {
+                $time = new DateTimeImmutable($startTime->format('Y-m-d H:i:s'), $startTime->getTimezone());
+                $seconds = Utils::relTimeToSeconds($timeValue);
+                if ($seconds < 0) {
+                    $time = $time->sub(new DateInterval(sprintf('PT%sS', abs($seconds))));
+                } else {
+                    $time = $time->add(new DateInterval(sprintf('PT%sS', $seconds)));
+                }
+            } else {
+                $time = date_create_from_format(DateTime::ISO8601, $timeValue) ?:
+                    // Make sure ISO 8601 but with the T replaced with a space also works.
+                    date_create_from_format('Y-m-d H:i:sO', $timeValue);
+            }
         } else {
             /** @var DateTime|DateTimeImmutable $time */
             $time = $timeValue;
@@ -171,11 +201,19 @@ class ImportExportService
         // If/When parsing fails we get a false instead of a null
         if ($time === false) {
             $errorMessage = 'Can not parse '.$usedField;
-            return null;
+            return [
+                'time' => null,
+                'isRelative' => null,
+                'relativeTime' => null,
+            ];
         } elseif ($time) {
             $time = $time->setTimezone(new DateTimeZone(date_default_timezone_get()));
         }
-        return $time instanceof DateTime ? DateTimeImmutable::createFromMutable($time) : $time;
+        return [
+            'time' => $time instanceof DateTime ? DateTimeImmutable::createFromMutable($time) : $time,
+            'isRelative' => $isRelative,
+            'relativeTime' => $isRelative ? $timeValue : null,
+        ];
     }
 
     public function importContestData(mixed $data, ?string &$errorMessage = null, ?string &$cid = null): bool
@@ -215,13 +253,17 @@ class ImportExportService
 
         $invalid_regex = str_replace(['/^[', '+$/'], ['/[^', '/'], DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX);
 
-        $startTime = $this->convertImportedTime($startTimeFields, $data, $errorMessage);
+        ['time' => $startTime] = $this->convertImportedTime($startTimeFields, $data, false, errorMessage: $errorMessage);
         if ($errorMessage) {
             return false;
         }
 
         // Activate time is special, it can return non empty message for parsing error or null if no field was provided
-        $activateTime = $this->convertImportedTime($activateTimeFields, $data, $errorMessage);
+        [
+            'time' => $activateTime,
+            'isRelative' => $activateTimeIsRelative,
+            'relativeTime' => $activateRelativeTime,
+        ] = $this->convertImportedTime($activateTimeFields, $data, startTime: $startTime, errorMessage: $errorMessage);
         if ($errorMessage) {
             return false;
         } elseif (!$activateTime) {
@@ -231,7 +273,11 @@ class ImportExportService
             }
         }
 
-        $deactivateTime = $this->convertImportedTime($deactivateTimeFields, $data, $errorMessage);
+        [
+            'time' => $deactivateTime,
+            'isRelative' => $deactivateTimeIsRelative,
+            'relativeTime' => $deactivateRelativeTime,
+        ] = $this->convertImportedTime($deactivateTimeFields, $data, startTime: $startTime, errorMessage: $errorMessage);
         if ($errorMessage) {
             return false;
         }
@@ -247,11 +293,11 @@ class ImportExportService
             ->setExternalid($contest->getShortname())
             ->setWarningMessage($data['warning_message'] ?? $data['warning-message'] ?? null)
             ->setStarttimeString(date_format($startTime, 'Y-m-d H:i:s e'))
-            ->setActivatetimeString(date_format($activateTime, 'Y-m-d H:i:s e'))
+            ->setActivatetimeString($activateTimeIsRelative ? $activateRelativeTime : date_format($activateTime, 'Y-m-d H:i:s e'))
             ->setEndtimeString(sprintf('+%s', $data['duration']))
             ->setPublic($data['public'] ?? true);
         if ($deactivateTime) {
-            $contest->setDeactivatetimeString(date_format($deactivateTime, 'Y-m-d H:i:s e'));
+            $contest->setDeactivatetimeString($deactivateTimeIsRelative ? $deactivateRelativeTime : date_format($deactivateTime, 'Y-m-d H:i:s e'));
         }
 
         // Get all visible categories. For now, we assume these are the ones getting awards
