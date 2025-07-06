@@ -144,7 +144,7 @@ class CallApiActionCommand extends Command
         }
 
         try {
-            $response = null;
+            $response = '';
             $this->dj->withAllRoles(function () use ($input, $data, $files, &$response) {
                 $response = $this->dj->internalApiRequest('/' . $input->getArgument('endpoint'), $input->getOption('method'), $data, $files, true);
             }, $user);
@@ -154,7 +154,7 @@ class CallApiActionCommand extends Command
             return Command::FAILURE;
         }
 
-        $output->writeln(json_encode($response, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+        $output->writeln($response);
         return Command::SUCCESS;
     }
 }
