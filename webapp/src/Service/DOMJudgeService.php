@@ -1625,7 +1625,7 @@ class DOMJudgeService
                 $testcase->getTestcaseid()
             );
             $judgetaskInsertParams[':testcase_id' . $testcase->getTestcaseid()] = $testcase->getTestcaseid();
-            $judgetaskInsertParams[':testcase_hash' . $testcase->getTestcaseid()] = $testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput();
+            $judgetaskInsertParams[':testcase_hash' . $testcase->getTestcaseid()] = $testcase->getTestcaseHash();
         }
         $judgetaskColumns = array_map(fn(string $column) => substr($column, 1), $judgetaskDefaultParamNames);
         $judgetaskInsertQuery = sprintf(
