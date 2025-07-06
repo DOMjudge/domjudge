@@ -279,7 +279,7 @@
         </div>
     {% endif %}
 
-    {% if not sameTestcaseIds and selectedJudging is not null and selectedJudging.result is not empty %}
+    {% if not sameTestcaseHashes and selectedJudging is not null and selectedJudging.result is not empty %}
         <div class="alert alert-danger">The problem's testcases have changed since this judging has been performed. We recommend rejudging the whole problem.</div>
     {% endif %}
 

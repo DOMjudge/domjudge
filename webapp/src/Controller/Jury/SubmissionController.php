@@ -377,7 +377,7 @@ class SubmissionController extends BaseController
         $runsOutstanding = false;
         $runs       = [];
         $runsOutput = [];
-        $sameTestcaseIds = true;
+        $sameTestcaseHashes = true;
         if ($selectedJudging || $externalJudgement) {
             $queryBuilder = $this->em->createQueryBuilder()
                 ->from(Testcase::class, 't')
@@ -414,9 +414,9 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getResult();
 
-            $judgingRunTestcaseIdsInOrder = $this->em->createQueryBuilder()
+            $judgingRunTestcaseHashesInOrder = $this->em->createQueryBuilder()
                 ->from(JudgeTask::class, 'jt')
-                ->select('jt.testcase_id')
+                ->select('jt.testcase_hash')
                 ->andWhere('jt.jobid = :judging')
                 ->setParameter('judging', $selectedJudging)
                 ->orderBy('jt.judgetaskid')
@@ -424,15 +424,15 @@ class SubmissionController extends BaseController
                 ->getScalarResult();
 
             $cnt = 0;
-            if (count($judgingRunTestcaseIdsInOrder) !== count($runResults)) {
-                $sameTestcaseIds = false;
+            if (count($judgingRunTestcaseHashesInOrder) !== count($runResults)) {
+                $sameTestcaseHashes = false;
             }
             foreach ($runResults as $runResult) {
                 /** @var Testcase $testcase */
                 $testcase = $runResult[0];
-                if (isset($judgingRunTestcaseIdsInOrder[$cnt])) {
-                    if ($testcase->getTestcaseid() != $judgingRunTestcaseIdsInOrder[$cnt]['testcase_id']) {
-                        $sameTestcaseIds = false;
+                if (isset($judgingRunTestcaseHashesInOrder[$cnt])) {
+                    if ($testcase->getTestcasehash() != $judgingRunTestcaseHashesInOrder[$cnt]['testcase_hash']) {
+                        $sameTestcaseHashes = false;
                     }
                 }
                 $cnt++;
@@ -571,7 +571,7 @@ class SubmissionController extends BaseController
             'runs' => $runs,
             'runsOutstanding' => $runsOutstanding,
             'judgehosts' => $judgehosts,
-            'sameTestcaseIds' => $sameTestcaseIds,
+            'sameTestcaseHashes' => $sameTestcaseHashes,
             'externalRuns' => $externalRuns,
             'runsOutput' => $runsOutput,
             'lastRuns' => $lastRuns,
@@ -710,7 +710,7 @@ class SubmissionController extends BaseController
             ->setJobId($jid->getJudgingid())
             ->setUuid($jid->getUuid())
             ->setTestcaseId($testcase->getTestcaseid())
-            ->setTestcaseHash($testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput());
+            ->setTestcaseHash($testcase->getTestcaseHash());
         $this->em->persist($judgeTask);
         $this->em->flush();
         return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_submission', [
