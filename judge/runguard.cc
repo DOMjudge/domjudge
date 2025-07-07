@@ -156,6 +156,7 @@ pid_t child_pid = -1;
 
 static volatile sig_atomic_t received_SIGCHLD = 0;
 static volatile sig_atomic_t received_signal = -1;
+static volatile sig_atomic_t error_in_signalhandler = 0;
 
 int child_pipefd[3][2];
 int child_redirfd[3];
@@ -192,7 +193,7 @@ struct option const long_opts[] = {
 void warning(   const char *, ...) __attribute__((format (printf, 1, 2)));
 void verbose(   const char *, ...) __attribute__((format (printf, 1, 2)));
 void error(int, const char *, ...) __attribute__((format (printf, 2, 3)));
-void write_meta(const char*, const char *, ...) __attribute__((format (printf, 2, 3)));
+void write_meta(const char *, const char *, ...) __attribute__((format (printf, 2, 3)));
 
 void warning(const char *format, ...)
 {
@@ -224,6 +225,25 @@ void verbose(const char *format, ...)
 	}
 
 	va_end(ap);
+}
+
+// These functions are called from signal handlers, so they
+// must only call async-signal-safe functions.
+// write() is async-signal-safe, printf and variants are not.
+void verbose_from_signalhandler(const char* msg)
+{
+	if (!be_quiet && be_verbose) {
+		write(STDERR_FILENO, msg, strlen(msg));
+	}
+}
+
+void warning_from_signalhandler(const char* msg)
+{
+	if (!be_quiet) {
+		// Do not include timing here, as it wouldn't be safe from a signalhandler.
+		// TODO: Consider rewriting using clock_gettime in the future.
+		write(STDERR_FILENO, msg, strlen(msg));
+	}
 }
 
 void error(int errnum, const char *format, ...)
@@ -674,43 +694,47 @@ void terminate(int sig)
 	sigact.sa_handler = SIG_DFL;
 	sigact.sa_flags = 0;
 	if ( sigemptyset(&sigact.sa_mask)!=0 ) {
-		warning("could not initialize signal mask");
+		warning_from_signalhandler("could not initialize signal mask");
 	}
 	if ( sigaction(SIGTERM,&sigact,nullptr)!=0 ) {
-		warning("could not restore signal handler");
+		warning_from_signalhandler("could not restore signal handler");
 	}
 	if ( sigaction(SIGALRM,&sigact,nullptr)!=0 ) {
-		warning("could not restore signal handler");
+		warning_from_signalhandler("could not restore signal handler");
 	}
 
 	if ( sig==SIGALRM ) {
 		if (runpipe_pid > 0) {
-			warning("sending SIGUSR1 to runpipe with pid %d", runpipe_pid);
+			warning_from_signalhandler("sending SIGUSR1 to runpipe");
 			kill(runpipe_pid, SIGUSR1);
 		}
 
 		walllimit_reached |= hard_timelimit;
-		warning("timelimit exceeded (hard wall time): aborting command");
+		warning_from_signalhandler("timelimit exceeded (hard wall time): aborting command");
 	} else {
-		warning("received signal %d: aborting command",sig);
+		warning_from_signalhandler("received signal: aborting command");
 	}
 
 	received_signal = sig;
 
 	/* First try to kill graciously, then hard.
 	   Don't report an already exited process as error. */
-	verbose("sending SIGTERM");
+	verbose_from_signalhandler("sending SIGTERM");
 	if ( kill(-child_pid,SIGTERM)!=0 && errno!=ESRCH ) {
-		error(errno,"sending SIGTERM to command");
+		warning_from_signalhandler("error sending SIGTERM to command");
+		error_in_signalhandler = 1;
+		return;
 	}
 
 	/* Prefer nanosleep over sleep because of higher resolution and
 	   it does not interfere with signals. */
 	nanosleep(&killdelay,nullptr);
 
-	verbose("sending SIGKILL");
+	verbose_from_signalhandler("sending SIGKILL");
 	if ( kill(-child_pid,SIGKILL)!=0 && errno!=ESRCH ) {
-		error(errno,"sending SIGKILL to command");
+		warning_from_signalhandler("error sending SIGKILL to command");
+		error_in_signalhandler = 1;
+		return;
 	}
 
 	/* Wait another while to make sure the process is killed by now. */
@@ -1465,6 +1489,9 @@ int main(int argc, char **argv)
 
 			int r = pselect(nfds+1, &readfds, nullptr, NULL, NULL, &emptymask);
 			if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
+			if (error_in_signalhandler) {
+				error(errno, "error in signal handler, exiting");
+			}
 
 			if ( received_SIGCHLD || received_signal == SIGALRM ) {
 				pid_t pid;
