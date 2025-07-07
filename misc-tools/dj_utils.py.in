@@ -11,7 +11,7 @@ import requests
 import requests.utils
 import subprocess
 import sys
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 
 _myself = os.path.basename(sys.argv[0])
 _default_user_agent = requests.utils.default_user_agent()
@@ -48,6 +48,13 @@ def parse_api_response(endpoint: str, response: requests.Response) -> bytes:
     return response.content
 
 
+def is_relative(url: str) -> bool:
+    parsed = urlparse(url)
+
+    return (parsed.scheme=='' and parsed.netloc=='' and
+            (len(parsed.path)==0 or parsed.path[0]!='/'))
+
+
 def do_api_request(endpoint: str, method: str = 'GET', jsonData: dict = {},
                    data: dict = {}, files: dict = {}, decode: bool = True):
     '''Perform an API call to the given endpoint and return its data.
@@ -56,7 +63,8 @@ def do_api_request(endpoint: str, method: str = 'GET', jsonData: dict = {},
     API via HTTP or CLI.
 
     Parameters:
-        endpoint (str): the endpoint to call
+        endpoint (str): the endpoint to call, relative to `domjudge_api_url`;
+          it may also contain a complete URL, which will then be used as-is
         method (str): the method to use, GET or PUT are supported
         jsonData (dict): the JSON data to PUT. Only used when method is PUT
         data (dict): data to pass in a POST request
@@ -73,12 +81,14 @@ def do_api_request(endpoint: str, method: str = 'GET', jsonData: dict = {},
     # For the recursive call below to ignore SSL validation:
     orig_kwargs = locals()
 
-    if domjudge_api_url is None:
+    if domjudge_api_url is None and is_relative(endpoint):
         result = api_via_cli(endpoint, method, {}, {}, jsonData)
     else:
+        if not is_relative(endpoint):
+            raise RuntimeError(f'Cannot access non-relative URL {endpoint} without API base URL')
         global ca_check
-        url = f'{domjudge_api_url}/{endpoint}'
         parsed = urlparse(domjudge_api_url)
+        url = urljoin(domjudge_api_url, endpoint)
         auth = None
         if parsed.username and parsed.password:
             auth = (parsed.username, parsed.password)
@@ -104,8 +114,7 @@ def do_api_request(endpoint: str, method: str = 'GET', jsonData: dict = {},
             ca_check = not confirm(
                 "Can not verify certificate, ignore certificate check?", False)
             if ca_check:
-                print('Can not verify certificate chain for DOMserver.')
-                exit(1)
+                raise RuntimeError(f'Cannot verify certificate chain for {url}')
             else:
                 # Retry with SSL verification disabled
                 return do_api_request(**orig_kwargs)
