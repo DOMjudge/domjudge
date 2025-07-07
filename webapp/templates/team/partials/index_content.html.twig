@@ -8,18 +8,6 @@
     </h2>
 {% else %}
 
-    <div id="teamscoresummary">
-        {% set displayRank = not contest.freezeData.showFrozen %}
-        {% include 'partials/scoreboard_table.html.twig' with {displayRank: displayRank, jury: false, public: false} %}
-    </div>
-
-    <div class="mt-4" data-flash-messages>
-        {% include 'partials/messages.html.twig' %}
-        {% if not contest.allowSubmit %}
-            {% include 'partials/alert.html.twig' with {'type': 'danger', 'message': 'Submissions (temporarily) disabled.'} %}
-        {% endif %}
-    </div>
-
 <div class="row equal mt-3">
     <div class="col-sm-6">
         <div class="card mb-3">
@@ -30,8 +18,6 @@
                 {% include 'team/partials/submission_list.html.twig' %}
             </div>
         </div>
-    </div>
-    <div class="col-sm-6">
         <div class="card mb-3">
             <div class="card-header">
                 Clarifications
@@ -61,18 +47,32 @@
                 </a>
             </div>
         </div>
-        <div class="card mb-3">
+    </div>
+    <div class="col-sm-6">
+        <div class="card mb-3" style="margin: 0; background-color: #c4d8ff;">
+            <div class="center card-header">
+                Clarifications
+            </div>
+            <div class="card-body" style="padding: 0">
+                {% if clarifications is empty %}
+                    <p class="nodata">No clarifications.</p>
+                {% else %}
+                    {% include 'team/partials/clarification_list_suggested.html.twig' with {clarifications: clarifications} %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="card mb-3" style="padding: 0; background-color: #c4d8ff;"">
             <div class="card-header">
                 Clarification Requests
                 <a style="float: right;" href="{{ path('team_clarification_add') }}" class="btn btn-secondary btn-sm" data-ajax-modal data-ajax-modal-after="initModalClarificationPreviewAdd">
                     Request clarification
                 </a>
             </div>
-            <div class="card-body">
+            <div class="card-body" style="padding: 0">
                 {% if clarificationRequests is empty %}
                     <p class="nodata">No clarification request.</p>
                 {% else %}
-                    {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarificationRequests} %}
+                    {% include 'team/partials/clarification_list_suggested.html.twig' with {clarifications: clarificationRequests} %}
                 {% endif %}
             </div>
         </div>
