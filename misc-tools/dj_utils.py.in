@@ -31,7 +31,7 @@ def confirm(message: str, default: bool) -> bool:
     return answer == 'y'
 
 
-def parse_api_response(name: str, response: requests.Response) -> bytes:
+def parse_api_response(endpoint: str, response: requests.Response) -> bytes:
     # The connection worked, but we may have received an HTTP error
     if response.status_code >= 300:
         print(response.text)
@@ -40,7 +40,7 @@ def parse_api_response(name: str, response: requests.Response) -> bytes:
                 'Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
         else:
             raise RuntimeError(
-                f'API request {name} failed (code {response.status_code}).')
+                f'API request {endpoint} failed (code {response.status_code}).')
 
     if response.status_code == 204:
         return None
@@ -48,7 +48,7 @@ def parse_api_response(name: str, response: requests.Response) -> bytes:
     return response.content
 
 
-def do_api_request(name: str, method: str = 'GET', jsonData: dict = {},
+def do_api_request(endpoint: str, method: str = 'GET', jsonData: dict = {},
                    data: dict = {}, files: dict = {}, decode: bool = True):
     '''Perform an API call to the given endpoint and return its data.
 
@@ -56,7 +56,7 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {},
     API via HTTP or CLI.
 
     Parameters:
-        name (str): the endpoint to call
+        endpoint (str): the endpoint to call
         method (str): the method to use, GET or PUT are supported
         jsonData (dict): the JSON data to PUT. Only used when method is PUT
         data (dict): data to pass in a POST request
@@ -71,10 +71,10 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {},
     '''
 
     if domjudge_api_url is None:
-        result = api_via_cli(name, method, {}, {}, jsonData)
+        result = api_via_cli(endpoint, method, {}, {}, jsonData)
     else:
         global ca_check
-        url = f'{domjudge_api_url}/{name}'
+        url = f'{domjudge_api_url}/{endpoint}'
         parsed = urlparse(domjudge_api_url)
         auth = None
         if parsed.username and parsed.password:
@@ -107,14 +107,14 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {},
                 return do_api_request(name)
         except requests.exceptions.RequestException as e:
             raise RuntimeError(e)
-        result = parse_api_response(name, response)
+        result = parse_api_response(endpoint, response)
 
     if decode:
         try:
             result = json.loads(result)
         except json.decoder.JSONDecodeError as e:
             print(result)
-            raise RuntimeError(f'Failed to JSON decode the response for API request {name}')
+            raise RuntimeError(f'Failed to JSON decode the response for API request {endpoint}')
 
     return result
 
@@ -128,11 +128,11 @@ def upload_file(endpoint: str, apifilename: str, file: str, data: dict = {}):
     do_api_request(endpoint, 'POST', data=data, files={apifilename: file})
 
 
-def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {}, jsonData: dict = {}):
+def api_via_cli(endpoint: str, method: str = 'GET', data: dict = {}, files: dict = {}, jsonData: dict = {}):
     '''Perform the given API request using the CLI
 
     Parameters:
-        name (str): the endpoint to call
+        endpoint (str): the endpoint to call, relative to API base url
         method (str): the method to use. Either GET, POST or PUT
         data (dict): the POST data to use. Only used when method is POST or PUT
         files (dict): the files to use. Only used when method is POST or PUT
@@ -161,7 +161,7 @@ def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {
     if jsonData:
         command.extend(['-j', json.dumps(jsonData)])
 
-    command.append(name)
+    command.append(endpoint)
 
     result = subprocess.run(command, capture_output=True)
 
@@ -172,6 +172,6 @@ def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {
             result.stderr.decode('utf-8'),
             file=sys.stderr
         )
-        raise RuntimeError(f'API request {name} failed')
+        raise RuntimeError(f'API request {endpoint} failed')
 
     return result.stdout
