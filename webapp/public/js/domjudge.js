@@ -617,7 +617,7 @@ function enableRefresh($url, $after, usingAjax) {
         }
     };
     refreshHandler = setTimeout(refresh, $after * 1000);
-    refreshEnabled = true;
+    refreshEnabled = false;
     setCookie('domjudge_refresh', 1);
 
     if(window.location.href == localStorage.getItem('lastUrl')) {
