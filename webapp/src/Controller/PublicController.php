@@ -369,7 +369,7 @@ class PublicController extends BaseController
             }
         }
 
-        $verificationRequired = $this->config->get('verification_required');
+        $verificationRequired = (bool)$this->config->get('verification_required');
 
         foreach ($submissions as $submission) {
             $teamKey = 'team-' . $submission->getTeam()->getExternalid();
