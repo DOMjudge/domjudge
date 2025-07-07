@@ -29,7 +29,6 @@ sys.path.append('@domserver_libdir@')
 import dj_utils
 
 cid = None
-webappdir = '@domserver_webappdir@'
 
 
 def usage():
@@ -134,11 +133,9 @@ def import_contest_problemset_document(cid: str):
         else:
             print('Skipping contest problemset import.')
 
-if len(sys.argv) == 1:
-    dj_utils.domjudge_webapp_folder_or_api_url = webappdir
-elif len(sys.argv) == 2:
-    dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[1]
-else:
+if len(sys.argv) == 2:
+    dj_utils.domjudge_api_url = sys.argv[1]
+elif len(sys.argv) != 1:
     usage()
 
 user_data = dj_utils.do_api_request('user')

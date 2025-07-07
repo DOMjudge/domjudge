@@ -24,8 +24,6 @@ from typing import List, Set
 sys.path.append('@domserver_libdir@')
 import dj_utils
 
-webappdir = '@domserver_webappdir@'
-
 def usage():
     print(f'Usage: {sys.argv[0]} [<domjudge-api-url>]')
     exit(1)
@@ -57,11 +55,9 @@ def _keyify_list(l: List) -> Set:
     return { elem['id']: elem for elem in l }
 
 
-if len(sys.argv) == 1:
-    dj_utils.domjudge_webapp_folder_or_api_url = webappdir
-elif len(sys.argv) == 2:
-    dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[1]
-else:
+if len(sys.argv) == 2:
+    dj_utils.domjudge_api_url = sys.argv[1]
+elif len(sys.argv) != 1:
     usage()
 
 user_data = dj_utils.do_api_request('user')

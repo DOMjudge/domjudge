@@ -16,7 +16,8 @@ from urllib.parse import urlparse
 _myself = os.path.basename(sys.argv[0])
 _default_user_agent = requests.utils.default_user_agent()
 headers = {'user-agent': f'dj_utils/{_myself} ({_default_user_agent})'}
-domjudge_webapp_folder_or_api_url = 'unset'
+domjudge_webapp_dir = '@domserver_webappdir@'
+domjudge_api_url = None
 ca_check = True
 
 
@@ -50,8 +51,8 @@ def parse_api_response(name: str, response: requests.Response) -> bytes:
 def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}, decode: bool = True):
     '''Perform an API call to the given endpoint and return its data.
 
-    Based on whether `domjudge_webapp_folder_or_api_url` is a folder or URL this
-    will use the DOMjudge CLI or HTTP API.
+    Based on whether `domjudge_api_url` is set, this will call the DOMjudge
+    API via HTTP or CLI.
 
     Parameters:
         name (str): the endpoint to call
@@ -67,12 +68,12 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}, decode: 
         cannot be JSON decoded.
     '''
 
-    if os.path.isdir(domjudge_webapp_folder_or_api_url):
+    if domjudge_api_url is None:
         result = api_via_cli(name, method, {}, {}, jsonData)
     else:
         global ca_check
-        url = f'{domjudge_webapp_folder_or_api_url}/{name}'
-        parsed = urlparse(domjudge_webapp_folder_or_api_url)
+        url = f'{domjudge_api_url}/{name}'
+        parsed = urlparse(domjudge_api_url)
         auth = None
         if parsed.username and parsed.password:
             auth = (parsed.username, parsed.password)
@@ -109,8 +110,8 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}, decode: 
 def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
     '''Upload the given file to the API at the given path with the given name.
 
-    Based on whether `domjudge_webapp_folder_or_api_url` is a folder or URL this
-    will use the DOMjudge CLI or HTTP API.
+    Based on whether `domjudge_api_url` is set, this will call the DOMjudge
+    API via HTTP or CLI.
 
     Parameters:
         name (str): the endpoint to call
@@ -124,13 +125,13 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
         RuntimeError when the HTTP status code is non 2xx.
     '''
 
-    if os.path.isdir(domjudge_webapp_folder_or_api_url):
+    if domjudge_api_url is None:
         response = api_via_cli(name, 'POST', data, {apifilename: file})
     else:
         global ca_check
         files = [(apifilename, open(file, 'rb'))]
 
-        url = f'{domjudge_webapp_folder_or_api_url}/{name}'
+        url = f'{domjudge_api_url}/{name}'
 
         try:
             response = requests.post(
@@ -166,7 +167,7 @@ def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {
     '''
 
     command = [
-        f'{domjudge_webapp_folder_or_api_url}/bin/console',
+        f'{domjudge_webapp_dir}/bin/console',
         'api:call',
         '-m',
         method
