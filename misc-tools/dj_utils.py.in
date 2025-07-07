@@ -70,6 +70,9 @@ def do_api_request(endpoint: str, method: str = 'GET', jsonData: dict = {},
         cannot be JSON decoded.
     '''
 
+    # For the recursive call below to ignore SSL validation:
+    orig_kwargs = locals()
+
     if domjudge_api_url is None:
         result = api_via_cli(endpoint, method, {}, {}, jsonData)
     else:
@@ -104,7 +107,8 @@ def do_api_request(endpoint: str, method: str = 'GET', jsonData: dict = {},
                 print('Can not verify certificate chain for DOMserver.')
                 exit(1)
             else:
-                return do_api_request(name)
+                # Retry with SSL verification disabled
+                return do_api_request(**orig_kwargs)
         except requests.exceptions.RequestException as e:
             raise RuntimeError(e)
         result = parse_api_response(endpoint, response)
