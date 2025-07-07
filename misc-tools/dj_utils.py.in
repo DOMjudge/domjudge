@@ -48,7 +48,8 @@ def parse_api_response(name: str, response: requests.Response) -> bytes:
     return response.content
 
 
-def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}, decode: bool = True):
+def do_api_request(name: str, method: str = 'GET', jsonData: dict = {},
+                   data: dict = {}, files: dict = {}, decode: bool = True):
     '''Perform an API call to the given endpoint and return its data.
 
     Based on whether `domjudge_api_url` is set, this will call the DOMjudge
@@ -58,6 +59,7 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}, decode: 
         name (str): the endpoint to call
         method (str): the method to use, GET or PUT are supported
         jsonData (dict): the JSON data to PUT. Only used when method is PUT
+        data (dict): data to pass in a POST request
         decode (bool): whether to decode the returned JSON data, default true
 
     Returns:
@@ -78,13 +80,23 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}, decode: 
         if parsed.username and parsed.password:
             auth = (parsed.username, parsed.password)
 
+        kwargs = {
+            'headers': headers,
+            'verify': ca_check,
+            'auth': auth,
+        }
+        if method == 'GET':
+            pass
+        elif method == 'PUT':
+            kwargs['json'] = jsonData
+        elif method == 'POST':
+            kwargs['data'] = data
+            kwargs['files'] = [(name, open(file, 'rb')) for (name, file) in files]
+        else:
+            raise RuntimeError(f"Method {method} not supported")
+
         try:
-            if method == 'GET':
-                response = requests.get(url, headers=headers, verify=ca_check, auth=auth)
-            elif method == 'PUT':
-                response = requests.put(url, headers=headers, verify=ca_check, auth=auth, json=jsonData)
-            else:
-                raise RuntimeError("Method not supported")
+            response = requests.request(method, url, **kwargs)
         except requests.exceptions.SSLError:
             ca_check = not confirm(
                 "Can not verify certificate, ignore certificate check?", False)
@@ -107,46 +119,13 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}, decode: 
     return result
 
 
-def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
-    '''Upload the given file to the API at the given path with the given name.
+def upload_file(endpoint: str, apifilename: str, file: str, data: dict = {}):
+    '''Upload the given file to the API endpoint as apifilename.
 
-    Based on whether `domjudge_api_url` is set, this will call the DOMjudge
-    API via HTTP or CLI.
-
-    Parameters:
-        name (str): the endpoint to call
-        apifilename (str): the argument name for the file to upload
-        file (str): the file to upload
-
-    Returns:
-        The parsed endpoint contents.
-
-    Raises:
-        RuntimeError when the HTTP status code is non 2xx.
+    Thin wrapper around do_api_request, see that function for more details.
     '''
 
-    if domjudge_api_url is None:
-        response = api_via_cli(name, 'POST', data, {apifilename: file})
-    else:
-        global ca_check
-        files = [(apifilename, open(file, 'rb'))]
-
-        url = f'{domjudge_api_url}/{name}'
-
-        try:
-            response = requests.post(
-                url, files=files, headers=headers, data=data, verify=ca_check)
-        except requests.exceptions.SSLError:
-            ca_check = not confirm(
-                "Can not verify certificate, ignore certificate check?", False)
-            if ca_check:
-                print('Can not verify certificate chain for DOMserver.')
-                exit(1)
-            else:
-                response = requests.post(
-                    url, files=files, headers=headers, data=data, verify=ca_check)
-
-    return parse_api_response(name, response)
+    do_api_request(endpoint, 'POST', data=data, files={apifilename: file})
 
 
 def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {}, jsonData: dict = {}):
