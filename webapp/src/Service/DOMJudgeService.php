@@ -43,6 +43,7 @@ use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\InputBag;
@@ -652,7 +653,8 @@ class DOMJudgeService
             return null;
         }
 
-        if ($response instanceof StreamedResponse) {
+        if ($response instanceof StreamedResponse ||
+            $response instanceof BinaryFileResponse) {
             ob_start(flags: PHP_OUTPUT_HANDLER_REMOVABLE);
             $response->sendContent();
             $content = ob_get_clean();
