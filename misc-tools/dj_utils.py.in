@@ -55,8 +55,9 @@ def is_relative(url: str) -> bool:
             (len(parsed.path)==0 or parsed.path[0]!='/'))
 
 
-def do_api_request(endpoint: str, method: str = 'GET', jsonData: dict = {},
-                   data: dict = {}, files: dict = {}, decode: bool = True):
+def do_api_request(endpoint: str, method: str = 'GET', *,
+                   data: dict = {}, files: dict = {}, jsonData: dict = {},
+                   decode: bool = True, output_file: str = None):
     '''Perform an API call to the given endpoint and return its data.
 
     Based on whether `domjudge_api_url` is set, this will call the DOMjudge
@@ -69,9 +70,12 @@ def do_api_request(endpoint: str, method: str = 'GET', jsonData: dict = {},
         jsonData (dict): the JSON data to PUT. Only used when method is PUT
         data (dict): data to pass in a POST request
         decode (bool): whether to decode the returned JSON data, default true
+        output_file (str): write API response to file, e.g. for binary content;
+          incompatible with decode=True.
 
     Returns:
-        The endpoint contents, either as raw bytes or JSON decoded.
+        The endpoint contents, either as raw bytes or JSON decoded, unless
+        output_file is specified.
 
     Raises:
         RuntimeError when the HTTP status code is non-2xx or the response
@@ -82,7 +86,7 @@ def do_api_request(endpoint: str, method: str = 'GET', jsonData: dict = {},
     orig_kwargs = locals()
 
     if domjudge_api_url is None and is_relative(endpoint):
-        result = api_via_cli(endpoint, method, {}, {}, jsonData)
+        result = api_via_cli(endpoint, method, jsonData=jsonData, output_file=output_file)
     else:
         if not is_relative(endpoint):
             raise RuntimeError(f'Cannot access non-relative URL {endpoint} without API base URL')
@@ -122,6 +126,10 @@ def do_api_request(endpoint: str, method: str = 'GET', jsonData: dict = {},
             raise RuntimeError(e)
         result = parse_api_response(endpoint, response)
 
+        if output_file is not None:
+            with open(output_file, 'wb') as f:
+                f.write(result)
+
     if decode:
         try:
             result = json.loads(result)
@@ -141,7 +149,9 @@ def upload_file(endpoint: str, apifilename: str, file: str, data: dict = {}):
     do_api_request(endpoint, 'POST', data=data, files={apifilename: file})
 
 
-def api_via_cli(endpoint: str, method: str = 'GET', data: dict = {}, files: dict = {}, jsonData: dict = {}):
+def api_via_cli(endpoint: str, method: str = 'GET', *,
+                data: dict = {}, files: dict = {}, jsonData: dict = {},
+                output_file: str = None):
     '''Perform the given API request using the CLI
 
     Parameters:
@@ -150,6 +160,7 @@ def api_via_cli(endpoint: str, method: str = 'GET', data: dict = {}, files: dict
         data (dict): the POST data to use. Only used when method is POST or PUT
         files (dict): the files to use. Only used when method is POST or PUT
         jsonData (dict): the JSON data to use. Only used when method is POST or PUT
+        output_file (str): write API response to file, e.g. for binary content
 
     Returns:
         The raw endpoint contents.
@@ -173,6 +184,9 @@ def api_via_cli(endpoint: str, method: str = 'GET', data: dict = {}, files: dict
 
     if jsonData:
         command.extend(['-j', json.dumps(jsonData)])
+
+    if output_file:
+        command.extend(['-o', output_file])
 
     command.append(endpoint)
 

@@ -65,6 +65,12 @@ class CallApiActionCommand extends Command
                 'u',
                 InputOption::VALUE_REQUIRED,
                 'User to use for API requests. If not given, the first admin user will be used'
+            )
+            ->addOption(
+                'output',
+                'o',
+                InputOption::VALUE_REQUIRED,
+                'Filename to write output to. Useful for binary content'
             );
     }
 
@@ -154,7 +160,13 @@ class CallApiActionCommand extends Command
             return Command::FAILURE;
         }
 
-        $output->writeln($response);
+        if ($filename = $input->getOption('output')) {
+            $fd = fopen($filename, 'w');
+            fwrite($fd, $response);
+            fclose($fd);
+        } else {
+            $output->write($response);
+        }
         return Command::SUCCESS;
     }
 }
