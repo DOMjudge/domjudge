@@ -48,17 +48,6 @@
     {% endif %}
     var markdownPreviewUrl = "{{ path('markdown_preview') }}";
     $(function () {
-        /* toggle refresh if set */
-        {% if refresh is defined and refresh %}
-        $('#refresh-navitem').on('click', function () {
-            toggleRefresh('{{ refresh.url | raw }}', {{ refresh.after }}, {{ refresh.ajax | default(0) }});
-        });
-        {% endif %}
-        /* Enable page refresh if set if wanted by the page, and wanted by the user */
-        {% if refresh is defined and refresh and refresh_flag %}
-        enableRefresh('{{ refresh.url | raw }}', {{ refresh.after }}, {{ refresh.ajax | default(0) }});
-        {% endif %}
-
         initializeAjaxModals();
     });
 </script>
