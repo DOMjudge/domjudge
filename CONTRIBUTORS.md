@@ -12,6 +12,7 @@ Many people have contributed over the years. Many thanks:
 * Jelle Besseling,
 * Jeroen Bransen,
 * Daniel Brinkers,
+* Wei-hua Chien
 * Mohammad Amin Chitgarha,
 * Matt Claycomb,
 * Stijn van Drongelen,
@@ -21,6 +22,7 @@ Many people have contributed over the years. Many thanks:
 * Kihoon Han,
 * Matt Hermes,
 * Seokju Hong,
+* Soha Jin,
 * Michał Kaczanowicz,
 * Yevgeny Kazakov,
 * Robert King,
@@ -46,6 +48,7 @@ Many people have contributed over the years. Many thanks:
 * Tobias Polzer,
 * Ludo Pulles,
 * Rusty Rob,
+* Rubén Rubio
 * Jeroen Schot,
 * Maarten Sijm,
 * Matt Steele,
@@ -59,7 +62,7 @@ Many people have contributed over the years. Many thanks:
 * Rick Wouters,
 * Tim "S.D.Eagle" Zeitz,
 * Xiaoyang Gu,
-* and Github users dup4, LETS-BEE, sylxjtu, s911415.
+* and Github users as6325400, dup4, LETS-BEE, sylxjtu, s911415.
 
 Some code has been ported from the ETH Zurich fork by Christoph
 Krautz, Thomas Rast et al.
