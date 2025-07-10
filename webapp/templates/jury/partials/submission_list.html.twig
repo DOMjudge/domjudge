@@ -15,6 +15,11 @@
     {% set tdExtraClass = ' thick-border' %}
 {% endif %}
 
+{% set is_scoring = false %}
+{% if current_contest and current_contest.scoreboardTypeString == 'scoring' %}
+    {% set is_scoring = true %}
+{% endif %}
+
 {% if submissions is empty %}
     <div class="alert alert-warning">No submissions</div>
 {% else %}
@@ -71,6 +76,9 @@
                 <th scope="col" colspan="2">{%-if rejudging is defined %}new {% endif %}result</th>
             {% else %}
                 <th scope="col">{%- if rejudging is defined %}new {% endif %}result</th>
+            {% endif %}
+            {% if is_scoring %}
+                <th scope="col">score</th>
             {% endif %}
             {% if showExternalResult and not showExternalTestcases %}
                 <th scope="col">external result</th>
@@ -159,6 +167,13 @@
                         {% endif %}
                         {{ submission | printValidJurySubmissionResult }}
                     </a>
+                </td>
+                <td class="right">
+                    {% if submission.score is not null %}
+                        {{ submission.score | number_format(2, '.', '') }}
+                    {% else %}
+                        {{ '-' }}
+                    {% endif %}
                 </td>
                 {% if showExternalResult and not showExternalTestcases %}
                     {% if submission.externalJudgements.empty %}

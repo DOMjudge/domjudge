@@ -211,6 +211,11 @@ class Problem extends BaseApiEntity implements
     #[Serializer\Exclude]
     private Collection $languages;
 
+    #[ORM\ManyToOne(inversedBy: 'problems')]
+    #[ORM\JoinColumn(name: 'parent_testcase_group_id', referencedColumnName: 'testcase_group_id', nullable: true, onDelete: 'SET NULL')]
+    #[Serializer\Exclude]
+    private ?TestcaseGroup $parentTestcaseGroup = null;
+
     public function setProbid(int $probid): Problem
     {
         $this->probid = $probid;
@@ -653,5 +658,16 @@ class Problem extends BaseApiEntity implements
     {
         $this->languages->removeElement($language);
         return $this;
+    }
+
+    public function setParentTestcaseGroup(?TestcaseGroup $parentTestcaseGroup): Problem
+    {
+        $this->parentTestcaseGroup = $parentTestcaseGroup;
+        return $this;
+    }
+
+    public function getParentTestcaseGroup(): ?TestcaseGroup
+    {
+        return $this->parentTestcaseGroup;
     }
 }

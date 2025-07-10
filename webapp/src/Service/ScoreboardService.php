@@ -8,6 +8,7 @@ use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\RankCache;
+use App\Entity\ScoreboardType;
 use App\Entity\ScoreCache;
 use App\Entity\Submission;
 use App\Entity\Team;
@@ -259,12 +260,27 @@ class ScoreboardService
 
         $contestStartTime = $contest->getStarttime();
 
+        $pointsJury      = "0";
+        $pointsPubl      = "0";
         foreach ($submissions as $submission) {
             /** @var Judging|ExternalJudgement|null $judging */
             if ($useExternalJudgements) {
                 $judging = $submission->getExternalJudgements()->first() ?: null;
             } else {
                 $judging = $submission->getJudgings()->first() ?: null;
+            }
+
+            if ($problem->isScoringProblem()) {
+                $score = $submission->getScore();
+                if ($score !== null) {
+                    if (bccomp($pointsJury, $score, scale: self::SCALE) < 0) {
+                        $pointsJury = $score;
+                    }
+                    if (!$submission->isAfterFreeze() &&
+                        bccomp($pointsPubl, $score, scale: self::SCALE) < 0) {
+                        $pointsPubl = $score;
+                    }
+                }
             }
 
             // three things will happen in the loop in this order:
@@ -409,19 +425,21 @@ class ScoreboardService
             'solvetimeRestricted' => (int)$timeJury,
             'runtimeRestricted' => $runtimeJury === PHP_INT_MAX ? 0 : $runtimeJury,
             'isCorrectRestricted' => (int)$correctJury,
+            'scoreRestricted' => $pointsJury,
             'submissionsPublic' => $submissionsPubl,
             'pendingPublic' => $pendingPubl,
             'solvetimePublic' => (int)$timePubl,
             'runtimePublic' => $runtimePubl === PHP_INT_MAX ? 0 : $runtimePubl,
             'isCorrectPublic' => (int)$correctPubl,
+            'scorePublic' => $pointsPubl,
             'isFirstToSolve' => (int)$firstToSolve,
         ];
         $this->em->getConnection()->executeQuery('REPLACE INTO scorecache
             (cid, teamid, probid,
-             submissions_restricted, pending_restricted, solvetime_restricted, runtime_restricted, is_correct_restricted,
-             submissions_public, pending_public, solvetime_public, runtime_public, is_correct_public, is_first_to_solve)
-            VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :runtimeRestricted, :isCorrectRestricted,
-            :submissionsPublic, :pendingPublic, :solvetimePublic, :runtimePublic, :isCorrectPublic, :isFirstToSolve)', $params);
+             submissions_restricted, pending_restricted, solvetime_restricted, runtime_restricted, is_correct_restricted, score_restricted,
+             submissions_public, pending_public, solvetime_public, runtime_public, is_correct_public, score_public, is_first_to_solve)
+            VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :runtimeRestricted, :isCorrectRestricted, :scoreRestricted,
+            :submissionsPublic, :pendingPublic, :solvetimePublic, :runtimePublic, :isCorrectPublic, :scorePublic, :isFirstToSolve)', $params);
 
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                                                     ['lock' => $lockString]) != 1) {
@@ -478,11 +496,13 @@ class ScoreboardService
         $totalTime = [];
         $totalRuntime = [];
         $timeOfLastCorrect = [];
+        $score = [];
         foreach ($variants as $variant => $isRestricted) {
             $numPoints[$variant] = 0;
             $totalTime[$variant] = $team->getPenalty();
             $totalRuntime[$variant] = 0;
             $timeOfLastCorrect[$variant] = 0;
+            $score[$variant] = "0";
         }
 
         $penaltyTime      = (int) $this->config->get('penalty_time');
@@ -517,16 +537,24 @@ class ScoreboardService
                     $timeOfLastCorrect[$variant] = max($timeOfLastCorrect[$variant], $solveTimeForProblem);
                     $totalTime[$variant] += $solveTimeForProblem + $penalty;
                     $totalRuntime[$variant] += $scoreCacheCell->getRuntime($isRestricted);
+                    $score[$variant] = bcadd($score[$variant], $scoreCacheCell->getScore($isRestricted), self::SCALE);
                 }
             }
         }
 
         foreach ($variants as $variant => $isRestricted) {
-            $scoreKey[$variant] = self::getICPCScoreKey(
-                $numPoints[$variant],
-                $totalTime[$variant],
-                $timeOfLastCorrect[$variant]
-            );
+            if ($contest->getScoreboardType() == ScoreboardType::PASS_FAIL) {
+                $scoreKey[$variant] = self::getICPCScoreKey(
+                    $numPoints[$variant],
+                    $totalTime[$variant],
+                    $timeOfLastCorrect[$variant]
+                );
+            } else {
+                // TODO: Any tie breakers?
+                $scoreKey[$variant] = self::getScoringScoreKey(
+                    $score[$variant],
+                );
+            }
         }
 
         // Use a direct REPLACE INTO query to drastically speed this up.
@@ -541,12 +569,14 @@ class ScoreboardService
             'totalRuntimePublic' => $totalRuntime['public'],
             'sortKeyRestricted' => $scoreKey['restricted'],
             'sortKeyPublic' => $scoreKey['public'],
+            'scoreRestricted' => $score['restricted'],
+            'scorePublic' => $score['public'],
         ];
         $this->em->getConnection()->executeQuery('REPLACE INTO rankcache (cid, teamid,
-            points_restricted, totaltime_restricted, totalruntime_restricted,
-            points_public, totaltime_public, totalruntime_public, sort_key_restricted, sort_key_public)
-            VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :totalRuntimeRestricted,
-            :pointsPublic, :totalTimePublic, :totalRuntimePublic, :sortKeyRestricted, :sortKeyPublic)', $params);
+            points_restricted, totaltime_restricted, totalruntime_restricted, score_restricted,
+            points_public, totaltime_public, totalruntime_public, sort_key_restricted, sort_key_public, score_public)
+            VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :totalRuntimeRestricted, :scoreRestricted,
+            :pointsPublic, :totalTimePublic, :totalRuntimePublic, :sortKeyRestricted, :sortKeyPublic, :scorePublic)', $params);
 
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                                                     ['lock' => $lockString]) != 1) {
@@ -593,6 +623,16 @@ class ScoreboardService
             self::convertToScoreKeyElement($numSolved),
             self::convertToScoreKeyElement($totalTime, Order::Ascending),
             self::convertToScoreKeyElement($timeOfLastSolved, Order::Ascending),
+        ];
+        return implode(',', $scoreKeyArray);
+    }
+
+    public static function getScoringScoreKey(string $score): string
+    {
+        // For scoring problems, we only use the score as the key (for now).
+        // We assume that the score is a valid bcmath number.
+        $scoreKeyArray = [
+            self::convertToScoreKeyElement($score, Order::Descending),
         ];
         return implode(',', $scoreKeyArray);
     }

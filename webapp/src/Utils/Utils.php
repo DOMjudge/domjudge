@@ -1023,4 +1023,10 @@ class Utils
             ini_set('max_execution_time', $minimumMaxExecutionTime);
         }
     }
+
+    public static function numericToBcMath(float|int|string $value, int $scale = 9): string
+    {
+        $value = (string)$value;
+        return bcadd($value, '0', $scale);
+    }
 }

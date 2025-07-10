@@ -294,6 +294,9 @@
                 <th scope="col">max runtime</th>
                 <th scope="col">judgehost</th>
                 <th scope="col">result</th>
+                {% if submission.problem.scoringProblem %}
+                    <th scope="col">score</th>
+                {% endif %}
                 <th scope="col">rejudging</th>
             </tr>
             </thead>
@@ -332,6 +335,17 @@
                             {% endif %}
                         </a>
                     </td>
+                    {% if submission.problem.scoringProblem %}
+                        <td class="right">
+                            <a href="{{ link }}">
+                                {% if judging.score is not null %}
+                                    {{ "%.2f" | format(judging.score) }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </a>
+                        </td>
+                    {% endif %}
                     <td>
                         <a href="{{ link }}">
                             {% if judging.rejudging is not null %}
@@ -378,6 +392,9 @@
                             {%- else %}
                                 {{- selectedJudging.result | printValidJuryResult -}}
                             {%- endif %}
+                            {% if submission.problem.scoringProblem %}
+                                (score: {{ "%.2f" | format(selectedJudging.score) }})
+                            {% endif %}
                             {%- if submission.stillBusy -%}
                                 (&hellip;)
                             {%- endif -%}
@@ -662,6 +679,14 @@
                                        judging
                                    {% endif %}
                                 </span>
+                            {% endif %}
+                            {% if submission.problem.scoringProblem %}
+                                | Score:
+                                {% if run.firstJudgingRun.score is not null %}
+                                    {{ "%.2f" | format(run.firstJudgingRun.score) }}
+                                {% else %}
+                                    -
+                                {% endif %}
                             {% endif %}
                         {% endif %}
                         {% if runsOutput[runIdx].hostname is not null %}
