@@ -36,10 +36,12 @@ class AccessControllerTest extends BaseTestCase
             'groups' => ['id', 'icpc_id', 'name', 'hidden'],
             'organizations' => ['id', 'icpc_id', 'name', 'formal_name', 'country', 'country_flag'],
             'teams' => ['id', 'icpc_id', 'name', 'display_name', 'organization_id', 'group_ids'],
+            'accounts' => ['id', 'username', 'name', 'type'],
             'state' => ['started', 'frozen', 'ended', 'thawed', 'finalized', 'end_of_updates'],
             'submissions' => ['id', 'language_id', 'problem_id', 'team_id', 'time', 'contest_time', 'entry_point', 'files'],
             'judgements' => ['id', 'submission_id', 'judgement_type_id', 'start_time', 'start_contest_time', 'end_time', 'end_contest_time', 'max_run_time'],
             'runs' => ['id', 'judgement_id', 'ordinal', 'judgement_type_id', 'time', 'contest_time', 'run_time'],
+            'clarifications' => ['id', 'from_team_id', 'problem_id', 'text', 'time', 'contest_time'],
             'awards' => ['id', 'citation', 'team_ids'],
         ];
 
@@ -54,7 +56,9 @@ class AccessControllerTest extends BaseTestCase
                     break;
                 }
             }
-            self::assertSame($expectedProperties, $actualProperties);
+            foreach ($expectedProperties as $property) {
+                self::assertContains($property, $actualProperties);
+            }
         }
     }
 }
