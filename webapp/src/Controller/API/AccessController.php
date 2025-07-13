@@ -59,6 +59,9 @@ class AccessController extends AbstractApiController
             $organizationProperties[] = 'country';
             $organizationProperties[] = 'country_flag';
         }
+        if ($this->config->get('show_affiliation_logos')) {
+            $organizationProperties[] = 'logo';
+        }
 
         $submissionsProperties = [
             'id',
