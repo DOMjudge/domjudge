@@ -111,6 +111,7 @@ class Problem extends BaseApiEntity implements
     /**
      * @var array<int, string>
      */
+    #[Serializer\Exclude]
     private array $typesToString = [
         self::TYPE_PASS_FAIL => 'pass-fail',
         self::TYPE_SCORING => 'scoring',
