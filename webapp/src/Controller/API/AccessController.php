@@ -49,6 +49,9 @@ class AccessController extends AbstractApiController
             'icpc_id',
             'name',
             'formal_name',
+            // DOMjudge specific properties:
+            'affilid',
+            'shortname',
         ];
 
         // Add country data to organizations if supported
@@ -65,6 +68,9 @@ class AccessController extends AbstractApiController
             'time',
             'contest_time',
             'entry_point',
+            // DOMjudge specific properties:
+            'submitid',
+            'import_error',
         ];
 
         // Add files to submissions if allowed
@@ -107,6 +113,14 @@ class AccessController extends AbstractApiController
                         'scoreboard_type',
                         'penalty_time',
                         'banner',
+                        // DOMjudge specific properties:
+                        'cid',
+                        'short_name',
+                        'end_time',
+                        'allow_submit',
+                        'runtime_as_score_tiebreaker',
+                        'warning_message',
+                        'problemset',
                     ],
                 ),
                 new AccessEndpoint(
@@ -128,6 +142,10 @@ class AccessController extends AbstractApiController
                         'extensions',
                         'compiler',
                         'runner',
+                        // DOMjudge specific properties:
+                        'allow_judge',
+                        'time_factor',
+                        'filter_compiler_files',
                     ],
                 ),
                 new AccessEndpoint(
@@ -142,6 +160,8 @@ class AccessController extends AbstractApiController
                         'time_limit',
                         'test_data_count',
                         'statement',
+                        // DOMjudge specific properties:
+                        'probid',
                     ],
                 ),
                 new AccessEndpoint(
@@ -151,6 +171,11 @@ class AccessController extends AbstractApiController
                         'icpc_id',
                         'name',
                         'hidden',
+                        // DOMjudge specific properties:
+                        'categoryid',
+                        'sortorder',
+                        'color',
+                        'allow_self_registration',
                     ],
                 ),
                 new AccessEndpoint(
@@ -170,6 +195,11 @@ class AccessController extends AbstractApiController
                         'hidden',
                         'location',
                         'photo',
+                        // DOMjudge specific properties:
+                        'teamid',
+                        'affiliation',
+                        'nationality',
+                        'public_description',
                     ]
                 ),
                 new AccessEndpoint(
@@ -181,6 +211,16 @@ class AccessController extends AbstractApiController
                         'type',
                         'ip',
                         'team_id',
+                        // DOMjudge specific properties:
+                        'first_login_time',
+                        'last_login_time',
+                        'last_api_login_time',
+                        'team',
+                        'roles',
+                        'userid',
+                        'email',
+                        'last_ip',
+                        'enabled',
                     ]
                 ),
                 new AccessEndpoint(
@@ -209,6 +249,8 @@ class AccessController extends AbstractApiController
                         'end_time',
                         'end_contest_time',
                         'max_run_time',
+                        // DOMjudge specific properties:
+                        'valid',
                     ],
                 ),
                 new AccessEndpoint(
@@ -234,6 +276,9 @@ class AccessController extends AbstractApiController
                         'text',
                         'time',
                         'contest_time',
+                        // DOMjudge specific properties:
+                        'clarid',
+                        'answered',
                     ],
                 ),
                 new AccessEndpoint(
