@@ -100,9 +100,13 @@ class AccessController extends AbstractApiController
                         'name',
                         'formal_name',
                         'start_time',
+                        'countdown_pause_time',
                         'duration',
                         'scoreboard_freeze_duration',
+                        'scoreboard_thaw_time',
+                        'scoreboard_type',
                         'penalty_time',
+                        'banner',
                     ],
                 ),
                 new AccessEndpoint(
@@ -122,9 +126,8 @@ class AccessController extends AbstractApiController
                         'entry_point_required',
                         'entry_point_name',
                         'extensions',
-                        // TODO: we don't support these yet
-//                        'compiler.command',
-//                        'runner.command',
+                        'compiler',
+                        'runner',
                     ],
                 ),
                 new AccessEndpoint(
@@ -160,9 +163,24 @@ class AccessController extends AbstractApiController
                         'id',
                         'icpc_id',
                         'name',
+                        'label',
                         'display_name',
                         'organization_id',
                         'group_ids',
+                        'hidden',
+                        'location',
+                        'photo',
+                    ]
+                ),
+                new AccessEndpoint(
+                    type: 'accounts',
+                    properties: [
+                        'id',
+                        'username',
+                        'name',
+                        'type',
+                        'ip',
+                        'team_id',
                     ]
                 ),
                 new AccessEndpoint(
@@ -203,6 +221,19 @@ class AccessController extends AbstractApiController
                         'time',
                         'contest_time',
                         'run_time',
+                    ],
+                ),
+                new AccessEndpoint(
+                    type: 'clarifications',
+                    properties: [
+                        'id',
+                        'from_team_id',
+                        'to_team_id',
+                        'reply_to_id',
+                        'problem_id',
+                        'text',
+                        'time',
+                        'contest_time',
                     ],
                 ),
                 new AccessEndpoint(
