@@ -315,7 +315,7 @@ class EventLogService
                 $query = ['ids' => $ids];
             }
 
-            $this->dj->withAllRoles(function () use ($query, $url, &$json) {
+            $this->dj->withAllRoles(function () use ($query, $url, &$response) {
                 $response = $this->dj->internalApiRequest($url, Request::METHOD_GET, $query);
             });
 
