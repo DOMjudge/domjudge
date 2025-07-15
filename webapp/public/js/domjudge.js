@@ -660,7 +660,7 @@ function toggleRefresh($url, $after, usingAjax) {
     $('#refresh-toggle').text(text);
 }
 
-function updateClarifications()
+function updateTeamNotifications()
 {
     $.ajax({
         url: $('#menuDefault').data('update-url'),
@@ -675,6 +675,14 @@ function updateClarifications()
                 sendNotification('New clarification',
                  {'tag': 'clar_' + data[i].clarid,
                         'link': domjudge_base_url + '/team/clarifications/'+data[i].clarid,
+                        'body': data[i].body });
+            }
+            data = json['unread_submissions'];
+            num = data.length;
+            for (let i = 0; i < num; i++) {
+                sendNotification('New result for submission',
+                 {'tag': 'sub_' + data[i].submissionid + '_judge_' + data[i].judgingid,
+                        'link': domjudge_base_url + '/team/submissions/'+data[i].submissionid,
                         'body': data[i].body });
             }
         }
