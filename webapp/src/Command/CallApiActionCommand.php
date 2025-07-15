@@ -65,6 +65,12 @@ class CallApiActionCommand extends Command
                 'u',
                 InputOption::VALUE_REQUIRED,
                 'User to use for API requests. If not given, the first admin user will be used'
+            )
+            ->addOption(
+                'output',
+                'o',
+                InputOption::VALUE_REQUIRED,
+                'Filename to write output to. Useful for binary content'
             );
     }
 
@@ -144,7 +150,7 @@ class CallApiActionCommand extends Command
         }
 
         try {
-            $response = null;
+            $response = '';
             $this->dj->withAllRoles(function () use ($input, $data, $files, &$response) {
                 $response = $this->dj->internalApiRequest('/' . $input->getArgument('endpoint'), $input->getOption('method'), $data, $files, true);
             }, $user);
@@ -154,7 +160,13 @@ class CallApiActionCommand extends Command
             return Command::FAILURE;
         }
 
-        $output->writeln(json_encode($response, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+        if ($filename = $input->getOption('output')) {
+            $fd = fopen($filename, 'w');
+            fwrite($fd, $response);
+            fclose($fd);
+        } else {
+            $output->write($response);
+        }
         return Command::SUCCESS;
     }
 }

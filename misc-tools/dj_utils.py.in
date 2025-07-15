@@ -1,0 +1,204 @@
+'''
+dj_utils -- Utility functions for other convenience scripts that come with DOMjudge.
+
+Part of the DOMjudge Programming Contest Jury System and licensed
+under the GNU GPL. See README and COPYING for details.
+'''
+
+import json
+import os
+import requests
+import requests.utils
+import subprocess
+import sys
+from urllib.parse import urlparse, urljoin
+
+_myself = os.path.basename(sys.argv[0])
+_default_user_agent = requests.utils.default_user_agent()
+headers = {'user-agent': f'dj_utils/{_myself} ({_default_user_agent})'}
+domjudge_webapp_dir = '@domserver_webappdir@'
+domjudge_api_url = None
+ca_check = True
+
+
+def confirm(message: str, default: bool) -> bool:
+    answer = 'x'
+    while answer not in ['y', 'n']:
+        yn = 'Y/n' if default else 'y/N'
+        answer = input(f'{message} ({yn}) ').lower()
+        if answer == '':
+            answer = 'y' if default else 'n'
+    return answer == 'y'
+
+
+def parse_api_response(endpoint: str, response: requests.Response) -> bytes:
+    # The connection worked, but we may have received an HTTP error
+    if response.status_code >= 300:
+        print(response.text)
+        if response.status_code == 401:
+            raise RuntimeError(
+                'Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
+        else:
+            raise RuntimeError(
+                f'API request {endpoint} failed (code {response.status_code}).')
+
+    if response.status_code == 204:
+        return None
+
+    return response.content
+
+
+def is_relative(url: str) -> bool:
+    parsed = urlparse(url)
+
+    return (parsed.scheme=='' and parsed.netloc=='' and
+            (len(parsed.path)==0 or parsed.path[0]!='/'))
+
+
+def do_api_request(endpoint: str, method: str = 'GET', *,
+                   data: dict = {}, files: dict = {}, jsonData: dict = {},
+                   decode: bool = True, output_file: str = None):
+    '''Perform an API call to the given endpoint and return its data.
+
+    Based on whether `domjudge_api_url` is set, this will call the DOMjudge
+    API via HTTP or CLI.
+
+    Parameters:
+        endpoint (str): the endpoint to call, relative to `domjudge_api_url`;
+          it may also contain a complete URL, which will then be used as-is
+        method (str): the method to use, GET or PUT are supported
+        jsonData (dict): the JSON data to PUT. Only used when method is PUT
+        data (dict): data to pass in a POST request
+        decode (bool): whether to decode the returned JSON data, default true
+        output_file (str): write API response to file, e.g. for binary content;
+          incompatible with decode=True.
+
+    Returns:
+        The endpoint contents, either as raw bytes or JSON decoded, unless
+        output_file is specified.
+
+    Raises:
+        RuntimeError when the HTTP status code is non-2xx or the response
+        cannot be JSON decoded.
+    '''
+
+    # For the recursive call below to ignore SSL validation:
+    orig_kwargs = locals()
+
+    if domjudge_api_url is None and is_relative(endpoint):
+        result = api_via_cli(endpoint, method, jsonData=jsonData, output_file=output_file)
+    else:
+        if not is_relative(endpoint):
+            raise RuntimeError(f'Cannot access non-relative URL {endpoint} without API base URL')
+        global ca_check
+        parsed = urlparse(domjudge_api_url)
+        url = urljoin(domjudge_api_url, endpoint)
+        auth = None
+        if parsed.username and parsed.password:
+            auth = (parsed.username, parsed.password)
+
+        kwargs = {
+            'headers': headers,
+            'verify': ca_check,
+            'auth': auth,
+        }
+        if method == 'GET':
+            pass
+        elif method == 'PUT':
+            kwargs['json'] = jsonData
+        elif method == 'POST':
+            kwargs['data'] = data
+            kwargs['files'] = [(name, open(file, 'rb')) for (name, file) in files]
+        else:
+            raise RuntimeError(f"Method {method} not supported")
+
+        try:
+            response = requests.request(method, url, **kwargs)
+        except requests.exceptions.SSLError:
+            ca_check = not confirm(
+                "Can not verify certificate, ignore certificate check?", False)
+            if ca_check:
+                raise RuntimeError(f'Cannot verify certificate chain for {url}')
+            else:
+                # Retry with SSL verification disabled
+                return do_api_request(**orig_kwargs)
+        except requests.exceptions.RequestException as e:
+            raise RuntimeError(e)
+        result = parse_api_response(endpoint, response)
+
+        if output_file is not None:
+            with open(output_file, 'wb') as f:
+                f.write(result)
+
+    if decode:
+        try:
+            result = json.loads(result)
+        except json.decoder.JSONDecodeError as e:
+            print(result)
+            raise RuntimeError(f'Failed to JSON decode the response for API request {endpoint}')
+
+    return result
+
+
+def upload_file(endpoint: str, apifilename: str, file: str, data: dict = {}):
+    '''Upload the given file to the API endpoint as apifilename.
+
+    Thin wrapper around do_api_request, see that function for more details.
+    '''
+
+    do_api_request(endpoint, 'POST', data=data, files={apifilename: file})
+
+
+def api_via_cli(endpoint: str, method: str = 'GET', *,
+                data: dict = {}, files: dict = {}, jsonData: dict = {},
+                output_file: str = None):
+    '''Perform the given API request using the CLI
+
+    Parameters:
+        endpoint (str): the endpoint to call, relative to API base url
+        method (str): the method to use. Either GET, POST or PUT
+        data (dict): the POST data to use. Only used when method is POST or PUT
+        files (dict): the files to use. Only used when method is POST or PUT
+        jsonData (dict): the JSON data to use. Only used when method is POST or PUT
+        output_file (str): write API response to file, e.g. for binary content
+
+    Returns:
+        The raw endpoint contents.
+
+    Raises:
+        RuntimeError when the command exit code is not 0.
+    '''
+
+    command = [
+        f'{domjudge_webapp_dir}/bin/console',
+        'api:call',
+        '-m',
+        method
+    ]
+
+    for item in data:
+        command.extend(['-d', f'{item}={data[item]}'])
+
+    for item in files:
+        command.extend(['-f', f'{item}={files[item]}'])
+
+    if jsonData:
+        command.extend(['-j', json.dumps(jsonData)])
+
+    if output_file:
+        command.extend(['-o', output_file])
+
+    command.append(endpoint)
+
+    result = subprocess.run(command, capture_output=True)
+
+    if result.returncode != 0:
+        print(
+            f"Command: {command}\nOutput:\n" +
+            result.stdout.decode('utf-8') +
+            result.stderr.decode('utf-8'),
+            file=sys.stderr
+        )
+        raise RuntimeError(f'API request {endpoint} failed')
+
+    return result.stdout

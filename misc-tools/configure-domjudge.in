@@ -24,8 +24,6 @@ from typing import List, Set
 sys.path.append('@domserver_libdir@')
 import dj_utils
 
-webappdir = '@domserver_webappdir@'
-
 def usage():
     print(f'Usage: {sys.argv[0]} [<domjudge-api-url>]')
     exit(1)
@@ -57,11 +55,9 @@ def _keyify_list(l: List) -> Set:
     return { elem['id']: elem for elem in l }
 
 
-if len(sys.argv) == 1:
-    dj_utils.domjudge_webapp_folder_or_api_url = webappdir
-elif len(sys.argv) == 2:
-    dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[1]
-else:
+if len(sys.argv) == 2:
+    dj_utils.domjudge_api_url = sys.argv[1]
+elif len(sys.argv) != 1:
     usage()
 
 user_data = dj_utils.do_api_request('user')
@@ -88,7 +84,7 @@ if os.path.exists('config.json'):
             print(f'  - missing keys from new config = {missing_keys}')
         if diffs or new_keys or missing_keys:
             if dj_utils.confirm('  - Upload these configuration changes?', True):
-                actual_config = dj_utils.do_api_request('config', 'PUT', expected_config)
+                actual_config = dj_utils.do_api_request('config', 'PUT', jsonData=expected_config)
                 diffs, new_keys, missing_keys = compare_configs(
                         actual_config=actual_config,
                         expected_config=expected_config
