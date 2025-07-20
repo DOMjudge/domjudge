@@ -335,6 +335,14 @@ class Judging extends BaseApiEntity
         return $this->valid;
     }
 
+    // Note: we can't use CCSApiVersion::Format_2025_DRAFT->value in PHP 8.1, only in 8.2+
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT, '2025-draft'])]
+    #[Serializer\VirtualProperty]
+    public function getCurrent(): bool
+    {
+        return $this->getValid();
+    }
+
     /**
      * @param resource|string $outputCompile
      */

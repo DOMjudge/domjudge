@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use App\DataTransferObject\Access;
 use App\DataTransferObject\AccessEndpoint;
+use App\Utils\CcsApiVersion;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -98,6 +99,9 @@ class AccessController extends AbstractApiController
             $capabilities[] = 'admin_submit';
             $capabilities[] = 'admin_clar';
         }
+
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
 
         return new Access(
             capabilities: $capabilities,
@@ -253,6 +257,7 @@ class AccessController extends AbstractApiController
                         'end_time',
                         'end_contest_time',
                         'max_run_time',
+                        'current',
                         // DOMjudge specific properties:
                         'valid',
                     ],
