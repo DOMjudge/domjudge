@@ -39,7 +39,7 @@ class AccessControllerTest extends BaseTestCase
             'accounts' => ['id', 'username', 'name', 'type'],
             'state' => ['started', 'frozen', 'ended', 'thawed', 'finalized', 'end_of_updates'],
             'submissions' => ['id', 'language_id', 'problem_id', 'team_id', 'time', 'contest_time', 'entry_point', 'files'],
-            'judgements' => ['id', 'submission_id', 'judgement_type_id', 'start_time', 'start_contest_time', 'end_time', 'end_contest_time', 'max_run_time'],
+            'judgements' => ['id', 'submission_id', 'judgement_type_id', 'start_time', 'start_contest_time', 'end_time', 'end_contest_time', 'max_run_time', 'current'],
             'runs' => ['id', 'judgement_id', 'ordinal', 'judgement_type_id', 'time', 'contest_time', 'run_time'],
             'clarifications' => ['id', 'from_team_id', 'problem_id', 'text', 'time', 'contest_time'],
             'awards' => ['id', 'citation', 'team_ids'],
