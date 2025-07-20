@@ -18,6 +18,11 @@ class ProblemControllerAdminTest extends ProblemControllerTest
         $this->expectedObjects['boolfind']['test_data_count'] = 10;
         $this->expectedObjects['fltcmp']['test_data_count'] = 1+3; // 1 sample, 3 secret cases
         $this->expectedObjects['hello']['test_data_count'] = 1;
+        foreach (array_keys($this->expectedObjects) as $problemId) {
+            $this->expectedObjects[$problemId]['memory_limit'] = 2048;
+            $this->expectedObjects[$problemId]['output_limit'] = 8;
+            $this->expectedObjects[$problemId]['code_limit'] = 256;
+        }
         parent::setUp();
     }
 
