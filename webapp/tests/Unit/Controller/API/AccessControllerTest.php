@@ -22,7 +22,7 @@ class AccessControllerTest extends BaseTestCase
         $access = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
         self::assertArrayHasKey('capabilities', $access);
         self::assertSame(
-            ['contest_start', 'contest_thaw', 'team_submit', 'team_clar', 'proxy_submit', 'proxy_clar', 'admin_submit', 'admin_clar'],
+            ['contest_start', 'contest_thaw', 'team_submit', 'post_clar', 'proxy_submit', 'proxy_clar', 'admin_submit', 'admin_clar'],
             $access['capabilities']
         );
 

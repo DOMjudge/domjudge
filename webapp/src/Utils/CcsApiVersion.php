@@ -32,4 +32,12 @@ enum CcsApiVersion: string
             default => true,
         };
     }
+
+    public function usePostClar(): bool
+    {
+        return match ($this) {
+            self::Format_2020_03, self::Format_2023_06 => false,
+            default => true,
+        };
+    }
 }
