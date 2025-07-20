@@ -1,4 +1,4 @@
-#!/usr/bin/env bats
+#!/usr/bin/env bats --trace
 
 load 'assert'
 
@@ -46,13 +46,13 @@ run_configure () {
 
 repo-install () {
     args=$(translate $@)
-    ${cmd} install $args -y >/dev/null
+    ${cmd} install $args -y
 }
 repo-remove () {
     args=$(translate $@)
     ${cmd} remove $args -y #>/dev/null
     if [ "$distro_id" != "ID=fedora" ]; then
-        apt-get autoremove -y 2>/dev/null
+        apt-get autoremove -y
     fi
 }
 
@@ -182,6 +182,8 @@ compile_assertions_finished () {
         groupdel ${www_group} || true
     done
     repo-install httpd
+    grep -E 'nginx|apache' /etc/passwd || true
+    grep -E 'nginx|apache' /etc/group || true
     run ./configure --with-domjudge-user=$u
     assert_line "checking webserver-group... apache (detected)"
     assert_line " * webserver group.....: apache"
@@ -214,7 +216,7 @@ compile_assertions_finished () {
 @test "cgroup library needed" {
    cgroup_init_find="checking for cgroup_init in -lcgroup... no"
    cgroup_init_error="configure: error: Linux cgroup library not found."
-   setup_user
+   setup
    repo-install gcc g++
    repo-remove libcgroup-dev
    run run_configure
