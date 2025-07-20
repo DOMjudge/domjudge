@@ -32,7 +32,7 @@ class AccessControllerTest extends BaseTestCase
             'contest' => ['id', 'name', 'formal_name', 'start_time', 'duration', 'scoreboard_freeze_duration', 'penalty_time'],
             'judgement-types' => ['id', 'name', 'penalty', 'solved'],
             'languages' => ['id', 'name', 'entry_point_required', 'entry_point_name', 'extensions'],
-            'problems' => ['id', 'label', 'name', 'ordinal', 'rgb', 'color', 'time_limit', 'test_data_count', 'statement'],
+            'problems' => ['id', 'label', 'name', 'ordinal', 'rgb', 'color', 'time_limit', 'memory_limit', 'output_limit', 'code_limit', 'test_data_count', 'statement'],
             'groups' => ['id', 'icpc_id', 'name', 'hidden'],
             'organizations' => ['id', 'icpc_id', 'name', 'formal_name', 'country', 'country_flag'],
             'teams' => ['id', 'icpc_id', 'name', 'display_name', 'organization_id', 'group_ids'],

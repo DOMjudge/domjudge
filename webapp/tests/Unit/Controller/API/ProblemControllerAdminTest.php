@@ -20,6 +20,11 @@ class ProblemControllerAdminTest extends ProblemControllerTest
         $this->expectedObjects['hello']['test_data_count'] = 1;
         $this->expectedObjects['jumble']['test_data_count'] = 3+15;
         $this->expectedObjects['hangman']['test_data_count'] = 1+7;
+        foreach (array_keys($this->expectedObjects) as $problemId) {
+            $this->expectedObjects[$problemId]['memory_limit'] = 2048;
+            $this->expectedObjects[$problemId]['output_limit'] = 8;
+            $this->expectedObjects[$problemId]['code_limit'] = 256;
+        }
         parent::setUp();
     }
 
