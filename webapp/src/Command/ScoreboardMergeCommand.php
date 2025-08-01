@@ -220,7 +220,7 @@ class ScoreboardMergeCommand extends Command
                     $teamObj->setAffiliation($affiliations[$organizationName]);
                 }
 
-                $teamObj->setCategory($category);
+                $teamObj->addCategory($category);
                 $oldid = $team['id'];
                 $newid = $nextTeamId++;
                 $teamObj->setTeamid($newid);

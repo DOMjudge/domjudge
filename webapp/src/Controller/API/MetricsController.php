@@ -7,11 +7,13 @@ use App\Entity\Balloon;
 use App\Entity\QueueTask;
 use App\Entity\Submission;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Service\DOMJudgeService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Attributes as OA;
@@ -79,8 +81,9 @@ class MetricsController extends AbstractFOSRestController
             ->select('t', 'u')
             ->from(Team::class, 't')
             ->leftJoin('t.users', 'u')
-            ->join('t.category', 'cat')
+            ->join('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
             ->andWhere('cat.visible = true')
+            ->setParameter('scoring', TeamCategory::TYPE_SCORING)
             ->getQuery()
             ->getResult();
 
@@ -89,8 +92,9 @@ class MetricsController extends AbstractFOSRestController
             ->select('u')
             ->from(User::class, 'u')
             ->leftJoin('u.team', 't')
-            ->join('t.category', 'cat')
+            ->join('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
             ->andWhere('cat.visible = true')
+            ->setParameter('scoring', TeamCategory::TYPE_SCORING)
             ->getQuery()
             ->getResult();
 
@@ -134,10 +138,11 @@ class MetricsController extends AbstractFOSRestController
                     ->from(Team::class, 't')
                     ->leftJoin('t.users', 'u')
                     ->leftJoin('t.contests', 'c')
-                    ->join('t.category', 'cat')
+                    ->join('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
                     ->leftJoin('cat.contests', 'cc')
                     ->andWhere('c.cid = :cid OR cc.cid = :cid')
                     ->andWhere('cat.visible = true')
+                    ->setParameter('scoring', TeamCategory::TYPE_SCORING)
                     ->setParameter('cid', $contest->getCid())
                     ->getQuery()
                     ->getResult();
@@ -154,10 +159,11 @@ class MetricsController extends AbstractFOSRestController
                     ->from(User::class, 'u')
                     ->leftJoin('u.team', 't')
                     ->leftJoin('t.contests', 'c')
-                    ->join('t.category', 'cat')
+                    ->join('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
                     ->leftJoin('cat.contests', 'cc')
                     ->andWhere('c.cid = :cid OR cc.cid = :cid')
                     ->andWhere('cat.visible = true')
+                    ->setParameter('scoring', TeamCategory::TYPE_SCORING)
                     ->setParameter('cid', $contest->getCid())
                     ->getQuery()
                     ->getResult();
@@ -227,10 +233,11 @@ class MetricsController extends AbstractFOSRestController
                 ->join('b.submission', 's')
                 ->join('s.contest', 'c')
                 ->join('s.team', 't')
-                ->join('t.category', 'cat')
+                ->join('t.categories', 'cat', Join::WITH, 'BIT_AND(cat.types, :scoring) = :scoring')
                 ->andWhere('b.done = false')
                 ->andWhere('c.cid = :cid')
                 ->andWhere('cat.visible = true')
+                ->setParameter('scoring', TeamCategory::TYPE_SCORING)
                 ->setParameter('cid', $contest->getCid())
                 ->getQuery()
                 ->getResult();

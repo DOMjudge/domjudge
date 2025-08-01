@@ -131,7 +131,7 @@ class ScoreboardService
         }
         $restricted = ($jury || $freezeData->showFinal(false));
         $variant    = $restricted ? 'Restricted' : 'Public';
-        $sortOrder  = $team->getCategory()->getSortorder();
+        $sortOrder  = $team->getSortOrder();
 
         $sortKey = $this->em->createQueryBuilder()
             ->from(RankCache::class, 'r')
@@ -152,11 +152,12 @@ class ScoreboardService
         $better = $this->em->createQueryBuilder()
             ->from(RankCache::class, 'r')
             ->join('r.team', 't')
-            ->join('t.category', 'tc')
+            ->join('t.categories', 'tc', Join::WITH, 'BIT_AND(tc.types, :scoring) = :scoring')
             ->select('COUNT(t.teamid)')
             ->andWhere('r.sortKey'.$variant.' > :sortKey')
             ->andWhere('r.contest = :contest')
             ->andWhere('tc.sortorder = :sortorder')
+            ->setParameter('scoring', TeamCategory::TYPE_SCORING)
             ->setParameter('sortKey', $sortKey)
             ->setParameter('contest', $contest)
             ->setParameter('sortorder', $sortOrder)
@@ -190,7 +191,7 @@ class ScoreboardService
             [ $contest->getCid(), $team->getTeamid(), $problem->getProbid() ]
         );
 
-        if (!$team->getCategory()) {
+        if (!$team->getScoringCategory()) {
             $this->logger->warning(
                 "Team '%d' has no category, skipping",
                 [ $team->getTeamid() ]
@@ -354,10 +355,11 @@ class ScoreboardService
             $params = [
                 'cid' => $contest->getCid(),
                 'probid' => $problem->getProbid(),
-                'teamSortOrder' => $team->getCategory()->getSortorder(),
+                'teamSortOrder' => $team->getSortorder(),
                 /** @phpstan-ignore-next-line $absSubmitTime is always set when $correctJury is true */
                 'submitTime' => $absSubmitTime,
                 'correctResult' => Judging::RESULT_CORRECT,
+                'scoring' => TeamCategory::TYPE_SCORING,
             ];
 
             // Find out how many valid submissions were submitted earlier
@@ -377,7 +379,9 @@ class ScoreboardService
                     LEFT JOIN external_judgement ej USING (submitid)
                     LEFT JOIN external_judgement ej2 ON ej2.submitid = s.submitid AND ej2.starttime > ej.starttime
                     LEFT JOIN team t USING(teamid)
-                    LEFT JOIN team_category tc USING (categoryid)
+                    # TODO: category type
+                    LEFT JOIN team_category_team tcc USING (teamid)
+                    LEFT JOIN team_category tc ON tc.categoryid = tcc.categoryid AND (tc.types & :scoring) = :scoring
                 WHERE s.valid = 1 AND
                     (ej.result IS NULL OR ej.result = :correctResult '.
                     $verificationRequiredExtra.') AND
@@ -389,7 +393,9 @@ class ScoreboardService
                 SELECT count(*) FROM submission s
                     LEFT JOIN judging j ON (s.submitid=j.submitid AND j.valid=1)
                     LEFT JOIN team t USING (teamid)
-                    LEFT JOIN team_category tc USING (categoryid)
+                    # TODO: category type
+                    LEFT JOIN team_category_team tcc USING (teamid)
+                    LEFT JOIN team_category tc ON tc.categoryid = tcc.categoryid AND (tc.types & :scoring) = :scoring
                 WHERE s.valid = 1 AND
                     (j.judgingid IS NULL OR j.result IS NULL OR j.result = :correctResult '.
                     $verificationRequiredExtra.') AND
@@ -621,7 +627,7 @@ class ScoreboardService
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
                 ->leftJoin('t.contests', 'c')
-                ->join('t.category', 'cat')
+                ->join('t.categories', 'cat')
                 ->leftJoin('cat.contests', 'cc')
                 ->andWhere('c.cid = :cid OR cc.cid = :cid')
                 ->setParameter('cid', $contest->getCid());
@@ -831,12 +837,13 @@ class ScoreboardService
                 ->from(TeamAffiliation::class, 'a')
                 ->select('a')
                 ->join('a.teams', 't')
-                ->andWhere('t.category IN (:categories)')
+                ->join('t.categories', 'tc')
+                ->andWhere('tc.categoryid IN (:categories)')
                 ->setParameter('categories', $categories);
             if (!$contest->isOpenToAllTeams()) {
                 $queryBuilder
                     ->leftJoin('t.contests', 'c')
-                    ->join('t.category', 'cat')
+                    ->join('t.categories', 'cat')
                     ->leftJoin('cat.contests', 'cc')
                     ->andWhere('c = :contest OR cc = :contest')
                     ->setParameter('contest', $contest);
@@ -951,17 +958,20 @@ class ScoreboardService
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
-            ->innerJoin('t.category', 'tc')
+            // Join on categories twice: once to determine the sort order (tc) and once to get all categories the team belongs to (tcc)
+            ->innerJoin('t.categories', 'tc', Join::WITH, 'BIT_AND(tc.types, :scoring) = :scoring')
+            ->innerJoin('t.categories', 'tcc')
             ->leftJoin(RankCache::class, 'r', Join::WITH, 'r.team = t AND r.contest = :rcid')
             ->leftJoin('t.affiliation', 'ta')
-            ->select('t, tc, ta', 'COALESCE(t.display_name, t.name) AS HIDDEN effectivename')
+            ->select('t, tcc, ta', 'COALESCE(t.display_name, t.name) AS HIDDEN effectivename')
             ->andWhere('t.enabled = 1')
-            ->setParameter('rcid', $contest->getCid());
+            ->setParameter('rcid', $contest->getCid())
+            ->setParameter('scoring', TeamCategory::TYPE_SCORING);
 
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
                 ->leftJoin('t.contests', 'c')
-                ->join('t.category', 'cat')
+                ->join('t.categories', 'cat')
                 ->leftJoin('cat.contests', 'cc')
                 ->andWhere('c.cid = :cid OR cc.cid = :cid')
                 ->setParameter('cid', $contest->getCid());
@@ -970,6 +980,7 @@ class ScoreboardService
         $show_filter = $this->config->get('show_teams_on_scoreboard');
         if (!$jury) {
             $queryBuilder->andWhere('tc.visible = 1');
+            $queryBuilder->andWhere('tcc.visible = 1');
             if ($show_filter === self::SHOW_TEAM_AFTER_LOGIN) {
                 $queryBuilder
                     ->join('t.users', 'u', Join::WITH, 'u.last_login IS NOT NULL OR u.last_api_login IS NOT NULL');
@@ -988,9 +999,14 @@ class ScoreboardService
             }
 
             if ($filter->categories) {
+                // Use a new join, since we need both the other two category joins for other logic already
                 $queryBuilder
-                    ->andWhere('t.category IN (:categories)')
+                    ->innerJoin('t.categories', 'tccc')
+                    ->andWhere('tccc.categoryid IN (:categories)')
                     ->setParameter('categories', $filter->categories);
+                if (!$jury) {
+                    $queryBuilder->andWhere('tccc.visible = 1');
+                }
             }
 
             if ($filter->countries) {

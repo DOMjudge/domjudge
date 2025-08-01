@@ -5,6 +5,7 @@ namespace App\Controller\API;
 use App\DataTransferObject\AddTeam;
 use App\Entity\Contest;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -12,6 +13,7 @@ use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -305,14 +307,16 @@ class TeamController extends AbstractRestController
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't')
             ->leftJoin('t.affiliation', 'ta')
-            ->leftJoin('t.category', 'tc')
+            ->leftJoin('t.categories', 'tc')
+            ->leftJoin('t.categories', 'tcc', Join::WITH, 'BIT_AND(tcc.types, :scoring) = :scoring')
             ->leftJoin('t.contests', 'c')
             ->leftJoin('tc.contests', 'cc')
-            ->select('t, ta');
+            ->setParameter('scoring', TeamCategory::TYPE_SCORING)
+            ->select('t, ta, tc');
 
         if ($request->query->has('category')) {
             $queryBuilder
-                ->andWhere('t.category = :category')
+                ->andWhere('tc.categoryid = :category')
                 ->setParameter('category', $request->query->get('category'));
         }
 
@@ -324,6 +328,7 @@ class TeamController extends AbstractRestController
 
         if (!$this->dj->checkrole('api_reader') || $request->query->getBoolean('public')) {
             $queryBuilder->andWhere('tc.visible = 1');
+            $queryBuilder->andWhere('tcc.visible = 1');
         }
 
         if ($request->attributes->has('cid')) {

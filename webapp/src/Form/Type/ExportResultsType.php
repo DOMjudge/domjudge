@@ -21,6 +21,8 @@ class ExportResultsType extends AbstractType
             ->from(TeamCategory::class, 'c', 'c.categoryid')
             ->select('c.sortorder, c.name')
             ->where('c.visible = 1')
+            ->andWhere('BIT_AND(c.types, :scoring) = :scoring')
+            ->setParameter('scoring', TeamCategory::TYPE_SCORING)
             ->orderBy('c.sortorder')
             ->getQuery()
             ->getResult();

@@ -19,8 +19,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['cid', 'points_public', 'totaltime_public', 'totalruntime_public'], name: 'order_public')]
 #[ORM\Index(columns: ['cid'], name: 'cid')]
 #[ORM\Index(columns: ['teamid'], name: 'teamid')]
-#[ORM\Index(columns: ['sort_key_public'], name: 'sortKeyPublic')]
-#[ORM\Index(columns: ['sort_key_restricted'], name: 'sortKeyRestricted')]
+#[ORM\Index(columns: ['sort_key_public'], name: 'sortKeyPublic', options: ['lengths' => [768]])]
+#[ORM\Index(columns: ['sort_key_restricted'], name: 'sortKeyRestricted', options: ['lengths' => [768]])]
 class RankCache
 {
     #[ORM\Column(options: [
