@@ -12,7 +12,9 @@ use App\Entity\TeamCategory;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
 use Collator;
+use Doctrine\Common\Collections\ArrayCollection;
 use Exception;
+use Ramsey\Collection\Set;
 
 class Scoreboard
 {
@@ -74,6 +76,27 @@ class Scoreboard
     public function getCategories(): array
     {
         return $this->categories;
+    }
+
+    /**
+     * @param int[] $limitToTeamIds
+     *
+     * @return list<TeamCategory>
+     */
+    public function getColorCategories(?array $limitToTeamIds = null): array
+    {
+        $categories = [];
+        foreach ($this->scores as $score) {
+            // Skip if we have limitteams and the team is not listed.
+            if (!empty($limitToTeamIds) &&
+                !in_array($score->team->getTeamid(), $limitToTeamIds)) {
+                continue;
+            }
+            if ($category = $score->team->getBackgroundColorCategory()) {
+                $categories[$category->getCategoryid()] = $category;
+            }
+        }
+        return array_values($categories);
     }
 
     /**
@@ -275,32 +298,7 @@ class Scoreboard
     }
 
     /**
-     * Return the used team categories for this scoreboard.
-     *
-     * @param int[] $limitToTeamIds
-     * @return TeamCategory[]
-     */
-    public function getUsedCategories(?array $limitToTeamIds = null): array
-    {
-        $usedCategories = [];
-        foreach ($this->scores as $score) {
-            // Skip if we have limitteams and the team is not listed.
-            if (!empty($limitToTeamIds) &&
-                !in_array($score->team->getTeamid(), $limitToTeamIds)) {
-                continue;
-            }
-
-            $category = $score->team->getSortOrderCategory();
-            if ($category) {
-                $usedCategories[$category->getCategoryid()] = $category;
-            }
-        }
-
-        return $usedCategories;
-    }
-
-    /**
-     * Return whether this scoreboard has multiple category colors.
+     * Return whether this scoreboard has at least one non default category color.
      *
      * @param int[] $limitToTeamIds
      */
@@ -314,15 +312,12 @@ class Scoreboard
                 continue;
             }
 
-            // TODO: category type
-            if ($score->team->getSortOrderCategory()?->getColor()) {
-                $colors[$score->team->getSortOrderCategory()->getColor()] = 1;
-            } else {
-                $colors['transparent'] = 1;
+            if ($score->team->getBackgroundColorCategory()?->getColor()) {
+                $colors[$score->team->getBackgroundColorCategory()->getColor()] = 1;
             }
         }
 
-        return count($colors) > 1;
+        return count($colors) > 0;
     }
 
     /**
@@ -330,7 +325,7 @@ class Scoreboard
      *
      * @param int[] $limitToTeamIds
      */
-    public function isBestInCategory(Team $team, ?array $limitToTeamIds = null): bool
+    public function isBestInCategory(Team $team, TeamCategory $category, ?array $limitToTeamIds = null): bool
     {
         if ($this->bestInCategoryData === null) {
             $this->bestInCategoryData = [];
@@ -341,16 +336,23 @@ class Scoreboard
                     continue;
                 }
 
-                $categoryId = $score->team->getSortOrderCategory()?->getCategoryid();
-                if ($categoryId && !isset($this->bestInCategoryData[$categoryId])) {
+                $categoryId = $score->team->getScoringCategory()->getCategoryid();
+                if (!isset($this->bestInCategoryData[$categoryId])) {
                     $this->bestInCategoryData[$categoryId] = $score->team->getTeamid();
+                }
+
+                foreach ($score->team->getTopBadgeCategories() as $badgeCategory) {
+                    $categoryId = $badgeCategory->getCategoryid();
+                    if (!isset($this->bestInCategoryData[$categoryId])) {
+                        $this->bestInCategoryData[$categoryId] = $score->team->getTeamid();
+                    }
                 }
             }
         }
 
-        $categoryId = $team->getSortOrderCategory()?->getCategoryid();
+        $categoryId = $category->getCategoryid();
         // Only check the scores when the team has points.
-        if ($categoryId && $this->scores[$team->getTeamid()]->numPoints > 0) {
+        if ($this->scores[$team->getTeamid()]->numPoints > 0) {
             // If the rank of this team is equal to the best team for this
             // category, this team is best in that category.
             return $this->scores[$this->bestInCategoryData[$categoryId]]->rank ===
