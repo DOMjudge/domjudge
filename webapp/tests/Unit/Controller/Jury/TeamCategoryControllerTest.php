@@ -20,6 +20,7 @@ class TeamCategoryControllerTest extends JuryControllerTestCase
     protected static string  $addForm                  = 'team_category[';
     protected static array   $addEntitiesShown         = ['name', 'sortorder'];
     protected static array   $addEntities              = [['name'                    => 'New Category',
+                                                           'types'                   => [TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BACKGROUND],
                                                            'sortorder'               => '1',
                                                            'color'                   => '#123456',
                                                            'visible'                 => '1',
@@ -31,11 +32,11 @@ class TeamCategoryControllerTest extends JuryControllerTestCase
                                                            'sortorder' => '0'],
                                                           ['name' => 'Large',
                                                            'sortorder' => '128'],
-                                                          ['name' => 'Colorless',
-                                                           'color' => ''],
                                                           ['name' => 'FutureColor',
+                                                           'types' => [TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BACKGROUND],
                                                            'color' => 'UnknownColor'],
                                                           ['name' => 'NameColor',
+                                                           'types' => [TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BACKGROUND],
                                                            'color' => 'yellow'],
                                                           ['name' => 'Invisible',
                                                            'visible' => '0'],

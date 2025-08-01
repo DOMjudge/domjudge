@@ -684,8 +684,12 @@ blockquote {
     color: darkgrey;
 }
 
-.category-best {
-    margin-right: 2em;
+.category-badges {
+    margin-right: 1.5em;
+}
+
+.category-best, .category-badge {
+    margin-right: 0.5em;
     font-weight: normal;
 }
 

@@ -18,12 +18,11 @@ class AwardService
         $group_winners = $problem_winners = $problem_shortname = [];
         $groups = [];
         foreach ($scoreboard->getTeamsInDescendingOrder() as $team) {
-            // TODO: category type
             $teamid = $team->getExternalid();
-            if ($scoreboard->isBestInCategory($team)) {
-                $catId = $team->getSortOrderCategory()?->getExternalid();
+            if ($scoreboard->isBestInCategory($team, $team->getScoringCategory())) {
+                $catId = $team->getScoringCategory()?->getExternalid();
                 $group_winners[$catId][] = $teamid;
-                $groups[$catId] = $team->getSortOrderCategory()?->getName();
+                $groups[$catId] = $team->getScoringCategory()?->getName();
             }
             foreach ($scoreboard->getProblems() as $problem) {
                 $shortname = $problem->getShortname();
@@ -81,7 +80,7 @@ class AwardService
                 $overall_winners[] = $teamid;
             }
             if ($contest->getMedalsEnabled()) {
-                if ($teamScore->team->getSortOrderCategory() && $contest->getMedalCategories()->contains($teamScore->team->getSortOrderCategory())) {
+                if ($teamScore->team->getScoringCategory() && $contest->getMedalCategories()->contains($teamScore->team->getScoringCategory())) {
                     if ($rank - $skippedTeams <= $contest->getGoldMedals()) {
                         $medal_winners['gold'][] = $teamid;
                     } elseif ($rank - $skippedTeams <= $contest->getGoldMedals() + $contest->getSilverMedals()) {

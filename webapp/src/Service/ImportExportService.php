@@ -23,6 +23,7 @@ use DateTimeInterface;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query\Expr\Join;
 use JsonException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -506,10 +507,10 @@ class ImportExportService
         /** @var Team[] $teams */
         $teams = $this->em->createQueryBuilder()
             ->from(Team::class, 't')
-            // TODO: category type
-            ->join('t.categories', 'c')
+            ->join('t.categories', 'c', Join::WITH, 'BIT_AND(c.types, :scoring) = :scoring')
             ->select('t')
             ->where('c.visible = 1')
+            ->setParameter('scoring', TeamCategory::TYPE_SCORING)
             ->getQuery()
             ->getResult();
 
@@ -518,7 +519,7 @@ class ImportExportService
             $data[] = [
                 $team->getExternalid(),
                 $team->getIcpcId(),
-                $team->getSortOrderCategory()?->getExternalid(),
+                $team->getScoringCategory()?->getExternalid(),
                 $team->getEffectiveName(),
                 $team->getAffiliation() ? $team->getAffiliation()->getName() : '',
                 $team->getAffiliation() ? $team->getAffiliation()->getShortname() : '',
@@ -604,7 +605,7 @@ class ImportExportService
             $numPoints = $teamScore->numPoints;
             $skip      = false;
 
-            if (!$teamScore->team->getSortOrderCategory() || !$contest->getMedalCategories()->contains($teamScore->team->getSortOrderCategory())) {
+            if (!$teamScore->team->getScoringCategory() || !$contest->getMedalCategories()->contains($teamScore->team->getScoringCategory())) {
                 $skip = true;
                 $skippedTeams++;
             }
@@ -659,12 +660,12 @@ class ImportExportService
                 $rank        = null;
             }
 
-            $categoryId  = $teamScore->team->getSortOrderCategory()?->getCategoryid();
+            $categoryId  = $teamScore->team->getScoringCategory()?->getCategoryid();
             if ($categoryId && isset($groupWinners[$categoryId])) {
                 $groupWinner = null;
             } else {
                 $groupWinners[$categoryId] = true;
-                $groupWinner               = $teamScore->team->getSortOrderCategory()?->getName();
+                $groupWinner               = $teamScore->team->getScoringCategory()?->getName();
             }
 
             $data[] = new ResultRow(
@@ -795,8 +796,8 @@ class ImportExportService
     /**
      * Import groups JSON
      *
-     * @param array<array{id?: string, icpc_id: string, name?: string, sortorder?: int,
-     *                    color?: string, hidden?: bool, allow_self_registration?: bool}> $data
+     * @param array<array{id?: string, icpc_id: string, name?: string, types?: string[], sortorder?: int,
+     *                    color?: string, css_class?: string, hidden?: bool, allow_self_registration?: bool}> $data
      * @param TeamCategory[]|null $saved The saved groups
      */
     public function importGroupsJson(array $data, ?string &$message = null, ?array &$saved = null): int
@@ -809,8 +810,10 @@ class ImportExportService
                 'icpc_id' => @$group['icpc_id'],
                 'name' => $group['name'] ?? '',
                 'visible' => !($group['hidden'] ?? false),
+                'types' => $group['types'] ?? [TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BADGE_TOP],
                 'sortorder' => @$group['sortorder'],
                 'color' => @$group['color'],
+                'css_class' => @$group['css_class'],
                 'allow_self_registration' => $group['allow_self_registration'] ?? false,
             ];
         }
@@ -822,7 +825,8 @@ class ImportExportService
      * Import group data from the given array
      *
      * @param array<array{categoryid: string, icpc_id?: string, name: string, visible?: bool,
-     *              sortorder?: int|null, color?: string|null, allow_self_registration: bool}> $groupData
+     *              types?: string[]|null, sortorder?: int|null, color?: string|null, css_class?: string|null,
+     *              allow_self_registration: bool}> $groupData
      * @param TeamCategory[]|null $saved The saved groups
      *
      * @throws NonUniqueResultException
@@ -854,11 +858,28 @@ class ImportExportService
                 }
                 $added = true;
             }
+            $types = $groupItem['types'] ?? [TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BADGE_TOP];
+            $sortOrder = $groupItem['sortorder'] ?? null;
+            if (in_array(TeamCategory::TYPE_SCORING, $types, true) && $sortOrder === null) {
+                $sortOrder = 0;
+            }
+            if ($sortOrder !== null && !in_array(TeamCategory::TYPE_SCORING, $types, true)) {
+                $types = [TeamCategory::TYPE_SCORING];
+            }
+            if (isset($groupItem['color']) && !in_array(TeamCategory::TYPE_BACKGROUND, $types, true)) {
+                $types[] = TeamCategory::TYPE_BACKGROUND;
+            }
+            if (isset($groupItem['css_class']) && !in_array(TeamCategory::TYPE_CSS_CLASS, $types, true)) {
+                $types[] = TeamCategory::TYPE_CSS_CLASS;
+            }
+
             $teamCategory
                 ->setName($groupItem['name'])
                 ->setVisible($groupItem['visible'] ?? true)
-                ->setSortorder($groupItem['sortorder'] ?? 0)
+                ->setTypes($types)
+                ->setSortorder($sortOrder)
                 ->setColor($groupItem['color'] ?? null)
+                ->setCssClass($groupItem['css_class'] ?? null)
                 ->setIcpcid($groupItem['icpc_id'] ?? null);
             $teamCategory->setAllowSelfRegistration($groupItem['allow_self_registration']);
 
@@ -1193,7 +1214,7 @@ class ImportExportService
      * Import team data from the given array.
      *
      * @param array<array{team: array{teamid: string|null, icpcid: string|null, label?: string|null,
-     *                                categoryid: string|null, name: string|null, display_name?: string,
+     *                                categoryids: string[]|null, name: string|null, display_name?: string,
      *                                publicdescription?: string, location?: string|null, affilid?: string},
      *                    team_affiliation: array{externalid: string|null, shortname?: string, name?: string,
      *                                            country?: string}}> $teamData
@@ -1279,6 +1300,8 @@ class ImportExportService
                 if (!$teamCategory) {
                     $teamCategory = new TeamCategory();
                     $teamCategory
+                        ->setTypes([TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BADGE_TOP])
+                        ->setSortorder(0)
                         ->setExternalid($categoryid)
                         ->setName($categoryid . ' - auto-create during import');
 
@@ -1369,15 +1392,21 @@ class ImportExportService
 
         foreach ($createdAffiliations as $affiliation) {
             $this->em->persist($affiliation);
-            $this->em->flush();
+        }
+
+        foreach ($createdCategories as $category) {
+            $this->em->persist($category);
+        }
+
+        $this->em->flush();
+
+        foreach ($createdAffiliations as $affiliation) {
             $this->dj->auditlog('team_affiliation',
                 $affiliation->getAffilid(),
                 'added', 'imported from tsv / json');
         }
 
         foreach ($createdCategories as $category) {
-            $this->em->persist($category);
-            $this->em->flush();
             $this->dj->auditlog('team_category', $category->getCategoryid(),
                                     'added', 'imported from tsv');
         }

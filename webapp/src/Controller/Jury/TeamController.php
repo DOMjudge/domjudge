@@ -128,7 +128,7 @@ class TeamController extends BaseController
                 }
             }
 
-            $teamdata['category'] = ['value' => $t->getSortOrderCategory()];
+            $teamdata['category'] = ['value' => $t->getScoringCategory()];
             $teamdata['num_categories'] = ['value' => $t->getCategories()->count()];
 
             // Add some elements for the solved status.
@@ -221,9 +221,7 @@ class TeamController extends BaseController
                 'data' => $teamdata,
                 'actions' => $teamactions,
                 'link' => $this->generateUrl('jury_team', ['teamId' => $t->getTeamId()]),
-                // TODO: category type
-                'cssclass' => ($t->getCategories()->first() ? ("category" . $t->getCategories()->first()->getCategoryId()) : '') .
-                    ($t->getEnabled() ? '' : ' disabled'),
+                'cssclass' => ($t->getEnabled() ? '' : ' disabled'),
             ];
         }
         return $this->render('jury/teams.html.twig', [
