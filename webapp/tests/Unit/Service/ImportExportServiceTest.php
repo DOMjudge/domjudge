@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Service;
 
+use App\DataFixtures\Test\NonSortOrderTeamCategoryFixture;
 use App\DataFixtures\Test\TeamWithExternalIdEqualsOneFixture;
 use App\DataFixtures\Test\TeamWithExternalIdEqualsTwoFixture;
 use App\DataTransferObject\ResultRow;
@@ -699,7 +700,7 @@ EOF;
                     self::assertEquals($data['team']['name'], $team->getName());
                 }
                 if (isset($data['team']['category'])) {
-                    self::assertNotNull($team->getCategories()->first());
+                    self::assertNotFalse($team->getCategories()->first());
                     self::assertEquals($data['team']['category'], $team->getCategories()->first()->getName());
                 }
                 if (isset($data['team']['members'])) {
@@ -805,6 +806,8 @@ EOF;
 
     public function testImportTeamsJson(): void
     {
+        $this->loadFixture(NonSortOrderTeamCategoryFixture::class);
+
         // Example from the manual, but we have changed the ID's to not mix them with fixtures and
         // we explicitly use a different label for the first team and no label for the second
         // Also we explicitly test for the label '0', since that is a special case
@@ -827,7 +830,7 @@ EOF;
     "id": "13",
     "icpc_id": "123456",
     "label": "0",
-    "group_ids": ["24", "26"],
+    "group_ids": ["24", "colorcat"],
     "name": "Team with label 0",
     "organization_id": "INST-44"
 }, {
@@ -867,7 +870,7 @@ EOF;
                 'label' => '0',
                 'name' => 'Team with label 0',
                 'location' => null,
-                'categories' => ['24', '26'],
+                'categories' => ['24', 'colorcat'],
                 'affiliation' => 'INST-44',
             ], [
                 'externalid' => '14',
@@ -911,7 +914,7 @@ EOF;
             self::assertEquals($data['location'], $team->getLocation());
             self::assertEquals($data['name'], $team->getName());
             $categoryIds = $team->getCategories()->map(fn(TeamCategory $category) => $category->getExternalid())->toArray();
-            self::assertEquals($data['categories'], $categoryIds);
+            self::assertEqualsCanonicalizing($data['categories'], $categoryIds);
             self::assertEquals($data['affiliation'], $team->getAffiliation()->getExternalid());
         }
     }

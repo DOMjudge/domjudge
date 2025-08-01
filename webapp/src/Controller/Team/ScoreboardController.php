@@ -67,7 +67,15 @@ class ScoreboardController extends BaseController
         }
 
         /** @var Team|null $team */
-        $team             = $this->em->getRepository(Team::class)->find($teamId);
+        $team = $this->em->createQueryBuilder()
+                         ->from(Team::class, 't')
+                         ->innerJoin('t.categories', 'tc')
+                         ->select('t, tc')
+                         ->andWhere('tc.visible = 1')
+                         ->andWhere('t.teamid = :teamId')
+                         ->setParameter('teamId', $teamId)
+                         ->getQuery()
+                         ->getOneOrNullResult();
         if ($team?->getHidden() && $teamId !== $this->dj->getUser()->getTeamId()) {
             $team = null;
         }

@@ -13,12 +13,15 @@ class TeamCategoryFixture extends AbstractExampleDataFixture
     {
         $participants = new TeamCategory();
         $participants
+            ->setTypes([TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BADGE_TOP])
+            ->setSortorder(0)
             ->setName('Participants')
             ->setExternalid('participants');
 
         $observers = new TeamCategory();
         $observers
             ->setName('Observers')
+            ->setTypes([TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BADGE_TOP, TeamCategory::TYPE_BACKGROUND])
             ->setSortorder(1)
             ->setColor('#ffcc33')
             ->setExternalid('observers');
@@ -26,6 +29,7 @@ class TeamCategoryFixture extends AbstractExampleDataFixture
         $organisation = new TeamCategory();
         $organisation
             ->setName('Organisation')
+            ->setTypes([TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BADGE_TOP, TeamCategory::TYPE_BACKGROUND])
             ->setSortorder(1)
             ->setColor('#ff99cc')
             ->setVisible(false)
