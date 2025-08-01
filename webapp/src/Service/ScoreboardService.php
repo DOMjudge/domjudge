@@ -958,6 +958,7 @@ class ScoreboardService
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
+            // Join on categories twice: once to determine the sort order (tc) and once to get all categories the team belongs to (tcc)
             ->innerJoin('t.categories', 'tc', Join::WITH, 'BIT_AND(tc.types, :scoring) = :scoring')
             ->innerJoin('t.categories', 'tcc')
             ->leftJoin(RankCache::class, 'r', Join::WITH, 'r.team = t AND r.contest = :rcid')
@@ -998,9 +999,14 @@ class ScoreboardService
             }
 
             if ($filter->categories) {
+                // Use a new join, since we need both the other two category joins for other logic already
                 $queryBuilder
-                    ->andWhere('tc.categoryid IN (:categories)')
+                    ->innerJoin('t.categories', 'tccc')
+                    ->andWhere('tccc.categoryid IN (:categories)')
                     ->setParameter('categories', $filter->categories);
+                if (!$jury) {
+                    $queryBuilder->andWhere('tccc.visible = 1');
+                }
             }
 
             if ($filter->countries) {
