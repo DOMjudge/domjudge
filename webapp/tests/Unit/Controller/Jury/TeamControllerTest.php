@@ -2,7 +2,9 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use App\DataFixtures\Test\NonSortOrderTeamCategoryFixture;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -26,7 +28,7 @@ class TeamControllerTest extends JuryControllerTestCase
     protected static array   $addEntitiesCount         = ['contests'];
     protected static array   $addEntities              = [['name' => 'New Team',
                                                            'displayName' => 'New Team Display Name',
-                                                           'categories' => ['3', '2'],
+                                                           'categories' => ['3'],
                                                            'publicdescription' => 'Some members',
                                                            'penalty' => '0',
                                                            'location' => 'The first room',
@@ -191,5 +193,18 @@ class TeamControllerTest extends JuryControllerTestCase
 
         static::assertNotNull($user);
         static::assertEquals('New Team', $user->getTeam()->getName());
+    }
+
+    /**
+     * Test that adding a team with multiple categories works.
+     */
+    public function testAddMultipleCategories(): void
+    {
+        $this->loadFixture(NonSortOrderTeamCategoryFixture::class);
+        $teamToAdd = static::$addEntities[0];
+        $teamToAdd['categories'][] = $this->resolveReference(NonSortOrderTeamCategoryFixture::class . ':0', TeamCategory::class);
+        [$combinedValues, $element] = $this->helperProvideMergeAddEntity($teamToAdd);
+        [$combinedValues, $element] = $this->helperProvideTranslateAddEntity($combinedValues, $element);
+        $this->testCheckAddEntityAdmin($combinedValues, $element);
     }
 }

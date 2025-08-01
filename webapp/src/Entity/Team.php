@@ -619,6 +619,12 @@ class Team extends BaseApiEntity implements
     #[Assert\Callback]
     public function validate(ExecutionContextInterface $context): void
     {
+        $this->validateUserCreation($context);
+        $this->validateCategoryTypes($context);
+    }
+
+    private function validateUserCreation(ExecutionContextInterface $context): void
+    {
         if ($this->getAddUserForTeam() === static::CREATE_NEW_USER) {
             if (empty($this->getNewUsername())) {
                 $context
@@ -629,6 +635,35 @@ class Team extends BaseApiEntity implements
                 $context
                     ->buildViolation('May only contain [a-zA-Z0-9_-].')
                     ->atPath('newUsername')
+                    ->addViolation();
+            }
+        }
+    }
+
+    private function validateCategoryTypes(ExecutionContextInterface $context): void
+    {
+        $exclusiveTypes = [
+            TeamCategory::TYPE_SCORING => 'scoring',
+            TeamCategory::TYPE_BACKGROUND => 'background',
+        ];
+
+        foreach ($exclusiveTypes as $typeFlag => $typeName) {
+            $categoriesWithType = [];
+            foreach ($this->getCategories() as $category) {
+                if ($category->hasType($typeFlag)) {
+                    $categoriesWithType[] = $category->getName();
+                }
+            }
+
+            if (count($categoriesWithType) > 1) {
+                $message = sprintf(
+                    'A team can be in at most one %s category. Found: %s.',
+                    $typeName,
+                    implode(', ', $categoriesWithType)
+                );
+                $context
+                    ->buildViolation($message)
+                    ->atPath('categories')
                     ->addViolation();
             }
         }
@@ -688,15 +723,56 @@ class Team extends BaseApiEntity implements
         return array_filter([$this->photoForApi]);
     }
 
-    public function getSortOrderCategory(): ?TeamCategory
+    public function getCategoryOfType(int $type): ?TeamCategory
     {
-        // TODO: category type
-        return $this->categories->first() ?: null;
+        return $this->categories->findFirst(fn(int $key, TeamCategory $category) => $category->hasType($type));
+    }
+
+    /**
+     * @return Collection<int, TeamCategory>
+     */
+    public function getCategoriesOfType(int $type): Collection
+    {
+        return $this->categories->filter(fn(TeamCategory $category) => $category->hasType($type));
+    }
+
+    public function getScoringCategory(): ?TeamCategory
+    {
+        return $this->getCategoryOfType(TeamCategory::TYPE_SCORING);
+    }
+
+    public function getBackgroundColorCategory(): ?TeamCategory
+    {
+        return $this->getCategoryOfType(TeamCategory::TYPE_BACKGROUND);
+    }
+
+    /**
+     * @return Collection<int, TeamCategory>
+     */
+    public function getCssClassCategories(): Collection
+    {
+        return $this->getCategoriesOfType(TeamCategory::TYPE_CSS_CLASS);
+    }
+
+    /**
+     * @return Collection<int, TeamCategory>
+     */
+    public function getTopBadgeCategories(): Collection
+    {
+        return $this->getCategoriesOfType(TeamCategory::TYPE_BADGE_TOP);
+    }
+
+    /**
+     * @return Collection<int, TeamCategory>
+     */
+    public function getBadgeCategories(): Collection
+    {
+        return $this->getCategoriesOfType(TeamCategory::TYPE_BADGE_ALL);
     }
 
     public function getSortOrder(): ?int
     {
-        return $this->getSortOrderCategory()?->getSortorder();
+        return $this->getScoringCategory()?->getSortorder();
     }
 
     public function isLocked(): bool
