@@ -1058,6 +1058,16 @@ EOF;
 }, {
     "id": "23",
     "name": "Spectators"
+}, {
+    "id": "24",
+    "name": "Color",
+    "types": ["background"],
+    "color": "#123123"
+}, {
+    "id": "25",
+    "name": "CSS",
+    "types": ["css-class"],
+    "css_class": "test"
 }]
 EOF;
 
@@ -1066,15 +1076,32 @@ EOF;
                 'externalid' => '13337',
                 'name' => 'Companies',
                 'icpcid' => '123',
+                'sortorder' => 0,
                 'visible' => false,
             ], [
                 'externalid' => '47',
                 'name' => 'Participants',
+                'sortorder' => 0,
                 'visible' => true,
             ], [
                 'externalid' => '23',
                 'name' => 'Spectators',
+                'sortorder' => 0,
                 'visible' => true,
+            ], [
+                'externalid' => '24',
+                'name' => 'Color',
+                'types' => [TeamCategory::TYPE_BACKGROUND],
+                'sortorder' => null,
+                'visible' => true,
+                'color' => '#123123',
+            ], [
+                'externalid' => '25',
+                'name' => 'CSS',
+                'types' => [TeamCategory::TYPE_CSS_CLASS],
+                'sortorder' => null,
+                'visible' => true,
+                'cssClass' => 'test',
             ],
         ];
 
@@ -1098,7 +1125,11 @@ EOF;
             self::assertNotNull($category, "Team cagegory $data[name] does not exist");
             self::assertEquals($data['icpcid'] ?? null, $category->getIcpcId());
             self::assertEquals($data['name'], $category->getName());
+            self::assertEquals($data['types'] ?? [TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BADGE_TOP], $category->getTypes());
             self::assertEquals($data['visible'], $category->getVisible());
+            self::assertEquals($data['sortorder'] ?? null, $category->getSortorder());
+            self::assertEquals($data['color'] ?? null, $category->getColor());
+            self::assertEquals($data['cssClass'] ?? null, $category->getCssClass());
         }
     }
 

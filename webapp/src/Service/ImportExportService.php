@@ -804,13 +804,26 @@ class ImportExportService
     {
         // TODO: can we have this use the DTO?
         $groupData = [];
-        foreach ($data as $group) {
+        foreach ($data as $index => $group) {
+            if (isset($group['types'])) {
+                $types = [];
+                $typeMapping = array_flip(TeamCategory::TYPES_TO_STRING);
+                foreach ($group['types'] as $type) {
+                    if (!isset($typeMapping[$type])) {
+                        $message = sprintf('Invalid group type at index %d: %s', $index, $type);
+                        return -1;
+                    }
+                    $types[] = $typeMapping[$type];
+                }
+            } else {
+                $types = [TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BADGE_TOP];
+            }
             $groupData[] = [
                 'categoryid' => @$group['id'],
                 'icpc_id' => @$group['icpc_id'],
                 'name' => $group['name'] ?? '',
                 'visible' => !($group['hidden'] ?? false),
-                'types' => $group['types'] ?? [TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BADGE_TOP],
+                'types' => $types,
                 'sortorder' => @$group['sortorder'],
                 'color' => @$group['color'],
                 'css_class' => @$group['css_class'],
@@ -825,7 +838,7 @@ class ImportExportService
      * Import group data from the given array
      *
      * @param array<array{categoryid: string, icpc_id?: string, name: string, visible?: bool,
-     *              types?: string[]|null, sortorder?: int|null, color?: string|null, css_class?: string|null,
+     *              types?: int[]|null, sortorder?: int|null, color?: string|null, css_class?: string|null,
      *              allow_self_registration: bool}> $groupData
      * @param TeamCategory[]|null $saved The saved groups
      *
@@ -858,6 +871,7 @@ class ImportExportService
                 }
                 $added = true;
             }
+            /** @var list<int> $types */
             $types = $groupItem['types'] ?? [TeamCategory::TYPE_SCORING, TeamCategory::TYPE_BADGE_TOP];
             $sortOrder = $groupItem['sortorder'] ?? null;
             if (in_array(TeamCategory::TYPE_SCORING, $types, true) && $sortOrder === null) {
