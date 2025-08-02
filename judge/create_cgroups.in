@@ -11,7 +11,7 @@ CGROUPBASE="/sys/fs/cgroup"
 
 cgroup_error_and_usage () {
     echo "$1" >&2
-    echo "To fix this, please make the following changes:
+    echo "Unable to continue. To fix this, you most likely need to follow these steps:
     1. In /etc/default/grub, add 'cgroup_enable=memory swapaccount=1' to GRUB_CMDLINE_LINUX_DEFAULT.
     2. Run update-grub
     3. Reboot" >&2
@@ -29,10 +29,13 @@ if [ "$fs_type" = "cgroup2" ]; then
 You can try using cgroup V1 by adding systemd.unified_cgroup_hierarchy=0 to the kernel params."
     fi
     if ! echo "+memory" >> /sys/fs/cgroup/cgroup.subtree_control; then
-        cgroup_error_and_usage "Error: Cannot add +memory to cgroup.subtree_control; check kernel params. Unable to continue."
+        cgroup_error_and_usage "Error: Cannot add +memory to cgroup.subtree_control; check kernel params."
     fi
     if ! echo "+cpuset" >> /sys/fs/cgroup/cgroup.subtree_control; then
-        cgroup_error_and_usage "Error: Cannot add +cpuset to cgroup.subtree_control; check kernel params. Unable to continue."
+        cgroup_error_and_usage "Error: Cannot add +cpuset to cgroup.subtree_control; check kernel params."
+    fi
+    if ! grep -q "slice" /proc/self/cgroup; then
+        cgroup_error_and_usage "Error: Cgroups not configured properly, missing systemd slice under /proc/self/cgroup. If running under docker, make sure to set cgroupns=host."
     fi
 
 else # Trying cgroup V1:
@@ -41,14 +44,14 @@ else # Trying cgroup V1:
         mkdir -p $CGROUPBASE/$i
         if [ ! -d $CGROUPBASE/$i/ ]; then
             if ! mount -t cgroup -o$i $i $CGROUPBASE/$i/; then
-                cgroup_error_and_usage "Error: Can not mount $i cgroup. Probably cgroup support is missing from running kernel. Unable to continue."
+                cgroup_error_and_usage "Error: Can not mount $i cgroup. Probably cgroup support is missing from running kernel."
             fi
         fi
         mkdir -p $CGROUPBASE/$i/domjudge
     done
 
     if [ ! -f $CGROUPBASE/memory/memory.limit_in_bytes ] || [ ! -f $CGROUPBASE/memory/memory.memsw.limit_in_bytes ]; then
-        cgroup_error_and_usage "Error: cgroup support missing memory features in running kernel. Unable to continue."
+        cgroup_error_and_usage "Error: cgroup support missing memory features in running kernel."
     fi
 
     chown -R $JUDGEHOSTUSER $CGROUPBASE/*/domjudge
