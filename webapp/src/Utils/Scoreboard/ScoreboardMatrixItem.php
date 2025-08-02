@@ -13,5 +13,6 @@ class ScoreboardMatrixItem
         public int $penaltyTime,
         public int $runtime,
         public ?int $numSubmissionsInFreeze = null,
+        public string $points = "",
     ) {}
 }

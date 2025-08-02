@@ -14,6 +14,7 @@
     {% set static = false %}
 {% endif %}
 {% set showPoints = scoreboard.showPoints %}
+{% set scoringScoreboard = scoreboard.isScoring %}
 {% set usedCategories = scoreboard.usedCategories(limitToTeamIds) %}
 {% set hasDifferentCategoryColors = scoreboard.categoryColors(limitToTeamIds) %}
 {% set scores = scoreboard.scores | filter(score => limitToTeams is null or score.team.teamid in limitToTeamIds) %}
@@ -62,7 +63,9 @@
     {% if enable_ranking %}
         <colgroup>
             <col id="scoresolv"/>
-            <col id="scoretotal"/>
+            {% if not scoringScoreboard %}
+                <col id="scoretotal"/>
+            {% endif %}
         </colgroup>
     {% endif %}
     <colgroup>
@@ -79,7 +82,11 @@
         {% endif %}
         <th title="team name" scope="col" colspan="{{ teamColspan }}">team</th>
         {% if enable_ranking %}
-            <th title="# solved / penalty time" colspan="2" scope="col">score</th>
+            {% if scoringScoreboard %}
+                <th title="points" colspan="1" scope="col">score</th>
+            {% else %}
+                <th title="# solved / penalty time" colspan="2" scope="col">score</th>
+            {% endif %}
         {% endif %}
         {% if showTeamSubmissions or jury %}
             {% for problem in problems %}
@@ -107,7 +114,8 @@
                 >
                     <a {% if link %}href="{{ link }}"{% endif %} target="{{ target }}">
                         {{  problem | problemBadge }}
-                        {% if showPoints %}
+                        {% if showPoints and not scoringScoreboard %}
+                            <br/>
                             <span class='problempoints'>
                                 [{% if problem.points == 1 %}1 point{% else %}{{ problem.points }} points{% endif %}]
                             </span>
@@ -254,10 +262,12 @@
             {% if enable_ranking %}
                 {% set totalPoints = score.numPoints %}
                 <td class="scorenc">{{ totalPoints }}</td>
-                {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
-                    <td class="scorett">{{ "%0.3f s" | format(score.totalRuntime/1000.0) }}</td>
-                {% else %}
-                    <td class="scorett">{{ totalTime }}</td>
+                {% if not scoringScoreboard %}
+                    {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
+                        <td class="scorett">{{ "%0.3f s" | format(score.totalRuntime/1000.0) }}</td>
+                    {% else %}
+                        <td class="scorett">{{ totalTime }}</td>
+                    {% endif %}
                 {% endif %}
             {% endif %}
 
@@ -328,8 +338,17 @@
                     <td class="score_cell">
                         {% if numSubmissions != '0' %}
                             <a {% if link %}href="{{ link }}"{% endif %} {% if extra %}{{ extra | raw }}{% endif %}>
-                                <div class="{{ scoreCssClass }}">
-                                    {% if matrixItem.isCorrect %}{{ time }}{% else %}&nbsp;{% endif %}
+                                <div
+                                    class="{{ scoreCssClass }}"
+                                {% if scoringScoreboard %}
+                                    title="{% if matrixItem.isCorrect %}{{ time }} mins{% endif %}"
+                                {% endif %}
+                                >
+                                    {% if scoringScoreboard %}
+                                        {% if matrixItem.isCorrect %}{{ matrixItem.points }}{% else %}&nbsp;{% endif %}
+                                    {% else %}
+                                        {% if matrixItem.isCorrect %}{{ time }}{% else %}&nbsp;{% endif %}
+                                    {% endif %}
                                     <span>
                                         {% if numSubmissions is same as(1) %}
                                             1 try

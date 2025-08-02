@@ -1297,6 +1297,7 @@ EOF;
                 ->setShortname($problemData['label']);
             $em->persist($problem);
             $em->persist($contestProblem);
+            $contest->addProblem($contestProblem);
             $em->flush();
             $contestProblemsById[$contestProblem->getExternalid()] = $contestProblem;
         }
