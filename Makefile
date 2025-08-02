@@ -11,6 +11,9 @@ REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
 
+debpool := /etc/php/$(PHPVERSION)/fpm/pool.d
+fedpool := /etc/php-fpm.d
+
 default:
 	@echo "No default target"
 	@echo
@@ -275,6 +278,14 @@ inplace-postinstall-permissions:
 	setfacl -R -m   u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
 	setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var
 	setfacl -R -m   m::rwx                    $(CURDIR)/webapp/var
+	if command -v sestatus >/dev/null 2>&1; then \
+		chcon -R -t httpd_sys_content_t $(CURDIR)/webapp; \
+		chcon -R -t httpd_config_t $(CURDIR)/etc; \
+		chcon -R -t httpd_log_t $(CURDIR)/webapp/var/log; \
+		chcon -R -t httpd_sys_rw_content_t $(CURDIR)/webapp/var/cache; \
+		chcon -R -t httpd_sys_rw_content_t $(CURDIR)/webapp/public/images; \
+		chcon    -t httpd_exec_t $(CURDIR)/lib/alert; \
+	fi
 
 inplace-postinstall-apache: inplace-postinstall-permissions
 	@if [ ! -d "/etc/apache2/conf-enabled" ]; then echo "Couldn't find directory /etc/apache2/conf-enabled. Is apache installed?"; false; fi
@@ -284,12 +295,23 @@ inplace-postinstall-apache: inplace-postinstall-permissions
 	systemctl restart apache2
 
 inplace-postinstall-nginx: inplace-postinstall-permissions
-	@if [ ! -d "/etc/nginx/sites-enabled/" ]; then echo "Couldn't find directory /etc/nginx/sites-enabled/. Is nginx installed?"; false; fi
-	@if [ ! -d "/etc/php/$(PHPVERSION)/fpm/pool.d/" ]; then echo "Couldn't find directory /etc/php/$(PHPVERSION)/fpm/pool.d/. Is php-fpm installed?"; false; fi
-	ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf
-	ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/$(PHPVERSION)/fpm/pool.d/domjudge-fpm.conf
+	@if [ ! -d "/etc/nginx/" ]; then echo "Couldn't find directory /etc/nginx/. Is nginx installed?"; false; fi
+	@cmd="ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/conf.d/domjudge.conf"; \
+	if [ -d "/etc/nginx/sites-enabled/" ]; then \
+		cmd="ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf"; \
+	fi; echo $$cmd; $$cmd
 	systemctl restart nginx
-	systemctl restart php$(PHPVERSION)-fpm
+	@if [ ! -d "$(debpool)" ] && [ ! -d "$(fedpool)" ]; then \
+		echo "Couldn't find directory $(debpool) or $(fedpool). Is php-fpm installed?"; false; \
+	fi
+	@service="php-fpm"; phppool="$(fedpool)"; \
+	if [ -d "$(debpool)" ]; then \
+		phppool="ln -sf $(CURDIR)/etc/domjudge-fpm.conf $(debpool)/domjudge-fpm.conf"; \
+		service="php$(PHPVERSION)-fpm"; \
+	fi; \
+	service="systemctl restart $$service"; \
+	ln="ln -sf $(CURDIR)/etc/domjudge-fpm.conf $$phppool/domjudge-fpm.conf"; \
+	echo $$ln; echo $$service; $$ln; $$service
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 inplace-uninstall-l:
