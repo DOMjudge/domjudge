@@ -554,7 +554,7 @@ class ScoreboardService
         }
     }
 
-    const SCALE = 9;
+    public const SCALE = 9;
 
     // Converts integer or bcmath floats to a string that can be used as a key in a score cache.
     // The resulting key will be a string with 33 characters, 23 before the decimal dot and 9 after.
