@@ -409,7 +409,11 @@
                             {% if submission.importError %}
                                 External result: {{ externalJudgement.result | printValidJuryResult }}
                             {% else %}
-                                (external: {{ externalJudgement.result | printValidJuryResult }})
+                                (external: {{ externalJudgement.result | printValidJuryResult }}
+                                {% if submission.problem.scoringProblem %}
+                                    , score: {{ "%.2f" | format(externalJudgement.score) }}
+                                {% endif %}
+                                )
                             {% endif %}
                         {%- endif %}
                         {%- if selectedJudging is not null and judgehosts is not empty -%}
