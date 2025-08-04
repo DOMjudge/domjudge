@@ -10,6 +10,10 @@ class TimeStringValidator extends ConstraintValidator
 {
     public function validate(mixed $value, Constraint $constraint): void
     {
+        $timezoneRegex = "[A-Za-z][A-Za-z0-9_\/+-]{1,35}"; # See: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+        $offsetRegex   = "[+-]\d{1,2}(:\d\d)?";
+        $absoluteRegex = "\d\d\d\d-\d\d-\d\d( |T)\d\d:\d\d:\d\d(\.\d{1,6})?( " . $timezoneRegex . "|" . $offsetRegex . "|Z)";
+        $relativeRegex = "\d+:\d\d(:\d\d(\.\d{1,6})?)?";
         if (!$constraint instanceof TimeString) {
             throw new UnexpectedTypeException($constraint, TimeString::class);
         }
@@ -24,11 +28,11 @@ class TimeStringValidator extends ConstraintValidator
 
         if ($constraint->allowRelative) {
             $regex   = $constraint->relativeIsPositive ?
-                "/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|\+\d+:\d\d(:\d\d(\.\d{1,6})?)?)$/" :
-                "/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|-\d+:\d\d(:\d\d(\.\d{1,6})?)?)$/";
+                "/^(" . $absoluteRegex . "|\+?" . $relativeRegex . ")$/" :
+                "/^(" . $absoluteRegex . "|-"   . $relativeRegex . ")$/";
             $message = $constraint->absoluteRelativeMessage;
         } else {
-            $regex   = "/^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}$/";
+            $regex   = "/^" . $absoluteRegex . "$/";
             $message = $constraint->absoluteMessage;
         }
         if (preg_match($regex, $value) !== 1) {
