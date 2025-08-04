@@ -238,6 +238,8 @@ inplace-install-l:
 	@echo "        sudo make inplace-postinstall-apache"
 	@echo "    - Configure nginx"
 	@echo "        sudo make inplace-postinstall-nginx"
+	@echo "    - Configure judgedaemon
+	@echo "        sudo make inplace-postinstall-judgedaemon"
 	@echo "    - Set up database"
 	@echo "        ./sql/dj_setup_database -u root [-r|-p ROOT_PASS] install"
 	@echo ""
@@ -290,6 +292,11 @@ inplace-postinstall-nginx: inplace-postinstall-permissions
 	ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/$(PHPVERSION)/fpm/pool.d/domjudge-fpm.conf
 	systemctl restart nginx
 	systemctl restart php$(PHPVERSION)-fpm
+
+inplace-postinstall-judgedaemon:
+	cp $(CURDIR)/etc/sudoers-domjudge /etc/sudoers.d/domjudge
+	chown root:root /etc/sudoers.d/domjudge
+	chmod 0600 /etc/sudoers.d/domjudge
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 inplace-uninstall-l:
