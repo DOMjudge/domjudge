@@ -1705,6 +1705,10 @@ class ExternalContestSourceService
             ->setEndtime($endTime)
             ->setResult($judgementTypeId === null ? null : $verdictsFlipped[$judgementTypeId]);
 
+        if (isset($data->score)) {
+            $judgement->setScore($data->score);
+        }
+
         if ($persist) {
             $this->em->persist($judgement);
         }
@@ -1854,6 +1858,10 @@ class ExternalContestSourceService
             ->setEndtime($time)
             ->setRuntime($runTime)
             ->setResult($judgementTypeId === null ? null : $verdictsFlipped[$judgementTypeId]);
+
+        if (isset($data->score)) {
+            $run->setScore($data->score);
+        }
 
         if ($persist) {
             $this->em->persist($run);
