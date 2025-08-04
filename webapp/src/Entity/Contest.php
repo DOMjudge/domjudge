@@ -1293,7 +1293,7 @@ class Contest extends BaseApiEntity implements
         $this->updateTimes();
         if (Utils::difftime((float)$this->getEndtime(), (float)$this->getStarttime(true)) <= 0) {
             $context
-                ->buildViolation('Contest ends before it even starts')
+                ->buildViolation('Contest ends before it even starts.')
                 ->atPath('endtimeString')
                 ->addViolation();
         }
