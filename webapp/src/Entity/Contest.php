@@ -1260,6 +1260,12 @@ class Contest extends BaseApiEntity implements
         return new FreezeData($this);
     }
 
+    public function checkValidTimeString(string $timeString): void {
+        if (preg_match("/^[+-]?\d+:\d\d(:\d\d(\.\d{1,6})?)?$/", $timeString) !== 1) {
+            $date = new DateTime($timeString);
+        }
+    }
+
     #[ORM\PrePersist]
     #[ORM\PreUpdate]
     public function updateTimes(): void
@@ -1272,6 +1278,18 @@ class Contest extends BaseApiEntity implements
     #[Assert\Callback]
     public function validate(ExecutionContextInterface $context): void
     {
+        foreach (['Activate', 'Deactivate', 'Start', 'End', 'Freeze', 'Unfreeze'] as $timeString) {
+            $tmpValue = $this->{'get' . $timeString . 'timeString'}();
+            if ($tmpValue === null) continue;
+            try {
+                $this->checkValidTimeString($tmpValue);
+            } catch (Exception $e) {
+                $context
+                    ->buildViolation("Can't parse this time:" . $e->getMessage())
+                    ->atPath(strtolower($timeString) . "timeString")
+                    ->addViolation();
+            }
+        };
         $this->updateTimes();
         if (Utils::difftime((float)$this->getEndtime(), (float)$this->getStarttime(true)) <= 0) {
             $context
