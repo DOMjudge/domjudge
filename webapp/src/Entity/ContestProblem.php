@@ -261,7 +261,7 @@ class ContestProblem extends BaseApiEntity
     {
         if ($this->getColor() && Utils::convertToHex($this->getColor()) === null) {
             $context
-                ->buildViolation('This is not a valid color')
+                ->buildViolation('This is not a valid color.')
                 ->atPath('color')
                 ->addViolation();
         }
