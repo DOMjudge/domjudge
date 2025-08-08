@@ -13,6 +13,8 @@ use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\SubmissionSource;
 use App\Entity\Team;
+use App\Entity\TestcaseAggregationType;
+use App\Entity\TestcaseGroup;
 use App\Entity\User;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
@@ -25,6 +27,7 @@ use InvalidArgumentException;
 use Knp\Component\Pager\Pagination\PaginationInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -55,6 +58,142 @@ class SubmissionService
         protected readonly ScoreboardService $scoreboardService,
         protected readonly PaginatorInterface $paginator,
     ) {}
+
+    /**
+     * Returns a two-element array:
+     *   - The score for the testcase group, or null if not all results are ready.
+     *   - The result for the testcase group, or null if not all results are ready.
+     * @return array{string|null, string|null}
+     */
+    public static function maybeSetScoringResult(TestcaseGroup $testcaseGroup, Judging $judging): array
+    {
+        $allResultsReady = true;
+        $allCorrect = true;
+        $firstIncorrectVerdict = null;
+        $results = [];
+        $ignoreSample = $testcaseGroup->isIgnoreSample();
+
+        // TODO: check whether it is allowed to mix groups and directs. Assume for that this is not the case.
+        if ($testcaseGroup->getChildren()->isEmpty()) {
+            if ($testcaseGroup->getAcceptScore() !== null) {
+                $acceptScore = $testcaseGroup->getAcceptScore();
+                $judgingRuns = $judging->getRuns();
+                // TODO: There is likely a more elegant way to get the runs for this testcase group.
+                $relevantRuns = [];
+                foreach ($judgingRuns as $run) {
+                    $testcase = $run->getTestcase();
+                    if ($testcase->getTestcaseGroup() === $testcaseGroup) {
+                        $relevantRuns[] = $run;
+                        if ($run->getRunresult() === null || $run->getRunresult() === '') {
+                            $allResultsReady = false;
+                        } else if ($run->getRunresult() !== 'correct') {
+                            $allCorrect = false;
+                            if ($firstIncorrectVerdict === null) {
+                                $firstIncorrectVerdict = $run->getRunresult();
+                            }
+                        }
+                    }
+                }
+                if (count($relevantRuns) > 0) {
+                    if ($allCorrect) {
+                        $results[] = $acceptScore;
+                    } else {
+                        $results[] = 0;
+                    }
+                }
+            } else {
+                // TODO: Reduce code duplication with the code above/below.
+                $judgingRuns = $judging->getRuns();
+                foreach ($judgingRuns as $run) {
+                    $testcase = $run->getTestcase();
+                    if ($testcase->getTestcaseGroup() === $testcaseGroup) {
+                        $results[] = $run->getScore();
+                        if ($run->getRunresult() === null || $run->getRunresult() === '') {
+                            $allResultsReady = false;
+                        } else if ($run->getRunresult() !== 'correct') {
+                            $allCorrect = false;
+                            if ($firstIncorrectVerdict === null) {
+                                $firstIncorrectVerdict = $run->getRunresult();
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            foreach ($testcaseGroup->getChildren() as $childGroup) {
+                if ($ignoreSample && $childGroup->getName() === 'data/sample') {
+                    continue;
+                }
+                $childScoreAndResult = self::maybeSetScoringResult(
+                    $childGroup,
+                    $judging
+                );
+                $childScore = $childScoreAndResult[0];
+                $childResult = $childScoreAndResult[1];
+                // TODO: Reduce code duplication with the code above.
+                if ($childResult === null || $childResult === '') {
+                    $allResultsReady = false;
+                } else if ($childResult !== 'correct') {
+                    $allCorrect = false;
+                    if ($firstIncorrectVerdict === null) {
+                        $firstIncorrectVerdict = $childResult;
+                    }
+                } else {
+                    $results[] = $childScore;
+                }
+            }
+        }
+
+        $testcaseAggregationType = $testcaseGroup->getAggregationType();
+        switch ($testcaseAggregationType) {
+            case TestcaseAggregationType::SUM:
+            case TestcaseAggregationType::AVG:
+                $score = "0";
+                foreach ($results as $result) {
+                    if ($result === null) {
+                        $allResultsReady = false;
+                        break;
+                    } else {
+                        $score = bcadd($score, $result, ScoreboardService::SCALE);
+                    }
+                }
+                if ($testcaseAggregationType === TestcaseAggregationType::AVG && count($results) > 0) {
+                    $score = bcdiv($score, (string)count($results), ScoreboardService::SCALE);
+                }
+                break;
+            case TestcaseAggregationType::MIN:
+            case TestcaseAggregationType::MAX:
+                $score = null;
+                foreach ($results as $result) {
+                    if ($result === null) {
+                        $allResultsReady = false;
+                        break;
+                    } elseif ($score === null) {
+                        $score = $result;
+                    } else {
+                        if ($testcaseAggregationType === TestcaseAggregationType::MIN
+                            && bccomp($result, $score, ScoreboardService::SCALE) < 0) {
+                            $score = $result;
+                        }
+                        if ($testcaseAggregationType === TestcaseAggregationType::MAX
+                            && bccomp($result, $score, ScoreboardService::SCALE) > 0) {
+                            $score = $result;
+                        }
+                    }
+                }
+                break;
+            default:
+                throw new InvalidArgumentException(sprintf("Unknown testcase aggregation type '%s'.",
+                    $testcaseAggregationType->name));
+        }
+
+        if ($allResultsReady || (!$allCorrect && !$testcaseGroup->isOnRejectContinue())) {
+            $score = (string)bcadd((string)$score, '0', ScoreboardService::SCALE);
+            $result = $allCorrect ? 'correct' : $firstIncorrectVerdict ?? 'judge-error';
+            return [$score, $result];
+        }
+        return [null, null];
+    }
 
     /**
      * Get a list of submissions that can be displayed in the interface using

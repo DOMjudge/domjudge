@@ -202,6 +202,16 @@ class Submission extends BaseApiEntity implements
         return null;
     }
 
+    public function getScore(): ?string
+    {
+        foreach ($this->judgings as $j) {
+            if ($j->getValid()) {
+                return $j->getScore();
+            }
+        }
+        return null;
+    }
+
     public function getSubmitid(): int
     {
         return $this->submitid;
