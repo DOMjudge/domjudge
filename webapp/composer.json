@@ -131,7 +131,8 @@
 			"App\\": "src/"
 		},
 		"files": [
-			"resources/functions.php"
+			"resources/functions.php",
+			"../lib/lib.misc.php"
 		]
 	},
 	"autoload-dev": {

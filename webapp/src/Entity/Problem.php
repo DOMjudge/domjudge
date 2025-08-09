@@ -112,13 +112,21 @@ class Problem extends BaseApiEntity implements
      * @var array<int, string>
      */
     #[Serializer\Exclude]
-    private array $typesToString = [
+    private static array $typesToString = [
         self::TYPE_PASS_FAIL => 'pass-fail',
         self::TYPE_SCORING => 'scoring',
         self::TYPE_MULTI_PASS => 'multi-pass',
         self::TYPE_INTERACTIVE => 'interactive',
         self::TYPE_SUBMIT_ANSWER => 'submit-answer',
     ];
+
+    /**
+     * @return array<int, string>
+     */
+    public static function getPossibleProblemTypes(): array
+    {
+        return self::$typesToString;
+    }
 
     #[ORM\Column(options: ['comment' => 'Bitmask of problem types, default is pass-fail.'])]
     #[Serializer\Exclude]
@@ -302,7 +310,7 @@ class Problem extends BaseApiEntity implements
     public function setTypesAsString(array $types): Problem
     {
         /** @var array<string, int> $stringToTypes */
-        $stringToTypes = array_flip($this->typesToString);
+        $stringToTypes = array_flip(self::$typesToString);
         $typeConstants = [];
         foreach ($types as $type) {
             if (!isset($stringToTypes[$type])) {
@@ -320,10 +328,10 @@ class Problem extends BaseApiEntity implements
         $typeConstants = $this->getTypes();
         $typeStrings = [];
         foreach ($typeConstants as $type) {
-            if (!isset($this->typesToString[$type])) {
+            if (!isset(self::$typesToString[$type])) {
                 throw new Exception("Unknown problem type: '$type'");
             }
-            $typeStrings[] = $this->typesToString[$type];
+            $typeStrings[] = self::$typesToString[$type];
         }
         return implode(', ', $typeStrings);
     }
@@ -334,7 +342,7 @@ class Problem extends BaseApiEntity implements
     public function getTypes(): array
     {
         $ret = [];
-        foreach (array_keys($this->typesToString) as $type) {
+        foreach (array_keys(self::$typesToString) as $type) {
             if ($this->types & $type) {
                 $ret[] = $type;
             }
