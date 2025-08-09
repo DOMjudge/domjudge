@@ -234,7 +234,7 @@ void verbose(const char *format, ...)
 void verbose_from_signalhandler(const char* msg)
 {
 	if (!be_quiet && be_verbose) {
-		static_cast<void>(write(STDERR_FILENO, msg, strlen(msg)));
+		[[maybe_unused]] auto r = write(STDERR_FILENO, msg, strlen(msg));
 	}
 }
 
@@ -243,7 +243,7 @@ void warning_from_signalhandler(const char* msg)
 	if (!be_quiet) {
 		// Do not include timing here, as it wouldn't be safe from a signalhandler.
 		// TODO: Consider rewriting using clock_gettime in the future.
-		std::ignore = write(STDERR_FILENO, msg, strlen(msg));
+		[[maybe_unused]] auto r = write(STDERR_FILENO, msg, strlen(msg));
 	}
 }
 
