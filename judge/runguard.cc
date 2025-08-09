@@ -234,7 +234,7 @@ void verbose(const char *format, ...)
 void verbose_from_signalhandler(const char* msg)
 {
 	if (!be_quiet && be_verbose) {
-		std::ignore = write(STDERR_FILENO, msg, strlen(msg));
+		static_cast<void>(write(STDERR_FILENO, msg, strlen(msg)));
 	}
 }
 
