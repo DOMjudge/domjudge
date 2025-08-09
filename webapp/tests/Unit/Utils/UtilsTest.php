@@ -321,10 +321,13 @@ class UtilsTest extends TestCase
 
     public function testParseHexColor(): void
     {
-        self::assertEquals([255, 255, 255], Utils::parseHexColor('#ffffff'));
-        self::assertEquals([0, 0, 0], Utils::parseHexColor('#000000'));
-        self::assertEquals([171, 205, 239], Utils::parseHexColor('#abcdef'));
-        self::assertEquals([254, 220, 186], Utils::parseHexColor('#FEDCBA'));
+        self::assertEquals([255, 255, 255, 255], Utils::parseHexColor('#ffffff'));
+        self::assertEquals([0, 0, 0, 255], Utils::parseHexColor('#000000'));
+        self::assertEquals([0, 0, 0, 255], Utils::parseHexColor('#000'));
+        self::assertEquals([0, 0, 0, 0], Utils::parseHexColor('#00000000'));
+        self::assertEquals([0, 0, 0, 0], Utils::parseHexColor('#0000'));
+        self::assertEquals([171, 205, 239, 255], Utils::parseHexColor('#abcdef'));
+        self::assertEquals([254, 220, 186, 255], Utils::parseHexColor('#FEDCBA'));
     }
 
     public function testComponentToHex(): void
@@ -337,10 +340,44 @@ class UtilsTest extends TestCase
 
     public function testRgbToHex(): void
     {
-        self::assertEquals('#ffffff', Utils::rgbToHex([255, 255, 255]));
-        self::assertEquals('#000000', Utils::rgbToHex([0, 0, 0]));
-        self::assertEquals('#abcdef', Utils::rgbToHex([171, 205, 239]));
-        self::assertEquals('#fedcba', Utils::rgbToHex([254, 220, 186]));
+        self::assertEquals('#ffffffff', Utils::rgbToHex([255, 255, 255, 255]));
+        self::assertEquals('#ffffff00', Utils::rgbToHex([255, 255, 255, 0]));
+        self::assertEquals('#000000ff', Utils::rgbToHex([0, 0, 0, 255]));
+        self::assertEquals('#00000000', Utils::rgbToHex([0, 0, 0, 0]));
+        self::assertEquals('#abcdefff', Utils::rgbToHex([171, 205, 239, 255]));
+        self::assertEquals('#fedcbaff', Utils::rgbToHex([254, 220, 186, 255]));
+    }
+ 
+    public function testRelativeLuminance(): void
+    {
+        self::assertEquals(0.0, Utils::relativeLuminance("#000000"));
+        self::assertEquals(1.0, Utils::relativeLuminance("#FFFfff"));
+        self::assertEquals(1.0, Utils::relativeLuminance("#FFFfffFF"));
+        self::assertEquals(0.00751604342389449, Utils::relativeLuminance("#123"));
+        self::assertEquals(0.528186803960141, Utils::relativeLuminance("#1234"));
+    }
+
+    /**
+     * Test that the APCA contrast function returns the correct data
+     */
+    public function testApcaContrast(): void
+    {
+        self::assertEquals(-114.0, Utils::apcaContrast("#ffffff", "#000000"));
+        self::assertEquals(114.0, Utils::apcaContrast("#000000", "#ffffff"));
+        self::assertEquals(0.0, Utils::apcaContrast("#fffFFF", "#FFFfff"));
+        self::assertEquals(-0.36, Utils::apcaContrast("#111", "#111"));
+        self::assertEquals(58.09, Utils::apcaContrast("#123f", "#975A"));
+        self::assertEquals(25.15, Utils::apcaContrast("#11223344", "#00110011"));
+        self::assertEquals(-35.06, Utils::apcaContrast("#11223344", "#FF0011"));
+    }
+
+    public function testHexToForegroundAndBorder(): void
+    {
+        self::assertEquals(["#000000", "#bfbd9dff"], Utils::hexToForegroundAndBorder("#fffDDD"));
+        self::assertEquals(["#ffffff", "#000000ff"], Utils::hexToForegroundAndBorder("#000000"));
+        self::assertEquals(["#000000", "#6a7b8cff"], Utils::hexToForegroundAndBorder("#ABC"));
+        self::assertEquals(["#ffffff", "#00000099"], Utils::hexToForegroundAndBorder("#1239"));
+        self::assertEquals(["#000000", "#00000040"], Utils::hexToForegroundAndBorder("#10203040"));
     }
 
     /**
