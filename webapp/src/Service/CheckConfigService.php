@@ -474,6 +474,9 @@ class CheckConfigService
                 if (empty($cp->getColor())) {
                     $result = ($result === 'E' ? 'E' : 'W');
                     $cperrors[$cid] .= "  - No color for problem `" . $cp->getShortname() . "` in contest c" . $cid . "\n";
+                } elseif (Utils::parseHexColor($cp->getColor())[3] !== 255) {
+                    $result = ($result === 'E' ? 'E' : 'W');
+                    $cperrors[$cid] .= "  - Semi-transparent color for problem `" . $cp->getShortname() . "` in contest c" . $cid . "\n";
                 }
             }
         }

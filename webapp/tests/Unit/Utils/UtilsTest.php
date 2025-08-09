@@ -321,10 +321,10 @@ class UtilsTest extends TestCase
 
     public function testParseHexColor(): void
     {
-        self::assertEquals([255, 255, 255], Utils::parseHexColor('#ffffff'));
-        self::assertEquals([0, 0, 0], Utils::parseHexColor('#000000'));
-        self::assertEquals([171, 205, 239], Utils::parseHexColor('#abcdef'));
-        self::assertEquals([254, 220, 186], Utils::parseHexColor('#FEDCBA'));
+        self::assertEquals([255, 255, 255, 255], Utils::parseHexColor('#ffffff'));
+        self::assertEquals([0, 0, 0, 255], Utils::parseHexColor('#000000'));
+        self::assertEquals([171, 205, 239, 255], Utils::parseHexColor('#abcdef'));
+        self::assertEquals([254, 220, 186, 255], Utils::parseHexColor('#FEDCBA'));
     }
 
     public function testComponentToHex(): void

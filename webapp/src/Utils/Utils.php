@@ -343,19 +343,24 @@ class Utils
     }
 
     /**
-     * Parse a hex color into it's three RGB values.
+     * Parse a hex color into it's four RGBA values.
      *
-     * @return array{int, int, int}
+     * @return array{int, int, int, int}
      */
     public static function parseHexColor(string $hex): array
     {
         // Source: https://stackoverflow.com/a/21966100
-        $length = (strlen($hex) - 1) / 3;
+        $length = (strlen($hex) - 1) / 4;
+        if (((strlen($hex) - 1) % 3) == 0) {
+            $length = (strlen($hex) - 1) / 3;
+            $hex .= str_repeat('F', $length);
+        }
         $fact = [17, 1, 0.062272][$length - 1];
         return [
             (int)round(hexdec(substr($hex, 1, $length)) * $fact),
             (int)round(hexdec(substr($hex, 1 + $length, $length)) * $fact),
-            (int)round(hexdec(substr($hex, 1 + 2 * $length, $length)) * $fact)
+            (int)round(hexdec(substr($hex, 1 + 2 * $length, $length)) * $fact),
+            (int)round(hexdec(substr($hex, 1 + 3 * $length, $length)))
         ];
     }
 
