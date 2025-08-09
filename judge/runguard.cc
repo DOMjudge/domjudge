@@ -64,6 +64,7 @@
 #include <sys/sysinfo.h>
 #include <vector>
 #include <string>
+#include <utility>
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
