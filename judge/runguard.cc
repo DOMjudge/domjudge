@@ -64,6 +64,7 @@
 #include <sys/sysinfo.h>
 #include <vector>
 #include <string>
+#include <utility>
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
@@ -233,7 +234,7 @@ void verbose(const char *format, ...)
 void verbose_from_signalhandler(const char* msg)
 {
 	if (!be_quiet && be_verbose) {
-		write(STDERR_FILENO, msg, strlen(msg));
+		[[maybe_unused]] auto r = write(STDERR_FILENO, msg, strlen(msg));
 	}
 }
 
@@ -242,7 +243,7 @@ void warning_from_signalhandler(const char* msg)
 	if (!be_quiet) {
 		// Do not include timing here, as it wouldn't be safe from a signalhandler.
 		// TODO: Consider rewriting using clock_gettime in the future.
-		write(STDERR_FILENO, msg, strlen(msg));
+		[[maybe_unused]] auto r = write(STDERR_FILENO, msg, strlen(msg));
 	}
 }
 
