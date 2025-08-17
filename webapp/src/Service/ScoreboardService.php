@@ -262,6 +262,9 @@ class ScoreboardService
 
         $pointsJury      = "0";
         $pointsPubl      = "0";
+
+        $firstAbsSubmitTime = null;
+
         foreach ($submissions as $submission) {
             /** @var Judging|ExternalJudgement|null $judging */
             if ($useExternalJudgements) {
@@ -300,7 +303,7 @@ class ScoreboardService
 
             // If there is a public and correct submission, we can stop counting
             // submissions or looking for a correct one (skip steps 2,3)
-            if ($correctPubl) {
+            if (!$problem->isScoringProblem() && $correctPubl) {
                 continue;
             }
 
@@ -324,11 +327,11 @@ class ScoreboardService
             // to count compiler penalties and the judging is a compiler error.
             $countSubmission = $compilePenalty || $judging->getResult() != Judging::RESULT_COMPILER_ERROR;
 
-            if (!$correctJury && $countSubmission) {
+            if (($problem->isScoringProblem() || !$correctJury) && $countSubmission) {
                 // For the jury: only consider it as a submission if we don't
                 // have a correct one yet. This is needed because during the
                 // freeze we consider submissions after the correct one for
-                // the public to not leak any info.
+                // the public to not leak any info. Note that this only holds for pass-fail problems.
                 $submissionsJury++;
             }
             if ($submission->isAfterFreeze()) {
@@ -343,7 +346,7 @@ class ScoreboardService
 
             // If we encountered a correct submission during the whole contest,
             // do not consider the submissions after that one for correctness.
-            if ($correctJury) {
+            if (!$problem->isScoringProblem() && $correctJury) {
                 continue;
             }
 
@@ -352,6 +355,13 @@ class ScoreboardService
             // Negative numbers don't make sense on the scoreboard, cap them to the contest start.
             $absSubmitTime = max($absSubmitTime, $contestStartTime);
             $submitTime    = $contest->getContestTime($absSubmitTime);
+
+            // For scoring problems we consider submissions after the first correct one. So we need to
+            // keep track of when the first correct submission occurred.
+            // TODO: is this actually what 'first to solve' for scoring problems means?
+            if ($firstAbsSubmitTime === null) {
+                $firstAbsSubmitTime = $absSubmitTime;
+            }
 
             if ($judging->getResult() == Judging::RESULT_CORRECT) {
                 $correctJury = true;
@@ -371,8 +381,8 @@ class ScoreboardService
                 'cid' => $contest->getCid(),
                 'probid' => $problem->getProbid(),
                 'teamSortOrder' => $team->getCategory()->getSortorder(),
-                /** @phpstan-ignore-next-line $absSubmitTime is always set when $correctJury is true */
-                'submitTime' => $absSubmitTime,
+                /** @phpstan-ignore-next-line $firstAbsSubmitTime is always set when $correctJury is true */
+                'submitTime' => $firstAbsSubmitTime,
                 'correctResult' => Judging::RESULT_CORRECT,
             ];
 
