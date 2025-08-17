@@ -274,7 +274,7 @@ class ScoreboardService
             }
 
             if ($problem->isScoringProblem()) {
-                $score = $judging->getScore();
+                $score = $judging?->getScore();
                 if ($score !== null) {
                     if (bccomp($pointsJury, $score, scale: self::SCALE) < 0) {
                         $pointsJury = $score;
