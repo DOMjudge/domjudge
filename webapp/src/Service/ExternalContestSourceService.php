@@ -29,6 +29,7 @@ use App\Entity\ExternalRun;
 use App\Entity\ExternalSourceWarning;
 use App\Entity\Language;
 use App\Entity\Problem;
+use App\Entity\ScoreboardType;
 use App\Entity\Submission;
 use App\Entity\SubmissionSource;
 use App\Entity\Team;
@@ -179,6 +180,15 @@ class ExternalContestSourceService
         }
 
         return $this->cachedContestData->id;
+    }
+
+    public function getScoreboardType(): ScoreboardType
+    {
+        if (!$this->isValidContestSource()) {
+            throw new LogicException('The contest source is not valid');
+        }
+
+        return $this->cachedContestData->scoreboardType ?? ScoreboardType::PASS_FAIL;
     }
 
     public function getContestName(): string

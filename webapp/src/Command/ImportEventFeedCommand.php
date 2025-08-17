@@ -129,7 +129,7 @@ class ImportEventFeedCommand extends Command
         $fromStart    = $input->getOption('from-start');
         $eventsToSkip = $input->getOption('skip-event-id');
 
-        if (!$this->compareContestId()) {
+        if (!$this->compareContestConfig()) {
             return Command::FAILURE;
         }
 
@@ -217,7 +217,7 @@ class ImportEventFeedCommand extends Command
      *
      * @return bool False if the import should stop, true otherwise.
      */
-    protected function compareContestId(): bool
+    protected function compareContestConfig(): bool
     {
         $contest = $this->sourceService->getSourceContest();
         $ourId   = $contest->getExternalid();
@@ -226,6 +226,17 @@ class ImportEventFeedCommand extends Command
             $this->style->warning(
                 "Contest ID in external system $theirId does not match external ID in DOMjudge ($ourId)."
             );
+            if (!$this->style->confirm('Do you want to continue anyway?', default: false)) {
+                return false;
+            }
+        }
+
+        if ($contest->getScoreboardType() !== $this->sourceService->getScoreboardType()) {
+            $this->style->warning(sprintf(
+                "Scoreboard type in external system (%s) does not match type in DOMjudge (%s).",
+                $this->sourceService->getScoreboardType()->value,
+                $contest->getScoreboardType()->value,
+            ));
             if (!$this->style->confirm('Do you want to continue anyway?', default: false)) {
                 return false;
             }

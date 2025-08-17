@@ -2,6 +2,8 @@
 
 namespace App\DataTransferObject\Shadowing;
 
+use App\Entity\ScoreboardType;
+
 class ContestData
 {
     public function __construct(
@@ -11,6 +13,7 @@ class ContestData
         public readonly ?string $scoreboardFreezeDuration,
         public readonly int $penaltyTime,
         public readonly ?string $startTime,
+        public readonly ?ScoreboardType $scoreboardType,
         // TODO: check for end time and scoreboard thaw time
     ) {}
 }
