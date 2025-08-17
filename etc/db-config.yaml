@@ -101,8 +101,10 @@
             regex: /^[1-9]\d*$/
             error_message: A positive number is required.
         -   name: timelimit_overshoot
-            type: string
-            default_value: 1s|10%
+            type: array_keyval
+            default_value:
+              default: "1s|10%"
+              interactive: "2s+20%"
             public: false
             description: Time that submissions are kept running beyond timelimit before being killed. Specify as `Xs` for X seconds, `Y%` as percentage, or a combination of both separated by one of `+|&` for the sum, maximum, or minimum of both.
             regex: /^\d+[s%]([+|&]\d+[s%])?$/

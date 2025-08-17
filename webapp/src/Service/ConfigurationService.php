@@ -7,6 +7,7 @@ use App\DataTransferObject\ConfigurationSpecification;
 use App\Entity\Configuration;
 use App\Entity\Executable;
 use App\Entity\Judging;
+use App\Entity\Problem;
 use App\Utils\Utils;
 use BackedEnum;
 use Doctrine\ORM\EntityManagerInterface;
@@ -215,7 +216,13 @@ EOF;
             }
 
             if (isset($spec->regex)) {
-                if (preg_match($spec->regex, (string)$val) === 0) {
+                if ($spec->type === 'array_keyval') {
+                    foreach($val as $val2) {
+                        if (preg_match($spec->regex, (string)$val2) === 0) {
+                            $errors[$specName] = $spec->errorMessage ?? 'This is not a valid value';
+                        }
+                    }
+                } elseif (preg_match($spec->regex, (string)$val) === 0) {
                     $errors[$specName] = $spec->errorMessage ?? 'This is not a valid value';
                 }
             }
@@ -379,6 +386,12 @@ EOF;
                 }
                 if ($item->name === 'results_remap') {
                     $item->valueOptions = $item->keyOptions;
+                }
+                break;
+            case 'timelimit_overshoot':
+                $problemTypes = array_merge(['default'], Problem::getPossibleProblemTypes());
+                foreach ($problemTypes as $type) {
+                    $item->keyOptions[$type] = $type;
                 }
         }
 

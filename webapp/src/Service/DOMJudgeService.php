@@ -1419,26 +1419,37 @@ class DOMJudgeService
         return $team;
     }
 
-    public function getRunConfig(ContestProblem $problem, Submission $submission, int $overshoot = 0): string
+    public function getRunConfig(ContestProblem $contestProblem, Submission $submission, int $overshoot_extra = 0): string
     {
-        $memoryLimit = $problem->getProblem()->getMemlimit();
-        $outputLimit = $problem->getProblem()->getOutputlimit();
+        $problem = $contestProblem->getProblem();
+        $memoryLimit = $problem->getMemlimit();
+        $outputLimit = $problem->getOutputlimit();
+        $overshootPerType = $this->config->get('timelimit_overshoot');
+        $overshoot = overshoot_time($problem->getTimeLimit(), $overshootPerType['default'] ?? "0s");
+        foreach ($problem->getTypes() as $problemTypeID) {
+            $problemType = $problem::getPossibleProblemTypes()[$problemTypeID];
+            $problemTypeOvershoot = $overshootPerType[$problemType] ?? false;
+            if (!$problemTypeOvershoot) {
+                continue;
+            }
+            $overshoot = max($overshoot, overshoot_time($problem->getTimelimit(), $problemTypeOvershoot));
+        }
         if (empty($memoryLimit)) {
             $memoryLimit = $this->config->get('memory_limit');
         }
         if (empty($outputLimit)) {
             $outputLimit = $this->config->get('output_limit');
         }
-        $runExecutable = $this->getImmutableRunExecutable($problem);
+        $runExecutable = $this->getImmutableRunExecutable($contestProblem);
 
         return Utils::jsonEncode(
             [
-                'time_limit' => $problem->getProblem()->getTimelimit() * $submission->getLanguage()->getTimeFactor(),
+                'time_limit' => $problem->getTimelimit() * $submission->getLanguage()->getTimeFactor(),
                 'memory_limit' => $memoryLimit,
                 'output_limit' => $outputLimit,
                 'process_limit' => $this->config->get('process_limit'),
                 'entry_point' => $submission->getEntryPoint(),
-                'pass_limit' => $problem->getProblem()->getMultipassLimit(),
+                'pass_limit' => $problem->getMultipassLimit(),
                 'hash' => $runExecutable->getHash(),
                 'overshoot' => $overshoot,
             ]
