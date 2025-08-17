@@ -1549,6 +1549,10 @@ class ExternalContestSourceService
                 for ($zipFileIdx = 0; $zipFileIdx < $zip->numFiles; $zipFileIdx++) {
                     $filename = $zip->getNameIndex($zipFileIdx);
                     $content = $zip->getFromName($filename);
+                    // Do not add directories to the submission
+                    if (str_ends_with($filename, '/')) {
+                        continue;
+                    }
 
                     if (!($tmpSubmissionFile = tempnam($tmpdir, "submission_source_"))) {
                         $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
