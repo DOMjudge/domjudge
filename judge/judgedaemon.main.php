@@ -1461,6 +1461,7 @@ function judge(array $judgeTask): bool
             }
         }
 
+        $compare_args = $compare_config['compare_args'];
         $test_run_cmd = LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt " .
             implode(' ', array_map('dj_escapeshellarg', [
                 $input,
@@ -1469,7 +1470,7 @@ function judge(array $judgeTask): bool
                 $passdir,
                 $run_runpath,
                 $compare_runpath,
-                $compare_config['compare_args']
+                $compare_args,
             ]));
         system($test_run_cmd, $retval);
 
@@ -1523,11 +1524,16 @@ function judge(array $judgeTask): bool
         if (file_exists($passdir . '/feedback/teammessage.txt')) {
             $new_judging_run['team_message'] = rest_encode_file($passdir . '/feedback/teammessage.txt', $output_storage_limit);
         }
+        $score = "";
+        if ($result === 'correct' && file_exists($passdir . '/feedback/score.txt')) {
+            $new_judging_run['score'] = rest_encode_file($passdir . '/feedback/score.txt');
+            $score = ", score: " . trim(dj_file_get_contents($passdir . '/feedback/score.txt'));
+        }
 
         if ($passLimit > 1) {
             $walltime = $metadata['wall-time'] ?? '?';
             logmsg(LOG_INFO, ' ' . ($result === 'correct' ? "   \033[0;32m✔\033[0m" : "   \033[1;31m✗\033[0m")
-                . '  ...done in ' . $walltime . 's (CPU: ' . $runtime . 's), result: ' . $result);
+                . '  ...done in ' . $walltime . 's (CPU: ' . $runtime . 's), result: ' . $result . $score);
         }
 
         if ($result !== 'correct') {
@@ -1575,7 +1581,7 @@ function judge(array $judgeTask): bool
     if ($passLimit == 1) {
         $walltime = $metadata['wall-time'] ?? '?';
         logmsg(LOG_INFO, ' ' . ($result === 'correct' ? " \033[0;32m✔\033[0m" : " \033[1;31m✗\033[0m")
-            . '  ...done in ' . $walltime . 's (CPU: ' . $runtime . 's), result: ' . $result);
+            . '  ...done in ' . $walltime . 's (CPU: ' . $runtime . 's), result: ' . $result . $score);
     }
 
     // done!

@@ -5,5 +5,5 @@ namespace App\Entity;
 enum ScoreboardType: string
 {
     case PASS_FAIL = 'pass-fail';
-    case SCORING = 'scoring';
+    case SCORE     = 'score';
 }
