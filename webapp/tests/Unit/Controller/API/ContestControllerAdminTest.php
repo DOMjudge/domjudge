@@ -29,9 +29,34 @@ class ContestControllerAdminTest extends ContestControllerTest
         return $new;
     }
 
-    public function testAddYaml(): void
+    /**
+     * @dataProvider provideAddYaml
+     */
+    public function testAddYaml(string $yaml, string $expectedYaml, string $contestName): void
     {
-        $yaml = <<<EOF
+        $url = $this->helperGetEndpointURL($this->apiEndpoint);
+        $tempYamlFile = tempnam(sys_get_temp_dir(), "/contest-yaml-");
+        file_put_contents($tempYamlFile, $yaml);
+        $yamlFile = new UploadedFile($tempYamlFile, 'contest.yaml');
+        $cid = $this->verifyApiJsonResponse('POST', $url, 200, $this->apiUser, [], ['yaml' => $yamlFile]);
+        self::assertIsString($cid);
+        unlink($tempYamlFile);
+
+        self::assertSame($contestName, $this->getContest($cid)->getName());
+        $url = $this->helperGetEndpointURL('contest-yaml', null, $cid);
+        $exportContestYaml = $this->verifyApiResponse('GET', $url, 200, $this->apiUser, null, [], true);
+        self::assertIsString($exportContestYaml);
+        $expected = $this->parseSortYaml($expectedYaml);
+        $actual = $this->parseSortYaml($exportContestYaml);
+        self::assertSame($expected, $actual);
+        self::assertSame($this->getContest($cid)->getActivatetime(), $this->getContest($cid)->getStarttime());
+        self::assertNull($this->getContest($cid)->getDeactivatetime());
+    }
+
+    public function provideAddYaml(): Generator
+    {
+        yield [
+            <<<EOF
 duration: 2:00:00
 formal_name: NWERC 2020 Practice Session
 penalty_time: 20
@@ -51,8 +76,8 @@ problems:
     letter: C
     rgb: '#FF7109'
     short-name: cheating
-EOF;
-        $expectedYaml = <<<EOF
+EOF,
+            <<<EOF
 id: practice
 formal_name: NWERC 2020 Practice Session
 name: practice
@@ -67,25 +92,39 @@ medals:
     bronze: 4
 scoreboard_freeze_time: '+01:30:00'
 scoreboard_freeze_duration: 0:30:00
-EOF;
-
-        $url = $this->helperGetEndpointURL($this->apiEndpoint);
-        $tempYamlFile = tempnam(sys_get_temp_dir(), "/contest-yaml-");
-        file_put_contents($tempYamlFile, $yaml);
-        $yamlFile = new UploadedFile($tempYamlFile, 'contest.yaml');
-        $cid = $this->verifyApiJsonResponse('POST', $url, 200, $this->apiUser, [], ['yaml' => $yamlFile]);
-        self::assertIsString($cid);
-        unlink($tempYamlFile);
-
-        self::assertSame('NWERC 2020 Practice Session', $this->getContest($cid)->getName());
-        $url = $this->helperGetEndpointURL('contest-yaml', null, $cid);
-        $exportContestYaml = $this->verifyApiResponse('GET', $url, 200, $this->apiUser, null, [], true);
-        self::assertIsString($exportContestYaml);
-        $expected = $this->parseSortYaml($expectedYaml);
-        $actual = $this->parseSortYaml($exportContestYaml);
-        self::assertSame($expected, $actual);
-        self::assertSame($this->getContest($cid)->getActivatetime(), $this->getContest($cid)->getStarttime());
-        self::assertNull($this->getContest($cid)->getDeactivatetime());
+scoreboard_type: pass-fail
+EOF,
+            'NWERC 2020 Practice Session',
+        ];
+        yield [
+            <<<EOF
+duration: 5:00:00
+formal_name: Some contest
+penalty_time: 0
+scoreboard_freeze_duration: 1:00:00
+id: scoretest
+start_time: 2024-01-01 00:00:00+00:00
+scoreboard_type: score
+EOF,
+            <<<EOF
+id: scoretest
+formal_name: Some contest
+name: scoretest
+activate_time: '2024-01-01T00:00:00+00:00'
+start_time: '2024-01-01T00:00:00+00:00'
+end_time: '+5:00:00'
+duration: 5:00:00.000
+penalty_time: 0
+medals:
+    gold: 4
+    silver: 4
+    bronze: 4
+scoreboard_freeze_time: '+04:00:00'
+scoreboard_freeze_duration: 1:00:00
+scoreboard_type: score
+EOF,
+            'Some contest',
+        ];
     }
 
     public function testAddJson(): void

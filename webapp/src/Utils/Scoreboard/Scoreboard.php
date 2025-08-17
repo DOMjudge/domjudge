@@ -273,7 +273,7 @@ class Scoreboard
 
     public function isScoring(): bool
     {
-        return $this->contest->getScoreboardType() === ScoreboardType::SCORING;
+        return $this->contest->getScoreboardType() === ScoreboardType::SCORE;
     }
 
     /**

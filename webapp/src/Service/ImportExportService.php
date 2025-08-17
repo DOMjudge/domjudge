@@ -9,6 +9,7 @@ use App\Entity\ContestProblem;
 use App\Entity\ExternalContestSource;
 use App\Entity\Problem;
 use App\Entity\Role;
+use App\Entity\ScoreboardType;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
@@ -93,6 +94,7 @@ class ImportExportService
             'activate_time' => Utils::isRelTime($contest->getActivatetimeString())
                 ? $contest->getActivatetimeString()
                 : Utils::absTime($contest->getActivatetime(), true),
+            'scoreboard_type' => $contest->getScoreboardType()->value,
         ];
         if ($warnMsg = $contest->getWarningMessage()) {
             $data['warning_message'] = $warnMsg;
@@ -298,6 +300,16 @@ class ImportExportService
             ->setPublic($data['public'] ?? true);
         if ($deactivateTime) {
             $contest->setDeactivatetimeString($deactivateTimeIsRelative ? $deactivateRelativeTime : date_format($deactivateTime, 'Y-m-d H:i:s e'));
+        }
+
+        if (isset($data['scoreboard_type'])) {
+            $scoreboardType = ScoreboardType::tryFrom($data['scoreboard_type']);
+            if (!$scoreboardType) {
+                $errorMessage = sprintf('Scoreboard type %s is not valid.', $data['scoreboard_type']);
+                return false;
+            }
+
+            $contest->setScoreboardtype($scoreboardType);
         }
 
         // Get all visible categories. For now, we assume these are the ones getting awards
