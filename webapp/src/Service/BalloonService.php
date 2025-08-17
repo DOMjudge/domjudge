@@ -141,7 +141,25 @@ class BalloonService
             }
             // Keep overwriting this - in the end it'll
             // contain the ID of the first balloon in this contest.
+            $submittime = $balloonsData[0]->getSubmission()->getSubmittime();
             $AWARD_BALLOONS['contest'] = $balloonsData[0]->getBalloonId();
+        }
+        $countBefore = $em->createQueryBuilder()
+            ->from(Judging::class, 'j')
+            ->leftJoin('j.submission', 's')
+            ->select('COUNT(s.submitid)')
+            ->where('s.contest = :cid')
+            ->andWhere('s.submittime < :submittime')
+            ->andWhere('s.valid = 1')
+            ->andWhere('j.valid = 1')
+            ->andWhere('j.result IS NULL')
+            ->setParameter('cid', $contest->getCid())
+            ->setParameter('submittime', $submittime)
+            ->getQuery()->getSingleScalarResult();
+        if ($countBefore > 0) {
+            // We don't have complete information about 'first in contest' yet as there are unjudged submissions that
+            // could influence the result.
+            $AWARD_BALLOONS['contest'] = -1;
         }
 
         // Loop again to construct table.
