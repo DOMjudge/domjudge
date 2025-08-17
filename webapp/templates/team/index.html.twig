@@ -24,7 +24,7 @@
 
 {% block messages %}{% endblock %}
 {% block content %}
-    <div data-ajax-refresh-target data-ajax-refresh-after="setFlashAndProgress" data-ajax-refresh-before="saveFlash">
+    <div data-ajax-refresh-target data-ajax-refresh-after="setFlashAndProgressAndExperimentalFeatures" data-ajax-refresh-before="saveFlash">
         {% include 'team/partials/index_content.html.twig' %}
     </div>
 {% endblock %}
@@ -37,7 +37,7 @@
             $flash = $('[data-flash-messages]').children();
         }
 
-        function setFlashAndProgress() {
+        function setFlashAndProgressAndExperimentalFeatures() {
             var $newProgress = $('[data-ajax-refresh-target] > [data-progress-bar]');
             if ($newProgress.length) {
                 var $oldProgress = $('body > [data-progress-bar]');
@@ -46,6 +46,8 @@
             }
 
             $('[data-flash-messages]').html($flash);
+
+            checkExperimentalFeature();
         }
 
         window.initModalClarificationPreviewAdd = function() {
