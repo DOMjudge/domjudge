@@ -61,10 +61,17 @@ class TestcaseGroup
     #[ORM\OneToMany(targetEntity: Testcase::class, mappedBy: 'testcaseGroup')]
     private Collection $testcases;
 
+    /**
+     * @var Collection<int, Problem>
+     */
+    #[ORM\OneToMany(mappedBy: 'parentTestcaseGroup', targetEntity: Problem::class)]
+    private Collection $problems;
+
     public function __construct()
     {
         $this->children = new ArrayCollection();
         $this->testcases = new ArrayCollection();
+        $this->problems = new ArrayCollection();
     }
 
     public function getTestcaseGroupId(): int
@@ -163,6 +170,14 @@ class TestcaseGroup
     public function getTestcases(): Collection
     {
         return $this->testcases;
+    }
+
+    /**
+     * @return Collection<int, Problem>
+     */
+    public function getProblems(): Collection
+    {
+        return $this->problems;
     }
 
     public function getOutputValidatorFlags(): string
