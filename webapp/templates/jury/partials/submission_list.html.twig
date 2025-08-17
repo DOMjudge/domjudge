@@ -172,7 +172,7 @@
                     </a>
                 </td>
                 {% if is_scoring %}
-                    <td class="right">
+                    <td class="{{ tdExtraClass }} right">
                         {% if submission.score is not null %}
                             {{ submission.score | number_format(2, '.', '') }}
                         {% else %}
@@ -292,12 +292,21 @@
                             {% endif %}
                         </a>
                     </td>
+                    {% if is_scoring %}
+                        <td class="right">
+                            {% if externalJudgement.score is not null %}
+                                {{ externalJudgement.score | number_format(2, '.', '') }}
+                            {% else %}
+                                {{ '-' }}
+                            {% endif %}
+                        </td>
+                    {% endif %}
                     <td class="testcase-results">
                         {{- submission | testcaseResults(true) -}}
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="3" class="inline-verify-form">
+                    <td colspan="{% if is_scoring %}4{% else %}3{% endif %}" class="inline-verify-form">
                         {% if externalJudgement is not null and (not submission.judgings.first or submission.judgings.first.result != externalJudgement.result) %}
                             {% include 'jury/partials/verify_form.html.twig' with {
                                 label: 'Shadow difference verified',
