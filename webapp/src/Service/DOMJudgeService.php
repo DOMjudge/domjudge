@@ -31,6 +31,7 @@ use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\FreezeData;
+use App\Utils\UpdateStrategy;
 use App\Utils\Utils;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,9 +39,11 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -62,6 +65,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Twig\Environment;
 use ZipArchive;
 
@@ -69,6 +73,8 @@ class DOMJudgeService
 {
     protected ?Executable $defaultCompareExecutable = null;
     protected ?Executable $defaultRunExecutable = null;
+
+    private string $localVersionString = '';
 
     final public const EVAL_DEFAULT = 0;
     final public const EVAL_LAZY = 1;
@@ -108,6 +114,10 @@ class DOMJudgeService
         protected string $projectDir,
         #[Autowire('%domjudge.vendordir%')]
         protected string $vendorDir,
+        #[Autowire('%domjudge.version%')]
+        protected readonly string $domjudgeVersion,
+        #[Autowire('%domjudge.installmethod%')]
+        protected readonly string $domjudgeInstallMethod,
     ) {}
 
     /**
@@ -1714,5 +1724,99 @@ class DOMJudgeService
             ->from(Team::class, 'l')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @return String[]|false
+     */
+    public function cacherCheckNewVersion(ItemInterface $item): array|false {
+        $item->expiresAfter(86400);
+
+        $versionUrl = 'https://versions.domjudge.org';
+        $options = ['http' => ['timeout' => 1, 'method' => 'GET', 'header' => "User-Agent: DOMjudge#" . $this->domjudgeInstallMethod . "/" . $this->localVersionString . "\r\n"]];
+        $context = stream_context_create($options);
+        $response = @file_get_contents($versionUrl, false, $context);
+        if ($response === false) {
+            return false;
+        }
+        // Assume we get a one-level unordered JSON list with the released versions e.g. ["10.0.0", "9.11.0", "12.0.12", "10.0.1"]
+        $tmp_versions = json_decode($response, true);
+        natsort($tmp_versions);
+        return array_reverse($tmp_versions);
+    }
+
+    /**
+     * Returns either the next strictly higher version or false when nothing is found/requested.
+     */
+    public function checkNewVersion(): string|false {
+        if ($this->config->get('check_new_version', false) === UpdateStrategy::Strategy_none) {
+            return false;
+        }
+        // The local version is something like "x.y.z / commit hash", e.g. "8.4.0DEV/4e25adb13" for development
+        // or 8.3.2 for a released version
+        // In case of development we remove the commit hash for some anonymity but keep the DEV to not count those as the (possibly) released version
+        $this->localVersionString = (string)strtok($this->domjudgeVersion, "/");
+        $localVersion = explode(".", $this->localVersionString);
+        if (count($localVersion) !== 3) {
+            // Unknown version, someone might have locally modified and used their own versioning
+            return false;
+        }
+
+        $cache = new FilesystemAdapter();
+        try {
+             $versions = $cache->get('domjudge_versions', [$this, 'cacherCheckNewVersion']);
+        } catch (InvalidArgumentException $e) {
+            return false;
+        }
+
+        if (!$versions) {
+            return false;
+        }
+
+        preg_match("/\d.\d.\d/", $this->domjudgeVersion, $matches);
+        $extractedLocalVersionString = $matches[0];
+        if ($this->config->get('check_new_version', false) === UpdateStrategy::Strategy_incremental) {
+            /* Steer towards the nearest highest patch release first
+             * So the expected path would be:
+             * DJ6.0.0 -> DJ6.0.6 -> DJ6.6.0 -> DJ9.1.2 instead of
+             *         -> DJ6.0.[1..6] -> DJ6.[1..6].* -> DJ[7..9].*.*
+             * skipping all patch releases in between, when no patch release
+             * is available, try the highest minor and otherwise the highest Major
+             * instead of going to the latest release:
+             * DJ6.0.0 -> DJ9.1.2
+             */
+            $patch = "/" . $localVersion[0] . "." . $localVersion[1] . ".\d/";
+            $minor = "/" . $localVersion[0] . ".\d.\d/";
+            $major = "/\d.\d.\d/";
+            foreach ([$patch, $minor, $major] as $regex) {
+                foreach ($versions as $release) {
+                    if (preg_match($regex, $release)) {
+                        if (strnatcmp($release, $extractedLocalVersionString) === 1) {
+                            return $release;
+                        }
+                        if (strnatcmp($release, $extractedLocalVersionString) === 0 && str_contains($this->localVersionString, "DEV")) {
+                            // Special case, the development version is now released
+                            return $release;
+                        }
+                    }
+                }
+            }
+        }
+        elseif ($this->config->get('check_new_version', false) === UpdateStrategy::Strategy_major_release) {
+            /* Steer towards the latest version directly
+             * So the expected path would be:
+             * DJ6.0.0 -> DJ9.1.2
+             * This should be safe as doctrine migrations check for upgrades regardless of current DOMjudge release
+             */
+            $latest = $versions[0];
+            if (strnatcmp($latest, $extractedLocalVersionString) === 1) {
+                return $latest;
+            }
+            if (strnatcmp($latest, $extractedLocalVersionString) === 0 && str_contains($this->localVersionString, "DEV")) {
+                // Special case, the development version is now released
+                return $latest;
+            }
+        }
+        return false;
     }
 }

@@ -57,6 +57,11 @@ class JuryMiscController extends BaseController
             }
         }
 
+        $newestVersion = $this->dj->checkNewVersion();
+        if ($newestVersion) {
+            $this->addFlash('info', 'New release ' . $newestVersion . ' available at: https://www.domjudge.org/download.');
+        }
+
         return $this->render('jury/index.html.twig', [
             'adminer_enabled' => $config->get('adminer_enabled'),
             'CCS_SPEC_API_URL' => GI::CCS_SPEC_API_URL,
