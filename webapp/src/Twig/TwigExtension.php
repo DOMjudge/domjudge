@@ -159,6 +159,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'doc_links'                     => $this->dj->getDocLinks(),
             'allow_registration'            => $selfRegistrationCategoriesCount !== 0,
             'enable_ranking'                => $this->config->get('enable_ranking'),
+            'new_version_available'         => $this->dj->checkNewVersion(),
             'editor_themes'                 => [
                 'vs'                        => ['name' => 'Visual Studio (light)'],
                 'vs-dark'                   => ['name' => 'Visual Studio (dark)'],

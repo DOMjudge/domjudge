@@ -111,7 +111,8 @@
 		"twig/extra-bundle": "^3.5",
 		"twig/markdown-extra": "^3.5",
 		"twig/string-extra": "^3.5",
-		"twig/twig": "^3.6"
+		"twig/twig": "^3.6",
+		"z4kn4fein/php-semver": "^3.0"
 	},
 	"require-dev": {
 		"ext-dom": "*",

@@ -38,6 +38,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
@@ -63,6 +64,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Twig\Environment;
+use z4kn4fein\SemVer\Version;
 use ZipArchive;
 
 class DOMJudgeService
@@ -108,6 +110,10 @@ class DOMJudgeService
         protected string $projectDir,
         #[Autowire('%domjudge.vendordir%')]
         protected string $vendorDir,
+        #[Autowire('%domjudge.version%')]
+        protected readonly string $domjudgeVersion,
+        #[Autowire('%domjudge.installmethod%')]
+        protected readonly string $domjudgeInstallMethod,
     ) {}
 
     /**
@@ -1674,5 +1680,60 @@ class DOMJudgeService
             ->where('l.allowSubmit = 1')
             ->getQuery()
             ->getResult();
+    }
+
+    public function checkNewVersion(): string|false {
+        if (!$this->config->get('check_new_version')) {
+            return false;
+	}
+        $versionLocalString = explode("/", str_replace("DEV", "-prerelease", $this->domjudgeVersion))[0];
+        $versionLocal = Version::parse($versionLocalString, false);
+        $versionUrl = 'https://versions.domjudge.org';
+        $options = ['http' => ['method' => 'GET', 'header' => "User-Agent: tarball/" . $versionLocalString . "\r\n"]];
+        $context = stream_context_create($options);
+        $response = @file_get_contents($versionUrl, false, $context);
+	if ($response === false) {
+            return false;
+        }
+        $versions = json_decode($response, true);
+        /* Steer towards to the latest patch first 
+         * the user can see on the website if there is a new Major/minor themselves
+         * otherwise the latest minor, or Major release. So the user might make the upgrade path:
+         * DJ6.0.0 -> DJ6.0.6 -> DJ6.6.0 -> DJ9.0.0 instead of
+         *         -> DJ6.0.[1..6] -> DJ6.[1..6] -> DJ[7..9].0.0
+         */
+        $latestPatchString = $versionLocal;
+        if (isset($versions[$versionLocal->getMajor()][$versionLocal->getMinor()])) {
+            $latestPatchString = Version::rsortString($versions[$versionLocal->getMajor()][$versionLocal->getMinor()])[0];
+            $latestPatch = Version::parse($latestPatchString);
+            if (Version::compare($versionLocal, $latestPatch) < 0) {
+                return $latestPatchString;
+            }
+        }
+        $latestMinorString = $versionLocal;
+        if (isset($versions[$versionLocal->getMajor()])) {
+            $highestMinorInMajor = array_keys($versions[$versionLocal->getMajor()]);
+            rsort($highestMinorInMajor);
+            $latestMinorString = Version::rsortString($versions[$versionLocal->getMajor()][$highestMinorInMajor[0]])[0];
+            $latestMinor = Version::parse($latestMinorString);
+            if (Version::compare($versionLocal, $latestMinor) < 0) {
+                return $latestMinorString;
+            }
+        }
+        $latestMajorString = $versionLocal;
+        try {
+            $highestMajor = array_keys($versions);
+            rsort($highestMajor);
+            $highestMinorInMajor = array_keys($versions[$highestMajor[0]]);
+            rsort($highestMinorInMajor);
+            $latestMajorString = Version::rsortString($versions[$highestMajor[0]][$highestMinorInMajor[0]])[0];
+            $latestMajor = Version::parse($latestMajorString);
+            if (Version::compare($versionLocal, $latestMajor) < 0) {
+                return $latestMajorString;
+            }
+        } catch (Exception $e) {
+            return false;
+        }
+        return false;
     }
 }
