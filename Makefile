@@ -306,7 +306,7 @@ inplace-postinstall-nginx: inplace-postinstall-permissions
 	fi
 	@service="php-fpm"; phppool="$(fedpool)"; \
 	if [ -d "$(debpool)" ]; then \
-		phppool="ln -sf $(CURDIR)/etc/domjudge-fpm.conf $(debpool)/domjudge-fpm.conf"; \
+		phppool="$(debpool)"; \
 		service="php$(PHPVERSION)-fpm"; \
 	fi; \
 	service="systemctl restart $$service"; \
