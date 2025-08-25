@@ -732,8 +732,13 @@ class SubmissionService
             // This is so that we can use the submitid/judgingid below.
             $this->em->flush();
 
-            $this->dj->maybeCreateJudgeTasks($judging,
-                $source === SubmissionSource::PROBLEM_IMPORT ? JudgeTask::PRIORITY_LOW : JudgeTask::PRIORITY_DEFAULT);
+            $priority = match ($source) {
+                SubmissionSource::PROBLEM_IMPORT => JudgeTask::PRIORITY_LOW,
+                default => JudgeTask::PRIORITY_DEFAULT,
+            };
+            // Create judgetask as invalid when evaluating as analyst.
+            $lazyEval = $this->config->get('lazy_eval_results');
+            $this->dj->maybeCreateJudgeTasks($judging, $priority, valid: $lazyEval !== DOMJudgeService::EVAL_ANALYST);
         }
 
         $this->em->wrapInTransaction(function () use ($contest, $submission) {

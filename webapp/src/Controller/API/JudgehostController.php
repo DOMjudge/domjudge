@@ -1076,7 +1076,7 @@ class JudgehostController extends AbstractFOSRestController
                     throw new BadMethodCallException('internal bug: the evaluated result changed during judging');
                 }
 
-                if ($lazyEval !== DOMJudgeService::EVAL_FULL) {
+                if ($lazyEval !== DOMJudgeService::EVAL_FULL && $lazyEval !== DOMJudgeService::EVAL_ANALYST) {
                     // We don't want to continue on this problem, even if there's spare resources.
                     $this->em->getConnection()->executeStatement(
                         'UPDATE judgetask SET valid=0, priority=:priority'
@@ -1086,7 +1086,7 @@ class JudgehostController extends AbstractFOSRestController
                             'jobid' => $judgingRun->getJudgingid(),
                         ]
                     );
-                } else {
+                } elseif ($lazyEval !== DOMJudgeService::EVAL_ANALYST) {
                     // Decrease priority of remaining unassigned judging runs.
                     $this->em->getConnection()->executeStatement(
                         'UPDATE judgetask SET priority=:priority'
