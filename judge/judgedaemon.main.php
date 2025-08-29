@@ -1359,9 +1359,6 @@ function judge(array $judgeTask): bool
         return false;
     }
 
-    // TODO: How do we plan to handle these?
-    $overshoot = djconfig_get_value('timelimit_overshoot');
-
     // Check whether we have received an exit signal (but not a graceful exit signal).
     if (function_exists('pcntl_signal_dispatch')) {
         pcntl_signal_dispatch();
@@ -1417,9 +1414,7 @@ function judge(array $judgeTask): bool
         }
     }
 
-    $hardtimelimit = $run_config['time_limit']
-        +  overshoot_time($run_config['time_limit'], $overshoot)
-        + $run_config['overshoot'];
+    $hardtimelimit = $run_config['time_limit'] + $run_config['overshoot'];
     if ($combined_run_compare) {
         // This accounts for wall time spent in the validator. We may likely
         // want to make this configurable in the future. The current factor is
