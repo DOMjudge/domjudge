@@ -53,5 +53,24 @@ class ContestProblemVisitor implements EventSubscriberInterface
         } else {
             $contestProblem->getProblem()->setStatementForApi();
         }
+
+        // Problem attachments
+        $attachments = [];
+        foreach ($contestProblem->getProblem()->getAttachments() as $attachment) {
+            $route = $this->dj->apiRelativeUrl(
+                'v4_app_api_problem_attachment',
+                [
+                    'cid'      => $contestProblem->getContest()->getExternalid(),
+                    'id'       => $contestProblem->getExternalId(),
+                    'filename' => $attachment->getName(),
+                ]
+            );
+            $attachments[] = new FileWithName(
+                $route,
+                $attachment->getMimeType(),
+                $attachment->getName()
+            );
+        }
+        $contestProblem->getProblem()->setAttachmentsForApi($attachments);
     }
 }
