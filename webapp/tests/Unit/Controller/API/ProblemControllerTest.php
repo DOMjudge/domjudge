@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\AddProblemAttachmentFixture;
 use App\DataFixtures\Test\DummyProblemFixture;
 use App\Entity\Problem;
 
@@ -31,6 +32,13 @@ class ProblemControllerTest extends BaseTestCase
                     'filename' => 'C.pdf',
                 ],
             ],
+            'attachments' => [
+                [
+                    'href'     => 'contests/demo/problems/boolfind/attachment/interactor',
+                    'mime'     => 'text/x-script.python',
+                    'filename' => 'interactor',
+                ],
+            ],
         ],
         'fltcmp' => [
             "ordinal"    => 1,
@@ -48,6 +56,7 @@ class ProblemControllerTest extends BaseTestCase
                     'filename' => 'B.pdf',
                 ],
             ],
+            'attachments' => [],
         ],
         'hello' => [
             "ordinal"    => 0,
@@ -65,10 +74,17 @@ class ProblemControllerTest extends BaseTestCase
                     'filename' => 'A.pdf',
                 ],
             ],
+            'attachments' => [],
         ],
     ];
 
     protected array $expectedAbsent = ['4242', 'nonexistent'];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->loadFixture(AddProblemAttachmentFixture::class);
+    }
 
     public function testDeleteNotAllowed(): void
     {
