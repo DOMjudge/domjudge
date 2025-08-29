@@ -214,6 +214,7 @@
                 <thead class="thead-light">
                 <tr>
                     <th>Name</th>
+                    <th>Mime type</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -228,6 +229,7 @@
                     {% for attachment in problem.attachments %}
                         <tr>
                             <td>{{ attachment.name }}</td>
+                            <td>{{ attachment.mimeType }}</td>
                             <td>
                                 <a href="{{ path('jury_attachment_fetch', {'attachmentId': attachment.attachmentid}) }}"
                                    class="btn btn-sm btn-primary">
@@ -247,7 +249,7 @@
 
                 {% if is_granted('ROLE_ADMIN') and not lockedProblem %}
                     <tr>
-                        <td>
+                        <td colspan="2">
                             {{ form_errors(problemAttachmentForm.content) }}
                             {{ form_widget(problemAttachmentForm.content) }}
                         </td>

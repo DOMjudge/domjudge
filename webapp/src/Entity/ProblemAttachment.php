@@ -28,6 +28,9 @@ class ProblemAttachment
     #[ORM\Column(length: 4, options: ['comment' => 'File type of attachment'])]
     private ?string $type = null;
 
+    #[ORM\Column(options: ['comment' => 'Mime type of attachment'])]
+    private ?string $mimeType = null;
+
     #[ORM\ManyToOne(inversedBy: 'attachments')]
     #[ORM\JoinColumn(name: 'probid', referencedColumnName: 'probid', onDelete: 'CASCADE')]
     private ?Problem $problem = null;
@@ -82,6 +85,18 @@ class ProblemAttachment
     public function setType(string $type): self
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getMimeType(): ?string
+    {
+        return $this->mimeType;
+    }
+
+    public function setMimeType(string $mimeType): self
+    {
+        $this->mimeType = $mimeType;
 
         return $this;
     }

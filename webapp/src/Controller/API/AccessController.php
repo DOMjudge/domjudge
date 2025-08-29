@@ -163,6 +163,7 @@ class AccessController extends AbstractApiController
                         'time_limit',
                         'test_data_count',
                         'statement',
+                        'attachments',
                         // DOMjudge specific properties:
                         'probid',
                     ],

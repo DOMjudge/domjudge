@@ -474,6 +474,7 @@ class ProblemController extends BaseController
                 ->setProblem($problem)
                 ->setName($name)
                 ->setType($type)
+                ->setMimeType(mime_content_type($file->getRealPath()))
                 ->setContent($attachmentContent);
 
             $this->em->persist($attachment);
