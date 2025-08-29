@@ -534,6 +534,10 @@ class ImportProblemService
                 $type = 'txt';
             }
 
+            $finfo = new \finfo();
+            $mime = $finfo->buffer($content);
+            $mime = explode(';', $mime)[0];
+
             // Check if an attachment already exists, since then we overwrite it.
             $attachment = $existingAttachments[$name] ?? null;
 
@@ -541,6 +545,9 @@ class ImportProblemService
                 $attachmentContent = $attachment->getContent();
                 if ($content !== $attachmentContent->getContent()) {
                     $attachmentContent->setContent($content);
+                    $attachment
+                        ->setType($type)
+                        ->setMimeType($mime);
                     $messages['info'][] = sprintf("Updated attachment '%s'", $name);
                     $numAttachments++;
                 }
@@ -555,6 +562,7 @@ class ImportProblemService
                     ->setProblem($problem)
                     ->setName($name)
                     ->setType($type)
+                    ->setMimeType($mime)
                     ->setContent($attachmentContent);
 
                 $attachmentContent

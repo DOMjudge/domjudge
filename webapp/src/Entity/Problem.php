@@ -200,6 +200,14 @@ class Problem extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ?FileWithName $statementForApi = null;
 
+    /**
+     * @var FileWithName[]
+     */
+    // This field gets filled by the contest problem visitor with an array of data transfer
+    // objects that represents the problem attachments.
+    #[Serializer\Exclude]
+    private array $attachmentsForApi = [];
+
 
     /**
      * @var Collection<int, Language>
@@ -633,6 +641,26 @@ class Problem extends BaseApiEntity implements
     public function getStatementForApi(): array
     {
         return array_filter([$this->statementForApi]);
+    }
+
+
+    /**
+     * @param list<FileWithName> $attachmentsForApi
+     */
+    public function setAttachmentsForApi(array $attachmentsForApi = []): void
+    {
+        $this->attachmentsForApi = $attachmentsForApi;
+    }
+
+    /**
+     * @return FileWithName[]
+     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('attachments')]
+    #[Serializer\Type('array<App\DataTransferObject\FileWithName>')]
+    public function getAttachmentsForApi(): array
+    {
+        return $this->attachmentsForApi;
     }
 
     public function addLanguage(Language $language): Problem

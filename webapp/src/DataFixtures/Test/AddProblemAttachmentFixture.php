@@ -39,7 +39,8 @@ for testcase_number in range(number_of_testcases):
         $problem = $manager->getRepository(Problem::class)->findOneBy(['externalid' => 'boolfind']);
         $attachment = (new ProblemAttachment())
             ->setName('interactor')
-            ->setType('py');
+            ->setType('py')
+            ->setMimeType('text/x-script.python');
         $manager->persist($attachment);
         $content = (new ProblemAttachmentContent())
             ->setContent($interactor)
