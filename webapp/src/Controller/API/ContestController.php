@@ -871,7 +871,7 @@ class ContestController extends AbstractRestController
                     }
 
                     echo Utils::jsonEncode($result) . "\n";
-                    ob_flush();
+                    Utils::ob_flush_if_possible();
                     flush();
                     $lastUpdate = Utils::now();
                     $lastIdSent = $event->getEventid();
@@ -896,7 +896,7 @@ class ContestController extends AbstractRestController
                         # Send keep alive every 10s. Guarantee according to spec is 120s.
                         # However, nginx drops the connection if we don't update for 60s.
                         echo "\n";
-                        ob_flush();
+                        Utils::ob_flush_if_possible();
                         flush();
                         $lastUpdate = $now;
                     }

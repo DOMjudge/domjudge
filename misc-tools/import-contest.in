@@ -15,7 +15,8 @@ Part of the DOMjudge Programming Contest Jury System and licensed
 under the GNU GPL. See README and COPYING for details.
 '''
 
-from os import listdir
+from argparse import ArgumentParser
+from os import chdir, listdir
 from typing import List
 import json
 import os.path
@@ -29,13 +30,16 @@ sys.path.append('@domserver_libdir@')
 import dj_utils
 
 cid = None
-webappdir = '@domserver_webappdir@'
 
+parser = ArgumentParser(description='Import a contest archive to DOMjudge via the API.')
+parser.add_argument('-d', '--dir',  help="directory containing the contest archive, defaults to current directory")
+parser.add_argument('-u', '--url',  help="DOMjudge API URL to use, if not specified use the CLI interface")
+args = parser.parse_args()
 
-def usage():
-    print(f'Usage: {sys.argv[0]} [<domjudge-api-url>]')
-    exit(1)
-
+if args.dir:
+    chdir(args.dir)
+if args.url:
+    dj_utils.domjudge_api_url = args.url
 
 def import_file(entity: str, files: List[str]) -> bool:
     any_matched = False
@@ -133,13 +137,6 @@ def import_contest_problemset_document(cid: str):
             print('Contest problemset imported.')
         else:
             print('Skipping contest problemset import.')
-
-if len(sys.argv) == 1:
-    dj_utils.domjudge_webapp_folder_or_api_url = webappdir
-elif len(sys.argv) == 2:
-    dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[1]
-else:
-    usage()
 
 user_data = dj_utils.do_api_request('user')
 if 'admin' not in user_data['roles']:
