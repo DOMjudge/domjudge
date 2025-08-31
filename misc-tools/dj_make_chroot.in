@@ -205,7 +205,7 @@ fi
 if [ "$DISTRO" = 'Ubuntu' ]; then
 
     # Packages to include during bootstrap process (comma separated):
-    INCLUDEDEBS=""
+    INCLUDEDEBS="ca-certificates"
 
     # Packages to install after upgrade (space separated):
     INSTALLDEBS="gcc g++ make default-jdk-headless default-jre-headless locales"
