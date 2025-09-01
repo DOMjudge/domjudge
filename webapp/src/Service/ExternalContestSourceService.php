@@ -30,6 +30,7 @@ use App\Entity\ExternalSourceWarning;
 use App\Entity\JudgeTask;
 use App\Entity\Language;
 use App\Entity\Problem;
+use App\Entity\QueueTask;
 use App\Entity\Submission;
 use App\Entity\SubmissionSource;
 use App\Entity\Team;
@@ -1866,6 +1867,7 @@ class ExternalContestSourceService
             $priority = $this->getAnalystRunPriority($run);
             if ($priority !== null) {
                 // Make the judgetask valid and assign running priority if no judgehost has picked it up yet.
+                $submission = $externalJudgement->getSubmission();
                 $this->em->createQueryBuilder()
                         ->update(JudgeTask::class, 'jt')
                         ->set('jt.valid', true)
@@ -1874,9 +1876,17 @@ class ExternalContestSourceService
                         ->andWhere('jt.submission = :submission')
                         ->andWhere('jt.judgehost IS NULL')
                         ->setParameter('testcase_id', $testcase->getTestcaseid())
-                        ->setParameter('submission', $externalJudgement->getSubmission())
+                        ->setParameter('submission', $submission)
                         ->getQuery()
                         ->execute();
+
+                $queueTask = new QueueTask();
+                $queueTask->setJudging($submission->getJudgings()->first())
+                    ->setPriority($priority)
+                    ->setTeam($submission->getTeam())
+                    ->setTeamPriority((int)$submission->getSubmittime())
+                    ->setStartTime(null);
+                $this->em->persist($queueTask);
             }
         }
 
