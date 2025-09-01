@@ -197,15 +197,20 @@
                     </a>
                 </span>
 
-                {% if external_ccs_submission_url is not empty %}
-                    {% set externalSubmissionUrl = submission | externalCcsUrl %}
-                    {% if externalSubmissionUrl is not empty %}
-                        <span>
-                    <i class="fas fa-link" title="External link:"></i>
-                    <a href="{{ externalSubmissionUrl }}" target="_blank">
-                        View in external CCS
-                    </a>
-                </span>
+                {% if shadowMode() and submission.externalid %}
+                    {% if external_ccs_submission_url is empty %}
+                        External ID: {{- submission.externalid -}}
+                    {% else %}
+                        {% set externalSubmissionUrl = submission | externalCcsUrl %}
+                        {% if externalSubmissionUrl is not empty %}
+                            <span>
+                                <i class="fas fa-link" title="External link:"></i>
+                                <a href="{{ externalSubmissionUrl }}" target="_blank">
+                                    View in external CCS
+                                </a>
+                                (ID: {{- submission.externalid -}})
+                            </span>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             </div>
@@ -227,22 +232,6 @@
     {% if not submission.contestProblem %}
         <div class="alert alert-danger">
             This submission is for a problem that is not part (anymore) of the contest of the submission.
-        </div>
-    {% endif %}
-
-    {% if shadowMode() and submission.externalid %}
-        <div class="mb-2">
-            External ID:
-            {% if external_ccs_submission_url is empty %}
-                {{- submission.externalid -}}
-            {% else %}
-                <a href="{{ submission | externalCcsUrl }}" target="_blank">
-                    {{- submission.externalid -}}
-                </a>
-            {%- endif -%}
-            {%- if externalJudgement is not null -%}
-                , {{ externalJudgement.result | printValidJuryResult }}
-            {% endif %}
         </div>
     {% endif %}
 
@@ -558,11 +547,11 @@
                             </td>
                             <td>
                                 {% if externalSubmissionUrl is defined and externalSubmissionUrl is not empty %}
-                                <a href="{{ externalSubmissionUrl }}">
-                                    {% endif %}
-                                    external {{ externalJudgement.extjudgementid }}
-                                    {% if externalSubmissionUrl is defined and externalSubmissionUrl is not empty %}
-                                </a>
+                                    <a href="{{ externalSubmissionUrl }}">
+                                {% endif %}
+                                external
+                                {% if externalSubmissionUrl is defined and externalSubmissionUrl is not empty %}
+                                    </a>
                                 {% endif %}
                             </td>
                         </tr>
