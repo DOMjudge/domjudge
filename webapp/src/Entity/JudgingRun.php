@@ -60,6 +60,17 @@ class JudgingRun extends BaseApiEntity
     #[Serializer\Exclude]
     private string|float|null $endtime = null;
 
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        options: [
+            'comment' => 'Optional score for this run, e.g. for partial scoring',
+            'default' => '0.000000000',
+        ]
+    )]
+    private string|float $score = 0;
+
     #[ORM\ManyToOne(inversedBy: 'runs')]
     #[ORM\JoinColumn(name: 'judgingid', referencedColumnName: 'judgingid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
@@ -160,6 +171,16 @@ class JudgingRun extends BaseApiEntity
     public function getEndtime(): string|float|null
     {
         return $this->endtime;
+    }
+
+    public function setScore(string|float $score): JudgingRun
+    {
+        $this->score = $score;
+        return $this;
+    }
+    public function getScore(): string|float
+    {
+        return $this->score;
     }
 
     #[Serializer\VirtualProperty]

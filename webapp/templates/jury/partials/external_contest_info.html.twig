@@ -91,7 +91,8 @@
                         ID: {{ sourceService.contestId }}<br/>
                         Name: {{ sourceService.contestName }}<br/>
                         Start time: {{ sourceService.contestStartTime | printtime('Y-m-d H:i:s (T)') }}<br/>
-                        Duration: {{ sourceService.contestDuration }}
+                        Duration: {{ sourceService.contestDuration }}<br/>
+                        Scoreboard type: {{ sourceService.scoreboardType.value }}
                     {% endif %}
                 </td>
             </tr>

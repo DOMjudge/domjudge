@@ -157,6 +157,7 @@ class ImportExportController extends BaseController
             try {
                 $zip = $this->dj->openZipFile($archive->getRealPath());
                 $clientName = $archive->getClientOriginalName();
+                /** @var array<string, string[]> $messages */
                 $messages = [];
                 if ($contestId === null) {
                     $contest = null;

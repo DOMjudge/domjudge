@@ -116,6 +116,11 @@ class Testcase
     #[Serializer\Exclude]
     private ?Problem $problem = null;
 
+    #[ORM\ManyToOne(inversedBy: 'testcases')]
+    #[ORM\JoinColumn(name: 'testcase_group_id', referencedColumnName: 'testcase_group_id', onDelete: 'SET NULL')]
+    #[Serializer\Exclude]
+    private ?TestcaseGroup $testcaseGroup = null;
+
     public function __construct()
     {
         $this->judging_runs  = new ArrayCollection();
@@ -290,6 +295,17 @@ class Testcase
     public function getProblem(): ?Problem
     {
         return $this->problem;
+    }
+
+    public function setTestcaseGroup(?TestcaseGroup $testcaseGroup = null): Testcase
+    {
+        $this->testcaseGroup = $testcaseGroup;
+        return $this;
+    }
+
+    public function getTestcaseGroup(): ?TestcaseGroup
+    {
+        return $this->testcaseGroup;
     }
 
     public function addExternalRun(ExternalRun $externalRun): Testcase

@@ -94,6 +94,28 @@ class ScoreCache
     ])]
     private bool $is_first_to_solve = false;
 
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        options: [
+            'comment' => 'Optional score for this run, e.g. for partial scoring',
+            'default' => '0.000000000',
+        ]
+    )]
+    private string|float $scorePublic = 0;
+
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        options: [
+            'comment' => 'Optional score for this run, e.g. for partial scoring (for restricted audience)',
+            'default' => '0.000000000',
+        ]
+    )]
+    private string|float $scoreRestricted = 0;
+
     #[ORM\Id]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
@@ -286,5 +308,10 @@ class ScoreCache
     public function getIsCorrect(bool $restricted): bool
     {
         return $restricted ? $this->getIsCorrectRestricted() : $this->getIsCorrectPublic();
+    }
+
+    public function getScore(bool $restricted): string|float
+    {
+        return $restricted ? $this->scoreRestricted : $this->scorePublic;
     }
 }

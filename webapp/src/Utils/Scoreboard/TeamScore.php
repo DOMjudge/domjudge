@@ -12,6 +12,7 @@ class TeamScore
     public int $rank = 0;
     public int $totalTime;
     public int $totalRuntime = 0;
+    public string|float|null $score = "0";
 
     public function __construct(public Team $team, public ?RankCache $rankCache, bool $restricted)
     {
@@ -21,10 +22,12 @@ class TeamScore
                 $this->numPoints = $rankCache->getPointsRestricted();
                 $this->totalTime += $rankCache->getTotaltimeRestricted();
                 $this->totalRuntime = $rankCache->getTotalruntimeRestricted();
+                $this->score = $rankCache->getScoreRestricted();
             } else {
                 $this->numPoints = $rankCache->getPointsPublic();
                 $this->totalTime += $rankCache->getTotaltimePublic();
                 $this->totalRuntime = $rankCache->getTotalruntimePublic();
+                $this->score = $rankCache->getScorePublic();
             }
         }
     }
