@@ -200,6 +200,9 @@ class ExternalContestSourceService
         if (isset($this->cachedContestData->startTime)) {
             return Utils::toEpochFloat($this->cachedContestData->startTime);
         } else {
+            if (empty($this->logger)) {
+                $this->configureLogger();
+            }
             $this->logger->warning('Contest has no start time, is the contest paused?');
             return null;
         }
