@@ -644,6 +644,8 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $runResult    = $request->request->get('runresult');
+        $startTime    = $request->request->get('start_time');
+        $endTime      = $request->request->get('end_time');
         $runTime      = $request->request->get('runtime');
         $outputRun    = $request->request->get('output_run');
         $outputDiff   = $request->request->get('output_diff');
@@ -659,7 +661,7 @@ class JudgehostController extends AbstractFOSRestController
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
         }
 
-        $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
+        $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime, $startTime, $endTime,
             $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
@@ -924,6 +926,8 @@ class JudgehostController extends AbstractFOSRestController
         string  $hostname,
         string  $runResult,
         string  $runTime,
+        string  $startTime,
+        string  $endTime,
         string  $outputSystem,
         string  $outputError,
         string  $outputDiff,
@@ -945,6 +949,8 @@ class JudgehostController extends AbstractFOSRestController
         $this->em->wrapInTransaction(function () use (
             $judgeTaskId,
             $runTime,
+            $startTime,
+            $endTime,
             $runResult,
             $outputSystem,
             $outputError,
@@ -966,7 +972,8 @@ class JudgehostController extends AbstractFOSRestController
             $judgingRun
                 ->setRunresult($runResult)
                 ->setRuntime((float)$runTime)
-                ->setEndtime(Utils::now())
+                ->setStarttime($startTime)
+                ->setEndtime($endTime)
                 ->setTestcasedir($testcasedir);
             $judgingRunOutput
                 ->setOutputRun(base64_decode($outputRun))

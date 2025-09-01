@@ -1325,6 +1325,7 @@ function compile(
 function judge(array $judgeTask): bool
 {
     global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled, $endpointID;
+    $startTime = microtime(true);
 
     $compile_config = dj_json_decode($judgeTask['compile_config']);
     $run_config     = dj_json_decode($judgeTask['run_config']);
@@ -1509,6 +1510,8 @@ function judge(array $judgeTask): bool
 
         $new_judging_run = [
             'runresult' => urlencode($result),
+            'start_time' => urlencode((string)$startTime),
+            'end_time' => urlencode((string)microtime(true)),
             'runtime' => urlencode((string)$runtime),
             'output_run' => rest_encode_file($passdir . '/program.out', $output_storage_limit),
             'output_error' => rest_encode_file($passdir . '/program.err', $output_storage_limit),
