@@ -300,6 +300,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         if (static::$add !== '') {
             $response = $this->helperSubmitFields($element);
+            static::assertLessThan(400, $this->client->getInternalResponse()->getStatusCode(),
+                                   $this->client->getInternalResponse()->getContent());
             $this->client->followRedirect();
             foreach ($element as $key => $value) {
                 if (!is_array($value) && !in_array($key, static::$overviewSingleNotShown)) {
