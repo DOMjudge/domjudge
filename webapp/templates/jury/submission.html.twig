@@ -541,7 +541,7 @@
                                 {% if selectedJudging is not null and runsOutstanding %}
                                     {% if selectedJudging.judgeCompletely %}
                                         <i class="fas fa-balance-scale" title="remaining test cases requested to be judged"></i>
-                                    {% elseif selectedJudging.result is not null %}
+                                    {% elseif selectedJudging.result is not null or isAnalystMode %}
                                         <form action="{{ path('jury_submission_request_remaining', {'judgingId': selectedJudging.judgingid}) }}" method="post"
                                               style="display: inline; ">
                                             <button type="submit" class="btn btn-outline-secondary btn-sm" style="padding: 0.1rem 0.5rem; font-size: 0.7em"><i class="fa-solid fa-gavel"></i> judge remaining</button>
