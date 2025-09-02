@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Entity\QueueTask;
+use App\Service\DOMJudgeService;
 
 trait JudgeRemainingTrait
 {
@@ -13,13 +14,14 @@ trait JudgeRemainingTrait
      */
     protected function judgeRemainingJudgings(array $judgings): void
     {
+        $lazyEval = $this->config->get('lazy_eval_results');
         $inProgress = [];
         $alreadyRequested = [];
         $invalidJudgings = [];
         $numRequested = 0;
         foreach ($judgings as $judging) {
             $judgingId = $judging->getJudgingid();
-            if ($judging->getResult() === null) {
+            if ($judging->getResult() === null && $lazyEval !== DOMJudgeService::EVAL_ANALYST) {
                 $inProgress[] = $judgingId;
             } elseif ($judging->getJudgeCompletely()) {
                 $alreadyRequested[] = $judgingId;

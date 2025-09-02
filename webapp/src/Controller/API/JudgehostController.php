@@ -1083,7 +1083,7 @@ class JudgehostController extends AbstractFOSRestController
                     throw new BadMethodCallException('internal bug: the evaluated result changed during judging');
                 }
 
-                if ($$lazyEval === DOMJudgeService::EVAL_ANALYST) {
+                if ($lazyEval === DOMJudgeService::EVAL_ANALYST) {
                     // Explicitly do not update priorities or cancel activated tasks.
                 } elseif ($lazyEval !== DOMJudgeService::EVAL_FULL) {
                     // We don't want to continue on this problem, even if there's spare resources.
