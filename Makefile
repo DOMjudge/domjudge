@@ -241,7 +241,7 @@ inplace-install-l:
 	@echo "        sudo make inplace-postinstall-apache"
 	@echo "    - Configure nginx"
 	@echo "        sudo make inplace-postinstall-nginx"
-	@echo "    - Configure judgedaemon
+	@echo "    - Configure judgedaemon"
 	@echo "        sudo make inplace-postinstall-judgedaemon"
 	@echo "    - Set up database"
 	@echo "        ./sql/dj_setup_database -u root [-r|-p ROOT_PASS] install"
