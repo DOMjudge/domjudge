@@ -1,4 +1,6 @@
 #!/bin/sh
+# To suppress false positive of FILELIMIT misspelling of TIMELIMIT:
+# shellcheck disable=SC2153
 
 # Script to test (run and compare) submissions with a single testcase
 #
@@ -7,8 +9,8 @@
 #
 # <testdata.in>     File containing test-input with absolute pathname.
 # <testdata.out>    File containing test-output with absolute pathname.
-# <timelimit>       Timelimit in seconds, optionally followed by ':' and
-#                   the hard limit to kill still running submissions.
+# <timelimit>       Timelimit in seconds in the format
+#                   "<cpu_soft>:<cpu_hard>,<wall_soft>:<wall_hard>".
 # <workdir>         Directory where to execute submission in a chroot-ed
 #                   environment. For best security leave it as empty as possible.
 #                   Certainly do not place output-files there!
@@ -200,15 +202,15 @@ if [ $COMBINED_RUN_COMPARE -eq 1 ]; then
 fi
 
 exitcode=0
-# To suppress false positive of FILELIMIT misspelling of TIMELIMIT:
-# shellcheck disable=SC2153
+TIMELIMIT_CPU="${TIMELIMIT%%,*}"
+TIMELIMIT_WALL="${TIMELIMIT#*,}"
 runcheck "$RUN_SCRIPT" $RUNARGS \
 	$GAINROOT "$RUNGUARD" ${DEBUG:+-v -V "DEBUG=$DEBUG"} ${TMPDIR:+ -V "TMPDIR=$TMPDIR"} $CPUSET_OPT \
 	-r "$PWD/../.." \
 	--nproc=$PROCLIMIT \
 	--no-core --streamsize=$FILELIMIT \
 	--user="$RUNUSER" --group="$RUNGROUP" \
-	--walltime=$TIMELIMIT --cputime=$TIMELIMIT \
+	--walltime="$TIMELIMIT_WALL" --cputime="$TIMELIMIT_CPU" \
 	--memsize=$MEMLIMIT --filesize=$FILELIMIT \
 	--stderr=program.err --outmeta=program.meta -- \
 	"$PREFIX/$PROGRAM" 2>runguard.err
