@@ -752,7 +752,7 @@ class ExternalContestSourceService
             // We do use precise time with milliseconds if provided, but strip trailing .000 off to make it look nicer.
             $toCheck = [
                 'start_time_enabled' => true,
-                'start_time_string'  => preg_replace('/\.000$/', '', $startTime->format('Y-m-d H:i:s.v')) . ' ' . $timezoneToUse),
+                'start_time_string'  => preg_replace('/\.000$/', '', $startTime->format('Y-m-d H:i:s.v')) . ' ' . $timezoneToUse,
                 'end_time_string'    => preg_replace('/\.000$/', '', $fullDuration),
                 'freeze_time_string' => preg_replace('/\.000$/', '', $fullFreeze),
             ];
