@@ -727,7 +727,7 @@
                             show complete metadata
                         </button>
                         {% if runsOutput[runIdx].metadata is not null %}
-                            {% if runsOutput[runIdx].output_limit is defined %}
+                            {% if runsOutput[runIdx].output_limit is defined and runsOutput[runIdx].output_limit %}
                                 <div class="alert alert-warning">
                                     The submission output (<code>{{ runsOutput[runIdx].output_limit }}</code>) was
                                     truncated because of the configured output limit.
