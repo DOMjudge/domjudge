@@ -455,7 +455,8 @@ class SubmissionController extends AbstractRestController
 
         // If an ID has not been given directly, only show submissions before contest end.
         // This allows us to use eventlog on too-late submissions while not exposing them in the API directly.
-        if (!$request->attributes->has('id') && !$request->query->has('ids') && !$this->dj->checkrole('admin')) {
+        if (!$request->attributes->has('id') && !$request->query->has('ids') &&
+            !($this->dj->checkrole('admin') || $this->dj->checkrole('judgehost'))) {
             $queryBuilder->andWhere('s.submittime < c.endtime');
         }
 
