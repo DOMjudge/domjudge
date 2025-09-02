@@ -583,6 +583,7 @@ class SubmissionController extends BaseController
             'version_warnings' => [],
             'isMultiPassProblem' => $submission->getProblem()->isMultipassProblem(),
             'thumbnailSize' => $this->config->get('thumbnail_size'),
+            'isAnalystMode' => $this->config->get('lazy_eval_results') === DOMJudgeService::EVAL_ANALYST,
         ];
 
         if ($selectedJudging === null) {
