@@ -494,9 +494,8 @@ void output_cgroup_stats_v1(double *cputime)
 	int ret;
 	if ((ret = cgroup_get_cgroup(cg)) != 0) error(ret,"get cgroup information");
 
-	int64_t max_usage;
-	struct cgroup_controller *cg_controller;
-	cg_controller = cgroup_get_controller(cg, "memory");
+	int64_t max_usage = 0;
+	struct cgroup_controller *cg_controller = cgroup_get_controller(cg, "memory");
 	ret = cgroup_get_value_int64(cg_controller, "memory.memsw.max_usage_in_bytes", &max_usage);
 	if ( ret!=0 ) error(ret,"get cgroup value memory.memsw.max_usage_in_bytes");
 
@@ -516,7 +515,7 @@ void output_cgroup_stats_v1(double *cputime)
 void output_cgroup_stats_v2(double *cputime)
 {
 	struct cgroup *cg;
-	if ( (cg = cgroup_new_cgroup(cgroupname))==NULL ) error(0,"cgroup_new_cgroup");
+	if ( (cg = cgroup_new_cgroup(cgroupname))==nullptr ) error(0,"cgroup_new_cgroup");
 
 	int ret;
 	if ((ret = cgroup_get_cgroup(cg)) != 0) error(ret,"get cgroup information");
@@ -549,7 +548,6 @@ void output_cgroup_stats_v2(double *cputime)
 	cgroup_read_stats_end(&handle);
 
 	cgroup_free(&cg);
-
 }
 
 /* Temporary shorthand define for error handling. */
