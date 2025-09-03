@@ -2,8 +2,9 @@
 
 ## Developers
 
-DOMjudge is currently developed by Jaap Eldering, Nicky Gerritsen, Keith
-Johnson, Thijs Kinkhorst, Mart Pluijmaekers, Michael Vasseur and Tobias Werth.
+DOMjudge is currently developed by Jaap
+Eldering, Nicky Gerritsen, Kevin Jilissen, Keith Johnson, Thijs Kinkhorst,
+Mart Pluijmaekers, Michael Vasseur and Tobias Werth.
 
 ## Contributors
 
