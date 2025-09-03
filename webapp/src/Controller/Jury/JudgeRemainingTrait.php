@@ -19,6 +19,10 @@ trait JudgeRemainingTrait
         $alreadyRequested = [];
         $invalidJudgings = [];
         $numRequested = 0;
+
+        // In analyst mode, when explicitly requested judging the remaining tasks is most important.
+        $priority = $lazyEval === DOMJudgeService::EVAL_ANALYST ? JudgeTask::PRIORITY_HIGH : JudgeTask::PRIORITY_LOW;
+
         foreach ($judgings as $judging) {
             $judgingId = $judging->getJudgingid();
             if ($judging->getResult() === null && $lazyEval !== DOMJudgeService::EVAL_ANALYST) {
@@ -42,7 +46,7 @@ trait JudgeRemainingTrait
 
                 $queueTask = new QueueTask();
                 $queueTask->setJudging($judging)
-                    ->setPriority(JudgeTask::PRIORITY_LOW)
+                    ->setPriority($priority)
                     ->setTeam($submission->getTeam())
                     ->setTeamPriority((int)$submission->getSubmittime())
                     ->setStartTime(null);
