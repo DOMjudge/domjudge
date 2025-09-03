@@ -7,6 +7,7 @@ use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
+use App\Entity\JudgingRun;
 use App\Form\Type\JudgehostsType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -57,10 +58,23 @@ class JudgehostController extends BaseController
             'hostname' => ['title' => 'hostname'],
             'enabled' => ['title' => 'enabled'],
             'status' => ['title' => 'status'],
+            'load' => ['title' => 'load (5m/15m/1h/5h)'],
             'last_judgingid' => ['title' => 'last judging'],
         ];
 
         $now = Utils::now();
+        $timings = $this->em->createQueryBuilder()
+            ->from(JudgeTask::class, 'jt')
+            ->join(JudgingRun::class, 'jr', 'WITH', 'jr.judgetask = jt')
+            ->join('jr.judging', 'j')
+            ->join('jt.judgehost', 'jh')
+            ->select('jh.judgehostid, jr.endtime, jr.startTime')
+            ->andWhere('jr.startTime IS NOT NULL')
+            ->andWhere('jr.endtime IS NOT NULL')
+            ->andWhere('jr.endtime >= :five_hours_ago')
+            ->setParameter('five_hours_ago', $now - 5*60*60)
+            ->getQuery()
+            ->getResult();
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $time_warn = $this->config->get('judgehost_warning');
@@ -115,6 +129,35 @@ class JudgehostController extends BaseController
                 ->getOneOrNullResult();
             $judgehostdata['last_judgingid'] = $lastJobId === null ? null : [
                 'value' => 'j' . $lastJobId['jobid'],
+            ];
+
+            $loads = [0.0, 0.0, 0.0, 0.0];
+            $loadMinutes = [60*5, 60*15, 60*60, 60*300];
+            $loadStart = [];
+            for ($i = 0; $i < 4; $i++) {
+                $loadStart[] = $now - $loadMinutes[$i];
+            }
+            foreach ($timings as $timing) {
+                if ($timing['judgehostid'] !== $judgehost->getJudgehostid()) {
+                    continue;
+                }
+                for ($i = 0; $i < 4; $i++) {
+                    $start_time = $timing['startTime'];
+                    $end_time = $timing['endtime'];
+                    $start_time = max($start_time, $loadStart[$i]);
+                    if ($start_time < $end_time) {
+                        $loads[$i] += ($end_time - $start_time);
+                    }
+                }
+            }
+            // Normalize to [0,1] range.
+            for ($i = 0; $i < 4; $i++) {
+                $loads[$i] = min(1.0, $loads[$i] / $loadMinutes[$i]);
+            }
+            $judgehostdata['load'] = [
+                'value' => sprintf('%.2f / %.2f / %.2f / %.2f', $loads[0], $loads[1], $loads[2], $loads[3]),
+                'title' => 'estimated load (5m/15m/1h/5h)',
+                'cssclass' => 'text-monospace',
             ];
 
             $judgehostdata = array_merge($judgehostdata, [
