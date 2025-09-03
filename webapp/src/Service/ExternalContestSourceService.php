@@ -1909,9 +1909,9 @@ class ExternalContestSourceService
             // We often do not get new useful information for judging correct testcases.
             'correct' => null,
             // Wrong answers are interesting for the analysts, assign a high priority but below manual judging.
-            'wrong-answer' => -9,
+            'wrong-answer' => JudgeTask::PRIORITY_HIGH + 1,
             // Compile errors could be interesting to see what went wrong, assign a low priority.
-            'compiler-error' => 9,
+            'compiler-error' => JudgeTask::PRIORITY_LOW - 1,
             // Otherwise, judge with normal priority.
             default => 0,
         };
