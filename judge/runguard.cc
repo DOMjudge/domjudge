@@ -539,7 +539,7 @@ void output_cgroup_stats_v2(double *cputime)
 	while (ret == 0) {
 		verbose("cpu.stat: %s = %s", stat.name, stat.value);
 		if (strcmp(stat.name, "usage_usec") == 0) {
-			long long usec = strtoll(stat.value, NULL, 10);
+			long long usec = strtoll(stat.value, nullptr, 10);
 			*cputime = usec / 1e6;
 		}
 		ret = cgroup_read_stats_next(&handle, &stat);
@@ -899,7 +899,7 @@ void setrestrictions()
 
 	/* Put the child process in the cgroup */
 	if (is_cgroup_v2) {
-		const char *controllers[] = { "memory", NULL };
+		const char *controllers[] = { "memory", nullptr };
 		if (cgroup_change_cgroup_path(cgroupname, getpid(), controllers) != 0) {
 			error(0, "Failed to move the process to the cgroup");
 		}
@@ -948,7 +948,7 @@ void setrestrictions()
 	/* Set group-id (must be root for this, so before setting user). */
 	if ( use_group ) {
 		if ( setgid(rungid) ) error(errno,"cannot set group ID to `%d'",rungid);
-		if ( setgroups(0, NULL) ) error(errno,"cannot clear auxiliary groups");
+		if ( setgroups(0, nullptr) ) error(errno,"cannot clear auxiliary groups");
 
 		verbose("using group ID `%d'",rungid);
 	}
@@ -1114,7 +1114,7 @@ int main(int argc, char **argv)
 		case 'u': /* user option: uid or string */
 			use_user = 1;
 			runuser = strdup(optarg);
-			if ( runuser==NULL ) error(errno,"strdup() failed");
+			if ( runuser==nullptr ) error(errno,"strdup() failed");
 			errno = 0;
 			runuid = strtol(optarg,&ptr,10);
 			if ( errno || *ptr!='\0' ) {
@@ -1131,7 +1131,7 @@ int main(int argc, char **argv)
 		case 'g': /* group option: gid or string */
 			use_group = 1;
 			rungroup = strdup(optarg);
-			if ( rungroup==NULL ) error(errno,"strdup() failed");
+			if ( rungroup==nullptr ) error(errno,"strdup() failed");
 			errno = 0;
 			rungid = strtol(optarg,&ptr,10);
 			if ( errno || *ptr!='\0' ) rungid = groupid(optarg);
@@ -1486,7 +1486,7 @@ int main(int argc, char **argv)
 				}
 			}
 
-			int r = pselect(nfds+1, &readfds, nullptr, NULL, NULL, &emptymask);
+			int r = pselect(nfds+1, &readfds, nullptr, nullptr, nullptr, &emptymask);
 			if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
 			if (error_in_signalhandler) {
 				error(errno, "error in signal handler, exiting");
