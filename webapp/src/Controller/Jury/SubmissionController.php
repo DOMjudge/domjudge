@@ -1206,13 +1206,17 @@ class SubmissionController extends BaseController
      * @param SubmissionFile[] $files
      * @param SubmissionFile[] $oldFiles
      * @return array{'changed': string[], 'changedfiles': array<SubmissionFile[]>,
-     *               'unchanged': string[], 'added': string[], 'removed': string[]}
+     *               'unchanged': string[], 'added': string[], 'removed': string[],
+     *               'unchangedfiles' : array<SubmissionFile>,
+     *               'addedfiles' : array<SubmissionFile>}
      */
     protected function determineFileChanged(array $files, array $oldFiles): array
     {
         $result = [
             'changed'      => [],
             'changedfiles' => [], // These will be shown, so we will add pairs of files here.
+            'unchangedfiles' => [],
+            'addedfiles'    => [],
             'unchanged'    => [],
         ];
 
@@ -1222,15 +1226,21 @@ class SubmissionController extends BaseController
         $result['removed'] = array_diff($oldFilenames, $newFilenames);
 
         foreach ($files as $newfile) {
+            $isNewFile = true;
             foreach ($oldFiles as $oldFile) {
                 if ($newfile->getFilename() === $oldFile->getFilename()) {
+                    $isNewFile = false;
                     if ($oldFile->getSourcecode() === $newfile->getSourcecode()) {
                         $result['unchanged'][] = $newfile->getFilename();
+                        $result['unchangedfiles'][] = $newfile;
                     } else {
                         $result['changed'][]      = $newfile->getFilename();
                         $result['changedfiles'][] = [$newfile, $oldFile];
                     }
                 }
+            }
+            if($isNewFile) {
+                $result['addedfiles'][] = $newfile;
             }
         }
 
