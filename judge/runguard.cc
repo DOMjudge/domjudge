@@ -63,6 +63,8 @@
 #include <sched.h>
 #include <sys/sysinfo.h>
 #include <vector>
+#include <set>
+#include <sstream>
 #include <string>
 #include <utility>
 
@@ -463,6 +465,50 @@ void output_exit_time(int exitcode, double cpudiff)
 	}
 
 	write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
+}
+
+std::set<unsigned> parse_cpuset(std::string cpus)
+{
+	std::stringstream ss(cpus);
+	std::set<unsigned> result;
+
+	std::string token;
+	while ( getline(ss, token, ',') ) {
+		size_t split = token.find('-');
+		if ( split!=std::string::npos ) {
+			std::string token1 = token.substr(0, split);
+			std::string token2 = token.substr(split+1);
+			size_t len;
+			unsigned cpu1 = std::stoul(token1, &len);
+			if ( len<token1.length() ) error(0, "failed to parse cpuset `%s'", cpus.c_str());
+			unsigned cpu2 = std::stoul(token2, &len);
+			if ( len<token2.length() ) error(0, "failed to parse cpuset `%s'", cpus.c_str());
+			for(unsigned i=cpu1; i<=cpu2; i++) result.insert(i);
+		} else {
+			size_t len;
+			unsigned cpu = std::stoul(token, &len);
+			if ( len<token.length() ) error(0, "failed to parse cpuset `%s'", cpus.c_str());
+			result.insert(cpu);
+		}
+	}
+
+	return result;
+}
+
+std::set<unsigned> read_cpuset(const char *path)
+{
+	FILE *file = fopen(path, "r");
+	if (file == nullptr) error(errno, "opening file `%s'", path);
+
+	char cpuset[1024];
+	if (fgets(cpuset, 1024, file) == nullptr) error(errno, "reading from file `%s'", path);
+
+	size_t len = strlen(cpuset);
+	if (len > 0 && cpuset[len-1] == '\n') cpuset[len-1] = 0;
+
+	if (fclose(file) != 0) error(errno, "closing file `%s'", path);
+
+	return parse_cpuset(cpuset);
 }
 
 void check_remaining_procs()
@@ -1310,14 +1356,12 @@ int main(int argc, char **argv)
 	}
 
 	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
-		int ret = strtol(cpuset, &ptr, 10);
-		/* check if input is only a single integer */
-		if ( *ptr == '\0' ) {
-			/* check if we have enough cores available */
-			int nprocs = get_nprocs_conf();
-			if ( ret < 0 || ret >= nprocs ) {
-				error(0, "processor ID %d given as cpuset, but only %d cores configured",
-				      ret, nprocs);
+		std::set<unsigned> cpus = parse_cpuset(cpuset);
+		std::set<unsigned> online_cpus = read_cpuset("/sys/devices/system/cpu/online");
+
+		for(unsigned cpu : cpus) {
+			if ( !online_cpus.count(cpu) ) {
+				error(0, "requested pinning on CPU %u which is not online", cpu);
 			}
 		}
 	}
