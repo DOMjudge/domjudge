@@ -34,7 +34,7 @@ use ZipArchive;
 
 class SubmissionService
 {
-    final public const FILENAME_REGEX = '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/';
+    final public const FILENAME_REGEX = '/^[a-zA-Z0-9_][a-zA-Z0-9+_\.-]*$/';
     final public const PROBLEM_RESULT_MATCHSTRING = ['@EXPECTED_RESULTS@: ', '@EXPECTED_SCORE@: '];
     final public const PROBLEM_RESULT_REMAP = [
         'ACCEPTED' => 'CORRECT',
