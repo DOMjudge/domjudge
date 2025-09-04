@@ -1421,12 +1421,16 @@ function judge(array $judgeTask): bool
     $hardtimelimit = $run_config['time_limit']
         +  overshoot_time($run_config['time_limit'], $overshoot)
         + $run_config['overshoot'];
+    $timelimit = [
+        'cpu'  => [ $run_config['time_limit'], $hardtimelimit ],
+        'wall' => [ $run_config['time_limit'], $hardtimelimit ],
+    ];
     if ($combined_run_compare) {
         // This accounts for wall time spent in the validator. We may likely
         // want to make this configurable in the future. The current factor is
         // under the assumption that the validator has to do approximately the
         // same amount of work wall-time wise as the submission.
-        $hardtimelimit *= 2;
+        $timelimit['wall'][1] *= 2;
     }
 
     // While we already set those above to likely the same values from the
@@ -1462,11 +1466,12 @@ function judge(array $judgeTask): bool
             }
         }
 
+        $timelimit_str = implode(':', $timelimit['cpu']) . ',' . implode(':', $timelimit['wall']);
         $test_run_cmd = LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt " .
             implode(' ', array_map('dj_escapeshellarg', [
                 $input,
                 $output,
-                "$run_config[time_limit]:$hardtimelimit",
+                $timelimit_str,
                 $passdir,
                 $run_runpath,
                 $compare_runpath,
