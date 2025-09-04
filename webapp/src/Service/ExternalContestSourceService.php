@@ -1884,13 +1884,19 @@ class ExternalContestSourceService
                         ->getQuery()
                         ->execute();
 
-                $queueTask = new QueueTask();
-                $queueTask->setJudging($submission->getJudgings()->first())
-                    ->setPriority($priority)
-                    ->setTeam($submission->getTeam())
-                    ->setTeamPriority((int)$submission->getSubmittime())
-                    ->setStartTime(null);
-                $this->em->persist($queueTask);
+                // We can only create a queue task if the initial import was successful and created a judging.
+                $judging = $submission->getJudgings()->first();
+                if ($judging) {
+                    $queueTask = new QueueTask();
+                    $queueTask->setJudging($submission->getJudgings()->first())
+                        ->setPriority($priority)
+                        ->setTeam($submission->getTeam())
+                        ->setTeamPriority((int)$submission->getSubmittime())
+                        ->setStartTime(null);
+                    $this->em->persist($queueTask);
+                } else {
+                    $this->logger->warning('Submission %s has no judging!', [$submission->getSubmitid()]);
+                }
             }
         }
 
