@@ -396,7 +396,7 @@
             type: bool
             default_value: false
             public: false
-            description: Automatically check for new DOMjudge release?
+            description: Automatically check and notify for new DOMjudge releases?
         -   name: adminer_enabled
             type: bool
             default_value: false
