@@ -16,7 +16,6 @@
             <th scope="col">location</th>
             <th scope="col">category</th>
             <th scope="col">total</th>
-            <th scope="col">awards</th>
             <th scope="col"></th>
         </tr>
         </thead>
@@ -47,7 +46,6 @@
                     {{ totalballoon | problemBadge }}&nbsp;
                 {%- endfor -%}
                 </td>
-                <td>{{ balloon.data.awards }}</td>
                 <td>
                     {%- if not balloon.data.done -%}
                     {%- set link = path('jury_balloons_setdone', {balloonId: balloon.data.balloonid}) %}

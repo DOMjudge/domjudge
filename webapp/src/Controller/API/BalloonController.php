@@ -73,7 +73,6 @@ class BalloonController extends AbstractApiController
                 category: $b['data']['category'],
                 categoryid: $b['data']['categoryid'],
                 total: $b['data']['total'],
-                awards: $b['data']['awards'],
                 done: $b['data']['done'],
             );
         }
