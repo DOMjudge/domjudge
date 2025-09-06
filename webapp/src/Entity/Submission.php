@@ -359,6 +359,16 @@ class Submission extends BaseApiEntity implements
         return $this->judgings;
     }
 
+    public function getValidJudging(): ?Judging
+    {
+        foreach ($this->judgings as $j) {
+            if ($j->getValid()) {
+                return $j;
+            }
+        }
+        return null;
+    }
+
     public function setLanguage(?Language $language = null): Submission
     {
         $this->language = $language;
@@ -535,6 +545,16 @@ class Submission extends BaseApiEntity implements
     public function getExternalJudgements(): Collection
     {
         return $this->external_judgements;
+    }
+
+    public function getValidExternalJudgement(): ?ExternalJudgement
+    {
+        foreach ($this->external_judgements as $ej) {
+            if ($ej->getValid()) {
+                return $ej;
+            }
+        }
+        return null;
     }
 
     public function setFileForApi(?FileWithName $fileForApi = null): Submission
