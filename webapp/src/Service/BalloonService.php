@@ -87,7 +87,7 @@ class BalloonService
      * @return array<array{data: array{balloonid: int, time: string, problem: string, contestproblem: ContestProblem,
      *                                 team: Team, teamid: int, location: string|null, affiliation: string|null,
      *                                 affiliationid: int, category: string, categoryid: int, total: array<string, ContestProblem>,
-     *                                 awards: string, done: bool}}>
+     *                                 done: bool}}>
     */
     public function collectBalloonTable(Contest $contest, bool $todo = false): array
     {
@@ -95,13 +95,6 @@ class BalloonService
         $showPostFreeze = (bool)$this->config->get('show_balloons_postfreeze');
         if (!$showPostFreeze) {
             $freezetime = $contest->getFreezeTime();
-        }
-
-        // Build a list of teams and the problems they solved first.
-        $firstSolved = $em->getRepository(ScoreCache::class)->findBy(['is_first_to_solve' => 1]);
-        $firstSolvers = [];
-        foreach ($firstSolved as $scoreCache) {
-            $firstSolvers[$scoreCache->getTeam()->getTeamId()][] = $scoreCache->getProblem()->getProbid();
         }
 
         $query = $em->createQueryBuilder()
@@ -125,23 +118,14 @@ class BalloonService
             ->addOrderBy('s.submittime', 'DESC');
 
         $balloons = $query->getQuery()->getResult();
-        // Loop once over the results to get totals and awards.
-        $TOTAL_BALLOONS = $AWARD_BALLOONS = [];
+        // Loop once over the results to get totals.
+        $TOTAL_BALLOONS = [];
         foreach ($balloons as $balloonsData) {
             if ($balloonsData['color'] === null) {
                 continue;
             }
 
             $TOTAL_BALLOONS[$balloonsData['teamid']][$balloonsData['probshortname']] = $balloonsData[0]->getSubmission()->getContestProblem();
-
-            // Keep a list of balloons that were first to solve this problem;
-            // can be multiple, one for each sortorder.
-            if (in_array($balloonsData['probid'], $firstSolvers[$balloonsData['teamid']] ?? [], true)) {
-                $AWARD_BALLOONS['problem'][$balloonsData['probid']][] = $balloonsData[0]->getBalloonId();
-            }
-            // Keep overwriting this - in the end it'll
-            // contain the ID of the first balloon in this contest.
-            $AWARD_BALLOONS['contest'] = $balloonsData[0]->getBalloonId();
         }
 
         // Loop again to construct table.
@@ -182,15 +166,6 @@ class BalloonService
             ksort($TOTAL_BALLOONS[$balloonsData['teamid']]);
             $balloondata['total'] = $TOTAL_BALLOONS[$balloonsData['teamid']];
 
-            $comments = [];
-            if ($AWARD_BALLOONS['contest'] == $balloonId) {
-                $comments[] = 'first in contest';
-            } elseif (isset($AWARD_BALLOONS['problem'][$balloonsData['probid']])
-                && in_array($balloonId, $AWARD_BALLOONS['problem'][$balloonsData['probid']], true)) {
-                $comments[] = 'first for problem';
-            }
-
-            $balloondata['awards'] = implode('; ', $comments);
             $balloondata['done'] = $done;
 
             $balloons_table[] = [
