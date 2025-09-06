@@ -262,9 +262,9 @@ class ScoreboardService
         foreach ($submissions as $submission) {
             /** @var Judging|ExternalJudgement|null $judging */
             if ($useExternalJudgements) {
-                $judging = $submission->getExternalJudgements()->first() ?: null;
+                $judging = $submission->getValidExternalJudgement();
             } else {
-                $judging = $submission->getJudgings()->first() ?: null;
+                $judging = $submission->getValidJudging();
             }
 
             // three things will happen in the loop in this order:
