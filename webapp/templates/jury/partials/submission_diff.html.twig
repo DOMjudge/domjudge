@@ -18,7 +18,6 @@
         </tr>
     </table>
 {% endif %}
-
 <ul class="nav nav-tabs source-tab-nav">
     {%- for filePair in oldFileStats.changedfiles %}
         <li class="nav-item">
@@ -26,26 +25,71 @@
                href="#diff-{{ filePair.1.submitfileid }}" role="tab">{{ filePair.0.filename }}</a>
         </li>
     {%- endfor %}
+    {%- for file in oldFileStats.unchangedfiles %}
+        <li class="nav-item">
+            <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
+               href="#diff-{{ file.submitfileid }}" role="tab">{{ file.filename }}</a>
+        </li>
+    {%- endfor %}
+    {%- for file in oldFileStats.addedfiles %}
+        <li class="nav-item">
+            <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
+               href="#diff-{{ file.submitfileid }}" role="tab">{{ file.filename }}</a>
+        </li>
+    {%- endfor %}
 
 </ul>
 <div class="tab-content source-tab">
     {%- for filePair in oldFileStats.changedfiles %}
-        <div class="mb-1">
-            <a class="btn btn-secondary btn-sm"
-               href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: filePair.1.rank}) }}">
-                <i class="fas fa-download"></i> Download
-            </a>
-            {% if allowEdit %}
-                <a class="btn btn-secondary btn-sm"
-                   href="{{ path('jury_submission_edit_source', {submission: submission.submitid, rank: filePair.1.rank}) }}">
-                    <i class="fas fa-pencil-alt"></i> Edit
-                </a>
-            {% endif %}
-        </div>
-
         <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="diff-{{ filePair.1.submitfileid }}"
              role="tabpanel">
+            <div class="mb-1">
+                <a class="btn btn-secondary btn-sm"
+                   href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: filePair.1.rank}) }}">
+                    <i class="fas fa-download"></i> Download
+                </a>
+                {% if allowEdit %}
+                    <a class="btn btn-secondary btn-sm"
+                       href="{{ path('jury_submission_edit_source', {submission: submission.submitid, rank: filePair.1.rank}) }}">
+                        <i class="fas fa-pencil-alt"></i> Edit
+                    </a>
+                {% endif %}
+            </div>
             {{ showDiff("diff" ~  filePair.1.submitfileid, filePair.0, filePair.1) }}
+        </div>
+    {%- endfor %}
+    {%- for file in oldFileStats.unchangedfiles %}
+        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="diff-{{ file.submitfileid }}"
+             role="tabpanel">
+            <div class="mb-1">
+                <a class="btn btn-secondary btn-sm"
+                   href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: file.rank}) }}">
+                    <i class="fas fa-download"></i> Download
+                </a>
+                {% if allowEdit %}
+                    <a class="btn btn-secondary btn-sm"
+                       href="{{ path('jury_submission_edit_source', {submission: submission.submitid, rank: file.rank}) }}">
+                        <i class="fas fa-pencil-alt"></i> Edit
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {%- endfor %}
+    {%- for file in oldFileStats.addedfiles %}
+        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="diff-{{ file.submitfileid }}"
+             role="tabpanel">
+            <div class="mb-1">
+                <a class="btn btn-secondary btn-sm"
+                   href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: file.rank}) }}">
+                    <i class="fas fa-download"></i> Download
+                </a>
+                {% if allowEdit %}
+                    <a class="btn btn-secondary btn-sm"
+                       href="{{ path('jury_submission_edit_source', {submission: submission.submitid, rank: file.rank}) }}">
+                        <i class="fas fa-pencil-alt"></i> Edit
+                    </a>
+                {% endif %}
+            </div>
         </div>
     {%- endfor %}
 </div>
