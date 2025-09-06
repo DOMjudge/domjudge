@@ -1,0 +1,31 @@
+{% extends "partials/modal.html.twig" %}
+
+{% block title %}View clarifications for problem {{ problem | problemBadgeForContest }} {{ problem.name }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    <style>
+        .data-table td a, .data-table td a:hover {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            padding: 3px 5px;
+        }
+
+        .data-table tr {
+            border-bottom: 1px solid silver;
+        }
+
+        .data-table tr:hover {
+            background: #ffffcc !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% if clarifications is empty %}
+        <p class="nodata">No clarifications.</p>
+    {% else %}
+        {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarifications, subject: false} %}
+    {% endif %}
+{% endblock %}

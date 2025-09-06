@@ -1028,6 +1028,7 @@ class DOMJudgeService
 
         $problems = [];
         $samples = [];
+        $clars = [];
         if ($contest && ($forJury || $contest->getFreezeData()->started())) {
             $problems = $this->em->createQueryBuilder()
                 ->from(ContestProblem::class, 'cp')
@@ -1057,6 +1058,27 @@ class DOMJudgeService
             foreach ($samplesData as $sample) {
                 $samples[$sample['probid']] = $sample['numsamples'];
             }
+
+            $raw_clars = $this->em->createQueryBuilder()
+                ->from(Clarification::class, 'clar')
+                ->select('clar')
+                ->andWhere('clar.contest = :cid')
+                // Only clars associated with a problem.
+                ->andWhere('clar.problem IS NOT NULL')
+                // Only clars send from the jury.
+                ->andWhere('clar.sender IS NULL')
+                // Only clars send to all teams or just this team.
+                ->andWhere('clar.recipient IS NULL OR clar.recipient = :teamid')
+                ->setParameter('cid', $contest->getCid())
+                ->setParameter('teamid', $teamId)
+                ->orderBy('clar.submittime', 'DESC')
+                ->getQuery()
+                ->getResult();
+
+            // Group clarifications by problem id.
+            foreach ($raw_clars as $clar) {
+                $clars[$clar->getProblem()->getProbid()][] = $clar;
+            }
         }
 
         $data = [
@@ -1065,6 +1087,8 @@ class DOMJudgeService
             'showLimits' => $showLimits,
             'defaultMemoryLimit' => $defaultMemoryLimit,
             'timeFactorDiffers' => $timeFactorDiffers,
+            'clarifications' => $clars,
+            'team' => $teamId ? $this->em->getRepository(Team::class)->find($teamId) : null,
         ];
 
         if ($contest && $this->config->get('show_public_stats')) {
