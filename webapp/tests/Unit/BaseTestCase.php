@@ -318,4 +318,13 @@ abstract class BaseTestCase extends WebTestCase
         $dj       = self::getContainer()->get(DOMJudgeService::class);
         $config->saveChanges(['shadow_mode'=>$shadowMode], $eventLog, $dj, treatMissingBooleansAsFalse: false);
     }
+
+    protected function checkStatusAndFollowRedirect(): Crawler
+    {
+        static::assertLessThan(
+            400, $this->client->getInternalResponse()->getStatusCode(),
+            $this->client->getInternalResponse()->getContent()
+        );
+        return $this->client->followRedirect();
+    }
 }

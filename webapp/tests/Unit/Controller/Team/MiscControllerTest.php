@@ -162,7 +162,7 @@ class MiscControllerTest extends BaseTestCase
 //            $this->client->request('GET', '/team/change-contest/' . $contest->getCid());
 //        }
 //
-//        $this->client->followRedirect();
+//        $this->client->checkStatusAndFollowRedirect();
 //
 //        // Check that we are still on the scoreboard.
 //        if ($withReferrer) {
