@@ -101,9 +101,12 @@ class ClarificationController extends BaseController
             throw new HttpException(401, 'Permission denied');
         }
 
-        // Get the "parent" message if we have one.
+        // Get the "parent" message if we have one - if we have access to it
         if ($clarification->getInReplyTo()) {
-            $clarification = $clarification->getInReplyTo();
+            $parent = $clarification->getInReplyTo();
+            if ($team->canViewClarification($parent)) {
+                $clarification = $parent;
+            }
         }
 
         // Mark clarification as read.
