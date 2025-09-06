@@ -111,7 +111,7 @@ class ClarificationControllerTest extends BaseTestCase
             'jury_clarification[message]' => 'This is a clarification',
         ]);
 
-        $this->client->followRedirect();
+        $this->checkStatusAndFollowRedirect();
 
         self::assertSelectorTextContains('div.col-sm strong', 'All');
         self::assertSelectorTextContains('span.clarification-subject',
