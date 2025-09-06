@@ -155,6 +155,21 @@
                                             </ol>
                                         {% endif %}
 
+                                        {% if clarifications[problem.probid] is defined and clarifications[problem.probid] %}
+                                            <hr/>
+                                            <h3 class="text-center">Clarifications</h3>
+                                            <ol class="list-group list-group-flush">
+                                                {% for clar in clarifications[problem.probid] %}
+                                                    <li class="list-group-item">
+                                                        <a data-ajax-modal data-ajax-modal-after="markSeen"
+                                                           href="{{ path('team_clarification', {clarId: clar.clarid}) }}">
+                                                            <strong>{{ clar.submittime | printtime(null, contest) }}:</strong>
+                                                            {{ clar.summary }}
+                                                        </a>
+                                                    </li>
+                                                {% endfor %}
+                                        {% endif %}
+
                                     </div>
                                 </div>
                 </div>
