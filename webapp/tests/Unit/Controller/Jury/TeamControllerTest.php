@@ -105,7 +105,7 @@ class TeamControllerTest extends JuryControllerTestCase
         $this->logIn();
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         $this->helperSubmitFields($teamToAdd);
-        $viewPage = $this->client->followRedirect()->getUri();
+        $viewPage = $this->checkStatusAndFollowRedirect()->getUri();
         $editPage = $viewPage . static::$edit;
         $this->verifyPageResponse('GET', $editPage, 200);
         $formFields = [
