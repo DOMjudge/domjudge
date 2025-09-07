@@ -700,7 +700,8 @@ class SubmissionService
             ->setOriginalSubmission($originalSubmission)
             ->setEntryPoint($entryPoint)
             ->setExternalid($externalId)
-            ->setImportError($importError);
+            ->setImportError($importError)
+            ->setSource($source);
 
         // Add expected results from source. We only do this for jury submissions
         // to prevent accidental auto-verification of team submissions.
