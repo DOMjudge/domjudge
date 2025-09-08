@@ -1119,9 +1119,7 @@ function resizeMobileTeamNamesAndProblemBadges() {
     });
 }
 
-function createSubmissionGraph(submissionStats, contestStartTime, contestDurationSeconds, submissions) {
-    const minBucketCount = 30;
-    const maxBucketCount = 301;
+function createSubmissionGraph(submissionStats, contestStartTime, contestDurationSeconds, submissions, minBucketCount = 30, maxBucketCount = 301) {
     const units = [
         { 'name': 'seconds', 'convert': 1, 'step': 60 },
         { 'name': 'minutes', 'convert': 60, 'step': 15 },
