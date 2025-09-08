@@ -234,7 +234,7 @@ $(function(){
       }{{ loop.last ? '' : ',' }}
       {% endfor %}
     ];
-    createSubmissionGraph(submission_stats, contest_start_time, contest_duration_seconds, submissions);
+    createSubmissionGraph(submission_stats, contest_start_time, contest_duration_seconds, submissions, minBucketCount = 10, maxBucketCount = 101);
 })
 </script>
 {% include 'jury/analysis/download_graphs.html.twig' %}
