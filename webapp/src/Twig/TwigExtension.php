@@ -940,10 +940,6 @@ JS;
     public function showDiff(string $id, SubmissionFile $newFile, SubmissionFile $oldFile): string
     {
         $editor = <<<HTML
-<div class="form-check form-switch">
-    <input class="form-check-input" type="checkbox" id="__EDITOR__SBS">
-    <label class="form-check-label" for="__EDITOR__SBS">Use side-by-side diff viewer</label>
-</div>
 <div class="editor" id="__EDITOR__"></div>
 <script>
 $(function() {
@@ -960,12 +956,14 @@ $(function() {
         );
 
         const sideBySide = isDiffSideBySide()
-        sideBySideSwitch = $("#__EDITOR__SBS");
-        sideBySideSwitch.prop('checked', sideBySide);
-        sideBySideSwitch.change(function(e) {
-            setDiffSideBySide(e.target.checked);
+        const diffSelect = $("#diffselect-__EDITOR__");
+        diffSelect.find("input[value='side-by-side']").prop('checked', sideBySide);
+        diffSelect.find("input[value='inline']").prop('checked', !sideBySide);
+        diffSelect.find("input[type='radio']").change(function(e) {
+            const sbs = e.target.value === 'side-by-side';
+            setDiffSideBySide(sbs);
             diffEditor.updateOptions({
-                renderSideBySide: e.target.checked,
+                renderSideBySide: sbs,
             });
         });
 
