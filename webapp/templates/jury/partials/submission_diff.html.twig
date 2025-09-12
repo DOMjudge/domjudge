@@ -43,6 +43,7 @@
     {%- for filePair in oldFileStats.changedfiles %}
         <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="diff-{{ filePair.1.submitfileid }}"
              role="tabpanel">
+            {% set diff_id = "diff" ~  filePair.1.submitfileid %}
             <div class="mb-1">
                 <a class="btn btn-secondary btn-sm"
                    href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: filePair.1.rank}) }}">
@@ -54,8 +55,15 @@
                         <i class="fas fa-pencil-alt"></i> Edit
                     </a>
                 {% endif %}
+                <div id="diffselect-{{ diff_id }}" class="btn-group">
+                    <a href="#" role="button" class="btn btn-secondary btn-sm pe-none" aria-disabled="true"><i class="fas fa-code-branch"></i></a>
+                    <input type="radio" class="btn-check" name="{{ diff_id }}-mode" id="{{ diff_id }}-side-by-side" value="side-by-side" autocomplete="off">
+                    <label class="btn btn-outline-secondary btn-sm" for="{{ diff_id }}-side-by-side">side-by-side</label>
+                    <input type="radio" class="btn-check" name="{{ diff_id }}-mode" id="{{ diff_id }}-inline" value="inline" autocomplete="off">
+                    <label class="btn btn-outline-secondary btn-sm" for="{{ diff_id }}-inline">inline</label>
+                </div>
             </div>
-            {{ showDiff("diff" ~  filePair.1.submitfileid, filePair.0, filePair.1) }}
+            {{ showDiff(diff_id, filePair.0, filePair.1) }}
         </div>
     {%- endfor %}
     {%- for file in oldFileStats.unchangedfiles %}
