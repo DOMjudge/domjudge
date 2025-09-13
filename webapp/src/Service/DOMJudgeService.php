@@ -1685,7 +1685,7 @@ class DOMJudgeService
      * Returns either the next strictly higher version or false when nothing is found/requested.
      */
     public function checkNewVersion(): string|false {
-        if (!$this->config->get('check_new_version')) {
+        if (!$this->config->get('check_new_version', false)) {
             return false;
         }
         return "9.0.0";
