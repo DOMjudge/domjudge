@@ -6,6 +6,7 @@
 // @configure_input@
 
 define('DOMJUDGE_VERSION', '@DOMJUDGE_VERSION@');
+define('DOMJUDGE_INSTALL_METHOD', '@INSTALL_METHOD@');
 
 define('BINDIR',    '@domserver_bindir@');
 define('ETCDIR',    '@domserver_etcdir@');

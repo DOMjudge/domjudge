@@ -2,6 +2,7 @@
 
 parameters:
     domjudge.version: @DOMJUDGE_VERSION@
+    domjudge.installmethod: @INSTALL_METHOD@
     domjudge.bindir: @domserver_bindir@
     domjudge.etcdir: @domserver_etcdir@
     domjudge.webappdir: @domserver_webappdir@

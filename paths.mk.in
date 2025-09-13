@@ -15,6 +15,7 @@ PACKAGE_VERSION   = @PACKAGE_VERSION@
 PACKAGE_STRING    = @PACKAGE_STRING@
 PACKAGE_TARNAME   = @PACKAGE_TARNAME@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
+INSTALL_METHOD    = @INSTALL_METHOD@
 
 # Compilers and FLAGS
 CC  = @CC@
@@ -130,6 +131,7 @@ define substconfigvars
 	-e "s|@configure_input[@]|Generated from '$<' on `date`.|g" \
 	-e 's,@PACKAGE_NAME[@],@PACKAGE_NAME@,g' \
 	-e 's,@DOMJUDGE_VERSION[@],@DOMJUDGE_VERSION@,g' \
+	-e 's,@INSTALL_METHOD[@],@INSTALL_METHOD@,g' \
 	-e 's,@domserver_bindir[@],@domserver_bindir@,g' \
 	-e 's,@domserver_etcdir[@],@domserver_etcdir@,g' \
 	-e 's,@domserver_webappdir[@],@domserver_webappdir@,g' \
