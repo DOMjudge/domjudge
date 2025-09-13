@@ -250,6 +250,10 @@ inplace-install-l:
 	@echo "    - Give the webserver access to things it needs"
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret"
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/symfony_app.secret"
+	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/domserver-static.php"
+	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/verdicts.php"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m d:m::rwx          $(CURDIR)/webapp/var"
@@ -274,6 +278,10 @@ inplace-install-l:
 inplace-postinstall-permissions:
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/symfony_app.secret
+	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/domserver-static.php
+	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/verdicts.php
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
 	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
 	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
@@ -313,7 +321,12 @@ inplace-postinstall-nginx: inplace-postinstall-permissions
 	fi; \
 	service="systemctl restart $$service"; \
 	ln="ln -sf $(CURDIR)/etc/domjudge-fpm.conf $$phppool/domjudge-fpm.conf"; \
-	echo $$ln; echo $$service; $$ln; $$service
+	echo $$ln; echo $$service; $$ln; $$service;
+	
+	while [ `pwd` != "/" ]; do \
+		setfacl -m u:$(WEBSERVER_GROUP):x .; \
+		cd ..; \
+	done
 
 inplace-postinstall-judgedaemon:
 	cp $(CURDIR)/etc/sudoers-domjudge /etc/sudoers.d/domjudge
