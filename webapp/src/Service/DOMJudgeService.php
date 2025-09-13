@@ -1691,7 +1691,7 @@ class DOMJudgeService
         $major = "/\d.\d.\d/";
 
         $versionUrl = 'https://versions.domjudge.org';
-        $options = ['http' => ['method' => 'GET', 'header' => "User-Agent: tarball/" . $versionLocalString . "\r\n"]];
+        $options = ['http' => ['method' => 'GET', 'header' => "User-Agent:" . $domjudgeInstallMethod . "/" . $versionLocalString . "\r\n"]];
         $context = stream_context_create($options);
         $response = @file_get_contents($versionUrl, false, $context);
         if ($response === false) {
