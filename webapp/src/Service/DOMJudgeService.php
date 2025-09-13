@@ -1681,6 +1681,9 @@ class DOMJudgeService
             ->getResult();
     }
 
+    /**
+     * Returns either the next strictly higher version or false when nothing is found/requested.
+     */
     public function checkNewVersion(): string|false {
         if (!$this->config->get('check_new_version')) {
             return false;
