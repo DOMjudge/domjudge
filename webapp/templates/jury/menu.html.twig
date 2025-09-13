@@ -93,6 +93,13 @@
                 </li>
             </ul>
         {% endif %}
+        {% if new_version_available %}
+            <ul class="navbar-nav">
+                <li class="nav-item nav-link">
+                    <i class="fa-solid fa-ship fa-2x"></i> New release {{ new_version_available }} available.
+                </li>
+            </ul>
+        {% endif %}
 
         <ul class="navbar-nav ml-auto">
 

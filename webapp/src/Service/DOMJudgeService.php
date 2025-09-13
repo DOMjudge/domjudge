@@ -38,6 +38,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
@@ -108,6 +109,8 @@ class DOMJudgeService
         protected string $projectDir,
         #[Autowire('%domjudge.vendordir%')]
         protected string $vendorDir,
+        #[Autowire('%domjudge.version%')]
+        protected readonly string $domjudgeVersion,
     ) {}
 
     /**
@@ -1674,5 +1677,43 @@ class DOMJudgeService
             ->where('l.allowSubmit = 1')
             ->getQuery()
             ->getResult();
+    }
+
+    public function checkNewVersion(): string|false {
+        if (!$this->config->get('check_new_version')) {
+            return false;
+        }
+        $versionLocalString = explode("/", $this->domjudgeVersion)[0];
+        $patch = "/" . substr($this->domjudgeVersion, 0, strrpos($this->domjudgeVersion, '.')) . ".\d/";
+        $minor = "/" . substr($this->domjudgeVersion, 0, strpos($this->domjudgeVersion, '.')) . ".\d.\d/";
+        $major = "/\d.\d.\d/";
+
+        $versionUrl = 'https://versions.domjudge.org';
+        $options = ['http' => ['method' => 'GET', 'header' => "User-Agent: tarball/" . $versionLocalString . "\r\n"]];
+        $context = stream_context_create($options);
+        $response = @file_get_contents($versionUrl, false, $context);
+        if ($response === false) {
+            return false;
+        }
+        $versions = json_decode($response, true);
+        /* Steer towards to the latest patch first
+         * the user can see on the website if there is a new Major/minor themselves
+         * otherwise the latest minor, or Major release. So the user might make the upgrade path:
+         * DJ6.0.0 -> DJ6.0.6 -> DJ6.6.0 -> DJ9.0.0 instead of
+         *         -> DJ6.0.[1..6] -> DJ6.[1..6] -> DJ[7..9].0.0
+         */
+        $newer_releases = [];
+        foreach ([$patch, $minor, $major] as $regex) {
+            foreach ($versions as $release) {
+                if (preg_match($regex, $release)) {
+                    $newer_releases[] = $release;
+                }
+            }
+            if (count($newer_releases) > 0) {
+                natsort($newer_releases);
+                return end($newer_releases);
+            }
+        }
+        return false;
     }
 }
