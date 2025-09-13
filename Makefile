@@ -250,6 +250,10 @@ inplace-install-l:
 	@echo "    - Give the webserver access to things it needs"
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret"
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/symfony_app.secret"
+	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/domserver-static.php"
+	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/verdicts.php"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m d:m::rwx          $(CURDIR)/webapp/var"
@@ -257,6 +261,7 @@ inplace-install-l:
 	@echo "        # Also make sure you keep access"
 	@echo "        setfacl -R -m d:u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m   u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
+	@echo "        And manually make sure the webserver has traversal access to: $(CURDIR)"
 	@echo "    - Configure webserver"
 	@echo "        Apache 2:"
 	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/domjudge.conf"
@@ -274,6 +279,10 @@ inplace-install-l:
 inplace-postinstall-permissions:
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/symfony_app.secret
+	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/domserver-static.php
+	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/verdicts.php
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
 	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
 	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
