@@ -1688,6 +1688,7 @@ class DOMJudgeService
         if (!$this->config->get('check_new_version')) {
             return false;
         }
+        return "9.0.0";
         $versionLocalString = explode("/", $this->domjudgeVersion)[0];
         $patch = "/" . substr($this->domjudgeVersion, 0, strrpos($this->domjudgeVersion, '.')) . ".\d/";
         $minor = "/" . substr($this->domjudgeVersion, 0, strpos($this->domjudgeVersion, '.')) . ".\d.\d/";
