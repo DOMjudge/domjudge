@@ -21,6 +21,17 @@ DOMserver
  * Install the MySQL database using e.g.
    ``bin/dj_setup_database -u root -r install``.
 
+ * For nginx: add ``etc/nginx-conf`` to your nginx configuration and
+   add ``etc/domjudge-fpm.conf`` to your PHP FPM pool directory, edit
+   it to your needs, reload web server
+
+   .. parsed-literal::
+
+     sudo ln -s <DOMSERVER_INSTALL_PATH>/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
+     sudo ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/\ |phpversion|/fpm/pool.d/domjudge.conf
+     sudo service php\ |phpversion|-fpm reload
+     sudo service nginx reload
+
  * For Apache: add ``etc/apache.conf`` to your Apache configuration and
    add ``etc/domjudge-fpm.conf`` to your PHP FPM pool directory, edit
    it to your needs, reload web server
@@ -33,17 +44,6 @@ DOMserver
      sudo a2enconf php\ |phpversion|-fpm domjudge
      sudo service php\ |phpversion|-fpm reload
      sudo service apache2 reload
-
- * For nginx: add ``etc/nginx-conf`` to your nginx configuration and
-   add ``etc/domjudge-fpm.conf`` to your PHP FPM pool directory, edit
-   it to your needs, reload web server
-
-   .. parsed-literal::
-
-     sudo ln -s <DOMSERVER_INSTALL_PATH>/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
-     sudo ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/\ |phpversion|/fpm/pool.d/domjudge.conf
-     sudo service php\ |phpversion|-fpm reload
-     sudo service nginx reload
 
  * Check that the web interface works (/team, /public and /jury).
  * Check that the API (/api) works and create credentials for the judgehosts.
