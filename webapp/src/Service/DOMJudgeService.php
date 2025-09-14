@@ -31,6 +31,7 @@ use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\FreezeData;
+use App\Utils\UpdateStrategy;
 use App\Utils\Utils;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -1685,66 +1686,74 @@ class DOMJudgeService
      * Returns either the next strictly higher version or false when nothing is found/requested.
      */
     public function checkNewVersion(): string|false {
-        if (!$this->config->get('check_new_version', false)) {
+        if ($this->config->get('check_new_version', false) === UpdateStrategy::Strategy_none) {
             return false;
         }
         // The local version is something like "x.y.z / commit hash", e.g. "8.4.0DEV/4e25adb13" for development
         // or 8.3.2 for a released version
-        /*$versionLocal = explode(".", $this->domjudgeVersion);
-        if (count($versionLocal) !== 3) return false;
-
-        $patch = "/" . $versionLocal[0] . "." . $versionLocal[1] . ".\d/";
-        $minor = "/" . $versionLocal[0] . ".\d.\d/";
-        $major = "/\d.\d.\d/";*/
-
-        //$versionUrl = 'https://versions.domjudge.org';
-        $versionUrl = 'http://localhost:81/versions.json';
-        $domjudgeVersion = strtok($this->domjudgeVersion, "/"); //Remove the commithash for some anonymity.
-        $options = ['http' => ['method' => 'GET', 'header' => "User-Agent: DOMjudge#" . $this->domjudgeInstallMethod . "/" . $domjudgeVersion . "\r\n"]];
+        // In case of development we remove the commithash for some anonymity but keep the DEV to not count those as the (possibly) released version
+        $localVersionString = strtok($this->domjudgeVersion, "/");
+        $localVersion = explode(".", $localVersionString);
+        if (count($localVersion) !== 3) {
+            // Unknown version, someone might have locally modified and used their own versioning
+            return false;
+        }
+        $versionUrl = 'https://versions.domjudge.org';
+        $options = ['http' => ['method' => 'GET', 'header' => "User-Agent: DOMjudge#" . $this->domjudgeInstallMethod . "/" . $localVersionString . "\r\n"]];
         $context = stream_context_create($options);
         $response = @file_get_contents($versionUrl, false, $context);
         if ($response === false) {
             return false;
         }
-        // Assume we get a plain unordered JSON list with the released versions
+        // Assume we get a one-level unordered JSON list with the released versions e.g. ["10.0.0", "9.11.0", "12.0.12", "10.0.1"]
         $versions = json_decode($response, true);
-        ///* Steer towards to the highest version first
-        // * the user can see on the website if there is a new patch themselves
-        // * So instead of:
-        // * DJ6.0.0 -> DJ6.0.6 -> DJ6.6.0 -> DJ9.0.0 instead of
-        // *         -> DJ6.0.[1..6] -> DJ6.[1..6] -> DJ[7..9].0.0
-        // * the path would be:
-        // * DJ6.0.0 -> DJ9.0.0
-        // * as doctrine migrations should allow any major upgrade.
-        // */
         natsort($versions);
-        $latest = end($versions);
+        $versions = array_reverse($versions);
         preg_match("/\d.\d.\d/", $this->domjudgeVersion, $matches);
-        $localVersion = $matches[0];
-        dump($versions, $latest, $localVersion, $this->domjudgeVersion, $latest < $localVersion, str_contains($this->domjudgeVersion, "DEV"), $localVersion === $latest);
-        if ($latest < $localVersion) {
-            return $latest;
+        $extractedLocalVersionString = $matches[0];
+        if ($this->config->get('check_new_version', false) === UpdateStrategy::Strategy_incremental) {
+            /* Steer towards the nearest new patch release first
+             * the user can see on the website if there are new Major/minor releases themselves
+             * So the expected path would be:
+             * DJ6.0.0 -> DJ6.0.6 -> DJ6.6.0 -> DJ9.0.0 instead of
+             *         -> DJ6.0.[1..6] -> DJ6.[1..6] -> DJ[7..9].0.0
+             * instead of: 
+             * DJ6.0.0 -> DJ9.0.0
+             */
+            $patch = "/" . $localVersion[0] . "." . $localVersion[1] . ".\d/";
+            $minor = "/" . $localVersion[0] . ".\d.\d/";
+            $major = "/\d.\d.\d/";
+            foreach ([$patch, $minor, $major] as $regex) {
+                foreach ($versions as $release) {
+                    if (preg_match($regex, $release)) {
+                        if (strnatcmp($release, $extractedLocalVersionString) === 1) {
+                            return $release;
+                        }
+                        if (strnatcmp($release, $extractedLocalVersionString) === 0 && str_contains($localVersionString, "DEV")) {
+                            // Special case, the development version is now released
+                            return $release;
+                        }
+                    }
+                }
+            }
         }
-        if ($localVersion === $latest && str_contains($this->domjudgeVersion, "DEV")) {
-            // Special case, the development version is now released
-            return $latest;
+        elseif ($this->config->get('check_new_version', false) === UpdateStrategy::Strategy_major_release) {
+            /* Steer towards the latest version directly
+             * So the expected path would be:
+             * DJ6.0.0 -> DJ9.0.0
+             * This should be safe as doctrine migrations check for upgrades regardless of current DOMjudge release
+             */
+            $latest = $versions[0];
+            if (strnatcmp($latest, $extractedLocalVersionString) === 1) {
+                return $latest;
+            }
+            if (strnatcmp($latest, $extractedlocalVersionString) === 0 && str_contains($localVersionString, "DEV")) {
+                // Special case, the development version is now released
+                return $latest;
+            }
+        } else {
+            throw Exception("Unknown UpdateStrategy value.");
         }
-        //$newer_releases = [];
-        //natsort($versions);
-        //
-        //foreach ($versions as $release) {
-        //foreach ([$patch, $minor, $major] as $regex) {
-        //    foreach ($versions as $release) {
-        //        if (preg_match($regex, $release)) {
-        //            $newer_releases[] = $release;
-        //        }
-        //    }
-        //    if (count($newer_releases) > 0) {
-        //        natsort($newer_releases);
-        //        dump($newer_releases);
-        //        return $newer_releases[0];
-        //    }
-        //}
         return false;
     }
 }

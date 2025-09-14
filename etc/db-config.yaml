@@ -394,8 +394,9 @@
             regex: /^\d+$/
             error_message: A non-negative number is required.
         -   name: check_new_version
-            type: bool
-            default_value: false
+            type: enum
+            enum_class: App\Utils\UpdateStrategy
+            default_value: none
             public: false
             description: Automatically check for new DOMjudge release?
         -   name: adminer_enabled
