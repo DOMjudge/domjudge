@@ -1747,12 +1747,12 @@ class DOMJudgeService
             if (strnatcmp($latest, $extractedLocalVersionString) === 1) {
                 return $latest;
             }
-            if (strnatcmp($latest, $extractedlocalVersionString) === 0 && str_contains($localVersionString, "DEV")) {
+            if (strnatcmp($latest, $extractedLocalVersionString) === 0 && str_contains($localVersionString, "DEV")) {
                 // Special case, the development version is now released
                 return $latest;
             }
         } else {
-            throw Exception("Unknown UpdateStrategy value.");
+            throw new Exception("Unknown UpdateStrategy value.");
         }
         return false;
     }
