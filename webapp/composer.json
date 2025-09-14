@@ -71,6 +71,7 @@
 		"jms/serializer-bundle": "^5.2",
 		"knplabs/knp-paginator-bundle": "^6.6",
 		"league/commonmark": "^2.3",
+		"mathjax/mathjax": "^4.0",
 		"mbostock/d3": "^3.5",
 		"nelmio/api-doc-bundle": "^5.0",
 		"nelmio/cors-bundle": "^2.4",
