@@ -1688,38 +1688,63 @@ class DOMJudgeService
         if (!$this->config->get('check_new_version', false)) {
             return false;
         }
-        return "9.0.0";
-        $versionLocalString = explode("/", $this->domjudgeVersion)[0];
-        $patch = "/" . substr($this->domjudgeVersion, 0, strrpos($this->domjudgeVersion, '.')) . ".\d/";
-        $minor = "/" . substr($this->domjudgeVersion, 0, strpos($this->domjudgeVersion, '.')) . ".\d.\d/";
-        $major = "/\d.\d.\d/";
+        // The local version is something like "x.y.z / commit hash", e.g. "8.4.0DEV/4e25adb13" for development
+        // or 8.3.2 for a released version
+        /*$versionLocal = explode(".", $this->domjudgeVersion);
+        if (count($versionLocal) !== 3) return false;
 
-        $versionUrl = 'https://versions.domjudge.org';
-        $options = ['http' => ['method' => 'GET', 'header' => "User-Agent:" . $domjudgeInstallMethod . "/" . $versionLocalString . "\r\n"]];
+        $patch = "/" . $versionLocal[0] . "." . $versionLocal[1] . ".\d/";
+        $minor = "/" . $versionLocal[0] . ".\d.\d/";
+        $major = "/\d.\d.\d/";*/
+
+        //$versionUrl = 'https://versions.domjudge.org';
+        $versionUrl = 'http://localhost:81/versions.json';
+        $domjudgeVersion = strtok($this->domjudgeVersion, "/"); //Remove the commithash for some anonymity.
+        $options = ['http' => ['method' => 'GET', 'header' => "User-Agent: DOMjudge#" . $this->domjudgeInstallMethod . "/" . $domjudgeVersion . "\r\n"]];
         $context = stream_context_create($options);
         $response = @file_get_contents($versionUrl, false, $context);
         if ($response === false) {
             return false;
         }
+        // Assume we get a plain unordered JSON list with the released versions
         $versions = json_decode($response, true);
-        /* Steer towards to the latest patch first
-         * the user can see on the website if there is a new Major/minor themselves
-         * otherwise the latest minor, or Major release. So the user might make the upgrade path:
-         * DJ6.0.0 -> DJ6.0.6 -> DJ6.6.0 -> DJ9.0.0 instead of
-         *         -> DJ6.0.[1..6] -> DJ6.[1..6] -> DJ[7..9].0.0
-         */
-        $newer_releases = [];
-        foreach ([$patch, $minor, $major] as $regex) {
-            foreach ($versions as $release) {
-                if (preg_match($regex, $release)) {
-                    $newer_releases[] = $release;
-                }
-            }
-            if (count($newer_releases) > 0) {
-                natsort($newer_releases);
-                return end($newer_releases);
-            }
+        ///* Steer towards to the highest version first
+        // * the user can see on the website if there is a new patch themselves
+        // * So instead of:
+        // * DJ6.0.0 -> DJ6.0.6 -> DJ6.6.0 -> DJ9.0.0 instead of
+        // *         -> DJ6.0.[1..6] -> DJ6.[1..6] -> DJ[7..9].0.0
+        // * the path would be:
+        // * DJ6.0.0 -> DJ9.0.0
+        // * as doctrine migrations should allow any major upgrade.
+        // */
+        natsort($versions);
+        $latest = end($versions);
+        preg_match("/\d.\d.\d/", $this->domjudgeVersion, $matches);
+        $localVersion = $matches[0];
+        dump($versions, $latest, $localVersion, $this->domjudgeVersion, $latest < $localVersion, str_contains($this->domjudgeVersion, "DEV"), $localVersion === $latest);
+        if ($latest < $localVersion) {
+            return $latest;
         }
+        if ($localVersion === $latest && str_contains($this->domjudgeVersion, "DEV")) {
+            // Special case, the development version is now released
+            return $latest;
+        }
+        //$newer_releases = [];
+        //natsort($versions);
+        //
+        //foreach ($versions as $release) {
+        //foreach ([$patch, $minor, $major] as $regex) {
+        //    foreach ($versions as $release) {
+        //        if (preg_match($regex, $release)) {
+        //            $newer_releases[] = $release;
+        //        }
+        //    }
+        //    if (count($newer_releases) > 0) {
+        //        natsort($newer_releases);
+        //        dump($newer_releases);
+        //        return $newer_releases[0];
+        //    }
+        //}
         return false;
     }
 }
