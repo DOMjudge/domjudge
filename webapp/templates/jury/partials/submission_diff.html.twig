@@ -57,10 +57,10 @@
                 {% endif %}
                 <div id="diffselect-{{ diff_id }}" class="btn-group">
                     <a href="#" role="button" class="btn btn-secondary btn-sm pe-none" aria-disabled="true"><i class="fas fa-code-branch"></i></a>
-                    <input type="radio" class="btn-check" name="{{ diff_id }}-mode" id="{{ diff_id }}-side-by-side" value="side-by-side" autocomplete="off">
-                    <label class="btn btn-outline-secondary btn-sm" for="{{ diff_id }}-side-by-side">side-by-side</label>
-                    <input type="radio" class="btn-check" name="{{ diff_id }}-mode" id="{{ diff_id }}-inline" value="inline" autocomplete="off">
-                    <label class="btn btn-outline-secondary btn-sm" for="{{ diff_id }}-inline">inline</label>
+                    {%- for mode_id, mode in diff_modes %}
+                    <input type="radio" class="btn-check" name="{{ diff_id }}-mode" id="{{ diff_id }}-{{ mode_id }}" value="{{ mode_id }}" autocomplete="off">
+                    <label class="btn btn-outline-secondary btn-sm" for="{{ diff_id }}-{{ mode_id }}">{{ mode.name }}</label>
+                    {%- endfor %}
                 </div>
             </div>
             {{ showDiff(diff_id, filePair.0, filePair.1) }}

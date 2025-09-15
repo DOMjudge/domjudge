@@ -172,6 +172,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 'hc-light'                  => ['name' => 'High contrast (light)'],
                 'hc-black'                  => ['name' => 'High contrast (dark)'],
             ],
+            'diff_modes'                    => [
+                'no-diff'                   => ["name"  => "No diff"],
+                'side-by-side'              => ["name"  => "Side-by-side"],
+                'inline'                    => ["name"  => "Inline"],
+            ],
         ];
     }
 
@@ -955,16 +960,10 @@ $(function() {
             monaco.Uri.parse("diff-new/%s")
         );
 
-        const sideBySide = isDiffSideBySide()
-        const diffSelect = $("#diffselect-__EDITOR__");
-        diffSelect.find("input[value='side-by-side']").prop('checked', sideBySide);
-        diffSelect.find("input[value='inline']").prop('checked', !sideBySide);
-        diffSelect.find("input[type='radio']").change(function(e) {
-            const sbs = e.target.value === 'side-by-side';
-            setDiffSideBySide(sbs);
-            diffEditor.updateOptions({
-                renderSideBySide: sbs,
-            });
+        const initialDiffMode = getDiffMode();
+        const radios = $("#diffselect-__EDITOR__ > input[name='__EDITOR__-mode']");
+        radios.each((_, radio) => {
+            $(radio).prop('checked', radio.value === initialDiffMode);
         });
 
         const diffEditor = monaco.editor.createDiffEditor(
@@ -976,13 +975,37 @@ $(function() {
             scrollBeyondLastLine: false,
             automaticLayout: true,
             readOnly: true,
-            renderSideBySide: sideBySide,
             theme: getCurrentEditorTheme(),
         });
-        diffEditor.setModel({
-            original: originalModel,
-            modified: modifiedModel,
+
+        const updateMode = (diffMode) => {
+            setDiffMode(diffMode);
+            const noDiff = diffMode === 'no-diff';
+            diffEditor.updateOptions({
+                renderOverviewRuler: !noDiff,
+                renderSideBySide: diffMode === 'side-by-side',
+            });
+
+            const oldViewState = diffEditor.saveViewState();
+            diffEditor.setModel({
+                original: noDiff ? modifiedModel : originalModel,
+                modified: modifiedModel,
+            });
+            diffEditor.restoreViewState(oldViewState);
+
+            diffEditor.getOriginalEditor().updateOptions({
+                lineNumbers: !noDiff,
+            });
+            diffEditor.getModifiedEditor().updateOptions({
+                minimap: {
+                    enabled: noDiff,
+                },
+            })
+        };
+        radios.change((e) => {
+            updateMode(e.target.value);
         });
+        updateMode(initialDiffMode);
     });
 });
 </script>
