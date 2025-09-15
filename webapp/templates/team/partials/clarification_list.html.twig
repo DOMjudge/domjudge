@@ -62,7 +62,7 @@
                     </td>
                 {% endif %}
 
-                <td>
+                <td class="clarification-text">
                     <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}">
                         {{ clarification.summary | markdown_to_html | sanitize_html('app.clarification_sanitizer') }}
                     </a>
@@ -72,4 +72,7 @@
 
         </tbody>
     </table>
+    <script>
+        MathJax.typeset([document.getElementsByClassName('clarification-text')]);
+    </script>
 </div>
