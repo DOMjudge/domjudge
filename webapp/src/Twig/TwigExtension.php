@@ -917,31 +917,6 @@ JS;
                            sprintf($editor, $code, $editable ? 'false' : 'true', $mode, $extraForEdit));
     }
 
-    // This function expects $difftext to be in unified diff format. In
-    // particular each line is expected to contain at least some character
-    // (that is, a leading space, + or -) so that strtok does not gobble up
-    // multiple empty lines in one go.
-    protected function parseSourceDiff(string $difftext): string
-    {
-        $line   = strtok($difftext, "\n"); // first line
-        $return = '';
-        while ($line !== false) {
-            // Strip any additional DOS/MAC newline characters:
-            $line = str_replace("\r", "↵", $line);
-            $formdiffline = match (substr($line, 0, 1)) {
-                '-' => "<span class='diff-del'>" . htmlspecialchars($line) . "</span>",
-                '+' => "<span class='diff-add'>" . htmlspecialchars($line) . "</span>",
-                default => htmlspecialchars($line),
-            };
-            if (str_contains($formdiffline, '#Warning: Strings contain different line endings')) {
-                $formdiffline = "<span class='diff-endline'>$formdiffline</span>";
-            }
-            $return .= $formdiffline . "\n";
-            $line   = strtok("\n");
-        }
-        return $return;
-    }
-
     public function showDiff(string $id, SubmissionFile $newFile, SubmissionFile $oldFile): string
     {
         $editor = <<<HTML
