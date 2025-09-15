@@ -55,7 +55,7 @@
 
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}">
-                        {{ clarification.summary }}
+                        {{ clarification.summary | markdown_to_html | sanitize_html('app.clarification_sanitizer') }}
                     </a>
                 </td>
             </tr>
