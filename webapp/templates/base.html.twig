@@ -16,6 +16,7 @@
     <script>
         window.MathJax = {
           tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+          svg: { fontCache: 'global' },
           chtml: { fontURL: "{{ app.request.basePath }}/mathjaxfonts" }
         };
     </script>
