@@ -350,6 +350,8 @@ class Utils
     public static function parseHexColor(string $hex): array
     {
         $tmp = substr($hex, 1);
+        // For a RGB hex value (without A), add a fully opaque alpha channel.
+        // e.g. convert #ABC to #ABCF, and #123456 to #123456FF
         if (strlen($tmp) % 3 == 0) {
             $mult = strlen($tmp) / 3;
             $hex .= str_repeat("f", $mult);
