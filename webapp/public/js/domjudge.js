@@ -124,18 +124,18 @@ function applyEditorTheme(theme = undefined, isExternal = false)
     });
 }
 
-function isDiffSideBySide()
+function getDiffMode()
 {
-    let sideBySide = localStorage.getItem('domjudge_editor_side_by_side');
-    if (sideBySide === undefined) {
-        return true;
+    let diffMode = localStorage.getItem('domjudge_editor_diff_mode');
+    if (diffMode === undefined) {
+        return 'side-by-side';
     }
-    return sideBySide == 'true';
+    return diffMode;
 }
 
-function setDiffSideBySide(value)
+function setDiffMode(value)
 {
-    localStorage.setItem('domjudge_editor_side_by_side', value);
+    localStorage.setItem('domjudge_editor_diff_mode', value);
 }
 
 // Send a notification if notifications have been enabled.
