@@ -34,8 +34,8 @@ You can try using cgroup V1 by adding systemd.unified_cgroup_hierarchy=0 to the 
     if ! echo "+cpuset" >> /sys/fs/cgroup/cgroup.subtree_control; then
         cgroup_error_and_usage "Error: Cannot add +cpuset to cgroup.subtree_control; check kernel params."
     fi
-    if ! grep -q "slice" /proc/self/cgroup; then
-        cgroup_error_and_usage "Error: Cgroups not configured properly, missing systemd slice under /proc/self/cgroup. If running under docker, make sure to set cgroupns=host."
+    if grep -q ":/$" /proc/self/cgroup; then
+        cgroup_error_and_usage "Error: Cgroups not configured properly, missing cgroup hierarchy prefix under /proc/self/cgroup. If running in a container, make sure to set cgroupns=host."
     fi
 
 else # Trying cgroup V1:
