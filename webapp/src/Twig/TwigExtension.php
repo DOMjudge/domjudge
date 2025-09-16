@@ -872,6 +872,7 @@ $(function() {
         const editor = monaco.editor.create(element, {
             value: content,
             scrollbar: {
+                alwaysConsumeMouseWheel: false,
                 vertical: 'auto',
                 horizontal: 'auto'
             },
@@ -972,6 +973,7 @@ $(function() {
         const diffEditor = monaco.editor.createDiffEditor(
             document.getElementById("__EDITOR__"), {
             scrollbar: {
+                alwaysConsumeMouseWheel: false,
                 vertical: 'auto',
                 horizontal: 'auto'
             },
