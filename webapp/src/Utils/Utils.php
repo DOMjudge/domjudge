@@ -343,19 +343,27 @@ class Utils
     }
 
     /**
-     * Parse a hex color into it's three RGB values.
+     * Parse a hex color into it's four RGBA values.
      *
-     * @return array{int, int, int}
+     * @return array{int, int, int, int}
      */
     public static function parseHexColor(string $hex): array
     {
+        $tmp = substr($hex, 1);
+        // For a RGB hex value (without A), add a fully opaque alpha channel.
+        // e.g. convert #ABC to #ABCF, and #123456 to #123456FF
+        if (strlen($tmp) % 3 == 0) {
+            $mult = strlen($tmp) / 3;
+            $hex .= str_repeat("f", $mult);
+        }
         // Source: https://stackoverflow.com/a/21966100
-        $length = (strlen($hex) - 1) / 3;
+        $length = (strlen($hex) - 1) / 4;
         $fact = [17, 1, 0.062272][$length - 1];
         return [
             (int)round(hexdec(substr($hex, 1, $length)) * $fact),
             (int)round(hexdec(substr($hex, 1 + $length, $length)) * $fact),
-            (int)round(hexdec(substr($hex, 1 + 2 * $length, $length)) * $fact)
+            (int)round(hexdec(substr($hex, 1 + 2 * $length, $length)) * $fact),
+            (int)round(hexdec(substr($hex, 1 + 3 * $length, $length)) * $fact)
         ];
     }
 
@@ -371,11 +379,88 @@ class Utils
     /**
      * Convert an RGB triple into a CSS hex color.
      *
-     * @param array{int, int, int} $color
+     * @param array{int, int, int}|array{int, int, int, int} $color
      */
     public static function rgbToHex(array $color): string
     {
-        return "#" . static::componentToHex($color[0]) . static::componentToHex($color[1]) . static::componentToHex($color[2]);
+        $result = "#";
+        if (count($color) === 3) {
+            $color[] = 255;
+	}
+        for ($i=0; $i<count($color); $i++) {
+            $result .= static::componentToHex($color[$i]);
+	}
+        return $result;
+    }
+
+    /**
+     * @param array{int, int, int}|array{int, int, int, int} $rgba
+     *
+     * @return array{int, int, int}
+     */
+    public static function blendAlphaBackground(array $rgba, string $bg): array
+    {
+        if (count($rgba) === 3) {
+            return $rgba;
+	} 
+	$result = [];
+        $bg = static::parseHexColor($bg);
+        for ($i=0; $i<3; $i++) {
+            $result[] = $rgba[$i] * ($rgba[3]/255) + $bg[$i] * (1 - ($rgba[3]/255));
+        }
+	return $result;
+    }
+
+    public static function relativeLuminance(string $hexRGB, string $rgb_background = "#fff"): float
+    {
+        // See https://en.wikipedia.org/wiki/Relative_luminance
+        $rgba = static::parseHexColor($hexRGB);
+        [$r, $g, $b] = static::blendAlphaBackground($rgba, $rgb_background);
+
+        [$lr, $lg, $lb] = [
+            pow($r / 255, 2.4),
+            pow($g / 255, 2.4),
+            pow($b / 255, 2.4),
+        ];
+
+        return 0.2126 * $lr + 0.7152 * $lg + 0.0722 * $lb;
+    }
+
+    public static function apcaContrast(string $fgColor, string $bgColor): float
+    {
+        // Based on WCAG 3.x (https://www.w3.org/TR/wcag-3.0/)
+        $luminanceForeground = static::relativeLuminance($fgColor);
+        $luminanceBackground = static::relativeLuminance($bgColor);
+
+        $contrast = ($luminanceBackground > $luminanceForeground)
+            ? (pow($luminanceBackground, 0.56) - pow($luminanceForeground, 0.57)) * 1.14
+            : (pow($luminanceBackground, 0.65) - pow($luminanceForeground, 0.62)) * 1.14;
+
+        return round($contrast * 100, 2);
+    }
+
+    /**
+     * @return array{string, string}
+     */
+    public static function hexToForegroundAndBorder(string $rgb): array
+    {
+        $background = Utils::parseHexColor($rgb);
+
+        // Pick a border that's a bit darker.
+        // We explicit keep the alpha channel as-is.
+        $darker = $background;
+        $darker[0] = max($darker[0] - 64, 0);
+        $darker[1] = max($darker[1] - 64, 0);
+        $darker[2] = max($darker[2] - 64, 0);
+        $border    = Utils::rgbToHex($darker);
+
+        // Pick the text color with the biggest absolute contrast.
+        $contrastWithWhite = static::apcaContrast('#ffffff', $rgb);
+        $contrastWithBlack = static::apcaContrast('#000000', $rgb);
+
+        $foreground = (abs($contrastWithBlack) > abs($contrastWithWhite)) ? '#000000' : '#ffffff';
+
+        return [$foreground, $border];
     }
 
     /**
