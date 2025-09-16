@@ -43,6 +43,9 @@ use Twig\TwigFunction;
 
 class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
+    /**
+     * @param array<int, bool> $renderedSources
+     */
     public function __construct(
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
@@ -55,7 +58,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         protected readonly AuthorizationCheckerInterface $authorizationChecker,
         protected readonly RouterInterface $router,
         #[Autowire('%kernel.project_dir%')]
-        protected readonly string $projectDir
+        protected readonly string $projectDir,
+        protected array $renderedSources = []
     ) {}
 
     public function getFunctions(): array
@@ -917,6 +921,38 @@ JS;
                            sprintf($editor, $code, $editable ? 'false' : 'true', $mode, $extraForEdit));
     }
 
+    /**
+     * Gets the JavaScript to get a Monaco model instance for the submission file.
+     * Renders the source code of the file as Monaco model, if not already rendered.
+     * @return string The JavaScript source assignable to a model variable.
+     */
+    public function getMonacoModel(SubmissionFile $file): string
+    {
+        if (array_key_exists($file->getSubmitfileid(), $this->renderedSources)) {
+            return sprintf(
+                <<<JS
+monaco.editor.getModel(monaco.Uri.parse("diff/%d/%s"));
+JS,
+                $file->getSubmitfileid(),
+                $file->getFilename(),
+            );
+        }
+        $this->renderedSources[$file->getSubmitfileid()] = true;
+
+        return sprintf(
+            <<<JS
+monaco.editor.createModel(
+    "%s",
+    undefined,
+    monaco.Uri.parse("diff/%d/%s")
+);
+JS,
+            $this->twig->getRuntime(EscaperRuntime::class)->escape($file->getSourcecode(), 'js'),
+            $file->getSubmitfileid(),
+            $file->getFilename(),
+        );
+    }
+
     public function showDiff(string $id, SubmissionFile $newFile, SubmissionFile $oldFile): string
     {
         $editor = <<<HTML
@@ -924,16 +960,8 @@ JS;
 <script>
 $(function() {
     require(['vs/editor/editor.main'], function () {
-        const originalModel = monaco.editor.createModel(
-            "%s",
-            undefined,
-            monaco.Uri.parse("diff-old/%s")
-        );
-        const modifiedModel = monaco.editor.createModel(
-            "%s",
-            undefined,
-            monaco.Uri.parse("diff-new/%s")
-        );
+        const originalModel = %s
+        const modifiedModel = %s
 
         const initialDiffMode = getDiffMode();
         const radios = $("#diffselect-__EDITOR__ > input[name='__EDITOR__-mode']");
@@ -988,10 +1016,8 @@ HTML;
 
         return sprintf(
             str_replace('__EDITOR__', $id, $editor),
-            $this->twig->getRuntime(EscaperRuntime::class)->escape($oldFile->getSourcecode(), 'js'),
-            $oldFile->getFilename(),
-            $this->twig->getRuntime(EscaperRuntime::class)->escape($newFile->getSourcecode(), 'js'),
-            $newFile->getFilename(),
+            $this->getMonacoModel($oldFile),
+            $this->getMonacoModel($newFile),
         );
     }
 
