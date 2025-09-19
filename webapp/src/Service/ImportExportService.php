@@ -395,7 +395,7 @@ class ImportExportService
     /**
      * @param array{name?: string, short-name?: string, id?: string, label?: string,
      *              letter?: string, time_limit?: int, rgb?: string, color?: string,
-     *              problems?: array{name?: string, short-name?: string, id?: string, label?: string,
+     *              problems?: array{name?: string|array<string, string>, short-name?: string, id?: string, label?: string,
      *                              letter?: string, label?: string, letter?: string}} $problems
      * @param string[]|null $ids
      * @param array<string, string[]> $messages
@@ -412,6 +412,16 @@ class ImportExportService
             // Deal with obsolete attribute names. Also for name fall back to ID if it is not specified.
             $problemName  = $problemData['name'] ?? $problemData['short-name'] ?? $problemData['id'] ?? null;
             $problemLabel = $problemData['label'] ?? $problemData['letter'] ?? null;
+
+            // The 2025-09 problem spec allows a 'language code'->'name' map.
+            if (is_array($problemName)) {
+                if (array_key_exists('en', $problemName)) {
+                    $problemName = $problemName['en'];
+                } else {
+                    $errorMessage = sprintf("Problem '%s' should have an English name", $problemName['id']);
+                    return false;
+                }
+            }
 
             $problem = new Problem();
             $problem
