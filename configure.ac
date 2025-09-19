@@ -11,6 +11,11 @@ AC_DEFUN([AX_WITH_COMMENT], [
 	AC_ARG_WITH([ax_comment_$1],[$2],[],[])
 	])
 
+AC_SUBST(INSTALL_METHOD, git)
+AC_ARG_WITH(install_method,AS_HELP_STRING([--with-install-method],
+[installation method e.g. debpackage, docker, git, tarball, (default: git).]),
+[if test "x$with_install_method" != x ; then AC_SUBST(INSTALL_METHOD,$with_install_method) fi])
+
 AC_SUBST(FHS_ENABLED,no)
 AC_ARG_ENABLE(fhs,AS_HELP_STRING([--enable-fhs],
 [use FHS directories (default: no), see below under "Optional
@@ -329,6 +334,7 @@ if test "x$QUIET" = x ; then
 echo ""
 echo "Summary:"
 echo " * project.............: $PACKAGE_NAME $PACKAGE_VERSION"
+echo " * installation source.: $INSTALL_METHOD"
 echo " * prefix..............: $prefix"
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 echo " * CPPFLAGS............: $CPPFLAGS"

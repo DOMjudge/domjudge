@@ -322,7 +322,12 @@ inplace-postinstall-nginx: inplace-postinstall-permissions
 	fi; \
 	service="systemctl restart $$service"; \
 	ln="ln -sf $(CURDIR)/etc/domjudge-fpm.conf $$phppool/domjudge-fpm.conf"; \
-	echo $$ln; echo $$service; $$ln; $$service
+	echo $$ln; echo $$service; $$ln; $$service;
+	
+	while [ `pwd` != "/" ]; do \
+		setfacl -m u:$(WEBSERVER_GROUP):x .; \
+		cd ..; \
+	done
 
 inplace-postinstall-judgedaemon:
 	cp $(CURDIR)/etc/sudoers-domjudge /etc/sudoers.d/domjudge
