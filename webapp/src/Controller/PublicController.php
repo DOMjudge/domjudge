@@ -86,18 +86,6 @@ class PublicController extends BaseController
 
         if ($static) {
             $data['hide_menu'] = true;
-            $submissions = $this->submissionService->getSubmissionList(
-                [$contest->getCid() => $contest],
-                new SubmissionRestriction(valid: true),
-                paginated: false
-            )[0];
-
-            $submissionsPerTeamAndProblem = [];
-            foreach ($submissions as $submission) {
-                $submissionsPerTeamAndProblem[$submission->getTeam()->getTeamid()][$submission->getProblem()->getProbid()][] = $submission;
-            }
-            $data['submissionsPerTeamAndProblem'] = $submissionsPerTeamAndProblem;
-            $data['verificationRequired'] = $this->config->get('verification_required');
         }
 
         $data['current_contest'] = $contest;
