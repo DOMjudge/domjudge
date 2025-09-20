@@ -13,6 +13,14 @@
     <script src="{{ asset("js/jquery.min.js") }}"></script>
     <script src="{{ asset("js/jquery.debounce.min.js") }}"></script>
     <script src="{{ asset("js/bootstrap.bundle.min.js") }}"></script>
+    <script>
+        window.MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+          svg: { fontCache: 'global' },
+          chtml: { fontURL: "{{ app.request.basePath }}/mathjaxfonts" }
+        };
+    </script>
+    <script src="{{ app.request.basePath }}/mathjax/tex-chtml.js"></script>
 
     <script src="{{ asset("js/domjudge.js") }}"></script>
     {% for file in customAssetFiles('js') %}
