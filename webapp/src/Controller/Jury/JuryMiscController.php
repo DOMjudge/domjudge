@@ -272,6 +272,8 @@ class JuryMiscController extends BaseController
 
         $verifyMultiple = (bool)$request->get('verify_multiple', false);
 
+        $problems = $this->dj->getCurrentContest()?->getProblems() ?? [];
+
         foreach ($submissions as $submission) {
             // As we only load the needed judging, this will automatically be the first one
             /** @var Judging $judging */
@@ -329,6 +331,7 @@ class JuryMiscController extends BaseController
             'verified' => $verified,
             'nomatch' => $nomatch,
             'earlier' => $earlier,
+            'problems' => $problems,
             'verifyMultiple' => $verifyMultiple,
         ]);
     }

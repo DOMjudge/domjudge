@@ -99,4 +99,12 @@
     {{ checkJudgings.verifyResults('earlier', 'Verified earlier', earlier, true) }}
     {{ checkJudgings.verifyResults('nomatch', 'Without magic string', nomatch, true) }}
 
+    <h2>Problem runtime analytics</h2>
+    You probably want to <a href="{{  path('jury_config') }}">fully</a> judge all submissions with enough overshoot to see the maximum runtime for Accepted solutions and tune those against
+    expected Timelimit Exceeded solutions.<br>
+    {% for p in problems %}
+        {% set link = path('analysis_problem', {'probid': p.probid, 'view': 'hidden'}) %}
+        <a href="{{ link }}">{{ p | problemBadge }}</a>
+    {% endfor %}
+
 {% endblock %}
