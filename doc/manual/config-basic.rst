@@ -129,6 +129,7 @@ Before a contest, you will want to have tested your reference
 solutions on the system to see whether those are judged as expected
 and maybe use their runtimes to set timelimits for the problems.
 
+
 The simplest way to do this is to include the jury solutions in a
 problem zip file and upload this. You can also upload a zip file
 containing just solutions to an existing problem. The zip
@@ -139,5 +140,12 @@ solutions will automatically be judged if the contest is active (but
 it need not have started yet). You can verify whether the submissions
 gave the expected answer in the Judging Verifier, available from
 the jury index page.
+
+After this check change the evaluation to full in the configuration
+and rejudge with a reasonable overshoot to distinguish between the
+slowest *Accepted* solution and the fastest *Timelimit Exceeded*.
+As a rule of thumb set the timelimit to twice the slowest *Accepted*
+solution. The Statistics/Analytics page has a graphic overview for those
+submissions.
 
 .. _ICPC-compatible teams.tsv files: https://ccs-specs.icpc.io/2021-11/ccs_system_requirements#teamstsv
