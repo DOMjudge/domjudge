@@ -1240,7 +1240,7 @@ class SubmissionController extends BaseController
                     }
                 }
             }
-            if($isNewFile) {
+            if ($isNewFile) {
                 $result['addedfiles'][] = $newfile;
             }
         }
