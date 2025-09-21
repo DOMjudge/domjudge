@@ -227,10 +227,12 @@ class ControllerRolesTraversalTest extends BaseTestCase
             try {
                 self::assertSelectorExists('a#navbarDropdownContests:contains("no contest")', "Failed at: " . $url);
             } catch (\Exception $e) {
-                $gitlabArtifacts = getenv('GITLABARTIFACTS');
-                if ($gitlabArtifacts != '') {
-                    $fileHandler = fopen(sprintf("%s/%s", $gitlabArtifacts, str_replace('/', '_s_', $url)), 'w');
-                    fwrite($fileHandler, $response->getContent());
+                if (getenv('CI')) { // We're running in GHA.
+                    $ciArtifacts = getenv('ARTIFACTS');
+                    if ($ciArtifacts != '') {
+                        $fileHandler = fopen(sprintf("%s/%s", $ciArtifacts, str_replace('/', '_s_', $url)), 'w');
+                        fwrite($fileHandler, $response->getContent());
+                    }
                 }
                 throw $e;
             }
