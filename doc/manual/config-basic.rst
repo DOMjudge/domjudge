@@ -140,4 +140,11 @@ it need not have started yet). You can verify whether the submissions
 gave the expected answer in the Judging Verifier, available from
 the jury index page.
 
+After this rejudge the whole contest with a higher overshoot, as well as
+judge remaining testcases. This rejudging is used to distinguish between the
+slowest *Accepted* solution and the fastest *Time Limit Exceeded*.
+As a rule of thumb set the timelimit to twice the slowest *Accepted*
+solution. The Statistics/Analytics page of each problem has a graphic
+overview for those submissions.
+
 .. _ICPC-compatible teams.tsv files: https://ccs-specs.icpc.io/2021-11/ccs_system_requirements#teamstsv
