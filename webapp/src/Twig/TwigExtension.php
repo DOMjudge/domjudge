@@ -1179,56 +1179,6 @@ EOF;
         return 'fas fa-file-' . $iconName;
     }
 
-    private function relativeLuminance(string $rgb): float
-    {
-        // See https://en.wikipedia.org/wiki/Relative_luminance
-        [$r, $g, $b] = Utils::parseHexColor($rgb);
-
-        [$lr, $lg, $lb] = [
-            pow($r / 255, 2.4),
-            pow($g / 255, 2.4),
-            pow($b / 255, 2.4),
-        ];
-
-        return 0.2126 * $lr + 0.7152 * $lg + 0.0722 * $lb;
-    }
-
-    private function apcaContrast(string $fgColor, string $bgColor): float
-    {
-        // Based on WCAG 3.x (https://www.w3.org/TR/wcag-3.0/)
-        $luminanceForeground = $this->relativeLuminance($fgColor);
-        $luminanceBackground = $this->relativeLuminance($bgColor);
-
-        $contrast = ($luminanceBackground > $luminanceForeground)
-            ? (pow($luminanceBackground, 0.56) - pow($luminanceForeground, 0.57)) * 1.14
-            : (pow($luminanceBackground, 0.65) - pow($luminanceForeground, 0.62)) * 1.14;
-
-        return round($contrast * 100, 2);
-    }
-
-    /**
-     * @return array{string, string}
-     */
-    private function hexToForegroundAndBorder(string $rgb): array
-    {
-        $background = Utils::parseHexColor($rgb);
-
-        // Pick a border that's a bit darker.
-        $darker = $background;
-        $darker[0] = max($darker[0] - 64, 0);
-        $darker[1] = max($darker[1] - 64, 0);
-        $darker[2] = max($darker[2] - 64, 0);
-        $border    = Utils::rgbToHex($darker);
-
-        // Pick the text color with the biggest absolute contrast.
-        $contrastWithWhite = $this->apcaContrast('#ffffff', $rgb);
-        $contrastWithBlack = $this->apcaContrast('#000000', $rgb);
-
-        $foreground = (abs($contrastWithBlack) > abs($contrastWithWhite)) ? '#000000' : '#ffffff';
-
-        return [$foreground, $border];
-    }
-
     public function problemBadge(ContestProblem $problem, bool $grayedOut = false): string
     {
         $rgb = Utils::convertToHex($problem->getColor() ?? '#ffffff');
@@ -1236,7 +1186,7 @@ EOF;
             $rgb = Utils::convertToHex('whitesmoke');
         }
 
-        [$foreground, $border] = $this->hexToForegroundAndBorder($rgb);
+        [$foreground, $border] = Utils::hexToForegroundAndBorder($rgb);
 
         if ($grayedOut) {
             $foreground = 'silver';
@@ -1262,7 +1212,7 @@ EOF;
             $rgb = Utils::convertToHex('whitesmoke');
         }
 
-        [$foreground, $border] = $this->hexToForegroundAndBorder($rgb);
+        [$foreground, $border] = Utils::hexToForegroundAndBorder($rgb);
 
         if (!$matrixItem->isCorrect) {
             $foreground = 'silver';

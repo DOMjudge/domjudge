@@ -290,7 +290,7 @@ class Utils
      */
     public static function convertToHex(string $color): ?string
     {
-        if (preg_match('/^#[[:xdigit:]]{3,6}$/', $color)) {
+        if (preg_match('/^#[[:xdigit:]]{3}(?:[[:xdigit:]]{3}){0,2}$/', $color)) {
             return $color;
         }
 
@@ -375,7 +375,62 @@ class Utils
      */
     public static function rgbToHex(array $color): string
     {
-        return "#" . static::componentToHex($color[0]) . static::componentToHex($color[1]) . static::componentToHex($color[2]);
+        $result = "#";
+        for ($i=0; $i<count($color); $i++) {
+            $result .= static::componentToHex($color[$i]);
+        }
+        return $result;
+    }
+
+    public static function relativeLuminance(string $rgb): float
+    {
+        // See https://en.wikipedia.org/wiki/Relative_luminance
+        [$r, $g, $b] = static::parseHexColor($rgb);
+
+        [$lr, $lg, $lb] = [
+            pow($r / 255, 2.4),
+            pow($g / 255, 2.4),
+            pow($b / 255, 2.4),
+        ];
+
+        return 0.2126 * $lr + 0.7152 * $lg + 0.0722 * $lb;
+    }
+
+    public static function apcaContrast(string $fgColor, string $bgColor): float
+    {
+        // Based on WCAG 3.x (https://www.w3.org/TR/wcag-3.0/)
+        $luminanceForeground = static::relativeLuminance($fgColor);
+        $luminanceBackground = static::relativeLuminance($bgColor);
+
+        $contrast = ($luminanceBackground > $luminanceForeground)
+            ? (pow($luminanceBackground, 0.56) - pow($luminanceForeground, 0.57)) * 1.14
+            : (pow($luminanceBackground, 0.65) - pow($luminanceForeground, 0.62)) * 1.14;
+
+        return round($contrast * 100, 2);
+    }
+
+    /**
+     * @return array{string, string}
+     */
+    public static function hexToForegroundAndBorder(string $rgb): array
+    {
+        $background = Utils::parseHexColor($rgb);
+
+        // Pick a border that's a bit darker.
+        // We explicit keep the alpha channel as-is.
+        $darker = $background;
+        $darker[0] = max($darker[0] - 64, 0);
+        $darker[1] = max($darker[1] - 64, 0);
+        $darker[2] = max($darker[2] - 64, 0);
+        $border    = Utils::rgbToHex($darker);
+
+        // Pick the text color with the biggest absolute contrast.
+        $contrastWithWhite = static::apcaContrast('#ffffff', $rgb);
+        $contrastWithBlack = static::apcaContrast('#000000', $rgb);
+
+        $foreground = (abs($contrastWithBlack) > abs($contrastWithWhite)) ? '#000000' : '#ffffff';
+
+        return [$foreground, $border];
     }
 
     /**
