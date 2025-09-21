@@ -256,8 +256,17 @@ inplace-install-l:
 	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m d:m::rwx          $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m   m::rwx          $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/teams"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/teams"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/banners"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/banners"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations"
+	@echo "        setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m   m::rwx                    $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m mask::rwx                   $(CURDIR)"
 	@echo "        # Also make sure you keep access"
 	@echo "        setfacl -R -m d:u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m   u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
@@ -285,10 +294,19 @@ inplace-postinstall-permissions:
 	setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
 	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/teams
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/teams
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/banners
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/banners
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations
 	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
 	setfacl -R -m   u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
 	setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var
 	setfacl -R -m   m::rwx                    $(CURDIR)/webapp/var
+	setfacl -R -m mask::rwx                   $(CURDIR)
 	if command -v sestatus >/dev/null 2>&1; then \
 		chcon -R -t httpd_sys_content_t $(CURDIR)/webapp; \
 		chcon -R -t httpd_config_t $(CURDIR)/etc; \
