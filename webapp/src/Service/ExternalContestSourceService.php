@@ -1050,7 +1050,12 @@ class ExternalContestSourceService
             );
             $contestProblem->setShortname($data->label);
         }
-        if ($contestProblem->getColor() !== ($data->rgb)) {
+        if (preg_match('/^#[[:xdigit:]]{3}(?:[[:xdigit:]]{3}){0,2}$/', $data->rgb)) {
+            $this->logger->warning(
+                'Contest problem color does not match between feed (%s) and local (%s), but feed is invalid.',
+                [$data->rgb, $contestProblem->getColor()]
+            );
+        } elseif ($contestProblem->getColor() !== ($data->rgb)) {
             $this->logger->warning(
                 'Contest problem color does not match between feed (%s) and local (%s), updating',
                 [$data->rgb, $contestProblem->getColor()]
