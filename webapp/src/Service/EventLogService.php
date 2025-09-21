@@ -487,7 +487,9 @@ class EventLogService
                 $awards = [];
                 $this->dj->withAllRoles(function () use ($url, &$awards) {
                     $response = $this->dj->internalApiRequest($url);
-                    if ( !empty($response) ) $awards = Utils::jsonDecode($response);
+                    if (!empty($response)) {
+                      $awards = Utils::jsonDecode($response);
+                    }
                 });
                 foreach ($awards as $award) {
                     $this->insertEvent($contest, 'awards', $award['id'], $award);
