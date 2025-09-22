@@ -4,3 +4,43 @@ framework:
             app.clarification_sanitizer:
                 allow_safe_elements: true
                 allow_relative_medias: true
+                allow_elements:
+                    msup: []
+                    mrow: []
+                    mfrac: []
+                    msqrt: []
+                    mfenced:
+                        - open
+                        - close
+                    mtable: []
+                    mtd: []
+                    mtr: []
+                    msubsup: []
+                    semantics: []
+                    mroot: []
+                    menclose:
+                        - notation
+                    mlabeledtr: []
+                    mstyle:
+                        - mathcolor
+                        - fontfamily
+                        - displaystyle
+                    math:
+                        - display
+                        - class
+                    mi:
+                        - class
+                    mn:
+                        - class
+                    mo:
+                        - class
+                    annotation-xml:
+                        - encoding
+                    apply: []
+                    bvar: []
+                    int: []
+                    ci: []
+                    cn: []
+                    lowlimit: []
+                    uplimit: []
+                    divide: []
