@@ -44,7 +44,7 @@ class JuryClarificationType extends AbstractType
             $recipientOptions[$this->getTeamLabel($limitToTeam)] = $limitToTeam->getTeamid();
         } else {
             /** @var Team|null $limitToTeam */
-            $teams = $this->em->getRepository(Team::class)->findAll();
+            $teams = $this->dj->getTeamsForContest($this->dj->getCurrentContest());
             foreach ($teams as $team) {
                 $recipientOptions[$this->getTeamLabel($team)] = $team->getTeamid();
             }

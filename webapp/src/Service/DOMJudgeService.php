@@ -1699,4 +1699,20 @@ class DOMJudgeService
             ->getQuery()
             ->getResult();
     }
+
+    /** @return Team[] */
+    public function getTeamsForContest(?Contest $contest) : array {
+        if ($contest && !$contest->isOpenToAllTeams()) {
+            $contestTeams = $contest->getTeams()->toArray();
+            foreach ($contest->getTeamCategories() as $category) {
+                $contestTeams = array_merge($contestTeams, $category->getTeams()->toArray());
+            }
+            return $contestTeams;
+        }
+        return $this->em->createQueryBuilder()
+            ->select('l')
+            ->from(Team::class, 'l')
+            ->getQuery()
+            ->getResult();
+    }
 }
