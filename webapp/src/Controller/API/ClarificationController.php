@@ -277,8 +277,10 @@ class ClarificationController extends AbstractRestController
             ->leftJoin('clar.sender', 's')
             ->leftJoin('clar.recipient', 'r')
             ->leftJoin('clar.problem', 'p')
+            ->innerJoin('c.problems', 'cp')
             ->select('clar, c, r, reply, p')
             ->andWhere('clar.contest = :cid')
+            ->andWhere('clar.problem IS NULL OR clar.problem = cp.problem')
             ->setParameter('cid', $this->getContestId($request))
             ->orderBy('clar.clarid');
 
