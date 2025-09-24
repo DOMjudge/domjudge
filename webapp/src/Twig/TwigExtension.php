@@ -1229,9 +1229,9 @@ EOF;
         return [$foreground, $border];
     }
 
-    public function problemBadge(ContestProblem $problem, bool $grayedOut = false): string
+    public function problemBadge(?ContestProblem $problem, bool $grayedOut = false): string
     {
-        $rgb = Utils::convertToHex($problem->getColor() ?? '#ffffff');
+        $rgb = Utils::convertToHex($problem?->getColor() ?? '#ffffff');
         if ($grayedOut || empty($rgb)) {
             $rgb = Utils::convertToHex('whitesmoke');
         }
@@ -1247,7 +1247,7 @@ EOF;
             $rgb,
             $border,
             $foreground,
-            $problem->getShortname()
+            $problem?->getShortname() ?? '?'
         );
     }
 
