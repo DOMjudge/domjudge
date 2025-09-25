@@ -216,11 +216,11 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
         confirmIndividually = dj_utils.confirm("Confirm individually for every problem", False)
         for problem in problems:
             print(f'\nPreparing problem \'{problem}\'.')
-            if os.path.exists(f'{problem}.zip'):
-                os.unlink(f'{problem}.zip')
             if not os.path.isdir(problem) or not os.path.isfile(f'{problem}/problem.yaml'):
                 print('Problem directory not found or doesn\'t contain a problem.yaml.')
                 exit(3)
+            if os.path.exists(f'{problem}.zip'):
+                os.unlink(f'{problem}.zip')
             zip_command = f"zip -r '../{problem}' -- .timelimit *"
             process = subprocess.Popen(zip_command, cwd=problem, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True)
 
