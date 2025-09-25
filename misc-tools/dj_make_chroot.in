@@ -178,7 +178,7 @@ if [ "$DISTRO" = 'Debian' ]; then
     REMOVEDEBS=""
 
     # Which debootstrap package to install on non-Debian systems:
-    DEBOOTDEB="debootstrap_1.0.128+nmu2+deb12u2_all.deb"
+    DEBOOTDEB="debootstrap_1.0.141_all.deb"
 
     # The Debian mirror/proxy below can be passed as environment
     # variables; if none are given the following defaults are used.
