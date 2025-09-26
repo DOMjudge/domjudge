@@ -218,7 +218,7 @@
                                                 {{ errors[option.name] }}
                                             </div>
                                         {% endif %}
-                                        <div class="small text-muted">{{ option.description | markdown_to_html }}</div>
+                                        <div class="small text-muted">{{ option.description | domjudgeMarkdownToHtml }}</div>
                                     </div>
                                 </li>
                             {% endfor %}
