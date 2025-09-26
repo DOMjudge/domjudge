@@ -40,7 +40,7 @@
         <hr/>
 
         <div class="card-text">
-            {{ clarification.body | markdown_to_html | sanitize_html('app.clarification_sanitizer') }}
+            {{ clarification.body | domjudgeMarkdownToHtml | sanitize_html('app.clarification_sanitizer') }}
         </div>
     </div>
 </div>
