@@ -23,7 +23,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @extends AbstractRestController<User, User>
@@ -41,7 +44,8 @@ class UserController extends AbstractRestController
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected readonly ImportExportService $importExportService
+        protected readonly ImportExportService $importExportService,
+        protected readonly ValidatorInterface $validator,
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
     }
@@ -86,9 +90,9 @@ class UserController extends AbstractRestController
         $message = null;
         $result = -1;
         if ((($tsvFile && ($result = $this->importExportService->importTsv('groups', $tsvFile, $message))) ||
-             ($jsonFile && ($result = $this->importExportService->importJson('groups', $jsonFile, $message)))) &&
+            ($jsonFile && ($result = $this->importExportService->importJson('groups', $jsonFile, $message)))) &&
             $result >= 0) {
-             return "$result new group(s) successfully added.";
+            return "$result new group(s) successfully added.";
         } else {
             throw new BadRequestHttpException("Error while adding groups: $message");
         }
@@ -171,7 +175,7 @@ class UserController extends AbstractRestController
         }
         $message = null;
         if ((($tsvFile && ($result = $this->importExportService->importTsv('teams', $tsvFile, $message))) ||
-             ($jsonFile && ($result = $this->importExportService->importJson('teams', $jsonFile, $message)))) &&
+                ($jsonFile && ($result = $this->importExportService->importJson('teams', $jsonFile, $message)))) &&
             $result >= 0) {
             // TODO: better return all teams here?
             return "$result new team(s) successfully added.";
@@ -235,7 +239,7 @@ class UserController extends AbstractRestController
 
         $message = null;
         if ((($tsvFile && ($result = $this->importExportService->importTsv('accounts', $tsvFile, $message))) ||
-             ($jsonFile && ($result = $this->importExportService->importJson('accounts', $jsonFile, $message)))) &&
+                ($jsonFile && ($result = $this->importExportService->importJson('accounts', $jsonFile, $message)))) &&
             $result >= 0) {
             // TODO: better return all accounts here?
             return "$result new account(s) successfully added.";
@@ -291,13 +295,12 @@ class UserController extends AbstractRestController
      * Add a new user.
      */
     #[IsGranted('ROLE_API_WRITER')]
-    #[Rest\Post]
+    #[Rest\Post()]
     #[OA\RequestBody(
         required: true,
         content: [
-            new OA\MediaType(
-                mediaType: 'multipart/form-data',
-                schema: new OA\Schema(ref: new Model(type: AddUser::class))
+            new OA\JsonContent(
+                ref: new Model(type: AddUser::class)
             ),
         ]
     )]
@@ -307,7 +310,7 @@ class UserController extends AbstractRestController
         content: new Model(type: User::class)
     )]
     public function addAction(
-        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
+        #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST, validationGroups: ['add'])]
         AddUser $addUser,
         Request $request
     ): Response {
@@ -315,78 +318,78 @@ class UserController extends AbstractRestController
     }
 
     /**
-     * Update an existing User or create one with the given ID
+     * Update an existing User
      */
     #[IsGranted('ROLE_API_WRITER')]
-    #[Rest\Put('/{id}')]
+    #[Rest\Patch('/{id}')]
     #[OA\RequestBody(
         required: true,
         content: [
-            new OA\MediaType(
-                mediaType: 'multipart/form-data',
-                schema: new OA\Schema(ref: new Model(type: UpdateUser::class))
+            new OA\JsonContent(
+                ref: new Model(type: UpdateUser::class)
             ),
         ]
     )]
     #[OA\Response(
         response: 201,
-        description: 'Returns the added user',
+        description: 'Returns the updated user',
         content: new Model(type: User::class)
     )]
     public function updateAction(
         #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
-        UpdateUser $updateUser,
+        UpdateUser $mutateUser,
+        string $id,
         Request $request
     ): Response {
-        return $this->addOrUpdateUser($updateUser, $request);
+        /** @var User|null $user */
+        $user = $this->em->getRepository(User::class)->findOneBy(['externalid' => $id]);
+        if ($user === null) {
+            throw new NotFoundHttpException(sprintf("User with id %s not found", $id));
+        }
+        return $this->addOrUpdateUser($mutateUser, $request, $user);
     }
 
-    protected function addOrUpdateUser(AddUser $addUser, Request $request): Response
+    protected function addOrUpdateUser(AddUser|UpdateUser $mutateUser, Request $request, ?User $user = null): Response
     {
-        if ($addUser instanceof UpdateUser && !$addUser->id) {
-            throw new BadRequestHttpException('`id` field is required');
+        // if the user to update is not set, create a new user
+        if (!$user) {
+            $user = new User();
         }
-
-        if ($this->em->getRepository(User::class)->findOneBy(['username' => $addUser->username])) {
-            throw new BadRequestHttpException(sprintf("User %s already exists", $addUser->username));
+        if ($mutateUser->username !== null) {
+            $user->setUsername($mutateUser->username);
         }
-
-        $user = new User();
-        if ($addUser instanceof UpdateUser) {
-            $existingUser = $this->em->getRepository(User::class)->findOneBy(['externalid' => $addUser->id]);
-            if ($existingUser) {
-                $user = $existingUser;
-            }
+        if ($mutateUser->name !== null) {
+            $user->setName($mutateUser->name);
         }
-        $user
-            ->setUsername($addUser->username)
-            ->setName($addUser->name)
-            ->setEmail($addUser->email)
-            ->setIpAddress($addUser->ip)
-            ->setPlainPassword($addUser->password)
-            ->setEnabled($addUser->enabled ?? true);
-
-        if ($addUser instanceof UpdateUser) {
-            $user->setExternalid($addUser->id);
+        if ($mutateUser->email !== null) {
+            $user->setEmail($mutateUser->email);
         }
-
-        if ($addUser->teamId) {
+        if ($mutateUser->ip !== null) {
+            $user->setIpAddress($mutateUser->ip);
+        }
+        if ($mutateUser->password !== null) {
+            $user->setPlainPassword($mutateUser->password);
+        }
+        if ($mutateUser->enabled !== null) {
+            $user->setEnabled($mutateUser->enabled);
+        }
+        if ($mutateUser->teamId) {
             /** @var Team|null $team */
             $team = $this->em->createQueryBuilder()
                 ->from(Team::class, 't')
                 ->select('t')
                 ->andWhere('t.externalid = :team')
-                ->setParameter('team', $addUser->teamId)
+                ->setParameter('team', $mutateUser->teamId)
                 ->getQuery()
                 ->getOneOrNullResult();
 
             if ($team === null) {
-                throw new BadRequestHttpException(sprintf("Team %s not found", $addUser->teamId));
+                throw new BadRequestHttpException(sprintf("Team %s not found", $mutateUser->teamId));
             }
             $user->setTeam($team);
         }
 
-        $roles = $addUser->roles;
+        $roles = $mutateUser->roles;
         // For the file import we change a CDS user to the roles needed for ICPC CDS.
         if ($user->getUsername() === 'cds') {
             $roles = ['cds'];
@@ -408,9 +411,14 @@ class UserController extends AbstractRestController
             $user->addUserRole($role);
         }
 
+        $validation = $this->validator->validate($user);
+        if (count($validation) > 0) {
+            throw new ValidationFailedException($user, $validation);
+        }
+
         $this->em->persist($user);
         $this->em->flush();
-        $this->dj->auditlog('user', $user->getUserid(), 'added');
+        $this->dj->auditlog('user', $user->getUserid(), 'updated');
 
         return $this->renderCreateData($request, $user, 'user', $user->getUserid());
     }
@@ -418,8 +426,8 @@ class UserController extends AbstractRestController
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $queryBuilder = $this->em->createQueryBuilder()
-                                 ->from(User::class, 'u')
-                                 ->select('u');
+            ->from(User::class, 'u')
+            ->select('u');
 
         if ($request->query->has('team')) {
             $queryBuilder
