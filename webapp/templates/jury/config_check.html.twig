@@ -99,7 +99,7 @@
         {% if testresult.escape is not defined or testresult.escape %}
           {% set description = description | escape %}
         {% endif %}
-        {{ description | markdown_to_html }}
+        {{ description | domjudgeMarkdownToHtml }}
       </div>
     </div>
   </div>
