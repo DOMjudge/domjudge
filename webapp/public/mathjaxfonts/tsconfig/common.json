@@ -1,0 +1,13 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "downlevelIteration": true,
+    "declaration": true,
+    "noImplicitAny": true,
+    "removeComments": true,
+    "lib": ["es6", "es2022", "dom"],
+    "noLib": false,
+    "sourceMap": true
+  },
+  "include": ["../ts/**/*"]
+}
