@@ -330,11 +330,15 @@ class PublicController extends BaseController
         }
 
         $scoreboard = $this->scoreboardService->getScoreboard($contest);
+        $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $scoreboard->getTeamsInDescendingOrder());
 
         /** @var Submission[] $submissions */
         $submissions = $this->submissionService->getSubmissionList(
             [$contest->getCid() => $contest],
-            restrictions: new SubmissionRestriction(valid: true),
+            restrictions: new SubmissionRestriction(
+                teamIds: $teamIds,
+                valid: true,
+            ),
             paginated: false
         )[0];
 
