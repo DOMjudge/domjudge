@@ -17,6 +17,9 @@
 ./webapp/var/cache
 ./webapp/migrations/Version20230122090005.php
 ./webapp/resources/adminer.php
+./webapp/mathjax
+./webapp/mathjaxfonts
+./webapp/node_modules
 FileSaver*
 bootstrap*
 d3.min*
