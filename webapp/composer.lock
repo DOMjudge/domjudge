@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4309b9d291f08f0533b4c6529b37513d",
+    "content-hash": "e250b78a9257c80e0b88e0a5c12a7ff2",
     "packages": [
         {
             "name": "apalfrey/select2-bootstrap-5-theme",
@@ -3092,52 +3092,11 @@
         {
             "name": "mathjax/mathjax",
             "version": "4.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/mathjax/MathJax.git",
-                "reference": "cfcb21644c5f06f59c0211a928690b7284073df7"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathjax/MathJax/zipball/cfcb21644c5f06f59c0211a928690b7284073df7",
-                "reference": "cfcb21644c5f06f59c0211a928690b7284073df7",
-                "shasum": ""
+                "url": "https://github.com/mathjax/MathJax/archive/refs/tags/4.0.0.zip"
             },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "Apache-2.0"
-            ],
-            "authors": [
-                {
-                    "name": "MathJax Consortium",
-                    "homepage": "https://github.com/mathjax"
-                }
-            ],
-            "description": "MathJax is an open-source JavaScript display engine for LaTeX, MathML, and AsciiMath notation that works in all modern browsers.",
-            "homepage": "http://www.mathjax.org/",
-            "keywords": [
-                "AsciiMath",
-                "JS",
-                "MathML",
-                "latex",
-                "math"
-            ],
-            "support": {
-                "issues": "https://github.com/mathjax/MathJax/issues",
-                "source": "https://github.com/mathjax/MathJax/tree/4.0.0"
-            },
-            "funding": [
-                {
-                    "url": "https://numfocus.org/donate-to-mathjax",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/numfocus",
-                    "type": "github"
-                }
-            ],
-            "time": "2025-08-04T19:29:47+00:00"
+            "type": "library"
         },
         {
             "name": "mbostock/d3",

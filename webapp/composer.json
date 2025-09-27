@@ -36,6 +36,17 @@
 					"type": "zip"
 				}
 			}
+		},
+		{
+			"type": "package",
+			"package": {
+				"name": "mathjax/mathjax",
+				"version": "4.0.0",
+				"dist": {
+					"url": "https://github.com/mathjax/MathJax/archive/refs/tags/4.0.0.zip",
+					"type": "zip"
+				}
+			}
 		}
 	],
 	"require": {
