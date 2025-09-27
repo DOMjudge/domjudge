@@ -10,6 +10,9 @@ View clarification
 
 {% block content %}
     {% include 'team/partials/clarification_content.html.twig' %}
+    <script>
+        MathJax.typeset([document.getElementsByClassName('card-body')]);
+    </script>
 {% endblock %}
 {% block extraButton %}
         <button class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#collapsereplyform"
