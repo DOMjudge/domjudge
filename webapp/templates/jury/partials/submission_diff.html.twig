@@ -83,6 +83,7 @@
                     </a>
                 {% endif %}
             </div>
+            {{ file.sourcecode | codeEditor(file.rank, submission.language.editorLanguage) }}
         </div>
     {%- endfor %}
     {%- for file in oldFileStats.addedfiles %}
@@ -101,6 +102,7 @@
                     </a>
                 {% endif %}
             </div>
+            {{ file.sourcecode | codeEditor(file.rank, submission.language.editorLanguage) }}
         </div>
     {%- endfor %}
 </div>
