@@ -111,7 +111,7 @@
                     $('select[data-filter-field]').each(function () {
                         var $filterField = $(this);
                         if ($filterField.data('filter-field') == "category-id") {
-                            $filterField.val({{- defaultCategories|json_encode() -}}).trigger('change');
+                            $filterField.val({{- defaultCategories | json_encode() -}}).trigger('change');
                         } else {
                             $filterField.val([]).trigger('change');
                         }

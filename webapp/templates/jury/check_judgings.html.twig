@@ -50,7 +50,7 @@
                         </td>
                         <td>
                             <a href="{{ link }}">
-                                {% if result.files is defined and result.files|length > 0 %}
+                                {% if result.files is defined and result.files | length > 0 %}
                                     {% for file in result.files[:3] %}
                                         <code>{{ file.filename }}</code>
                                     {% endfor %}

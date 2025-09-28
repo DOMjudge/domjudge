@@ -34,11 +34,11 @@
         <div class="btn-group btn-group-sm mb-3" role="group">
             <span class="input-group-text listtoggles">Filter:</span>
             {% for type in ['all', 'new', 'handled', 'general'] %}
-                <input type="radio" name="filter" autocomplete="off" class="btn-check" value="{{type}}" id="filter{{type}}"
+                <input type="radio" name="filter" autocomplete="off" class="btn-check" value="{{ type }}" id="filter{{ type }}"
                        {% if type == 'all' and currentFilter == null %}checked{% endif %}
                        {% if type != 'all' and currentFilter == type %}checked{% endif %}
                 >
-                <label class="btn btn-secondary" for="filter{{type}}">{{ type|capitalize }}</label>
+                <label class="btn btn-secondary" for="filter{{ type }}">{{ type | capitalize }}</label>
             {% endfor %}
         </div>
 

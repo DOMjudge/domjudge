@@ -59,8 +59,8 @@
                 </tr>
                 {% for type, data in contest.dataForJuryInterface %}
                     <tr>
-                        <td class="{{ data.class|default('') }}"><b>{{ data.label }}:</b></td>
-                        <td class="{{ data.class|default('') }}">
+                        <td class="{{ data.class | default('') }}"><b>{{ data.label }}:</b></td>
+                        <td class="{{ data.class | default('') }}">
                             {{ data.time }}
                             {% if data.icon is defined %}
                                 <i class="fas fa-{{ data.icon }}"></i>
@@ -69,7 +69,7 @@
                         {% if is_granted('ROLE_ADMIN') %}
                             <td>
                                 {% if data.show_button %}
-                                    {% set button_label =  type ~ " now" %}
+                                    {% set button_label = type ~ " now" %}
                                     {{ button(path('jury_contest_donow', {'contestId': contest.cid, 'time': type}), button_label, 'primary btn-sm timebutton') }}
                                 {% endif %}
                                 {% if data.extra_button is defined %}

@@ -4,10 +4,10 @@
 
 {% block extrahead %}
 {{ parent() }}
-<link rel="stylesheet" href="{{asset('css/nv.d3.min.css')}}">
-<script src="{{asset('js/d3.min.js')}}"></script>
-<script src="{{asset('js/nv.d3.min.js')}}"></script>
-<script src="{{asset('js/FileSaver.min.js')}}"></script>
+<link rel="stylesheet" href="{{ asset('css/nv.d3.min.css') }}">
+<script src="{{ asset('js/d3.min.js') }}"></script>
+<script src="{{ asset('js/nv.d3.min.js') }}"></script>
+<script src="{{ asset('js/FileSaver.min.js') }}"></script>
 <style>
 .card-body.tablecard{
   overflow-y: auto;
@@ -50,9 +50,9 @@ $(function() {
             <br>
             Calculated as:<br>
             average across all teams of [3 people x (number of minutes elapsed - minute last problem solved by team t)]
-          ">Misery index</abbr>: {{misc.misery_index|number_format(0)}} minutes<br>
+          ">Misery index</abbr>: {{ misc.misery_index | number_format(0) }} minutes<br>
           # Submissions: {{ misc.total_submissions }}<br>
-          # Accepted Submissions: {{ misc.total_accepted }} <span class="text-muted">(~{{ (misc.total_submissions>0 ? (misc.total_accepted/misc.total_submissions)*100:0)|number_format(0) }}%)</span><br>
+          # Accepted Submissions: {{ misc.total_accepted }} <span class="text-muted">(~{{ (misc.total_submissions>0 ? (misc.total_accepted/misc.total_submissions)*100:0) | number_format(0) }}%)</span><br>
           # of Teams: {{ misc.num_teams }}<br>
         </div>
       </div>
@@ -116,13 +116,13 @@ $(function() {
               {% set id=p.probid %}
               <tr>
                 {% set link = path('analysis_problem', {'probid': id, 'view': view}) %}
-                <td scope="row"><a href="{{path('analysis_problem', {'probid': id, 'view': view}) }}">{{ id }}</a></td>
+                <td scope="row"><a href="{{ path('analysis_problem', {'probid': id, 'view': view}) }}">{{ id }}</a></td>
                 <td><a href="{{ link }}">{{ p | problemBadge }} {{ p.problem.name }}</a></td>
                 <td><a href="{{ link }}">{{ p.problem.timelimit }}</a></td>
-                <td><a href="{{ link }}">{{ p.problem.memlimit|default('default') }}</a></td>
+                <td><a href="{{ link }}">{{ p.problem.memlimit | default('default') }}</a></td>
                 <td><a href="{{ link }}">{{ misc.problem_num_testcases[id] }}</a></td>
-                <td><a href="{{ link }}">{{ misc.problem_attempts[id]|default(0) }} / {{ misc.problem_solutions[id]|default(0) }}</a></td>
-                <td><a href="{{ link }}">{{ misc.problem_stats.teams_attempted[id]|default([])|length }} / {{ misc.problem_stats.teams_solved[id]|default([])|length }}</a></td>
+                <td><a href="{{ link }}">{{ misc.problem_attempts[id] | default(0) }} / {{ misc.problem_solutions[id] | default(0) }}</a></td>
+                <td><a href="{{ link }}">{{ misc.problem_stats.teams_attempted[id] | default([]) | length }} / {{ misc.problem_stats.teams_solved[id] | default([]) | length }}</a></td>
               </tr>
             {% endfor %}
             </tbody>
@@ -156,8 +156,8 @@ $(function() {
                 <td><a href="{{ link }}">{% if t.affiliation %}{{ t.affiliation.name }}{% else %}-{% endif %}</a></td>
                 <td class="truncate" style="max-width: 200px"><a href="{{ link }}">{{ t.effectiveName }}</a></td>
                 <td><a href="{{ link }}">{{ misc.team_stats[id].total_submitted }} / {{ misc.team_stats[id].total_accepted }}</a></td>
-                <td><a href="{{ link }}">{{ misc.team_stats[id].problems_submitted|length }} / {{ misc.team_stats[id].problems_accepted|length }}</a></td>
-                <td><a href="{{ link }}">{{ misc.team_stats[id].misery_index|number_format(0) }}</a></td>
+                <td><a href="{{ link }}">{{ misc.team_stats[id].problems_submitted | length }} / {{ misc.team_stats[id].problems_accepted | length }}</a></td>
+                <td><a href="{{ link }}">{{ misc.team_stats[id].misery_index | number_format(0) }}</a></td>
               </tr>
             {% endfor %}
             </tbody>
@@ -173,7 +173,7 @@ $(function() {
                   Delayed Judgings (by more than {{ delayed_judgings.delay }}s)
               </div>
               <div class="card-body tablecard">
-                  {% if delayed_judgings.data|length > 0 %}
+                  {% if delayed_judgings.data | length > 0 %}
                       <table class="table table-sm table-striped table-hover table-full-clickable-cell">
                           <thead>
                           <tr>
@@ -235,7 +235,7 @@ var language_stats = [
     values: [
       {% for lang,count in misc.language_stats.total_submissions %}
         {
-          "label" : "{{lang}}",
+          "label" : "{{ lang }}",
           "value" : {{ count }},
         },
       {% endfor %}
@@ -247,7 +247,7 @@ var language_stats = [
     values: [
       {% for lang,count in misc.language_stats.total_solutions %}
         {
-          "label" : "{{lang}}",
+          "label" : "{{ lang }}",
           "value" : {{ count }},
         },
       {% endfor %}
@@ -288,8 +288,8 @@ var problem_stats = [
     values: [
       {% for prob in problems %}
         {
-          "label" : "{{prob.shortname}}",
-          "value" : {{ misc.problem_stats.teams_attempted[prob.probid]|default([])|length }},
+          "label" : "{{ prob.shortname }}",
+          "value" : {{ misc.problem_stats.teams_attempted[prob.probid] | default([]) | length }},
         },
       {% endfor %}
     ]
@@ -300,8 +300,8 @@ var problem_stats = [
     values: [
       {% for prob in problems %}
         {
-          "label" : "{{prob.shortname}}",
-          "value" : {{ misc.problem_stats.teams_solved[prob.probid]|default([])|length }},
+          "label" : "{{ prob.shortname }}",
+          "value" : {{ misc.problem_stats.teams_solved[prob.probid] | default([]) | length }},
         },
       {% endfor %}
     ]
@@ -344,8 +344,8 @@ nv.addGraph(function() {
 const submission_stats = [
   {% for result in ['correct', 'wrong-answer', 'timelimit', 'run-error', 'compiler-error', 'no-output'] %}
   {
-    key: "{{result}}",
-    color: "{{colors[result]}}",
+    key: "{{ result }}",
+    color: "{{ colors[result] }}",
     values: []
   },
   {% endfor %}
