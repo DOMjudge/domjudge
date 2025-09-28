@@ -10,7 +10,7 @@
   <table class="w-100">
   <tr><td>DOMjudge:</td><td id="dj_version">{{ DOMJUDGE_VERSION }}</td></tr>
   <tr><td>Environment:</td><td>{{ app.environment }}</td></tr>
-  <tr><td>Debug:</td><td>{{ app.debug|printYesNo }}</td></tr>
+  <tr><td>Debug:</td><td>{{ app.debug | printYesNo }}</td></tr>
   <tr><td colspan="2">&nbsp;</td></tr>
   <tr><td>PHP:</td><td>{{ constant('PHP_VERSION') }}</td></tr>
   <tr><td>Symfony:</td><td>{{ constant('\\Symfony\\Component\\HttpKernel\\Kernel::VERSION') }}</td></tr>
@@ -75,12 +75,12 @@
 {% for resultgroup,groupresults in results %}
 <h3 class="mt-3 ms-3">{{ resultgroup }}</h3>
 
-<div class="accordion w-50 ms-5" id="{{ resultgroup|replace({' ':''}) }}" role="tablist" aria-multiselectable="true">
+<div class="accordion w-50 ms-5" id="{{ resultgroup | replace({' ':''}) }}" role="tablist" aria-multiselectable="true">
 
 {% for test,testresult in groupresults %}
   <div class="card">
     <h6 class="card-header result {{ testresult.result }}" role="tab" id="heading{{ test }}">
-      <a class="collapsed d-block text-dark pt-0 pb-0" data-bs-toggle="collapse" href="#collapse{{ test }}" aria-expanded="true" aria-controls="collapse{{ test }}" data-parent="#{{ resultgroup|replace({' ':''}) }}">
+      <a class="collapsed d-block text-dark pt-0 pb-0" data-bs-toggle="collapse" href="#collapse{{ test }}" aria-expanded="true" aria-controls="collapse{{ test }}" data-parent="#{{ resultgroup | replace({' ':''}) }}">
         {% if testresult.result == 'O' %}
         <i class="fas fa-check text-success"></i>
         {% elseif testresult.result == 'W' %}

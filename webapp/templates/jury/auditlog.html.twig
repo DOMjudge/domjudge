@@ -14,7 +14,7 @@
     {% if maxPages > 1 %}
     <ul class="pagination pagination-sm">
         <li class="page-item{{ showAll or thisPage == 1 ? ' disabled' }}">
-            <a class="page-link" href="{{ path('jury_auditlog', {page: thisPage-1 < 1 ? 1 : thisPage-1}) }}">«</a>
+            <a class="page-link" href="{{ path('jury_auditlog', {page: thisPage - 1 < 1 ? 1 : thisPage - 1}) }}">«</a>
         </li>
 
         {% for i in 1..maxPages %}
@@ -24,7 +24,7 @@
         {% endfor %}
 
         <li class="page-item{{ showAll or thisPage == maxPages ? ' disabled' }}">
-            <a class="page-link" href="{{ path('jury_auditlog', {page: thisPage+1 <= maxPages ? thisPage+1 : thisPage}) }}">»</a>
+            <a class="page-link" href="{{ path('jury_auditlog', {page: thisPage + 1 <= maxPages ? thisPage + 1 : thisPage}) }}">»</a>
         </li>
 
         <li class="page-item{{ showAll ? ' active' }}">

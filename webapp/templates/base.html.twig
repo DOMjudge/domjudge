@@ -21,13 +21,13 @@
     {% block extrahead %}
         <link rel="stylesheet" href="{{ asset('style_domjudge.css') }}">
 
-        {{ extrahead|default('') }}
+        {{ extrahead | default('') }}
     {% endblock %}
     {% for file in customAssetFiles('css') %}
         <link rel="stylesheet" href="{{ asset('css/custom/' ~ file) }}">
     {% endfor %}
 </head>
-<body{% if static is defined and static %} class="static"{% endif%}>
+<body{% if static is defined and static %} class="static"{% endif %}>
 {% block menu %}{% endblock %}
 {% block body %}
     <div class="container-fluid">
@@ -36,7 +36,7 @@
                 {% block messages %}
                     {% include 'partials/messages.html.twig' %}
                 {% endblock %}
-                {% block content %}{{ body|raw }}{% endblock %}
+                {% block content %}{{ body | raw }}{% endblock %}
             </div>
         </div>
     </div>
