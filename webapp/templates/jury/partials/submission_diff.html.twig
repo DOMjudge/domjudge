@@ -27,22 +27,23 @@
     {%- endfor %}
     {%- for file in oldFileStats.unchangedfiles %}
         <li class="nav-item">
-            <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
-               href="#diff-{{ file.submitfileid }}" role="tab">{{ file.filename }}</a>
+            <a class="nav-link {% if loop.first and oldFileStats.changedfiles == [] %}active{% endif %}"
+               data-bs-toggle="tab" href="#diff-{{ file.submitfileid }}" role="tab">{{ file.filename }}</a>
         </li>
     {%- endfor %}
     {%- for file in oldFileStats.addedfiles %}
         <li class="nav-item">
-            <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
-               href="#diff-{{ file.submitfileid }}" role="tab">{{ file.filename }}</a>
+            <a class="nav-link {% if loop.first and oldFileStats.changedfiles == [] and oldFileStats.addedfiles == [] %}active{% endif %}"
+               data-bs-toggle="tab" href="#diff-{{ file.submitfileid }}" role="tab">{{ file.filename }}</a>
         </li>
     {%- endfor %}
 
 </ul>
 <div class="tab-content source-tab">
     {%- for filePair in oldFileStats.changedfiles %}
-        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="diff-{{ filePair.1.submitfileid }}"
-             role="tabpanel">
+        <div class="tab-pane fade
+                    {% if loop.first %}show active{% endif %}"
+             id="diff-{{ filePair.1.submitfileid }}" role="tabpanel">
             {% set diff_id = "diff" ~  filePair.1.submitfileid %}
             <div class="mb-1">
                 <a class="btn btn-secondary btn-sm"
@@ -67,8 +68,9 @@
         </div>
     {%- endfor %}
     {%- for file in oldFileStats.unchangedfiles %}
-        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="diff-{{ file.submitfileid }}"
-             role="tabpanel">
+        <div class="tab-pane fade
+                    {% if loop.first and (oldFileStats.changedfiles == []) %}show active{% endif %}"
+             id="diff-{{ file.submitfileid }}" role="tabpanel">
             <div class="mb-1">
                 <a class="btn btn-secondary btn-sm"
                    href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: file.rank}) }}">
@@ -84,8 +86,9 @@
         </div>
     {%- endfor %}
     {%- for file in oldFileStats.addedfiles %}
-        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="diff-{{ file.submitfileid }}"
-             role="tabpanel">
+        <div class="tab-pane fade
+                    {% if loop.first and (oldFileStats.changedfiles == []) and (oldFileStats.addedfiles == []) %}show active{% endif %}"
+             id="diff-{{ file.submitfileid }}" role="tabpanel">
             <div class="mb-1">
                 <a class="btn btn-secondary btn-sm"
                    href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: file.rank}) }}">
