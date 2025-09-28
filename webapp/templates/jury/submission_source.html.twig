@@ -41,7 +41,9 @@
         <p><a href="#origdiff">Go to diff to original submission</a></p>
     {%- endif %}
 
-    {% if not oldSubmission %}
+    {%- if oldSubmission %}
+        {%- include 'jury/partials/submission_diff.html.twig' with {oldSubmission: oldSubmission, oldFiles: oldFiles, oldFileStats: oldFileStats} %}
+    {% else %}
         <ul class="nav nav-tabs source-tab-nav">
             {%- for file in files %}
                 <li class="nav-item">
@@ -73,10 +75,6 @@
             {%- endfor %}
         </div>
     {% endif %}
-
-    {%- if oldSubmission is not null %}
-        {%- include 'jury/partials/submission_diff.html.twig' with {oldSubmission: oldSubmission, oldFiles: oldFiles, oldFileStats: oldFileStats} %}
-    {%- endif %}
 
     {%- if originalSubmission is not null %}
         <h2 id="origdiff" class="mt-3">
