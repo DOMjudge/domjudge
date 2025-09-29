@@ -18,30 +18,32 @@
         </tr>
     </table>
 {% endif %}
+{% set is_first_tab = true %}
 <ul class="nav nav-tabs source-tab-nav">
     {%- for filePair in oldFileStats.changedfiles %}
         <li class="nav-item">
-            <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
+            <a class="nav-link {% if is_first_tab %}active{% set is_first_tab = false %}{% endif %}" data-bs-toggle="tab"
                href="#diff-{{ filePair.1.submitfileid }}" role="tab">{{ filePair.0.filename }}</a>
         </li>
     {%- endfor %}
     {%- for file in oldFileStats.unchangedfiles %}
         <li class="nav-item">
-            <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
+            <a class="nav-link {% if is_first_tab %}active{% set is_first_tab = false %}{% endif %}" data-bs-toggle="tab"
                href="#diff-{{ file.submitfileid }}" role="tab">{{ file.filename }}</a>
         </li>
     {%- endfor %}
     {%- for file in oldFileStats.addedfiles %}
         <li class="nav-item">
-            <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
+            <a class="nav-link {% if is_first_tab %}active{% set is_first_tab = false %}{% endif %}" data-bs-toggle="tab"
                href="#diff-{{ file.submitfileid }}" role="tab">{{ file.filename }}</a>
         </li>
     {%- endfor %}
 
 </ul>
+{% set is_first_pane = true %}
 <div class="tab-content source-tab">
     {%- for filePair in oldFileStats.changedfiles %}
-        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="diff-{{ filePair.1.submitfileid }}"
+        <div class="tab-pane fade {% if is_first_pane %}show active{% set is_first_pane = false %}{% endif %}" id="diff-{{ filePair.1.submitfileid }}"
              role="tabpanel">
             {% set diff_id = "diff" ~  filePair.1.submitfileid %}
             <div class="mb-1">
@@ -67,7 +69,7 @@
         </div>
     {%- endfor %}
     {%- for file in oldFileStats.unchangedfiles %}
-        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="diff-{{ file.submitfileid }}"
+        <div class="tab-pane fade {% if is_first_pane %}show active{% set is_first_pane = false %}{% endif %}" id="diff-{{ file.submitfileid }}"
              role="tabpanel">
             <div class="mb-1">
                 <a class="btn btn-secondary btn-sm"
@@ -81,10 +83,11 @@
                     </a>
                 {% endif %}
             </div>
+            {{ file.sourcecode | codeEditor(file.rank, submission.language.editorLanguage) }}
         </div>
     {%- endfor %}
     {%- for file in oldFileStats.addedfiles %}
-        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="diff-{{ file.submitfileid }}"
+        <div class="tab-pane fade {% if is_first_pane %}show active{% set is_first_pane = false %}{% endif %}" id="diff-{{ file.submitfileid }}"
              role="tabpanel">
             <div class="mb-1">
                 <a class="btn btn-secondary btn-sm"
@@ -98,6 +101,7 @@
                     </a>
                 {% endif %}
             </div>
+            {{ file.sourcecode | codeEditor(file.rank, submission.language.editorLanguage) }}
         </div>
     {%- endfor %}
 </div>
