@@ -849,22 +849,10 @@ class SubmissionController extends BaseController
             ->getQuery()
             ->getResult();
 
-        $originalSubmission = $originalFiles = null;
-
-        if ($submission->getOriginalSubmission()) {
-            /** @var Submission $originalSubmission */
-            $originalSubmission = $this->em->getRepository(Submission::class)->find($submission->getOriginalSubmission()->getSubmitid());
-
-            /** @var SubmissionFile[] $files */
-            $originalFiles = $this->em->createQueryBuilder()
-                ->from(SubmissionFile::class, 'file')
-                ->select('file')
-                ->andWhere('file.submission = :submission')
-                ->setParameter('submission', $originalSubmission)
-                ->orderBy('file.ranknumber')
-                ->getQuery()
-                ->getResult();
-
+        $otherSubmissions = [];
+        $originalSubmission = $submission->getOriginalSubmission();
+        if ($originalSubmission) {
+            $otherSubmissions[] = $originalSubmission;
             /** @var Submission $oldSubmission */
             $oldSubmission = $this->em->createQueryBuilder()
                 ->from(Submission::class, 's')
@@ -900,30 +888,39 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getOneOrNullResult();
         }
+        if ($oldSubmission !== null) {
+            $otherSubmissions[] = $oldSubmission;
+        }
 
         /** @var SubmissionFile[] $files */
         $oldFiles = $this->em->createQueryBuilder()
             ->from(SubmissionFile::class, 'file')
             ->select('file')
-            ->andWhere('file.submission = :submission')
-            ->setParameter('submission', $oldSubmission)
-            ->orderBy('file.ranknumber')
+            ->andWhere('file.submission in (:submissions)')
+            ->setParameter('submissions', array_map(fn($s) => $s->getSubmitid(), $otherSubmissions))
+            ->orderBy('file.submission, file.ranknumber')
             ->getQuery()
             ->getResult();
 
-        $oldFileStats      = $oldFiles !== null ? $this->determineFileChanged($files, $oldFiles) : [];
-        $originalFileStats = $originalFiles !== null ? $this->determineFileChanged($files, $originalFiles) : [];
+        $otherFiles = [];
+        foreach ($oldFiles as $f) {
+            $submitId = $f->getSubmission()->getSubmitid();
+            $otherFiles[$submitId] ??= [];
+            $otherFiles[$submitId][] = $f;
+        }
+
+        foreach ($otherFiles as $s => $v) {
+            $otherFiles[$s] = $this->determineFileChanged($files, $v);
+        }
 
         return $this->render('jury/submission_source.html.twig', [
             'submission' => $submission,
             'files' => $files,
             'oldSubmission' => $oldSubmission,
-            'oldFiles' => $oldFiles,
-            'oldFileStats' => $oldFileStats,
             'originalSubmission' => $originalSubmission,
-            'originalFiles' => $originalFiles,
-            'originalFileStats' => $originalFileStats,
             'allowEdit' => $this->allowEdit(),
+            'otherSubmissions' => $otherSubmissions,
+            'otherFiles' => $otherFiles,
         ]);
     }
 
