@@ -42,7 +42,7 @@
     {%- endif %}
 
     {% if oldSubmission %}
-        {%- include 'jury/partials/submission_diff.html.twig' with {oldSubmission: oldSubmission, oldFiles: oldFiles, oldFileStats: oldFileStats} %}
+        {%- include 'jury/partials/submission_diff.html.twig' with {oldSubmission: oldSubmission, oldFileStats: otherFiles[oldSubmission.submitid]} %}
     {% else %}
         <ul class="nav nav-tabs source-tab-nav">
             {%- for file in files %}
@@ -84,7 +84,7 @@
             </a>
         </h2>
 
-        {%- include 'jury/partials/submission_diff.html.twig' with {oldSubmission: originalSubmission, oldFiles: originalFiles, oldFileStats: originalFileStats} %}
+        {%- include 'jury/partials/submission_diff.html.twig' with {oldSubmission: originalSubmission, oldFileStats: otherFiles[originalSubmission.submitid]} %}
     {%- endif %}
 
 {% endblock %}
