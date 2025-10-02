@@ -1290,3 +1290,170 @@ function initScoreboardSubmissions() {
         });
     });
 }
+
+const editors = [];
+function initDiffEditor(editorId) {
+    const wrapper = $(`#${editorId}-wrapper`);
+
+    // TODO: store and restore tag preference in local storage.
+    const initialSelect = "";
+    const select = wrapper.find(".diff-select");
+    select[0].selectedIndex = 0;
+
+    const initialDiffMode = getDiffMode();
+    const radios = wrapper.find(`.diff-mode > input[type='radio']`);
+    radios.each((_, radio) => {
+        radio.checked = radio.value === initialDiffMode
+    });
+
+    const download = wrapper.find(".download")[0];
+    const edit = wrapper.find(".edit")[0];
+    const updateTabRank = (rank) => {
+        if (rank) {
+            let url = new URL(download.href);
+            url.searchParams.set("fetch", rank);
+            download.href = url;
+
+            url = new URL(edit.href);
+            url.searchParams.set("rank", rank);
+            edit.href = url;
+        } else {
+            download.href = "#";
+            edit.href = "#";
+        }
+    };
+    wrapper.find(".nav").on('show.bs.tab', (e) => {
+        updateTabRank(e.target.dataset.rank);
+    })
+
+    const editor = {
+        'getDiffMode': () => {
+            for (let radio of radios) {
+                if (radio.checked) {
+                    return radio.value;
+                }
+            }
+        },
+        'getDiffSelection': () => {
+            let s = select[0];
+            return s.options[s.selectedIndex].value;
+        },
+        'updateIcon': (rank, icon) => {
+            const element = wrapper.find(".nav-link[data-rank]")[rank].querySelector('.fa-fw');
+            element.className = 'fas fa-fw fa-' + icon;
+        },
+        'onDiffModeChange': (f) => {
+            radios.change((e) => {
+                const diffMode = e.target.value;
+                f(diffMode);
+            });
+        },
+        'onDiffSelectChange': (f) => {
+            select.change((e) => {
+                const submitId = e.target.value;
+                const noDiff = submitId === "";
+                f(submitId, noDiff);
+            });
+        }
+    };
+    editors[editorId] = editor;
+
+    const updateMode = (diffMode) => {
+        setDiffMode(diffMode);
+    };
+    updateMode(initialDiffMode);
+    editor.onDiffModeChange(updateMode);
+
+    const updateSelect = (submitId, noDiff) => {
+        radios.each((_, radio) => {
+            radio.disabled = noDiff;
+        });
+        // TODO: add tab panes for deleted source files.
+    };
+    updateSelect("", true);
+    editor.onDiffSelectChange(updateSelect);
+}
+
+function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
+    const empty = monaco.editor.getModel(monaco.Uri.file("empty")) ?? monaco.editor.createModel("", undefined, monaco.Uri.file("empty"));
+
+    const diffEditor = monaco.editor.createDiffEditor(
+        document.getElementById(diffId), {
+        scrollbar: {
+            alwaysConsumeMouseWheel: false,
+            vertical: 'auto',
+            horizontal: 'auto'
+        },
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        readOnly: true,
+        theme: getCurrentEditorTheme(),
+    });
+
+    const updateSelect = (submitId, noDiff) => {
+        if (!noDiff) {
+            const model = models[submitId];
+            if (model === undefined) {
+                models[submitId] = {'model': empty};
+            } else if (model !== undefined && !model['model']) {
+                // TODO: show source code instead of diff to empty file?
+                model['model'] = monaco.editor.createModel(model['source'], undefined, monaco.Uri.file("test/" + submitId + "/" + model['filename']));
+            }
+        }
+
+        diffEditor.updateOptions({
+            renderOverviewRuler: !noDiff,
+        });
+        if (noDiff) {
+            diffEditor.updateOptions({
+                renderSideBySide: false,
+            });
+        } else {
+            // Reset the diff mode to the currently selected mode.
+            updateMode(editors[editorId].getDiffMode())
+        }
+        // TODO: handle single-file submission case with renamed file.
+        const oldViewState = diffEditor.saveViewState();
+        diffEditor.setModel({
+            original: noDiff ? modifiedModel : models[submitId]['model'],
+            modified: modifiedModel,
+        });
+        diffEditor.restoreViewState(oldViewState);
+
+        diffEditor.getOriginalEditor().updateOptions({
+            lineNumbers: !noDiff,
+        });
+        diffEditor.getModifiedEditor().updateOptions({
+            minimap: {
+                enabled: noDiff,
+            },
+        })
+    };
+    editors[editorId].onDiffSelectChange(updateSelect);
+    updateSelect("", true);
+
+    const updateIcon = () => {
+        const noDiff = editors[editorId].getDiffSelection() === "";
+        if (noDiff) {
+            editors[editorId].updateIcon(rank, 'file');
+            return;
+        }
+
+        const lineChanges = diffEditor.getLineChanges();
+        if (diffEditor.getModel().original == empty) {
+            editors[editorId].updateIcon(rank, 'file-circle-plus');
+        } else if (lineChanges !== null && lineChanges.length > 0) {
+            editors[editorId].updateIcon(rank, 'file-circle-exclamation');
+        } else {
+            editors[editorId].updateIcon(rank, 'file-circle-check');
+        }
+    }
+    diffEditor.onDidUpdateDiff(updateIcon);
+
+    const updateMode = (diffMode) => {
+        diffEditor.updateOptions({
+            renderSideBySide: diffMode === 'side-by-side',
+        });
+    };
+    editors[editorId].onDiffModeChange(updateMode);
+}

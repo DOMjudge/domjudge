@@ -34,6 +34,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
@@ -57,6 +58,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         protected readonly TokenStorageInterface $tokenStorage,
         protected readonly AuthorizationCheckerInterface $authorizationChecker,
         protected readonly RouterInterface $router,
+        protected readonly SerializerInterface $serializer,
         #[Autowire('%kernel.project_dir%')]
         protected readonly string $projectDir,
         protected array $renderedSources = []
@@ -177,7 +179,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 'hc-black'                  => ['name' => 'High contrast (dark)'],
             ],
             'diff_modes'                    => [
-                'no-diff'                   => ["name"  => "No diff"],
                 'side-by-side'              => ["name"  => "Side-by-side"],
                 'inline'                    => ["name"  => "Inline"],
             ],
@@ -954,71 +955,44 @@ JS,
         );
     }
 
-    public function showDiff(string $id, SubmissionFile $newFile, SubmissionFile $oldFile): string
+    /** @param array<int, SubmissionFile[]> $otherFiles */
+    public function showDiff(string $editorId, string $diffId, SubmissionFile $newFile, array $otherFiles): string
     {
         $editor = <<<HTML
-<div class="editor" id="__EDITOR__"></div>
+<div class="editor" id="$diffId"></div>
 <script>
 $(function() {
-    require(['vs/editor/editor.main'], function () {
-        const originalModel = %s
-        const modifiedModel = %s
-
-        const initialDiffMode = getDiffMode();
-        const radios = $("#diffselect-__EDITOR__ > input[name='__EDITOR__-mode']");
-        radios.each((_, radio) => {
-            $(radio).prop('checked', radio.value === initialDiffMode);
-        });
-
-        const diffEditor = monaco.editor.createDiffEditor(
-            document.getElementById("__EDITOR__"), {
-            scrollbar: {
-                alwaysConsumeMouseWheel: false,
-                vertical: 'auto',
-                horizontal: 'auto'
-            },
-            scrollBeyondLastLine: false,
-            automaticLayout: true,
-            readOnly: true,
-            theme: getCurrentEditorTheme(),
-        });
-
-        const updateMode = (diffMode) => {
-            setDiffMode(diffMode);
-            const noDiff = diffMode === 'no-diff';
-            diffEditor.updateOptions({
-                renderOverviewRuler: !noDiff,
-                renderSideBySide: diffMode === 'side-by-side',
-            });
-
-            const oldViewState = diffEditor.saveViewState();
-            diffEditor.setModel({
-                original: noDiff ? modifiedModel : originalModel,
-                modified: modifiedModel,
-            });
-            diffEditor.restoreViewState(oldViewState);
-
-            diffEditor.getOriginalEditor().updateOptions({
-                lineNumbers: !noDiff,
-            });
-            diffEditor.getModifiedEditor().updateOptions({
-                minimap: {
-                    enabled: noDiff,
-                },
-            })
-        };
-        radios.change((e) => {
-            updateMode(e.target.value);
-        });
-        updateMode(initialDiffMode);
+    const editorId = '%s';
+    const diffId = '%s';
+    const rank = %d;
+    const models = %s;
+    require(['vs/editor/editor.main'], () => {
+        const modifiedModel = %s;
+        initDiffEditorTab(editorId, diffId, rank, models, modifiedModel)
     });
 });
 </script>
 HTML;
 
+        $others = [];
+        foreach ($otherFiles as $submissionId => $files) {
+            foreach ($files as $f) {
+                if ($f->getFilename() == $newFile->getFilename()) {
+                    // TODO: add `tag` containing `previous` / `original`
+                    $others[$submissionId] = [
+                        'filename' => $f->getFilename(),
+                        'source'   => $f->getSourcecode(),
+                    ];
+                }
+            }
+        }
+
         return sprintf(
-            str_replace('__EDITOR__', $id, $editor),
-            $this->getMonacoModel($oldFile),
+            $editor,
+            $editorId,
+            $diffId,
+            $newFile->getRank(),
+            $this->serializer->serialize($others, 'json'),
             $this->getMonacoModel($newFile),
         );
     }
