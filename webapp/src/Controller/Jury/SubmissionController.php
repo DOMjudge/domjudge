@@ -909,10 +909,6 @@ class SubmissionController extends BaseController
             $otherFiles[$submitId][] = $f;
         }
 
-        foreach ($otherFiles as $s => $v) {
-            $otherFiles[$s] = $this->determineFileChanged($files, $v);
-        }
-
         return $this->render('jury/submission_source.html.twig', [
             'submission' => $submission,
             'files' => $files,

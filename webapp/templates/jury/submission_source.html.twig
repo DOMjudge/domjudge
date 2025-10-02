@@ -37,12 +37,8 @@
         <p><b>Entry point</b>: {{ submission.entryPoint }}</p>
     {%- endif %}
 
-    {%- if submission.originalSubmission %}
-        <p><a href="#origdiff">Go to diff to original submission</a></p>
-    {%- endif %}
-
-    {% if oldSubmission %}
-        {%- include 'jury/partials/submission_diff.html.twig' with {oldSubmission: oldSubmission, oldFileStats: otherFiles[oldSubmission.submitid]} %}
+    {% if otherFiles | length > 0 %}
+        {%- include 'jury/partials/submission_diff.html.twig' with {editor_id: "diffw" ~ submission.submitid} %}
     {% else %}
         <ul class="nav nav-tabs source-tab-nav">
             {%- for file in files %}
@@ -75,16 +71,4 @@
             {%- endfor %}
         </div>
     {% endif %}
-
-    {%- if originalSubmission is not null %}
-        <h2 id="origdiff" class="mt-3">
-            Diff to original submission
-            <a href="{{ path('jury_submission', {submitId: originalSubmission.submitid}) }}">
-                s{{ originalSubmission.submitid }}
-            </a>
-        </h2>
-
-        {%- include 'jury/partials/submission_diff.html.twig' with {oldSubmission: originalSubmission, oldFileStats: otherFiles[originalSubmission.submitid]} %}
-    {%- endif %}
-
 {% endblock %}
