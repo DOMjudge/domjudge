@@ -4,7 +4,7 @@
 {% if submissions is empty %}
     <div class="alert alert-warning">No submissions</div>
 {% else %}
-    <table class="data-table table table-hover table-striped table-sm submissions-table">
+    <table class="data-table table table-hover table-sm submissions-table">
         <thead class="thead-light">
         <tr>
             <th scope="col">time</th>
@@ -29,9 +29,6 @@
             {% set classes = '' %}
             {% if not submission.valid %}
                 {% set classes = classes ~ ' ignore' %}
-            {% endif %}
-            {% if submission.judgings.first is empty or not submission.judgings.first.seen %}
-                {% set classes = classes ~ ' unseen' %}
             {% endif %}
             <tr class="{{ classes }}">
                 <td>
@@ -81,7 +78,7 @@
         {% endif %}
         {% if allowDownload %}
                 <td>
-                    <a title="Download submission ZIP" aria-label="download submission zip" class="btn btn-light" href="{{ path('team_submission_download', {'submitId': submission.submitid}) }}">
+                    <a title="Download submission ZIP" aria-label="download submission zip" href="{{ path('team_submission_download', {'submitId': submission.submitid}) }}">
                         <i class="fa fa-file-archive"></i>
                     </a>
                 </td>

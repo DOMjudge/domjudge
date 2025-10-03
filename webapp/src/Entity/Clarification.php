@@ -352,6 +352,6 @@ class Clarification extends BaseApiEntity implements
                 $newBody .= $line . ' ';
             }
         }
-        return Utils::cutString(html_entity_decode((empty($newBody) ? $this->getBody() : $newBody)), 80);
+        return Utils::cutString(html_entity_decode((empty($newBody) ? $this->getBody() : $newBody)), 120);
     }
 }

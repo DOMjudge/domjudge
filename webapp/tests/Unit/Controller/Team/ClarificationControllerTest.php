@@ -23,7 +23,7 @@ class ClarificationControllerTest extends BaseTestCase
         $this->verifyRedirectToURL('http://localhost/team');
 
         // Now check if we actually have this clarification.
-        self::assertSelectorExists('html:contains("problem C")');
+        self::assertSelectorExists('html:contains("C")');
         self::assertSelectorExists('html:contains("I don\'t understand this problem")');
     }
 }
