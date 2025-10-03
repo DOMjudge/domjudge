@@ -372,7 +372,7 @@ abstract class BaseController extends AbstractController
             }
             $primaryKeyData[] = $primaryKeyDataTemp;
         }
-        return [$isError, $primaryKeyData, $messages];
+        return [$isError, $primaryKeyData, array_values(array_unique($messages))];
     }
 
     /**
@@ -445,6 +445,7 @@ abstract class BaseController extends AbstractController
             'showModalSubmit' => !$isError,
             'modalUrl' => $request->getRequestUri(),
             'redirectUrl' => $redirectUrl,
+            'count' => count($entities),
         ];
         if ($request->isXmlHttpRequest()) {
             return $this->render('jury/delete_modal.html.twig', $data);

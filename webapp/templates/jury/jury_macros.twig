@@ -104,7 +104,7 @@
                     <th scope="col" class="
                         {%- if column.sort is defined and column.sort %}sortable{%- endif %}
                         {%- if (column.search is not defined) or column.search %} searchable{%- endif %}">
-                        {{- column.title|nl2br -}}
+                        {%- if column.raw|default(false) %}{{- column.title|raw -}}{% else %}{{- column.title|nl2br -}}{% endif -%}
                     </th>
                 {%- endfor %}
                 {%- if num_actions > 0 %}
@@ -149,7 +149,7 @@
                             {% elseif (column.render | default('')) == "entity_id_badge" %}
                             {% if item.value %}{{- item.value|entityIdBadge(item.idPrefix|default('')) -}}{% endif %}
                             {% else %}
-                            {{- (item.value|default(item.default|default(''))) -}}
+                            {%- if column.raw|default(false) %}{{- (item.value|default(item.default|default('')))|raw -}}{% else %}{{- (item.value|default(item.default|default(''))) -}}{% endif -%}
                             {% endif %}
                             {% if item.icon is defined %}<i class="fas fa-{{ item.icon }}"></i>{%- endif %}
                             {%- if item.link is defined or (row.link is defined and not item.toggle_partial is defined) -%}</a>{% endif %}
