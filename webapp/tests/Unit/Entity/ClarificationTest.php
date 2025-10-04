@@ -15,7 +15,7 @@ class ClarificationTest extends TestCase
 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
 tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.';
         $clarification->setBody($text);
-        static::assertEquals('Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod …',
+        static::assertEquals('Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magn…',
             $clarification->getSummary());
     }
 
@@ -50,9 +50,10 @@ fifth line,
 sixth line,
 seventh line,
 eighth line,
+ninth line,
 and so on.';
         $clarification->setBody($text);
-        static::assertEquals('First line, second line, third line, fourth line, fifth line, sixth line, sevent…',
+        static::assertEquals('First line, second line, third line, fourth line, fifth line, sixth line, seventh line, eighth line, ninth line, and so …',
             $clarification->getSummary());
     }
 }
