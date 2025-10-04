@@ -223,14 +223,13 @@ class TeamAffiliationController extends BaseController
     #[Route(path: '/delete-multiple', name: 'jury_team_affiliation_delete_multiple', methods: ['GET', 'POST'])]
     public function deleteMultipleAction(Request $request): Response
     {
-        $ids = $request->query->all('ids');
-        if (empty($ids)) {
-            throw new BadRequestHttpException('No IDs specified for deletion');
-        }
-
-        $affiliations = $this->em->getRepository(TeamAffiliation::class)->findBy(['affilid' => $ids]);
-
-        return $this->deleteEntities($request, $affiliations, $this->generateUrl('jury_team_affiliations'));
+        return $this->deleteMultiple(
+            $request,
+            TeamAffiliation::class,
+            'affilid',
+            'jury_team_affiliations',
+            'No affiliations could be deleted.'
+        );
     }
 
     #[IsGranted('ROLE_ADMIN')]

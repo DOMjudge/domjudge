@@ -661,4 +661,21 @@ class Team extends BaseApiEntity implements
     {
         return array_filter([$this->photoForApi]);
     }
+
+    public function isLocked(): bool
+    {
+        foreach ($this->getContests() as $contest) {
+            if ($contest->isLocked()) {
+                return true;
+            }
+        }
+        if ($this->getCategory()) {
+            foreach ($this->getCategory()->getContests() as $contest) {
+                if ($contest->isLocked()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

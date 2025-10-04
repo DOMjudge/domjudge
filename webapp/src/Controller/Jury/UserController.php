@@ -415,25 +415,13 @@ class UserController extends BaseController
     #[Route(path: '/delete-multiple', name: 'jury_user_delete_multiple', methods: ['GET', 'POST'])]
     public function deleteMultipleAction(Request $request): Response
     {
-        $ids = $request->query->all('ids');
-        if (empty($ids)) {
-            throw new BadRequestHttpException('No IDs specified for deletion');
-        }
-
-        $users = $this->em->getRepository(User::class)->findBy(['userid' => $ids]);
-
-        $deletableUsers = [];
-        foreach ($users as $user) {
-            if ($user->getUserid() !== $this->dj->getUser()->getUserid()) {
-                $deletableUsers[] = $user;
-            }
-        }
-
-        if (empty($deletableUsers)) {
-            $this->addFlash('warning', 'No users could be deleted (you cannot delete your own account).');
-            return $this->redirectToRoute('jury_users');
-        }
-
-        return $this->deleteEntities($request, $deletableUsers, $this->generateUrl('jury_users'));
+        return $this->deleteMultiple(
+            $request,
+            User::class,
+            'userid',
+            'jury_users',
+            'No users could be deleted (you cannot delete your own account).',
+            fn(User $user) => $user->getUserid() !== $this->dj->getUser()->getUserid()
+        );
     }
 }

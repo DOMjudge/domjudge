@@ -458,6 +458,34 @@ abstract class BaseController extends AbstractController
      * @param array<string, array<array{'target': string, 'targetColumn': string, 'type': string}>> $relations
      * @return string[]
      */
+    protected function deleteMultiple(
+        Request $request,
+        string $entityClass,
+        string $idProperty,
+        string $redirectRoute,
+        string $warningMessage,
+        ?callable $filter = null
+    ): Response {
+        $ids = $request->query->all('ids');
+        if (empty($ids)) {
+            throw new BadRequestHttpException('No IDs specified for deletion');
+        }
+
+        $entities = $this->em->getRepository($entityClass)->findBy([$idProperty => $ids]);
+
+        if ($filter) {
+            $entities = array_filter($entities, $filter);
+        }
+
+        if (empty($entities)) {
+            $this->addFlash('warning', $warningMessage);
+            return $this->redirectToRoute($redirectRoute);
+        }
+
+        return $this->deleteEntities($request, $entities, $this->generateUrl($redirectRoute));
+    }
+
+
     protected function getDependentEntities(string $entityClass, array $relations): array
     {
         $result = [];
