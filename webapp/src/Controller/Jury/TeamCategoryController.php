@@ -66,12 +66,7 @@ class TeamCategoryController extends BaseController
             'allow_self_registration' => ['title' => 'self-registration', 'sort' => true],
         ];
 
-        if ($this->isGranted('ROLE_ADMIN')) {
-            $table_fields = array_merge(
-                ['checkbox' => ['title' => '<input type="checkbox" class="select-all" title="Select all categories">', 'sort' => false, 'search' => false, 'raw' => true]],
-                $table_fields
-            );
-        }
+        $this->addSelectAllCheckbox($table_fields, 'categories');
 
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
         $team_categories_table = [];
@@ -81,14 +76,7 @@ class TeamCategoryController extends BaseController
             $categorydata    = [];
             $categoryactions = [];
 
-            if ($this->isGranted('ROLE_ADMIN')) {
-                $categorydata['checkbox'] = [
-                    'value' => sprintf(
-                        '<input type="checkbox" name="ids[]" value="%s" class="category-checkbox">',
-                        $teamCategory->getCategoryid()
-                    )
-                ];
-            }
+            $this->addEntityCheckbox($categorydata, $teamCategory, $teamCategory->getCategoryid(), 'category-checkbox');
 
             // Get whatever fields we can from the category object itself.
             foreach ($table_fields as $k => $v) {

@@ -102,12 +102,7 @@ class TeamController extends BaseController
             'stats' => ['title' => 'stats', 'sort' => true,],
         ];
 
-        if ($this->isGranted('ROLE_ADMIN')) {
-            $table_fields = array_merge(
-                ['checkbox' => ['title' => '<input type="checkbox" class="select-all" title="Select all teams">', 'sort' => false, 'search' => false, 'raw' => true]],
-                $table_fields
-            );
-        }
+        $this->addSelectAllCheckbox($table_fields, 'teams');
 
         $userDataPerTeam = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
@@ -123,34 +118,7 @@ class TeamController extends BaseController
             $teamdata    = [];
             $teamactions = [];
 
-            if ($this->isGranted('ROLE_ADMIN')) {
-                $isLocked = false;
-                foreach ($t->getContests() as $contest) {
-                    if ($contest->isLocked()) {
-                        $isLocked = true;
-                        break;
-                    }
-                }
-                if (!$isLocked && $t->getCategory()) {
-                    foreach ($t->getCategory()->getContests() as $contest) {
-                        if ($contest->isLocked()) {
-                            $isLocked = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!$isLocked) {
-                    $teamdata['checkbox'] = [
-                        'value' => sprintf(
-                            '<input type="checkbox" name="ids[]" value="%s" class="team-checkbox">',
-                            $t->getTeamid()
-                        )
-                    ];
-                } else {
-                    $teamdata['checkbox'] = ['value' => ''];
-                }
-            }
+            $this->addEntityCheckbox($teamdata, $t, $t->getTeamid(), 'team-checkbox', fn(Team $team) => !$team->isLocked());
 
             // Get whatever fields we can from the team object itself.
             foreach ($table_fields as $k => $v) {

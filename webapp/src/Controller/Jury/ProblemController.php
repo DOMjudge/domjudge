@@ -88,12 +88,7 @@ class ProblemController extends BaseController
             'type' => ['title' => 'type', 'sort' => true],
         ];
 
-        if ($this->isGranted('ROLE_ADMIN')) {
-            $table_fields = array_merge(
-                ['checkbox' => ['title' => '<input type="checkbox" class="select-all" title="Select all problems">', 'sort' => false, 'search' => false, 'raw' => true]],
-                $table_fields
-            );
-        }
+        $this->addSelectAllCheckbox($table_fields, 'problems');
 
         $contestCountData = $this->em->createQueryBuilder()
             ->from(ContestProblem::class, 'cp')
@@ -117,26 +112,7 @@ class ProblemController extends BaseController
             $problemdata    = [];
             $problemactions = [];
 
-            if ($this->isGranted('ROLE_ADMIN')) {
-                $problemIsLocked = false;
-                foreach ($p->getContestProblems() as $contestProblem) {
-                    if ($contestProblem->getContest()->isLocked()) {
-                        $problemIsLocked = true;
-                        break;
-                    }
-                }
-
-                if (!$problemIsLocked) {
-                    $problemdata['checkbox'] = [
-                        'value' => sprintf(
-                            '<input type="checkbox" name="ids[]" value="%s" class="problem-checkbox">',
-                            $p->getProbid()
-                        )
-                    ];
-                } else {
-                    $problemdata['checkbox'] = ['value' => ''];
-                }
-            }
+            $this->addEntityCheckbox($problemdata, $p, $p->getProbid(), 'problem-checkbox', fn(Problem $problem) => !$problem->isLocked());
 
             // Get whatever fields we can from the problem object itself.
             foreach ($table_fields as $k => $v) {
