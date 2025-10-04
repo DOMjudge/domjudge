@@ -15,9 +15,24 @@
     {{ macros.table(users, table_fields) }}
 
     {% if is_granted('ROLE_ADMIN') %}
-        <p>
+        <p class="mt-4">
+            {% include 'jury/partials/_delete_button.html.twig' with {'entities': users} %}
             {{ button(path('jury_user_add'), 'Add new user', 'primary', 'plus') }}
             {{ button(path('jury_reset_login_status'), 'Reset login status of all team users', 'secondary', 'refresh') }}
         </p>
     {% endif %}
+{% endblock %}
+
+{% block extrafooter %}
+    {{ parent() }}
+    <script src="{{ asset('js/multi-delete.js') }}"></script>
+    <script>
+        $(function() {
+            initializeMultiDelete({
+                buttonSelector: '#delete-selected-button',
+                checkboxClass: 'user-checkbox',
+                deleteUrl: '{{ path('jury_user_delete_multiple') }}'
+            });
+        });
+    </script>
 {% endblock %}

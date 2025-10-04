@@ -22,6 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -70,6 +71,14 @@ class UserController extends BaseController
             'teamid'     => ['title' => '', 'sort' => false, 'render' => 'entity_id_badge'],
             'team'       => ['title' => 'team', 'sort' => true],
         ];
+
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $table_fields = array_merge(
+                ['checkbox' => ['title' => '<input type="checkbox" class="select-all" title="Select all users">', 'sort' => false, 'search' => false, 'raw' => true]],
+                $table_fields
+            );
+        }
+
         if (in_array('ipaddress', $this->config->get('auth_methods'))) {
             $table_fields['ip_address'] = ['title' => 'autologin IP', 'sort' => true];
         }
@@ -83,6 +92,21 @@ class UserController extends BaseController
             /** @var User $u */
             $userdata    = [];
             $useractions = [];
+
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $canBeDeleted = $u->getUserid() !== $this->dj->getUser()->getUserid();
+                if ($canBeDeleted) {
+                    $userdata['checkbox'] = [
+                        'value' => sprintf(
+                            '<input type="checkbox" name="ids[]" value="%s" class="user-checkbox">',
+                            $u->getUserid()
+                        )
+                    ];
+                } else {
+                    $userdata['checkbox'] = ['value' => ''];
+                }
+            }
+
             // Get whatever fields we can from the user object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($u, $k)) {
@@ -385,5 +409,31 @@ class UserController extends BaseController
         $this->em->flush();
         $this->addFlash('success', 'Reset login status all ' . $count . ' users with the team role.');
         return $this->redirectToRoute('jury_users');
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/delete-multiple', name: 'jury_user_delete_multiple', methods: ['GET', 'POST'])]
+    public function deleteMultipleAction(Request $request): Response
+    {
+        $ids = $request->query->all('ids');
+        if (empty($ids)) {
+            throw new BadRequestHttpException('No IDs specified for deletion');
+        }
+
+        $users = $this->em->getRepository(User::class)->findBy(['userid' => $ids]);
+
+        $deletableUsers = [];
+        foreach ($users as $user) {
+            if ($user->getUserid() !== $this->dj->getUser()->getUserid()) {
+                $deletableUsers[] = $user;
+            }
+        }
+
+        if (empty($deletableUsers)) {
+            $this->addFlash('warning', 'No users could be deleted (you cannot delete your own account).');
+            return $this->redirectToRoute('jury_users');
+        }
+
+        return $this->deleteEntities($request, $deletableUsers, $this->generateUrl('jury_users'));
     }
 }
