@@ -36,7 +36,17 @@
                                     {% set numsamples = 0 %}
                                 {% endif %}
                                 <div class="card">
-                                    <div class="card-body">
+                                    <div class="card-body position-relative">
+                                    {% if problemStatuses[problem.probid] is defined %}
+                                        {% set status = problemStatuses[problem.probid] %}
+                                        <div class="position-absolute top-0 end-0 p-2">
+                                            {% if status.is_correct %}
+                                                <span class="badge text-bg-success"><i class="fas fa-check" style="font-size: 2em;"></i><br>{{ status.solvetime | scoreTime }}</span>
+                                            {% elseif status.submissions > 0 %}
+                                                <span class="badge text-bg-danger"><i class="fas fa-times" style="font-size: 2em;"></i><br>{{ status.submissions }} {% if status.submissions == 1 %}try{% else %}tries{% endif %}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
                                         <h2 class="card-title">
                                             {{ problem | problemBadge }}
                                         </h2>
