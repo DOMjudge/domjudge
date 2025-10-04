@@ -102,6 +102,8 @@ class TeamController extends BaseController
             'stats' => ['title' => 'stats', 'sort' => true,],
         ];
 
+        $this->addSelectAllCheckbox($table_fields, 'teams');
+
         $userDataPerTeam = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
             ->leftJoin('t.users', 'u')
@@ -115,6 +117,9 @@ class TeamController extends BaseController
         foreach ($teams as $t) {
             $teamdata    = [];
             $teamactions = [];
+
+            $this->addEntityCheckbox($teamdata, $t, $t->getTeamid(), 'team-checkbox', fn(Team $team) => !$team->isLocked());
+
             // Get whatever fields we can from the team object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($t, $k)) {
@@ -344,6 +349,20 @@ class TeamController extends BaseController
         }
 
         return $this->deleteEntities($request, [$team], $this->generateUrl('jury_teams'));
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/delete-multiple', name: 'jury_team_delete_multiple', methods: ['GET', 'POST'])]
+    public function deleteMultipleAction(Request $request): Response
+    {
+        return $this->deleteMultiple(
+            $request,
+            Team::class,
+            'teamid',
+            'jury_teams',
+            'No teams could be deleted (they might be in a locked contest).',
+            fn(Team $team) => !$team->isLocked()
+        );
     }
 
     #[IsGranted('ROLE_ADMIN')]

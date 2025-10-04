@@ -88,12 +88,7 @@ class ProblemController extends BaseController
             'type' => ['title' => 'type', 'sort' => true],
         ];
 
-        if ($this->isGranted('ROLE_ADMIN')) {
-            $table_fields = array_merge(
-                ['checkbox' => ['title' => '<input type="checkbox" class="select-all" title="Select all problems">', 'sort' => false, 'search' => false, 'raw' => true]],
-                $table_fields
-            );
-        }
+        $this->addSelectAllCheckbox($table_fields, 'problems');
 
         $contestCountData = $this->em->createQueryBuilder()
             ->from(ContestProblem::class, 'cp')
@@ -117,26 +112,7 @@ class ProblemController extends BaseController
             $problemdata    = [];
             $problemactions = [];
 
-            if ($this->isGranted('ROLE_ADMIN')) {
-                $problemIsLocked = false;
-                foreach ($p->getContestProblems() as $contestProblem) {
-                    if ($contestProblem->getContest()->isLocked()) {
-                        $problemIsLocked = true;
-                        break;
-                    }
-                }
-
-                if (!$problemIsLocked) {
-                    $problemdata['checkbox'] = [
-                        'value' => sprintf(
-                            '<input type="checkbox" name="ids[]" value="%s" class="problem-checkbox">',
-                            $p->getProbid()
-                        )
-                    ];
-                } else {
-                    $problemdata['checkbox'] = ['value' => ''];
-                }
-            }
+            $this->addEntityCheckbox($problemdata, $p, $p->getProbid(), 'problem-checkbox', fn(Problem $problem) => !$problem->isLocked());
 
             // Get whatever fields we can from the problem object itself.
             foreach ($table_fields as $k => $v) {
@@ -1032,33 +1008,14 @@ class ProblemController extends BaseController
     #[Route(path: '/delete-multiple', name: 'jury_problem_delete_multiple', methods: ['GET', 'POST'])]
     public function deleteMultipleAction(Request $request): Response
     {
-        $ids = $request->query->all('ids');
-        if (empty($ids)) {
-            throw new BadRequestHttpException('No IDs specified for deletion');
-        }
-
-        $problems = $this->em->getRepository(Problem::class)->findBy(['probid' => $ids]);
-
-        $deletableProblems = [];
-        foreach ($problems as $problem) {
-            $isLocked = false;
-            foreach ($problem->getContestProblems() as $contestProblem) {
-                if ($contestProblem->getContest()->isLocked()) {
-                    $isLocked = true;
-                    break;
-                }
-            }
-            if (!$isLocked) {
-                $deletableProblems[] = $problem;
-            }
-        }
-
-        if (empty($deletableProblems)) {
-            $this->addFlash('warning', 'No problems could be deleted (they might be locked).');
-            return $this->redirectToRoute('jury_problems');
-        }
-
-        return $this->deleteEntities($request, $deletableProblems, $this->generateUrl('jury_problems'));
+        return $this->deleteMultiple(
+            $request,
+            Problem::class,
+            'probid',
+            'jury_problems',
+            'No problems could be deleted (they might be locked).',
+            fn(Problem $problem) => !$problem->isLocked()
+        );
     }
 
     #[IsGranted('ROLE_ADMIN')]

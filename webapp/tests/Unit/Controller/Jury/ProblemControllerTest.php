@@ -6,6 +6,7 @@ use App\DataFixtures\Test\AddProblemAttachmentFixture;
 use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
+use App\Entity\ContestProblem;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -113,5 +114,85 @@ class ProblemControllerTest extends JuryControllerTestCase
             'Delete',
         ];
         self::assertTrue(array_intersect($titles, $unexpectedTitles) == []);
+    }
+
+    public function testMultiDeleteProblems(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        // Get a contest to associate problems with
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        self::assertNotNull($contest, 'Demo contest not found.');
+
+        // Create some problems to delete
+        $problemsData = [
+            ['name' => 'Problem 1 for multi-delete', 'externalid' => 'prob1md', 'shortname' => 'MDA'],
+            ['name' => 'Problem 2 for multi-delete', 'externalid' => 'prob2md', 'shortname' => 'MDB'],
+            ['name' => 'Problem 3 for multi-delete', 'externalid' => 'prob3md', 'shortname' => 'MDC'],
+        ];
+
+        $problemIds = [];
+        $createdProblems = [];
+
+        foreach ($problemsData as $index => $data) {
+            $problem = new Problem();
+            $problem->setName($data['name']);
+            $problem->setExternalid($data['externalid']);
+            $em->persist($problem);
+
+            $contestProblem = new ContestProblem();
+            $contestProblem->setProblem($problem);
+            $contestProblem->setContest($contest);
+            $contestProblem->setShortname($data['shortname']);
+            $em->persist($contestProblem);
+
+            $createdProblems[] = $problem;
+        }
+
+        $em->flush();
+
+        // Get the IDs of the newly created problems
+        foreach ($createdProblems as $problem) {
+            $problemIds[] = $problem->getProbid();
+        }
+
+        $problem1Id = $problemIds[0];
+        $problem2Id = $problemIds[1];
+        $problem3Id = $problemIds[2];
+
+        // Verify problems exist before deletion
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        foreach ([1, 2, 3] as $i) {
+            self::assertSelectorExists('body:contains("Problem ' . $i . ' for multi-delete")');
+        }
+
+        // Simulate multi-delete POST request
+        $this->client->request(
+            'POST',
+            static::getContainer()->get('router')->generate('jury_problem_delete_multiple', ['ids' => [$problem1Id, $problem2Id]]),
+            [
+                'submit' => 'delete' // Assuming a submit button with name 'submit' and value 'delete'
+            ]
+        );
+
+        $this->checkStatusAndFollowRedirect();
+
+        // Verify problems are deleted
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        self::assertSelectorNotExists('body:contains("Problem 1 for multi-delete")');
+        self::assertSelectorNotExists('body:contains("Problem 2 for multi-delete")');
+        // Problem 3 should still exist
+        self::assertSelectorExists('body:contains("Problem 3 for multi-delete")');
+
+        // Verify problem 3 can still be deleted individually
+        $this->verifyPageResponse('GET', static::$baseUrl . '/' . $problem3Id . static::$delete, 200);
+        $this->client->submitForm('Delete', []);
+        $this->checkStatusAndFollowRedirect();
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
     }
 }

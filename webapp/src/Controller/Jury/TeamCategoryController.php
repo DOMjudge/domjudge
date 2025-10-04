@@ -20,6 +20,7 @@ use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -65,6 +66,8 @@ class TeamCategoryController extends BaseController
             'allow_self_registration' => ['title' => 'self-registration', 'sort' => true],
         ];
 
+        $this->addSelectAllCheckbox($table_fields, 'categories');
+
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
         $team_categories_table = [];
         foreach ($teamCategories as $teamCategoryData) {
@@ -72,6 +75,9 @@ class TeamCategoryController extends BaseController
             $teamCategory    = $teamCategoryData[0];
             $categorydata    = [];
             $categoryactions = [];
+
+            $this->addEntityCheckbox($categorydata, $teamCategory, $teamCategory->getCategoryid(), 'category-checkbox');
+
             // Get whatever fields we can from the category object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($teamCategory, $k)) {
@@ -228,6 +234,19 @@ class TeamCategoryController extends BaseController
         return $this->render('jury/team_category_add.html.twig', [
             'form' => $form,
         ]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/delete-multiple', name: 'jury_team_category_delete_multiple', methods: ['GET', 'POST'])]
+    public function deleteMultipleAction(Request $request): Response
+    {
+        return $this->deleteMultiple(
+            $request,
+            TeamCategory::class,
+            'categoryid',
+            'jury_team_categories',
+            'No categories could be deleted.'
+        );
     }
 
     #[Route(path: '/{categoryId<\d+>}/request-remaining', name: 'jury_team_category_request_remaining')]

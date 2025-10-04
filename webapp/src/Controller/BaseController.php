@@ -455,6 +455,39 @@ abstract class BaseController extends AbstractController
     }
 
     /**
+     * @template T of object
+     * @param class-string<T> $entityClass
+     */
+    protected function deleteMultiple(
+        Request $request,
+        string $entityClass,
+        string $idProperty,
+        string $redirectRoute,
+        string $warningMessage,
+        ?callable $filter = null
+    ): Response {
+        $ids = $request->query->all('ids');
+        if (empty($ids)) {
+            throw new BadRequestHttpException('No IDs specified for deletion');
+        }
+
+        /** @var \Doctrine\ORM\EntityRepository<T> $repository */
+        $repository = $this->em->getRepository($entityClass);
+        $entities = $repository->findBy([$idProperty => $ids]);
+
+        if ($filter) {
+            $entities = array_filter($entities, $filter);
+        }
+
+        if (empty($entities)) {
+            $this->addFlash('warning', $warningMessage);
+            return $this->redirectToRoute($redirectRoute);
+        }
+
+        return $this->deleteEntities($request, $entities, $this->generateUrl($redirectRoute));
+    }
+
+    /**
      * @param array<string, array<array{'target': string, 'targetColumn': string, 'type': string}>> $relations
      * @return string[]
      */
@@ -484,6 +517,39 @@ abstract class BaseController extends AbstractController
         }
 
         return $result;
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $table_fields
+     */
+    protected function addSelectAllCheckbox(array &$table_fields, string $title): void
+    {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $table_fields = array_merge(
+                ['checkbox' => ['title' => sprintf('<input type="checkbox" class="select-all" title="Select all %s">', $title), 'sort' => false, 'search' => false, 'raw' => true]],
+                $table_fields
+            );
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    protected function addEntityCheckbox(array &$data, object $entity, mixed $identifierValue, string $checkboxClass, ?callable $condition = null): void
+    {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            if ($condition !== null && !$condition($entity)) {
+                $data['checkbox'] = ['value' => ''];
+                return;
+            }
+            $data['checkbox'] = [
+                'value' => sprintf(
+                    '<input type="checkbox" name="ids[]" value="%s" class="%s">',
+                    $identifierValue,
+                    $checkboxClass
+                )
+            ];
+        }
     }
 
     /**

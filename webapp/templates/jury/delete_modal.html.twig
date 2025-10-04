@@ -2,7 +2,7 @@
 
 {% block title %}
     {% if count > 1 %}
-        Delete {{ count }} {{ type }}s
+        Delete {{ count }} {% if type|slice(-1) == 'y' %}{{ type|slice(0, -1) }}ies{% else %}{{ type }}s{% endif %}
     {% else %}
         Delete {{ type }} {{ primaryKey }} - "{{ description }}"
     {% endif %}
@@ -16,7 +16,7 @@
         </div>
     {% else %}
         {% if count > 1 %}
-            <p>You're about to delete the following {{ count }} {{ type }}s:</p>
+            <p>You're about to delete the following {{ count }} {% if type|slice(-1) == 'y' %}{{ type|slice(0, -1) }}ies{% else %}{{ type }}s{% endif %}:</p>
             <ul>
                 {% for desc in description|split(',') %}
                     <li>{{ desc|trim }}</li>

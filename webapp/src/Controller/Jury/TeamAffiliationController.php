@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -59,6 +60,8 @@ class TeamAffiliationController extends BaseController
             'name' => ['title' => 'name', 'sort' => true, 'default_sort' => true],
         ];
 
+        $this->addSelectAllCheckbox($table_fields, 'affiliations');
+
         if ($showFlags) {
             $table_fields['country'] = ['title' => 'country', 'sort' => true];
             $table_fields['affiliation_logo'] = ['title' => 'logo', 'sort' => false];
@@ -73,6 +76,9 @@ class TeamAffiliationController extends BaseController
             $teamAffiliation    = $teamAffiliationData[0];
             $affiliationdata    = [];
             $affiliationactions = [];
+
+            $this->addEntityCheckbox($affiliationdata, $teamAffiliation, $teamAffiliation->getAffilid(), 'affiliation-checkbox');
+
             // Get whatever fields we can from the affiliation object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($teamAffiliation, $k)) {
@@ -199,6 +205,19 @@ class TeamAffiliationController extends BaseController
         }
 
         return $this->deleteEntities($request, [$teamAffiliation], $this->generateUrl('jury_team_affiliations'));
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/delete-multiple', name: 'jury_team_affiliation_delete_multiple', methods: ['GET', 'POST'])]
+    public function deleteMultipleAction(Request $request): Response
+    {
+        return $this->deleteMultiple(
+            $request,
+            TeamAffiliation::class,
+            'affilid',
+            'jury_team_affiliations',
+            'No affiliations could be deleted.'
+        );
     }
 
     #[IsGranted('ROLE_ADMIN')]

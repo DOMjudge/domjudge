@@ -682,4 +682,14 @@ class Problem extends BaseApiEntity implements
         $this->languages->removeElement($language);
         return $this;
     }
+
+    public function isLocked(): bool
+    {
+        foreach ($this->getContestProblems() as $contestProblem) {
+            if ($contestProblem->getContest()->isLocked()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

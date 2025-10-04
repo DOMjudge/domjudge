@@ -27,9 +27,7 @@
 
     {% if is_granted('ROLE_ADMIN') %}
         <p class="mt-4">
-            {% if problems_current is not empty or problems_other is not empty %}
-                <button type="button" class="btn btn-danger me-2" id="delete-selected-button" disabled><i class="fas fa-trash-alt"></i> Delete selected</button>
-            {% endif %}
+            {% include 'jury/partials/_delete_button.html.twig' with {'entities': problems_current} %}
             {{ button(path('jury_problem_add'), 'Add new problem', 'primary', 'plus') }}
             {{ button(path('jury_import_export', {'_fragment':'problemarchive'}), 'Import problem', 'primary', 'upload') }}
         </p>
@@ -40,49 +38,13 @@
 
 {% block extrafooter %}
     {{ parent() }}
+    <script src="{{ asset('js/multi-delete.js') }}"></script>
     <script>
         $(function() {
-            var $deleteButton = $('#delete-selected-button');
-
-            function toggleDeleteButton() {
-                var checkedCount = $('.problem-checkbox:checked').length;
-                $deleteButton.prop('disabled', checkedCount === 0);
-            }
-
-            // Use delegated events to handle clicks on checkboxes, as DataTables might redraw the table.
-            $(document).on('change', '.problem-checkbox', function() {
-                var table = $(this).closest('table');
-                var $tableCheckboxes = table.find('.problem-checkbox');
-                var $selectAllInTable = table.find('.select-all');
-                $selectAllInTable.prop('checked', $tableCheckboxes.length > 0 && $tableCheckboxes.length === $tableCheckboxes.filter(':checked').length);
-                toggleDeleteButton();
-            });
-
-            $(document).on('change', '.select-all', function() {
-                var table = $(this).closest('table');
-                table.find('.problem-checkbox').prop('checked', $(this).is(':checked'));
-                toggleDeleteButton();
-            });
-
-            // Initial state on page load.
-            toggleDeleteButton();
-
-            $deleteButton.on('click', function () {
-                var ids = $('.problem-checkbox:checked').map(function () {
-                    return 'ids[]=' + $(this).val();
-                }).get();
-                if (ids.length === 0) return;
-
-                var url = "{{ path('jury_problem_delete_multiple') }}" + '?' + ids.join('&');
-
-                // Create a temporary link and click it to trigger the existing AJAX modal logic.
-                var $tempLink = $('<a>', {
-                    'href': url,
-                    'data-ajax-modal': ''
-                }).hide().appendTo('body');
-
-                $tempLink.trigger('click');
-                $tempLink.remove();
+            initializeMultiDelete({
+                buttonSelector: '#delete-selected-button',
+                checkboxClass: 'problem-checkbox',
+                deleteUrl: '{{ path('jury_problem_delete_multiple') }}'
             });
         });
     </script>
