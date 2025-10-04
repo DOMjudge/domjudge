@@ -102,6 +102,13 @@ class TeamController extends BaseController
             'stats' => ['title' => 'stats', 'sort' => true,],
         ];
 
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $table_fields = array_merge(
+                ['checkbox' => ['title' => '<input type="checkbox" class="select-all" title="Select all teams">', 'sort' => false, 'search' => false, 'raw' => true]],
+                $table_fields
+            );
+        }
+
         $userDataPerTeam = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
             ->leftJoin('t.users', 'u')
@@ -115,6 +122,36 @@ class TeamController extends BaseController
         foreach ($teams as $t) {
             $teamdata    = [];
             $teamactions = [];
+
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $isLocked = false;
+                foreach ($t->getContests() as $contest) {
+                    if ($contest->isLocked()) {
+                        $isLocked = true;
+                        break;
+                    }
+                }
+                if (!$isLocked && $t->getCategory()) {
+                    foreach ($t->getCategory()->getContests() as $contest) {
+                        if ($contest->isLocked()) {
+                            $isLocked = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!$isLocked) {
+                    $teamdata['checkbox'] = [
+                        'value' => sprintf(
+                            '<input type="checkbox" name="ids[]" value="%s" class="team-checkbox">',
+                            $t->getTeamid()
+                        )
+                    ];
+                } else {
+                    $teamdata['checkbox'] = ['value' => ''];
+                }
+            }
+
             // Get whatever fields we can from the team object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($t, $k)) {
@@ -344,6 +381,47 @@ class TeamController extends BaseController
         }
 
         return $this->deleteEntities($request, [$team], $this->generateUrl('jury_teams'));
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/delete-multiple', name: 'jury_team_delete_multiple', methods: ['GET', 'POST'])]
+    public function deleteMultipleAction(Request $request): Response
+    {
+        $ids = $request->query->all('ids');
+        if (empty($ids)) {
+            throw new BadRequestHttpException('No IDs specified for deletion');
+        }
+
+        $teams = $this->em->getRepository(Team::class)->findBy(['teamid' => $ids]);
+
+        $deletableTeams = [];
+        foreach ($teams as $team) {
+            $isLocked = false;
+            foreach ($team->getContests() as $contest) {
+                if ($contest->isLocked()) {
+                    $isLocked = true;
+                    break;
+                }
+            }
+            if (!$isLocked && $team->getCategory()) {
+                foreach ($team->getCategory()->getContests() as $contest) {
+                    if ($contest->isLocked()) {
+                        $isLocked = true;
+                        break;
+                    }
+                }
+            }
+            if (!$isLocked) {
+                $deletableTeams[] = $team;
+            }
+        }
+
+        if (empty($deletableTeams)) {
+            $this->addFlash('warning', 'No teams could be deleted (they might be in a locked contest).');
+            return $this->redirectToRoute('jury_teams');
+        }
+
+        return $this->deleteEntities($request, $deletableTeams, $this->generateUrl('jury_teams'));
     }
 
     #[IsGranted('ROLE_ADMIN')]
