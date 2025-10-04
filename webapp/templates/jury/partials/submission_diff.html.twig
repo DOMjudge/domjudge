@@ -24,16 +24,16 @@
                 <div class="btn-group">
                     <a href="#" role="button" class="btn btn-secondary btn-sm pe-none" aria-disabled="true"><i class="fas fa-code-branch"></i></a>
                     <select class="diff-select btn btn-secondary btn-sm form-select-sm text-start" aria-label="Submission to diff against">
-                        <option value="">No diff</option>
+                        <option value="" data-tag="no-diff">No diff</option>
                         {%- for other in otherSubmissions %}
-                        <option value="{{ other.submitid }}">
-                            {%- if originalSubmission and originalSubmission.submitid == other.submitid %}
-                            s{{ other.submitid }} (original)
-                            {%- elseif oldSubmission and oldSubmission.submitid == other.submitid %}
-                            s{{ other.submitid }} (previous)
-                            {%- else %}
-                            s{{ other.submitid }}
-                            {%- endif %}
+                        {%- set tag = "" %}
+                        {%- if originalSubmission and originalSubmission.submitid == other.submitid %}
+                            {%- set tag = "original" %}
+                        {%- elseif oldSubmission and oldSubmission.submitid == other.submitid %}
+                            {%- set tag = "previous" %}
+                        {%- endif %}
+                        <option value="{{ other.submitid }}" {%- if tag %} data-tag="{{ tag }}" {%- endif %}>
+                            s{{ other.submitid }} {%- if tag %} ({{ tag }}) {%- endif %}
                         </option>
                         {%- endfor %}
                     </select>
