@@ -252,14 +252,13 @@ class TeamCategoryController extends BaseController
     #[Route(path: '/delete-multiple', name: 'jury_team_category_delete_multiple', methods: ['GET', 'POST'])]
     public function deleteMultipleAction(Request $request): Response
     {
-        $ids = $request->query->all('ids');
-        if (empty($ids)) {
-            throw new BadRequestHttpException('No IDs specified for deletion');
-        }
-
-        $categories = $this->em->getRepository(TeamCategory::class)->findBy(['categoryid' => $ids]);
-
-        return $this->deleteEntities($request, $categories, $this->generateUrl('jury_team_categories'));
+        return $this->deleteMultiple(
+            $request,
+            TeamCategory::class,
+            'categoryid',
+            'jury_team_categories',
+            'No categories could be deleted.'
+        );
     }
 
     #[Route(path: '/{categoryId<\d+>}/request-remaining', name: 'jury_team_category_request_remaining')]

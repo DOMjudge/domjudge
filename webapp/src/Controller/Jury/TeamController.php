@@ -387,41 +387,14 @@ class TeamController extends BaseController
     #[Route(path: '/delete-multiple', name: 'jury_team_delete_multiple', methods: ['GET', 'POST'])]
     public function deleteMultipleAction(Request $request): Response
     {
-        $ids = $request->query->all('ids');
-        if (empty($ids)) {
-            throw new BadRequestHttpException('No IDs specified for deletion');
-        }
-
-        $teams = $this->em->getRepository(Team::class)->findBy(['teamid' => $ids]);
-
-        $deletableTeams = [];
-        foreach ($teams as $team) {
-            $isLocked = false;
-            foreach ($team->getContests() as $contest) {
-                if ($contest->isLocked()) {
-                    $isLocked = true;
-                    break;
-                }
-            }
-            if (!$isLocked && $team->getCategory()) {
-                foreach ($team->getCategory()->getContests() as $contest) {
-                    if ($contest->isLocked()) {
-                        $isLocked = true;
-                        break;
-                    }
-                }
-            }
-            if (!$isLocked) {
-                $deletableTeams[] = $team;
-            }
-        }
-
-        if (empty($deletableTeams)) {
-            $this->addFlash('warning', 'No teams could be deleted (they might be in a locked contest).');
-            return $this->redirectToRoute('jury_teams');
-        }
-
-        return $this->deleteEntities($request, $deletableTeams, $this->generateUrl('jury_teams'));
+        return $this->deleteMultiple(
+            $request,
+            Team::class,
+            'teamid',
+            'jury_teams',
+            'No teams could be deleted (they might be in a locked contest).',
+            fn(Team $team) => !$team->isLocked()
+        );
     }
 
     #[IsGranted('ROLE_ADMIN')]

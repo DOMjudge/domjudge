@@ -1032,33 +1032,14 @@ class ProblemController extends BaseController
     #[Route(path: '/delete-multiple', name: 'jury_problem_delete_multiple', methods: ['GET', 'POST'])]
     public function deleteMultipleAction(Request $request): Response
     {
-        $ids = $request->query->all('ids');
-        if (empty($ids)) {
-            throw new BadRequestHttpException('No IDs specified for deletion');
-        }
-
-        $problems = $this->em->getRepository(Problem::class)->findBy(['probid' => $ids]);
-
-        $deletableProblems = [];
-        foreach ($problems as $problem) {
-            $isLocked = false;
-            foreach ($problem->getContestProblems() as $contestProblem) {
-                if ($contestProblem->getContest()->isLocked()) {
-                    $isLocked = true;
-                    break;
-                }
-            }
-            if (!$isLocked) {
-                $deletableProblems[] = $problem;
-            }
-        }
-
-        if (empty($deletableProblems)) {
-            $this->addFlash('warning', 'No problems could be deleted (they might be locked).');
-            return $this->redirectToRoute('jury_problems');
-        }
-
-        return $this->deleteEntities($request, $deletableProblems, $this->generateUrl('jury_problems'));
+        return $this->deleteMultiple(
+            $request,
+            Problem::class,
+            'probid',
+            'jury_problems',
+            'No problems could be deleted (they might be locked).',
+            fn(Problem $problem) => !$problem->isLocked()
+        );
     }
 
     #[IsGranted('ROLE_ADMIN')]
