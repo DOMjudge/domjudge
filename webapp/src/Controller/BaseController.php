@@ -239,6 +239,9 @@ abstract class BaseController extends AbstractController
         }
 
         // Now actually delete the entity.
+        // This is a great use of a transaction! Order needs to be guaranteed. Normally deletion
+        // succeeds, in cases where it does not, all work executed by the deletion must be restored
+        // to bring the database in an expected and consistent state.
         $this->em->wrapInTransaction(function () use ($entity) {
             if ($entity instanceof Problem) {
                 // Deleting a problem is a special case:
