@@ -60,12 +60,7 @@ class TeamAffiliationController extends BaseController
             'name' => ['title' => 'name', 'sort' => true, 'default_sort' => true],
         ];
 
-        if ($this->isGranted('ROLE_ADMIN')) {
-            $table_fields = array_merge(
-                ['checkbox' => ['title' => '<input type="checkbox" class="select-all" title="Select all affiliations">', 'sort' => false, 'search' => false, 'raw' => true]],
-                $table_fields
-            );
-        }
+        $this->addSelectAllCheckbox($table_fields, 'affiliations');
 
         if ($showFlags) {
             $table_fields['country'] = ['title' => 'country', 'sort' => true];
@@ -82,14 +77,7 @@ class TeamAffiliationController extends BaseController
             $affiliationdata    = [];
             $affiliationactions = [];
 
-            if ($this->isGranted('ROLE_ADMIN')) {
-                $affiliationdata['checkbox'] = [
-                    'value' => sprintf(
-                        '<input type="checkbox" name="ids[]" value="%s" class="affiliation-checkbox">',
-                        $teamAffiliation->getAffilid()
-                    )
-                ];
-            }
+            $this->addEntityCheckbox($affiliationdata, $teamAffiliation, $teamAffiliation->getAffilid(), 'affiliation-checkbox');
 
             // Get whatever fields we can from the affiliation object itself.
             foreach ($table_fields as $k => $v) {

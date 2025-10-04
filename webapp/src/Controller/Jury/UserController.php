@@ -72,12 +72,7 @@ class UserController extends BaseController
             'team'       => ['title' => 'team', 'sort' => true],
         ];
 
-        if ($this->isGranted('ROLE_ADMIN')) {
-            $table_fields = array_merge(
-                ['checkbox' => ['title' => '<input type="checkbox" class="select-all" title="Select all users">', 'sort' => false, 'search' => false, 'raw' => true]],
-                $table_fields
-            );
-        }
+        $this->addSelectAllCheckbox($table_fields, 'users');
 
         if (in_array('ipaddress', $this->config->get('auth_methods'))) {
             $table_fields['ip_address'] = ['title' => 'autologin IP', 'sort' => true];
@@ -93,19 +88,7 @@ class UserController extends BaseController
             $userdata    = [];
             $useractions = [];
 
-            if ($this->isGranted('ROLE_ADMIN')) {
-                $canBeDeleted = $u->getUserid() !== $this->dj->getUser()->getUserid();
-                if ($canBeDeleted) {
-                    $userdata['checkbox'] = [
-                        'value' => sprintf(
-                            '<input type="checkbox" name="ids[]" value="%s" class="user-checkbox">',
-                            $u->getUserid()
-                        )
-                    ];
-                } else {
-                    $userdata['checkbox'] = ['value' => ''];
-                }
-            }
+            $this->addEntityCheckbox($userdata, $u, $u->getUserid(), 'user-checkbox', fn(User $user) => $user->getUserid() !== $this->dj->getUser()->getUserid());
 
             // Get whatever fields we can from the user object itself.
             foreach ($table_fields as $k => $v) {
