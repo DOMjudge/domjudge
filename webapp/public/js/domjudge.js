@@ -138,6 +138,20 @@ function setDiffMode(value)
     localStorage.setItem('domjudge_editor_diff_mode', value);
 }
 
+function getDiffTag()
+{
+    let diffTag = localStorage.getItem('domjudge_editor_diff_tag');
+    if (diffTag === undefined) {
+        return 'no-diff';
+    }
+    return diffTag;
+}
+
+function setDiffTag(value)
+{
+    localStorage.setItem('domjudge_editor_diff_tag', value);
+}
+
 // Send a notification if notifications have been enabled.
 // The options argument is passed to the Notification constructor,
 // except that the following tags (if found) are interpreted and
@@ -1295,10 +1309,23 @@ const editors = [];
 function initDiffEditor(editorId) {
     const wrapper = $(`#${editorId}-wrapper`);
 
-    // TODO: store and restore tag preference in local storage.
-    const initialSelect = "";
+    const initialTag = getDiffTag();
     const select = wrapper.find(".diff-select");
-    select[0].selectedIndex = 0;
+    for (let i = 0; i < select[0].options.length; i++) {
+        if (select[0].options[i].dataset.tag == initialTag) {
+            select[0].selectedIndex = i;
+            break;
+        }
+    }
+    // Fall back to other tagged diff if preferred tag is not available for this submission.
+    if (initialTag !== "no-diff" && select[0].selectedIndex === 0) {
+        for (let i = 1; i < select[0].options.length; i++) {
+            if (select[0].options[i].dataset.tag) {
+                select[0].selectedIndex = i;
+                break;
+            }
+        }
+    }
 
     const initialDiffMode = getDiffMode();
     const radios = wrapper.find(`.diff-mode > input[type='radio']`);
@@ -1368,9 +1395,15 @@ function initDiffEditor(editorId) {
         radios.each((_, radio) => {
             radio.disabled = noDiff;
         });
+
+        const selected = select[0].options[select[0].selectedIndex];
+        if (selected && selected.dataset.tag) {
+            setDiffTag(selected.dataset.tag);
+        }
+
         // TODO: add tab panes for deleted source files.
     };
-    updateSelect("", true);
+    updateSelect(select[0].value, select[0].value === "");
     editor.onDiffSelectChange(updateSelect);
 }
 
@@ -1389,6 +1422,13 @@ function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
         readOnly: true,
         theme: getCurrentEditorTheme(),
     });
+
+    const updateMode = (diffMode) => {
+        diffEditor.updateOptions({
+            renderSideBySide: diffMode === 'side-by-side',
+        });
+    };
+    editors[editorId].onDiffModeChange(updateMode);
 
     const updateSelect = (submitId, noDiff) => {
         if (!noDiff) {
@@ -1430,7 +1470,7 @@ function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
         })
     };
     editors[editorId].onDiffSelectChange(updateSelect);
-    updateSelect("", true);
+    updateSelect(editors[editorId].getDiffSelection(), editors[editorId].getDiffSelection() === "");
 
     const updateIcon = () => {
         const noDiff = editors[editorId].getDiffSelection() === "";
@@ -1449,11 +1489,4 @@ function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
         }
     }
     diffEditor.onDidUpdateDiff(updateIcon);
-
-    const updateMode = (diffMode) => {
-        diffEditor.updateOptions({
-            renderSideBySide: diffMode === 'side-by-side',
-        });
-    };
-    editors[editorId].onDiffModeChange(updateMode);
 }
