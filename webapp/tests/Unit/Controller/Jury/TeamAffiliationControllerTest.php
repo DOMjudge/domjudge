@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\SampleAffiliationsFixture;
 use App\Entity\TeamAffiliation;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Service\ConfigurationService;
 
 class TeamAffiliationControllerTest extends JuryControllerTestCase
@@ -48,6 +49,76 @@ class TeamAffiliationControllerTest extends JuryControllerTestCase
                                                           'Only letters, numbers, dashes and underscores are allowed.' => [['icpcid' => '()viol'],
                                                                                                                            ['icpcid' => '|viol']],
                                                           'Only letters, numbers, dashes, underscores and dots are allowed.' => [['externalid' => '()']]];
+
+    public function testMultiDeleteTeamAffiliations(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        // Create some team affiliations to delete
+        $affiliationsData = [
+            ['name' => 'Affiliation 1 for multi-delete', 'shortname' => 'affil1md'],
+            ['name' => 'Affiliation 2 for multi-delete', 'shortname' => 'affil2md'],
+            ['name' => 'Affiliation 3 for multi-delete', 'shortname' => 'affil3md'],
+        ];
+
+        $affiliationIds = [];
+        $createdAffiliations = [];
+
+        foreach ($affiliationsData as $data) {
+            $affiliation = new TeamAffiliation();
+            $affiliation
+                ->setName($data['name'])
+                ->setShortname($data['shortname']);
+            $em->persist($affiliation);
+            $createdAffiliations[] = $affiliation;
+        }
+
+        $em->flush();
+
+        // Get the IDs of the newly created affiliations
+        foreach ($createdAffiliations as $affiliation) {
+            $affiliationIds[] = $affiliation->getAffilid();
+        }
+
+        $affiliation1Id = $affiliationIds[0];
+        $affiliation2Id = $affiliationIds[1];
+        $affiliation3Id = $affiliationIds[2];
+
+        // Verify affiliations exist before deletion
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        foreach ([1, 2, 3] as $i) {
+            self::assertSelectorExists(sprintf('body:contains("Affiliation %d for multi-delete")', $i));
+        }
+
+        // Simulate multi-delete POST request
+        $this->client->request(
+            'POST',
+            static::getContainer()->get('router')->generate('jury_team_affiliation_delete_multiple', ['ids' => [$affiliation1Id, $affiliation2Id]]),
+            [
+                'submit' => 'delete'
+            ]
+        );
+
+        $this->checkStatusAndFollowRedirect();
+
+        // Verify affiliations are deleted
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        self::assertSelectorNotExists('body:contains("Affiliation 1 for multi-delete")');
+        self::assertSelectorNotExists('body:contains("Affiliation 2 for multi-delete")');
+        // Affiliation 3 should still exist
+        self::assertSelectorExists('body:contains("Affiliation 3 for multi-delete")');
+
+        // Verify affiliation 3 can still be deleted individually
+        $this->verifyPageResponse('GET', static::$baseUrl . '/' . $affiliation3Id . static::$delete, 200);
+        $this->client->submitForm('Delete', []);
+        $this->checkStatusAndFollowRedirect();
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+    }
 
     protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {

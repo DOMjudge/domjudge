@@ -94,6 +94,74 @@ class TeamControllerTest extends JuryControllerTestCase
                                                                                                                            ['icpcid' => '&viol', 'name' => 'icpcid violation-2']],
                                                           'This value should not be blank.' => [['name' => '', 'displayName' => 'Teams should have a name']]];
 
+    public function testMultiDeleteTeams(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        // Create some teams to delete
+        $teamsData = [
+            ['name' => 'Team 1 for multi-delete'],
+            ['name' => 'Team 2 for multi-delete'],
+            ['name' => 'Team 3 for multi-delete'],
+        ];
+
+        $teamIds = [];
+        $createdTeams = [];
+
+        foreach ($teamsData as $data) {
+            $team = new Team();
+            $team->setName($data['name']);
+            $em->persist($team);
+            $createdTeams[] = $team;
+        }
+
+        $em->flush();
+
+        // Get the IDs of the newly created teams
+        foreach ($createdTeams as $team) {
+            $teamIds[] = $team->getTeamid();
+        }
+
+        $team1Id = $teamIds[0];
+        $team2Id = $teamIds[1];
+        $team3Id = $teamIds[2];
+
+        // Verify teams exist before deletion
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        foreach ([1, 2, 3] as $i) {
+            self::assertSelectorExists(sprintf('body:contains("Team %d for multi-delete")', $i));
+        }
+
+        // Simulate multi-delete POST request
+        $this->client->request(
+            'POST',
+            static::getContainer()->get('router')->generate('jury_team_delete_multiple', ['ids' => [$team1Id, $team2Id]]),
+            [
+                'submit' => 'delete'
+            ]
+        );
+
+        $this->checkStatusAndFollowRedirect();
+
+        // Verify teams are deleted
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        self::assertSelectorNotExists('body:contains("Team 1 for multi-delete")');
+        self::assertSelectorNotExists('body:contains("Team 2 for multi-delete")');
+        // Team 3 should still exist
+        self::assertSelectorExists('body:contains("Team 3 for multi-delete")');
+
+        // Verify team 3 can still be deleted individually
+        $this->verifyPageResponse('GET', static::$baseUrl . '/' . $team3Id . static::$delete, 200);
+        $this->client->submitForm('Delete', []);
+        $this->checkStatusAndFollowRedirect();
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+    }
+
     /**
      * Test that adding a team without a user and then editing it to add a user works.
      */
