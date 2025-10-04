@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.texOldstyleBold = void 0;
+exports.texOldstyleBold = {
+    0x30: [.461, .017, .575],
+    0x31: [.461, 0, .575],
+    0x32: [.461, 0, .575],
+    0x33: [.461, .211, .575],
+    0x34: [.469, .194, .575],
+    0x35: [.461, .211, .575],
+    0x36: [.661, .017, .575],
+    0x37: [.476, .211, .575],
+    0x38: [.661, .017, .575],
+    0x39: [.461, .211, .575]
+};
+//# sourceMappingURL=tex-oldstyle-bold.js.map

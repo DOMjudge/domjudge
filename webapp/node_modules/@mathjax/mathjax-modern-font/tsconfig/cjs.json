@@ -1,0 +1,8 @@
+{
+  "extends": "./common.json",
+  "compilerOptions": {
+    "target": "ES5",
+    "outDir": "../cjs",
+    "module": "CommonJS"
+  }
+}

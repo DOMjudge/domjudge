@@ -1,0 +1,10 @@
+{
+  "extends": "./mjs.json",
+  "compilerOptions": {
+    "sourceMap": false,
+    "declaration": false,
+    "outDir": "../def"
+  },
+  "include": ["../def/*.ts"],
+  "exclude": []
+}
