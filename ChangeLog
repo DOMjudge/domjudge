@@ -1,6 +1,6 @@
 DOMjudge Programming Contest Judging System
 
-Version 9.0.0DEV
+Version 9.0.0 - 5 October 2025
 ---------------------------
  - API and integration:
    - Get rid of 'internal' data source mode, always requiring - but auto
