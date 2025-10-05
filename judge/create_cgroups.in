@@ -25,8 +25,7 @@ if [ "$fs_type" = "cgroup2" ]; then
     major=$(echo "$kernel_version" | cut -d '.' -f 1)
     minor=$(echo "$kernel_version" | cut -d '.' -f 2)
     if [ "$major" -lt 5 ] || { [ "$major" -eq 5 ] && [ "$minor" -lt 19 ]; }; then
-        cgroup_error_and_usage "Error: kernel ($kernel_version) is too old to record peak RAM usage with cgroup V2.
-You can try using cgroup V1 by adding systemd.unified_cgroup_hierarchy=0 to the kernel params."
+        cgroup_error_and_usage "Error: kernel ($kernel_version) is too old to record peak RAM usage with cgroup V2."
     fi
     if ! echo "+memory" >> /sys/fs/cgroup/cgroup.subtree_control; then
         cgroup_error_and_usage "Error: Cannot add +memory to cgroup.subtree_control; check kernel params."
@@ -37,26 +36,6 @@ You can try using cgroup V1 by adding systemd.unified_cgroup_hierarchy=0 to the 
     if grep -q ":/$" /proc/self/cgroup; then
         cgroup_error_and_usage "Error: Cgroups not configured properly, missing cgroup hierarchy prefix under /proc/self/cgroup. If running in a container, make sure to set cgroupns=host."
     fi
-
-else # Trying cgroup V1:
-
-    for i in cpuset memory; do
-        mkdir -p $CGROUPBASE/$i
-        if [ ! -d $CGROUPBASE/$i/ ]; then
-            if ! mount -t cgroup -o$i $i $CGROUPBASE/$i/; then
-                cgroup_error_and_usage "Error: Can not mount $i cgroup. Probably cgroup support is missing from running kernel."
-            fi
-        fi
-        mkdir -p $CGROUPBASE/$i/domjudge
-    done
-
-    if [ ! -f $CGROUPBASE/memory/memory.limit_in_bytes ] || [ ! -f $CGROUPBASE/memory/memory.memsw.limit_in_bytes ]; then
-        cgroup_error_and_usage "Error: cgroup support missing memory features in running kernel."
-    fi
-
-    chown -R $JUDGEHOSTUSER $CGROUPBASE/*/domjudge
-
-    cat $CGROUPBASE/cpuset/cpuset.cpus > $CGROUPBASE/cpuset/domjudge/cpuset.cpus
-    cat $CGROUPBASE/cpuset/cpuset.mems > $CGROUPBASE/cpuset/domjudge/cpuset.mems
-
-fi # cgroup V1
+else
+    cgroup_error_and_usage "Error: Cgroups not configured properly, did not find cgroup v2 in /sys/fs/cgroup but '$fs_type'."
+fi

@@ -145,8 +145,6 @@ int show_version;
 int in_error_handling = 0;
 pid_t runpipe_pid = -1;
 
-bool is_cgroup_v2 = false;
-
 double walltimelimit[2], cputimelimit[2]; /* in seconds, soft and hard limits */
 int walllimit_reached, cpulimit_reached; /* 1=soft, 2=hard, 3=both limits reached */
 rlim_t memsize;
@@ -514,11 +512,7 @@ std::set<unsigned> read_cpuset(const char *path)
 void check_remaining_procs()
 {
 	char path[1024];
-	if (is_cgroup_v2) {
-		snprintf(path, 1023, "/sys/fs/cgroup/%s/cgroup.procs", cgroupname);
-	} else {
-		snprintf(path, 1023, "/sys/fs/cgroup/cpuacct/%s/cgroup.procs", cgroupname);
-	}
+	snprintf(path, 1023, "/sys/fs/cgroup/%s/cgroup.procs", cgroupname);
 
 	FILE *file = fopen(path, "r");
 	if (file == nullptr) {
@@ -532,33 +526,8 @@ void check_remaining_procs()
 	if (fclose(file) != 0) error(errno, "closing file `%s'", path);
 }
 
-void output_cgroup_stats_v1(double *cputime)
-{
-	struct cgroup *cg;
-	if ( (cg = cgroup_new_cgroup(cgroupname))==nullptr ) error(0,"cgroup_new_cgroup");
 
-	int ret;
-	if ((ret = cgroup_get_cgroup(cg)) != 0) error(ret,"get cgroup information");
-
-	int64_t max_usage = 0;
-	struct cgroup_controller *cg_controller = cgroup_get_controller(cg, "memory");
-	ret = cgroup_get_value_int64(cg_controller, "memory.memsw.max_usage_in_bytes", &max_usage);
-	if ( ret!=0 ) error(ret,"get cgroup value memory.memsw.max_usage_in_bytes");
-
-	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
-	write_meta("memory-bytes","%" PRId64, max_usage);
-
-	int64_t cpu_time_int;
-	cg_controller = cgroup_get_controller(cg, "cpuacct");
-	ret = cgroup_get_value_int64(cg_controller, "cpuacct.usage", &cpu_time_int);
-	if ( ret!=0 ) error(ret,"get cgroup value cpuacct.usage");
-
-	*cputime = (double) cpu_time_int / 1.e9;
-
-	cgroup_free(&cg);
-}
-
-void output_cgroup_stats_v2(double *cputime)
+void output_cgroup_stats(double *cputime)
 {
 	struct cgroup *cg;
 	if ( (cg = cgroup_new_cgroup(cgroupname))==nullptr ) error(0,"cgroup_new_cgroup");
@@ -615,18 +584,13 @@ void cgroup_create()
 	}
 
 	int ret;
-	if (is_cgroup_v2) {
-		// TODO: do we want to set cpu.weight here as well?
-		if (memsize != RLIM_INFINITY) {
-			cgroup_add_value(uint64, "memory.max", memsize);
-			cgroup_add_value(uint64, "memory.swap.max", 0);
-		} else {
-			cgroup_add_value(string, "memory.max", "max");
-			cgroup_add_value(string, "memory.swap.max", "max");
-		}
+	// TODO: do we want to set cpu.weight here as well?
+	if (memsize != RLIM_INFINITY) {
+		cgroup_add_value(uint64, "memory.max", memsize);
+		cgroup_add_value(uint64, "memory.swap.max", 0);
 	} else {
-		cgroup_add_value(uint64, "memory.limit_in_bytes", memsize);
-		cgroup_add_value(uint64, "memory.memsw.limit_in_bytes", memsize);
+		cgroup_add_value(string, "memory.max", "max");
+		cgroup_add_value(string, "memory.swap.max", "max");
 	}
 
 	/* Set up cpu restrictions; we pin the task to a specific set of
@@ -645,15 +609,6 @@ void cgroup_create()
 		verbose("cpuset undefined");
 	}
 
-	if (!is_cgroup_v2) {
-		if ( (cg_controller = cgroup_add_controller(cg, "cpu"))==nullptr ) {
-			error(0,"cgroup_add_controller cpu");
-		}
-		if ((cg_controller = cgroup_add_controller(cg, "cpuacct")) == nullptr) {
-			error(0, "cgroup_add_controller cpuacct");
-		}
-	}
-
 	/* Perform the actual creation of the cgroup */
 	if ( (ret = cgroup_create_cgroup(cg, 1))!=0 ) error(ret,"creating cgroup");
 
@@ -663,46 +618,21 @@ void cgroup_create()
 
 #undef cgroup_setval
 
-void cgroup_attach()
-{
-	struct cgroup *cg;
-	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) error(0,"cgroup_new_cgroup");
-
-	int ret;
-	if ( (ret = cgroup_get_cgroup(cg))!=0 ) error(ret,"get cgroup information");
-
-	/* Attach task to the cgroup */
-	if ( (ret = cgroup_attach_task(cg))!=0 ) error(ret,"attach task to cgroup");
-
-	cgroup_free(&cg);
-}
 
 void cgroup_kill()
 {
 	/* kill any remaining tasks, and wait for them to be gone */
 	char mem_controller[10] = "memory";
-	if (is_cgroup_v2) {
-		int size;
-		do {
-			pid_t* pids;
-			int ret = cgroup_get_procs(cgroupname, mem_controller, &pids, &size);
-			if (ret != 0) error(ret, "cgroup_get_procs");
-			for(int i = 0; i < size; i++) {
-				kill(pids[i], SIGKILL);
-			}
-			free(pids);
-		} while (size > 0);
-	} else {
-		while(1) {
-			void *handle = nullptr;
-			pid_t pid;
-			int ret = cgroup_get_task_begin(cgroupname, mem_controller, &handle, &pid);
-			cgroup_get_task_end(&handle);
-			if (ret == ECGEOF) break;
-			kill(pid, SIGKILL);
+	int size;
+	do {
+		pid_t* pids;
+		int ret = cgroup_get_procs(cgroupname, mem_controller, &pids, &size);
+		if (ret != 0) error(ret, "cgroup_get_procs");
+		for(int i = 0; i < size; i++) {
+			kill(pids[i], SIGKILL);
 		}
-	}
+		free(pids);
+	} while (size > 0);
 }
 
 void cgroup_delete()
@@ -712,9 +642,6 @@ void cgroup_delete()
 	if (!cg) error(0,"cgroup_new_cgroup");
 
 	if (cgroup_add_controller(cg, "cpu") == nullptr) error(0, "cgroup_add_controller cpu");
-	if (!is_cgroup_v2) {
-		if (cgroup_add_controller(cg, "cpuacct") == nullptr) error(0, "cgroup_add_controller cpuacct");
-	}
 	if ( cgroup_add_controller(cg, "memory")==nullptr ) error(0,"cgroup_add_controller memory");
 
 	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
@@ -958,13 +885,9 @@ void setrestrictions()
 	}
 
 	/* Put the child process in the cgroup */
-	if (is_cgroup_v2) {
-		const char *controllers[] = { "memory", nullptr };
-		if (cgroup_change_cgroup_path(cgroupname, getpid(), controllers) != 0) {
-			error(0, "Failed to move the process to the cgroup");
-		}
-	} else {
-		cgroup_attach();
+	const char *controllers[] = { "memory", nullptr };
+	if (cgroup_change_cgroup_path(cgroupname, getpid(), controllers) != 0) {
+		error(0, "Failed to move the process to the cgroup");
 	}
 
 	/* Run the command in a separate process group so that the command
@@ -1109,28 +1032,6 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 
 }
 
-bool cgroup_is_v2() {
-	bool ret = false;
-	FILE *fp = setmntent("/proc/mounts", "r");
-	if (!fp) {
-		perror("Error opening /proc/mounts");
-		return false;
-	}
-
-	struct mntent *entry;
-	while ((entry = getmntent(fp)) != nullptr) {
-		if (strcmp(entry->mnt_dir, "/sys/fs/cgroup") == 0) {
-			if (strcmp(entry->mnt_type, "cgroup2") == 0) {
-				ret = true;
-			}
-			break;
-		}
-	}
-
-	endmntent(fp);
-
-	return ret;
-}
 
 int main(int argc, char **argv)
 {
@@ -1305,8 +1206,6 @@ int main(int argc, char **argv)
 	/* Command to be executed */
 	cmdname = argv[optind];
 	cmdargs = argv+optind;
-
-	is_cgroup_v2 = cgroup_is_v2();
 
 	if ( outputmeta && (metafile = fopen(metafilename,"w"))==nullptr ) {
 		error(errno,"cannot open `%s'",metafilename);
@@ -1630,11 +1529,7 @@ int main(int argc, char **argv)
 		check_remaining_procs();
 
 		double cputime = -1;
-		if (is_cgroup_v2) {
-			output_cgroup_stats_v2(&cputime);
-		} else {
-			output_cgroup_stats_v1(&cputime);
-		}
+		output_cgroup_stats(&cputime);
 		cgroup_kill();
 		cgroup_delete();
 
