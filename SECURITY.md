@@ -5,7 +5,7 @@
 | DOMjudge Version | Supported          | PHP version supported |
 |------------------| ------------------ |-----------------------|
 | main branch      | :warning:          | 8.1-8.4               |
-| 8.4.x            | :white_check_mark: | 8.1-8.4               |
+| 9.0.x            | :white_check_mark: | 8.1-8.4               |
 | 8.3.x            | :white_check_mark: | 8.1-8.3               |
 | < 8.3            | :x:                | :x:                   |
 
