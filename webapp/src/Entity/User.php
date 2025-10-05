@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
@@ -132,7 +133,7 @@ class User extends BaseApiEntity implements
     #[ORM\JoinTable(name: 'userrole')]
     #[ORM\JoinColumn(name: 'userid', referencedColumnName: 'userid', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'roleid', referencedColumnName: 'roleid', onDelete: 'CASCADE')]
-    #[Assert\Count(min: 1)]
+    #[Assert\Count(min: 1, minMessage: 'User should have at least {{ limit }} role')]
     #[Serializer\Exclude]
     private Collection $user_roles;
 
@@ -439,9 +440,14 @@ class User extends BaseApiEntity implements
         // Types allowed by the CCS Specs Contest API in order of most permissions to least.
         // Either key=>value where key is the DOMjudge role and value is the API account type or
         // only value, where both the DOMjudge role and API type are the same.
-        $allowedTypes = ['admin', 'api_writer' => 'admin', 'api_reader' => 'admin',
-                         'jury' => 'judge', 'api_source_reader' => 'judge',
-                         'team'];
+        $allowedTypes = [
+            'admin',
+            'api_writer' => 'admin',
+            'api_reader' => 'admin',
+            'jury' => 'judge',
+            'api_source_reader' => 'judge',
+            'team'
+        ];
         foreach ($allowedTypes as $role => $allowedType) {
             if (is_numeric($role)) {
                 $role = $allowedType;
