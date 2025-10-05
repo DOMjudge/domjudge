@@ -782,8 +782,8 @@ class Team extends BaseApiEntity implements
                 return true;
             }
         }
-        if ($this->getCategory()) {
-            foreach ($this->getCategory()->getContests() as $contest) {
+        foreach ($this->getCategories() as $category) {
+            foreach ($category->getContests() as $contest) {
                 if ($contest->isLocked()) {
                     return true;
                 }
