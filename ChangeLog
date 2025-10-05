@@ -15,6 +15,8 @@ Version 9.0.0DEV
    - Add option to print from the submit client.
  - UI/UX:
    - Removed first to solve in problem/contest from balloon service.
+   - Add option to delete multiple entities of the same kind in one go, e.g.
+     problems, users, teams...
    - Replaced ACE editor with Monaco, improving diff viewing and
      adding a `no-diff` mode.
    - Highlight pending submissions during freeze on jury scoreboard.
