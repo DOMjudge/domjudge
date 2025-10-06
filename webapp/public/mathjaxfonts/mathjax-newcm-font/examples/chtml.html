@@ -1,0 +1,116 @@
+!<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width">
+  <title>CHTML output using MathJax-Ncm fonts</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script>
+  MathJax = {
+    loader: {
+      paths: {
+        mathjax: '../../MathJax-src/es5',
+        'mathjax-ncm': './es5'
+      }
+    },
+    tex: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
+    startup: {
+      ready() {
+        MathJax.startup.defaultReady();
+        document.getElementById('render').disabled = false;
+      }
+    }
+  }
+  </script>
+  <script id="MathJax-script" async src="es5/tex-mml-chtml-mathjax-ncm.js"></script>
+  <script>
+    function convert() {
+      //
+      //  Get the input (it is HTML containing delimited TeX math
+      //    and/or MathML tags)
+      //
+      var input = document.getElementById("input").value.trim();
+      //
+      //  Disable the render button until MathJax is done
+      //
+      var button = document.getElementById("render");
+      button.disabled = true;
+      //
+      //  Clear the old output
+      //
+      output = document.getElementById('output');
+      output.innerHTML = input;
+      //
+      //  Reset the tex labels (and automatic equation numbers, though there aren't any here).
+      //  Reset the typesetting system (font caches, etc.)
+      //  Typeset the page, using a promise to let us know when that is complete
+      //
+      MathJax.texReset();
+      MathJax.typesetClear();
+      MathJax.typesetPromise()
+        .catch(function (err) {
+          //
+          //  If there was an internal error, put the message into the output instead
+          //
+          output.innerHTML = '';
+          output.appendChild(document.createElement('pre')).appendChild(document.createTextNode(err.message));
+        })
+        .then(function() {
+          //
+          //  Error or not, re-enable the render button
+          //
+          button.disabled = false;
+        });
+    }
+  </script>
+  <style>
+  #frame {
+    max-width: 40em;
+    margin: auto;
+  }
+  #input {
+    border: 1px solid grey;
+    margin: 0 0 .25em;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #output {
+    margin-top: .75em;
+    border: 1px solid grey;
+    padding: .25em;
+    min-height: 2em;
+    font-size: 150%;
+  }
+  #output > pre {
+    margin-left: 5px;
+  }
+  .right {
+    float: right;
+  }
+  </style>
+</head>
+
+<body>
+<div id="frame">
+
+<h1>CHTML with MathJax-Ncm fonts</h1>
+
+<textarea id="input" rows="15" cols="10">
+<!--  Enter HTML containing TeX or MathML below -->
+
+If $a \ne 0$, then $ax^2 + bx + c = 0$ has two solutions,
+$$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$
+</textarea>
+<br />
+<div class="right">
+<input type="button" value="Render HTML" id="render" onclick="convert()" disabled />
+</div>
+<br clear="all" />
+<div id="output"></div>
+</div>
+
+</body>
+
+</html>
