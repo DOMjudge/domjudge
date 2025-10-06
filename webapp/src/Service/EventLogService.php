@@ -12,6 +12,7 @@ use App\Entity\JudgingRun;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use BadMethodCallException;
 use Doctrine\Inflector\InflectorFactory;
@@ -123,7 +124,7 @@ class EventLogService
             }
             if (!array_key_exists(self::KEY_TABLES, $data)) {
                 $this->apiEndpoints[$endpoint][self::KEY_TABLES] = [
-                    preg_replace('/s$/', '', $endpoint)
+                    preg_replace('/s$/', '', $endpoint),
                 ];
             }
 
@@ -562,7 +563,7 @@ class EventLogService
             $existingEvent = $existingEvents[$event->getEndpointid()] ?? null;
             $existingData = $existingEvent === null ?
                 null :
-                Utils::jsonEncode($existingEvent->getContent());
+                Utils::jsonEncode($this->applyCcsVersionChanges($endpointType, $existingEvent->getContent()));
             $data = Utils::jsonEncode($event->getContent());
             if ($existingEvent === null || $existingData !== $data) {
                 // Special case for state: this is always an update event
@@ -854,5 +855,28 @@ class EventLogService
         }
 
         return null;
+    }
+
+    /**
+     * @param array<string,mixed>  $event
+     *
+     * @return array<string,mixed>
+     */
+    public function applyCcsVersionChanges(string $endpointType, array $event): array
+    {
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+
+        if ($endpointType == 'contests') {
+            $penaltyTime = $event['penalty_time'];
+            $penaltyTimeIsRelative = is_string($penaltyTime) && Utils::isRelTime($penaltyTime);
+            if ($ccsApiVersion->useRelTimes() && !$penaltyTimeIsRelative) {
+                $event['penalty_time'] = Utils::relTime($penaltyTime * 60, true);
+            } elseif (!$ccsApiVersion->useRelTimes() && $penaltyTimeIsRelative) {
+                $event['penalty_time'] = (int)floor(Utils::relTimeToSeconds($penaltyTime) / 60);
+            }
+        }
+
+        return $event;
     }
 }
