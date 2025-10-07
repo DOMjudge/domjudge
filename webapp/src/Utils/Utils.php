@@ -1082,10 +1082,10 @@ class Utils
     /**
      * Call ob_flush() unless the top-level output buffer does not allow it.
      */
-    public static function ob_flush_if_possible(): bool
+    public static function ob_flush_if_possible(): bool // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     {
         $status = ob_get_status();
-        if ( empty($status) || ($status['flags'] & PHP_OUTPUT_HANDLER_CLEANABLE) ) {
+        if (empty($status) || ($status['flags'] & PHP_OUTPUT_HANDLER_CLEANABLE)) {
             return ob_flush();
         }
         return false;
