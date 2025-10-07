@@ -26,8 +26,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use App\Twig\Attribute\AjaxTemplate;
 use Knp\Component\Pager\Pagination\PaginationInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -59,11 +63,17 @@ class RejudgingController extends BaseController
     }
 
     /**
+     * @return array{
+     *     rejudgings: list<array<string, mixed>>,
+     *     table_fields: array<string, array<string, mixed>>,
+     *     refresh: array{after: int, url: string}
+     * }
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route(path: '', name: 'jury_rejudgings')]
-    public function indexAction(): Response
+    #[Template(template: 'jury/rejudgings.html.twig')]
+    public function indexAction(): array
     {
         $curContest = $this->dj->getCurrentContest();
         $queryBuilder = $this->em->createQueryBuilder()
@@ -178,7 +188,7 @@ class RejudgingController extends BaseController
             }
         }
 
-        $twigData = [
+        return [
             'rejudgings' => $filtered_table,
             'table_fields' => $table_fields,
             'refresh' => [
@@ -186,15 +196,18 @@ class RejudgingController extends BaseController
                 'url' => $this->generateUrl('jury_rejudgings'),
             ],
         ];
-
-        return $this->render('jury/rejudgings.html.twig', $twigData);
     }
 
     /**
+     * @return array<string, mixed>
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route(path: '/{rejudgingId<\d+>}', name: 'jury_rejudging')]
+    #[AjaxTemplate(
+        normalTemplate: 'jury/rejudging.html.twig',
+        ajaxTemplate: 'jury/partials/rejudging_submissions.html.twig'
+    )]
     public function viewAction(
         Request $request,
         SubmissionService $submissionService,
@@ -207,7 +220,7 @@ class RejudgingController extends BaseController
         string $newverdict = 'all',
         #[MapQueryParameter(name: 'show_statistics')]
         ?bool $showStatistics = null,
-    ): Response {
+    ): array {
         // Close the session, as this might take a while and we don't need the session below.
         $this->requestStack->getSession()->save();
 
@@ -418,23 +431,23 @@ class RejudgingController extends BaseController
         ];
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;
-            return $this->render('jury/partials/rejudging_submissions.html.twig', $data);
-        } else {
-            return $this->render('jury/rejudging.html.twig', $data);
         }
+        return $data;
     }
 
     /**
+     * @return array{action: string, rejudging: Rejudging}|Response
      * @throws NonUniqueResultException
      */
     #[Route(path: '/{rejudgingId<\d+>}/{action<cancel|apply>}', name: 'jury_rejudging_finish')]
+    #[Template(template: 'jury/rejudging_finish.html.twig')]
     public function finishAction(
         Request $request,
         RejudgingService $rejudgingService,
         ?Profiler $profiler,
         int $rejudgingId,
         string $action
-    ): Response {
+    ): array|Response {
         // Note: we use a XMLHttpRequest here as Symfony does not support streaming Twig output
 
         // Disable the profiler toolbar to avoid OOMs.
@@ -470,14 +483,18 @@ class RejudgingController extends BaseController
             });
         }
 
-        return $this->render('jury/rejudging_finish.html.twig', [
+        return [
             'action' => $action,
             'rejudging' => $rejudging,
-        ]);
+        ];
     }
 
+    /**
+     * @return array<string, mixed>|Response
+     */
     #[Route(path: '/add', name: 'jury_rejudging_add')]
-    public function addAction(Request $request, FormFactoryInterface $formFactory): Response
+    #[Template(template: 'jury/rejudging_add.html.twig')]
+    public function addAction(Request $request, FormFactoryInterface $formFactory): array|Response
     {
         $isContestUpdateAjax   = $request->isXmlHttpRequest() && $request->request->getBoolean('refresh_form');
         $isCreateRejudgingAjax = $request->isMethod('POST') && $request->isXmlHttpRequest() && !$isContestUpdateAjax;
@@ -532,10 +549,10 @@ class RejudgingController extends BaseController
                 'referer'    => $request->headers->get('referer'),
                 'overshoot'  => $formData['overshoot'],
             ];
-            return $this->render('jury/rejudging_add.html.twig', [
+            return [
                 'data'    => http_build_query($data),
                 'url'     => $this->generateUrl('jury_rejudging_add'),
-            ]);
+            ];
         }
         if ($isCreateRejudgingAjax) {
             $progressReporter = function (int $progress, string $log, ?string $redirect = null) {
@@ -665,8 +682,12 @@ class RejudgingController extends BaseController
         ]);
     }
 
+    /**
+     * @return array{data: string, url: string}|Response
+     */
     #[Route(path: '/create', methods: ['POST'], name: 'jury_create_rejudge')]
-    public function createAction(Request $request): Response
+    #[Template(template: 'jury/rejudging_add.html.twig')]
+    public function createAction(Request $request): array|Response
     {
         $table      = $request->request->get('table');
         $id         = $request->request->get('id');
@@ -717,10 +738,10 @@ class RejudgingController extends BaseController
         if (!$request->isXmlHttpRequest()) {
             $data            = $request->request->all();
             $data['referer'] = $request->headers->get('referer');
-            return $this->render('jury/rejudging_add.html.twig', [
+            return [
                 'data' => http_build_query($data),
                 'url'  => $this->generateUrl('jury_create_rejudge'),
-            ]);
+            ];
         }
 
         $progressReporter = function (int $progress, string $log, ?string $redirect = null) {

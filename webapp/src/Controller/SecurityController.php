@@ -9,16 +9,21 @@ use App\Entity\User;
 use App\Form\Type\UserRegistrationType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Twig\EventListener\CustomResponseListener;
 use Doctrine\ORM\EntityManagerInterface;
 use Ramsey\Uuid\Uuid;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
@@ -31,12 +36,24 @@ class SecurityController extends AbstractController
         private readonly int $minimumPasswordLength,
     ) {}
 
+    /**
+     * @return array{
+     *     last_username: string,
+     *     error: AuthenticationException|null,
+     *     allow_registration: bool,
+     *     allowed_authmethods: string[],
+     *     auth_xheaders_present: string|null,
+     *     auth_ipaddress_users: User[]
+     * }|RedirectResponse
+     */
     #[Route(path: '/login', name: 'login')]
+    #[Template(template: 'security/login.html.twig')]
     public function loginAction(
         Request $request,
         AuthorizationCheckerInterface $authorizationChecker,
-        AuthenticationUtils $authUtils
-    ): Response {
+        AuthenticationUtils $authUtils,
+        CustomResponseListener $customResponseListener,
+    ): array|RedirectResponse {
         $allowIPAuth = false;
         $authmethods = $this->config->get('auth_methods');
 
@@ -70,24 +87,30 @@ class SecurityController extends AbstractController
             $response->setStatusCode(401);
         }
 
+        $customResponseListener->setCustomResponse($response);
+
         $selfRegistrationCategoriesCount = $em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
 
-        return $this->render('security/login.html.twig', [
+        return [
             'last_username' => $lastUsername,
             'error' => $error,
             'allow_registration' => $selfRegistrationCategoriesCount !== 0,
             'allowed_authmethods' => $authmethods,
             'auth_xheaders_present' => $request->headers->get('X-DOMjudge-Login'),
             'auth_ipaddress_users' => $auth_ipaddress_users,
-        ], $response);
+        ];
     }
 
+    /**
+     * @return array{registration_form: FormInterface}|RedirectResponse
+     */
     #[Route(path: '/register', name: 'register')]
+    #[Template(template: 'security/register.html.twig')]
     public function registerAction(
         Request $request,
         AuthorizationCheckerInterface $authorizationChecker,
         UserPasswordHasherInterface $passwordHasher
-    ): Response {
+    ): array|RedirectResponse {
         // Redirect if already logged in
         if ($authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('root');
@@ -165,6 +188,6 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        return $this->render('security/register.html.twig', ['registration_form' => $registration_form]);
+        return ['registration_form' => $registration_form];
     }
 }

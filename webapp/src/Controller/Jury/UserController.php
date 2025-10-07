@@ -16,8 +16,10 @@ use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -50,8 +52,15 @@ class UserController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     users: list<array<string, mixed>>,
+     *     table_fields: array<string, array<string, mixed>>
+     * }
+     */
+    #[Template(template: 'jury/users.html.twig')]
     #[Route(path: '', name: 'jury_users')]
-    public function indexAction(): Response
+    public function indexAction(): array
     {
         /** @var User[] $users */
         $users = $this->em->createQueryBuilder()
@@ -171,14 +180,25 @@ class UserController extends BaseController
             ];
         }
 
-        return $this->render('jury/users.html.twig', [
+        return [
             'users' => $users_table,
             'table_fields' => $table_fields,
-        ]);
+        ];
     }
 
+    /**
+     * @return array{
+     *     user: User,
+     *     submissions: list<Submission>,
+     *     submissionCounts: array<string, int>,
+     *     showContest: bool,
+     *     showExternalResult: bool,
+     *     refresh: array{after: int, url: string, ajax: bool}
+     * }
+     */
+    #[Template(template: 'jury/user.html.twig')]
     #[Route(path: '/{userId<\d+>}', name: 'jury_user')]
-    public function viewAction(Request $request, int $userId, SubmissionService $submissionService): Response
+    public function viewAction(Request $request, int $userId, SubmissionService $submissionService): array
     {
         $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
@@ -192,7 +212,7 @@ class UserController extends BaseController
             page: $request->query->getInt('page', 1),
         );
 
-        return $this->render('jury/user.html.twig', [
+        return [
             'user' => $user,
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
@@ -203,26 +223,38 @@ class UserController extends BaseController
                 'url' => $this->generateUrl('jury_user', ['userId' => $user->getUserid()]),
                 'ajax' => true,
             ],
-        ]);
+        ];
     }
 
-    public function checkPasswordLength(User $user, FormInterface $form): ?Response
+    /**
+     * @return array{
+     *     user: User,
+     *     form: FormInterface
+     * }|null
+     */
+    public function checkPasswordLength(User $user, FormInterface $form): ?array
     {
         if ($user->getPlainPassword() && strlen($user->getPlainPassword()) < $this->minimumPasswordLength) {
             $this->addFlash('danger', "Password should be " . $this->minimumPasswordLength . "+ chars.");
-            return $this->render('jury/user_edit.html.twig', [
+            return [
                 'user' => $user,
                 'form' => $form,
-                'min_password_length' => $this->minimumPasswordLength,
-            ]);
+            ];
         }
 
         return null;
     }
 
+    /**
+     * @return array{
+     *     user: User,
+     *     form: FormInterface
+     * }|RedirectResponse
+     */
+    #[Template(template: 'jury/user_edit.html.twig')]
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{userId<\d+>}/edit', name: 'jury_user_edit')]
-    public function editAction(Request $request, int $userId): Response
+    public function editAction(Request $request, int $userId): array|RedirectResponse
     {
         $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
@@ -253,10 +285,10 @@ class UserController extends BaseController
             return $this->redirectToRoute('jury_user', ['userId' => $user->getUserid()]);
         }
 
-        return $this->render('jury/user_edit.html.twig', [
-            'user'                => $user,
-            'form'                => $form,
-        ]);
+        return [
+            'user' => $user,
+            'form' => $form,
+        ];
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -271,13 +303,20 @@ class UserController extends BaseController
         return $this->deleteEntities($request, [$user], $this->generateUrl('jury_users'));
     }
 
+    /**
+     * @return array{
+     *     user: User,
+     *     form: FormInterface
+     * }|Response
+     */
+    #[Template(template: 'jury/user_add.html.twig')]
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/add', name: 'jury_user_add')]
     public function addAction(
         Request $request,
         #[MapQueryParameter]
         ?int $team = null,
-    ): Response {
+    ): array|Response {
         $user = new User();
         if ($team) {
             $user->setTeam($this->em->getRepository(Team::class)->find($team));
@@ -302,15 +341,19 @@ class UserController extends BaseController
             return $response;
         }
 
-        return $this->render('jury/user_add.html.twig', [
+        return [
             'user' => $user,
             'form' => $form,
-        ]);
+        ];
     }
 
+    /**
+     * @return array{form: FormInterface}|Response
+     */
+    #[Template(template: 'jury/user_generate_passwords.html.twig')]
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/generate-passwords', name: 'jury_generate_passwords')]
-    public function generatePasswordsAction(Request $request): Response
+    public function generatePasswordsAction(Request $request): array|Response
     {
         $form = $this->createForm(GeneratePasswordsType::class);
         $form->handleRequest($request);
@@ -368,9 +411,7 @@ class UserController extends BaseController
             return $response;
         }
 
-        return $this->render('jury/user_generate_passwords.html.twig', [
-            'form' => $form,
-        ]);
+        return ['form' => $form];
     }
 
     #[IsGranted('ROLE_ADMIN')]

@@ -29,7 +29,10 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
+use App\Twig\Attribute\AjaxTemplate;
 use Knp\Component\Pager\Pagination\PaginationInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -64,8 +67,16 @@ class ProblemController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     problems_current: list<array<string, mixed>>,
+     *     problems_other: list<array<string, mixed>>,
+     *     table_fields: array<string, array<string, mixed>>
+     * }
+     */
     #[Route(path: '', name: 'jury_problems')]
-    public function indexAction(): Response
+    #[Template(template: 'jury/problems.html.twig')]
+    public function indexAction(): array
     {
         $problems = $this->em->createQueryBuilder()
             ->select('p', 'COUNT(tc.testcaseid) AS testdatacount')
@@ -226,23 +237,22 @@ class ProblemController extends BaseController
                 $problems_table_other[] = $data_to_add;
             }
         }
-        $data = [
+        return [
             'problems_current' => $problems_table_current,
             'problems_other' => $problems_table_other,
             'table_fields' => $table_fields,
         ];
-
-        return $this->render('jury/problems.html.twig', $data);
     }
 
     /**
+     * @return array<string, mixed>
      * @throws NonUniqueResultException
      */
     #[Route(path: '/problemset', name: 'jury_problemset')]
-    public function problemsetAction(StatisticsService $stats): Response
+    #[Template(template: 'jury/problemset.html.twig')]
+    public function problemsetAction(StatisticsService $stats): array
     {
-        return $this->render('jury/problemset.html.twig',
-            $this->dj->getTwigDataForProblemsAction($stats, forJury: true));
+        return $this->dj->getTwigDataForProblemsAction($stats, forJury: true);
     }
 
     #[Route(path: '/{probId<\d+>}/samples.zip', name: 'jury_problem_sample_zip')]
@@ -429,11 +439,16 @@ class ProblemController extends BaseController
     }
 
     /**
+     * @return array<string, mixed>|RedirectResponse
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route(path: '/{probId<\d+>}', name: 'jury_problem')]
-    public function viewAction(Request $request, SubmissionService $submissionService, int $probId): Response
+    #[AjaxTemplate(
+        normalTemplate: 'jury/problem.html.twig',
+        ajaxTemplate: 'jury/partials/submission_list.html.twig'
+    )]
+    public function viewAction(Request $request, SubmissionService $submissionService, int $probId): array|RedirectResponse
     {
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
@@ -518,10 +533,9 @@ class ProblemController extends BaseController
         // For ajax requests, only return the submission list partial.
         if ($request->isXmlHttpRequest()) {
             $data['showTestcases'] = false;
-            return $this->render('jury/partials/submission_list.html.twig', $data);
         }
 
-        return $this->render('jury/problem.html.twig', $data);
+        return $data;
     }
 
     #[Route(path: '/{probId<\d+>}/statement', name: 'jury_problem_statement')]
@@ -535,8 +549,18 @@ class ProblemController extends BaseController
         return $problem->getProblemStatementStreamedResponse();
     }
 
+    /**
+     * @return array{
+     *     problem: Problem,
+     *     testcases: list<Testcase>,
+     *     testcaseData: array<int, mixed>,
+     *     extensionMapping: array<string, string>,
+     *     allowEdit: bool
+     * }|RedirectResponse
+     */
     #[Route(path: '/{probId<\d+>}/testcases', name: 'jury_problem_testcases')]
-    public function testcasesAction(Request $request, int $probId): Response
+    #[Template(template: 'jury/problem_testcases.html.twig')]
+    public function testcasesAction(Request $request, int $probId): array|RedirectResponse
     {
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
@@ -790,15 +814,13 @@ class ProblemController extends BaseController
                 . join($lockedContests)
                 . ', disallowing editing.');
         }
-        $data = [
+        return [
             'problem' => $problem,
             'testcases' => $testcases,
             'testcaseData' => $testcaseData,
             'extensionMapping' => Testcase::EXTENSION_MAPPING,
             'allowEdit' => $this->isGranted('ROLE_ADMIN') && empty($lockedContests),
         ];
-
-        return $this->render('jury/problem_testcases.html.twig', $data);
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -928,9 +950,17 @@ class ProblemController extends BaseController
         return $response;
     }
 
+    /**
+     * @return array{
+     *     problem: Problem,
+     *     form: FormInterface,
+     *     uploadForm: FormInterface
+     * }|RedirectResponse
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{probId<\d+>}/edit', name: 'jury_problem_edit')]
-    public function editAction(Request $request, int $probId): Response
+    #[Template(template: 'jury/problem_edit.html.twig')]
+    public function editAction(Request $request, int $probId): array|RedirectResponse
     {
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
@@ -997,11 +1027,11 @@ class ProblemController extends BaseController
             return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
         }
 
-        return $this->render('jury/problem_edit.html.twig', [
+        return [
             'problem' => $problem,
             'form' => $form,
             'uploadForm' => $uploadForm,
-        ]);
+        ];
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -1106,9 +1136,13 @@ class ProblemController extends BaseController
         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $problem->getProbid()]);
     }
 
+    /**
+     * @return array{form: FormInterface}|Response
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/add', name: 'jury_problem_add')]
-    public function addAction(Request $request): Response
+    #[Template(template: 'jury/problem_add.html.twig')]
+    public function addAction(Request $request): array|Response
     {
         $problem = new Problem();
 
@@ -1123,9 +1157,9 @@ class ProblemController extends BaseController
             return $response;
         }
 
-        return $this->render('jury/problem_add.html.twig', [
+        return [
             'form' => $form,
-        ]);
+        ];
     }
 
     /**

@@ -19,6 +19,7 @@ use App\Service\ScoreboardService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -47,9 +48,13 @@ class JuryMiscController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{adminer_enabled: bool, CCS_SPEC_API_URL: string}
+     */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') or is_granted('ROLE_CLARIFICATION_RW')"))]
     #[Route(path: '', name: 'jury_index')]
-    public function indexAction(ConfigurationService $config): Response
+    #[Template(template: 'jury/index.html.twig')]
+    public function indexAction(ConfigurationService $config): array
     {
         if ($this->isGranted('ROLE_ADMIN')) {
             $innodbSnapshotIsolation = $this->em->getConnection()->executeQuery('SHOW VARIABLES LIKE "innodb_snapshot_isolation"')->fetchAssociative();
@@ -63,10 +68,10 @@ class JuryMiscController extends BaseController
             $this->addFlash('info', 'New release ' . $newestVersion . ' available at: https://www.domjudge.org/download.');
         }
 
-        return $this->render('jury/index.html.twig', [
+        return [
             'adminer_enabled' => $config->get('adminer_enabled'),
             'CCS_SPEC_API_URL' => GI::CCS_SPEC_API_URL,
-        ]);
+        ];
     }
 
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')"))]
@@ -200,9 +205,17 @@ class JuryMiscController extends BaseController
         return $this->json(['results' => $results]);
     }
 
+    /**
+     * @return array{
+     *     contests: array<int, Contest>,
+     *     contest: Contest|null,
+     *     doRefresh: bool
+     * }|Response
+     */
+    #[Template(template: 'jury/refresh_cache.html.twig')]
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/refresh-cache', name: 'jury_refresh_cache')]
-    public function refreshCacheAction(Request $request, ScoreboardService $scoreboardService): Response
+    public function refreshCacheAction(Request $request, ScoreboardService $scoreboardService): array|Response
     {
         // Note: we use a XMLHttpRequest here as Symfony does not support
         // streaming Twig output.
@@ -240,16 +253,31 @@ class JuryMiscController extends BaseController
             });
         }
 
-        return $this->render('jury/refresh_cache.html.twig', [
+        return [
             'contests' => $contests,
             'contest' => count($contests) === 1 ? reset($contests) : null,
             'doRefresh' => $request->request->has('refresh'),
-        ]);
+        ];
     }
 
+    /**
+     * @return array{
+     *     numChecked: int,
+     *     numUnchecked: int,
+     *     unexpected: array<int, array<string, mixed>>,
+     *     multiple: array<int, array<string, mixed>>,
+     *     verified: array<int, array<string, mixed>>,
+     *     nomatch: array<int, array<string, mixed>>,
+     *     earlier: array<int, array<string, mixed>>,
+     *     problems: array<int, ContestProblem>,
+     *     contestId: int|null,
+     *     verifyMultiple: bool
+     * }
+     */
+    #[Template(template: 'jury/check_judgings.html.twig')]
     #[IsGranted('ROLE_JURY')]
     #[Route(path: '/judging-verifier', name: 'jury_judging_verifier')]
-    public function judgingVerifierAction(Request $request): Response
+    public function judgingVerifierAction(Request $request): array
     {
         /** @var Submission[] $submissions */
         $submissions = [];
@@ -331,7 +359,7 @@ class JuryMiscController extends BaseController
 
         $this->em->flush();
 
-        return $this->render('jury/check_judgings.html.twig', [
+        return [
             'numChecked' => $numChecked,
             'numUnchecked' => $numUnchecked,
             'unexpected' => $unexpected,
@@ -342,7 +370,7 @@ class JuryMiscController extends BaseController
             'problems' => $problems,
             'contestId' => $this->dj->getCurrentContest()?->getCid(),
             'verifyMultiple' => $verifyMultiple,
-        ]);
+        ];
     }
 
     #[Route(path: '/change-contest/{contestId<-?\d+>}', name: 'jury_change_contest')]

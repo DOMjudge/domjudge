@@ -28,9 +28,12 @@ use App\Utils\Utils;
 use Collator;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\SubmitButton;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -69,15 +72,26 @@ class ImportExportController extends BaseController
     }
 
     /**
+     * @return array{
+     *     tsv_form: FormInterface,
+     *     json_form: FormInterface,
+     *     icpccms_form: FormInterface,
+     *     problem_form: FormInterface,
+     *     contest_export_form: FormInterface,
+     *     contest_import_form: FormInterface,
+     *     problems_import_form: FormInterface,
+     *     export_results_form: FormInterface
+     * }|Response
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
+    #[Template(template: 'jury/import_export.html.twig')]
     #[Route(path: '', name: 'jury_import_export')]
     #[IsGranted('ROLE_ADMIN')]
-    public function indexAction(Request $request): Response
+    public function indexAction(Request $request): array|Response
     {
         $tsvForm = $this->createForm(TsvImportType::class);
 
@@ -328,7 +342,7 @@ class ImportExportController extends BaseController
             return $response;
         }
 
-        return $this->render('jury/import_export.html.twig', [
+        return [
             'tsv_form' => $tsvForm,
             'json_form' => $jsonForm,
             'icpccms_form' => $icpcCmsForm,
@@ -337,7 +351,7 @@ class ImportExportController extends BaseController
             'contest_import_form' => $contestImportForm,
             'problems_import_form' => $problemsImportForm,
             'export_results_form' => $exportResultsForm,
-        ]);
+        ];
     }
 
     #[Route(path: '/export/{type<groups|teams|wf_results|full_results>}.tsv', name: 'jury_tsv_export')]
@@ -375,8 +389,20 @@ class ImportExportController extends BaseController
         return $response;
     }
 
+    /**
+     * @return array{
+     *     domjudgeVersion: string,
+     *     title: string,
+     *     grouped: array<string|null, array<int, Clarification>>,
+     *     queues: array<string|null, string>,
+     *     categories: array<string, string>,
+     *     contest: Contest,
+     *     problems: array<int, ContestProblem>
+     * }|RedirectResponse
+     */
     #[Route(path: '/export/clarifications.html', name: 'jury_html_export_clarifications')]
-    public function exportClarificationsHtmlAction(): Response
+    #[Template(template: 'jury/export/clarifications.html.twig')]
+    public function exportClarificationsHtmlAction(): array|RedirectResponse
     {
         try {
             return $this->getClarificationsHtml();
@@ -531,7 +557,18 @@ class ImportExportController extends BaseController
         return $this->twig->render('jury/export/results.html.twig', $data);
     }
 
-    protected function getClarificationsHtml(): Response
+    /**
+     * @return array{
+     *     domjudgeVersion: string,
+     *     title: string,
+     *     grouped: array<string|null, array<int, Clarification>>,
+     *     queues: array<string|null, string>,
+     *     categories: array<string, string>,
+     *     contest: Contest,
+     *     problems: array<int, ContestProblem>
+     * }
+     */
+    protected function getClarificationsHtml(): array
     {
         $contest = $this->dj->getCurrentContest();
         if ($contest === null) {
@@ -592,7 +629,7 @@ class ImportExportController extends BaseController
         }
         $contestProblems = $contestProblemsIndexed;
 
-        return $this->render('jury/export/clarifications.html.twig', [
+        return [
             'domjudgeVersion' => $this->domjudgeVersion,
             'title' => sprintf('Clarifications for %s', $contest->getName()),
             'grouped' => $grouped,
@@ -600,7 +637,7 @@ class ImportExportController extends BaseController
             'categories' => $clarificationCategories,
             'contest' => $contest,
             'problems' => $contestProblems,
-        ]);
+        ];
     }
 
     /**

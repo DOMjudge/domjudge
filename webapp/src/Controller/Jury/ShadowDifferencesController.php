@@ -12,13 +12,14 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
+use App\Twig\Attribute\AjaxTemplate;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -41,10 +42,30 @@ class ShadowDifferencesController extends BaseController
     }
 
     /**
+     * @return array{
+     *     verdicts: array<string, string>,
+     *     used: array<string, bool>,
+     *     verdictTable: array<string, array<string, list<int>>>,
+     *     viewTypes: array<int, string>,
+     *     view: int,
+     *     verificationViewTypes: array<int, string>,
+     *     verificationView: int,
+     *     submissions: list<Submission>,
+     *     submissionCounts: array<string, int>,
+     *     external: string,
+     *     local: string,
+     *     showExternalResult: bool,
+     *     showContest: bool,
+     *     showTestcases: bool,
+     *     showExternalTestcases: bool,
+     *     refresh: array{after: int, url: string, ajax: bool},
+     *     ajax?: bool
+     * }|RedirectResponse
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route(path: '', name: 'jury_shadow_differences')]
+    #[AjaxTemplate(normalTemplate: 'jury/shadow_differences.html.twig', ajaxTemplate: 'jury/partials/shadow_submissions.html.twig')]
     public function indexAction(
         Request $request,
         #[MapQueryParameter(name: 'view')]
@@ -55,7 +76,7 @@ class ShadowDifferencesController extends BaseController
         string $external = 'all',
         #[MapQueryParameter]
         string $local = 'all',
-    ): Response {
+    ): array|RedirectResponse {
         if (!$this->dj->shadowMode()) {
             $this->addFlash('danger', 'Shadow differences only supported when shadow_mode is true');
             return $this->redirectToRoute('jury_index');
@@ -233,9 +254,7 @@ class ShadowDifferencesController extends BaseController
         ];
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;
-            return $this->render('jury/partials/shadow_submissions.html.twig', $data);
-        } else {
-            return $this->render('jury/shadow_differences.html.twig', $data);
         }
+        return $data;
     }
 }

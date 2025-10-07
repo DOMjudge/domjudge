@@ -11,6 +11,7 @@ use App\Form\Type\TeamClarificationType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Twig\Attribute\AjaxTemplate;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -18,6 +19,7 @@ use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -45,8 +47,16 @@ class ClarificationController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     clarifications: Clarification[],
+     *     team: Team,
+     *     problem: Problem
+     * }
+     */
     #[Route(path: '/clarifications/by-problem/{probId<\d+>}', name: 'team_clarification_by_prob')]
-    public function viewByProblemAction(Request $request, int $probId): Response
+    #[AjaxTemplate(normalTemplate: 'team/clarifications_by_problem.html.twig', ajaxTemplate: 'team/clarifications_by_problem_modal.html.twig')]
+    public function viewByProblemAction(Request $request, int $probId): array
     {
         $user    = $this->dj->getUser();
         $team    = $user->getTeam();
@@ -88,23 +98,25 @@ class ClarificationController extends BaseController
             ->getQuery()
             ->getResult();
 
-        $data = [
+        return [
             'clarifications' => $clarifications,
             'team' => $team,
             'problem' => $problem,
         ];
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('team/clarifications_by_problem_modal.html.twig', $data);
-        } else {
-            return $this->render('team/clarifications_by_problem.html.twig', $data);
-        }
     }
 
     /**
+     * @return array{
+     *     clarification: Clarification,
+     *     team: Team,
+     *     categories: array<string, string>,
+     *     form: FormView
+     * }
      * @throws NonUniqueResultException
      */
     #[Route(path: '/clarifications/{clarId<\d+>}', name: 'team_clarification')]
-    public function viewAction(Request $request, int $clarId): Response
+    #[AjaxTemplate(normalTemplate: 'team/clarification.html.twig', ajaxTemplate: 'team/clarification_modal.html.twig')]
+    public function viewAction(Request $request, int $clarId): Response|array
     {
         $categories = $this->config->get('clar_categories');
         $user       = $this->dj->getUser();
@@ -171,22 +183,23 @@ class ClarificationController extends BaseController
         }
         $this->em->flush();
 
-        $data = [
+        return [
             'clarification' => $clarification,
             'team' => $team,
             'categories' => $categories,
             'form' => $form->createView(),
         ];
-
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('team/clarification_modal.html.twig', $data);
-        } else {
-            return $this->render('team/clarification.html.twig', $data);
-        }
     }
 
+    /**
+     * @return array{
+     *     categories: array<string, string>,
+     *     form: FormView
+     * }
+     */
     #[Route(path: '/clarifications/add', name: 'team_clarification_add')]
-    public function addAction(Request $request): Response
+    #[AjaxTemplate(normalTemplate: 'team/clarification_add.html.twig', ajaxTemplate: 'team/clarification_add_modal.html.twig')]
+    public function addAction(Request $request): Response|array
     {
         $categories = $this->config->get('clar_categories');
         $user       = $this->dj->getUser();
@@ -206,16 +219,10 @@ class ClarificationController extends BaseController
             return $this->redirectToRoute('team_index');
         }
 
-        $data = [
+        return [
             'categories' => $categories,
             'form' => $form->createView(),
         ];
-
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('team/clarification_add_modal.html.twig', $data);
-        } else {
-            return $this->render('team/clarification_add.html.twig', $data);
-        }
     }
 
     /**

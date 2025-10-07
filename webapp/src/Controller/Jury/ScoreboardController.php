@@ -4,6 +4,8 @@ namespace App\Controller\Jury;
 
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
+use App\Twig\Attribute\AjaxTemplate;
+use App\Twig\EventListener\CustomResponseListener;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,8 +21,12 @@ class ScoreboardController extends AbstractController
     {
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     #[Route(path: '', name: 'jury_scoreboard')]
-    public function scoreboardAction(Request $request): Response
+    #[AjaxTemplate(normalTemplate: 'jury/scoreboard.html.twig', ajaxTemplate: 'partials/scoreboard.html.twig')]
+    public function scoreboardAction(Request $request, CustomResponseListener $customResponseListener): array
     {
         $response   = new Response();
         $refreshUrl = $this->generateUrl('jury_scoreboard');
@@ -29,10 +35,11 @@ class ScoreboardController extends AbstractController
             $request, $response, $refreshUrl, $this->isGranted('ROLE_JURY'), false, false, $contest
         );
 
+        $customResponseListener->setCustomResponse($response);
+
         if ($request->isXmlHttpRequest()) {
             $data['current_contest'] = $contest;
-            return $this->render('partials/scoreboard.html.twig', $data, $response);
         }
-        return $this->render('jury/scoreboard.html.twig', $data, $response);
+        return $data;
     }
 }

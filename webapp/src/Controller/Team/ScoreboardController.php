@@ -3,12 +3,18 @@
 namespace App\Controller\Team;
 
 use App\Controller\BaseController;
+use App\Entity\Contest;
 use App\Entity\Team;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
+use App\Twig\Attribute\AjaxTemplate;
+use App\Twig\EventListener\CustomResponseListener;
+use App\Utils\Scoreboard\Filter;
+use App\Utils\Scoreboard\Scoreboard;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,8 +42,17 @@ class ScoreboardController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{refresh?: array{after: int, url: string, ajax: bool}, static: bool, contest?: Contest,
+     *                scoreFilter?: Filter, scoreboard: Scoreboard, filterValues: array<string, string[]>,
+     *                groupedAffiliations: null|array<array<string, array<array{id: string, name: string}>>>,
+     *                showFlags: int, showAffiliationLogos: bool, showAffiliations: int, showPending: int,
+     *                showTeamSubmissions: int, scoreInSeconds: bool, maxWidth: int, myTeamId: int,
+     *                current_contest?: Contest|null}
+     */
     #[Route(path: '/scoreboard', name: 'team_scoreboard')]
-    public function scoreboardAction(Request $request): Response
+    #[AjaxTemplate(normalTemplate: 'team/scoreboard.html.twig', ajaxTemplate: 'partials/scoreboard.html.twig')]
+    public function scoreboardAction(Request $request, CustomResponseListener $customResponseListener): array
     {
         if (!$this->config->get('enable_ranking')) {
             throw new BadRequestHttpException('Scoreboard is not available.');
@@ -52,15 +67,20 @@ class ScoreboardController extends BaseController
         );
         $data['myTeamId'] = $user->getTeam()->getTeamid();
 
+        $customResponseListener->setCustomResponse($response);
+
         if ($request->isXmlHttpRequest()) {
             $data['current_contest'] = $contest;
-            return $this->render('partials/scoreboard.html.twig', $data, $response);
         }
-        return $this->render('team/scoreboard.html.twig', $data, $response);
+        return $data;
     }
 
+    /**
+     * @return array{team: Team|null, showFlags: bool, showAffiliations: bool}
+     */
     #[Route(path: '/team/{teamId<\d+>}', name: 'team_team')]
-    public function teamAction(Request $request, int $teamId): Response
+    #[AjaxTemplate(normalTemplate: 'team/team.html.twig', ajaxTemplate: 'team/team_modal.html.twig')]
+    public function teamAction(int $teamId): array
     {
         if (!$this->config->get('enable_ranking')) {
             throw new BadRequestHttpException('Scoreboard is not available.');
@@ -73,16 +93,11 @@ class ScoreboardController extends BaseController
         }
         $showFlags        = (bool)$this->config->get('show_flags');
         $showAffiliations = (bool)$this->config->get('show_affiliations');
-        $data             = [
+
+        return [
             'team' => $team,
             'showFlags' => $showFlags,
             'showAffiliations' => $showAffiliations,
         ];
-
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('team/team_modal.html.twig', $data);
-        }
-
-        return $this->render('team/team.html.twig', $data);
     }
 }

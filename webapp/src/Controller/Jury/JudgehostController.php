@@ -12,11 +12,14 @@ use App\Form\Type\JudgehostsType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Twig\Attribute\AjaxTemplate;
 use App\Utils\Utils;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -43,8 +46,25 @@ class JudgehostController extends BaseController
         parent::__construct($em, $eventLog, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     judgehosts: list<array{
+     *         data: array<string, array<string, mixed>>,
+     *         actions: list<array<string, mixed>>,
+     *         link: string,
+     *         cssclass: string
+     *     }>,
+     *     table_fields: array<string, array{title: string}>,
+     *     all_checked_in_recently: bool,
+     *     refresh: array{after: int, url: string, ajax: bool}
+     * }
+     */
     #[Route(path: '', name: 'jury_judgehosts')]
-    public function indexAction(Request $request): Response
+    #[AjaxTemplate(
+        normalTemplate: 'jury/judgehosts.html.twig',
+        ajaxTemplate: 'jury/partials/judgehost_list.html.twig'
+    )]
+    public function indexAction(Request $request): array
     {
         /** @var Judgehost[] $judgehosts */
         $judgehosts = $this->em->createQueryBuilder()
@@ -210,7 +230,7 @@ class JudgehostController extends BaseController
             return strnatcasecmp($a['data']['hostname']['value'], $b['data']['hostname']['value']);
         });
 
-        $data = [
+        return [
             'judgehosts' => $judgehosts_table,
             'table_fields' => $table_fields,
             'all_checked_in_recently' => $all_checked_in_recently,
@@ -220,18 +240,24 @@ class JudgehostController extends BaseController
                 'ajax' => true,
             ]
         ];
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('jury/partials/judgehost_list.html.twig', $data);
-        } else {
-            return $this->render('jury/judgehosts.html.twig', $data);
-        }
     }
 
     /**
+     * @return array{
+     *     judgehost: Judgehost,
+     *     status: string,
+     *     statusIcon: string,
+     *     judgings: list<Judging>,
+     *     refresh: array{after: int, url: string, ajax: bool}
+     * }
      * @throws NonUniqueResultException
      */
     #[Route(path: '/{judgehostid}', methods: ['GET'], name: 'jury_judgehost')]
-    public function viewAction(Request $request, int $judgehostid): Response
+    #[AjaxTemplate(
+        normalTemplate: 'jury/judgehost.html.twig',
+        ajaxTemplate: 'jury/partials/judgehost_judgings.html.twig'
+    )]
+    public function viewAction(Request $request, int $judgehostid): array
     {
         /** @var Judgehost|null $judgehost */
         $judgehost = $this->em->createQueryBuilder()
@@ -278,7 +304,7 @@ class JudgehostController extends BaseController
                 ->getResult();
         }
 
-        $data = [
+        return [
             'judgehost' => $judgehost,
             'status' => $status,
             'statusIcon' => $statusIcon,
@@ -289,11 +315,6 @@ class JudgehostController extends BaseController
                 'ajax' => true,
             ],
         ];
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('jury/partials/judgehost_judgings.html.twig', $data);
-        } else {
-            return $this->render('jury/judgehost.html.twig', $data);
-        }
     }
 
     /**
@@ -375,9 +396,13 @@ class JudgehostController extends BaseController
         return $this->redirectToRoute('jury_judgehosts');
     }
 
+    /**
+     * @return array{form: FormInterface}|RedirectResponse
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/edit/multiple', name: 'jury_judgehost_edit')]
-    public function editMultipleAction(Request $request): Response
+    #[Template(template: 'jury/judgehosts_edit_multiple.html.twig')]
+    public function editMultipleAction(Request $request): array|RedirectResponse
     {
         $querybuilder = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')
@@ -398,8 +423,8 @@ class JudgehostController extends BaseController
             return $this->redirectToRoute('jury_judgehosts');
         }
 
-        return $this->render('jury/judgehosts_edit_multiple.html.twig', [
+        return [
             'form' => $form,
-        ]);
+        ];
     }
 }

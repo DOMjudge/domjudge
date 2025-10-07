@@ -13,9 +13,12 @@ use App\Service\EventLogService;
 use App\Service\RejudgingService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
@@ -38,8 +41,21 @@ class InternalErrorController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     internal_errors: list<array{
+     *         data: array<string, array{value: mixed}>,
+     *         actions: list<mixed>,
+     *         link: string,
+     *         cssclass: string
+     *     }>,
+     *     table_fields: array<string, array<string, mixed>>,
+     *     refresh: array{after: int, url: string}
+     * }
+     */
     #[Route(path: '', name: 'jury_internal_errors')]
-    public function indexAction(): Response
+    #[Template(template: 'jury/internal_errors.html.twig')]
+    public function indexAction(): array
     {
         /** @var InternalError[] $internalErrors */
         $internalErrors = $this->em->createQueryBuilder()
@@ -80,18 +96,26 @@ class InternalErrorController extends BaseController
             ];
         }
 
-        return $this->render('jury/internal_errors.html.twig', [
+        return [
             'internal_errors' => $internal_errors_table,
             'table_fields' => $table_fields,
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_internal_errors'),
             ]
-        ]);
+        ];
     }
 
+    /**
+     * @return array{
+     *     internalError: InternalError,
+     *     affectedLink: string|null,
+     *     affectedText: string|null
+     * }
+     */
     #[Route(path: '/{errorId<\d+>}', methods: ['GET'], name: 'jury_internal_error')]
-    public function viewAction(int $errorId): Response
+    #[Template(template: 'jury/internal_error.html.twig')]
+    public function viewAction(int $errorId): array
     {
         $internalError = $this->em->getRepository(InternalError::class)->find($errorId);
         if (!$internalError) {
@@ -126,15 +150,19 @@ class InternalErrorController extends BaseController
                 break;
         }
 
-        return $this->render('jury/internal_error.html.twig', [
+        return [
             'internalError' => $internalError,
             'affectedLink' => $affectedLink,
             'affectedText' => $affectedText,
-        ]);
+        ];
     }
 
+    /**
+     * @return array{url: string}|RedirectResponse|StreamedResponse
+     */
     #[Route(path: '/{errorId<\d+>}/{action<ignore|resolve>}', name: 'jury_internal_error_handle', methods: ['POST'])]
-    public function handleAction(Request $request, ?Profiler $profiler, int $errorId, string $action): Response
+    #[Template(template: 'jury/internal_error_resolve.html.twig')]
+    public function handleAction(Request $request, ?Profiler $profiler, int $errorId, string $action): array|RedirectResponse|StreamedResponse
     {
         /** @var InternalError $internalError */
         $internalError = $this->em->createQueryBuilder()
@@ -211,8 +239,8 @@ class InternalErrorController extends BaseController
             });
         }
 
-        return $this->render('jury/internal_error_resolve.html.twig', [
+        return [
             'url' => $this->generateUrl('jury_internal_error_handle', ['errorId' => $errorId, 'action' => $action]),
-        ]);
+        ];
     }
 }

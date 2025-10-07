@@ -14,9 +14,15 @@ use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\StatisticsService;
 use App\Service\SubmissionService;
+use App\Twig\Attribute\AjaxTemplate;
+use App\Twig\EventListener\CustomResponseListener;
 use App\Twig\TwigExtension;
+use App\Utils\Scoreboard\Filter;
+use App\Utils\Scoreboard\Scoreboard;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,15 +53,25 @@ class PublicController extends BaseController
         parent::__construct($em, $eventLog, $dj, $kernel);
     }
 
+    /**
+     * @return array{refresh?: array{after: int, url: string, ajax: bool}, static: bool, contest?: Contest,
+     *                scoreFilter?: Filter, scoreboard: Scoreboard, filterValues: array<string, string[]>,
+     *                groupedAffiliations: null|array<array<string, array<array{id: string, name: string}>>>,
+     *                showFlags: int, showAffiliationLogos: bool, showAffiliations: int, showPending: int,
+     *                showTeamSubmissions: int, scoreInSeconds: bool, maxWidth: int, jury?: bool,
+     *                public?: bool, ajax?: bool, hide_menu?: bool, current_contest: Contest|null}|RedirectResponse
+     */
     #[Route(path: '', name: 'public_index')]
     #[Route(path: '/scoreboard')]
+    #[AjaxTemplate(normalTemplate: 'public/scoreboard.html.twig', ajaxTemplate: 'partials/scoreboard.html.twig')]
     public function scoreboardAction(
         Request $request,
+        CustomResponseListener $customResponseListener,
         #[MapQueryParameter(name: 'contest')]
         ?string $contestId = null,
         #[MapQueryParameter]
         ?bool $static = false,
-    ): Response {
+    ): array|RedirectResponse {
         $response         = new Response();
         $refreshUrl       = $this->generateUrl('public_index');
         $contest          = $this->dj->getCurrentContest(onlyPublic: true);
@@ -84,16 +100,15 @@ class PublicController extends BaseController
             $request, $response, $refreshUrl, false, true, $static, $contest
         );
 
+        $customResponseListener->setCustomResponse($response);
+
         if ($static) {
             $data['hide_menu'] = true;
         }
 
         $data['current_contest'] = $contest;
 
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('partials/scoreboard.html.twig', $data, $response);
-        }
-        return $this->render('public/scoreboard.html.twig', $data, $response);
+        return $data;
     }
 
     #[Route(path: '/scoreboard.zip', name: 'public_scoreboard_data_zip')]
@@ -170,8 +185,12 @@ class PublicController extends BaseController
                                                  $response);
     }
 
+    /**
+     * @return array{team: Team|null, showFlags: bool, showAffiliations: bool}
+     */
     #[Route(path: '/team/{teamId<\d+>}', name: 'public_team')]
-    public function teamAction(Request $request, int $teamId): Response
+    #[AjaxTemplate(normalTemplate: 'public/team.html.twig', ajaxTemplate: 'public/team_modal.html.twig')]
+    public function teamAction(Request $request, int $teamId): array
     {
         /** @var Team|null $team */
         $team             = $this->em->getRepository(Team::class)->find($teamId);
@@ -186,21 +205,24 @@ class PublicController extends BaseController
             'showAffiliations' => $showAffiliations,
         ];
 
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('public/team_modal.html.twig', $data);
-        }
-
-        return $this->render('public/team.html.twig', $data);
+        return $data;
     }
 
     /**
+     * @return array{'problems': ContestProblem[], 'samples': string[], 'showLimits': bool,
+     *               'defaultMemoryLimit': int, 'timeFactorDiffers': bool,
+     *               'stats': array{'numBuckets': int, 'maxBucketSizeCorrect': int,
+     *                              'maxBucketSizeCorrect': int, 'maxBucketSizeIncorrect': int,
+     *                              'problems': array<array{'correct': array<array{'start': DateTime, 'end': DateTime, 'count': int}>,
+     *                                                      'incorrect': array<array{'start': DateTime, 'end': DateTime, 'count': int}>}>}}
+     *
      * @throws NonUniqueResultException
      */
     #[Route(path: '/problems', name: 'public_problems')]
-    public function problemsAction(): Response
+    #[Template(template: 'public/problems.html.twig')]
+    public function problemsAction(): array
     {
-        return $this->render('public/problems.html.twig',
-            $this->dj->getTwigDataForProblemsAction($this->stats));
+        return $this->dj->getTwigDataForProblemsAction($this->stats);
     }
 
     #[Route(path: '/problems/{probId<\d+>}/statement', name: 'public_problem_statement')]
@@ -275,8 +297,12 @@ class PublicController extends BaseController
         return $response($probId, $contest, $contestProblem);
     }
 
+    /**
+     * @return array{contest: Contest, problem: ContestProblem, team: Team|null}
+     */
     #[Route(path: '/submissions/team/{teamId}/problem/{problemId}', name: 'public_submissions')]
-    public function submissionsAction(Request $request, string $teamId, string $problemId): Response
+    #[Template(template: 'public/team_submissions.html.twig')]
+    public function submissionsAction(Request $request, string $teamId, string $problemId): array
     {
         $contest = $this->dj->getCurrentContest(onlyPublic: true);
 
@@ -310,13 +336,11 @@ class PublicController extends BaseController
             throw $this->createNotFoundException('Problem not found');
         }
 
-        $data = [
+        return [
             'contest' => $contest,
             'problem' => $problem,
             'team' => $team,
         ];
-
-        return $this->render('public/team_submissions.html.twig', $data);
     }
 
     #[Route(path: '/submissions-data.json', name: 'public_submissions_data')]
