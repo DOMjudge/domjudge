@@ -11,10 +11,10 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -49,12 +49,26 @@ class BalloonController extends AbstractController
         return false;
     }
 
+    /**
+     * @return array{}|array{
+     *     refresh: array{after: int, url: string, ajax: bool},
+     *     isfrozen: bool,
+     *     hasFilters: bool,
+     *     filteredAffiliations: list<TeamAffiliation>,
+     *     filteredLocations: list<Team>,
+     *     filteredCategories: list<TeamCategory>,
+     *     availableCategories: list<TeamCategory>,
+     *     defaultCategories: list<int>,
+     *     balloons: list<mixed>
+     * }
+     */
     #[Route(path: '', name: 'jury_balloons')]
-    public function indexAction(BalloonService $balloonService): Response
+    #[Template(template: 'jury/balloons.html.twig')]
+    public function indexAction(BalloonService $balloonService): array
     {
         $contest = $this->dj->getCurrentContest();
         if (is_null($contest)) {
-            return $this->render('jury/balloons.html.twig');
+            return [];
         }
 
         $balloons_table = $balloonService->collectBalloonTable($contest);
@@ -151,7 +165,7 @@ class BalloonController extends AbstractController
             ->getArrayResult();
         $defaultCategories = array_column($defaultCategories, "categoryid");
 
-        return $this->render('jury/balloons.html.twig', [
+        return [
             'refresh' => [
                 'after' => 60,
                 'url' => $this->generateUrl('jury_balloons'),
@@ -165,7 +179,7 @@ class BalloonController extends AbstractController
             'availableCategories' => $availableCategories,
             'defaultCategories' => $defaultCategories,
             'balloons' => $balloons_table
-        ]);
+        ];
     }
 
     #[Route(path: '/{balloonId}/done', name: 'jury_balloons_setdone')]

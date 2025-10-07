@@ -11,8 +11,12 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ExternalContestSourceService;
+use App\Twig\Attribute\AjaxTemplate;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -35,8 +39,28 @@ class ExternalContestController extends BaseController
         parent::__construct($em, $eventLog, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     externalContestSource: ExternalContestSource,
+     *     status: string,
+     *     sourceService: ExternalContestSourceService,
+     *     webappDir: string,
+     *     warningTableFields: array<string, array{title: string}>,
+     *     warningTable: list<array{
+     *         data: array<string, array<string, mixed>>,
+     *         actions: list<mixed>
+     *     }>,
+     *     form: \Symfony\Component\Form\FormView,
+     *     hasFilters: bool,
+     *     refresh: array{after: int, url: string, ajax: bool}
+     * }|RedirectResponse
+     */
     #[Route(path: '/', name: 'jury_external_contest')]
-    public function indexAction(Request $request): Response
+    #[AjaxTemplate(
+        normalTemplate: 'jury/external_contest.html.twig',
+        ajaxTemplate: 'jury/partials/external_contest_warnings.html.twig'
+    )]
+    public function indexAction(Request $request): array|RedirectResponse
     {
         /** @var ExternalContestSource|null $externalContestSource */
         $externalContestSource = $this->em->createQueryBuilder()
@@ -107,7 +131,7 @@ class ExternalContestController extends BaseController
         // Build the filter form.
         $form = $this->createForm(ExternalSourceWarningsFilterType::class, $filters);
 
-        $data = [
+        return [
             'externalContestSource' => $externalContestSource,
             'status' => $status,
             'sourceService' => $this->sourceService,
@@ -122,16 +146,17 @@ class ExternalContestController extends BaseController
                 'ajax' => true,
             ]
         ];
-
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('jury/partials/external_contest_warnings.html.twig', $data);
-        } else {
-            return $this->render('jury/external_contest.html.twig', $data);
-        }
     }
 
+    /**
+     * @return array{
+     *     externalContestSource: ExternalContestSource,
+     *     form: FormInterface
+     * }|RedirectResponse
+     */
     #[Route(path: '/manage', name: 'jury_external_contest_manage')]
-    public function manageAction(Request $request): Response
+    #[Template(template: 'jury/external_contest_manage.html.twig')]
+    public function manageAction(Request $request): array|RedirectResponse
     {
         /** @var ExternalContestSource $externalContestSource */
         $externalContestSource = $this->em->createQueryBuilder()
@@ -162,9 +187,9 @@ class ExternalContestController extends BaseController
             return $this->redirectToRoute('jury_external_contest');
         }
 
-        return $this->render('jury/external_contest_manage.html.twig', [
+        return [
             'externalContestSource' => $externalContestSource,
             'form' => $form,
-        ]);
+        ];
     }
 }

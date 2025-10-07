@@ -9,7 +9,9 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,8 +34,12 @@ class PrintController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{form: FormInterface}|array{success: bool, output: string}|Response
+     */
+    #[Template(template: 'jury/print.html.twig')]
     #[Route(path: '', name: 'jury_print')]
-    public function showAction(Request $request): Response
+    public function showAction(Request $request): array|Response
     {
         if (!$this->config->get('print_command')) {
             throw new AccessDeniedHttpException("Printing disabled in config");
@@ -62,8 +68,6 @@ class PrintController extends BaseController
             ]);
         }
 
-        return $this->render('jury/print.html.twig', [
-            'form' => $form,
-        ]);
+        return ['form' => $form];
     }
 }

@@ -32,6 +32,8 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query\Expr\Join;
+use App\Twig\Attribute\AjaxTemplate;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -64,11 +66,17 @@ class ContestController extends BaseController
     }
 
     /**
+     * @return array{
+     *     upcoming_contest: Contest|null,
+     *     contests_table: list<array<string, mixed>>,
+     *     table_fields: array<string, array<string, mixed>>
+     * }
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
     #[Route(path: '', name: 'jury_contests')]
-    public function indexAction(Request $request): Response
+    #[Template(template: 'jury/contests.html.twig')]
+    public function indexAction(Request $request): array
     {
         $em = $this->em;
 
@@ -298,15 +306,26 @@ class ContestController extends BaseController
             ->getQuery()
             ->getOneOrNullResult();
 
-        return $this->render('jury/contests.html.twig', [
+        return [
             'upcoming_contest' => $upcomingContest,
             'contests_table' => $contests_table,
             'table_fields' => $table_fields,
-        ]);
+        ];
     }
 
+    /**
+     * @return array{
+     *     contest: Contest,
+     *     allowRemovedIntervals: bool,
+     *     removedIntervalForm: FormInterface,
+     *     removedIntervals: list<RemovedInterval>,
+     *     problems: list<ContestProblem>,
+     *     languages: list<Language>
+     * }|Response
+     */
     #[Route(path: '/{contestId<\d+>}', name: 'jury_contest')]
-    public function viewAction(Request $request, int $contestId): Response
+    #[Template(template: 'jury/contest.html.twig')]
+    public function viewAction(Request $request, int $contestId): array|Response
     {
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
@@ -351,14 +370,14 @@ class ContestController extends BaseController
 
         $languages = $this->dj->getAllowedLanguagesForContest($contest);
 
-        return $this->render('jury/contest.html.twig', [
+        return [
             'contest' => $contest,
             'allowRemovedIntervals' => $this->getParameter('removed_intervals'),
             'removedIntervalForm' => $form,
             'removedIntervals' => $removedIntervals,
             'problems' => $problems,
             'languages' => $languages,
-        ]);
+        ];
     }
 
     #[Route(path: '/{contestId}/toggle/{type<submit|balloons|tiebreaker|medals|public>}', name: 'jury_contest_toggle')]
@@ -440,9 +459,16 @@ class ContestController extends BaseController
         return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);
     }
 
+    /**
+     * @return array{
+     *     contest: Contest,
+     *     form: FormInterface
+     * }|Response
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{contestId<\d+>}/edit', name: 'jury_contest_edit')]
-    public function editAction(Request $request, int $contestId): Response
+    #[Template(template: 'jury/contest_edit.html.twig')]
+    public function editAction(Request $request, int $contestId): array|Response
     {
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
@@ -571,10 +597,10 @@ class ContestController extends BaseController
 
         $this->em->refresh($contest);
 
-        return $this->render('jury/contest_edit.html.twig', [
+        return [
             'contest' => $contest,
             'form' => $form,
-        ]);
+        ];
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -617,9 +643,13 @@ class ContestController extends BaseController
         return $this->deleteEntities($request, [$contestProblem], $this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
 
+    /**
+     * @return array{form: FormInterface}|Response
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/add', name: 'jury_contest_add')]
-    public function addAction(Request $request): Response
+    #[Template(template: 'jury/contest_add.html.twig')]
+    public function addAction(Request $request): array|Response
     {
         $contest = new Contest();
         // Set default activate time
@@ -670,9 +700,9 @@ class ContestController extends BaseController
             return $response;
         }
 
-        return $this->render('jury/contest_add.html.twig', [
+        return [
             'form' => $form,
-        ]);
+        ];
     }
 
     #[Route(path: '/{contestId<\d+>}/prefetch', name: 'jury_contest_prefetch')]
@@ -755,9 +785,17 @@ class ContestController extends BaseController
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
+    /**
+     * @return array{
+     *     contest: Contest,
+     *     blockers: list<string>,
+     *     form: FormInterface
+     * }|RedirectResponse
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{contestId<\d+>}/finalize', name: 'jury_contest_finalize')]
-    public function finalizeAction(Request $request, int $contestId): Response
+    #[Template(template: 'jury/contest_finalize.html.twig')]
+    public function finalizeAction(Request $request, int $contestId): array|RedirectResponse
     {
         /** @var Contest $contest */
         $contest  = $this->em->getRepository(Contest::class)->find($contestId);
@@ -816,11 +854,11 @@ class ContestController extends BaseController
             }
         }
 
-        return $this->render('jury/contest_finalize.html.twig', [
+        return [
             'contest' => $contest,
             'blockers' => $blockers,
             'form' => $form,
-        ]);
+        ];
     }
 
     #[IsGranted('ROLE_ADMIN')]
