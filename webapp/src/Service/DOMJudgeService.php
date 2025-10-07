@@ -1801,8 +1801,7 @@ class DOMJudgeService
                     }
                 }
             }
-        }
-        elseif ($this->config->get('check_new_version', false) === UpdateStrategy::Strategy_major_release) {
+        } elseif ($this->config->get('check_new_version', false) === UpdateStrategy::Strategy_major_release) {
             /* Steer towards the latest version directly
              * So the expected path would be:
              * DJ6.0.0 -> DJ9.1.2

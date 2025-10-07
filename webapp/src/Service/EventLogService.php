@@ -488,7 +488,7 @@ class EventLogService
                 $this->dj->withAllRoles(function () use ($url, &$awards) {
                     $response = $this->dj->internalApiRequest($url);
                     if (!empty($response)) {
-                      $awards = Utils::jsonDecode($response);
+                        $awards = Utils::jsonDecode($response);
                     }
                 });
                 foreach ($awards as $award) {
