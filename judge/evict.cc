@@ -1,15 +1,21 @@
 #include "config.h"
 
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include <dirent.h>
 #include <fcntl.h>
 #include <getopt.h>
-#include <malloc.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <cstring>
+#include <cstdlib>
+
+extern "C" {
 #include "lib.error.h"
 #include "lib.misc.h"
+}
 
 #define PROGRAM "evict"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
@@ -30,27 +36,23 @@ struct option const long_opts[] = {
 
 void usage()
 {
-	printf("\
-Usage: %s [OPTION]... DIRECTORY\n\
-Evicts all files in a directory tree from the kernel filesystem cache.\n\
-\n\
-  -v, --verbose        display some extra warnings and information\n\
-      --help           display this help and exit\n\
-      --version        output version information and exit\n\
-\n", progname);
+    std::cout << "Usage: " << progname << " [OPTION]... DIRECTORY" << std::endl
+              << "Evicts all files in a directory tree from the kernel filesystem cache." << std::endl << std::endl
+              << "  -v, --verbose        display some extra warnings and information" << std::endl
+              << "      --help           display this help and exit" << std::endl
+              << "      --version        output version information and exit" << std::endl << std::endl;
 	exit(0);
 }
 
-void evict_directory(char *dirname) {
+void evict_directory(const std::string& dirname) {
 	DIR *dir;
 	struct dirent *entry;
-	int fd;
-	char *entry_path;
+	int fd = -1;
 	struct stat s;
 
-	dir = opendir(dirname);
+	dir = opendir(dirname.c_str());
 	if (dir != NULL) {
-		if (be_verbose) logmsg(LOG_INFO, "Evicting all files in directory: %s", dirname);
+		if (be_verbose) logmsg(LOG_INFO, "Evicting all files in directory: %s", dirname.c_str());
 
 		/* Read everything in the directory */
 		while ( (entry = readdir(dir)) != NULL ) {
@@ -60,16 +62,19 @@ void evict_directory(char *dirname) {
 			}
 
 			/* Construct the full file path */
-			entry_path = allocstr("%s/%s", dirname, entry->d_name);
-			fd = open(entry_path, O_RDONLY, 0);
+			std::string entry_path = dirname + "/" + entry->d_name;
+			fd = open(entry_path.c_str(), O_RDONLY, 0);
 			if (fd == -1) {
-				warning(errno, "Unable to open file: %s", entry_path);
-				goto entry_done;
+				warning(errno, "Unable to open file: %s", entry_path.c_str());
+				continue;
 			}
 
 			if (fstat(fd, &s) < 0) {
-				if (be_verbose) logerror(errno, "Unable to stat file/directory: %s\n", entry_path);
-				goto entry_done;
+				if (be_verbose) logerror(errno, "Unable to stat file/directory: %s\n", entry_path.c_str());
+				if ( close(fd)!=0 ) {
+					warning(errno, "Unable to close file: %s", entry_path.c_str());
+				}
+				continue;
 			}
 			if (S_ISDIR(s.st_mode)) {
 				/* Recurse into subdirectories */
@@ -77,30 +82,27 @@ void evict_directory(char *dirname) {
 			} else {
 				/* evict this file from the cache */
 				if (posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED)) {
-					warning(errno, "Unable to evict file: %s\n", entry_path);
+					warning(errno, "Unable to evict file: %s\n", entry_path.c_str());
 				} else {
-					if (be_verbose) logmsg(LOG_DEBUG, "Evicted file: %s", entry_path);
+					if (be_verbose) logmsg(LOG_DEBUG, "Evicted file: %s", entry_path.c_str());
 				}
 			}
-		  entry_done:
 
-			if ( fd!=-1 && close(fd)!=0 ) {
-				warning(errno, "Unable to close file: %s", entry_path);
+			if ( close(fd)!=0 ) {
+				warning(errno, "Unable to close file: %s", entry_path.c_str());
 			}
-			free(entry_path);
 		}
 		if ( closedir(dir)!=0 ) {
-			warning(errno, "Unable to close directory: %s", dirname);
+			warning(errno, "Unable to close directory: %s", dirname.c_str());
 		}
 	} else {
-		warning(errno, "Unable to open directory: %s", dirname);
+		warning(errno, "Unable to open directory: %s", dirname.c_str());
 	}
 }
 
 int main(int argc, char *argv[])
 {
 	int opt;
-	char* dirname;
 
 	progname = argv[0];
 
@@ -129,11 +131,11 @@ int main(int argc, char *argv[])
 
 	if ( argc<=optind ) {
 		logmsg(LOG_ERR, "no directory specified");
-		return 0;
+		return 1;
 	}
 
 	/* directory to evict */
-	dirname = argv[optind];
+	std::string dirname = argv[optind];
 
 	evict_directory(dirname);
 
