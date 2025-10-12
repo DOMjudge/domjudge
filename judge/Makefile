@@ -13,8 +13,8 @@ judgehost: $(TARGETS) $(SUBST_FILES)
 $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 
-evict: evict.c $(LIBHEADERS) $(LIBSOURCES)
-	$(CC) $(CFLAGS) -o $@ $< $(LIBSOURCES)
+evict: evict.cc $(LIBHEADERS) $(LIBSOURCES)
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LIBSOURCES)
 
 runguard: runguard.cc $(LIBHEADERS) $(LIBSOURCES) $(TOPDIR)/etc/runguard-config.h
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LIBSOURCES) $(LIBCGROUP)
