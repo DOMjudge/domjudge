@@ -117,11 +117,6 @@ FILE  *metafile;
 char  cgroupname[255];
 const char *cpuset;
 
-/* Linux Out-Of-Memory adjustment for current process. */
-#define OOM_PATH_NEW "/proc/self/oom_score_adj"
-#define OOM_PATH_OLD "/proc/self/oom_adj"
-#define OOM_RESET_VALUE 0
-
 char *runuser;
 char *rungroup;
 int runuid;
@@ -1288,24 +1283,23 @@ int main(int argc, char **argv)
 	}
 
 	/* Check if any Linux Out-Of-Memory killer adjustments have to
-	 * be made. The oom_adj or oom_score_adj is inherited by child
+	 * be made. The oom_score_adj is inherited by child
 	 * processes, and at least some configurations of sshd set
 	 * it, leading to processes getting a timelimit instead of memory
 	 * exceeded, when running via SSH. */
 	FILE *fp = nullptr;
-	char *oom_path;
-	if ( !fp && (fp = fopen(OOM_PATH_NEW,"r+")) ) oom_path = strdup(OOM_PATH_NEW);
-	if ( !fp && (fp = fopen(OOM_PATH_OLD,"r+")) ) oom_path = strdup(OOM_PATH_OLD);
-	if ( fp!=nullptr ) {
-		if ( fscanf(fp,"%d",&ret)!=1 ) error(errno,"cannot read from `%s'",oom_path);
+	const char *oom_score_path = "/proc/self/oom_score_adj";
+	if ( fp = fopen(oom_score_path, "r+") ) {
+		if ( fscanf(fp,"%d", &ret)!=1 ) error(errno,"cannot read from `%s'", oom_score_path);
 		if ( ret<0 ) {
-			verbose("resetting `%s' from %d to %d",oom_path,ret,OOM_RESET_VALUE);
+			int oom_reset_value = 0;
+			verbose("resetting `%s' from %d to %d", oom_score_path, ret, oom_reset_value);
 			rewind(fp);
-			if ( fprintf(fp,"%d\n",OOM_RESET_VALUE)<=0 ) {
-				error(errno,"cannot write to `%s'",oom_path);
+			if ( fprintf(fp,"%d\n", oom_reset_value) <= 0 ) {
+				error(errno, "cannot write to `%s'", oom_score_path);
 			}
 		}
-		if ( fclose(fp)!=0 ) error(errno,"closing file `%s'",oom_path);
+		if ( fclose(fp)!=0 ) error(errno, "closing file `%s'", oom_score_path);
 	}
 
 	switch ( child_pid = fork() ) {
