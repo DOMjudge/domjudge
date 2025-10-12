@@ -1289,7 +1289,7 @@ int main(int argc, char **argv)
 
 	/* Check if any Linux Out-Of-Memory killer adjustments have to
 	 * be made. The oom_adj or oom_score_adj is inherited by child
-	 * processes, and at least older versions of sshd seemed to set
+	 * processes, and at least some configurations of sshd set
 	 * it, leading to processes getting a timelimit instead of memory
 	 * exceeded, when running via SSH. */
 	FILE *fp = nullptr;
