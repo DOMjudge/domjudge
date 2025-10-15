@@ -13,10 +13,13 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
+use App\Twig\Attribute\AjaxTemplate;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Knp\Component\Pager\Pagination\PaginationInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -43,8 +46,20 @@ class TeamCategoryController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     team_categories: list<array{
+     *         data: array<string, array<string, mixed>>,
+     *         actions: list<array<string, string>>,
+     *         link: string,
+     *         style: string
+     *     }>,
+     *     table_fields: array<string, array<string, mixed>>
+     * }
+     */
     #[Route(path: '', name: 'jury_team_categories')]
-    public function indexAction(): Response
+    #[Template(template: 'jury/team_categories.html.twig')]
+    public function indexAction(): array
     {
         $em             = $this->em;
         $teamCategories = $em->createQueryBuilder()
@@ -114,18 +129,31 @@ class TeamCategoryController extends BaseController
                 'style' => $teamCategory->getColor() ? sprintf('background-color: %s;', $teamCategory->getColor()) : '',
             ];
         }
-        return $this->render('jury/team_categories.html.twig', [
+        return [
             'team_categories' => $team_categories_table,
             'table_fields' => $table_fields,
-        ]);
+        ];
     }
 
     /**
+     * @return array{
+     *     teamCategory: TeamCategory,
+     *     submissions: PaginationInterface<int, Submission>,
+     *     submissionCounts: array<string, int>,
+     *     showContest: bool,
+     *     showExternalResult: bool,
+     *     showTestcases?: bool,
+     *     refresh: array{after: int, url: string, ajax: bool}
+     * }
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route(path: '/{categoryId<\d+>}', name: 'jury_team_category')]
-    public function viewAction(Request $request, SubmissionService $submissionService, int $categoryId): Response
+    #[AjaxTemplate(
+        normalTemplate: 'jury/team_category.html.twig',
+        ajaxTemplate: 'jury/partials/submission_list.html.twig'
+    )]
+    public function viewAction(Request $request, SubmissionService $submissionService, int $categoryId): array
     {
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$teamCategory) {
@@ -155,15 +183,21 @@ class TeamCategoryController extends BaseController
         // For ajax requests, only return the submission list partial.
         if ($request->isXmlHttpRequest()) {
             $data['showTestcases'] = false;
-            return $this->render('jury/partials/submission_list.html.twig', $data);
         }
 
-        return $this->render('jury/team_category.html.twig', $data);
+        return $data;
     }
 
+    /**
+     * @return array{
+     *     teamCategory: TeamCategory,
+     *     form: FormInterface
+     * }|RedirectResponse
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{categoryId<\d+>}/edit', name: 'jury_team_category_edit')]
-    public function editAction(Request $request, int $categoryId): Response
+    #[Template(template: 'jury/team_category_edit.html.twig')]
+    public function editAction(Request $request, int $categoryId): array|RedirectResponse
     {
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$teamCategory) {
@@ -196,10 +230,10 @@ class TeamCategoryController extends BaseController
             return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
         }
 
-        return $this->render('jury/team_category_edit.html.twig', [
+        return [
             'teamCategory' => $teamCategory,
             'form' => $form,
-        ]);
+        ];
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -214,9 +248,13 @@ class TeamCategoryController extends BaseController
         return $this->deleteEntities($request, [$teamCategory], $this->generateUrl('jury_team_categories'));
     }
 
+    /**
+     * @return array{form: FormInterface}|Response
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/add', name: 'jury_team_category_add')]
-    public function addAction(Request $request): Response
+    #[Template(template: 'jury/team_category_add.html.twig')]
+    public function addAction(Request $request): array|Response
     {
         $teamCategory = new TeamCategory();
 
@@ -231,9 +269,9 @@ class TeamCategoryController extends BaseController
             return $response;
         }
 
-        return $this->render('jury/team_category_add.html.twig', [
+        return [
             'form' => $form,
-        ]);
+        ];
     }
 
     #[IsGranted('ROLE_ADMIN')]

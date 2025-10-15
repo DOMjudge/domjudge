@@ -11,6 +11,7 @@ use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -27,11 +28,24 @@ class AnalysisController extends AbstractController
         private readonly EntityManagerInterface $em
     ) {}
 
+    /**
+     * @return array{error: string}|array{
+     *     contest: mixed,
+     *     problems: mixed,
+     *     teams: mixed,
+     *     submissions: mixed,
+     *     delayed_judgings: array{data: mixed, overflow: int, delay: int},
+     *     misc: mixed,
+     *     filters: array<string, string>,
+     *     view: string
+     * }|Response
+     */
+    #[Template(template: 'jury/analysis/contest_overview.html.twig')]
     #[Route(path: '', name: 'analysis_index')]
     public function indexAction(
         #[MapQueryParameter]
         ?string $view = null
-    ): Response {
+    ): array|Response {
         $em = $this->em;
         $contest = $this->dj->getCurrentContest();
 
@@ -66,7 +80,7 @@ class AnalysisController extends AbstractController
             ->orderBy('timediff', 'DESC')
             ->getQuery()->getResult();
 
-        return $this->render('jury/analysis/contest_overview.html.twig', [
+        return [
             'contest' => $contest,
             'problems' => $problems,
             'teams' => $teams,
@@ -79,11 +93,15 @@ class AnalysisController extends AbstractController
             'misc' => $misc,
             'filters' => StatisticsService::FILTERS,
             'view' => $view,
-        ]);
+        ];
     }
 
+    /**
+     * @return array<string, mixed>|Response
+     */
+    #[Template(template: 'jury/analysis/team.html.twig')]
     #[Route(path: '/team/{team}', name: 'analysis_team')]
-    public function teamAction(Team $team): Response
+    public function teamAction(Team $team): array|Response
     {
         $contest = $this->dj->getCurrentContest();
 
@@ -93,18 +111,20 @@ class AnalysisController extends AbstractController
             ]);
         }
 
-        return $this->render('jury/analysis/team.html.twig',
-            $this->stats->getTeamStats($contest, $team)
-        );
+        return $this->stats->getTeamStats($contest, $team);
     }
 
+    /**
+     * @return array<string, mixed>|Response
+     */
+    #[Template(template: 'jury/analysis/problem.html.twig')]
     #[Route(path: '/problem/{probid}', name: 'analysis_problem')]
     public function problemAction(
         #[MapEntity(id: 'probid')]
         Problem $problem,
         #[MapQueryParameter]
         ?string $view = null
-    ): Response {
+    ): array|Response {
         $contest = $this->dj->getCurrentContest();
 
         if ($contest === null) {
@@ -116,16 +136,18 @@ class AnalysisController extends AbstractController
         $filterKeys = array_keys(StatisticsService::FILTERS);
         $view = $view ?: reset($filterKeys);
 
-        return $this->render('jury/analysis/problem.html.twig',
-            $this->stats->getProblemStats($contest, $problem, $view)
-        );
+        return $this->stats->getProblemStats($contest, $problem, $view);
     }
 
+    /**
+     * @return array<string, mixed>|Response
+     */
+    #[Template(template: 'jury/analysis/languages.html.twig')]
     #[Route(path: '/languages', name: 'analysis_languages')]
     public function languagesAction(
         #[MapQueryParameter]
         ?string $view = null
-    ): Response {
+    ): array|Response {
         $contest = $this->dj->getCurrentContest();
 
         if ($contest === null) {
@@ -137,8 +159,6 @@ class AnalysisController extends AbstractController
         $filterKeys = array_keys(StatisticsService::FILTERS);
         $view = $view ?: reset($filterKeys);
 
-        return $this->render('jury/analysis/languages.html.twig',
-            $this->stats->getLanguagesStats($contest, $view)
-        );
+        return $this->stats->getLanguagesStats($contest, $view);
     }
 }

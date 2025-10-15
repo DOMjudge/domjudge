@@ -40,9 +40,13 @@ use Doctrine\ORM\Query\Expr\Join;
 use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Twig\Attribute\AjaxTemplate;
+use App\Twig\EventListener\CustomResponseListener;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -75,12 +79,34 @@ class SubmissionController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     refresh: array{after: int, url: string, ajax: bool},
+     *     viewTypes: array<int, string>,
+     *     view: int,
+     *     submissions: PaginationInterface<int, Submission>,
+     *     submissionCounts: array<string, int>,
+     *     showContest: bool,
+     *     hasFilters: bool,
+     *     results: list<string>,
+     *     showExternalResult: bool,
+     *     showTestcases: bool,
+     *     disabledProbs: array<int, string>,
+     *     disabledLangs: array<string, string>,
+     *     form?: mixed
+     * }
+     */
     #[Route(path: '', name: 'jury_submissions')]
+    #[AjaxTemplate(
+        normalTemplate: 'jury/submissions.html.twig',
+        ajaxTemplate: 'jury/partials/submission_list.html.twig'
+    )]
     public function indexAction(
         Request $request,
+        CustomResponseListener $customResponseListener,
         #[MapQueryParameter(name: 'view')]
         ?string $viewFromRequest = null,
-    ): Response {
+    ): array {
         $viewTypes = [0 => 'all', 1 => 'unverified', 2 => 'unjudged', 3 => 'judging'];
         $view      = 0;
         if (($submissionViewCookie = $this->dj->getCookie('domjudge_submissionview')) &&
@@ -213,19 +239,21 @@ class SubmissionController extends BaseController
         ];
 
         // For ajax requests, only return the submission list partial.
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('jury/partials/submission_list.html.twig', $data);
+        if (!$request->isXmlHttpRequest()) {
+            $data["form"] = $form->createView();
         }
 
-        $data["form"] = $form->createView();
+        $customResponseListener->setCustomResponse($response);
 
-        return $this->render('jury/submissions.html.twig', $data, $response);
+        return $data;
     }
 
     /**
+     * @return array<string, mixed>|RedirectResponse
      * @throws NonUniqueResultException
      */
     #[Route(path: '/{submitId<\d+>}', name: 'jury_submission')]
+    #[Template(template: 'jury/submission.html.twig')]
     public function viewAction(
         Request $request,
         int $submitId,
@@ -233,7 +261,7 @@ class SubmissionController extends BaseController
         ?int $judgingId = null,
         #[MapQueryParameter(name: 'rejudgingid')]
         ?int $rejudgingId = null,
-    ): Response {
+    ): array|RedirectResponse {
         if (isset($judgingId, $rejudgingId)) {
             throw new BadRequestHttpException("You cannot specify jid and rejudgingid at the same time.");
         }
@@ -648,7 +676,7 @@ class SubmissionController extends BaseController
             }
         }
 
-        return $this->render('jury/submission.html.twig', $twigData);
+        return $twigData;
     }
 
     #[Route(path: '/request-full-debug/{jid}', name: 'request_full_debug')]
@@ -805,14 +833,26 @@ class SubmissionController extends BaseController
     }
 
     /**
+     * @return array{
+     *     submission: Submission,
+     *     files: list<SubmissionFile>,
+     *     oldSubmission: Submission|null,
+     *     oldFiles: list<SubmissionFile>|null,
+     *     oldFileStats: array<string, mixed>,
+     *     originalSubmission: Submission|null,
+     *     originalFiles: list<SubmissionFile>|null,
+     *     originalFileStats: array<string, mixed>,
+     *     allowEdit: bool
+     * }|Response
      * @throws NonUniqueResultException
      */
     #[Route(path: '/{submission}/source', name: 'jury_submission_source')]
+    #[Template(template: 'jury/submission_source.html.twig')]
     public function sourceAction(
         Submission $submission,
         #[MapQueryParameter]
         ?int $fetch = null
-    ): Response {
+    ): array|Response {
         if ($fetch !== null) {
             /** @var SubmissionFile|null $file */
             $file = $this->em->createQueryBuilder()
@@ -914,7 +954,7 @@ class SubmissionController extends BaseController
         $oldFileStats      = $oldFiles !== null ? $this->determineFileChanged($files, $oldFiles) : [];
         $originalFileStats = $originalFiles !== null ? $this->determineFileChanged($files, $originalFiles) : [];
 
-        return $this->render('jury/submission_source.html.twig', [
+        return [
             'submission' => $submission,
             'files' => $files,
             'oldSubmission' => $oldSubmission,
@@ -924,11 +964,20 @@ class SubmissionController extends BaseController
             'originalFiles' => $originalFiles,
             'originalFileStats' => $originalFileStats,
             'allowEdit' => $this->allowEdit(),
-        ]);
+        ];
     }
 
+    /**
+     * @return array{
+     *     submission: Submission,
+     *     files: list<SubmissionFile>,
+     *     form: FormInterface,
+     *     selected: int|null
+     * }|RedirectResponse
+     */
     #[Route(path: '/{submission}/edit-source', name: 'jury_submission_edit_source')]
-    public function editSourceAction(Request $request, Submission $submission, #[MapQueryParameter] ?int $rank = null): Response
+    #[Template(template: 'jury/submission_edit_source.html.twig')]
+    public function editSourceAction(Request $request, Submission $submission, #[MapQueryParameter] ?int $rank = null): array|RedirectResponse
     {
         if (!$this->allowEdit()) {
             $this->addFlash('danger', 'You cannot re-submit code without being a team.');
@@ -1039,12 +1088,12 @@ class SubmissionController extends BaseController
             return $this->redirectToRoute('jury_submission', ['submitId' => $submittedSubmission->getSubmitid()]);
         }
 
-        return $this->render('jury/submission_edit_source.html.twig', [
+        return [
             'submission' => $submission,
             'files' => $files,
             'form' => $form,
             'selected' => $rank,
-        ]);
+        ];
     }
 
     /**

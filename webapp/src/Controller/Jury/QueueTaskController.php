@@ -9,6 +9,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -42,8 +43,16 @@ class QueueTaskController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     queueTasksTable: list<array{data: array<string, mixed>, actions: list<mixed>}>,
+     *     tableFields: array<string, array{title: string}>,
+     *     numActions: int
+     * }
+     */
     #[Route(path: '', name: 'jury_queue_tasks')]
-    public function indexAction(): Response
+    #[Template(template: 'jury/queue_tasks.html.twig')]
+    public function indexAction(): array
     {
         /** @var QueueTask[] $queueTasks */
         $queueTasks = $this->em->createQueryBuilder()
@@ -121,11 +130,11 @@ class QueueTaskController extends BaseController
             ];
         }
 
-        return $this->render('jury/queue_tasks.html.twig', [
+        return [
             'queueTasksTable' => $queueTasksTable,
             'tableFields' => $tableFields,
             'numActions' => 4,
-        ]);
+        ];
     }
 
     #[Route(path: '/{queueTaskId}/change-priority/{priority}', name: 'jury_queue_task_change_priority')]
@@ -161,8 +170,19 @@ class QueueTaskController extends BaseController
         return $this->redirectToRoute('jury_queue_tasks');
     }
 
+    /**
+     * @return array{
+     *     firstJudgeTask: JudgeTask|null,
+     *     judgeTaksPriority: string|null,
+     *     queueTask: QueueTask,
+     *     judgeTasksTable: list<array{data: array<string, mixed>, actions: list<mixed>}>,
+     *     tableFields: array<string, array{title: string}>,
+     *     numActions: int
+     * }|RedirectResponse
+     */
     #[Route(path: '/{queueTaskId}/judgetasks', name: 'jury_queue_task_judge_tasks')]
-    public function viewJudgeTasksAction(int $queueTaskId): Response
+    #[Template(template: 'jury/judge_tasks.html.twig')]
+    public function viewJudgeTasksAction(int $queueTaskId): array|RedirectResponse
     {
         $queueTask = $this->em->getRepository(QueueTask::class)->find($queueTaskId);
         if (!$queueTask) {
@@ -227,13 +247,13 @@ class QueueTaskController extends BaseController
 
         $firstJudgeTask = $judgeTasks[0] ?? null;
 
-        return $this->render('jury/judge_tasks.html.twig', [
+        return [
             'firstJudgeTask' => $firstJudgeTask,
             'judgeTaksPriority' => isset($firstJudgeTask) ? static::PRIORITY_MAP[$firstJudgeTask->getPriority()] : null,
             'queueTask' => $queueTask,
             'judgeTasksTable' => $judgeTasksTable,
             'tableFields' => $tableFields,
             'numActions' => 0,
-        ]);
+        ];
     }
 }

@@ -11,15 +11,19 @@ use App\Form\Type\ExecutableUploadType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Twig\Attribute\AjaxTemplate;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException as PHPInvalidArgumentException;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -43,8 +47,27 @@ class ExecutableController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     executables_used: list<array{
+     *         data: array<string, array<string, mixed>>,
+     *         actions: list<array<string, string>>,
+     *         link: string,
+     *         cssclass?: string|null
+     *     }>,
+     *     executables_unused: list<array{
+     *         data: array<string, array<string, mixed>>,
+     *         actions: list<array<string, string>>,
+     *         link: string,
+     *         cssclass?: string|null
+     *     }>,
+     *     table_fields: array<string, array<string, mixed>>,
+     *     form: FormInterface
+     * }
+     */
     #[Route(path: '', name: 'jury_executables')]
-    public function indexAction(Request $request): Response
+    #[Template(template: 'jury/executables.html.twig')]
+    public function indexAction(Request $request): array
     {
         $executables_tables_used = [];
         $executables_tables_unused = [];
@@ -188,17 +211,21 @@ class ExecutableController extends BaseController
         // This is replaced with the icon.
         unset($table_fields['type']);
 
-        return $this->render('jury/executables.html.twig', [
+        return [
             'executables_used' => $executables_tables_used,
             'executables_unused' => $executables_tables_unused,
             'table_fields' => $table_fields,
             'form' => $form,
-        ]);
+        ];
     }
 
+    /**
+     * @return array{form: FormInterface}|RedirectResponse
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/add', name: 'jury_executable_add')]
-    public function addAction(Request $request): Response
+    #[Template(template: 'jury/executable_add.html.twig')]
+    public function addAction(Request $request): array|RedirectResponse
     {
         $data = [];
         $form = $this->createForm(ExecutableUploadType::class, $data);
@@ -255,18 +282,22 @@ class ExecutableController extends BaseController
             }
         }
 
-        return $this->render('jury/executable_add.html.twig', [
+        return [
             'form' => $form,
-        ]);
+        ];
     }
 
+    /**
+     * @return array<string, mixed>|RedirectResponse
+     */
     #[Route(path: '/{execId}', name: 'jury_executable')]
+    #[Template(template: 'jury/executable.html.twig')]
     public function viewAction(
         Request $request,
         string $execId,
         #[MapQueryParameter]
         ?int $index = null
-    ): Response {
+    ): array|RedirectResponse {
         $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
@@ -363,7 +394,7 @@ class ExecutableController extends BaseController
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }
 
-        return $this->render('jury/executable.html.twig', array_merge($editorData, [
+        return array_merge($editorData, [
             'form' => $form->createView(),
             'uploadForm' => $uploadForm->createView(),
             'selected' => $index,
@@ -371,7 +402,7 @@ class ExecutableController extends BaseController
             'default_compare' => (string)$this->config->get('default_compare'),
             'default_run' => (string)$this->config->get('default_run'),
             'default full debug' => (string)$this->config->get('default_full_debug'),
-        ]));
+        ]);
     }
 
     #[Route(path: '/{execId}/download', name: 'jury_executable_download')]
@@ -388,9 +419,22 @@ class ExecutableController extends BaseController
         return Utils::streamAsBinaryFile($zipFileContent, $filename, 'zip');
     }
 
+    /**
+     * @return array{
+     *     type: string,
+     *     primaryKey: string,
+     *     description: string,
+     *     messages: list<mixed>,
+     *     isError: bool,
+     *     showModalSubmit: bool,
+     *     modalUrl: string,
+     *     redirectUrl: string
+     * }|RedirectResponse|JsonResponse
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{execId}/delete/{rankToDelete}', name: 'jury_executable_delete_single')]
-    public function deleteSingleAction(Request $request, string $execId, int $rankToDelete): Response
+    #[AjaxTemplate(normalTemplate: 'jury/delete.html.twig', ajaxTemplate: 'jury/delete_modal.html.twig')]
+    public function deleteSingleAction(Request $request, string $execId, int $rankToDelete): array|RedirectResponse|JsonResponse
     {
         $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
@@ -410,7 +454,7 @@ class ExecutableController extends BaseController
         }
 
         if ($request->isMethod('GET')) {
-            $data = [
+            return [
                 'type' => 'ExecutableFile',
                 'primaryKey' => $execId,
                 'description' => $fileToDelete->getFilename(),
@@ -420,11 +464,6 @@ class ExecutableController extends BaseController
                 'modalUrl' => $request->getRequestUri(),
                 'redirectUrl' => $this->generateUrl('jury_executable', ['execId' => $execId]),
             ];
-            if ($request->isXmlHttpRequest()) {
-                return $this->render('jury/delete_modal.html.twig', $data);
-            }
-
-            return $this->render('jury/delete.html.twig', $data);
         } else {
             // Create a copy of all files except $file
             $files = [];

@@ -11,8 +11,8 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -28,13 +28,24 @@ class AuditLogController extends AbstractController
         protected readonly EventLogService $eventLogService
     ) {}
 
+    /**
+     * @return array{
+     *     auditlog: list<array{data: array<string, mixed>, actions: list<mixed>}>,
+     *     table_fields: array<string, array{title: string, sort: bool}>,
+     *     table_options: array{ordering: string, searching: string, full_clickable: bool},
+     *     maxPages: int,
+     *     thisPage: int,
+     *     showAll: bool
+     * }
+     */
     #[Route(path: '', name: 'jury_auditlog')]
+    #[Template(template: 'jury/auditlog.html.twig')]
     public function indexAction(
         #[MapQueryParameter]
         bool $showAll = false,
         #[MapQueryParameter]
         int $page = 1,
-    ): Response {
+    ): array {
         $timeFormat = (string)$this->config->get('time_format');
 
         $limit = 1000;
@@ -96,17 +107,17 @@ class AuditLogController extends AbstractController
             'what' => ['title' => 'action', 'sort' => false],
         ];
 
-        $maxPages = ceil($paginator->count() / $limit);
+        $maxPages = (int)ceil($paginator->count() / $limit);
         $thisPage = $page;
 
-        return $this->render('jury/auditlog.html.twig', [
+        return [
             'auditlog' => $auditlog_table,
             'table_fields' => $table_fields,
             'table_options' => ['ordering' => 'false', 'searching' => 'false', 'full_clickable' => false],
             'maxPages' => $maxPages,
             'thisPage' => $thisPage,
             'showAll' => $showAll,
-        ]);
+        ];
     }
 
     private function generateDatatypeUrl(string $type, int|string|null $id): ?string

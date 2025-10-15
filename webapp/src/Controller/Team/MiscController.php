@@ -12,10 +12,13 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
+use App\Twig\Attribute\AjaxTemplate;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -50,11 +53,14 @@ class MiscController extends BaseController
     }
 
     /**
+     * @return array<string, mixed>
+     *
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route(path: '', name: 'team_index')]
-    public function homeAction(Request $request): Response
+    #[AjaxTemplate(normalTemplate: 'team/index.html.twig', ajaxTemplate: 'team/partials/index_content.html.twig')]
+    public function homeAction(Request $request): array
     {
         $user    = $this->dj->getUser();
         $team    = $user->getTeam();
@@ -134,10 +140,9 @@ class MiscController extends BaseController
 
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;
-            return $this->render('team/partials/index_content.html.twig', $data);
         }
 
-        return $this->render('team/index.html.twig', $data);
+        return $data;
     }
 
     #[Route(path: '/updates', methods: ['GET'], name: 'team_ajax_updates')]
@@ -195,10 +200,14 @@ class MiscController extends BaseController
         ]);
     }
 
+    /**
+     * @return array{}
+     */
     #[Route(path: '/docs', name: 'team_docs')]
-    public function docsAction(): Response
+    #[Template(template: 'team/docs.html.twig')]
+    public function docsAction(): array
     {
-        return $this->render('team/docs.html.twig');
+        return [];
     }
 
     #[Route(path: '/problemset', name: 'team_contest_problemset')]
