@@ -293,6 +293,41 @@ function read_judgehostlog(int $numLines = 20) : string
     return trim(ob_get_clean());
 }
 
+define('DONT_CARE', new class {});
+/**
+ * Execute a shell command given an array of strings forming the command.
+ * The command and all its arguments are automatically escaped.
+ *
+ * @param array $command_parts         The command and its arguments (e.g., ['ls', '-l', '/tmp/']).
+ * @param mixed $retval                The (integer) variable to store the command's exit code.
+ * @param bool  $log_nonzero_exitcode  Whether non-zero exit codes should be logged.
+ *
+ * @return bool Returns true on success (exit code 0), false otherwise.
+ */
+function run_command_safe(array $command_parts, &$retval = DONT_CARE, $log_nonzero_exitcode = true): bool
+{
+    if (empty($command_parts)) {
+        logmsg(LOG_WARNING, "Need at least the command that should be called.");
+        $retval = -1;
+        return false;
+    }
+
+    $command = implode(' ', array_map('dj_escapeshellarg', $command_parts));
+
+    logmsg(LOG_DEBUG, "Executing command: $command");
+    system($command, $retval_local);
+    if ($retval !== DONT_CARE) $retval = $retval_local;
+
+    if ($retval_local !== 0) {
+        if ($log_nonzero_exitcode) {
+            logmsg(LOG_WARNING, "Command failed with exit code $retval_local: $command");
+        }
+        return false;
+    }
+
+    return true;
+}
+
 // Fetches a new executable from database if not cached already, and runs build script to compile executable.
 // Returns an array with
 // - absolute path to run script
@@ -354,12 +389,10 @@ function fetch_executable_internal(
     $execrunjurypath = $execbuilddir . '/runjury';
     if (!is_dir($execdir) || !file_exists($execdeploypath) ||
         ($combined_run_compare && file_get_contents(LIBJUDGEDIR . '/run-interactive.sh')!==file_get_contents($execrunpath))) {
-        system('rm -rf ' . dj_escapeshellarg($execdir) . ' ' . dj_escapeshellarg($execbuilddir), $retval);
-        if ($retval !== 0) {
+        if (!run_command_safe(['rm', '-rf', $execdir, $execbuilddir])) {
             disable('judgehost', 'hostname', $myhost, "Deleting '$execdir' or '$execbuilddir' was unsuccessful.");
         }
-        system('mkdir -p ' . dj_escapeshellarg($execbuilddir), $retval);
-        if ($retval !== 0) {
+        if (!run_command_safe(['mkdir', '-p', $execbuilddir])) {
             disable('judgehost', 'hostname', $myhost, "Could not create directory '$execbuilddir'");
         }
 
@@ -469,8 +502,7 @@ function fetch_executable_internal(
             putenv('SCRIPTMEMLIMIT='  . djconfig_get_value('script_memory_limit'));
             putenv('SCRIPTFILELIMIT=' . djconfig_get_value('script_filesize_limit'));
 
-            system(LIBJUDGEDIR . '/build_executable.sh ' . dj_escapeshellarg($execdir), $retval);
-            if ($retval !== 0) {
+            if (!run_command_safe([LIBJUDGEDIR . '/build_executable.sh', $execdir])) {
                 return [null, "Failed to build executable in $execdir.", "$execdir/build.log"];
             }
             chmod($execrunpath, 0755);
@@ -531,7 +563,11 @@ if (posix_getuid()==0 || posix_geteuid()==0) {
     exit(1);
 }
 
-$myhost = trim(`hostname | cut -d . -f 1`);
+$hostname = gethostname();
+if ($hostname === false) {
+    error("Could not determine hostname.");
+}
+$myhost = explode('.', $hostname)[0];
 if (isset($options['daemonid'])) {
     if (preg_match('/^\d+$/', $options['daemonid'])) {
         $myhost = $myhost . "-" . $options['daemonid'];
@@ -662,9 +698,8 @@ umask(0022);
 
 // Check basic prerequisites for chroot at judgehost startup
 logmsg(LOG_INFO, "🔏 Executing chroot script: '".CHROOT_SCRIPT." check'");
-system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' check', $retval);
-if ($retval!==0) {
-    error("chroot validation check exited with exitcode $retval");
+if (!run_command_safe([LIBJUDGEDIR.'/'.CHROOT_SCRIPT, 'check'])) {
+    error("chroot validation check failed");
 }
 
 foreach ($endpoints as $id => $endpoint) {
@@ -756,8 +791,7 @@ while (true) {
                 foreach ($candidateDirs as $d) {
                     $cnt++;
                     logmsg(LOG_INFO, "  - deleting $d");
-                    system('rm -rf ' . dj_escapeshellarg($d), $retval);
-                    if ($retval !== 0) {
+                    if (!run_command_safe(['rm', '-rf', $d])) {
                         logmsg(LOG_WARNING, "Deleting '$d' was unsuccessful.");
                     }
                     $after = disk_free_space(JUDGEDIR);
@@ -881,10 +915,7 @@ while (true) {
                     $judgeTask['judgetaskid']
                 );
 
-                $debug_cmd = implode(' ', array_map('dj_escapeshellarg',
-                    [$runpath, $workdir, $tmpfile]));
-                system($debug_cmd, $retval);
-                if ($retval !== 0) {
+                if (!run_command_safe([$runpath, $workdir, $tmpfile])) {
                     disable('run_script', 'run_script_id', $judgeTask['run_script_id'], "Running '$runpath' failed.");
                 }
 
@@ -953,8 +984,7 @@ while (true) {
     }
 
 
-    system('mkdir -p ' . dj_escapeshellarg("$workdir/compile"), $retval);
-    if ($retval !== 0) {
+    if (!run_command_safe(['mkdir', '-p', "$workdir/compile"])) {
         error("Could not create '$workdir/compile'");
     }
 
@@ -967,8 +997,7 @@ while (true) {
     if ($lastWorkdir !== $workdir) {
         // create chroot environment
         logmsg(LOG_INFO, "  🔒 Executing chroot script: '".CHROOT_SCRIPT." start'");
-        system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
-        if ($retval!==0) {
+        if (!run_command_safe([LIBJUDGEDIR.'/'.CHROOT_SCRIPT, 'start'], $retval)) {
             logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
             disable('judgehost', 'hostname', $myhost, "chroot script exited with exitcode $retval on $myhost");
             continue;
@@ -1030,8 +1059,7 @@ function registerJudgehost(string $myhost): void
 
     // Create directory where to test submissions
     $workdirpath = JUDGEDIR . "/$myhost/endpoint-$endpointID";
-    system('mkdir -p ' . dj_escapeshellarg("$workdirpath/testcase"), $retval);
-    if ($retval !== 0) {
+    if (!run_command_safe(['mkdir', '-p', "$workdirpath/testcase"])) {
         error("Could not create $workdirpath");
     }
     chmod("$workdirpath/testcase", 0700);
@@ -1109,8 +1137,7 @@ function cleanup_judging(string $workdir) : void
 
     // destroy chroot environment
     logmsg(LOG_INFO, "  🔓 Executing chroot script: '".CHROOT_SCRIPT." stop'");
-    system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
-    if ($retval!==0) {
+    if (!run_command_safe([LIBJUDGEDIR.'/'.CHROOT_SCRIPT, 'stop'], $retval)) {
         logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
         disable('judgehost', 'hostname', $myhost, "chroot script exited with exitcode $retval on $myhost");
         // Just continue here: even though we might continue a current
@@ -1120,9 +1147,8 @@ function cleanup_judging(string $workdir) : void
     }
 
     // Evict all contents of the workdir from the kernel fs cache
-    system(LIBJUDGEDIR . '/evict ' . dj_escapeshellarg($workdir), $retval);
-    if ($retval!==0) {
-        warning("evict script exited with exitcode $retval");
+    if (!run_command_safe([LIBJUDGEDIR . '/evict', $workdir])) {
+        warning("evict script failed, continuing gracefully");
     }
 }
 
@@ -1131,7 +1157,7 @@ function compile(
     string $workdir,
     string $workdirpath,
     array $compile_config,
-    string $cpuset_opt,
+    ?string $daemonid,
     int $output_storage_limit
 ): bool {
     global $myhost, $EXITCODES;
@@ -1151,26 +1177,24 @@ function compile(
         $args = 'hostname=' . urlencode($myhost);
         foreach (['compiler', 'runner'] as $type) {
             if (isset($version_verification[$type . '_version_command'])) {
+                if (file_exists($version_output_file)) {
+                    unlink($version_output_file);
+                }
+
                 $vcscript_content = $version_verification[$type . '_version_command'];
                 $vcscript = tempnam(TMPDIR, 'version_check-');
                 file_put_contents($vcscript, $vcscript_content);
                 chmod($vcscript, 0755);
-                $version_cmd = LIBJUDGEDIR . "/version_check.sh " .
-                    implode(' ', array_map('dj_escapeshellarg', [
-                        $vcscript,
-                        $workdir,
-                    ]));
 
-                if (file_exists($version_output_file)) {
-                    unlink($version_output_file);
-                }
-                system($version_cmd, $retval);
+                run_command_safe([LIBJUDGEDIR . "/version_check.sh", $vcscript, $workdir], $retval);
+
                 $versions[$type] = trim(file_get_contents($version_output_file));
                 if ($retval !== 0) {
                     $versions[$type] =
                         "Getting $type version failed with exit code $retval\n"
                         . $versions[$type];
                 }
+
                 unlink($vcscript);
             }
             if (isset($versions[$type])) {
@@ -1248,16 +1272,14 @@ function compile(
     }
 
     // Compile the program.
-    $compile_cmd = LIBJUDGEDIR . "/compile.sh $cpuset_opt " .
-        implode(' ', array_map('dj_escapeshellarg', array_merge([
-            $execrunpath,
-            $workdir,
-        ], $files)));
-    logmsg(LOG_DEBUG, "Compile command: ".$compile_cmd);
-    system($compile_cmd, $retval);
-    if ($retval!==0) {
-        warning("compile script exited with exitcode $retval");
+    $compile_command_parts = [LIBJUDGEDIR . '/compile.sh'];
+    if (isset($daemonid)) {
+        $compile_command_parts[] = '-n';
+        $compile_command_parts[] = $daemonid;
     }
+    array_push($compile_command_parts, $execrunpath, $workdir, ...$files);
+    // Note that the $retval is handled further down after reading/writing metadata.
+    run_command_safe($compile_command_parts, $retval, log_nonzero_exitcode: false);
 
     $compile_output = '';
     if (is_readable($workdir . '/compile.out')) {
@@ -1358,7 +1380,7 @@ function judge(array $judgeTask): bool
     }
 
     $workdir = judging_directory($workdirpath, $judgeTask);
-    $compile_success = compile($judgeTask, $workdir, $workdirpath, $compile_config, $cpuset_opt, $output_storage_limit);
+    $compile_success = compile($judgeTask, $workdir, $workdirpath, $compile_config, $options['daemonid'] ?? null, $output_storage_limit);
     if (!$compile_success) {
         return false;
     }
@@ -1460,37 +1482,39 @@ function judge(array $judgeTask): bool
         // after the first (note that $passCnt starts at 1).
         if ($passCnt > 1) {
             $prevPassdir = $testcasedir . '/' . ($passCnt - 1) . '/feedback';
-            system('cp -R ' . dj_escapeshellarg($prevPassdir) . ' ' . dj_escapeshellarg($passdir . '/'));
-            system('rm ' . dj_escapeshellarg($passdir . '/feedback/nextpass.in'));
+            run_command_safe(['cp', '-R', $prevPassdir, $passdir . '/']);
+            run_command_safe(['rm', $passdir . '/feedback/nextpass.in']);
         }
 
         // Copy program with all possible additional files to testcase
         // dir. Use hardlinks to preserve space with big executables.
         $programdir = $passdir . '/execdir';
-        system('mkdir -p ' . dj_escapeshellarg($programdir), $retval);
-        if ($retval!==0) {
+        if (!run_command_safe(['mkdir', '-p', $programdir])) {
             error("Could not create directory '$programdir'");
         }
 
         foreach (glob("$workdir/compile/*") as $compile_file) {
-            system('cp -PRl ' . dj_escapeshellarg($compile_file) . ' ' . dj_escapeshellarg($programdir), $retval);
-            if ($retval!==0) {
+            if (!run_command_safe(['cp', '-PRl', $compile_file, $programdir])) {
                 error("Could not copy program to '$programdir'");
             }
         }
 
         $timelimit_str = implode(':', $timelimit['cpu']) . ',' . implode(':', $timelimit['wall']);
-        $test_run_cmd = LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt " .
-            implode(' ', array_map('dj_escapeshellarg', [
-                $input,
-                $output,
-                $timelimit_str,
-                $passdir,
-                $run_runpath,
-                $compare_runpath,
-                $compare_config['compare_args']
-            ]));
-        system($test_run_cmd, $retval);
+        $run_command_parts = [LIBJUDGEDIR . '/testcase_run.sh'];
+        if (isset($options['daemonid'])) {
+            $run_command_parts[] = '-n';
+            $run_command_parts[] = $options['daemonid'];
+        }
+        array_push($run_command_parts,
+            $input,
+            $output,
+            $timelimit_str,
+            $passdir,
+            $run_runpath,
+            $compare_runpath,
+            $compare_config['compare_args']
+        );
+        run_command_safe($run_command_parts, $retval, log_nonzero_exitcode: false);
 
         // What does the exitcode mean?
         if (!isset($EXITCODES[$retval])) {
