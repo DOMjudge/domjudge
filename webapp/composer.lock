@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "88f6e44e48730e8efd3a8ccaeefb5ed7",
+    "content-hash": "e250b78a9257c80e0b88e0a5c12a7ff2",
     "packages": [
         {
             "name": "apalfrey/select2-bootstrap-5-theme",
@@ -3088,6 +3088,15 @@
                 "source": "https://github.com/Masterminds/html5-php/tree/2.9.0"
             },
             "time": "2024-03-31T07:05:07+00:00"
+        },
+        {
+            "name": "mathjax/mathjax",
+            "version": "4.0.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/mathjax/MathJax/archive/refs/tags/4.0.0.zip"
+            },
+            "type": "library"
         },
         {
             "name": "mbostock/d3",
