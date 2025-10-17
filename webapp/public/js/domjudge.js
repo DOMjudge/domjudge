@@ -588,7 +588,7 @@ function processAjaxResponse(jqXHR, data) {
         if ($refreshTarget.data('ajax-refresh-before')) {
             window[$refreshTarget.data('ajax-refresh-before')]();
         }
-        $refreshTarget.html($data);
+        $refreshTarget.empty().html($data);
         if ($refreshTarget.data('ajax-refresh-after')) {
             window[$refreshTarget.data('ajax-refresh-after')]();
         }
