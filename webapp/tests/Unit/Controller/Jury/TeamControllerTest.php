@@ -2,7 +2,9 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use App\DataFixtures\Test\NonSortOrderTeamCategoryFixture;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -26,7 +28,7 @@ class TeamControllerTest extends JuryControllerTestCase
     protected static array   $addEntitiesCount         = ['contests'];
     protected static array   $addEntities              = [['name' => 'New Team',
                                                            'displayName' => 'New Team Display Name',
-                                                           'category' => '3',
+                                                           'categories' => ['3'],
                                                            'publicdescription' => 'Some members',
                                                            'penalty' => '0',
                                                            'location' => 'The first room',
@@ -37,7 +39,7 @@ class TeamControllerTest extends JuryControllerTestCase
                                                            'icpcid' => ''],
                                                           ['name' => 'Another Team',
                                                            'displayName' => 'Another Team Display Name',
-                                                           'category' => '1',
+                                                           'categories' => ['1'],
                                                            'publicdescription' => 'More members',
                                                            'penalty' => '20',
                                                            'location' => 'Another room',
@@ -47,7 +49,7 @@ class TeamControllerTest extends JuryControllerTestCase
                                                            'newUsername' => 'linkeduser'],
                                                           ['name' => 'Team linked to existing user',
                                                            'displayName' => 'Third team display name',
-                                                           'category' => '1',
+                                                           'categories' => ['1'],
                                                            'publicdescription' => 'Members of this team',
                                                            'penalty' => '0',
                                                            'enabled' => '1',
@@ -191,5 +193,18 @@ class TeamControllerTest extends JuryControllerTestCase
 
         static::assertNotNull($user);
         static::assertEquals('New Team', $user->getTeam()->getName());
+    }
+
+    /**
+     * Test that adding a team with multiple categories works.
+     */
+    public function testAddMultipleCategories(): void
+    {
+        $this->loadFixture(NonSortOrderTeamCategoryFixture::class);
+        $teamToAdd = static::$addEntities[0];
+        $teamToAdd['categories'][] = $this->resolveReference(NonSortOrderTeamCategoryFixture::class . ':0', TeamCategory::class);
+        [$combinedValues, $element] = $this->helperProvideMergeAddEntity($teamToAdd);
+        [$combinedValues, $element] = $this->helperProvideTranslateAddEntity($combinedValues, $element);
+        $this->testCheckAddEntityAdmin($combinedValues, $element);
     }
 }

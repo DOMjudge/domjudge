@@ -86,6 +86,7 @@ class SubmissionService
             ->from(Submission::class, 's')
             ->select('s', 'j', 'cp')
             ->join('s.team', 't')
+            ->join('t.categories', 'tc')
             ->join('s.contest_problem', 'cp')
             ->andWhere('s.contest IN (:contests)')
             ->setParameter('contests', array_keys($contests))
@@ -214,13 +215,13 @@ class SubmissionService
 
         if (isset($restrictions->categoryId)) {
             $queryBuilder
-                ->andWhere('t.category = :categoryid')
+                ->andWhere('tc.categoryid = :categoryid')
                 ->setParameter('categoryid', $restrictions->categoryId);
         }
 
         if (!empty($restrictions->categoryIds)) {
             $queryBuilder
-                ->andWhere('t.category IN (:categoryids)')
+                ->andWhere('tc.categoryid IN (:categoryids)')
                 ->setParameter('categoryids', $restrictions->categoryIds);
         }
 
@@ -238,7 +239,7 @@ class SubmissionService
 
         if (isset($restrictions->visible)) {
             $queryBuilder
-                ->innerJoin('t.category', 'cat')
+                ->innerJoin('t.categories', 'cat')
                 ->andWhere('cat.visible = true');
         }
 
@@ -374,7 +375,6 @@ class SubmissionService
         $counts['inContest'] = (clone $queryBuilder)
             ->select('COUNT(s.submitid)')
             ->join('s.contest', 'c')
-            ->join('t.category', 'tc')
             ->andWhere('s.submittime BETWEEN c.starttime AND c.endtime')
             ->andWhere('tc.visible = true')
             ->getQuery()

@@ -18,10 +18,10 @@ class AwardService
         $groups = [];
         foreach ($scoreboard->getTeamsInDescendingOrder() as $team) {
             $teamid = $team->getExternalid();
-            if ($scoreboard->isBestInCategory($team)) {
-                $catId = $team->getCategory()->getExternalid();
+            if ($scoreboard->isBestInCategory($team, $team->getScoringCategory())) {
+                $catId = $team->getScoringCategory()?->getExternalid();
                 $group_winners[$catId][] = $teamid;
-                $groups[$catId] = $team->getCategory()->getName();
+                $groups[$catId] = $team->getScoringCategory()?->getName();
             }
             foreach ($scoreboard->getProblems() as $problem) {
                 $shortname = $problem->getShortname();
@@ -65,8 +65,8 @@ class AwardService
 
         foreach ($scoreboard->getScores() as $teamScore) {
             // If we are checking a new sort order, reset the number of skipped teams
-            if ($teamScore->team->getCategory()->getSortorder() !== $currentSortOrder) {
-                $currentSortOrder = $teamScore->team->getCategory()->getSortorder();
+            if ($teamScore->team->getSortOrder() !== $currentSortOrder) {
+                $currentSortOrder = $teamScore->team->getSortorder();
                 $skippedTeams = 0;
             }
 
@@ -79,7 +79,7 @@ class AwardService
                 $overall_winners[] = $teamid;
             }
             if ($contest->getMedalsEnabled()) {
-                if ($contest->getMedalCategories()->contains($teamScore->team->getCategory())) {
+                if ($teamScore->team->getScoringCategory() && $contest->getMedalCategories()->contains($teamScore->team->getScoringCategory())) {
                     if ($rank - $skippedTeams <= $contest->getGoldMedals()) {
                         $medal_winners['gold'][] = $teamid;
                     } elseif ($rank - $skippedTeams <= $contest->getGoldMedals() + $contest->getSilverMedals()) {

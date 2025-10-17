@@ -302,4 +302,9 @@ class TeamAffiliation extends BaseApiEntity implements
     {
         return array_filter([$this->logoForApi]);
     }
+
+    public function __toString(): string
+    {
+        return $this->getName() ?? $this->getShortname();
+    }
 }
