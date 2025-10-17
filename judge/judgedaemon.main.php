@@ -33,9 +33,12 @@ function read_credentials(): void
     global $endpoints;
 
     $credfile = ETCDIR . '/restapi.secret';
-    $credentials = @file($credfile);
-    if (!$credentials) {
-        error("Cannot read REST API credentials file " . $credfile);
+    if (!is_readable($credfile)) {
+        error("REST API credentials file " . $credfile . " is not readable or does not exist.");
+    }
+    $credentials = file($credfile);
+    if ($credentials === false) {
+        error("Error reading REST API credentials file " . $credfile);
     }
     $lineno = 0;
     foreach ($credentials as $credential) {
@@ -1500,8 +1503,8 @@ function judge(array $judgeTask): bool
         $runtime = null;
         $metadata = read_metadata($passdir . '/program.meta');
 
-        if (isset($metadata['time-used'])) {
-            $runtime = @$metadata[$metadata['time-used']];
+        if (isset($metadata['time-used']) && array_key_exists($metadata['time-used'], $metadata)) {
+            $runtime = $metadata[$metadata['time-used']];
         }
 
         if ($result === 'compare-error') {
