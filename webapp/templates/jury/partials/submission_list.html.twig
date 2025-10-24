@@ -88,13 +88,13 @@
         <tbody>
         {%- for submission in submissions %}
             {%- if rejudging is defined %}
-                {%- set link = path('jury_submission', {submitId: submission.submitid, rejudgingid: rejudging.rejudgingid}) %}
+                {%- set link = path('jury_submission', {submitId: submission.externalid, rejudgingid: rejudging.rejudgingid}) %}
             {%- else %}
-                {%- set link = path('jury_submission', {submitId: submission.submitid}) %}
+                {%- set link = path('jury_submission', {submitId: submission.externalid}) %}
             {%- endif %}
 
             {% if submission.team.affiliation %}
-                {% set affilid = submission.team.affiliation.affilid %}
+                {% set affilid = submission.team.affiliation.externalid %}
             {% else %}
                 {% set affilid = '' %}
             {% endif %}
@@ -109,14 +109,11 @@
                 {% endif %}
                 <td class="{{ tdExtraClass }}">
                     <a href="{{ link }}">
-                        s{{ submission.submitid }}
-                        {% if shadowMode() and submission.externalid %}
-                            ({{ submission.externalid }})
-                        {% endif %}
+                        {{ submission.externalid }}
                     </a>
                 </td>
                 {%- if showContest %}
-                    <td class="{{ tdExtraClass }}"><a href="{{ link }}">c{{ submission.contest.cid }}</a></td>
+                    <td class="{{ tdExtraClass }}"><a href="{{ link }}">{{ submission.contest.externalid }}</a></td>
                 {%- endif %}
 
                 <td rowspan="{{ rowSpan }}" class="{{ tdExtraClass }}">
@@ -124,7 +121,7 @@
                 </td>
                 <td rowspan="{{ rowSpan }}" class="{{ tdExtraClass }}" style="text-align: right;">
                     <a href="{{ link }}">
-                        {{ submission.team | entityIdBadge('t') }}
+                        {{ submission.team | entityIdBadge }}
                     </a>
                 </td>
                 <td rowspan="{{ rowSpan }}" class="{{ tdExtraClass }}">
@@ -148,7 +145,7 @@
                     </td>
                 {% endif %}
                 {%- if rejudging is defined %}
-                    <td class="{{ tdExtraClass }}"><a href="{{ path('jury_submission', {submitId: submission.submitid}) }}">
+                    <td class="{{ tdExtraClass }}"><a href="{{ path('jury_submission', {submitId: submission.externalid}) }}">
                             {{ submission.oldResult | printValidJuryResult }}
                         </a></td>
                 {%- endif %}
@@ -205,9 +202,9 @@
                     {% if not showExternalResult or not showExternalTestcases %}
                         <td class="{{ tdExtraClass }}">
                             {%- if rejudging is defined %}
-                                {%- set claimLink = path('jury_submission', claimArg | merge({submitId: submission.submitid, rejudgingid: rejudging.rejudgingid})) %}
+                                {%- set claimLink = path('jury_submission', claimArg | merge({submitId: submission.externalid, rejudgingid: rejudging.rejudgingid})) %}
                             {%- else %}
-                                {%- set claimLink = path('jury_submission', claimArg | merge({submitId: submission.submitid})) %}
+                                {%- set claimLink = path('jury_submission', claimArg | merge({submitId: submission.externalid})) %}
                             {%- endif %}
                             {%- if claim -%}
                                 <a class="btn btn-outline-secondary btn-sm"

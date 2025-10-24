@@ -64,7 +64,7 @@ class ScoreboardController extends AbstractApiController
         name: 'category',
         description: 'Get the scoreboard for only this category',
         in: 'query',
-        schema: new OA\Schema(type: 'integer')
+        schema: new OA\Schema(type: 'string')
     )]
     #[OA\Parameter(
         name: 'country',
@@ -76,7 +76,7 @@ class ScoreboardController extends AbstractApiController
         name: 'affiliation',
         description: 'Get the scoreboard for only this affiliation',
         in: 'query',
-        schema: new OA\Schema(type: 'integer')
+        schema: new OA\Schema(type: 'string')
     )]
     #[OA\Parameter(
         name: 'public',
@@ -93,11 +93,11 @@ class ScoreboardController extends AbstractApiController
     public function getScoreboardAction(
         Request $request,
         #[MapQueryParameter]
-        ?int $category = null,
+        ?string $category = null,
         #[MapQueryParameter]
         ?string $country = null,
         #[MapQueryParameter]
-        ?int $affiliation = null,
+        ?string $affiliation = null,
         #[MapQueryParameter(name: 'allteams')]
         bool $allTeams = false,
         #[MapQueryParameter(name: 'public')]

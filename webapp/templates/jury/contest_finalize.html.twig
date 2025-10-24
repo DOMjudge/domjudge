@@ -26,7 +26,7 @@
             <table class="table table-sm table-striped">
                 <tr>
                     <th>Contest ID</th>
-                    <td>c{{ contest.cid }}</td>
+                    <td>c{{ contest.externalid }}</td>
                 </tr>
                 <tr>
                     <th>Contest name</th>
@@ -47,7 +47,7 @@
         {{ form_row(form.b) }}
         {{ form_row(form.finalizecomment) }}
         {{ form_widget(form.finalize) }}
-        {{ button(path('jury_contest', {'contestId': contest.cid}), 'Cancel', 'secondary') }}
+        {{ button(path('jury_contest', {'contestId': contest.externalid}), 'Cancel', 'secondary') }}
         {{ form_end(form) }}
     {% endif %}
 

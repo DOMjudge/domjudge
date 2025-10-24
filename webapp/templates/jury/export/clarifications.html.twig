@@ -64,18 +64,18 @@
             <tbody>
             {% for clarification in clarifications %}
                 <tr class="top-line">
-                    <td>{{ clarification.clarId }}</td>
+                    <td>{{ clarification.externalid }}</td>
                     <td>{{ clarification.submitTime | printtime(null, contest) }}</td>
                     <td>
                         {% if clarification.sender %}
-                            {{ clarification.sender.effectiveName }} {{ clarification.sender | entityIdBadge('t') }}
+                            {{ clarification.sender.effectiveName }} {{ clarification.sender | entityIdBadge }}
                         {% else %}
                             Jury ({{ clarification.juryMember }})
                         {% endif %}
                     </td>
                     <td>
                         {% if clarification.recipient and clarification.sender is empty %}
-                            {{ clarification.recipient.effectiveName }} {{ clarification.recipient | entityIdBadge('t') }}
+                            {{ clarification.recipient.effectiveName }} {{ clarification.recipient | entityIdBadge }}
                         {% elseif clarification.sender %}
                             Jury
                         {% else %}

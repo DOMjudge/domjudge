@@ -81,8 +81,7 @@ class ContestController extends BaseController
             ->getQuery()->getResult();
 
         $table_fields = [
-            'cid'             => ['title' => 'CID', 'sort' => true],
-            'externalid'      => ['title' => "external ID", 'sort' => true],
+            'externalid'      => ['title' => "ID", 'sort' => true],
             'shortname'       => ['title' => 'shortname', 'sort' => true],
             'name'            => ['title' => 'name', 'sort' => true],
             'scoreboard_type' => ['title' => 'scoreboard type', 'sort' => true],
@@ -151,7 +150,7 @@ class ContestController extends BaseController
                     'icon' => 'file-' . $contest->getContestProblemsetType(),
                     'title' => 'view contest problemset document',
                     'link' => $this->generateUrl('jury_contest_problemset', [
-                        'cid' => $contest->getCid(),
+                        'cid' => $contest->getExternalid(),
                     ])
                 ];
             } else {
@@ -170,14 +169,14 @@ class ContestController extends BaseController
                         'icon' => 'edit',
                         'title' => 'edit this contest',
                         'link' => $this->generateUrl('jury_contest_edit', [
-                            'contestId' => $contest->getCid(),
+                            'contestId' => $contest->getExternalid(),
                         ])
                     ];
                     $contestactions[] = [
                         'icon' => 'trash-alt',
                         'title' => 'delete this contest',
                         'link' => $this->generateUrl('jury_contest_delete', [
-                            'contestId' => $contest->getCid(),
+                            'contestId' => $contest->getExternalid(),
                         ]),
                         'ajaxModal' => true,
                     ];
@@ -275,13 +274,13 @@ class ContestController extends BaseController
             if (!$contest->getEnabled()) {
                 $styles[] = 'disabled';
             }
-            if (in_array($contest->getCid(), array_keys($currentContests))) {
+            if (in_array($contest->getExternalid(), array_keys($currentContests))) {
                 $styles[] = 'highlight';
             }
             $contests_table[] = [
                 'data' => $contestdata,
                 'actions' => $contestactions,
-                'link' => $this->generateUrl('jury_contest', ['contestId' => $contest->getCid()]),
+                'link' => $this->generateUrl('jury_contest', ['contestId' => $contest->getExternalid()]),
                 'cssclass' => implode(' ', $styles),
             ];
         }
@@ -305,10 +304,10 @@ class ContestController extends BaseController
         ]);
     }
 
-    #[Route(path: '/{contestId<\d+>}', name: 'jury_contest')]
-    public function viewAction(Request $request, int $contestId): Response
+    #[Route(path: '/{contestId}', name: 'jury_contest')]
+    public function viewAction(Request $request, string $contestId): Response
     {
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
@@ -353,6 +352,10 @@ class ContestController extends BaseController
 
         return $this->render('jury/contest.html.twig', [
             'contest' => $contest,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                Contest::class,
+                $contest->getExternalid(),
+            ),
             'allowRemovedIntervals' => $this->getParameter('removed_intervals'),
             'removedIntervalForm' => $form,
             'removedIntervals' => $removedIntervals,
@@ -368,7 +371,7 @@ class ContestController extends BaseController
         string $contestId,
         string $type
     ): Response {
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
@@ -401,7 +404,7 @@ class ContestController extends BaseController
         }
         $this->em->flush();
 
-        $this->dj->auditlog('contest', $contestId, $label, $value ? 'yes' : 'no');
+        $this->dj->auditlog('contest', $contest->getExternalid(), $label, $value ? 'yes' : 'no');
         return $this->redirectToLocalReferrer(
             $router,
             $request,
@@ -409,10 +412,10 @@ class ContestController extends BaseController
         );
     }
 
-    #[Route(path: '/{contestId<\d+>}/remove-interval/{intervalId}', name: 'jury_contest_remove_interval', methods: ['POST'])]
-    public function removeIntervalAction(int $contestId, int $intervalId): RedirectResponse
+    #[Route(path: '/{contestId}/remove-interval/{intervalId}', name: 'jury_contest_remove_interval', methods: ['POST'])]
+    public function removeIntervalAction(string $contestId, int $intervalId): RedirectResponse
     {
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
@@ -437,14 +440,14 @@ class ContestController extends BaseController
         $this->addFlash('scoreboard_refresh',
             'After removing a removed time interval, it is ' .
             'necessary to recalculate any cached scoreboards.');
-        return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);
+        return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getExternalid()]);
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{contestId<\d+>}/edit', name: 'jury_contest_edit')]
-    public function editAction(Request $request, int $contestId): Response
+    #[Route(path: '/{contestId}/edit', name: 'jury_contest_edit')]
+    public function editAction(Request $request, string $contestId): Response
     {
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
@@ -466,7 +469,7 @@ class ContestController extends BaseController
             if ($problems = $contestData['problems'] ?? null) {
                 $existingProblemIndices = [];
                 foreach ($contest->getProblems() as $index => $problem) {
-                    $existingProblemIndices[$problem->getProbId()] = $index;
+                    $existingProblemIndices[$problem->getExternalId()] = $index;
                 }
                 $indexForNew = $contest->getProblems()->count();
                 $newProblems = [];
@@ -566,7 +569,7 @@ class ContestController extends BaseController
                 $this->eventLogService->log('problems', $problem->getProbid(),
                     EventLogService::ACTION_DELETE, $contest->getCid(), null, null, false);
             }
-            return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getcid()]);
+            return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getExternalId()]);
         }
 
         $this->em->refresh($contest);
@@ -578,10 +581,10 @@ class ContestController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{contestId<\d+>}/delete', name: 'jury_contest_delete')]
-    public function deleteAction(Request $request, int $contestId): Response
+    #[Route(path: '/{contestId}/delete', name: 'jury_contest_delete')]
+    public function deleteAction(Request $request, string $contestId): Response
     {
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
@@ -595,13 +598,10 @@ class ContestController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{contestId<\d+>}/problems/{probId<\d+>}/delete', name: 'jury_contest_problem_delete')]
-    public function deleteProblemAction(Request $request, int $contestId, int $probId): Response
+    #[Route(path: '/{contestId}/problems/{probId}/delete', name: 'jury_contest_problem_delete')]
+    public function deleteProblemAction(Request $request, string $contestId, string $probId): Response
     {
-        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-            'contest' => $contestId,
-            'problem' => $probId
-        ]);
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->findByProblemAndContest($contestId, $probId);
         if (!$contestProblem) {
             throw new NotFoundHttpException(
                 sprintf('Contest problem with contest ID %s and problem ID %s not found',
@@ -618,7 +618,7 @@ class ContestController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/add', name: 'jury_contest_add')]
+    #[Route(path: '/add', name: 'jury_contest_add', priority: 1)]
     public function addAction(Request $request): Response
     {
         $contest = new Contest();
@@ -631,7 +631,7 @@ class ContestController extends BaseController
 
         if ($response = $this->processAddFormForExternalIdEntity(
             $form, $contest,
-            fn () => $this->generateUrl('jury_contest', ['contestId' => $contest->getcid()]),
+            fn () => $this->generateUrl('jury_contest', ['contestId' => $contest->getExternalid()]),
             function () use ($form, $contest) {
                 $response = $this->checkTimezones($form);
                 if ($response !== null) {
@@ -675,12 +675,12 @@ class ContestController extends BaseController
         ]);
     }
 
-    #[Route(path: '/{contestId<\d+>}/prefetch', name: 'jury_contest_prefetch')]
-    public function prefetchAction(Request $request, int $contestId): Response
+    #[Route(path: '/{contestId}/prefetch', name: 'jury_contest_prefetch')]
+    public function prefetchAction(Request $request, string $contestId): Response
     {
-        $contest  = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest  = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         if ($contest === null) {
-            throw new BadRequestHttpException("Contest with cid=$contestId not found.");
+            throw new BadRequestHttpException("Contest with ID $contestId not found.");
         }
         $judgehosts = $this->em->getRepository(Judgehost::class)->findBy([
             'enabled' => true,
@@ -756,11 +756,11 @@ class ContestController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{contestId<\d+>}/finalize', name: 'jury_contest_finalize')]
-    public function finalizeAction(Request $request, int $contestId): Response
+    #[Route(path: '/{contestId}/finalize', name: 'jury_contest_finalize')]
+    public function finalizeAction(Request $request, string $contestId): Response
     {
         /** @var Contest $contest */
-        $contest  = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest  = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         $blockers = [];
         if (Utils::difftime((float)$contest->getEndtime(), Utils::now()) > 0) {
             $blockers[] = sprintf('Contest not ended yet (will end at %s)',
@@ -771,24 +771,24 @@ class ContestController extends BaseController
         $submissionIds = array_map(fn(array $data) => $data['submitid'], $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
-            ->select('s.submitid')
+            ->select('s.externalid')
             ->andWhere('s.contest = :contest')
             ->andWhere('s.valid = true')
             ->andWhere('j.result IS NULL')
             ->setParameter('contest', $contest)
-            ->orderBy('s.submitid')
+            ->orderBy('s.externalid')
             ->getQuery()
             ->getResult()
         );
 
         if (count($submissionIds) > 0) {
-            $blockers[] = 'Unjudged submissions found: s' . implode(', s', $submissionIds);
+            $blockers[] = 'Unjudged submissions found: ' . implode(', ', $submissionIds);
         }
 
         /** @var int[] $clarificationIds */
         $clarificationIds = array_map(fn(array $data) => $data['clarid'], $this->em->createQueryBuilder()
             ->from(Clarification::class, 'c')
-            ->select('c.clarid')
+            ->select('c.externalid')
             ->andWhere('c.contest = :contest')
             ->andWhere('c.answered = false')
             ->setParameter('contest', $contest)
@@ -810,9 +810,9 @@ class ContestController extends BaseController
             if ($form->isSubmitted() && $form->isValid()) {
                 $contest->setFinalizetime(Utils::now());
                 $this->em->flush();
-                $this->dj->auditlog('contest', $contest->getCid(), 'finalized',
+                $this->dj->auditlog('contest', $contest->getExternalid(), 'finalized',
                                                  $contest->getFinalizecomment());
-                return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);
+                return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getExternalid()]);
             }
         }
 
@@ -824,14 +824,14 @@ class ContestController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{contestId<\d+>}/{time}/doNow', name: 'jury_contest_donow')]
-    public function doNowAction(Request $request, int $contestId, string $time): Response
+    #[Route(path: '/{contestId}/{time}/doNow', name: 'jury_contest_donow')]
+    public function doNowAction(Request $request, string $contestId, string $time): Response
     {
         $times         = ['activate', 'start', 'freeze', 'end', 'unfreeze', 'finalize', 'deactivate'];
         $start_actions = ['delay_start', 'resume_start'];
         $actions       = array_merge($times, $start_actions);
 
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
@@ -841,12 +841,12 @@ class ContestController extends BaseController
         }
 
         if ($time === 'finalize') {
-            return $this->redirectToRoute('jury_contest_finalize', ['contestId' => $contest->getCid()]);
+            return $this->redirectToRoute('jury_contest_finalize', ['contestId' => $contest->getExternalid()]);
         }
 
         $now       = (int)floor(Utils::now());
         $nowstring = date('Y-m-d H:i:s ', $now) . date_default_timezone_get();
-        $this->dj->auditlog('contest', $contest->getCid(), $time . ' now', $nowstring);
+        $this->dj->auditlog('contest', $contest->getExternalid(), $time . ' now', $nowstring);
 
         // Special case delay/resume start (only sets/unsets starttime_undefined).
         $maxSeconds = Contest::STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
@@ -919,10 +919,10 @@ class ContestController extends BaseController
         return $this->redirectToRoute('jury_contests');
     }
 
-    #[Route(path: '/{contestId<\d+>}/request-remaining', name: 'jury_contest_request_remaining')]
-    public function requestRemainingRunsWholeContestAction(int $contestId): RedirectResponse
+    #[Route(path: '/{contestId}/request-remaining', name: 'jury_contest_request_remaining')]
+    public function requestRemainingRunsWholeContestAction(string $contestId): RedirectResponse
     {
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
@@ -930,13 +930,10 @@ class ContestController extends BaseController
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
-    #[Route(path: '/{contestId<\d+>}/problems/{probId<\d+>}/request-remaining', name: 'jury_contest_problem_request_remaining')]
-    public function requestRemainingRunsContestProblemAction(int $contestId, int $probId): RedirectResponse
+    #[Route(path: '/{contestId}/problems/{probId}/request-remaining', name: 'jury_contest_problem_request_remaining')]
+    public function requestRemainingRunsContestProblemAction(string $contestId, string $probId): RedirectResponse
     {
-        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-            'contest' => $contestId,
-            'problem' => $probId
-        ]);
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->findByProblemAndContest($contestId, $probId);
         if (!$contestProblem) {
             throw new NotFoundHttpException(
                 sprintf('Contest problem with contest ID %s and problem ID %s not found',
@@ -987,23 +984,23 @@ class ContestController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{contestId<\d+>}/lock', name: 'jury_contest_lock')]
-    public function lockAction(Request $request, int $contestId): Response
+    #[Route(path: '/{contestId}/lock', name: 'jury_contest_lock')]
+    public function lockAction(Request $request, string $contestId): Response
     {
         return $this->doLock($contestId, true);
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{contestId<\d+>}/unlock', name: 'jury_contest_unlock')]
-    public function unlockAction(Request $request, int $contestId): Response
+    #[Route(path: '/{contestId}/unlock', name: 'jury_contest_unlock')]
+    public function unlockAction(Request $request, string $contestId): Response
     {
         return $this->doLock($contestId, false);
     }
 
-    #[Route(path: '/{contestId<\d+>}/samples.zip', name: 'jury_contest_samples_data_zip')]
-    public function samplesDataZipAction(Request $request, int $contestId): Response
+    #[Route(path: '/{contestId}/samples.zip', name: 'jury_contest_samples_data_zip')]
+    public function samplesDataZipAction(Request $request, string $contestId): Response
     {
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
@@ -1011,14 +1008,14 @@ class ContestController extends BaseController
         return $this->dj->getSamplesZipForContest($contest);
     }
 
-    private function doLock(int $contestId, bool $locked): Response
+    private function doLock(string $contestId, bool $locked): Response
     {
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found.', $contestId));
         }
 
-        $this->dj->auditlog('contest', $contest->getCid(), $locked ? 'lock' : 'unlock');
+        $this->dj->auditlog('contest', $contest->getExternalid(), $locked ? 'lock' : 'unlock');
         $contest->setIsLocked($locked);
         $this->em->flush();
 
@@ -1030,25 +1027,25 @@ class ContestController extends BaseController
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
-    #[Route(path: '/{contestId<\d+>}/{type<public|unfrozen>}-scoreboard.zip', name: 'jury_scoreboard_data_zip')]
+    #[Route(path: '/{contestId}/{type<public|unfrozen>}-scoreboard.zip', name: 'jury_scoreboard_data_zip')]
     public function scoreboardDataZipAction(
-        int $contestId,
+        string $contestId,
         string $type,
         RequestStack $requestStack,
         Request $request,
         ScoreboardService $scoreboardService
     ): Response {
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
         return $this->dj->getScoreboardZip($request, $requestStack, $contest, $scoreboardService, $type === 'unfrozen');
     }
 
-    #[Route(path: '/{cid<\d+>}/problemset', name: 'jury_contest_problemset')]
-    public function viewProblemsetAction(int $cid): StreamedResponse
+    #[Route(path: '/{cid}/problemset', name: 'jury_contest_problemset')]
+    public function viewProblemsetAction(string $cid): StreamedResponse
     {
-        $contest = $this->em->getRepository(Contest::class)->find($cid);
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($cid);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $cid));
         }

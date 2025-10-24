@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Team {{ team.teamid }} - {{ parent() }}{% endblock %}
+{% block title %}Team {{ team.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -18,10 +18,6 @@
             <table class="table table-sm table-striped">
                 <tr>
                     <th>ID</th>
-                    <td>{{ team.teamid }}</td>
-                </tr>
-                <tr>
-                    <th>External ID</th>
                     <td>{{ team.externalid }}</td>
                 </tr>
                 <tr>
@@ -94,10 +90,10 @@
                     <th>User</th>
                     <td>
                         {% for user in team.users %}
-                            <a href="{{ path('jury_user', {'userId': user.userid}) }}">{{ user.username }}</a>
+                            <a href="{{ path('jury_user', {'userId': user.externalid}) }}">{{ user.username }}</a>
                         {% else %}
                             {%- if is_granted('ROLE_ADMIN') -%}
-                                <a href="{{ path('jury_user_add', {'team': team.teamid}) }}">
+                                <a href="{{ path('jury_user_add', {'team': team.externalid}) }}">
                                     <i class="fas fa-user-plus"></i> add user
                                 </a>
                             {% endif %}
@@ -118,7 +114,7 @@
                             <ul>
                                 {% for category in team.categories %}
                                     <li>
-                                        <a href="{{ path('jury_team_category', {'categoryId': category.categoryid}) }}">
+                                        <a href="{{ path('jury_team_category', {'categoryId': category.externalid}) }}">
                                             {{ category.name }}
                                         </a>
                                     </li>
@@ -137,7 +133,7 @@
                                 <img src="{{ asset(affiliationLogo) }}" alt="{{ team.affiliation.shortname }}"
                                      title="{{ team.affiliation.shortname }}" class="affiliation-logo"/>
                             {% endif %}
-                            <a href="{{ path('jury_team_affiliation', {'affilId': team.affiliation.affilid}) }}">
+                            <a href="{{ path('jury_team_affiliation', {'affilId': team.affiliation.externalid}) }}">
                                 {{ team.affiliation.name }}
                             </a>
                         </td>
@@ -156,7 +152,7 @@
                     <th>Contests</th>
                     <td>
                         {% for ucontest in team.contests %}
-                            <a href="{{ path('jury_contest', {'contestId': ucontest.cid}) }}">{{ ucontest.shortname }}</a>
+                            <a href="{{ path('jury_contest', {'contestId': ucontest.externalid}) }}">{{ ucontest.shortname }}</a>
                         {% endfor %}
                     </td>
                 </tr>
@@ -189,11 +185,11 @@
 
     <div class="button-row">
         {%- if is_granted('ROLE_ADMIN') -%}
-            {{ button(path('jury_team_edit', {'teamId': team.teamid}), 'Edit', 'primary', 'edit') }}
-            {{ button(path('jury_team_delete', {'teamId': team.teamid}), 'Delete', 'danger', 'trash-alt', true) }}
+            {{ button(path('jury_team_edit', {'teamId': team.externalid}), 'Edit', 'primary', 'edit') }}
+            {{ button(path('jury_team_delete', {'teamId': team.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
         {% endif %}
-        {{ button(path('jury_clarification_new', {'teamto': team.teamid}), 'Send message', 'secondary', 'envelope') }}
-        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'team', id: team.teamid, buttonClass: 'btn-secondary'} %}
+        {{ button(path('jury_clarification_new', {'teamto': team.externalid}), 'Send message', 'secondary', 'envelope') }}
+        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'team', id: team.externalid, buttonClass: 'btn-secondary'} %}
     </div>
 
     <div data-ajax-refresh-target>

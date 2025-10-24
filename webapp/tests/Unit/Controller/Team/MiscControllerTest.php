@@ -103,14 +103,14 @@ class MiscControllerTest extends BaseTestCase
 
                 $crawler = $this->client->submitForm('Print code', [
                     'print[code]' => $code,
-                    'print[langid]' => 'kt',
+                    'print[langid]' => 'kotlin',
                 ]);
 
                 static::assertSelectorTextContains('div.alert.alert-success',
                     'File has been printed');
 
                 $text = trim($crawler->filter('pre')->text(null, false));
-                static::assertStringStartsWith('kt', $text);
+                static::assertStringStartsWith('kotlin', $text);
                 static::assertStringEndsWith(
                     trim(file_get_contents($testFile)), $text);
             });

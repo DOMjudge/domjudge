@@ -88,11 +88,11 @@ class ScoreboardService
      * scorecache table.
      *
      * @param Contest $contest         The contest to get the scoreboard for.
-     * @param int     $teamId          The ID of the team to get the scoreboard for.
+     * @param string  $teamId          The ID of the team to get the scoreboard for.
      * @param bool    $showFtsInFreeze If false, the scoreboard will hide first
      *                                 to solve for submissions after contest freeze.
      */
-    public function getTeamScoreboard(Contest $contest, int $teamId, bool $showFtsInFreeze = true): ?Scoreboard
+    public function getTeamScoreboard(Contest $contest, string $teamId, bool $showFtsInFreeze = true): ?Scoreboard
     {
         $freezeData = new FreezeData($contest);
 
@@ -612,7 +612,7 @@ class ScoreboardService
     {
         Utils::extendMaxExecutionTime(300);
 
-        $this->dj->auditlog('contest', $contest->getCid(), 'refresh scoreboard cache');
+        $this->dj->auditlog('contest', $contest->getExternalid(), 'refresh scoreboard cache');
 
         if ($progressReporter === null) {
             $progressReporter = static function (int $progress, string $log, ?string $message = null): void {
@@ -663,7 +663,7 @@ class ScoreboardService
                 $log .= ', ';
             }
             $first = false;
-            $log .= sprintf('t%d', $team->getTeamid());
+            $log .= $team->getExternalid();
             $progress = (int)round($index / count($teams) * 100);
             $progressReporter($progress, $log);
 
@@ -826,7 +826,7 @@ class ScoreboardService
         /** @var TeamCategory[] $categories */
         $categories = $queryBuilder->getQuery()->getResult();
         foreach ($categories as $category) {
-            $filters['categories'][$category->getCategoryid()] = $category->getName();
+            $filters['categories'][$category->getExternalid()] = $category->getName();
         }
 
         // Show only affiliations / countries with visible teams.
@@ -852,7 +852,7 @@ class ScoreboardService
             /** @var TeamAffiliation[] $affiliations */
             $affiliations = $queryBuilder->getQuery()->getResult();
             foreach ($affiliations as $affiliation) {
-                $filters['affiliations'][$affiliation->getAffilid()] = $affiliation->getName();
+                $filters['affiliations'][$affiliation->getExternalid()] = $affiliation->getName();
                 if ($showFlags && $affiliation->getCountry() !== null) {
                     $filters['countries'][] = $affiliation->getCountry();
                 }
@@ -994,7 +994,7 @@ class ScoreboardService
         if ($filter) {
             if ($filter->affiliations) {
                 $queryBuilder
-                    ->andWhere('t.affiliation IN (:affiliations)')
+                    ->andWhere('ta.externalid IN (:affiliations)')
                     ->setParameter('affiliations', $filter->affiliations);
             }
 
@@ -1002,7 +1002,7 @@ class ScoreboardService
                 // Use a new join, since we need both the other two category joins for other logic already
                 $queryBuilder
                     ->innerJoin('t.categories', 'tccc')
-                    ->andWhere('tccc.categoryid IN (:categories)')
+                    ->andWhere('tccc.externalid IN (:categories)')
                     ->setParameter('categories', $filter->categories);
                 if (!$jury) {
                     $queryBuilder->andWhere('tccc.visible = 1');
@@ -1017,7 +1017,7 @@ class ScoreboardService
 
             if ($filter->teams) {
                 $queryBuilder
-                    ->andWhere('t.teamid IN (:teams)')
+                    ->andWhere('t.externalid IN (:teams)')
                     ->setParameter('teams', $filter->teams);
             }
         }

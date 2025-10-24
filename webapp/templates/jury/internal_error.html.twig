@@ -92,8 +92,8 @@
                     <tr>
                         <th>Related contest</th>
                         <td>
-                            <a href="{{ path('jury_contest', {'contestId': internalError.contest.cid}) }}">
-                                c{{ internalError.contest.cid }}
+                            <a href="{{ path('jury_contest', {'contestId': internalError.contest.externalid}) }}">
+                                {{ internalError.contest.externalid }}
                             </a>
                         </td>
                     </tr>

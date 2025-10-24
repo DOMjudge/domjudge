@@ -84,12 +84,13 @@ class SubmissionService
 
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
-            ->select('s', 'j', 'cp')
+            ->select('s', 'j', 'cp', 'l')
             ->join('s.team', 't')
             ->join('t.categories', 'tc')
             ->join('s.contest_problem', 'cp')
+            ->join('s.language', 'l')
             ->andWhere('s.contest IN (:contests)')
-            ->setParameter('contests', array_keys($contests))
+            ->setParameter('contests', $contests)
             ->orderBy('s.submittime', 'DESC')
             ->addOrderBy('s.submitid', 'DESC');
 
@@ -470,7 +471,7 @@ class SubmissionService
             ]);
         }
         if (!$language instanceof Language) {
-            $language = $this->em->getRepository(Language::class)->find($language);
+            $language = $this->em->getRepository(Language::class)->findByExternalId($language);
         }
         if ($originalSubmission !== null && !$originalSubmission instanceof Submission) {
             $originalSubmission = $this->em->getRepository(Submission::class)->find($originalSubmission);
@@ -769,8 +770,8 @@ class SubmissionService
                                            $submission->getSubmitid(), $team->getTeamid(),
                                            $language->getLangid(), $problem->getProblem()->getProbid()));
 
-        $this->dj->auditlog('submission', $submission->getSubmitid(), 'added',
-            'via ' . $source->value, null, $contest->getCid());
+        $this->dj->auditlog('submission', $submission->getExternalid(), 'added',
+            'via ' . $source->value, null, $contest->getExternalid());
 
         if (Utils::difftime((float)$contest->getEndtime(), $submitTime) <= 0) {
             $this->logger->info(

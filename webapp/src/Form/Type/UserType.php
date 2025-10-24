@@ -78,6 +78,7 @@ class UserType extends AbstractExternalIdEntityType
             'choice_label' => 'effective_name',
             'required' => false,
             'placeholder' => '-- no team --',
+            'choice_value' => 'externalid',
             'choices' => $teams,
         ]);
         $builder->add('user_roles', EntityType::class, [

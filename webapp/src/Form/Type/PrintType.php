@@ -21,7 +21,7 @@ class PrintType extends AbstractType
         $languages       = $this->em->getRepository(Language::class)->findAll();
         $languageChoices = [];
         foreach ($languages as $language) {
-            $languageChoices[$language->getName()] = $language->getLangid();
+            $languageChoices[$language->getName()] = $language->getExternalid();
         }
         ksort($languageChoices, SORT_NATURAL | SORT_FLAG_CASE);
         $languageChoices = ['plain text' => ''] + $languageChoices;

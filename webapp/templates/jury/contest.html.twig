@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Contest {{ contest.cid }} - {{ parent() }}{% endblock %}
+{% block title %}Contest {{ contest.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -38,12 +38,7 @@
         <div class="col-lg-5">
             <table class="table table-sm table-striped">
                 <tr>
-                    <th>CID</th>
-                    <td>c{{ contest.cid }}</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>External ID</th>
+                    <th>ID</th>
                     <td>{{ contest.externalid }}</td>
                     <td></td>
                 </tr>
@@ -70,14 +65,14 @@
                             <td>
                                 {% if data.show_button %}
                                     {% set button_label = type ~ " now" %}
-                                    {{ button(path('jury_contest_donow', {'contestId': contest.cid, 'time': type}), button_label, 'primary btn-sm timebutton') }}
+                                    {{ button(path('jury_contest_donow', {'contestId': contest.externalid, 'time': type}), button_label, 'primary btn-sm timebutton') }}
                                 {% endif %}
                                 {% if data.extra_button is defined %}
-                                    {{ button(path('jury_contest_donow', {'contestId': contest.cid, 'time': data.extra_button.type}), data.extra_button.label, 'primary btn-sm timebutton') }}
+                                    {{ button(path('jury_contest_donow', {'contestId': contest.externalid, 'time': data.extra_button.type}), data.extra_button.label, 'primary btn-sm timebutton') }}
                                 {% endif %}
                                 {% if type == 'finalize' %}
                                     {% if contest.finalizetime %}
-                                        {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary btn-sm timebutton') }}
+                                        {{ button(path('jury_contest_finalize', {'contestId': contest.externalid}), 'Update finalization', 'secondary btn-sm timebutton') }}
                                     {% endif %}
                                 {% endif %}
                             </td>
@@ -97,7 +92,7 @@
                     <tr>
                         <th>Problemset document</th>
                         <td>
-                            <a href="{{ path('jury_contest_problemset', {'cid': contest.cid}) }}">
+                            <a href="{{ path('jury_contest_problemset', {'cid': contest.externalid}) }}">
                                 <i title="view problemset document of the contest"
                                    class="fas fa-file-{{ contest.contestProblemsetType }}"></i>
                             </a>
@@ -148,7 +143,7 @@
                                         <ul>
                                             {% for category in contest.medalCategories %}
                                                 <li>
-                                                    <a href="{{ path('jury_team_category', {'categoryId': category.categoryid}) }}">
+                                                    <a href="{{ path('jury_team_category', {'categoryId': category.externalid}) }}">
                                                         {{ category.name }}
                                                     </a>
                                                 </li>
@@ -182,14 +177,14 @@
                             <em>all teams</em>
                         {% else %}
                             {% for team in contest.teams %}
-                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">
-                                    {{ team.effectiveName }} {{ team | entityIdBadge('t') }}
+                                <a href="{{ path('jury_team', {'teamId': team.externalid}) }}">
+                                    {{ team.effectiveName }} {{ team | entityIdBadge }}
                                 </a>
                                 <br>
                             {% endfor %}
                             {% for category in contest.teamCategories %}
                                 All teams from
-                                <a href="{{ path('jury_team_category', {'categoryId': category.categoryid}) }}">
+                                <a href="{{ path('jury_team_category', {'categoryId': category.externalid}) }}">
                                     {{ category.name }}
                                 </a>
                                 <br>
@@ -209,7 +204,7 @@
                         {% endif %}
                         <ul>
                             {% for language in allowedLanguages %}
-                                <li><a href="{{ path('jury_language', {"langId": language.langid}) }}">{{ language.name }}</a></li>
+                                <li><a href="{{ path('jury_language', {"langId": language.externalid}) }}">{{ language.name }}</a></li>
                             {% endfor %}
                         </ul>
                     </td>
@@ -218,7 +213,7 @@
                 <tr>
                     <th>Public static scoreboard ZIP</th>
                     <td>
-                        <a class="btn btn-sm btn-secondary" href="{{ path('jury_scoreboard_data_zip', {contestId: contest.cid, type: 'public'}) }}">
+                        <a class="btn btn-sm btn-secondary" href="{{ path('jury_scoreboard_data_zip', {contestId: contest.externalid, type: 'public'}) }}">
                             <i class="fas fa-download"></i> Download
                         </a>
                     </td>
@@ -227,7 +222,7 @@
                 <tr>
                     <th>Jury (unfrozen) static scoreboard ZIP</th>
                     <td>
-                        <a class="btn btn-sm btn-secondary" href="{{ path('jury_scoreboard_data_zip', {contestId: contest.cid, type: 'unfrozen'}) }}">
+                        <a class="btn btn-sm btn-secondary" href="{{ path('jury_scoreboard_data_zip', {contestId: contest.externalid, type: 'unfrozen'}) }}">
                             <i class="fas fa-download"></i> Download
                         </a>
                     </td>
@@ -236,7 +231,7 @@
                 <tr>
                     <th>Sample data ZIP</th>
                     <td>
-                        <a class="btn btn-sm btn-secondary" href="{{ path('jury_contest_samples_data_zip', {contestId: contest.cid}) }}">
+                        <a class="btn btn-sm btn-secondary" href="{{ path('jury_contest_samples_data_zip', {contestId: contest.externalid}) }}">
                             <i class="fas fa-download"></i> Download
                         </a>
                         <br/>
@@ -321,7 +316,7 @@
                                 <td>{{ removedInterval.starttime | printtimediff(removedInterval.endtime) }}</td>
                                 <td>
                                     <button class="btn btn-sm btn-danger remove-interval-button" type="button"
-                                            data-submit-url="{{ path('jury_contest_remove_interval', {'contestId': contest.cid, 'intervalId': removedInterval.intervalid}) }}">
+                                            data-submit-url="{{ path('jury_contest_remove_interval', {'contestId': contest.externalid, 'intervalId': removedInterval.intervalid}) }}">
                                         <i class="fas fa-trash-alt"></i></button>
                                 </td>
                             </tr>
@@ -398,8 +393,8 @@
                     <tbody>
                     {% for problem in problems %}
                         <tr>
-                            {% set link = path('jury_problem', {'probId': problem.probid}) %}
-                            <td><a href="{{ link }}">p{{ problem.probid }}</a></td>
+                            {% set link = path('jury_problem', {'probId': problem.externalId}) %}
+                            <td><a href="{{ link }}">{{ problem.externalId }}</a></td>
                             <td><a href="{{ link }}">{{ problem.problem.name }}</a></td>
                             <td><a href="{{ link }}">{{ problem.shortname }}</a></td>
                             <td><a href="{{ link }}">{{ problem.points }}</a></td>
@@ -425,14 +420,14 @@
                             </td>
                             <td>
                                 {% if problem.problem.problemstatementType %}
-                                    <a title="view problem statement" href="{{ path('jury_problem_statement', {'probId': problem.probid}) }}">
+                                    <a title="view problem statement" href="{{ path('jury_problem_statement', {'probId': problem.externalId}) }}">
                                         <i class="fas fa-file-{{ problem.problem.problemstatementType }}"></i>
                                     </a>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if is_granted('ROLE_ADMIN') and not contest.isLocked %}
-                                    <a title="Unlink problem from contest" href="{{ path('jury_contest_problem_delete', {'contestId': contest.cid, 'probId': problem.probid}) }}"
+                                    <a title="Unlink problem from contest" href="{{ path('jury_contest_problem_delete', {'contestId': contest.externalid, 'probId': problem.externalId}) }}"
                                        data-ajax-modal>
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
@@ -440,7 +435,7 @@
                             </td>
                             <td>
                                 {% if is_granted('ROLE_ADMIN') %}
-                                    <a title="Judge remaining testcases" href="{{ path('jury_contest_problem_request_remaining', {'contestId': contest.cid, 'probId': problem.probid}) }}">
+                                    <a title="Judge remaining testcases" href="{{ path('jury_contest_problem_request_remaining', {'contestId': contest.externalid, 'probId': problem.externalId}) }}">
                                         <i class="fas fa-gavel"></i>
                                     </a>
                                 {% endif %}
@@ -456,16 +451,16 @@
     <div class="button-row">
         {%- if is_granted('ROLE_ADMIN') -%}
             {% if contest.isLocked %}
-                {{ button(path('jury_contest_unlock', {'contestId': contest.cid}), 'Unlock', 'danger', 'unlock') }}
+                {{ button(path('jury_contest_unlock', {'contestId': contest.externalid}), 'Unlock', 'danger', 'unlock') }}
             {% else %}
-                {{ button(path('jury_contest_edit', {'contestId': contest.cid}), 'Edit', 'primary', 'edit') }}
-                {{ button(path('jury_contest_delete', {'contestId': contest.cid}), 'Delete', 'danger', 'trash-alt', true) }}
-                {{ button(path('jury_contest_lock', {'contestId': contest.cid}), 'Lock', 'secondary', 'lock') }}
+                {{ button(path('jury_contest_edit', {'contestId': contest.externalid}), 'Edit', 'primary', 'edit') }}
+                {{ button(path('jury_contest_delete', {'contestId': contest.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
+                {{ button(path('jury_contest_lock', {'contestId': contest.externalid}), 'Lock', 'secondary', 'lock') }}
             {% endif %}
-            {{ button(path('jury_contest_request_remaining', {'contestId': contest.cid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
+            {{ button(path('jury_contest_request_remaining', {'contestId': contest.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
         {% endif %}
-        {{ button(path('jury_contest_prefetch', {'contestId': contest.cid}), 'Heat up judgehosts with contest data', 'secondary', 'download') }}
-        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'contest', id: contest.cid, buttonClass: 'btn-secondary'} %}
+        {{ button(path('jury_contest_prefetch', {'contestId': contest.externalid}), 'Heat up judgehosts with contest data', 'secondary', 'download') }}
+        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'contest', id: contest.externalid, buttonClass: 'btn-secondary'} %}
     </div>
 
 {% endblock %}

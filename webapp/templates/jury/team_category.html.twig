@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Category {{ teamCategory.categoryid }} - {{ parent() }}{% endblock %}
+{% block title %}Category {{ teamCategory.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -18,10 +18,6 @@
             <table class="table table-sm table-striped">
                 <tr>
                     <th>ID</th>
-                    <td>{{ teamCategory.categoryid }}</td>
-                </tr>
-                <tr>
-                    <th>External ID</th>
                     <td>{{ teamCategory.externalid }}</td>
                 </tr>
                 <tr>
@@ -80,9 +76,9 @@
 
     {%- if is_granted('ROLE_ADMIN') -%}
         <p>
-            {{ button(path('jury_team_category_edit', {'categoryId': teamCategory.categoryid}), 'Edit', 'primary', 'edit') }}
-            {{ button(path('jury_team_category_delete', {'categoryId': teamCategory.categoryid}), 'Delete', 'danger', 'trash-alt', true) }}
-            {{ button(path('jury_team_category_request_remaining', {'categoryId': teamCategory.categoryid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
+            {{ button(path('jury_team_category_edit', {'categoryId': teamCategory.externalid}), 'Edit', 'primary', 'edit') }}
+            {{ button(path('jury_team_category_delete', {'categoryId': teamCategory.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
+            {{ button(path('jury_team_category_request_remaining', {'categoryId': teamCategory.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
         </p>
     {% endif %}
 
@@ -103,10 +99,10 @@
                     {% for team in teamCategory.teams %}
                         <tr>
                             <td style="text-align: right">
-                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team | entityIdBadge('t') }}</a>
+                                <a href="{{ path('jury_team', {'teamId': team.externalid}) }}">{{ team | entityIdBadge }}</a>
                             </td>
                             <td>
-                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team.effectiveName }}</a>
+                                <a href="{{ path('jury_team', {'teamId': team.externalid}) }}">{{ team.effectiveName }}</a>
                             </td>
                         </tr>
                     {% endfor %}

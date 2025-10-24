@@ -79,7 +79,7 @@ class AuditLogController extends AbstractController
 
             $cid = $logline->getCid();
             if ($cid) {
-                    $data['where']['value'] = "c" . $cid;
+                    $data['where']['value'] = $cid;
                     $data['where']['sortvalue'] = $cid;
                     $data['where']['link'] = $this->generateUrl('jury_contest', ['contestId' => $cid]);
             } else {
@@ -148,11 +148,6 @@ class AuditLogController extends AbstractController
             case 'team_category':
                 return $this->generateUrl('jury_team_category', ['categoryId' => $id]);
             case 'user':
-                // Pre 6.1, usernames were stored instead of numeric IDs.
-                if (!is_numeric($id)) {
-                    $user = $this->em->getRepository(User::class)->findOneBy(['username'=>$id]);
-                    $id = $user->getUserId();
-                }
                 return $this->generateUrl('jury_user', ['userId' => $id]);
             case 'testcase':
                 // For testcase audit logs, the ID is actually the problem ID

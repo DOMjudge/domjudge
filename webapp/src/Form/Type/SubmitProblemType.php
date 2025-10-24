@@ -50,6 +50,7 @@ class SubmitProblemType extends AbstractType
             'choice_label' => fn(Problem $problem) => sprintf(
                 '%s - %s', $problem->getContestProblems()->first()->getShortName(), $problem->getName()
             ),
+            'choice_value' => 'externalid',
             'placeholder' => 'Select a problem',
         ];
         $builder->add('problem', EntityType::class, $problemConfig);
@@ -59,6 +60,7 @@ class SubmitProblemType extends AbstractType
             'class' => Language::class,
             'choices' => $languages,
             'choice_label' => 'name',
+            'choice_value' => 'externalid',
             'placeholder' => 'Select a language',
         ]);
 

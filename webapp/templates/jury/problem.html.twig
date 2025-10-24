@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Problem {{ problem.probid }} - {{ parent() }}{% endblock %}
+{% block title %}Problem {{ problem.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -19,10 +19,6 @@
             <table class="table table-sm table-striped">
                 <tr>
                     <th>ID</th>
-                    <td>p{{ problem.probid }}</td>
-                </tr>
-                <tr>
-                    <th>External ID</th>
                     <td>{{ problem.externalid }}</td>
                 </tr>
                 <tr>
@@ -33,8 +29,8 @@
                         {% else %}
                             {{ problem.testcases.count }}
                         {% endif %}
-                        <a href="{{ path('jury_problem_testcases', {'probId': problem.probid}) }}">details
-                            {%- if is_granted('ROLE_ADMIN') and not lockedProblem -%}
+                        <a href="{{ path('jury_problem_testcases', {'probId': problem.externalid}) }}">details
+                            {%- if is_granted('ROLE_ADMIN') and not lockedProblem %}
                                 / edit
                             {% endif %}
                         </a>
@@ -68,7 +64,7 @@
                     <tr>
                         <th>Problem statement</th>
                         <td>
-                            <a href="{{ path('jury_problem_statement', {'probId': problem.probid}) }}">
+                            <a href="{{ path('jury_problem_statement', {'probId': problem.externalid}) }}">
                                 <i title="view problem statement"
                                    class="fas fa-file-{{ problem.problemstatementType }}"></i>
                             </a>
@@ -124,7 +120,7 @@
                         {% else %}
                             <ul>
                                 {% for language in problem.languages %}
-                                    <li><a href="{{ path('jury_language', {'langId': language.langid}) }}">{{ language.name }}</a></li>
+                                    <li><a href="{{ path('jury_language', {'langId': language.externalid}) }}">{{ language.name }}</a></li>
                                 {% endfor %}
                             </ul>
                         {% endif %}
@@ -137,13 +133,13 @@
     <div class="button-row">
         {%- if is_granted('ROLE_ADMIN') -%}
             {%- if not lockedProblem -%}
-                {{ button(path('jury_problem_edit', {'probId': problem.probid}), 'Edit', 'primary', 'edit') }}
-                {{ button(path('jury_problem_delete', {'probId': problem.probid}), 'Delete', 'danger', 'trash-alt', true) }}
+                {{ button(path('jury_problem_edit', {'probId': problem.externalid}), 'Edit', 'primary', 'edit') }}
+                {{ button(path('jury_problem_delete', {'probId': problem.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
             {% endif %}
-            {{ button(path('jury_problem_request_remaining', {'probId': problem.probid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
+            {{ button(path('jury_problem_request_remaining', {'probId': problem.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
         {% endif %}
-        {{ button(path('jury_export_problem', {'problemId': problem.probid}), 'Export', 'secondary', 'download') }}
-        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'problem', id: problem.probid, buttonClass: 'btn-secondary'} %}
+        {{ button(path('jury_export_problem', {'problemId': problem.externalid}), 'Export', 'secondary', 'download') }}
+        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'problem', id: problem.externalid, buttonClass: 'btn-secondary'} %}
     </div>
 
     <h3>Contests</h3>
@@ -157,7 +153,7 @@
                     class="data-table table table-hover table-striped table-sm">
                     <thead class="thead-light">
                     <tr>
-                        <th>CID</th>
+                        <th>ID</th>
                         <th>Contest<br/>shortname</th>
                         <th>Contest<br/>name</th>
                         <th>Problem<br/>shortname</th>
@@ -168,10 +164,10 @@
                     </thead>
                     <tbody>
                     {% for contestProblem in problem.contestProblems %}
-                        {% set link = path('jury_contest', {'contestId': contestProblem.cid}) %}
+                        {% set link = path('jury_contest', {'contestId': contestProblem.contest.externalid}) %}
                         <tr>
                             <td>
-                                <a href="{{ link }}">c{{ contestProblem.cid }}</a>
+                                <a href="{{ link }}">{{ contestProblem.contest.externalid }}</a>
                             </td>
                             <td>
                                 <a href="{{ link }}">{{ contestProblem.contest.shortname }}</a>

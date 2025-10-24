@@ -24,13 +24,10 @@
     </thead>
     <tbody>
     {%- for clarification in clarifications %}
-        {%- set link = path('jury_clarification', {id: clarification.clarid}) %}
+        {%- set link = path('jury_clarification', {id: clarification.externalid}) %}
 
         <tr>
-            <td><a href="{{ link }}">{{ clarification.clarid }}</a></td>
-            {% if shadowMode() %}
-                <td><a href="{{ link }}">{{ clarification.externalid }}</a></td>
-            {% endif %}
+            <td><a href="{{ link }}">{{ clarification.externalid }}</a></td>
             {%- if current_contest is null and current_contests | length > 1 %}
                 <td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>
             {%- endif %}
@@ -42,7 +39,7 @@
                     {%- set recipient = 'All' %}
                 {%- else %}
                     {%- set recipient = clarification.recipient.effectiveName %}
-                    {%- set recipientBadge = clarification.recipient | entityIdBadge('t') %}
+                    {%- set recipientBadge = clarification.recipient | entityIdBadge %}
                 {%- endif %}
                 <td style="text-align: right;">
                     <a href="{{ link }}" title="{{ recipient }}">
@@ -56,7 +53,7 @@
                 </td>
             {%- else %}
                 {%- set sender = clarification.sender.effectiveName %}
-                {%- set senderBadge = clarification.sender | entityIdBadge('t') %}
+                {%- set senderBadge = clarification.sender | entityIdBadge %}
                 <td style="text-align: right;">
                     <a href="{{ link }}" title="{{ sender }}">
                         {{ senderBadge | raw }}
@@ -93,7 +90,7 @@
             {%- endif %}
 
             <td><a href="{{ link }}">{{ answered | raw }}</a></td>
-            <td><form action="{{ path('jury_clarification_claim', {clarId: clarification.clarid}) }}" method="post">
+            <td><form action="{{ path('jury_clarification_claim', {clarId: clarification.externalid}) }}" method="post">
                 {%- if claim and clarification.sender -%}
                     <button name="claimed" value="1"
                        class="btn btn-outline-success btn-sm">Claim</button>
@@ -108,12 +105,12 @@
 {% if queues | length > 1 %}
             <td data-search="{{ queues[clarification.queue]|default('') }}">
             <div class="btn-group" role="group">
-                 <span class="input-group-text" id="qig{{clarification.clarid}}"><i class="fab fa-quora"></i></span>
+                 <span class="input-group-text" id="qig{{clarification.externalid}}"><i class="fab fa-quora"></i></span>
                  {% for qk,qv in queues %}
                  <input class="qbut btn-check" type="radio" autocomplete="off"
-                     name="queue[{{ clarification.clarid }}]" data-clarid="{{ clarification.clarid }}" id="q_{{ clarification.clarid }}{{ qk }}" value="{{ qk }}"
+                     name="queue[{{ clarification.externalid }}]" data-clarid="{{ clarification.externalid }}" id="q_{{ clarification.externalid }}{{ qk }}" value="{{ qk }}"
                      {% if qk == clarification.queue %} checked{% endif %}>
-                 <label class="btn btn-sm btn-outline-secondary" for="q_{{ clarification.clarid }}{{ qk }}">{{ qv }}</label>
+                 <label class="btn btn-sm btn-outline-secondary" for="q_{{ clarification.externalid }}{{ qk }}">{{ qv }}</label>
                  {% endfor %}
             </div>
             </td>

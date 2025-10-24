@@ -15,7 +15,7 @@ class TeamAffiliationControllerTest extends JuryControllerTestCase
     protected static array   $deleteEntities           = ['UU','FAU'];
     protected static string  $deleteEntityIdentifier   = 'shortname';
     protected static array   $deleteFixtures           = [SampleAffiliationsFixture::class];
-    protected static string  $getIDFunc                = 'getAffilid';
+    protected static string  $getIDFunc                = 'getExternalid';
     protected static string  $className                = TeamAffiliation::class;
     protected static array   $DOM_elements             = ['h1' => ['Affiliations']];
     protected static string  $identifyingEditAttribute = 'shortname';
@@ -82,7 +82,7 @@ class TeamAffiliationControllerTest extends JuryControllerTestCase
 
         // Get the IDs of the newly created affiliations
         foreach ($createdAffiliations as $affiliation) {
-            $affiliationIds[] = $affiliation->getAffilid();
+            $affiliationIds[] = $affiliation->getExternalid();
         }
 
         $affiliation1Id = $affiliationIds[0];

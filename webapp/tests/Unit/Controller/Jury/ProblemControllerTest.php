@@ -13,11 +13,11 @@ use Symfony\Component\DomCrawler\Crawler;
 class ProblemControllerTest extends JuryControllerTestCase
 {
     protected static string  $baseUrl                  = '/jury/problems';
-    protected static array   $exampleEntries           = ['Hello World', 'default', 5, 3, 2, 1];
+    protected static array   $exampleEntries           = ['Hello World', 'default', 5, 'boolfind', 'fltcmp', 'hello'];
     protected static string  $shortTag                 = 'problem';
     protected static array   $deleteEntities           = ['Hello World','Float special compare test'];
     protected static string  $deleteEntityIdentifier   = 'name';
-    protected static string  $getIDFunc                = 'getProbid';
+    protected static string  $getIDFunc                = 'getExternalid';
     protected static string  $className                = Problem::class;
     protected static array   $DOM_elements             = [
         'h1'                            => ['Problems in contest Demo contest'],
@@ -28,7 +28,7 @@ class ProblemControllerTest extends JuryControllerTestCase
     // Note: we replace the deleteurl in testDeleteExtraEntity below with the actual attachment ID.
     // This can change when running the tests multiple times.
     protected static ?array $deleteExtra      = [
-        'pageurl'   => '/jury/problems/3',
+        'pageurl'   => '/jury/problems/boolfind',
         'deleteurl' => '/jury/problems/attachments/1/delete',
         'selector'  => 'interactor'
     ];
@@ -89,7 +89,7 @@ class ProblemControllerTest extends JuryControllerTestCase
         $contest->setIsLocked(true);
         $contestId = $contest->getCid();
         $problem = $em->getRepository(Problem::class)->findOneBy(['probid' => 1]);
-        $probId = $problem->getProbid();
+        $probId = $problem->getExternalid();
         $editUrl = "/jury/problems/$probId/edit";
         $deleteUrl = "/jury/problems/$probId/delete";
         $problemUrl = "/jury/problems/$probId";
@@ -158,7 +158,7 @@ class ProblemControllerTest extends JuryControllerTestCase
 
         // Get the IDs of the newly created problems
         foreach ($createdProblems as $problem) {
-            $problemIds[] = $problem->getProbid();
+            $problemIds[] = $problem->getExternalid();
         }
 
         $problem1Id = $problemIds[0];

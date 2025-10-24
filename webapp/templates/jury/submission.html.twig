@@ -1,7 +1,7 @@
 {# @var \App\Entity\ExternalJudgement externalJudgement #}
 {% extends "jury/base.html.twig" %}
 
-{% block title %}Submission s{{ submission.submitid }} - {{ parent() }}{% endblock %}
+{% block title %}Submission {{ submission.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -75,7 +75,7 @@
         {% for type, versions in version_warnings %}
             <div class="alert alert-warning">
                 <p>
-                    This judging did not use the same {{ type}} version for all testcases.
+                    This judging did not use the same {{ type }} version for all testcases.
                     This may lead to unexpected results. Versions used:
                 </p>
                 <p>
@@ -91,16 +91,16 @@
     <div class="card">
         <div class="card-header">
             <h1 style="display: inline;">
-                Submission s{{ submission.submitid }}
+                Submission {{ submission.externalid }}
                 {% if submission.originalSubmission %}
-                    {% set origSubmissionUrl = path('jury_submission', {submitId: submission.originalSubmission.submitid}) %}
-                    (resubmit of <a href="{{ origSubmissionUrl }}">s{{ submission.originalSubmission.submitid }}</a>)
+                    {% set origSubmissionUrl = path('jury_submission', {submitId: submission.originalSubmission.externalid}) %}
+                    (resubmit of <a href="{{ origSubmissionUrl }}">{{ submission.originalSubmission.externalid }}</a>)
                 {% endif %}
                 {% if submission.resubmissions is not empty %}
                     (resubmitted as
                     {%- for resubmission in submission.resubmissions -%}
-                        {% set resubmissionUrl = path('jury_submission', {submitId: resubmission.submitid}) %}
-                        <a href="{{ resubmissionUrl }}">s{{ resubmission.submitid }}</a>
+                        {% set resubmissionUrl = path('jury_submission', {submitId: resubmission.externalid}) %}
+                        <a href="{{ resubmissionUrl }}">{{ resubmission.externalid }}</a>
                         {%- if not loop.last -%},{%- endif -%}
                     {%- endfor -%}
                     )
@@ -117,16 +117,16 @@
                         {% else %}
                             {% set action = 'unignore' %}
                         {% endif %}
-                        <form action="{{ path('jury_submission_update_status', {'submitId': submission.submitid}) }}" method="post"
+                        <form action="{{ path('jury_submission_update_status', {'submitId': submission.externalid}) }}" method="post"
                               style="display: inline; ">
                             <input type="hidden" name="valid" value="{% if submission.valid %}0{% else %}1{% endif %}"/>
                             <input type="submit" class="btn btn-outline-secondary btn-sm"
                                    value="{{ action | upper }} this submission"
-                                   onclick="return confirm('Really {{ action }} submission s{{ submission.submitid }}?');"/>
+                                   onclick="return confirm('Really {{ action }} submission {{ submission.externalid }}?');"/>
                         </form>
                     {% endif %}
 
-                    {% include 'jury/partials/rejudge_form.html.twig' with {table: 'submission', id: submission.submitid} %}
+                    {% include 'jury/partials/rejudge_form.html.twig' with {table: 'submission', id: submission.externalid} %}
                 </div>
             {% endif %}
 
@@ -134,16 +134,16 @@
             <div class="submission-summary mb-2">
                 <span>
                     <i class="fas fa-users" title="Team:"></i>
-                    <a href="{{ path('jury_team', {teamId: submission.team.teamid, cid: submission.contest.cid}) }}">
-                        {{ submission.team.effectiveName }} {{ submission.team | entityIdBadge('t') }}
+                    <a href="{{ path('jury_team', {teamId: submission.team.externalid, cid: submission.contest.externalid}) }}">
+                        {{ submission.team.effectiveName }} {{ submission.team | entityIdBadge }}
                     </a>
                 </span>
 
                 {% if submission.user %}
                     <span>
                         <i class="fas fa-user" title="User:"></i>
-                        <a href="{{ path('jury_user', {userId: submission.user.userid, cid: submission.contest.cid}) }}">
-                            {{ submission.user.username }} {{ submission.user | entityIdBadge('u') }}
+                        <a href="{{ path('jury_user', {userId: submission.user.externalid, cid: submission.contest.externalid}) }}">
+                            {{ submission.user.username }} {{ submission.user | entityIdBadge }}
                         </a>
                     </span>
                 {% endif %}
@@ -151,28 +151,28 @@
                 {% if current_contest.cid != submission.contest.cid %}
                     <span>
                         <i class="fas fa-trophy" title="Contest:"></i>
-                        <a href="{{ path('jury_contest', {'contestId': submission.contest.cid}) }}">
+                        <a href="{{ path('jury_contest', {'contestId': submission.contest.externalid}) }}">
                             {{ submission.contest.shortname }}
-                            {{ submission.contest | entityIdBadge('c') }}
+                            {{ submission.contest | entityIdBadge }}
                         </a>
                     </span>
                 {% endif %}
 
                 <span>
                     <i class="fas fa-book-open" title="Problem:"></i>
-                    <a href="{{ path('jury_problem', {'probId': submission.problem.probid}) }}">
+                    <a href="{{ path('jury_problem', {'probId': submission.problem.externalid}) }}">
                         {% if submission.contestProblem %}
                             {{ submission.contestProblem | problemBadge }} {{ submission.problem.name }}
                         {% else %}
                             {{ submission.problem.name }}
                         {% endif %}
-                        {{ submission.problem | entityIdBadge('p') }}
+                        {{ submission.problem | entityIdBadge }}
                     </a>
                 </span>
 
                 <span>
                     <i class="fas fa-comments" title="Language:"></i>
-                    <a href="{{ path('jury_language', {'langId': submission.language.langid}) }}">
+                    <a href="{{ path('jury_language', {'langId': submission.language.externalid}) }}">
                         {{ submission.language.name }}
                         {{ submission.language | entityIdBadge }}
                     </a>
@@ -192,25 +192,20 @@
 
                 <span>
                     <i class="fas fa-code" title="Source code:"></i>
-                    <a href="{{ path('jury_submission_source', {submission: submission.submitid}) }}">
+                    <a href="{{ path('jury_submission_source', {submission: submission.externalid}) }}">
                         View {{ submission.files | printFiles }}
                     </a>
                 </span>
 
-                {% if shadowMode() and submission.externalid %}
-                    {% if external_ccs_submission_url is empty %}
-                        External ID: {{- submission.externalid -}}
-                    {% else %}
-                        {% set externalSubmissionUrl = submission | externalCcsUrl %}
-                        {% if externalSubmissionUrl is not empty %}
-                            <span>
-                                <i class="fas fa-link" title="External link:"></i>
-                                <a href="{{ externalSubmissionUrl }}" target="_blank">
-                                    View in external CCS
-                                </a>
-                                (ID: {{- submission.externalid -}})
-                            </span>
-                        {% endif %}
+                {% if shadowMode() and external_ccs_submission_url is not empty %}
+                    {% set externalSubmissionUrl = submission | externalCcsUrl %}
+                    {% if externalSubmissionUrl is not empty %}
+                        <span>
+                            <i class="fas fa-link" title="External link:"></i>
+                            <a href="{{ externalSubmissionUrl }}" target="_blank">
+                                View in external CCS
+                            </a>
+                        </span>
                     {% endif %}
                 {% endif %}
             </div>
@@ -288,7 +283,7 @@
             </thead>
             <tbody>
             {% for judging in judgings %}
-                {% set link = path('jury_submission', {submitId: submission.submitid, jid: judging.judgingid}) %}
+                {% set link = path('jury_submission', {submitId: submission.externalid, jid: judging.judgingid}) %}
                 <tr {% if not judging.valid %}class="disabled"{% endif %}>
                     <td>
                         <a href="{{ link }}">
@@ -372,9 +367,9 @@
                             {%- endif -%}
                         {% endif %}
                         {%- if lastJudging is not null -%}
-                            {% set lastSubmissionLink = path('jury_submission', {submitId: lastSubmission.submitid}) %}{#-
+                            {% set lastSubmissionLink = path('jury_submission', {submitId: lastSubmission.externalid}) %}{#-
                         -#}<span class="lastresult">
-                            (<a href="{{ lastSubmissionLink }}">s{{ lastSubmission.submitid }}</a>: {{ lastJudging.result | printResult }}){#-
+                            (<a href="{{ lastSubmissionLink }}">{{ lastSubmission.externalid }}</a>: {{ lastJudging.result | printResult }}){#-
                         -#}</span>
                         {%- endif -%}
                         {%- if externalJudgement is not null %}
@@ -433,7 +428,7 @@
                     {% endif %}
                 &nbsp;
                 {% if not selectedJudging.verified %}
-                    <form action="{{ path('jury_submission', {submitId: submission.submitid, jid: selectedJudging.judgingid}) }}"
+                    <form action="{{ path('jury_submission', {submitId: submission.externalid, jid: selectedJudging.judgingid}) }}"
                           method="post" style="display: inline;">
                         {% if selectedJudging.juryMember is not empty %}
                             (claimed by {{ selectedJudging.juryMember }})
@@ -449,7 +444,7 @@
                 &nbsp;
                 {% if selectedJudging is null or selectedJudging.result is empty %}
                     {%- if not selectedJudging or not selectedJudging.started %}
-                        <a href="{{ path('jury_submission_create_tasks', {'submitId': submission.submitid}) }}">
+                        <a href="{{ path('jury_submission_create_tasks', {'submitId': submission.externalid}) }}">
                             <button class="btn btn-sm btn-outline-secondary" >
                                 <i class="fas fa-gavel"></i>
                                 Judge submission
@@ -562,7 +557,7 @@
                                 {{ lastRuns | displayTestcaseResults(lastJudging.endtime is not empty) }}
                             </td>
                             <td>
-                                <a href="{{ lastSubmissionLink }}">previous s{{ lastSubmission.submitid }}</a>
+                                <a href="{{ lastSubmissionLink }}">previous {{ lastSubmission.externalid }}</a>
                                 {% if lastJudging.verifyComment %}
                                     <span class="prevsubmit">(verify comment: '{{ lastJudging.verifyComment }}')</span>
                                 {% endif %}
@@ -671,20 +666,20 @@
                             -#}<button type="button" class="btn btn-link" onclick="navigator.clipboard.writeText('{{ runsOutput[runIdx].testcasedir }}')"><i class="fa-regular fa-copy"></i></button>
                         {% endif %}
                         <div style="float: right;">
-                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.probid, 'rank': run.rank, 'type': 'input'}) }}">
+                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'input'}) }}">
                                 <button class="btn btn-sm btn-outline-secondary" >
                                     <i class="fas fa-download"></i>
                                     Input
                                 </button>
                             </a>
-                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.probid, 'rank': run.rank, 'type': 'output'}) }}">
+                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'output'}) }}">
                                 <button class="btn btn-sm btn-outline-secondary" >
                                     <i class="fas fa-download"></i>
                                     Reference Output
                                 </button>
                             </a>
                             {% if run.firstJudgingRun is not null %}
-                                <a href="{{ path('jury_submission_team_output', {'submission': submission.submitid, 'run': run.firstJudgingRun.runid, 'contest': submission.contest.cid}) }}">
+                                <a href="{{ path('jury_submission_team_output', {'submission': submission.externalid, 'run': run.firstJudgingRun.runid, 'contest': submission.contest.externalid}) }}">
                                     <button class="btn btn-sm btn-outline-secondary" >
                                         <i class="fas fa-download"></i>
                                         {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
@@ -735,7 +730,7 @@
                     {% endif %}
                     {% if runsOutput[runIdx].image_thumb %}
                         <span style="float:right; border: 3px solid #438ec3; margin: 5px; padding: 5px;">
-                            {% set imgUrl = path('jury_problem_testcase_fetch', {'probId': submission.problem.probid, 'rank': run.rank, 'type': 'image'}) %}
+                            {% set imgUrl = path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'image'}) %}
                             <a href="{{ imgUrl }}">
                                 <img class="image_thumb" src="data:{{ run.imageType | extensionToMime }};base64,{{ runsOutput[runIdx].image_thumb | base64 }}"/>
                             </a>

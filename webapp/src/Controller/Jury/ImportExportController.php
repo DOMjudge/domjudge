@@ -168,7 +168,7 @@ class ImportExportController extends BaseController
                 );
                 $allMessages = array_merge($allMessages, $messages);
                 if ($newProblem) {
-                    $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip',
+                    $this->dj->auditlog('problem', $newProblem->getExternalid(), 'upload zip',
                         $clientName);
                 } else {
                     $this->postMessages($allMessages);
@@ -184,7 +184,7 @@ class ImportExportController extends BaseController
             $this->postMessages($allMessages);
 
             if ($newProblem !== null) {
-                return $this->redirectToRoute('jury_problem', ['probId' => $newProblem->getProbid()]);
+                return $this->redirectToRoute('jury_problem', ['probId' => $newProblem->getExternalid()]);
             } else {
                 return $this->redirectToRoute('jury_problems');
             }
@@ -400,7 +400,7 @@ class ImportExportController extends BaseController
             ->getResult();
         $categoryIds = [];
         foreach ($categories as $category) {
-            $categoryIds[] = $category->getCategoryid();
+            $categoryIds[] = $category->getExternalid();
         }
 
         $contest = $this->dj->getCurrentContest();
@@ -416,7 +416,7 @@ class ImportExportController extends BaseController
 
         $teamNames = [];
         foreach ($teams as $team) {
-            $teamNames[$team->getIcpcId()] = $team->getEffectiveName();
+            $teamNames[$team->getIcpcId() ?? $team->getExternalid()] = $team->getEffectiveName();
         }
 
         $awarded       = [];
@@ -496,8 +496,8 @@ class ImportExportController extends BaseController
                     $firstToSolve[$problem->getProbid()] = [
                         'problem' => $problem->getShortname(),
                         'problem_name' => $problem->getProblem()->getName(),
-                        'team' => $teamNames[$team->getIcpcId()],
-                        'rank' => $rankPerTeam[$team->getIcpcId()] ?: '-',
+                        'team' => $teamNames[$team->getIcpcId() ?? $team->getExternalid()],
+                        'rank' => $rankPerTeam[$team->getIcpcId() ?? $team->getExternalid()] ?: '-',
                         'time' => Utils::scoretime($matrixItem->time, $scoreIsInSeconds),
                     ];
                 }
@@ -574,7 +574,7 @@ class ImportExportController extends BaseController
                 if (!isset($grouped[$queue])) {
                     $grouped[$queue] = [];
                 }
-                $grouped[$queue][$clarification->getClarid()] = $clarification;
+                $grouped[$queue][$clarification->getExternalid()] = $clarification;
             }
         }
 

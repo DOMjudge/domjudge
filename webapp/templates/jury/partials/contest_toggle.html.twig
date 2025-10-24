@@ -1,4 +1,4 @@
-<form action="{{ path('jury_contest_toggle', {'contestId': contest.cid, 'type': type}) }}" method="post" class="d-inline">
+<form action="{{ path('jury_contest_toggle', {'contestId': contest.externalid, 'type': type}) }}" method="post" class="d-inline">
     <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
            name="value" {% if enabled %}checked{% endif %}>
 </form>

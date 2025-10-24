@@ -55,12 +55,12 @@ class AnalysisController extends AbstractController
         $delayedJudgings = $em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->innerJoin(Judging::class, 'j', Expr\Join::WITH, 's.submitid = j.submission')
-            ->select('s.submitid, MIN(j.judgingid) AS judgingid, s.submittime, MIN(j.starttime) - s.submittime AS timediff, COUNT(j.judgingid) AS num_judgings')
+            ->select('s.externalid as submitexternalid, MIN(j.judgingid) AS judgingid, s.submittime, MIN(j.starttime) - s.submittime AS timediff, COUNT(j.judgingid) AS num_judgings')
             ->andWhere('s.contest = :contest')
             ->setParameter('contest', $contest)
             ->andWhere('s.team IN (:teams)')
             ->setParameter('teams', $teams)
-            ->groupBy('s.submitid')
+            ->groupBy('s.externalid')
             ->andHaving('timediff > :timediff')
             ->setParameter('timediff', $delayedTimeDiff)
             ->orderBy('timediff', 'DESC')
@@ -83,8 +83,10 @@ class AnalysisController extends AbstractController
     }
 
     #[Route(path: '/team/{team}', name: 'analysis_team')]
-    public function teamAction(Team $team): Response
-    {
+    public function teamAction(
+        #[MapEntity(mapping: ['team' => 'externalid'])]
+        Team $team,
+    ): Response {
         $contest = $this->dj->getCurrentContest();
 
         if ($contest === null) {
@@ -100,7 +102,7 @@ class AnalysisController extends AbstractController
 
     #[Route(path: '/problem/{probid}', name: 'analysis_problem')]
     public function problemAction(
-        #[MapEntity(id: 'probid')]
+        #[MapEntity(mapping: ['probid' => 'externalid'])]
         Problem $problem,
         #[MapQueryParameter]
         ?string $view = null

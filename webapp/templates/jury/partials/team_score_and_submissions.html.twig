@@ -8,7 +8,7 @@
     Submissions
     {% if restrictionText %}
     <small class="text-muted">
-        restricted to {{ restrictionText }} (<a href="{{ path('jury_team', {'teamId': team.teamid}) }}">show all</a>)
+        restricted to {{ restrictionText }} (<a href="{{ path('jury_team', {'teamId': team.externalid}) }}">show all</a>)
     </small>
     {% endif %}
 </h2>

@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Controller\API\AbstractRestController as ARC;
 use App\DataTransferObject\ImageFile;
 use App\DataTransferObject\TeamLocation;
+use App\Repository\TeamRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -18,7 +19,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /**
  * All teams participating in the contest.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: TeamRepository::class)]
 #[ORM\Table(options: ['collation' => 'utf8mb4_unicode_ci', 'charset' => 'utf8mb4'])]
 #[ORM\Index(columns: ['affilid'], name: 'affilid')]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
@@ -37,8 +38,7 @@ class Team extends BaseApiEntity implements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Team ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('teamid')]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\Exclude]
     protected ?int $teamid = null;
 
     #[ORM\Column(

@@ -21,7 +21,8 @@ class ContestProblemType extends AbstractType
         $builder->add('problem', EntityType::class, [
             'class' => Problem::class,
             'required' => true,
-            'choice_label' => fn(Problem $problem) => sprintf('p%d - %s', $problem->getProbid(), $problem->getName()),
+            'choice_label' => fn(Problem $problem) => sprintf('%s - %s', $problem->getExternalid(), $problem->getName()),
+            'choice_value' => 'externalid',
             'query_builder' => fn(EntityRepository $er) => $er
                 ->createQueryBuilder('p')
                 ->orderBy('p.probid'),

@@ -2,6 +2,7 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
+use App\Repository\ContestProblemRepository;
 use App\Service\DOMJudgeService as DJS;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -14,7 +15,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /**
  * Many-to-Many mapping of contests and problems.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ContestProblemRepository::class)]
 #[ORM\Table(
     name: 'contestproblem',
     options: [
@@ -26,11 +27,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\Index(columns: ['cid'], name: 'cid')]
 #[ORM\Index(columns: ['probid'], name: 'probid')]
 #[ORM\UniqueConstraint(name: 'shortname', columns: ['cid', 'shortname'], options: ['lengths' => [null, 190]])]
-#[Serializer\VirtualProperty(
-    name: 'probid',
-    exp: 'object.getProblem().getProbid()',
-    options: [new Serializer\Groups([ARC::GROUP_NONSTRICT])]
-)]
 
 #[Serializer\VirtualProperty(
     name: 'short_name',

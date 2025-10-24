@@ -6,6 +6,7 @@ use App\Controller\API\AbstractRestController as ARC;
 use App\DataTransferObject\ContestState;
 use App\DataTransferObject\FileWithName;
 use App\DataTransferObject\ImageFile;
+use App\Repository\ContestRepository;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
 use App\Validator\Constraints\Identifier;
@@ -28,7 +29,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /**
  * Contests that will be run with this install.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ContestRepository::class)]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -56,7 +57,7 @@ class Contest extends BaseApiEntity implements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Contest ID', 'unsigned' => true])]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\Exclude]
     protected ?int $cid = null;
 
     #[ORM\Column(

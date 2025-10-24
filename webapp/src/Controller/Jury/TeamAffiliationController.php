@@ -37,10 +37,7 @@ class TeamAffiliationController extends BaseController
     }
 
     #[Route(path: '', name: 'jury_team_affiliations')]
-    public function indexAction(
-        #[Autowire('%kernel.project_dir%')]
-        string $projectDir
-    ): Response {
+    public function indexAction(): Response {
         $em               = $this->em;
         $teamAffiliations = $em->createQueryBuilder()
             ->select('a', 'COUNT(t.teamid) AS num_teams')
@@ -53,8 +50,7 @@ class TeamAffiliationController extends BaseController
         $showFlags = $this->config->get('show_flags');
 
         $table_fields = [
-            'affilid' => ['title' => 'ID', 'sort' => true],
-            'externalid' => ['title' => 'external ID', 'sort' => true],
+            'externalid' => ['title' => 'ID', 'sort' => true],
             'icpcid' => ['title' => 'ICPC ID', 'sort' => true],
             'shortname' => ['title' => 'shortname', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true, 'default_sort' => true],
@@ -77,7 +73,7 @@ class TeamAffiliationController extends BaseController
             $affiliationdata    = [];
             $affiliationactions = [];
 
-            $this->addEntityCheckbox($affiliationdata, $teamAffiliation, $teamAffiliation->getAffilid(), 'affiliation-checkbox');
+            $this->addEntityCheckbox($affiliationdata, $teamAffiliation, $teamAffiliation->getExternalid(), 'affiliation-checkbox');
 
             // Get whatever fields we can from the affiliation object itself.
             foreach ($table_fields as $k => $v) {
@@ -91,14 +87,14 @@ class TeamAffiliationController extends BaseController
                     'icon' => 'edit',
                     'title' => 'edit this affiliation',
                     'link' => $this->generateUrl('jury_team_affiliation_edit', [
-                        'affilId' => $teamAffiliation->getAffilid(),
+                        'affilId' => $teamAffiliation->getExternalid(),
                     ])
                 ];
                 $affiliationactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this affiliation',
                     'link' => $this->generateUrl('jury_team_affiliation_delete', [
-                        'affilId' => $teamAffiliation->getAffilid(),
+                        'affilId' => $teamAffiliation->getExternalid(),
                     ]),
                     'ajaxModal' => true,
                 ];
@@ -114,14 +110,14 @@ class TeamAffiliationController extends BaseController
             }
 
             $affiliationdata['affiliation_logo'] = [
-                'value' => $teamAffiliation->getExternalid() ?? $teamAffiliation->getAffilid(),
+                'value' => $teamAffiliation->getExternalid(),
                 'title' => $teamAffiliation->getShortname(),
             ];
 
             $team_affiliations_table[] = [
                 'data' => $affiliationdata,
                 'actions' => $affiliationactions,
-                'link' => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]),
+                'link' => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getExternalid()]),
             ];
         }
 
@@ -131,20 +127,24 @@ class TeamAffiliationController extends BaseController
         ]);
     }
 
-    #[Route(path: '/{affilId<\d+>}', name: 'jury_team_affiliation')]
-    public function viewAction(Request $request, ScoreboardService $scoreboardService, int $affilId): Response
+    #[Route(path: '/{affilId}', name: 'jury_team_affiliation')]
+    public function viewAction(Request $request, ScoreboardService $scoreboardService, string $affilId): Response
     {
-        $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
+        $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findByExternalId($affilId);
         if (!$teamAffiliation) {
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
         }
 
         $data = [
             'teamAffiliation' => $teamAffiliation,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                TeamAffiliation::class,
+                $teamAffiliation->getExternalid(),
+            ),
             'showFlags' => $this->config->get('show_flags'),
             'refresh' => [
                 'after' => 30,
-                'url' => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]),
+                'url' => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getExternalid()]),
                 'ajax' => true,
             ],
             'maxWidth' => $this->config->get('team_column_width'),
@@ -171,10 +171,10 @@ class TeamAffiliationController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{affilId<\d+>}/edit', name: 'jury_team_affiliation_edit')]
-    public function editAction(Request $request, int $affilId): Response
+    #[Route(path: '/{affilId}/edit', name: 'jury_team_affiliation_edit')]
+    public function editAction(Request $request, string $affilId): Response
     {
-        $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
+        $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findByExternalId($affilId);
         if (!$teamAffiliation) {
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
         }
@@ -186,7 +186,7 @@ class TeamAffiliationController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->assetUpdater->updateAssets($teamAffiliation);
             $this->saveEntity($teamAffiliation, $teamAffiliation->getAffilid(), false);
-            return $this->redirectToRoute('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]);
+            return $this->redirectToRoute('jury_team_affiliation', ['affilId' => $affilId]);
         }
 
         return $this->render('jury/team_affiliation_edit.html.twig', [
@@ -196,10 +196,10 @@ class TeamAffiliationController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{affilId<\d+>}/delete', name: 'jury_team_affiliation_delete')]
-    public function deleteAction(Request $request, int $affilId): Response
+    #[Route(path: '/{affilId}/delete', name: 'jury_team_affiliation_delete')]
+    public function deleteAction(Request $request, string $affilId): Response
     {
-        $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
+        $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findByExternalId($affilId);
         if (!$teamAffiliation) {
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
         }
@@ -208,20 +208,20 @@ class TeamAffiliationController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/delete-multiple', name: 'jury_team_affiliation_delete_multiple', methods: ['GET', 'POST'])]
+    #[Route(path: '/delete-multiple', name: 'jury_team_affiliation_delete_multiple', methods: ['GET', 'POST'], priority: 1)]
     public function deleteMultipleAction(Request $request): Response
     {
         return $this->deleteMultiple(
             $request,
             TeamAffiliation::class,
-            'affilid',
+            'externalid',
             'jury_team_affiliations',
             'No affiliations could be deleted.'
         );
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/add', name: 'jury_team_affiliation_add')]
+    #[Route(path: '/add', name: 'jury_team_affiliation_add', priority: 1)]
     public function addAction(Request $request): Response
     {
         $teamAffiliation = new TeamAffiliation();
@@ -232,7 +232,7 @@ class TeamAffiliationController extends BaseController
 
         if ($response = $this->processAddFormForExternalIdEntity(
             $form, $teamAffiliation,
-            fn() => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]),
+            fn() => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getExternalid()]),
             function () use ($teamAffiliation) {
                 $this->em->persist($teamAffiliation);
                 $this->assetUpdater->updateAssets($teamAffiliation);

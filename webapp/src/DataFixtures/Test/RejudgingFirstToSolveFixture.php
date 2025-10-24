@@ -34,7 +34,7 @@ class RejudgingFirstToSolveFixture extends AbstractTestDataFixture
             [$team1, $contest->getStarttime() + 400, 'correct'],
         ];
 
-        $language = $manager->getRepository(Language::class)->find('cpp');
+        $language = $manager->getRepository(Language::class)->findByExternalId('cpp');
         $problem = $contest->getProblems()->filter(fn(ContestProblem $problem) => $problem->getShortname() === 'A')->first();
 
         foreach ($submissionData as $submissionItem) {
