@@ -3,7 +3,7 @@ namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
 use App\DataTransferObject\Command;
-use App\Validator\Constraints\Identifier;
+use App\Repository\LanguageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Programming languages in which teams can submit solutions.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: LanguageRepository::class)]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -30,12 +30,10 @@ class Language extends BaseApiEntity implements
     ExternalIdFromInternalIdInterface
 {
     #[ORM\Id]
-    #[ORM\Column(length: 32, options: ['comment' => 'Language ID (string)'])]
-    #[Assert\NotBlank]
-    #[Assert\NotEqualTo('add')]
-    #[Identifier]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Language ID', 'unsigned' => true])]
     #[Serializer\Exclude]
-    protected ?string $langid = null;
+    protected ?int $langid = null;
 
     #[ORM\Column(nullable: true, options: ['comment' => 'Language ID to expose in the REST API'])]
     #[Serializer\SerializedName('id')]
@@ -264,13 +262,13 @@ class Language extends BaseApiEntity implements
         return $ret;
     }
 
-    public function setLangid(string $langid): Language
+    public function setLangid(int $langid): Language
     {
         $this->langid = $langid;
         return $this;
     }
 
-    public function getLangid(): ?string
+    public function getLangid(): ?int
     {
         return $this->langid;
     }
@@ -420,16 +418,11 @@ class Language extends BaseApiEntity implements
 
     public function getEditorLanguage(): string
     {
-        return match ($this->getLangid()) {
+        return match ($this->getExternalid()) {
             'bash' => 'shell',
-            'cxx' => 'cpp',
-            'kt' => 'kotlin',
-            'pas' => 'pascal',
             'pl' => 'perl',
-            'py2', 'py3' => 'python',
-            'rb' => 'ruby',
-            'rs' => 'rust',
-            default => $this->getLangid(),
+            'python2', 'python3' => 'python',
+            default => $this->getExternalid(),
         };
     }
 

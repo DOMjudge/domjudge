@@ -697,7 +697,7 @@ class CheckConfigService
         $languageerrors = $morelanguageerrors = [];
         $result = 'O';
         foreach ($languages as $language) {
-            $langid = $language->getLangid();
+            $langid = $language->getExternalid();
             $errors = $this->validator->validate($language);
             if (count($errors)) {
                 $result = 'E';
