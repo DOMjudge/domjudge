@@ -1338,7 +1338,7 @@ EOF;
             $contestProblemsById[$contestProblem->getExternalid()] = $contestProblem;
         }
 
-        $cpp = $em->getRepository(Language::class)->find('cpp');
+        $cpp = $em->getRepository(Language::class)->findByExternalId('cpp');
 
         // We use direct queries here to speed this up
         $submissionInsertQuery = $em->getConnection()->prepare('INSERT INTO submission (teamid, cid, probid, langid, submittime) VALUES (:teamid, :cid, :probid, :langid, :submittime)');

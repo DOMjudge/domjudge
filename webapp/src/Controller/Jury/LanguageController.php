@@ -253,7 +253,7 @@ class LanguageController extends BaseController
         $this->em->flush();
 
         if ($enabled) {
-            $this->dj->unblockJudgeTasksForLanguage($langId);
+            $this->dj->unblockJudgeTasksForLanguage($language->getLangid());
         }
 
         $this->dj->auditlog('language', $langId, 'set allow judge',
@@ -302,7 +302,7 @@ class LanguageController extends BaseController
             }
             $this->saveEntity($language, $language->getLangid(), false);
             if ($language->getAllowJudge()) {
-                $this->dj->unblockJudgeTasksForLanguage($langId);
+                $this->dj->unblockJudgeTasksForLanguage($language->getLangid());
             }
             return $this->redirectToRoute('jury_language', ['langId' => $language->getLangid()]);
         }

@@ -55,7 +55,7 @@ class PrintControllerTest extends BaseTestCase
 
                 $crawler = $this->client->submitForm('Print code', [
                     'print[code]' => $code,
-                    'print[langid]' => 'csharp',
+                    'print[langid]' => '6',
                 ]);
 
                 static::assertSelectorTextContains('div.alert.alert-success',

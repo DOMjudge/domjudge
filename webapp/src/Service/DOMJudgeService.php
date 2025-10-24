@@ -737,23 +737,24 @@ class DOMJudgeService
      *
      * @param string      $filename The on-disk file to be printed out
      * @param string      $origname The original filename as submitted by the team
-     * @param string|null $language Langid of the programming language this file is in
+     * @param int|null    $language Langid of the programming language this file is in
      * @param bool        $asTeam   Print the file as the team associated with the user
      * @return array{0: bool, 1: string}
      */
     public function printUserFile(
         string $filename,
         string $origname,
-        ?string $language,
+        ?int $language,
         ?bool $asTeam = false,
     ): array {
         $user = $this->getUser();
         $team = $user->getTeam();
+        $language = $language ? $this->em->getRepository(Language::class)->find($language) : null;
         if ($asTeam && $team !== null) {
             $teamid = $team->getLabel() ?? $team->getExternalid();
-            return $this->printFile($filename, $origname, $language, $user->getUserIdentifier(), $team->getEffectiveName(), $teamid, $team->getLocation());
+            return $this->printFile($filename, $origname, $language?->getExternalid(), $user->getUserIdentifier(), $team->getEffectiveName(), $teamid, $team->getLocation());
         }
-        return $this->printFile($filename, $origname, $language, $user->getUserIdentifier());
+        return $this->printFile($filename, $origname, $language?->getExternalid(), $user->getUserIdentifier());
     }
 
     /**
@@ -764,7 +765,7 @@ class DOMJudgeService
      *
      * @param string      $filename The on-disk file to be printed out
      * @param string      $origname The original filename as submitted by the team
-     * @param string|null $language Langid of the programming language this file is in
+     * @param string|null $language External ID of the programming language this file is in
      * @param string      $username Username of the print job submitter
      * @param string|null $teamname Teamname of the team this user belongs to, if any
      * @param string|null $teamid   Teamid of the team this user belongs to, if any
@@ -1226,7 +1227,7 @@ class DOMJudgeService
             ->where('jt.jobid IS NULL');
     }
 
-    public function unblockJudgeTasksForLanguage(string $langId): void
+    public function unblockJudgeTasksForLanguage(int $langId): void
     {
         // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
         $judgings = $this->helperUnblockJudgeTasks()
