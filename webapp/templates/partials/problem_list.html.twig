@@ -7,7 +7,7 @@
     {% if contest and show_contest_problemset %}
         {% if contest.contestProblemsetType is not empty %}
             {% if contest_problemset_add_cid %}
-                {% set contest_problemset_url = path(contest_problemset_path, {'cid': contest.cid}) %}
+                {% set contest_problemset_url = path(contest_problemset_path, {'cid': contest.externalid}) %}
             {% else %}
                 {% set contest_problemset_url = path(contest_problemset_path) %}
             {% endif %}
@@ -18,7 +18,7 @@
             </a>
         {% endif %}
         {% if showSamples %}
-            <a class="btn btn-secondary" href="{{ path('current_samples_data_zip', {cid: contest.cid}) }}" title="Contains samples, attachments and statement for all problems.">
+            <a class="btn btn-secondary" href="{{ path('current_samples_data_zip', {cid: contest.externalid}) }}" title="Contains samples, attachments and statement for all problems.">
                 <i class="fas fa-download"></i> samples
             </a>
         {% endif %}
@@ -152,7 +152,7 @@
                                             {% endif %}
                                             {% if clarificationsCount > 0 %}
                                                 <a data-ajax-modal class="btn btn-secondary" role="button"
-                                                   href="{{ path('team_clarification_by_prob', {'probId': problem.probid}) }}">
+                                                   href="{{ path('team_clarification_by_prob', {'probId': problem.externalId}) }}">
                                                     <i class="fas fa-question-circle"></i>
                                                     {% if clarificationsCount > 0 %}
                                                         {% set badgeClass = 'text-bg-info' %}
@@ -170,7 +170,7 @@
 
                                             {% if problem.problem.problemstatementType is not empty %}
                                                 <a class="btn btn-secondary" role="button"
-                                                   href="{{ path(problem_statement_path, {'probId': problem.probid}) }}">
+                                                   href="{{ path(problem_statement_path, {'probId': problem.externalId}) }}">
                                                     <i class="fas fa-file-{{ problem.problem.problemstatementType }}"></i>
                                                     statement
                                                 </a>
@@ -178,7 +178,7 @@
 
                                             {% if numsamples > 0 %}
                                                 <a class="btn btn-secondary" role="button"
-                                                   href="{{ path(problem_sample_zip_path, {'probId': problem.probid}) }}">
+                                                   href="{{ path(problem_sample_zip_path, {'probId': problem.externalId}) }}">
                                                     <i class="fas fa-file-archive"></i> samples
                                                 </a>
                                             {% endif %}
@@ -190,7 +190,7 @@
                                                 {% for attachment in problem.problem.attachments %}
                                                     <li class="list-group-item">
                                                         <a class="btn btn-outline-secondary" role="button"
-                                                           href="{{ path(problem_attachment_path, {'probId': problem.probid, 'attachmentId': attachment.attachmentid}) }}">
+                                                           href="{{ path(problem_attachment_path, {'probId': problem.externalId, 'attachmentId': attachment.attachmentid}) }}">
                                                             <i class="{{ attachment.type | fileTypeIcon }}"></i> {{ attachment.name }}
                                                         </a>
                                                     </li>

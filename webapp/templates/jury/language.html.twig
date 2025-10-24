@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Language {{ language.langid }} - {{ parent() }}{% endblock %}
+{% block title %}Language {{ language.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -19,10 +19,6 @@
             <table class="table table-sm table-striped">
                 <tr>
                     <th>ID</th>
-                    <td>{{ language.langid }}</td>
-                </tr>
-                <tr>
-                    <th>External ID</th>
                     <td>{{ language.externalid }}</td>
                 </tr>
                 <tr>
@@ -106,11 +102,11 @@
 
     <div class="button-row">
         {%- if is_granted('ROLE_ADMIN') -%}
-            {{ button(path('jury_language_edit', {'langId': language.langid}), 'Edit', 'primary', 'edit') }}
-            {{ button(path('jury_language_delete', {'langId': language.langid}), 'Delete', 'danger', 'trash-alt', true) }}
-            {{ button(path('jury_language_request_remaining', {'langId': language.langid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
+            {{ button(path('jury_language_edit', {'langId': language.externalid}), 'Edit', 'primary', 'edit') }}
+            {{ button(path('jury_language_delete', {'langId': language.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
+            {{ button(path('jury_language_request_remaining', {'langId': language.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
         {% endif %}
-        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'language', id: language.langid, buttonClass: 'btn-secondary'} %}
+        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'language', id: language.externalid, buttonClass: 'btn-secondary'} %}
     </div>
 
     <h3>Recent submissions</h3>

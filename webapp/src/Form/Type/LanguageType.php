@@ -22,9 +22,6 @@ class LanguageType extends AbstractExternalIdEntityType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $this->addExternalIdField($builder, Language::class);
-        $builder->add('langid', TextType::class, [
-            'label' => 'Language ID',
-        ]);
         $builder->add('name', TextType::class, [
             'empty_data' => ''
         ]);

@@ -232,7 +232,7 @@ class RejudgingService
             ->getQuery()
             ->getResult();
 
-        $this->dj->auditlog('rejudging', $rejudgingId, $action . 'ing rejudge', '(start)');
+        $this->dj->auditlog('rejudging', (string)$rejudgingId, $action . 'ing rejudge', '(start)');
 
         // Add missing state events for all active contests. We do this here
         // and disable doing it in the loop when calling EventLogService::log,
@@ -400,7 +400,7 @@ class RejudgingService
             ->setValid($action === self::ACTION_APPLY);
         $this->em->flush();
 
-        $this->dj->auditlog('rejudging', $rejudgingId, $action . 'ing rejudge', '(end)');
+        $this->dj->auditlog('rejudging', (string)$rejudgingId, $action . 'ing rejudge', '(end)');
 
         return true;
     }

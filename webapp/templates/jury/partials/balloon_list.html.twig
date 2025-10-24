@@ -39,7 +39,7 @@
                     <td data-order="{{ balloon.data.time }}">{{ balloon.data.time | printtime }}</td>
                     <td>{{ balloon.data.contestproblem | problemBadge }}</td>
                     <td>
-                        {{ balloon.data.team | entityIdBadge('t') }}
+                        {{ balloon.data.team | entityIdBadge }}
                         {{ balloon.data.team.effectiveName | u.truncate(teamname_max_length, '…') }}
                     </td>
                     <td>{{ balloon.data.affiliation }}</td>

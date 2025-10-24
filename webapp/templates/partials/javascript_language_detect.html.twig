@@ -5,7 +5,7 @@
                 {% for language in submission_languages %}
                 {% for extension in language.extensions %}
             case '{{ extension|lower }}':
-                return '{{ language.langid }}';
+                return '{{ language.externalid }}';
                 {% endfor %}
                 {% endfor %}
             default:
@@ -17,7 +17,7 @@
         switch (mainext) {
                 {% for language in submission_languages %}
                 {% if language.requireEntryPoint %}
-            case '{{ language.langid }}':
+            case '{{ language.externalid }}':
                 return '{{ language.entryPointDescription | default('Entry point') }}';
                 {% endif %}
                 {% endfor %}

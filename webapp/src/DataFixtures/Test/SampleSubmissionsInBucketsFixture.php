@@ -43,7 +43,7 @@ class SampleSubmissionsInBucketsFixture extends AbstractTestDataFixture
                 ->setContest($demoContest)
                 ->setTeam($manager->getRepository(Team::class)->findOneBy(['name' => 'Example teamname']))
                 ->setContestProblem($problem)
-                ->setLanguage($manager->getRepository(Language::class)->find('cpp'))
+                ->setLanguage($manager->getRepository(Language::class)->findByExternalId('cpp'))
                 ->setSubmittime(Utils::toEpochFloat($time));
             $judging    = (new Judging())
                 ->setContest($demoContest)

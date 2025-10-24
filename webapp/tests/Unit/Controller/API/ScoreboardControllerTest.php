@@ -66,10 +66,10 @@ class ScoreboardControllerTest extends BaseTestCase
 
     public function provideFilters(): Generator
     {
-        yield [['category=3'], 1];
-        yield [['category=1', 'sortorder=9', 'allteams=true'], 1];
-        yield [['category=1', 'sortorder=9'], 0];
-        yield [['affiliation=1'], 1];
+        yield [['category=participants'], 1];
+        yield [['category=system', 'sortorder=9', 'allteams=true'], 1];
+        yield [['category=system', 'sortorder=9'], 0];
+        yield [['affiliation=utrecht'], 1];
         yield [['public=true'], 1]; // Scoreboard is frozen but has no results so those are the same
         yield [['public=false'], 1];
         yield [['sortorder=0'], 1];
@@ -82,6 +82,6 @@ class ScoreboardControllerTest extends BaseTestCase
         yield [['country=NLD'], 1];
         yield [['country=AAA'], 0];
         yield [['country=USA'], 0];
-        yield [['category=2'], 0];
+        yield [['category=self-registered'], 0];
     }
 }

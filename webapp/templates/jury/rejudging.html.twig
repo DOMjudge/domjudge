@@ -31,7 +31,7 @@
                     <tr>
                         <th>Issued by</th>
                         <td>
-                            <a href="{{ path('jury_user', {'userId': rejudging.startUser.userid}) }}">
+                            <a href="{{ path('jury_user', {'userId': rejudging.startUser.externalid}) }}">
                                 {{ rejudging.startUser.name }}
                             </a>
                         </td>
@@ -46,7 +46,7 @@
                             {% elseif rejudging.repeat %}
                                 part of a repeated judging
                             {% else %}
-                                <a href="{{ path('jury_user', {'userId': rejudging.finishUser.userid}) }}">
+                                <a href="{{ path('jury_user', {'userId': rejudging.finishUser.externalid}) }}">
                                     {{ rejudging.finishUser.name }}
                                 </a>
                             {% endif %}

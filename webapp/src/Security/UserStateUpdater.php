@@ -47,7 +47,7 @@ class UserStateUpdater implements EventSubscriberInterface
             // Otherwise, we would log every API call and we do not want that.
             if ($firewallName === 'main') {
                 $ip = $this->requestStack->getMainRequest()->getClientIp();
-                $this->dj->auditlog('user', $user->getUserid(), 'logged on on ' . $ip, null, $user->getUserName());
+                $this->dj->auditlog('user', $user->getExternalid(), 'logged on on ' . $ip, null, $user->getUserName());
             }
         }
     }

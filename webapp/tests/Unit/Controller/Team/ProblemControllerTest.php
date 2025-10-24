@@ -135,8 +135,8 @@ class ProblemControllerTest extends BaseTestCase
         // Check the link to download all samples.
         $link = $cardBodies->eq(1)->filter('a')->eq(2);
         self::assertSame('samples', $link->text(null, true));
-        self::assertSame(sprintf('/team/%d/samples.zip',
-            $problem->getProbid()),
+        self::assertSame(sprintf('/team/%s/samples.zip',
+            $problem->getExternalid()),
             $link->attr('href'));
 
         // Download the sample and make sure the contents are correct.

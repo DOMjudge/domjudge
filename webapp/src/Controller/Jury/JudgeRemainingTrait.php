@@ -79,7 +79,7 @@ trait JudgeRemainingTrait
         }
     }
 
-    public function judgeRemaining(int $contestId = -1, string $categoryId = '', string|int $probId = '', string $langId = ''): void
+    public function judgeRemaining(?string $contestId = null, ?string $categoryId = null, ?string $probId = null, ?string $langId = null): void
     {
         $query = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
@@ -90,24 +90,27 @@ trait JudgeRemainingTrait
             ->andWhere('j.valid = true')
             ->andWhere('j.result != :compiler_error')
             ->setParameter('compiler_error', 'compiler-error');
-        if ($contestId > -1) {
+        if ($contestId !== null) {
             $query
-                ->andWhere('s.contest = :contestId')
+                ->join('s.contest', 'c')
+                ->andWhere('c.externalid = :contestId')
                 ->setParameter('contestId', $contestId);
         }
-        if ($categoryId > -1) {
+        if ($categoryId !== null) {
             $query
-                ->andWhere('tc.categoryid = :categoryId')
+                ->andWhere('tc.externalid = :categoryId')
                 ->setParameter('categoryId', $categoryId);
         }
-        if ($probId !== '') {
+        if ($probId !== null) {
             $query
-                ->andWhere('s.problem = :probId')
+                ->join('s.problem', 'p')
+                ->andWhere('p.externalid = :probId')
                 ->setParameter('probId', $probId);
         }
-        if ($langId !== '') {
+        if ($langId !== null) {
             $query
-                ->andWhere('s.language = :langId')
+                ->join('s.language', 'l')
+                ->andWhere('l.externalid = :langId')
                 ->setParameter('langId', $langId);
         }
         $judgings = $query->getQuery()->getResult();

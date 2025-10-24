@@ -99,6 +99,7 @@ class ProblemType extends AbstractExternalIdEntityType
             'required' => false,
             'class' => Language::class,
             'multiple' => true,
+            'choice_value' => 'externalid',
             'choice_label' => fn(Language $language) => sprintf('%s (%s)', $language->getName(), $language->getExternalid()),
             'help' => 'List of languages that can be used for this problem. Leave empty to allow all languages that are enabled for this contest.',
         ]);

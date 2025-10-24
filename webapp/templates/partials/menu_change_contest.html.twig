@@ -11,7 +11,7 @@
         {% endif %}
         {% for c in contests | filter(c => c != contest) %}
             <a class="dropdown-item"
-               href="{{ path(change_path, {'contestId': c.cid}) }}">{{ c.shortname }}</a>
+               href="{{ path(change_path, {'contestId': c.externalid}) }}">{{ c.shortname }}</a>
         {% endfor %}
     </div>
 </li>

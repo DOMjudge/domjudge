@@ -53,7 +53,7 @@
         {% if allowDownload %}
             <div class="d-flex flex-row">
                 <div class="p-2">
-                    <a title="Download submission ZIP" aria-label="download submission zip" class="btn btn-primary" href="{{ path('team_submission_download', {'submitId': judging.submission.submitid}) }}">
+                    <a title="Download submission ZIP" aria-label="download submission zip" class="btn btn-primary" href="{{ path('team_submission_download', {'submitId': judging.submission.externalid}) }}">
                         <i class="fa fa-file-archive"></i> Download submission ZIP
                     </a>
                 </div>

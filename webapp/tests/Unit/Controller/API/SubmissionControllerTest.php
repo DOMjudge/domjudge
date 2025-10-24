@@ -305,7 +305,7 @@ class SubmissionControllerTest extends BaseTestCase
         static::assertEquals($expectedProblemId, $submission->getProblem()->getProbid(), 'Wrong problem ID');
         static::assertEquals($expectedTeamId, $submission->getTeam()->getTeamid(), 'Wrong team ID');
         static::assertEquals($expectedUsername, $submission->getUser()->getUserIdentifier(), 'Wrong user');
-        static::assertEquals($expectedLanguageId, $submission->getLanguage()->getLangid(), 'Wrong language ID');
+        static::assertEquals($expectedLanguageId, $submission->getLanguage()->getExternalid(), 'Wrong language ID');
         if ($expectedSubmissionExternalId) {
             static::assertEquals($expectedSubmissionExternalId, $submission->getExternalid(), 'Wrong external submission ID');
         }
@@ -390,7 +390,7 @@ class SubmissionControllerTest extends BaseTestCase
             1,
             2,
             'demo',
-            'kt',
+            'kotlin',
             null,
             null,
             ['somefile.kt' => file_get_contents(__FILE__)],

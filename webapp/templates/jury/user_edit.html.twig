@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Edit user {{ user.userid }} - {{ parent() }}{% endblock %}
+{% block title %}Edit user {{ user.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -10,15 +10,11 @@
 
 {% block content %}
 
-    <h1>Edit user {{ user.userid }}</h1>
+    <h1>Edit user {{ user.externalid }}</h1>
 
     <div class="row">
         <div class="col-lg-4">
             <table class="table table-sm table-striped">
-                <tr>
-                    <th>User ID</th>
-                    <td>{{ user.userid }}</td>
-                </tr>
                 <tr>
                     <th>Username</th>
                     <td class="teamid">{{ user.username }}</td>

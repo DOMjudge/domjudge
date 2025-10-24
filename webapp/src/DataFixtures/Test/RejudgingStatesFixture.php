@@ -50,7 +50,7 @@ class RejudgingStatesFixture extends AbstractTestDataFixture
                 /** @var Team $team */
                 $team = $manager->getRepository(Team::class)->findOneBy(['name' => 'Example teamname']);
                 /** @var Language $language */
-                $language = $manager->getRepository(Language::class)->find('java');
+                $language = $manager->getRepository(Language::class)->findByExternalId('java');
                 // A rejudging has both judgings todo and finished
                 for ($b = 0; $b<=1; $b++) {
                     for ($x = 0; $x < $rejudgingStage[2+$b]; $x++) {

@@ -14,7 +14,7 @@ class TeamCategoryControllerTest extends JuryControllerTestCase
     protected static string  $shortTag                 = 'category';
     protected static array   $deleteEntities           = ['System','Observers'];
     protected static string  $deleteEntityIdentifier   = 'name';
-    protected static string  $getIDFunc                = 'getCategoryid';
+    protected static string  $getIDFunc                = 'getExternalid';
     protected static string  $className                = TeamCategory::class;
     protected static array   $DOM_elements             = ['h1' => ['Categories']];
     protected static string  $addForm                  = 'team_category[';
@@ -87,7 +87,7 @@ class TeamCategoryControllerTest extends JuryControllerTestCase
 
         // Get the IDs of the newly created categories
         foreach ($createdCategories as $category) {
-            $categoryIds[] = $category->getCategoryid();
+            $categoryIds[] = $category->getExternalid();
         }
 
         $category1Id = $categoryIds[0];

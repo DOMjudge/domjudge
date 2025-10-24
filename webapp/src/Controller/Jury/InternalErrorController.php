@@ -7,6 +7,7 @@ use App\Doctrine\DBAL\Types\InternalErrorStatusType;
 use App\Entity\InternalError;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
+use App\Entity\Language;
 use App\Entity\Problem;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -102,8 +103,8 @@ class InternalErrorController extends BaseController
         $affectedLink = $affectedText = null;
         switch ($disabled['kind']) {
             case 'problem':
-                $affectedLink = $this->generateUrl('jury_problem', ['probId' => $disabled['probid']]);
                 $problem      = $this->em->getRepository(Problem::class)->find($disabled['probid']);
+                $affectedLink = $this->generateUrl('jury_problem', ['probId' => $problem->getExternalid()]);
                 $affectedText = $problem->getName();
                 break;
             case 'judgehost':
@@ -117,8 +118,9 @@ class InternalErrorController extends BaseController
                 }
                 break;
             case 'language':
-                $affectedLink = $this->generateUrl('jury_language', ['langId' => $disabled['langid']]);
-                $affectedText = $disabled['langid'];
+                $language     = $this->em->getRepository(Language::class)->find($disabled['langid']);
+                $affectedLink = $this->generateUrl('jury_language', ['langId' => $language->getExternalid()]);
+                $affectedText = $language->getName();
                 break;
             case 'executable':
                 $affectedLink = $this->generateUrl('jury_executable', ['execId' => $disabled['execid']]);
@@ -151,7 +153,7 @@ class InternalErrorController extends BaseController
             ->getSingleResult();
         if ($action === 'ignore') {
             $internalError->setStatus(InternalErrorStatusType::STATUS_IGNORED);
-            $this->dj->auditlog('internal_error', $internalError->getErrorid(),
+            $this->dj->auditlog('internal_error', (string)$internalError->getErrorid(),
                 sprintf('internal error: %s', InternalErrorStatusType::STATUS_IGNORED));
             $this->em->flush();
             return $this->redirectToRoute('jury_internal_error', ['errorId' => $internalError->getErrorid()]);
@@ -175,7 +177,7 @@ class InternalErrorController extends BaseController
                 );
                 $this->em->flush();
 
-                $this->dj->auditlog('internal_error', $internalError->getErrorid(),
+                $this->dj->auditlog('internal_error', (string)$internalError->getErrorid(),
                     sprintf('internal error: %s', InternalErrorStatusType::STATUS_RESOLVED));
 
                 $affectedJudgings = $internalError->getAffectedJudgings();

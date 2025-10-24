@@ -37,7 +37,7 @@ class BalloonsControllerTest extends BaseTestCase
 
     public function testMarkAsDone(): void
     {
-        $expectedBalloon = ['team'=>'t2: Example teamname', 'problem'=>'U'];
+        $expectedBalloon = ['team'=>'exteam: Example teamname', 'problem'=>'U'];
         $contestId = $this->getUnitContestId();
         $url = "/contests/$contestId/balloons?todo=1";
         $this->loadFixtures([BalloonCorrectSubmissionFixture::class,BalloonUserFixture::class]);

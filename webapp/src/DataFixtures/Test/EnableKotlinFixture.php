@@ -9,7 +9,7 @@ class EnableKotlinFixture extends AbstractTestDataFixture
 {
     public function load(ObjectManager $manager): void
     {
-        $kotlin = $manager->getRepository(Language::class)->find('kt');
+        $kotlin = $manager->getRepository(Language::class)->findByExternalId('kotlin');
         $kotlin->setAllowSubmit(true);
         $manager->flush();
     }

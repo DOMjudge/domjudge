@@ -861,7 +861,7 @@ JS;
      *      renamedFrom?: string
      * }> $files */
     #[AsTwigFunction('showDiff', isSafe: ['html'])]
-    public function showDiff(string $editorId, string $diffId, int $submissionId, string $filename, array $files): string
+    public function showDiff(string $editorId, string $diffId, string $submissionId, string $filename, array $files): string
     {
         $editor = <<<HTML
 <div class="editor" id="$diffId"></div>
@@ -869,7 +869,7 @@ JS;
 $(function() {
     const editorId = '%s';
     const diffId = '%s';
-    const submissionId = %d;
+    const submissionId = '%s';
     const models = %s;
     require(['vs/editor/editor.main'], () => {
         initDiffEditorTab(editorId, diffId, submissionId, models);
@@ -1237,28 +1237,11 @@ EOF;
 
     /**
      * Get the entity ID badge to display for the given entity.
-     *
-     * When we are in a data source mode that uses external ID's, those will be used and the
-     * internal ID will be shown in a tooltip.
-     *
-     * @param string $idPrefix The prefix to use for the internal ID, if any.
      */
     #[AsTwigFilter('entityIdBadge', isSafe: ['html'])]
-    public function entityIdBadge(BaseApiEntity $entity, string $idPrefix = ''): string
+    public function entityIdBadge(BaseApiEntity&HasExternalIdInterface $entity): string
     {
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $metadata = $this->em->getClassMetadata($entity::class);
-        $primaryKeyColumn = $metadata->getIdentifierColumnNames()[0];
-
-        $data = [
-            'idPrefix' => $idPrefix,
-            'id' => $propertyAccessor->getValue($entity, $primaryKeyColumn),
-            'externalId' => null,
-        ];
-
-        if ($entity instanceof HasExternalIdInterface) {
-            $data['externalId'] = $entity->getExternalid();
-        }
+        $data = ['externalId' => $entity->getExternalid()];
 
         if ($entity instanceof Team) {
             $data['label'] = $entity->getLabel();

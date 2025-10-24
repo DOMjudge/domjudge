@@ -51,11 +51,11 @@ class ProblemController extends BaseController
     }
 
 
-    #[Route(path: '/problems/{probId<\d+>}/statement', name: 'team_problem_statement')]
-    public function problemStatementAction(int $probId): StreamedResponse
+    #[Route(path: '/problems/{probId}/statement', name: 'team_problem_statement')]
+    public function problemStatementAction(string $probId): StreamedResponse
     {
         return $this->getBinaryFile($probId, function (
-            int $probId,
+            string $probId,
             Contest $contest,
             ContestProblem $contestProblem
         ) {
@@ -73,20 +73,20 @@ class ProblemController extends BaseController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route(path: '/{probId<\d+>}/attachment/{attachmentId<\d+>}', name: 'team_problem_attachment')]
-    public function attachmentAction(int $probId, int $attachmentId): StreamedResponse
+    #[Route(path: '/{probId}/attachment/{attachmentId<\d+>}', name: 'team_problem_attachment')]
+    public function attachmentAction(string $probId, int $attachmentId): StreamedResponse
     {
         return $this->getBinaryFile($probId, fn(
-            int $probId,
+            string $probId,
             Contest $contest,
             ContestProblem $contestProblem
         ) => $this->dj->getAttachmentStreamedResponse($contestProblem, $attachmentId));
     }
 
-    #[Route(path: '/{probId<\d+>}/samples.zip', name: 'team_problem_sample_zip')]
-    public function sampleZipAction(int $probId): StreamedResponse
+    #[Route(path: '/{probId}/samples.zip', name: 'team_problem_sample_zip')]
+    public function sampleZipAction(string $probId): StreamedResponse
     {
-        return $this->getBinaryFile($probId, function (int $probId, Contest $contest, ContestProblem $contestProblem) {
+        return $this->getBinaryFile($probId, function (string $probId, Contest $contest, ContestProblem $contestProblem) {
             return $this->dj->getSamplesZipStreamedResponse($contestProblem);
         });
     }
@@ -96,17 +96,14 @@ class ProblemController extends BaseController
      *
      * Shared code between testcases, problem text and attachments.
      */
-    protected function getBinaryFile(int $probId, callable $response): StreamedResponse
+    protected function getBinaryFile(string $probId, callable $response): StreamedResponse
     {
         $user    = $this->dj->getUser();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
-        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-            'problem' => $probId,
-            'contest' => $contest,
-        ]);
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->findByProblemAndContest($contest, $probId);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }

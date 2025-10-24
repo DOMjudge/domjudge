@@ -5,10 +5,10 @@ namespace App\Utils\Scoreboard;
 class Filter
 {
     /**
-     * @param int[] $affiliations
+     * @param string[] $affiliations
      * @param string[] $countries
-     * @param int[] $categories
-     * @param int[] $teams
+     * @param string[] $categories
+     * @param string[] $teams
      */
     public function __construct(
         public array $affiliations = [],

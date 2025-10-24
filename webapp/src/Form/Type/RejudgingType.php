@@ -53,6 +53,7 @@ class RejudgingType extends AbstractType
             'required' => false,
             'multiple' => true,
             'choice_label' => 'name',
+            'choice_value' => 'externalid',
             'query_builder' => fn(EntityRepository $er) => $er
                 ->createQueryBuilder('c')
                 ->where('c.enabled = 1')
@@ -64,6 +65,7 @@ class RejudgingType extends AbstractType
             'class' => Problem::class,
             'required' => false,
             'choice_label' => 'name',
+            'choice_value' => 'externalid',
             'choices' => [],
         ]);
         $builder->add('languages', EntityType::class, [
@@ -72,6 +74,7 @@ class RejudgingType extends AbstractType
             'class' => Language::class,
             'required' => false,
             'choice_label' => 'name',
+            'choice_value' => 'externalid',
             'query_builder' => fn(EntityRepository $er) => $er
                 ->createQueryBuilder('l')
                 ->where('l.allowSubmit = 1')
@@ -83,6 +86,7 @@ class RejudgingType extends AbstractType
             'class' => Team::class,
             'required' => false,
             'choice_label' => 'name',
+            'choice_value' => 'externalid',
             'choices' => [],
         ]);
         $builder->add('users', EntityType::class, [
@@ -91,6 +95,7 @@ class RejudgingType extends AbstractType
             'required' => false,
             'multiple' => true,
             'choice_label' => 'name',
+            'choice_value' => 'externalid',
             'query_builder' => fn(EntityRepository $er) => $er
                 ->createQueryBuilder('u')
                 ->where('u.enabled = 1')
@@ -161,6 +166,7 @@ class RejudgingType extends AbstractType
                 'class' => Problem::class,
                 'required' => false,
                 'choice_label' => 'name',
+                'choice_value' => 'externalid',
                 'choices' => $problems,
             ]);
 
@@ -195,6 +201,7 @@ class RejudgingType extends AbstractType
                 'class' => Team::class,
                 'required' => false,
                 'choice_label' => 'name',
+                'choice_value' => 'externalid',
                 'choices' => $teams,
             ]);
         };

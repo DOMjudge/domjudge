@@ -1,6 +1,6 @@
 {% extends "jury/base.html.twig" %}
 
-{% block title %}Analysis - Problem {{ problem.probid }} {{ current_contest.shortname | default('') }} - {{ parent() }}{% endblock %}
+{% block title %}Analysis - Problem {{ problem.externalid }} {{ current_contest.shortname | default('') }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
 {{ parent() }}
@@ -20,7 +20,7 @@
 {% endblock %}
 
 {% block content %}
-      <h1>Problem {{ problem.probid }}: <span style="font-size: 60%;">{{ contest_problem | problemBadge }}</span> {{ problem.name }}</h1>
+      <h1>Problem {{ problem.externalid }}: <span style="font-size: 60%;">{{ contest_problem | problemBadge }}</span> {{ problem.name }}</h1>
         {% include 'jury/partials/analysis_filter.html.twig' %}
      </div>
     <div class="col-lg-3 col-sm-6 mt-3">

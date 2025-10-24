@@ -999,14 +999,16 @@ function initializeKeyboardShortcuts() {
             var parts = window.location.href.split('/');
             var lastPart = parts[parts.length - 1];
             var params = lastPart.split('?');
-            var currentNumber = parseInt(params[0]);
-            if (isNaN(currentNumber)) {
-                return;
-            }
             if (key === 'j') {
-                parts[parts.length - 1] = currentNumber + 1;
+                if (!window.nextEntity) {
+                    return;
+                }
+                parts[parts.length - 1] = window.nextEntity;
             } else if (key === 'k') {
-                parts[parts.length - 1] = currentNumber - 1;
+                if (!window.previousEntity) {
+                    return;
+                }
+                parts[parts.length - 1] = window.previousEntity;
             }
             if (params.length > 1) {
                 parts[parts.length - 1] += '?' + params[1];
@@ -1040,8 +1042,12 @@ function initializeKeyboardShortcuts() {
                     sequence = '';
                     return;
                 }
-                if (e.key >= '0' && e.key <= '9') {
+                if (/^[a-zA-Z0-9_.-]$/.test(e.key)) {
                     sequence += e.key;
+                    box.text(type + sequence);
+                } else if (e.key === 'Backspace') {
+                    e.preventDefault();
+                    sequence = sequence.slice(0, -1);
                     box.text(type + sequence);
                 } else {
                     ignore = false;
@@ -1303,8 +1309,8 @@ function initScoreboardSubmissions() {
         const linkEl = e.currentTarget;
         e.preventDefault();
         const $modal = $('[data-submissions-modal] .modal').clone();
-        const $teamEl = $(`[data-team-external-id="${linkEl.dataset.teamId}"]`);
-        const $problemEl = $(`[data-problem-external-id="${linkEl.dataset.problemId}"]`);
+        const $teamEl = $(`tr[data-team-id="${linkEl.dataset.teamId}"]`);
+        const $problemEl = $(`th[data-problem-id="${linkEl.dataset.problemId}"]`);
         $modal.find('[data-team]').html($teamEl.data('teamName'));
         $modal.find('[data-problem-badge]').html($problemEl.data('problemBadge'));
         $modal.find('[data-problem-name]').html($problemEl.data('problemName'));
@@ -1404,7 +1410,7 @@ function initDiffEditor(editorId) {
         'onDiffSelectChange': (f) => {
             select.change((e) => {
                 const noDiff = e.target.value === "";
-                const submitId = parseInt(e.target.value);
+                const submitId = e.target.value;
                 f(submitId, noDiff);
             });
         }
@@ -1433,10 +1439,10 @@ function initDiffEditor(editorId) {
             diffTitle.style.display = 'inline';
             diffTag.innerText = selected.dataset.tag;
             diffLink.href = selected.dataset.url;
-            diffLink.innerText = `s${submitId}`;
+            diffLink.innerText = submitId;
         }
     };
-    updateSelect(parseInt(select[0].value), select[0].value === "");
+    updateSelect(select[0].value, select[0].value === "");
     editor.onDiffSelectChange(updateSelect);
 }
 
@@ -1571,7 +1577,7 @@ function initDiffEditorTab(editorId, diffId, submissionId, models) {
             return;
         }
 
-        const submitId = parseInt(editors[editorId].getDiffSelection());
+        const submitId = editors[editorId].getDiffSelection();
         const noDiff = editors[editorId].getDiffSelection() === "";
         if (noDiff) {
             setIcon('file');

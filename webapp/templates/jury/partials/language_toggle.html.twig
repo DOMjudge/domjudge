@@ -1,4 +1,4 @@
-<form action="{{ path(path, {'langId': language.langid}) }}" method="post" class="d-inline">
+<form action="{{ path(path, {'langId': language.externalid}) }}" method="post" class="d-inline">
     <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
            name="value" {% if value %}checked{% endif %}>
 </form>

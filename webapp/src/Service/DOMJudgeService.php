@@ -143,7 +143,7 @@ class DOMJudgeService
         if ($honorCookie) {
             $contest = $this->getCurrentContest(onlyOfTeam: $onlyOfTeam, onlyPublic: $onlyPublic);
             if ($contest) {
-                return [$contest->getCid() => $contest];
+                return [$contest->getExternalid() => $contest];
             }
         }
 
@@ -152,7 +152,7 @@ class DOMJudgeService
         }
         $now = Utils::now();
         $qb  = $this->em->createQueryBuilder();
-        $qb->select('c')->from(Contest::class, 'c', 'c.cid');
+        $qb->select('c')->from(Contest::class, 'c', 'c.externalid');
         if (isset($onlyOfTeam)) {
             $qb->leftJoin('c.teams', 'ct')
                 ->leftJoin('c.team_categories', 'tc')
@@ -198,7 +198,7 @@ class DOMJudgeService
             }
 
             foreach ($contests as $contest) {
-                if ($contest->getCid() == $selected_cid) {
+                if ($contest->getExternalid() == $selected_cid) {
                     return $contest;
                 }
             }
@@ -316,7 +316,7 @@ class DOMJudgeService
     }
 
     /**
-     * @return array<array{'clarid': int, 'body': string}>
+     * @return list<array{clarid: string, body: string}>
      */
     public function getUnreadClarifications(): array
     {
@@ -331,7 +331,7 @@ class DOMJudgeService
         foreach ($clarifications as $clar) {
             if ($clar->getContest()->getCid() === $contest->getCid()) {
                 $unreadClarifications[] = [
-                    'clarid' => $clar->getClarid(),
+                    'clarid' => $clar->getExternalid(),
                     'body' => $clar->getBody(),
                 ];
             }
@@ -365,7 +365,7 @@ class DOMJudgeService
         if ($this->checkRole('jury')) {
             if ($contest) {
                 $clarifications = $this->em->createQueryBuilder()
-                    ->select('clar.clarid', 'clar.body')
+                    ->select('clar.externalid', 'clar.body')
                     ->from(Clarification::class, 'clar')
                     ->andWhere('clar.contest = :contest')
                     ->andWhere('clar.sender is not null')
@@ -509,20 +509,16 @@ class DOMJudgeService
      */
     public function auditlog(
         string $datatype,
-        mixed $dataid,
+        string|null $dataid,
         string $action,
         mixed $extraInfo = null,
         ?string $forceUsername = null,
-        string|int|null $cid = null
+        string|null $cid = null
     ): void {
         if (!empty($forceUsername)) {
             $user = $forceUsername;
         } else {
             $user = $this->getUser() ? $this->getUser()->getUsername() : null;
-        }
-
-        if (gettype($cid) == 'string') {
-            $cid = (int) $cid;
         }
 
         $auditLog = new AuditLog();
@@ -764,7 +760,7 @@ class DOMJudgeService
      *
      * @param string      $filename The on-disk file to be printed out
      * @param string      $origname The original filename as submitted by the team
-     * @param string|null $language Langid of the programming language this file is in
+     * @param string|null $language External ID of the programming language this file is in
      * @param string      $username Username of the print job submitter
      * @param string|null $teamname Teamname of the team this user belongs to, if any
      * @param string|null $teamid   Teamid of the team this user belongs to, if any
@@ -1226,7 +1222,7 @@ class DOMJudgeService
             ->where('jt.jobid IS NULL');
     }
 
-    public function unblockJudgeTasksForLanguage(string $langId): void
+    public function unblockJudgeTasksForLanguage(int $langId): void
     {
         // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
         $judgings = $this->helperUnblockJudgeTasks()
@@ -1261,7 +1257,7 @@ class DOMJudgeService
         // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
         $judgings = $this->helperUnblockJudgeTasks()
             ->join(Submission::class, 's', Join::WITH, 'j.submission = s.submitid')
-            ->andWhere('j.submission = :submissionid')
+            ->andWhere('s.externalid = :submissionid')
             ->setParameter('submissionid', $submissionId)
             ->getQuery()
             ->getResult();

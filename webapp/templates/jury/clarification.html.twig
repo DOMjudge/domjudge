@@ -4,7 +4,7 @@
 {% set origclar = list | first %}
 {% set claimed = not origclar.answered and origclar.from_jurymember is defined %}
 
-{% block title %}Clarification {{ origclar.clarid }} - {{ parent() }}{% endblock %}
+{% block title %}Clarification {{ origclar.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -25,10 +25,7 @@
                 <div class="card-header">
                     <div class="row">
                         <div class="col-sm">
-                            Clarification {{ clar.clarid }}
-                            {% if shadowMode() %}
-                                (external ID: {{ clar.externalid }})
-                            {% endif %}
+                            Clarification {{ clar.externalid }}
                         </div>
                         <div class="col-sm text-muted text-end">{{ clar.time | printtimeHover(clar.contest) }}</div>
                     </div>
@@ -39,7 +36,7 @@
                             <div class="col-sm">
                                 From:
                                 {% if clar.from_team is defined %}
-                                    <a href="{{ path('jury_team', {teamId: clar.from_team.teamid}) }}">{{ clar.from_teamname }} {{ clar.from_team | entityIdBadge('t') }}</a>
+                                    <a href="{{ path('jury_team', {teamId: clar.from_team.externalid}) }}">{{ clar.from_teamname }} {{ clar.from_team | entityIdBadge }}</a>
                                 {% else %}
                                     Jury
                                     {% if clar.from_jurymember is defined %}
@@ -60,8 +57,8 @@
                                         <i class="far fa-edit" title="Change subject"></i>
                                     </button>
                                 </span>
-                                <span class="clarification-subject-form" data-current-selected-subject="{{ clar.categoryid }}" data-clarification-id="{{ clar.clarid }}">
-                                    <form action="{{ path('jury_clarification_change_subject', {'clarId': clar.clarid }) }}" method="post" class="d-flex">
+                                <span class="clarification-subject-form" data-current-selected-subject="{{ clar.categoryid }}" data-clarification-id="{{ clar.externalid }}">
+                                    <form action="{{ path('jury_clarification_change_subject', {'clarId': clar.externalid }) }}" method="post" class="d-flex">
                                         <select name="subject" class="subject form-select form-select-sm w-auto" id="subselect">
                                             {% for contest,subject in subjects %}
                                                 <optgroup label="{{ contest }}">
@@ -80,7 +77,7 @@
                         <div class="row">
                             <div class="col-sm">To:
                                 {% if clar.to_team is defined %}
-                                    <a href="{{ path('jury_team', {teamId: clar.to_team.teamid}) }}">{{ clar.to_teamname }} {{ clar.to_team | entityIdBadge('t') }}</a>
+                                    <a href="{{ path('jury_team', {teamId: clar.to_team.externalid}) }}">{{ clar.to_teamname }} {{ clar.to_team | entityIdBadge }}</a>
                                 {% elseif clar.from_team is defined %}
                                     Jury
                                 {% else %}
@@ -94,8 +91,8 @@
                                     {{ clar.queue }}
                                     <button class="btn btn-sm btn-link clarification-queue-change-button"><i class="far fa-edit" title="Change queue"></i></button>
                                 </span>
-                                <span class="clarification-queue-form" data-current-selected-queue="{{ clar.queueid }}" data-clarification-id="{{ clar.clarid }}">
-                                    <form action="{{ path('jury_clarification_change_queue', {'clarId': clar.clarid }) }}" class="d-flex" method="post">
+                                <span class="clarification-queue-form" data-current-selected-queue="{{ clar.queueid }}" data-clarification-id="{{ clar.externalid }}">
+                                    <form action="{{ path('jury_clarification_change_queue', {'clarId': clar.externalid }) }}" class="d-flex" method="post">
                                         <select name="queue" class="queue form-select w-auto form-select-sm" id="qselect">
                                             <option value="unassigned">Unassigned issues</option>
                                             {% for qid,queue in queues %}
@@ -128,7 +125,7 @@
                 </div>
 
                 <div class="col-sm text-center">
-                    <form action="{{ path('jury_clarification_claim', {'clarId': origclar.clarid}) }}" method="post">
+                    <form action="{{ path('jury_clarification_claim', {'clarId': origclar.externalid}) }}" method="post">
                         {% if claimed %}
                             {% if origclar.jurymember_is_me %}
                                 <button class="btn btn-sm btn-outline-success" name="claimed" value="0" type="submit"><i class="fas fa-lock-open"></i> unclaim</button>
@@ -144,7 +141,7 @@
                 </div>
 
                 <div class="col-sm text-end">
-                    <form action="{{ path('jury_clarification_set_answered', {'clarId': origclar.clarid}) }}" method="post">
+                    <form action="{{ path('jury_clarification_set_answered', {'clarId': origclar.externalid}) }}" method="post">
                         {% if origclar.answered %}
                             <button class="btn btn-sm btn-outline-warning" name="answered" value="0" type="submit">
                                 <i class="fas fa-times"></i> set unanswered

@@ -281,7 +281,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         }
 
         $this->em->remove($contestProblem);
-        $id = [$contestProblem->getCid(), $contestProblem->getProbid()];
+        $id = [$contestProblem->getContest()->getExternalId(), $contestProblem->getProblem()->getExternalId()];
         $this->dj->auditlog('contest_problem', implode(', ', $id), 'deleted');
         $this->eventLogService->log('problem', $contestProblem->getProbid(),
                                     EventLogService::ACTION_DELETE, $cid,
@@ -354,7 +354,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         $this->em->persist($contestProblem);
         $this->em->flush();
 
-        $fullId = [$contestProblem->getCid(), $contestProblem->getProbid()];
+        $fullId = [$contestProblem->getContest()->getExternalId(), $contestProblem->getProblem()->getExternalId()];
         $this->dj->auditlog('contest_problem', implode(', ', $fullId), 'added');
         $this->eventLogService->log('problem', $contestProblem->getProbid(),
                                     EventLogService::ACTION_CREATE, $cid,
