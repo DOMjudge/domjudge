@@ -117,7 +117,7 @@ if [ "$TEST" = "w3cval" ]; then
 
     section_start "Install testsuite"
     cd "$DIR"
-    wget https://github.com/validator/validator/releases/latest/download/vnu.linux.zip
+    wget https://github.com/validator/validator/releases/download/20.6.30/vnu.linux.zip
     unzip -q vnu.linux.zip
     section_end
 
