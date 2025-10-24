@@ -23,8 +23,8 @@ class SubmissionRestriction
      * @param list<int>|null    $affiliationIds      ID's of affiliations to filter on
      * @param int|null          $problemId           ID of a problem to filter on
      * @param list<int>|null    $problemIds          ID's of problems to filter on
-     * @param string|null       $languageId          ID of a language to filter on
-     * @param list<string>|null $languageIds         ID's of languages to filter on
+     * @param int|null          $languageId          ID of a language to filter on
+     * @param list<int>|null    $languageIds         ID's of languages to filter on
      * @param string|null       $judgehost           Hostname of a judgehost to filter on
      * @param string|null       $oldResult           Result of old judging to filter on
      * @param string|null       $result              Result of current judging to filter on
@@ -56,7 +56,7 @@ class SubmissionRestriction
         public ?array $affiliationIds = [],
         public ?int $problemId = null,
         public ?array $problemIds = [],
-        public ?string $languageId = null,
+        public ?int $languageId = null,
         public ?array $languageIds = [],
         public ?string $judgehost = null,
         public ?string $oldResult = null,

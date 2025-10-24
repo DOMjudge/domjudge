@@ -470,7 +470,7 @@ class SubmissionService
             ]);
         }
         if (!$language instanceof Language) {
-            $language = $this->em->getRepository(Language::class)->find($language);
+            $language = $this->em->getRepository(Language::class)->findByExternalId($language);
         }
         if ($originalSubmission !== null && !$originalSubmission instanceof Submission) {
             $originalSubmission = $this->em->getRepository(Submission::class)->find($originalSubmission);

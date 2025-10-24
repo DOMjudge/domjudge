@@ -9,7 +9,7 @@ class EnableJavaEntrypointFixture extends AbstractTestDataFixture
 {
     public function load(ObjectManager $manager): void
     {
-        $java = $manager->getRepository(Language::class)->find('java');
+        $java = $manager->getRepository(Language::class)->findByExternalId('java');
         $java->setRequireEntryPoint(true);
         $manager->flush();
     }
