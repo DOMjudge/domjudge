@@ -1277,9 +1277,7 @@ class Contest extends BaseApiEntity implements
     {
         foreach (['Activate', 'Deactivate', 'Start', 'End', 'Freeze', 'Unfreeze'] as $timeString) {
             $tmpValue = $this->{'get' . $timeString . 'timeString'}();
-            if ($tmpValue === null) {
-                continue;
-            }
+            if ($tmpValue === null) continue; // phpcs:ignore Generic.ControlStructures.InlineControlStructure.NotAllowed
             try {
                 $this->checkValidTimeString($tmpValue);
             } catch (Exception $e) {
