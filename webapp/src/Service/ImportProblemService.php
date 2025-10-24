@@ -684,7 +684,7 @@ class ImportProblemService
                     $extension = end($parts);
                     foreach ($allowedLanguages as $language) {
                         if (in_array($extension, $language->getExtensions())) {
-                            $languageToUse = $language->getLangid();
+                            $languageToUse = $language->getExternalid();
                             break 2;
                         }
                     }

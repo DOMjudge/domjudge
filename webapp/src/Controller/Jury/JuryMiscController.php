@@ -152,18 +152,18 @@ class JuryMiscController extends BaseController
             }, $teams);
         } elseif ($datatype === 'languages') {
             $languages = $qb->from(Language::class, 'l')
-                ->select('l.langid', 'l.name')
+                ->select('l.externalid', 'l.name')
                 ->where($qb->expr()->like('l.name', '?1'))
-                ->orWhere($qb->expr()->eq('l.langid', '?2'))
+                ->orWhere($qb->expr()->eq('l.externalid', '?2'))
                 ->orderBy('l.name', 'ASC')
                 ->getQuery()->setParameter(1, '%' . $q . '%')
                 ->setParameter(2, $q)
                 ->getResult();
 
             $results = array_map(function (array $language) {
-                $displayname = $language['name'] . " (" . $language['langid'] . ")";
+                $displayname = $language['name'] . " (" . $language['externalid'] . ")";
                 return [
-                    'id' => $language['langid'],
+                    'id' => $language['externalid'],
                     'text' => $displayname,
                 ];
             }, $languages);

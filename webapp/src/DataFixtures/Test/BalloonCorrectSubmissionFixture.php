@@ -45,7 +45,7 @@ class BalloonCorrectSubmissionFixture extends AbstractTestDataFixture
                 ->setContest($contest)
                 ->setTeam($team)
                 ->setContestProblem($cp)
-                ->setLanguage($manager->getRepository(Language::class)->find($submissionItem[1]))
+                ->setLanguage($manager->getRepository(Language::class)->findByExternalId($submissionItem[1]))
                 ->setSubmittime(Utils::now()-2)
                 ->setEntryPoint($submissionItem[3]);
             $judging = (new Judging())

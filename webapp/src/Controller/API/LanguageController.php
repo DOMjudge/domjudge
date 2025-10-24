@@ -82,7 +82,7 @@ class LanguageController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function updateExecutableActions(Request $request, string $id): void
     {
-        $language = $this->em->getRepository(Language::class)->find($id);
+        $language = $this->em->getRepository(Language::class)->findByExternalId($id);
         if (!$language) {
             throw new BadRequestHttpException("Unknown language '$id'.");
         }

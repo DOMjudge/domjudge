@@ -296,7 +296,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
     public function testOneSingleFTS(): void
     {
-        $lang = $this->em->getRepository(Language::class)->find('c');
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('c');
 
         $team = $this->teams[0];
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.053, 'correct', true)
@@ -329,7 +329,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
     public function testFTSwithVerificationRequired(): void
     {
-        $lang = $this->em->getRepository(Language::class)->find('c');
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('c');
 
         $team = $this->teams[0];
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.053, 'correct', true)
@@ -365,7 +365,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
     public function testFTSwithQueuedRejudging(): void
     {
-        $lang = $this->em->getRepository(Language::class)->find('c');
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('c');
 
         $team = $this->teams[0];
         $this->createSubmission($lang, $this->problems[0], $team, 53 * 60 + 15.053, 'wrong-answer')
@@ -445,7 +445,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
     protected function createDefaultSubmissions(): void
     {
-        $lang = $this->em->getRepository(Language::class)->find('cpp');
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('cpp');
 
         $team = $this->teams[0];
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.053, 'no-output');

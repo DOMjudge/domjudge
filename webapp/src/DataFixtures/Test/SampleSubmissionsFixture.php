@@ -31,7 +31,7 @@ class SampleSubmissionsFixture extends AbstractTestDataFixture
                 ->setContest($contest)
                 ->setTeam($manager->getRepository(Team::class)->findOneBy(['name' => $submissionItem[0]]))
                 ->setContestProblem($problem)
-                ->setLanguage($manager->getRepository(Language::class)->find($submissionItem[2]))
+                ->setLanguage($manager->getRepository(Language::class)->findByExternalId($submissionItem[2]))
                 ->setSubmittime(Utils::toEpochFloat($submissionItem[3]))
                 ->setEntryPoint($submissionItem[4]);
             $judging = (new Judging())
