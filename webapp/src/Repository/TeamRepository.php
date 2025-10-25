@@ -3,15 +3,16 @@
 namespace App\Repository;
 
 use App\Entity\Language;
+use App\Entity\Team;
 use Doctrine\ORM\EntityRepository;
 
 /**
- * @extends EntityRepository<Language>
+ * @extends EntityRepository<Team>
  */
-class LanguageRepository extends EntityRepository
+class TeamRepository extends EntityRepository
 {
     /**
-     * @use FindByExternalidTrait<Language>
+     * @use FindByExternalidTrait<Team>
      */
     use FindByExternalidTrait;
 }

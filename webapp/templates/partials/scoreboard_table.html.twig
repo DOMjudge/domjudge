@@ -97,7 +97,7 @@
                         {% set link = path('jury_problem', {'probId': problem.probid}) %}
                     {% elseif problem.problem.problemstatementType is not empty %}
                         {% if public %}
-                            {% set link = path('public_problem_statement', {probId: problem.probid}) %}
+                            {% set link = path('public_problem_statement', {probId: problem.externalid}) %}
                             {% set target = '_blank' %}
                         {% else %}
                             {% set link = path('team_problem_statement', {probId: problem.probid}) %}
@@ -233,7 +233,7 @@
                     {% if jury %}
                         {% set link = path('jury_team', {teamId: score.team.teamid}) %}
                     {% elseif public %}
-                        {% set link = path('public_team', {teamId: score.team.teamid}) %}
+                        {% set link = path('public_team', {teamId: score.team.externalid}) %}
                         {% set extra = 'data-ajax-modal' %}
                     {% else %}
                         {% set link = path('team_team', {teamId: score.team.teamid}) %}

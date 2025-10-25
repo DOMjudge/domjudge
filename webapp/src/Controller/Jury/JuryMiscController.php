@@ -346,15 +346,15 @@ class JuryMiscController extends BaseController
         ]);
     }
 
-    #[Route(path: '/change-contest/{contestId<-?\d+>}', name: 'jury_change_contest')]
-    public function changeContestAction(Request $request, RouterInterface $router, int $contestId): Response
+    #[Route(path: '/change-contest/{contestId}', name: 'jury_change_contest')]
+    public function changeContestAction(Request $request, RouterInterface $router, string $contestId): Response
     {
         if ($this->isLocalReferer($router, $request)) {
             $response = new RedirectResponse($request->headers->get('referer'));
         } else {
             $response = $this->redirectToRoute('jury_index');
         }
-        return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
+        return $this->dj->setCookie('domjudge_cid', $contestId, 0, null, '', false, false,
                                                  $response);
     }
 

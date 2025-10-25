@@ -288,7 +288,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
         $team = $this->teams[1];
 
-        $scoreboard = $this->ss->getTeamScoreboard($this->contest, $team->getTeamid(), false);
+        $scoreboard = $this->ss->getTeamScoreboard($this->contest, $team->getExternalid(), false);
 
         static::assertInstanceOf(SingleTeamScoreboard::class, $scoreboard);
         static::assertFTSMatch($expected_fts, $scoreboard);
