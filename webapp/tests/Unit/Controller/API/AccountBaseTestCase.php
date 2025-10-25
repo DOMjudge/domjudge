@@ -26,8 +26,8 @@ abstract class AccountBaseTestCase extends BaseTestCase
         [['type' => 'api_writer'], ['type' => 'admin', 'roles' => ['api_writer']]],
         [['type' => 'api_reader'], ['type' => 'admin', 'roles' => ['api_reader']]],
         [['type' => 'api_source_reader'], ['type' => 'judge', 'roles' => ['api_source_reader']]],
-        [['type' => 'balloon'], ['roles' => ['balloon'], 'type' => null]],
-        [['type' => 'clarification_rw'], ['roles' => ['clarification_rw'], 'type' => null]],
+        [['type' => 'balloon'], ['roles' => ['balloon'], 'type' => 'other']],
+        [['type' => 'clarification_rw'], ['roles' => ['clarification_rw'], 'type' => 'other']],
         [['type' => 'cds'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
         [['username' => 'cds', 'type' => 'admin'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
         [['username' => 'cds', 'type' => 'jury'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
@@ -35,7 +35,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
 
     protected static array $accountAddCombinationsWithoutFile = [
         [['username' => 'cds', 'roles' => ['admin']], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
-        [['username' => 'another_judgehost', 'roles' => ['judgehost']], ['type' => null]],
+        [['username' => 'another_judgehost', 'roles' => ['judgehost']], ['type' => 'other']],
     ];
 
     protected static array $optionalAddKeys = ['id', 'name', 'password'];
