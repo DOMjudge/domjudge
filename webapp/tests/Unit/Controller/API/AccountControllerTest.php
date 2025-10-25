@@ -22,7 +22,7 @@ class AccountControllerTest extends AccountBaseTestCase
             "id"       => "judgehost",
             "username" => "judgehost",
             "team_id"  => null,
-            "type"     => null,
+            "type"     => "judgehost",
             "ip"       => null,
         ],
         'demo' => [

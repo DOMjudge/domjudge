@@ -451,7 +451,7 @@ class User extends BaseApiEntity implements
             }
         }
 
-        return null;
+        return $this->getRoleList()[0];
     }
 
     /**
