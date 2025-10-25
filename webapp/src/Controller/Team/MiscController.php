@@ -73,7 +73,7 @@ class MiscController extends BaseController
         ];
         if ($contest) {
             $scoreboard = $this->scoreboardService
-                ->getTeamScoreboard($contest, $teamId, false);
+                ->getTeamScoreboard($contest, $team->getExternalid(), false);
             $data = array_merge(
                 $data,
                 $this->scoreboardService->getScoreboardTwigData(
@@ -151,15 +151,15 @@ class MiscController extends BaseController
         return $this->json(['unread_clarifications' => $this->dj->getUnreadClarifications()]);
     }
 
-    #[Route(path: '/change-contest/{contestId<-?\d+>}', name: 'team_change_contest')]
-    public function changeContestAction(Request $request, RouterInterface $router, int $contestId): Response
+    #[Route(path: '/change-contest/{contestId}', name: 'team_change_contest')]
+    public function changeContestAction(Request $request, RouterInterface $router, string $contestId): Response
     {
         if ($this->isLocalReferer($router, $request)) {
             $response = new RedirectResponse($request->headers->get('referer'));
         } else {
             $response = $this->redirectToRoute('team_index');
         }
-        return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
+        return $this->dj->setCookie('domjudge_cid', $contestId, 0, null, '', false, false,
                                                  $response);
     }
 
