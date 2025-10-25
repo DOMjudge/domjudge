@@ -88,11 +88,11 @@ class ScoreboardService
      * scorecache table.
      *
      * @param Contest $contest         The contest to get the scoreboard for.
-     * @param int     $teamId          The ID of the team to get the scoreboard for.
+     * @param string  $teamId          The ID of the team to get the scoreboard for.
      * @param bool    $showFtsInFreeze If false, the scoreboard will hide first
      *                                 to solve for submissions after contest freeze.
      */
-    public function getTeamScoreboard(Contest $contest, int $teamId, bool $showFtsInFreeze = true): ?Scoreboard
+    public function getTeamScoreboard(Contest $contest, string $teamId, bool $showFtsInFreeze = true): ?Scoreboard
     {
         $freezeData = new FreezeData($contest);
 
@@ -820,7 +820,7 @@ class ScoreboardService
         /** @var TeamCategory[] $categories */
         $categories = $queryBuilder->getQuery()->getResult();
         foreach ($categories as $category) {
-            $filters['categories'][$category->getCategoryid()] = $category->getName();
+            $filters['categories'][$category->getExternalid()] = $category->getName();
         }
 
         // Show only affiliations / countries with visible teams.
@@ -845,7 +845,7 @@ class ScoreboardService
             /** @var TeamAffiliation[] $affiliations */
             $affiliations = $queryBuilder->getQuery()->getResult();
             foreach ($affiliations as $affiliation) {
-                $filters['affiliations'][$affiliation->getAffilid()] = $affiliation->getName();
+                $filters['affiliations'][$affiliation->getExternalid()] = $affiliation->getName();
                 if ($showFlags && $affiliation->getCountry() !== null) {
                     $filters['countries'][] = $affiliation->getCountry();
                 }
@@ -983,13 +983,13 @@ class ScoreboardService
         if ($filter) {
             if ($filter->affiliations) {
                 $queryBuilder
-                    ->andWhere('t.affiliation IN (:affiliations)')
+                    ->andWhere('ta.externalid IN (:affiliations)')
                     ->setParameter('affiliations', $filter->affiliations);
             }
 
             if ($filter->categories) {
                 $queryBuilder
-                    ->andWhere('t.category IN (:categories)')
+                    ->andWhere('tc.externalid IN (:categories)')
                     ->setParameter('categories', $filter->categories);
             }
 
@@ -1001,7 +1001,7 @@ class ScoreboardService
 
             if ($filter->teams) {
                 $queryBuilder
-                    ->andWhere('t.teamid IN (:teams)')
+                    ->andWhere('t.externalid IN (:teams)')
                     ->setParameter('teams', $filter->teams);
             }
         }

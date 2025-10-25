@@ -2,6 +2,7 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
+use App\Repository\ContestProblemRepository;
 use App\Service\DOMJudgeService as DJS;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -14,7 +15,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /**
  * Many-to-Many mapping of contests and problems.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ContestProblemRepository::class)]
 #[ORM\Table(
     name: 'contestproblem',
     options: [

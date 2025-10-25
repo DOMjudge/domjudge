@@ -196,7 +196,7 @@ class DOMJudgeService
             }
 
             foreach ($contests as $contest) {
-                if ($contest->getCid() == $selected_cid) {
+                if ($contest->getExternalid() == $selected_cid) {
                     return $contest;
                 }
             }

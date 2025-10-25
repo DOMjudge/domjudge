@@ -84,9 +84,10 @@ class SubmissionService
 
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
-            ->select('s', 'j', 'cp')
+            ->select('s', 'j', 'cp', 'l')
             ->join('s.team', 't')
             ->join('s.contest_problem', 'cp')
+            ->join('s.language', 'l')
             ->andWhere('s.contest IN (:contests)')
             ->setParameter('contests', array_keys($contests))
             ->orderBy('s.submittime', 'DESC')
