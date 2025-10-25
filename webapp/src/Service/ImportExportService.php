@@ -551,7 +551,7 @@ class ImportExportService
             ->getResult();
         $categoryIds = [];
         foreach ($categories as $category) {
-            $categoryIds[] = $category->getCategoryid();
+            $categoryIds[] = $category->getExternalid();
         }
 
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');

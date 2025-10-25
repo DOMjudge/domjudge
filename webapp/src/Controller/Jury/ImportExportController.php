@@ -400,7 +400,7 @@ class ImportExportController extends BaseController
             ->getResult();
         $categoryIds = [];
         foreach ($categories as $category) {
-            $categoryIds[] = $category->getCategoryid();
+            $categoryIds[] = $category->getExternalid();
         }
 
         $contest = $this->dj->getCurrentContest();
