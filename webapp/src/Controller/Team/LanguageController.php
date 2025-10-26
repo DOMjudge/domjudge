@@ -8,8 +8,8 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\ExpressionLanguage\Expression;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -33,8 +33,12 @@ class LanguageController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{languages: Language[]}
+     */
     #[Route(path: '', name: 'team_languages')]
-    public function languagesAction(): Response
+    #[Template(template: 'team/languages.html.twig')]
+    public function languagesAction(): array
     {
         $languagesEnabled = $this->config->get('show_language_versions');
         if (!$languagesEnabled) {
@@ -43,6 +47,6 @@ class LanguageController extends BaseController
         $currentContest = $this->dj->getCurrentContest();
         /** @var Language[] $languages */
         $languages = $this->dj->getAllowedLanguagesForContest($currentContest);
-        return $this->render('team/languages.html.twig', ['languages' => $languages]);
+        return ['languages' => $languages];
     }
 }

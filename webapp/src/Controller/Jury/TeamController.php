@@ -15,8 +15,12 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
+use App\Twig\Attribute\AjaxTemplate;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -42,8 +46,12 @@ class TeamController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{teams: list<array<string, mixed>>, table_fields: array<string, array<string, mixed>>}
+     */
     #[Route(path: '', name: 'jury_teams')]
-    public function indexAction(): Response
+    #[Template(template: 'jury/teams.html.twig')]
+    public function indexAction(): array
     {
         /** @var Team[] $teams */
         $teams = $this->em->createQueryBuilder()
@@ -221,13 +229,20 @@ class TeamController extends BaseController
                     ($t->getEnabled() ? '' : ' disabled'),
             ];
         }
-        return $this->render('jury/teams.html.twig', [
+        return [
             'teams' => $teams_table,
             'table_fields' => $table_fields,
-        ]);
+        ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     #[Route(path: '/{teamId<\d+>}', name: 'jury_team')]
+    #[AjaxTemplate(
+        normalTemplate: 'jury/team.html.twig',
+        ajaxTemplate: 'jury/partials/team_score_and_submissions.html.twig'
+    )]
     public function viewAction(
         Request $request,
         int $teamId,
@@ -235,7 +250,7 @@ class TeamController extends BaseController
         SubmissionService $submissionService,
         #[MapQueryParameter]
         ?int $cid = null,
-    ): Response {
+    ): array {
         $team = $this->em->getRepository(Team::class)->find($teamId);
         if (!$team) {
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
@@ -307,15 +322,21 @@ class TeamController extends BaseController
         if ($request->isXmlHttpRequest()) {
             $data['displayRank'] = true;
             $data['jury']        = true;
-            return $this->render('jury/partials/team_score_and_submissions.html.twig', $data);
         }
 
-        return $this->render('jury/team.html.twig', $data);
+        return $data;
     }
 
+    /**
+     * @return array{
+     *     team: Team,
+     *     form: FormInterface
+     * }|RedirectResponse
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{teamId<\d+>}/edit', name: 'jury_team_edit')]
-    public function editAction(Request $request, int $teamId): Response
+    #[Template(template: 'jury/team_edit.html.twig')]
+    public function editAction(Request $request, int $teamId): array|RedirectResponse
     {
         $team = $this->em->getRepository(Team::class)->find($teamId);
         if (!$team) {
@@ -333,10 +354,10 @@ class TeamController extends BaseController
             return $this->redirectToRoute('jury_team', ['teamId' => $team->getTeamid()]);
         }
 
-        return $this->render('jury/team_edit.html.twig', [
+        return [
             'team' => $team,
             'form' => $form,
-        ]);
+        ];
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -365,9 +386,16 @@ class TeamController extends BaseController
         );
     }
 
+    /**
+     * @return array{
+     *     team: Team,
+     *     form: FormInterface
+     * }|Response
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/add', name: 'jury_team_add')]
-    public function addAction(Request $request): Response
+    #[Template(template: 'jury/team_add.html.twig')]
+    public function addAction(Request $request): array|Response
     {
         $team = new Team();
         $team->setAddUserForTeam(Team::CREATE_NEW_USER);
@@ -389,10 +417,10 @@ class TeamController extends BaseController
             return $response;
         }
 
-        return $this->render('jury/team_add.html.twig', [
+        return [
             'team' => $team,
             'form' => $form,
-        ]);
+        ];
     }
 
     /**

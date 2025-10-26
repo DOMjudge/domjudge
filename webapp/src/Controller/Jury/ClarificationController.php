@@ -14,8 +14,11 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -34,13 +37,25 @@ class ClarificationController extends AbstractController
         protected readonly EventLogService $eventLogService
     ) {}
 
+    /**
+     * @return array{
+     *     newClarifications: list<Clarification>,
+     *     oldClarifications: list<Clarification>,
+     *     generalClarifications: list<Clarification>,
+     *     queues: array<string, string>,
+     *     currentQueue: string,
+     *     currentFilter: string|null,
+     *     categories: array<string, string>
+     * }
+     */
     #[Route(path: '', name: 'jury_clarifications')]
+    #[Template(template: 'jury/clarifications.html.twig')]
     public function indexAction(
         #[MapQueryParameter(name: 'filter')]
         ?string $currentFilter = null,
         #[MapQueryParameter(name: 'queue')]
         string $currentQueue = 'all',
-    ): Response {
+    ): array {
         $categories = $this->config->get('clar_categories');
         if ($contest = $this->dj->getCurrentContest()) {
             $contestIds = [$contest->getCid()];
@@ -102,7 +117,7 @@ class ClarificationController extends AbstractController
 
         $queues = $this->config->get('clar_queues');
 
-        return $this->render('jury/clarifications.html.twig', [
+        return [
             'newClarifications' => $newClarifications,
             'oldClarifications' => $oldClarifications,
             'generalClarifications' => $generalClarifications,
@@ -110,11 +125,19 @@ class ClarificationController extends AbstractController
             'currentQueue' => $currentQueue,
             'currentFilter' => $currentFilter,
             'categories' => $categories,
-        ]);
+        ];
     }
 
+    /**
+     * @return array{
+     *     list: list<array<string, mixed>>,
+     *     queues: array<string, string>,
+     *     answers: list<string>, jurymember: string|null
+     * }|RedirectResponse
+     */
     #[Route(path: '/{id<\d+>}', name: 'jury_clarification')]
-    public function viewAction(Request $request, int $id): Response
+    #[Template(template: 'jury/clarification.html.twig')]
+    public function viewAction(Request $request, int $id): array|RedirectResponse
     {
         $clarification = $this->em->getRepository(Clarification::class)->find($id);
         if (!$clarification) {
@@ -230,15 +253,19 @@ class ClarificationController extends AbstractController
             ->getQuery()
             ->getSingleResult()['jury_member'];
 
-        return $this->render('jury/clarification.html.twig', $parameters);
+        return $parameters;
     }
 
+    /**
+     * @return array{form: FormView}|RedirectResponse
+     */
     #[Route(path: '/send', name: 'jury_clarification_new')]
+    #[Template(template: 'jury/clarification_new.html.twig')]
     public function composeClarificationAction(
         Request $request,
         #[MapQueryParameter]
         ?string $teamto = null,
-    ): Response {
+    ): array|RedirectResponse {
         $formData = ['recipient' => JuryClarificationType::RECIPIENT_MUST_SELECT];
 
         if ($teamto !== null) {
@@ -253,7 +280,7 @@ class ClarificationController extends AbstractController
             return $this->processSubmittedClarification($form);
         }
 
-        return $this->render('jury/clarification_new.html.twig', ['form' => $form->createView()]);
+        return ['form' => $form->createView()];
     }
 
     #[Route(path: '/{clarId<\d+>}/claim', name: 'jury_clarification_claim')]
@@ -354,7 +381,7 @@ class ClarificationController extends AbstractController
     protected function processSubmittedClarification(
         FormInterface $form,
         ?Clarification $inReplTo = null
-    ): Response {
+    ): RedirectResponse {
         $formData = $form->getData();
         $clarification = new Clarification();
         $clarification->setInReplyTo($inReplTo);

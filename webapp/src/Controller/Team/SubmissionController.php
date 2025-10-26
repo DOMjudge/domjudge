@@ -14,11 +14,13 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
+use App\Twig\Attribute\AjaxTemplate;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,8 +53,16 @@ class SubmissionController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     form: FormView,
+     *     problem: Problem|null,
+     *     validFilenameRegex: string
+     * }
+     */
     #[Route(path: '/submit/{problem}', name: 'team_submit')]
-    public function createAction(Request $request, ?Problem $problem = null): Response
+    #[AjaxTemplate(normalTemplate: 'team/submit.html.twig', ajaxTemplate: 'team/submit_modal.html.twig')]
+    public function createAction(Request $request, ?Problem $problem = null): Response|array
     {
         $user    = $this->dj->getUser();
         $team    = $user->getTeam();
@@ -101,21 +111,30 @@ class SubmissionController extends BaseController
             }
         }
 
-        $data = ['form' => $form->createView(), 'problem' => $problem];
-        $data['validFilenameRegex'] = SubmissionService::FILENAME_REGEX;
-
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('team/submit_modal.html.twig', $data);
-        } else {
-            return $this->render('team/submit.html.twig', $data);
-        }
+        return [
+            'form' => $form->createView(),
+            'problem' => $problem,
+            'validFilenameRegex' => SubmissionService::FILENAME_REGEX,
+        ];
     }
 
     /**
+     * @return array{
+     *     judging: Judging|null,
+     *     verificationRequired: bool,
+     *     showCompile: bool,
+     *     allowDownload: bool,
+     *     showSampleOutput: bool,
+     *     runs: array<mixed>,
+     *     showTooLateResult: bool,
+     *     thumbnailSize: int,
+     *     size?: string
+     * }
      * @throws NonUniqueResultException
      */
     #[Route(path: '/submission/{submitId<\d+>}', name: 'team_submission')]
-    public function viewAction(Request $request, int $submitId): Response
+    #[AjaxTemplate(normalTemplate: 'team/submission.html.twig', ajaxTemplate: 'team/submission_modal.html.twig')]
+    public function viewAction(Request $request, int $submitId): array
     {
         $verificationRequired = (bool)$this->config->get('verification_required');
         $showCompile          = $this->config->get('show_compile');
@@ -207,11 +226,7 @@ class SubmissionController extends BaseController
             $data['size'] = 'xl';
         }
 
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('team/submission_modal.html.twig', $data);
-        } else {
-            return $this->render('team/submission.html.twig', $data);
-        }
+        return $data;
     }
 
     /**

@@ -10,8 +10,12 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
+use App\Twig\Attribute\AjaxTemplate;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -36,11 +40,22 @@ class TeamAffiliationController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     team_affiliations: list<array{
+     *         data: array<string, array<string, mixed>>,
+     *         actions: list<array<string, string>>,
+     *         link: string
+     *     }>,
+     *     table_fields: array<string, array<string, mixed>>
+     * }
+     */
     #[Route(path: '', name: 'jury_team_affiliations')]
+    #[Template(template: 'jury/team_affiliations.html.twig')]
     public function indexAction(
         #[Autowire('%kernel.project_dir%')]
         string $projectDir
-    ): Response {
+    ): array {
         $em               = $this->em;
         $teamAffiliations = $em->createQueryBuilder()
             ->select('a', 'COUNT(t.teamid) AS num_teams')
@@ -125,14 +140,21 @@ class TeamAffiliationController extends BaseController
             ];
         }
 
-        return $this->render('jury/team_affiliations.html.twig', [
+        return [
             'team_affiliations' => $team_affiliations_table,
             'table_fields' => $table_fields,
-        ]);
+        ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     #[Route(path: '/{affilId<\d+>}', name: 'jury_team_affiliation')]
-    public function viewAction(Request $request, ScoreboardService $scoreboardService, int $affilId): Response
+    #[AjaxTemplate(
+        normalTemplate: 'jury/team_affiliation.html.twig',
+        ajaxTemplate: 'partials/scoreboard_table.html.twig'
+    )]
+    public function viewAction(Request $request, ScoreboardService $scoreboardService, int $affilId): array
     {
         $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
         if (!$teamAffiliation) {
@@ -164,15 +186,21 @@ class TeamAffiliationController extends BaseController
         // For ajax requests, only return the submission list partial.
         if ($request->isXmlHttpRequest()) {
             $data['displayRank'] = true;
-            return $this->render('partials/scoreboard_table.html.twig', $data);
         }
 
-        return $this->render('jury/team_affiliation.html.twig', $data);
+        return $data;
     }
 
+    /**
+     * @return array{
+     *     teamAffiliation: TeamAffiliation,
+     *     form: FormInterface
+     * }|RedirectResponse
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{affilId<\d+>}/edit', name: 'jury_team_affiliation_edit')]
-    public function editAction(Request $request, int $affilId): Response
+    #[Template(template: 'jury/team_affiliation_edit.html.twig')]
+    public function editAction(Request $request, int $affilId): array|RedirectResponse
     {
         $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
         if (!$teamAffiliation) {
@@ -189,10 +217,10 @@ class TeamAffiliationController extends BaseController
             return $this->redirectToRoute('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]);
         }
 
-        return $this->render('jury/team_affiliation_edit.html.twig', [
+        return [
             'teamAffiliation' => $teamAffiliation,
             'form' => $form,
-        ]);
+        ];
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -220,9 +248,13 @@ class TeamAffiliationController extends BaseController
         );
     }
 
+    /**
+     * @return array{form: FormInterface}|Response
+     */
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/add', name: 'jury_team_affiliation_add')]
-    public function addAction(Request $request): Response
+    #[Template(template: 'jury/team_affiliation_add.html.twig')]
+    public function addAction(Request $request): array|Response
     {
         $teamAffiliation = new TeamAffiliation();
 
@@ -243,8 +275,8 @@ class TeamAffiliationController extends BaseController
             return $response;
         }
 
-        return $this->render('jury/team_affiliation_add.html.twig', [
+        return [
             'form' => $form,
-        ]);
+        ];
     }
 }

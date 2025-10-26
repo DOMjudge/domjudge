@@ -8,6 +8,7 @@ use App\Entity\Version;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -27,8 +28,20 @@ class VersionController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @return array{
+     *     data: list<array{
+     *         language: Language,
+     *         compiler_outputs: array<string, array{command: string, version: string, hostdata: list<mixed>, versionid: int}>,
+     *         canonical_compiler_key: string,
+     *         canonical_runner_key: string,
+     *         runner_outputs: array<string, array{command: string, version: string, hostdata: list<mixed>, versionid: int}>
+     *     }>
+     * }
+     */
     #[Route(path: '', name: 'jury_versions')]
-    public function indexAction(): Response
+    #[Template(template: 'jury/versions.html.twig')]
+    public function indexAction(): array
     {
         /** @var Language[] $languages */
         $languages = $this->em->createQueryBuilder()
@@ -97,7 +110,7 @@ class VersionController extends BaseController
             ];
         }
 
-        return $this->render('jury/versions.html.twig', ['data' => $data]);
+        return ['data' => $data];
     }
 
     #[IsGranted('ROLE_ADMIN')]

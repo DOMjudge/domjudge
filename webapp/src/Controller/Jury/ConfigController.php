@@ -11,11 +11,12 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -31,8 +32,30 @@ class ConfigController extends AbstractController
         protected readonly ConfigurationService $config
     ) {}
 
+    /**
+     * @return array{
+     *     options: list<array{
+     *         name: string,
+     *         data: list<array{
+     *             name: string,
+     *             type: string,
+     *             value: mixed,
+     *             description: string,
+     *             options: array<int|string, string>|null,
+     *             key_options: array<int|string, string>|null,
+     *             value_options: array<int|string, string>|null,
+     *             key_placeholder: string,
+     *             value_placeholder: string
+     *         }>
+     *     }>,
+     *     errors: array<string, string>,
+     *     activeCategory: string,
+     *     diffs: array<string, array{before: mixed, after: mixed}>|null
+     * }|RedirectResponse
+     */
     #[Route(path: '', name: 'jury_config')]
-    public function indexAction(EventLogService $eventLogService, Request $request): Response
+    #[Template(template: 'jury/config.html.twig')]
+    public function indexAction(EventLogService $eventLogService, Request $request): array|RedirectResponse
     {
         $specs = $this->config->getConfigSpecification();
         foreach ($specs as &$spec) {
@@ -163,21 +186,30 @@ class ConfigController extends AbstractController
         if ($diffs !== null) {
             $diffs = json_decode($diffs, true);
         }
-        return $this->render('jury/config.html.twig', [
+        return [
             'options' => $allData,
             'errors' => $errors ?? [],
             'activeCategory' => $activeCategory ?? 'Scoring',
             'diffs' => $diffs,
-        ]);
+        ];
     }
 
+    /**
+     * @return array{
+     *     results: array<string, mixed>,
+     *     stopwatch: mixed,
+     *     dir: array{project: string, log: string},
+     *     logFilesWithSize: array<string, string>
+     * }
+     */
     #[Route(path: '/check', name: 'jury_config_check')]
+    #[Template(template: 'jury/config_check.html.twig')]
     public function checkAction(
         #[Autowire('%kernel.project_dir%')]
         string $projectDir,
         #[Autowire('%kernel.logs_dir%')]
         string $logsDir
-    ): Response {
+    ): array {
         $results = $this->checkConfigService->runAll();
         $stopwatch = $this->checkConfigService->getStopwatch();
         $logFiles = glob($logsDir . '/*.log');
@@ -185,7 +217,7 @@ class ConfigController extends AbstractController
         foreach ($logFiles as $logFile) {
             $logFilesWithSize[str_replace($logsDir . '/', '', $logFile)] = Utils::printsize(filesize($logFile));
         }
-        return $this->render('jury/config_check.html.twig', [
+        return [
             'results' => $results,
             'stopwatch' => $stopwatch,
             'dir' => [
@@ -193,22 +225,29 @@ class ConfigController extends AbstractController
                 'log' => $logsDir,
             ],
             'logFilesWithSize' => $logFilesWithSize,
-        ]);
+        ];
     }
 
+    /**
+     * @return array{
+     *     logFile: string,
+     *     contents: string
+     * }
+     */
     #[Route(path: '/tail-log/{logFile<[a-z0-9-]+\.log>}', name: 'jury_tail_log')]
+    #[Template(template: 'jury/tail_log.html.twig')]
     public function tailLogAction(
         string $logFile,
         #[Autowire('%kernel.logs_dir%')]
         string $logsDir
-    ): Response {
+    ): array {
         $fullFile = "$logsDir/$logFile";
         $command = sprintf('tail -n200 %s', escapeshellarg($fullFile));
         exec($command, $lines);
-        return $this->render('jury/tail_log.html.twig', [
+        return [
             'logFile' => $logFile,
             'contents' => implode("\n", $lines),
-        ]);
+        ];
     }
 
     #[Route(path: '/download-log/{logFile<[a-z0-9-]+\.log>}', name: 'jury_download_log')]

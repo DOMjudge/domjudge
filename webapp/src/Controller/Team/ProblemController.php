@@ -9,10 +9,11 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\StatisticsService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\ExpressionLanguage\Expression;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -40,14 +41,20 @@ class ProblemController extends BaseController
     }
 
     /**
+     * @return array{'problems': ContestProblem[], 'samples': string[], 'showLimits': bool,
+     *               'defaultMemoryLimit': int, 'timeFactorDiffers': bool,
+     *               'stats': array{'numBuckets': int, 'maxBucketSizeCorrect': int,
+     *                              'maxBucketSizeIncorrect': int,
+     *                              'problems': array<array{'correct': array<array{'start': DateTime, 'end': DateTime, 'count': int}>,
+     *                                                      'incorrect': array<array{'start': DateTime, 'end': DateTime, 'count': int}>}>}}
      * @throws NonUniqueResultException
      */
     #[Route(path: '/problems', name: 'team_problems')]
-    public function problemsAction(): Response
+    #[Template(template: 'team/problems.html.twig')]
+    public function problemsAction(): array
     {
         $teamId = $this->dj->getUser()->getTeam()->getTeamid();
-        return $this->render('team/problems.html.twig',
-            $this->dj->getTwigDataForProblemsAction($this->stats, $teamId));
+        return $this->dj->getTwigDataForProblemsAction($this->stats, $teamId);
     }
 
 
