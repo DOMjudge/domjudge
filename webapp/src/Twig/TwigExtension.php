@@ -110,7 +110,7 @@ class TwigExtension
         if ($datetime === null) {
             $datetime = Utils::now();
         }
-        if ($contest !== null && $this->config->get('show_relative_time')) {
+        if ($contest !== null) {
             $relativeTime = $contest->getContestTime((float)$datetime);
             if ($maskOutsideContest) {
                 if ($relativeTime < 0) {
@@ -121,31 +121,32 @@ class TwigExtension
                     return "After contest";
                 }
             }
-            $sign         = ($relativeTime < 0 ? -1 : 1);
-            $relativeTime *= $sign;
-            // We're not showing seconds, while the last minute before
-            // contest start should show as "-0:01", so if there's a
-            // nonzero amount of seconds before the contest, we have to
-            // add a minute.
-            $s            = $relativeTime % 60;
-            $relativeTime = ($relativeTime - $s) / 60;
-            if ($sign < 0 && $s > 0) {
-                $relativeTime++;
+            if ($this->config->get('show_relative_time')) {
+                $sign         = ($relativeTime < 0 ? -1 : 1);
+                $relativeTime *= $sign;
+                // We're not showing seconds, while the last minute before
+                // contest start should show as "-0:01", so if there's a
+                // nonzero amount of seconds before the contest, we have to
+                // add a minute.
+                $s            = $relativeTime % 60;
+                $relativeTime = ($relativeTime - $s) / 60;
+                if ($sign < 0 && $s > 0) {
+                    $relativeTime++;
+                }
+                $m            = $relativeTime % 60;
+                $relativeTime = ($relativeTime - $m) / 60;
+                $h            = $relativeTime;
+                if ($sign < 0) {
+                    return sprintf("-%d:%02d", $h, $m);
+                } else {
+                    return sprintf("%d:%02d", $h, $m);
+                }
             }
-            $m            = $relativeTime % 60;
-            $relativeTime = ($relativeTime - $m) / 60;
-            $h            = $relativeTime;
-            if ($sign < 0) {
-                return sprintf("-%d:%02d", $h, $m);
-            } else {
-                return sprintf("%d:%02d", $h, $m);
-            }
-        } else {
-            if ($format === null) {
-                $format = $this->config->get('time_format');
-            }
-            return Utils::printtime($datetime, $format);
         }
+        if ($format === null) {
+            $format = $this->config->get('time_format');
+        }
+        return Utils::printtime($datetime, $format);
     }
 
     #[AsTwigFilter('printHumanTimeDiff')]
