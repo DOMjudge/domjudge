@@ -1,3 +1,5 @@
 {
-  "dependencies": {}
+  "dependencies": {
+    "@melloware/coloris": "^0.25.0"
+  }
 }
