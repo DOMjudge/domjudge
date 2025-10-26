@@ -1118,7 +1118,7 @@ class SubmissionController extends BaseController
         // FIXME: We should also delete/recreate any dependent judging(runs).
         $eventLogService->log('submission', $submission->getSubmitid(), ($valid ? 'create' : 'delete'),
                               $submission->getContest()->getCid(), null, null, $valid);
-        $this->dj->auditlog('submission', $submission->getSubmitid(),
+        $this->dj->auditlog('submission', $submission->getExternalid(),
                                          'marked ' . ($valid ? 'valid' : 'invalid'));
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         $team    = $this->em->getRepository(Team::class)->find($teamId);
@@ -1155,7 +1155,7 @@ class SubmissionController extends BaseController
                 ->setVerifyComment($comment);
 
             $this->em->flush();
-            $this->dj->auditlog('judging', $judging->getJudgingid(),
+            $this->dj->auditlog('judging', (string)$judging->getJudgingid(),
                                              $verified ? 'set verified' : 'set unverified');
 
             if ((bool)$this->config->get('verification_required')) {
@@ -1221,7 +1221,7 @@ class SubmissionController extends BaseController
                 ->setVerifyComment($comment);
 
             $this->em->flush();
-            $this->dj->auditlog('external_judgement', $judgement->getExtjudgementid(),
+            $this->dj->auditlog('external_judgement', (string)$judgement->getExtjudgementid(),
                 $verified ? 'set verified' : 'set unverified');
         });
 
@@ -1267,7 +1267,7 @@ class SubmissionController extends BaseController
                     $auditLogType = 'judging';
                     $auditLogId = $judging->getJudgingid();
                 }
-                $this->dj->auditlog($auditLogType, $auditLogId, $action . 'ed');
+                $this->dj->auditlog($auditLogType, (string)$auditLogId, $action . 'ed');
 
                 if ($action === 'claim') {
                     return $this->redirectToRoute('jury_submission', ['submitId' => $judging->getSubmission()->getSubmitid()]);

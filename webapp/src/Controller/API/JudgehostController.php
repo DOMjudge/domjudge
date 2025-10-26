@@ -442,8 +442,9 @@ class JudgehostController extends AbstractFOSRestController
 
                     $judgingId = $judging->getJudgingid();
                     $contestId = $judging->getSubmission()->getContest()->getCid();
-                    $this->dj->auditlog('judging', $judgingId, 'judged',
-                                        'compiler-error', $judgehost->getHostname(), $contestId);
+                    $contestExernalid = $judging->getSubmission()->getContest()->getExternalid();
+                    $this->dj->auditlog('judging', (string)$judgingId, 'judged',
+                                        'compiler-error', $judgehost->getHostname(), $contestExernalid);
 
                     $this->maybeUpdateActiveJudging($judging);
                     $this->em->flush();
@@ -905,9 +906,9 @@ class JudgehostController extends AbstractFOSRestController
                 $this->em->flush();
             }
 
-            $this->dj->auditlog('judging', $judgingId, 'given back'
+            $this->dj->auditlog('judging', (string)$judgingId, 'given back'
                 . ($judgehost === null ? '' : ' for judgehost ' . $judgehost->getHostname()), null,
-                $judgehost?->getHostname(), $judging->getContest()->getCid());
+                $judgehost?->getHostname(), $judging->getContest()->getExternalid());
         }
     }
 
@@ -1127,7 +1128,7 @@ class JudgehostController extends AbstractFOSRestController
                     $this->balloonService->updateBalloons($contest, $submission, $judging);
                 }
 
-                $this->dj->auditlog('judging', $judging->getJudgingid(), 'judged', $result, $hostname);
+                $this->dj->auditlog('judging', (string)$judging->getJudgingid(), 'judged', $result, $hostname);
             }
 
             // Send an event for an endtime (and max runtime update).

@@ -770,8 +770,8 @@ class SubmissionService
                                            $submission->getSubmitid(), $team->getTeamid(),
                                            $language->getLangid(), $problem->getProblem()->getProbid()));
 
-        $this->dj->auditlog('submission', $submission->getSubmitid(), 'added',
-            'via ' . $source->value, null, $contest->getCid());
+        $this->dj->auditlog('submission', $submission->getExternalid(), 'added',
+            'via ' . $source->value, null, $contest->getExternalid());
 
         if (Utils::difftime((float)$contest->getEndtime(), $submitTime) <= 0) {
             $this->logger->info(

@@ -883,7 +883,7 @@ class ImportProblemService
             );
             $allMessages = array_merge($allMessages, $messages);
             if ($newProblem) {
-                $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
+                $this->dj->auditlog('problem', $newProblem->getExternalid(), 'upload zip', $clientName);
                 $probId = $newProblem->getExternalid();
             } else {
                 $errors = array_merge($errors, $messages);

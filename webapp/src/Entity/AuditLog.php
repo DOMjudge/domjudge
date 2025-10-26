@@ -33,9 +33,9 @@ class AuditLog
 
     #[ORM\Column(
         nullable: true,
-        options: ['comment' => 'Contest ID associated to this entry', 'unsigned' => true]
+        options: ['comment' => 'External contest ID associated to this entry', 'unsigned' => true]
     )]
-    private ?int $cid = null;
+    private ?string $cid = null;
 
     #[ORM\Column(
         nullable: true,
@@ -52,7 +52,7 @@ class AuditLog
     #[ORM\Column(
         length: 64,
         nullable: true,
-        options: ['comment' => 'Identifier in reference table']
+        options: ['comment' => '(External) identifier in reference table']
     )]
     private ?string $dataid = null;
 
@@ -81,13 +81,13 @@ class AuditLog
         return $this->logtime;
     }
 
-    public function setCid(?int $cid): AuditLog
+    public function setCid(?string $cid): AuditLog
     {
         $this->cid = $cid;
         return $this;
     }
 
-    public function getCid(): ?int
+    public function getCid(): ?string
     {
         return $this->cid;
     }

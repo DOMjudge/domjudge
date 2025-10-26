@@ -151,7 +151,7 @@ class InternalErrorController extends BaseController
             ->getSingleResult();
         if ($action === 'ignore') {
             $internalError->setStatus(InternalErrorStatusType::STATUS_IGNORED);
-            $this->dj->auditlog('internal_error', $internalError->getErrorid(),
+            $this->dj->auditlog('internal_error', (string)$internalError->getErrorid(),
                 sprintf('internal error: %s', InternalErrorStatusType::STATUS_IGNORED));
             $this->em->flush();
             return $this->redirectToRoute('jury_internal_error', ['errorId' => $internalError->getErrorid()]);
@@ -175,7 +175,7 @@ class InternalErrorController extends BaseController
                 );
                 $this->em->flush();
 
-                $this->dj->auditlog('internal_error', $internalError->getErrorid(),
+                $this->dj->auditlog('internal_error', (string)$internalError->getErrorid(),
                     sprintf('internal error: %s', InternalErrorStatusType::STATUS_RESOLVED));
 
                 $affectedJudgings = $internalError->getAffectedJudgings();

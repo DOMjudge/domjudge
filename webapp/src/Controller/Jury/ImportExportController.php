@@ -168,7 +168,7 @@ class ImportExportController extends BaseController
                 );
                 $allMessages = array_merge($allMessages, $messages);
                 if ($newProblem) {
-                    $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip',
+                    $this->dj->auditlog('problem', $newProblem->getExternalid(), 'upload zip',
                         $clientName);
                 } else {
                     $this->postMessages($allMessages);
