@@ -145,7 +145,7 @@
                                             {% endif %}
                                             {% if clarificationsCount > 0 %}
                                                 <a data-ajax-modal class="btn btn-secondary" role="button"
-                                                   href="{{ path('team_clarification_by_prob', {'probId': problem.probid}) }}">
+                                                   href="{{ path('team_clarification_by_prob', {'probId': problem.externalId}) }}">
                                                     <i class="fas fa-question-circle"></i>
                                                     {% if clarificationsCount > 0 %}
                                                         {% set badgeClass = 'text-bg-info' %}
