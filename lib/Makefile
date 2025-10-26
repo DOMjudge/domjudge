@@ -4,7 +4,7 @@ endif
 
 include $(TOPDIR)/Makefile.global
 
-OBJECTS = lib.error$(OBJEXT) lib.misc$(OBJEXT)
+OBJECTS = $(addsuffix $(OBJEXT),lib.error lib.misc)
 
 build: $(OBJECTS)
 

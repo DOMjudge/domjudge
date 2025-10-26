@@ -66,6 +66,7 @@
 #include "lib.misc.h"
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <csignal>
 #include <cstring>
@@ -232,22 +233,17 @@ struct process_t {
 
   // Fork and exec the child process, redirecting its standard I/O.
   void spawn() {
-    fd_t stdio[3] = {stdin_fd, stdout_fd, FDREDIR_NONE};
+    std::array<int, 3> stdio = {stdin_fd, stdout_fd, FDREDIR_NONE};
 
-    char pid_buf[12];
-    vector<const char *> argv;
-    for (size_t i = 0; i < args.size(); i++) {
-      argv.push_back(args[i].c_str());
-      if (i == 1 && cmd == "sudo" &&
-          args[i].find("/runguard") != string::npos) {
+    auto exec_args = args;
+    if (cmd == "sudo" && exec_args.size() > 1 && exec_args[1].find("/runguard") != string::npos) {
         // This is a hack, and can be improved significantly after implementing
         // https://docs.google.com/document/d/1WZRwdvJUamsczYC7CpP3ZIBU8xG6wNqYqrNJf7osxYs/edit#heading=h.i7kgdnmw8qd7
-        argv.push_back("-U");
-        sprintf(pid_buf, "%d", getpid());
-        argv.push_back(pid_buf);
-      }
+        exec_args.push_back("-U");
+        exec_args.push_back(std::to_string(getpid()));
     }
-    pid = execute(cmd.c_str(), argv.data(), argv.size(), stdio, 0);
+
+    pid = execute(cmd, exec_args, stdio, false);
     if (pid < 0) {
       error(errno, "failed to execute command #%ld", index);
     }
