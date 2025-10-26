@@ -135,7 +135,7 @@
                 <span>
                     <i class="fas fa-users" title="Team:"></i>
                     <a href="{{ path('jury_team', {teamId: submission.team.teamid, cid: submission.contest.cid}) }}">
-                        {{ submission.team.effectiveName }} {{ submission.team | entityIdBadge('t') }}
+                        {{ submission.team.effectiveName }} {{ submission.team | entityIdBadge }}
                     </a>
                 </span>
 
@@ -143,7 +143,7 @@
                     <span>
                         <i class="fas fa-user" title="User:"></i>
                         <a href="{{ path('jury_user', {userId: submission.user.userid, cid: submission.contest.cid}) }}">
-                            {{ submission.user.username }} {{ submission.user | entityIdBadge('u') }}
+                            {{ submission.user.username }} {{ submission.user | entityIdBadge }}
                         </a>
                     </span>
                 {% endif %}
@@ -153,7 +153,7 @@
                         <i class="fas fa-trophy" title="Contest:"></i>
                         <a href="{{ path('jury_contest', {'contestId': submission.contest.cid}) }}">
                             {{ submission.contest.shortname }}
-                            {{ submission.contest | entityIdBadge('c') }}
+                            {{ submission.contest | entityIdBadge }}
                         </a>
                     </span>
                 {% endif %}
@@ -166,7 +166,7 @@
                         {% else %}
                             {{ submission.problem.name }}
                         {% endif %}
-                        {{ submission.problem | entityIdBadge('p') }}
+                        {{ submission.problem | entityIdBadge }}
                     </a>
                 </span>
 
