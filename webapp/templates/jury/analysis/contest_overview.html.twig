@@ -152,7 +152,7 @@ $(function() {
               {% set id=t.externalid %}
               <tr>
                 {% set link = path('analysis_team', {'team':id}) %}
-                <td scope="row" style="text-align: right;"><a href="{{ link }}">{{ t | entityIdBadge('t') }}</a></td>
+                <td scope="row" style="text-align: right;"><a href="{{ link }}">{{ t | entityIdBadge }}</a></td>
                 <td><a href="{{ link }}">{% if t.affiliation %}{{ t.affiliation.name }}{% else %}-{% endif %}</a></td>
                 <td class="truncate" style="max-width: 200px"><a href="{{ link }}">{{ t.effectiveName }}</a></td>
                 <td><a href="{{ link }}">{{ misc.team_stats[id].total_submitted }} / {{ misc.team_stats[id].total_accepted }}</a></td>

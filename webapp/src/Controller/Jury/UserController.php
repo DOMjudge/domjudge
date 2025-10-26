@@ -105,7 +105,6 @@ class UserController extends BaseController
             if ($u->getTeam()) {
                 $userdata['teamid'] = [
                     'value' => $u->getTeam(),
-                    'idPrefix' => 't',
                 ];
                 $userdata['team'] = [
                     'value' => $u->getTeamName(),
