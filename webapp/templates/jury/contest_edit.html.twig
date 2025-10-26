@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Edit contest {{ contest.cid }} - {{ parent() }}{% endblock %}
+{% block title %}Edit contest {{ contest.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
