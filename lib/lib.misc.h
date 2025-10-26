@@ -17,12 +17,6 @@ extern "C" {
  * LIBDIR as defined in calling program. */
 #define alert(msgtype,description) _alert(LIBDIR,msgtype,description)
 
-void _alert(const char *libdir, const char *msgtype, const char *description)
-    __attribute__((nonnull (1, 2)));
-/* Execute 'alert' plugin program to perform user configurable action
- * on important system events. See default alert script for more details.
- */
-
 int execute(const char *, const char **, int, int[3], int)
     __attribute__((nonnull (1, 2)));
 /* Execute a subprocess using fork and execvp and optionally perform
@@ -53,28 +47,6 @@ int execute(const char *, const char **, int, int[3], int)
  * with the process-ID of the child command.
  */
 
-void initsignals();
-/* Installs a signal handler to gracefully terminate daemon programs
- * upon receiving TERMINATE, HANGUP and INTERRUPT signals which sets
- * 'extern int exitsignalled = 1'. The sleep() call will automatically
- * return on receiving a signal.
- */
-
-void daemonize(const char *);
-/* Forks and detaches the current process to run as a daemon. Similar
- * to the daemon() call present in Linux and *BSD, but implemented here,
- * because it is not specified by POSIX, SUSv2 or SVr4.
- *
- * Arguments:
- * char *pidfile    pidfile to check for running instances and write PID;
- *                    set to NULL to not use a pidfile.
- *
- * Either returns successfully or exits with an error.
- */
-
-char *stripendline(char *) __attribute__((nonnull (1)));
-/* Removes end-of-line characters (CR and LF) from string. Returns the
- * original pointer to the modified string. */
 
 void version(const char *, const char *) __attribute__((nonnull (1, 2)));
 /* Print standard program name and version, with disclaimer and GPL
