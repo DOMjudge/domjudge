@@ -130,7 +130,7 @@
                                             {% if clarifications[problem.probid] is defined %}
                                                 {% set clarificationsCount = clarifications[problem.probid] | length %}
                                                 {% for clar in clarifications[problem.probid] %}
-                                                    {% if team.unreadClarifications.contains(clar) %}
+                                                    {% if team and team.unreadClarifications.contains(clar) %}
                                                         {% set unseenClarificationCount = unseenClarificationCount + 1 %}
                                                     {% endif %}
                                                 {% endfor %}
