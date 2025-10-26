@@ -1289,7 +1289,7 @@ int main(int argc, char **argv)
 	 * exceeded, when running via SSH. */
 	FILE *fp = nullptr;
 	const char *oom_score_path = "/proc/self/oom_score_adj";
-	if ( fp = fopen(oom_score_path, "r+") ) {
+	if ( (fp = fopen(oom_score_path, "r+"))!=nullptr ) {
 		if ( fscanf(fp,"%d", &ret)!=1 ) error(errno,"cannot read from `%s'", oom_score_path);
 		if ( ret<0 ) {
 			int oom_reset_value = 0;
