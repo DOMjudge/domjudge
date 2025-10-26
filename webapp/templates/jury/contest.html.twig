@@ -178,7 +178,7 @@
                         {% else %}
                             {% for team in contest.teams %}
                                 <a href="{{ path('jury_team', {'teamId': team.externalid}) }}">
-                                    {{ team.effectiveName }} {{ team | entityIdBadge('t') }}
+                                    {{ team.effectiveName }} {{ team | entityIdBadge }}
                                 </a>
                                 <br>
                             {% endfor %}

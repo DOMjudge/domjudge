@@ -1237,21 +1237,15 @@ EOF;
 
     /**
      * Get the entity ID badge to display for the given entity.
-     *
-     * When we are in a data source mode that uses external ID's, those will be used and the
-     * internal ID will be shown in a tooltip.
-     *
-     * @param string $idPrefix The prefix to use for the internal ID, if any.
      */
     #[AsTwigFilter('entityIdBadge', isSafe: ['html'])]
-    public function entityIdBadge(BaseApiEntity $entity, string $idPrefix = ''): string
+    public function entityIdBadge(BaseApiEntity $entity): string
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $metadata = $this->em->getClassMetadata($entity::class);
         $primaryKeyColumn = $metadata->getIdentifierColumnNames()[0];
 
         $data = [
-            'idPrefix' => $idPrefix,
             'id' => $propertyAccessor->getValue($entity, $primaryKeyColumn),
             'externalId' => null,
         ];
