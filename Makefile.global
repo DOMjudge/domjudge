@@ -62,12 +62,11 @@ endef
 # Library objects required in multiple places:
 LIBSBASE   = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc)
 LIBHEADERS = $(addsuffix .h,$(LIBSBASE))
-LIBSOURCES = $(addsuffix .c,$(LIBSBASE))
 LIBOBJECTS = $(addsuffix $(OBJEXT),$(LIBSBASE))
 CFLAGS   += -I$(TOPDIR)/lib -I$(TOPDIR)/etc
 CXXFLAGS += -I$(TOPDIR)/lib -I$(TOPDIR)/etc
 
-$(LIBOBJECTS): %$(OBJEXT): %.c %.h
+$(LIBOBJECTS):
 	$(MAKE) -C $(TOPDIR)/lib $(notdir $@)
 
 # Default recursive targets; these should always at least call the
