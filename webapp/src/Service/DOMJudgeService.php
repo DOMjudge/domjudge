@@ -1568,6 +1568,9 @@ class DOMJudgeService
         $publicPath = realpath(sprintf('%s/public/', $this->projectDir));
         foreach ($assetMatches[1] as $file) {
             $filepath = realpath($publicPath . '/' . $file);
+            if ($filepath === false) {
+                throw new Exception("Could not find (possibly symlinked) file: " . $file . ", at: " . $publicPath);
+            }
             if (!str_starts_with($filepath, $publicPath) &&
                 !str_starts_with($filepath, $this->vendorDir)
             ) {
