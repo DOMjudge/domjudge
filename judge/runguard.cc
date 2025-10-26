@@ -29,6 +29,8 @@
 
 #include "config.h"
 
+#include "lib.misc.h"
+
 /* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
 #include "runguard-config.h"
 
@@ -344,17 +346,6 @@ void write_meta(const char *key, const char *format, ...)
 	}
 
 	va_end(ap);
-}
-
-void version(const char *prog, const char *vers)
-{
-	printf("\
-%s -- part of DOMjudge version %s\n\
-Written by the DOMjudge developers\n\n\
-DOMjudge comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n\
-are welcome to redistribute it under certain conditions.  See the GNU\n\
-General Public Licence for details.\n", prog, vers);
-	exit(0);
 }
 
 void usage()
