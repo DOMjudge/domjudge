@@ -100,7 +100,7 @@
                             {% set link = path('public_problem_statement', {probId: problem.externalid}) %}
                             {% set target = '_blank' %}
                         {% else %}
-                            {% set link = path('team_problem_statement', {probId: problem.probid}) %}
+                            {% set link = path('team_problem_statement', {probId: problem.externalid}) %}
                             {% set target = '_blank' %}
                         {% endif %}
                     {% endif %}
@@ -108,7 +108,7 @@
                 <th
                     title="problem {{ problem.problem.name }}"
                     scope="col"
-                    data-problem-external-id="{{ problem.externalid }}"
+                    data-problem-id="{{ problem.externalid }}"
                     data-problem-name="{{ problem.problem.name | escape('html_attr') }}"
                     data-problem-badge="{{ problem | problemBadge | escape('html_attr') }}"
                 >
@@ -159,7 +159,7 @@
         {% for category in score.team.cssClassCategories %}
             {% set classes = classes | merge([category.cssClass]) %}
         {% endfor %}
-        <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}" data-team-external-id="{{ score.team.externalid }}" data-team-name="{{ score.team.effectiveName | escape('html_attr') }}">
+        <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.externalid }}" data-team-name="{{ score.team.effectiveName | escape('html_attr') }}">
             {% if enable_ranking %}
                 {% if medalsEnabled %}
                     <td class="no-border">
@@ -236,7 +236,7 @@
                         {% set link = path('public_team', {teamId: score.team.externalid}) %}
                         {% set extra = 'data-ajax-modal' %}
                     {% else %}
-                        {% set link = path('team_team', {teamId: score.team.teamid}) %}
+                        {% set link = path('team_team', {teamId: score.team.externalid}) %}
                         {% set extra = 'data-ajax-modal' %}
                     {% endif %}
                 {% endif %}
@@ -462,8 +462,7 @@
     {% endfor %}
     <tr
         class="{{ classes | join(' ') }}"
-        data-team-id="{{ score.team.teamid }}"
-        data-team-external-id="{{ score.team.externalid }}"
+        data-team-id="{{ score.team.externalid }}"
         data-team-name="{{ score.team.effectiveName | escape('html_attr') }}"
         style="border-bottom-width: 0; height: 28px;">
         {% if enable_ranking %}
@@ -529,7 +528,7 @@
                 {% set link = path('public_team', {teamId: score.team.teamid}) %}
                 {% set extra = 'data-ajax-modal' %}
             {% else %}
-                {% set link = path('team_team', {teamId: score.team.teamid}) %}
+                {% set link = path('team_team', {teamId: score.team.externalid}) %}
                 {% set extra = 'data-ajax-modal' %}
             {% endif %}
         {% endif %}

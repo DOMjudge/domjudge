@@ -32,7 +32,7 @@ class TeamClarificationType extends AbstractType
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         if ($contest) {
             foreach ($categories as $categoryId => $categoryName) {
-                $subjects[$categoryName] = sprintf('%d-%s', $contest->getCid(), $categoryId);
+                $subjects[$categoryName] = sprintf('%s#%s', $contest->getExternalid(), $categoryId);
             }
             if ($contest->getFreezeData()->started()) {
                 /** @var ContestProblem $problem */
@@ -40,7 +40,7 @@ class TeamClarificationType extends AbstractType
                     if ($problem->getAllowSubmit()) {
                         $problemName = sprintf('%s: %s', $problem->getShortname(),
                             $problem->getProblem()->getName());
-                        $subjects[$problemName] = sprintf('%d-%d', $contest->getCid(), $problem->getProbid());
+                        $subjects[$problemName] = sprintf('%s|%s', $contest->getExternalid(), $problem->getExternalId());
                     }
                 }
             }
