@@ -6,10 +6,8 @@
     <h2 id="contestnotstarted" class="text-center">
         Contest {{ contest | printContestStart }}
     </h2>
-    {% if clarifications is not empty %}
-        <h1 class="teamoverview">Clarifications</h1>
-        {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarifications} %}
-    {% endif %}
+
+    {% include 'team/partials/clarifications_team.html.twig' with {'always_display': false} %}
 {% else %}
 
     <div id="teamscoresummary">
@@ -30,26 +28,9 @@
 
             {% include 'team/partials/submission_list.html.twig' %}
         </div>
+
         <div class="col">
-            <h1 class="teamoverview">Clarifications</h1>
-            {% if clarifications is empty %}
-                <p class="nodata">No clarifications.</p>
-            {% else %}
-                {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarifications} %}
-            {% endif %}
-
-            <h1 class="teamoverview">Clarification Requests</h1>
-            {% if clarificationRequests is empty %}
-                <p class="nodata">No clarification request.</p>
-            {% else %}
-                {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarificationRequests} %}
-            {% endif %}
-
-            <div class="m-1">
-                <a href="{{ path('team_clarification_add') }}" class="btn btn-secondary btn-sm" data-ajax-modal data-ajax-modal-after="initModalClarificationPreviewAdd">
-                    Request clarification
-                </a>
-            </div>
+            {% include 'team/partials/clarifications_team.html.twig' with {'always_display': true} %}
         </div>
     </div>
 {% endif %}
