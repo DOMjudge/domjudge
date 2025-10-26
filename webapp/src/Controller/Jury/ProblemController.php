@@ -241,8 +241,9 @@ class ProblemController extends BaseController
     #[Route(path: '/problemset', name: 'jury_problemset')]
     public function problemsetAction(StatisticsService $stats): Response
     {
+        $teamId = $this->dj->getUser()->getTeam()?->getTeamid();
         return $this->render('jury/problemset.html.twig',
-            $this->dj->getTwigDataForProblemsAction($stats, forJury: true));
+            $this->dj->getTwigDataForProblemsAction($stats, teamId: $teamId, forJury: true));
     }
 
     #[Route(path: '/{probId<\d+>}/samples.zip', name: 'jury_problem_sample_zip')]
