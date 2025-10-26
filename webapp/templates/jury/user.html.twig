@@ -79,7 +79,7 @@
                     {% if user.team %}
                         <td class="teamid">
                             <a href="{{ path('jury_team', {'teamId': user.team.teamid}) }}">
-                                {{ user.team.effectiveName }} {{ user.team | entityIdBadge('t') }}
+                                {{ user.team.effectiveName }} {{ user.team | entityIdBadge }}
                             </a>
                         </td>
                     {% else %}

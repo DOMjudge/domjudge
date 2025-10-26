@@ -34,7 +34,7 @@
                             <div class="col-sm">
                                 From:
                                 {% if clar.from_team is defined %}
-                                    <a href="{{ path('jury_team', {teamId: clar.from_team.externalid}) }}">{{ clar.from_teamname }} {{ clar.from_team | entityIdBadge('t') }}</a>
+                                    <a href="{{ path('jury_team', {teamId: clar.from_team.externalid}) }}">{{ clar.from_teamname }} {{ clar.from_team | entityIdBadge }}</a>
                                 {% else %}
                                     Jury
                                     {% if clar.from_jurymember is defined %}
@@ -75,7 +75,7 @@
                         <div class="row">
                             <div class="col-sm">To:
                                 {% if clar.to_team is defined %}
-                                    <a href="{{ path('jury_team', {teamId: clar.to_team.externalid}) }}">{{ clar.to_teamname }} {{ clar.to_team | entityIdBadge('t') }}</a>
+                                    <a href="{{ path('jury_team', {teamId: clar.to_team.externalid}) }}">{{ clar.to_teamname }} {{ clar.to_team | entityIdBadge }}</a>
                                 {% elseif clar.from_team is defined %}
                                     Jury
                                 {% else %}

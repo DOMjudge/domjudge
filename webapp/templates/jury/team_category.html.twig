@@ -81,7 +81,7 @@
                     {% for team in teamCategory.teams %}
                         <tr>
                             <td style="text-align: right">
-                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team | entityIdBadge('t') }}</a>
+                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team | entityIdBadge }}</a>
                             </td>
                             <td>
                                 <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team.effectiveName }}</a>
