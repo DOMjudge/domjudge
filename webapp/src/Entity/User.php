@@ -73,7 +73,7 @@ class User extends BaseApiEntity implements
     )]
     #[OA\Property(nullable: true)]
     #[Serializer\Exclude]
-    private ?float $last_login = null;
+    private string|float|null $last_login = null;
 
     #[ORM\Column(
         type: 'decimal',
@@ -84,7 +84,7 @@ class User extends BaseApiEntity implements
     )]
     #[OA\Property(nullable: true)]
     #[Serializer\Exclude]
-    private ?float $last_api_login = null;
+    private string|float|null $last_api_login = null;
 
     #[ORM\Column(
         type: 'decimal',
@@ -95,7 +95,7 @@ class User extends BaseApiEntity implements
     )]
     #[OA\Property(nullable: true)]
     #[Serializer\Exclude]
-    private ?float $first_login = null;
+    private string|float|null $first_login = null;
 
     #[ORM\Column(nullable: true, options: ['comment' => 'Last IP address of successful login'])]
     #[OA\Property(nullable: true)]
@@ -228,13 +228,13 @@ class User extends BaseApiEntity implements
         return $this->email;
     }
 
-    public function setLastLogin(?float $lastLogin): User
+    public function setLastLogin(string|float|null $lastLogin): User
     {
         $this->last_login = $lastLogin;
         return $this;
     }
 
-    public function getLastLogin(): float|null
+    public function getLastLogin(): string|float|null
     {
         return $this->last_login;
     }
@@ -249,13 +249,13 @@ class User extends BaseApiEntity implements
         return $this->getLastLogin() ? new DateTime(Utils::absTime($this->getLastLogin())) : null;
     }
 
-    public function setLastApiLogin(?float $lastApiLogin): User
+    public function setLastApiLogin(string|float|null $lastApiLogin): User
     {
         $this->last_api_login = $lastApiLogin;
         return $this;
     }
 
-    public function getLastApiLogin(): float|null
+    public function getLastApiLogin(): string|float|null
     {
         return $this->last_api_login;
     }
@@ -270,13 +270,13 @@ class User extends BaseApiEntity implements
         return $this->getLastApiLogin() ? new DateTime(Utils::absTime($this->getLastApiLogin())) : null;
     }
 
-    public function setFirstLogin(?float $firstLogin): User
+    public function setFirstLogin(string|float|null $firstLogin): User
     {
         $this->first_login = $firstLogin;
         return $this;
     }
 
-    public function getFirstLogin(): float|null
+    public function getFirstLogin(): string|float|null
     {
         return $this->first_login;
     }

@@ -644,8 +644,8 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $runResult    = $request->request->get('runresult');
-        $startTime    = (float)$request->request->get('start_time');
-        $endTime      = (float)$request->request->get('end_time');
+        $startTime    = $request->request->get('start_time');
+        $endTime      = $request->request->get('end_time');
         $runTime      = $request->request->get('runtime');
         $outputRun    = $request->request->get('output_run');
         $outputDiff   = $request->request->get('output_diff');
@@ -926,8 +926,8 @@ class JudgehostController extends AbstractFOSRestController
         string  $hostname,
         string  $runResult,
         string  $runTime,
-        float   $startTime,
-        float   $endTime,
+        string  $startTime,
+        string  $endTime,
         string  $outputSystem,
         string  $outputError,
         string  $outputDiff,

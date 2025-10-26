@@ -83,7 +83,7 @@ class Contest extends BaseApiEntity implements
         options: ['comment' => 'Time contest becomes visible in team/public views', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private ?float $activatetime;
+    private string|float|null $activatetime;
 
     #[ORM\Column(
         type: 'decimal',
@@ -92,7 +92,7 @@ class Contest extends BaseApiEntity implements
         options: ['comment' => 'Time contest starts, submissions accepted', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private ?float $starttime = null;
+    private string|float|null $starttime = null;
 
     #[ORM\Column(options: [
         'comment' => 'If disabled, starttime is not used, e.g. to delay contest start',
@@ -109,7 +109,7 @@ class Contest extends BaseApiEntity implements
         options: ['comment' => 'Time scoreboard is frozen', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private ?float $freezetime = null;
+    private string|float|null $freezetime = null;
 
     #[ORM\Column(
         type: 'decimal',
@@ -118,7 +118,7 @@ class Contest extends BaseApiEntity implements
         options: ['comment' => 'Time after which no more submissions are accepted', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private ?float $endtime;
+    private string|float|null $endtime;
 
     #[ORM\Column(
         type: 'decimal',
@@ -128,7 +128,7 @@ class Contest extends BaseApiEntity implements
         options: ['comment' => 'Unfreeze a frozen scoreboard at this time', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private ?float $unfreezetime = null;
+    private string|float|null $unfreezetime = null;
 
     #[ORM\Column(
         type: 'decimal',
@@ -138,7 +138,7 @@ class Contest extends BaseApiEntity implements
         options: ['comment' => 'Time when contest was finalized, null if not yet', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private ?float $finalizetime = null;
+    private string|float|null $finalizetime = null;
 
     #[ORM\Column(
         type: 'text',
@@ -213,7 +213,7 @@ class Contest extends BaseApiEntity implements
         options: ['comment' => 'Time contest becomes invisible in team/public views', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private ?float $deactivatetime = null;
+    private string|float|null $deactivatetime = null;
 
     #[ORM\Column(
         length: 64,
@@ -513,7 +513,7 @@ class Contest extends BaseApiEntity implements
         return $this->activatetime === null ? null : (float)$this->activatetime;
     }
 
-    public function setStarttime(float $starttime): Contest
+    public function setStarttime(string|float $starttime): Contest
     {
         $this->starttime = $starttime;
         return $this;
@@ -581,7 +581,7 @@ class Contest extends BaseApiEntity implements
         return $this->finalizetime === null ? null : (float)$this->finalizetime;
     }
 
-    public function setFinalizetime(?float $finalizetimeString): Contest
+    public function setFinalizetime(string|float|null $finalizetimeString): Contest
     {
         $this->finalizetime = $finalizetimeString;
         return $this;
@@ -699,31 +699,31 @@ class Contest extends BaseApiEntity implements
         return $this->deactivatetimeString;
     }
 
-    public function setActivatetime(float $activatetime): Contest
+    public function setActivatetime(string|float|null $activatetime): Contest
     {
         $this->activatetime = $activatetime;
         return $this;
     }
 
-    public function setFreezetime(float $freezetime): Contest
+    public function setFreezetime(string|float $freezetime): Contest
     {
         $this->freezetime = $freezetime;
         return $this;
     }
 
-    public function setEndtime(float $endtime): Contest
+    public function setEndtime(string|float $endtime): Contest
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    public function setUnfreezetime(float $unfreezetime): Contest
+    public function setUnfreezetime(string|float $unfreezetime): Contest
     {
         $this->unfreezetime = $unfreezetime;
         return $this;
     }
 
-    public function setDeactivatetime(float $deactivatetime): Contest
+    public function setDeactivatetime(string|float $deactivatetime): Contest
     {
         $this->deactivatetime = $deactivatetime;
         return $this;
@@ -1042,7 +1042,7 @@ class Contest extends BaseApiEntity implements
             ($this->deactivatetime == null || $this->deactivatetime > time());
     }
 
-    public function getAbsoluteTime(?string $time_string): float|int|null
+    public function getAbsoluteTime(?string $time_string): string|float|int|null
     {
         if ($time_string === null) {
             return null;
@@ -1073,7 +1073,7 @@ class Contest extends BaseApiEntity implements
             } catch (Exception) {
                 return null;
             }
-            return (float)$date->format('U.v');
+            return $date->format('U.v');
         }
     }
 

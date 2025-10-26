@@ -31,7 +31,7 @@ class Rejudging
         scale: 9,
         options: ['comment' => 'Time rejudging started', 'unsigned' => true]
     )]
-    private float $starttime;
+    private string|float $starttime;
 
     #[ORM\Column(
         type: 'decimal',
@@ -40,7 +40,7 @@ class Rejudging
         nullable: true,
         options: ['comment' => 'Time rejudging ended, null = still busy', 'unsigned' => true]
     )]
-    private ?float $endtime = null;
+    private string|float|null $endtime = null;
 
     #[ORM\Column(options: ['comment' => 'Reason to start this rejudge'])]
     private string $reason;
@@ -107,24 +107,24 @@ class Rejudging
         return $this->rejudgingid;
     }
 
-    public function setStarttime(float $starttime): Rejudging
+    public function setStarttime(string|float $starttime): Rejudging
     {
         $this->starttime = $starttime;
         return $this;
     }
 
-    public function getStarttime(): float
+    public function getStarttime(): string|float
     {
         return $this->starttime;
     }
 
-    public function setEndtime(float $endtime): Rejudging
+    public function setEndtime(string|float $endtime): Rejudging
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    public function getEndtime(): float|null
+    public function getEndtime(): string|float|null
     {
         return $this->endtime;
     }

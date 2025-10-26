@@ -33,7 +33,7 @@ class RemovedInterval
         scale: 9,
         options: ['comment' => 'Initial time of removed interval', 'unsigned' => true]
     )]
-    private float $starttime;
+    private string|float $starttime;
 
     #[ORM\Column(
         type: 'decimal',
@@ -41,7 +41,7 @@ class RemovedInterval
         scale: 9,
         options: ['comment' => 'Final time of removed interval', 'unsigned' => true]
     )]
-    private float $endtime;
+    private string|float $endtime;
 
     #[ORM\Column(
         length: 64,
@@ -66,24 +66,24 @@ class RemovedInterval
         return $this->intervalid;
     }
 
-    public function setStarttime(float $starttime): RemovedInterval
+    public function setStarttime(string|float $starttime): RemovedInterval
     {
         $this->starttime = $starttime;
         return $this;
     }
 
-    public function getStarttime(): float
+    public function getStarttime(): string|float
     {
         return $this->starttime;
     }
 
-    public function setEndtime(float $endtime): RemovedInterval
+    public function setEndtime(string|float $endtime): RemovedInterval
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    public function getEndtime(): float
+    public function getEndtime(): string|float
     {
         return $this->endtime;
     }
@@ -95,7 +95,7 @@ class RemovedInterval
     {
         $this->starttimeString = $starttimeString;
         $date                  = new DateTime($starttimeString);
-        $this->starttime       = (float)$date->format('U.v');
+        $this->starttime       = $date->format('U.v');
 
         return $this;
     }
@@ -112,7 +112,7 @@ class RemovedInterval
     {
         $this->endtimeString = $endtimeString;
         $date                = new DateTime($endtimeString);
-        $this->endtime       = (float)$date->format('U.v');
+        $this->endtime       = $date->format('U.v');
 
         return $this;
     }

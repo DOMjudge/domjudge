@@ -47,7 +47,7 @@ class ExternalContestSource
         nullable: true,
         options: ['comment' => 'Time of last poll by event feed reader', 'unsigned' => true]
     )]
-    private ?float $lastPollTime = null;
+    private string|float|null $lastPollTime = null;
 
     #[ORM\Column(
         type: 'smallint',
@@ -139,12 +139,12 @@ class ExternalContestSource
         return $this;
     }
 
-    public function getLastPollTime(): float|null
+    public function getLastPollTime(): string|float|null
     {
         return $this->lastPollTime;
     }
 
-    public function setLastPollTime(?float $lastPollTime): ExternalContestSource
+    public function setLastPollTime(string|float|null $lastPollTime): ExternalContestSource
     {
         $this->lastPollTime = $lastPollTime;
         return $this;

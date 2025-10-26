@@ -49,7 +49,7 @@ class ScoreCache
             'default' => '0.000000000',
         ]
     )]
-    private float $solvetime_restricted = 0;
+    private string|float $solvetime_restricted = 0;
 
     #[ORM\Column(options: [
         'comment' => 'Runtime in milliseconds (restricted audience)',
@@ -83,7 +83,7 @@ class ScoreCache
             'default' => '0.000000000',
         ]
     )]
-    private float $solvetime_public = 0;
+    private string|float $solvetime_public = 0;
 
     #[ORM\Column(options: ['comment' => 'Runtime in milliseconds (public)', 'default' => 0])]
     private int $runtime_public = 0;
@@ -142,13 +142,13 @@ class ScoreCache
         return $this->is_correct_restricted;
     }
 
-    public function setSolvetimeRestricted(float $solvetimeRestricted): ScoreCache
+    public function setSolvetimeRestricted(string|float $solvetimeRestricted): ScoreCache
     {
         $this->solvetime_restricted = $solvetimeRestricted;
         return $this;
     }
 
-    public function getSolvetimeRestricted(): float
+    public function getSolvetimeRestricted(): string|float
     {
         return $this->solvetime_restricted;
     }
@@ -197,13 +197,13 @@ class ScoreCache
         return $this->is_correct_public;
     }
 
-    public function setSolvetimePublic(float $solvetimePublic): ScoreCache
+    public function setSolvetimePublic(string|float $solvetimePublic): ScoreCache
     {
         $this->solvetime_public = $solvetimePublic;
         return $this;
     }
 
-    public function getSolvetimePublic(): float
+    public function getSolvetimePublic(): string|float
     {
         return $this->solvetime_public;
     }
@@ -273,7 +273,7 @@ class ScoreCache
         return $restricted ? $this->getPendingRestricted() : $this->getPendingPublic();
     }
 
-    public function getSolveTime(bool $restricted): float
+    public function getSolveTime(bool $restricted): string|float
     {
         return $restricted ? $this->getSolvetimeRestricted() : $this->getSolvetimePublic();
     }

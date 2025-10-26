@@ -48,7 +48,7 @@ class JudgingRun extends BaseApiEntity
         options: ['comment' => 'Submission running time on this testcase']
     )]
     #[Serializer\Exclude]
-    private ?float $runtime = null;
+    private string|float|null $runtime = null;
 
     #[ORM\Column(
         type: 'decimal',
@@ -58,7 +58,7 @@ class JudgingRun extends BaseApiEntity
         options: ['comment' => 'Time run judging ended', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private ?float $endtime = null;
+    private string|float|null $endtime = null;
 
     #[ORM\Column(
         type: 'decimal',
@@ -68,7 +68,7 @@ class JudgingRun extends BaseApiEntity
         options: ['comment' => 'Time run judging started', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private ?float $startTime = null;
+    private string|float|null $startTime = null;
 
     #[ORM\ManyToOne(inversedBy: 'runs')]
     #[ORM\JoinColumn(name: 'judgingid', referencedColumnName: 'judgingid', onDelete: 'CASCADE')]
@@ -147,7 +147,7 @@ class JudgingRun extends BaseApiEntity
         return $this->runresult;
     }
 
-    public function setRuntime(float $runtime): JudgingRun
+    public function setRuntime(string|float $runtime): JudgingRun
     {
         $this->runtime = $runtime;
         return $this;
@@ -156,29 +156,29 @@ class JudgingRun extends BaseApiEntity
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('run_time')]
     #[Serializer\Type('float')]
-    public function getRuntime(): ?float
+    public function getRuntime(): string|float|null
     {
         return Utils::roundedFloat($this->runtime);
     }
 
-    public function setEndtime(float $endtime): JudgingRun
+    public function setEndtime(string|float $endtime): JudgingRun
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    public function setStarttime(float $startTime): JudgingRun
+    public function setStarttime(string|float $startTime): JudgingRun
     {
         $this->startTime = $startTime;
         return $this;
     }
 
-    public function getStarttime(): float|null
+    public function getStarttime(): string|float|null
     {
         return $this->startTime;
     }
 
-    public function getEndtime(): float|null
+    public function getEndtime(): string|float|null
     {
         return $this->endtime;
     }
