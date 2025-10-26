@@ -297,6 +297,14 @@ class ClarificationController extends AbstractRestController
             }
         }
 
+        // For non-API-reader users, only expose the problems after the contest has started.
+        // `WF Access Policy` allows for clarifications before the contest, but not to disclose the problem
+        // so referencing them in clarifications would violate referential integrity.
+        if (!$this->dj->checkrole('api_reader')) {
+            $queryBuilder->andWhere('c.starttime < :now OR clar.problem IS NULL')
+                ->setParameter('now', Utils::now());
+        }
+
         if ($request->query->has('problem')) {
             $queryBuilder
                 ->andWhere('clar.problem = :problem')
