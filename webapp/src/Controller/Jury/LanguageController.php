@@ -232,7 +232,7 @@ class LanguageController extends BaseController
         $language->setAllowSubmit($request->request->getBoolean('value'));
         $this->em->flush();
 
-        $this->dj->auditlog('language', $langId, 'set allow submit',
+        $this->dj->auditlog('language', $language->getExternalid(), 'set allow submit',
                                          $request->request->getBoolean('value') ? 'yes' : 'no');
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
@@ -256,7 +256,7 @@ class LanguageController extends BaseController
             $this->dj->unblockJudgeTasksForLanguage($language->getLangid());
         }
 
-        $this->dj->auditlog('language', $langId, 'set allow judge',
+        $this->dj->auditlog('language', $language->getExternalid(), 'set allow judge',
                                          $request->request->getBoolean('value') ? 'yes' : 'no');
         return $this->redirectToLocalReferrer(
             $router,
@@ -277,7 +277,7 @@ class LanguageController extends BaseController
         $language->setFilterCompilerFiles($enabled);
         $this->em->flush();
 
-        $this->dj->auditlog('language', $langId, 'set filter compiler flags',
+        $this->dj->auditlog('language', $language->getExternalid(), 'set filter compiler flags',
             $request->request->getBoolean('value') ? 'yes' : 'no');
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }

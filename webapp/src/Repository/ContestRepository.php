@@ -2,16 +2,16 @@
 
 namespace App\Repository;
 
-use App\Entity\Team;
+use App\Entity\Contest;
 use Doctrine\ORM\EntityRepository;
 
 /**
- * @extends EntityRepository<Team>
+ * @extends EntityRepository<Contest>
  */
-class TeamRepository extends EntityRepository
+class ContestRepository extends EntityRepository
 {
     /**
-     * @use FindByExternalidTrait<Team>
+     * @use FindByExternalidTrait<Contest>
      */
     use FindByExternalidTrait;
 }

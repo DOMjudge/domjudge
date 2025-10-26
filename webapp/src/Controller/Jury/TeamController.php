@@ -230,16 +230,16 @@ class TeamController extends BaseController
         ]);
     }
 
-    #[Route(path: '/{teamId<\d+>}', name: 'jury_team')]
+    #[Route(path: '/{teamId}', name: 'jury_team')]
     public function viewAction(
         Request $request,
-        int $teamId,
+        string $teamId,
         ScoreboardService $scoreboardService,
         SubmissionService $submissionService,
         #[MapQueryParameter]
-        ?int $cid = null,
+        ?string $cid = null,
     ): Response {
-        $team = $this->em->getRepository(Team::class)->find($teamId);
+        $team = $this->em->getRepository(Team::class)->findByExternalId($teamId);
         if (!$team) {
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
@@ -297,7 +297,7 @@ class TeamController extends BaseController
             }
             $restrictionText = implode(', ', $restrictionTexts);
         }
-        $restrictions->teamId = $teamId;
+        $restrictions->teamId = $team->getTeamid();
         [$submissions, $submissionCounts] =
             $submissionService->getSubmissionList(
                 $this->dj->getCurrentContests(honorCookie: true),
@@ -373,7 +373,7 @@ class TeamController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/add', name: 'jury_team_add')]
+    #[Route(path: '/add', name: 'jury_team_add', priority: 1)]
     public function addAction(Request $request): Response
     {
         $team = new Team();

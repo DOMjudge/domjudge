@@ -124,7 +124,7 @@ class LanguageController extends AbstractRestController
 
         $language->getCompileExecutable()->setImmutableExecutable($immutableExecutable);
         $this->em->flush();
-        $this->dj->auditlog('executable', $language->getLangid(), 'updated');
+        $this->dj->auditlog('executable', $language->getExternalid(), 'updated');
     }
 
     #[IsGranted('ROLE_ADMIN')]

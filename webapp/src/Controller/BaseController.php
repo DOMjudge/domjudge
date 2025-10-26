@@ -8,6 +8,7 @@ use App\Entity\CalculatedExternalIdBasedOnRelatedFieldInterface;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\ExternalIdFromInternalIdInterface;
+use App\Entity\HasExternalIdInterface;
 use App\Entity\Problem;
 use App\Entity\RankCache;
 use App\Entity\ScoreCache;
@@ -151,7 +152,12 @@ abstract class BaseController extends AbstractController
             }
         }
 
-        $this->dj->auditlog($auditLogType, $id, $isNewEntity ? 'added' : 'updated');
+        if ($entity instanceof HasExternalIdInterface) {
+            $dataid = $entity->getExternalId();
+        } else {
+            $dataid = $id;
+        }
+        $this->dj->auditlog($auditLogType, $dataid, $isNewEntity ? 'added' : 'updated');
     }
 
     /**
@@ -216,7 +222,12 @@ abstract class BaseController extends AbstractController
 
         // Add an audit log entry.
         $auditLogType = Utils::tableForEntity($entity);
-        $this->dj->auditlog($auditLogType, implode(', ', $primaryKeyData), 'deleted');
+        if ($entity instanceof HasExternalIdInterface) {
+            $dataid = $entity->getExternalId();
+        } else {
+            $dataid = implode(', ', $primaryKeyData);
+        }
+        $this->dj->auditlog($auditLogType, $dataid, 'deleted');
 
         // Trigger the delete event. We need to do this before deleting the entity to make
         // sure we can still find the entity in the table.

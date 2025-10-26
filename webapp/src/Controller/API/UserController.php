@@ -410,7 +410,7 @@ class UserController extends AbstractRestController
 
         $this->em->persist($user);
         $this->em->flush();
-        $this->dj->auditlog('user', $user->getUserid(), 'added');
+        $this->dj->auditlog('user', $user->getExternalid(), 'added');
 
         return $this->renderCreateData($request, $user, 'user', $user->getUserid());
     }

@@ -325,7 +325,7 @@ class JudgehostController extends BaseController
         $judgehost = $this->em->getRepository(Judgehost::class)->find($judgehostid);
         $judgehost->setEnabled(true);
         $this->em->flush();
-        $this->dj->auditlog('judgehost', $judgehost->getJudgehostid(), 'marked enabled');
+        $this->dj->auditlog('judgehost', (string)$judgehost->getJudgehostid(), 'marked enabled');
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_judgehosts'));
     }
 
@@ -337,7 +337,7 @@ class JudgehostController extends BaseController
         $judgehost = $this->em->getRepository(Judgehost::class)->find($judgehostid);
         $judgehost->setEnabled(false);
         $this->em->flush();
-        $this->dj->auditlog('judgehost', $judgehost->getJudgehostid(), 'marked disabled');
+        $this->dj->auditlog('judgehost', (string)$judgehost->getJudgehostid(), 'marked disabled');
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_judgehosts'));
     }
 
