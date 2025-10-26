@@ -152,7 +152,7 @@ class DOMJudgeService
         }
         $now = Utils::now();
         $qb  = $this->em->createQueryBuilder();
-        $qb->select('c')->from(Contest::class, 'c', 'c.cid');
+        $qb->select('c')->from(Contest::class, 'c', 'c.externalid');
         if (isset($onlyOfTeam)) {
             $qb->leftJoin('c.teams', 'ct')
                 ->leftJoin('c.team_categories', 'tc')
@@ -509,20 +509,16 @@ class DOMJudgeService
      */
     public function auditlog(
         string $datatype,
-        mixed $dataid,
+        string|null $dataid,
         string $action,
         mixed $extraInfo = null,
         ?string $forceUsername = null,
-        string|int|null $cid = null
+        string|null $cid = null
     ): void {
         if (!empty($forceUsername)) {
             $user = $forceUsername;
         } else {
             $user = $this->getUser() ? $this->getUser()->getUsername() : null;
-        }
-
-        if (gettype($cid) == 'string') {
-            $cid = (int) $cid;
         }
 
         $auditLog = new AuditLog();

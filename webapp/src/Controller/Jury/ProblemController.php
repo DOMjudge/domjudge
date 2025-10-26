@@ -433,10 +433,10 @@ class ProblemController extends BaseController
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    #[Route(path: '/{probId<\d+>}', name: 'jury_problem')]
-    public function viewAction(Request $request, SubmissionService $submissionService, int $probId): Response
+    #[Route(path: '/{probId}', name: 'jury_problem')]
+    public function viewAction(Request $request, SubmissionService $submissionService, string $probId): Response
     {
-        $problem = $this->em->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->findByExternalId($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
@@ -637,7 +637,7 @@ class ProblemController extends BaseController
                             }
                         }
 
-                        $this->dj->auditlog('testcase', $probId, 'updated',
+                        $this->dj->auditlog('testcase', $problem->getExternalid(), 'updated',
                                             sprintf('%s rank %d', $type, $rank));
 
                         $message = sprintf('Updated %s for testcase %d with file %s (%s)',
@@ -739,7 +739,7 @@ class ProblemController extends BaseController
                 }
 
                 $this->em->persist($newTestcase);
-                $this->dj->auditlog('testcase', $probId, 'added', sprintf("rank %d", $maxrank));
+                $this->dj->auditlog('testcase', $problem->getExternalid(), 'added', sprintf("rank %d", $maxrank));
 
                 $inFile  = $request->files->get('add_input');
                 $outFile = $request->files->get('add_output');
@@ -866,7 +866,7 @@ class ProblemController extends BaseController
                 $other->setRank($currentRank);
             });
 
-            $this->dj->auditlog('testcase', $probId, 'switch rank',
+            $this->dj->auditlog('testcase', $problem->getExternalid(), 'switch rank',
                                              sprintf("%d <=> %d", $current->getRank(), $other->getRank()));
         }
 
@@ -981,7 +981,7 @@ class ProblemController extends BaseController
                 if ($this->importProblemService->importZippedProblem(
                     $zip, $clientName, $problem, $contest, $messages
                 )) {
-                    $this->dj->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
+                    $this->dj->auditlog('problem', $problem->getExternalid(), 'upload zip', $clientName);
                 } else {
                     $this->postMessages($messages);
                     return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
@@ -1220,7 +1220,7 @@ class ProblemController extends BaseController
         }
         $this->em->flush();
 
-        $id = [$contestProblem->getCid(), $contestProblem->getProbid()];
+        $id = [$contestProblem->getExternalId(), $contestProblem->getExternalId()];
         $this->dj->auditlog('contest_problem', implode(', ', $id), $label, $value ? 'yes' : 'no');
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_problems'));
     }

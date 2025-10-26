@@ -894,7 +894,7 @@ class ImportExportService
         foreach ($allCategories as $category) {
             $this->em->persist($category);
             $this->em->flush();
-            $this->dj->auditlog('team_category', $category->getCategoryid(), 'replaced',
+            $this->dj->auditlog('team_category', $category->getExternalid(), 'replaced',
                 'imported from tsv / json');
         }
 
@@ -1004,7 +1004,7 @@ class ImportExportService
         foreach ($allOrganizations as $organization) {
             $this->em->persist($organization);
             $this->em->flush();
-            $this->dj->auditlog('team_affiliation', $organization->getAffilid(), 'replaced',
+            $this->dj->auditlog('team_affiliation', $organization->getExternalid(), 'replaced',
                 'imported from tsv / json');
         }
 
@@ -1368,21 +1368,21 @@ class ImportExportService
             $this->em->persist($affiliation);
             $this->em->flush();
             $this->dj->auditlog('team_affiliation',
-                $affiliation->getAffilid(),
+                $affiliation->getExternalid(),
                 'added', 'imported from tsv / json');
         }
 
         foreach ($createdCategories as $category) {
             $this->em->persist($category);
             $this->em->flush();
-            $this->dj->auditlog('team_category', $category->getCategoryid(),
+            $this->dj->auditlog('team_category', $category->getExternalid(),
                                     'added', 'imported from tsv');
         }
 
         foreach ($allTeams as $team) {
             $this->em->persist($team);
             $this->em->flush();
-            $this->dj->auditlog('team', $team->getTeamid(), 'replaced', 'imported from tsv');
+            $this->dj->auditlog('team', $team->getExternalid(), 'replaced', 'imported from tsv');
         }
 
         if ($contest = $this->dj->getCurrentContest()) {
@@ -1479,7 +1479,7 @@ class ImportExportService
                             ->setExternalid((string)$teamId)
                             ->setName($teamId . ' - auto-create during import');
                         $this->em->persist($team);
-                        $this->dj->auditlog('team', $team->getTeamid(),
+                        $this->dj->auditlog('team', $team->getExternalid(),
                             'added', 'imported from tsv');
                     }
                 }
@@ -1529,14 +1529,15 @@ class ImportExportService
         $this->em->flush();
 
         foreach ($allUsers as $user) {
-            $this->dj->auditlog('user', $user->getUserid(), 'replaced', 'imported from tsv');
+            $this->dj->auditlog('user', $user->getExternalid(), 'replaced', 'imported from tsv');
         }
 
         if ($contest = $this->dj->getCurrentContest()) {
             foreach ($newTeams as $newTeam) {
+                /** @var Team $team */
                 $team = $newTeam['team'];
                 $action = $newTeam['action'];
-                $this->dj->auditlog('team', $team->getTeamid(), 'replaced',
+                $this->dj->auditlog('team', $team->getExternalid(), 'replaced',
                     'imported from tsv, autocreated for judge');
                 $this->eventLogService->log('team', $team->getTeamid(), $action, $contest->getCid());
             }

@@ -2,16 +2,16 @@
 
 namespace App\Repository;
 
-use App\Entity\Team;
+use App\Entity\User;
 use Doctrine\ORM\EntityRepository;
 
 /**
- * @extends EntityRepository<Team>
+ * @extends EntityRepository<User>
  */
-class TeamRepository extends EntityRepository
+class UserRepository extends EntityRepository
 {
     /**
-     * @use FindByExternalidTrait<Team>
+     * @use FindByExternalidTrait<User>
      */
     use FindByExternalidTrait;
 }

@@ -67,7 +67,7 @@ class ScoreboardController extends BaseController
         }
 
         $team = $this->em->getRepository(Team::class)->findByExternalId($teamId);
-        if ($team && $team->getCategory() && !$team->getCategory()->getVisible() && $teamId !== $this->dj->getUser()->getTeamId()) {
+        if ($team && $team->getCategory() && !$team->getCategory()->getVisible() && $teamId !== $this->dj->getUser()->getTeam()->getExternalid()) {
             $team = null;
         }
         $showFlags        = (bool)$this->config->get('show_flags');
