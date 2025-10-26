@@ -205,14 +205,24 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     /**
      * Print a time formatted as specified. The format is according to date().
      * @param Contest|null $contest If given, print time relative to that contest start.
+     * @param bool $maskOutsideContest When true and contest is given replace time with before/after.
      */
-    public function printtime(string|float|null $datetime, ?string $format = null, ?Contest $contest = null): string
+    public function printtime(string|float|null $datetime, ?string $format = null, ?Contest $contest = null, bool $maskOutsideContest = true): string
     {
         if ($datetime === null) {
             $datetime = Utils::now();
         }
         if ($contest !== null && $this->config->get('show_relative_time')) {
             $relativeTime = $contest->getContestTime((float)$datetime);
+            if ($maskOutsideContest) {
+                if ($relativeTime < 0) {
+                    return "Before contest";
+                }
+                if ($relativeTime > $contest->getContestTime($contest->getEndtime())) {
+                    // The case where it would be exactly at EndTime is important to display
+                    return "After contest";
+                }
+            }
             $sign         = ($relativeTime < 0 ? -1 : 1);
             $relativeTime *= $sign;
             // We're not showing seconds, while the last minute before
