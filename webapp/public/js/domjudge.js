@@ -1302,8 +1302,8 @@ function initScoreboardSubmissions() {
         const linkEl = e.currentTarget;
         e.preventDefault();
         const $modal = $('[data-submissions-modal] .modal').clone();
-        const $teamEl = $(`[data-team-external-id="${linkEl.dataset.teamId}"]`);
-        const $problemEl = $(`[data-problem-external-id="${linkEl.dataset.problemId}"]`);
+        const $teamEl = $(`tr[data-team-id="${linkEl.dataset.teamId}"]`);
+        const $problemEl = $(`th[data-problem-id="${linkEl.dataset.problemId}"]`);
         $modal.find('[data-team]').html($teamEl.data('teamName'));
         $modal.find('[data-problem-badge]').html($problemEl.data('problemBadge'));
         $modal.find('[data-problem-name]').html($problemEl.data('problemName'));
