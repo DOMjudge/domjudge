@@ -124,8 +124,8 @@ class TeamCategoryController extends BaseController
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    #[Route(path: '/{categoryId<\d+>}', name: 'jury_team_category')]
-    public function viewAction(Request $request, SubmissionService $submissionService, int $categoryId): Response
+    #[Route(path: '/{categoryId}', name: 'jury_team_category')]
+    public function viewAction(Request $request, SubmissionService $submissionService, string $categoryId): Response
     {
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$teamCategory) {
@@ -256,7 +256,7 @@ class TeamCategoryController extends BaseController
         if (!$category) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
-        $contestId = $this->dj->getCurrentContest()->getCid();
+        $contestId = $this->dj->getCurrentContest()->getExternalid();
         $this->judgeRemaining(contestId: $contestId, categoryId: $categoryId);
         return $this->redirectToRoute('jury_team_category', ['categoryId' => $categoryId]);
     }
