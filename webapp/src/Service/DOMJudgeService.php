@@ -114,6 +114,8 @@ class DOMJudgeService
         protected string $projectDir,
         #[Autowire('%domjudge.vendordir%')]
         protected string $vendorDir,
+        #[Autowire('%domjudge.nodemodulesdir%')]
+        protected string $nodeModulesDir,
         #[Autowire('%domjudge.version%')]
         protected readonly string $domjudgeVersion,
         #[Autowire('%domjudge.installmethod%')]
@@ -1571,8 +1573,9 @@ class DOMJudgeService
             if ($filepath === false) {
                 throw new Exception("Could not find (possibly symlinked) file: " . $file . ", at: " . $publicPath);
             }
-            if (!str_starts_with($filepath, $publicPath) &&
-                !str_starts_with($filepath, $this->vendorDir)
+            if (!(str_starts_with($filepath, $publicPath) ||
+                  str_starts_with($filepath, $this->vendorDir) ||
+                  str_starts_with($filepath, $this->nodeModulesDir))
             ) {
                 // Path outside of known good dirs: path traversal
                 continue;

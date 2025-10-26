@@ -6,7 +6,7 @@ export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
             docs install-docs inplace-install inplace-uninstall maintainer-conf \
-            maintainer-install composer-dependencies composer-dependencies-dev
+            maintainer-install dependencies dependencies-dev
 
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
@@ -54,7 +54,7 @@ docs: paths.mk config
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
-dist: configure composer-dependencies
+dist: configure dependencies
 
 domserver-configure:
 ifneq "$(DOMSERVER_BUILD_ENABLED)" "yes"
@@ -98,8 +98,8 @@ dist:                       SUBDIRS=        lib sql       misc-tools
 clean:                      SUBDIRS=etc doc lib sql judge misc-tools webapp
 distclean:                  SUBDIRS=etc doc lib sql judge misc-tools webapp
 maintainer-clean:           SUBDIRS=etc doc lib sql judge misc-tools webapp
-composer-dependencies:      SUBDIRS=                                 webapp
-composer-dependencies-dev:  SUBDIRS=                                 webapp
+dependencies:               SUBDIRS=                                 webapp
+dependencies-dev:           SUBDIRS=                                 webapp
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(domserver_dirs))
@@ -191,8 +191,8 @@ paths.mk:
 	@exit 1
 
 # Configure for running in source tree, not meant for normal use:
-maintainer-conf: inplace-conf-common composer-dependencies-dev
-inplace-conf: inplace-conf-common composer-dependencies
+maintainer-conf: inplace-conf-common dependencies-dev
+inplace-conf: inplace-conf-common dependencies
 inplace-conf-common: dist
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
@@ -385,5 +385,4 @@ clean-autoconf:
 .PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
         $(addprefix inplace-,conf conf-common install uninstall) \
         $(addprefix maintainer-,conf install) clean-autoconf config distdocs \
-        composer-dependencies composer-dependencies-dev \
-        coverity-conf coverity-build
+        dependencies dependencies-dev coverity-conf coverity-build

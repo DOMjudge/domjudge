@@ -11,6 +11,8 @@ SUBDIRS = config
 
 domserver: composer-dump-autoload
 
+dependencies: composer-dependencies node-dependencies
+
 # Install PHP dependencies
 composer-dependencies:
 ifeq (, $(shell command -v composer 2> /dev/null))
@@ -19,6 +21,8 @@ endif
 # We use --no-scripts here because at this point the autoload.php file is
 # not generated yet, which is needed to run the post-install scripts.
 	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o -a --no-scripts --no-plugins
+
+dependencies-dev: composer-dependencies-dev node-dependencies
 
 composer-dependencies-dev:
 	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
@@ -35,6 +39,13 @@ vendor/autoload_runtime.php:
 
 composer-dump-autoload-dev:
 	composer $(subst 1,-q,$(QUIET)) dump-autoload
+
+node-dependencies:
+ifeq (, $(shell command -v yarn || command -v yarnpkg 2> /dev/null))
+	$(error "neither 'yarnpkg' nor 'yarn' command found in $(PATH), install it via your package manager or https://yarnpkg.com/cli/node")
+endif
+	@YARN_CMD=$(shell command -v yarn || command -v yarnpkg); \
+  $$YARN_CMD install
 
 # Run Symfony in dev mode (for maintainer-mode):
 .env.local:
@@ -58,7 +69,7 @@ install-domserver:
 # This must be done first to install with the rest.
 	$(MAKE) copy-bundle-assets
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
-	for d in bin config migrations public resources src templates tests vendor; do \
+	for d in bin config migrations public resources src templates tests vendor node_modules; do \
 		$(call install_tree,$(DESTDIR)$(domserver_webappdir),$$d) ; \
 	done
 # Add Symlink to Symfony console that is in the standard path
@@ -78,5 +89,5 @@ maintainer-clean-l:
 		done ; \
 	done
 
-.PHONY: composer-dump-autoload composer-dump-autoload-dev \
-        copy-bundle-assets
+.PHONY: composer-dump-autoload composer-dump-autoload-dev copy-bundle-assets \
+        composer-dependencies composer-dependencies-dev node-dependencies
