@@ -9,6 +9,7 @@ parameters:
     domjudge.libdir: @domserver_libdir@
     domjudge.sqldir: @domserver_sqldir@
     domjudge.vendordir: @domserver_webappdir@/vendor
+    domjudge.nodemodulesdir: @domserver_webappdir@/node_modules
     domjudge.logdir: @domserver_logdir@
     domjudge.rundir: @domserver_rundir@
     domjudge.tmpdir: @domserver_tmpdir@
