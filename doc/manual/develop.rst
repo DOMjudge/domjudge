@@ -41,7 +41,7 @@ already listed under
 
   sudo apt install autoconf automake bats \
     python3-sphinx python3-sphinx-rtd-theme fontconfig python3-yaml \
-    latexmk texlive-latex-recommended texlive-latex-extra tex-gyre
+    latexmk yarnpkg texlive-latex-recommended texlive-latex-extra tex-gyre
 
 For Fedora use::
 

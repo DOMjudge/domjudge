@@ -12,7 +12,7 @@ SUBDIRS = config
 domserver: composer-dump-autoload
 
 # Install PHP dependencies
-composer-dependencies:
+composer-dependencies: node-dependencies
 ifeq (, $(shell command -v composer 2> /dev/null))
 	$(error "'composer' command not found in $(PATH), install it via your package manager or https://getcomposer.org/download/")
 endif
@@ -20,7 +20,7 @@ endif
 # not generated yet, which is needed to run the post-install scripts.
 	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o -a --no-scripts --no-plugins
 
-composer-dependencies-dev:
+composer-dependencies-dev: node-dependencies
 	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
 
 # Dump autoload dependencies (including plugins)
@@ -35,6 +35,13 @@ vendor/autoload_runtime.php:
 
 composer-dump-autoload-dev:
 	composer $(subst 1,-q,$(QUIET)) dump-autoload
+
+node-dependencies:
+ifeq (, $(shell command -v yarn || command -v yarnpkg 2> /dev/null))
+	$(error "neither 'yarnpkg' nor 'yarn' command found in $(PATH), install it via your package manager or https://yarnpkg.com/cli/node")
+endif
+	@YARN_CMD=$(shell command -v yarn || command -v yarnpkg); \
+  $$YARN_CMD install
 
 # Run Symfony in dev mode (for maintainer-mode):
 .env.local:

@@ -28,6 +28,13 @@ composer install --no-scripts |tee "$ARTIFACTS"/composer_out.txt
 cd ..
 section_end
 
+section_start "Install JS frontend dependencies"
+cd webapp
+apt-get update; apt-get install -y yarnpkg
+yarnpkg install
+cd ..
+section_end
+
 section_start "Set simple admin password"
 echo "password" > ./etc/initial_admin_password.secret
 echo "default login admin password password" > ~/.netrc
