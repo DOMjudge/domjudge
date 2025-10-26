@@ -333,7 +333,7 @@ class LanguageController extends BaseController
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
-        $contestId = $this->dj->getCurrentContest()->getCid();
+        $contestId = $this->dj->getCurrentContest()->getExternalid();
         $this->judgeRemaining(contestId: $contestId, langId: $langId);
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }

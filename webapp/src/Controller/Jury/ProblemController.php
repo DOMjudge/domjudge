@@ -525,8 +525,8 @@ class ProblemController extends BaseController
         return $this->render('jury/problem.html.twig', $data);
     }
 
-    #[Route(path: '/{probId<\d+>}/statement', name: 'jury_problem_statement')]
-    public function viewTextAction(int $probId): StreamedResponse
+    #[Route(path: '/{probId}/statement', name: 'jury_problem_statement')]
+    public function viewTextAction(string $probId): StreamedResponse
     {
         $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
@@ -1183,7 +1183,7 @@ class ProblemController extends BaseController
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
-        $contestId = $this->dj->getCurrentContest()->getCid();
+        $contestId = $this->dj->getCurrentContest()->getExternalid();
         $this->judgeRemaining(contestId: $contestId, probId: $probId);
         return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
     }

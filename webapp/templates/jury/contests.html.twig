@@ -19,11 +19,11 @@
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-header">
-                        {{ contest.name }} ({{ contest.shortname }} - c{{ contest.cid }})
+                        {{ contest.name }} ({{ contest.shortname }} - {{ contest.externalid }})
                         {% if contest.locked %}
                             <i class="fas fa-lock"></i>
                         {% endif %}
-                        <a class="fa-regular fa-folder-open" style="float: right; color: black" href={{ path('jury_contest', {'contestId': contest.cid}) }}></a>
+                        <a class="fa-regular fa-folder-open" style="float: right; color: black" href={{ path('jury_contest', {'contestId': contest.externalid}) }}></a>
                     </div>
                     <div class="card-body">
                         {% if not contest.starttimeEnabled and contest.finalizetime is not empty %}
@@ -46,10 +46,10 @@
                                         <td>
                                             {% if data.show_button %}
                                                 {% set button_label =  type ~ " now" %}
-                                                {{ button(path('jury_contest_donow', {'contestId': contest.cid, 'time': type}), button_label, 'primary btn-sm') }}
+                                                {{ button(path('jury_contest_donow', {'contestId': contest.externalid, 'time': type}), button_label, 'primary btn-sm') }}
                                             {% endif %}
                                             {% if data.extra_button is defined %}
-                                                {{ button(path('jury_contest_donow', {'contestId': contest.cid, 'time': data.extra_button.type}), data.extra_button.label, 'primary btn-sm') }}
+                                                {{ button(path('jury_contest_donow', {'contestId': contest.externalid, 'time': data.extra_button.type}), data.extra_button.label, 'primary btn-sm') }}
                                             {% endif %}
                                         </td>
                                     {% endif %}
@@ -73,7 +73,7 @@
                     <i>{{ upcoming_contest.name }} ({{ upcoming_contest.shortname }})</i>;
                     active from {{ upcoming_contest.activatetime | printtime('D d M Y H:i:s T') }}
                 </p>
-                {{ button(path('jury_contest_donow', {'contestId': upcoming_contest.cid, 'time': 'activate'}), 'Activate now', 'primary') }}
+                {{ button(path('jury_contest_donow', {'contestId': upcoming_contest.externalid, 'time': 'activate'}), 'Activate now', 'primary') }}
             </div>
         {% endif %}
     {% endfor %}
