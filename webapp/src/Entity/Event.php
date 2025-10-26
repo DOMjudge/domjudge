@@ -29,7 +29,7 @@ class Event
         scale: 9,
         options: ['comment' => 'When the event occurred', 'unsigned' => true]
     )]
-    private float $eventtime;
+    private string|float $eventtime;
 
     #[ORM\Column(length: 32, options: ['comment' => 'API endpoint associated to this entry'])]
     private string $endpointtype;
@@ -64,13 +64,13 @@ class Event
         return $this->eventid;
     }
 
-    public function setEventtime(float $eventtime): Event
+    public function setEventtime(string|float $eventtime): Event
     {
         $this->eventtime = $eventtime;
         return $this;
     }
 
-    public function getEventtime(): float
+    public function getEventtime(): string|float
     {
         return $this->eventtime;
     }
