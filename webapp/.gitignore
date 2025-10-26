@@ -8,6 +8,7 @@
 /var/log/*
 !var/log/.gitkeep
 /vendor/
+/node_modules/
 
 ###> phpunit/phpunit ###
 /phpunit.xml

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "88f6e44e48730e8efd3a8ccaeefb5ed7",
+    "content-hash": "629e7d2150fc6058701b85863ce56292",
     "packages": [
         {
             "name": "apalfrey/select2-bootstrap-5-theme",
@@ -1853,15 +1853,6 @@
             "time": "2025-01-24T11:45:48+00:00"
         },
         {
-            "name": "eligrey/filesaver",
-            "version": "2.0.4",
-            "dist": {
-                "type": "zip",
-                "url": "https://github.com/eligrey/FileSaver.js/archive/v2.0.4.zip"
-            },
-            "type": "library"
-        },
-        {
             "name": "enshrined/svg-sanitize",
             "version": "0.22.0",
             "source": {
@@ -3090,49 +3081,6 @@
             "time": "2024-03-31T07:05:07+00:00"
         },
         {
-            "name": "mbostock/d3",
-            "version": "v3.5.17",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/mbostock/d3.git",
-                "reference": "9cc9a875e636a1dcf36cc1e07bdf77e1ad6e2c74"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/mbostock/d3/zipball/9cc9a875e636a1dcf36cc1e07bdf77e1ad6e2c74",
-                "reference": "9cc9a875e636a1dcf36cc1e07bdf77e1ad6e2c74",
-                "shasum": ""
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Mike Bostock",
-                    "homepage": "http://bost.ocks.org/mike"
-                }
-            ],
-            "description": "A JavaScript visualization library for HTML and SVG.",
-            "homepage": "http://d3js.org/",
-            "keywords": [
-                "W3C",
-                "animation",
-                "canvas",
-                "dom",
-                "svg",
-                "visualization"
-            ],
-            "support": {
-                "API": "https://github.com/mbostock/d3/wiki/API-Reference",
-                "issues": "https://github.com/mbostock/d3/issues",
-                "source": "https://github.com/mbostock/d3",
-                "wiki": "https://github.com/mbostock/d3/wiki"
-            },
-            "time": "2016-05-05T00:29:22+00:00"
-        },
-        {
             "name": "monolog/monolog",
             "version": "3.9.0",
             "source": {
@@ -3625,59 +3573,6 @@
                 "source": "https://github.com/nikic/PHP-Parser/tree/v5.5.0"
             },
             "time": "2025-05-31T08:24:38+00:00"
-        },
-        {
-            "name": "novus/nvd3",
-            "version": "v1.8.6",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/novus/nvd3.git",
-                "reference": "d273ea52d91b482d044f8cef1e921256f2bfddcd"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/novus/nvd3/zipball/d273ea52d91b482d044f8cef1e921256f2bfddcd",
-                "reference": "d273ea52d91b482d044f8cef1e921256f2bfddcd",
-                "shasum": ""
-            },
-            "require": {
-                "mbostock/d3": "@stable"
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "Apache-2.0"
-            ],
-            "authors": [
-                {
-                    "name": "Bob Monteverde"
-                },
-                {
-                    "name": "Tyler Wolf"
-                },
-                {
-                    "name": "Robin Hu"
-                },
-                {
-                    "name": "Frank Shao"
-                },
-                {
-                    "name": "liquidpele"
-                }
-            ],
-            "description": "A reusable charting library written in d3.js",
-            "homepage": "https://github.com/novus/nvd3",
-            "keywords": [
-                "chart",
-                "d3",
-                "graph",
-                "nvd3"
-            ],
-            "support": {
-                "issues": "https://github.com/novus/nvd3/issues",
-                "source": "https://github.com/novus/nvd3/tree/v1.8.6"
-            },
-            "time": "2017-08-24T01:23:44+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -4580,48 +4475,6 @@
                 "source": "https://github.com/Riverline/multipart-parser/tree/2.2.0"
             },
             "time": "2025-04-29T08:38:14+00:00"
-        },
-        {
-            "name": "select2/select2",
-            "version": "4.0.13",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/select2/select2.git",
-                "reference": "45f2b83ceed5231afa7b3d5b12b58ad335edd82e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/select2/select2/zipball/45f2b83ceed5231afa7b3d5b12b58ad335edd82e",
-                "reference": "45f2b83ceed5231afa7b3d5b12b58ad335edd82e",
-                "shasum": ""
-            },
-            "type": "component",
-            "extra": {
-                "component": {
-                    "files": [
-                        "dist/js/select2.js",
-                        "dist/js/i18n/*.js",
-                        "dist/css/select2.css"
-                    ],
-                    "styles": [
-                        "dist/css/select2.css"
-                    ],
-                    "scripts": [
-                        "dist/js/select2.js"
-                    ]
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "Select2 is a jQuery based replacement for select boxes.",
-            "homepage": "https://select2.org/",
-            "support": {
-                "issues": "https://github.com/select2/select2/issues",
-                "source": "https://github.com/select2/select2/tree/4.0.13"
-            },
-            "time": "2020-01-28T05:01:22+00:00"
         },
         {
             "name": "sentry/sentry",
