@@ -48,21 +48,21 @@
                         {% endif %}
                         {% if executable.type == 'compare' %}
                             {% for problem in executable.problemsCompare %}
-                                <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">
-                                    p{{ problem.probid }} {{ problem | problemBadgeForContest }}
+                                <a href="{{ path('jury_problem', {'probId': problem.externalid}) }}">
+                                    {{ problem.externalid }} {{ problem | problemBadgeForContest }}
                                 </a>
                                 {% set used = true %}
                             {% endfor %}
                         {% elseif executable.type == 'run' %}
                             {% for problem in executable.problemsRun %}
-                                <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">
-                                    p{{ problem.probid }} {{ problem | problemBadgeForContest }}
+                                <a href="{{ path('jury_problem', {'probId': problem.externalid}) }}">
+                                    {{ problem.externalid }} {{ problem | problemBadgeForContest }}
                                 </a>
                                 {% set used = true %}
                             {% endfor %}
                         {% elseif executable.type == 'compile' %}
                             {% for language in executable.languages %}
-                                <a href="{{ path('jury_language', {'langId': language.langid}) }}">
+                                <a href="{{ path('jury_language', {'langId': language.externalid}) }}">
                                     {{ language | entityIdBadge }}
                                 </a>
                                 {% set used = true %}
