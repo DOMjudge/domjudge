@@ -99,11 +99,11 @@ class BalloonService
 
         $query = $em->createQueryBuilder()
             ->select('b', 's.submittime', 'p.probid',
-                't.teamid', 's', 't', 't.location',
-                'c.categoryid AS categoryid', 'c.name AS catname',
-                'co.cid', 'co.shortname',
+                't.externalid as teamid', 's', 't', 't.location',
+                'c.externalid AS categoryid', 'c.name AS catname',
+                'co.externalid as cid', 'co.shortname',
                 'cp.shortname AS probshortname', 'cp.color',
-                'a.affilid AS affilid', 'a.shortname AS affilshort')
+                'a.externalid AS affilid', 'a.shortname AS affilshort')
             ->from(Balloon::class, 'b')
             ->leftJoin('b.submission', 's')
             ->leftJoin('b.problem', 'p')
