@@ -254,7 +254,7 @@ class ClarificationController extends AbstractRestController
         $this->em->persist($clarification);
         $this->em->flush();
 
-        $this->dj->auditlog('clarification', $clarification->getClarid(), 'added', null, null, $contestId);
+        $this->dj->auditlog('clarification', $clarification->getExternalid(), 'added', null, null, $contest->getExternalid());
         $this->eventLogService->log('clarification', $clarification->getClarid(), 'create', $contestId);
 
         // Refresh the clarification since the event log service will have unloaded it.

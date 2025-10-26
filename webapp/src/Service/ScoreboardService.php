@@ -612,7 +612,7 @@ class ScoreboardService
     {
         Utils::extendMaxExecutionTime(300);
 
-        $this->dj->auditlog('contest', $contest->getCid(), 'refresh scoreboard cache');
+        $this->dj->auditlog('contest', $contest->getExternalid(), 'refresh scoreboard cache');
 
         if ($progressReporter === null) {
             $progressReporter = static function (int $progress, string $log, ?string $message = null): void {

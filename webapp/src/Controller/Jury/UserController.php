@@ -175,10 +175,10 @@ class UserController extends BaseController
         ]);
     }
 
-    #[Route(path: '/{userId<\d+>}', name: 'jury_user')]
-    public function viewAction(Request $request, int $userId, SubmissionService $submissionService): Response
+    #[Route(path: '/{userId}', name: 'jury_user')]
+    public function viewAction(Request $request, string $userId, SubmissionService $submissionService): Response
     {
-        $user = $this->em->getRepository(User::class)->find($userId);
+        $user = $this->em->getRepository(User::class)->findByExternalId($userId);
         if (!$user) {
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
@@ -345,7 +345,7 @@ class UserController extends BaseController
                 if ($doit) {
                     $newpass = Utils::generatePassword(false);
                     $user->setPlainPassword($newpass);
-                    $this->dj->auditlog('user', $user->getUserid(), 'set password');
+                    $this->dj->auditlog('user', $user->getExternalid(), 'set password');
                     $changes[] = [
                             'type' => $role,
                             'fullname' => $user->getName(),

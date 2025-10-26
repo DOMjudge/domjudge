@@ -305,10 +305,10 @@ class ContestController extends BaseController
         ]);
     }
 
-    #[Route(path: '/{contestId<\d+>}', name: 'jury_contest')]
-    public function viewAction(Request $request, int $contestId): Response
+    #[Route(path: '/{contestId}', name: 'jury_contest')]
+    public function viewAction(Request $request, string $contestId): Response
     {
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
@@ -401,7 +401,7 @@ class ContestController extends BaseController
         }
         $this->em->flush();
 
-        $this->dj->auditlog('contest', $contestId, $label, $value ? 'yes' : 'no');
+        $this->dj->auditlog('contest', $contest->getExternalid(), $label, $value ? 'yes' : 'no');
         return $this->redirectToLocalReferrer(
             $router,
             $request,
@@ -810,7 +810,7 @@ class ContestController extends BaseController
             if ($form->isSubmitted() && $form->isValid()) {
                 $contest->setFinalizetime(Utils::now());
                 $this->em->flush();
-                $this->dj->auditlog('contest', $contest->getCid(), 'finalized',
+                $this->dj->auditlog('contest', $contest->getExternalid(), 'finalized',
                                                  $contest->getFinalizecomment());
                 return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);
             }
@@ -846,7 +846,7 @@ class ContestController extends BaseController
 
         $now       = (int)floor(Utils::now());
         $nowstring = date('Y-m-d H:i:s ', $now) . date_default_timezone_get();
-        $this->dj->auditlog('contest', $contest->getCid(), $time . ' now', $nowstring);
+        $this->dj->auditlog('contest', $contest->getExternalid(), $time . ' now', $nowstring);
 
         // Special case delay/resume start (only sets/unsets starttime_undefined).
         $maxSeconds = Contest::STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
@@ -1018,7 +1018,7 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found.', $contestId));
         }
 
-        $this->dj->auditlog('contest', $contest->getCid(), $locked ? 'lock' : 'unlock');
+        $this->dj->auditlog('contest', $contest->getExternalid(), $locked ? 'lock' : 'unlock');
         $contest->setIsLocked($locked);
         $this->em->flush();
 
