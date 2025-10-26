@@ -12,9 +12,10 @@
 #include <cstring>
 #include <cstdlib>
 
+#include "lib.misc.h"
+
 extern "C" {
 #include "lib.error.h"
-#include "lib.misc.h"
 }
 
 #define PROGRAM "evict"
