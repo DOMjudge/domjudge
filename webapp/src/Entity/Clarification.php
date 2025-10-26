@@ -2,6 +2,7 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
+use App\Repository\ClarificationRepository;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -13,7 +14,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * Clarification requests by teams and responses by the jury.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ClarificationRepository::class)]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
