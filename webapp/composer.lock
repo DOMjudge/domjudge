@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "18ef24a582d6e4cfce2da7f2b282949b",
+    "content-hash": "629e7d2150fc6058701b85863ce56292",
     "packages": [
         {
             "name": "apalfrey/select2-bootstrap-5-theme",
@@ -3079,49 +3079,6 @@
                 "source": "https://github.com/Masterminds/html5-php/tree/2.9.0"
             },
             "time": "2024-03-31T07:05:07+00:00"
-        },
-        {
-            "name": "mbostock/d3",
-            "version": "v3.5.17",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/mbostock/d3.git",
-                "reference": "9cc9a875e636a1dcf36cc1e07bdf77e1ad6e2c74"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/mbostock/d3/zipball/9cc9a875e636a1dcf36cc1e07bdf77e1ad6e2c74",
-                "reference": "9cc9a875e636a1dcf36cc1e07bdf77e1ad6e2c74",
-                "shasum": ""
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Mike Bostock",
-                    "homepage": "http://bost.ocks.org/mike"
-                }
-            ],
-            "description": "A JavaScript visualization library for HTML and SVG.",
-            "homepage": "http://d3js.org/",
-            "keywords": [
-                "W3C",
-                "animation",
-                "canvas",
-                "dom",
-                "svg",
-                "visualization"
-            ],
-            "support": {
-                "API": "https://github.com/mbostock/d3/wiki/API-Reference",
-                "issues": "https://github.com/mbostock/d3/issues",
-                "source": "https://github.com/mbostock/d3",
-                "wiki": "https://github.com/mbostock/d3/wiki"
-            },
-            "time": "2016-05-05T00:29:22+00:00"
         },
         {
             "name": "monolog/monolog",
