@@ -210,9 +210,6 @@
     "nikic/php-parser": {
         "version": "v4.2.4"
     },
-    "novus/nvd3": {
-        "version": "v1.8.6"
-    },
     "phar-io/manifest": {
         "version": "1.0.3"
     },

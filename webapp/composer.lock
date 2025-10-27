@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c2f8e4afa753f506179b594cd9b18454",
+    "content-hash": "2136e23ed0c070ef448001539b2c7656",
     "packages": [
         {
             "name": "apalfrey/select2-bootstrap-5-theme",
@@ -3616,59 +3616,6 @@
                 "source": "https://github.com/nikic/PHP-Parser/tree/v5.5.0"
             },
             "time": "2025-05-31T08:24:38+00:00"
-        },
-        {
-            "name": "novus/nvd3",
-            "version": "v1.8.6",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/novus/nvd3.git",
-                "reference": "d273ea52d91b482d044f8cef1e921256f2bfddcd"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/novus/nvd3/zipball/d273ea52d91b482d044f8cef1e921256f2bfddcd",
-                "reference": "d273ea52d91b482d044f8cef1e921256f2bfddcd",
-                "shasum": ""
-            },
-            "require": {
-                "mbostock/d3": "@stable"
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "Apache-2.0"
-            ],
-            "authors": [
-                {
-                    "name": "Bob Monteverde"
-                },
-                {
-                    "name": "Tyler Wolf"
-                },
-                {
-                    "name": "Robin Hu"
-                },
-                {
-                    "name": "Frank Shao"
-                },
-                {
-                    "name": "liquidpele"
-                }
-            ],
-            "description": "A reusable charting library written in d3.js",
-            "homepage": "https://github.com/novus/nvd3",
-            "keywords": [
-                "chart",
-                "d3",
-                "graph",
-                "nvd3"
-            ],
-            "support": {
-                "issues": "https://github.com/novus/nvd3/issues",
-                "source": "https://github.com/novus/nvd3/tree/v1.8.6"
-            },
-            "time": "2017-08-24T01:23:44+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",

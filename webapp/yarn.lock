@@ -33,3 +33,8 @@ monaco@^1.201704190613.0:
   version "1.201704190613.0"
   resolved "https://registry.npmjs.org/monaco/-/monaco-1.201704190613.0.tgz"
   integrity sha512-xcQUOfa7inJdhOjHmwxILMIyPk4nl80E9AVvwyz5PUC2uEbxSjNUR9tjEIUxR+rR5o0xe64lqsIpChSzu8YMOQ==
+
+nvd3@1.8.6:
+  version "1.8.6"
+  resolved "https://registry.yarnpkg.com/nvd3/-/nvd3-1.8.6.tgz#2d3eba74bf33363b5101ebf1d093c59a53ae73c4"
+  integrity sha512-YGQ9hAQHuQCF0JmYkT2GhNMHb5pA+vDfQj6C2GdpQPzdRPj/srPG3mh/3fZzUFt+at1NusLk/RqICUWkxm4viQ==
