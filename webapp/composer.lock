@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "88f6e44e48730e8efd3a8ccaeefb5ed7",
+    "content-hash": "c2f8e4afa753f506179b594cd9b18454",
     "packages": [
         {
             "name": "apalfrey/select2-bootstrap-5-theme",
@@ -1851,15 +1851,6 @@
                 "source": "https://github.com/doctrine/sql-formatter/tree/1.5.2"
             },
             "time": "2025-01-24T11:45:48+00:00"
-        },
-        {
-            "name": "eligrey/filesaver",
-            "version": "2.0.4",
-            "dist": {
-                "type": "zip",
-                "url": "https://github.com/eligrey/FileSaver.js/archive/v2.0.4.zip"
-            },
-            "type": "library"
         },
         {
             "name": "enshrined/svg-sanitize",

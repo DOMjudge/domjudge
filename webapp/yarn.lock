@@ -12,6 +12,11 @@ bootstrap-toggle@^2.2.2:
   resolved "https://registry.yarnpkg.com/bootstrap-toggle/-/bootstrap-toggle-2.2.2.tgz#2b88534fc1b998674f877f98ba0d8b5b743e96fe"
   integrity sha512-AkYD/i3NGCEksIb/PmmUrrxpa0DYi7Si30e9Ldhou2t1HTd9npoXUsxJJjFPvlV7iLUptlysWTcYD7i3DKV6qg==
 
+file-saver@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/file-saver/-/file-saver-2.0.5.tgz#d61cfe2ce059f414d899e9dd6d4107ee25670c38"
+  integrity sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==
+
 jquery-debounce-throttle@^1.0.6-rc.0:
   version "1.0.6-rc.0"
   resolved "https://registry.yarnpkg.com/jquery-debounce-throttle/-/jquery-debounce-throttle-1.0.6-rc.0.tgz#59a7737e46d8b435d01bc94b224e98fa126aba46"
