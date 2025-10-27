@@ -2,22 +2,23 @@
 
 namespace App\DataTransferObject;
 
+use JMS\Serializer\Annotation as Serializer;
 use OpenApi\Attributes as OA;
 
-#[OA\Schema(required: ['id', 'username', 'name', 'roles'])]
-class UpdateUser extends AddUser
+class UpdateUser
 {
-    public function __construct(
-        public readonly string $id,
-        string $username,
-        string $name,
-        ?string $email,
-        ?string $ip,
-        ?string $password,
-        ?bool $enabled,
-        ?string $teamId,
-        array $roles
-    ) {
-        parent::__construct($username, $name, $email, $ip, $password, $enabled, $teamId, $roles);
-    }
+    public ?string $id = null;
+    public ?string $username = null;
+    public ?string $name = null;
+    public ?string $email = null;
+    public ?string $ip = null;
+    #[OA\Property(format: 'password')]
+    public ?string $password = null;
+    public ?bool $enabled = null;
+    public ?string $teamId = null;
+    /**
+     * @var array<string>
+     */
+    #[Serializer\Type('array<string>')]
+    public array $roles = [];
 }
