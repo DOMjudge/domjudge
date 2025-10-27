@@ -347,9 +347,6 @@
     "sebastian/version": {
         "version": "2.0.1"
     },
-    "select2/select2": {
-        "version": "4.0.7"
-    },
     "sentry/sentry": {
         "version": "3.4.0"
     },
