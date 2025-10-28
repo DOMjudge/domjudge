@@ -408,6 +408,14 @@ for different programming languages.
    :language: java
    :caption: *A solution in Java*
 
+.. raw:: pdf
+
+    PageBreak
+
+.. raw:: latex
+
+    \clearpage
+
 .. literalinclude:: ../examples/example.kt
    :language: kotlin
    :caption: *A solution in Kotlin*
