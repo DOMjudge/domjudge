@@ -297,7 +297,7 @@ This will be documented in the problem description.
 Restrictions
 ````````````
 
-Submissions are run in a sandbox to prevent abuse, keep the jury system
+Submissions are run in a sandbox to prevent abuse, keep the judging system
 stable and give everyone clear and equal environments. There
 are some restrictions to which all submissions are subjected:
 
