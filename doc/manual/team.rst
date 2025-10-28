@@ -392,13 +392,13 @@ follow.
 What follows is a number of possible solutions to this problem
 for different programming languages.
 
+.. literalinclude:: ../examples/example.py
+   :language: python
+   :caption: *A solution in Python*
+
 .. literalinclude:: ../examples/example.c
    :language: c
    :caption: *A solution in C*
-
-.. raw:: latex
-
-   \clearpage
 
 .. literalinclude:: ../examples/example.cc
    :language: cpp
@@ -411,10 +411,6 @@ for different programming languages.
 .. literalinclude:: ../examples/example.kt
    :language: kotlin
    :caption: *A solution in Kotlin*
-
-.. literalinclude:: ../examples/example.py
-   :language: python
-   :caption: *A solution in Python*
 
 .. literalinclude:: ../examples/example.cs
    :language: csharp
