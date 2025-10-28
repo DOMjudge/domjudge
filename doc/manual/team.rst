@@ -141,6 +141,16 @@ an error message otherwise.
 
 Web interface
 `````````````
+Judges may distribute the digital versions of the problems either individually
+per or as full problemset through DOMjudge. If the judges issue a clarification
+for a problem, it will be sent out and displayed in the corresponding problem card.
+The judges may provide additional files for a problem, such as extra inputs,
+testing tools, or other relevant attachments. You can use the problemset page to
+help decide which problem to solve next. DOMjudge shows the live contest progress,
+including the number of successful and failed submissions for each problem. Use the
+info from the problemset page and the scoreboard to gauge problem difficulty. A good
+rule of thumb is: Problems solved often and early in the contest are likely easier.
+Problems solved infrequently or only later in the contest are typically more difficult.
 
 Solutions can be submitted from the web interface at |baseurlteam|.
 Click the green *Submit* button at the menu bar on every page.
