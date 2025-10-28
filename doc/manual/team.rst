@@ -58,7 +58,7 @@ become of importance when you run into problems.
 
      - all attachments such as 'testing tools' to problems,
      - view the submission and acceptance ratio during the contest as an indicator of the difficulty of a problem,
-     - get the problem statement and clarifications on those statements
+     - get the problem statement and clarifications on those statements,
      - see the time & memory limits.
 
 
