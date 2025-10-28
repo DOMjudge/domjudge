@@ -424,10 +424,6 @@ for different programming languages.
    :language: csharp
    :caption: *A solution in C#*
 
-.. literalinclude:: ../examples/example.pas
-   :language: pas
-   :caption: *A solution in Pascal*
-
 .. literalinclude:: ../examples/example.hs
    :language: hs
    :caption: *A solution in Haskell*
