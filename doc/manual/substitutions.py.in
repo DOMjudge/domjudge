@@ -13,4 +13,4 @@ rst_prolog = """
 .. |COMPILETIME| replace:: 30
 .. |PROCLIMIT| replace:: 64
 
-""" % (baseurl_separator, baseurl_separator)
+""" % tuple(['/' if '@BASEURL@'[-1]!='/' else '']*2)
