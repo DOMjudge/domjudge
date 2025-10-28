@@ -7,6 +7,11 @@
   resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-free/-/fontawesome-free-7.1.0.tgz#8eb76278515341720aa74485266f8be121089529"
   integrity sha512-+WxNld5ZCJHvPQCr/GnzCTVREyStrAJjisUPtUxG5ngDA8TMlPnKp6dddlTpai4+1GNmltAeuk1hJEkBohwZYA==
 
+"@mathjax/mathjax-newcm-font@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@mathjax/mathjax-newcm-font/-/mathjax-newcm-font-4.0.0.tgz#01afa8b20f2114665dc1d9a7fbc623a23ddb54e4"
+  integrity sha512-kpsJgIF4FpWiwIkFgOPmWwy5GXfL25spmJJNg27HQxPddmEL8Blx0jn2BuU/nlwjM/9SnYpEfDrWiAMgLPlB8Q==
+
 "@melloware/coloris@^0.25.0":
   version "0.25.0"
   resolved "https://registry.yarnpkg.com/@melloware/coloris/-/coloris-0.25.0.tgz#7012c10dc510dca1660b3692ed3c812344aec6ca"
@@ -78,6 +83,13 @@ marked@14.0.0:
   version "14.0.0"
   resolved "https://registry.yarnpkg.com/marked/-/marked-14.0.0.tgz#79a1477358a59e0660276f8fec76de2c33f35d83"
   integrity sha512-uIj4+faQ+MgHgwUW1l2PsPglZLOLOT1uErt06dAPtx2kjteLAkbsd/0FiYg/MGS+i7ZKLb7w2WClxHkzOOuryQ==
+
+mathjax@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/mathjax/-/mathjax-4.0.0.tgz#ff7aa8b6bfdc7e97e41091a9ed6d8c8f8eefd2a0"
+  integrity sha512-ThMPHiPl9ibZBInAmfoTCNq9MgCdH7ChIQ9YhKFc325noJ4DMzy9/Q14qdcuPzVJjEmC3kyXhwnERZWX3hbWzQ==
+  dependencies:
+    "@mathjax/mathjax-newcm-font" "^4.0.0"
 
 monaco-editor@^0.54.0:
   version "0.54.0"
