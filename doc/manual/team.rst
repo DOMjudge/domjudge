@@ -23,7 +23,7 @@ become of importance when you run into problems.
 .. admonition:: Summary
 
    The web interface of DOMjudge can be found at
-   |baseurlteam|. See the two figures on the next page for
+   |baseurlteam|. See the three figures on the next pages for
    an impression.
 
    Solutions have to read all input from 'standard in' and write all
@@ -54,6 +54,14 @@ become of importance when you run into problems.
    requests and replies is done through the web interface at
    |baseurlteam|.
 
+   Use the problemset page to get:
+
+     - get all attachments such as 'testing tools' for each problem,
+     - view indicators for problem difficulty (submission and acceptance rates) across
+       contest intervals (hover over the boxes for exact numbers),
+     - get the problem statement and clarifications on those statements
+     - see the time & memory limits.
+
 
 .. raw:: pdf
 
@@ -75,6 +83,11 @@ Overview of the interface
    :width: 80%
 
    The scoreboard webpage.
+
+.. figure:: team-problemset.png
+   :width: 80%
+
+   The problemset webpage.
 
 .. raw:: pdf
 
