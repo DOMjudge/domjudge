@@ -141,6 +141,15 @@ an error message otherwise.
 
 Web interface
 `````````````
+The problems can be found at |problemseturlteam|.
+The setup of every contest is different so the judges may provide the problemset in hardcopy
+or provide the single problem PDFs here and an optional online full problem set.
+Sometimes a clarification about a problem is send, you can view those coupled with the statement with the problem.
+The judges may provide additional attachments like extra input files, testing/helpful tools or anything relevant to the problem.
+You can use this page to pick the next problem to solve, DOMjudge shows the progress of the contest with the amount of
+successful and failed submissions, you can use those to find the next problem to solve with as rule of thumb that problems
+which are solved often in the beginning are most likely simpler and problems which are solved later in the contest are
+deemed harder to grasp.
 
 Solutions can be submitted from the web interface at |baseurlteam|.
 Click the green *Submit* button at the menu bar on every page.
