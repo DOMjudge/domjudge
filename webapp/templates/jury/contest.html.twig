@@ -394,7 +394,7 @@
                     {% for problem in problems %}
                         <tr>
                             {% set link = path('jury_problem', {'probId': problem.externalId}) %}
-                            <td><a href="{{ link }}">p{{ problem.externalId }}</a></td>
+                            <td><a href="{{ link }}">{{ problem.externalId }}</a></td>
                             <td><a href="{{ link }}">{{ problem.problem.name }}</a></td>
                             <td><a href="{{ link }}">{{ problem.shortname }}</a></td>
                             <td><a href="{{ link }}">{{ problem.points }}</a></td>
