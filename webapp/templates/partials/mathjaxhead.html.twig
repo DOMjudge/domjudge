@@ -1,0 +1,23 @@
+<script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$']]
+        },
+        chtml: {
+            fontURL: '{{ app.request.basePath }}/mathjaxfonts',
+            scale: 1.0
+        },
+        loader: {
+            paths: {
+                mathjax: '{{ app.request.basePath }}/mathjax',
+                '@mathjax': '{{ app.request.basePath }}/mathjax'
+            },
+            // Optional: reinforce that @mathjax modules resolve under the same base
+            source: {
+                '@mathjax': '[mathjax]'
+            },
+            load: ['input/tex', 'output/chtml']
+        }
+    };
+</script>
+<script src="{{ app.request.basePath }}/mathjax/tex-chtml.js"></script>

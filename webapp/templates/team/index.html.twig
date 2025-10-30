@@ -46,6 +46,8 @@
             }
 
             $('[data-flash-messages]').html($flash);
+
+            MathJax.typeset([document.getElementsByClassName('clarification-text')]);
         }
 
         window.initModalClarificationPreviewAdd = function() {
