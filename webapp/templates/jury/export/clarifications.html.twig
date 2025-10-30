@@ -64,7 +64,7 @@
             <tbody>
             {% for clarification in clarifications %}
                 <tr class="top-line">
-                    <td>{{ clarification.clarId }}</td>
+                    <td>{{ clarification.externalid }}</td>
                     <td>{{ clarification.submitTime | printtime(null, contest) }}</td>
                     <td>
                         {% if clarification.sender %}
