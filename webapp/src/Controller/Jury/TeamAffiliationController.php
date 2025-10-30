@@ -131,7 +131,7 @@ class TeamAffiliationController extends BaseController
         ]);
     }
 
-    #[Route(path: '/{affilId<\d+>}', name: 'jury_team_affiliation')]
+    #[Route(path: '/{affilId}', name: 'jury_team_affiliation')]
     public function viewAction(Request $request, ScoreboardService $scoreboardService, int $affilId): Response
     {
         $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
