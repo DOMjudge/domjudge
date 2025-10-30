@@ -157,7 +157,7 @@ abstract class BaseController extends AbstractController
         } else {
             $dataid = $id;
         }
-        $this->dj->auditlog($auditLogType, $dataid, $isNewEntity ? 'added' : 'updated');
+        $this->dj->auditlog($auditLogType, (string)$dataid, $isNewEntity ? 'added' : 'updated');
     }
 
     /**
