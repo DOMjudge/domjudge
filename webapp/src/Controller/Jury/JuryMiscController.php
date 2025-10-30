@@ -216,7 +216,7 @@ class JuryMiscController extends BaseController
             $contests = [$cid => $contests[$cid]];
         } elseif ($request->cookies->has('domjudge_cid') &&
                   ($contest = $this->dj->getCurrentContest())) {
-            $contests = [$contest->getCid() => $contest];
+            $contests = [$contest->getExternalid() => $contest];
         }
 
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
