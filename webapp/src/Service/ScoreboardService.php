@@ -663,7 +663,7 @@ class ScoreboardService
                 $log .= ', ';
             }
             $first = false;
-            $log .= sprintf('t%d', $team->getTeamid());
+            $log .= $team->getExternalid();
             $progress = (int)round($index / count($teams) * 100);
             $progressReporter($progress, $log);
 
