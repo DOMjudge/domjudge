@@ -812,10 +812,10 @@ class RejudgingController extends BaseController
         /** @var Judging $judging */
         foreach ($skipped as $judging) {
             $submission = $judging->getSubmission();
-            $submitid = $submission->getSubmitid();
+            $submitid = $submission->getExternalid();
             $rejudgingid = $submission->getRejudging()->getRejudgingid();
             $msg = sprintf(
-                'Skipping submission s%d since it is ' .
+                'Skipping submission %s since it is ' .
                 'already part of rejudging r%d.',
                 $submitid,
                 $rejudgingid
@@ -845,7 +845,7 @@ class RejudgingController extends BaseController
             ->leftJoin('j.rejudging', 'r')
             ->leftJoin('j.submission', 's')
             ->leftJoin('jt.judgehost', 'jh')
-            ->select('r.rejudgingid, j.judgingid', 's.submitid', 'jh.hostname', 'j.result',
+            ->select('r.rejudgingid, j.judgingid', 's.externalid as submitid', 'jh.hostname', 'j.result',
                 'AVG(jr.runtime) AS runtime_avg', 'COUNT(jr.runtime) AS ntestcases',
                 '(j.endtime - j.starttime) AS duration'
             )
@@ -904,7 +904,8 @@ class RejudgingController extends BaseController
                 ->select('t.ranknumber', 'MAX(jr.runtime) - MIN(jr.runtime) AS spread')
                 ->leftJoin('jr.judging', 'j')
                 ->leftJoin('jr.testcase', 't')
-                ->andWhere('j.submission = :submitid')
+                ->leftJoin('j.submission', 's')
+                ->andWhere('s.externalid = :submitid')
                 ->setParameter('submitid', $submitid)
                 ->groupBy('jr.testcase')
                 ->getQuery()
