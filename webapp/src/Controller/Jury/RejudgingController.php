@@ -703,7 +703,7 @@ class RejudgingController extends BaseController
             'contest' => 'c.externalid',
             'judgehost' => 'jt.judgehost',
             'language' => 'l.externalid',
-            'problem' => 's.problem',
+            'problem' => 'p.externalid',
             'submission' => 's.submitid',
             'team' => 's.team',
             'user' => 's.user',
@@ -739,6 +739,7 @@ class RejudgingController extends BaseController
                 ->leftJoin('s.rejudging', 'r')
                 ->leftJoin('s.contest', 'c')
                 ->leftJoin('s.language', 'l')
+                ->leftJoin('s.problem', 'p')
                 ->leftJoin('s.team', 't')
                 ->leftJoin('j.runs', 'jr')
                 ->leftJoin('jr.judgetask', 'jt')

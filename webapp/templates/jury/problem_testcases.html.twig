@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Testcases for p{{ problem.probid }} - {{ parent() }}{% endblock %}
+{% block title %}Testcases for p{{ problem.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -10,10 +10,10 @@
 
 {% block content %}
 
-    <h1>Testcases for p{{ problem.probid }} - {{ problem.name }}</h1>
+    <h1>Testcases for {{ problem.externalid }} - {{ problem.name }}</h1>
 
     <div class="mb-2">
-        <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">Back to problem p{{ problem.probid }}</a>
+        <a href="{{ path('jury_problem', {'probId': problem.externalid}) }}">Back to problem {{ problem.externalid }}</a>
     </div>
 
     <form method="post" enctype="multipart/form-data">
