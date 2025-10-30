@@ -79,7 +79,7 @@ class QueueTaskController extends BaseController
             $queueTaskData['priority']['value'] = static::PRIORITY_MAP[$queueTaskData['priority']['value']];
 
             // Add some links.
-            $queueTaskData['team.name']['link'] = $this->generateUrl('jury_team', ['teamId' => $queueTask->getTeam()->getTeamid()]);
+            $queueTaskData['team.name']['link'] = $this->generateUrl('jury_team', ['teamId' => $queueTask->getTeam()->getExternalid()]);
             $queueTaskData['judgingid']['link'] = $this->generateUrl('jury_submission_by_judging', ['jid' => $queueTask->getJudging()->getJudgingid()]);
 
             // Format start time.
