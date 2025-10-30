@@ -465,7 +465,7 @@ class ContestController extends BaseController
             if ($problems = $contestData['problems'] ?? null) {
                 $existingProblemIndices = [];
                 foreach ($contest->getProblems() as $index => $problem) {
-                    $existingProblemIndices[$problem->getProbId()] = $index;
+                    $existingProblemIndices[$problem->getExternalId()] = $index;
                 }
                 $indexForNew = $contest->getProblems()->count();
                 $newProblems = [];
@@ -565,7 +565,7 @@ class ContestController extends BaseController
                 $this->eventLogService->log('problems', $problem->getProbid(),
                     EventLogService::ACTION_DELETE, $contest->getCid(), null, null, false);
             }
-            return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getcid()]);
+            return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getExternalId()]);
         }
 
         $this->em->refresh($contest);
