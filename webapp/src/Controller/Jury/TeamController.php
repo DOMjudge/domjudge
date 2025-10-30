@@ -5,6 +5,8 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Contest;
+use App\Entity\Language;
+use App\Entity\Problem;
 use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
@@ -292,7 +294,12 @@ class TeamController extends BaseController
                     'judgehost' => 'judgehost',
                     default => throw new BadRequestHttpException(sprintf('Restriction on %s not allowed.', $key)),
                 };
-                $restrictions->$key = is_numeric($value) ? (int)$value : $value;
+                $restrictionValue = match ($key) {
+                    'problemId' => $this->em->getRepository(Problem::class)->findByExternalId($value)->getProbid(),
+                    'languageId' => $this->em->getRepository(Language::class)->findByExternalId($value)->getLangid(),
+                    default => $value,
+                };
+                $restrictions->$key = is_numeric($restrictionValue) ? (int)$restrictionValue : $restrictionValue;
                 $restrictionTexts[] = sprintf('%s %s', $restrictionKeyText, $value);
             }
             $restrictionText = implode(', ', $restrictionTexts);

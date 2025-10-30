@@ -94,7 +94,7 @@
                 {% set target = '_self' %}
                 {% if not static %}
                     {% if jury %}
-                        {% set link = path('jury_problem', {'probId': problem.probid}) %}
+                        {% set link = path('jury_problem', {'probId': problem.externalid}) %}
                     {% elseif problem.problem.problemstatementType is not empty %}
                         {% if public %}
                             {% set link = path('public_problem_statement', {probId: problem.externalid}) %}
@@ -191,7 +191,7 @@
                     {% if score.team.affiliation %}
                         {% set link = null %}
                         {% if jury %}
-                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
+                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.externalid}) %}
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
                             {{ score.team.affiliation.country|countryFlag }}
@@ -204,7 +204,7 @@
                     {% if score.team.affiliation %}
                         {% set link = null %}
                         {% if jury %}
-                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
+                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.externalid}) %}
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
                             {% set affiliationId = score.team.affiliation.externalid %}
@@ -228,10 +228,10 @@
                 {% set extra = null %}
                 {% if static %}
                     {% set link = '#' %}
-                    {% set extra = 'data-bs-toggle="modal" data-bs-target="#team-modal-' ~ score.team.teamid ~ '"' %}
+                    {% set extra = 'data-bs-toggle="modal" data-bs-target="#team-modal-' ~ score.team.externalid ~ '"' %}
                 {% else %}
                     {% if jury %}
-                        {% set link = path('jury_team', {teamId: score.team.teamid}) %}
+                        {% set link = path('jury_team', {teamId: score.team.externalid}) %}
                     {% elseif public %}
                         {% set link = path('public_team', {teamId: score.team.externalid}) %}
                         {% set extra = 'data-ajax-modal' %}
@@ -339,8 +339,8 @@
                     {% set link = null %}
                     {% set extra = null %}
                     {% if jury %}
-                        {% set restrict = {problemId: problem.probid} %}
-                        {% set link = path('jury_team', {teamId: score.team.teamid, restrict: restrict}) %}
+                        {% set restrict = {problemId: problem.externalid} %}
+                        {% set link = path('jury_team', {teamId: score.team.externalid, restrict: restrict}) %}
                     {% elseif static %}
                         {% set link = '#' %}
                         {% set extra = 'data-submissions-url="' ~ path('public_submissions_data') ~ '"' %}
@@ -483,7 +483,7 @@
                 {% if score.team.affiliation %}
                     {% set link = null %}
                     {% if jury %}
-                        {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
+                        {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.externalid}) %}
                     {% endif %}
                     <a {% if link %}href="{{ link }}"{% endif %}>
                         {{ score.team.affiliation.country|countryFlag }}
@@ -496,7 +496,7 @@
                 {% if score.team.affiliation %}
                     {% set link = null %}
                     {% if jury %}
-                        {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
+                        {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.externalid}) %}
                     {% endif %}
                     <a {% if link %}href="{{ link }}"{% endif %}>
                         {% set affiliationId = score.team.affiliation.externalid %}
@@ -520,12 +520,12 @@
         {% set extra = null %}
         {% if static %}
             {% set link = '#' %}
-            {% set extra = 'data-bs-toggle="modal" data-bs-target="#team-modal-' ~ score.team.teamid ~ '"' %}
+            {% set extra = 'data-bs-toggle="modal" data-bs-target="#team-modal-' ~ score.team.externalid ~ '"' %}
         {% else %}
             {% if jury %}
-                {% set link = path('jury_team', {teamId: score.team.teamid}) %}
+                {% set link = path('jury_team', {teamId: score.team.externalid}) %}
             {% elseif public %}
-                {% set link = path('public_team', {teamId: score.team.teamid}) %}
+                {% set link = path('public_team', {teamId: score.team.externalid}) %}
                 {% set extra = 'data-ajax-modal' %}
             {% else %}
                 {% set link = path('team_team', {teamId: score.team.externalid}) %}
@@ -608,7 +608,7 @@
 
 {% if static %}
     {% for score in scores %}
-        {% embed 'partials/modal.html.twig' with {'modalId': 'team-modal-' ~ score.team.teamid} %}
+        {% embed 'partials/modal.html.twig' with {'modalId': 'team-modal-' ~ score.team.externalid} %}
             {% block title %}{{ score.team.effectiveName }}{% endblock %}
             {% block content %}
                 {% include 'partials/team.html.twig' with {size: 6, team: score.team} %}
@@ -639,7 +639,7 @@
                     <td>
                         {% set link = null %}
                         {% if jury %}
-                            {% set link = path('jury_team_category', {'categoryId': category.categoryid}) %}
+                            {% set link = path('jury_team_category', {'categoryId': category.externalid}) %}
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>{{ category.name }}</a>
                     </td>
