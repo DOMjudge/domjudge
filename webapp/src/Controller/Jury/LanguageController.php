@@ -52,8 +52,7 @@ class LanguageController extends BaseController
             ->orderBy('lang.name', 'ASC')
             ->getQuery()->getResult();
         $table_fields = [
-            'langid' => ['title' => 'ID', 'sort' => true],
-            'externalid' => ['title' => 'external ID', 'sort' => true],
+            'externalid' => ['title' => 'ID', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true, 'default_sort' => true],
             'entrypoint' => ['title' => 'entry point', 'sort' => true],
             'allowjudge' => ['title' => 'allow judge', 'sort' => true],
@@ -80,14 +79,14 @@ class LanguageController extends BaseController
                     'icon' => 'edit',
                     'title' => 'edit this language',
                     'link' => $this->generateUrl('jury_language_edit', [
-                        'langId' => $lang->getLangid()
+                        'langId' => $lang->getExternalid()
                     ])
                 ];
                 $langactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this language',
                     'link' => $this->generateUrl('jury_language_delete', [
-                        'langId' => $lang->getLangid(),
+                        'langId' => $lang->getExternalid(),
                     ]),
                     'ajaxModal' => true,
                 ];
@@ -126,14 +125,14 @@ class LanguageController extends BaseController
                 $enabled_languages[] = [
                     'data' => $langdata,
                     'actions' => $langactions,
-                    'link' => $this->generateUrl('jury_language', ['langId' => $lang->getLangid()]),
+                    'link' => $this->generateUrl('jury_language', ['langId' => $lang->getExternalid()]),
                     'cssclass' => '',
                 ];
             } else {
                 $disabled_languages[] = [
                     'data' => $langdata,
                     'actions' => $langactions,
-                    'link' => $this->generateUrl('jury_language', ['langId' => $lang->getLangid()]),
+                    'link' => $this->generateUrl('jury_language', ['langId' => $lang->getExternalid()]),
                     'cssclass' => 'disabled',
                 ];
             }
@@ -145,10 +144,8 @@ class LanguageController extends BaseController
         ]);
     }
 
-    // Note that the add action appears before the view action to make sure
-    // /add is not seen as a language.
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/add', name: 'jury_language_add')]
+    #[Route(path: '/add', name: 'jury_language_add', priority: 1)]
     public function addAction(Request $request): Response
     {
         $language = new Language();
@@ -159,7 +156,7 @@ class LanguageController extends BaseController
 
         if ($response = $this->processAddFormForExternalIdEntity(
             $form, $language,
-            fn() => $this->generateUrl('jury_language', ['langId' => $language->getLangid()]),
+            fn() => $this->generateUrl('jury_language', ['langId' => $language->getExternalid()]),
             function () use ($language) {
                 // Normalize extensions
                 if ($language->getExtensions()) {
@@ -187,7 +184,7 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}', name: 'jury_language')]
     public function viewAction(Request $request, SubmissionService $submissionService, string $langId): Response
     {
-        $language = $this->em->getRepository(Language::class)->find($langId);
+        $language = $this->em->getRepository(Language::class)->findByExternalId($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
@@ -207,7 +204,7 @@ class LanguageController extends BaseController
             'showExternalResult' => $this->dj->shadowMode(),
             'refresh' => [
                 'after' => 15,
-                'url' => $this->generateUrl('jury_language', ['langId' => $language->getLangid()]),
+                'url' => $this->generateUrl('jury_language', ['langId' => $language->getExternalid()]),
                 'ajax' => true,
             ],
         ];
@@ -224,7 +221,7 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/toggle-submit', name: 'jury_language_toggle_submit')]
     public function toggleSubmitAction(Request $request, string $langId): Response
     {
-        $language = $this->em->getRepository(Language::class)->find($langId);
+        $language = $this->em->getRepository(Language::class)->findByExternalId($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
@@ -243,7 +240,7 @@ class LanguageController extends BaseController
         Request $request,
         string $langId
     ): Response {
-        $language = $this->em->getRepository(Language::class)->find($langId);
+        $language = $this->em->getRepository(Language::class)->findByExternalId($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
@@ -268,7 +265,7 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/toggle-filter-compiler-flags', name: 'jury_language_toggle_filter_compiler_files')]
     public function toggleFilterCompilerFlagsAction(Request $request, string $langId): Response
     {
-        $language = $this->em->getRepository(Language::class)->find($langId);
+        $language = $this->em->getRepository(Language::class)->findByExternalId($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
@@ -286,7 +283,7 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/edit', name: 'jury_language_edit')]
     public function editAction(Request $request, string $langId): Response
     {
-        $language = $this->em->getRepository(Language::class)->find($langId);
+        $language = $this->em->getRepository(Language::class)->findByExternalId($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
@@ -317,7 +314,7 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/delete', name: 'jury_language_delete')]
     public function deleteAction(Request $request, string $langId): Response
     {
-        $language = $this->em->getRepository(Language::class)->find($langId);
+        $language = $this->em->getRepository(Language::class)->findByExternalId($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
@@ -329,7 +326,7 @@ class LanguageController extends BaseController
     #[Route(path: '/{langId}/request-remaining', name: 'jury_language_request_remaining')]
     public function requestRemainingRunsWholeLanguageAction(string $langId): RedirectResponse
     {
-        $language = $this->em->getRepository(Language::class)->find($langId);
+        $language = $this->em->getRepository(Language::class)->findByExternalId($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }

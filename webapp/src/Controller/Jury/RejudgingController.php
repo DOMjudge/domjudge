@@ -702,7 +702,7 @@ class RejudgingController extends BaseController
         $tablemap = [
             'contest' => 'c.externalid',
             'judgehost' => 'jt.judgehost',
-            'language' => 's.language',
+            'language' => 'l.externalid',
             'problem' => 's.problem',
             'submission' => 's.submitid',
             'team' => 's.team',
@@ -738,6 +738,7 @@ class RejudgingController extends BaseController
                 ->leftJoin('j.submission', 's')
                 ->leftJoin('s.rejudging', 'r')
                 ->leftJoin('s.contest', 'c')
+                ->leftJoin('s.language', 'l')
                 ->leftJoin('s.team', 't')
                 ->leftJoin('j.runs', 'jr')
                 ->leftJoin('jr.judgetask', 'jt')
