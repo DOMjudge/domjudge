@@ -45,7 +45,11 @@
             <div class="page-break"></div>
             <h1>{{ title }}</h1>
         {% endif %}
-        <h2>{{ queues[queue] }}</h2>
+        {% if queues[queue] is defined %}
+            <h2>{{ queues[queue] }}</h2>
+        {%  else %}
+            <h2><i>Unknown queue: {{ queue }}</i></h2>
+        {% endif %}
         <table class="table">
             <thead>
             <tr>
