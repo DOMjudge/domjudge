@@ -10,18 +10,7 @@
 
 {% block content %}
 
-    <h1>Edit language {{ language.langid }}</h1>
-
-    <div class="row">
-        <div class="col-lg-4">
-            <table class="table table-sm table-striped">
-                <tr>
-                    <th>Language ID</th>
-                    <td>{{ language.langid }}</td>
-                </tr>
-            </table>
-        </div>
-    </div>
+    <h1>Edit language {{ language.externalid }}</h1>
 
     {% include 'jury/partials/language_form.html.twig' %}
 
