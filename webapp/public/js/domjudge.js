@@ -945,6 +945,7 @@ function previewClarification($input, $previewDiv) {
             }
         }).done(function (data) {
             $previewDiv.html(data.html);
+            MathJax.typesetPromise([document.getElementById($previewDiv[0].id)]);
         });
     }
 }
