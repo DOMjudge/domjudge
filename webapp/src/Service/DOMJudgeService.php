@@ -360,7 +360,7 @@ class DOMJudgeService
         if ($this->checkRole('jury')) {
             if ($contest) {
                 $clarifications = $this->em->createQueryBuilder()
-                    ->select('clar.clarid', 'clar.body')
+                    ->select('clar.externalid', 'clar.body')
                     ->from(Clarification::class, 'clar')
                     ->andWhere('clar.contest = :contest')
                     ->andWhere('clar.sender is not null')
