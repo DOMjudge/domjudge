@@ -48,7 +48,7 @@
                     {%- endif -%}
                 </td>
 
-                <td>
+                <td class="clarification-text">
                     <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}">
                         <i>{{ clarification.summary
                             | markdown_to_html
@@ -57,6 +57,9 @@
                             | raw
                             }}</i>
                     </a>
+                    <script>
+                        MathJax.typeset([document.getElementsByClassName('card-body')]);
+                    </script>
                 </td>
             </tr>
         {%- endfor %}
