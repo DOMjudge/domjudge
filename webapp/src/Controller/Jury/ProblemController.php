@@ -76,10 +76,9 @@ class ProblemController extends BaseController
             ->getQuery()->getResult();
 
         $table_fields = [
-            'probid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
-            'externalid' => ['title' => 'external ID', 'sort' => true],
+            'externalid' => ['title' => 'ID', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true],
-            'badges' => ['title' => '', 'sort' => false],
+            'badges' => ['title' => '', 'sort' => true],
             'num_contests' => ['title' => '# contests', 'sort' => true],
             'timelimit' => ['title' => 'time limit', 'sort' => true],
             'memlimit' => ['title' => 'memory limit', 'sort' => true],
@@ -87,6 +86,12 @@ class ProblemController extends BaseController
             'num_testcases' => ['title' => '# test cases', 'sort' => true],
             'type' => ['title' => 'type', 'sort' => true],
         ];
+
+        if ($this->dj->getCurrentContest() !== null) {
+            $table_fields['badges']['default_sort'] = true;
+        } else {
+            $table_fields['badges']['externalid'] = true;
+        }
 
         $this->addSelectAllCheckbox($table_fields, 'problems');
 
@@ -112,7 +117,7 @@ class ProblemController extends BaseController
             $problemdata    = [];
             $problemactions = [];
 
-            $this->addEntityCheckbox($problemdata, $p, $p->getProbid(), 'problem-checkbox', fn(Problem $problem) => !$problem->isLocked());
+            $this->addEntityCheckbox($problemdata, $p, $p->getExternalid(), 'problem-checkbox', fn(Problem $problem) => !$problem->isLocked());
 
             // Get whatever fields we can from the problem object itself.
             foreach ($table_fields as $k => $v) {
@@ -127,7 +132,7 @@ class ProblemController extends BaseController
                     'icon' => 'file-' . $p->getProblemstatementType(),
                     'title' => 'view problem statement',
                     'link' => $this->generateUrl('jury_problem_statement', [
-                        'probId' => $p->getProbid(),
+                        'probId' => $p->getExternalid(),
                     ])
                 ];
             } else {
@@ -137,7 +142,7 @@ class ProblemController extends BaseController
                 'icon' => 'save',
                 'title' => 'export problem as zip-file',
                 'link' => $this->generateUrl('jury_export_problem', [
-                    'problemId' => $p->getProbid(),
+                    'problemId' => $p->getExternalid(),
                 ])
             ];
 
@@ -146,7 +151,7 @@ class ProblemController extends BaseController
                     'icon' => 'edit',
                     'title' => 'edit this problem',
                     'link' => $this->generateUrl('jury_problem_edit', [
-                        'probId' => $p->getProbid(),
+                        'probId' => $p->getExternalid(),
                     ])
                 ];
 
@@ -161,7 +166,7 @@ class ProblemController extends BaseController
                     'icon' => 'trash-alt',
                     'title' => 'delete this problem',
                     'link' => $this->generateUrl('jury_problem_delete', [
-                        'probId' => $p->getProbid(),
+                        'probId' => $p->getExternalid(),
                     ]),
                     'ajaxModal' => true,
                 ];
@@ -206,7 +211,10 @@ class ProblemController extends BaseController
             if ($this->dj->getCurrentContest() !== null) {
                 $badges = array_filter($contestProblems, fn($cp) => $cp->getCid() === $this->dj->getCurrentContest()->getCid());
             }
-            $problemdata['badges'] = ['value' => $badges];
+            $problemdata['badges'] = [
+                'value' => $badges,
+                'sortvalue' => implode(', ', array_map(fn(ContestProblem $problem) => $problem->getShortname(), $badges)),
+            ];
 
             // merge in the rest of the data
             $problemdata = array_merge($problemdata, [
@@ -218,7 +226,7 @@ class ProblemController extends BaseController
             $data_to_add = [
                 'data' => $problemdata,
                 'actions' => $problemactions,
-                'link' => $this->generateUrl('jury_problem', ['probId' => $p->getProbid()]),
+                'link' => $this->generateUrl('jury_problem', ['probId' => $p->getExternalid()]),
             ];
             if ($badges) {
                 $problems_table_current[] = $data_to_add;
@@ -246,16 +254,13 @@ class ProblemController extends BaseController
             $this->dj->getTwigDataForProblemsAction($stats, teamId: $teamId, forJury: true));
     }
 
-    #[Route(path: '/{probId<\d+>}/samples.zip', name: 'jury_problem_sample_zip')]
-    public function sampleZipAction(int $probId): StreamedResponse
+    #[Route(path: '/{probId}/samples.zip', name: 'jury_problem_sample_zip')]
+    public function sampleZipAction(string $probId): StreamedResponse
     {
         $contest = $this->dj->getCurrentContest();
-        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-            'problem' => $probId,
-            'contest' => $contest,
-        ]);
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->findByProblemAndContest($contest, $probId);
         if (!$contestProblem) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+            throw new NotFoundHttpException(sprintf('Problem %s not found or not available', $probId));
         }
         return $this->dj->getSamplesZipStreamedResponse($contestProblem);
     }
@@ -264,8 +269,8 @@ class ProblemController extends BaseController
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_JURY')]
-    #[Route(path: '/{problemId<\d+>}/export', name: 'jury_export_problem')]
-    public function exportAction(int $problemId): StreamedResponse
+    #[Route(path: '/{problemId}/export', name: 'jury_export_problem')]
+    public function exportAction(string $problemId): StreamedResponse
     {
         // This might take a while.
         Utils::extendMaxExecutionTime(300);
@@ -275,7 +280,7 @@ class ProblemController extends BaseController
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
             ->leftJoin('p.problemStatementContent', 'content')
             ->select('p', 'cp', 'content')
-            ->andWhere('p.probid = :problemId')
+            ->andWhere('p.externalid = :problemId')
             ->setParameter('problemId', $problemId)
             ->setParameter('contest', $this->dj->getCurrentContest())
             ->getQuery()
@@ -412,7 +417,7 @@ class ProblemController extends BaseController
             // since we can't change the filename to something unique, since
             // that could break e.g. Java sources, even if _we_ support this
             // by default.
-            $directory = sprintf('submissions/%s/s%d/', $problemResult, $solution->getSubmitid());
+            $directory = sprintf('submissions/%s/%s/', $problemResult, $solution->getExternalid());
             /** @var SubmissionFile $source */
             foreach ($solution->getFiles() as $source) {
                 $zip->addFromString($directory . $source->getFilename(), $source->getSourcecode());
@@ -423,7 +428,7 @@ class ProblemController extends BaseController
         if ($contestProblem && $contestProblem->getShortname()) {
             $zipFilename = sprintf('%s.zip', $contestProblem->getShortname());
         } else {
-            $zipFilename = sprintf('p%d.zip', $problem->getProbid());
+            $zipFilename = sprintf('%s.zip', $problem->getExternalid());
         }
 
         return Utils::streamZipFile($tempFilename, $zipFilename);
@@ -446,7 +451,7 @@ class ProblemController extends BaseController
             /** @var ContestProblem $contestProblem */
             if ($contestProblem->getContest()->isLocked()) {
                 if (!$request->isXmlHttpRequest()) {
-                    $this->addFlash('warning', 'Cannot edit problem, it belongs to locked contest c' . $contestProblem->getContest()->getCid());
+                    $this->addFlash('warning', 'Cannot edit problem, it belongs to locked contest ' . $contestProblem->getContest()->getExternalid());
                 }
                 $lockedProblem = true;
             }
@@ -511,7 +516,7 @@ class ProblemController extends BaseController
             'lockedProblem' => $lockedProblem,
             'refresh' => [
                 'after' => 15,
-                'url' => $this->generateUrl('jury_problem', ['probId' => $problem->getProbid()]),
+                'url' => $this->generateUrl('jury_problem', ['probId' => $problem->getExternalid()]),
                 'ajax' => true,
             ],
         ];
@@ -528,7 +533,7 @@ class ProblemController extends BaseController
     #[Route(path: '/{probId}/statement', name: 'jury_problem_statement')]
     public function viewTextAction(string $probId): StreamedResponse
     {
-        $problem = $this->em->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->findByExternalId($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
@@ -536,10 +541,10 @@ class ProblemController extends BaseController
         return $problem->getProblemStatementStreamedResponse();
     }
 
-    #[Route(path: '/{probId<\d+>}/testcases', name: 'jury_problem_testcases')]
-    public function testcasesAction(Request $request, int $probId): Response
+    #[Route(path: '/{probId}/testcases', name: 'jury_problem_testcases')]
+    public function testcasesAction(Request $request, string $probId): Response
     {
-        $problem = $this->em->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->findByExternalId($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
@@ -548,7 +553,7 @@ class ProblemController extends BaseController
         foreach ($problem->getContestProblems() as $contestproblem) {
             /** @var ContestProblem $contestproblem */
             if ($contestproblem->getContest()->isLocked()) {
-                $lockedContests[] = 'c' . $contestproblem->getContest()->getCid();
+                $lockedContests[] = $contestproblem->getContest()->getExternalid();
                 break;
             }
         }
@@ -571,7 +576,7 @@ class ProblemController extends BaseController
             if (!empty($lockedContests)) {
                 $this->addFlash('danger', 'Cannot edit problem / testcases, it belongs to locked contest(s) '
                     . join(', ', $lockedContests));
-                return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
+                return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
             }
             $messages      = [];
             $maxrank       = 0;
@@ -803,10 +808,10 @@ class ProblemController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{probId<\d+>}/testcases/{rank<\d+>}/move/{direction<up|down>}', name: 'jury_problem_testcase_move')]
-    public function moveTestcaseAction(int $probId, int $rank, string $direction): Response
+    #[Route(path: '/{probId}/testcases/{rank<\d+>}/move/{direction<up|down>}', name: 'jury_problem_testcase_move')]
+    public function moveTestcaseAction(string $probId, int $rank, string $direction): Response
     {
-        $problem = $this->em->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->findByExternalId($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
@@ -815,7 +820,7 @@ class ProblemController extends BaseController
             /** @var ContestProblem $contestProblem */
             if ($contestProblem->getContest()->isLocked()) {
                 $this->addFlash('danger', 'Cannot edit problem, it belongs to locked contest c' . $contestProblem->getContest()->getCid());
-                return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
+                return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
             }
         }
 
@@ -876,28 +881,29 @@ class ProblemController extends BaseController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route(path: '/{probId<\d+>}/testcases/{rank<\d+>}/fetch/{type<input|output|image>}', name: 'jury_problem_testcase_fetch')]
-    public function fetchTestcaseAction(int $probId, int $rank, string $type): Response
+    #[Route(path: '/{probId}/testcases/{rank<\d+>}/fetch/{type<input|output|image>}', name: 'jury_problem_testcase_fetch')]
+    public function fetchTestcaseAction(string $probId, int $rank, string $type): Response
     {
         /** @var Testcase|null $testcase */
         $testcase = $this->em->createQueryBuilder()
             ->from(Testcase::class, 'tc')
             ->join('tc.content', 'tcc')
+            ->join('tc.problem', 'p')
             ->select('tc', 'tcc')
-            ->andWhere('tc.problem = :problem')
+            ->andWhere('p.externalid = :problem')
             ->andWhere('tc.ranknumber = :ranknumber')
             ->setParameter('problem', $probId)
             ->setParameter('ranknumber', $rank)
             ->getQuery()
             ->getOneOrNullResult();
         if (!$testcase) {
-            throw new NotFoundHttpException(sprintf('Testcase with rank %d for problem %d not found', $rank, $probId));
+            throw new NotFoundHttpException(sprintf('Testcase with rank %d for problem %s not found', $rank, $probId));
         }
 
         if ($type === 'image') {
             $extension = $testcase->getImageType();
             $mimetype  = sprintf('image/%s', $extension);
-            $filename  = sprintf('p%d.t%d.%s', $probId, $rank, $extension);
+            $filename  = sprintf('%s.t%d.%s', $probId, $rank, $extension);
         } else {
             $extension = Testcase::EXTENSION_MAPPING[$type];
             $mimetype  = 'text/plain';
@@ -930,10 +936,10 @@ class ProblemController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{probId<\d+>}/edit', name: 'jury_problem_edit')]
-    public function editAction(Request $request, int $probId): Response
+    #[Route(path: '/{probId}/edit', name: 'jury_problem_edit')]
+    public function editAction(Request $request, string $probId): Response
     {
-        $problem = $this->em->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->findByExternalId($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
@@ -941,8 +947,8 @@ class ProblemController extends BaseController
         foreach ($problem->getContestProblems() as $contestProblem) {
             /** @var ContestProblem $contestProblem */
             if ($contestProblem->getContest()->isLocked()) {
-                $this->addFlash('danger', 'Cannot edit problem, it belongs to locked contest c' . $contestProblem->getContest()->getCid());
-                return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
+                $this->addFlash('danger', 'Cannot edit problem, it belongs to locked contest ' . $contestProblem->getContest()->getExternalid());
+                return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
             }
         }
 
@@ -952,7 +958,7 @@ class ProblemController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->saveEntity($problem, $problem->getProbid(), false);
-            return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
+            return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
         }
 
         $data       = [];
@@ -984,7 +990,7 @@ class ProblemController extends BaseController
                     $this->dj->auditlog('problem', $problem->getExternalid(), 'upload zip', $clientName);
                 } else {
                     $this->postMessages($messages);
-                    return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
+                    return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
                 }
             } catch (Exception $e) {
                 $messages['danger'][] = $e->getMessage();
@@ -995,7 +1001,7 @@ class ProblemController extends BaseController
             }
             $this->postMessages($messages);
 
-            return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
+            return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
         }
 
         return $this->render('jury/problem_edit.html.twig', [
@@ -1012,7 +1018,7 @@ class ProblemController extends BaseController
         return $this->deleteMultiple(
             $request,
             Problem::class,
-            'probid',
+            'externalid',
             'jury_problems',
             'No problems could be deleted (they might be locked).',
             fn(Problem $problem) => !$problem->isLocked()
@@ -1020,10 +1026,10 @@ class ProblemController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{probId<\d+>}/delete', name: 'jury_problem_delete')]
-    public function deleteAction(Request $request, int $probId): Response
+    #[Route(path: '/{probId}/delete', name: 'jury_problem_delete')]
+    public function deleteAction(Request $request, string $probId): Response
     {
-        $problem = $this->em->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->findByExternalId($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
@@ -1031,7 +1037,7 @@ class ProblemController extends BaseController
         foreach ($problem->getContestProblems() as $contestProblem) {
             /** @var ContestProblem $contestProblem */
             if ($contestProblem->getContest()->isLocked()) {
-                $this->addFlash('danger', 'Cannot delete problem, it belongs to locked contest c' . $contestProblem->getContest()->getCid());
+                $this->addFlash('danger', 'Cannot delete problem, it belongs to locked contest ' . $contestProblem->getContest()->getExternalid());
                 return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
             }
         }
@@ -1061,7 +1067,7 @@ class ProblemController extends BaseController
         }
 
         $problem = $attachment->getProblem();
-        $probId = $problem->getProbid();
+        $probId = $problem->getExternalid();
 
         foreach ($problem->getContestProblems() as $contestProblem) {
             /** @var ContestProblem $contestProblem */
@@ -1086,8 +1092,8 @@ class ProblemController extends BaseController
         foreach ($problem->getContestProblems() as $contestProblem) {
             /** @var ContestProblem $contestProblem */
             if ($contestProblem->getContest()->isLocked()) {
-                $this->addFlash('danger', 'Cannot edit problem, it belongs to locked contest c' . $contestProblem->getContest()->getCid());
-                return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
+                $this->addFlash('danger', 'Cannot edit problem, it belongs to locked contest ' . $contestProblem->getContest()->getExternalid());
+                return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
             }
         }
         $testcase->setDeleted(true);
@@ -1103,12 +1109,12 @@ class ProblemController extends BaseController
             }
         }
         $this->em->flush();
-        $this->addFlash('danger', sprintf('Testcase %d removed from problem %s. Consider rejudging the problem.', $testcaseId, $problem->getProbid()));
-        return $this->redirectToRoute('jury_problem_testcases', ['probId' => $problem->getProbid()]);
+        $this->addFlash('danger', sprintf('Testcase %d removed from problem %s. Consider rejudging the problem.', $testcaseId, $problem->getExternalid()));
+        return $this->redirectToRoute('jury_problem_testcases', ['probId' => $problem->getExternalid()]);
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/add', name: 'jury_problem_add')]
+    #[Route(path: '/add', name: 'jury_problem_add', priority: 1)]
     public function addAction(Request $request): Response
     {
         $problem = new Problem();
@@ -1119,7 +1125,7 @@ class ProblemController extends BaseController
 
         if ($response = $this->processAddFormForExternalIdEntity(
             $form, $problem,
-            fn() => $this->generateUrl('jury_problem', ['probId' => $problem->getProbid()])
+            fn() => $this->generateUrl('jury_problem', ['probId' => $problem->getExternalid()])
         )) {
             return $response;
         }
@@ -1176,10 +1182,10 @@ class ProblemController extends BaseController
         }
     }
 
-    #[Route(path: '/{probId<\d+>}/request-remaining', name: 'jury_problem_request_remaining')]
+    #[Route(path: '/{probId}/request-remaining', name: 'jury_problem_request_remaining')]
     public function requestRemainingRunsWholeProblemAction(string $probId): RedirectResponse
     {
-        $problem = $this->em->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->findByExternalId($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
@@ -1196,10 +1202,7 @@ class ProblemController extends BaseController
         string $probId,
         string $type
     ): Response {
-        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-            'contest' => $contestId,
-            'problem' => $probId,
-        ]);
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->findByProblemAndContest($contestId, $probId);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found for contest %s', $probId, $contestId));
         }
