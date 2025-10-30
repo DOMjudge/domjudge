@@ -19,7 +19,7 @@
     <h1>Balloons - {{ current_contest.name }}</h1>
 
     {% if isfrozen %}
-        <div class="alert alert-info"><i class="fas fa-snowflake"></i> Scoreboard of c{{ current_contest.cid }} ({{ current_contest.shortname }}) is now frozen.</div>
+        <div class="alert alert-info"><i class="fas fa-snowflake"></i> Scoreboard of {{ current_contest.externalid }} ({{ current_contest.shortname }}) is now frozen.</div>
     {% endif %}
 
     <div class="mb-3">
