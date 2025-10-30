@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Edit problem {{ problem.probid }} - {{ parent() }}{% endblock %}
+{% block title %}Edit problem {{ problem.externalid }} - {{ parent() }}{% endblock %}
 
 {% block content %}
 
@@ -11,16 +11,12 @@
         <div class="col-lg-4">
             <table class="table table-sm table-striped">
                 <tr>
-                    <th>Problem ID</th>
-                    <td>{{ problem.probid }}</td>
-                </tr>
-                <tr>
                     <th>Testcases</th>
                     <td>
                         {% if problem.testcases is empty %}
                             <em>no testcases</em>
                         {% else %}
-                            <a href="{{ path('jury_problem_testcases', {'probId': problem.probid}) }}">details / edit</a>
+                            <a href="{{ path('jury_problem_testcases', {'probId': problem.externalid}) }}">details / edit</a>
                         {% endif %}
                     </td>
                 </tr>
