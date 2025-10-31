@@ -1431,7 +1431,7 @@ EOF;
 
         $new = '';
         foreach ($latexFound as $inlineLatex) {
-            $replacedStart = strpos($markdown,'$LaTeX$');
+            $replacedStart = strpos($markdown, '$LaTeX$');
             $new = substr($markdown, 0, $replacedStart);
             $new .= $inlineLatex;
             $new .= substr($markdown, $replacedStart+strlen('$LaTeX$'));
