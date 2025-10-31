@@ -1569,7 +1569,7 @@ class DOMJudgeService
         foreach ($assetMatches[1] as $file) {
             $filepath = realpath($publicPath . '/' . $file);
             if ($filepath === false) {
-                throw new BadRequestHttpException("Could not find (symlinked) file: " . $file);
+                throw new BadRequestHttpException("Could not find (symlinked) file: " . $file . "with filepath: " . $filepath . " and " . $$publicPath);
             }
             if (!str_starts_with($filepath, $publicPath) &&
                 !str_starts_with($filepath, $this->vendorDir)
