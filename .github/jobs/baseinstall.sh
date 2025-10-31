@@ -32,6 +32,8 @@ section_start "Install JS frontend dependencies"
 cd webapp
 apt-get update; apt-get install -y yarnpkg
 yarnpkg install
+ls -atrl node_modules
+ls -atrl public
 cd ..
 section_end
 
