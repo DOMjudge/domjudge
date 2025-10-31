@@ -37,6 +37,8 @@ ls -atrl public
 ls -atrl public/mathjaxfonts
 ls -atrl public/mathjaxfonts/*
 ls -atrl public/mathjaxfonts/mjx-ncm-zero.woff2
+realpath /opt/domjudge/domserver/webapp/public
+realpath /opt/domjudge/domserver/webapp/public/mathjaxfonts
 cd ..
 section_end
 
