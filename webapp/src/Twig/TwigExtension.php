@@ -1412,7 +1412,7 @@ EOF;
     public function domjudgeMarkdownToHTML(string $markdown): string
     {
         $latexFound = [];
-        while(true) {
+        while (true) {
             $start = strpos($markdown,'$$');
             $end = strpos(substr($markdown, $start+2), '$$');
             if ($start === false || $end === false) {
