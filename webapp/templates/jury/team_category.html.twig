@@ -35,13 +35,35 @@
                     </td>
                 </tr>
                 <tr>
-                    <th>Sortorder</th>
-                    <td>{{ teamCategory.sortorder }}</td>
+                    <th>Types</th>
+                    <td>
+                        {% if teamCategory.typeHumanNames %}
+                            <ul class="mb-0">
+                                {% for typeName in teamCategory.typeHumanNames %}
+                                    <li>{{ typeName }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
                 </tr>
+                {% if teamCategory.sortorder is not null %}
+                    <tr>
+                        <th>Sortorder</th>
+                        <td>{{ teamCategory.sortorder }}</td>
+                    </tr>
+                {% endif %}
                 {% if teamCategory.color %}
                     <tr>
                         <th>Color</th>
                         <td style="background-color: {{ teamCategory.color }};">{{ teamCategory.color }}</td>
+                    </tr>
+                {% endif %}
+                {% if teamCategory.cssClass %}
+                    <tr>
+                        <th>CSS Class</th>
+                        <td><code>{{ teamCategory.cssClass }}</code></td>
                     </tr>
                 {% endif %}
                 <tr>
