@@ -35,6 +35,8 @@ yarnpkg install
 ls -atrl node_modules
 ls -atrl public
 ls -atrl public/mathjaxfonts
+ls -atrl public/mathjaxfonts/*
+ls -atrl public/mathjaxfonts/mjx-ncm-zero.woff2
 cd ..
 section_end
 
