@@ -1762,7 +1762,7 @@ class DOMJudgeService
      * Returns either the next strictly higher version or false when nothing is found/requested.
      */
     public function checkNewVersion(): string|false {
-        if ($this->config->get('check_new_version', false) === UpdateStrategy::Strategy_none) {
+        if ($this->config->get('check_new_version', false) === UpdateStrategy::NONE) {
             return false;
         }
         // The local version is something like "x.y.z / commit hash", e.g. "8.4.0DEV/4e25adb13" for development
@@ -1788,7 +1788,7 @@ class DOMJudgeService
 
         preg_match("/\d.\d.\d/", $this->domjudgeVersion, $matches);
         $extractedLocalVersionString = $matches[0];
-        if ($this->config->get('check_new_version', false) === UpdateStrategy::Strategy_incremental) {
+        if ($this->config->get('check_new_version', false) === UpdateStrategy::INCREMENTAL) {
             /* Steer towards the nearest highest patch release first
              * So the expected path would be:
              * DJ6.0.0 -> DJ6.0.6 -> DJ6.6.0 -> DJ9.1.2 instead of
@@ -1814,8 +1814,7 @@ class DOMJudgeService
                     }
                 }
             }
-        }
-        elseif ($this->config->get('check_new_version', false) === UpdateStrategy::Strategy_major_release) {
+        } elseif ($this->config->get('check_new_version', false) === UpdateStrategy::MAJOR_RELEASE) {
             /* Steer towards the latest version directly
              * So the expected path would be:
              * DJ6.0.0 -> DJ9.1.2
