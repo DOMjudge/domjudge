@@ -46,7 +46,7 @@ already listed under
 For Fedora use::
 
   sudo dnf install git autoconf automake bats \
-    sphinx-build python3-sphinx_rtd_theme latexmk texlive-cmap \
+    sphinx-build python3-sphinx_rtd_theme latexmk yarnpkg texlive-cmap \
     texlive-metafont texlive-tex-gyre texlive-fncychap texlive-wrapfig \
     texlive-capt-of texlive-framed texlive-upquote texlive-needspace \
     texlive-tabulary texlive-parskip texlive-oberdiek texlive-makeindex \
