@@ -34,6 +34,7 @@ apt-get update; apt-get install -y yarnpkg
 yarnpkg install
 ls -atrl node_modules
 ls -atrl public
+ls -atrl public/mathjaxfonts
 cd ..
 section_end
 
