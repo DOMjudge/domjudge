@@ -1413,7 +1413,7 @@ EOF;
     {
         $latexFound = [];
         while (true) {
-            $start = strpos($markdown,'$$');
+            $start = strpos($markdown, '$$');
             $end = strpos(substr($markdown, $start+2), '$$');
             if ($start === false || $end === false) {
                 break;
