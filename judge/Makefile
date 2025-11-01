@@ -13,14 +13,14 @@ judgehost: $(TARGETS) $(SUBST_FILES)
 $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 
-evict: evict.cc $(LIBHEADERS) $(LIBSOURCES)
-	$(CXX) $(CXXFLAGS) -o $@ $< $(LIBSOURCES)
+evict: evict.cc $(LIBOBJECTS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $< $(LIBOBJECTS)
 
-runguard: runguard.cc $(LIBHEADERS) $(LIBSOURCES) $(TOPDIR)/etc/runguard-config.h
-	$(CXX) $(CXXFLAGS) -o $@ $< $(LIBSOURCES) $(LIBCGROUP)
+runguard: runguard.cc $(LIBOBJECTS) $(TOPDIR)/etc/runguard-config.h
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $< $(LIBOBJECTS) $(LIBCGROUP)
 
-runpipe: runpipe.cc $(LIBHEADERS) $(LIBSOURCES)
-	$(CXX) $(CXXFLAGS) -static -o $@ $< $(LIBSOURCES)
+runpipe: runpipe.cc $(LIBOBJECTS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -static -o $@ $< $(LIBOBJECTS)
 
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_libjudgedir) \

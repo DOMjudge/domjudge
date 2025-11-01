@@ -4,11 +4,12 @@ endif
 
 include $(TOPDIR)/Makefile.global
 
-OBJECTS = $(addsuffix $(OBJEXT),lib.error lib.misc)
+OBJECTS = lib.error$(OBJEXT) lib.misc$(OBJEXT)
 
 build: $(OBJECTS)
 
-$(OBJECTS): %$(OBJEXT): %.c %.h
+lib.error$(OBJEXT): lib.error.c lib.error.h
+lib.misc$(OBJEXT): lib.misc.cc lib.misc.h
 
 clean-l:
 	rm -f $(OBJECTS)
