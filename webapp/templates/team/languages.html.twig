@@ -19,8 +19,33 @@
                                     {% for ext in lang.extensions %}
                                         <span class="extension-badge">.{{ ext }}</span>
                                     {% endfor %}
+                                    {% if limited %}
+                                        <div style="margin-left: auto; float: right; text-align: right;">
+                                            {% for problem in problems %}
+                                                {{ problem | problemBadge }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
+
+                            {% if limited %}
+                                <div class="mb-4">
+                                    <div class="section-label">
+                                        <i class="fas fa-book-open"></i> Problems
+                                    </div>
+                                    <div>
+                                        {% for problem in problems %}
+                                            {{ problem | problemBadge }}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="output_test" style="scrollbar-width: thin; scrollbar-gutter: stable both-edges; text-wrap: nowrap; overflow: scroll; max-height: 4em;">
+                                    {% for problem in problems %}
+                                        {{ problem | problemBadge }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
 
                             {% if lang.compilerVersion and lang.compilerVersionCommand %}
                                 <div class="mb-4">
