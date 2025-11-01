@@ -37,6 +37,7 @@ section_end
 
 section_start "Debug JS frontend dependencies"
 pwd
+cd webapp
 ls -atrl node_modules
 ls -atrl public/mathjaxfonts/*
 ls -atrl public/mathjaxfonts/mjx-ncm-zero.woff2
