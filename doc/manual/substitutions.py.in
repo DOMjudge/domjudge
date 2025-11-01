@@ -1,13 +1,16 @@
 # @configure_input@
 
+baseurl_separator = '/' if '@BASEURL@'[-1]!='/' else ''
+
 rst_prolog = """
 .. |DOMjudge| replace:: @PACKAGE_NAME@
 
 .. |phpversion| replace:: @PHPVERSION@
 .. |baseurlteam| replace:: @BASEURL@%steam
+.. |problemseturlteam| replace:: @BASEURL@%steam/problems
 
 .. |SOURCESIZE| replace:: 256
 .. |COMPILETIME| replace:: 30
 .. |PROCLIMIT| replace:: 64
 
-""" % ('/' if '@BASEURL@'[-1]!='/' else '')
+""" % tuple(['/' if '@BASEURL@'[-1]!='/' else '']*2)

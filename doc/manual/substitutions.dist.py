@@ -7,6 +7,7 @@ rst_prolog = """
 .. |DOMjudge| replace:: DOMjudge
 
 .. |baseurlteam| replace:: https://example.com/domjudge/team
+.. |problemseturlteam| replace:: https://example.com/domjudge/team/problems
 
 .. |SOURCESIZE| replace:: 256
 .. |COMPILETIME| replace:: 30
