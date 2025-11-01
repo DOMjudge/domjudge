@@ -37,6 +37,8 @@ ls -atrl public
 ls -atrl public/mathjaxfonts
 ls -atrl public/mathjaxfonts/*
 ls -atrl public/mathjaxfonts/mjx-ncm-zero.woff2
+pwd
+# The problem might be that we don't install the mathjaxfonts directory in the make domserver step.
 realpath /opt/domjudge/domserver/webapp/public
 realpath /opt/domjudge/domserver/webapp/public/mathjaxfonts
 cd ..
