@@ -17,7 +17,7 @@ class AddContentSecurityPolicyListener
         // the profiler requires 'unsafe-eval' for script-src 'self'.
         $response = $event->getResponse();
         $cspExtra = $this->profiler ? "'unsafe-eval'" : "";
-        $csp = "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' $cspExtra; img-src 'self' data:; worker-src 'self' blob:";
+        $csp = "font-src 'self' data:; default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' $cspExtra; img-src 'self' data:; worker-src 'self' blob:";
         $response->headers->set('Content-Security-Policy', $csp);
     }
 }

@@ -37,6 +37,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
+use Twig\Extra\Markdown\MarkdownRuntime;
 use Twig\Runtime\EscaperRuntime;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -124,6 +125,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('medalType', $this->awards->medalType(...)),
             new TwigFilter('numTableActions', $this->numTableActions(...)),
             new TwigFilter('extensionToMime', $this->extensionToMime(...)),
+            new TwigFilter('domjudge_markdown_to_html', $this->domjudgeMarkdownToHTML(...), ['is_safe' => ['html']]),
         ];
     }
 
@@ -1405,5 +1407,36 @@ EOF;
     public function extensionToMime(string $extension): string
     {
         return DOMJudgeService::EXTENSION_TO_MIMETYPE[$extension];
+    }
+
+    public function domjudgeMarkdownToHTML(string $markdown): string
+    {
+        $latexFound = [];
+        while (true) {
+            $start = strpos($markdown, '$$');
+            $end = strpos(substr($markdown, $start+2), '$$');
+            if ($start === false || $end === false) {
+                break;
+            }
+            $latexFound[] = substr($markdown, $start, $end+2+2);
+            $newMarkdown = substr($markdown, 0, $start);
+            $newMarkdown .= '$LaTeX$';
+            $newMarkdown .= substr($markdown, $end+$start+4);
+            $markdown = $newMarkdown;
+        }
+
+        /** @var MarkdownRuntime $runtime */
+        $runtime = $this->twig->getRuntime(MarkdownRuntime::class);
+        $markdown = (string)$runtime->convert($markdown);
+
+        $new = '';
+        foreach ($latexFound as $inlineLatex) {
+            $replacedStart = strpos($markdown, '$LaTeX$');
+            $new = substr($markdown, 0, $replacedStart);
+            $new .= $inlineLatex;
+            $new .= substr($markdown, $replacedStart+strlen('$LaTeX$'));
+            $markdown = $new;
+        }
+        return $markdown;
     }
 }

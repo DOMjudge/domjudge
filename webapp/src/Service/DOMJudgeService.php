@@ -43,6 +43,7 @@ use Exception;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
+use ReflectionException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -67,6 +68,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 use ZipArchive;
 
 class DOMJudgeService
@@ -1512,6 +1516,12 @@ class DOMJudgeService
         );
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws ReflectionException
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
     public function getScoreboardZip(
         Request $request,
         RequestStack $requestStack,
@@ -1568,6 +1578,9 @@ class DOMJudgeService
         $publicPath = realpath(sprintf('%s/public/', $this->projectDir));
         foreach ($assetMatches[1] as $file) {
             $filepath = realpath($publicPath . '/' . $file);
+            if ($filepath === false) {
+                throw new Exception("Could not find (symlinked) file: " . $file . " and " . $publicPath);
+            }
             if (!str_starts_with($filepath, $publicPath) &&
                 !str_starts_with($filepath, $this->vendorDir)
             ) {
