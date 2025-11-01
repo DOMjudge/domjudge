@@ -18,34 +18,95 @@
         </tr>
     </table>
 {% endif %}
-
+{# Mark the first tab that is shown as active. #}
+{% set extra_css_classes = "active" %}
 <ul class="nav nav-tabs source-tab-nav">
     {%- for filePair in oldFileStats.changedfiles %}
         <li class="nav-item">
-            <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
+            <a class="nav-link {{ extra_css_classes }}" data-bs-toggle="tab"
                href="#diff-{{ filePair.1.submitfileid }}" role="tab">{{ filePair.0.filename }}</a>
         </li>
+        {% set extra_css_classes = "" %}
+    {%- endfor %}
+    {%- for file in oldFileStats.unchangedfiles %}
+        <li class="nav-item">
+            <a class="nav-link {{ extra_css_classes }}" data-bs-toggle="tab"
+               href="#diff-{{ file.submitfileid }}" role="tab">{{ file.filename }}</a>
+        </li>
+        {% set extra_css_classes = "" %}
+    {%- endfor %}
+    {%- for file in oldFileStats.addedfiles %}
+        <li class="nav-item">
+            <a class="nav-link {{ extra_css_classes }}" data-bs-toggle="tab"
+               href="#diff-{{ file.submitfileid }}" role="tab">{{ file.filename }}</a>
+        </li>
+        {% set extra_css_classes = "" %}
     {%- endfor %}
 
 </ul>
+{# Mark the first pane that is shown as active. #}
+{% set extra_css_classes = "show active" %}
 <div class="tab-content source-tab">
     {%- for filePair in oldFileStats.changedfiles %}
-        <div class="mb-1">
-            <a class="btn btn-secondary btn-sm"
-               href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: filePair.1.rank}) }}">
-                <i class="fas fa-download"></i> Download
-            </a>
-            {% if allowEdit %}
+        <div class="tab-pane fade {{ extra_css_classes }}" id="diff-{{ filePair.1.submitfileid }}" role="tabpanel">
+            {% set diff_id = "diff" ~  filePair.1.submitfileid %}
+            <div class="mb-1">
                 <a class="btn btn-secondary btn-sm"
-                   href="{{ path('jury_submission_edit_source', {submission: submission.submitid, rank: filePair.1.rank}) }}">
-                    <i class="fas fa-pencil-alt"></i> Edit
+                   href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: filePair.1.rank}) }}">
+                    <i class="fas fa-download"></i> Download
                 </a>
-            {% endif %}
+                {% if allowEdit %}
+                    <a class="btn btn-secondary btn-sm"
+                       href="{{ path('jury_submission_edit_source', {submission: submission.submitid, rank: filePair.1.rank}) }}">
+                        <i class="fas fa-pencil-alt"></i> Edit
+                    </a>
+                {% endif %}
+                <div id="diffselect-{{ diff_id }}" class="btn-group">
+                    <a href="#" role="button" class="btn btn-secondary btn-sm pe-none" aria-disabled="true"><i class="fas fa-code-branch"></i></a>
+                    {%- for mode_id, mode in diff_modes %}
+                    <input type="radio" class="btn-check" name="{{ diff_id }}-mode" id="{{ diff_id }}-{{ mode_id }}" value="{{ mode_id }}" autocomplete="off">
+                    <label class="btn btn-outline-secondary btn-sm" for="{{ diff_id }}-{{ mode_id }}">{{ mode.name }}</label>
+                    {%- endfor %}
+                </div>
+            </div>
+            {{ showDiff(diff_id, filePair.0, filePair.1) }}
         </div>
-
-        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="diff-{{ filePair.1.submitfileid }}"
-             role="tabpanel">
-            {{ showDiff("diff" ~  filePair.1.submitfileid, filePair.0, filePair.1) }}
+        {% set extra_css_classes = "" %}
+    {%- endfor %}
+    {%- for file in oldFileStats.unchangedfiles %}
+        <div class="tab-pane fade {{ extra_css_classes }}" id="diff-{{ file.submitfileid }}" role="tabpanel">
+            <div class="mb-1">
+                <a class="btn btn-secondary btn-sm"
+                   href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: file.rank}) }}">
+                    <i class="fas fa-download"></i> Download
+                </a>
+                {% if allowEdit %}
+                    <a class="btn btn-secondary btn-sm"
+                       href="{{ path('jury_submission_edit_source', {submission: submission.submitid, rank: file.rank}) }}">
+                        <i class="fas fa-pencil-alt"></i> Edit
+                    </a>
+                {% endif %}
+            </div>
+            {{ file.sourcecode | codeEditor(file.rank, submission.language.editorLanguage) }}
         </div>
+        {% set extra_css_classes = "" %}
+    {%- endfor %}
+    {%- for file in oldFileStats.addedfiles %}
+        <div class="tab-pane fade {{ extra_css_classes }}" id="diff-{{ file.submitfileid }}" role="tabpanel">
+            <div class="mb-1">
+                <a class="btn btn-secondary btn-sm"
+                   href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: file.rank}) }}">
+                    <i class="fas fa-download"></i> Download
+                </a>
+                {% if allowEdit %}
+                    <a class="btn btn-secondary btn-sm"
+                       href="{{ path('jury_submission_edit_source', {submission: submission.submitid, rank: file.rank}) }}">
+                        <i class="fas fa-pencil-alt"></i> Edit
+                    </a>
+                {% endif %}
+            </div>
+            {{ file.sourcecode | codeEditor(file.rank, submission.language.editorLanguage) }}
+        </div>
+        {% set extra_css_classes = "" %}
     {%- endfor %}
 </div>

@@ -17,6 +17,7 @@ use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
+use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
@@ -376,7 +377,7 @@ class SubmissionController extends BaseController
         $runsOutstanding = false;
         $runs       = [];
         $runsOutput = [];
-        $sameTestcaseIds = true;
+        $sameTestcaseHashes = true;
         if ($selectedJudging || $externalJudgement) {
             $queryBuilder = $this->em->createQueryBuilder()
                 ->from(Testcase::class, 't')
@@ -413,9 +414,9 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getResult();
 
-            $judgingRunTestcaseIdsInOrder = $this->em->createQueryBuilder()
+            $judgingRunTestcaseHashesInOrder = $this->em->createQueryBuilder()
                 ->from(JudgeTask::class, 'jt')
-                ->select('jt.testcase_id')
+                ->select('jt.testcase_hash')
                 ->andWhere('jt.jobid = :judging')
                 ->setParameter('judging', $selectedJudging)
                 ->orderBy('jt.judgetaskid')
@@ -423,15 +424,15 @@ class SubmissionController extends BaseController
                 ->getScalarResult();
 
             $cnt = 0;
-            if (count($judgingRunTestcaseIdsInOrder) !== count($runResults)) {
-                $sameTestcaseIds = false;
+            if (count($judgingRunTestcaseHashesInOrder) !== count($runResults)) {
+                $sameTestcaseHashes = false;
             }
             foreach ($runResults as $runResult) {
                 /** @var Testcase $testcase */
                 $testcase = $runResult[0];
-                if (isset($judgingRunTestcaseIdsInOrder[$cnt])) {
-                    if ($testcase->getTestcaseid() != $judgingRunTestcaseIdsInOrder[$cnt]['testcase_id']) {
-                        $sameTestcaseIds = false;
+                if (isset($judgingRunTestcaseHashesInOrder[$cnt])) {
+                    if ($testcase->getTestcasehash() != $judgingRunTestcaseHashesInOrder[$cnt]['testcase_hash']) {
+                        $sameTestcaseHashes = false;
                     }
                 }
                 $cnt++;
@@ -570,7 +571,7 @@ class SubmissionController extends BaseController
             'runs' => $runs,
             'runsOutstanding' => $runsOutstanding,
             'judgehosts' => $judgehosts,
-            'sameTestcaseIds' => $sameTestcaseIds,
+            'sameTestcaseHashes' => $sameTestcaseHashes,
             'externalRuns' => $externalRuns,
             'runsOutput' => $runsOutput,
             'lastRuns' => $lastRuns,
@@ -582,6 +583,7 @@ class SubmissionController extends BaseController
             'version_warnings' => [],
             'isMultiPassProblem' => $submission->getProblem()->isMultipassProblem(),
             'thumbnailSize' => $this->config->get('thumbnail_size'),
+            'isAnalystMode' => $this->config->get('lazy_eval_results') === DOMJudgeService::EVAL_ANALYST,
         ];
 
         if ($selectedJudging === null) {
@@ -709,7 +711,7 @@ class SubmissionController extends BaseController
             ->setJobId($jid->getJudgingid())
             ->setUuid($jid->getUuid())
             ->setTestcaseId($testcase->getTestcaseid())
-            ->setTestcaseHash($testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput());
+            ->setTestcaseHash($testcase->getTestcaseHash());
         $this->em->persist($judgeTask);
         $this->em->flush();
         return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_submission', [
@@ -887,10 +889,12 @@ class SubmissionController extends BaseController
                 ->andWhere('s.problem = :probid')
                 ->andWhere('s.language = :langid')
                 ->andWhere('s.submittime < :submittime')
+                ->andWhere('s.contest = :contest')
                 ->setParameter('teamid', $submission->getTeam())
                 ->setParameter('probid', $submission->getProblem())
                 ->setParameter('langid', $submission->getLanguage())
                 ->setParameter('submittime', $submission->getSubmittime())
+                ->setParameter('contest', $submission->getContest())
                 ->orderBy('s.submittime', 'DESC')
                 ->setMaxResults(1)
                 ->getQuery()
@@ -1014,7 +1018,7 @@ class SubmissionController extends BaseController
                 $submission->getContest(),
                 $language,
                 $filesToSubmit,
-                'edit/resubmit',
+                SubmissionSource::EDIT_RESUBMIT,
                 $this->getUser()->getUserIdentifier(),
                 $submission->getOriginalSubmission() ?? $submission,
                 $entryPoint,
@@ -1205,13 +1209,17 @@ class SubmissionController extends BaseController
      * @param SubmissionFile[] $files
      * @param SubmissionFile[] $oldFiles
      * @return array{'changed': string[], 'changedfiles': array<SubmissionFile[]>,
-     *               'unchanged': string[], 'added': string[], 'removed': string[]}
+     *               'unchanged': string[], 'added': string[], 'removed': string[],
+     *               'unchangedfiles' : array<SubmissionFile>,
+     *               'addedfiles' : array<SubmissionFile>}
      */
     protected function determineFileChanged(array $files, array $oldFiles): array
     {
         $result = [
             'changed'      => [],
             'changedfiles' => [], // These will be shown, so we will add pairs of files here.
+            'unchangedfiles' => [],
+            'addedfiles'    => [],
             'unchanged'    => [],
         ];
 
@@ -1221,15 +1229,21 @@ class SubmissionController extends BaseController
         $result['removed'] = array_diff($oldFilenames, $newFilenames);
 
         foreach ($files as $newfile) {
+            $isNewFile = true;
             foreach ($oldFiles as $oldFile) {
                 if ($newfile->getFilename() === $oldFile->getFilename()) {
+                    $isNewFile = false;
                     if ($oldFile->getSourcecode() === $newfile->getSourcecode()) {
                         $result['unchanged'][] = $newfile->getFilename();
+                        $result['unchangedfiles'][] = $newfile;
                     } else {
                         $result['changed'][]      = $newfile->getFilename();
                         $result['changedfiles'][] = [$newfile, $oldFile];
                     }
                 }
+            }
+            if ($isNewFile) {
+                $result['addedfiles'][] = $newfile;
             }
         }
 

@@ -36,6 +36,7 @@ abstract class BaseTestCase extends WebTestCase
     /** @var string[] */
     protected static array $fixtures = [];
 
+    /** @var class-string|null */
     protected ?string $entityClass = null;
 
     protected function setUp(): void
@@ -86,12 +87,17 @@ abstract class BaseTestCase extends WebTestCase
 
     /**
      * Resolve any references in the given ID.
+     * @param class-string|null $class
      */
-    protected function resolveReference(int|string $id, ?string $class = null): int|string
+    protected function resolveReference(int|string $id, ?string $class = null, bool $preferExternalId = false): int|string
     {
         // If the object ID contains a :, it is a reference to a fixture item, so get it.
         if (is_string($id) && str_contains($id, ':')) {
+            /** @var object $referenceObject */
             $referenceObject = $this->fixtureExecutor->getReferenceRepository()->getReference($id, $class ?? $this->entityClass);
+            if ($preferExternalId && method_exists($referenceObject, 'getExternalid')) {
+                return $referenceObject->getExternalid();
+            }
             $metadata = static::getContainer()->get(EntityManagerInterface::class)->getClassMetadata($referenceObject::class);
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             return $propertyAccessor->getValue($referenceObject, $metadata->getSingleIdentifierColumnName());
@@ -311,5 +317,14 @@ abstract class BaseTestCase extends WebTestCase
         $eventLog = self::getContainer()->get(EventLogService::class);
         $dj       = self::getContainer()->get(DOMJudgeService::class);
         $config->saveChanges(['shadow_mode'=>$shadowMode], $eventLog, $dj, treatMissingBooleansAsFalse: false);
+    }
+
+    protected function checkStatusAndFollowRedirect(): Crawler
+    {
+        static::assertLessThan(
+            400, $this->client->getInternalResponse()->getStatusCode(),
+            $this->client->getInternalResponse()->getContent()
+        );
+        return $this->client->followRedirect();
     }
 }

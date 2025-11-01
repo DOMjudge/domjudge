@@ -7,6 +7,7 @@ use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
+use App\Entity\SubmissionSource;
 use App\Entity\Testcase;
 use App\Form\Type\SubmitProblemType;
 use App\Service\ConfigurationService;
@@ -77,14 +78,14 @@ class SubmissionController extends BaseController
                 $problem = $form->get('problem')->getData();
                 /** @var Language $language */
                 $language = $form->get('language')->getData();
-                /** @var UploadedFile[] $files */
+                /** @var UploadedFile[]|UploadedFile $files */
                 $files      = $form->get('code')->getData();
                 if (!is_array($files)) {
                     $files = [$files];
                 }
                 $entryPoint = $form->get('entry_point')->getData() ?: null;
                 $submission = $this->submissionService->submitSolution(
-                    $team, $this->dj->getUser(), $problem->getProbid(), $contest, $language, $files, 'team page', null,
+                    $team, $this->dj->getUser(), $problem->getProbid(), $contest, $language, $files, SubmissionSource::TEAM_PAGE, null,
                     null, $entryPoint, null, null, $message
                 );
 

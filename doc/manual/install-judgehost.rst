@@ -19,6 +19,8 @@ System requirements
 * A TCP/IP network which connects the DOMserver and the judgehosts.
   The machines only need HTTP(S) access to the DOMserver.
 
+We recommend running a single judgedaemon per physical machine.
+For more details see the section :ref:`multiple-judgedaemons`.
 
 .. _judgehost_software:
 
@@ -167,9 +169,9 @@ no separate measures are necessary, and they allow running
 :ref:`multiple judgedaemons <multiple-judgedaemons>`
 on a multi-core machine by using CPU binding.
 
-The judgedaemon needs to run a recent Linux kernel (at least 3.2.0). The
-following steps configure cgroups on Debian. Instructions for other
-distributions may be different (send us your feedback!).
+The judgedaemon needs to run a recent Linux kernel (at least 5.19 or 6.0 or
+later). The following steps configure cgroups v2 on Debian. Instructions for
+other distributions may be different (send us your feedback!).
 
 Edit grub config to add cgroup memory and swap accounting to the boot
 options. Edit ``/etc/default/grub`` and change the default
@@ -178,12 +180,6 @@ commandline to
 Optionally the timings can be made more stable by not letting the OS schedule
 any other tasks on the same CPU core the judgedaemon is using:
 ``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1 isolcpus=2"``
-
-On modern systems where cgroup v2 is available, DOMjudge will try to
-use that. This requires kernel versions 5.19 or 6.0 or later to
-support reporting peak memory usage. If not found, the system will try
-to fall back to cgroup v1, but this might require you to add
-``systemd.unified_cgroup_hierarchy=0`` to the boot options as well.
 
 You have now configured the system to use cgroups. To create
 the actual cgroups that DOMjudge will use you need to run::

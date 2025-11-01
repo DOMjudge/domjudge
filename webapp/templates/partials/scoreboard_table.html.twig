@@ -14,6 +14,7 @@
     {% set static = false %}
 {% endif %}
 {% set showPoints = scoreboard.showPoints %}
+{% set scoringScoreboard = scoreboard.isScoring %}
 {% set usedCategories = scoreboard.usedCategories(limitToTeamIds) %}
 {% set hasDifferentCategoryColors = scoreboard.categoryColors(limitToTeamIds) %}
 {% set scores = scoreboard.scores | filter(score => limitToTeams is null or score.team.teamid in limitToTeamIds) %}
@@ -62,7 +63,9 @@
     {% if enable_ranking %}
         <colgroup>
             <col id="scoresolv"/>
-            <col id="scoretotal"/>
+            {% if not scoringScoreboard %}
+                <col id="scoretotal"/>
+            {% endif %}
         </colgroup>
     {% endif %}
     <colgroup>
@@ -79,7 +82,11 @@
         {% endif %}
         <th title="team name" scope="col" colspan="{{ teamColspan }}">team</th>
         {% if enable_ranking %}
-            <th title="# solved / penalty time" colspan="2" scope="col">score</th>
+            {% if scoringScoreboard %}
+                <th title="points" colspan="1" scope="col">score</th>
+            {% else %}
+                <th title="# solved / penalty time" colspan="2" scope="col">score</th>
+            {% endif %}
         {% endif %}
         {% if showTeamSubmissions or jury %}
             {% for problem in problems %}
@@ -98,10 +105,17 @@
                         {% endif %}
                     {% endif %}
                 {% endif %}
-                <th title="problem {{ problem.problem.name }}" scope="col">
+                <th
+                    title="problem {{ problem.problem.name }}"
+                    scope="col"
+                    data-problem-external-id="{{ problem.externalid }}"
+                    data-problem-name="{{ problem.problem.name | escape('html_attr') }}"
+                    data-problem-badge="{{ problem | problemBadge | escape('html_attr') }}"
+                >
                     <a {% if link %}href="{{ link }}"{% endif %} target="{{ target }}">
                         {{  problem | problemBadge }}
-                        {% if showPoints %}
+                        {% if showPoints and not scoringScoreboard %}
+                            <br/>
                             <span class='problempoints'>
                                 [{% if problem.points == 1 %}1 point{% else %}{{ problem.points }} points{% endif %}]
                             </span>
@@ -142,7 +156,7 @@
         {% else %}
             {% set color = score.team.category.color %}
         {% endif %}
-        <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}">
+        <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}" data-team-external-id="{{ score.team.externalid }}" data-team-name="{{ score.team.effectiveName | escape('html_attr') }}">
             {% if enable_ranking %}
                 {% if medalsEnabled %}
                     <td class="no-border">
@@ -248,10 +262,12 @@
             {% if enable_ranking %}
                 {% set totalPoints = score.numPoints %}
                 <td class="scorenc">{{ totalPoints }}</td>
-                {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
-                    <td class="scorett">{{ "%0.3f s" | format(score.totalRuntime/1000.0) }}</td>
-                {% else %}
-                    <td class="scorett">{{ totalTime }}</td>
+                {% if not scoringScoreboard %}
+                    {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
+                        <td class="scorett">{{ "%0.3f s" | format(score.totalRuntime/1000.0) }}</td>
+                    {% else %}
+                        <td class="scorett">{{ totalTime }}</td>
+                    {% endif %}
                 {% endif %}
             {% endif %}
 
@@ -303,16 +319,36 @@
                     {% endif %}
 
                     {% set link = null %}
+                    {% set extra = null %}
                     {% if jury %}
                         {% set restrict = {problemId: problem.probid} %}
                         {% set link = path('jury_team', {teamId: score.team.teamid, restrict: restrict}) %}
+                    {% elseif static %}
+                        {% set link = '#' %}
+                        {% set extra = 'data-submissions-url="' ~ path('public_submissions_data') ~ '"' %}
+                        {% set extra = extra ~ ' data-team-id="' ~ score.team.externalid ~ '"' %}
+                        {% set extra = extra ~ ' data-problem-id="' ~ problem.externalid ~ '"' %}
+                    {% elseif public %}
+                        {% set link = path('public_submissions', {teamId: score.team.externalid, problemId: problem.externalid}) %}
+                        {% set extra = 'data-submissions-url="' ~ path('public_submissions_data_cell', {teamId: score.team.externalid, problemId: problem.externalid}) ~ '"' %}
+                        {% set extra = extra ~ ' data-team-id="' ~ score.team.externalid ~ '"' %}
+                        {% set extra = extra ~ ' data-problem-id="' ~ problem.externalid ~ '"' %}
                     {% endif %}
 
                     <td class="score_cell">
                         {% if numSubmissions != '0' %}
-                            <a {% if link %}href="{{ link }}"{% endif %}>
-                                <div class="{{ scoreCssClass }}">
-                                    {% if matrixItem.isCorrect %}{{ time }}{% else %}&nbsp;{% endif %}
+                            <a {% if link %}href="{{ link }}"{% endif %} {% if extra %}{{ extra | raw }}{% endif %}>
+                                <div
+                                    class="{{ scoreCssClass }}"
+                                {% if scoringScoreboard %}
+                                    title="{% if matrixItem.isCorrect %}{{ time }} mins{% endif %}"
+                                {% endif %}
+                                >
+                                    {% if scoringScoreboard %}
+                                        {% if matrixItem.isCorrect %}{{ matrixItem.points }}{% else %}&nbsp;{% endif %}
+                                    {% else %}
+                                        {% if matrixItem.isCorrect %}{{ time }}{% else %}&nbsp;{% endif %}
+                                    {% endif %}
                                     <span>
                                         {% if numSubmissions is same as(1) %}
                                             1 try
@@ -403,7 +439,12 @@
     {% else %}
         {% set color = score.team.category.color %}
     {% endif %}
-    <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.teamid }}" style="border-bottom-width: 0; height: 28px;">
+    <tr
+        class="{{ classes | join(' ') }}"
+        data-team-id="{{ score.team.teamid }}"
+        data-team-external-id="{{ score.team.externalid }}"
+        data-team-name="{{ score.team.effectiveName | escape('html_attr') }}"
+        style="border-bottom-width: 0; height: 28px;">
         {% if enable_ranking %}
             <td class="scorepl">
                 {% if medalsEnabled and medalColor != '' %}
@@ -522,7 +563,7 @@
             <td colspan="{{ problemSpan }}">
                 {% for problem in problems %}
                     {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
-                    {{ problem | problemBadgeMaybe(matrixItem) }}
+                    {{ problem | problemBadgeMaybe(matrixItem, score, static) }}
                 {% endfor %}
             </td>
         </tr>

@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 
 class UserControllerTest extends JuryControllerTestCase
 {
@@ -89,4 +90,75 @@ class UserControllerTest extends JuryControllerTestCase
                                                                                                       ['ipAddress' => '1.1.1.256'],
                                                                                                       ['ipAddress' => '1.1.1.1.1'],
                                                                                                       ['ipAddress' => '::g']]];
+
+    public function testMultiDeleteUsers(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        // Create some users to delete
+        $usersData = [
+            ['name' => 'User 1 for multi-delete', 'username' => 'user1md'],
+            ['name' => 'User 2 for multi-delete', 'username' => 'user2md'],
+            ['name' => 'User 3 for multi-delete', 'username' => 'user3md'],
+        ];
+
+        $userIds = [];
+        $createdUsers = [];
+
+        foreach ($usersData as $data) {
+            $user = new User();
+            $user
+                ->setName($data['name'])
+                ->setUsername($data['username'])
+                ->setPlainPassword('password');
+            $em->persist($user);
+            $createdUsers[] = $user;
+        }
+
+        $em->flush();
+
+        // Get the IDs of the newly created users
+        foreach ($createdUsers as $user) {
+            $userIds[] = $user->getUserid();
+        }
+
+        $user1Id = $userIds[0];
+        $user2Id = $userIds[1];
+        $user3Id = $userIds[2];
+
+        // Verify users exist before deletion
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        foreach ([1, 2, 3] as $i) {
+            self::assertSelectorExists(sprintf('body:contains("User %d for multi-delete")', $i));
+        }
+
+        // Simulate multi-delete POST request
+        $this->client->request(
+            'POST',
+            static::getContainer()->get('router')->generate('jury_user_delete_multiple', ['ids' => [$user1Id, $user2Id]]),
+            [
+                'submit' => 'delete'
+            ]
+        );
+
+        $this->checkStatusAndFollowRedirect();
+
+        // Verify users are deleted
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        self::assertSelectorNotExists('body:contains("User 1 for multi-delete")');
+        self::assertSelectorNotExists('body:contains("User 2 for multi-delete")');
+        // User 3 should still exist
+        self::assertSelectorExists('body:contains("User 3 for multi-delete")');
+
+        // Verify user 3 can still be deleted individually
+        $this->verifyPageResponse('GET', static::$baseUrl . '/' . $user3Id . static::$delete, 200);
+        $this->client->submitForm('Delete', []);
+        $this->checkStatusAndFollowRedirect();
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+    }
 }

@@ -24,7 +24,7 @@ use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use Metadata\MetadataFactoryInterface;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -180,7 +180,7 @@ class ContestController extends AbstractRestController
     public function bannerAction(Request $request, string $cid): Response
     {
         /** @var Contest|null $contest */
-        $contest = $this->getQueryBuilder($request)
+        $contest = $this->getQueryBuilder($request, filterBeforeContest: false)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $cid)
             ->getQuery()
@@ -364,7 +364,7 @@ class ContestController extends AbstractRestController
 
         $hasAccess = $this->dj->checkrole('jury') ||
             $this->dj->checkrole('api_reader') ||
-            $contest->getFreezeData()->started();
+            $contest?->getFreezeData()->started();
 
         if (!$hasAccess) {
             throw new AccessDeniedHttpException();
@@ -418,7 +418,7 @@ class ContestController extends AbstractRestController
         if (!$request->request->has('start_time') && !$request->request->has('scoreboard_thaw_time')) {
             throw new BadRequestHttpException('Missing "start_time" or "scoreboard_thaw_time" in request.');
         }
-        if ($request->request->get('id') != $contest->getExternalid()) {
+        if ($request->request->get('id') !== $contest->getExternalid()) {
             throw new BadRequestHttpException('Invalid "id" in request.');
         }
         if ($request->request->has('start_time') && $request->request->has('scoreboard_thaw_time')) {
@@ -871,7 +871,7 @@ class ContestController extends AbstractRestController
                     }
 
                     echo Utils::jsonEncode($result) . "\n";
-                    ob_flush();
+                    Utils::ob_flush_if_possible();
                     flush();
                     $lastUpdate = Utils::now();
                     $lastIdSent = $event->getEventid();
@@ -896,7 +896,7 @@ class ContestController extends AbstractRestController
                         # Send keep alive every 10s. Guarantee according to spec is 120s.
                         # However, nginx drops the connection if we don't update for 60s.
                         echo "\n";
-                        ob_flush();
+                        Utils::ob_flush_if_possible();
                         flush();
                         $lastUpdate = $now;
                     }
@@ -950,10 +950,10 @@ class ContestController extends AbstractRestController
         return $this->dj->getSamplesZipForContest($contest);
     }
 
-    protected function getQueryBuilder(Request $request): QueryBuilder
+    protected function getQueryBuilder(Request $request, bool $filterBeforeContest = true): QueryBuilder
     {
         try {
-            return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', true));
+            return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', true), $filterBeforeContest);
         } catch (TypeError) {
             throw new BadRequestHttpException('\'onlyActive\' must be a boolean.');
         }
@@ -970,7 +970,7 @@ class ContestController extends AbstractRestController
      */
     protected function getContestWithId(Request $request, string $id): Contest
     {
-        $queryBuilder = $this->getQueryBuilder($request)
+        $queryBuilder = $this->getQueryBuilder($request, filterBeforeContest: false)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $id);
 
@@ -987,7 +987,7 @@ class ContestController extends AbstractRestController
     private function getContestAndCheckIfLocked(Request $request, string $cid): Contest
     {
         /** @var Contest|null $contest */
-        $contest = $this->getQueryBuilder($request)
+        $contest = $this->getQueryBuilder($request, filterBeforeContest: false)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $cid)
             ->getQuery()

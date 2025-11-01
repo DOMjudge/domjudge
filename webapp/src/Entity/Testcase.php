@@ -94,7 +94,7 @@ class Testcase
     private Collection $judging_runs;
 
     /**
-     * @var Collection<int, ExternalRun>>
+     * @var Collection<int, ExternalRun>
      */
     #[ORM\OneToMany(mappedBy: 'testcase', targetEntity: ExternalRun::class)]
     #[Serializer\Exclude]
@@ -159,6 +159,11 @@ class Testcase
     public function getRank(): int
     {
         return $this->ranknumber;
+    }
+
+    public function getTestcaseHash(): string
+    {
+        return $this->getMd5sumInput() . '_' . $this->getMd5sumOutput();
     }
 
     /**

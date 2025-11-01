@@ -254,10 +254,7 @@ abstract class BaseTestCase extends BaseBaseTestCase
             static::markTestSkipped('No endpoint defined.');
         }
         if (in_array($apiEndpoint, static::$rootEndpoints)) {
-            // We can not test this, since e.g. /contests always exists. Assert that true is true to not make the test
-            // risky.
-            static::assertTrue(true);
-            return;
+            static::markTestSkipped('Endpoint is root endpoint');
         }
         // Note that the 42 here is a contest that doesn't exist.
         $response = $this->verifyApiJsonResponse('GET', "/contests/42/$apiEndpoint", 404, $this->apiUser);
@@ -318,7 +315,7 @@ abstract class BaseTestCase extends BaseBaseTestCase
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
         static::assertIsArray($object);
 
-        $object = is_array($object) && count($object)===1 ? $object[0] : $object;
+        $object = count($object)===1 ? $object[0] : $object;
         foreach ($expectedProperties as $key => $value) {
             // Null values can also be absent.
             static::assertEquals($value, $object[$key] ?? null, $key . ' has correct value.');

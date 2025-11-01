@@ -19,7 +19,7 @@ Command line submit client
 DOMjudge comes with a command line submit client which makes it really
 convenient for teams to submit their solutions to DOMjudge.
 
-In order to use the submit client, you need Python, the python requests 
+In order to use the submit client, you need Python, the python requests
 library and optionally the python magic library installed on the team's
 workstation. To install this on Debian-like distributions::
 
@@ -85,7 +85,7 @@ the team manual can be generated with the command ``make docs``.
 The following should do it on a Debian-like system::
 
   sudo apt install python3-sphinx python3-sphinx-rtd-theme fontconfig python3-yaml
-  cd <INSTALL_PATH>/doc/
+  cd <DOWNLOAD_PATH>/doc/
   make docs
 
 The resulting manual will then be found in the ``team/`` subdirectory.

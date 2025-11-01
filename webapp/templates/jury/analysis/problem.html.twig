@@ -4,10 +4,10 @@
 
 {% block extrahead %}
 {{ parent() }}
-<link rel="stylesheet" href="{{asset('css/nv.d3.min.css')}}">
-<script src="{{asset('js/d3.min.js')}}"></script>
-<script src="{{asset('js/nv.d3.min.js')}}"></script>
-<script src="{{asset('js/FileSaver.min.js')}}"></script>
+<link rel="stylesheet" href="{{ asset('css/nv.d3.min.css') }}">
+<script src="{{ asset('js/d3.min.js') }}"></script>
+<script src="{{ asset('js/nv.d3.min.js') }}"></script>
+<script src="{{ asset('js/FileSaver.min.js') }}"></script>
 <style>
 .row.equal {
   display: flex;
@@ -31,16 +31,16 @@
         <div class="card-body">
           <dl class="row">
             <dt class="col-sm-6"># Submissions</dt>
-            <dd class="col-sm-6">{{ submissions|length }}</dd>
+            <dd class="col-sm-6">{{ submissions | length }}</dd>
 
             <dt class="col-sm-6"># Correct</dt>
-            <dd class="col-sm-6">{{ results['correct']|default(0) }} <span class="text-muted">({{ misc.correct_percentage|number_format(2) }}%)</span></dd>
+            <dd class="col-sm-6">{{ results['correct'] | default(0) }} <span class="text-muted">({{ misc.correct_percentage | number_format(2) }}%)</span></dd>
 
             <dt class="col-sm-6"># Teams Attempted</dt>
             <dd class="col-sm-6">{{ misc.num_teams_attempted }}</dd>
 
             <dt class="col-sm-6"># Teams Correct</dt>
-            <dd class="col-sm-6">{{misc.num_teams_correct}} <span class="text-muted">({{  misc.teams_correct_percentage|number_format(2) }}%)</dd>
+            <dd class="col-sm-6">{{ misc.num_teams_correct }} <span class="text-muted">({{  misc.teams_correct_percentage | number_format(2) }}%)</dd>
           </dl>
         </div>
       </div>
@@ -163,9 +163,9 @@ $(function(){
         line = d3.select('#maxruntime svg #maxline')
         .attr({
           x1: chart.margin().left,
-          y1: chart.yAxis.scale()({{timelimit}})+ chart.margin().top,
+          y1: chart.yAxis.scale()({{ timelimit }})+ chart.margin().top,
           x2: +svgsize - chart.margin().right,
-          y2: chart.yAxis.scale()({{timelimit}}) + chart.margin().top,
+          y2: chart.yAxis.scale()({{ timelimit }}) + chart.margin().top,
         })
       }
       updateline();
@@ -184,7 +184,7 @@ $(function(){
         values: [
           {% for result,count in results %}
             {
-              "label" : "{{result}}",
+              "label" : "{{ result }}",
               "value" : {{ count }},
               "color" : "{{ colors[result] }}",
             },
@@ -218,8 +218,8 @@ $(function(){
     const submission_stats = [
       {% for result in ['correct', 'wrong-answer', 'timelimit', 'run-error', 'compiler-error', 'no-output'] %}
       {
-        key: "{{result}}",
-        color: "{{colors[result]}}",
+        key: "{{ result }}",
+        color: "{{ colors[result] }}",
         values: []
       },
       {% endfor %}
@@ -234,7 +234,7 @@ $(function(){
       }{{ loop.last ? '' : ',' }}
       {% endfor %}
     ];
-    createSubmissionGraph(submission_stats, contest_start_time, contest_duration_seconds, submissions);
+    createSubmissionGraph(submission_stats, contest_start_time, contest_duration_seconds, submissions, minBucketCount = 10, maxBucketCount = 101);
 })
 </script>
 {% include 'jury/analysis/download_graphs.html.twig' %}

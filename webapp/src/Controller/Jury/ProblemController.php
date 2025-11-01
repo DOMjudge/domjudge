@@ -88,6 +88,8 @@ class ProblemController extends BaseController
             'type' => ['title' => 'type', 'sort' => true],
         ];
 
+        $this->addSelectAllCheckbox($table_fields, 'problems');
+
         $contestCountData = $this->em->createQueryBuilder()
             ->from(ContestProblem::class, 'cp')
             ->select('COUNT(cp.shortname) AS count', 'p.probid')
@@ -109,6 +111,9 @@ class ProblemController extends BaseController
             $p              = $row[0];
             $problemdata    = [];
             $problemactions = [];
+
+            $this->addEntityCheckbox($problemdata, $p, $p->getProbid(), 'problem-checkbox', fn(Problem $problem) => !$problem->isLocked());
+
             // Get whatever fields we can from the problem object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($p, $k)) {
@@ -236,8 +241,9 @@ class ProblemController extends BaseController
     #[Route(path: '/problemset', name: 'jury_problemset')]
     public function problemsetAction(StatisticsService $stats): Response
     {
+        $teamId = $this->dj->getUser()->getTeam()?->getTeamid();
         return $this->render('jury/problemset.html.twig',
-            $this->dj->getTwigDataForProblemsAction($stats, forJury: true));
+            $this->dj->getTwigDataForProblemsAction($stats, teamId: $teamId, forJury: true));
     }
 
     #[Route(path: '/{probId<\d+>}/samples.zip', name: 'jury_problem_sample_zip')]
@@ -262,7 +268,7 @@ class ProblemController extends BaseController
     public function exportAction(int $problemId): StreamedResponse
     {
         // This might take a while.
-        ini_set('max_execution_time', '300');
+        Utils::extendMaxExecutionTime(300);
         /** @var Problem $problem */
         $problem = $this->em->createQueryBuilder()
             ->from(Problem::class, 'p')
@@ -474,6 +480,7 @@ class ProblemController extends BaseController
                 ->setProblem($problem)
                 ->setName($name)
                 ->setType($type)
+                ->setMimeType(mime_content_type($file->getRealPath()))
                 ->setContent($attachmentContent);
 
             $this->em->persist($attachment);
@@ -593,8 +600,10 @@ class ProblemController extends BaseController
                         $content = file_get_contents($file->getRealPath());
                         if ($type === 'image') {
                             if (mime_content_type($file->getRealPath()) === 'image/svg+xml') {
+                                $originalContent = $content;
                                 $content = Utils::sanitizeSvg($content);
                                 if ($content === false) {
+                                    $imageType = Utils::getImageType($originalContent, $error);
                                     $this->addFlash('danger', sprintf('image: %s', $error));
                                     return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                                 }
@@ -994,6 +1003,20 @@ class ProblemController extends BaseController
             'form' => $form,
             'uploadForm' => $uploadForm,
         ]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/delete-multiple', name: 'jury_problem_delete_multiple', methods: ['GET', 'POST'])]
+    public function deleteMultipleAction(Request $request): Response
+    {
+        return $this->deleteMultiple(
+            $request,
+            Problem::class,
+            'probid',
+            'jury_problems',
+            'No problems could be deleted (they might be locked).',
+            fn(Problem $problem) => !$problem->isLocked()
+        );
     }
 
     #[IsGranted('ROLE_ADMIN')]

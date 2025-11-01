@@ -8,6 +8,7 @@ use App\DataTransferObject\ContestProblemWrapper;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
+use App\Entity\ProblemAttachment;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -18,7 +19,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -58,7 +59,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     /**
      * Add one or more problems.
      *
-     * @return int[]
+     * @return string[]
      * @throws BadRequestHttpException
      * @throws NonUniqueResultException
      */
@@ -105,7 +106,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
         $messages = [];
         if ($this->importExportService->importProblemsData($contest, $data, $ids, $messages)) {
-            return $ids;
+            return $ids ?? [];
         }
         $message = "Error while adding problems";
         if (!empty($messages)) {
@@ -434,6 +435,58 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         }
 
         return $contestProblem->getProblem()->getProblemStatementStreamedResponse();
+    }
+
+    /**
+     * Get an attachment for given problem for this contest.
+     * @throws NonUniqueResultException
+     */
+    #[Rest\Get('/{id}/attachment/{filename}')]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given problem attachment for this contest'
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
+    #[OA\Parameter(
+        name: 'filename',
+        description: 'The filename of the attachment to get',
+        in: 'query',
+        required: true,
+        schema: new OA\Schema(type: 'string')
+    )]
+    public function attachmentAction(Request $request, string $id, string $filename): Response
+    {
+        $contestProblemData = $this
+            ->getQueryBuilder($request)
+            ->setParameter('id', $id)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($contestProblemData === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        /** @var ContestProblem $contestProblem */
+        $contestProblem = $contestProblemData[0];
+
+        /** @var ProblemAttachment|null $attachment */
+        $attachment = $this->em->createQueryBuilder()
+            ->from(ProblemAttachment::class, 'a')
+            ->join('a.content', 'c')
+            ->select('a, c')
+            ->andWhere('a.problem = :problem')
+            ->andWhere('a.name = :filename')
+            ->setParameter('problem', $contestProblem->getProblem())
+            ->setParameter('filename', $filename)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($attachment === null) {
+            throw new NotFoundHttpException(sprintf('Attachment with filename \'%s\' not found for problem with ID \'%s\'', $filename, $id));
+        }
+
+        return $attachment->getStreamedResponse();
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder

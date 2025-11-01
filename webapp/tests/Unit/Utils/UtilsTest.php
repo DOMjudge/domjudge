@@ -317,12 +317,17 @@ class UtilsTest extends TestCase
         self::assertEquals('#00BFFF', Utils::convertToHex('deep sky blue'));
         self::assertEquals('#FFD700', Utils::convertToHex('GOLD'));
         self::assertEquals('#B8860B', Utils::convertToHex('darkgoldenrod '));
+        self::assertEquals('#aabbcc', Utils::convertToHex('#aabbcc'));
+        self::assertEquals('#aaabbbccc', Utils::convertToHex('#aaabbbccc'));
+        self::assertEquals('#def', Utils::convertToHex('#def'));
+        self::assertEquals('#f1A', Utils::convertToHex('#f1A'));
     }
 
     public function testParseHexColor(): void
     {
         self::assertEquals([255, 255, 255], Utils::parseHexColor('#ffffff'));
         self::assertEquals([0, 0, 0], Utils::parseHexColor('#000000'));
+        self::assertEquals([0, 0, 0], Utils::parseHexColor('#000'));
         self::assertEquals([171, 205, 239], Utils::parseHexColor('#abcdef'));
         self::assertEquals([254, 220, 186], Utils::parseHexColor('#FEDCBA'));
     }
@@ -343,6 +348,34 @@ class UtilsTest extends TestCase
         self::assertEquals('#fedcba', Utils::rgbToHex([254, 220, 186]));
     }
 
+    public function testRelativeLuminance(): void
+    {
+        self::assertEquals(0.0, Utils::relativeLuminance("#000000"));
+        self::assertEquals(1.0, Utils::relativeLuminance("#FFFfff"));
+        self::assertEquals(0.00751604342389449, Utils::relativeLuminance("#123"));
+    }
+
+    /**
+     * Test that the APCA contrast function returns the correct data
+     */
+    public function testApcaContrast(): void
+    {
+        self::assertEquals(-114.0, Utils::apcaContrast("#fff", "#000000"));
+        self::assertEquals(-114.0, Utils::apcaContrast("#ffffff", "#000000"));
+        self::assertEquals(-114.0, Utils::apcaContrast("#fffffffff", "#000"));
+        self::assertEquals(114.0, Utils::apcaContrast("#000000", "#ffffff"));
+        self::assertEquals(0.0, Utils::apcaContrast("#fffFFF", "#FFFfff"));
+        self::assertEquals(-0.36, Utils::apcaContrast("#111", "#111"));
+    }
+
+    public function testHexToForegroundAndBorder(): void
+    {
+        self::assertEquals(["#000000", "#bfbd9d"], Utils::hexToForegroundAndBorder("#fffDDD"));
+        self::assertEquals(["#ffffff", "#000000"], Utils::hexToForegroundAndBorder("#000000"));
+        self::assertEquals(["#000000", "#6a7b8c"], Utils::hexToForegroundAndBorder("#ABC"));
+        self::assertEquals(["#000000", "#6a7b8c"], Utils::hexToForegroundAndBorder("#AAABBBCCC"));
+    }
+
     /**
      * Test function that converts colour name to hex notation.
      * Returns null for unknown values.
@@ -351,7 +384,9 @@ class UtilsTest extends TestCase
     {
         self::assertNull(Utils::convertToHex('doesnotexist'));
         self::assertNull(Utils::convertToHex('#aabbccdd'));
-        self::assertNull(Utils::convertToHex('#12346h'));
+        self::assertNull(Utils::convertToHex('#12345h'));
+        self::assertNull(Utils::convertToHex('#1234'));
+        self::assertNull(Utils::convertToHex('#12'));
     }
 
     /**
@@ -770,7 +805,7 @@ class UtilsTest extends TestCase
                 <a xlink:href="javascript:alert(2)">test 2</a>
                 <a href="#test3">test 3</a>
                 <a xlink:href="#test">test 4</a>
-            
+
                 <a href="data:data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' onload='alert(88)'%3E%3C/svg%3E">test 5</a>
                 <a xlink:href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' onload='alert(88)'%3E%3C/svg%3E">test 6</a>
                 <use xlink:href="defs.svg#icon-1"/>
@@ -783,7 +818,7 @@ class UtilsTest extends TestCase
             <this>shouldn't be here</this>
             <script>alert(1);</script>
             <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="541.54" y1="299.573" x2="543.179" y2="536.458"/>
-            
+
             </svg>
             EOF;
         $clean = Utils::sanitizeSvg($dirty);

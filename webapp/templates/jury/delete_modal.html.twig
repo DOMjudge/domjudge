@@ -1,6 +1,12 @@
 {% extends "partials/modal.html.twig" %}
 
-{% block title %}Delete {{ type }} {{ primaryKey }} - "{{ description }}"{% endblock %}
+{% block title %}
+    {% if count > 1 %}
+        Delete {{ count }} {% if type|slice(-1) == 'y' %}{{ type|slice(0, -1) }}ies{% else %}{{ type }}s{% endif %}
+    {% else %}
+        Delete {{ type }} {{ primaryKey }} - "{{ description }}"
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 
@@ -9,7 +15,16 @@
             <strong>Error: {{ messages.0 }}</strong>
         </div>
     {% else %}
-        <p>You're about to delete {{ type }} {{ primaryKey }} "{{ description }}".</p>
+        {% if count > 1 %}
+            <p>You're about to delete the following {{ count }} {% if type|slice(-1) == 'y' %}{{ type|slice(0, -1) }}ies{% else %}{{ type }}s{% endif %}:</p>
+            <ul>
+                {% for desc in description|split(',') %}
+                    <li>{{ desc|trim }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You're about to delete {{ type }} {{ primaryKey }} "{{ description }}".</p>
+        {% endif %}
 
         {% if messages is not empty %}
             <p>

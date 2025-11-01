@@ -52,7 +52,7 @@ class Problem extends BaseApiEntity implements
 
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]
     #[Assert\NotBlank]
-    private string $name;
+    private string $name = 'Unknown name';
 
     #[ORM\Column(options: [
         'comment' => 'Maximum run time (in seconds) for this problem',
@@ -108,6 +108,10 @@ class Problem extends BaseApiEntity implements
     public const TYPE_INTERACTIVE = 8;
     public const TYPE_SUBMIT_ANSWER = 16;
 
+    /**
+     * @var array<int, string>
+     */
+    #[Serializer\Exclude]
     private array $typesToString = [
         self::TYPE_PASS_FAIL => 'pass-fail',
         self::TYPE_SCORING => 'scoring',
@@ -195,6 +199,14 @@ class Problem extends BaseApiEntity implements
     // object that represents the problem statement.
     #[Serializer\Exclude]
     private ?FileWithName $statementForApi = null;
+
+    /**
+     * @var FileWithName[]
+     */
+    // This field gets filled by the contest problem visitor with an array of data transfer
+    // objects that represents the problem attachments.
+    #[Serializer\Exclude]
+    private array $attachmentsForApi = [];
 
 
     /**
@@ -292,8 +304,12 @@ class Problem extends BaseApiEntity implements
         return $this->special_compare_args;
     }
 
+    /**
+     * @param list<string> $types
+     */
     public function setTypesAsString(array $types): Problem
     {
+        /** @var array<string, int> $stringToTypes */
         $stringToTypes = array_flip($this->typesToString);
         $typeConstants = [];
         foreach ($types as $type) {
@@ -320,6 +336,9 @@ class Problem extends BaseApiEntity implements
         return implode(', ', $typeStrings);
     }
 
+    /**
+     * @return list<int>
+     */
     public function getTypes(): array
     {
         $ret = [];
@@ -331,6 +350,9 @@ class Problem extends BaseApiEntity implements
         return $ret;
     }
 
+    /**
+     * @param array<int> $types
+     */
     public function setTypes(array $types): Problem
     {
         $types = array_unique($types);
@@ -338,7 +360,11 @@ class Problem extends BaseApiEntity implements
         foreach ($types as $type) {
             $this->types |= $type;
         }
-        if (!($this->types & self::TYPE_PASS_FAIL) xor ($this->types & self::TYPE_SCORING)) {
+        if (!($this->types & self::TYPE_SCORING)) {
+            // In case the problem is not explicitly a scoring problem, default to pass-fail.
+            $this->types |= self::TYPE_PASS_FAIL;
+        }
+        if (($this->types & self::TYPE_PASS_FAIL) && ($this->types & self::TYPE_SCORING)) {
             throw new Exception("Invalid problem type: must be exactly one of 'pass-fail' or 'scoring'.");
         }
         if ($this->types & self::TYPE_SUBMIT_ANSWER) {
@@ -617,6 +643,26 @@ class Problem extends BaseApiEntity implements
         return array_filter([$this->statementForApi]);
     }
 
+
+    /**
+     * @param list<FileWithName> $attachmentsForApi
+     */
+    public function setAttachmentsForApi(array $attachmentsForApi = []): void
+    {
+        $this->attachmentsForApi = $attachmentsForApi;
+    }
+
+    /**
+     * @return FileWithName[]
+     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('attachments')]
+    #[Serializer\Type('array<App\DataTransferObject\FileWithName>')]
+    public function getAttachmentsForApi(): array
+    {
+        return $this->attachmentsForApi;
+    }
+
     public function addLanguage(Language $language): Problem
     {
         $this->languages[] = $language;
@@ -635,5 +681,15 @@ class Problem extends BaseApiEntity implements
     {
         $this->languages->removeElement($language);
         return $this;
+    }
+
+    public function isLocked(): bool
+    {
+        foreach ($this->getContestProblems() as $contestProblem) {
+            if ($contestProblem->getContest()->isLocked()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

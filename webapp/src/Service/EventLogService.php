@@ -299,7 +299,7 @@ class EventLogService
 
         // Generate JSON content if not set, for deletes this is only the ID.
         if ($action === self::ACTION_DELETE) {
-            $json = array_values(array_map(fn($id) => ['id' => (string)$id], $ids));
+            $json = array_map(fn($id) => ['id' => (string)$id], $ids);
         } elseif ($json === null) {
             $url = $type === 'contests' ? '' : ('/' . $type);
 
@@ -315,13 +315,13 @@ class EventLogService
                 $query = ['ids' => $ids];
             }
 
-            $this->dj->withAllRoles(function () use ($query, $url, &$json) {
-                $json = $this->dj->internalApiRequest($url, Request::METHOD_GET, $query);
+            $this->dj->withAllRoles(function () use ($query, $url, &$response) {
+                $response = $this->dj->internalApiRequest($url, Request::METHOD_GET, $query);
             });
 
-            if ($json === null) {
+            if ($response === null || $response === '') {
                 $this->logger->warning(
-                    "EventLogService::log got no JSON data from '%s'", [ $url ]
+                    "EventLogService::log got no data from '%s'", [ $url ]
                 );
                 // If we didn't get data from the API, then that is probably
                 // because this particular data is not visible, for example
@@ -329,6 +329,8 @@ class EventLogService
                 // have data, there's also no point in trying to insert
                 // anything in the eventlog table.
                 return;
+            } else {
+                $json = Utils::jsonDecode($response);
             }
         }
 
@@ -484,7 +486,10 @@ class EventLogService
                 $url = sprintf('/contests/%s/awards', $contest->getExternalid());
                 $awards = [];
                 $this->dj->withAllRoles(function () use ($url, &$awards) {
-                    $awards = $this->dj->internalApiRequest($url);
+                    $response = $this->dj->internalApiRequest($url);
+                    if (!empty($response)) {
+                        $awards = Utils::jsonDecode($response);
+                    }
                 });
                 foreach ($awards as $award) {
                     $this->insertEvent($contest, 'awards', $award['id'], $award);
@@ -625,7 +630,8 @@ class EventLogService
                 $urlPart = $endpoint === 'contests' ? '' : ('/' . $endpoint);
                 $url = sprintf('/contests/%s%s', $contestId, $urlPart);
                 $this->dj->withAllRoles(function () use ($url, &$data) {
-                    $data = $this->dj->internalApiRequest($url);
+                    $response = $this->dj->internalApiRequest($url);
+                    $data = (empty($response) ? null : Utils::jsonDecode($response));
                 });
 
                 // Get a partial reference to the contest,

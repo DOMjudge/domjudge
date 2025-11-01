@@ -118,12 +118,13 @@
             type: int
             default_value: 1
             public: false
-            description: Lazy evaluation of results? If enabled, stops judging as soon as a highest priority result is found, otherwise always all testcases will be judged. On request will not auto-start judging and is typically used when running as analyst system.
+            description: Lazy evaluation of results? If enabled, stops judging as soon as a highest priority result is found, otherwise always all testcases will be judged. On request will not auto-start judging. Analyst mode tries to judge only interesting testcases.
             options:
                 1: Lazy
                 2: Full judging
                 3: Only on request
-            regex: /^[123]$/
+                4: Analyst mode
+            regex: /^[1234]$/
             error_message: A value between 1 and 3 is required.
         -   name: judgehost_warning
             type: int
@@ -392,6 +393,12 @@
             description: Time in seconds after an external contest source reader last checked in before showing its status as `critical`.
             regex: /^\d+$/
             error_message: A non-negative number is required.
+        -   name: check_new_version
+            type: enum
+            enum_class: App\Utils\UpdateStrategy
+            default_value: none
+            public: false
+            description: Automatically check and notify for new DOMjudge releases?
         -   name: adminer_enabled
             type: bool
             default_value: false

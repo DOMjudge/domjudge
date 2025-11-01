@@ -35,7 +35,7 @@ For your convenience, the following command will install the necessary
 software on the DOMjudge server as mentioned above when using Debian
 GNU/Linux, or one of its derivative distributions like Ubuntu::
 
-  sudo apt install libcgroup-dev make acl zip unzip pv mariadb-server apache2 \
+  sudo apt install libcgroup-dev make acl zip unzip pv mariadb-server nginx \
         php php-fpm php-gd php-cli php-intl php-mbstring php-mysql \
         php-curl php-json php-xml php-zip composer ntp python3-yaml php-bcmath
 
@@ -46,7 +46,7 @@ Red Hat Enterprise Linux and Rocky Linux (before V9)::
         php-gd php-cli php-intl php-mbstring php-mysqlnd php-fpm \
         php-xml php-zip composer chronyd python3-pyyaml php-bcmath
 
-`nginx` can be used as an alternate web server.
+`apache2` can be used as an alternate web server.
 
 The packages `libcgroup-dev` (`libcgroup-devel` on Fedora) and `make` are
 :ref:`judgehost software requirements <judgehost_software>`, but also
@@ -109,24 +109,7 @@ with it. Refer to the documentation of your web server and PHP for
 details. In the examples below, replace |phpversion| with the PHP version
 you're installing.
 
-To configure the Apache web server for DOMjudge, use the Apache
-configuration snippet from ``etc/apache.conf``. It contains
-examples for configuring the DOMjudge pages with an alias directive,
-or as a virtualhost, optionally with TLS; it also contains PHP and security
-settings. Reload the web server for changes to take effect.
-
-.. parsed-literal::
-
-  ln -s <DOMSERVER_INSTALL_PATH>/etc/apache.conf /etc/apache2/conf-available/domjudge.conf
-  ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/|phpversion|/fpm/pool.d/domjudge.conf
-  a2enmod proxy_fcgi setenvif rewrite
-  a2enconf php\ |phpversion|-fpm domjudge
-  # Edit the file /etc/apache2/conf-available/domjudge.conf and
-  # /etc/php/\ |phpversion|/fpm/pool.d/domjudge.conf to your needs
-  service php\ |phpversion|-fpm reload
-  service apache2 reload
-
-An nginx webserver configuration snippet is also provided in
+To configure the nginx web server for DOMjudge, use the nginx configuration snippet in 
 ``etc/nginx-conf``.  You still need ``htpasswd`` from ``apache2-utils``
 though. To use this configuration, perform the following steps:
 
@@ -149,6 +132,23 @@ On Fedora, use the following nginx configuration steps:
   # <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf to your needs
   systemctl restart php-fpm.service
   systemctl restart nginx.service
+
+To configure the Apache web server for DOMjudge, use the Apache
+configuration snippet from ``etc/apache.conf``. It contains
+examples for configuring the DOMjudge pages with an alias directive,
+or as a virtualhost, optionally with TLS; it also contains PHP and security
+settings. Reload the web server for changes to take effect.
+
+.. parsed-literal::
+
+  ln -s <DOMSERVER_INSTALL_PATH>/etc/apache.conf /etc/apache2/conf-available/domjudge.conf
+  ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/|phpversion|/fpm/pool.d/domjudge.conf
+  a2enmod proxy_fcgi setenvif rewrite
+  a2enconf php\ |phpversion|-fpm domjudge
+  # Edit the file /etc/apache2/conf-available/domjudge.conf and
+  # /etc/php/\ |phpversion|/fpm/pool.d/domjudge.conf to your needs
+  service php\ |phpversion|-fpm reload
+  service apache2 reload
 
 The judgehosts connect to DOMjudge via the DOMjudge API so need
 to be able to access at least this part of the web interface.

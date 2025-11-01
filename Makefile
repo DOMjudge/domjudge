@@ -11,6 +11,9 @@ REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
 
+debpool := /etc/php/$(PHPVERSION)/fpm/pool.d
+fedpool := /etc/php-fpm.d
+
 default:
 	@echo "No default target"
 	@echo
@@ -234,10 +237,12 @@ inplace-install-l:
 	@echo "========== Maintainer Install Completed =========="
 	@echo ""
 	@echo "Next:"
-	@echo "    - Configure apache2"
-	@echo "        sudo make inplace-postinstall-apache"
 	@echo "    - Configure nginx"
 	@echo "        sudo make inplace-postinstall-nginx"
+	@echo "    - Configure apache2"
+	@echo "        sudo make inplace-postinstall-apache"
+	@echo "    - Configure judgedaemon"
+	@echo "        sudo make inplace-postinstall-judgedaemon"
 	@echo "    - Set up database"
 	@echo "        ./sql/dj_setup_database -u root [-r|-p ROOT_PASS] install"
 	@echo ""
@@ -245,36 +250,71 @@ inplace-install-l:
 	@echo "    - Give the webserver access to things it needs"
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret"
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/symfony_app.secret"
+	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/domserver-static.php"
+	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/verdicts.php"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m d:m::rwx          $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m   m::rwx          $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/teams"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/teams"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/banners"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/banners"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations"
+	@echo "        setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m   m::rwx                    $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m mask::rwx                   $(CURDIR)"
 	@echo "        # Also make sure you keep access"
 	@echo "        setfacl -R -m d:u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m   u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
+	@echo "        And manually make sure the webserver has traversal access to: $(CURDIR)"
 	@echo "    - Configure webserver"
-	@echo "        Apache 2:"
-	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/domjudge.conf"
-	@echo "           a2enconf domjudge"
-	@echo "           a2enmod rewrite headers"
-	@echo "           systemctl restart apache2"
 	@echo "        Nginx + PHP-FPM:"
 	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/"
 	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm /etc/php/$(PHPVERSION)/fpm/pool.d/domjudge.conf"
 	@echo "           systemctl restart nginx"
 	@echo "           systemctl restart php-fpm"
+	@echo "        Apache 2:"
+	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/domjudge.conf"
+	@echo "           a2enconf domjudge"
+	@echo "           a2enmod rewrite headers"
+	@echo "           systemctl restart apache2"
 	@echo ""
 	@echo "The admin password for the web interface is in etc/initial_admin_password.secret"
 
 inplace-postinstall-permissions:
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/symfony_app.secret
+	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/domserver-static.php
+	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/verdicts.php
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
 	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/teams
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/teams
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/banners
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/banners
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/affiliations
 	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
 	setfacl -R -m   u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
 	setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var
 	setfacl -R -m   m::rwx                    $(CURDIR)/webapp/var
+	setfacl -R -m mask::rwx                   $(CURDIR)
+	if command -v sestatus >/dev/null 2>&1; then \
+		chcon -R -t httpd_sys_content_t $(CURDIR)/webapp; \
+		chcon -R -t httpd_config_t $(CURDIR)/etc; \
+		chcon -R -t httpd_log_t $(CURDIR)/webapp/var/log; \
+		chcon -R -t httpd_sys_rw_content_t $(CURDIR)/webapp/var/cache; \
+		chcon -R -t httpd_sys_rw_content_t $(CURDIR)/webapp/public/images; \
+		chcon    -t httpd_exec_t $(CURDIR)/lib/alert; \
+	fi
 
 inplace-postinstall-apache: inplace-postinstall-permissions
 	@if [ ! -d "/etc/apache2/conf-enabled" ]; then echo "Couldn't find directory /etc/apache2/conf-enabled. Is apache installed?"; false; fi
@@ -284,12 +324,28 @@ inplace-postinstall-apache: inplace-postinstall-permissions
 	systemctl restart apache2
 
 inplace-postinstall-nginx: inplace-postinstall-permissions
-	@if [ ! -d "/etc/nginx/sites-enabled/" ]; then echo "Couldn't find directory /etc/nginx/sites-enabled/. Is nginx installed?"; false; fi
-	@if [ ! -d "/etc/php/$(PHPVERSION)/fpm/pool.d/" ]; then echo "Couldn't find directory /etc/php/$(PHPVERSION)/fpm/pool.d/. Is php-fpm installed?"; false; fi
-	ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf
-	ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/$(PHPVERSION)/fpm/pool.d/domjudge-fpm.conf
+	@if [ ! -d "/etc/nginx/" ]; then echo "Couldn't find directory /etc/nginx/. Is nginx installed?"; false; fi
+	@cmd="ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/conf.d/domjudge.conf"; \
+	if [ -d "/etc/nginx/sites-enabled/" ]; then \
+		cmd="ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf"; \
+	fi; echo $$cmd; $$cmd
 	systemctl restart nginx
-	systemctl restart php$(PHPVERSION)-fpm
+	@if [ ! -d "$(debpool)" ] && [ ! -d "$(fedpool)" ]; then \
+		echo "Couldn't find directory $(debpool) or $(fedpool). Is php-fpm installed?"; false; \
+	fi
+	@service="php-fpm"; phppool="$(fedpool)"; \
+	if [ -d "$(debpool)" ]; then \
+		phppool="$(debpool)"; \
+		service="php$(PHPVERSION)-fpm"; \
+	fi; \
+	service="systemctl restart $$service"; \
+	ln="ln -sf $(CURDIR)/etc/domjudge-fpm.conf $$phppool/domjudge-fpm.conf"; \
+	echo $$ln; echo $$service; $$ln; $$service
+
+inplace-postinstall-judgedaemon:
+	cp $(CURDIR)/etc/sudoers-domjudge /etc/sudoers.d/domjudge
+	chown root:root /etc/sudoers.d/domjudge
+	chmod 0600 /etc/sudoers.d/domjudge
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 inplace-uninstall-l:

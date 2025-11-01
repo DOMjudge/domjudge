@@ -23,7 +23,9 @@
                         {{ scoreboard.summary.numberOfPoints(sortOrder) }}
                     </td>
                 {% endif %}
-                <td></td>
+                {% if not scoringScoreboard %}
+                    <td></td>
+                {% endif %}
             {% endif %}
             {% for problem in scoreboard.problems %}
                 {% set summary = scoreboard.summary.problem(problem.probid) %}
@@ -41,7 +43,7 @@
 
                         <i class="fas fa-thumbs-down fa-fw"></i>
                         <span class="submreject" style="font-size:90%;" title="number of rejected submissions">
-                                {{ summary.numSubmissions[sortOrder] ?? 0 - summary.numSubmissionsCorrect[sortOrder] ?? 0 }}
+                                {{ (summary.numSubmissions[sortOrder] ?? 0) - (summary.numSubmissionsCorrect[sortOrder] ?? 0) }}
                             </span>
                         <br/>
 

@@ -14,7 +14,7 @@ class AssetUpdateService
     /**
      * Update assets for the given entity.
      */
-    public function updateAssets(AssetEntityInterface &$entity): void
+    public function updateAssets(AssetEntityInterface $entity): void
     {
         $fs = new Filesystem();
 

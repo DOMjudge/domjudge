@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Controller\API\GeneralInfoController as GI;
 use App\Controller\BaseController;
 use App\Entity\Contest;
+use App\Entity\ContestProblem;
 use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Problem;
@@ -55,6 +56,11 @@ class JuryMiscController extends BaseController
             if ($innodbSnapshotIsolation && $innodbSnapshotIsolation['Value'] === 'ON') {
                 $this->addFlash('danger', 'InnoDB snapshot isolation is enabled. Set --innodb_snapshot_isolation=OFF in your MariaDB configuration. See https://github.com/DOMjudge/domjudge/issues/2848 for more information.');
             }
+        }
+
+        $newestVersion = $this->dj->checkNewVersion();
+        if ($newestVersion) {
+            $this->addFlash('info', 'New release ' . $newestVersion . ' available at: https://www.domjudge.org/download.');
         }
 
         return $this->render('jury/index.html.twig', [
@@ -247,18 +253,8 @@ class JuryMiscController extends BaseController
     {
         /** @var Submission[] $submissions */
         $submissions = [];
-        if ($contest = $this->dj->getCurrentContest()) {
-            $submissions = $this->em->createQueryBuilder()
-                ->from(Submission::class, 's')
-                ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
-                ->select('s', 'j')
-                ->andWhere('s.contest = :contest')
-                ->andWhere('j.result IS NOT NULL')
-                ->setParameter('contest', $contest)
-                ->getQuery()
-                ->getResult();
-        }
-
+        /** @var ContestProblem[] $problems */
+        $problems = [];
         $numChecked   = 0;
         $numUnchecked = 0;
 
@@ -271,6 +267,20 @@ class JuryMiscController extends BaseController
         $verifier = 'auto-verifier';
 
         $verifyMultiple = (bool)$request->get('verify_multiple', false);
+
+        $contest = $this->dj->getCurrentContest();
+        if ($contest) {
+            $problems = $contest->getProblems();
+            $submissions = $this->em->createQueryBuilder()
+                ->from(Submission::class, 's')
+                ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
+                ->select('s', 'j')
+                ->andWhere('s.contest = :contest')
+                ->andWhere('j.result IS NOT NULL')
+                ->setParameter('contest', $contest)
+                ->getQuery()
+                ->getResult();
+        }
 
         foreach ($submissions as $submission) {
             // As we only load the needed judging, this will automatically be the first one
@@ -329,6 +339,8 @@ class JuryMiscController extends BaseController
             'verified' => $verified,
             'nomatch' => $nomatch,
             'earlier' => $earlier,
+            'problems' => $problems,
+            'contestId' => $this->dj->getCurrentContest()?->getCid(),
             'verifyMultiple' => $verifyMultiple,
         ]);
     }

@@ -109,21 +109,6 @@
                                         {% endif %}
 
                                         <div class="text-center">
-                                            {% if problem.problem.problemstatementType is not empty %}
-                                                <a class="btn btn-secondary" role="button"
-                                                   href="{{ path(problem_statement_path, {'probId': problem.probid}) }}">
-                                                    <i class="fas fa-file-{{ problem.problem.problemstatementType }}"></i>
-                                                    statement
-                                                </a>
-                                            {% endif %}
-
-                                            {% if numsamples > 0 %}
-                                                <a class="btn btn-secondary" role="button"
-                                                   href="{{ path(problem_sample_zip_path, {'probId': problem.probid}) }}">
-                                                    <i class="fas fa-file-archive"></i> samples
-                                                </a>
-                                            {% endif %}
-
                                             {% if show_submit_button | default(false) %}
                                                 {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
                                                     <a class="justify-content-center" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit', {problem: problem.probid}) }}">
@@ -138,6 +123,49 @@
                                                         </span>
                                                     </a>
                                                 {% endif %}
+                                            {% endif %}
+
+                                            {% set clarificationsCount = 0 %}
+                                            {% set unseenClarificationCount = 0 %}
+                                            {% if clarifications[problem.probid] is defined %}
+                                                {% set clarificationsCount = clarifications[problem.probid] | length %}
+                                                {% for clar in clarifications[problem.probid] %}
+                                                    {% if team and team.unreadClarifications.contains(clar) %}
+                                                        {% set unseenClarificationCount = unseenClarificationCount + 1 %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                            {% if clarificationsCount > 0 %}
+                                                <a data-ajax-modal class="btn btn-secondary" role="button"
+                                                   href="{{ path('team_clarification_by_prob', {'probId': problem.probid}) }}">
+                                                    <i class="fas fa-question-circle"></i>
+                                                    {% if clarificationsCount > 0 %}
+                                                        {% set badgeClass = 'text-bg-info' %}
+                                                        {% if unseenClarificationCount > 0 %}
+                                                            {% set badgeClass = 'text-bg-danger' %}
+                                                        {% endif %}
+                                                        <span class="badge {{ badgeClass }}">{{ clarificationsCount }}</span>
+                                                    {% endif %}
+                                                    clarifications
+                                                </a>
+                                            {% endif %}
+
+                                            <div style="margin-top: 10px;">
+                                            </div>
+
+                                            {% if problem.problem.problemstatementType is not empty %}
+                                                <a class="btn btn-secondary" role="button"
+                                                   href="{{ path(problem_statement_path, {'probId': problem.probid}) }}">
+                                                    <i class="fas fa-file-{{ problem.problem.problemstatementType }}"></i>
+                                                    statement
+                                                </a>
+                                            {% endif %}
+
+                                            {% if numsamples > 0 %}
+                                                <a class="btn btn-secondary" role="button"
+                                                   href="{{ path(problem_sample_zip_path, {'probId': problem.probid}) }}">
+                                                    <i class="fas fa-file-archive"></i> samples
+                                                </a>
                                             {% endif %}
                                         </div>
 

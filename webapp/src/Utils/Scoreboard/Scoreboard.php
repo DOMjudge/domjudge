@@ -5,6 +5,7 @@ namespace App\Utils\Scoreboard;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\RankCache;
+use App\Entity\ScoreboardType;
 use App\Entity\ScoreCache;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
@@ -31,6 +32,7 @@ class Scoreboard
      * @param TeamCategory[]   $categories
      * @param ContestProblem[] $problems
      * @param ScoreCache[]     $scoreCache
+     * @param RankCache[]      $rankCache
      */
     public function __construct(
         protected readonly Contest    $contest,
@@ -152,22 +154,32 @@ class Scoreboard
                 !array_key_exists($probId, $this->problems)) {
                 continue;
             }
+            $isCorrect = $scoreCell->getIsCorrect($this->restricted);
 
             $penalty = Utils::calcPenaltyTime(
-                $scoreCell->getIsCorrect($this->restricted),
+                $isCorrect,
                 $scoreCell->getSubmissions($this->restricted),
                 $this->penaltyTime, $this->scoreIsInSeconds
             );
 
+            $contestProblem = $scoreCell->getContest()->getContestProblem($scoreCell->getProblem());
+            // TODO: For actual scoring problems, we need to calculate the score here and
+            // output it with the correct precision. For now, this is always an integer.
+            $points = strval(
+                $isCorrect ?
+                $contestProblem->getPoints() : 0
+            );
+
             $this->matrix[$teamId][$probId] = new ScoreboardMatrixItem(
-                isCorrect: $scoreCell->getIsCorrect($this->restricted),
-                isFirst: $scoreCell->getIsCorrect($this->restricted) && $scoreCell->getIsFirstToSolve(),
+                isCorrect: $isCorrect,
+                isFirst: $isCorrect && $scoreCell->getIsFirstToSolve(),
                 numSubmissions: $scoreCell->getSubmissions($this->restricted),
                 numSubmissionsPending: $scoreCell->getPending($this->restricted),
                 time: $scoreCell->getSolveTime($this->restricted),
                 penaltyTime: $penalty,
                 runtime: $scoreCell->getRuntime($this->restricted),
                 numSubmissionsInFreeze: $scoreCell->getPending(false),
+                points: $points,
             );
         }
 
@@ -255,6 +267,11 @@ class Scoreboard
         }
 
         return false;
+    }
+
+    public function isScoring(): bool
+    {
+        return $this->contest->getScoreboardType() === ScoreboardType::SCORING;
     }
 
     /**

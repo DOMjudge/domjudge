@@ -43,14 +43,14 @@
         <ul class="nav nav-pills nav-fill" id="configtablist" role="tablist">
             {% for category in options %}
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link {{ (category.name == activeCategory) ? 'active' : '' }}" id="{{ category.name|replace({' ': ''}) }}-tab" data-bs-toggle="tab" href="#{{ category.name|replace({' ': ''}) }}" role="tab">{{ category.name }}</a>
+                    <a class="nav-link {{ (category.name == activeCategory) ? 'active' : '' }}" id="{{ category.name | replace({' ': ''}) }}-tab" data-bs-toggle="tab" href="#{{ category.name | replace({' ': ''}) }}" role="tab">{{ category.name }}</a>
                 </li>
             {% endfor %}
         </ul>
 
         <div class="tab-content mb-2" id="configtab">
         {% for category in options %}
-            <div class="tab-pane fade {{ (category.name == activeCategory) ? 'show active' : '' }}" id="{{ category.name|replace({' ': ''}) }}" role="tabpanel" aria-labelledby="{{ category.name|replace({' ': ''}) }}-tab">
+            <div class="tab-pane fade {{ (category.name == activeCategory) ? 'show active' : '' }}" id="{{ category.name | replace({' ': ''}) }}" role="tabpanel" aria-labelledby="{{ category.name | replace({' ': ''}) }}-tab">
                 <div class="card">
                     <div class="card-body">
                         <ul class="list-group list-group-flush">

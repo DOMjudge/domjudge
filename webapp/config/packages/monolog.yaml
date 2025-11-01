@@ -1,15 +1,3 @@
-monolog:
-    # Set up logger for the event feed importer.
-    # key, to make sure the logs don't also appear there.
-    channels:
-        - event-feed-importer
-    handlers:
-        event-feed-importer:
-            level: info
-            type: stream
-            path: "%kernel.logs_dir%/event-feed-importer.log"
-            channels: ["event-feed-importer"]
-
 when@dev:
     monolog:
         handlers:
@@ -30,10 +18,6 @@ when@dev:
                 type: console
                 process_psr_3_messages: false
                 channels: ["!event", "!doctrine", "!console"]
-
-            # In dev mode, also log debug messages
-            event-feed-importer:
-                level: debug
 
 when@test:
     monolog:

@@ -114,7 +114,7 @@ class QueueTask
         return $this->team;
     }
 
-    public function setStartTime(?float $startTime = null): QueueTask
+    public function setStartTime(string|float|null $startTime = null): QueueTask
     {
         $this->startTime = $startTime;
         return $this;

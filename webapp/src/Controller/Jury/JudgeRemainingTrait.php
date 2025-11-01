@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Entity\QueueTask;
+use App\Service\DOMJudgeService;
 
 trait JudgeRemainingTrait
 {
@@ -13,13 +14,18 @@ trait JudgeRemainingTrait
      */
     protected function judgeRemainingJudgings(array $judgings): void
     {
+        $lazyEval = $this->config->get('lazy_eval_results');
         $inProgress = [];
         $alreadyRequested = [];
         $invalidJudgings = [];
         $numRequested = 0;
+
+        // In analyst mode, when explicitly requested judging the remaining tasks is most important.
+        $priority = $lazyEval === DOMJudgeService::EVAL_ANALYST ? JudgeTask::PRIORITY_HIGH : JudgeTask::PRIORITY_LOW;
+
         foreach ($judgings as $judging) {
             $judgingId = $judging->getJudgingid();
-            if ($judging->getResult() === null) {
+            if ($judging->getResult() === null && $lazyEval !== DOMJudgeService::EVAL_ANALYST) {
                 $inProgress[] = $judgingId;
             } elseif ($judging->getJudgeCompletely()) {
                 $alreadyRequested[] = $judgingId;
@@ -40,7 +46,7 @@ trait JudgeRemainingTrait
 
                 $queueTask = new QueueTask();
                 $queueTask->setJudging($judging)
-                    ->setPriority(JudgeTask::PRIORITY_LOW)
+                    ->setPriority($priority)
                     ->setTeam($submission->getTeam())
                     ->setTeamPriority((int)$submission->getSubmittime())
                     ->setStartTime(null);

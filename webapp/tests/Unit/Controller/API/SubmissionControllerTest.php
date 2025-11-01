@@ -73,7 +73,7 @@ class SubmissionControllerTest extends BaseTestCase
             $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem_id']);
         }
         if (isset($dataToSend['user_id'])) {
-            $dataToSend['user_id'] = $this->resolveReference($dataToSend['user_id'], User::class);
+            $dataToSend['user_id'] = $this->resolveReference($dataToSend['user_id'], User::class, true);
         }
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -267,7 +267,7 @@ class SubmissionControllerTest extends BaseTestCase
             $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem_id']);
         }
         if (isset($dataToSend['user_id'])) {
-            $dataToSend['user_id'] = $this->resolveReference($dataToSend['user_id'], User::class);
+            $dataToSend['user_id'] = $this->resolveReference($dataToSend['user_id'], User::class, true);
         }
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;

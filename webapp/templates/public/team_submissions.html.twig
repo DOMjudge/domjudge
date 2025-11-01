@@ -1,0 +1,30 @@
+{% extends "public/base.html.twig" %}
+
+{% block title %}
+    {% if team is not empty %}Submissions for team {{ team.effectiveName }} on problem {{ problem.problem.name }} - {% endif %}{{ parent() }}
+{% endblock %}
+
+{% block content %}
+    <h1 class="mt-3">
+        Submissions for team {{ team.effectiveName }} on problem {{ problem | problemBadge }} {{ problem.problem.name }}
+    </h1>
+
+    <div
+        data-team-id="{{ team.externalid }}"
+        data-problem-id="{{ problem.externalId }}"
+        data-submissions-url="{{ path('public_submissions_data_cell', {teamId: team.externalid, problemId: problem.externalId}) }}">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        {% include 'public/partials/submission_list_template.html.twig' %}
+    </div>
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        $(function() {
+            const submissionsDiv = document.querySelector('[data-submissions-url]');
+            loadSubmissions(submissionsDiv, $(submissionsDiv));
+        });
+    </script>
+{% endblock %}

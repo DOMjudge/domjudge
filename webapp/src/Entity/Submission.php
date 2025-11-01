@@ -102,6 +102,13 @@ class Submission extends BaseApiEntity implements
     #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private ?string $importError = null;
 
+    #[ORM\Column(options: [
+        'comment' => 'Where did we receive this submission from?',
+        'default' => SubmissionSource::UNKNOWN,
+    ])]
+    #[Serializer\Exclude]
+    private SubmissionSource $source = SubmissionSource::UNKNOWN;
+
     #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
@@ -359,6 +366,16 @@ class Submission extends BaseApiEntity implements
         return $this->judgings;
     }
 
+    public function getValidJudging(): ?Judging
+    {
+        foreach ($this->judgings as $j) {
+            if ($j->getValid()) {
+                return $j;
+            }
+        }
+        return null;
+    }
+
     public function setLanguage(?Language $language = null): Submission
     {
         $this->language = $language;
@@ -537,6 +554,16 @@ class Submission extends BaseApiEntity implements
         return $this->external_judgements;
     }
 
+    public function getValidExternalJudgement(): ?ExternalJudgement
+    {
+        foreach ($this->external_judgements as $ej) {
+            if ($ej->getValid()) {
+                return $ej;
+            }
+        }
+        return null;
+    }
+
     public function setFileForApi(?FileWithName $fileForApi = null): Submission
     {
         $this->fileForApi = $fileForApi;
@@ -552,5 +579,16 @@ class Submission extends BaseApiEntity implements
     public function getFileForApi(): array
     {
         return array_filter([$this->fileForApi]);
+    }
+
+    public function setSource(SubmissionSource $source): Submission
+    {
+        $this->source = $source;
+        return $this;
+    }
+
+    public function getSource(): SubmissionSource
+    {
+        return $this->source;
     }
 }

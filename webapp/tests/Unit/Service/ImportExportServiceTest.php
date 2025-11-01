@@ -112,8 +112,13 @@ class ImportExportServiceTest extends BaseTestCase
     /**
      * @dataProvider provideImportContestDataSuccess
      */
-    public function testImportContestDataSuccess(mixed $data, string $expectedShortName, array $expectedProblems = []): void
-    {
+    public function testImportContestDataSuccess(
+        mixed $data,
+        string $expectedShortName,
+        string $expectedActivateTimeString,
+        ?string $expectedDeactivateTimeString,
+        array $expectedProblems = []
+    ): void {
         /** @var ImportExportService $importExportService */
         $importExportService = static::getContainer()->get(ImportExportService::class);
         self::assertTrue($importExportService->importContestData($data, $message, $cid), 'Importing failed: ' . $message);
@@ -125,6 +130,8 @@ class ImportExportServiceTest extends BaseTestCase
         self::assertEquals($data['name'], $contest->getName());
         self::assertEquals($data['public'] ?? true, $contest->getPublic());
         self::assertEquals($expectedShortName, $contest->getShortname());
+        self::assertEquals($expectedActivateTimeString, $contest->getActivatetimeString());
+        self::assertEquals($expectedDeactivateTimeString, $contest->getDeactivatetimeString());
 
         $problems = [];
         /** @var ContestProblem $problem */
@@ -149,6 +156,38 @@ class ImportExportServiceTest extends BaseTestCase
                 'scoreboard-freeze-length' => '1:00:00',
             ],
             'test-contest',
+            '2020-01-01 10:34:56 UTC',
+            null,
+        ];
+        // Adding absolute activate and deactivate time
+        yield [
+            [
+                'name'                     => 'Some test contest',
+                'short-name'               => 'test-contest',
+                'duration'                 => '5:00:00',
+                'start-time'               => '2020-01-01T12:34:56+02:00',
+                'activate_time'            => '2020-01-01T06:34:56+02:00',
+                'deactivate_time'          => '2020-01-01T18:34:56+02:00',
+                'scoreboard-freeze-length' => '1:00:00',
+            ],
+            'test-contest',
+            '2020-01-01 04:34:56 UTC',
+            '2020-01-01 16:34:56 UTC',
+        ];
+        // Adding relative activate and deactivate time
+        yield [
+            [
+                'name'                     => 'Some test contest',
+                'short-name'               => 'test-contest',
+                'duration'                 => '5:00:00',
+                'start-time'               => '2020-01-01T12:34:56+02:00',
+                'activate_time'            => '-6:00',
+                'deactivate_time'          => '+06:00:00',
+                'scoreboard-freeze-length' => '1:00:00',
+            ],
+            'test-contest',
+            '-6:00',
+            '+06:00:00',
         ];
         // - Freeze length without hours
         // - Set a short name with invalid characters
@@ -162,6 +201,8 @@ class ImportExportServiceTest extends BaseTestCase
                 'scoreboard-freeze-length' => '30:00',
             ],
             'test-contest__-__test',
+            '2020-01-01 10:34:56 UTC',
+            null,
         ];
         // Real life example from NWERC 2020 practice session, including problems.
         yield [
@@ -195,6 +236,8 @@ class ImportExportServiceTest extends BaseTestCase
                 ],
             ],
             'practice',
+            '2021-03-27 09:00:00 UTC',
+            null,
             ['A' => 'anothereruption', 'B' => 'brokengears', 'C' => 'cheating'],
         ];
 
@@ -209,6 +252,8 @@ class ImportExportServiceTest extends BaseTestCase
                 'public'                     => false,
             ],
             'test-contest',
+            '2020-01-01 10:34:56 UTC',
+            null,
         ];
     }
 
@@ -1252,6 +1297,7 @@ EOF;
                 ->setShortname($problemData['label']);
             $em->persist($problem);
             $em->persist($contestProblem);
+            $contest->addProblem($contestProblem);
             $em->flush();
             $contestProblemsById[$contestProblem->getExternalid()] = $contestProblem;
         }

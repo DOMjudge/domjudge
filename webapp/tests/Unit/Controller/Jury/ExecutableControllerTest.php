@@ -11,7 +11,7 @@ class ExecutableControllerTest extends JuryControllerTestCase
     protected static ?string $editDefault              = null;
 
     protected static string  $baseUrl                  = '/jury/executables';
-    protected static array   $exampleEntries           = ['adb', 'run', 'output validator for boolfind'];
+    protected static array   $exampleEntries           = ['adb', 'run', 'output validator for Boolean'];
     protected static string  $shortTag                 = 'executable';
     protected static array   $deleteEntities           = ['adb','default run script','rb','default full debug script'];
     protected static string  $deleteEntityIdentifier   = 'description';

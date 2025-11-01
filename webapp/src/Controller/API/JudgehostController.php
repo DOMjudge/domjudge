@@ -42,7 +42,7 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
@@ -175,7 +175,7 @@ class JudgehostController extends AbstractFOSRestController
             ->andWhere('jh.hostname = :hostname')
             ->andWhere('j.judgingid = jt.jobid')
             ->andWhere('jr.runresult IS NULL')
-            ->andWhere('j.valid = 1 OR r.valid = 1')
+            ->andWhere('j.valid = 1 OR j.rejudging IS NOT NULL')
             ->andWhere('j.result != :compiler_error')
             ->setParameter('hostname', $hostname)
             ->setParameter('compiler_error', 'compiler-error')
@@ -644,6 +644,8 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $runResult    = $request->request->get('runresult');
+        $startTime    = $request->request->get('start_time');
+        $endTime      = $request->request->get('end_time');
         $runTime      = $request->request->get('runtime');
         $outputRun    = $request->request->get('output_run');
         $outputDiff   = $request->request->get('output_diff');
@@ -659,7 +661,7 @@ class JudgehostController extends AbstractFOSRestController
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
         }
 
-        $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
+        $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime, $startTime, $endTime,
             $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
@@ -924,6 +926,8 @@ class JudgehostController extends AbstractFOSRestController
         string  $hostname,
         string  $runResult,
         string  $runTime,
+        string  $startTime,
+        string  $endTime,
         string  $outputSystem,
         string  $outputError,
         string  $outputDiff,
@@ -945,6 +949,8 @@ class JudgehostController extends AbstractFOSRestController
         $this->em->wrapInTransaction(function () use (
             $judgeTaskId,
             $runTime,
+            $startTime,
+            $endTime,
             $runResult,
             $outputSystem,
             $outputError,
@@ -966,7 +972,8 @@ class JudgehostController extends AbstractFOSRestController
             $judgingRun
                 ->setRunresult($runResult)
                 ->setRuntime((float)$runTime)
-                ->setEndtime(Utils::now())
+                ->setStarttime($startTime)
+                ->setEndtime($endTime)
                 ->setTestcasedir($testcasedir);
             $judgingRunOutput
                 ->setOutputRun(base64_decode($outputRun))
@@ -1076,7 +1083,9 @@ class JudgehostController extends AbstractFOSRestController
                     throw new BadMethodCallException('internal bug: the evaluated result changed during judging');
                 }
 
-                if ($lazyEval !== DOMJudgeService::EVAL_FULL) {
+                if ($lazyEval === DOMJudgeService::EVAL_ANALYST) {
+                    // Explicitly do not update priorities or cancel activated tasks.
+                } elseif ($lazyEval !== DOMJudgeService::EVAL_FULL) {
                     // We don't want to continue on this problem, even if there's spare resources.
                     $this->em->getConnection()->executeStatement(
                         'UPDATE judgetask SET valid=0, priority=:priority'
@@ -1656,9 +1665,7 @@ class JudgehostController extends AbstractFOSRestController
                     $judgetasks = [['type' => 'try_again']];
                 }
             }
-            if (!empty($judgetasks)) {
-                return $judgetasks;
-            }
+            return $judgetasks;
         }
 
         if ($this->config->get('enable_parallel_judging')) {

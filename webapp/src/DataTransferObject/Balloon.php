@@ -24,7 +24,6 @@ class Balloon
         public readonly ?int $categoryid,
         #[Serializer\Type('array<string, App\Entity\ContestProblem>')]
         public readonly array $total,
-        public readonly string $awards,
         public readonly bool $done,
     ) {}
 }

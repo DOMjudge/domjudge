@@ -7,6 +7,7 @@ use App\Entity\ContestProblem;
 use App\Entity\JudgeTask;
 use App\Entity\Problem;
 use App\Entity\QueueTask;
+use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
@@ -59,6 +60,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
             'shadow_mode' => 0,
             'sourcefiles_limit' => 1,
             'sourcesize_limit' => 1024*256,
+            'lazy_eval_results' => 1,
         ];
 
         $this->config = $this->createMock(ConfigurationService::class);
@@ -151,13 +153,10 @@ class QueuetaskIntegrationTest extends KernelTestCase
         // Using the TestBrowserToken is the easiest way to do this.
         $user  = $this->em->getRepository(User::class)->findAll()[0];
         $token = new TestBrowserToken([], $user, 'main');
-        if (method_exists($token, 'setAuthenticated')) {
-            $token->setAuthenticated(true, false);
-        }
         self::getContainer()->get('security.untracked_token_storage')->setToken($token);
     }
 
-    private function submit(?float $time, ?Team $team = null, ?Problem $problem = null, string $source = 'team page'): QueueTask
+    private function submit(?float $time, ?Team $team = null, ?Problem $problem = null, SubmissionSource $source = SubmissionSource::TEAM_PAGE): QueueTask
     {
         $contest = $this->em->getRepository(Contest::class)->find($this->contest->getCid());
         $team ??= $this->teams[0];
@@ -323,15 +322,15 @@ class QueuetaskIntegrationTest extends KernelTestCase
     {
         $time = Utils::now();
 
-        $normal = $this->submit($time, $this->teams[0], null, 'team page');
+        $normal = $this->submit($time, $this->teams[0], null, SubmissionSource::TEAM_PAGE);
         self::assertEquals((int)$time, $normal->getTeamPriority());
         self::assertEquals(JudgeTask::PRIORITY_DEFAULT, $normal->getPriority());
 
-        $api = $this->submit($time, $this->teams[1], null, 'api');
+        $api = $this->submit($time, $this->teams[1], null, SubmissionSource::API);
         self::assertEquals((int)$time, $api->getTeamPriority());
         self::assertEquals(JudgeTask::PRIORITY_DEFAULT, $api->getPriority());
 
-        $problem_import = $this->submit($time, $this->teams[2], null, 'problem import');
+        $problem_import = $this->submit($time, $this->teams[2], null, SubmissionSource::PROBLEM_IMPORT);
         self::assertEquals((int)$time, $problem_import->getTeamPriority());
         self::assertEquals(JudgeTask::PRIORITY_LOW, $problem_import->getPriority());
     }

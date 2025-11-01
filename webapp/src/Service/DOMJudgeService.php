@@ -31,6 +31,7 @@ use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\FreezeData;
+use App\Utils\UpdateStrategy;
 use App\Utils\Utils;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,14 +39,17 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\InputBag;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -61,6 +65,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Twig\Environment;
 use ZipArchive;
 
@@ -69,10 +74,13 @@ class DOMJudgeService
     protected ?Executable $defaultCompareExecutable = null;
     protected ?Executable $defaultRunExecutable = null;
 
+    private string $localVersionString = '';
+
     final public const EVAL_DEFAULT = 0;
     final public const EVAL_LAZY = 1;
     final public const EVAL_FULL = 2;
     final public const EVAL_DEMAND = 3;
+    final public const EVAL_ANALYST = 4;
 
     // Regex external identifiers must adhere to. Note that we are not checking whether it
     // does not start with a dot or dash or ends with a dot. We could but it would make the
@@ -106,6 +114,10 @@ class DOMJudgeService
         protected string $projectDir,
         #[Autowire('%domjudge.vendordir%')]
         protected string $vendorDir,
+        #[Autowire('%domjudge.version%')]
+        protected readonly string $domjudgeVersion,
+        #[Autowire('%domjudge.installmethod%')]
+        protected readonly string $domjudgeInstallMethod,
     ) {}
 
     /**
@@ -651,13 +663,15 @@ class DOMJudgeService
             return null;
         }
 
-        $content = $response->getContent();
-
-        if ($content === '') {
-            return null;
+        if ($response instanceof StreamedResponse) {
+            ob_start(flags: PHP_OUTPUT_HANDLER_REMOVABLE);
+            $response->sendContent();
+            $content = ob_get_clean();
+        } else {
+            $content = $response->getContent();
         }
 
-        return Utils::jsonDecode($content);
+        return $content;
     }
 
     public function getDomjudgeEtcDir(): string
@@ -718,6 +732,7 @@ class DOMJudgeService
      * @param string      $origname The original filename as submitted by the team
      * @param string|null $language Langid of the programming language this file is in
      * @param bool        $asTeam   Print the file as the team associated with the user
+     * @return array{0: bool, 1: string}
      */
     public function printUserFile(
         string $filename,
@@ -1023,6 +1038,7 @@ class DOMJudgeService
 
         $problems = [];
         $samples = [];
+        $clars = [];
         if ($contest && ($forJury || $contest->getFreezeData()->started())) {
             $problems = $this->em->createQueryBuilder()
                 ->from(ContestProblem::class, 'cp')
@@ -1052,6 +1068,27 @@ class DOMJudgeService
             foreach ($samplesData as $sample) {
                 $samples[$sample['probid']] = $sample['numsamples'];
             }
+
+            $raw_clars = $this->em->createQueryBuilder()
+                ->from(Clarification::class, 'clar')
+                ->select('clar')
+                ->andWhere('clar.contest = :cid')
+                // Only clars associated with a problem.
+                ->andWhere('clar.problem IS NOT NULL')
+                // Only clars send from the jury.
+                ->andWhere('clar.sender IS NULL')
+                // Only clars send to all teams or just this team.
+                ->andWhere('clar.recipient IS NULL OR clar.recipient = :teamid')
+                ->setParameter('cid', $contest->getCid())
+                ->setParameter('teamid', $teamId)
+                ->orderBy('clar.submittime', 'DESC')
+                ->getQuery()
+                ->getResult();
+
+            // Group clarifications by problem id.
+            foreach ($raw_clars as $clar) {
+                $clars[$clar->getProblem()->getProbid()][] = $clar;
+            }
         }
 
         $data = [
@@ -1060,6 +1097,8 @@ class DOMJudgeService
             'showLimits' => $showLimits,
             'defaultMemoryLimit' => $defaultMemoryLimit,
             'timeFactorDiffers' => $timeFactorDiffers,
+            'clarifications' => $clars,
+            'team' => $teamId ? $this->em->getRepository(Team::class)->find($teamId) : null,
         ];
 
         if ($contest && $this->config->get('show_public_stats')) {
@@ -1180,7 +1219,7 @@ class DOMJudgeService
         }
     }
 
-    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = false, int $overshoot = 0): void
+    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = false, int $overshoot = 0, bool $valid = true): void
     {
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
@@ -1193,7 +1232,7 @@ class DOMJudgeService
             return;
         }
 
-        $this->actuallyCreateJudgetasks($priority, $judging, $overshoot);
+        $this->actuallyCreateJudgetasks($priority, $judging, $overshoot, $valid);
 
         $team = $submission->getTeam();
         $result = $this->em->createQueryBuilder()
@@ -1211,7 +1250,7 @@ class DOMJudgeService
 
         // Teams that submit frequently slow down the judge queue but should not be able to starve other teams of their
         // deserved and timely judgement.
-        // For every "recent" pending job in the queue by that team, add a penalty (60s). Our definiition of "recent"
+        // For every "recent" pending job in the queue by that team, add a penalty (60s). Our definition of "recent"
         // includes all submissions that have been placed at a virtual time (including penalty) more recent than 60s
         // ago. This is done in order to avoid punishing teams who submit while their submissions are stuck in the queue
         // for other reasons, for example an internal error for a problem or language.
@@ -1506,6 +1545,7 @@ class DOMJudgeService
         $assetRegex = '|/CHANGE_ME/([/a-z0-9_\-\.]*)(\??[/a-z0-9_\-\.=]*)|i';
         preg_match_all($assetRegex, $contestPage, $assetMatches);
         $contestPage = preg_replace($assetRegex, '$1$2', $contestPage);
+        $contestPage = str_replace('/public/submissions-data.json', 'submissions-data.json', $contestPage);
 
         $zip = new ZipArchive();
         if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "contest-"))) {
@@ -1517,6 +1557,13 @@ class DOMJudgeService
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary zip file.');
         }
         $zip->addFromString('index.html', $contestPage);
+
+        $submissionsDataRequest  = Request::create('/public/submissions-data.json', Request::METHOD_GET);
+        $submissionsDataRequest->setSession($this->requestStack->getSession());
+        /** @var JsonResponse $response */
+        $response = $this->httpKernel->handle($submissionsDataRequest, HttpKernelInterface::SUB_REQUEST);
+        $submissionsData = $response->getContent();
+        $zip->addFromString('submissions-data.json', $submissionsData);
 
         $publicPath = realpath(sprintf('%s/public/', $this->projectDir));
         foreach ($assetMatches[1] as $file) {
@@ -1543,7 +1590,7 @@ class DOMJudgeService
     }
 
     /**
-     * @return array{'backgroundColors', array<TeamCategory>}
+     * @return array{backgroundColors: array<string>}
      */
     public function getScoreboardCategoryColorCss(): array {
         $backgroundColors = array_map(fn($x) => ( $x->getColor() ?? '#FFFFFF' ), $this->em->getRepository(TeamCategory::class)->findAll());
@@ -1574,12 +1621,12 @@ class DOMJudgeService
         return !$evalOnDemand;
     }
 
-    private function actuallyCreateJudgetasks(int $priority, Judging $judging, int $overshoot = 0): void
+    private function actuallyCreateJudgetasks(int $priority, Judging $judging, int $overshoot = 0, bool $valid = true): void
     {
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
         // We use a mass insert query, since that is way faster than doing a separate insert for each testcase.
-        // We first insert judgetasks, then select their ID's and finally insert the judging runs.
+        // We first insert judgetasks, then select their IDs and finally insert the judging runs.
 
         // Step 1: Create the template for the judgetasks.
         $compileExecutable = $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable();
@@ -1587,6 +1634,7 @@ class DOMJudgeService
             ':type' => JudgeTaskType::JUDGING_RUN,
             ':submitid' => $submission->getSubmitid(),
             ':priority' => $priority,
+            ':valid' => $valid ? 1 : 0,
             ':jobid' => $judging->getJudgingid(),
             ':uuid' => $judging->getUuid(),
             ':compile_script_id' => $compileExecutable->getImmutableExecId(),
@@ -1615,7 +1663,7 @@ class DOMJudgeService
                 $testcase->getTestcaseid()
             );
             $judgetaskInsertParams[':testcase_id' . $testcase->getTestcaseid()] = $testcase->getTestcaseid();
-            $judgetaskInsertParams[':testcase_hash' . $testcase->getTestcaseid()] = $testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput();
+            $judgetaskInsertParams[':testcase_hash' . $testcase->getTestcaseid()] = $testcase->getTestcaseHash();
         }
         $judgetaskColumns = array_map(fn(string $column) => substr($column, 1), $judgetaskDefaultParamNames);
         $judgetaskInsertQuery = sprintf(
@@ -1660,5 +1708,114 @@ class DOMJudgeService
             ->where('l.allowSubmit = 1')
             ->getQuery()
             ->getResult();
+    }
+
+    /** @return Team[] */
+    public function getTeamsForContest(?Contest $contest) : array {
+        if ($contest && !$contest->isOpenToAllTeams()) {
+            $contestTeams = $contest->getTeams()->toArray();
+            foreach ($contest->getTeamCategories() as $category) {
+                $contestTeams = array_merge($contestTeams, $category->getTeams()->toArray());
+            }
+            return $contestTeams;
+        }
+        return $this->em->createQueryBuilder()
+            ->select('l')
+            ->from(Team::class, 'l')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return String[]|false
+     */
+    public function cacherCheckNewVersion(ItemInterface $item): array|false {
+        $item->expiresAfter(86400);
+
+        $versionUrl = 'https://versions.domjudge.org';
+        $options = ['http' => ['timeout' => 1, 'method' => 'GET', 'header' => "User-Agent: DOMjudge#" . $this->domjudgeInstallMethod . "/" . $this->localVersionString . "\r\n"]];
+        $context = stream_context_create($options);
+        $response = @file_get_contents($versionUrl, false, $context);
+        if ($response === false) {
+            return false;
+        }
+        // Assume we get a one-level unordered JSON list with the released versions e.g. ["10.0.0", "9.11.0", "12.0.12", "10.0.1"]
+        $tmp_versions = json_decode($response, true);
+        natsort($tmp_versions);
+        return array_reverse($tmp_versions);
+    }
+
+    /**
+     * Returns either the next strictly higher version or false when nothing is found/requested.
+     */
+    public function checkNewVersion(): string|false {
+        if ($this->config->get('check_new_version', false) === UpdateStrategy::NONE) {
+            return false;
+        }
+        // The local version is something like "x.y.z / commit hash", e.g. "8.4.0DEV/4e25adb13" for development
+        // or 8.3.2 for a released version
+        // In case of development we remove the commit hash for some anonymity but keep the DEV to not count those as the (possibly) released version
+        $this->localVersionString = (string)strtok($this->domjudgeVersion, "/");
+        $localVersion = explode(".", $this->localVersionString);
+        if (count($localVersion) !== 3) {
+            // Unknown version, someone might have locally modified and used their own versioning
+            return false;
+        }
+
+        $cache = new FilesystemAdapter();
+        try {
+             $versions = $cache->get('domjudge_versions', [$this, 'cacherCheckNewVersion']);
+        } catch (InvalidArgumentException $e) {
+            return false;
+        }
+
+        if (!$versions) {
+            return false;
+        }
+
+        preg_match("/\d.\d.\d/", $this->domjudgeVersion, $matches);
+        $extractedLocalVersionString = $matches[0];
+        if ($this->config->get('check_new_version', false) === UpdateStrategy::INCREMENTAL) {
+            /* Steer towards the nearest highest patch release first
+             * So the expected path would be:
+             * DJ6.0.0 -> DJ6.0.6 -> DJ6.6.0 -> DJ9.1.2 instead of
+             *         -> DJ6.0.[1..6] -> DJ6.[1..6].* -> DJ[7..9].*.*
+             * skipping all patch releases in between, when no patch release
+             * is available, try the highest minor and otherwise the highest Major
+             * instead of going to the latest release:
+             * DJ6.0.0 -> DJ9.1.2
+             */
+            $patch = "/" . $localVersion[0] . "." . $localVersion[1] . ".\d/";
+            $minor = "/" . $localVersion[0] . ".\d.\d/";
+            $major = "/\d.\d.\d/";
+            foreach ([$patch, $minor, $major] as $regex) {
+                foreach ($versions as $release) {
+                    if (preg_match($regex, $release)) {
+                        if (strnatcmp($release, $extractedLocalVersionString) === 1) {
+                            return $release;
+                        }
+                        if (strnatcmp($release, $extractedLocalVersionString) === 0 && str_contains($this->localVersionString, "DEV")) {
+                            // Special case, the development version is now released
+                            return $release;
+                        }
+                    }
+                }
+            }
+        } elseif ($this->config->get('check_new_version', false) === UpdateStrategy::MAJOR_RELEASE) {
+            /* Steer towards the latest version directly
+             * So the expected path would be:
+             * DJ6.0.0 -> DJ9.1.2
+             * This should be safe as doctrine migrations check for upgrades regardless of current DOMjudge release
+             */
+            $latest = $versions[0];
+            if (strnatcmp($latest, $extractedLocalVersionString) === 1) {
+                return $latest;
+            }
+            if (strnatcmp($latest, $extractedLocalVersionString) === 0 && str_contains($this->localVersionString, "DEV")) {
+                // Special case, the development version is now released
+                return $latest;
+            }
+        }
+        return false;
     }
 }

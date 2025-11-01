@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
+use App\Entity\RankCache;
 use App\Entity\ScoreCache;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
@@ -14,6 +15,7 @@ use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Scoreboard;
+use App\Utils\Utils;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -131,6 +133,11 @@ class ScoreboardMergeCommand extends Command
         $problems = [];
         $problemNameToIdMap = [];
         $scoreCache = [];
+        /** @var RankCache[] $rankCache */
+        $rankCache = [];
+        $penaltyTime = (int)$this->config->get('penalty_time');
+        $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
+        $timeOfLastCorrect = [];
         $affiliations = [];
         $firstSolve = [];
         $contest = (new Contest())
@@ -261,6 +268,7 @@ class ScoreboardMergeCommand extends Command
                         $id = count($problems);
                         $problemObj = (new Problem())
                             ->setProbid($id)
+                            ->setExternalid((string)$id)
                             ->setName($name);
                         $contestProblemObj = (new ContestProblem())
                             ->setProblem($problemObj)
@@ -280,10 +288,8 @@ class ScoreboardMergeCommand extends Command
                         $scoreCacheObj
                             ->setSolveTimePublic($problem['time'] * 60)
                             ->setSolveTimeRestricted($problem['time'] * 60);
-                        if (
-                            $firstSolve[$name] === null or
-                            $problem['time'] * 60 < $firstSolve[$name]
-                        ) {
+                        if ($firstSolve[$name] === null ||
+                            $problem['time'] * 60 < $firstSolve[$name]) {
                             $firstSolve[$name] = $problem['time'] * 60;
                         }
                     }
@@ -302,7 +308,56 @@ class ScoreboardMergeCommand extends Command
             if ($scoreCacheObj->getSolveTimeRestricted() == $firstSolve[$scoreCacheObj->getProblem()->getName()]) {
                 $scoreCacheObj->setIsFirstToSolve(true);
             }
+
+            $teamId = $scoreCacheObj->getTeam()->getTeamid();
+            if (isset($rankCache[$teamId])) {
+                $rankCacheObj = $rankCache[$teamId];
+            } else {
+                $rankCacheObj = (new RankCache())
+                    ->setTeam($scoreCacheObj->getTeam());
+                $rankCache[$teamId] = $rankCacheObj;
+            }
+
+            $problem = $problems[$scoreCacheObj->getProblem()->getProbid()];
+            if ($scoreCacheObj->getIsCorrectRestricted()) {
+                $rankCacheObj->setPointsRestricted($rankCacheObj->getPointsRestricted() + $problem->getPoints());
+                $solveTime = Utils::scoretime(
+                    (float)$scoreCacheObj->getSolvetimeRestricted(),
+                    $scoreIsInSeconds
+                );
+                $penalty = Utils::calcPenaltyTime($scoreCacheObj->getIsCorrectRestricted(),
+                    $scoreCacheObj->getSubmissionsRestricted(),
+                    $penaltyTime, $scoreIsInSeconds);
+                $rankCacheObj->setTotaltimeRestricted($rankCacheObj->getTotaltimeRestricted() + $solveTime + $penalty);
+                $rankCacheObj->setTotalruntimeRestricted($rankCacheObj->getTotalruntimeRestricted() + $scoreCacheObj->getRuntimeRestricted());
+                $timeOfLastCorrect[$teamId] = max(
+                    $timeOfLastCorrect[$teamId] ?? 0,
+                    Utils::scoretime(
+                        (float)$scoreCacheObj->getSolvetimeRestricted(),
+                        $scoreIsInSeconds
+                    ),
+                );
+            }
         }
+
+        foreach ($rankCache as $rankCacheObj) {
+            $teamId = $rankCacheObj->getTeam()->getTeamid();
+            $rankCacheObj->setSortKeyRestricted(ScoreboardService::getICPCScoreKey(
+                $rankCacheObj->getPointsRestricted(),
+                $rankCacheObj->getTotaltimeRestricted(), $timeOfLastCorrect[$teamId] ?? 0
+            ));
+        }
+
+        usort($teams, function (Team $a, Team $b) use ($rankCache) {
+            $rankCacheA = $rankCache[$a->getTeamid()];
+            $rankCacheB = $rankCache[$b->getTeamid()];
+            $rankCacheSort = $rankCacheB->getSortKeyRestricted() <=> $rankCacheA->getSortKeyRestricted();
+            if ($rankCacheSort === 0) {
+                return $a->getEffectiveName() <=> $b->getEffectiveName();
+            }
+
+            return $rankCacheSort;
+        });
 
         $scoreboard = new Scoreboard(
             $contest,
@@ -310,6 +365,7 @@ class ScoreboardMergeCommand extends Command
             [$category],
             $problems,
             $scoreCache,
+            array_values($rankCache),
             $freezeData,
             false,
             (int)$this->config->get('penalty_time'),

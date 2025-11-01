@@ -49,7 +49,7 @@ class EventDataDenormalizer implements DenormalizerInterface, SerializerAwareInt
     }
 
     /**
-     * @param array{api_version?: string, event_type?: EventType} $context
+     * @param array{api_version?: string, event_type?: mixed} $context
      */
     public function supportsDenormalization(
         mixed $data,

@@ -77,33 +77,26 @@ class ClarificationController extends AbstractController
                 ->setParameter('queue', $currentQueue);
         }
 
+        $clarifications = $queryBuilder
+            ->getQuery()
+            ->getResult();
+
         /** @var Clarification[] $newClarifications */
         $newClarifications = [];
         /** @var Clarification[] $oldClarifications */
         $oldClarifications = [];
         /** @var Clarification[] $generalClarifications */
         $generalClarifications = [];
-        $wheres            = [
-            'new' => 'clar.sender IS NOT NULL AND clar.answered = 0',
-            'old' => 'clar.sender IS NOT NULL AND clar.answered != 0',
-            'general' => 'clar.sender IS NULL AND clar.in_reply_to IS NULL',
-        ];
-        foreach ($wheres as $type => $where) {
-            $clarifications = (clone $queryBuilder)
-                ->andWhere($where)
-                ->getQuery()
-                ->getResult();
 
-            switch ($type) {
-                case 'new':
-                    $newClarifications = $clarifications;
-                    break;
-                case 'old':
-                    $oldClarifications = $clarifications;
-                    break;
-                case 'general':
-                    $generalClarifications = $clarifications;
-                    break;
+        foreach ($clarifications as $clar) {
+            if ($clar->getSender() !== null) {
+                if ($clar->getAnswered()) {
+                    $oldClarifications[] = $clar;
+                } else {
+                    $newClarifications[] = $clar;
+                }
+            } elseif ($clar->getInReplyTo() === null) {
+                $generalClarifications[] = $clar;
             }
         }
 
@@ -200,7 +193,12 @@ class ClarificationController extends AbstractController
             $clarcontest = $contest->getShortname();
             $data['subjectlink'] = null;
             if ($clar->getProblem()) {
-                $concernssubject = $contest->getCid() . "-" . $clar->getProblem()->getProbid();
+                if ($clar->getContestProblem()) {
+                    $concernssubject = $contest->getCid() . "-" . $clar->getProblem()->getProbid();
+                } else {
+                    // Very special case, this problem is unlinked.
+                    $concernssubject = "";
+                }
                 $data['subjectlink'] = $this->generateUrl('jury_problem', ['probId' => $clar->getProblem()->getProbid()]);
             } elseif ($clar->getCategory()) {
                 $concernssubject = $contest->getCid() . "-" . $clar->getCategory();

@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Language;
+use App\Entity\ScoreboardType;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
@@ -75,6 +76,14 @@ class ContestType extends AbstractExternalIdEntityType
             'label' => 'Deactivate time',
             'required' => false,
             'help' => 'Time when the contest and scoreboard are hidden again. Usually a few hours/days after the contest ends.',
+        ]);
+        $builder->add('scoreboardType', ChoiceType::class, [
+            'label' => 'Scoreboard type',
+            'choices' => [
+                'pass-fail' => ScoreboardType::PASS_FAIL,
+                'scoring' => ScoreboardType::SCORING,
+            ],
+            'help' => 'The type of scoreboard to use for this contest.',
         ]);
         $builder->add('allowSubmit', ChoiceType::class, [
             'expanded' => true,

@@ -1,6 +1,6 @@
 {% extends "jury/base.html.twig" %}
 
-{% set origclar = list|first %}
+{% set origclar = list | first %}
 {% set claimed = not origclar.answered and origclar.from_jurymember is defined %}
 
 {% block title %}Clarification {{ origclar.clarid }} - {{ parent() }}{% endblock %}
@@ -58,13 +58,13 @@
                                         <i class="far fa-edit" title="Change subject"></i>
                                     </button>
                                 </span>
-                                <span class="clarification-subject-form" data-current-selected-subject="{{ clar.categoryid }}" data-clarification-id="{{clar.clarid}}">
+                                <span class="clarification-subject-form" data-current-selected-subject="{{ clar.categoryid }}" data-clarification-id="{{ clar.clarid }}">
                                     <form action="{{ path('jury_clarification_change_subject', {'clarId': clar.clarid }) }}" method="post" class="d-flex">
                                         <select name="subject" class="subject form-select form-select-sm w-auto" id="subselect">
                                             {% for contest,subject in subjects %}
                                                 <optgroup label="{{ contest }}">
                                                 {% for id,descr in subject %}
-                                                    <option value="{{id}}"{% if clar.categoryid == id %} selected{% endif %}>{{descr}}</option>
+                                                    <option value="{{ id }}"{% if clar.categoryid == id %} selected{% endif %}>{{ descr }}</option>
                                                 {% endfor %}
                                                 </optgroup>
                                             {% endfor %}
@@ -92,12 +92,12 @@
                                     {{ clar.queue }}
                                     <button class="btn btn-sm btn-link clarification-queue-change-button"><i class="far fa-edit" title="Change queue"></i></button>
                                 </span>
-                                <span class="clarification-queue-form" data-current-selected-queue="{{ clar.queueid }}" data-clarification-id="{{clar.clarid}}">
+                                <span class="clarification-queue-form" data-current-selected-queue="{{ clar.queueid }}" data-clarification-id="{{ clar.clarid }}">
                                     <form action="{{ path('jury_clarification_change_queue', {'clarId': clar.clarid }) }}" class="d-flex" method="post">
                                         <select name="queue" class="queue form-select w-auto form-select-sm" id="qselect">
                                             <option value="unassigned">Unassigned issues</option>
                                             {% for qid,queue in queues %}
-                                                <option value="{{qid}}"{% if clar.queueid == qid %} selected{% endif %}>{{queue}}</option>
+                                                <option value="{{ qid }}"{% if clar.queueid == qid %} selected{% endif %}>{{ queue }}</option>
                                             {% endfor %}
                                             </select>
                                         <button type="button" class="btn-close clarification-queue-cancel-button ms-2 w-auto" aria-label="Cancel"></button>
@@ -159,7 +159,7 @@
         </div>
     </div>
 
-    <div class="mt-4 collapse {% if not form.vars.valid %}show{% endif%} container clarificationform" id="collapsereplyform">
+    <div class="mt-4 collapse {% if not form.vars.valid %}show{% endif %} container clarificationform" id="collapsereplyform">
         <div class="card">
             <div class="card-header">Send clarification</div>
             <div class="card-body">

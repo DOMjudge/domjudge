@@ -788,20 +788,8 @@ class RejudgingController extends BaseController
                 } else {
                     $redirect = $this->generateUrl('jury_index');
                 }
-            } elseif ($res instanceof Rejudging) {
-                $redirect = $this->generateUrl('jury_rejudging', ['rejudgingId' => $res->getRejudgingid()]);
             } else {
-                $redirect = match ($table) {
-                    'contest' => $this->generateUrl('jury_contest', ['contestId' => $id]),
-                    'judgehost' => $this->generateUrl('jury_judgehost', ['judgehostid' => $id]),
-                    'language' => $this->generateUrl('jury_language', ['langId' => $id]),
-                    'problem' => $this->generateUrl('jury_problem', ['probId' => $id]),
-                    'submission' => $this->generateUrl('jury_submission', ['submitId' => $id]),
-                    'team' => $this->generateUrl('jury_team', ['teamId' => $id]),
-                    // This case never happens, since we already check above.
-                    // Add it here to silence linter warnings.
-                    default => throw new BadRequestHttpException(sprintf('unknown table %s in rejudging', $table)),
-                };
+                $redirect = $this->generateUrl('jury_rejudging', ['rejudgingId' => $res->getRejudgingid()]);
             }
 
             $progressReporter(100, '', $redirect);

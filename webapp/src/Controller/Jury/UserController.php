@@ -22,6 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -70,6 +71,9 @@ class UserController extends BaseController
             'teamid'     => ['title' => '', 'sort' => false, 'render' => 'entity_id_badge'],
             'team'       => ['title' => 'team', 'sort' => true],
         ];
+
+        $this->addSelectAllCheckbox($table_fields, 'users');
+
         if (in_array('ipaddress', $this->config->get('auth_methods'))) {
             $table_fields['ip_address'] = ['title' => 'autologin IP', 'sort' => true];
         }
@@ -83,6 +87,9 @@ class UserController extends BaseController
             /** @var User $u */
             $userdata    = [];
             $useractions = [];
+
+            $this->addEntityCheckbox($userdata, $u, $u->getUserid(), 'user-checkbox', fn(User $user) => $user->getUserid() !== $this->dj->getUser()->getUserid());
+
             // Get whatever fields we can from the user object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($u, $k)) {
@@ -385,5 +392,19 @@ class UserController extends BaseController
         $this->em->flush();
         $this->addFlash('success', 'Reset login status all ' . $count . ' users with the team role.');
         return $this->redirectToRoute('jury_users');
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/delete-multiple', name: 'jury_user_delete_multiple', methods: ['GET', 'POST'])]
+    public function deleteMultipleAction(Request $request): Response
+    {
+        return $this->deleteMultiple(
+            $request,
+            User::class,
+            'userid',
+            'jury_users',
+            'No users could be deleted (you cannot delete your own account).',
+            fn(User $user) => $user->getUserid() !== $this->dj->getUser()->getUserid()
+        );
     }
 }

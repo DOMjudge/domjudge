@@ -7,7 +7,7 @@ use App\DataTransferObject\AccessEndpoint;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -49,12 +49,18 @@ class AccessController extends AbstractApiController
             'icpc_id',
             'name',
             'formal_name',
+            // DOMjudge specific properties:
+            'affilid',
+            'shortname',
         ];
 
         // Add country data to organizations if supported
         if ($this->config->get('show_flags')) {
             $organizationProperties[] = 'country';
             $organizationProperties[] = 'country_flag';
+        }
+        if ($this->config->get('show_affiliation_logos')) {
+            $organizationProperties[] = 'logo';
         }
 
         $submissionsProperties = [
@@ -65,6 +71,9 @@ class AccessController extends AbstractApiController
             'time',
             'contest_time',
             'entry_point',
+            // DOMjudge specific properties:
+            'submitid',
+            'import_error',
         ];
 
         // Add files to submissions if allowed
@@ -100,9 +109,21 @@ class AccessController extends AbstractApiController
                         'name',
                         'formal_name',
                         'start_time',
+                        'countdown_pause_time',
                         'duration',
                         'scoreboard_freeze_duration',
+                        'scoreboard_thaw_time',
+                        'scoreboard_type',
                         'penalty_time',
+                        'banner',
+                        // DOMjudge specific properties:
+                        'cid',
+                        'short_name',
+                        'end_time',
+                        'allow_submit',
+                        'runtime_as_score_tiebreaker',
+                        'warning_message',
+                        'problemset',
                     ],
                 ),
                 new AccessEndpoint(
@@ -122,9 +143,12 @@ class AccessController extends AbstractApiController
                         'entry_point_required',
                         'entry_point_name',
                         'extensions',
-                        // TODO: we don't support these yet
-//                        'compiler.command',
-//                        'runner.command',
+                        'compiler',
+                        'runner',
+                        // DOMjudge specific properties:
+                        'allow_judge',
+                        'time_factor',
+                        'filter_compiler_files',
                     ],
                 ),
                 new AccessEndpoint(
@@ -139,6 +163,9 @@ class AccessController extends AbstractApiController
                         'time_limit',
                         'test_data_count',
                         'statement',
+                        'attachments',
+                        // DOMjudge specific properties:
+                        'probid',
                     ],
                 ),
                 new AccessEndpoint(
@@ -148,6 +175,11 @@ class AccessController extends AbstractApiController
                         'icpc_id',
                         'name',
                         'hidden',
+                        // DOMjudge specific properties:
+                        'categoryid',
+                        'sortorder',
+                        'color',
+                        'allow_self_registration',
                     ],
                 ),
                 new AccessEndpoint(
@@ -160,9 +192,39 @@ class AccessController extends AbstractApiController
                         'id',
                         'icpc_id',
                         'name',
+                        'label',
                         'display_name',
                         'organization_id',
                         'group_ids',
+                        'hidden',
+                        'location',
+                        'photo',
+                        // DOMjudge specific properties:
+                        'teamid',
+                        'affiliation',
+                        'nationality',
+                        'public_description',
+                    ]
+                ),
+                new AccessEndpoint(
+                    type: 'accounts',
+                    properties: [
+                        'id',
+                        'username',
+                        'name',
+                        'type',
+                        'ip',
+                        'team_id',
+                        // DOMjudge specific properties:
+                        'first_login_time',
+                        'last_login_time',
+                        'last_api_login_time',
+                        'team',
+                        'roles',
+                        'userid',
+                        'email',
+                        'last_ip',
+                        'enabled',
                     ]
                 ),
                 new AccessEndpoint(
@@ -191,6 +253,8 @@ class AccessController extends AbstractApiController
                         'end_time',
                         'end_contest_time',
                         'max_run_time',
+                        // DOMjudge specific properties:
+                        'valid',
                     ],
                 ),
                 new AccessEndpoint(
@@ -203,6 +267,22 @@ class AccessController extends AbstractApiController
                         'time',
                         'contest_time',
                         'run_time',
+                    ],
+                ),
+                new AccessEndpoint(
+                    type: 'clarifications',
+                    properties: [
+                        'id',
+                        'from_team_id',
+                        'to_team_id',
+                        'reply_to_id',
+                        'problem_id',
+                        'text',
+                        'time',
+                        'contest_time',
+                        // DOMjudge specific properties:
+                        'clarid',
+                        'answered',
                     ],
                 ),
                 new AccessEndpoint(

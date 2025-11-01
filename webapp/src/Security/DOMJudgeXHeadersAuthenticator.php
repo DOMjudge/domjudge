@@ -76,8 +76,7 @@ class DOMJudgeXHeadersAuthenticator extends AbstractAuthenticator implements Aut
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'xheaders') {
             // Use target URL from session if set.
-            if ($firewallName !== null &&
-                $targetUrl = $this->getTargetPath($request->getSession(), $firewallName)) {
+            if ($targetUrl = $this->getTargetPath($request->getSession(), $firewallName)) {
                 $this->removeTargetPath($request->getSession(), $firewallName);
                 return new RedirectResponse($targetUrl);
             }

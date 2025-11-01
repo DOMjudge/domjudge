@@ -11,6 +11,7 @@ use App\Entity\ProblemAttachment;
 use App\Entity\ProblemAttachmentContent;
 use App\Entity\ProblemStatementContent;
 use App\Entity\Submission;
+use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
@@ -27,6 +28,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -60,7 +62,7 @@ class ImportProblemService
         ?array &$messages = []
     ): ?Problem {
         // This might take a while.
-        ini_set('max_execution_time', '300');
+        Utils::extendMaxExecutionTime(300);
 
         foreach (['info', 'warning', 'danger'] as $type) {
             $messages[$type] = [];
@@ -222,6 +224,7 @@ class ImportProblemService
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($problemProperties as $key => $value) {
             $propertyAccessor->setValue($problem, $key, $value);
+            assert($problem instanceof Problem);
         }
 
         $hasErrors = false;
@@ -241,6 +244,7 @@ class ImportProblemService
         if ($contestProblem !== null) {
             foreach ($contestProblemProperties as $key => $value) {
                 $propertyAccessor->setValue($contestProblem, $key, $value);
+                assert($contestProblem instanceof ContestProblem);
             }
 
             $errors = $this->validator->validate($contestProblem);
@@ -261,72 +265,12 @@ class ImportProblemService
             return null;
         }
 
-        if ($problemYaml !== false) {
-            $yamlData = Yaml::parse($problemYaml);
-
-            if (!empty($yamlData)) {
-                $yamlProblemProperties = [];
-                if (isset($yamlData['name'])) {
-                    if (is_array($yamlData['name'])) {
-                        foreach ($yamlData['name'] as $name) {
-                            // TODO: select a specific instead of the first language.
-                            $yamlProblemProperties['name'] = $name;
-                            break;
-                        }
-                    } else {
-                        $yamlProblemProperties['name'] = $yamlData['name'];
-                    }
-                }
-
-                if (isset($yamlData['type'])) {
-                    $types = explode(' ', $yamlData['type']);
-                    // Validation happens later when we set the properties.
-                    $yamlProblemProperties['typesAsString'] = $types;
-                } else {
-                    $yamlProblemProperties['typesAsString'] = ['pass-fail'];
-                }
-
-                if (isset($yamlData['validator_flags'])) {
-                    $yamlProblemProperties['special_compare_args'] = $yamlData['validator_flags'];
-                }
-
-                if (isset($yamlData['validation'])
-                    && ($yamlData['validation'] == 'custom' ||
-                        $yamlData['validation'] == 'custom interactive' ||
-                        $yamlData['validation'] == 'custom multi-pass')) {
-                    if (!$this->searchAndAddValidator($zip, $messages, $externalId, $yamlData['validation'], $problem)) {
-                        return null;
-                    }
-
-                    if ($yamlData['validation'] == 'custom multi-pass') {
-                        $yamlProblemProperties['typesAsString'][] = 'multi-pass';
-                    }
-                    if ($yamlData['validation'] == 'custom interactive') {
-                        $yamlProblemProperties['typesAsString'][] = 'interactive';
-                    }
-                }
-
-                if (isset($yamlData['limits'])) {
-                    if (isset($yamlData['limits']['memory'])) {
-                        $yamlProblemProperties['memlimit'] = 1024 * $yamlData['limits']['memory'];
-                    }
-                    if (isset($yamlData['limits']['output'])) {
-                        $yamlProblemProperties['outputlimit'] = 1024 * $yamlData['limits']['output'];
-                    }
-                    if (isset($yamlData['limits']['validation_passes'])) {
-                        $problem->setMultipassLimit($yamlData['limits']['validation_passes']);
-                    }
-                }
-
-                foreach ($yamlProblemProperties as $key => $value) {
-                    try {
-                        $propertyAccessor->setValue($problem, $key, $value);
-                    } catch (Exception $e) {
-                        $messages['danger'][] = sprintf('Error: problem.%s: %s', $key, $e->getMessage());
-                        return null;
-                    }
-                }
-            }
+        $validationMode = 'default';
+        if (!$this->parseYaml($problemYaml, $messages, $validationMode, $propertyAccessor, $problem)) {
+            return null;
+        }
+        if (!$this->searchAndAddValidator($zip, $messages, $externalId, $validationMode, $problem)) {
+            return null;
         }
 
         // Add problem statement, also look in obsolete location.
@@ -590,6 +534,10 @@ class ImportProblemService
                 $type = 'txt';
             }
 
+            $finfo = new \finfo();
+            $mime = $finfo->buffer($content);
+            $mime = explode(';', $mime)[0];
+
             // Check if an attachment already exists, since then we overwrite it.
             $attachment = $existingAttachments[$name] ?? null;
 
@@ -597,6 +545,9 @@ class ImportProblemService
                 $attachmentContent = $attachment->getContent();
                 if ($content !== $attachmentContent->getContent()) {
                     $attachmentContent->setContent($content);
+                    $attachment
+                        ->setType($type)
+                        ->setMimeType($mime);
                     $messages['info'][] = sprintf("Updated attachment '%s'", $name);
                     $numAttachments++;
                 }
@@ -611,6 +562,7 @@ class ImportProblemService
                     ->setProblem($problem)
                     ->setName($name)
                     ->setType($type)
+                    ->setMimeType($mime)
                     ->setContent($attachmentContent);
 
                 $attachmentContent
@@ -816,12 +768,14 @@ class ImportProblemService
                             ]
                         );
                         $submission     = $this->submissionService->submitSolution(
-                            $team, $jury_user, $contestProblem, $contest, $languageToUse, $filesToSubmit, 'problem import', null,
+                            $team, $jury_user, $contestProblem, $contest, $languageToUse, $filesToSubmit, SubmissionSource::PROBLEM_IMPORT, null,
                             null, $entry_point, null, null, $submissionMessage
                         );
 
                         if (!$submission) {
-                            $messages['danger'][] = $submissionMessage;
+                            if ($submissionMessage) {
+                                $messages['danger'][] = $submissionMessage;
+                            }
                         } else {
                             $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
                             $submission->setExpectedResults($results);
@@ -948,103 +902,198 @@ class ImportProblemService
     }
 
     /**
-     * @param array{danger: string[], info: string[]} $messages
+     * @param array{danger?: string[], info?: string[]} $messages
      */
     private function searchAndAddValidator(ZipArchive $zip, ?array &$messages, string $externalId, string $validationMode, ?Problem $problem): bool
     {
         $validatorFiles = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $filename = $zip->getNameIndex($i);
-            if (Utils::startsWith($filename, 'output_validators/') &&
-                !Utils::endsWith($filename, '/')) {
-                $validatorFiles[] = $filename;
+            foreach (['output_validators/', 'output_validator'] as $dir) {
+                if (Utils::startsWith($filename, $dir) &&
+                    !Utils::endsWith($filename, '/')) {
+                    $validatorFiles[] = $filename;
+                }
             }
         }
         if (sizeof($validatorFiles) == 0) {
-            $messages['danger'][] = 'Custom validator specified but not found.';
-            return false;
-        } else {
-            // File(s) have to share common directory.
-            $validatorDir = mb_substr($validatorFiles[0], 0, mb_strrpos($validatorFiles[0], '/')) . '/';
-            $sameDir = true;
-            foreach ($validatorFiles as $validatorFile) {
-                if (!Utils::startsWith($validatorFile, $validatorDir)) {
-                    $sameDir = false;
-                    $messages['warning'][] = sprintf('%s does not start with %s.',
-                        $validatorFile, $validatorDir);
-                    break;
-                }
-            }
-            if (!$sameDir) {
-                $messages['danger'][] = 'Found multiple custom output validators.';
-                return false;
+            if ($validationMode === 'default') {
+                return true;
             } else {
-                $tmpzipfiledir = exec("mktemp -d --tmpdir=" .
-                    $this->dj->getDomjudgeTmpDir(),
-                    $dontcare, $retval);
-                if ($retval != 0) {
-                    throw new ServiceUnavailableHttpException(
-                        null, 'Failed to create temporary directory.'
-                    );
-                }
-                chmod($tmpzipfiledir, 0700);
-                foreach ($validatorFiles as $validatorFile) {
-                    $content = $zip->getFromName($validatorFile);
-                    $filebase = basename($validatorFile);
-                    $newfilename = $tmpzipfiledir . "/" . $filebase;
-                    file_put_contents($newfilename, $content);
-                    if ($filebase === 'build' || $filebase === 'run') {
-                        // Mark special files as executable.
-                        chmod($newfilename, 0755);
-                    }
-                }
-
-                exec("zip -r -j '$tmpzipfiledir/outputvalidator.zip' '$tmpzipfiledir'",
-                    $dontcare, $retval);
-                if ($retval != 0) {
-                    throw new ServiceUnavailableHttpException(
-                        null, 'Failed to create ZIP file for output validator.'
-                    );
-                }
-
-                $outputValidatorZip = file_get_contents($tmpzipfiledir . '/outputvalidator.zip');
-                $outputValidatorName = substr($externalId, 0, 20) . '_cmp';
-                if ($this->em->getRepository(Executable::class)->find($outputValidatorName)) {
-                    // Avoid name clash.
-                    $clashCount = 2;
-                    while ($this->em->getRepository(Executable::class)->find(
-                        $outputValidatorName . '_' . $clashCount)) {
-                        $clashCount++;
-                    }
-                    $outputValidatorName = $outputValidatorName . "_" . $clashCount;
-                }
-
-                $combinedRunCompare = $validationMode == 'custom interactive';
-
-                if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
-                    throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file.');
-                }
-                file_put_contents($tempzipFile, $outputValidatorZip);
-                $zipArchive = new ZipArchive();
-                $zipArchive->open($tempzipFile, ZipArchive::CREATE);
-
-                $executable = new Executable();
-                $executable
-                    ->setExecid($outputValidatorName)
-                    ->setImmutableExecutable($this->dj->createImmutableExecutable($zipArchive))
-                    ->setDescription(sprintf('output validator for %s', $problem->getName()))
-                    ->setType($combinedRunCompare ? 'run' : 'compare');
-                $this->em->persist($executable);
-
-                if ($combinedRunCompare) {
-                    $problem->setRunExecutable($executable);
-                } else {
-                    $problem->setCompareExecutable($executable);
-                }
-
-                $messages['info'][] = "Added output validator '$outputValidatorName'.";
+                $messages['danger'][] = 'Custom validator specified but not found.';
+                return false;
             }
         }
+
+        // File(s) have to share common directory.
+        $validatorDir = mb_substr($validatorFiles[0], 0, mb_strrpos($validatorFiles[0], '/')) . '/';
+        $sameDir = true;
+        foreach ($validatorFiles as $validatorFile) {
+            if (!Utils::startsWith($validatorFile, $validatorDir)) {
+                $sameDir = false;
+                $messages['warning'][] = sprintf('%s does not start with %s.',
+                    $validatorFile, $validatorDir);
+                break;
+            }
+        }
+        if (!$sameDir) {
+            $messages['danger'][] = 'Found multiple custom output validators.';
+            return false;
+        } else {
+            $tmpzipfiledir = exec("mktemp -d --tmpdir=" .
+                $this->dj->getDomjudgeTmpDir(),
+                $dontcare, $retval);
+            if ($retval != 0) {
+                throw new ServiceUnavailableHttpException(
+                    null, 'Failed to create temporary directory.'
+                );
+            }
+            chmod($tmpzipfiledir, 0700);
+            foreach ($validatorFiles as $validatorFile) {
+                $content = $zip->getFromName($validatorFile);
+                $filebase = basename($validatorFile);
+                $newfilename = $tmpzipfiledir . "/" . $filebase;
+                file_put_contents($newfilename, $content);
+                if ($filebase === 'build' || $filebase === 'run') {
+                    // Mark special files as executable.
+                    chmod($newfilename, 0755);
+                }
+            }
+
+            exec("zip -r -j '$tmpzipfiledir/outputvalidator.zip' '$tmpzipfiledir'",
+                $dontcare, $retval);
+            if ($retval != 0) {
+                throw new ServiceUnavailableHttpException(
+                    null, 'Failed to create ZIP file for output validator.'
+                );
+            }
+
+            $outputValidatorZip = file_get_contents($tmpzipfiledir . '/outputvalidator.zip');
+            $outputValidatorName = substr($externalId, 0, 20) . '_cmp';
+            if ($this->em->getRepository(Executable::class)->find($outputValidatorName)) {
+                // Avoid name clash.
+                $clashCount = 2;
+                while ($this->em->getRepository(Executable::class)->find(
+                    $outputValidatorName . '_' . $clashCount)) {
+                    $clashCount++;
+                }
+                $outputValidatorName = $outputValidatorName . "_" . $clashCount;
+            }
+
+            $combinedRunCompare = $validationMode == 'custom interactive';
+
+            if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
+                throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file.');
+            }
+            file_put_contents($tempzipFile, $outputValidatorZip);
+            $zipArchive = new ZipArchive();
+            $zipArchive->open($tempzipFile, ZipArchive::CREATE);
+
+            $executable = new Executable();
+            $executable
+                ->setExecid($outputValidatorName)
+                ->setImmutableExecutable($this->dj->createImmutableExecutable($zipArchive))
+                ->setDescription(sprintf('output validator for %s', $problem->getName()))
+                ->setType($combinedRunCompare ? 'run' : 'compare');
+            $this->em->persist($executable);
+
+            if ($combinedRunCompare) {
+                $problem->setRunExecutable($executable);
+            } else {
+                $problem->setCompareExecutable($executable);
+            }
+
+            $messages['info'][] = "Added output validator '$outputValidatorName'.";
+        }
+        return true;
+    }
+
+    /**
+     * Returns true iff the yaml could be parsed correctly.
+     *
+     * @param array{danger?: string[], info?: string[]} $messages
+     */
+    public static function parseYaml(bool|string $problemYaml, array &$messages, string &$validationMode, PropertyAccessor $propertyAccessor, Problem $problem): bool
+    {
+        if ($problemYaml === false) {
+            // While there was no problem.yaml, there was also no error in parsing.
+            return true;
+        }
+
+        $yamlData = Yaml::parse($problemYaml);
+        if (empty($yamlData)) {
+            // Empty yaml is OK.
+            return true;
+        }
+
+        $yamlProblemProperties = [];
+        if (isset($yamlData['name'])) {
+            if (is_array($yamlData['name'])) {
+                // Prefer english name, but if not available, use first name.
+                $englishOrFirstName = null;
+                foreach ($yamlData['name'] as $lang => $name) {
+                    if ($englishOrFirstName === null || $lang === 'en') {
+                        $englishOrFirstName = $name;
+                    }
+                }
+                $yamlProblemProperties['name'] = $englishOrFirstName;
+            } else {
+                $yamlProblemProperties['name'] = $yamlData['name'];
+            }
+        }
+
+        $validationMode = 'default';
+        if (isset($yamlData['type'])) {
+            $types = explode(' ', $yamlData['type']);
+            // Validation happens later when we set the properties.
+            $yamlProblemProperties['typesAsString'] = $types;
+            if (in_array('interactive', $types)) {
+                $validationMode = 'custom interactive';
+            }
+        } else {
+            $yamlProblemProperties['typesAsString'] = ['pass-fail'];
+        }
+
+        if (isset($yamlData['validator_flags'])) {
+            $yamlProblemProperties['special_compare_args'] = $yamlData['validator_flags'];
+        }
+
+        if (isset($yamlData['validation'])
+            && ($yamlData['validation'] == 'custom' ||
+                $yamlData['validation'] == 'custom interactive' ||
+                $yamlData['validation'] == 'custom multi-pass')) {
+            $validationMode = $yamlData['validation'];
+
+            if ($yamlData['validation'] == 'custom multi-pass') {
+                $yamlProblemProperties['typesAsString'][] = 'multi-pass';
+            }
+            if ($yamlData['validation'] == 'custom interactive') {
+                $yamlProblemProperties['typesAsString'][] = 'interactive';
+            }
+        }
+
+        if (isset($yamlData['limits'])) {
+            if (isset($yamlData['limits']['memory'])) {
+                $yamlProblemProperties['memlimit'] = 1024 * $yamlData['limits']['memory'];
+            }
+            if (isset($yamlData['limits']['output'])) {
+                $yamlProblemProperties['outputlimit'] = 1024 * $yamlData['limits']['output'];
+            }
+            if (isset($yamlData['limits']['validation_passes'])) {
+                $yamlProblemProperties['multipassLimit'] = $yamlData['limits']['validation_passes'];
+            }
+        }
+
+        foreach ($yamlProblemProperties as $key => $value) {
+            try {
+                $propertyAccessor->setValue($problem, $key, $value);
+                assert($problem instanceof Problem);
+            } catch (Exception $e) {
+                $messages['danger'][] = sprintf('Error: problem.%s: %s', $key, $e->getMessage());
+                return false;
+            }
+        }
+
         return true;
     }
 }

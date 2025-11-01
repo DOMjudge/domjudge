@@ -46,9 +46,9 @@ cp ${DIR}/webapp/var/log/*.log "$ARTIFACTS"/
 
 set -e
 CNT=0
-THRESHOLD=32
+THRESHOLD=2
 if [ $CODECOVERAGE -eq 1 ]; then
-    CNT=$(sed -n '/Generating code coverage report/,$p' "$ARTIFACTS"/phpunit.out | grep -v DoctrineTestBundle | grep -cv ^$)
+    CNT=$(sed -n '/Generating code coverage report/,$p' "$ARTIFACTS"/phpunit.out | grep -cv ^$)
 fi
 
 if [ $UNITSUCCESS -ne 0 ] || [ $CNT -gt $THRESHOLD ]; then

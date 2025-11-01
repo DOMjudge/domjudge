@@ -45,6 +45,61 @@ class ClarificationController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    #[Route(path: '/clarifications/by-problem/{probId<\d+>}', name: 'team_clarification_by_prob')]
+    public function viewByProblemAction(Request $request, int $probId): Response
+    {
+        $user    = $this->dj->getUser();
+        $team    = $user->getTeam();
+        $teamId  = $team->getTeamid();
+        $contest = $this->dj->getCurrentContest($teamId);
+
+        $problem = $this->em->getRepository(Problem::class)->find($probId);
+        if ($problem === null) {
+            throw new NotFoundHttpException(sprintf('Problem %d not found', $probId));
+        }
+        $contestProblem = $problem->getContestProblems();
+        $foundProblemInContest = false;
+        foreach ($contestProblem as $cp) {
+            if ($cp->getContest()->getCid() === $contest->getCid()) {
+                $foundProblemInContest = true;
+                break;
+            }
+        }
+        if (!$foundProblemInContest) {
+            throw new NotFoundHttpException(sprintf('Problem %d not in current contest', $probId));
+        }
+
+        /** @var Clarification[] $clarifications */
+        $clarifications = $this->em->createQueryBuilder()
+            ->from(Clarification::class, 'c')
+            ->leftJoin('c.problem', 'p')
+            ->leftJoin('c.sender', 's')
+            ->leftJoin('c.recipient', 'r')
+            ->select('c', 'p')
+            ->andWhere('c.contest = :contest')
+            ->andWhere('c.sender IS NULL')
+            ->andWhere('c.recipient = :team OR c.recipient IS NULL')
+            ->andWhere('c.problem = :problem')
+            ->setParameter('contest', $contest)
+            ->setParameter('team', $team)
+            ->setParameter('problem', $problem)
+            ->addOrderBy('c.submittime', 'DESC')
+            ->addOrderBy('c.clarid', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $data = [
+            'clarifications' => $clarifications,
+            'team' => $team,
+            'problem' => $problem,
+        ];
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('team/clarifications_by_problem_modal.html.twig', $data);
+        } else {
+            return $this->render('team/clarifications_by_problem.html.twig', $data);
+        }
+    }
+
     /**
      * @throws NonUniqueResultException
      */
@@ -101,9 +156,12 @@ class ClarificationController extends BaseController
             throw new HttpException(401, 'Permission denied');
         }
 
-        // Get the "parent" message if we have one.
+        // Get the "parent" message if we have one - if we have access to it
         if ($clarification->getInReplyTo()) {
-            $clarification = $clarification->getInReplyTo();
+            $parent = $clarification->getInReplyTo();
+            if ($team->canViewClarification($parent)) {
+                $clarification = $parent;
+            }
         }
 
         // Mark clarification as read.

@@ -50,7 +50,7 @@
                         </td>
                         <td>
                             <a href="{{ link }}">
-                                {% if result.files is defined and result.files|length > 0 %}
+                                {% if result.files is defined and result.files | length > 0 %}
                                     {% for file in result.files[:3] %}
                                         <code>{{ file.filename }}</code>
                                     {% endfor %}
@@ -98,5 +98,22 @@
     {{ checkJudgings.verifyResults('verified', 'Automatically verified', verified, true) }}
     {{ checkJudgings.verifyResults('earlier', 'Verified earlier', earlier, true) }}
     {{ checkJudgings.verifyResults('nomatch', 'Without magic string', nomatch, true) }}
+
+    {% if problems != [] %}
+        <h2>Problem runtime analytics</h2>
+        You probably want to <a href="{{ path('jury_contest', {'contestId': contestId }) }}">rejudge</a>
+        all submissions with a reasonable overshoot and
+        {%- if not is_granted('ROLE_ADMIN') %} let an admin {% endif %}
+        judge the
+        {%- if is_granted('ROLE_ADMIN') %}<a href="{{ path('jury_contest_request_remaining', {'contestId': contestId}) }}">{% endif %}
+          remaining testcases
+        {%- if is_granted('ROLE_ADMIN') %}</a>{% endif %}.
+        After this compare the maximum runtime for <code>Accepted</code>
+        solutions and tune those against expected <code>Time Limit Exceeded</code> solutions.<br>
+        {% for p in problems %}
+            {% set link = path('analysis_problem', {'probid': p.probid, 'view': 'hidden'}) %}
+            <a href="{{ link }}">{{ p | problemBadge }}</a>
+        {% endfor %}
+    {% endif %}
 
 {% endblock %}

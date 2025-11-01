@@ -1,3 +1,8 @@
+{% set includeSubject = true %}
+{% if subject is defined and not subject %}
+    {% set includeSubject = false %}
+{% endif %}
+
 <div class="table-wrapper">
     <table class="data-table table table-striped table-hover table-sm" style="width:100%;">
         <thead class="thead-light">
@@ -5,7 +10,9 @@
             <th scope="col">time</th>
             <th scope="col">from</th>
             <th scope="col">to</th>
-            <th scope="col">subject</th>
+            {% if includeSubject %}
+                <th scope="col">subject</th>
+            {% endif %}
             <th scope="col">text</th>
         </tr>
         </thead>
@@ -41,21 +48,23 @@
                         {{ recipient | u.truncate(teamname_max_length, '…') }}
                     </a>
                 </td>
-                <td>
-                    <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}">
-                        {%- if clarification.problem -%}
-                            problem {{ clarification.contestProblem | problemBadge -}}
-                        {%- elseif clarification.category -%}
-                            {{- categories[clarification.category]|default('general') -}}
-                        {%- else -%}
-                            general
-                        {%- endif -%}
-                    </a>
-                </td>
+                {% if includeSubject %}
+                    <td>
+                        <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}">
+                            {%- if clarification.problem -%}
+                                problem {{ clarification.contestProblem | problemBadge -}}
+                            {%- elseif clarification.category -%}
+                                {{- categories[clarification.category]|default('general') -}}
+                            {%- else -%}
+                                general
+                            {%- endif -%}
+                        </a>
+                    </td>
+                {% endif %}
 
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}">
-                        {{ clarification.summary }}
+                        {{ clarification.summary | markdown_to_html | sanitize_html('app.clarification_sanitizer') }}
                     </a>
                 </td>
             </tr>

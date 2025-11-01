@@ -29,10 +29,13 @@ class JsonType extends BaseJsonType
     }
 
     /**
-     * @return string|false|null
-     * @throws ConversionException
+     * @template T
+     * @param T $value
+     *
+     * @return (T is null ? null : string)
+     * @throws \JsonException
      */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue($value, AbstractPlatform $platform): ?string
     {
         if ($value === null) {
             return null;

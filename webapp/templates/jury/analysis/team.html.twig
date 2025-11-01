@@ -4,10 +4,10 @@
 
 {% block extrahead %}
 {{ parent() }}
-<link rel="stylesheet" href="{{asset('css/nv.d3.min.css')}}">
-<script src="{{asset('js/d3.min.js')}}"></script>
-<script src="{{asset('js/nv.d3.min.js')}}"></script>
-<script src="{{asset('js/FileSaver.min.js')}}"></script>
+<link rel="stylesheet" href="{{ asset('css/nv.d3.min.css') }}">
+<script src="{{ asset('js/d3.min.js') }}"></script>
+<script src="{{ asset('js/nv.d3.min.js') }}"></script>
+<script src="{{ asset('js/FileSaver.min.js') }}"></script>
 <style>
 .row.equal {
   display: flex;
@@ -35,10 +35,10 @@
         <div class="card-body">
           <dl class="row">
             <dt class="col-sm-6"># Submissions</dt>
-            <dd class="col-sm-6">{{ submissions|length }}</dd>
+            <dd class="col-sm-6">{{ submissions | length }}</dd>
 
             <dt class="col-sm-6"># Correct</dt>
-            <dd class="col-sm-6">{{ results['correct']|default(0) }} <span class="text-muted">({{ misc.correct_percentage|number_format(2) }}%)</span></dd>
+            <dd class="col-sm-6">{{ results['correct'] | default(0) }} <span class="text-muted">({{ misc.correct_percentage | number_format(2) }}%)</span></dd>
           </dl>
         </div>
       </div>
@@ -66,7 +66,7 @@
   </div>
   <div class="row equal">
   {% for problem in problems %}
-      <div class="col-3 mt-3" id="maxruntime_{{problem.probid}}">
+      <div class="col-3 mt-3" id="maxruntime_{{ problem.probid }}">
         <div class="card">
           <div class="card-header">
             Max Runtimes for problem {{ problem.name }}
@@ -97,7 +97,7 @@ set colors = {
 $(function(){
 
     {% for problem in problems %}
-      var run_max_times_{{problem.probid}} = [
+      var run_max_times_{{ problem.probid }} = [
         {
           key: "Max Runtimes",
           values: [
@@ -120,7 +120,7 @@ $(function(){
             .x(function(d) { return d.label })
             .y(function(d) { return d.value })
             .valueFormat(d3.format('.3f'))
-            .staggerLabels(run_max_times_{{problem.probid}}[0].values.length > 10)
+            .staggerLabels(run_max_times_{{ problem.probid }}[0].values.length > 10)
             .showValues(false)
             .forceY([0, {{ problem.timelimit*1.20 }}])
             .margin({bottom: 90})
@@ -132,8 +132,8 @@ $(function(){
           .tickFormat(d3.format('.3f'))
           .axisLabel('Runtime(in s)');
         chart.xAxis.axisLabel("Judgings");
-        d3.select('#maxruntime_{{problem.probid}} svg')
-            .datum(run_max_times_{{problem.probid}})
+        d3.select('#maxruntime_{{ problem.probid }} svg')
+            .datum(run_max_times_{{ problem.probid }})
             .call(chart);
         // Clicking on one of the bars takes you to the judgment
         chart.discretebar.dispatch.on('elementClick', function(e) {
@@ -156,24 +156,24 @@ $(function(){
         });
 
         // Create our timelimit line
-        d3.select('#maxruntime_{{problem.probid}} svg')
+        d3.select('#maxruntime_{{ problem.probid }} svg')
           .append('line')
           .attr({id: 'maxline'})
           .style("stroke", "#F00");
 
         var svgsize = chart.container.clientWidth || chart.container.parentNode.clientWidth;
-        updateline_{{problem.probid}} = function(){
-          line = d3.select('#maxruntime_{{problem.probid}} svg #maxline')
+        updateline_{{ problem.probid }} = function(){
+          line = d3.select('#maxruntime_{{ problem.probid }} svg #maxline')
           .attr({
             x1: chart.margin().left,
-            y1: chart.yAxis.scale()({{problem.timelimit}})+ chart.margin().top,
+            y1: chart.yAxis.scale()({{ problem.timelimit }})+ chart.margin().top,
             x2: +svgsize - chart.margin().right,
-            y2: chart.yAxis.scale()({{problem.timelimit}}) + chart.margin().top,
+            y2: chart.yAxis.scale()({{ problem.timelimit }}) + chart.margin().top,
           })
         }
-        updateline_{{problem.probid}}();
+        updateline_{{ problem.probid }}();
         nv.utils.windowResize(function() {
-          updateline_{{problem.probid}}();
+          updateline_{{ problem.probid }}();
           chart.update()
         });
         return chart;
@@ -189,7 +189,7 @@ $(function(){
         values: [
           {% for result,count in results %}
             {
-              "label" : "{{result}}",
+              "label" : "{{ result }}",
               "value" : {{ count }},
               "color" : "{{ colors[result] }}",
             },
@@ -227,8 +227,8 @@ $(function(){
     var submission_stats = [
       {% for result in ['correct', 'wrong-answer', 'timelimit', 'run-error', 'compiler-error', 'no-output'] %}
       {
-        key: "{{result}}",
-        color: "{{colors[result]}}",
+        key: "{{ result }}",
+        color: "{{ colors[result] }}",
         values: [
           {# TODO: make sure these are actually ordered by submittime #}
           {# TODO: also make sure these submissions are in the same contest #}
@@ -256,7 +256,7 @@ $(function(){
           .showYAxis(true)        //Show the y-axis
           .showXAxis(true)        //Show the x-axis
           .forceX([0, {{ (current_contest.endtime - current_contest.starttime) / 60 }}])
-          .forceY([0, {{ submissions|length *1.10 }}])
+          .forceY([0, {{ submissions | length *1.10 }}])
           ;
       chart.xAxis     //Chart x-axis settings
           .axisLabel('Contest Time(minutes)')

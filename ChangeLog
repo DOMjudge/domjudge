@@ -1,10 +1,54 @@
 DOMjudge Programming Contest Judging System
 
-Version 9.0.0DEV
+Version 10.0.0DEV
 ---------------------------
- - Get rid of 'internal' data source mode, always requiring - but auto
-   generating - external ID's for all entities to simplify event logic.
- - Replace ACE editor with Monaco editor and also use it for diffs.
+
+Version 9.0.0 - 5 October 2025
+---------------------------
+ - API and integration:
+   - Get rid of 'internal' data source mode, always requiring - but auto
+     generating - external ID's for all entities to simplify event logic.
+   - Added and improved several API endpoints for better integration with
+     other tools.
+   - Improved shadowing from CCS spec compliant external sources.
+   - Added a new contest export script; added many improvements to the import
+     contest script.
+   - "Reset login status of all team users" now applies to API login status as
+     well.
+   - Add option to print from the submit client.
+ - UI/UX:
+   - Removed first to solve in problem/contest from balloon service.
+   - Add option to delete multiple entities of the same kind in one go, e.g.
+     problems, users, teams...
+   - Replaced ACE editor with Monaco, improving diff viewing and
+     adding a `no-diff` mode.
+   - Highlight pending submissions during freeze on jury scoreboard.
+   - Redesigned and modernized the scoreboard, submission, and verification
+     pages for better clarity and usability.
+   - Improved mobile experience with a redesigned scoreboard.
+   - Added a progress bar to rejudgings and simple load numbers to the
+     judgedaemon overview page.
+   - Added a page with language statistics.
+   - Many smaller UI enhancements and bugfixes.
+ - Judging and scoring:
+   - Added support for systems with cgroup v2.
+   - Added (basic) support for multi-pass problems.
+   - Introduced a new scoring system with a basic visualization for the
+     `scoring` scoreboard type, building the foundation to support more than
+     pass-fail problems.
+   - Added an analyst evaluation mode to only judge "interesting" submissions.
+   - Many bugfixes and improvements to judging, scoring, and rejudging.
+ - Security:
+   - Fixed several security issues, including not exposing submission data for
+     hidden teams on the public scoreboard.
+   - Improved permission handling for clarifications and submissions.
+ - Installation / developer experience:
+   - Add configuration to autocheck for new DOMjudge releases (default off).
+   - Upgraded to debootstrap for latest Debian stable (Trixie).
+   - Cgroup and judgedaemon service files need to be installed and enabled
+     manually.
+   - Moved vendor directory to webapp/vendor.
+   - Many improvements to the build and installation process.
 
 Version 8.3.0 - 31 May 2024
 ---------------------------

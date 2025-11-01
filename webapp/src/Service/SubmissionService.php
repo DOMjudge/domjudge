@@ -11,6 +11,7 @@ use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
+use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Utils\FreezeData;
@@ -33,7 +34,7 @@ use ZipArchive;
 
 class SubmissionService
 {
-    final public const FILENAME_REGEX = '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/';
+    final public const FILENAME_REGEX = '/^[a-zA-Z0-9_][a-zA-Z0-9+_\.-]*$/';
     final public const PROBLEM_RESULT_MATCHSTRING = ['@EXPECTED_RESULTS@: ', '@EXPECTED_SCORE@: '];
     final public const PROBLEM_RESULT_REMAP = [
         'ACCEPTED' => 'CORRECT',
@@ -305,6 +306,12 @@ class SubmissionService
                 ->setParameter('results', $restrictions->results);
         }
 
+        if (isset($restrictions->valid)) {
+            $queryBuilder
+                ->andWhere('s.valid = :valid')
+                ->setParameter('valid', $restrictions->valid);
+        }
+
         if ($this->dj->shadowMode()) {
             // When we are shadow, also load the external results
             $queryBuilder
@@ -438,7 +445,7 @@ class SubmissionService
         Contest|int $contest,
         Language|string $language,
         array $files,
-        ?string $source = null,
+        SubmissionSource $source = SubmissionSource::UNKNOWN,
         ?string $juryMember = null,
         Submission|int|null $originalSubmission = null,
         ?string $entryPoint = null,
@@ -569,7 +576,7 @@ class SubmissionService
 
         if (!empty($entryPoint) && !preg_match(self::FILENAME_REGEX, $entryPoint)) {
             $message = sprintf("Entry point '%s' contains illegal characters.", $entryPoint);
-            if ($forceImportInvalid) {
+            if ($forceImportInvalid || $source === SubmissionSource::SHADOWING) {
                 $importError = $message;
             } else {
                 return null;
@@ -610,7 +617,7 @@ class SubmissionService
             }
             if (!preg_match(self::FILENAME_REGEX, $file->getClientOriginalName())) {
                 $message = sprintf("Illegal filename '%s'.", $file->getClientOriginalName());
-                if ($forceImportInvalid) {
+                if ($forceImportInvalid || $source === SubmissionSource::SHADOWING) {
                     $importError = $message;
                 } else {
                     return null;
@@ -618,7 +625,7 @@ class SubmissionService
             }
             $totalSize += $file->getSize();
 
-            if ($source !== 'shadowing' && $language->getFilterCompilerFiles()) {
+            if ($source !== SubmissionSource::SHADOWING && $language->getFilterCompilerFiles()) {
                 $matchesExtension = false;
                 foreach ($language->getExtensions() as $extension) {
                     if (str_ends_with($file->getClientOriginalName(), '.' . $extension)) {
@@ -632,7 +639,7 @@ class SubmissionService
             }
         }
 
-        if ($source !== 'shadowing' && $language->getFilterCompilerFiles() && $extensionMatchCount === 0) {
+        if ($source !== SubmissionSource::SHADOWING && $language->getFilterCompilerFiles() && $extensionMatchCount === 0) {
             $message = sprintf(
                 "None of the submitted files match any of the allowed " .
                 "extensions for %s (allowed: %s)",
@@ -647,7 +654,7 @@ class SubmissionService
 
         if ($totalSize > $sourceSize * 1024) {
             $message = sprintf("Submission file(s) are larger than %d kB.", $sourceSize);
-            if ($forceImportInvalid) {
+            if ($forceImportInvalid || $source === SubmissionSource::SHADOWING) {
                 $importError = $message;
             } else {
                 return null;
@@ -660,7 +667,7 @@ class SubmissionService
         // SQL transaction time below.
         // Only do this for problem import submissions, as we do not want this for re-submitted submissions nor
         // submissions that come through the API, e.g. when doing a replay of an old contest.
-        if ($this->dj->checkrole('jury') && $source == 'problem import') {
+        if ($this->dj->checkrole('jury') && $source === SubmissionSource::PROBLEM_IMPORT) {
             $results = null;
             foreach ($files as $file) {
                 $fileResult = self::getExpectedResults(file_get_contents($file->getRealPath()),
@@ -693,7 +700,8 @@ class SubmissionService
             ->setOriginalSubmission($originalSubmission)
             ->setEntryPoint($entryPoint)
             ->setExternalid($externalId)
-            ->setImportError($importError);
+            ->setImportError($importError)
+            ->setSource($source);
 
         // Add expected results from source. We only do this for jury submissions
         // to prevent accidental auto-verification of team submissions.
@@ -725,8 +733,15 @@ class SubmissionService
             // This is so that we can use the submitid/judgingid below.
             $this->em->flush();
 
-            $this->dj->maybeCreateJudgeTasks($judging,
-                $source === 'problem import' ? JudgeTask::PRIORITY_LOW : JudgeTask::PRIORITY_DEFAULT);
+            $priority = match ($source) {
+                SubmissionSource::PROBLEM_IMPORT => JudgeTask::PRIORITY_LOW,
+                default => JudgeTask::PRIORITY_DEFAULT,
+            };
+            // Create judgetask as invalid when evaluating as analyst.
+            $lazyEval = $this->config->get('lazy_eval_results');
+            // We create invalid judgetasks, and only mark them valid when they are interesting for the analysts.
+            $start_invalid = $lazyEval === DOMJudgeService::EVAL_ANALYST && $source == SubmissionSource::SHADOWING;
+            $this->dj->maybeCreateJudgeTasks($judging, $priority, valid: !$start_invalid);
         }
 
         $this->em->wrapInTransaction(function () use ($contest, $submission) {
@@ -755,7 +770,7 @@ class SubmissionService
                                            $language->getLangid(), $problem->getProblem()->getProbid()));
 
         $this->dj->auditlog('submission', $submission->getSubmitid(), 'added',
-            'via ' . ($source ?? 'unknown'), null, $contest->getCid());
+            'via ' . $source->value, null, $contest->getCid());
 
         if (Utils::difftime((float)$contest->getEndtime(), $submitTime) <= 0) {
             $this->logger->info(
@@ -853,7 +868,6 @@ class SubmissionService
      */
     public function getSubmissionZipResponse(Submission $submission): StreamedResponse
     {
-        /** @var SubmissionFile[] $files */
         $files = $submission->getFiles();
         $zip   = new ZipArchive;
         if (!($tmpfname = tempnam($this->dj->getDomjudgeTmpDir(), "submission_file-"))) {
@@ -874,10 +888,9 @@ class SubmissionService
 
     public function getSubmissionFileResponse(Submission $submission): StreamedResponse
     {
-        /** @var SubmissionFile[] $files */
         $files = $submission->getFiles();
 
-        if (count($files) !== 1) {
+        if ($files->count() !== 1) {
             throw new ServiceUnavailableHttpException(null, 'Submission does not contain exactly one file.');
         }
 

@@ -67,8 +67,9 @@ class ScoreboardService
         if (!$freezeData->started() && !$jury && !$forceUnfrozen) {
             return null;
         }
+        $restricted = ($jury || $freezeData->showFinal(false));
 
-        $teams      = $this->getTeamsInOrder($contest, $jury && !$visibleOnly, $filter);
+        $teams      = $this->getTeamsInOrder($contest, $jury && !$visibleOnly, $filter, $restricted);
         $problems   = $this->getProblems($contest);
         $categories = $this->getCategories($jury && !$visibleOnly);
         $scoreCache = $this->getScorecache($contest);
@@ -95,7 +96,7 @@ class ScoreboardService
     {
         $freezeData = new FreezeData($contest);
 
-        $teams = $this->getTeamsInOrder($contest, true, new Filter([], [], [], [$teamId]));
+        $teams = $this->getTeamsInOrder($contest, true, new Filter([], [], [], [$teamId]), true);
         if (empty($teams)) {
             return null;
         }
@@ -261,9 +262,9 @@ class ScoreboardService
         foreach ($submissions as $submission) {
             /** @var Judging|ExternalJudgement|null $judging */
             if ($useExternalJudgements) {
-                $judging = $submission->getExternalJudgements()->first() ?: null;
+                $judging = $submission->getValidExternalJudgement();
             } else {
-                $judging = $submission->getJudgings()->first() ?: null;
+                $judging = $submission->getValidJudging();
             }
 
             // three things will happen in the loop in this order:
@@ -553,7 +554,7 @@ class ScoreboardService
         }
     }
 
-    const SCALE = 9;
+    public const SCALE = 9;
 
     // Converts integer or bcmath floats to a string that can be used as a key in a score cache.
     // The resulting key will be a string with 33 characters, 23 before the decimal dot and 9 after.
@@ -603,7 +604,7 @@ class ScoreboardService
      */
     public function refreshCache(Contest $contest, ?callable $progressReporter = null): void
     {
-        ini_set('max_execution_time', 300);
+        Utils::extendMaxExecutionTime(300);
 
         $this->dj->auditlog('contest', $contest->getCid(), 'refresh scoreboard cache');
 
@@ -749,7 +750,8 @@ class ScoreboardService
             ->leftJoin('t.affiliation', 'affil')
             ->andWhere('cat.visible = 1')
             ->orderBy('cat.name')
-            ->addOrderBy('affil.name');
+            ->addOrderBy('affil.name')
+            ->addOrderBy('t.name');
 
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
@@ -860,11 +862,12 @@ class ScoreboardService
     /**
      * Get the scoreboard Twig data for a given contest.
      *
-     * @return array{refresh: array{after: int, url: string, ajax: bool}, static: bool, contest: Contest,
-     *               scoreFilter: Filter, scoreboard: Scoreboard, filterValues: array<string, string[]>,
-     *               groupedAffiliations: null|TeamAffiliation[], showFlags: int, showAffiliationLogos: bool,
-     *               showAffiliations: int, showPending: int, showTeamSubmissions: int, scoreInSeconds: bool,
-     *               maxWidth: int, jury?: bool, public?: bool, ajax?: bool}
+     * @return array{refresh?: array{after: int, url: string, ajax: bool}, static: bool, contest?: Contest,
+     *               scoreFilter?: Filter, scoreboard: Scoreboard, filterValues: array<string, string[]>,
+     *               groupedAffiliations: null|array<array<string, array<array{id: string, name: string}>>>,
+     *               showFlags: int, showAffiliationLogos: bool, showAffiliations: int, showPending: int,
+     *               showTeamSubmissions: int, scoreInSeconds: bool, maxWidth: int, jury?: bool,
+     *               public?: bool, ajax?: bool}
      */
     public function getScoreboardTwigData(
         ?Request $request,
@@ -944,7 +947,7 @@ class ScoreboardService
      * Get the teams to display on the scoreboard, returns them in order.
      * @return Team[]
      */
-    protected function getTeamsInOrder(Contest $contest, bool $jury = false, ?Filter $filter = null): array
+    protected function getTeamsInOrder(Contest $contest, bool $jury = false, ?Filter $filter = null, bool $restricted = false): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
@@ -1005,7 +1008,7 @@ class ScoreboardService
 
         $ret = $queryBuilder
             ->addOrderBy('tc.sortorder')
-            ->addOrderBy('r.sortKey' . ($jury ? 'Restricted' : 'Public'), 'DESC')
+            ->addOrderBy('r.sortKey' . ($restricted ? 'Restricted' : 'Public'), 'DESC')
             ->addOrderBy('effectivename')
             ->getQuery()->getResult();
         return $ret;

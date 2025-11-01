@@ -2,7 +2,6 @@
 
 namespace App;
 
-use App\DependencyInjection\Compiler\RemoveEventFeedImporterChannelFromLogs;
 use App\DependencyInjection\Compiler\SetDocLinksPass;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -20,6 +19,5 @@ class Kernel extends BaseKernel
     protected function build(ContainerBuilder $container): void
     {
         $container->addCompilerPass(new SetDocLinksPass());
-        $container->addCompilerPass(new RemoveEventFeedImporterChannelFromLogs());
     }
 }

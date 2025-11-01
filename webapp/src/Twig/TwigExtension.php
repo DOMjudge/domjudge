@@ -23,6 +23,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use App\Utils\Scoreboard\ScoreboardMatrixItem;
+use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,6 +31,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Exception\MissingResourceException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Environment;
@@ -41,6 +43,9 @@ use Twig\TwigFunction;
 
 class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
+    /**
+     * @param array<int, bool> $renderedSources
+     */
     public function __construct(
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
@@ -51,8 +56,10 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         protected readonly AwardService $awards,
         protected readonly TokenStorageInterface $tokenStorage,
         protected readonly AuthorizationCheckerInterface $authorizationChecker,
+        protected readonly RouterInterface $router,
         #[Autowire('%kernel.project_dir%')]
-        protected readonly string $projectDir
+        protected readonly string $projectDir,
+        protected array $renderedSources = []
     ) {}
 
     public function getFunctions(): array
@@ -168,6 +175,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 'Tomorrow'                  => ['name' => 'Tomorrow', 'external' => true],
                 'hc-light'                  => ['name' => 'High contrast (light)'],
                 'hc-black'                  => ['name' => 'High contrast (dark)'],
+            ],
+            'diff_modes'                    => [
+                'no-diff'                   => ["name"  => "No diff"],
+                'side-by-side'              => ["name"  => "Side-by-side"],
+                'inline'                    => ["name"  => "Inline"],
             ],
         ];
     }
@@ -513,8 +525,12 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return $results;
     }
 
-    public function printResult(?string $result, bool $valid = true, bool $jury = false): string
-    {
+    public function printResult(
+        ?string $result,
+        bool $valid = true,
+        bool $jury = false,
+        bool $onlyRejectedForIncorrect = false,
+    ): string {
         $result = strtolower($result ?? '');
         switch ($result) {
             case 'too-late':
@@ -539,6 +555,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 break;
             default:
                 $style = 'sol_incorrect';
+                if ($onlyRejectedForIncorrect) {
+                    $result = 'rejected';
+                }
         }
 
         return sprintf('<span class="sol %s">%s</span>', $valid ? $style : 'disabled', $result);
@@ -853,6 +872,7 @@ $(function() {
         const editor = monaco.editor.create(element, {
             value: content,
             scrollbar: {
+                alwaysConsumeMouseWheel: false,
                 vertical: 'auto',
                 horizontal: 'auto'
             },
@@ -902,79 +922,95 @@ JS;
                            sprintf($editor, $code, $editable ? 'false' : 'true', $mode, $extraForEdit));
     }
 
-    // This function expects $difftext to be in unified diff format. In
-    // particular each line is expected to contain at least some character
-    // (that is, a leading space, + or -) so that strtok does not gobble up
-    // multiple empty lines in one go.
-    protected function parseSourceDiff(string $difftext): string
+    /**
+     * Gets the JavaScript to get a Monaco model instance for the submission file.
+     * Renders the source code of the file as Monaco model, if not already rendered.
+     * @return string The JavaScript source assignable to a model variable.
+     */
+    public function getMonacoModel(SubmissionFile $file): string
     {
-        $line   = strtok($difftext, "\n"); // first line
-        $return = '';
-        while ($line !== false) {
-            // Strip any additional DOS/MAC newline characters:
-            $line = str_replace("\r", "↵", $line);
-            $formdiffline = match (substr($line, 0, 1)) {
-                '-' => "<span class='diff-del'>" . htmlspecialchars($line) . "</span>",
-                '+' => "<span class='diff-add'>" . htmlspecialchars($line) . "</span>",
-                default => htmlspecialchars($line),
-            };
-            if (str_contains($formdiffline, '#Warning: Strings contain different line endings')) {
-                $formdiffline = "<span class='diff-endline'>$formdiffline</span>";
-            }
-            $return .= $formdiffline . "\n";
-            $line   = strtok("\n");
+        if (array_key_exists($file->getSubmitfileid(), $this->renderedSources)) {
+            return sprintf(
+                <<<JS
+monaco.editor.getModel(monaco.Uri.parse("diff/%d/%s"));
+JS,
+                $file->getSubmitfileid(),
+                $file->getFilename(),
+            );
         }
-        return $return;
+        $this->renderedSources[$file->getSubmitfileid()] = true;
+
+        return sprintf(
+            <<<JS
+monaco.editor.createModel(
+    "%s",
+    undefined,
+    monaco.Uri.parse("diff/%d/%s")
+);
+JS,
+            $this->twig->getRuntime(EscaperRuntime::class)->escape($file->getSourcecode(), 'js'),
+            $file->getSubmitfileid(),
+            $file->getFilename(),
+        );
     }
 
     public function showDiff(string $id, SubmissionFile $newFile, SubmissionFile $oldFile): string
     {
         $editor = <<<HTML
-<div class="form-check form-switch">
-    <input class="form-check-input" type="checkbox" id="__EDITOR__SBS">
-    <label class="form-check-label" for="__EDITOR__SBS">Use side-by-side diff viewer</label>
-</div>
 <div class="editor" id="__EDITOR__"></div>
 <script>
 $(function() {
     require(['vs/editor/editor.main'], function () {
-        const originalModel = monaco.editor.createModel(
-            "%s",
-            undefined,
-            monaco.Uri.parse("diff-old/%s")
-        );
-        const modifiedModel = monaco.editor.createModel(
-            "%s",
-            undefined,
-            monaco.Uri.parse("diff-new/%s")
-        );
+        const originalModel = %s
+        const modifiedModel = %s
 
-        const sideBySide = isDiffSideBySide()
-        sideBySideSwitch = $("#__EDITOR__SBS");
-        sideBySideSwitch.prop('checked', sideBySide);
-        sideBySideSwitch.change(function(e) {
-            setDiffSideBySide(e.target.checked);
-            diffEditor.updateOptions({
-                renderSideBySide: e.target.checked,
-            });
+        const initialDiffMode = getDiffMode();
+        const radios = $("#diffselect-__EDITOR__ > input[name='__EDITOR__-mode']");
+        radios.each((_, radio) => {
+            $(radio).prop('checked', radio.value === initialDiffMode);
         });
 
         const diffEditor = monaco.editor.createDiffEditor(
             document.getElementById("__EDITOR__"), {
             scrollbar: {
+                alwaysConsumeMouseWheel: false,
                 vertical: 'auto',
                 horizontal: 'auto'
             },
             scrollBeyondLastLine: false,
             automaticLayout: true,
             readOnly: true,
-            renderSideBySide: sideBySide,
             theme: getCurrentEditorTheme(),
         });
-        diffEditor.setModel({
-            original: originalModel,
-            modified: modifiedModel,
+
+        const updateMode = (diffMode) => {
+            setDiffMode(diffMode);
+            const noDiff = diffMode === 'no-diff';
+            diffEditor.updateOptions({
+                renderOverviewRuler: !noDiff,
+                renderSideBySide: diffMode === 'side-by-side',
+            });
+
+            const oldViewState = diffEditor.saveViewState();
+            diffEditor.setModel({
+                original: noDiff ? modifiedModel : originalModel,
+                modified: modifiedModel,
+            });
+            diffEditor.restoreViewState(oldViewState);
+
+            diffEditor.getOriginalEditor().updateOptions({
+                lineNumbers: !noDiff,
+            });
+            diffEditor.getModifiedEditor().updateOptions({
+                minimap: {
+                    enabled: noDiff,
+                },
+            })
+        };
+        radios.change((e) => {
+            updateMode(e.target.value);
         });
+        updateMode(initialDiffMode);
     });
 });
 </script>
@@ -982,10 +1018,8 @@ HTML;
 
         return sprintf(
             str_replace('__EDITOR__', $id, $editor),
-            $this->twig->getRuntime(EscaperRuntime::class)->escape($oldFile->getSourcecode(), 'js'),
-            $oldFile->getFilename(),
-            $this->twig->getRuntime(EscaperRuntime::class)->escape($newFile->getSourcecode(), 'js'),
-            $newFile->getFilename(),
+            $this->getMonacoModel($oldFile),
+            $this->getMonacoModel($newFile),
         );
     }
 
@@ -1145,64 +1179,14 @@ EOF;
         return 'fas fa-file-' . $iconName;
     }
 
-    private function relativeLuminance(string $rgb): float
+    public function problemBadge(?ContestProblem $problem, bool $grayedOut = false): string
     {
-        // See https://en.wikipedia.org/wiki/Relative_luminance
-        [$r, $g, $b] = Utils::parseHexColor($rgb);
-
-        [$lr, $lg, $lb] = [
-            pow($r / 255, 2.4),
-            pow($g / 255, 2.4),
-            pow($b / 255, 2.4),
-        ];
-
-        return 0.2126 * $lr + 0.7152 * $lg + 0.0722 * $lb;
-    }
-
-    private function apcaContrast(string $fgColor, string $bgColor): float
-    {
-        // Based on WCAG 3.x (https://www.w3.org/TR/wcag-3.0/)
-        $luminanceForeground = $this->relativeLuminance($fgColor);
-        $luminanceBackground = $this->relativeLuminance($bgColor);
-
-        $contrast = ($luminanceBackground > $luminanceForeground)
-            ? (pow($luminanceBackground, 0.56) - pow($luminanceForeground, 0.57)) * 1.14
-            : (pow($luminanceBackground, 0.65) - pow($luminanceForeground, 0.62)) * 1.14;
-
-        return round($contrast * 100, 2);
-    }
-
-    /**
-     * @return array{string, string}
-     */
-    private function hexToForegroundAndBorder(string $rgb): array
-    {
-        $background = Utils::parseHexColor($rgb);
-
-        // Pick a border that's a bit darker.
-        $darker = $background;
-        $darker[0] = max($darker[0] - 64, 0);
-        $darker[1] = max($darker[1] - 64, 0);
-        $darker[2] = max($darker[2] - 64, 0);
-        $border    = Utils::rgbToHex($darker);
-
-        // Pick the text color with the biggest absolute contrast.
-        $contrastWithWhite = $this->apcaContrast('#ffffff', $rgb);
-        $contrastWithBlack = $this->apcaContrast('#000000', $rgb);
-
-        $foreground = (abs($contrastWithBlack) > abs($contrastWithWhite)) ? '#000000' : '#ffffff';
-
-        return [$foreground, $border];
-    }
-
-    public function problemBadge(ContestProblem $problem, bool $grayedOut = false): string
-    {
-        $rgb = Utils::convertToHex($problem->getColor() ?? '#ffffff');
+        $rgb = Utils::convertToHex($problem?->getColor() ?? '#ffffff');
         if ($grayedOut || empty($rgb)) {
             $rgb = Utils::convertToHex('whitesmoke');
         }
 
-        [$foreground, $border] = $this->hexToForegroundAndBorder($rgb);
+        [$foreground, $border] = Utils::hexToForegroundAndBorder($rgb);
 
         if ($grayedOut) {
             $foreground = 'silver';
@@ -1213,28 +1197,49 @@ EOF;
             $rgb,
             $border,
             $foreground,
-            $problem->getShortname()
+            $problem?->getShortname() ?? '?'
         );
     }
 
-    public function problemBadgeMaybe(ContestProblem $problem, ScoreboardMatrixItem $matrixItem): string
-    {
+    public function problemBadgeMaybe(
+        ContestProblem $problem,
+        ScoreboardMatrixItem $matrixItem,
+        TeamScore $score,
+        bool $static = false,
+    ): string {
         $rgb = Utils::convertToHex($problem->getColor() ?? '#ffffff');
         if (!$matrixItem->isCorrect || empty($rgb)) {
             $rgb = Utils::convertToHex('whitesmoke');
         }
 
-        [$foreground, $border] = $this->hexToForegroundAndBorder($rgb);
+        [$foreground, $border] = Utils::hexToForegroundAndBorder($rgb);
 
         if (!$matrixItem->isCorrect) {
             $foreground = 'silver';
             $border = 'linen';
         }
 
-        $ret = sprintf(
-            '<span class="badge problem-badge" style="font-size: x-small; background-color: %s; min-width: 18px; border: 1px solid %s;"><span style="color: %s;">%s</span></span>',
+        $submissionsUrl = $static
+            ? $this->router->generate('public_submissions_data')
+            : $this->router->generate('public_submissions_data_cell', [
+                'teamId' => $score->team->getExternalid(),
+                'problemId' => $problem->getExternalId(),
+            ]);
+
+        $ret = sprintf(<<<HTML
+                <span class="badge problem-badge"
+                      style="font-size: x-small; background-color: %s; min-width: 18px; border: 1px solid %s;"
+                      data-submissions-url="%s"
+                      data-team-id="%s"
+                      data-problem-id="%s">
+                    <span style="color: %s;">%s</span>
+                </span>
+                HTML,
             $rgb,
             $border,
+            $submissionsUrl,
+            $score->team->getExternalid(),
+            $problem->getExternalId(),
             $foreground,
             $problem->getShortname()
         );

@@ -18,12 +18,18 @@
     <div data-ajax-refresh-target data-ajax-refresh-after="initializeScoreboard" class="mt-3">
         {% include 'partials/scoreboard.html.twig' with {jury: false, public: true} %}
     </div>
+
+    <div data-submissions-modal>
+        {% include 'public/team_submissions_modal.html.twig' %}
+    </div>
+    {% include 'public/partials/submission_list_template.html.twig' %}
 {% endblock %}
 
 {% block extrafooter %}
     <script>
         initFavouriteTeams();
         pinScoreheader();
+        initScoreboardSubmissions();
 
         {% if static and refresh is defined %}
         function disableRefreshOnModal() {
@@ -54,6 +60,7 @@
                 disableRefreshOnModal();
                 {% endif %}
                 resizeMobileTeamNamesAndProblemBadges();
+                initScoreboardSubmissions();
             };
 
             {% if static and refresh is defined %}

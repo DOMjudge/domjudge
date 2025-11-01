@@ -67,6 +67,9 @@ password=${MYSQL_ROOT_PASSWORD}
 EOF
 cat ~/.my.cnf
 
+# TODO: Remove after fixing https://github.com/DOMjudge/domjudge/issues/2848
+mysql_root "SET GLOBAL innodb_snapshot_isolation = OFF;"
+
 mysql_root "CREATE DATABASE IF NOT EXISTS \`$DATABASE_NAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql_root "CREATE USER IF NOT EXISTS \`domjudge\`@'%' IDENTIFIED BY 'domjudge';"
 mysql_root "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DATABASE_NAME\`.* TO 'domjudge'@'%';"
@@ -79,6 +82,7 @@ mysql_root "SELECT USER();"
 mysql_root "SELECT user,host FROM mysql.user"
 mysql_root "SET GLOBAL max_allowed_packet=1073741824"
 mysql_root "SHOW GLOBAL STATUS LIKE 'Connection_errors_%'"
+mysql_root "SHOW VARIABLES LIKE 'innodb_snapshot_isolation'"
 mysql_root "SHOW VARIABLES LIKE '%_timeout'"
 echo "unused:sqlserver:$DATABASE_NAME:domjudge:domjudge:3306" > /opt/domjudge/domserver/etc/dbpasswords.secret
 mysql_user "SELECT CURRENT_USER();"

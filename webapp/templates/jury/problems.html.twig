@@ -26,9 +26,26 @@
     {% endif %}
 
     {% if is_granted('ROLE_ADMIN') %}
-        <p>
+        <p class="mt-4">
+            {% include 'jury/partials/_delete_button.html.twig' with {'entities': problems_current} %}
             {{ button(path('jury_problem_add'), 'Add new problem', 'primary', 'plus') }}
             {{ button(path('jury_import_export', {'_fragment':'problemarchive'}), 'Import problem', 'primary', 'upload') }}
         </p>
     {% endif %}
+
+
+{% endblock %}
+
+{% block extrafooter %}
+    {{ parent() }}
+    <script src="{{ asset('js/multi-delete.js') }}"></script>
+    <script>
+        $(function() {
+            initializeMultiDelete({
+                buttonSelector: '#delete-selected-button',
+                checkboxClass: 'problem-checkbox',
+                deleteUrl: '{{ path('jury_problem_delete_multiple') }}'
+            });
+        });
+    </script>
 {% endblock %}

@@ -704,7 +704,7 @@ class ContestController extends BaseController
                         ->setJudgehost($judgehost)
                         ->setPriority(JudgeTask::PRIORITY_DEFAULT)
                         ->setTestcaseId($testcase->getTestcaseid())
-                        ->setTestcaseHash($testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput());
+                        ->setTestcaseHash($testcase->getTestcaseHash());
                     $this->em->persist($judgeTask);
                     $cnt++;
                 }
@@ -956,9 +956,24 @@ class ContestController extends BaseController
         foreach (['Activate', 'Deactivate', 'Start', 'End', 'Freeze', 'Unfreeze'] as $timeString) {
             $tmpValue = $formData->{'get' . $timeString . 'timeString'}();
             if ($tmpValue !== '' && !is_null($tmpValue)) {
-                $fields = explode(' ', $tmpValue);
-                if (count($fields) > 1) {
-                    $timeZones[] = $fields[2];
+                if (preg_match("/\d{2}-\d{2}-\d{2}.*/", $tmpValue) === 1) {
+                    $chr = $tmpValue[10]; // The separator between date & time
+                    $fields = explode($chr, $tmpValue);
+                    // First field is the time, 2nd/3th might be timezone or offset
+                    $tmpValue = substr(str_replace($fields[0], '', $tmpValue), 1); // Also remove the separator
+                    if (str_contains($tmpValue, ' ')) {
+                        $fields = explode(' ', $tmpValue);
+                    } elseif (str_contains($tmpValue, '+')) {
+                        $fields = explode('+', $tmpValue);
+                    } elseif (str_contains($tmpValue, '-')) {
+                        $fields = explode('-', $tmpValue);
+                    } elseif (substr($tmpValue, -1) === 'Z') {
+                        $timeZones[] = 'UTC';
+                        continue;
+                    }
+                    if (count($fields) > 1) {
+                        $timeZones[] = $fields[1];
+                    }
                 }
             }
         }

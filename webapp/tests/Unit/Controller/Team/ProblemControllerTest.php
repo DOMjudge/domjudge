@@ -133,7 +133,7 @@ class ProblemControllerTest extends BaseTestCase
             $cardBodies->eq(2)->filter('.list-group .list-group-item')->count());
 
         // Check the link to download all samples.
-        $link = $cardBodies->eq(1)->filter('a')->eq(1);
+        $link = $cardBodies->eq(1)->filter('a')->eq(2);
         self::assertSame('samples', $link->text(null, true));
         self::assertSame(sprintf('/team/%d/samples.zip',
             $problem->getProbid()),

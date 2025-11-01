@@ -42,7 +42,7 @@
 // Additionally, we set up a signal handler for SIGUSR1 which runguard will use
 // to indicate when it killed its child process due to a time limit.
 //
-// If the proxy is not enabled (i.e. no traffic capturing), the pipes are setup
+// If the proxy is not enabled (i.e. no traffic capturing), the pipes are set up
 // like this:
 //
 //   #0            #1
@@ -52,7 +52,7 @@
 // SIGUSR1 -----------------> epoll
 //
 //
-// If the proxy is enabled the pipes are setup like this:
+// If the proxy is enabled the pipes are set up like this:
 //
 //   #0            proxy           #1
 // stdout  ----->  epoll  -----> stdin
@@ -65,12 +65,13 @@
 #include "lib.error.h"
 #include "lib.misc.h"
 
-#include <cstring>
+#include <algorithm>
 #include <chrono>
+#include <csignal>
+#include <cstring>
 #include <fcntl.h>
 #include <fstream>
 #include <getopt.h>
-#include <signal.h>
 #include <sstream>
 #include <string>
 #include <sys/epoll.h>
@@ -87,7 +88,6 @@ using namespace std;
 using fd_t = int;
 
 const char *progname;
-const int N_PROC = 2;
 
 // Set the NONBLOCK flag for a file descriptor.
 void set_non_blocking(fd_t fd) {
@@ -102,8 +102,6 @@ void set_non_blocking(fd_t fd) {
    writing to the other side, if that side doesn't consume data from the pipe.
    See also: https://github.com/Kattis/problemtools/issues/113
  */
-// For Linux specific fcntl F_SETPIPE_SZ command.
-#if __gnu_linux__
 const char *PROC_MAX_PIPE_SIZE = "/proc/sys/fs/pipe-max-size";
 
 void resize_pipe(int fd) {
@@ -116,7 +114,7 @@ void resize_pipe(int fd) {
   }
   if (max_pipe_size == UNINIT) {
     FILE *f = nullptr;
-    if ((f = fopen(PROC_MAX_PIPE_SIZE, "r")) == NULL) {
+    if ((f = fopen(PROC_MAX_PIPE_SIZE, "r")) == nullptr) {
       max_pipe_size = FAILED;
       warning(errno, "could not open '%s'", PROC_MAX_PIPE_SIZE);
       return;
@@ -141,9 +139,6 @@ void resize_pipe(int fd) {
 
   logmsg(LOG_DEBUG, "set pipe fd %d to size %d", fd, new_size);
 }
-#else  // __gnu_linux__
-void resize_pipe(int fd) {}
-#endif // __gnu_linux__
 
 // Write all the data into the file descriptor. It is assumed that the file
 // descriptor is *not* NONBLOCK. This function blocks until all the data is
@@ -242,15 +237,15 @@ struct process_t {
     char pid_buf[12];
     vector<const char *> argv;
     for (size_t i = 0; i < args.size(); i++) {
-        argv.push_back(args[i].c_str());
-        if (i == 1 && cmd == "sudo" &&
-            args[i].find("/runguard") != string::npos) {
-            // This is a hack, and can be improved significantly after implementing
-            // https://docs.google.com/document/d/1WZRwdvJUamsczYC7CpP3ZIBU8xG6wNqYqrNJf7osxYs/edit#heading=h.i7kgdnmw8qd7
-            argv.push_back("-U");
-            sprintf(pid_buf, "%d", getpid());
-            argv.push_back(pid_buf);
-        }
+      argv.push_back(args[i].c_str());
+      if (i == 1 && cmd == "sudo" &&
+          args[i].find("/runguard") != string::npos) {
+        // This is a hack, and can be improved significantly after implementing
+        // https://docs.google.com/document/d/1WZRwdvJUamsczYC7CpP3ZIBU8xG6wNqYqrNJf7osxYs/edit#heading=h.i7kgdnmw8qd7
+        argv.push_back("-U");
+        sprintf(pid_buf, "%d", getpid());
+        argv.push_back(pid_buf);
+      }
     }
     pid = execute(cmd.c_str(), argv.data(), argv.size(), stdio, 0);
     if (pid < 0) {
@@ -317,7 +312,7 @@ struct output_file_t {
 
   chrono::time_point<chrono::steady_clock> start;
 
-  output_file_t(string path) {
+  output_file_t(const string &path) {
     // If the output file is not enable this struct only does noops.
     if (path.empty()) {
       return;
@@ -332,8 +327,11 @@ struct output_file_t {
   }
 
   output_file_t(const output_file_t &) = delete;
+
   output_file_t(const output_file_t &&) = delete;
+
   output_file_t &operator=(const output_file_t &) = delete;
+
   output_file_t &operator=(const output_file_t &&) = delete;
 
   ~output_file_t() {
@@ -406,7 +404,7 @@ struct state_t {
     string meta_file;
   } args;
 
-  // The N_PROC processes to execute.
+  // The two processes to execute.
   vector<process_t> processes;
 
   // The PID of the first process that exited.
@@ -451,7 +449,7 @@ struct state_t {
 
     progname = argv[0];
     int opt = -1;
-    while ((opt = getopt_long(argc, argv, "+o:M:vh", long_opts, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "+o:M:vh", long_opts, nullptr)) != -1) {
       switch (opt) {
       case 0: /* long-only option */
         break;
@@ -494,9 +492,9 @@ struct state_t {
     }
   }
 
-  // Parse the N_PROC commands separated by '='.
+  // Parse the two commands separated by '='.
   void parse_commands(int argc, char **argv) {
-    for (size_t i = 0; i < N_PROC; i++) {
+    for (size_t i = 0; i < 2; i++) {
       process_t proc(i);
       processes.emplace_back(move(proc));
     }
@@ -508,7 +506,7 @@ struct state_t {
       // Command separator.
       if (arg == "=") {
         current_process_index += 1;
-        if (current_process_index >= N_PROC) {
+        if (current_process_index >= 2) {
           logmsg(LOG_ERR, "too many commands specified!");
           exit(1);
         }
@@ -533,7 +531,7 @@ struct state_t {
     }
 
     if (processes.back().cmd.empty()) {
-      logmsg(LOG_ERR, "you should provide %d commands", N_PROC);
+      logmsg(LOG_ERR, "you should provide exactly 2 commands");
       exit(1);
     }
 
@@ -549,16 +547,16 @@ struct state_t {
 
   bool has_proxy() { return !args.output_file.empty(); }
 
-  // Install an handler for the SIGTERM signal. This will send SIGTERM to all
-  // the children and then restore the default signal handler.
-  void install_sigterm_handler() {
+  // Install a handler for SIGTERM: This will send SIGTERM to all
+  // children and then restore the default signal handler.
+  static void install_sigterm_handler() {
     sigset_t sigmask;
-    struct sigaction sigact {};
+    struct sigaction sigact{};
 
     if (sigemptyset(&sigmask)) {
       error(errno, "creating signal mask");
     }
-    if (sigprocmask(SIG_SETMASK, &sigmask, NULL)) {
+    if (sigprocmask(SIG_SETMASK, &sigmask, nullptr)) {
       error(errno, "unmasking signals");
     }
     if (sigaddset(&sigmask, SIGTERM)) {
@@ -570,13 +568,13 @@ struct state_t {
     sigact.sa_handler = [](int) {
       // When SIGTERM is received, the original handler is restored and then
       // the signal is propagated to the children.
-      struct sigaction sigact {};
+      struct sigaction sigact{};
       sigact.sa_handler = SIG_IGN;
       sigact.sa_flags = 0;
       if (sigemptyset(&sigact.sa_mask)) {
         warning(errno, "creating signal mask");
       }
-      if (sigaction(SIGTERM, &sigact, NULL)) {
+      if (sigaction(SIGTERM, &sigact, nullptr)) {
         warning(errno, "cannot restore signal handler");
       }
 
@@ -587,15 +585,16 @@ struct state_t {
     };
 
     logmsg(LOG_DEBUG, "installing SIGTERM handler");
-    if (sigaction(SIGTERM, &sigact, NULL)) {
+    if (sigaction(SIGTERM, &sigact, nullptr)) {
       error(errno, "installing signal handler");
     }
   }
 
-  // Install a handler for the SIGCHLD signal. The handler will send a byte to
-  // a pipe notifying the main loop that a child exited.
-  // This method can be called only once.
-  void install_sigchld_handler() {
+  // Install a handler for the given signal. The handler will send a byte to
+  // a pipe notifying the main loop.
+  // This method can be called only once for a given signal.
+  template<int signum>
+  fd_t install_signal_handler() {
     fd_t fds[2];
     if (pipe2(fds, O_CLOEXEC | O_NONBLOCK)) {
       error(errno, "creating exit pipes");
@@ -607,74 +606,48 @@ struct state_t {
     fd_t read_end = fds[0];
     static fd_t write_end = -1;
     if (write_end != -1) {
-      error(0, "install_sigchld_handler can be called only once");
+      error(0, "attempted to install signal handler for %d twice", signum);
     }
     write_end = fds[1];
 
     logmsg(LOG_DEBUG, "exit handler will send event using %d -> %d", write_end,
            read_end);
 
-    signal(SIGCHLD, [](int) {
+    signal(signum, [](int) {
       // TODO: Decide whether to keep some logging as the line below. We can't
       // use logmsg here since that will in turn call syslog which is not safe
       // to do in a signal handler (see also `man signal-safety`).
-      // logmsg(LOG_DEBUG, "caught SIGCHLD signal");
+      // logmsg(LOG_DEBUG, "caught signal %d", signum);
 
       // Notify the main loop that a child exited by sending a message via
-      // child_exited_pipe.
+      // the pipe.
       static char buf[] = {42};
       if (write(write_end, buf, 1) != 1) {
-        error(errno, "failed to notify child exit");
+        error(errno, "failed to notify main loop of signal");
       }
     });
 
-    child_exited_pipe = read_end;
+    return read_end;
   }
 
- // Install a handler for the SIGUSR1 signal. The handler will send a byte to
- // a pipe notifying the main loop that the child was terminated due to time limit.
- // This method can be called only once.
- // TODO: Refactor code to avoid code duplication with install_sigchld_handler.
- void install_sigusr1_handler() {
-     fd_t fds[2];
-     if (pipe2(fds, O_CLOEXEC | O_NONBLOCK)) {
-         error(errno, "creating exit pipes");
-     }
+  // Install a handler for the SIGCHLD signal. The handler will send a byte to
+  // a pipe notifying the main loop that a child exited.
+  // This method can be called only once.
+  void install_sigchld_handler() {
+    child_exited_pipe = install_signal_handler<SIGCHLD>();
+  }
 
-     // The lambda below cannot capture anything, otherwise it couldn't be made
-     // into a function pointer. Therefore the write_end must have a static
-     // lifetime.
-     fd_t read_end = fds[0];
-     static fd_t write_end = -1;
-     if (write_end != -1) {
-         error(0, "install_sigchld_handler can be called only once");
-     }
-     write_end = fds[1];
-
-     logmsg(LOG_DEBUG, "exit handler will send event using %d -> %d", write_end,
-            read_end);
-
-     signal(SIGUSR1, [](int) {
-         // TODO: Decide whether to keep some logging as the line below. We can't
-         // use logmsg here since that will in turn call syslog which is not safe
-         // to do in a signal handler (see also `man signal-safety`).
-         // logmsg(LOG_DEBUG, "caught SIGUSR1 signal");
-
-         // Notify the main loop that a child was terminated due to time limit by sending a message via
-         // child_timelimit_pipe.
-         static char buf[] = {42};
-         if (write(write_end, buf, 1) != 1) {
-             error(errno, "failed to notify child exit");
-         }
-     });
-
-     child_timelimit_pipe = read_end;
- }
+  // Install a handler for the SIGUSR1 signal. The handler will send a byte to
+  // a pipe notifying the main loop that the child was terminated due to time
+  // limit. This method can be called only once.
+  void install_sigusr1_handler() {
+    child_timelimit_pipe = install_signal_handler<SIGUSR1>();
+  }
 
   // Create the pipes used for the process communication, including the ones for
   // the proxy, if enabled.
   void setup_pipes() {
-    // Create and setup a pipe.
+    // Create and set up a pipe.
     auto make_pipe = [&]() {
       fd_t fds[2];
       if (pipe2(fds, O_CLOEXEC)) {
@@ -689,9 +662,8 @@ struct state_t {
     };
 
     for (size_t i = 0; i < processes.size(); i++) {
-      size_t j = (i + 1) % N_PROC;
-      // Setup the communication #i -> #j (optionally with an proxy in
-      // between).
+      size_t j = 1 - i;
+      // Set up the communication #i -> #j (optionally with a proxy in between).
       process_t &process = processes[i];
       process_t &other = processes[j];
 
@@ -747,7 +719,7 @@ struct state_t {
 
     // Always listen for child timelimit events.
     if (child_timelimit_pipe == -1) {
-        error(0, "SIGUSR1 handler not installed");
+      error(0, "SIGUSR1 handler not installed");
     }
     add_fd(child_timelimit_pipe);
 
@@ -817,12 +789,8 @@ struct state_t {
 
   // Check if every process has exited.
   bool has_everyone_exited() {
-    for (const auto &proc : processes) {
-      if (!proc.exited) {
-        return false;
-      }
-    }
-    return true;
+    return all_of(processes.begin(), processes.end(),
+                  [](const process_t &p) { return p.exited; });
   }
 
   // The pipe connecting from -> to has some data ready. Consume it reading as
@@ -877,8 +845,9 @@ struct state_t {
 
     // We can only receive 2 types of events:
     // - a child exited
-    // - some data is ready in an proxy's pipe (at most N_PROC)
-    const int MAX_EVENTS = 1 + N_PROC;
+    // - some data is ready in a proxy's pipe (at most one for each child
+    // process)
+    const int MAX_EVENTS = 1 + 2;
     epoll_event events[MAX_EVENTS];
     while (true) {
       // This will block until an event is ready.
@@ -914,26 +883,25 @@ struct state_t {
           continue;
         }
         if (fd == child_timelimit_pipe) {
-            static char buffer[1];
-            if (read(child_timelimit_pipe, buffer, 1) != 1) {
-                if (errno != EAGAIN && errno != EWOULDBLOCK) {
-                    error(errno, "failed to read from tle pipe");
-                }
-            } else if (buffer[0] == 42) {
-                logmsg(LOG_WARNING, "child indicated TLE");
-                child_indicated_timelimit = true;
-                continue;
+          static char buffer[1];
+          if (read(child_timelimit_pipe, buffer, 1) != 1) {
+            if (errno != EAGAIN && errno != EWOULDBLOCK) {
+              error(errno, "failed to read from tle pipe");
             }
+          } else if (buffer[0] == 42) {
+            logmsg(LOG_WARNING, "child indicated TLE");
+            child_indicated_timelimit = true;
+            continue;
+          }
         }
 
-
         // A process wrote in one of the pipes to the proxy.
-        for (size_t i = 0; i < processes.size(); i++) {
-          auto &from = processes[i];
+        for (size_t j = 0; j < processes.size(); j++) {
+          auto &from = processes[j];
           if (fd != from.process_to_proxy) {
             continue;
           }
-          auto &to = processes[(i + 1) % processes.size()];
+          auto &to = processes[1 - j];
           // Do not write to an exited process.
           if (to.exited) {
             break;
@@ -979,12 +947,15 @@ int main(int argc, char **argv) {
   if (setsid() < 0) {
     warning(errno, "failed to create a new session");
   }
+
   // The processes may close their pipes, so we need to ignore "broken pipe"
   // errors.
   signal(SIGPIPE, SIG_IGN);
-  state.install_sigterm_handler();
+
+  state_t::install_sigterm_handler();
   state.install_sigchld_handler();
   state.install_sigusr1_handler();
+
   state.setup_pipes();
   for (auto &proc : state.processes) {
     proc.spawn();

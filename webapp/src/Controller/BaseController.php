@@ -10,7 +10,6 @@ use App\Entity\ContestProblem;
 use App\Entity\ExternalIdFromInternalIdInterface;
 use App\Entity\Problem;
 use App\Entity\RankCache;
-use App\Entity\ScoreboardType;
 use App\Entity\ScoreCache;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
@@ -168,8 +167,9 @@ abstract class BaseController extends AbstractController
             $parts = explode('/', $file);
             $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
             $class = sprintf('App\\Entity\\%s', $shortClass);
-            if (class_exists($class) && !in_array($class,
-                    [RankCache::class, ScoreCache::class, BaseApiEntity::class, ScoreboardType::class])) {
+            if (class_exists($class) &&
+                !in_array($class, [RankCache::class, ScoreCache::class, BaseApiEntity::class]) &&
+                !enum_exists($class)) {
                 $metadata = $this->em->getClassMetadata($class);
 
                 $tableRelations = [];
@@ -372,7 +372,7 @@ abstract class BaseController extends AbstractController
             }
             $primaryKeyData[] = $primaryKeyDataTemp;
         }
-        return [$isError, $primaryKeyData, $messages];
+        return [$isError, $primaryKeyData, array_values(array_unique($messages))];
     }
 
     /**
@@ -445,12 +445,46 @@ abstract class BaseController extends AbstractController
             'showModalSubmit' => !$isError,
             'modalUrl' => $request->getRequestUri(),
             'redirectUrl' => $redirectUrl,
+            'count' => count($entities),
         ];
         if ($request->isXmlHttpRequest()) {
             return $this->render('jury/delete_modal.html.twig', $data);
         }
 
         return $this->render('jury/delete.html.twig', $data);
+    }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $entityClass
+     */
+    protected function deleteMultiple(
+        Request $request,
+        string $entityClass,
+        string $idProperty,
+        string $redirectRoute,
+        string $warningMessage,
+        ?callable $filter = null
+    ): Response {
+        $ids = $request->query->all('ids');
+        if (empty($ids)) {
+            throw new BadRequestHttpException('No IDs specified for deletion');
+        }
+
+        /** @var \Doctrine\ORM\EntityRepository<T> $repository */
+        $repository = $this->em->getRepository($entityClass);
+        $entities = $repository->findBy([$idProperty => $ids]);
+
+        if ($filter) {
+            $entities = array_filter($entities, $filter);
+        }
+
+        if (empty($entities)) {
+            $this->addFlash('warning', $warningMessage);
+            return $this->redirectToRoute($redirectRoute);
+        }
+
+        return $this->deleteEntities($request, $entities, $this->generateUrl($redirectRoute));
     }
 
     /**
@@ -483,6 +517,39 @@ abstract class BaseController extends AbstractController
         }
 
         return $result;
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $table_fields
+     */
+    protected function addSelectAllCheckbox(array &$table_fields, string $title): void
+    {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $table_fields = array_merge(
+                ['checkbox' => ['title' => sprintf('<input type="checkbox" class="select-all" title="Select all %s">', $title), 'sort' => false, 'search' => false, 'raw' => true]],
+                $table_fields
+            );
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    protected function addEntityCheckbox(array &$data, object $entity, mixed $identifierValue, string $checkboxClass, ?callable $condition = null): void
+    {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            if ($condition !== null && !$condition($entity)) {
+                $data['checkbox'] = ['value' => ''];
+                return;
+            }
+            $data['checkbox'] = [
+                'value' => sprintf(
+                    '<input type="checkbox" name="ids[]" value="%s" class="%s">',
+                    $identifierValue,
+                    $checkboxClass
+                )
+            ];
+        }
     }
 
     /**

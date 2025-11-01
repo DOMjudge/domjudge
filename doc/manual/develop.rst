@@ -43,6 +43,15 @@ already listed under
     python3-sphinx python3-sphinx-rtd-theme fontconfig python3-yaml \
     latexmk texlive-latex-recommended texlive-latex-extra tex-gyre
 
+For Fedora use::
+
+  sudo dnf install git autoconf automake bats \
+    sphinx-build python3-sphinx_rtd_theme latexmk texlive-cmap \
+    texlive-metafont texlive-tex-gyre texlive-fncychap texlive-wrapfig \
+    texlive-capt-of texlive-framed texlive-upquote texlive-needspace \
+    texlive-tabulary texlive-parskip texlive-oberdiek texlive-makeindex \
+    texlive-ellipse texlive-pict2e texlive-collection-fontsextra
+
 When this software is present, bootstrapping can be done by running
 ``make dist``, which creates the ``configure`` script,
 downloads and installs the PHP dependencies via composer and

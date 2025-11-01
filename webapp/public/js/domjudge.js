@@ -124,18 +124,18 @@ function applyEditorTheme(theme = undefined, isExternal = false)
     });
 }
 
-function isDiffSideBySide()
+function getDiffMode()
 {
-    let sideBySide = localStorage.getItem('domjudge_editor_side_by_side');
-    if (sideBySide === undefined) {
-        return true;
+    let diffMode = localStorage.getItem('domjudge_editor_diff_mode');
+    if (diffMode === undefined) {
+        return 'side-by-side';
     }
-    return sideBySide == 'true';
+    return diffMode;
 }
 
-function setDiffSideBySide(value)
+function setDiffMode(value)
 {
-    localStorage.setItem('domjudge_editor_side_by_side', value);
+    localStorage.setItem('domjudge_editor_diff_mode', value);
 }
 
 // Send a notification if notifications have been enabled.
@@ -1119,9 +1119,7 @@ function resizeMobileTeamNamesAndProblemBadges() {
     });
 }
 
-function createSubmissionGraph(submissionStats, contestStartTime, contestDurationSeconds, submissions) {
-    const minBucketCount = 30;
-    const maxBucketCount = 301;
+function createSubmissionGraph(submissionStats, contestStartTime, contestDurationSeconds, submissions, minBucketCount = 30, maxBucketCount = 301) {
     const units = [
         { 'name': 'seconds', 'convert': 1, 'step': 60 },
         { 'name': 'minutes', 'convert': 60, 'step': 15 },
@@ -1235,3 +1233,60 @@ $(function() {
         });
     });
 });
+
+function loadSubmissions(dataElement, $displayElement) {
+    const url = dataElement.dataset.submissionsUrl
+    fetch(url)
+        .then(data => data.json())
+        .then(data => {
+            const teamId = dataElement.dataset.teamId;
+            const problemId = dataElement.dataset.problemId;
+            const teamKey = `team-${teamId}`;
+            const problemKey = `problem-${problemId}`;
+            if (!data.submissions || !data.submissions[teamKey] || !data.submissions[teamKey][problemKey]) {
+                return;
+            }
+
+            const submissions = data.submissions[teamKey][problemKey];
+            if (submissions.length === 0) {
+                $displayElement.html(document.querySelector('#empty-submission-list').innerHTML);
+            } else {
+                let templateData = document.querySelector('#submission-list').innerHTML;
+                const $table = $(templateData);
+                const itemTemplateData = document.querySelector('#submission-list-item').innerHTML;
+                const $itemTemplate = $(itemTemplateData);
+                const $submissionList = $table.find('[data-submission-list]');
+                for (const submission of submissions) {
+                    const $item = $itemTemplate.clone();
+                    $item.find('[data-time]').html(submission.time);
+                    $item.find('[data-language-id]').html(submission.language);
+                    $item.find('[data-verdict]').html(submission.verdict);
+                    $submissionList.append($item);
+                }
+                $displayElement.find('.spinner-border').remove();
+                $displayElement.append($table);
+            }
+        });
+}
+
+function initScoreboardSubmissions() {
+    $('[data-submissions-url]').on('click', function (e) {
+        const linkEl = e.currentTarget;
+        e.preventDefault();
+        const $modal = $('[data-submissions-modal] .modal').clone();
+        const $teamEl = $(`[data-team-external-id="${linkEl.dataset.teamId}"]`);
+        const $problemEl = $(`[data-problem-external-id="${linkEl.dataset.problemId}"]`);
+        $modal.find('[data-team]').html($teamEl.data('teamName'));
+        $modal.find('[data-problem-badge]').html($problemEl.data('problemBadge'));
+        $modal.find('[data-problem-name]').html($problemEl.data('problemName'));
+        $modal.modal();
+        $modal.modal('show');
+        $modal.on('hidden.bs.modal', function (e) {
+            $(e.currentTarget).remove();
+        });
+        $modal.on('shown.bs.modal', function (e) {
+            const $modalBody = $(e.currentTarget).find('.modal-body');
+            loadSubmissions(linkEl, $modalBody);
+        });
+    });
+}

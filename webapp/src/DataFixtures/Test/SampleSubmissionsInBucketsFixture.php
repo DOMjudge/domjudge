@@ -21,7 +21,7 @@ class SampleSubmissionsInBucketsFixture extends AbstractTestDataFixture
             ->setStarttimeString('2022-01-01 00:00:00 Europe/Amsterdam')
             ->setFreezetimeString('2022-01-01 04:05:00 Europe/Amsterdam')
             ->setEndtimeString('2022-01-01 05:00:00 Europe/Amsterdam')
-            ->setUnfreezetime(sprintf('%d-01-01 05:00:00 Europe/Amsterdam', date('Y') + 1));
+            ->setUnfreezetimeString(sprintf('%d-01-01 05:00:00 Europe/Amsterdam', (int)date('Y') + 1));
         $manager->flush();
 
         // Now add some submissions:

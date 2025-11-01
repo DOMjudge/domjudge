@@ -69,5 +69,6 @@ class SubmissionRestriction
         public ?bool $externallyJudged = null,
         public ?bool $externallyVerified = null,
         public ?bool $withExternalId = null,
+        public ?bool $valid = null,
     ) {}
 }

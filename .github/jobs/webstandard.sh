@@ -117,8 +117,10 @@ if [ "$TEST" = "w3cval" ]; then
 
     section_start "Install testsuite"
     cd "$DIR"
-    wget https://github.com/validator/validator/releases/latest/download/vnu.linux.zip
+    wget https://github.com/validator/validator/releases/download/latest/vnu.linux.zip
     unzip -q vnu.linux.zip
+    # Remove a warning by creating an empty config.
+    touch vnu.properties
     section_end
 
     FLTR='--filterpattern .*autocomplete.*|.*role=tab.*|.*descendant.*|.*Stray.*|.*attribute.*|.*Forbidden.*|.*stream.*|.*obsolete.*'
@@ -128,7 +130,7 @@ if [ "$TEST" = "w3cval" ]; then
         # shellcheck disable=SC2086
         "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
         # shellcheck disable=SC2086
-        NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | wc -l)
+        NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | tee "$ARTIFACTS/w3c_${typ}_${URL}.log" | wc -l)
         FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
         python3 -m "json.tool" < result.json > "$ARTIFACTS/w3c$typ$URL.json"
         trace_off; python3 .github/jobs/jsontogha.py "$ARTIFACTS/w3c$typ$URL.json"; trace_on

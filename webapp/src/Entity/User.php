@@ -434,24 +434,24 @@ class User extends BaseApiEntity implements
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('type')]
     #[Serializer\Type('string')]
-    public function getType(): ?string
+    public function getType(): string
     {
-        // Types allowed by the CCS Specs Contest API in order of most permissions to least.
+        // Types suggested by the CCS Specs Contest API in order of most permissions to least.
         // Either key=>value where key is the DOMjudge role and value is the API account type or
         // only value, where both the DOMjudge role and API type are the same.
-        $allowedTypes = ['admin', 'api_writer' => 'admin', 'api_reader' => 'admin',
-                         'jury' => 'judge', 'api_source_reader' => 'judge',
-                         'team'];
-        foreach ($allowedTypes as $role => $allowedType) {
+        $mappedTypes = ['admin', 'api_writer' => 'admin', 'api_reader' => 'admin',
+                        'jury' => 'judge', 'api_source_reader' => 'judge',
+                        'team'];
+        foreach ($mappedTypes as $role => $mappedType) {
             if (is_numeric($role)) {
-                $role = $allowedType;
+                $role = $mappedType;
             }
             if (in_array($role, $this->getRoleList())) {
-                return $allowedType;
+                return $mappedType;
             }
         }
 
-        return null;
+        return 'other';
     }
 
     /**

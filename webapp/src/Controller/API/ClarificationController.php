@@ -12,7 +12,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
@@ -277,8 +277,10 @@ class ClarificationController extends AbstractRestController
             ->leftJoin('clar.sender', 's')
             ->leftJoin('clar.recipient', 'r')
             ->leftJoin('clar.problem', 'p')
+            ->innerJoin('c.problems', 'cp')
             ->select('clar, c, r, reply, p')
             ->andWhere('clar.contest = :cid')
+            ->andWhere('clar.problem IS NULL OR clar.problem = cp.problem')
             ->setParameter('cid', $this->getContestId($request))
             ->orderBy('clar.clarid');
 

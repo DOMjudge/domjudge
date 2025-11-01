@@ -197,15 +197,20 @@
                     </a>
                 </span>
 
-                {% if external_ccs_submission_url is not empty %}
-                    {% set externalSubmissionUrl = submission | externalCcsUrl %}
-                    {% if externalSubmissionUrl is not empty %}
-                        <span>
-                    <i class="fas fa-link" title="External link:"></i>
-                    <a href="{{ externalSubmissionUrl }}" target="_blank">
-                        View in external CCS
-                    </a>
-                </span>
+                {% if shadowMode() and submission.externalid %}
+                    {% if external_ccs_submission_url is empty %}
+                        External ID: {{- submission.externalid -}}
+                    {% else %}
+                        {% set externalSubmissionUrl = submission | externalCcsUrl %}
+                        {% if externalSubmissionUrl is not empty %}
+                            <span>
+                                <i class="fas fa-link" title="External link:"></i>
+                                <a href="{{ externalSubmissionUrl }}" target="_blank">
+                                    View in external CCS
+                                </a>
+                                (ID: {{- submission.externalid -}})
+                            </span>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             </div>
@@ -227,22 +232,6 @@
     {% if not submission.contestProblem %}
         <div class="alert alert-danger">
             This submission is for a problem that is not part (anymore) of the contest of the submission.
-        </div>
-    {% endif %}
-
-    {% if shadowMode() and submission.externalid %}
-        <div class="mb-2">
-            External ID:
-            {% if external_ccs_submission_url is empty %}
-                {{- submission.externalid -}}
-            {% else %}
-                <a href="{{ submission | externalCcsUrl }}" target="_blank">
-                    {{- submission.externalid -}}
-                </a>
-            {%- endif -%}
-            {%- if externalJudgement is not null -%}
-                , {{ externalJudgement.result | printValidJuryResult }}
-            {% endif %}
         </div>
     {% endif %}
 
@@ -279,7 +268,7 @@
         </div>
     {% endif %}
 
-    {% if not sameTestcaseIds and selectedJudging is not null and selectedJudging.result is not empty %}
+    {% if not sameTestcaseHashes and selectedJudging is not null and selectedJudging.result is not empty %}
         <div class="alert alert-danger">The problem's testcases have changed since this judging has been performed. We recommend rejudging the whole problem.</div>
     {% endif %}
 
@@ -399,7 +388,8 @@
                             , on {{ judgehosts | printHosts }}
                             {%- if selectedJudging.starttime -%}
                                 {%- if selectedJudging.endtime -%}
-                                    , took <span title="started: {{ selectedJudging.starttime | printtime('H:i:s') }}, completed: {{ selectedJudging.endtime | printtime('H:i:s') }}">{{ selectedJudging.starttime | printHumanTimeDiff(selectedJudging.endtime) }}</span>
+                                    , started at <span title="{{ selectedJudging.starttime | printtime('Y-m-d H:i:s (T)') }}">{{ selectedJudging.starttime | printtime('H:i') }}</span>
+                                    , took <span title="completed: {{ selectedJudging.endtime | printtime('Y-m-d H:i:s (T)') }}">{{ selectedJudging.starttime | printHumanTimeDiff(selectedJudging.endtime) }}</span>
                                 {%- elseif selectedJudging.valid or selectedJudging.rejudging -%}
                                     &nbsp;[still judging - busy {{ selectedJudging.starttime | printtimediff }}]
                                 {%- else -%}
@@ -540,7 +530,7 @@
                                 {% if selectedJudging is not null and runsOutstanding %}
                                     {% if selectedJudging.judgeCompletely %}
                                         <i class="fas fa-balance-scale" title="remaining test cases requested to be judged"></i>
-                                    {% elseif selectedJudging.result is not null %}
+                                    {% elseif selectedJudging.result is not null or isAnalystMode %}
                                         <form action="{{ path('jury_submission_request_remaining', {'judgingId': selectedJudging.judgingid}) }}" method="post"
                                               style="display: inline; ">
                                             <button type="submit" class="btn btn-outline-secondary btn-sm" style="padding: 0.1rem 0.5rem; font-size: 0.7em"><i class="fa-solid fa-gavel"></i> judge remaining</button>
@@ -557,11 +547,11 @@
                             </td>
                             <td>
                                 {% if externalSubmissionUrl is defined and externalSubmissionUrl is not empty %}
-                                <a href="{{ externalSubmissionUrl }}">
-                                    {% endif %}
-                                    external {{ externalJudgement.extjudgementid }}
-                                    {% if externalSubmissionUrl is defined and externalSubmissionUrl is not empty %}
-                                </a>
+                                    <a href="{{ externalSubmissionUrl }}">
+                                {% endif %}
+                                external
+                                {% if externalSubmissionUrl is defined and externalSubmissionUrl is not empty %}
+                                    </a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -726,7 +716,7 @@
                             show complete metadata
                         </button>
                         {% if runsOutput[runIdx].metadata is not null %}
-                            {% if runsOutput[runIdx].output_limit %}
+                            {% if runsOutput[runIdx].output_limit is defined and runsOutput[runIdx].output_limit %}
                                 <div class="alert alert-warning">
                                     The submission output (<code>{{ runsOutput[runIdx].output_limit }}</code>) was
                                     truncated because of the configured output limit.

@@ -9,6 +9,7 @@ use App\Entity\ContestProblem;
 use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
+use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Service\ConfigurationService;
@@ -21,7 +22,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -158,7 +159,7 @@ class SubmissionController extends AbstractRestController
             if ($this->isGranted('ROLE_API_WRITER')) {
                 // Load the user.
                 /** @var User|null $user */
-                $user = $this->em->getRepository(User::class)->find($userId);
+                $user = $this->em->getRepository(User::class)->findOneBy(['externalid' => $userId]);
 
                 if (!$user) {
                     throw new BadRequestHttpException("User not found.");
@@ -331,7 +332,7 @@ class SubmissionController extends AbstractRestController
         // Now submit the solution.
         $submission = $this->submissionService->submitSolution(
             $team, $user, $problem, $problem->getContest(), $language,
-            $files, 'API', null, null, $entryPoint, $submissionId, $time, $message
+            $files, SubmissionSource::API, null, null, $entryPoint, $submissionId, $time, $message
         );
 
         // Clean up temporary if needed.
@@ -454,7 +455,8 @@ class SubmissionController extends AbstractRestController
 
         // If an ID has not been given directly, only show submissions before contest end.
         // This allows us to use eventlog on too-late submissions while not exposing them in the API directly.
-        if (!$request->attributes->has('id') && !$request->query->has('ids') && !$this->dj->checkrole('admin')) {
+        if (!$request->attributes->has('id') && !$request->query->has('ids') &&
+            !($this->dj->checkrole('admin') || $this->dj->checkrole('judgehost'))) {
             $queryBuilder->andWhere('s.submittime < c.endtime');
         }
 

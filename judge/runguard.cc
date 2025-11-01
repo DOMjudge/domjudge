@@ -63,7 +63,10 @@
 #include <sched.h>
 #include <sys/sysinfo.h>
 #include <vector>
+#include <set>
+#include <sstream>
 #include <string>
+#include <utility>
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
@@ -114,11 +117,6 @@ FILE  *metafile;
 char  cgroupname[255];
 const char *cpuset;
 
-/* Linux Out-Of-Memory adjustment for current process. */
-#define OOM_PATH_NEW "/proc/self/oom_score_adj"
-#define OOM_PATH_OLD "/proc/self/oom_adj"
-#define OOM_RESET_VALUE 0
-
 char *runuser;
 char *rungroup;
 int runuid;
@@ -142,8 +140,6 @@ int show_version;
 int in_error_handling = 0;
 pid_t runpipe_pid = -1;
 
-bool is_cgroup_v2 = false;
-
 double walltimelimit[2], cputimelimit[2]; /* in seconds, soft and hard limits */
 int walllimit_reached, cpulimit_reached; /* 1=soft, 2=hard, 3=both limits reached */
 rlim_t memsize;
@@ -156,6 +152,7 @@ pid_t child_pid = -1;
 
 static volatile sig_atomic_t received_SIGCHLD = 0;
 static volatile sig_atomic_t received_signal = -1;
+static volatile sig_atomic_t error_in_signalhandler = 0;
 
 int child_pipefd[3][2];
 int child_redirfd[3];
@@ -192,7 +189,7 @@ struct option const long_opts[] = {
 void warning(   const char *, ...) __attribute__((format (printf, 1, 2)));
 void verbose(   const char *, ...) __attribute__((format (printf, 1, 2)));
 void error(int, const char *, ...) __attribute__((format (printf, 2, 3)));
-void write_meta(const char*, const char *, ...) __attribute__((format (printf, 2, 3)));
+void write_meta(const char *, const char *, ...) __attribute__((format (printf, 2, 3)));
 
 void warning(const char *format, ...)
 {
@@ -224,6 +221,25 @@ void verbose(const char *format, ...)
 	}
 
 	va_end(ap);
+}
+
+// These functions are called from signal handlers, so they
+// must only call async-signal-safe functions.
+// write() is async-signal-safe, printf and variants are not.
+void verbose_from_signalhandler(const char* msg)
+{
+	if (!be_quiet && be_verbose) {
+		[[maybe_unused]] auto r = write(STDERR_FILENO, msg, strlen(msg));
+	}
+}
+
+void warning_from_signalhandler(const char* msg)
+{
+	if (!be_quiet) {
+		// Do not include timing here, as it wouldn't be safe from a signalhandler.
+		// TODO: Consider rewriting using clock_gettime in the future.
+		[[maybe_unused]] auto r = write(STDERR_FILENO, msg, strlen(msg));
+	}
 }
 
 void error(int errnum, const char *format, ...)
@@ -444,14 +460,54 @@ void output_exit_time(int exitcode, double cpudiff)
 	write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
 }
 
+std::set<unsigned> parse_cpuset(std::string cpus)
+{
+	std::stringstream ss(cpus);
+	std::set<unsigned> result;
+
+	std::string token;
+	while ( getline(ss, token, ',') ) {
+		size_t split = token.find('-');
+		if ( split!=std::string::npos ) {
+			std::string token1 = token.substr(0, split);
+			std::string token2 = token.substr(split+1);
+			size_t len;
+			unsigned cpu1 = std::stoul(token1, &len);
+			if ( len<token1.length() ) error(0, "failed to parse cpuset `%s'", cpus.c_str());
+			unsigned cpu2 = std::stoul(token2, &len);
+			if ( len<token2.length() ) error(0, "failed to parse cpuset `%s'", cpus.c_str());
+			for(unsigned i=cpu1; i<=cpu2; i++) result.insert(i);
+		} else {
+			size_t len;
+			unsigned cpu = std::stoul(token, &len);
+			if ( len<token.length() ) error(0, "failed to parse cpuset `%s'", cpus.c_str());
+			result.insert(cpu);
+		}
+	}
+
+	return result;
+}
+
+std::set<unsigned> read_cpuset(const char *path)
+{
+	FILE *file = fopen(path, "r");
+	if (file == nullptr) error(errno, "opening file `%s'", path);
+
+	char cpuset[1024];
+	if (fgets(cpuset, 1024, file) == nullptr) error(errno, "reading from file `%s'", path);
+
+	size_t len = strlen(cpuset);
+	if (len > 0 && cpuset[len-1] == '\n') cpuset[len-1] = 0;
+
+	if (fclose(file) != 0) error(errno, "closing file `%s'", path);
+
+	return parse_cpuset(cpuset);
+}
+
 void check_remaining_procs()
 {
 	char path[1024];
-	if (is_cgroup_v2) {
-		snprintf(path, 1023, "/sys/fs/cgroup/%s/cgroup.procs", cgroupname);
-	} else {
-		snprintf(path, 1023, "/sys/fs/cgroup/cpuacct/%s/cgroup.procs", cgroupname);
-	}
+	snprintf(path, 1023, "/sys/fs/cgroup/%s/cgroup.procs", cgroupname);
 
 	FILE *file = fopen(path, "r");
 	if (file == nullptr) {
@@ -465,37 +521,11 @@ void check_remaining_procs()
 	if (fclose(file) != 0) error(errno, "closing file `%s'", path);
 }
 
-void output_cgroup_stats_v1(double *cputime)
+
+void output_cgroup_stats(double *cputime)
 {
 	struct cgroup *cg;
 	if ( (cg = cgroup_new_cgroup(cgroupname))==nullptr ) error(0,"cgroup_new_cgroup");
-
-	int ret;
-	if ((ret = cgroup_get_cgroup(cg)) != 0) error(ret,"get cgroup information");
-
-	int64_t max_usage;
-	struct cgroup_controller *cg_controller;
-	cg_controller = cgroup_get_controller(cg, "memory");
-	ret = cgroup_get_value_int64(cg_controller, "memory.memsw.max_usage_in_bytes", &max_usage);
-	if ( ret!=0 ) error(ret,"get cgroup value memory.memsw.max_usage_in_bytes");
-
-	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
-	write_meta("memory-bytes","%" PRId64, max_usage);
-
-	int64_t cpu_time_int;
-	cg_controller = cgroup_get_controller(cg, "cpuacct");
-	ret = cgroup_get_value_int64(cg_controller, "cpuacct.usage", &cpu_time_int);
-	if ( ret!=0 ) error(ret,"get cgroup value cpuacct.usage");
-
-	*cputime = (double) cpu_time_int / 1.e9;
-
-	cgroup_free(&cg);
-}
-
-void output_cgroup_stats_v2(double *cputime)
-{
-	struct cgroup *cg;
-	if ( (cg = cgroup_new_cgroup(cgroupname))==NULL ) error(0,"cgroup_new_cgroup");
 
 	int ret;
 	if ((ret = cgroup_get_cgroup(cg)) != 0) error(ret,"get cgroup information");
@@ -519,7 +549,7 @@ void output_cgroup_stats_v2(double *cputime)
 	while (ret == 0) {
 		verbose("cpu.stat: %s = %s", stat.name, stat.value);
 		if (strcmp(stat.name, "usage_usec") == 0) {
-			long long usec = strtoll(stat.value, NULL, 10);
+			long long usec = strtoll(stat.value, nullptr, 10);
 			*cputime = usec / 1e6;
 		}
 		ret = cgroup_read_stats_next(&handle, &stat);
@@ -528,7 +558,6 @@ void output_cgroup_stats_v2(double *cputime)
 	cgroup_read_stats_end(&handle);
 
 	cgroup_free(&cg);
-
 }
 
 /* Temporary shorthand define for error handling. */
@@ -550,18 +579,13 @@ void cgroup_create()
 	}
 
 	int ret;
-	if (is_cgroup_v2) {
-		// TODO: do we want to set cpu.weight here as well?
-		if (memsize != RLIM_INFINITY) {
-			cgroup_add_value(uint64, "memory.max", memsize);
-			cgroup_add_value(uint64, "memory.swap.max", 0);
-		} else {
-			cgroup_add_value(string, "memory.max", "max");
-			cgroup_add_value(string, "memory.swap.max", "max");
-		}
+	// TODO: do we want to set cpu.weight here as well?
+	if (memsize != RLIM_INFINITY) {
+		cgroup_add_value(uint64, "memory.max", memsize);
+		cgroup_add_value(uint64, "memory.swap.max", 0);
 	} else {
-		cgroup_add_value(uint64, "memory.limit_in_bytes", memsize);
-		cgroup_add_value(uint64, "memory.memsw.limit_in_bytes", memsize);
+		cgroup_add_value(string, "memory.max", "max");
+		cgroup_add_value(string, "memory.swap.max", "max");
 	}
 
 	/* Set up cpu restrictions; we pin the task to a specific set of
@@ -580,15 +604,6 @@ void cgroup_create()
 		verbose("cpuset undefined");
 	}
 
-	if (!is_cgroup_v2) {
-		if ( (cg_controller = cgroup_add_controller(cg, "cpu"))==nullptr ) {
-			error(0,"cgroup_add_controller cpu");
-		}
-		if ((cg_controller = cgroup_add_controller(cg, "cpuacct")) == nullptr) {
-			error(0, "cgroup_add_controller cpuacct");
-		}
-	}
-
 	/* Perform the actual creation of the cgroup */
 	if ( (ret = cgroup_create_cgroup(cg, 1))!=0 ) error(ret,"creating cgroup");
 
@@ -598,46 +613,21 @@ void cgroup_create()
 
 #undef cgroup_setval
 
-void cgroup_attach()
-{
-	struct cgroup *cg;
-	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) error(0,"cgroup_new_cgroup");
-
-	int ret;
-	if ( (ret = cgroup_get_cgroup(cg))!=0 ) error(ret,"get cgroup information");
-
-	/* Attach task to the cgroup */
-	if ( (ret = cgroup_attach_task(cg))!=0 ) error(ret,"attach task to cgroup");
-
-	cgroup_free(&cg);
-}
 
 void cgroup_kill()
 {
 	/* kill any remaining tasks, and wait for them to be gone */
 	char mem_controller[10] = "memory";
-	if (is_cgroup_v2) {
-		int size;
-		do {
-			pid_t* pids;
-			int ret = cgroup_get_procs(cgroupname, mem_controller, &pids, &size);
-			if (ret != 0) error(ret, "cgroup_get_procs");
-			for(int i = 0; i < size; i++) {
-				kill(pids[i], SIGKILL);
-			}
-			free(pids);
-		} while (size > 0);
-	} else {
-		while(1) {
-			void *handle = nullptr;
-			pid_t pid;
-			int ret = cgroup_get_task_begin(cgroupname, mem_controller, &handle, &pid);
-			cgroup_get_task_end(&handle);
-			if (ret == ECGEOF) break;
-			kill(pid, SIGKILL);
+	int size;
+	do {
+		pid_t* pids;
+		int ret = cgroup_get_procs(cgroupname, mem_controller, &pids, &size);
+		if (ret != 0) error(ret, "cgroup_get_procs");
+		for(int i = 0; i < size; i++) {
+			kill(pids[i], SIGKILL);
 		}
-	}
+		free(pids);
+	} while (size > 0);
 }
 
 void cgroup_delete()
@@ -647,9 +637,6 @@ void cgroup_delete()
 	if (!cg) error(0,"cgroup_new_cgroup");
 
 	if (cgroup_add_controller(cg, "cpu") == nullptr) error(0, "cgroup_add_controller cpu");
-	if (!is_cgroup_v2) {
-		if (cgroup_add_controller(cg, "cpuacct") == nullptr) error(0, "cgroup_add_controller cpuacct");
-	}
 	if ( cgroup_add_controller(cg, "memory")==nullptr ) error(0,"cgroup_add_controller memory");
 
 	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
@@ -674,43 +661,47 @@ void terminate(int sig)
 	sigact.sa_handler = SIG_DFL;
 	sigact.sa_flags = 0;
 	if ( sigemptyset(&sigact.sa_mask)!=0 ) {
-		warning("could not initialize signal mask");
+		warning_from_signalhandler("could not initialize signal mask");
 	}
 	if ( sigaction(SIGTERM,&sigact,nullptr)!=0 ) {
-		warning("could not restore signal handler");
+		warning_from_signalhandler("could not restore signal handler");
 	}
 	if ( sigaction(SIGALRM,&sigact,nullptr)!=0 ) {
-		warning("could not restore signal handler");
+		warning_from_signalhandler("could not restore signal handler");
 	}
 
 	if ( sig==SIGALRM ) {
 		if (runpipe_pid > 0) {
-			warning("sending SIGUSR1 to runpipe with pid %d", runpipe_pid);
+			warning_from_signalhandler("sending SIGUSR1 to runpipe");
 			kill(runpipe_pid, SIGUSR1);
 		}
 
 		walllimit_reached |= hard_timelimit;
-		warning("timelimit exceeded (hard wall time): aborting command");
+		warning_from_signalhandler("timelimit exceeded (hard wall time): aborting command");
 	} else {
-		warning("received signal %d: aborting command",sig);
+		warning_from_signalhandler("received signal: aborting command");
 	}
 
 	received_signal = sig;
 
 	/* First try to kill graciously, then hard.
 	   Don't report an already exited process as error. */
-	verbose("sending SIGTERM");
+	verbose_from_signalhandler("sending SIGTERM");
 	if ( kill(-child_pid,SIGTERM)!=0 && errno!=ESRCH ) {
-		error(errno,"sending SIGTERM to command");
+		warning_from_signalhandler("error sending SIGTERM to command");
+		error_in_signalhandler = 1;
+		return;
 	}
 
 	/* Prefer nanosleep over sleep because of higher resolution and
 	   it does not interfere with signals. */
 	nanosleep(&killdelay,nullptr);
 
-	verbose("sending SIGKILL");
+	verbose_from_signalhandler("sending SIGKILL");
 	if ( kill(-child_pid,SIGKILL)!=0 && errno!=ESRCH ) {
-		error(errno,"sending SIGKILL to command");
+		warning_from_signalhandler("error sending SIGKILL to command");
+		error_in_signalhandler = 1;
+		return;
 	}
 
 	/* Wait another while to make sure the process is killed by now. */
@@ -744,6 +735,20 @@ int groupid(char *name)
 	if ( grp==nullptr || errno ) return -1;
 
 	return (int) grp->gr_gid;
+}
+
+char *username()
+{
+	int saved_errno = errno;
+	errno = 0; /* per the linux GETPWNAM(3) man-page */
+
+	struct passwd *pwd;
+	pwd = getpwuid(getuid());
+
+	if ( pwd==nullptr || errno ) error(errno,"failed to get username");
+	errno = saved_errno;
+
+	return pwd->pw_name;
 }
 
 long read_optarg_int(const char *desc, long minval, long maxval)
@@ -875,13 +880,9 @@ void setrestrictions()
 	}
 
 	/* Put the child process in the cgroup */
-	if (is_cgroup_v2) {
-		const char *controllers[] = { "memory", NULL };
-		if (cgroup_change_cgroup_path(cgroupname, getpid(), controllers) != 0) {
-			error(0, "Failed to move the process to the cgroup");
-		}
-	} else {
-		cgroup_attach();
+	const char *controllers[] = { "memory", nullptr };
+	if (cgroup_change_cgroup_path(cgroupname, getpid(), controllers) != 0) {
+		error(0, "Failed to move the process to the cgroup");
 	}
 
 	/* Run the command in a separate process group so that the command
@@ -925,7 +926,7 @@ void setrestrictions()
 	/* Set group-id (must be root for this, so before setting user). */
 	if ( use_group ) {
 		if ( setgid(rungid) ) error(errno,"cannot set group ID to `%d'",rungid);
-		if ( setgroups(0, NULL) ) error(errno,"cannot clear auxiliary groups");
+		if ( setgroups(0, nullptr) ) error(errno,"cannot clear auxiliary groups");
 
 		verbose("using group ID `%d'",rungid);
 	}
@@ -1026,28 +1027,6 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 
 }
 
-bool cgroup_is_v2() {
-	bool ret = false;
-	FILE *fp = setmntent("/proc/mounts", "r");
-	if (!fp) {
-		perror("Error opening /proc/mounts");
-		return false;
-	}
-
-	struct mntent *entry;
-	while ((entry = getmntent(fp)) != nullptr) {
-		if (strcmp(entry->mnt_dir, "/sys/fs/cgroup") == 0) {
-			if (strcmp(entry->mnt_type, "cgroup2") == 0) {
-				ret = true;
-			}
-			break;
-		}
-	}
-
-	endmntent(fp);
-
-	return ret;
-}
 
 int main(int argc, char **argv)
 {
@@ -1091,7 +1070,7 @@ int main(int argc, char **argv)
 		case 'u': /* user option: uid or string */
 			use_user = 1;
 			runuser = strdup(optarg);
-			if ( runuser==NULL ) error(errno,"strdup() failed");
+			if ( runuser==nullptr ) error(errno,"strdup() failed");
 			errno = 0;
 			runuid = strtol(optarg,&ptr,10);
 			if ( errno || *ptr!='\0' ) {
@@ -1108,7 +1087,7 @@ int main(int argc, char **argv)
 		case 'g': /* group option: gid or string */
 			use_group = 1;
 			rungroup = strdup(optarg);
-			if ( rungroup==NULL ) error(errno,"strdup() failed");
+			if ( rungroup==nullptr ) error(errno,"strdup() failed");
 			errno = 0;
 			rungid = strtol(optarg,&ptr,10);
 			if ( errno || *ptr!='\0' ) rungid = groupid(optarg);
@@ -1223,8 +1202,6 @@ int main(int argc, char **argv)
 	cmdname = argv[optind];
 	cmdargs = argv+optind;
 
-	is_cgroup_v2 = cgroup_is_v2();
-
 	if ( outputmeta && (metafile = fopen(metafilename,"w"))==nullptr ) {
 		error(errno,"cannot open `%s'",metafilename);
 	}
@@ -1273,14 +1250,12 @@ int main(int argc, char **argv)
 	}
 
 	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
-		int ret = strtol(cpuset, &ptr, 10);
-		/* check if input is only a single integer */
-		if ( *ptr == '\0' ) {
-			/* check if we have enough cores available */
-			int nprocs = get_nprocs_conf();
-			if ( ret < 0 || ret >= nprocs ) {
-				error(0, "processor ID %d given as cpuset, but only %d cores configured",
-				      ret, nprocs);
+		std::set<unsigned> cpus = parse_cpuset(cpuset);
+		std::set<unsigned> online_cpus = read_cpuset("/sys/devices/system/cpu/online");
+
+		for(unsigned cpu : cpus) {
+			if ( !online_cpus.count(cpu) ) {
+				error(0, "requested pinning on CPU %u which is not online", cpu);
 			}
 		}
 	}
@@ -1308,24 +1283,23 @@ int main(int argc, char **argv)
 	}
 
 	/* Check if any Linux Out-Of-Memory killer adjustments have to
-	 * be made. The oom_adj or oom_score_adj is inherited by child
-	 * processes, and at least older versions of sshd seemed to set
+	 * be made. The oom_score_adj is inherited by child
+	 * processes, and at least some configurations of sshd set
 	 * it, leading to processes getting a timelimit instead of memory
 	 * exceeded, when running via SSH. */
 	FILE *fp = nullptr;
-	char *oom_path;
-	if ( !fp && (fp = fopen(OOM_PATH_NEW,"r+")) ) oom_path = strdup(OOM_PATH_NEW);
-	if ( !fp && (fp = fopen(OOM_PATH_OLD,"r+")) ) oom_path = strdup(OOM_PATH_OLD);
-	if ( fp!=nullptr ) {
-		if ( fscanf(fp,"%d",&ret)!=1 ) error(errno,"cannot read from `%s'",oom_path);
+	const char *oom_score_path = "/proc/self/oom_score_adj";
+	if ( (fp = fopen(oom_score_path, "r+"))!=nullptr ) {
+		if ( fscanf(fp,"%d", &ret)!=1 ) error(errno,"cannot read from `%s'", oom_score_path);
 		if ( ret<0 ) {
-			verbose("resetting `%s' from %d to %d",oom_path,ret,OOM_RESET_VALUE);
+			int oom_reset_value = 0;
+			verbose("resetting `%s' from %d to %d", oom_score_path, ret, oom_reset_value);
 			rewind(fp);
-			if ( fprintf(fp,"%d\n",OOM_RESET_VALUE)<=0 ) {
-				error(errno,"cannot write to `%s'",oom_path);
+			if ( fprintf(fp,"%d\n", oom_reset_value) <= 0 ) {
+				error(errno, "cannot write to `%s'", oom_score_path);
 			}
 		}
-		if ( fclose(fp)!=0 ) error(errno,"closing file `%s'",oom_path);
+		if ( fclose(fp)!=0 ) error(errno, "closing file `%s'", oom_score_path);
 	}
 
 	switch ( child_pid = fork() ) {
@@ -1359,9 +1333,7 @@ int main(int argc, char **argv)
 
 		/* And execute child command. */
 		execvp(cmdname,cmdargs);
-		struct rlimit limit;
-		getrlimit(RLIMIT_NPROC, &limit);
-		error(errno,"cannot start `%s', limit: %ld/%ld | ",cmdname, limit.rlim_cur, limit.rlim_max);
+		error(errno,"cannot start `%s' as user `%s'", cmdname, username());
 
 	default: /* become watchdog */
 		verbose("child pid = %d", child_pid);
@@ -1463,8 +1435,11 @@ int main(int argc, char **argv)
 				}
 			}
 
-			int r = pselect(nfds+1, &readfds, nullptr, NULL, NULL, &emptymask);
+			int r = pselect(nfds+1, &readfds, nullptr, nullptr, nullptr, &emptymask);
 			if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
+			if (error_in_signalhandler) {
+				error(errno, "error in signal handler, exiting");
+			}
 
 			if ( received_SIGCHLD || received_signal == SIGALRM ) {
 				pid_t pid;
@@ -1548,11 +1523,7 @@ int main(int argc, char **argv)
 		check_remaining_procs();
 
 		double cputime = -1;
-		if (is_cgroup_v2) {
-			output_cgroup_stats_v2(&cputime);
-		} else {
-			output_cgroup_stats_v1(&cputime);
-		}
+		output_cgroup_stats(&cputime);
 		cgroup_kill();
 		cgroup_delete();
 

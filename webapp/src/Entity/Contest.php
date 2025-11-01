@@ -699,34 +699,31 @@ class Contest extends BaseApiEntity implements
         return $this->deactivatetimeString;
     }
 
-    public function setActivatetime(string $activatetime): Contest
+    public function setActivatetime(string|float|null $activatetime): Contest
     {
         $this->activatetime = $activatetime;
         return $this;
     }
 
-    public function setFreezetime(string $freezetime): Contest
+    public function setFreezetime(string|float $freezetime): Contest
     {
         $this->freezetime = $freezetime;
         return $this;
     }
 
-    public function setEndtime(string $endtime): Contest
+    public function setEndtime(string|float $endtime): Contest
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    /**
-     * @param string|float $unfreezetime
-     */
-    public function setUnfreezetime($unfreezetime): Contest
+    public function setUnfreezetime(string|float $unfreezetime): Contest
     {
         $this->unfreezetime = $unfreezetime;
         return $this;
     }
 
-    public function setDeactivatetime(string $deactivatetime): Contest
+    public function setDeactivatetime(string|float $deactivatetime): Contest
     {
         $this->deactivatetime = $deactivatetime;
         return $this;
@@ -936,6 +933,9 @@ class Contest extends BaseApiEntity implements
         $this->languages->removeElement($language);
     }
 
+    /**
+     * @return Collection<int, Language>
+     */
     public function getLanguages(): Collection
     {
         return $this->languages;
@@ -1042,24 +1042,12 @@ class Contest extends BaseApiEntity implements
             ($this->deactivatetime == null || $this->deactivatetime > time());
     }
 
-    public function getAbsoluteTime(?string $time_string): float|int|string|null
+    public function getAbsoluteTime(?string $time_string): string|float|int|null
     {
         if ($time_string === null) {
             return null;
-        } elseif (preg_match('/^[+-][0-9]+:[0-9]{2}(:[0-9]{2}(\.[0-9]{0,6})?)?$/', $time_string)) {
-            $sign           = ($time_string[0] == '-' ? -1 : +1);
-            $time_string[0] = 0;
-            $times          = explode(':', $time_string, 3);
-            $hours          = (int)$times[0];
-            $minutes        = (int)$times[1];
-            if (count($times) == 2) {
-                $seconds = 0;
-            } else {
-                $seconds = (float)$times[2];
-            }
-            $seconds      = $seconds + 60 * ($minutes + 60 * $hours);
-            $seconds      *= $sign;
-            $absoluteTime = $this->starttime + $seconds;
+        } elseif (Utils::isRelTime($time_string)) {
+            $absoluteTime = $this->starttime + Utils::relTimeToSeconds($time_string);
 
             // Take into account the removed intervals.
             /** @var RemovedInterval[] $removedIntervals */
@@ -1191,7 +1179,8 @@ class Contest extends BaseApiEntity implements
                     $showButton = $hasstarted && !$hasended && (empty($this->getFreezetime()) || $hasfrozen);
                     break;
                 case 'deactivate':
-                    $showButton = $hasended && (empty($this->getUnfreezetime()) || $hasunfrozen);
+                    $futureDeactivate = empty($this->getDeactivatetime()) || Utils::difftime((float)$this->getDeactivatetime(), $now) > 0;
+                    $showButton = $hasended && (empty($this->getUnfreezetime()) || $hasunfrozen) && $futureDeactivate;
                     break;
                 case 'freeze':
                     $showButton = $hasstarted && !$hasended && !$hasfrozen;
@@ -1268,6 +1257,12 @@ class Contest extends BaseApiEntity implements
         return new FreezeData($this);
     }
 
+    public function checkValidTimeString(string $timeString): void {
+        if (preg_match("/^[+-]?\d+:\d\d(:\d\d(\.\d{1,6})?)?$/", $timeString) !== 1) {
+            $date = new DateTime($timeString);
+        }
+    }
+
     #[ORM\PrePersist]
     #[ORM\PreUpdate]
     public function updateTimes(): void
@@ -1280,10 +1275,22 @@ class Contest extends BaseApiEntity implements
     #[Assert\Callback]
     public function validate(ExecutionContextInterface $context): void
     {
+        foreach (['Activate', 'Deactivate', 'Start', 'End', 'Freeze', 'Unfreeze'] as $timeString) {
+            $tmpValue = $this->{'get' . $timeString . 'timeString'}();
+            if ($tmpValue === null) continue; // phpcs:ignore Generic.ControlStructures.InlineControlStructure.NotAllowed
+            try {
+                $this->checkValidTimeString($tmpValue);
+            } catch (Exception $e) {
+                $context
+                    ->buildViolation("Can't parse this time:" . $e->getMessage())
+                    ->atPath(strtolower($timeString) . "timeString")
+                    ->addViolation();
+            }
+        };
         $this->updateTimes();
         if (Utils::difftime((float)$this->getEndtime(), (float)$this->getStarttime(true)) <= 0) {
             $context
-                ->buildViolation('Contest ends before it even starts')
+                ->buildViolation('Contest ends before it even starts.')
                 ->atPath('endtimeString')
                 ->addViolation();
         }

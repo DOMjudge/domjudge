@@ -21,6 +21,7 @@ class SingleTeamScoreboard extends Scoreboard
     /**
      * @param ContestProblem[] $problems
      * @param ScoreCache[]     $scoreCache
+     * @param RankCache[]      $rankCache
      */
     public function __construct(
         Contest $contest,
@@ -41,17 +42,7 @@ class SingleTeamScoreboard extends Scoreboard
 
     protected function calculateScoreboard(): void
     {
-        $rankCacheForTeam = null;
-        if ($this->rankCache !== null && count($this->rankCache) > 0) {
-            $rankCacheForTeam = $this->rankCache[0];
-        }
-
         $teamScore = $this->scores[$this->team->getTeamid()];
-        if ($rankCacheForTeam !== null) {
-            $teamScore->numPoints += $rankCacheForTeam->getPointsRestricted();
-            $teamScore->totalTime += $rankCacheForTeam->getTotaltimeRestricted();
-            $teamScore->totalRuntime += $rankCacheForTeam->getTotalruntimeRestricted();
-        }
         $teamScore->rank = $this->teamRank;
 
         // Loop all info the scoreboard cache and put it in our own data structure.

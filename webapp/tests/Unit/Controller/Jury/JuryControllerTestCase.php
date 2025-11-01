@@ -299,8 +299,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
         $this->logIn();
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         if (static::$add !== '') {
-            $response = $this->helperSubmitFields($element);
-            $this->client->followRedirect();
+            $this->helperSubmitFields($element);
+            $this->checkStatusAndFollowRedirect();
             foreach ($element as $key => $value) {
                 if (!is_array($value) && !in_array($key, static::$overviewSingleNotShown)) {
                     self::assertSelectorExists('body:contains("' . $value . '")');
@@ -593,7 +593,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
             self::assertSelectorNotExists('body:contains("' . static::$deleteExtra['selector'] . '")');
             $this->verifyPageResponse('GET', static::$deleteExtra['deleteurl'], 404);
         } else {
-            self::assertTrue(true, "Test skipped");
+            self::markTestSkipped('Test skipped');
         }
     }
 

@@ -11,6 +11,7 @@
         problem_statement_path: 'jury_problem_statement',
         problem_attachment_path: 'jury_attachment_fetch',
         problem_sample_zip_path: 'jury_problem_sample_zip',
-        show_jury_warning: not (current_contest.state.started ?? false)
+        show_jury_warning: not (current_contest.state.started ?? false),
+        team: team
     } %}
 {% endblock %}

@@ -68,6 +68,10 @@ class CheckConfigService
             'hashtime' => $this->checkHashTime(),
         ];
 
+        foreach (['affiliations', 'banners', 'countries', 'teams'] as $key) {
+            $config['publicdirwritable_' . $key] = $this->checkPublicdirWritable($key);
+        }
+
         $results['Configuration'] = $config;
         $this->stopwatch->stopSection('Configuration');
 
@@ -356,27 +360,52 @@ class CheckConfigService
         );
     }
 
-    public function checkTmpdirWritable(): ConfigCheckItem
+    public function checkDirWritable(string $directory, string $name, string $success_description, string $warning_description): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
-        $tmpdir = $this->dj->getDomjudgeTmpDir();
-        if (is_writable($tmpdir)) {
+        if (is_writable($directory)) {
             $this->stopwatch->stop(__FUNCTION__);
             return new ConfigCheckItem(
-                caption: 'TMPDIR writable',
+                caption: $name . ' writable',
                 result: 'O',
-                desc: sprintf('TMPDIR (`%s`) can be used to store temporary ' .
-                    'files for submission diffs and edits.',
-                    $tmpdir)
+                desc: $success_description,
             );
         }
         $this->stopwatch->stop(__FUNCTION__);
         return new ConfigCheckItem(
-            caption: 'TMPDIR writable',
+            caption: $name . ' writable',
             result: 'W',
-            desc: sprintf('TMPDIR (`%s`) is not writable by the webserver; ' .
+            desc: $warning_description,
+        );
+    }
+
+    public function checkTmpdirWritable(): ConfigCheckItem
+    {
+        $tmpdir = $this->dj->getDomjudgeTmpDir();
+        return $this->checkDirWritable(
+            $tmpdir,
+            'TMPDIR',
+            sprintf('TMPDIR (`%s`) can be used to store temporary ' .
+                    'files for submission diffs and edits.',
+                    $tmpdir),
+            sprintf('TMPDIR (`%s`) is not writable by the webserver; ' .
                 'Showing diffs and editing of submissions may not work.',
                 $tmpdir)
+        );
+    }
+
+    public function checkPublicdirWritable(string $directory): ConfigCheckItem
+    {
+        $dir = $this->dj->getDomjudgeWebappDir() . '/public/images/' . $directory;
+        return $this->checkDirWritable(
+            $dir,
+            'PUBLICDIR_' . strtoupper($directory),
+            sprintf('The public directory (`%s`) can be used to store ' .
+                ' images, logo\'s and other resources for team affiliations.',
+                $dir),
+            sprintf('The public Organization directory (`%s`) is not writable by the webserver; ' .
+                'Uploading images such as photo\'s and logo\'s may not work.',
+                $dir)
         );
     }
 

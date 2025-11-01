@@ -48,7 +48,7 @@ class JudgingRun extends BaseApiEntity
         options: ['comment' => 'Submission running time on this testcase']
     )]
     #[Serializer\Exclude]
-    private ?float $runtime = null;
+    private string|float|null $runtime = null;
 
     #[ORM\Column(
         type: 'decimal',
@@ -59,6 +59,16 @@ class JudgingRun extends BaseApiEntity
     )]
     #[Serializer\Exclude]
     private string|float|null $endtime = null;
+
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: true,
+        options: ['comment' => 'Time run judging started', 'unsigned' => true]
+    )]
+    #[Serializer\Exclude]
+    private string|float|null $startTime = null;
 
     #[ORM\ManyToOne(inversedBy: 'runs')]
     #[ORM\JoinColumn(name: 'judgingid', referencedColumnName: 'judgingid', onDelete: 'CASCADE')]
@@ -137,7 +147,7 @@ class JudgingRun extends BaseApiEntity
         return $this->runresult;
     }
 
-    public function setRuntime(float $runtime): JudgingRun
+    public function setRuntime(string|float $runtime): JudgingRun
     {
         $this->runtime = $runtime;
         return $this;
@@ -146,7 +156,7 @@ class JudgingRun extends BaseApiEntity
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('run_time')]
     #[Serializer\Type('float')]
-    public function getRuntime(): ?float
+    public function getRuntime(): string|float|null
     {
         return Utils::roundedFloat($this->runtime);
     }
@@ -155,6 +165,17 @@ class JudgingRun extends BaseApiEntity
     {
         $this->endtime = $endtime;
         return $this;
+    }
+
+    public function setStarttime(string|float $startTime): JudgingRun
+    {
+        $this->startTime = $startTime;
+        return $this;
+    }
+
+    public function getStarttime(): string|float|null
+    {
+        return $this->startTime;
     }
 
     public function getEndtime(): string|float|null
