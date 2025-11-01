@@ -57,9 +57,10 @@ class SubmissionController extends BaseController
         $user    = $this->dj->getUser();
         $team    = $user->getTeam();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
-        $data = [];
+        $data = ['languages' => []];
         if ($problem !== null) {
             $data['problem'] = $problem;
+            $data['languages'] = $problem->getLanguages()->toArray();
         }
         $form    = $this->formFactory
             ->createBuilder(SubmitProblemType::class, $data)

@@ -54,7 +54,7 @@ class SubmitProblemType extends AbstractType
         ];
         $builder->add('problem', EntityType::class, $problemConfig);
 
-        $languages = $this->dj->getAllowedLanguagesForContest($contest);
+        $languages = empty($options['data']['languages']) ? $this->dj->getAllowedLanguagesForContest($contest) : $options['data']['languages'];
         $builder->add('language', EntityType::class, [
             'class' => Language::class,
             'choices' => $languages,

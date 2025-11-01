@@ -55,6 +55,14 @@
                                                 {{ ((problem.problem.memlimit | default(defaultMemoryLimit)) * 1024) | printSize }}
                                             </h4>
                                         {% endif %}
+                                        {% if problem.problem.languages | length != 0 %}
+                                            <h4 class="card-subtitle mb-2 text-muted">
+                                                Language{% if problem.problem.languages | length > 1 %}s{% endif %}:
+                                                {% for lang in problem.problem.languages %}
+                                                    <code>{{ lang.name }}</code>{% if not loop.last %}, {% endif %}
+                                                {% endfor %}
+                                            </h4>
+                                        {% endif %}
                                         <h4 class="card-subtitle mb-2 text-muted">
                                             Type: {{ problem.problem.typesAsString }}
                                         </h4>
