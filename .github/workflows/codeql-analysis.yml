@@ -40,6 +40,7 @@ jobs:
       if: ${{ contains(env.COMPILED, matrix.language) }}
       run: |
         cd webapp
+        apt-get update; apt-get install yarnpkg -y
         yarnpkg install
 
     - name: Install composer files
