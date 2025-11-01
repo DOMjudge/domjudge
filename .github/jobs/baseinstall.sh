@@ -35,15 +35,6 @@ yarnpkg install
 cd ..
 section_end
 
-section_start "Debug JS frontend dependencies"
-pwd
-cd webapp
-ls -atrl node_modules
-ls -atrl public/mathjaxfonts/*
-ls -atrl public/mathjaxfonts/mjx-ncm-zero.woff2
-realpath public/mathjaxfonts
-section_end
-
 section_start "Set simple admin password"
 echo "password" > ./etc/initial_admin_password.secret
 echo "default login admin password password" > ~/.netrc
@@ -72,13 +63,6 @@ else
     cp -r doc /opt/domjudge/domserver/webapp/public/
     find /opt/domjudge/domserver -name DOMjudgelogo.pdf
 fi
-section_end
-
-section_start "Debug JS frontend dependencies"
-# The problem might be that we don't install the mathjaxfonts directory in the make domserver step.
-realpath /opt/domjudge/domserver/webapp/public
-ls -atrl /opt/domjudge/domserver/webapp/public
-realpath /opt/domjudge/domserver/webapp/public/mathjaxfonts
 section_end
 
 section_start "SQL settings"
