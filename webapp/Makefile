@@ -65,7 +65,7 @@ install-domserver:
 # This must be done first to install with the rest.
 	$(MAKE) copy-bundle-assets
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
-	for d in bin config migrations public resources src templates tests vendor; do \
+	for d in bin config migrations public resources src templates tests vendor node_modules; do \
 		$(call install_tree,$(DESTDIR)$(domserver_webappdir),$$d) ; \
 	done
 # Add Symlink to Symfony console that is in the standard path
