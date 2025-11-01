@@ -46,6 +46,23 @@
                     Request clarification
                 </a>
             </div>
+            <h1 class="teamoverview">Experimental feature</h1>
+            <div class="m-1">
+                <p id="no-picture-in-picture">
+                    Ask your Tech team for another browser (<code>Document Picture-in-Picture API not available
+                <p>
+                <span class="btn btn-warning btn-sm" id="pop-out-button">
+                    <i class="fa-solid fa-explosion"></i> PR Pop-out
+                </span>
+                <div id="pop-out-container">
+                    <div id="pop-out-frame">
+                        {% set displayRank = not contest.freezeData.showFrozen %}
+                        {% include 'partials/scoreboard_table.html.twig' with {displayRank: displayRank, jury: false, public: false} %}
+                        <span style="background-color: black; color: white"><i class="fas fa-comments"></i>3</span>
+                        <span style="background-color: red; color: white"><i class="fas fa-gavel"></i>C++/warning</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endif %}

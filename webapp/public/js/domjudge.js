@@ -1290,3 +1290,97 @@ function initScoreboardSubmissions() {
         });
     });
 }
+
+$(function () {
+    window.checkExperimentalFeature = function () {
+        if ("documentPictureInPicture" in window) {
+            // Only the team interface has this button.
+            const togglePipButton = document.querySelector("#pop-out-button");
+            if (togglePipButton) {
+                togglePipButton.style.display = 'inline';
+                togglePipButton.addEventListener("click", togglePictureInPicture, false);
+            }
+        } else {
+            const pipMessage = document.querySelector("#no-picture-in-picture");
+            if (pipMessage) {
+                pipMessage.style.display = 'inline';
+            }
+        }
+    };
+    checkExperimentalFeature();
+
+    // Heavily based on: https://github.com/mdn/dom-examples/tree/main/document-picture-in-picture
+    const popOutFrame     = document.querySelector("#pop-out-frame");
+    const popOutContainer = document.querySelector("#pop-out-container");
+    async function togglePictureInPicture() {
+        if (!(popOutFrame && popOutContainer)) {
+            console.log("Unexpected page, we only run if both are available.");
+            return;
+        }
+
+        popOutContainer.style.display = 'block';
+        // Early return if there's already a Picture-in-Picture window open
+        if (window.documentPictureInPicture.window) {
+            popOutContainer.append(popOutFrame);
+            window.documentPictureInPicture.window.close();
+            return;
+        }
+
+        // Open a Picture-in-Picture window.
+        const pipWindow = await window.documentPictureInPicture.requestWindow({
+            width: popOutFrame.clientWidth,
+            height: popOutFrame.clientHeight
+        });
+
+        pipWindow.document.body.style.padding = 0;
+        pipWindow.document.body.style.margin = 0;
+        const scoreBoards = document.querySelectorAll("#pop-out-frame .scoreboard");
+        scoreBoards.forEach((scoreBoard) => {
+            scoreBoard.style.margin = 0;
+        });
+        console.log("sb", scoreBoards);
+        
+        // Add pagehide listener to handle the case of the pip window being closed using the browser X button
+        pipWindow.addEventListener("pagehide", (event) => {
+            popOutContainer.style.display = 'none';
+            popOutContainer.append(popOutFrame);
+        });
+
+        
+        // Copy style sheets over from the initial document
+        // so that the player looks the same.
+        [...document.styleSheets].forEach((styleSheet) => {
+            try {
+                if (styleSheet.href) {
+                    const link = document.createElement("link");
+
+                    link.rel = "stylesheet";
+                    link.type = styleSheet.type;
+                    link.media = styleSheet.media;
+                    link.href = styleSheet.href;
+                    
+                    pipWindow.document.head.appendChild(link);
+                } else {
+                    const cssRules = [...styleSheet.cssRules]
+                        .map((rule) => rule.cssText)
+                        .join("");
+                    const style = document.createElement("style");
+
+                    style.textContent = cssRules;
+                    pipWindow.document.head.appendChild(style);
+                }
+            } catch (e) {
+                const link = document.createElement("link");
+
+                link.rel = "stylesheet";
+                link.type = styleSheet.type;
+                link.media = styleSheet.media;
+                link.href = styleSheet.href;
+                
+                pipWindow.document.head.appendChild(link);
+            }
+        });
+
+        pipWindow.document.body.append(popOutFrame);
+    }
+});
