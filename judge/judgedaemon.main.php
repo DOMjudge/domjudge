@@ -1,4 +1,6 @@
 <?php declare(strict_types=1);
+
+require_once __DIR__ . '/../vendor/autoload.php';
 /**
  * Requests a batch of judge tasks the domserver, executes them and reports
  * the results back to the domserver.
@@ -12,6 +14,10 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
 
 require(ETCDIR . '/judgehost-config.php');
 require(LIBDIR . '/lib.misc.php');
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\CurlMultiHandler;
+use GuzzleHttp\HandlerStack;
 
 $endpoints = [];
 $domjudge_config = [];
@@ -537,7 +543,7 @@ function fetch_executable_internal(
     return [$execrunpath, null, null];
 }
 
-$options = getopt("dv:n:hVe:j:t:", ["diskspace-error"]);
+$options = getopt("dv:n:hV", ["diskspace-error"]);
 // We can't fully trust the output of getopt, it has outstanding bugs:
 // https://bugs.php.net/search.php?cmd=display&search_for=getopt&x=0&y=0
 if ($options===false) {
@@ -658,39 +664,7 @@ initsignals();
 
 read_credentials();
 
-if (!empty($options['e'])) {
-    $endpointID = $options['e'];
-    $endpoint = $endpoints[$endpointID];
-    $endpoints[$endpointID]['ch'] = setup_curl_handle($endpoint['user'], $endpoint['pass']);
-    $new_judging_run = (array) dj_json_decode(base64_decode(file_get_contents($options['j'])));
-    $judgeTaskId = $options['t'];
 
-    $success = false;
-    for ($i = 0; $i < 5; $i++) {
-        if ($i > 0) {
-            $sleep_ms = 100 + random_int(200, ($i+1)*1000);
-            dj_sleep(0.001 * $sleep_ms);
-        }
-        $response = request(
-            sprintf('judgehosts/add-judging-run/%s/%s', $new_judging_run['hostname'],
-                urlencode((string)$judgeTaskId)),
-            'POST',
-            $new_judging_run,
-            false
-        );
-        if ($response !== null) {
-            logmsg(LOG_DEBUG, "Adding judging run result for jt$judgeTaskId successful.");
-            $success = true;
-            break;
-        }
-        logmsg(LOG_WARNING, "Failed to report jt$judgeTaskId in attempt #" . ($i + 1) . ".");
-    }
-    if (!$success) {
-        error("Final attempt of uploading jt$judgeTaskId was unsuccessful, giving up.");
-    }
-    unlink($options['j']);
-    exit(0);
-}
 
 // Set umask to allow group and other access, as this is needed for the
 // unprivileged user.
@@ -729,7 +703,14 @@ foreach ($domserver_languages as $language) {
 $endpointIDs = array_keys($endpoints);
 $currentEndpoint = 0;
 $lastWorkdir = null;
+
+// Set up Guzzle client used for async progress reporting.
+$guzzleHandler = new CurlMultiHandler();
+$handlerStack = HandlerStack::create($guzzleHandler);
+$guzzleClient = new Client(['handler' => $handlerStack, 'timeout' => 30]);
+
 while (true) {
+    $guzzleHandler->tick(); // process async requests in case there are any
     // If all endpoints are waiting, sleep for a bit.
     $dosleep = true;
     foreach ($endpoints as $id => $endpoint) {
@@ -1026,6 +1007,7 @@ while (true) {
             }
             break;
         }
+        $guzzleHandler->tick(); // process async requests in case there are any
     }
 
     file_put_contents($success_file, $expected_uuid_pid);
@@ -1349,7 +1331,7 @@ function compile(
 
 function judge(array $judgeTask): bool
 {
-    global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled, $endpointID;
+    global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled, $endpointID, $guzzleClient, $endpoints;
     $startTime = microtime(true);
 
     $compile_config = dj_json_decode($judgeTask['compile_config']);
@@ -1593,17 +1575,26 @@ function judge(array $judgeTask): bool
 
     $ret = true;
     if ($result === 'correct') {
-        // Post result back asynchronously. PHP is lacking multi-threading, so
-        // we just call ourselves again.
-        $tmpfile = tempnam(TMPDIR, 'judging_run_');
-        file_put_contents($tmpfile, base64_encode(dj_json_encode($new_judging_run)));
-        $judgedaemon = BINDIR . '/judgedaemon';
-        $cmd = $judgedaemon
-            . ' -e ' . $endpointID
-            . ' -t ' . $judgeTask['judgetaskid']
-            . ' -j ' . $tmpfile
-            . ' >> /dev/null & ';
-        shell_exec($cmd);
+        // Post result back asynchronously.
+        $url = sprintf('%s/judgehosts/add-judging-run/%s/%s', $endpoints[$endpointID]['url'], urlencode($myhost), urlencode((string)$judgeTask['judgetaskid']));
+        $auth = [$endpoints[$endpointID]['user'], $endpoints[$endpointID]['pass']];
+
+        $multipart_data = [];
+        foreach ($new_judging_run as $key => $value) {
+            $multipart_data[] = [
+                'name' => $key,
+                'contents' => $value
+            ];
+        }
+
+        $promise = $guzzleClient->postAsync($url, [
+            'auth' => $auth,
+            'multipart' => $multipart_data
+        ]);
+
+        $promise->then(null, function ($reason) {
+            logmsg(LOG_WARNING, "Async submission failed: " . $reason->getMessage());
+        });
     } else {
         // This run was incorrect, only continue with the remaining judge tasks
         // if we are told to do so.

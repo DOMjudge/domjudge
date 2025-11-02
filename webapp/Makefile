@@ -10,6 +10,7 @@ include $(TOPDIR)/Makefile.global
 SUBDIRS = config
 
 domserver: composer-dump-autoload
+judgehost: composer-dump-autoload
 
 # Install PHP dependencies
 composer-dependencies:
@@ -66,6 +67,9 @@ install-domserver:
 # Change webapp/public/doc symlink
 	ln -sf $(domjudge_docdir) $(DESTDIR)$(domserver_webappdir)/public/doc
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
+
+install-judgehost:
+	$(call install_tree,$(DESTDIR),vendor)
 
 maintainer-conf: .env.local
 
