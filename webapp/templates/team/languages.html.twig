@@ -21,14 +21,14 @@
                                 <code>.{{ ext }}</code>{% if not loop.last %}, {% endif %}
                             {% endfor %}
                             </span>
-                            {% if limited %}
-                                <span style="float: right; font-size:50%;">
-                                    {% for problem in problems %}
-                                        {{ problem | problemBadge }}
-                                    {% endfor %}
-                                </span>
-                            {% endif %}
                         </h2>
+                        {% if limited %}
+                            <span class="output_test" style="">
+                            {% for problem in problems %}
+                                {{ problem | problemBadge }}
+                            {% endfor %}
+                        </span>
+                        {% endif %}
                     </div>
                     {% if lang.compilerVersion and lang.compilerVersionCommand %}
                         <pre class="output_text" style="background-color: rgba(0,121,54,.1);">$ {{ lang.compilerVersionCommand }}</pre>
