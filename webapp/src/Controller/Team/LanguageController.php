@@ -4,6 +4,7 @@ namespace App\Controller\Team;
 
 use App\Controller\BaseController;
 use App\Entity\Language;
+use App\Entity\ContestProblem;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -33,6 +34,20 @@ class LanguageController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @param Language[] $languages
+     * @return Language[]
+     */
+    private function addLanguage(array $languages, Language $language, ContestProblem $problem): array
+    {
+        $langId = $language->getName();
+        if (!isset($languages[$langId])) {
+            $languages[$langId] = ['problems' => [], 'language' => $language];
+        }
+        $languages[$langId]['problems'][] = $problem;
+        return $languages;
+    }
+
     #[Route(path: '', name: 'team_languages')]
     public function languagesAction(): Response
     {
@@ -45,20 +60,15 @@ class LanguageController extends BaseController
         $limited = false;
         foreach ($this->dj->getCurrentContest()->getProblems() as $problem) {
             foreach ($problem->getProblem()->getLanguages() as $language) {
-                $langId = $language->getName();
-                if (!isset($languages[$langId])) {
-                    $languages[$langId] = ['problems' => [], 'contestlang' => false, 'language' => $language];
-                }
-                $languages[$langId]['problems'][] = $problem;
+                $languages = $this->addLanguage($languages, $language, $problem);
                 $limited = true;
             }
-        }
-        foreach ($this->dj->getAllowedLanguagesForContest($currentContest) as $language) {
-            if (!isset($languages[$language->getName()])) {
-                $languages[$language->getName()] = ['problems' => [], 'contestlang' => true, 'language' => $language];
+            if (count($problem->getProblem()->getLanguages()) == 0) {
+                foreach ($this->dj->getAllowedLanguagesForContest($currentContest) as $language) {
+                    $languages = $this->addLanguage($languages, $language, $problem);
+                }
             }
-            $languages[$language->getName()]['contestlang'] = true;
-        };
+        }
         return $this->render('team/languages.html.twig', ['languages' => $languages, 'limited' => $limited]);
     }
 }

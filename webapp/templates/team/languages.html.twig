@@ -10,7 +10,6 @@
     {% for langarray in languages %}
         {% set lang = langarray['language'] %}
         {% set problems = langarray['problems'] %}
-        {% set contestlang = langarray['contestlang'] %}
                 <div class="col">
                 <div class="card">
                     <div class="card-body">
@@ -24,11 +23,6 @@
                             </span>
                             {% if limited %}
                                 <span style="float: right; font-size:50%;">
-                                    {% if contestlang %}
-                                        <span class="badge problem-badge" style="background-color: #fff; border: 1px solid #000">
-                                            <span style="color: #000">All</span>
-                                        </span>
-                                    {% endif %}
                                     {% for problem in problems %}
                                         {{ problem | problemBadge }}
                                     {% endfor %}
