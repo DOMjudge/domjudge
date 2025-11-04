@@ -36,13 +36,6 @@ jobs:
       with:
         languages: ${{ matrix.language }}
 
-    - name: Install yarn files
-      if: ${{ contains(env.COMPILED, matrix.language) }}
-      run: |
-        cd webapp
-        sudo apt-get update; sudo apt-get install yarnpkg -y
-        sudo yarnpkg install
-
     - name: Install composer files
       if: ${{ contains(env.COMPILED, matrix.language) }}
       run: |
