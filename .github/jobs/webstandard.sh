@@ -117,7 +117,7 @@ if [ "$TEST" = "w3cval" ]; then
 
     section_start "Install testsuite"
     cd "$DIR"
-    wget https://github.com/validator/validator/releases/download/latest/vnu.linux.zip
+    wget https://github.com/validator/validator/archive/refs/tags/latest.zip
     unzip -q vnu.linux.zip
     # Remove a warning by creating an empty config.
     touch vnu.properties
