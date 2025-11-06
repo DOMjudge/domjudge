@@ -8,14 +8,15 @@
 define('DOMJUDGE_VERSION', '@DOMJUDGE_VERSION@');
 define('DOMJUDGE_INSTALL_METHOD', '@INSTALL_METHOD@');
 
-define('BINDIR',    '@domserver_bindir@');
-define('ETCDIR',    '@domserver_etcdir@');
-define('WEBAPPDIR', '@domserver_webappdir@');
-define('LIBDIR',    '@domserver_libdir@');
-define('SQLDIR',    '@domserver_sqldir@');
-define('VENDORDIR', '@domserver_webappdir@/vendor');
-define('LOGDIR',    '@domserver_logdir@');
-define('RUNDIR',    '@domserver_rundir@');
-define('TMPDIR',    '@domserver_tmpdir@');
+define('BINDIR',         '@domserver_bindir@');
+define('ETCDIR',         '@domserver_etcdir@');
+define('WEBAPPDIR',      '@domserver_webappdir@');
+define('LIBDIR',         '@domserver_libdir@');
+define('SQLDIR',         '@domserver_sqldir@');
+define('VENDORDIR',      '@domserver_webappdir@/vendor');
+define('NODEMODULESDIR', '@domserver_webappdir@/node_modules');
+define('LOGDIR',         '@domserver_logdir@');
+define('RUNDIR',         '@domserver_rundir@');
+define('TMPDIR',         '@domserver_tmpdir@');
 
-define('BASEURL',   '@BASEURL@');
+define('BASEURL',        '@BASEURL@');
