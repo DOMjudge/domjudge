@@ -23,11 +23,11 @@
                             </span>
                         </h2>
                         {% if limited %}
-                            <span class="output_test" style="">
-                            {% for problem in problems %}
-                                {{ problem | problemBadge }}
-                            {% endfor %}
-                        </span>
+                            <span class="output_test">
+                                {% for problem in problems %}
+                                    {{ problem | problemBadge }}
+                                {% endfor %}
+                            </span>
                         {% endif %}
                     </div>
                     {% if lang.compilerVersion and lang.compilerVersionCommand %}
