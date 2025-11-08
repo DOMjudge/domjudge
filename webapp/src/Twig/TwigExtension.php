@@ -941,15 +941,16 @@ JS,
         }
         $this->renderedSources[$file->getSubmitfileid()] = true;
 
+        $source = mb_check_encoding($file->getSourcecode(), 'UTF-8') ? $file->getSourcecode() : "Could not display file as UTF-8, is it binary?";
         return sprintf(
             <<<JS
 monaco.editor.createModel(
-    "%s",
+    %s,
     undefined,
     monaco.Uri.parse("diff/%d/%s")
 );
 JS,
-            $this->twig->getRuntime(EscaperRuntime::class)->escape($file->getSourcecode(), 'js'),
+            $this->serializer->serialize($source, 'json'),
             $file->getSubmitfileid(),
             $file->getFilename(),
         );
@@ -968,7 +969,7 @@ $(function() {
     const models = %s;
     require(['vs/editor/editor.main'], () => {
         const modifiedModel = %s;
-        initDiffEditorTab(editorId, diffId, rank, models, modifiedModel)
+        initDiffEditorTab(editorId, diffId, rank, models, modifiedModel);
     });
 });
 </script>
@@ -977,11 +978,12 @@ HTML;
         $others = [];
         foreach ($otherFiles as $submissionId => $files) {
             foreach ($files as $f) {
-                if ($f->getFilename() == $newFile->getFilename()) {
+                // TODO: this renames the old file to multiple files, need more data in `showDiff`.
+                if (($newFile->getRank() === 1 && count($files) === 1) || ($f->getFilename() == $newFile->getFilename())) {
                     // TODO: add `tag` containing `previous` / `original`
                     $others[$submissionId] = [
                         'filename' => $f->getFilename(),
-                        'source'   => $f->getSourcecode(),
+                        'source'   => mb_check_encoding($f->getSourcecode(), 'UTF-8') ? $f->getSourcecode() : "Could not display file as UTF-8, is it binary?",
                     ];
                 }
             }
