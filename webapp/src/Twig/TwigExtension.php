@@ -862,16 +862,17 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         ?string $filename = null
     ): string {
         $editor = <<<HTML
-<div class="editor" id="__EDITOR__">%s</div>
+<div class="editor" id="__EDITOR__"></div>
 <script>
 $(function() {
     require(['vs/editor/editor.main'], function () {
         const element = document.getElementById('__EDITOR__');
-        const content = element.textContent;
-        element.textContent = '';
+        const content = %s;
+        const filePath = %s;
+        const uri = filePath ? monaco.Uri.file(filePath) : monaco.Uri.parse("editor-__EDITOR__");
+        const model = monaco.editor.createModel(content, undefined, uri);
 
         const editor = monaco.editor.create(element, {
-            value: content,
             scrollbar: {
                 alwaysConsumeMouseWheel: false,
                 vertical: 'auto',
@@ -882,6 +883,7 @@ $(function() {
             readOnly: %s,
             theme: getCurrentEditorTheme(),
         });
+        editor.setModel(model);
         %s
         %s
     });
@@ -890,7 +892,7 @@ $(function() {
 HTML;
         $rank   = $index;
         $id     = sprintf('editor%s', $rank);
-        $code   = htmlspecialchars($code);
+        $source = mb_check_encoding($code, 'UTF-8') ? $code : "Could not display file as UTF-8, is it binary?";
         if ($elementToUpdate) {
             $extraForEdit = <<<JS
 editor.getModel().onDidChangeContent(() => {
@@ -905,22 +907,21 @@ JS;
 
         if ($language !== null) {
             $mode = <<<JS
-const model = editor.getModel();
 model.setLanguage("$language");
 JS;
-        } elseif ($filename !== null) {
-            $modeTemplate = <<<JS
-const filePath = "%s";
-const model = monaco.editor.createModel(content, undefined, monaco.Uri.file(filePath));
-editor.setModel(model);
-JS;
-            $mode         = sprintf($modeTemplate, htmlspecialchars($filename));
         } else {
             $mode = '';
         }
 
         return str_replace('__EDITOR__', $id,
-                           sprintf($editor, $code, $editable ? 'false' : 'true', $mode, $extraForEdit));
+                           sprintf(
+                            $editor,
+                            $this->serializer->serialize($source, 'json'),
+                            $this->serializer->serialize($filename, 'json'),
+                            $editable ? 'false' : 'true',
+                            $mode,
+                            $extraForEdit
+        ));
     }
 
     /**
