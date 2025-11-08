@@ -38,13 +38,26 @@ class LanguageController extends BaseController
      * @param Language[] $languages
      * @return Language[]
      */
-    private function addLanguage(array $languages, Language $language, ContestProblem $problem): array
+    private function addLanguage(array $languages, Language $language, ContestProblem $problem, bool $inverted = false): array
     {
         $langId = $language->getName();
         if (!isset($languages[$langId])) {
-            $languages[$langId] = ['problems' => [], 'language' => $language];
+            $languages[$langId] = ['problems' => [], 'limitedProblems' => [], 'language' => $language];
         }
-        $languages[$langId]['problems'][] = $problem;
+        if ($inverted) {
+            $languages[$langId]['limitedProblems'][] = $problem;
+        } else {
+            $languages[$langId]['problems'][] = $problem;
+        }
+        return $languages;
+    }
+
+    private function removeLanguage(array $languages, Language $language): array
+    {
+        $langId = $language->getLangid();
+        if (isset($languages[$langId])) {
+            unset($languages[$langId]);
+        }
         return $languages;
     }
 
@@ -58,15 +71,30 @@ class LanguageController extends BaseController
         $languages = [];
         $currentContest = $this->dj->getCurrentContest();
         $limited = false;
+        $allLanguages = [];
+        foreach($this->dj->getAllowedLanguagesForContest($currentContest) as $language) {
+            $allLanguages[$language->getLangid()] = $language;
+        }
         foreach ($this->dj->getCurrentContest()->getProblems() as $problem) {
             foreach ($problem->getProblem()->getLanguages() as $language) {
+                $allLanguages[$language->getLangid()] = $language;
+            }
+        }
+        foreach ($this->dj->getCurrentContest()->getProblems() as $problem) {
+            $missingLanguages = $allLanguages;
+            foreach ($problem->getProblem()->getLanguages() as $language) {
                 $languages = $this->addLanguage($languages, $language, $problem);
+                $missingLanguages = $this->removeLanguage($missingLanguages, $language);
                 $limited = true;
             }
             if (count($problem->getProblem()->getLanguages()) == 0) {
                 foreach ($this->dj->getAllowedLanguagesForContest($currentContest) as $language) {
                     $languages = $this->addLanguage($languages, $language, $problem);
+                    $missingLanguages = $this->removeLanguage($missingLanguages, $language);
                 }
+            }
+            foreach ($missingLanguages as $lang) {
+                $languages = $this->addLanguage($languages, $lang, $problem, true);
             }
         }
         return $this->render('team/languages.html.twig', ['languages' => $languages, 'limited' => $limited]);
