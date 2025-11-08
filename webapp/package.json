@@ -5,7 +5,7 @@
     "d3": "3.5.17",
     "file-saver": "^2.0.5",
     "jquery-debounce-throttle": "^1.0.6-rc.0",
-    "monaco": "^1.201704190613.0",
+    "monaco-editor": "^0.54.0",
     "nvd3": "1.8.6",
     "select2": "^4.0.13"
   }
