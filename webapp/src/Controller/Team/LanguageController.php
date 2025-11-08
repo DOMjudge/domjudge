@@ -52,6 +52,10 @@ class LanguageController extends BaseController
         return $languages;
     }
 
+    /**
+     * @param Language[] $languages
+     * @return Language[]
+     */
     private function removeLanguage(array $languages, Language $language): array
     {
         $langId = $language->getLangid();
