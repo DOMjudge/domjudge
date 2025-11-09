@@ -978,15 +978,9 @@ HTML;
 
         $others = [];
         foreach ($otherFiles as $submissionId => $files) {
-            foreach ($files as $f) {
-                // TODO: this renames the old file to multiple files, need more data in `showDiff`.
-                if (($newFile->getRank() === 1 && count($files) === 1) || ($f->getFilename() == $newFile->getFilename())) {
-                    // TODO: add `tag` containing `previous` / `original`
-                    $others[$submissionId] = [
-                        'filename' => $f->getFilename(),
-                        'source'   => mb_check_encoding($f->getSourcecode(), 'UTF-8') ? $f->getSourcecode() : "Could not display file as UTF-8, is it binary?",
-                    ];
-                }
+            if (isset($files[$newFile->getFilename()])) {
+                // TODO: add `tag` containing `previous` / `original`
+                $others[$submissionId] = $files[$newFile->getFilename()];
             }
         }
 
