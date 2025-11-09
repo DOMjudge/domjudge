@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "de9377b7947057b0bb370ca8d3c6ba45",
+    "content-hash": "b8e29c5cac21d56eb7817cd2a1d4033f",
     "packages": [
         {
             "name": "apalfrey/select2-bootstrap-5-theme",
@@ -157,48 +157,6 @@
                 "wiki": "http://docs.jquery.com/"
             },
             "time": "2023-09-22T01:43:46+00:00"
-        },
-        {
-            "name": "datatables.net/datatables.net",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/DataTables/Dist-DataTables.git",
-                "reference": "bb84edac11e767b7b5a504624ea03cd7781fd9a8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/DataTables/Dist-DataTables/zipball/bb84edac11e767b7b5a504624ea03cd7781fd9a8",
-                "reference": "bb84edac11e767b7b5a504624ea03cd7781fd9a8",
-                "shasum": ""
-            },
-            "require": {
-                "components/jquery": ">=1.7"
-            },
-            "default-branch": true,
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "SpryMedia",
-                    "homepage": "https://datatables.net"
-                }
-            ],
-            "description": "DataTables is a plug-in for the jQuery Javascript library. It is a highly flexible tool, based upon the foundations of progressive enhancement, which will add advanced interaction controls to any HTML table. This is jQuery DataTables",
-            "homepage": "http://www.datatables.net/",
-            "keywords": [
-                "datatables",
-                "jquery",
-                "table"
-            ],
-            "support": {
-                "forum": "https://datatables.net/forums",
-                "source": "https://github.com/DataTables/Dist-DataTables"
-            },
-            "time": "2025-07-02T16:25:26+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
@@ -12551,9 +12509,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "datatables.net/datatables.net": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
