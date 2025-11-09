@@ -12,6 +12,11 @@
   resolved "https://registry.yarnpkg.com/@melloware/coloris/-/coloris-0.25.0.tgz#7012c10dc510dca1660b3692ed3c812344aec6ca"
   integrity sha512-RBWVFLjWbup7GRkOXb9g3+ZtR9AevFtJinrRz2cYPLjZ3TCkNRGMWuNbmQWbZ5cF3VU7aQDZwUsYgIY/bGrh2g==
 
+"@popperjs/core@^2.11.8":
+  version "2.11.8"
+  resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
+  integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
+
 bootstrap-toggle@^2.2.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/bootstrap-toggle/-/bootstrap-toggle-2.2.2.tgz#2b88534fc1b998674f877f98ba0d8b5b743e96fe"
