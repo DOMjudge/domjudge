@@ -64,7 +64,6 @@
 		"doctrine/doctrine-migrations-bundle": "^3.2",
 		"doctrine/orm": "^2.14",
 		"enshrined/svg-sanitize": "^0.22.0",
-		"fortawesome/font-awesome": "6.*",
 		"friendsofsymfony/rest-bundle": "^3.5",
 		"ircmaxell/password-compat": "*",
 		"jms/serializer-bundle": "^5.2",
