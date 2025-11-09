@@ -2,9 +2,6 @@
     "brick/math": {
         "version": "0.9.3"
     },
-    "components/jquery": {
-        "version": "3.3.1"
-    },
     "dama/doctrine-test-bundle": {
         "version": "7.2",
         "recipe": {
