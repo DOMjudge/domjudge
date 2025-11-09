@@ -906,7 +906,27 @@ class SubmissionController extends BaseController
         foreach ($oldFiles as $f) {
             $submitId = $f->getSubmission()->getSubmitid();
             $otherFiles[$submitId] ??= [];
-            $otherFiles[$submitId][$f->getFilename()] = $f;
+            $otherFiles[$submitId][$f->getFilename()] = [
+                'filename' => $f->getFilename(),
+                'source'   => mb_check_encoding($f->getSourcecode(), 'UTF-8') ? $f->getSourcecode() : "Could not display file as UTF-8, is it binary?",
+            ];
+        }
+
+        // Handle file renaming for a single-file submission.
+        if (count($files) === 1) {
+            $f = $files[0];
+            foreach ($otherSubmissions as $s) {
+                $sf = $otherFiles[$s->getSubmitid()];
+                if (count($sf) === 1 && !array_key_exists($f->getFilename(), $sf)) {
+                    $oldName = array_key_first($sf);
+                    $otherFiles[$s->getSubmitid()] = [
+                        $f->getFilename() => [
+                            'renamedFrom' => $oldName,
+                            ...$sf[$oldName]
+                        ],
+                    ];
+                }
+            }
         }
 
         return $this->render('jury/submission_source.html.twig', [
