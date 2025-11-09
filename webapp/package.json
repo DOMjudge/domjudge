@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.1.0",
     "@melloware/coloris": "^0.25.0",
     "bootstrap-toggle": "^2.2.2",
     "d3": "3.5.17",

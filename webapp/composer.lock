@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "629e7d2150fc6058701b85863ce56292",
+    "content-hash": "9b170e9e59c408c277981e5bfb4e58a0",
     "packages": [
         {
             "name": "apalfrey/select2-bootstrap-5-theme",
@@ -1896,15 +1896,6 @@
                 "source": "https://github.com/darylldoyle/svg-sanitizer/tree/0.22.0"
             },
             "time": "2025-08-12T10:13:48+00:00"
-        },
-        {
-            "name": "fortawesome/font-awesome",
-            "version": "6.5.2",
-            "dist": {
-                "type": "zip",
-                "url": "https://github.com/FortAwesome/Font-Awesome/releases/download/6.5.2/fontawesome-free-6.5.2-web.zip"
-            },
-            "type": "library"
         },
         {
             "name": "friendsofsymfony/rest-bundle",

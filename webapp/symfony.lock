@@ -107,9 +107,6 @@
     "endclothing/prometheus_client_php": {
         "version": "1.0.1"
     },
-    "fortawesome/font-awesome": {
-        "version": "5.9.0"
-    },
     "friendsofphp/proxy-manager-lts": {
         "version": "v1.0.3"
     },
