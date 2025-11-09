@@ -54,7 +54,6 @@
 		"ext-posix": "*",
 		"ext-simplexml": "*",
 		"ext-zip": "*",
-		"apalfrey/select2-bootstrap-5-theme": "^1.3",
 		"doctrine/doctrine-bundle": "^2.8",
 		"doctrine/doctrine-fixtures-bundle": "^4.0",
 		"doctrine/doctrine-migrations-bundle": "^3.2",
