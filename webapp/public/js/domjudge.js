@@ -1369,6 +1369,33 @@ function initDiffEditor(editorId) {
             const element = wrapper.find(".nav-link[data-rank]")[rank].querySelector('.fa-fw');
             element.className = 'fas fa-fw fa-' + icon;
         },
+        'renamedFrom': (rank, oldName) => {
+            const navItem = wrapper.find(".nav-link[data-rank]")[rank];
+            let renamed = navItem.querySelector('.renamed');
+            let arrow = navItem.querySelector('.fa-arrow-right');
+            if (oldName === undefined) {
+                if (renamed) {
+                    navItem.removeChild(renamed);
+                }
+                if (arrow) {
+                    navItem.removeChild(arrow);
+                }
+                return;
+            }
+
+            if (!renamed) {
+                renamed = document.createElement('span');
+                renamed.className = 'renamed';
+                navItem.insertBefore(renamed, navItem.childNodes[1]);
+            }
+            renamed.innerText = ` ${oldName} `;
+
+            if (!arrow) {
+                arrow = document.createElement('i');
+                arrow.className = 'fas fa-arrow-right';
+                navItem.insertBefore(arrow, navItem.childNodes[2]);
+            }
+        },
         'onDiffModeChange': (f) => {
             radios.change((e) => {
                 const diffMode = e.target.value;
@@ -1431,14 +1458,18 @@ function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
     editors[editorId].onDiffModeChange(updateMode);
 
     const updateSelect = (submitId, noDiff) => {
+        const model = models[submitId] ??= {'model': empty};
         if (!noDiff) {
-            const model = models[submitId];
-            if (model === undefined) {
-                models[submitId] = {'model': empty};
-            } else if (model !== undefined && !model['model']) {
+            if (!model['model']) {
                 // TODO: show source code instead of diff to empty file?
                 model['model'] = monaco.editor.createModel(model['source'], undefined, monaco.Uri.file("test/" + submitId + "/" + model['filename']));
             }
+        }
+
+        if (noDiff || !model['renamedFrom']) {
+            editors[editorId].renamedFrom(rank, undefined);
+        } else {
+            editors[editorId].renamedFrom(rank, model['renamedFrom']);
         }
 
         diffEditor.updateOptions({
@@ -1452,7 +1483,6 @@ function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
             // Reset the diff mode to the currently selected mode.
             updateMode(editors[editorId].getDiffMode())
         }
-        // TODO: handle single-file submission case with renamed file.
         const oldViewState = diffEditor.saveViewState();
         diffEditor.setModel({
             original: noDiff ? modifiedModel : models[submitId]['model'],
