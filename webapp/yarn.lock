@@ -40,7 +40,7 @@ datatables.net-bs5@^2.3.4:
     datatables.net "2.3.4"
     jquery ">=1.7"
 
-datatables.net@2.3.4:
+datatables.net@2.3.4, datatables.net@^2.3.4:
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-2.3.4.tgz#8cf69f2e6cb8d271be3d5c4f75a479684d20f253"
   integrity sha512-fKuRlrBIdpAl2uIFgl9enKecHB41QmFd/2nN9LBbOvItV/JalAxLcyqdZXex7wX4ZXjnJQEnv6xeS9veOpKzSw==
