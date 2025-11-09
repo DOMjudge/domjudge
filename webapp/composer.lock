@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9b170e9e59c408c277981e5bfb4e58a0",
+    "content-hash": "752fb5c7fa59e03f1608b7141fa9a415",
     "packages": [
         {
             "name": "apalfrey/select2-bootstrap-5-theme",
@@ -108,47 +108,6 @@
                 }
             ],
             "time": "2025-03-29T13:50:30+00:00"
-        },
-        {
-            "name": "components/flag-icon-css",
-            "version": "v6.15.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/lipis/flag-icons.git",
-                "reference": "be01befd268ae71183d339901cd2ea64e0da4307"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/lipis/flag-icons/zipball/be01befd268ae71183d339901cd2ea64e0da4307",
-                "reference": "be01befd268ae71183d339901cd2ea64e0da4307",
-                "shasum": ""
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Panayiotis Lipiridis",
-                    "email": "lipiridis@gmail.com",
-                    "role": "Lead"
-                }
-            ],
-            "description": "A curated collection of all country flags in SVG — plus the CSS for easier integration.",
-            "homepage": "https://flagicons.lipis.dev",
-            "keywords": [
-                "country",
-                "country-flags",
-                "css",
-                "icon-css",
-                "svg"
-            ],
-            "support": {
-                "issues": "https://github.com/lipis/flag-icons/issues",
-                "source": "https://github.com/lipis/flag-icons/tree/v6.15.0"
-            },
-            "time": "2023-11-09T10:49:39+00:00"
         },
         {
             "name": "components/jquery",
