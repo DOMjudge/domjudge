@@ -2,9 +2,6 @@
     "brick/math": {
         "version": "0.9.3"
     },
-    "components/flag-icon-css": {
-        "version": "3.5.0"
-    },
     "components/jquery": {
         "version": "3.3.1"
     },
