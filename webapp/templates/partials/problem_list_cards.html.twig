@@ -1,0 +1,168 @@
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 problem-list{% if collapse == 1 %} collapse{% endif %}" {% if collapse == 1 %}id="alreadySolved"{% endif %}>
+    {% for ind, problem in problems %}
+        <div class="col{% if solved[ind] %} collapse collapse-solved-problems{% endif %}">
+            {% set numsamples = samples[problem.probid] %}
+            {% if problem.problem.interactiveProblem %}
+                {% set numsamples = 0 %}
+            {% endif %}
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">
+                        {{ problem | problemBadge }}
+                    </h2>
+                    <h3 class="card-subtitle mb-2 text-muted">
+                        {{ problem.problem.name }}
+                    </h3>
+                    {% if showLimits %}
+                        <h4 class="card-subtitle mb-2 text-muted">
+                            Limits: {{ problem.problem.timelimit }}
+                            second
+                            {%- if problem.problem.timelimit > 1 %}s{% endif %}
+                            {%- if timeFactorDiffers -%}
+                                <sup>*</sup>
+                            {% endif %}
+                            /
+                            {{ ((problem.problem.memlimit | default(defaultMemoryLimit)) * 1024) | printSize }}
+                        </h4>
+                    {% endif %}
+                    {% if problem.problem.languages | length != 0 %}
+                        <h4 class="card-subtitle mb-2 text-muted">
+                            Language{% if problem.problem.languages | length > 1 %}s{% endif %}:
+                            {% for lang in problem.problem.languages %}
+                                <code>{{ lang.name }}</code>{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </h4>
+                    {% endif %}
+                    <h4 class="card-subtitle mb-2 text-muted">
+                        Type: {{ problem.problem.typesAsString }}
+                    </h4>
+
+                    {% if stats is defined %}
+                        <div class="mt-3">
+                            {% for correct in [true, false] %}
+                                <div class="problem-stats d-flex justify-content-center">
+                                    {% for bucket in 0..stats.numBuckets - 1 %}
+                                        {% if correct %}
+                                            {% set index = 'correct' %}
+                                            {% set maxBucketSize = stats.maxBucketSizeCorrect %}
+                                        {% else %}
+                                            {% set index = 'incorrect' %}
+                                            {% set maxBucketSize = stats.maxBucketSizeIncorrect %}
+                                        {% endif %}
+                                        {% set stat = stats.problems[problem.problem.probid][index][bucket] %}
+                                        {% set count = stat.count %}
+                                        {% if maxBucketSize == 0 %}
+                                            {% set bucket = 0 %}
+                                        {% else %}
+                                            {% set bucket = (count / maxBucketSize * 9) | round(0, 'ceil') %}
+                                        {% endif %}
+                                        {% if count == 1 %}
+                                            {% set submissionText = 'submission' %}
+                                        {% else %}
+                                            {% set submissionText = 'submissions' %}
+                                        {% endif %}
+                                        {% if not contest.freezeData.showFinal and contest.freezetime and stat.end.timestamp >= contest.freezetime %}
+                                            {% set maxBucketSize = max(1, stats.maxBucketSizeCorrect, stats.maxBucketSizeIncorrect) %}
+                                            {% set bucket = (count / maxBucketSize * 9) | round(0, 'ceil') %}
+                                            {% set itemClass = 'frozen' ~ '-' ~ bucket %}
+                                            {% set label = count ~ ' ' ~ submissionText ~ ' in freeze' %}
+                                        {% else %}
+                                            {% set itemClass = index ~ '-' ~ bucket %}
+                                            {% set label = count ~ ' ' ~ index ~ ' ' ~ submissionText %}
+                                        {% endif %}
+                                        <div
+                                            class="problem-stats-item {{ itemClass }}"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            data-bs-html="true"
+                                            title="Between {{ stat.start.timestamp | printtime(null, contest) }} and {{ stat.end.timestamp | printtime(null, contest) }}:<br/>{{ label }}">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div>
+                            <br/>
+                        </div>
+                    {% endif %}
+
+                    <div class="text-center">
+                        {% if show_submit_button | default(false) %}
+                            {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
+                                <a class="justify-content-center" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit', {problem: problem.probid}) }}">
+                                                    <span class="btn btn-success">
+                                                        <i class="fas fa-cloud-upload-alt"></i> Submit
+                                                    </span>
+                                </a>
+                            {% else %}
+                                <a class="justify-content-center">
+                                                    <span class="btn btn-success disabled" disabled>
+                                                        <i class="fas fa-cloud-upload-alt"></i> Submit
+                                                    </span>
+                                </a>
+                            {% endif %}
+                        {% endif %}
+
+                        {% set clarificationsCount = 0 %}
+                        {% set unseenClarificationCount = 0 %}
+                        {% if clarifications[problem.probid] is defined %}
+                            {% set clarificationsCount = clarifications[problem.probid] | length %}
+                            {% for clar in clarifications[problem.probid] %}
+                                {% if team and team.unreadClarifications.contains(clar) %}
+                                    {% set unseenClarificationCount = unseenClarificationCount + 1 %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if clarificationsCount > 0 %}
+                            <a data-ajax-modal class="btn btn-secondary" role="button"
+                               href="{{ path('team_clarification_by_prob', {'probId': problem.probid}) }}">
+                                <i class="fas fa-question-circle"></i>
+                                {% if clarificationsCount > 0 %}
+                                    {% set badgeClass = 'text-bg-info' %}
+                                    {% if unseenClarificationCount > 0 %}
+                                        {% set badgeClass = 'text-bg-danger' %}
+                                    {% endif %}
+                                    <span class="badge {{ badgeClass }}">{{ clarificationsCount }}</span>
+                                {% endif %}
+                                clarifications
+                            </a>
+                        {% endif %}
+
+                        <div style="margin-top: 10px;">
+                        </div>
+
+                        {% if problem.problem.problemstatementType is not empty %}
+                            <a class="btn btn-secondary" role="button"
+                               href="{{ path(problem_statement_path, {'probId': problem.probid}) }}">
+                                <i class="fas fa-file-{{ problem.problem.problemstatementType }}"></i>
+                                statement
+                            </a>
+                        {% endif %}
+
+                        {% if numsamples > 0 %}
+                            <a class="btn btn-secondary" role="button"
+                               href="{{ path(problem_sample_zip_path, {'probId': problem.probid}) }}">
+                                <i class="fas fa-file-archive"></i> samples
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    {% if problem.problem.attachments | length > 0 %}
+                        <hr/>
+                        <ol class="text-center list-group list-group-flush">
+                            {% for attachment in problem.problem.attachments %}
+                                <li class="list-group-item">
+                                    <a class="btn btn-outline-secondary" role="button"
+                                       href="{{ path(problem_attachment_path, {'probId': problem.probid, 'attachmentId': attachment.attachmentid}) }}">
+                                        <i class="{{ attachment.type | fileTypeIcon }}"></i> {{ attachment.name }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ol>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>

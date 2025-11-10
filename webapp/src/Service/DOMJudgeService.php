@@ -1012,7 +1012,7 @@ class DOMJudgeService
     /**
      * @param ScoreCache[]|null $cache
      * @return array{'allproblems': array<mixed, ContestProblem[]>, 'samples': string[], 'showLimits': bool,
-     *               'defaultMemoryLimit': int, 'timeFactorDiffers': bool,
+     *               'defaultMemoryLimit': int, 'timeFactorDiffers': bool, 'solved': bool[], 'fullallproblems': ContestProblem[],
      *               'stats': array{'numBuckets': int, 'maxBucketSizeCorrect': int,
      *                              'maxBucketSizeCorrect': int, 'maxBucketSizeIncorrect': int,
      *                              'problems': array<array{'correct': array<array{'start': DateTime, 'end': DateTime, 'count': int}>,
@@ -1097,12 +1097,15 @@ class DOMJudgeService
         }
 
         $allProblems = [null => [], 'solved' => []];
+        $solvedProblem = [];
         if ($cache) {
             foreach ($cache as $ind => $cachedProblem) {
                 if ($cachedProblem->getIsCorrect(true)) {
                     $allProblems['solved'][] = $problems[$ind];
+                    $solvedProblem[] = true;
                 } else {
                     $allProblems[null][] = $problems[$ind];
+                    $solvedProblem[] = false;
                 }
             }
         } else {
@@ -1110,6 +1113,8 @@ class DOMJudgeService
         }
         $data = [
             'allproblems' => $allProblems,
+            'fullallproblems' => [null => $problems],
+            'solved' => $solvedProblem,
             'samples' => $samples,
             'showLimits' => $showLimits,
             'defaultMemoryLimit' => $defaultMemoryLimit,
