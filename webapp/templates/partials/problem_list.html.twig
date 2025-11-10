@@ -4,17 +4,24 @@
 
 <h1 class="mt-4 text-center">
     {{ contest.name | default('Contest') }} problems
-    {% if contest and show_contest_problemset and contest.contestProblemsetType is not empty %}
-        {% if contest_problemset_add_cid %}
-            {% set contest_problemset_url = path(contest_problemset_path, {'cid': contest.cid}) %}
-        {% else %}
-            {% set contest_problemset_url = path(contest_problemset_path) %}
+    {% if contest and show_contest_problemset %}
+        {% if contest.contestProblemsetType is not empty %}
+            {% if contest_problemset_add_cid %}
+                {% set contest_problemset_url = path(contest_problemset_path, {'cid': contest.cid}) %}
+            {% else %}
+                {% set contest_problemset_url = path(contest_problemset_path) %}
+            {% endif %}
+            <a class="btn btn-secondary" role="button"
+               href="{{ contest_problemset_url }}">
+                <i class="fas fa-file-{{ contest.contestProblemsetType }}"></i>
+                problemset
+            </a>
         {% endif %}
-        <a class="btn btn-secondary" role="button"
-           href="{{ contest_problemset_url }}">
-            <i class="fas fa-file-{{ contest.contestProblemsetType }}"></i>
-            problemset
-        </a>
+        {% if showSamples %}
+            <a class="btn btn-secondary" href="{{ path('current_samples_data_zip', {cid: contest.cid}) }}" title="Contains samples, attachments and statement for all problems.">
+                <i class="fas fa-download"></i> samples
+            </a>
+        {% endif %}
     {% endif %}
 </h1>
 
