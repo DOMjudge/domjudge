@@ -24,6 +24,7 @@ use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
 use App\Entity\QueueTask;
 use App\Entity\Rejudging;
+use App\Entity\ScoreCache;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
@@ -1009,7 +1010,8 @@ class DOMJudgeService
     }
 
     /**
-     * @return array{'problems': ContestProblem[], 'samples': string[], 'showLimits': bool,
+     * @param ScoreCache[]|null $cache
+     * @return array{'allproblems': array<mixed, ContestProblem[]>, 'samples': string[], 'showLimits': bool,
      *               'defaultMemoryLimit': int, 'timeFactorDiffers': bool,
      *               'stats': array{'numBuckets': int, 'maxBucketSizeCorrect': int,
      *                              'maxBucketSizeCorrect': int, 'maxBucketSizeIncorrect': int,
@@ -1020,7 +1022,8 @@ class DOMJudgeService
     public function getTwigDataForProblemsAction(
         StatisticsService $statistics,
         ?int $teamId = null,
-        bool $forJury = false
+        bool $forJury = false,
+        ?array $cache = null
     ): array {
         $contest            = isset($teamId) ? $this->getCurrentContest($teamId) : $this->getCurrentContest(onlyPublic: !$forJury);
         $showLimits         = (bool)$this->config->get('show_limits_on_team_page');
@@ -1093,8 +1096,20 @@ class DOMJudgeService
             }
         }
 
+        $allProblems = [null => [], 'solved' => []];
+        if ($cache) {
+            foreach ($cache as $ind => $cachedProblem) {
+                if ($cachedProblem->getIsCorrect(true)) {
+                    $allProblems['solved'][] = $problems[$ind];
+                } else {
+                    $allProblems[null][] = $problems[$ind];
+                }
+            }
+        } else {
+            $allProblems = [null => $problems];
+        }
         $data = [
-            'problems' => $problems,
+            'allproblems' => $allProblems,
             'samples' => $samples,
             'showLimits' => $showLimits,
             'defaultMemoryLimit' => $defaultMemoryLimit,

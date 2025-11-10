@@ -8,6 +8,7 @@ use App\Entity\ContestProblem;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Service\ScoreboardService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -32,6 +33,7 @@ class ProblemController extends BaseController
         DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly StatisticsService $stats,
+        protected readonly ScoreboardService $scoreboard,
         protected readonly EventLogService $eventLogService,
         EntityManagerInterface $em,
         KernelInterface $kernel,
@@ -46,8 +48,9 @@ class ProblemController extends BaseController
     public function problemsAction(): Response
     {
         $teamId = $this->dj->getUser()->getTeam()->getTeamid();
+        $cache = $this->scoreboard->getScorecache($this->dj->getCurrentContest(), $this->dj->getUser()->getTeam());
         return $this->render('team/problems.html.twig',
-            $this->dj->getTwigDataForProblemsAction($this->stats, $teamId));
+            $this->dj->getTwigDataForProblemsAction($this->stats, $teamId, cache: $cache));
     }
 
 
