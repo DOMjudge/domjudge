@@ -307,7 +307,7 @@ abstract class BaseController extends AbstractController
      * @param Object[] $entities
      * @param array<string, array<string, array{'target': string, 'targetColumn': string, 'type': string}>> $relations
      *
-     * @return array{0: bool, 1: array<int[]>, 2: string[]}
+     * @return array{0: bool, 1: array<int[]>, 2: string[], 3: array<string>}
      */
     protected function buildDeleteTree(array $entities, array $relations): array {
         $isError = false;
@@ -316,9 +316,13 @@ abstract class BaseController extends AbstractController
         $readableType = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
         $metadata = $this->em->getClassMetadata($entities[0]::class);
         $primaryKeyData = [];
+        $externalIdData = [];
         $messages = [];
         foreach ($entities as $entity) {
             $primaryKeyDataTemp = [];
+            if ($entity instanceof HasExternalIdInterface) {
+                $externalIdData[] = $entity->getExternalId();
+            }
             foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
                 $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
                 $primaryKeyDataTemp[] = $primaryKeyColumnValue;
@@ -383,7 +387,7 @@ abstract class BaseController extends AbstractController
             }
             $primaryKeyData[] = $primaryKeyDataTemp;
         }
-        return [$isError, $primaryKeyData, array_values(array_unique($messages))];
+        return [$isError, $primaryKeyData, array_values(array_unique($messages)), $externalIdData];
     }
 
     /**
@@ -415,6 +419,7 @@ abstract class BaseController extends AbstractController
             $isError,
             $primaryKeyData,
             $deleteTreeMessages,
+            $externalIdData,
         ] = $this->buildDeleteTree($entities, $relations);
         if (!empty($deleteTreeMessages)) {
             $messages = $deleteTreeMessages;
@@ -430,7 +435,7 @@ abstract class BaseController extends AbstractController
                 $this->commitDeleteEntity($entity, $primaryKeyData[$id]);
                 $description = $entity->getShortDescription();
                 $msgList[] = sprintf('Successfully deleted %s %s "%s"',
-                    $readableType, implode(', ', $primaryKeyData[$id]), $description);
+                    $readableType, $externalIdData[$id] ?? implode(', ', $primaryKeyData[$id]), $description);
             }
 
             $msg = implode("\n", $msgList);
@@ -449,7 +454,7 @@ abstract class BaseController extends AbstractController
 
         $data = [
             'type' => $readableType,
-            'primaryKey' => implode(', ', array_merge(...$primaryKeyData)),
+            'primaryKey' => !empty($externalIdData) ? implode(', ', $externalIdData) : implode(', ', array_merge(...$primaryKeyData)),
             'description' => implode(',', $descriptions),
             'messages' => $messages,
             'isError' => $isError,
