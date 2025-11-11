@@ -1130,6 +1130,7 @@ class DOMJudgeService
             'problems' => $problems,
             'samples' => $samples,
             'showLimits' => $showLimits,
+            'showSamples' => $this->checkIfSamplesZipForContest($contest),
             'defaultMemoryLimit' => $defaultMemoryLimit,
             'timeFactorDiffers' => $timeFactorDiffers,
             'clarifications' => $clars,
