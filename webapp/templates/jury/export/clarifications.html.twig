@@ -98,7 +98,7 @@
                 <tr>
                     <td><b>Content</b></td>
                     <td colspan="5">
-                        <div class="card-text">{{ clarification.body | markdown_to_html | sanitize_html('app.clarification_sanitizer') }}</div>
+                        <div class="card-text">{{ clarification.body | domjudgeMarkdownToHtml | sanitize_html('app.clarification_sanitizer') }}</div>
                     </td>
                 </tr>
                 {% if clarification.replies is not empty %}
@@ -114,7 +114,7 @@
                                 </b>
                             </td>
                             <td colspan="5">
-                                <div class="card-text">{{ reply.body | markdown_to_html | sanitize_html('app.clarification_sanitizer') }}</div>
+                                <div class="card-text">{{ reply.body | domjudgeMarkdownToHtml | sanitize_html('app.clarification_sanitizer') }}</div>
                             </td>
                         </tr>
                     {% endfor %}
