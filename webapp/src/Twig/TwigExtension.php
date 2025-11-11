@@ -125,7 +125,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('medalType', $this->awards->medalType(...)),
             new TwigFilter('numTableActions', $this->numTableActions(...)),
             new TwigFilter('extensionToMime', $this->extensionToMime(...)),
-            new TwigFilter('domjudge_markdown_to_html', $this->domjudgeMarkdownToHTML(...), ['is_safe' => ['html']]),
+            new TwigFilter('domjudgeMarkdownToHtml', $this->domjudgeMarkdownToHTML(...), ['is_safe' => ['html']]),
         ];
     }
 
@@ -1409,6 +1409,10 @@ EOF;
         return DOMJudgeService::EXTENSION_TO_MIMETYPE[$extension];
     }
 
+    /**
+     * Extract all LaTeX code from the given string, sanitize the markdown and
+     * inject the original LaTeX code back so MathJax can render it.
+     */
     public function domjudgeMarkdownToHTML(string $markdown): string
     {
         $latexFound = [];

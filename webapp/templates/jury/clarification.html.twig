@@ -22,10 +22,10 @@
             <div style="height: 100px;"></div>
             <div>Pure body:<br>{{ clar.body }}</div>
             <div>Markdown converted:<br>{{ clar.body | markdown_to_html }}</div>
-            <div>DOMjudge Markdown converted:<br>{{ clar.body | domjudge_markdown_to_html }}</div>
+            <div>DOMjudge Markdown converted:<br>{{ clar.body | domjudgeMarkdownToHtml }}</div>
             <div>Sanitized:<br>{{ clar.body | sanitize_html('app.clarification_sanitizer') }}</div>
-            <div>All:<br>{{ clar.body | domjudge_markdown_to_html | sanitize_html('app.clarification_sanitizer') }}</div>
-            <div>DOMjudge all:<br>{{ clar.body | domjudge_markdown_to_html | sanitize_html('app.clarification_sanitizer') }}</div>
+            <div>All:<br>{{ clar.body | domjudgeMarkdownToHtml | sanitize_html('app.clarification_sanitizer') }}</div>
+            <div>DOMjudge all:<br>{{ clar.body | domjudgeMarkdownToHtml | sanitize_html('app.clarification_sanitizer') }}</div>
             <div class="card mb-3 {% if clar.from_team is not defined %}border-primary{% endif %}">
                 <div class="card-header">
                     <div class="row">
