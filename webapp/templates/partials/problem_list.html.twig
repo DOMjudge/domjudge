@@ -17,9 +17,11 @@
                 problemset
             </a>
         {% endif %}
-        <a class="btn btn-secondary" href="{{ path('current_samples_data_zip', {cid: contest.cid}) }}" title="Contains samples, attachments and statement for all problems.">
-            <i class="fas fa-download"></i> samples
-        </a>
+        {% if showSamples %}
+            <a class="btn btn-secondary" href="{{ path('current_samples_data_zip', {cid: contest.cid}) }}" title="Contains samples, attachments and statement for all problems.">
+                <i class="fas fa-download"></i> samples
+            </a>
+        {% endif %}
     {% endif %}
 </h1>
 
