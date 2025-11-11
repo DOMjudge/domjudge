@@ -1297,8 +1297,19 @@ function initScoreboardSubmissions() {
     });
 }
 
+const enableButton = (btn, url) => {
+    btn.href = url;
+    btn.classList.remove('disabled');
+    btn.ariaDisabled=false;
+};
+
+const disableButton = (btn) => {
+    btn.classList.add('disabled');
+    btn.ariaDisabled=true;
+}
+
 const editors = [];
-function initDiffEditor(editorId) {
+function initDiffEditor(editorId, deletedFiles) {
     const wrapper = $(`#${editorId}-wrapper`);
 
     const initialTag = getDiffTag();
@@ -1332,14 +1343,14 @@ function initDiffEditor(editorId) {
         if (rank) {
             let url = new URL(download.href);
             url.searchParams.set("fetch", rank);
-            download.href = url;
+            enableButton(download, url);
 
             url = new URL(edit.href);
             url.searchParams.set("rank", rank);
-            edit.href = url;
+            enableButton(edit, url);
         } else {
-            download.href = "#";
-            edit.href = "#";
+            disableButton(download);
+            disableButton(edit);
         }
     };
     wrapper.find(".nav").on('show.bs.tab', (e) => {
@@ -1358,37 +1369,6 @@ function initDiffEditor(editorId) {
             let s = select[0];
             return s.options[s.selectedIndex].value;
         },
-        'updateIcon': (rank, icon) => {
-            const element = wrapper.find(".nav-link[data-rank]")[rank].querySelector('.fa-fw');
-            element.className = 'fas fa-fw fa-' + icon;
-        },
-        'renamedFrom': (rank, oldName) => {
-            const navItem = wrapper.find(".nav-link[data-rank]")[rank];
-            let renamedFromName = navItem.querySelector('.renamed');
-            let arrow = navItem.querySelector('.fa-arrow-right');
-            if (oldName === undefined) {
-                if (renamedFromName) {
-                    navItem.removeChild(renamedFromName);
-                }
-                if (arrow) {
-                    navItem.removeChild(arrow);
-                }
-                return;
-            }
-
-            if (!renamedFromName) {
-                renamedFromName = document.createElement('span');
-                renamedFromName.className = 'renamed';
-                navItem.insertBefore(renamedFromName, navItem.childNodes[1]);
-            }
-            renamedFromName.innerText = ` ${oldName} `;
-
-            if (!arrow) {
-                arrow = document.createElement('i');
-                arrow.className = 'fas fa-arrow-right';
-                navItem.insertBefore(arrow, navItem.childNodes[2]);
-            }
-        },
         'onDiffModeChange': (f) => {
             radios.change((e) => {
                 const diffMode = e.target.value;
@@ -1397,8 +1377,8 @@ function initDiffEditor(editorId) {
         },
         'onDiffSelectChange': (f) => {
             select.change((e) => {
-                const submitId = e.target.value;
-                const noDiff = submitId === "";
+                const noDiff = e.target.value === "";
+                const submitId = parseInt(e.target.value);
                 f(submitId, noDiff);
             });
         }
@@ -1420,15 +1400,14 @@ function initDiffEditor(editorId) {
         if (selected && selected.dataset.tag) {
             setDiffTag(selected.dataset.tag);
         }
-
-        // TODO: add tab panes for deleted source files.
     };
-    updateSelect(select[0].value, select[0].value === "");
+    updateSelect(parseInt(select[0].value), select[0].value === "");
     editor.onDiffSelectChange(updateSelect);
 }
 
 function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
     const empty = monaco.editor.getModel(monaco.Uri.file("empty")) ?? monaco.editor.createModel("", undefined, monaco.Uri.file("empty"));
+    const navItem = document.getElementById(`${diffId}-link`);
 
     const diffEditor = monaco.editor.createDiffEditor(
         document.getElementById(diffId), {
@@ -1450,19 +1429,52 @@ function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
     };
     editors[editorId].onDiffModeChange(updateMode);
 
+    const renamedFrom = (oldName) => {
+        let renamedFromName = navItem.querySelector('.renamed');
+        let arrow = navItem.querySelector('.fa-arrow-right');
+        if (oldName === undefined) {
+            if (renamedFromName) {
+                navItem.removeChild(renamedFromName);
+            }
+            if (arrow) {
+                navItem.removeChild(arrow);
+            }
+            return;
+        }
+
+        if (!renamedFromName) {
+            renamedFromName = document.createElement('span');
+            renamedFromName.className = 'renamed';
+            navItem.insertBefore(renamedFromName, navItem.childNodes[1]);
+        }
+        renamedFromName.innerText = ` ${oldName} `;
+
+        if (!arrow) {
+            arrow = document.createElement('i');
+            arrow.className = 'fas fa-arrow-right';
+            navItem.insertBefore(arrow, navItem.childNodes[2]);
+        }
+    };
+
     const updateSelect = (submitId, noDiff) => {
+        const exists = submitId in models;
+        if (rank === undefined) {
+            document.getElementById(diffId).parentElement.style.display = exists ? 'block' : 'none';
+            navItem.style.display = exists ? 'block' : 'none';
+            if (!exists) return;
+        }
+
         const model = models[submitId] ??= {'model': empty};
         if (!noDiff) {
             if (!model['model']) {
-                // TODO: show source code instead of diff to empty file?
                 model['model'] = monaco.editor.createModel(model['source'], undefined, monaco.Uri.file("test/" + submitId + "/" + model['filename']));
             }
         }
 
         if (noDiff || !model['renamedFrom']) {
-            editors[editorId].renamedFrom(rank, undefined);
+            renamedFrom(undefined);
         } else {
-            editors[editorId].renamedFrom(rank, model['renamedFrom']);
+            renamedFrom(model['renamedFrom']);
         }
 
         diffEditor.updateOptions({
@@ -1496,19 +1508,24 @@ function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
     updateSelect(editors[editorId].getDiffSelection(), editors[editorId].getDiffSelection() === "");
 
     const updateIcon = () => {
+        if (rank === undefined) return;
+        const update = (icon) => {
+            const element = navItem.querySelector('.fa-fw');
+            element.className = 'fas fa-fw fa-' + icon;
+        };
         const noDiff = editors[editorId].getDiffSelection() === "";
         if (noDiff) {
-            editors[editorId].updateIcon(rank, 'file');
+            update('file');
             return;
         }
 
         const lineChanges = diffEditor.getLineChanges();
         if (diffEditor.getModel().original == empty) {
-            editors[editorId].updateIcon(rank, 'file-circle-plus');
+            update('file-circle-plus');
         } else if (lineChanges !== null && lineChanges.length > 0) {
-            editors[editorId].updateIcon(rank, 'file-circle-exclamation');
+            update('file-circle-exclamation');
         } else {
-            editors[editorId].updateIcon(rank, 'file-circle-check');
+            update('file-circle-check');
         }
     }
     diffEditor.onDidUpdateDiff(updateIcon);
