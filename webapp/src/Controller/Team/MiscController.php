@@ -105,7 +105,7 @@ class MiscController extends BaseController
                 ->setParameter('team', $team)
                 ->addOrderBy('c.submittime', 'DESC')
                 ->addOrderBy('c.clarid', 'DESC');
-            if (!$this->dj->checkrole('jury') && $contest->getStartTimeObject()->getTimestamp() > time()) {
+            if ($contest->getStartTimeObject()->getTimestamp() > time()) {
                 $qb->andWhere('c.problem IS NULL');
             }
             /** @var Clarification[] $clarifications */
