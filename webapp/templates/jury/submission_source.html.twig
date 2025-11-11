@@ -37,38 +37,5 @@
         <p><b>Entry point</b>: {{ submission.entryPoint }}</p>
     {%- endif %}
 
-    {% if otherFiles | length > 0 %}
-        {%- include 'jury/partials/submission_diff.html.twig' with {editor_id: "diffw" ~ submission.submitid} %}
-    {% else %}
-        <ul class="nav nav-tabs source-tab-nav">
-            {%- for file in files %}
-                <li class="nav-item">
-                    <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
-                       href="#source-{{ file.rank }}" role="tab">{{ file.filename }}</a>
-                </li>
-            {%- endfor %}
-
-        </ul>
-        <div class="tab-content source-tab">
-            {%- for file in files %}
-                <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="source-{{ file.rank }}"
-                     role="tabpanel">
-                    <div class="mb-1">
-                        <a class="btn btn-secondary btn-sm"
-                           href="{{ path('jury_submission_source', {submission: submission.submitid, fetch: file.rank}) }}">
-                            <i class="fas fa-download"></i> Download
-                        </a>
-                        {% if allowEdit %}
-                            <a class="btn btn-secondary btn-sm"
-                               href="{{ path('jury_submission_edit_source', {submission: submission.submitid, rank: file.rank}) }}">
-                                <i class="fas fa-pencil-alt"></i> Edit
-                            </a>
-                        {% endif %}
-                    </div>
-
-                    {{ file.sourcecode | codeEditor(file.rank, submission.language.editorLanguage) }}
-                </div>
-            {%- endfor %}
-        </div>
-    {% endif %}
+    {%- include 'jury/partials/submission_diff.html.twig' with {editor_id: "diffw" ~ submission.submitid} %}
 {% endblock %}
