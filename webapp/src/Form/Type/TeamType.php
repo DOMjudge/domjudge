@@ -65,6 +65,7 @@ class TeamType extends AbstractExternalIdEntityType
         ]);
         $builder->add('category', EntityType::class, [
             'class' => TeamCategory::class,
+            'choice_value' => 'externalid',
         ]);
         $builder->add('publicdescription', TextareaType::class, [
             'label' => 'Public description',
@@ -74,6 +75,7 @@ class TeamType extends AbstractExternalIdEntityType
             'class'         => TeamAffiliation::class,
             'required'      => false,
             'choice_label'  => 'name',
+            'choice_value' => 'externalid',
             'placeholder'   => '-- no affiliation --',
             'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')->orderBy('a.name'),
         ]);
@@ -95,6 +97,7 @@ class TeamType extends AbstractExternalIdEntityType
             'class'         => Contest::class,
             'required'      => false,
             'choice_label'  => 'name',
+            'choice_value' => 'externalid',
             'multiple'      => true,
             'by_reference'  => false,
             'query_builder' => fn(EntityRepository $er) => $er
@@ -130,6 +133,7 @@ class TeamType extends AbstractExternalIdEntityType
             'label'        => "User",
             'required'     => true,
             'choice_label' => 'name',
+            'choice_value' => 'externalid',
         ]);
         $builder->add('newUsername', TextType::class, [
             'label'    => 'Username',

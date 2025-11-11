@@ -705,7 +705,7 @@ class RejudgingController extends BaseController
             'language' => 'l.externalid',
             'problem' => 'p.externalid',
             'submission' => 's.externalid',
-            'team' => 's.team',
+            'team' => 't.externalid',
             'user' => 's.user',
             'rejudging' => 'j2.rejudging',
         ];
