@@ -848,6 +848,7 @@ class SubmissionController extends BaseController
             ->orderBy('file.ranknumber')
             ->getQuery()
             ->getResult();
+        // TODO: change array to `filename -> file` for efficiency of renaming?
 
         $otherSubmissions = [];
         $originalSubmission = $submission->getOriginalSubmission();
@@ -929,6 +930,23 @@ class SubmissionController extends BaseController
             }
         }
 
+        $deletedFiles = [];
+        foreach ($otherSubmissions as $s) {
+            $submitId = $s->getSubmitid();
+            $sf = $otherFiles[$submitId];
+            if (count($files) === 1 && count($sf) === 1) {
+                continue;
+            }
+            foreach ($sf as $name => $file) {
+                if (!array_key_exists($name, $files)) {
+                    // TODO: note to self: rotated the key order s.t. we can iterate over deleted filenames in a.o. twig
+                    $deletedFiles[$name] ??= [];
+                    $deletedFiles[$name][$submitId] = $otherFiles[$submitId][$name];
+                }
+            }
+        }
+        dump($deletedFiles);
+
         return $this->render('jury/submission_source.html.twig', [
             'submission' => $submission,
             'files' => $files,
@@ -937,6 +955,7 @@ class SubmissionController extends BaseController
             'allowEdit' => $this->allowEdit(),
             'otherSubmissions' => $otherSubmissions,
             'otherFiles' => $otherFiles,
+            'deletedFiles' => $deletedFiles,
         ]);
     }
 

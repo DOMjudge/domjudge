@@ -73,6 +73,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('globalBannerAssetPath', $this->dj->globalBannerAssetPath(...)),
             new TwigFunction('shadowMode', $this->shadowMode(...)),
             new TwigFunction('showDiff', $this->showDiff(...), ['is_safe' => ['html']]),
+            new TwigFunction('showDeleted', $this->showDeleted(...), ['is_safe' => ['html']]),
         ];
     }
 
@@ -991,6 +992,32 @@ HTML;
             $newFile->getRank(),
             $this->serializer->serialize($others, 'json'),
             $this->getMonacoModel($newFile),
+        );
+    }
+
+    /** @param array<int, SubmissionFile[]> $deletedFiles */
+    public function showDeleted(string $editorId, string $diffId, string $filename, array $deletedFiles): string
+    {
+        $editor = <<<HTML
+<div class="editor" id="$diffId"></div>
+<script>
+$(function() {
+    const editorId = '%s';
+    const diffId = '%s';
+    const models = %s;
+    require(['vs/editor/editor.main'], () => {
+        const modifiedModel = monaco.editor.getModel(monaco.Uri.file("empty"));
+        initDiffEditorTab(editorId, diffId, undefined, models, modifiedModel);
+    });
+});
+</script>
+HTML;
+
+        return sprintf(
+            $editor,
+            $editorId,
+            $diffId,
+            $this->serializer->serialize($deletedFiles, 'json'),
         );
     }
 
