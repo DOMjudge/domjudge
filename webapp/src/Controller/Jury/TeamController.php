@@ -91,8 +91,7 @@ class TeamController extends BaseController
         $teams_that_solved = array_column($teams_that_solved, 'num_correct', 'teamid');
 
         $table_fields = [
-            'teamid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
-            'externalid' => ['title' => 'external ID', 'sort' => true],
+            'externalid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
             'label' => ['title' => 'label', 'sort' => true,],
             'effective_name' => ['title' => 'name', 'sort' => true,],
             'category' => ['title' => 'sort order category', 'sort' => true,],
@@ -121,7 +120,7 @@ class TeamController extends BaseController
             $teamdata    = [];
             $teamactions = [];
 
-            $this->addEntityCheckbox($teamdata, $t, $t->getTeamid(), 'team-checkbox', fn(Team $team) => !$team->isLocked());
+            $this->addEntityCheckbox($teamdata, $t, $t->getExternalid(), 'team-checkbox', fn(Team $team) => !$team->isLocked());
 
             // Get whatever fields we can from the team object itself.
             foreach ($table_fields as $k => $v) {
@@ -159,14 +158,14 @@ class TeamController extends BaseController
                     'icon' => 'edit',
                     'title' => 'edit this team',
                     'link' => $this->generateUrl('jury_team_edit', [
-                        'teamId' => $t->getTeamid(),
+                        'teamId' => $t->getExternalid(),
                     ]),
                 ];
                 $teamactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this team',
                     'link' => $this->generateUrl('jury_team_delete', [
-                        'teamId' => $t->getTeamId(),
+                        'teamId' => $t->getExternalid(),
                     ]),
                     'ajaxModal' => true,
                 ];
@@ -175,7 +174,7 @@ class TeamController extends BaseController
                 'icon' => 'envelope',
                 'title' => 'send clarification to this team',
                 'link' => $this->generateUrl('jury_clarification_new', [
-                    'teamto' => $t->getTeamId(),
+                    'teamto' => $t->getExternalid(),
                 ])
             ];
 
@@ -222,7 +221,7 @@ class TeamController extends BaseController
             $teams_table[] = [
                 'data' => $teamdata,
                 'actions' => $teamactions,
-                'link' => $this->generateUrl('jury_team', ['teamId' => $t->getTeamId()]),
+                'link' => $this->generateUrl('jury_team', ['teamId' => $t->getExternalid()]),
                 'cssclass' => ($t->getEnabled() ? '' : ' disabled'),
             ];
         }
@@ -328,10 +327,10 @@ class TeamController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{teamId<\d+>}/edit', name: 'jury_team_edit')]
-    public function editAction(Request $request, int $teamId): Response
+    #[Route(path: '/{teamId}/edit', name: 'jury_team_edit')]
+    public function editAction(Request $request, string $teamId): Response
     {
-        $team = $this->em->getRepository(Team::class)->find($teamId);
+        $team = $this->em->getRepository(Team::class)->findByExternalId($teamId);
         if (!$team) {
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
@@ -344,7 +343,7 @@ class TeamController extends BaseController
             $this->possiblyAddUser($team);
             $this->assetUpdater->updateAssets($team);
             $this->saveEntity($team, $team->getTeamid(), false);
-            return $this->redirectToRoute('jury_team', ['teamId' => $team->getTeamid()]);
+            return $this->redirectToRoute('jury_team', ['teamId' => $team->getExternalid()]);
         }
 
         return $this->render('jury/team_edit.html.twig', [
@@ -354,10 +353,10 @@ class TeamController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{teamId<\d+>}/delete', name: 'jury_team_delete')]
-    public function deleteAction(Request $request, int $teamId): Response
+    #[Route(path: '/{teamId}/delete', name: 'jury_team_delete')]
+    public function deleteAction(Request $request, string $teamId): Response
     {
-        $team = $this->em->getRepository(Team::class)->find($teamId);
+        $team = $this->em->getRepository(Team::class)->findByExternalId($teamId);
         if (!$team) {
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
@@ -366,13 +365,13 @@ class TeamController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/delete-multiple', name: 'jury_team_delete_multiple', methods: ['GET', 'POST'])]
+    #[Route(path: '/delete-multiple', name: 'jury_team_delete_multiple', methods: ['GET', 'POST'], priority: 1)]
     public function deleteMultipleAction(Request $request): Response
     {
         return $this->deleteMultiple(
             $request,
             Team::class,
-            'teamid',
+            'externalid',
             'jury_teams',
             'No teams could be deleted (they might be in a locked contest).',
             fn(Team $team) => !$team->isLocked()
@@ -391,7 +390,7 @@ class TeamController extends BaseController
 
         if ($response = $this->processAddFormForExternalIdEntity(
             $form, $team,
-            fn() => $this->generateUrl('jury_team', ['teamId' => $team->getTeamid()]),
+            fn() => $this->generateUrl('jury_team', ['teamId' => $team->getExternalid()]),
             function () use ($team) {
                 $this->possiblyAddUser($team);
                 $this->em->persist($team);
