@@ -92,7 +92,8 @@ class MiscController extends BaseController
                 paginated: false
             )[0];
 
-            $qb = $this->em->createQueryBuilder()
+            /** @var Clarification[] $clarifications */
+            $clarifications = $this->em->createQueryBuilder()
                 ->from(Clarification::class, 'c')
                 ->leftJoin('c.problem', 'p')
                 ->leftJoin('c.sender', 's')
@@ -101,17 +102,14 @@ class MiscController extends BaseController
                 ->andWhere('c.contest = :contest')
                 ->andWhere('c.sender IS NULL')
                 ->andWhere('c.recipient = :team OR c.recipient IS NULL')
+                ->andWhere('c.submittime <= :time')
                 ->setParameter('contest', $contest)
                 ->setParameter('team', $team)
+                ->setparameter('time', time())
                 ->addOrderBy('c.submittime', 'DESC')
                 ->addOrderBy('c.clarid', 'DESC');
-            if (!$this->dj->checkrole('jury')) {
-                $qb->andWhere('c.submittime <= :time')
-                   ->setparameter('time', time());
-            }
-
-            /** @var Clarification[] $clarifications */
-            $clarifications = $qb->getQuery()->getResult();
+                ->getQuery()
+                ->getResult();
 
             /** @var Clarification[] $clarificationRequests */
             $clarificationRequests = $this->em->createQueryBuilder()
