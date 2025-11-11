@@ -706,7 +706,7 @@ class RejudgingController extends BaseController
             'problem' => 'p.externalid',
             'submission' => 's.externalid',
             'team' => 't.externalid',
-            'user' => 's.user',
+            'user' => 'u.externalid',
             'rejudging' => 'j2.rejudging',
         ];
 
@@ -741,6 +741,7 @@ class RejudgingController extends BaseController
                 ->leftJoin('s.language', 'l')
                 ->leftJoin('s.problem', 'p')
                 ->leftJoin('s.team', 't')
+                ->leftJoin('s.user', 'u')
                 ->leftJoin('j.runs', 'jr')
                 ->leftJoin('jr.judgetask', 'jt')
                 ->select('j', 's', 'r', 't')
