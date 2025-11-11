@@ -107,7 +107,7 @@ class MiscController extends BaseController
                 ->setParameter('team', $team)
                 ->setparameter('time', time())
                 ->addOrderBy('c.submittime', 'DESC')
-                ->addOrderBy('c.clarid', 'DESC');
+                ->addOrderBy('c.clarid', 'DESC')
                 ->getQuery()
                 ->getResult();
 
