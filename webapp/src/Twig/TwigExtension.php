@@ -73,7 +73,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('globalBannerAssetPath', $this->dj->globalBannerAssetPath(...)),
             new TwigFunction('shadowMode', $this->shadowMode(...)),
             new TwigFunction('showDiff', $this->showDiff(...), ['is_safe' => ['html']]),
-            new TwigFunction('showDeleted', $this->showDeleted(...), ['is_safe' => ['html']]),
         ];
     }
 
@@ -958,8 +957,13 @@ JS,
         );
     }
 
-    /** @param array<int, SubmissionFile[]> $otherFiles */
-    public function showDiff(string $editorId, string $diffId, SubmissionFile $newFile, array $otherFiles): string
+    /** @param array<int, array{
+     *      rank: int,
+     *      filename: string,
+     *      source: string,
+     *      renamedFrom?: string
+     * }> $files */
+    public function showDiff(string $editorId, string $diffId, int $submissionId, string $filename, array $files): string
     {
         $editor = <<<HTML
 <div class="editor" id="$diffId"></div>
@@ -967,47 +971,10 @@ JS,
 $(function() {
     const editorId = '%s';
     const diffId = '%s';
-    const rank = %d;
+    const submissionId = %d;
     const models = %s;
     require(['vs/editor/editor.main'], () => {
-        const modifiedModel = %s;
-        initDiffEditorTab(editorId, diffId, rank, models, modifiedModel);
-    });
-});
-</script>
-HTML;
-
-        $others = [];
-        foreach ($otherFiles as $submissionId => $files) {
-            if (isset($files[$newFile->getFilename()])) {
-                // TODO: add `tag` containing `previous` / `original`
-                $others[$submissionId] = $files[$newFile->getFilename()];
-            }
-        }
-
-        return sprintf(
-            $editor,
-            $editorId,
-            $diffId,
-            $newFile->getRank(),
-            $this->serializer->serialize($others, 'json'),
-            $this->getMonacoModel($newFile),
-        );
-    }
-
-    /** @param array<int, SubmissionFile[]> $deletedFiles */
-    public function showDeleted(string $editorId, string $diffId, string $filename, array $deletedFiles): string
-    {
-        $editor = <<<HTML
-<div class="editor" id="$diffId"></div>
-<script>
-$(function() {
-    const editorId = '%s';
-    const diffId = '%s';
-    const models = %s;
-    require(['vs/editor/editor.main'], () => {
-        const modifiedModel = monaco.editor.getModel(monaco.Uri.file("empty"));
-        initDiffEditorTab(editorId, diffId, undefined, models, modifiedModel);
+        initDiffEditorTab(editorId, diffId, submissionId, models);
     });
 });
 </script>
@@ -1017,7 +984,8 @@ HTML;
             $editor,
             $editorId,
             $diffId,
-            $this->serializer->serialize($deletedFiles, 'json'),
+            $submissionId,
+            $this->serializer->serialize($files, 'json'),
         );
     }
 

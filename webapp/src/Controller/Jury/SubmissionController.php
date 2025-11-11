@@ -839,17 +839,6 @@ class SubmissionController extends BaseController
             return $response;
         }
 
-        /** @var SubmissionFile[] $files */
-        $files = $this->em->createQueryBuilder()
-            ->from(SubmissionFile::class, 'file')
-            ->select('file')
-            ->andWhere('file.submission = :submission')
-            ->setParameter('submission', $submission)
-            ->orderBy('file.ranknumber')
-            ->getQuery()
-            ->getResult();
-        // TODO: change array to `filename -> file` for efficiency of renaming?
-
         $otherSubmissions = [];
         $originalSubmission = $submission->getOriginalSubmission();
         if ($originalSubmission) {
@@ -893,60 +882,56 @@ class SubmissionController extends BaseController
             $otherSubmissions[] = $oldSubmission;
         }
 
-        /** @var SubmissionFile[] $files */
+        $files_query = array_map(fn($s) => $s->getSubmitid(), $otherSubmissions);
+        $files_query[] = $submission->getSubmitid();
+        /** @var SubmissionFile[] $oldFiles */
         $oldFiles = $this->em->createQueryBuilder()
             ->from(SubmissionFile::class, 'file')
             ->select('file')
             ->andWhere('file.submission in (:submissions)')
-            ->setParameter('submissions', array_map(fn($s) => $s->getSubmitid(), $otherSubmissions))
+            ->setParameter('submissions', $files_query)
             ->orderBy('file.submission, file.ranknumber')
             ->getQuery()
             ->getResult();
 
-        $otherFiles = [];
+        /** @var array<string, array<int, array{
+         *      rank: int,
+         *      filename: string,
+         *      source: string,
+         *      renamedFrom?: string
+         * }>> $files */
+        $files = [];
+        /** @var array<int, (string|false)> $renames */
+        $renames = [];
         foreach ($oldFiles as $f) {
             $submitId = $f->getSubmission()->getSubmitid();
-            $otherFiles[$submitId] ??= [];
-            $otherFiles[$submitId][$f->getFilename()] = [
+            $files[$f->getFilename()] ??= [];
+            $files[$f->getFilename()][$submitId] = [
+                'rank' => $f->getRank(),
                 'filename' => $f->getFilename(),
                 'source'   => mb_check_encoding($f->getSourcecode(), 'UTF-8') ? $f->getSourcecode() : "Could not display file as UTF-8, is it binary?",
             ];
+
+            // Keep track of the single filename within a submission for handling renaming.
+            $renames[$submitId] = array_key_exists($submitId, $renames) ? false : $f->getFilename();
         }
 
         // Handle file renaming for a single-file submission.
-        if (count($files) === 1) {
-            $f = $files[0];
-            foreach ($otherSubmissions as $s) {
-                $sf = $otherFiles[$s->getSubmitid()];
-                if (count($sf) === 1 && !array_key_exists($f->getFilename(), $sf)) {
-                    $oldName = array_key_first($sf);
-                    $otherFiles[$s->getSubmitid()] = [
-                        $f->getFilename() => [
-                            'renamedFrom' => $oldName,
-                            ...$sf[$oldName]
-                        ],
-                    ];
+        $renamedTo = $renames[$submission->getSubmitid()];
+        if ($renamedTo !== false) {
+            foreach ($renames as $submitId => $filename) {
+                if ($filename !== false && $filename !== $renamedTo) {
+                    $files[$renamedTo][$submitId] = $files[$filename][$submitId];
+                    $files[$renamedTo][$submitId]['renamedFrom'] = $filename;
+                    unset($files[$filename][$submitId]);
+                    if (count($files[$filename]) === 0) {
+                        unset($files[$filename]);
+                    }
                 }
             }
         }
 
-        $deletedFiles = [];
-        foreach ($otherSubmissions as $s) {
-            $submitId = $s->getSubmitid();
-            $sf = $otherFiles[$submitId];
-            if (count($files) === 1 && count($sf) === 1) {
-                continue;
-            }
-            foreach ($sf as $name => $file) {
-                if (!array_key_exists($name, $files)) {
-                    // TODO: note to self: rotated the key order s.t. we can iterate over deleted filenames in a.o. twig
-                    $deletedFiles[$name] ??= [];
-                    $deletedFiles[$name][$submitId] = $otherFiles[$submitId][$name];
-                }
-            }
-        }
-        dump($deletedFiles);
-
+        ksort($files);
         return $this->render('jury/submission_source.html.twig', [
             'submission' => $submission,
             'files' => $files,
@@ -954,8 +939,6 @@ class SubmissionController extends BaseController
             'originalSubmission' => $originalSubmission,
             'allowEdit' => $this->allowEdit(),
             'otherSubmissions' => $otherSubmissions,
-            'otherFiles' => $otherFiles,
-            'deletedFiles' => $deletedFiles,
         ]);
     }
 
