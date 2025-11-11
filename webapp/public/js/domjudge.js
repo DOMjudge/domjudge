@@ -1309,7 +1309,7 @@ const disableButton = (btn) => {
 }
 
 const editors = [];
-function initDiffEditor(editorId, deletedFiles) {
+function initDiffEditor(editorId) {
     const wrapper = $(`#${editorId}-wrapper`);
 
     const initialTag = getDiffTag();
@@ -1354,7 +1354,12 @@ function initDiffEditor(editorId, deletedFiles) {
         }
     };
     wrapper.find(".nav").on('show.bs.tab', (e) => {
-        updateTabRank(e.target.dataset.rank);
+        if (e.target.dataset.rank.length > 0) {
+            const rank = parseInt(e.target.dataset.rank);
+            updateTabRank(rank);
+        } else {
+            updateTabRank(undefined);
+        }
     })
 
     const editor = {
@@ -1405,9 +1410,25 @@ function initDiffEditor(editorId, deletedFiles) {
     editor.onDiffSelectChange(updateSelect);
 }
 
-function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
+function ensureModel(models, submitId) {
+    if (submitId in models) {
+        const model = models[submitId];
+        if (!('model' in model)) {
+            model['model'] = monaco.editor.createModel(
+                model['source'],
+                undefined,
+                monaco.Uri.file("diff/" + submitId + "/" + model['filename'])
+            );
+        }
+        return model['model'];
+    }
     const empty = monaco.editor.getModel(monaco.Uri.file("empty")) ?? monaco.editor.createModel("", undefined, monaco.Uri.file("empty"));
+    return empty;
+}
+
+function initDiffEditorTab(editorId, diffId, submissionId, models) {
     const navItem = document.getElementById(`${diffId}-link`);
+    const isDeleted = !(submissionId in models);
 
     const diffEditor = monaco.editor.createDiffEditor(
         document.getElementById(diffId), {
@@ -1458,24 +1479,15 @@ function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
 
     const updateSelect = (submitId, noDiff) => {
         const exists = submitId in models;
-        if (rank === undefined) {
-            document.getElementById(diffId).parentElement.style.display = exists ? 'block' : 'none';
-            navItem.style.display = exists ? 'block' : 'none';
+        if (isDeleted) {
+            document.getElementById(diffId).parentElement.style.display = exists ? '' : 'none';
+            navItem.style.display = exists ? '' : 'none';
             if (!exists) return;
         }
 
-        const model = models[submitId] ??= {'model': empty};
-        if (!noDiff) {
-            if (!model['model']) {
-                model['model'] = monaco.editor.createModel(model['source'], undefined, monaco.Uri.file("test/" + submitId + "/" + model['filename']));
-            }
-        }
-
-        if (noDiff || !model['renamedFrom']) {
-            renamedFrom(undefined);
-        } else {
-            renamedFrom(model['renamedFrom']);
-        }
+        const model = models[submitId];
+        const notRenamed = noDiff || !model || !model['renamedFrom'];
+        renamedFrom(notRenamed ? undefined : model['renamedFrom']);
 
         diffEditor.updateOptions({
             renderOverviewRuler: !noDiff,
@@ -1489,10 +1501,11 @@ function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
             updateMode(editors[editorId].getDiffMode())
         }
         const oldViewState = diffEditor.saveViewState();
-        diffEditor.setModel({
-            original: noDiff ? modifiedModel : models[submitId]['model'],
-            modified: modifiedModel,
-        });
+        const x = {
+            original: noDiff ? ensureModel(models, submissionId) : ensureModel(models, submitId),
+            modified: ensureModel(models, submissionId),
+        };
+        diffEditor.setModel(x);
         diffEditor.restoreViewState(oldViewState);
 
         diffEditor.getOriginalEditor().updateOptions({
@@ -1507,25 +1520,30 @@ function initDiffEditorTab(editorId, diffId, rank, models, modifiedModel) {
     editors[editorId].onDiffSelectChange(updateSelect);
     updateSelect(editors[editorId].getDiffSelection(), editors[editorId].getDiffSelection() === "");
 
+    const setIcon = (icon) => {
+        const element = navItem.querySelector('.fa-fw');
+        element.className = 'fas fa-fw fa-' + icon;
+    };
     const updateIcon = () => {
-        if (rank === undefined) return;
-        const update = (icon) => {
-            const element = navItem.querySelector('.fa-fw');
-            element.className = 'fas fa-fw fa-' + icon;
-        };
+        if (isDeleted) {
+            setIcon('file-circle-minus');
+            return;
+        }
+
+        const submitId = parseInt(editors[editorId].getDiffSelection());
         const noDiff = editors[editorId].getDiffSelection() === "";
         if (noDiff) {
-            update('file');
+            setIcon('file');
             return;
         }
 
         const lineChanges = diffEditor.getLineChanges();
-        if (diffEditor.getModel().original == empty) {
-            update('file-circle-plus');
+        if (!(submitId in models)) {
+            setIcon('file-circle-plus');
         } else if (lineChanges !== null && lineChanges.length > 0) {
-            update('file-circle-exclamation');
+            setIcon('file-circle-exclamation');
         } else {
-            update('file-circle-check');
+            setIcon('file-circle-check');
         }
     }
     diffEditor.onDidUpdateDiff(updateIcon);

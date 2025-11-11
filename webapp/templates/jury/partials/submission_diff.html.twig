@@ -2,19 +2,18 @@
 {# Mark the first tab that is shown as active. #}
 {% set extra_css_classes = "active" %}
 <ul class="nav nav-tabs source-tab-nav align-items-end">
-    {%- for file in files %}
-        {% set diff_id = "diff" ~ file.submitfileid %}
+    {%- for name, name_files in files %}
+        {% set diff_id = "diff-" ~ name %}
+        {% if name_files[submission.submitid] is defined %}        
+            {% set rank = name_files[submission.submitid].rank %}
+        {% else %}
+            {% set rank = null %}
+        {% endif %}
         <li class="nav-item">
-            <a id="{{ diff_id }}-link" class="nav-link {{ extra_css_classes }}" data-bs-toggle="tab" data-rank="{{ file.rank }}" href="#{{ diff_id }}-tab" role="tab"><i class="fas fa-fw fa-file"></i> {{ file.filename }}</a>
+            <a id="{{ diff_id }}-link" class="nav-link {{ extra_css_classes }}" data-bs-toggle="tab" data-rank="{{ rank }}" href="#{{ diff_id }}-tab" role="tab"><i class="fas fa-fw fa-file"></i> {{ name }}</a>
         </li>
         {% set extra_css_classes = "" %}
     {%- endfor %}
-    {%- for deletedName, _ in deletedFiles %}
-        {% set diff_id = "diff-deleted-" ~ deletedName %}
-        <li class="nav-item">
-            <a id="{{ diff_id }}-link" class="nav-link source-deleted" data-bs-toggle="tab" href="#{{ diff_id }}-tab" role="tab"><i class="fas fa-fw fa-file-circle-minus"></i> {{ deletedName }}</a>
-        </li>
-    {%- endfor -%}
 
             <li class="nav-item flex-grow-1 text-end mb-1">
                 <a class="download btn btn-secondary btn-sm"
@@ -56,27 +55,18 @@
 <script>
 $(() => {
     require(['vs/editor/editor.main'], () => {
-        const deletedFiles = {{ deletedFiles | json_encode | raw }};
-        initDiffEditor('{{ editor_id }}', deletedFiles);
+        initDiffEditor('{{ editor_id }}');
     });
 });
 </script>
 {% set extra_css_classes = "show active" %}
 <div class="tab-content source-tab">
-    {%- for file in files %}
-    {# TODO: rewrite s.t. files is also a nice array like otherFiles #}
-    {# TODO: allow null to showDiff work as deleted file #}
-        {% set diff_id = "diff" ~ file.submitfileid %}
+    {%- for name, name_files in files %}
+        {% set diff_id = "diff-" ~ name %}
         <div class="tab-pane fade {{ extra_css_classes }}" id="{{ diff_id }}-tab" role="tabpanel">
-            {{ showDiff(editor_id, diff_id, file, otherFiles) }}
+            {{ showDiff(editor_id, diff_id, submission.submitid, name, name_files) }}
         </div>
         {% set extra_css_classes = "" %}
-    {%- endfor %}
-    {%- for deletedName, deletedF in deletedFiles %}
-        {% set diff_id = "diff-deleted-" ~ deletedName %}
-        <div class="tab-pane fade source-deleted" id="{{ diff_id }}-tab" role="tabpanel">
-            {{ showDeleted(editor_id, diff_id, deletedName, deletedF) }}
-        </div>
     {%- endfor %}
 </div>
 </div>
