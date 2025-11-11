@@ -56,8 +56,7 @@ class TeamCategoryController extends BaseController
             ->groupBy('c.categoryid')
             ->getQuery()->getResult();
         $table_fields   = [
-            'categoryid' => ['title' => 'ID', 'sort' => true],
-            'externalid' => ['title' => 'external ID', 'sort' => true],
+            'externalid' => ['title' => 'ID', 'sort' => true],
             'icpcid' => ['title' => 'ICPC ID', 'sort' => true],
             'sortorder' => ['title' => 'sort', 'sort' => true, 'default_sort' => true],
             'name' => ['title' => 'name', 'sort' => true],
@@ -76,7 +75,7 @@ class TeamCategoryController extends BaseController
             $categorydata    = [];
             $categoryactions = [];
 
-            $this->addEntityCheckbox($categorydata, $teamCategory, $teamCategory->getCategoryid(), 'category-checkbox');
+            $this->addEntityCheckbox($categorydata, $teamCategory, $teamCategory->getExternalid(), 'category-checkbox');
 
             // Get whatever fields we can from the category object itself.
             foreach ($table_fields as $k => $v) {
@@ -90,14 +89,14 @@ class TeamCategoryController extends BaseController
                     'icon' => 'edit',
                     'title' => 'edit this category',
                     'link' => $this->generateUrl('jury_team_category_edit', [
-                        'categoryId' => $teamCategory->getCategoryid(),
+                        'categoryId' => $teamCategory->getExternalid(),
                     ])
                 ];
                 $categoryactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this category',
                     'link' => $this->generateUrl('jury_team_category_delete', [
-                        'categoryId' => $teamCategory->getCategoryid(),
+                        'categoryId' => $teamCategory->getExternalid(),
                     ]),
                     'ajaxModal' => true,
                 ];
@@ -110,7 +109,7 @@ class TeamCategoryController extends BaseController
             $team_categories_table[] = [
                 'data' => $categorydata,
                 'actions' => $categoryactions,
-                'link' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]),
+                'link' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getExternalid()]),
                 'style' => $teamCategory->getColor() ? sprintf('background-color: %s;', $teamCategory->getColor()) : '',
             ];
         }
@@ -127,7 +126,7 @@ class TeamCategoryController extends BaseController
     #[Route(path: '/{categoryId}', name: 'jury_team_category')]
     public function viewAction(Request $request, SubmissionService $submissionService, string $categoryId): Response
     {
-        $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
+        $teamCategory = $this->em->getRepository(TeamCategory::class)->findByExternalId($categoryId);
         if (!$teamCategory) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
@@ -147,7 +146,7 @@ class TeamCategoryController extends BaseController
             'showExternalResult' => $this->dj->shadowMode(),
             'refresh' => [
                 'after' => 15,
-                'url' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]),
+                'url' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getExternalid()]),
                 'ajax' => true,
             ],
         ];
@@ -162,10 +161,10 @@ class TeamCategoryController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{categoryId<\d+>}/edit', name: 'jury_team_category_edit')]
-    public function editAction(Request $request, int $categoryId): Response
+    #[Route(path: '/{categoryId}/edit', name: 'jury_team_category_edit')]
+    public function editAction(Request $request, string $categoryId): Response
     {
-        $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
+        $teamCategory = $this->em->getRepository(TeamCategory::class)->findByExternalId($categoryId);
         if (!$teamCategory) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
@@ -193,7 +192,7 @@ class TeamCategoryController extends BaseController
                 }
             }
             $this->addFlash('scoreboard_refresh', 'If the category sort order was changed, it may be necessary to recalculate any cached scoreboards.');
-            return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
+            return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getExternalid()]);
         }
 
         return $this->render('jury/team_category_edit.html.twig', [
@@ -203,10 +202,10 @@ class TeamCategoryController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{categoryId<\d+>}/delete', name: 'jury_team_category_delete')]
-    public function deleteAction(Request $request, int $categoryId): Response
+    #[Route(path: '/{categoryId}/delete', name: 'jury_team_category_delete')]
+    public function deleteAction(Request $request, string $categoryId): Response
     {
-        $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
+        $teamCategory = $this->em->getRepository(TeamCategory::class)->findByExternalId($categoryId);
         if (!$teamCategory) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
@@ -215,7 +214,7 @@ class TeamCategoryController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/add', name: 'jury_team_category_add')]
+    #[Route(path: '/add', name: 'jury_team_category_add', priority: 1)]
     public function addAction(Request $request): Response
     {
         $teamCategory = new TeamCategory();
@@ -226,7 +225,7 @@ class TeamCategoryController extends BaseController
 
         if ($response = $this->processAddFormForExternalIdEntity(
             $form, $teamCategory,
-            fn() => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()])
+            fn() => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getExternalid()])
         )) {
             return $response;
         }
@@ -237,19 +236,19 @@ class TeamCategoryController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/delete-multiple', name: 'jury_team_category_delete_multiple', methods: ['GET', 'POST'])]
+    #[Route(path: '/delete-multiple', name: 'jury_team_category_delete_multiple', methods: ['GET', 'POST'], priority: 1)]
     public function deleteMultipleAction(Request $request): Response
     {
         return $this->deleteMultiple(
             $request,
             TeamCategory::class,
-            'categoryid',
+            'externalid',
             'jury_team_categories',
             'No categories could be deleted.'
         );
     }
 
-    #[Route(path: '/{categoryId<\d+>}/request-remaining', name: 'jury_team_category_request_remaining')]
+    #[Route(path: '/{categoryId}/request-remaining', name: 'jury_team_category_request_remaining')]
     public function requestRemainingRunsWholeTeamCategoryAction(string $categoryId): RedirectResponse
     {
         $category = $this->em->getRepository(TeamCategory::class)->find($categoryId);
