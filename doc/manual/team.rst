@@ -54,9 +54,9 @@ become of importance when you run into problems.
    requests and replies is done through the web interface at
    |baseurlteam|.
 
-   Use the |problemseturlteam| page to get:
+   Use the |problemseturlteam| page to:
 
-     - all attachments such as 'testing tools' to problems,
+     - get all attachments such as 'testing tools' for each problem,
      - view the submission and acceptance ratio during the contest as an indicator of the difficulty of a problem,
      - get the problem statement and clarifications on those statements,
      - see the time & memory limits.
