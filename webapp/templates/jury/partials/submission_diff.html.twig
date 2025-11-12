@@ -31,14 +31,8 @@
                     <select class="diff-select btn btn-secondary btn-sm form-select-sm text-start" aria-label="Submission to diff against">
                         <option value="" data-tag="no-diff">No diff</option>
                         {%- for other in otherSubmissions %}
-                        {%- set tag = "" %}
-                        {%- if originalSubmission and originalSubmission.submitid == other.submitid %}
-                            {%- set tag = "original" %}
-                        {%- elseif oldSubmission and oldSubmission.submitid == other.submitid %}
-                            {%- set tag = "previous" %}
-                        {%- endif %}
-                        <option value="{{ other.submitid }}" {%- if tag %} data-tag="{{ tag }}" {%- endif %}>
-                            s{{ other.submitid }} {%- if tag %} ({{ tag }}) {%- endif %}
+                        <option value="{{ other.submitid }}" {%- if other.tag %} data-tag="{{ other.tag }}" {%- endif %}>
+                            s{{ other.submitid }} {%- if other.tag %} ({{ other.tag }}) {%- endif %}
                         </option>
                         {%- endfor %}
                     </select>
