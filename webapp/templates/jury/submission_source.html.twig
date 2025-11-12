@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-
+    {% set editor_id = "diffw" ~ submission.submitid %}
     <h1>
         Source code for submission
         <a href="{{ path('jury_submission', {submitId: submission.submitid}) }}">s{{ submission.submitid }}</a>
@@ -25,17 +25,15 @@
             )
         {% endif %}
 
-        {% if oldSubmission %}
-            and diff to previous submission
-            <a href="{{ path('jury_submission', {submitId: oldSubmission.submitid}) }}">
-                s{{ oldSubmission.submitid }}
-            </a>
-        {% endif %}
+        <span class="diff-title" id="{{editor_id}}-title-diff">
+            and diff to <span class="diff-tag"></span> submission
+            <a class="diff-link" href="#"></a>
+        </span>
     </h1>
 
     {%- if submission.entryPoint %}
         <p><b>Entry point</b>: {{ submission.entryPoint }}</p>
     {%- endif %}
 
-    {%- include 'jury/partials/submission_diff.html.twig' with {editor_id: "diffw" ~ submission.submitid} %}
+    {%- include 'jury/partials/submission_diff.html.twig' with {editor_id: editor_id} %}
 {% endblock %}
