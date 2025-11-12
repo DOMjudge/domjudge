@@ -1362,6 +1362,10 @@ function initDiffEditor(editorId) {
         }
     })
 
+    const diffTitle = document.getElementById(`${editorId}-title-diff`);
+    const diffTag = diffTitle.querySelector('span.diff-tag');
+    const diffLink = diffTitle.querySelector('a.diff-link');
+
     const editor = {
         'getDiffMode': () => {
             for (let radio of radios) {
@@ -1404,6 +1408,15 @@ function initDiffEditor(editorId) {
         const selected = select[0].options[select[0].selectedIndex];
         if (selected && selected.dataset.tag) {
             setDiffTag(selected.dataset.tag);
+        }
+
+        if (noDiff) {
+            diffTitle.style.display = 'none';
+        } else {
+            diffTitle.style.display = 'inline';
+            diffTag.innerText = selected.dataset.tag;
+            diffLink.href = selected.dataset.url;
+            diffLink.innerText = `s${submitId}`;
         }
     };
     updateSelect(parseInt(select[0].value), select[0].value === "");
