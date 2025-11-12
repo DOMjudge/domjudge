@@ -212,12 +212,14 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
         if ($contest !== null && $this->config->get('show_relative_time')) {
             $relativeTime = $contest->getContestTime((float)$datetime);
-            if ($relativeTime < 0 && $squash) {
-                return "Before contest";
-            }
-            if ($relativeTime > $contest->getContestTime($contest->getEndtime())) {
-                // The case where it would be exactly at EndTime is important to display
-                return "After contest";
+            if ($squash) {
+                if ($relativeTime < 0) {
+                    return "Before contest";
+                }
+                if ($relativeTime > $contest->getContestTime($contest->getEndtime())) {
+                    // The case where it would be exactly at EndTime is important to display
+                    return "After contest";
+                }
             }
             $sign         = ($relativeTime < 0 ? -1 : 1);
             $relativeTime *= $sign;
