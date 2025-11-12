@@ -830,7 +830,7 @@ class DOMJudgeService
         return $zipFileContents;
     }
 
-    protected function addSamplesToZip(?ZipArchive $zip, ContestProblem $problem, ?string $directory = null, bool $fullZip = true): bool
+    protected function addSamplesToZip(ZipArchive $zip, ContestProblem $problem, ?string $directory = null): void
     {
         /** @var Testcase[] $testcases */
         $testcases = $this->em->createQueryBuilder()
@@ -849,9 +849,6 @@ class DOMJudgeService
             ->getResult();
 
         foreach ($testcases as $index => $testcase) {
-            if (!$fullZip) {
-                return true;
-            }
             foreach (['input', 'output'] as $type) {
                 $extension = Testcase::EXTENSION_MAPPING[$type];
 
@@ -873,7 +870,6 @@ class DOMJudgeService
                 $zip->addFromString($filename, $content);
             }
         }
-        return false;
     }
 
     public function getSamplesZipStreamedResponse(ContestProblem $contestProblem): StreamedResponse
@@ -883,7 +879,7 @@ class DOMJudgeService
         return Utils::streamAsBinaryFile($zipFileContent, $outputFilename, 'zip');
     }
 
-    public function helperSamplesZipForContest(Contest $contest, bool $fullZip): StreamedResponse|bool
+    public function getSamplesZipForContest(Contest $contest): StreamedResponse
     {
         // Note, we reload the contest with the problems and attachments, to reduce the number of queries
         // We do not load the testcases here since addSamplesToZip loads them
@@ -900,42 +896,30 @@ class DOMJudgeService
             ->getQuery()
             ->getSingleResult();
 
-        $zip = null;
-        if ($fullZip) {
-            $zip = new ZipArchive();
-            if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "export-"))) {
-                throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
-            }
+        $zip = new ZipArchive();
+        if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "export-"))) {
+            throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
+        }
 
-            $res = $zip->open($tempFilename, ZipArchive::OVERWRITE);
-            if ($res !== true) {
-                throw new ServiceUnavailableHttpException(null, 'Could not create temporary zip file.');
-            }
+        $res = $zip->open($tempFilename, ZipArchive::OVERWRITE);
+        if ($res !== true) {
+            throw new ServiceUnavailableHttpException(null, 'Could not create temporary zip file.');
         }
 
         /** @var ContestProblem $problem */
         foreach ($contest->getProblems() as $problem) {
             // We don't include the samples for interactive problems.
             if (!$problem->getProblem()->isInteractiveProblem()) {
-                $samplesFound = $this->addSamplesToZip($zip, $problem, $problem->getShortname(), fullZip: $fullZip);;
-                if (!$fullZip && $samplesFound) {
-                    return true;
-                }
+                $this->addSamplesToZip($zip, $problem, $problem->getShortname());
             }
 
             if ($problem->getProblem()->getProblemstatementType()) {
-                if (!$fullZip) {
-                    return true;
-                }
                 $filename    = sprintf('%s/statement.%s', $problem->getShortname(), $problem->getProblem()->getProblemstatementType());
                 $zip->addFromString($filename, $problem->getProblem()->getProblemstatement());
             }
 
             /** @var ProblemAttachment $attachment */
             foreach ($problem->getProblem()->getAttachments() as $attachment) {
-                if (!$fullZip) {
-                    return true;
-                }
                 $filename = sprintf('%s/attachments/%s', $problem->getShortname(), $attachment->getName());
                 $zip->addFromString($filename, $attachment->getContent()->getContent());
                 if ($attachment->getContent()->isExecutable()) {
@@ -950,15 +934,8 @@ class DOMJudgeService
         }
 
         if ($contest->getContestProblemsetType()) {
-            if (!$fullZip) {
-                return true;
-            }
             $filename = sprintf('contest.%s', $contest->getContestProblemsetType());
             $zip->addFromString($filename, $contest->getContestProblemset());
-        }
-
-        if (!$fullZip) {
-            return false;
         }
 
         $zip->close();
@@ -966,16 +943,6 @@ class DOMJudgeService
         unlink($tempFilename);
 
         return Utils::streamAsBinaryFile($zipFileContents, 'samples.zip', 'zip');
-    }
-
-    public function checkIfSamplesZipForContest(Contest $contest): bool
-    {
-        return self::helperSamplesZipForContest($contest, fullZip: false);
-    }
-
-    public function getSamplesZipForContest(Contest $contest): StreamedResponse
-    {
-        return self::helperSamplesZipForContest($contest, fullZip: true);
     }
 
     /**
