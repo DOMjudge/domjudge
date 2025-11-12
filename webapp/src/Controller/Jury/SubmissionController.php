@@ -839,10 +839,18 @@ class SubmissionController extends BaseController
             return $response;
         }
 
+        /** @var array{
+         *      submitid: int,
+         *      tag?: string
+         * } otherSubmissions
+         */
         $otherSubmissions = [];
         $originalSubmission = $submission->getOriginalSubmission();
         if ($originalSubmission) {
-            $otherSubmissions[] = $originalSubmission;
+            $otherSubmissions[] = [
+                'submitid' => $originalSubmission->getSubmitid(),
+                'tag'      => 'original',
+            ];
             /** @var Submission $oldSubmission */
             $oldSubmission = $this->em->createQueryBuilder()
                 ->from(Submission::class, 's')
@@ -879,10 +887,13 @@ class SubmissionController extends BaseController
                 ->getOneOrNullResult();
         }
         if ($oldSubmission !== null) {
-            $otherSubmissions[] = $oldSubmission;
+            $otherSubmissions[] = [
+                'submitid' => $oldSubmission->getSubmitid(),
+                'tag'      => 'previous',
+            ];
         }
 
-        $files_query = array_map(fn($s) => $s->getSubmitid(), $otherSubmissions);
+        $files_query = array_map(fn($s) => $s['submitid'], $otherSubmissions);
         $files_query[] = $submission->getSubmitid();
         /** @var SubmissionFile[] $oldFiles */
         $oldFiles = $this->em->createQueryBuilder()
