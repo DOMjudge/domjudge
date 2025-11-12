@@ -1078,8 +1078,11 @@ class ScoreboardService
      * Get the scorecache used to calculate the scoreboard.
      * @return ScoreCache[]
      */
-    protected function getScorecache(Contest $contest, ?Team $team = null): array
+    protected function getScorecache(?Contest $contest, ?Team $team = null): array
     {
+        if (!$contest) {
+            return [];
+        }
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(ScoreCache::class, 's')
             ->select('s')
