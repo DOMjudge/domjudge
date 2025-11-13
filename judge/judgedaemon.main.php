@@ -463,10 +463,10 @@ function fetch_executable_internal(
                 }
                 switch ($execlang) {
                     case 'c':
-                        $buildscript .= "gcc -Wall -O2 -std=gnu11 $source -o run -lm\n";
+                        $buildscript .= "gcc -Wall -O2 -static -std=gnu11 $source -o run -lm\n";
                         break;
                     case 'cpp':
-                        $buildscript .= "g++ -Wall -O2 -std=gnu++20 $source -o run\n";
+                        $buildscript .= "g++ -Wall -O2 -static -std=gnu++20 $source -o run\n";
                         break;
                     case 'java':
                         $buildscript .= "javac -cp . -d . $source\n";
