@@ -11,9 +11,7 @@
         source files
     </h1>
 
-    {{ form_start(form) }}
-
-    <ul class="nav nav-tabs source-tab-nav">
+    <ul class="nav nav-tabs source-tab-nav align-items-end">
         {%- for file in files %}
 
             <li class="nav-item">
@@ -22,28 +20,38 @@
             </li>
         {%- endfor %}
 
+        <li class="nav-item flex-grow-1 text-end mb-1">
+            <a class="btn btn-success btn-sm" data-ajax-modal data-ajax-modal-after="transferSourceToModal" href="{{ path('jury_submission_edit_source', {submission: submission.submitid}) }}">
+                <i class="fas fa-cloud-upload-alt"></i> Submit
+            </a>
+        </li>
     </ul>
+
+    <script>
+    function transferSourceToModal(elem) {
+        const editors = monaco.editor.getEditors();
+        const idx = {{ files | keys | json_encode }}
+        for (let i = 0; i < editors.length; i++) {
+            const tab = editors[i].getDomNode().parentElement.parentElement;
+            const rank = tab.dataset.rank;
+            if (rank !== undefined && tab.id === `source-${rank}`) {
+                const input = $(`#form_source${rank}`);
+                input.val(editors[i].getValue());
+                // Hide the source in the modal
+                input.closest('div.mb-3').hide();
+            }
+        }
+    }
+    </script>
     <div class="tab-content source-tab">
         {%- for idx, file in files %}
 
             <div class="tab-pane fade {% if (selected is null and loop.first) or selected == file.rank %}show active{% endif %}"
-                 id="source-{{ file.rank }}" role="tabpanel">
-                {{ file.sourcecode | codeEditor(idx, submission.language.editorLanguage, true, 'form_source' ~ file.rank) }}
-                <script>
-                    $(function () {
-                        $('#form_source{{ file.rank }}').closest('div.mb-3').hide();
-                    });
-                </script>
+                 id="source-{{ file.rank }}" data-rank="{{ file.rank }}" role="tabpanel">
+                {{ file.sourcecode | codeEditor(idx, submission.language.editorLanguage, true) }}
             </div>
         {%- endfor %}
 
     </div>
-
-    <div class="row">
-        <div class="col-lg-4">
-            {{ form_widget(form) }}
-        </div>
-    </div>
-    {{ form_end(form) }}
 
 {% endblock %}

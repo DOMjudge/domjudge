@@ -979,8 +979,7 @@ class SubmissionController extends BaseController
             ->add('entry_point', TextType::class, [
                 'label' => 'Optional entry point',
                 'required' => false,
-            ])
-            ->add('submit', SubmitType::class);
+            ]);
 
         foreach ($files as $file) {
             $formBuilder->add('source' . $file->getRank(), TextareaType::class);
@@ -1039,12 +1038,17 @@ class SubmissionController extends BaseController
             return $this->redirectToRoute('jury_submission', ['submitId' => $submittedSubmission->getSubmitid()]);
         }
 
-        return $this->render('jury/submission_edit_source.html.twig', [
+        $twigData = [
             'submission' => $submission,
             'files' => $files,
             'form' => $form,
             'selected' => $rank,
-        ]);
+        ];
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('jury/submission_edit_source_modal.html.twig', $twigData);
+        } else {
+            return $this->render('jury/submission_edit_source.html.twig', $twigData);
+        }
     }
 
     /**
