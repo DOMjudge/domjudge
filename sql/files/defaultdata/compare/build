@@ -1,2 +1,2 @@
 #!/bin/sh
-g++ -std=c++11 -pedantic -g -O1 -Wall -fstack-protector -D_FORTIFY_SOURCE=2 -fPIE -Wformat -Wformat-security -fPIE -Wl,-z,relro -Wl,-z,now  compare.cc -o run
+g++ -std=c++11 -pedantic -g -O1 -static -Wall -fstack-protector -D_FORTIFY_SOURCE=2 -fPIE -Wformat -Wformat-security -fPIE -Wl,-z,relro -Wl,-z,now  compare.cc -o run
