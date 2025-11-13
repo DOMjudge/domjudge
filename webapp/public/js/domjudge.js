@@ -1290,3 +1290,11 @@ function initScoreboardSubmissions() {
         });
     });
 }
+
+function resizeEditors() {
+    // This function assumes that there is at most one tabbed editor in the screen.
+    const activeEditor = document.querySelector(".tab-pane.active .editor");
+    const height = $(window).height() - document.body.offsetHeight + activeEditor.clientHeight - 1 + "px";
+    $('.editor').height(height);
+}
+$(window).resize(resizeEditors);

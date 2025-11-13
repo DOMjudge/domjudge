@@ -883,6 +883,7 @@ $(function() {
         });
         %s
         %s
+        resizeEditors();
     });
 });
 </script>
@@ -1011,6 +1012,7 @@ $(function() {
             updateMode(e.target.value);
         });
         updateMode(initialDiffMode);
+        resizeEditors();
     });
 });
 </script>
