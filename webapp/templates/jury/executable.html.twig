@@ -42,6 +42,9 @@
                         {% elseif executable.type == 'run' and default_run == executable.execid %}
                             <em>default run</em>
                             {% set used = true %}
+                        {% elseif executable.type == 'debug' and default_full_debug == executable.execid %}
+                            <em>default full debug</em>
+                            {% set used = true %}
                         {% endif %}
                         {% if executable.type == 'compare' %}
                             {% for problem in executable.problemsCompare %}
