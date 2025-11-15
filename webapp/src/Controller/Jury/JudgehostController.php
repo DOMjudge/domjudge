@@ -4,6 +4,7 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
+use App\Entity\Executable;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
@@ -210,8 +211,19 @@ class JudgehostController extends BaseController
             return strnatcasecmp($a['data']['hostname']['value'], $b['data']['hostname']['value']);
         });
 
+        /** @var Executable[] $executables */
+        $executables      = $this->em->createQueryBuilder()
+            ->select('e as executable, e.execid as execid')
+            ->from(Executable::class, 'e')
+            ->addOrderBy('e.type', 'ASC')
+            ->addOrderBy('e.execid', 'ASC')
+            ->andWhere('e.type = :type')
+            ->setParameter('type', JudgeTaskType::GENERIC_TASK)
+            ->getQuery()->getResult();
+
         $data = [
             'judgehosts' => $judgehosts_table,
+            'executables' => $executables,
             'table_fields' => $table_fields,
             'all_checked_in_recently' => $all_checked_in_recently,
             'refresh' => [
@@ -278,7 +290,18 @@ class JudgehostController extends BaseController
                 ->getResult();
         }
 
+        /** @var Executable[] $executables */
+        $executables      = $this->em->createQueryBuilder()
+            ->select('e as executable, e.execid as execid')
+            ->from(Executable::class, 'e')
+            ->addOrderBy('e.type', 'ASC')
+            ->addOrderBy('e.execid', 'ASC')
+            ->andWhere('e.type = :type')
+            ->setParameter('type', JudgeTaskType::GENERIC_TASK)
+            ->getQuery()->getResult();
+
         $data = [
+            'executables' => $executables,
             'judgehost' => $judgehost,
             'status' => $status,
             'statusIcon' => $statusIcon,
@@ -296,10 +319,10 @@ class JudgehostController extends BaseController
         }
     }
 
-    private function helperGenericTask(int $execid, ?JudgeHost $judgehost = null): void {
+    private function helperGenericTask(string $execid, ?JudgeHost $judgehost = null): void {
         $executable = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $execid]);
         if (!$executable) {
-            throw new NotFoundHttpException(sprintf('Executable with ID %d not found', $execid));
+            throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execid));
         }
 
         $executable = $executable->getImmutableExecutable();
@@ -329,7 +352,7 @@ class JudgehostController extends BaseController
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{judgehostid}/request-generic-task/{execid}', name: 'jury_request_judgehost_generic')]
-    public function requestGenericTaskJudgehost(Request $request, int $judgehostid, int $execid): RedirectResponse
+    public function requestGenericTaskJudgehost(Request $request, int $judgehostid, string $execid): RedirectResponse
     {
         $judgehost = $this->em->getRepository(Judgehost::class)->find($judgehostid);
         if (!$judgehost) {
@@ -346,7 +369,7 @@ class JudgehostController extends BaseController
     // TODO: Does the ordering matter in the file.
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/request-generic-task/{execid}', name: 'jury_request_generic')]
-    public function requestGenericTask(Request $request, int $execid): RedirectResponse
+    public function requestGenericTask(Request $request, string $execid): RedirectResponse
     {
         $this->helperGenericTask($execid);
         return $this->redirectToRoute('jury_judgehost', [
