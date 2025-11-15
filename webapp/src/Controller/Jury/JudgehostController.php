@@ -296,6 +296,64 @@ class JudgehostController extends BaseController
         }
     }
 
+    private function helperGenericTask(int $execid, ?JudgeHost $judgehost = null): void {
+        $executable = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $execid]);
+        if (!$executable) {
+            throw new NotFoundHttpException(sprintf('Executable with ID %d not found', $execid));
+        }
+
+        $executable = $executable->getImmutableExecutable();
+
+        $judgehosts = [];
+        if ($judgehost) {
+            $judgehosts[] = $judgehost;
+        } else {
+            /** @var Judgehost[] $judgehosts */
+            $judgehosts = $this->em->createQueryBuilder()
+                ->from(Judgehost::class, 'j')
+                ->select('j')
+                ->andWhere('j.hidden = 0')
+                ->getQuery()->getResult();
+        }
+        foreach ($judgehosts as $judgehost) {
+            $judgeTask = new JudgeTask();
+            $judgeTask
+                ->setType(JudgeTaskType::GENERIC_TASK)
+                ->setPriority(JudgeTask::PRIORITY_HIGH)
+                ->setRunScriptId($executable->getImmutableExecId())
+                ->setRunConfig(Utils::jsonEncode(['hash' => $executable->getHash()]));
+            $this->em->persist($judgeTask);
+        }
+        $this->em->flush();
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{judgehostid}/request-generic-task/{execid}', name: 'jury_request_judgehost_generic')]
+    public function requestGenericTaskJudgehost(Request $request, int $judgehostid, int $execid): RedirectResponse
+    {
+        $judgehost = $this->em->getRepository(Judgehost::class)->find($judgehostid);
+        if (!$judgehost) {
+            throw new NotFoundHttpException(sprintf('Judgehost with ID %d not found', $judgehostid));
+        }
+
+        $this->helperGenericTask($execid, $judgehost);
+
+        return $this->redirectToRoute('jury_judgehost', [
+            'judgehostid' => $judgehostid
+        ]);
+    }
+
+    // TODO: Does the ordering matter in the file.
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/request-generic-task/{execid}', name: 'jury_request_generic')]
+    public function requestGenericTask(Request $request, int $execid): RedirectResponse
+    {
+        $this->helperGenericTask($execid);
+        return $this->redirectToRoute('jury_judgehost', [
+            'judgehostid' => $judgehostid
+        ]);
+    }
+
     /**
      * @throws DBALException
      * @throws NoResultException
