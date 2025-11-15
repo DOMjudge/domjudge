@@ -60,6 +60,9 @@ class ExecutableController extends BaseController
             ->addOrderBy('e.type', 'ASC')
             ->addOrderBy('e.execid', 'ASC')
             ->getQuery()->getResult();
+        // PhpStorm doesn't pick this up without,
+        // based on a dump this is `"c" => App\Entity\Executable`.
+        /** @var Executable[] $executables */
         $executables      = array_column($executables, 'executable', 'execid');
         $table_fields     = [
             'icon' => ['title' => 'type', 'sort' => false],
