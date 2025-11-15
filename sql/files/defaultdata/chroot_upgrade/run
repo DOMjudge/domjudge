@@ -1,0 +1,13 @@
+#!/bin/bash
+# This is an example to upgrade the chroot packages
+# The basic calling convention of these scripts is:
+#   ./script <working_dir> <output_file>
+
+output_file="$1"
+
+exec &>> "${output_file}"
+
+bin/dj_run_chroot "apt-get update" 
+bin/dj_run_chroot "apt-get full-upgrade -y"
+
+exit 0
