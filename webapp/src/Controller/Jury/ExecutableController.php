@@ -142,6 +142,9 @@ class ExecutableController extends BaseController
                 case 'debug':
                     $execdata['icon']['icon'] = 'bug';
                     break;
+                case 'generic_task':
+                    $execdata['icon']['icon'] = 'check-double';
+                    break;
                 case 'run':
                     $execdata['icon']['icon'] = 'person-running';
                     break;

@@ -23,10 +23,12 @@ class ExecutableFixture extends AbstractDefaultDataFixture
     {
         $data = [
             // ID,         description,               type
-            ['compare',    'default compare script',    'compare'],
-            ['full_debug', 'default full debug script', 'debug'],
-            ['java_javac', 'java_javac',                'compile'],
-            ['run',        'default run script',        'run'],
+            ['compare',        'default compare script',                  'compare'],
+            ['full_debug',     'default full debug script',               'debug'],
+            ['java_javac',     'java_javac',                              'compile'],
+            ['judgehost_info', 'generic information about the judgehost', 'generic_task'],
+            ['chroot_upgrade', 'upgrade chroot packages',                 'generic_task'],
+            ['run',            'default run script',                      'run'],
         ];
 
         foreach ($data as $item) {
