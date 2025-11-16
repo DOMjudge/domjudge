@@ -74,7 +74,7 @@ class JudgeDaemon
     {
         self::$instance = $this;
 
-        $this->options = getopt("dv:n:hVe:j:t:", ["diskspace-error"]);
+        $this->options = getopt("dv:n:hV", ["diskspace-error"]);
         if ($this->options === false) {
             echo "Error: parsing options failed.\n";
             $this->usage();
@@ -137,7 +137,7 @@ class JudgeDaemon
             $runuser .= '-' . $this->options['daemonid'];
         }
 
-        if ($runuser === posix_getpwuid(posix_geteuid())['name'] || 
+        if ($runuser === posix_getpwuid(posix_geteuid())['name'] ||
             RUNGROUP === posix_getgrgid(posix_getegid())['name']
         ) {
             error("Do not run the judgedaemon as the runuser or rungroup.");
@@ -197,41 +197,7 @@ class JudgeDaemon
 
         $this->initsignals();
 
-        $this->read_credentials();
-
-        if (!empty($this->options['e'])) {
-            $this->endpointID = $this->options['e'];
-            $endpoint = $this->endpoints[$this->endpointID];
-            $this->endpoints[$this->endpointID]['ch'] = $this->setup_curl_handle($endpoint['user'], $endpoint['pass']);
-            $new_judging_run = (array)dj_json_decode(base64_decode(file_get_contents($this->options['j'])));
-            $judgeTaskId = $this->options['t'];
-
-            $success = false;
-            for ($i = 0; $i < 5; $i++) {
-                if ($i > 0) {
-                    $sleep_ms = 100 + random_int(200, ($i + 1) * 1000);
-                    dj_sleep(0.001 * $sleep_ms);
-                }
-                $response = $this->request(
-                    sprintf('judgehosts/add-judging-run/%s/%s', $new_judging_run['hostname'],
-                        urlencode((string)$judgeTaskId)),
-                    'POST',
-                    $new_judging_run,
-                    false
-                );
-                if ($response !== null) {
-                    logmsg(LOG_DEBUG, "Adding judging run result for jt$judgeTaskId successful.");
-                    $success = true;
-                    break;
-                }
-                logmsg(LOG_WARNING, "Failed to report jt$judgeTaskId in attempt #" . ($i + 1) . ".");
-            }
-            if (!$success) {
-                error("Final attempt of uploading jt$judgeTaskId was unsuccessful, giving up.");
-            }
-            unlink($this->options['j']);
-            exit(0);
-        }
+        $this->readCredentials();
     }
 
     public function run(): void
@@ -313,6 +279,12 @@ class JudgeDaemon
             // Check whether we have received an exit signal
             if (function_exists('pcntl_signal_dispatch')) {
                 pcntl_signal_dispatch();
+            }
+            if (function_exists('pcntl_waitpid')) {
+                // Reap any finished child processes.
+                while (pcntl_waitpid(-1, $status, WNOHANG) > 0) {
+                    // Do nothing.
+                }
             }
             if ($this->exitsignalled) {
                 logmsg(LOG_NOTICE, "Received signal, exiting.");
@@ -647,7 +619,7 @@ class JudgeDaemon
             . $judgeTask['jobid'];
     }
 
-    private function read_credentials(): void
+    private function readCredentials(): void
     {
         $credfile = ETCDIR . '/restapi.secret';
         if (!is_readable($credfile)) {
@@ -1127,7 +1099,7 @@ class JudgeDaemon
             foreach ($unfinished as $jud) {
                 $workdir = $this->judging_directory($workdirpath, $jud);
                 @chmod($workdir, 0700);
-                logmsg(LOG_WARNING, "Found unfinished judging with jobid " . $jud['jobid'] . 
+                logmsg(LOG_WARNING, "Found unfinished judging with jobid " . $jud['jobid'] .
                     " in my name; given back unfinished runs from me.");
             }
         }
@@ -1655,27 +1627,12 @@ class JudgeDaemon
 
         $ret = true;
         if ($result === 'correct') {
-            // Post result back asynchronously. PHP is lacking multi-threading, so
-            // we just call ourselves again.
-            $tmpfile = tempnam(TMPDIR, 'judging_run_');
-            file_put_contents($tmpfile, base64_encode(dj_json_encode($new_judging_run)));
-            $judgedaemon = BINDIR . '/judgedaemon';
-            $cmd = $judgedaemon
-                . ' -e ' . $this->endpointID
-                . ' -t ' . $judgeTask['judgetaskid']
-                . ' -j ' . $tmpfile
-                . ' >> /dev/null & ';
-            shell_exec($cmd);
+            // Correct results get reported asynchronously, so we can continue judging in parallel.
+            $this->reportJudgingRun($judgeTask, $new_judging_run, asynchronous: true);
         } else {
             // This run was incorrect, only continue with the remaining judge tasks
             // if we are told to do so.
-            $needsMoreWork = $this->request(
-                sprintf('judgehosts/add-judging-run/%s/%s', urlencode($this->myhost),
-                    urlencode((string)$judgeTask['judgetaskid'])),
-                'POST',
-                $new_judging_run,
-                false
-            );
+            $needsMoreWork = $this->reportJudgingRun($judgeTask, $new_judging_run, asynchronous: false);
             $ret = (bool)$needsMoreWork;
         }
 
@@ -1687,6 +1644,75 @@ class JudgeDaemon
 
         // done!
         return $ret;
+    }
+
+    private function reportJudgingRun(array $judgeTask, array $new_judging_run, bool $asynchronous): ?string
+    {
+        $judgeTaskId = $judgeTask['judgetaskid'];
+
+        if ($asynchronous && function_exists('pcntl_fork')) {
+            $pid = pcntl_fork();
+            if ($pid === -1) {
+                logmsg(LOG_WARNING, "Could not fork to report result for jt$judgeTaskId asynchronously, reporting synchronously.");
+                // Fallback to synchronous reporting by continuing in this process.
+            } elseif ($pid > 0) {
+                // Parent process, nothing more to do here.
+                logmsg(LOG_DEBUG, "Forked a child with PID $pid to report judging run for jt$judgeTaskId.");
+                return null;
+            } else {
+                // Child process: reset signal handlers to default.
+                pcntl_signal(SIGTERM, SIG_DFL);
+                pcntl_signal(SIGINT, SIG_DFL);
+                pcntl_signal(SIGHUP, SIG_DFL);
+                pcntl_signal(SIGUSR1, SIG_DFL);
+
+                // The child should use its own curl handle to avoid issues with sharing handles
+                // between processes.
+                $endpoint = $this->endpoints[$this->endpointID];
+                $this->endpoints[$this->endpointID]['ch'] = $this->setup_curl_handle($endpoint['user'], $endpoint['pass']);
+            }
+        } elseif ($asynchronous) {
+            logmsg(LOG_WARNING, "pcntl extension not available, reporting result for jt$judgeTaskId synchronously.");
+        }
+
+        $isChild = isset($pid) && $pid === 0;
+
+        $success = false;
+        for ($i = 0; $i < 5; $i++) {
+            if ($i > 0) {
+                $sleep_ms = 100 + random_int(200, ($i + 1) * 1000);
+                dj_sleep(0.001 * $sleep_ms);
+            }
+            $response = $this->request(
+                sprintf('judgehosts/add-judging-run/%s/%s', $new_judging_run['hostname'],
+                    urlencode((string)$judgeTaskId)),
+                'POST',
+                $new_judging_run,
+                false
+            );
+            if ($response !== null) {
+                logmsg(LOG_DEBUG, "Adding judging run result for jt$judgeTaskId successful.");
+                $success = true;
+                break;
+            }
+            logmsg(LOG_WARNING, "Failed to report jt$judgeTaskId in attempt #" . ($i + 1) . ".");
+        }
+
+        if (!$success) {
+            $message = "Final attempt of uploading jt$judgeTaskId was unsuccessful, giving up.";
+            if ($isChild) {
+                error($message);
+            } else {
+                warning($message);
+                return null;
+            }
+        }
+
+        if ($isChild) {
+            exit(0);
+        }
+
+        return $response;
     }
 
     private function fetchTestcase(string $workdirpath, string $testcase_id, int $judgetaskid, string $testcase_hash): ?array
