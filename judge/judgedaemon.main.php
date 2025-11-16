@@ -236,6 +236,15 @@ class JudgeDaemon
 
     public function run(): void
     {
+        $this->initialize();
+
+        // Constantly check API for outstanding judgetasks, cycling through all
+        // configured endpoints.
+        $this->loop();
+    }
+
+    private function initialize(): void
+    {
         // Set umask to allow group and other access, as this is needed for the
         // unprivileged user.
         umask(0022);
@@ -269,9 +278,10 @@ class JudgeDaemon
                 $this->langexts[$id] = $language['extensions'];
             }
         }
+    }
 
-        // Constantly check API for outstanding judgetasks, cycling through all
-        // configured endpoints.
+    private function loop(): void
+    {
         $endpointIDs = array_keys($this->endpoints);
         $currentEndpoint = 0;
         $lastWorkdir = null;
@@ -317,57 +327,18 @@ class JudgeDaemon
 
 
             if ($this->endpoints[$this->endpointID]['waiting'] === false) {
-                // Check for available disk space
-                $free_space = disk_free_space(JUDGEDIR);
-                $allowed_free_space = $this->djconfig_get_value('diskspace_error'); // in kB
-                if ($free_space < 1024 * $allowed_free_space) {
-                    $after = disk_free_space(JUDGEDIR);
-                    if (!isset($this->options['diskspace-error'])) {
-                        $candidateDirs = [];
-                        foreach (scandir($workdirpath) as $subdir) {
-                            if (is_numeric($subdir) && is_dir(($workdirpath . "/" . $subdir))) {
-                                $candidateDirs[] = $workdirpath . "/" . $subdir;
-                            }
-                        }
-                        uasort($candidateDirs, fn($a, $b) => filemtime($a) <=> filemtime($b));
-                        $after = $before = disk_free_space(JUDGEDIR);
-                        logmsg(LOG_INFO,
-                            "🗑 Low on diskspace, cleaning up (" . count($candidateDirs) . " potential candidates).");
-                        $cnt = 0;
-                        foreach ($candidateDirs as $d) {
-                            $cnt++;
-                            logmsg(LOG_INFO, "  - deleting $d");
-                            if (!$this->run_command_safe(['rm', '-rf', $d])) {
-                                logmsg(LOG_WARNING, "Deleting '$d' was unsuccessful.");
-                            }
-                            $after = disk_free_space(JUDGEDIR);
-                            if ($after >= 1024 * $allowed_free_space) {
-                                break;
-                            }
-                        }
-                        logmsg(LOG_INFO, "🗑 Cleaned up $cnt old judging directories; reduced disk space by " .
-                            sprintf("%01.2fMB.", ($after - $before) / (1024 * 1024))
-                        );
-                    }
-                    if ($after < 1024 * $allowed_free_space) {
-                        $free_abs = sprintf("%01.2fGB", $after / (1024 * 1024 * 1024));
-                        logmsg(LOG_ERR, "Low on disk space: $free_abs free, clean up or " .
-                            "change 'diskspace error' value in config before resolving this error.");
-
-                        $this->disable('judgehost', 'hostname', $this->myhost, "low on disk space on $this->myhost");
-                    }
-                }
+                $this->checkDiskSpace($workdirpath);
             }
 
             // Request open judge tasks to be executed.
             // Any errors will be treated as non-fatal: we will just keep on retrying in this loop.
-            $row = [];
-            $judging = $this->request('judgehosts/fetch-work', 'POST', ['hostname' => $this->myhost], false);
+            $row = $this->fetchWork();
+
             // If $judging is null, an error occurred; we marked the endpoint already as errorred above.
-            if (is_null($judging)) {
+            if (is_null($row)) {
                 continue;
             } else {
-                $row = dj_json_decode($judging);
+                $row = dj_json_decode($row);
             }
 
             // Nothing returned -> no open work for us.
@@ -395,196 +366,272 @@ class JudgeDaemon
             $this->endpoints[$this->endpointID]["waiting"] = false;
 
             // All tasks are guaranteed to be of the same type.
+            // If $row is empty, we already continued.
+            // If $row[0] is not set, or $row[0]['type'] is not set, something is wrong.
+            if (!isset($row[0]['type'])) {
+                logmsg(LOG_ERR, "Received work packet with invalid format: 'type' not found in first element.");
+                continue;
+            }
             $type = $row[0]['type'];
 
-            if ($type == 'try_again') {
-                if (!$this->endpoints[$this->endpointID]['retrying']) {
-                    logmsg(LOG_INFO, "API indicated to retry fetching work (this might take a while to clean up).");
-                }
-                $this->endpoints[$this->endpointID]['retrying'] = true;
-                continue;
-            }
-            $this->endpoints[$this->endpointID]['retrying'] = false;
+            $this->handleTask($type, $row, $lastWorkdir, $workdirpath);
+        }
+    }
 
-            logmsg(LOG_INFO,
-                "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint $this->endpointID)");
+    private function handleJudgingTask(array $row, ?string &$lastWorkdir, string $workdirpath, string $workdir): void
+    {
+        $success_file = "$workdir/.uuid_pid";
+        $expected_uuid_pid = $row[0]['uuid'] . '_' . (string)getmypid();
 
-            if ($type == 'prefetch') {
-                if ($lastWorkdir !== null) {
-                    $this->cleanup_judging($lastWorkdir);
-                    $lastWorkdir = null;
+        $needs_cleanup = false;
+        if ($lastWorkdir !== $workdir) {
+            // Switching between workdirs requires cleanup.
+            $needs_cleanup = true;
+        }
+        if (file_exists($workdir)) {
+            // If the workdir still exists we need to check whether it may be a left-over from a previous database.
+            // If that is the case, we need to rename it and potentially clean up.
+            if (file_exists($success_file)) {
+                $old_uuid_pid = file_get_contents($success_file);
+                if ($old_uuid_pid !== $expected_uuid_pid) {
+                    $needs_cleanup = true;
+                    unlink($success_file);
                 }
-                foreach ($row as $judgeTask) {
-                    foreach (['compile', 'run', 'compare'] as $script_type) {
-                        if (!empty($judgeTask[$script_type . '_script_id']) && !empty($judgeTask[$script_type . '_config'])) {
-                            $config = dj_json_decode($judgeTask[$script_type . '_config']);
-                            $combined_run_compare = $script_type == 'run' && ($config['combined_run_compare'] ?? false);
-                            if (!empty($config['hash'])) {
-                                [$execrunpath, $error] = $this->fetch_executable(
-                                    $workdirpath,
-                                    $script_type,
-                                    $judgeTask[$script_type . '_script_id'],
-                                    $config['hash'],
-                                    $judgeTask['judgetaskid'],
-                                    $combined_run_compare
-                                );
-                            }
-                        }
-                    }
-                    if (!empty($judgeTask['testcase_id'])) {
-                        $this->fetchTestcase($workdirpath, $judgeTask['testcase_id'], $judgeTask['judgetaskid'], $judgeTask['testcase_hash']);
-                    }
-                }
-                logmsg(LOG_INFO, "  🔥 Pre-heating judgehost completed.");
-                continue;
+            } else {
+                $old_uuid_pid = 'n/a';
+                $needs_cleanup = true;
             }
 
-            // Create workdir for judging.
+            // Either the file didn't exist or we deleted it above.
+            if (!file_exists($success_file)) {
+                $oldworkdir = $workdir . '-old-' . getmypid() . '-' . date('Y-m-d_H:i');
+                if (!rename($workdir, $oldworkdir)) {
+                    error("Could not rename stale working directory to '$oldworkdir'.");
+                }
+                @chmod($oldworkdir, 0700);
+                warning("Found stale working directory; renamed to '$oldworkdir'.");
+            }
+        }
+
+        if ($needs_cleanup && $lastWorkdir !== null) {
+            $this->cleanup_judging($lastWorkdir);
+            $lastWorkdir = null;
+        }
+
+
+        if (!$this->run_command_safe(['mkdir', '-p', "$workdir/compile"])) {
+            error("Could not create '$workdir/compile'");
+        }
+
+        chmod($workdir, 0755);
+
+        if (!chdir($workdir)) {
+            error("Could not chdir to '$workdir'");
+        }
+
+        if ($lastWorkdir !== $workdir) {
+            // create chroot environment
+            logmsg(LOG_INFO, "  🔒 Executing chroot script: '" . self::CHROOT_SCRIPT . " start'");
+            if (!$this->run_command_safe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'start'], $retval)) {
+                logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
+                $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
+                return;
+            }
+
+            // Refresh config at start of each batch.
+            $this->djconfig_refresh();
+
+            $lastWorkdir = $workdir;
+        }
+
+        // Make sure the workdir is accessible for the domjudge-run user.
+        // Will be revoked again after this run finished.
+        foreach ($row as $judgetask) {
+            if (!$this->compile_and_run_submission($judgetask, $workdirpath)) {
+                // Potentially return remaining outstanding judgetasks here.
+                $returnedJudgings = $this->request('judgehosts', 'POST', ['hostname' => urlencode($this->myhost)], false);
+                if ($returnedJudgings !== null) {
+                    $returnedJudgings = dj_json_decode($returnedJudgings);
+                    foreach ($returnedJudgings as $jud) {
+                        $workdir = $this->judging_directory($workdirpath, $jud);
+                        @chmod($workdir, 0700);
+                        logmsg(LOG_WARNING, "  🔙 Returned unfinished judging with jobid " . $jud['jobid'] .
+                            " in my name; given back unfinished runs from me.");
+                    }
+                }
+                break;
+            }
+        }
+
+        file_put_contents($success_file, $expected_uuid_pid);
+
+        // Check if we were interrupted while judging, if so, exit (to avoid sleeping)
+        if ($this->exitsignalled) {
+            logmsg(LOG_NOTICE, "Received signal, exiting.");
+            $this->close_curl_handles();
+            fclose($this->lockfile);
+            exit;
+        }
+    }
+
+    private function handleDebugInfoTask(array $row, ?string &$lastWorkdir, string $workdirpath, string $workdir): void
+    {
+        if ($lastWorkdir !== null) {
+            $this->cleanup_judging($lastWorkdir);
+            $lastWorkdir = null;
+        }
+        foreach ($row as $judgeTask) {
+            if (isset($judgeTask['run_script_id'])) {
+                // Full debug package requested.
+                $run_config = dj_json_decode($judgeTask['run_config']);
+                $tmpfile = tempnam(TMPDIR, 'full_debug_package_');
+                [$runpath, $error] = $this->fetch_executable(
+                    $workdirpath,
+                    'debug',
+                    $judgeTask['run_script_id'],
+                    $run_config['hash'],
+                    $judgeTask['judgetaskid']
+                );
+
+                if (!$this->run_command_safe([$runpath, $workdir, $tmpfile])) {
+                    $this->disable('run_script', 'run_script_id', $judgeTask['run_script_id'], "Running '$runpath' failed.");
+                }
+
+                $this->request(
+                    sprintf('judgehosts/add-debug-info/%s/%s', urlencode($this->myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])),
+                    'POST',
+                    ['full_debug' => $this->rest_encode_file($tmpfile, false)],
+                    false
+                );
+                unlink($tmpfile);
+
+                logmsg(LOG_INFO, "  ⇡ Uploading debug package of workdir $workdir.");
+            } else {
+                // Retrieving full team output for a particular testcase.
+                $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
+                $this->request(
+                    sprintf('judgehosts/add-debug-info/%s/%s', urlencode($this->myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])),
+                    'POST',
+                    ['output_run' => $this->rest_encode_file($testcasedir . '/program.out', false)],
+                    false
+                );
+                logmsg(LOG_INFO, "  ⇡ Uploading full output of testcase $judgeTask[testcase_id].");
+            }
+        }
+    }
+
+    private function handlePrefetchTask(array $row, ?string &$lastWorkdir, string $workdirpath): void
+    {
+        if ($lastWorkdir !== null) {
+            $this->cleanup_judging($lastWorkdir);
+            $lastWorkdir = null;
+        }
+        foreach ($row as $judgeTask) {
+            foreach (['compile', 'run', 'compare'] as $script_type) {
+                if (!empty($judgeTask[$script_type . '_script_id']) && !empty($judgeTask[$script_type . '_config'])) {
+                    $config = dj_json_decode($judgeTask[$script_type . '_config']);
+                    $combined_run_compare = $script_type == 'run' && ($config['combined_run_compare'] ?? false);
+                    if (!empty($config['hash'])) {
+                        [$execrunpath, $error] = $this->fetch_executable(
+                            $workdirpath,
+                            $script_type,
+                            $judgeTask[$script_type . '_script_id'],
+                            $config['hash'],
+                            $judgeTask['judgetaskid'],
+                            $combined_run_compare
+                        );
+                    }
+                }
+            }
+            if (!empty($judgeTask['testcase_id'])) {
+                $this->fetchTestcase($workdirpath, $judgeTask['testcase_id'], $judgeTask['judgetaskid'], $judgeTask['testcase_hash']);
+            }
+        }
+        logmsg(LOG_INFO, "  🔥 Pre-heating judgehost completed.");
+    }
+
+    private function handleTask(string $type, array $row, ?string &$lastWorkdir, string $workdirpath): void
+    {
+        if ($type == 'try_again') {
+            if (!$this->endpoints[$this->endpointID]['retrying']) {
+                logmsg(LOG_INFO, "API indicated to retry fetching work (this might take a while to clean up).");
+            }
+            $this->endpoints[$this->endpointID]['retrying'] = true;
+            return;
+        }
+        $this->endpoints[$this->endpointID]['retrying'] = false;
+
+        logmsg(LOG_INFO,
+            "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint $this->endpointID)");
+
+        if ($type == 'prefetch') {
+            $this->handlePrefetchTask($row, $lastWorkdir, $workdirpath);
+            return;
+        }
+
+        if ($type == 'debug_info') {
+            // Create workdir for debugging only if needed.
             $workdir = $this->judging_directory($workdirpath, $row[0]);
             logmsg(LOG_INFO, "  Working directory: $workdir");
 
-            if ($type == 'debug_info') {
-                if ($lastWorkdir !== null) {
-                    $this->cleanup_judging($lastWorkdir);
-                    $lastWorkdir = null;
-                }
-                foreach ($row as $judgeTask) {
-                    if (isset($judgeTask['run_script_id'])) {
-                        // Full debug package requested.
-                        $run_config = dj_json_decode($judgeTask['run_config']);
-                        $tmpfile = tempnam(TMPDIR, 'full_debug_package_');
-                        [$runpath, $error] = $this->fetch_executable(
-                            $workdirpath,
-                            'debug',
-                            $judgeTask['run_script_id'],
-                            $run_config['hash'],
-                            $judgeTask['judgetaskid']
-                        );
+            $this->handleDebugInfoTask($row, $lastWorkdir, $workdirpath, $workdir);
+            return;
+        }
 
-                        if (!$this->run_command_safe([$runpath, $workdir, $tmpfile])) {
-                            $this->disable('run_script', 'run_script_id', $judgeTask['run_script_id'], "Running '$runpath' failed.");
-                        }
+        // Create workdir for judging.
+        $workdir = $this->judging_directory($workdirpath, $row[0]);
+        logmsg(LOG_INFO, "  Working directory: $workdir");
+        $this->handleJudgingTask($row, $lastWorkdir, $workdirpath, $workdir);
+    }
 
-                        $this->request(
-                            sprintf('judgehosts/add-debug-info/%s/%s', urlencode($this->myhost),
-                                urlencode((string)$judgeTask['judgetaskid'])),
-                            'POST',
-                            ['full_debug' => $this->rest_encode_file($tmpfile, false)],
-                            false
-                        );
-                        unlink($tmpfile);
+    private function fetchWork()
+    {
+        return $this->request('judgehosts/fetch-work', 'POST', ['hostname' => $this->myhost], false);
+    }
 
-                        logmsg(LOG_INFO, "  ⇡ Uploading debug package of workdir $workdir.");
-                    } else {
-                        // Retrieving full team output for a particular testcase.
-                        $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
-                        $this->request(
-                            sprintf('judgehosts/add-debug-info/%s/%s', urlencode($this->myhost),
-                                urlencode((string)$judgeTask['judgetaskid'])),
-                            'POST',
-                            ['output_run' => $this->rest_encode_file($testcasedir . '/program.out', false)],
-                            false
-                        );
-                        logmsg(LOG_INFO, "  ⇡ Uploading full output of testcase $judgeTask[testcase_id].");
+    private function checkDiskSpace(string $workdirpath): void
+    {
+        // Check for available disk space
+        $free_space = disk_free_space(JUDGEDIR);
+        $allowed_free_space = $this->djconfig_get_value('diskspace_error'); // in kB
+        if ($free_space < 1024 * $allowed_free_space) {
+            $after = disk_free_space(JUDGEDIR);
+            if (!isset($this->options['diskspace-error'])) {
+                $candidateDirs = [];
+                foreach (scandir($workdirpath) as $subdir) {
+                    if (is_numeric($subdir) && is_dir(($workdirpath . "/" . $subdir))) {
+                        $candidateDirs[] = $workdirpath . "/" . $subdir;
                     }
                 }
-                continue;
-            }
-
-            $success_file = "$workdir/.uuid_pid";
-            $expected_uuid_pid = $row[0]['uuid'] . '_' . (string)getmypid();
-
-            $needs_cleanup = false;
-            if ($lastWorkdir !== $workdir) {
-                // Switching between workdirs requires cleanup.
-                $needs_cleanup = true;
-            }
-            if (file_exists($workdir)) {
-                // If the workdir still exists we need to check whether it may be a left-over from a previous database.
-                // If that is the case, we need to rename it and potentially clean up.
-                if (file_exists($success_file)) {
-                    $old_uuid_pid = file_get_contents($success_file);
-                    if ($old_uuid_pid !== $expected_uuid_pid) {
-                        $needs_cleanup = true;
-                        unlink($success_file);
+                uasort($candidateDirs, fn($a, $b) => filemtime($a) <=> filemtime($b));
+                $after = $before = disk_free_space(JUDGEDIR);
+                logmsg(LOG_INFO,
+                    "🗑 Low on diskspace, cleaning up (" . count($candidateDirs) . " potential candidates).");
+                $cnt = 0;
+                foreach ($candidateDirs as $d) {
+                    $cnt++;
+                    logmsg(LOG_INFO, "  - deleting $d");
+                    if (!$this->run_command_safe(['rm', '-rf', $d])) {
+                        logmsg(LOG_WARNING, "Deleting '$d' was unsuccessful.");
                     }
-                } else {
-                    $old_uuid_pid = 'n/a';
-                    $needs_cleanup = true;
-                }
-
-                // Either the file didn't exist or we deleted it above.
-                if (!file_exists($success_file)) {
-                    $oldworkdir = $workdir . '-old-' . getmypid() . '-' . date('Y-m-d_H:i');
-                    if (!rename($workdir, $oldworkdir)) {
-                        error("Could not rename stale working directory to '$oldworkdir'.");
+                    $after = disk_free_space(JUDGEDIR);
+                    if ($after >= 1024 * $allowed_free_space) {
+                        break;
                     }
-                    @chmod($oldworkdir, 0700);
-                    warning("Found stale working directory; renamed to '$oldworkdir'.");
                 }
+                logmsg(LOG_INFO, "🗑 Cleaned up $cnt old judging directories; reduced disk space by " .
+                    sprintf("%01.2fMB.", ($after - $before) / (1024 * 1024))
+                );
             }
+            if ($after < 1024 * $allowed_free_space) {
+                $free_abs = sprintf("%01.2fGB", $after / (1024 * 1024 * 1024));
+                logmsg(LOG_ERR, "Low on disk space: $free_abs free, clean up or " .
+                    "change 'diskspace error' value in config before resolving this error.");
 
-            if ($needs_cleanup && $lastWorkdir !== null) {
-                $this->cleanup_judging($lastWorkdir);
-                $lastWorkdir = null;
+                $this->disable('judgehost', 'hostname', $this->myhost, "low on disk space on $this->myhost");
             }
-
-
-            if (!$this->run_command_safe(['mkdir', '-p', "$workdir/compile"])) {
-                error("Could not create '$workdir/compile'");
-            }
-
-            chmod($workdir, 0755);
-
-            if (!chdir($workdir)) {
-                error("Could not chdir to '$workdir'");
-            }
-
-            if ($lastWorkdir !== $workdir) {
-                // create chroot environment
-                logmsg(LOG_INFO, "  🔒 Executing chroot script: '" . self::CHROOT_SCRIPT . " start'");
-                if (!$this->run_command_safe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'start'], $retval)) {
-                    logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
-                    $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
-                    continue;
-                }
-
-                // Refresh config at start of each batch.
-                $this->djconfig_refresh();
-
-                $lastWorkdir = $workdir;
-            }
-
-            // Make sure the workdir is accessible for the domjudge-run user.
-            // Will be revoked again after this run finished.
-            foreach ($row as $judgetask) {
-                if (!$this->judge($judgetask, $workdirpath)) {
-                    // Potentially return remaining outstanding judgetasks here.
-                    $returnedJudgings = $this->request('judgehosts', 'POST', ['hostname' => urlencode($this->myhost)], false);
-                    if ($returnedJudgings !== null) {
-                        $returnedJudgings = dj_json_decode($returnedJudgings);
-                        foreach ($returnedJudgings as $jud) {
-                            $workdir = $this->judging_directory($workdirpath, $jud);
-                            @chmod($workdir, 0700);
-                            logmsg(LOG_WARNING, "  🔙 Returned unfinished judging with jobid " . $jud['jobid'] . 
-                                " in my name; given back unfinished runs from me.");
-                        }
-                    }
-                    break;
-                }
-            }
-
-            file_put_contents($success_file, $expected_uuid_pid);
-
-            // Check if we were interrupted while judging, if so, exit (to avoid sleeping)
-            if ($this->exitsignalled) {
-                logmsg(LOG_NOTICE, "Received signal, exiting.");
-                $this->close_curl_handles();
-                fclose($this->lockfile);
-                exit;
-            }
-
-            // restart the judging loop
         }
     }
 
@@ -1350,7 +1397,7 @@ class JudgeDaemon
         return true;
     }
 
-    private function judge(array $judgeTask, string $workdirpath): bool
+    private function compile_and_run_submission(array $judgeTask, string $workdirpath): bool
     {
         $startTime = microtime(true);
 
@@ -1401,12 +1448,25 @@ class JudgeDaemon
             $unfinished = $this->request('judgehosts', 'POST', ['hostname' => urlencode($this->myhost)]);
             $unfinished = dj_json_decode($unfinished);
             foreach ($unfinished as $jud) {
-                logmsg(LOG_WARNING, "Aborted judging task " . $jud['judgetaskid'] . 
+                logmsg(LOG_WARNING, "Aborted judging task " . $jud['judgetaskid'] .
                     " due to signal");
             }
             return false;
         }
 
+        return $this->run_testcase($judgeTask, $workdir, $workdirpath, $run_config, $compare_config, $output_storage_limit, $overshoot, $startTime);
+    }
+
+    private function run_testcase(
+        array $judgeTask,
+        string $workdir,
+        string $workdirpath,
+        array $run_config,
+        array $compare_config,
+        int $output_storage_limit,
+        string $overshoot,
+        float $startTime
+    ): bool {
         logmsg(LOG_INFO, "  🏃 Running testcase $judgeTask[testcase_id]...");
         $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
         $tcfile = $this->fetchTestcase($workdirpath, $judgeTask['testcase_id'], $judgeTask['judgetaskid'], $judgeTask['testcase_hash']);
