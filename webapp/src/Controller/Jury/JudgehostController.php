@@ -372,9 +372,7 @@ class JudgehostController extends BaseController
     public function requestGenericTask(Request $request, string $execid): RedirectResponse
     {
         $this->helperGenericTask($execid);
-        return $this->redirectToRoute('jury_judgehost', [
-            'judgehostid' => $judgehostid
-        ]);
+        return $this->redirectToRoute('jury_judgehosts');
     }
 
     /**
