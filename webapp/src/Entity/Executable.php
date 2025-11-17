@@ -31,7 +31,7 @@ class Executable
     private ?string $description = null;
 
     #[ORM\Column(length: 32, options: ['comment' => 'Type of executable'])]
-    #[Assert\Choice(['compare', 'compile', 'debug', 'run'])]
+    #[Assert\Choice(['compare', 'compile', 'debug', 'run', 'generic_task'])]
     private string $type;
 
     #[ORM\OneToOne(targetEntity: ImmutableExecutable::class)]
@@ -187,6 +187,9 @@ class Executable
      */
     public function checkUsed(array $configScripts): bool
     {
+        if ($this->getType() === 'generic_task') {
+            return true;
+        }
         if (in_array($this->execid, $configScripts, true)) {
             return true;
         }
