@@ -155,7 +155,7 @@ class GenericTask extends BaseApiEntity
     {
         $this->output->clear();
         $this->output->add($output);
-        $output->setRun($this);
+        $output->setGenericTask($this);
 
         return $this;
     }

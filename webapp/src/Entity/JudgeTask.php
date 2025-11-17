@@ -161,6 +161,13 @@ class JudgeTask
     #[Serializer\Exclude]
     private Collection $judging_runs;
 
+    /**
+     * @var Collection<int, GenericTask>
+     */
+    #[ORM\OneToMany(mappedBy: 'judgetask', targetEntity: GenericTask::class)]
+    #[Serializer\Exclude]
+    private Collection $generic_tasks;
+
     #[ORM\ManyToOne(inversedBy: 'judgeTasks')]
     #[ORM\JoinColumn(name: 'versionid', referencedColumnName: 'versionid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
