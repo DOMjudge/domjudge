@@ -342,6 +342,7 @@ class JudgehostController extends BaseController
             $judgeTask = new JudgeTask();
             $judgeTask
                 ->setType(JudgeTaskType::GENERIC_TASK)
+                ->setJudgehost($judgehost)
                 ->setPriority(JudgeTask::PRIORITY_HIGH)
                 ->setRunScriptId($executable->getImmutableExecId())
                 ->setRunConfig(Utils::jsonEncode(['hash' => $executable->getHash()]));
