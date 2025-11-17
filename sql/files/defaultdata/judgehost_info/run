@@ -1,0 +1,33 @@
+#!/bin/sh
+# This is the default script to retrieve a the configuration of both
+# software & hardware of the judgehost. The basic
+# calling convention of these scripts is:
+#   ./script <working_dir> <output_file>
+
+output_file="$1"
+
+# Source - https://stackoverflow.com/a
+# Posted by fjarlq, modified by community. See post 'Timeline' for change history
+# Retrieved 2025-11-15, License - CC BY-SA 4.0
+
+# We can't use &>> as it's not POSIX,
+# this does introduce a racecondition
+exec 1>> "${output_file}"
+exec 2>> "${output_file}"
+
+# Generic linux/distro information
+uname -a
+cat /etc/os-release
+
+# Information about the php version
+php -v
+
+# Generic hardware information
+lsusb
+lspci
+lscpu
+cat /proc/cpuinfo
+free -h
+cat /proc/meminfo
+
+exit 0

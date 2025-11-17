@@ -161,6 +161,13 @@ class JudgeTask
     #[Serializer\Exclude]
     private Collection $judging_runs;
 
+    /**
+     * @var Collection<int, GenericTask>
+     */
+    #[ORM\OneToMany(mappedBy: 'judgetask', targetEntity: GenericTask::class)]
+    #[Serializer\Exclude]
+    private Collection $generic_tasks;
+
     #[ORM\ManyToOne(inversedBy: 'judgeTasks')]
     #[ORM\JoinColumn(name: 'versionid', referencedColumnName: 'versionid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
@@ -169,6 +176,7 @@ class JudgeTask
     public function __construct()
     {
         $this->judging_runs  = new ArrayCollection();
+        $this->generic_tasks  = new ArrayCollection();
     }
 
     public function getJudgetaskid(): int
@@ -373,6 +381,20 @@ class JudgeTask
     public function getJudgingRuns(): Collection
     {
         return $this->judging_runs;
+    }
+
+    public function addGenericTask(GenericTask $genericTask): JudgeTask
+    {
+        $this->generic_tasks[] = $genericTask;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, GenericTask>
+     */
+    public function getGenericTasks(): Collection
+    {
+        return $this->generic_tasks;
     }
 
     /**

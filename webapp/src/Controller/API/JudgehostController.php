@@ -8,6 +8,8 @@ use App\Entity\Contest;
 use App\Entity\DebugPackage;
 use App\Entity\Executable;
 use App\Entity\ExecutableFile;
+use App\Entity\GenericTask;
+use App\Entity\GenericTaskOutput;
 use App\Entity\InternalError;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
@@ -550,6 +552,63 @@ class JudgehostController extends AbstractFOSRestController
             $judgingRunOutput = $judgingRun->getOutput();
             $judgingRunOutput->setOutputRun($outputRun);
         }
+        $this->em->flush();
+    }
+
+    /**
+     * Add generic task output.
+     */
+    #[IsGranted('ROLE_JUDGEHOST')]
+    #[Rest\Post('/add-generic-task/{hostname}/{judgeTaskId<\d+>}')]
+    #[OA\Response(response: 200, description: 'When the task output has been added')]
+    public function addGenericTaskOutput(
+        Request $request,
+        #[OA\PathParameter(description: 'The hostname of the judgehost that wants to add the task output')]
+        string $hostname,
+        #[OA\PathParameter(description: 'The ID of the judgetask to add', schema: new OA\Schema(type: 'integer'))]
+        int $judgeTaskId
+    ): void {
+        $judgeTask = $this->em->getRepository(JudgeTask::class)->find($judgeTaskId);
+        if ($judgeTask === null) {
+            throw new BadRequestHttpException(
+                'Inconsistent data, no judgetask known with judgetaskid = ' . $judgeTaskId . '.');
+        }
+
+        $required = ['generic_task'];
+        foreach ($required as $argument) {
+            if (!$request->request->has($argument)) {
+                throw new BadRequestHttpException(
+                    sprintf("Argument '%s' is mandatory", $argument));
+            }
+        }
+
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
+        if (!$judgehost) {
+            throw new BadRequestHttpException("Who are you and why are you sending us any data?");
+        }
+
+        $genericTask = $judgeTask->getGenericTasks();
+        if (count($genericTask) === 0) {
+            $genericTask = new GenericTask();
+            $genericTask
+                ->setJudgeTask($judgeTask)
+                ->setStarttime($judgeTask->getStarttime())
+                ->setEndtime(Utils::now());
+            $genericTaskOutput = new GenericTaskOutput();
+            $genericTaskOutput->setGenericTask($genericTask);
+            $genericTask->setOutput($genericTaskOutput);
+            $this->em->persist($genericTask);
+            $this->em->persist($genericTaskOutput);
+        } elseif (count($genericTask) !== 1) {
+            throw new BadRequestHttpException("There should be only one generic task for this judgetask.");
+        } else {
+            $genericTask = $genericTask->first();
+        }
+
+        $genericTask->setEndtime(Utils::now());
+        $outputTask = base64_decode($request->request->get('generic_task'));
+        $genericTaskOutput = $genericTask->getOutput();
+        $genericTaskOutput->setOutputTask($outputTask);
         $this->em->flush();
     }
 
@@ -1238,7 +1297,7 @@ class JudgehostController extends AbstractFOSRestController
         return match ($type) {
             'source' => $this->getSourceFiles($id),
             'testcase' => $this->getTestcaseFiles($id),
-            'compare', 'compile', 'debug', 'run' => $this->getExecutableFiles($id),
+            'compare', 'compile', 'debug', 'run', 'generic_task' => $this->getExecutableFiles($id),
             default => throw new BadRequestHttpException('Unknown type requested.'),
         };
     }
@@ -1581,9 +1640,10 @@ class JudgehostController extends AbstractFOSRestController
             ->andWhere('jt.judgehost = :judgehost')
             ->andWhere('jt.starttime IS NULL')
             ->andWhere('jt.valid = 1')
-            ->andWhere('jt.type = :type')
+            ->andWhere('jt.type in (:type)')
             ->setParameter('judgehost', $judgehost)
-            ->setParameter('type', JudgeTaskType::DEBUG_INFO)
+            ->setParameter('type', [JudgeTaskType::DEBUG_INFO, JudgeTaskType::GENERIC_TASK],
+                ArrayParameterType::STRING)
             ->addOrderBy('jt.priority')
             ->addOrderBy('jt.judgetaskid')
             ->setMaxResults(1)

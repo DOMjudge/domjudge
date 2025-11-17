@@ -67,4 +67,13 @@
         {% include 'jury/partials/judgehost_judgings.html.twig' %}
     </div>
 
+    <div>
+        <h3>Request generic actions</h3>
+        {% for executable in executables %}
+            <a href="{{ path('jury_request_judgehost_generic', {'execid': executable.executable.execid, 'judgehostid': judgehost.judgehostid}) }}">
+                {{ executable.executable.description }}
+            </a><br>
+        {% endfor %}
+    </div>
+
 {% endblock %}

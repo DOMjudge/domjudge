@@ -463,10 +463,10 @@ function fetch_executable_internal(
                 }
                 switch ($execlang) {
                     case 'c':
-                        $buildscript .= "gcc -Wall -O2 -std=gnu11 $source -o run -lm\n";
+                        $buildscript .= "gcc -Wall -O2 -static -std=gnu11 $source -o run -lm\n";
                         break;
                     case 'cpp':
-                        $buildscript .= "g++ -Wall -O2 -std=gnu++20 $source -o run\n";
+                        $buildscript .= "g++ -Wall -O2 -static -std=gnu++20 $source -o run\n";
                         break;
                     case 'java':
                         $buildscript .= "javac -cp . -d . $source\n";
@@ -890,6 +890,40 @@ while (true) {
             }
         }
         logmsg(LOG_INFO, "  🔥 Pre-heating judgehost completed.");
+        continue;
+    } elseif ($type == 'generic_task') {
+        foreach ($row as $judgeTask) {
+            if (!(isset($judgeTask['run_script_id']) && isset($judgeTask['run_config']))) {
+                // TODO: Should we actually exit here, we do for malformed above but the mistake is not on our side.
+                error("Received judgehost_check task without run_script_id/run_config.");
+            }
+
+            $run_config = dj_json_decode($judgeTask['run_config']);
+            $tmpfile = tempnam(TMPDIR, 'generic_task_');
+            [$runpath, $error] = fetch_executable(
+                $workdirpath,
+                'generic_task',
+                $judgeTask['run_script_id'],
+                $run_config['hash'],
+                $judgeTask['judgetaskid']
+            );
+
+            if (!run_command_safe([$runpath, $tmpfile])) {
+                disable('run_script', 'run_script_id', $judgeTask['run_script_id'], "Running '$runpath' failed.");
+            }
+
+            request(
+                sprintf('judgehosts/add-generic-task/%s/%s', urlencode($myhost), urlencode((string)$judgeTask['judgetaskid'])),
+                'POST',
+                ['generic_task' => rest_encode_file($tmpfile, false)],
+                false
+            );
+
+            unlink($tmpfile);
+            logmsg(LOG_INFO, "  ⇡ Uploading task output.");
+        }
+
+        logmsg(LOG_INFO, "  🔥 Running generic judgehost tasks completed.");
         continue;
     }
 
