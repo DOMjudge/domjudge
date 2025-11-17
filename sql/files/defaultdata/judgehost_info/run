@@ -10,14 +10,10 @@ output_file="$1"
 # Posted by fjarlq, modified by community. See post 'Timeline' for change history
 # Retrieved 2025-11-15, License - CC BY-SA 4.0
 
-if [ "${SHELL#*"bash"}" != "${SHELL}" ]; then
-    exec &>> "${output_file}"
-else
-    # We can't use &>> as it's not POSIX,
-    # this does introduce a racecondition
-    exec 1>> "${output_file}"
-    exec 2>> "${output_file}"
-fi
+# We can't use &>> as it's not POSIX,
+# this does introduce a racecondition
+exec 1>> "${output_file}"
+exec 2>> "${output_file}"
 
 # Generic linux/distro information
 uname -a
@@ -33,13 +29,5 @@ lscpu
 cat /proc/cpuinfo
 free -h
 cat /proc/meminfo
-
-if [ command -v hwinfo ]; then
-    hwinfo --short
-fi
-
-if [ command -v inxi ]; then
-    inxi -Fx
-fi
 
 exit 0
