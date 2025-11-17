@@ -1581,9 +1581,10 @@ class JudgehostController extends AbstractFOSRestController
             ->andWhere('jt.judgehost = :judgehost')
             ->andWhere('jt.starttime IS NULL')
             ->andWhere('jt.valid = 1')
-            ->andWhere('jt.type = :type')
+            ->andWhere('jt.type in (:type)')
             ->setParameter('judgehost', $judgehost)
-            ->setParameter('type', JudgeTaskType::DEBUG_INFO)
+            ->setParameter('type', [JudgeTaskType::DEBUG_INFO, JudgeTaskType::GENERIC_TASK],
+                ArrayParameterType::STRING)
             ->addOrderBy('jt.priority')
             ->addOrderBy('jt.judgetaskid')
             ->setMaxResults(1)
