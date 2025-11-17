@@ -60,7 +60,7 @@ class GenericTask extends BaseApiEntity
     private string|float|null $startTime = null;
 
     /**
-     * @var Collection<int, JudgingRunOutput>
+     * @var Collection<int, GenericTaskOutput>
      *
      * We use a OneToMany instead of a OneToOne here, because otherwise this
      * relation will always be loaded. See the commit message of commit

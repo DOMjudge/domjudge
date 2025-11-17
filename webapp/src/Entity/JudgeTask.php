@@ -383,7 +383,7 @@ class JudgeTask
         return $this->judging_runs;
     }
 
-    public function addGenericTask(GenericTask $genericTask): GenericTask
+    public function addGenericTask(GenericTask $genericTask): JudgeTask
     {
         $this->generic_tasks[] = $genericTask;
         return $this;

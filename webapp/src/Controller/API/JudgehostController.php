@@ -599,7 +599,7 @@ class JudgehostController extends AbstractFOSRestController
             $genericTask->setOutput($genericTaskOutput);
             $this->em->persist($genericTask);
             $this->em->persist($genericTaskOutput);
-        } elseif (count($genercTasks) !== 1) {
+        } elseif (count($genericTask) !== 1) {
             throw new BadRequestHttpException("There should be only one generic task for this judgetask.");
         } else {
             $genericTask = $genericTask->first();
