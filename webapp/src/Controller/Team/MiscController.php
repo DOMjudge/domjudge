@@ -5,13 +5,13 @@ namespace App\Controller\Team;
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Clarification;
-use App\Entity\Language;
 use App\Form\Type\PrintType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -92,8 +92,7 @@ class MiscController extends BaseController
                 paginated: false
             )[0];
 
-            /** @var Clarification[] $clarifications */
-            $clarifications = $this->em->createQueryBuilder()
+            $qb = $this->em->createQueryBuilder()
                 ->from(Clarification::class, 'c')
                 ->leftJoin('c.problem', 'p')
                 ->leftJoin('c.sender', 's')
@@ -105,9 +104,12 @@ class MiscController extends BaseController
                 ->setParameter('contest', $contest)
                 ->setParameter('team', $team)
                 ->addOrderBy('c.submittime', 'DESC')
-                ->addOrderBy('c.clarid', 'DESC')
-                ->getQuery()
-                ->getResult();
+                ->addOrderBy('c.clarid', 'DESC');
+            if ($contest->getStartTimeObject()->getTimestamp() > time()) {
+                $qb->andWhere('c.problem IS NULL');
+            }
+            /** @var Clarification[] $clarifications */
+            $clarifications = $qb->getQuery()->getResult();
 
             /** @var Clarification[] $clarificationRequests */
             $clarificationRequests = $this->em->createQueryBuilder()
