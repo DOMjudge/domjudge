@@ -839,32 +839,18 @@ class SubmissionController extends BaseController
             return $response;
         }
 
-        /** @var SubmissionFile[] $files */
-        $files = $this->em->createQueryBuilder()
-            ->from(SubmissionFile::class, 'file')
-            ->select('file')
-            ->andWhere('file.submission = :submission')
-            ->setParameter('submission', $submission)
-            ->orderBy('file.ranknumber')
-            ->getQuery()
-            ->getResult();
-
-        $originalSubmission = $originalFiles = null;
-
-        if ($submission->getOriginalSubmission()) {
-            /** @var Submission $originalSubmission */
-            $originalSubmission = $this->em->getRepository(Submission::class)->find($submission->getOriginalSubmission()->getSubmitid());
-
-            /** @var SubmissionFile[] $files */
-            $originalFiles = $this->em->createQueryBuilder()
-                ->from(SubmissionFile::class, 'file')
-                ->select('file')
-                ->andWhere('file.submission = :submission')
-                ->setParameter('submission', $originalSubmission)
-                ->orderBy('file.ranknumber')
-                ->getQuery()
-                ->getResult();
-
+        /** @var array{
+         *      submitid: int,
+         *      tag?: string
+         * } otherSubmissions
+         */
+        $otherSubmissions = [];
+        $originalSubmission = $submission->getOriginalSubmission();
+        if ($originalSubmission) {
+            $otherSubmissions[] = [
+                'submitid' => $originalSubmission->getSubmitid(),
+                'tag'      => 'original',
+            ];
             /** @var Submission $oldSubmission */
             $oldSubmission = $this->em->createQueryBuilder()
                 ->from(Submission::class, 's')
@@ -900,30 +886,70 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getOneOrNullResult();
         }
+        if ($oldSubmission !== null) {
+            $otherSubmissions[] = [
+                'submitid' => $oldSubmission->getSubmitid(),
+                'tag'      => 'previous',
+            ];;
+        }
 
-        /** @var SubmissionFile[] $files */
+        $files_query = array_map(fn($s) => $s['submitid'], $otherSubmissions);
+        $files_query[] = $submission->getSubmitid();
+        /** @var SubmissionFile[] $oldFiles */
         $oldFiles = $this->em->createQueryBuilder()
             ->from(SubmissionFile::class, 'file')
             ->select('file')
-            ->andWhere('file.submission = :submission')
-            ->setParameter('submission', $oldSubmission)
-            ->orderBy('file.ranknumber')
+            ->andWhere('file.submission in (:submissions)')
+            ->setParameter('submissions', $files_query)
+            ->orderBy('file.submission, file.ranknumber')
             ->getQuery()
             ->getResult();
 
-        $oldFileStats      = $oldFiles !== null ? $this->determineFileChanged($files, $oldFiles) : [];
-        $originalFileStats = $originalFiles !== null ? $this->determineFileChanged($files, $originalFiles) : [];
+        /** @var array<string, array<int, array{
+         *      rank: int,
+         *      filename: string,
+         *      source: string,
+         *      renamedFrom?: string
+         * }>> $files */
+        $files = [];
+        /** @var (string|false)[] $renames */
+        $renames = [];
+        foreach ($oldFiles as $f) {
+            $submitId = $f->getSubmission()->getSubmitid();
+            $files[$f->getFilename()] ??= [];
+            $files[$f->getFilename()][$submitId] = [
+                'rank' => $f->getRank(),
+                'filename' => $f->getFilename(),
+                'source'   => mb_check_encoding($f->getSourcecode(), 'UTF-8') ? $f->getSourcecode() : "Could not display binary file",
+            ];
 
+            // Keep track of the single filename within a submission for handling renaming.
+            $renames[$submitId] = array_key_exists($submitId, $renames) ? false : $f->getFilename();
+        }
+
+        // Handle file renaming for a single-file submission.
+        $renamedTo = $renames[$submission->getSubmitid()];
+        if ($renamedTo !== false) {
+            foreach ($renames as $submitId => $filename) {
+                if ($filename !== false && $filename !== $renamedTo) {
+                    $files[$renamedTo][$submitId] = $files[$filename][$submitId];
+                    $files[$renamedTo][$submitId]['renamedFrom'] = $filename;
+                    unset($files[$filename][$submitId]);
+                    if (count($files[$filename]) === 0) {
+                        unset($files[$filename]);
+                    }
+                }
+            }
+        }
+
+        ksort($files);
         return $this->render('jury/submission_source.html.twig', [
             'submission' => $submission,
             'files' => $files,
             'oldSubmission' => $oldSubmission,
-            'oldFiles' => $oldFiles,
-            'oldFileStats' => $oldFileStats,
             'originalSubmission' => $originalSubmission,
-            'originalFiles' => $originalFiles,
-            'originalFileStats' => $originalFileStats,
             'allowEdit' => $this->allowEdit(),
+            'otherSubmissions' => $otherSubmissions,
         ]);
     }
 

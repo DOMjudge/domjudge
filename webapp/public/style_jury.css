@@ -248,3 +248,7 @@ table.table-full-clickable-cell tr .table-button-head-right-right{
 .timebutton {
     min-width: 9em;
 }
+
+.diff-title {
+    display: none;
+}

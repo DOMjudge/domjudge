@@ -138,6 +138,20 @@ function setDiffMode(value)
     localStorage.setItem('domjudge_editor_diff_mode', value);
 }
 
+function getDiffTag()
+{
+    let diffTag = localStorage.getItem('domjudge_editor_diff_tag');
+    if (diffTag === undefined) {
+        return 'no-diff';
+    }
+    return diffTag;
+}
+
+function setDiffTag(value)
+{
+    localStorage.setItem('domjudge_editor_diff_tag', value);
+}
+
 // Send a notification if notifications have been enabled.
 // The options argument is passed to the Notification constructor,
 // except that the following tags (if found) are interpreted and
@@ -1289,4 +1303,268 @@ function initScoreboardSubmissions() {
             loadSubmissions(linkEl, $modalBody);
         });
     });
+}
+
+const enableButton = (btn, url) => {
+    btn.href = url;
+    btn.classList.remove('disabled');
+    btn.ariaDisabled=false;
+};
+
+const disableButton = (btn) => {
+    btn.classList.add('disabled');
+    btn.ariaDisabled=true;
+}
+
+const editors = [];
+function initDiffEditor(editorId) {
+    const wrapper = $(`#${editorId}-wrapper`);
+
+    const initialTag = getDiffTag();
+    const select = wrapper.find(".diff-select");
+    for (let i = 0; i < select[0].options.length; i++) {
+        if (select[0].options[i].dataset.tag == initialTag) {
+            select[0].selectedIndex = i;
+            break;
+        }
+    }
+    // Fall back to other tagged diff if preferred tag is not available for this submission.
+    if (initialTag !== "no-diff" && select[0].selectedIndex === 0) {
+        for (let i = 1; i < select[0].options.length; i++) {
+            if (select[0].options[i].dataset.tag) {
+                select[0].selectedIndex = i;
+                break;
+            }
+        }
+    }
+
+    const initialDiffMode = getDiffMode();
+    const radios = wrapper.find(`.diff-mode > input[type='radio']`);
+    radios.each((_, radio) => {
+        radio.checked = radio.value === initialDiffMode
+    });
+
+    const download = wrapper.find(".download")[0];
+    const edit = wrapper.find(".edit")[0];
+    const updateTabRank = (rank) => {
+        if (rank) {
+            let url = new URL(download.href);
+            url.searchParams.set("fetch", rank);
+            enableButton(download, url);
+
+            url = new URL(edit.href);
+            url.searchParams.set("rank", rank);
+            enableButton(edit, url);
+        } else {
+            disableButton(download);
+            disableButton(edit);
+        }
+    };
+    wrapper.find(".nav").on('show.bs.tab', (e) => {
+        if (e.target.dataset.rank.length > 0) {
+            const rank = parseInt(e.target.dataset.rank);
+            updateTabRank(rank);
+        } else {
+            updateTabRank(undefined);
+        }
+    })
+
+    const diffTitle = document.getElementById(`${editorId}-title-diff`);
+    const diffTag = diffTitle.querySelector('span.diff-tag');
+    const diffLink = diffTitle.querySelector('a.diff-link');
+
+    const editor = {
+        'getDiffMode': () => {
+            for (let radio of radios) {
+                if (radio.checked) {
+                    return radio.value;
+                }
+            }
+        },
+        'getDiffSelection': () => {
+            let s = select[0];
+            return s.options[s.selectedIndex].value;
+        },
+        'onDiffModeChange': (f) => {
+            radios.change((e) => {
+                const diffMode = e.target.value;
+                f(diffMode);
+            });
+        },
+        'onDiffSelectChange': (f) => {
+            select.change((e) => {
+                const noDiff = e.target.value === "";
+                const submitId = parseInt(e.target.value);
+                f(submitId, noDiff);
+            });
+        }
+    };
+    editors[editorId] = editor;
+
+    const updateMode = (diffMode) => {
+        setDiffMode(diffMode);
+    };
+    updateMode(initialDiffMode);
+    editor.onDiffModeChange(updateMode);
+
+    const updateSelect = (submitId, noDiff) => {
+        radios.each((_, radio) => {
+            radio.disabled = noDiff;
+        });
+
+        const selected = select[0].options[select[0].selectedIndex];
+        if (selected && selected.dataset.tag) {
+            setDiffTag(selected.dataset.tag);
+        }
+
+        if (noDiff) {
+            diffTitle.style.display = 'none';
+        } else {
+            diffTitle.style.display = 'inline';
+            diffTag.innerText = selected.dataset.tag;
+            diffLink.href = selected.dataset.url;
+            diffLink.innerText = `s${submitId}`;
+        }
+    };
+    updateSelect(parseInt(select[0].value), select[0].value === "");
+    editor.onDiffSelectChange(updateSelect);
+}
+
+function ensureModel(models, submitId) {
+    if (submitId in models) {
+        const model = models[submitId];
+        if (!('model' in model)) {
+            model['model'] = monaco.editor.createModel(
+                model['source'],
+                undefined,
+                monaco.Uri.file("diff/" + submitId + "/" + model['filename'])
+            );
+        }
+        return model['model'];
+    }
+    const empty = monaco.editor.getModel(monaco.Uri.file("empty")) ?? monaco.editor.createModel("", undefined, monaco.Uri.file("empty"));
+    return empty;
+}
+
+function initDiffEditorTab(editorId, diffId, submissionId, models) {
+    const navItem = document.getElementById(`${diffId}-link`);
+    const isDeleted = !(submissionId in models);
+
+    const diffEditor = monaco.editor.createDiffEditor(
+        document.getElementById(diffId), {
+        scrollbar: {
+            alwaysConsumeMouseWheel: false,
+            vertical: 'auto',
+            horizontal: 'auto'
+        },
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        readOnly: true,
+        theme: getCurrentEditorTheme(),
+    });
+
+    const updateMode = (diffMode) => {
+        diffEditor.updateOptions({
+            renderSideBySide: diffMode === 'side-by-side',
+        });
+    };
+    editors[editorId].onDiffModeChange(updateMode);
+
+    const renamedFrom = (oldName) => {
+        let renamed = navItem.querySelector('.renamed');
+        let arrow = navItem.querySelector('.fa-arrow-right');
+        if (oldName === undefined) {
+            if (renamed) {
+                navItem.removeChild(renamed);
+            }
+            if (arrow) {
+                navItem.removeChild(arrow);
+            }
+            return;
+        }
+
+        if (!renamed) {
+            renamed = document.createElement('span');
+            renamed.className = 'renamed';
+            navItem.insertBefore(renamed, navItem.childNodes[1]);
+        }
+        renamed.innerText = ` ${oldName} `;
+
+        if (!arrow) {
+            arrow = document.createElement('i');
+            arrow.className = 'fas fa-arrow-right';
+            navItem.insertBefore(arrow, navItem.childNodes[2]);
+        }
+    };
+
+    const updateSelect = (submitId, noDiff) => {
+        const exists = submitId in models;
+        if (isDeleted) {
+            document.getElementById(diffId).parentElement.style.display = exists ? '' : 'none';
+            navItem.style.display = exists ? '' : 'none';
+            if (!exists) return;
+        }
+
+        const model = models[submitId];
+        const notRenamed = noDiff || !model || !model['renamedFrom'];
+        renamedFrom(notRenamed ? undefined : model['renamedFrom']);
+
+        diffEditor.updateOptions({
+            renderOverviewRuler: !noDiff,
+        });
+        if (noDiff) {
+            diffEditor.updateOptions({
+                renderSideBySide: false,
+            });
+        } else {
+            // Reset the diff mode to the currently selected mode.
+            updateMode(editors[editorId].getDiffMode())
+        }
+        const oldViewState = diffEditor.saveViewState();
+        const x = {
+            original: noDiff ? ensureModel(models, submissionId) : ensureModel(models, submitId),
+            modified: ensureModel(models, submissionId),
+        };
+        diffEditor.setModel(x);
+        diffEditor.restoreViewState(oldViewState);
+
+        diffEditor.getOriginalEditor().updateOptions({
+            lineNumbers: !noDiff,
+        });
+        diffEditor.getModifiedEditor().updateOptions({
+            minimap: {
+                enabled: noDiff,
+            },
+        })
+    };
+    editors[editorId].onDiffSelectChange(updateSelect);
+    updateSelect(editors[editorId].getDiffSelection(), editors[editorId].getDiffSelection() === "");
+
+    const setIcon = (icon) => {
+        const element = navItem.querySelector('.fa-fw');
+        element.className = 'fas fa-fw fa-' + icon;
+    };
+    const updateIcon = () => {
+        if (isDeleted) {
+            setIcon('file-circle-minus');
+            return;
+        }
+
+        const submitId = parseInt(editors[editorId].getDiffSelection());
+        const noDiff = editors[editorId].getDiffSelection() === "";
+        if (noDiff) {
+            setIcon('file');
+            return;
+        }
+
+        const lineChanges = diffEditor.getLineChanges();
+        if (!(submitId in models)) {
+            setIcon('file-circle-plus');
+        } else if (lineChanges !== null && lineChanges.length > 0) {
+            setIcon('file-circle-exclamation');
+        } else {
+            setIcon('file-circle-check');
+        }
+    }
+    diffEditor.onDidUpdateDiff(updateIcon);
 }

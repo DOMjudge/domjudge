@@ -34,6 +34,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
@@ -57,6 +58,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         protected readonly TokenStorageInterface $tokenStorage,
         protected readonly AuthorizationCheckerInterface $authorizationChecker,
         protected readonly RouterInterface $router,
+        protected readonly SerializerInterface $serializer,
         #[Autowire('%kernel.project_dir%')]
         protected readonly string $projectDir,
         protected array $renderedSources = []
@@ -177,7 +179,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 'hc-black'                  => ['name' => 'High contrast (dark)'],
             ],
             'diff_modes'                    => [
-                'no-diff'                   => ["name"  => "No diff"],
                 'side-by-side'              => ["name"  => "Side-by-side"],
                 'inline'                    => ["name"  => "Inline"],
             ],
@@ -861,16 +862,17 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         ?string $filename = null
     ): string {
         $editor = <<<HTML
-<div class="editor" id="__EDITOR__">%s</div>
+<div class="editor" id="__EDITOR__"></div>
 <script>
 $(function() {
     require(['vs/editor/editor.main'], function () {
         const element = document.getElementById('__EDITOR__');
-        const content = element.textContent;
-        element.textContent = '';
+        const content = %s;
+        const filePath = %s;
+        const uri = filePath ? monaco.Uri.file(filePath) : monaco.Uri.parse("editor-__EDITOR__");
+        const model = monaco.editor.createModel(content, undefined, uri);
 
         const editor = monaco.editor.create(element, {
-            value: content,
             scrollbar: {
                 alwaysConsumeMouseWheel: false,
                 vertical: 'auto',
@@ -881,6 +883,7 @@ $(function() {
             readOnly: %s,
             theme: getCurrentEditorTheme(),
         });
+        editor.setModel(model);
         %s
         %s
     });
@@ -889,7 +892,7 @@ $(function() {
 HTML;
         $rank   = $index;
         $id     = sprintf('editor%s', $rank);
-        $code   = htmlspecialchars($code);
+        $source = mb_check_encoding($code, 'UTF-8') ? $code : "Could not display binary file";
         if ($elementToUpdate) {
             $extraForEdit = <<<JS
 editor.getModel().onDidChangeContent(() => {
@@ -904,22 +907,21 @@ JS;
 
         if ($language !== null) {
             $mode = <<<JS
-const model = editor.getModel();
 model.setLanguage("$language");
 JS;
-        } elseif ($filename !== null) {
-            $modeTemplate = <<<JS
-const filePath = "%s";
-const model = monaco.editor.createModel(content, undefined, monaco.Uri.file(filePath));
-editor.setModel(model);
-JS;
-            $mode         = sprintf($modeTemplate, htmlspecialchars($filename));
         } else {
             $mode = '';
         }
 
         return str_replace('__EDITOR__', $id,
-                           sprintf($editor, $code, $editable ? 'false' : 'true', $mode, $extraForEdit));
+                           sprintf(
+                            $editor,
+                            $this->serializer->serialize($source, 'json'),
+                            $this->serializer->serialize($filename, 'json'),
+                            $editable ? 'false' : 'true',
+                            $mode,
+                            $extraForEdit
+        ));
     }
 
     /**
@@ -940,86 +942,50 @@ JS,
         }
         $this->renderedSources[$file->getSubmitfileid()] = true;
 
+        $source = mb_check_encoding($file->getSourcecode(), 'UTF-8') ? $file->getSourcecode() : "Could not display binary file";
         return sprintf(
             <<<JS
 monaco.editor.createModel(
-    "%s",
+    %s,
     undefined,
     monaco.Uri.parse("diff/%d/%s")
 );
 JS,
-            $this->twig->getRuntime(EscaperRuntime::class)->escape($file->getSourcecode(), 'js'),
+            $this->serializer->serialize($source, 'json'),
             $file->getSubmitfileid(),
             $file->getFilename(),
         );
     }
 
-    public function showDiff(string $id, SubmissionFile $newFile, SubmissionFile $oldFile): string
+    /** @param array<int, array{
+     *      rank: int,
+     *      filename: string,
+     *      source: string,
+     *      renamedFrom?: string
+     * }> $files */
+    public function showDiff(string $editorId, string $diffId, int $submissionId, string $filename, array $files): string
     {
         $editor = <<<HTML
-<div class="editor" id="__EDITOR__"></div>
+<div class="editor" id="$diffId"></div>
 <script>
 $(function() {
-    require(['vs/editor/editor.main'], function () {
-        const originalModel = %s
-        const modifiedModel = %s
-
-        const initialDiffMode = getDiffMode();
-        const radios = $("#diffselect-__EDITOR__ > input[name='__EDITOR__-mode']");
-        radios.each((_, radio) => {
-            $(radio).prop('checked', radio.value === initialDiffMode);
-        });
-
-        const diffEditor = monaco.editor.createDiffEditor(
-            document.getElementById("__EDITOR__"), {
-            scrollbar: {
-                alwaysConsumeMouseWheel: false,
-                vertical: 'auto',
-                horizontal: 'auto'
-            },
-            scrollBeyondLastLine: false,
-            automaticLayout: true,
-            readOnly: true,
-            theme: getCurrentEditorTheme(),
-        });
-
-        const updateMode = (diffMode) => {
-            setDiffMode(diffMode);
-            const noDiff = diffMode === 'no-diff';
-            diffEditor.updateOptions({
-                renderOverviewRuler: !noDiff,
-                renderSideBySide: diffMode === 'side-by-side',
-            });
-
-            const oldViewState = diffEditor.saveViewState();
-            diffEditor.setModel({
-                original: noDiff ? modifiedModel : originalModel,
-                modified: modifiedModel,
-            });
-            diffEditor.restoreViewState(oldViewState);
-
-            diffEditor.getOriginalEditor().updateOptions({
-                lineNumbers: !noDiff,
-            });
-            diffEditor.getModifiedEditor().updateOptions({
-                minimap: {
-                    enabled: noDiff,
-                },
-            })
-        };
-        radios.change((e) => {
-            updateMode(e.target.value);
-        });
-        updateMode(initialDiffMode);
+    const editorId = '%s';
+    const diffId = '%s';
+    const submissionId = %d;
+    const models = %s;
+    require(['vs/editor/editor.main'], () => {
+        initDiffEditorTab(editorId, diffId, submissionId, models);
     });
 });
 </script>
 HTML;
 
         return sprintf(
-            str_replace('__EDITOR__', $id, $editor),
-            $this->getMonacoModel($oldFile),
-            $this->getMonacoModel($newFile),
+            $editor,
+            $editorId,
+            $diffId,
+            $submissionId,
+            $this->serializer->serialize($files, 'json'),
         );
     }
 
