@@ -103,9 +103,9 @@
                 </li>
             {%- endfor %}
         </ul>
-        <div class="tab-content source-tab">
+        <div class="tab-content source-tab flex-pass">
             {%- for idx, filename in filenames %}
-                <div class="tab-pane fade {% if (selected is null and loop.first) or selected == idx %}show active{% endif %}" id="source-{{ idx }}"
+                <div class="tab-pane flex-pass fade {% if (selected is null and loop.first) or selected == idx %}show active{% endif %}" id="source-{{ idx }}"
                      role="tabpanel">
                     <div class="mb-1">
                         <a class="btn btn-secondary btn-sm"
