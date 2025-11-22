@@ -1152,7 +1152,7 @@ class SubmissionController extends BaseController
             if (!$judging->getContest()->isOpenToAllTeams()) {
                 $teamsQueryBuilder
                     ->leftJoin('t.contests', 'c')
-                    ->join('t.category', 'cat')
+                    ->join('t.categories', 'cat')
                     ->leftJoin('cat.contests', 'cc')
                     ->andWhere('c.cid = :cid OR cc.cid = :cid')
                     ->setParameter('cid', $judging->getContest()->getCid());
