@@ -53,9 +53,9 @@
             {%- endfor %}
 
         </ul>
-        <div class="tab-content source-tab">
+        <div class="tab-content source-tab flex-pass">
             {%- for file in files %}
-                <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="source-{{ file.rank }}"
+                <div class="tab-pane flex-pass fade {% if loop.first %}show active{% endif %}" id="source-{{ file.rank }}"
                      role="tabpanel">
                     <div class="mb-1">
                         <a class="btn btn-secondary btn-sm"
