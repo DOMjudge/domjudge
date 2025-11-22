@@ -1290,3 +1290,15 @@ function initScoreboardSubmissions() {
         });
     });
 }
+
+// Force a recompute of the monaco editor height when the display size changes.
+if ('ResizeObserver' in window) {
+    $(() => {
+        var monacoObserver = new ResizeObserver(() => {
+            document.querySelectorAll('.monaco-editor').forEach(e => {
+                e.style.height = "0";
+            });
+        });
+        monacoObserver.observe(document.body);
+    });
+}
