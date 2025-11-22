@@ -46,9 +46,9 @@
 </ul>
 {# Mark the first pane that is shown as active. #}
 {% set extra_css_classes = "show active" %}
-<div class="tab-content source-tab">
+<div class="tab-content source-tab flex-pass">
     {%- for filePair in oldFileStats.changedfiles %}
-        <div class="tab-pane fade {{ extra_css_classes }}" id="diff-{{ filePair.1.submitfileid }}" role="tabpanel">
+        <div class="tab-pane flex-pass fade {{ extra_css_classes }}" id="diff-{{ filePair.1.submitfileid }}" role="tabpanel">
             {% set diff_id = "diff" ~  filePair.1.submitfileid %}
             <div class="mb-1">
                 <a class="btn btn-secondary btn-sm"

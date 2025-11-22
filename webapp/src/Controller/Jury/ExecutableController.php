@@ -371,6 +371,7 @@ class ExecutableController extends BaseController
             'default_compare' => (string)$this->config->get('default_compare'),
             'default_run' => (string)$this->config->get('default_run'),
             'default_full_debug' => (string)$this->config->get('default_full_debug'),
+            'fill_height' => true,
         ]));
     }
 
