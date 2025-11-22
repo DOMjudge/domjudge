@@ -68,6 +68,11 @@ class ImportProblemService
             $messages[$type] = [];
         }
 
+        $zipEntries = [];
+        for ($j = 0; $j < $zip->numFiles; $j++) {
+            $zipEntries[$j] = $zip->getNameIndex($j);
+        }
+
         $propertiesFile  = 'domjudge-problem.ini';
         $yamlFile        = 'problem.yaml';
         $tleFile         = '.timelimit';
@@ -269,7 +274,7 @@ class ImportProblemService
         if (!$this->parseYaml($problemYaml, $messages, $validationMode, $propertyAccessor, $problem)) {
             return null;
         }
-        if (!$this->searchAndAddValidator($zip, $messages, $externalId, $validationMode, $problem)) {
+        if (!$this->searchAndAddValidator($zip, $zipEntries, $messages, $externalId, $validationMode, $problem)) {
             return null;
         }
 
@@ -343,8 +348,7 @@ class ImportProblemService
         foreach (['sample', 'secret'] as $type) {
             $numCases  = 0;
             $dataFiles = [];
-            for ($j = 0; $j < $zip->numFiles; $j++) {
-                $filename = $zip->getNameIndex($j);
+            foreach ($zipEntries as $filename) {
                 if (Utils::startsWith($filename, sprintf('data/%s/', $type)) &&
                     Utils::endsWith($filename, '.in')) {
                     $fileout  = preg_replace("/\.in$/", ".ans", $filename);
@@ -505,8 +509,7 @@ class ImportProblemService
         $touchedAttachments = [];
 
         $numAttachments = 0;
-        for ($j = 0; $j < $zip->numFiles; $j++) {
-            $filename = $zip->getNameIndex($j);
+        foreach ($zipEntries as $j => $filename) {
             if (!Utils::startsWith($filename, 'attachments/')) {
                 continue;
             }
@@ -639,8 +642,7 @@ class ImportProblemService
                 Utils::jsonDecode($submission_file_string);
 
             $numJurySolutions = 0;
-            for ($j = 0; $j < $zip->numFiles; $j++) {
-                $path = $zip->getNameIndex($j);
+            foreach ($zipEntries as $j => $path) {
                 if (!Utils::startsWith($path, 'submissions/')) {
                     // Skipping non-submission files silently.
                     continue;
@@ -663,8 +665,7 @@ class ImportProblemService
                     $indices = [];
                     $length  = mb_strrpos($path, '/') + 1;
                     $prefix  = mb_substr($path, 0, $length);
-                    for ($k = 0; $k < $zip->numFiles; $k++) {
-                        $file = $zip->getNameIndex($k);
+                    foreach ($zipEntries as $k => $file) {
                         // Only allow multi-file submission with all files directly under the directory.
                         if (strncmp($prefix, $file, $length) == 0 && mb_strlen($file) > $length &&
                             mb_strrpos($file, '/') + 1 == $length) {
@@ -902,13 +903,14 @@ class ImportProblemService
     }
 
     /**
+     *
+     * @param array<int, string> $zipEntries
      * @param array{danger?: string[], info?: string[]} $messages
      */
-    private function searchAndAddValidator(ZipArchive $zip, ?array &$messages, string $externalId, string $validationMode, ?Problem $problem): bool
+    private function searchAndAddValidator(ZipArchive $zip, array $zipEntries, ?array &$messages, string $externalId, string $validationMode, ?Problem $problem): bool
     {
         $validatorFiles = [];
-        for ($i = 0; $i < $zip->numFiles; $i++) {
-            $filename = $zip->getNameIndex($i);
+        foreach ($zipEntries as $filename) {
             foreach (['output_validators/', 'output_validator'] as $dir) {
                 if (Utils::startsWith($filename, $dir) &&
                     !Utils::endsWith($filename, '/')) {
