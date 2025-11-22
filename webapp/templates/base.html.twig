@@ -27,12 +27,12 @@
         <link rel="stylesheet" href="{{ asset('css/custom/' ~ file) }}">
     {% endfor %}
 </head>
-<body{% if static is defined and static %} class="static"{% endif %}>
+<body class="{% if fill_height is defined and fill_height %} fill-height{% endif %}{% if static is defined and static %} static{% endif %}">
 {% block menu %}{% endblock %}
 {% block body %}
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
+    <div class="container-fluid{% if fill_height is defined and fill_height %} flex-pass{% endif %}">
+        <div class="row{% if fill_height is defined and fill_height %} flex-pass{% endif %}">
+            <div class="col-12{% if fill_height is defined and fill_height %} flex-pass{% endif %}">
                 {% block messages %}
                     {% include 'partials/messages.html.twig' %}
                 {% endblock %}
