@@ -40,6 +40,7 @@ inplace-install: docs
 inplace-install-l:
 	ln -sf build/html
 	ln -sf build/team
+	ln -sf build/domjudge-team-manual.pdf
 
 inplace-uninstall-l:
 	-rm -f html team
