@@ -62,7 +62,7 @@
 
 #include "config.h"
 
-#include "lib.error.h"
+#include "lib.error.hpp"
 #include "lib.misc.h"
 
 #include <algorithm>
@@ -88,13 +88,13 @@ using namespace std;
 
 using fd_t = int;
 
-const char *progname;
+std::string_view progname;
 
 // Set the NONBLOCK flag for a file descriptor.
 void set_non_blocking(fd_t fd) {
   int flags = fcntl(fd, F_GETFL, 0);
   if (fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
-    error(errno, "failed to set fd %d to non blocking", fd);
+    error(errno, "failed to set fd {} to non blocking", fd);
   }
 }
 
@@ -117,28 +117,28 @@ void resize_pipe(int fd) {
     FILE *f = nullptr;
     if ((f = fopen(PROC_MAX_PIPE_SIZE, "r")) == nullptr) {
       max_pipe_size = FAILED;
-      warning(errno, "could not open '%s'", PROC_MAX_PIPE_SIZE);
+      warning(errno, "could not open '{}'", PROC_MAX_PIPE_SIZE);
       return;
     }
     if (fscanf(f, "%d", &max_pipe_size) != 1) {
       max_pipe_size = FAILED;
-      warning(errno, "could not read from '%s'", PROC_MAX_PIPE_SIZE);
+      warning(errno, "could not read from '{}'", PROC_MAX_PIPE_SIZE);
       if (fclose(f) != 0) {
-        warning(errno, "could not close '%s'", PROC_MAX_PIPE_SIZE);
+        warning(errno, "could not close '{}'", PROC_MAX_PIPE_SIZE);
       }
       return;
     }
     if (fclose(f) != 0) {
-      warning(errno, "could not close '%s'", PROC_MAX_PIPE_SIZE);
+      warning(errno, "could not close '{}'", PROC_MAX_PIPE_SIZE);
     }
   }
 
   int new_size = fcntl(fd, F_SETPIPE_SZ, max_pipe_size);
   if (new_size == -1) {
-    warning(errno, "could not change pipe size of %d", fd);
+    warning(errno, "could not change pipe size of {}", fd);
   }
 
-  logmsg(LOG_DEBUG, "set pipe fd %d to size %d", fd, new_size);
+  logmsg(LOG_DEBUG, "set pipe fd {} to size {}", fd, new_size);
 }
 
 // Write all the data into the file descriptor. It is assumed that the file
@@ -245,9 +245,9 @@ struct process_t {
 
     pid = execute(cmd, exec_args, stdio, false);
     if (pid < 0) {
-      error(errno, "failed to execute command #%ld", index);
+      error(errno, "failed to execute command #{}", index);
     }
-    logmsg(LOG_DEBUG, "started #%ld, pid %d", index, pid);
+    logmsg(LOG_DEBUG, "started #{}, pid {}", index, pid);
     // Do not leak these file descriptors, otherwise we cannot detect if the
     // process has closed stdout.
     close(stdin_fd);
@@ -264,7 +264,7 @@ struct process_t {
   // (i.e. proxy -> process).
   void close_input_fd() {
     if (proxy_to_process != -1) {
-      logmsg(LOG_DEBUG, "closing fd: %d (proxy -> process) of %d",
+      logmsg(LOG_DEBUG, "closing fd: {} (proxy -> process) of {}",
              proxy_to_process, pid);
       close(proxy_to_process);
     }
@@ -274,7 +274,7 @@ struct process_t {
   // (i.e. process -> proxy).
   void close_output_fd() {
     if (process_to_proxy != -1) {
-      logmsg(LOG_DEBUG, "closing fd: %d (process -> proxy) of %d",
+      logmsg(LOG_DEBUG, "closing fd: {} (process -> proxy) of {}",
              process_to_proxy, pid);
       close(process_to_proxy);
     }
@@ -318,7 +318,7 @@ struct output_file_t {
     output_file = open(path.c_str(), O_CREAT | O_CLOEXEC | O_WRONLY | O_TRUNC,
                        S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
     if (output_file == -1) {
-      error(errno, "failed to create proxy output file at %s", path.c_str());
+      error(errno, "failed to create proxy output file at {}", path);
     }
   }
 
@@ -362,7 +362,7 @@ struct output_file_t {
                  time_millis, size, direction);
     // Check that snprintf didn't truncate the header.
     if (header_len >= static_cast<int>(HEADER_SIZE)) {
-      error(0, "header size too small: %d > %ld", header_len, HEADER_SIZE);
+      error(0, "header size too small: {} > {}", header_len, HEADER_SIZE);
     }
 
     write_all(output_file, header, header_len);
@@ -376,7 +376,7 @@ void usage() {
 Usage: %s [OPTION]... COMMAND1 [ARGS...] = COMMAND2 [ARGS...]\n\
 Run two commands with stdin/stdout bi-directionally connected.\n\
 \n",
-         progname);
+         progname.data());
   printf("\
   -o, --outprog=FILE   write stdout from second program to FILE\n\
   -M, --outmeta=FILE   write metadata (runtime, exit_code, etc.) of first program to FILE\n\
@@ -456,22 +456,21 @@ struct state_t {
         break;
       case 'o': /* outprog option */
         args.output_file = optarg;
-        logmsg(LOG_DEBUG, "writing interactions to '%s'",
-               args.output_file.c_str());
+        logmsg(LOG_DEBUG, "writing interactions to '{}'", args.output_file);
         break;
       case 'M': /* outmeta option */
         args.meta_file = optarg;
-        logmsg(LOG_DEBUG, "writing metadata to '%s'", args.meta_file.c_str());
+        logmsg(LOG_DEBUG, "writing metadata to '{}'", args.meta_file);
         break;
       case 'h':
         args.show_help = 1;
         break;
       case ':': /* getopt error */
       case '?':
-        error(0, "unknown option or missing argument `%c'", optopt);
+        error(0, "unknown option or missing argument `{:c}'", optopt);
         break;
       default:
-        error(0, "getopt returned character code `%c' ??", (char)opt);
+        error(0, "getopt returned character code `{:c}' ??", opt);
       }
     }
 
@@ -534,7 +533,7 @@ struct state_t {
     if (args.verbose) {
       logmsg(LOG_DEBUG, "Processes:");
       for (size_t i = 0; i < processes.size(); i++) {
-        logmsg(LOG_DEBUG, "  #%ld: %s", i, processes[i].debug().c_str());
+        logmsg(LOG_DEBUG, "  #{}: {}", i, processes[i].debug());
       }
     }
   }
@@ -602,18 +601,18 @@ struct state_t {
     fd_t read_end = fds[0];
     static fd_t write_end = -1;
     if (write_end != -1) {
-      error(0, "attempted to install signal handler for %d twice", signum);
+      error(0, "attempted to install signal handler for {} twice", signum);
     }
     write_end = fds[1];
 
-    logmsg(LOG_DEBUG, "exit handler will send event using %d -> %d", write_end,
+    logmsg(LOG_DEBUG, "exit handler will send event using {} -> {}", write_end,
            read_end);
 
     signal(signum, [](int) {
       // TODO: Decide whether to keep some logging as the line below. We can't
       // use logmsg here since that will in turn call syslog which is not safe
       // to do in a signal handler (see also `man signal-safety`).
-      // logmsg(LOG_DEBUG, "caught signal %d", signum);
+      // logmsg(LOG_DEBUG, "caught signal {}", signum);
 
       // Notify the main loop that a child exited by sending a message via
       // the pipe.
@@ -668,21 +667,21 @@ struct state_t {
         // Use two pipes for the given direction with the
         // proxy in between.
         tie(read_end, write_end) = make_pipe();
-        logmsg(LOG_DEBUG, "setting up pipe #%ld (fd %d) -> proxy (fd %d)", i,
+        logmsg(LOG_DEBUG, "setting up pipe #{} (fd {}) -> proxy (fd {})", i,
                write_end, read_end);
         process.stdout_fd = write_end;
         process.process_to_proxy = read_end;
         set_non_blocking(process.process_to_proxy);
 
         tie(read_end, write_end) = make_pipe();
-        logmsg(LOG_DEBUG, "setting up pipe proxy (fd %d) -> #%ld (fd %d)",
+        logmsg(LOG_DEBUG, "setting up pipe proxy (fd {}) -> #{} (fd {})",
                write_end, j, read_end);
         other.proxy_to_process = write_end;
         other.stdin_fd = read_end;
       } else {
         // No proxy: direct communication.
         tie(read_end, write_end) = make_pipe();
-        logmsg(LOG_DEBUG, "setting up pipe #%ld (fd %d) -> #%ld (fd %d)", i,
+        logmsg(LOG_DEBUG, "setting up pipe #{} (fd {}) -> #{} (fd {})", i,
                write_end, j, read_end);
         process.stdout_fd = write_end;
         other.stdin_fd = read_end;
@@ -698,12 +697,12 @@ struct state_t {
     }
 
     auto add_fd = [&](fd_t fd) {
-      logmsg(LOG_DEBUG, "epoll will listen for fd %d", fd);
+      logmsg(LOG_DEBUG, "epoll will listen for fd {}", fd);
       epoll_event ev{};
       ev.data.fd = fd;
       ev.events = EPOLLIN;
       if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &ev)) {
-        error(errno, "failed to add fd %d to epoll", fd);
+        error(errno, "failed to add fd {} to epoll", fd);
       }
     };
 
@@ -751,7 +750,7 @@ struct state_t {
       return false;
     }
 
-    logmsg(LOG_DEBUG, "child with pid %d exited", pid);
+    logmsg(LOG_DEBUG, "child with pid {} exited", pid);
 
     // Only set the first process if runguard didn't tell us about a TLE.
     if (first_process_exit_id == -1 && !child_indicated_timelimit) {
@@ -777,7 +776,7 @@ struct state_t {
     }
 
     if (!found) {
-      error(0, "unknown child with pid %d exited", pid);
+      error(0, "unknown child with pid {} exited", pid);
     }
 
     return true;
@@ -811,7 +810,7 @@ struct state_t {
         sprintf(eofbuf, "[%3d.%03ds/%ld]%c", time_sec, time_millis, 0L, direction);
         write_all(output_file.output_file, eofbuf, strlen(eofbuf));
 
-        warning(0, "EOF from process #%ld", from.index);
+        warning(0, "EOF from process #{}", from.index);
         // The process closed stdout, we need to close the pipe's file
         // descriptors as well.
         to.close_input_fd();
@@ -823,7 +822,7 @@ struct state_t {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
           return;
         }
-        error(errno, "failed to read from pipe of #%ld", from.index);
+        error(errno, "failed to read from pipe of #{}", from.index);
       }
       // We've read nread bytes, write them to the other process' pipe.
       write_all(to.proxy_to_process, buffer, nread);
@@ -873,8 +872,8 @@ struct state_t {
           // happening and the communication with the other process may be very
           // broken.
           if (main_process().has_exited_with_signal()) {
-            logmsg(LOG_WARNING, "the first process crashed! %s",
-                   processes[0].exit_info_to_string().c_str());
+            logmsg(LOG_WARNING, "the first process crashed! {}",
+                   processes[0].exit_info_to_string());
           }
           continue;
         }
@@ -910,7 +909,7 @@ struct state_t {
   finish:
     logmsg(LOG_DEBUG, "all processes exited");
     if (!args.output_file.empty()) {
-      logmsg(LOG_INFO, "total communication amount: %ld KiB",
+      logmsg(LOG_INFO, "total communication amount: {} KiB",
              total_bytes_transferred / 1024);
     }
   }
@@ -925,7 +924,7 @@ struct state_t {
 
     ofstream meta(args.meta_file);
     if (meta.fail()) {
-      error(errno, "failed to open meta file at %s", args.meta_file.c_str());
+      error(errno, "failed to open meta file at {}", args.meta_file);
     }
     meta << "exitcode: " << main_process().exit_code() << endl;
     meta << "bytes-transferred: " << total_bytes_transferred << endl;
@@ -964,8 +963,8 @@ int main(int argc, char **argv) {
   if (state.args.verbose) {
     logmsg(LOG_DEBUG, "Exit statuses:");
     for (const auto &proc : state.processes) {
-      logmsg(LOG_DEBUG, "  #%ld: %s", proc.index,
-             proc.exit_info_to_string().c_str());
+      logmsg(LOG_DEBUG, "  #{}: {}", proc.index,
+             proc.exit_info_to_string());
     }
   }
 
@@ -977,6 +976,6 @@ int main(int argc, char **argv) {
   }
 
   // The first command exited with a signal.
-  error(0, "the first process crashed! %s",
-        main_process.exit_info_to_string().c_str());
+  error(0, "the first process crashed! {}",
+        main_process.exit_info_to_string());
 }

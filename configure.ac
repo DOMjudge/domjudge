@@ -72,7 +72,7 @@ if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
 	AX_APPEND_LINK_FLAGS([-Wl,-z,now],   DEF_LDFLAGS)
 
 	test "x$enable_CFLAGS_setting"   = xyes && AC_SUBST(CFLAGS,   "$DEF_CXFLAGS -std=c11")
-	test "x$enable_CXXFLAGS_setting" = xyes && AC_SUBST(CXXFLAGS, "$DEF_CXFLAGS -std=c++11")
+	test "x$enable_CXXFLAGS_setting" = xyes && AC_SUBST(CXXFLAGS, "$DEF_CXFLAGS -std=c++20")
 	test "x$enable_LDFLAGS_setting"  = xyes && AC_SUBST(LDFLAGS,  $DEF_LDFLAGS)
 fi
 

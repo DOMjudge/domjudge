@@ -88,7 +88,7 @@ test_invalid_float_extra_chars() {
 
 any_test_failed=0
 
-g++ -g -O2 -Wall -std=c++17 ../sql/files/defaultdata/compare/compare.cc -o $COMPARE_EXECUTABLE
+g++ -g -O2 -Wall -std=c++20 ../sql/files/defaultdata/compare/compare.cc -o $COMPARE_EXECUTABLE
 
 for func in $(compgen -o nosort -A function test_); do
     fail=0
