@@ -18,7 +18,7 @@
 #include <iostream>
 
 #include "lib.misc.h"
-#include "lib.error.h"
+#include "lib.error.hpp"
 
 /* Array indices for input/output file descriptors as used by pipe() */
 constexpr int PIPE_IN = 1;

@@ -14,13 +14,13 @@
 
 #include "lib.misc.h"
 
-#include "lib.error.h"
+#include "lib.error.hpp"
 
 #define PROGRAM "evict"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
 extern int errno;
-const char *progname;
+std::string_view progname;
 
 int be_verbose;
 int show_help;
@@ -51,7 +51,7 @@ void evict_directory(const std::string& dirname) {
 
 	dir = opendir(dirname.c_str());
 	if (dir != NULL) {
-		if (be_verbose) logmsg(LOG_INFO, "Evicting all files in directory: %s", dirname.c_str());
+		if (be_verbose) logmsg(LOG_INFO, "Evicting all files in directory: {}", dirname);
 
 		/* Read everything in the directory */
 		while ( (entry = readdir(dir)) != NULL ) {
@@ -64,14 +64,14 @@ void evict_directory(const std::string& dirname) {
 			std::string entry_path = dirname + "/" + entry->d_name;
 			fd = open(entry_path.c_str(), O_RDONLY, 0);
 			if (fd == -1) {
-				warning(errno, "Unable to open file: %s", entry_path.c_str());
+				warning(errno, "Unable to open file: {}", entry_path);
 				continue;
 			}
 
 			if (fstat(fd, &s) < 0) {
-				if (be_verbose) logerror(errno, "Unable to stat file/directory: %s\n", entry_path.c_str());
+				if (be_verbose) logerror(errno, "Unable to stat file/directory: {}\n", entry_path);
 				if ( close(fd)!=0 ) {
-					warning(errno, "Unable to close file: %s", entry_path.c_str());
+					warning(errno, "Unable to close file: {}", entry_path);
 				}
 				continue;
 			}
@@ -81,21 +81,21 @@ void evict_directory(const std::string& dirname) {
 			} else {
 				/* evict this file from the cache */
 				if (posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED)) {
-					warning(errno, "Unable to evict file: %s\n", entry_path.c_str());
+					warning(errno, "Unable to evict file: {}\n", entry_path);
 				} else {
-					if (be_verbose) logmsg(LOG_DEBUG, "Evicted file: %s", entry_path.c_str());
+					if (be_verbose) logmsg(LOG_DEBUG, "Evicted file: {}", entry_path);
 				}
 			}
 
 			if ( close(fd)!=0 ) {
-				warning(errno, "Unable to close file: %s", entry_path.c_str());
+				warning(errno, "Unable to close file: {}", entry_path);
 			}
 		}
 		if ( closedir(dir)!=0 ) {
-			warning(errno, "Unable to close directory: %s", dirname.c_str());
+			warning(errno, "Unable to close directory: {}", dirname);
 		}
 	} else {
-		warning(errno, "Unable to open directory: %s", dirname.c_str());
+		warning(errno, "Unable to open directory: {}", dirname);
 	}
 }
 
@@ -118,10 +118,10 @@ int main(int argc, char *argv[])
 			break;
 		case ':': /* getopt error */
 		case '?':
-			logmsg(LOG_ERR, "unknown option or missing argument `%c'", optopt);
+			logmsg(LOG_ERR, "unknown option or missing argument `{}`", (char)optopt);
 			break;
 		default:
-			logmsg(LOG_ERR, "getopt returned character code `%c' ??", (char)opt);
+			logmsg(LOG_ERR, "getopt returned character code `{}` ??", (char)opt);
 		}
 	}
 

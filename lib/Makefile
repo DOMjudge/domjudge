@@ -8,7 +8,7 @@ OBJECTS = $(addsuffix $(OBJEXT),lib.error lib.misc)
 
 build: $(OBJECTS)
 
-lib.error$(OBJEXT): lib.error.cc lib.error.h
+lib.error$(OBJEXT): lib.error.cc lib.error.hpp
 lib.misc$(OBJEXT): lib.misc.cc lib.misc.h
 
 clean-l:
