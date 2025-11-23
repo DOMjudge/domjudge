@@ -187,9 +187,28 @@ Loading development fixture data
 To debug failing Unit tests the fixtures can be loaded with:
 ``./webapp/bin/console domjudge:load-development-data SampleSubmissionsFixture`` in the current database.
 
+Installing, uppdating & upgrading dependencies
+-----------------------------------
+To manage the PHP dependencies start from ``/webapp``.
+
+To require a new dependency/library:
+``composer require package/name`` or ``composer require package/name:version``, this is most often needed
+when a newer version is broken, is needed because you need a specific new feature or when you need a new library.
+
+To update all dependencies:
+``composer update``, this is useful before a new contest when there is enough time to fix possible issues.
+
+To update a single dependency:
+``composer update package/name`` and ``composer update -W package/name`` for either a single package upgrade or
+also the other requirements if needed. For the second case ``composer`` is allowed to update a dependency in case the
+dependency ``package/name`` requires a higher version.
+
+When you expect a dependency to upgrade and it doesn't you can check on `Packagist`_ if a newer version exists
+and change the version in `composer.json`, or use `composer require package/name:version`` and rerun the commands above.
+
 .. _CCS Contest API specification: https://ccs-specs.icpc.io/2021-11/contest_api
 .. _OpenAPI Specification ver. 3: https://swagger.io/specification/
-
+.. _Packagist: https://packagist.org/
 
 Additional developer documentation
 ----------------------------------
