@@ -895,7 +895,10 @@ class DOMJudgeService
             ->setParameter('cid', $contest->getCid());
 
         /** @var Contest $contest */
-        $contest = $contestQuery->getQuery()->getSingleResult();
+        $contest = $contestQuery->getQuery()->getOneOrNullResult();
+        if (!$contest) {
+            return false;
+        }
 
         if ($contest->getContestProblemsetType()) {
             return true;
