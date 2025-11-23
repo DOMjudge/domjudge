@@ -1235,59 +1235,6 @@ class SubmissionController extends BaseController
         return $this->redirectToLocalReferrer($this->router, $request, $redirect);
     }
 
-    /**
-     * @param SubmissionFile[] $files
-     * @param SubmissionFile[] $oldFiles
-     * @return array{'changed': string[], 'changedfiles': array<SubmissionFile[]>,
-     *               'unchanged': string[], 'added': string[], 'removed': string[],
-     *               'unchangedfiles' : array<SubmissionFile>,
-     *               'addedfiles' : array<SubmissionFile>}
-     */
-    protected function determineFileChanged(array $files, array $oldFiles): array
-    {
-        $result = [
-            'changed'      => [],
-            'changedfiles' => [], // These will be shown, so we will add pairs of files here.
-            'unchangedfiles' => [],
-            'addedfiles'    => [],
-            'unchanged'    => [],
-        ];
-
-        $newFilenames = array_map(fn($f) => $f->getFilename(), $files);
-        $oldFilenames = array_map(fn($f) => $f->getFilename(), $oldFiles);
-        $result['added']   = array_diff($newFilenames, $oldFilenames);
-        $result['removed'] = array_diff($oldFilenames, $newFilenames);
-
-        foreach ($files as $newfile) {
-            $isNewFile = true;
-            foreach ($oldFiles as $oldFile) {
-                if ($newfile->getFilename() === $oldFile->getFilename()) {
-                    $isNewFile = false;
-                    if ($oldFile->getSourcecode() === $newfile->getSourcecode()) {
-                        $result['unchanged'][] = $newfile->getFilename();
-                        $result['unchangedfiles'][] = $newfile;
-                    } else {
-                        $result['changed'][]      = $newfile->getFilename();
-                        $result['changedfiles'][] = [$newfile, $oldFile];
-                    }
-                }
-            }
-            if ($isNewFile) {
-                $result['addedfiles'][] = $newfile;
-            }
-        }
-
-        // Special case: if there's just a single file (before and after) that has been renamed, use that for diffing.
-        if (count($result['added']) === 1 && count($result['removed']) === 1 && empty($result['changed'])) {
-            $result['added']        = [];
-            $result['removed']      = [];
-            $result['changed']      = [$files[0]->getFilename()];
-            $result['changedfiles'] = [[$files[0], $oldFiles[0]]];
-        }
-
-        return $result;
-    }
-
     protected function processClaim(
         Judging|ExternalJudgement|null $judging,
         Request $request,
