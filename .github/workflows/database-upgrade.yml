@@ -34,3 +34,29 @@ jobs:
         run: mysql -hsqlserver -uroot -proot -e "SHOW TABLES FROM domjudge;"
       - name: Check for Errors in DOMjudge Webinterface
         run: .github/jobs/webstandard.sh none admin
+      - name: dump the db
+        if: ${{ !cancelled() }}
+        run: mysqldump -uroot -proot --quick --max_allowed_packet=1024M domjudge > /tmp/db.sql
+      - name: Upload database dump for debugging
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: DB-dump
+          path: /tmp/db.sql
+      - name: Get SQL logs
+        run: docker logs "${{ job.services.sqlserver.id }}"
+      - name: Collect docker logs on failure
+        if: ${{ !cancelled() }}
+        uses: jwalton/gh-docker-logs@v1
+        with:
+          dest: '/tmp/docker-logs'
+      - name: Upload all logs/artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs
+          path: |
+            /var/log/nginx
+            /opt/domjudge/domserver/webapp/var/log/*.log
+            /tmp/docker-logs
+            /tmp/artifacts
