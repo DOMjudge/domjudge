@@ -188,12 +188,12 @@ struct option const long_opts[] = {
 	{ nullptr,     0,                 nullptr,          0 }
 };
 
-void warning(   const char *, ...) __attribute__((format (printf, 1, 2)));
-void verbose(   const char *, ...) __attribute__((format (printf, 1, 2)));
-void error(int, const char *, ...) __attribute__((format (printf, 2, 3)));
+static void warning(   const char *, ...) __attribute__((format (printf, 1, 2)));
+static void verbose(   const char *, ...) __attribute__((format (printf, 1, 2)));
+static void error(int, const char *, ...) __attribute__((format (printf, 2, 3)));
 void write_meta(const char *, const char *, ...) __attribute__((format (printf, 2, 3)));
 
-void warning(const char *format, ...)
+static void warning(const char *format, ...)
 {
 	va_list ap;
 	va_start(ap,format);
@@ -207,7 +207,7 @@ void warning(const char *format, ...)
 	va_end(ap);
 }
 
-void verbose(const char *format, ...)
+static void verbose(const char *format, ...)
 {
 	va_list ap;
 	va_start(ap,format);
@@ -244,7 +244,7 @@ void warning_from_signalhandler(const char* msg)
 	}
 }
 
-void error(int errnum, const char *format, ...)
+static void error(int errnum, const char *format, ...)
 {
 	// Silently ignore errors that happen while handling other errors.
 	if (in_error_handling) return;

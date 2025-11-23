@@ -5,9 +5,9 @@
 #ifndef LIB_ERROR_H
 #define LIB_ERROR_H
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <errno.h>
+#include <cstdarg>
+#include <cstdio>
+#include <cerrno>
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #else
@@ -19,10 +19,6 @@
 
 #define WARNSTR   "warning"
 #define WARNMATCH WARNSTR": "
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 extern const int exit_failure;
 
@@ -88,9 +84,5 @@ char *vallocstr(const char *, va_list);
  *
  * Returns a pointer to the allocated string
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* LIB_ERROR_H */
