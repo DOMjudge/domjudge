@@ -546,8 +546,11 @@ class Utils
      *
      * Copied from lib/www/print.php
      */
-    public static function printtimediff(float $start, ?float $end = null): string
+    public static function printtimediff(?float $start, ?float $end = null): string
     {
+        if (is_null($start)) {
+            return '-';
+        }
         if (is_null($end)) {
             $end = microtime(true);
         }
