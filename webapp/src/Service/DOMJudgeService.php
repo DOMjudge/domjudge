@@ -896,10 +896,6 @@ class DOMJudgeService
 
         /** @var Contest $contest */
         $contest = $contestQuery->getQuery()->getOneOrNullResult();
-        if (!$contest) {
-            return false;
-        }
-
         if ($contest->getContestProblemsetType()) {
             return true;
         }
@@ -1157,7 +1153,7 @@ class DOMJudgeService
             'problems' => $problems,
             'samples' => $samples,
             'showLimits' => $showLimits,
-            'showSamples' => $this->checkIfSamplesZipForContest($contest),
+            'showSamples' => $contest && $this->checkIfSamplesZipForContest($contest),
             'defaultMemoryLimit' => $defaultMemoryLimit,
             'timeFactorDiffers' => $timeFactorDiffers,
             'clarifications' => $clars,
