@@ -14,9 +14,7 @@
 
 #include "lib.misc.h"
 
-extern "C" {
 #include "lib.error.h"
-}
 
 #define PROGRAM "evict"
 #define VERSION DOMJUDGE_VERSION "/" REVISION

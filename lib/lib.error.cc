@@ -18,24 +18,16 @@
 
 #include "lib.error.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
+#include <cstdarg>
+#include <cstdio>
+#include <ctime>
+#include <vector>
+#include <string>
+#include <iostream>
 #include <unistd.h>
-#include <time.h>
 #include <sys/time.h>
-
-/* Define va_copy macro if not available (ANSI C99 only).
- * memcpy() is fallback suggested by the autoconf manual, but doesn't
- * work with g++ on AMD 64bit platform.
- * FIXME: Replace by autoconf test?
- */
-#ifndef va_copy
-#ifdef __va_copy
-#define va_copy(dest, src) __va_copy(dest,src)
-#else
-#define va_copy(dest, src) memcpy(&dest, &src, sizeof(va_list))
-#endif
-#endif
 
 /* Use program name in syslogging if defined */
 #ifndef PROGRAM
@@ -52,22 +44,28 @@ int  loglevel     = LOG_DEBUG;
 FILE *stdlog      = NULL;
 int  syslog_open  = 0;
 
-char *printf_escape(const char *str)
+/* Escape '%' characters in a string for use in printf like functions */
+static std::string escape_percent(const char *str)
 {
-	char *escaped;
-	char c;
-	size_t str_pos, esc_pos;
+	if (str == NULL) return "";
+	std::string escaped;
+	size_t len = strlen(str);
+	size_t percent_count = 0;
 
-	escaped = (char *)malloc(2*strlen(str)+1);
-	esc_pos = 0;
-
-	for(str_pos=0; str_pos<strlen(str); str_pos++) {
-		c = str[str_pos];
-		escaped[esc_pos++] = c;
-		if ( c=='%' ) escaped[esc_pos++] = c;
+	for (size_t i = 0; i < len; ++i) {
+		if (str[i] == '%') {
+			percent_count++;
+		}
 	}
-	escaped[esc_pos] = 0;
 
+	escaped.reserve(len + percent_count);
+
+	for (size_t i = 0; i < len; ++i) {
+		escaped += str[i];
+		if (str[i] == '%') {
+			escaped += '%';
+		}
+	}
 	return escaped;
 }
 
@@ -77,9 +75,7 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 	struct timeval currtime;
 	struct tm tm_buf;
 	char timestring[128];
-	char *progname_escaped;
-	char *buffer;
-	int bufferlen;
+	std::string buffer;
 	va_list aq;
 	char *str, *endptr;
 	int syslog_fac;
@@ -106,37 +102,36 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 	strftime(timestring, sizeof(timestring), "%b %d %H:%M:%S", &tm_buf);
 	sprintf(timestring+strlen(timestring), ".%03d", (int)(currtime.tv_usec/1000));
 
-	progname_escaped = printf_escape(progname);
-	if ( progname_escaped==NULL ) abort();
+	std::string progname_escaped = escape_percent(progname);
 
-	bufferlen = strlen(timestring)+strlen(progname_escaped)+strlen(mesg)+20;
-	buffer = (char *)malloc(bufferlen);
-	if ( buffer==NULL ) abort();
-
-	snprintf(buffer, bufferlen, "[%s] %s[%d]: %s\n",
-	         timestring, progname_escaped, getpid(), mesg);
-
-	free(progname_escaped);
+	// Construct the format string: "[time] progname[pid]: message\n"
+	buffer = "[";
+	buffer += timestring;
+	buffer += "] ";
+	buffer += progname_escaped;
+	buffer += "[";
+	buffer += std::to_string(getpid());
+	buffer += "]: ";
+	buffer += mesg;
+	buffer += "\n";
 
 	if ( msglevel<=verbose ) {
 		va_copy(aq, ap);
-		vfprintf(stderr, buffer, aq);
+		vfprintf(stderr, buffer.c_str(), aq);
 		fflush(stderr);
 		va_end(aq);
 	}
 	if ( msglevel<=loglevel && stdlog!=NULL ) {
 		va_copy(aq, ap);
-		vfprintf(stdlog, buffer, aq);
+		vfprintf(stdlog, buffer.c_str(), aq);
 		fflush(stdlog);
 		va_end(aq);
 	}
 
-	free(buffer);
-
 	if ( msglevel<=loglevel && syslog_open ) {
-		buffer = vallocstr(mesg, ap);
-		syslog(msglevel, "%s", buffer);
-		free(buffer);
+		char *syslog_buf = vallocstr(mesg, ap);
+		syslog(msglevel, "%s", syslog_buf);
+		free(syslog_buf);
 	}
 }
 
@@ -161,47 +156,36 @@ void logmsg(int msglevel, const char *mesg, ...)
 */
 char *errorstring(const char *type, int errnum, const char *mesg)
 {
-	size_t buffersize;
-	char *errtype, *errdescr, *buffer;
+	std::string errtype;
+	std::string errdescr;
+	std::string buffer;
 
 	/* Set errtype to given string or default to 'ERROR' */
 	if ( type==NULL ) {
-		errtype = strdup(ERRSTR);
-		if ( errtype==NULL ) abort();
+		errtype = ERRSTR;
 	} else {
-		errtype = (char *)type;
+		errtype = type;
 	}
 
-	errdescr = NULL;
 	if ( errnum != 0 ) {
 		errdescr = strerror(errno);
 	} else if ( mesg == NULL ) {
-		errdescr = strdup("unknown error");
+		errdescr = "unknown error";
 	}
 
-	buffersize = strlen(errtype)
-	            + (errdescr == NULL ? 0 : strlen(errdescr))
-	            + (mesg == NULL     ? 0 : strlen(mesg))
-	            + 5;
+	buffer = errtype + ": ";
 
-	buffer = (char *)malloc(sizeof(char) * buffersize);
-	if ( buffer==NULL ) abort();
-	buffer[0] = '\0';
-
-	strcat(buffer, errtype);
-	strcat(buffer, ": ");
-
-	if ( mesg != NULL )     strcat(buffer, mesg);
+	if ( mesg != NULL )     buffer += mesg;
 
 	if ( mesg != NULL &&
-	     errdescr != NULL ) strcat(buffer, ": ");
+	     !errdescr.empty() ) buffer += ": ";
 
-	if ( errdescr != NULL )	strcat(buffer, errdescr);
+	if ( !errdescr.empty() ) buffer += errdescr;
 
-	if ( type == NULL ) free(errtype);
-	if ( mesg == NULL && errnum == 0 ) free(errdescr);
+	char *res = strdup(buffer.c_str());
+	if ( res==NULL ) abort();
 
-	return buffer;
+	return res;
 }
 
 /* Function to generate and write error logmessage (using vlogmsg) */
