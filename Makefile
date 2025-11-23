@@ -254,6 +254,14 @@ inplace-install-l:
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/verdicts.php"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp"
 	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp"
+	@echo "        setfacl    -m d:u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc"
+	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc"
+	@echo "        setfacl    -m d:u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual"
+	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual"
+	@echo "        setfacl    -m d:u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual/build"
+	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual/build"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/doc/manual/build/html"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/doc/manual/build/html"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries"
@@ -292,6 +300,14 @@ inplace-postinstall-permissions:
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/verdicts.php
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp
 	setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/webapp
+	setfacl    -m d:u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc
+	setfacl    -m   u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc
+	setfacl    -m d:u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual
+	setfacl    -m   u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual
+	setfacl    -m d:u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual/build
+	setfacl    -m   u:$(WEBSERVER_GROUP):x    $(CURDIR)/doc/manual/build
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rx   $(CURDIR)/doc/manual/build/html
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rx   $(CURDIR)/doc/manual/build/html
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
 	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/public/images/countries
