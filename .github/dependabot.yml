@@ -1,7 +1,15 @@
 version: 2
 updates:
   - package-ecosystem: "composer"
-    directory: "/"
+    directory: "/webapp"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 0
+    versioning-strategy: increase-if-necessary
+    allow:
+        - dependency-type: "all"
+  - package-ecosystem: "npm"
+    directory: "/webapp"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 0
