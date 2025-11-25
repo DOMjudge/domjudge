@@ -1056,6 +1056,23 @@ class Utils
         return json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
     }
 
+    public static function reencodeUtf8(string $source): string {
+        $detectOrder = array_unique(array_merge(mb_detect_order(), mb_list_encodings()));
+        $encoding = mb_detect_encoding($source, $detectOrder, strict: true);
+        if ($encoding !== false) {
+            $encoded = $encoding !== 'UTF-8' ? mb_convert_encoding($source, 'UTF-8', $encoding) : $source;
+            // Some binary files are strictly valid in an encoding but fail to re-encoding correctly.
+            // A successive strict call to mb_detect_encoding still says it is validly encoded, but rendering the string fails.
+            // This will filter these files.
+            $sanity = mb_convert_encoding($encoded, $encoding, 'UTF-8');
+            if ($source === $sanity) {
+                return $encoded;
+            }
+        }
+        return "Could not display file as UTF-8.\n"
+             . "Check the supported PHP mbstring encodings on the `Config checker` page if you did not expect this file to be binary.";
+    }
+
     /**
      * @return array<string, string>
      */

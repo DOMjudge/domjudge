@@ -920,7 +920,7 @@ class SubmissionController extends BaseController
             $files[$f->getFilename()][$submitId] = [
                 'rank' => $f->getRank(),
                 'filename' => $f->getFilename(),
-                'source'   => mb_check_encoding($f->getSourcecode(), 'UTF-8') ? $f->getSourcecode() : "Could not display file as UTF-8, is it binary?",
+                'source'   => Utils::reencodeUtf8($f->getSourcecode()),
             ];
 
             // Keep track of the single filename within a submission for handling renaming.
