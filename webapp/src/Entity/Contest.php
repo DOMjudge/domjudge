@@ -1340,14 +1340,6 @@ class Contest extends BaseApiEntity implements
         }
 
         if ($this->medalsEnabled) {
-            foreach (['goldMedals', 'silverMedals', 'bronzeMedals'] as $field) {
-                if ($this->$field === null) {
-                    $context
-                        ->buildViolation('This field is required when \'Enable medals\' is set.')
-                        ->atPath($field)
-                        ->addViolation();
-                }
-            }
             if ($this->medal_categories->isEmpty()) {
                 $context
                     ->buildViolation('This field is required when \'Process medals\' is set.')
