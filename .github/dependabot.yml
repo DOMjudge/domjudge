@@ -21,7 +21,7 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 0
-    versioning-strategy: lockfile-only
+    versioning-strategy: increase-if-necessary
     allow:
         - dependency-type: "all"
     target-branch: "8.3"
