@@ -892,7 +892,7 @@ $(function() {
 HTML;
         $rank   = $index;
         $id     = sprintf('editor%s', $rank);
-        $source = mb_check_encoding($code, 'UTF-8') ? $code : "Could not display file as UTF-8, is it binary?";
+        $source = Utils::reencodeUtf8($code);
         if ($elementToUpdate) {
             $extraForEdit = <<<JS
 editor.getModel().onDidChangeContent(() => {
@@ -942,7 +942,7 @@ JS,
         }
         $this->renderedSources[$file->getSubmitfileid()] = true;
 
-        $source = mb_check_encoding($file->getSourcecode(), 'UTF-8') ? $file->getSourcecode() : "Could not display file as UTF-8, is it binary?";
+        $source = Utils::reencodeUtf8($file->getSourcecode());
         return sprintf(
             <<<JS
 monaco.editor.createModel(
