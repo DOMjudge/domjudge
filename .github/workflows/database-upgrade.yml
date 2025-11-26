@@ -24,6 +24,20 @@ jobs:
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v4
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: webapp/node_modules
+          key: npm-${{ hashFiles('webapp/package-lock.json') }}
+          restore-keys: |
+            npm-
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: webapp/vendor
+          key: composer-${{ hashFiles('webapp/composer.lock') }}
+          restore-keys: |
+            composer-
       - name: Import Database
         run: mysql -hsqlserver -uroot -proot < .github/jobs/data/dj733.sql
       - name: Upgrade DOMjudge

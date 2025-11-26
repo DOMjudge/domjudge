@@ -50,6 +50,20 @@ jobs:
             db: install
     steps:
       - uses: actions/checkout@v4
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: webapp/node_modules
+          key: npm-${{ hashFiles('webapp/package-lock.json') }}
+          restore-keys: |
+            npm-
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: webapp/vendor
+          key: composer-${{ hashFiles('webapp/composer.lock') }}
+          restore-keys: |
+            composer-
       - name: Install DOMjudge
         run: .github/jobs/baseinstall.sh ${{ matrix.role }}
       - name: Run webstandard tests (W3C, WCAG)
