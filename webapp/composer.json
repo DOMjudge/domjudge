@@ -57,7 +57,7 @@
 		"doctrine/doctrine-bundle": "^2.8",
 		"doctrine/doctrine-fixtures-bundle": "^4.0",
 		"doctrine/doctrine-migrations-bundle": "^3.2",
-		"doctrine/orm": "^2.14",
+		"doctrine/orm": "^3.0",
 		"enshrined/svg-sanitize": "^0.22.0",
 		"friendsofsymfony/rest-bundle": "^3.5",
 		"ircmaxell/password-compat": "*",

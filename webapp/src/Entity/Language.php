@@ -57,10 +57,10 @@ class Language extends BaseApiEntity implements
     )]
     #[Assert\NotBlank]
     #[Assert\All([
-        new Assert\Regex([
-            'pattern' => '/^[^.]/',
-            'message' => 'The extension should not start with a dot.'
-        ])
+        new Assert\Regex(
+            pattern: '/^[^.]/',
+            message: 'The extension should not start with a dot.'
+        )
     ])]
     #[Serializer\Type('array<string>')]
     private array $extensions = [];

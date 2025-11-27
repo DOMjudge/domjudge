@@ -30,18 +30,12 @@ class JudgeTaskType extends Type
         return sprintf("ENUM(%s)", $statuses);
     }
 
-    /**
-     * @return mixed
-     */
-    public function convertToPHPValue($value, AbstractPlatform $platform)
+    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): mixed
     {
         return $value;
     }
 
-    /**
-     * @return mixed
-     */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): mixed
     {
         if (!in_array($value, self::ALL_TYPES)) {
             throw new InvalidArgumentException("Invalid judgetask type");
@@ -49,13 +43,8 @@ class JudgeTaskType extends Type
         return $value;
     }
 
-    public function getName(): string
+    public function getMappedDatabaseTypes(AbstractPlatform $platform): array
     {
-        return self::ENUM_JUDGE_TASK_TYPE;
-    }
-
-    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
-    {
-        return true;
+        return ['enum'];
     }
 }

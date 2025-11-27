@@ -6,7 +6,7 @@ use App\Entity\Configuration;
 use App\Entity\Executable;
 use App\Service\ConfigurationService;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ObjectRepository;
+use Doctrine\ORM\EntityRepository;
 use Exception;
 use Generator;
 use PHPUnit\Framework\MockObject\Builder\InvocationMocker;
@@ -24,9 +24,9 @@ class ConfigurationServiceTest extends KernelTestCase
     private ?EntityManagerInterface $em;
 
     /**
-     * @var ObjectRepository<Configuration>&MockObject
+     * @var EntityRepository<Configuration>&MockObject
      */
-    private ObjectRepository&MockObject $configRepository;
+    private EntityRepository&MockObject $configRepository;
 
     private InvocationMocker $emGetRepositoryExpects;
 
@@ -43,7 +43,7 @@ class ConfigurationServiceTest extends KernelTestCase
         self::bootKernel();
 
         $this->em                     = $this->createMock(EntityManagerInterface::class);
-        $this->configRepository       = $this->createMock(ObjectRepository::class);
+        $this->configRepository       = $this->createMock(EntityRepository::class);
         $this->emGetRepositoryExpects = $this->em->expects(self::any())
             ->method('getRepository')
             ->willReturnMap([[Configuration::class, $this->configRepository]]);
@@ -298,7 +298,7 @@ class ConfigurationServiceTest extends KernelTestCase
             throw new Exception("Item value should be default_{compare,run}.");
         }
 
-        $execRepository = $this->createMock(ObjectRepository::class);
+        $execRepository = $this->createMock(EntityRepository::class);
 
         $this->emGetRepositoryExpects
             ->willReturnMap([[Configuration::class, $this->configRepository], [Executable::class, $execRepository]]);

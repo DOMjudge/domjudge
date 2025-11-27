@@ -8,11 +8,6 @@ use Doctrine\DBAL\Types\Type;
 
 class TinyIntType extends Type
 {
-    public function getName(): string
-    {
-        return 'tinyint';
-    }
-
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         $declaration = 'TINYINT';
@@ -33,13 +28,13 @@ class TinyIntType extends Type
         return $value === null ? null : (int)$value;
     }
 
-    public function getBindingType(): int
+    public function getBindingType(): ParameterType
     {
         return ParameterType::INTEGER;
     }
 
-    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
+    public function getMappedDatabaseTypes(AbstractPlatform $platform): array
     {
-        return true;
+        return ['tinyint'];
     }
 }

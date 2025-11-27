@@ -52,7 +52,7 @@ class User extends BaseApiEntity implements
     #[ORM\Column(options: ['comment' => 'User login name'])]
     // See: https://symfony.com/doc/current/reference/constraints/Regex.html, the regex is considered valid when empty
     #[Assert\NotBlank]
-    #[Assert\Regex('/^[a-z0-9@._-]+$/i', message: 'Only alphanumeric characters and _-@. are allowed')]
+    #[Assert\Regex(pattern: '/^[a-z0-9@._-]+$/i', message: 'Only alphanumeric characters and _-@. are allowed')]
     private string $username = '';
 
     #[ORM\Column(options: ['comment' => 'Name'])]
@@ -148,6 +148,7 @@ class User extends BaseApiEntity implements
         return null;
     }
 
+    #[\Deprecated]
     public function eraseCredentials(): void
     {
         $this->plainPassword = null;

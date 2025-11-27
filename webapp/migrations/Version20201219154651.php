@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
@@ -25,7 +26,7 @@ final class Version20201219154651 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
+        $this->abortIf(!$this->connection->getDatabasePlatform() instanceof AbstractMySQLPlatform, 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('CREATE TABLE judgetask (judgetaskid INT UNSIGNED AUTO_INCREMENT NOT NULL COMMENT \'Judgetask ID\', judgehostid INT UNSIGNED DEFAULT NULL COMMENT \'Judgehost ID\', type ENUM(\'judging_run\', \'generic_task\', \'config_check\', \'debug_info\', \'prefetch\') DEFAULT \'judging_run\' NOT NULL COMMENT \'Type of the judge task.(DC2Type:judge_task_type)\', priority INT NOT NULL COMMENT \'Priority; negative means higher priority\', jobid INT UNSIGNED DEFAULT NULL COMMENT \'All judgetasks with the same jobid belong together.\', submitid INT UNSIGNED DEFAULT NULL COMMENT \'Submission ID being judged\', compile_script_id INT UNSIGNED DEFAULT NULL COMMENT \'Compile script ID\', run_script_id INT UNSIGNED DEFAULT NULL COMMENT \'Run script ID\', compare_script_id INT UNSIGNED DEFAULT NULL COMMENT \'Compare script ID\', testcase_id INT UNSIGNED DEFAULT NULL COMMENT \'Testcase ID\', compile_config LONGTEXT DEFAULT NULL COLLATE `utf8mb4_bin` COMMENT \'The compile config as JSON-blob.\', run_config LONGTEXT DEFAULT NULL COLLATE `utf8mb4_bin` COMMENT \'The run config as JSON-blob.\', compare_config LONGTEXT DEFAULT NULL COLLATE `utf8mb4_bin` COMMENT \'The compare config as JSON-blob.\', valid TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Only handed out if still valid.\', starttime NUMERIC(32, 9) UNSIGNED DEFAULT NULL COMMENT \'Time the judgetask was started\', PRIMARY KEY(judgetaskid)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB COMMENT = \'Individual judge tasks.\' ');
         $this->addSql('CREATE TABLE executable_file (execfileid INT UNSIGNED AUTO_INCREMENT NOT NULL COMMENT \'Executable file ID\', immutable_execid INT UNSIGNED DEFAULT NULL COMMENT \'ID\', filename VARCHAR(255) NOT NULL COMMENT \'Filename as uploaded\', ranknumber INT UNSIGNED NOT NULL COMMENT \'Order of the executable files, zero-indexed\', file_content LONGBLOB NOT NULL COMMENT \'Full file content(DC2Type:blobtext)\', hash VARCHAR(32) DEFAULT NULL COMMENT \'hash of the content\', is_executable TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Whether this file gets an executable bit.\', INDEX immutable_execid (immutable_execid), UNIQUE INDEX rankindex (immutable_execid, ranknumber), UNIQUE INDEX filename (immutable_execid, filename(190)), PRIMARY KEY(execfileid)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB COMMENT = \'Files associated to an executable\' ');

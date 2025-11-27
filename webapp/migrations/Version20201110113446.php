@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
@@ -25,7 +26,7 @@ final class Version20201110113446 extends AbstractMigration
     public function up(Schema $schema) : void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
+        $this->abortIf(!$this->connection->getDatabasePlatform() instanceof AbstractMySQLPlatform, 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE language CHANGE compile_script compile_script VARCHAR(32) DEFAULT NULL COMMENT \'Executable ID (string)\'');
         $this->addSql('ALTER TABLE problem CHANGE special_run special_run VARCHAR(32) DEFAULT NULL COMMENT \'Executable ID (string)\', CHANGE special_compare special_compare VARCHAR(32) DEFAULT NULL COMMENT \'Executable ID (string)\'');
@@ -49,7 +50,7 @@ final class Version20201110113446 extends AbstractMigration
     public function down(Schema $schema) : void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
+        $this->abortIf(!$this->connection->getDatabasePlatform() instanceof AbstractMySQLPlatform, 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE balloon CHANGE submitid submitid INT UNSIGNED NOT NULL COMMENT \'Submission for which balloon was earned\'');
         $this->addSql('ALTER TABLE clarification CHANGE probid probid INT UNSIGNED DEFAULT NULL COMMENT \'Problem associated to this clarification\', CHANGE cid cid INT UNSIGNED NOT NULL COMMENT \'Contest ID\', CHANGE respid respid INT UNSIGNED DEFAULT NULL COMMENT \'In reply to clarification ID\', CHANGE sender sender INT UNSIGNED DEFAULT NULL COMMENT \'Team ID, null means jury\', CHANGE recipient recipient INT UNSIGNED DEFAULT NULL COMMENT \'Team ID, null means to jury or to all\'');
