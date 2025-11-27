@@ -44,10 +44,8 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
             'help'        => 'Optional ID of the organization in the ICPC CMS.',
             'constraints' => [
                 new Regex(
-                    [
-                        'pattern' => '/^[a-zA-Z0-9_-]+$/i',
-                        'message' => 'Only letters, numbers, dashes and underscores are allowed.',
-                    ]
+                    pattern: '/^[a-zA-Z0-9_-]+$/i',
+                    message: 'Only letters, numbers, dashes and underscores are allowed.',
                 )
             ]
         ]);
