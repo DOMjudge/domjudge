@@ -92,7 +92,7 @@ class SubmissionControllerTest extends BaseTestCase
 
     public function provideAddInvalidData(): Generator
     {
-        yield ['demo', [], ""];
+        yield ['demo', [], 'Request payload contains invalid "json" data.'];
         yield ['demo', ['unknown_key'], "/One of the arguments 'problem', 'problem_id' is required/"];
         yield ['demo', ['problem' => 'hello'], "/One of the arguments 'language', 'language_id' is required/"];
         yield ['demo', ['problem_id' => 'hello'], "/One of the arguments 'language', 'language_id' is required/"];

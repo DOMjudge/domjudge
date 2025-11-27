@@ -229,7 +229,6 @@ class ImportProblemService
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($problemProperties as $key => $value) {
             $propertyAccessor->setValue($problem, $key, $value);
-            assert($problem instanceof Problem);
         }
 
         $hasErrors = false;
@@ -249,7 +248,6 @@ class ImportProblemService
         if ($contestProblem !== null) {
             foreach ($contestProblemProperties as $key => $value) {
                 $propertyAccessor->setValue($contestProblem, $key, $value);
-                assert($contestProblem instanceof ContestProblem);
             }
 
             $errors = $this->validator->validate($contestProblem);
@@ -1089,7 +1087,6 @@ class ImportProblemService
         foreach ($yamlProblemProperties as $key => $value) {
             try {
                 $propertyAccessor->setValue($problem, $key, $value);
-                assert($problem instanceof Problem);
             } catch (Exception $e) {
                 $messages['danger'][] = sprintf('Error: problem.%s: %s', $key, $e->getMessage());
                 return false;

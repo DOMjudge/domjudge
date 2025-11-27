@@ -4,17 +4,11 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
-use App\Entity\Configuration;
-use App\Entity\TeamCategory;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-final class Version20200131064449 extends AbstractMigration implements ContainerAwareInterface
+final class Version20200131064449 extends AbstractMigration
 {
-    use ContainerAwareTrait;
-
     public function isTransactional(): bool
     {
         return false;

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use App\Migrations\Factory\ConfigurationServiceAwareInterface;
+use App\Migrations\Factory\ConfigurationServiceAwareTrait;
 use App\Service\ConfigurationService;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20200111104415 extends AbstractMigration implements ContainerAwareInterface
+final class Version20200111104415 extends AbstractMigration implements ConfigurationServiceAwareInterface
 {
-    use ContainerAwareTrait;
+    use ConfigurationServiceAwareTrait;
 
     public function isTransactional(): bool
     {
@@ -29,9 +29,8 @@ final class Version20200111104415 extends AbstractMigration implements Container
 
     public function up(Schema $schema): void
     {
-        $configService = $this->container->get(ConfigurationService::class);
-        $specs         = $configService->getConfigSpecification();
-        $allConfig     = $configService->all();
+        $specs         = $this->configurationService->getConfigSpecification();
+        $allConfig     = $this->configurationService->all();
 
         foreach ($allConfig as $name => $value) {
             if ($value == ($specs[$name]->default_value ?? null)) {
@@ -45,8 +44,7 @@ final class Version20200111104415 extends AbstractMigration implements Container
 
     public function down(Schema $schema): void
     {
-        $configService = $this->container->get(ConfigurationService::class);
-        $allConfig     = $configService->all();
+        $allConfig     = $this->configurationService->all();
 
         foreach ($allConfig as $name => $value) {
             $this->addSql(

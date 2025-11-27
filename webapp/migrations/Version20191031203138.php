@@ -7,16 +7,12 @@ namespace DoctrineMigrations;
 use App\Entity\Language;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20191031203138 extends AbstractMigration implements ContainerAwareInterface
+final class Version20191031203138 extends AbstractMigration
 {
-    use ContainerAwareTrait;
-
     public function isTransactional(): bool
     {
         return false;
