@@ -9,6 +9,8 @@ on:
 jobs:
   integration:
     runs-on: ubuntu-24.04
+    env:
+      MYSQL_ROOT_PASSWORD: mysql_root_password
     timeout-minutes: 30
     container:
       image: domjudge/gitlabci:24.04
@@ -19,9 +21,7 @@ jobs:
         ports:
           - 3306:3306
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_USER: domjudge
-          MYSQL_PASSWORD: domjudge
+          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v4
@@ -95,7 +95,7 @@ jobs:
           done
       - name: dump the db
         if: ${{ !cancelled() }}
-        run: mysqldump -uroot -proot --quick --max_allowed_packet=1024M domjudge > /tmp/db.sql
+        run: mysqldump -uroot -p${{ env.MYSQL_ROOT_PASSWORD }} --quick --max_allowed_packet=1024M domjudge > /tmp/db.sql
       - name: Upload database dump for debugging
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4

@@ -11,8 +11,6 @@ export APP_ENV="${4:-prod}"
 # In the test environment, we need to use a different database
 [ "$APP_ENV" = "prod" ] && DATABASE_NAME=domjudge || DATABASE_NAME=domjudge_test
 
-MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
-
 set -euxo pipefail
 
 if [ -z "$phpversion" ]; then
@@ -74,25 +72,22 @@ EOF
 cat ~/.my.cnf
 
 # TODO: Remove after fixing https://github.com/DOMjudge/domjudge/issues/2848
-mysql_root "SET GLOBAL innodb_snapshot_isolation = OFF;"
+mysql_log "SET GLOBAL innodb_snapshot_isolation = OFF;"
 
-mysql_root "CREATE DATABASE IF NOT EXISTS \`$DATABASE_NAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql_root "CREATE USER IF NOT EXISTS \`domjudge\`@'%' IDENTIFIED BY 'domjudge';"
-mysql_root "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DATABASE_NAME\`.* TO 'domjudge'@'%';"
-mysql_root "FLUSH PRIVILEGES;"
+mysql_log "CREATE DATABASE IF NOT EXISTS \`$DATABASE_NAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql_log "CREATE USER IF NOT EXISTS \`domjudge\`@'%' IDENTIFIED BY 'domjudge';"
+mysql_log "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DATABASE_NAME\`.* TO 'domjudge'@'%';"
+mysql_log "FLUSH PRIVILEGES;"
+echo "unused:sqlserver:$DATABASE_NAME:domjudge:domjudge:3306" > /opt/domjudge/domserver/etc/dbpasswords.secret
 
 # Show some MySQL debugging
-mysql_root "show databases"
-mysql_root "SELECT CURRENT_USER();"
-mysql_root "SELECT USER();"
-mysql_root "SELECT user,host FROM mysql.user"
-mysql_root "SET GLOBAL max_allowed_packet=1073741824"
-mysql_root "SHOW GLOBAL STATUS LIKE 'Connection_errors_%'"
-mysql_root "SHOW VARIABLES LIKE 'innodb_snapshot_isolation'"
-mysql_root "SHOW VARIABLES LIKE '%_timeout'"
-echo "unused:sqlserver:$DATABASE_NAME:domjudge:domjudge:3306" > /opt/domjudge/domserver/etc/dbpasswords.secret
-mysql_user "SELECT CURRENT_USER();"
-mysql_user "SELECT USER();"
+mysql_log "show databases"
+mysql_log "SELECT CURRENT_USER();"
+mysql_log "SELECT USER();"
+mysql_log "SELECT user,host FROM mysql.user"
+mysql_log "SET GLOBAL max_allowed_packet=1073741824"
+mysql_log "SHOW GLOBAL STATUS LIKE 'Connection_errors_%'"
+mysql_log "SHOW VARIABLES LIKE '%_timeout'"
 section_end
 
 if [ "${db}" = "install" ]; then
@@ -102,6 +97,7 @@ if [ "${db}" = "install" ]; then
 elif [ "${db}" = "upgrade" ]; then
     section_start "Upgrade DOMjudge database"
     /opt/domjudge/domserver/bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} upgrade
+    /opt/domjudge/domserver/webapp/bin/console domjudge:reset-user-password admin "pass"
     section_end
 fi
 
@@ -141,7 +137,7 @@ if [ "${db}" = "install" ]; then
     section_start "Install the example data"
     if [ "$version" = "unit" ]; then
 	    # Make sure admin has no team associated so we will not insert submissions during unit tests.
-	    mysql_root "UPDATE user SET teamid=null WHERE userid=1;" $DATABASE_NAME
+	    mysql_log "UPDATE user SET teamid=null WHERE userid=1;" $DATABASE_NAME
     fi
     /opt/domjudge/domserver/bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} install-examples | tee -a "$ARTIFACTS/mysql.txt"
     section_end
@@ -149,23 +145,23 @@ fi
 
 section_start "Setup user"
 # We're using the admin user in all possible roles
-mysql_root "DELETE FROM userrole WHERE userid=1;" $DATABASE_NAME
+mysql_log "DELETE FROM userrole WHERE userid=1;" $DATABASE_NAME
 if [ "$version" = "team" ]; then
     # Add team to admin user
-    mysql_root "INSERT INTO userrole (userid, roleid) VALUES (1, 3);" $DATABASE_NAME
-    mysql_root "UPDATE user SET teamid = 1 WHERE userid = 1;" $DATABASE_NAME
+    mysql_log "INSERT INTO userrole (userid, roleid) VALUES (1, 3);" $DATABASE_NAME
+    mysql_log "UPDATE user SET teamid = 1 WHERE userid = 1;" $DATABASE_NAME
 elif [ "$version" = "jury" ]; then
     # Add jury to admin user
-    mysql_root "INSERT INTO userrole (userid, roleid) VALUES (1, 2);" $DATABASE_NAME
+    mysql_log "INSERT INTO userrole (userid, roleid) VALUES (1, 2);" $DATABASE_NAME
 elif [ "$version" = "balloon" ]; then
     # Add balloon to admin user
-    mysql_root "INSERT INTO userrole (userid, roleid) VALUES (1, 4);" $DATABASE_NAME
+    mysql_log "INSERT INTO userrole (userid, roleid) VALUES (1, 4);" $DATABASE_NAME
 elif [ "$version" = "admin" ]; then
     # Add admin to admin user
-    mysql_root "INSERT INTO userrole (userid, roleid) VALUES (1, 1);" $DATABASE_NAME
+    mysql_log "INSERT INTO userrole (userid, roleid) VALUES (1, 1);" $DATABASE_NAME
 elif [ "$version" = "all" ] || [ "$version" = "unit" ]; then
-    mysql_root "INSERT INTO userrole (userid, roleid) VALUES (1, 1);" $DATABASE_NAME
-    mysql_root "INSERT INTO userrole (userid, roleid) VALUES (1, 3);" $DATABASE_NAME
-    mysql_root "UPDATE user SET teamid = 1 WHERE userid = 1;" $DATABASE_NAME
+    mysql_log "INSERT INTO userrole (userid, roleid) VALUES (1, 1);" $DATABASE_NAME
+    mysql_log "INSERT INTO userrole (userid, roleid) VALUES (1, 3);" $DATABASE_NAME
+    mysql_log "UPDATE user SET teamid = 1 WHERE userid = 1;" $DATABASE_NAME
 fi
 section_end
