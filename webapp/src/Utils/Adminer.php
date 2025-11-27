@@ -2,7 +2,10 @@
 
 namespace App\Utils;
 
-class Adminer extends \Adminer
+use function Adminer\h;
+use function Adminer\lang;
+
+class Adminer extends \Adminer\Adminer
 {
     public function name(): string
     {
@@ -11,26 +14,17 @@ class Adminer extends \Adminer
 
     public function database(): string
     {
-        return 'domjudge';
+        return $this->getDatabaseCredentials()['db'];
     }
 
     public function databases($flush = true): array
     {
-        return ['domjudge'];
+        return [$this->getDatabaseCredentials()['db']];
     }
 
     public function credentials(): array
     {
-        // Load credentials from <etcDir>/dbpasswords.secret
-        $dbsecretsfile = $GLOBALS['etcDir'] . '/dbpasswords.secret';
-        $db_credentials = file($dbsecretsfile);
-        foreach ($db_credentials as $line) {
-            if ($line[0] == '#') {
-                continue;
-            }
-            list($_, $host, $db, $user, $pass, $port) = array_pad(explode(':', trim($line)), 6, null);
-            break;
-        }
+        ['host' => $host, 'user' => $user, 'pass' => $pass] = $this->getDatabaseCredentials();
 
         return [$host, $user, $pass];
     }
@@ -52,8 +46,34 @@ class Adminer extends \Adminer
 
     public function loginForm()
     {
+        $db = $this->getDatabaseCredentials()['db'];
         echo "<input type='hidden' value='server' name='auth[driver]'/>";
-        echo "<input type='hidden' value='domjudge' name='auth[db]'/>";
+        echo "<input type='hidden' value='$db' name='auth[db]'/>";
         echo "<p><input type='submit' value='" . lang('Click to Login') . "'>\n";
+    }
+
+    /**
+     * @return array{host: string, db: string, user: string, pass: string}
+     */
+    private function getDatabaseCredentials(): array
+    {
+        $host = $db = $user = $pass = null;
+
+        // Load credentials from <etcDir>/dbpasswords.secret
+        $dbsecretsfile = $GLOBALS['etcDir'] . '/dbpasswords.secret';
+        $db_credentials = file($dbsecretsfile);
+        foreach ($db_credentials as $line) {
+            if ($line[0] == '#') {
+                continue;
+            }
+            [$_, $host, $db, $user, $pass] = array_pad(explode(':', trim($line)), 6, null);
+            break;
+        }
+
+        if ($host === null) {
+            throw new \LogicException("Can't get DB credentials");
+        }
+
+        return ['host' => $host, 'db' => $db, 'user' => $user, 'pass' => $pass];
     }
 }
