@@ -59,7 +59,7 @@ class GeneralInfoController extends AbstractFOSRestController
     /**
      * Get the current API version
      */
-    #[Rest\Get('/version')]
+    #[Rest\Get(path: '/version')]
     #[OA\Response(
         response: 200,
         description: 'The current API version information',
@@ -73,8 +73,8 @@ class GeneralInfoController extends AbstractFOSRestController
     /**
      * Get information about the API and DOMjudge
      */
-    #[Rest\Get('/info')]
-    #[Rest\Get('', name: 'api_root')]
+    #[Rest\Get(path: '/info')]
+    #[Rest\Get(path: '', name: 'api_root')]
     #[OA\Response(
         response: 200,
         description: 'Information about the API and DOMjudge',
@@ -115,7 +115,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * @return ExtendedContestStatus[]
      */
     #[IsGranted('ROLE_API_READER')]
-    #[Rest\Get('/status')]
+    #[Rest\Get(path: '/status')]
     #[OA\Response(
         response: 200,
         description: 'General status information for the currently active contests',
@@ -147,7 +147,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * Get information about the currently logged in user.
      */
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    #[Rest\Get('/user')]
+    #[Rest\Get(path: '/user')]
     #[OA\Response(
         response: 200,
         description: 'Information about the logged in user',
@@ -163,7 +163,7 @@ class GeneralInfoController extends AbstractFOSRestController
      *
      * @return array<string, bool|int|string|array<string, string>>
      */
-    #[Rest\Get('/config')]
+    #[Rest\Get(path: '/config')]
     #[OA\Response(
         response: 200,
         description: 'The configuration variables',
@@ -206,7 +206,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Put('/config')]
+    #[Rest\Put(path: '/config')]
     #[OA\Response(
         response: 200,
         description: 'The full configuration after change',
@@ -244,7 +244,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * Check the DOMjudge configuration.
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Get('/config/check')]
+    #[Rest\Get(path: '/config/check')]
     #[OA\Response(
         response: 200,
         description: 'Result of the various checks performed, no problems found',
@@ -288,7 +288,7 @@ class GeneralInfoController extends AbstractFOSRestController
     /**
      * Get the flag for the given country.
      */
-    #[Rest\Get('/country-flags/{countryCode}/{size}')]
+    #[Rest\Get(path: '/country-flags/{countryCode}/{size}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given country flag in SVG format',
@@ -333,7 +333,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * @return array{problem_id: string, messages: array<string, string[]>}
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Post('/problems')]
+    #[Rest\Post(path: '/problems')]
     #[OA\Tag(name: 'Problems')]
     #[OA\RequestBody(
         required: true,

@@ -21,7 +21,7 @@ use ZipArchive;
 /**
  * @extends AbstractRestController<Language, Language>
  */
-#[Rest\Route('/')]
+#[Rest\Route(path: '/')]
 #[OA\Tag(name: 'Languages')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -34,9 +34,9 @@ class LanguageController extends AbstractRestController
      * Get all the languages for this contest.
      * @throws NonUniqueResultException
      */
-    #[Rest\Get('languages')]
+    #[Rest\Get(path: 'languages')]
     // The languages endpoint doesn't require `cid` but the CLICS spec requires us to also expose it under a contest.
-    #[Rest\Get('contests/{cid}/languages')]
+    #[Rest\Get(path: 'contests/{cid}/languages')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the languages for this contest',
@@ -55,9 +55,9 @@ class LanguageController extends AbstractRestController
      * Get the given language for this contest.
      * @throws NonUniqueResultException
      */
-    #[Rest\Get('languages/{id}')]
+    #[Rest\Get(path: 'languages/{id}')]
     // The languages endpoint doesn't require `cid` but the CLICS spec requires us to also expose it under a contest.
-    #[Rest\Get('contests/{cid}/languages/{id}')]
+    #[Rest\Get(path: 'contests/{cid}/languages/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given language for this contest',
@@ -74,7 +74,7 @@ class LanguageController extends AbstractRestController
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Post('languages/{id}/executable')]
+    #[Rest\Post(path: 'languages/{id}/executable')]
     #[OA\Response(
         response: 200,
         description: 'Update the executable for a given language.',
@@ -128,7 +128,7 @@ class LanguageController extends AbstractRestController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Post('languages')]
+    #[Rest\Post(path: 'languages')]
     #[OA\Response(
         response: 200,
         description: 'Configure all specified languages.',
