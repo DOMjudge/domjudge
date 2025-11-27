@@ -79,7 +79,7 @@ class Scoreboard
     }
 
     /**
-     * @param int[] $limitToTeamIds
+     * @param int[]|null $limitToTeamIds
      *
      * @return list<TeamCategory>
      */
