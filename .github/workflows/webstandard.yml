@@ -10,6 +10,7 @@ jobs:
   standards:
     runs-on: ubuntu-latest
     env:
+      ADMIN_PASSWORD: admin_password
       MYSQL_ROOT_PASSWORD: mysql_root_password
     container:
       image: domjudge/gitlabci:24.04

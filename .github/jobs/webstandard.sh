@@ -20,19 +20,18 @@ section_start "Setup pa11y"
 section_end
 
 section_start "Setup the test user"
-ADMINPASS=$(cat etc/initial_admin_password.secret)
 export COOKIEJAR
 COOKIEJAR=$(mktemp --tmpdir)
 export CURLOPTS="--fail -sq -m 30 -b $COOKIEJAR"
 if [ "$ROLE" = "public" ]; then
-    ADMINPASS="failedlogin"
+    ADMIN_PASSWORD="failedlogin"
 fi
 
 # Make an initial request which will get us a session id, and grab the csrf token from it
 CSRFTOKEN=$(curl $CURLOPTS -c $COOKIEJAR "http://localhost/domjudge/login" 2>/dev/null | sed -n 's/.*_csrf_token.*value="\(.*\)".*/\1/p')
 # Make a second request with our session + csrf token to actually log in
 # shellcheck disable=SC2086
-curl $CURLOPTS -c "$COOKIEJAR" -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F "_password=$ADMINPASS" "http://localhost/domjudge/login"
+curl $CURLOPTS -c "$COOKIEJAR" -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F "_password=$ADMIN_PASSWORD" "http://localhost/domjudge/login"
 
 # Move back to the default directory
 cd "$DIR"

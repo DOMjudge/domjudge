@@ -32,9 +32,9 @@ yarnpkg install
 cd ..
 section_end
 
-section_start "Set simple admin password"
-echo "password" > ./etc/initial_admin_password.secret
-echo "default login admin password password" > ~/.netrc
+section_start "Set admin password"
+echo "${ADMIN_PASSWORD}" > ./etc/initial_admin_password.secret
+echo "default login admin password ${ADMIN_PASSWORD}" > ~/.netrc
 section_end
 
 section_start "Install domserver"
@@ -97,7 +97,7 @@ if [ "${db}" = "install" ]; then
 elif [ "${db}" = "upgrade" ]; then
     section_start "Upgrade DOMjudge database"
     /opt/domjudge/domserver/bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} upgrade
-    /opt/domjudge/domserver/webapp/bin/console domjudge:reset-user-password admin "pass"
+    /opt/domjudge/domserver/webapp/bin/console domjudge:reset-user-password admin "${ADMIN_PASSWORD}"
     section_end
 fi
 
