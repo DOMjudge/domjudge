@@ -877,15 +877,17 @@ class ImportExportService
             if (in_array(TeamCategory::TYPE_SCORING, $types, true) && $sortOrder === null) {
                 $sortOrder = 0;
             }
-            if (!($sortOrder === null || in_array(TeamCategory::TYPE_SCORING, $types, true))) {
-                $types = [TeamCategory::TYPE_SCORING];
+            if ($sortOrder !== null) {
+                $types[] = TeamCategory::TYPE_SCORING;
             }
-            if (isset($groupItem['color']) && !in_array(TeamCategory::TYPE_BACKGROUND, $types, true)) {
+            if (isset($groupItem['color'])) {
                 $types[] = TeamCategory::TYPE_BACKGROUND;
             }
-            if (isset($groupItem['css_class']) && !in_array(TeamCategory::TYPE_CSS_CLASS, $types, true)) {
+            if (isset($groupItem['css_class'])) {
                 $types[] = TeamCategory::TYPE_CSS_CLASS;
             }
+
+            $types = array_unique($types);
 
             $teamCategory
                 ->setName($groupItem['name'])
