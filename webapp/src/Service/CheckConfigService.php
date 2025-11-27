@@ -52,6 +52,7 @@ class CheckConfigService
             'php_version' => $this->checkPhpVersion(),
             'php_extensions' => $this->checkPhpExtensions(),
             'php_settings' => $this->checkPhpSettings(),
+            'mbstring_settings' => $this->checkMbstringSettings(),
             'mysql_settings' => $this->checkMysqlSettings(),
         ];
 
@@ -192,6 +193,23 @@ class CheckConfigService
         $this->stopwatch->stop(__FUNCTION__);
         return new ConfigCheckItem(
             caption: 'PHP settings',
+            result: $result,
+            desc: $desc
+        );
+    }
+
+    public function checkMbstringSettings(): ConfigCheckItem
+    {
+        $this->stopwatch->start(__FUNCTION__);
+
+        $desc = "\nFor submission source code displaying, the detect order should at least contain all expected submission encodings:\n";
+        $desc .= sprintf("  - `mbstring.detect_order` should at least contain `UTF-8` (now set to `%s`).\n", implode(', ', mb_detect_order()));
+        $desc .= sprintf("  - Supported encodings: `%s`.\n", implode(', ', mb_list_encodings()));
+        $result = in_array('UTF-8', mb_detect_order()) ? 'O' : 'W';
+
+        $this->stopwatch->stop(__FUNCTION__);
+        return new ConfigCheckItem(
+            caption: 'PHP multibyte string settings',
             result: $result,
             desc: $desc
         );
