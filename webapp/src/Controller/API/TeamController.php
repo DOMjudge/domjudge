@@ -308,10 +308,8 @@ class TeamController extends AbstractRestController
             ->from(Team::class, 't')
             ->leftJoin('t.affiliation', 'ta')
             ->leftJoin('t.categories', 'tc')
-            ->leftJoin('t.categories', 'tcc', Join::WITH, 'BIT_AND(tcc.types, :scoring) = :scoring')
             ->leftJoin('t.contests', 'c')
             ->leftJoin('tc.contests', 'cc')
-            ->setParameter('scoring', TeamCategory::TYPE_SCORING)
             ->select('t, ta, tc');
 
         if ($request->query->has('category')) {
@@ -327,8 +325,14 @@ class TeamController extends AbstractRestController
         }
 
         if (!$this->dj->checkrole('api_reader') || $request->query->getBoolean('public')) {
-            $queryBuilder->andWhere('tc.visible = 1');
-            $queryBuilder->andWhere('tcc.visible = 1');
+            $queryBuilder
+                // We need a separate join to filter on scoring categories, to filter on visible ones.
+                // `tc` is used as $team->getCategories, which is what we output on the API. We DO want
+                // to show all the categories a team belongs to, not only the scoring ones
+                ->leftJoin('t.categories', 'scoringcats', Join::WITH, 'BIT_AND(scoringcats.types, :scoring) = :scoring')
+                ->setParameter('scoring', TeamCategory::TYPE_SCORING)
+                ->andWhere('tc.visible = 1')
+                ->andWhere('scoringcats.visible = 1');
         }
 
         if ($request->attributes->has('cid')) {
