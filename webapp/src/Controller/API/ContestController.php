@@ -356,22 +356,22 @@ class ContestController extends AbstractRestController
     public function problemsetAction(Request $request, string $cid): Response
     {
         /** @var Contest|null $contest */
-        $contest = $this->getQueryBuilder($request)
+        $contest = $this->getQueryBuilder($request, filterBeforeContest: true)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter('id', $cid)
             ->getQuery()
             ->getOneOrNullResult();
 
+        if ($contest === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $cid));
+        }
+
         $hasAccess = $this->dj->checkrole('jury') ||
             $this->dj->checkrole('api_reader') ||
-            $contest?->getFreezeData()->started();
+            $contest->getFreezeData()->started();
 
         if (!$hasAccess) {
             throw new AccessDeniedHttpException();
-        }
-
-        if ($contest === null) {
-            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $cid));
         }
 
         if (!$contest->getContestProblemsetType()) {
@@ -950,10 +950,18 @@ class ContestController extends AbstractRestController
         return $this->dj->getSamplesZipForContest($contest);
     }
 
-    protected function getQueryBuilder(Request $request, bool $filterBeforeContest = true): QueryBuilder
+    protected function shouldFilterBeforeContest(): bool
+    {
+        return false;
+    }
+
+    protected function getQueryBuilder(Request $request, ?bool $filterBeforeContest = null): QueryBuilder
     {
         try {
-            return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', true), $filterBeforeContest);
+            return $this->getContestQueryBuilder(
+                $request->query->getBoolean('onlyActive', true),
+                $filterBeforeContest ?? $this->shouldFilterBeforeContest()
+            );
         } catch (TypeError) {
             throw new BadRequestHttpException('\'onlyActive\' must be a boolean.');
         }

@@ -30,6 +30,16 @@ abstract class AbstractApiController extends AbstractFOSRestController
     ) {}
 
     /**
+     * Whether to filter out contests that haven't started yet in calls to getQueryBuilder
+     * without an explicit value set for $filterBeforeContest.
+     * Override in subclasses to change this behavior.
+     */
+    protected function shouldFilterBeforeContest(): bool
+    {
+        return true;
+    }
+
+    /**
      * Get the query builder used for getting contests.
      *
      * @param bool $onlyActive return only contests that are active
