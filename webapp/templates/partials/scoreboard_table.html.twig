@@ -535,7 +535,7 @@
         {% endif %}
         <a {% if extra is not null %}{{ extra | raw }}{% endif %} {% if link is not null %}href="{{ link }}"{% endif %}>
                     <span class="forceWidth">
-                        {# TODO: how to display badges on mobile scorebaord #}
+                        {# TODO: how to display badges on mobile scoreboard #}
                         {% if false %}
                             {% set hasBadges = score.team.badgeCategories | length > 0 %}
                             {% for category in score.team.topBadgeCategories %}
