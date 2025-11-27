@@ -57,7 +57,7 @@ void log_helper(int level, const char* prefix, int errnum, std::format_string<Ar
         std::string err_descr;
         
         if (errnum != 0) {
-            err_descr = std::strerror(errno);
+            err_descr = std::strerror(errnum);
         }
 
         std::string buffer;
