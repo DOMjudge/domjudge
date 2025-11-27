@@ -10,6 +10,8 @@ on:
 jobs:
   check-static-codecov:
     runs-on: ubuntu-24.04
+    env:
+      MYSQL_ROOT_PASSWORD: mysql_root_password
     steps:
       - uses: actions/checkout@v4
       - name: Download latest codecov upload script
@@ -38,9 +40,7 @@ jobs:
         ports:
           - 3306:3306
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_USER: domjudge
-          MYSQL_PASSWORD: domjudge
+          MYSQL_ROOT_PASSWORD: {{ env.MYSQL_ROOT_PASSWORD }}
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
     strategy:
       matrix:
