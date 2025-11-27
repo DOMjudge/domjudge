@@ -17,7 +17,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 /**
  * @extends AbstractRestController<User, User>
  */
-#[Rest\Route('/contests/{cid}')]
+#[Rest\Route(path: '/contests/{cid}')]
 #[OA\Tag(name: 'Accounts')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -38,7 +38,7 @@ class AccountController extends AbstractRestController
      * @throws NonUniqueResultException
      */
     #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')"))]
-    #[Rest\Get('/accounts')]
+    #[Rest\Get(path: '/accounts')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the accounts for this contest',
@@ -66,7 +66,7 @@ class AccountController extends AbstractRestController
      * @throws NonUniqueResultException
      */
     #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')"))]
-    #[Rest\Get('/accounts/{id}')]
+    #[Rest\Get(path: '/accounts/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given account',
@@ -83,7 +83,7 @@ class AccountController extends AbstractRestController
     /**
      * Get information about the currently logged in account.
      */
-    #[Rest\Get('/account')]
+    #[Rest\Get(path: '/account')]
     #[OA\Response(
         response: 200,
         description: 'Information about the logged in account',

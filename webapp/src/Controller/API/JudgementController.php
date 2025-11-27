@@ -21,7 +21,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 /**
  * @extends AbstractRestController<Judging, JudgingWrapper>
  */
-#[Rest\Route('/')]
+#[Rest\Route(path: '/')]
 #[OA\Tag(name: 'Judgements')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -52,8 +52,8 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * @throws NonUniqueResultException
      */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')"))]
-    #[Rest\Get('contests/{cid}/judgements')]
-    #[Rest\Get('judgements')]
+    #[Rest\Get(path: 'contests/{cid}/judgements')]
+    #[Rest\Get(path: 'judgements')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the judgements for this contest',
@@ -85,8 +85,8 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * @throws NonUniqueResultException
      */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')"))]
-    #[Rest\Get('contests/{cid}/judgements/{id<\d+>}')]
-    #[Rest\Get('judgements/{id<\d+>}')]
+    #[Rest\Get(path: 'contests/{cid}/judgements/{id<\d+>}')]
+    #[Rest\Get(path: 'judgements/{id<\d+>}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given judgement for this contest',
