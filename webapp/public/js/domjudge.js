@@ -1340,7 +1340,7 @@ function initDiffEditor(editorId) {
     const download = wrapper.find(".download")[0];
     const edit = wrapper.find(".edit")[0];
     const updateTabRank = (rank) => {
-        if (rank) {
+        if (rank !== undefined) {
             let url = new URL(download.href);
             url.searchParams.set("fetch", rank);
             enableButton(download, url);
