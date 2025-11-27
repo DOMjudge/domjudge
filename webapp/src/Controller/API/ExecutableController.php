@@ -13,7 +13,7 @@ use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Rest\Route('/executables')]
+#[Rest\Route(path: '/executables')]
 #[OA\Tag(name: 'Executables')]
 class ExecutableController extends AbstractFOSRestController
 {
@@ -26,7 +26,7 @@ class ExecutableController extends AbstractFOSRestController
      * @throws NonUniqueResultException
      */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
-    #[Rest\Get('/{id}')]
+    #[Rest\Get(path: '/{id}')]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     #[OA\Response(
         response: 200,

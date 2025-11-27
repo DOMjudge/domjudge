@@ -22,7 +22,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 /**
  * @extends AbstractRestController<JudgingRun, JudgingRunWrapper>
  */
-#[Rest\Route('/contests/{cid}/runs')]
+#[Rest\Route(path: '/contests/{cid}/runs')]
 #[OA\Tag(name: 'Runs')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -54,7 +54,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * @throws NonUniqueResultException
      */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')"))]
-    #[Rest\Get('')]
+    #[Rest\Get(path: '')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the runs for this contest',
@@ -98,7 +98,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * @throws NonUniqueResultException
      */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')"))]
-    #[Rest\Get('/{id<\d+>}')]
+    #[Rest\Get(path: '/{id<\d+>}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given run for this contest',

@@ -29,7 +29,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 /**
  * @extends AbstractRestController<Team, Team>
  */
-#[Rest\Route('/')]
+#[Rest\Route(path: '/')]
 #[OA\Tag(name: 'Teams')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -53,8 +53,8 @@ class TeamController extends AbstractRestController
      * Get all the teams for this contest.
      * @throws NonUniqueResultException
      */
-    #[Rest\Get('contests/{cid}/teams')]
-    #[Rest\Get('teams')]
+    #[Rest\Get(path: 'contests/{cid}/teams')]
+    #[Rest\Get(path: 'teams')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the teams for this contest',
@@ -94,8 +94,8 @@ class TeamController extends AbstractRestController
      * Get the given team for this contest.
      * @throws NonUniqueResultException
      */
-    #[Rest\Get('contests/{cid}/teams/{id}')]
-    #[Rest\Get('teams/{id}')]
+    #[Rest\Get(path: 'contests/{cid}/teams/{id}')]
+    #[Rest\Get(path: 'teams/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given team for this contest',
@@ -113,8 +113,8 @@ class TeamController extends AbstractRestController
     /**
      * Get the photo for the given team.
      */
-    #[Rest\Get('contests/{cid}/teams/{id}/photo', name: 'team_photo')]
-    #[Rest\Get('teams/{id}/photo', name: 'no_contest_team_photo')]
+    #[Rest\Get(path: 'contests/{cid}/teams/{id}/photo', name: 'team_photo')]
+    #[Rest\Get(path: 'teams/{id}/photo', name: 'no_contest_team_photo')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given team photo in PNG, JPG or SVG format',
@@ -153,8 +153,8 @@ class TeamController extends AbstractRestController
      * Delete the photo for the given team.
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Delete('contests/{cid}/teams/{id}/photo', name: 'delete_team_photo')]
-    #[Rest\Delete('teams/{id}/photo')]
+    #[Rest\Delete(path: 'contests/{cid}/teams/{id}/photo', name: 'delete_team_photo')]
+    #[Rest\Delete(path: 'teams/{id}/photo')]
     #[OA\Response(response: 204, description: 'Deleting photo succeeded')]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function deletePhotoAction(Request $request, string $id): Response
@@ -187,10 +187,10 @@ class TeamController extends AbstractRestController
      * Set the photo for the given team.
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Post('contests/{cid}/teams/{id}/photo', name: 'post_team_photo')]
-    #[Rest\Post('teams/{id}/photo')]
-    #[Rest\Put('contests/{cid}/teams/{id}/photo', name: 'put_team_photo')]
-    #[Rest\Put('teams/{id}/photo')]
+    #[Rest\Post(path: 'contests/{cid}/teams/{id}/photo', name: 'post_team_photo')]
+    #[Rest\Post(path: 'teams/{id}/photo')]
+    #[Rest\Put(path: 'contests/{cid}/teams/{id}/photo', name: 'put_team_photo')]
+    #[Rest\Put(path: 'teams/{id}/photo')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -251,8 +251,8 @@ class TeamController extends AbstractRestController
      * Add a new team.
      */
     #[IsGranted('ROLE_API_WRITER')]
-    #[Rest\Post('contests/{cid}/teams')]
-    #[Rest\Post('teams')]
+    #[Rest\Post(path: 'contests/{cid}/teams')]
+    #[Rest\Post(path: 'teams')]
     #[OA\RequestBody(
         required: true,
         content: [
