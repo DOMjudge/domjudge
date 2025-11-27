@@ -1230,7 +1230,7 @@ class ImportExportService
      * Import team data from the given array.
      *
      * @param array<array{team: array{teamid: string|null, icpcid: string|null, label?: string|null,
-     *                                categoryids: string[]|null, name: string|null, display_name?: string,
+     *                                categoryids: string[], name: string|null, display_name?: string,
      *                                publicdescription?: string, location?: string|null, affilid?: string},
      *                    team_affiliation: array{externalid: string|null, shortname?: string, name?: string,
      *                                            country?: string}}> $teamData
@@ -1304,7 +1304,7 @@ class ImportExportService
             unset($teamItem['team']['affilid']);
 
             $teamCategories = [];
-            foreach ($teamItem['team']['categoryids'] ?? [] as $categoryid) {
+            foreach ($teamItem['team']['categoryids'] as $categoryid) {
                 $teamCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $categoryid]);
                 if (!$teamCategory) {
                     foreach ($createdCategories as $createdCategory) {
