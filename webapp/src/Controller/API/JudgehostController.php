@@ -868,24 +868,19 @@ class JudgehostController extends AbstractFOSRestController
 
         if ($field_name !== null) {
             // Disable any outstanding judgetasks with the same script that have not been claimed yet.
-            $rows = $this->em->createQueryBuilder()
-                ->update(Judging::class, 'j')
-                ->leftJoin(JudgeTask::class, 'jt')
-                ->set('j.internal_error', ':error')
-                ->set('jt.valid', 0)
-                ->andWhere('jt.' . $field_name . ' = :id')
-                ->andWhere('j.internal_error IS NULL')
-                ->andWhere('jt.judgehost_id IS NULL')
-                ->andWhere('jt.valid = 1')
-                ->setParameter('error', $error)
-                ->setParameter('id', $disabled_id)
-                ->distinct()
-                ->getQuery()
-                ->getArrayResult();
-
-            if ($rows == 0) {
-                // TODO, handle this case. Nothing was updated.
-            }
+            $this->em->getConnection()->executeStatement(
+                'UPDATE judging j ' .
+                'LEFT JOIN judgetask jt ON jt.judgingid = j.judgingid ' .
+                'SET j.internal_error = :error, jt.valid = 0 ' .
+                'WHERE jt' . $field_name . ' = :id' .
+                ' AND j.internal_error IS NULL' .
+                ' AND jt.judgehost_id IS NULL' .
+                ' AND jt.valid = 1',
+                [
+                    ':error' => $error,
+                    ':id' => $disabled_id,
+                ]
+            );
         }
 
         $this->dj->setInternalError($disabled, $contest, false);
