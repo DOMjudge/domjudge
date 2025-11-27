@@ -56,8 +56,9 @@ become of importance when you run into problems.
 
    Use the problemset page to get:
 
-     - all attachments such as 'testing tools' to problems,
-     - view the submission and acceptance ratio during the contest as an indicator of the difficulty of a problem,
+     - get all attachments such as 'testing tools' for each problem,
+     - view indicators for problem difficulty (submission and acceptance rates) across
+       contest intervals (hover over the boxes for exact numbers),
      - get the problem statement and clarifications on those statements
      - see the time & memory limits.
 
