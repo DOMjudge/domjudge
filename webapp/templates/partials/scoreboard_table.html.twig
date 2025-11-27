@@ -535,29 +535,26 @@
         {% endif %}
         <a {% if extra is not null %}{{ extra | raw }}{% endif %} {% if link is not null %}href="{{ link }}"{% endif %}>
                     <span class="forceWidth">
-                        {# TODO: how to display badges on mobile scoreboard #}
-                        {% if false %}
-                            {% set hasBadges = score.team.badgeCategories | length > 0 %}
-                            {% for category in score.team.topBadgeCategories %}
-                                {% if scoreboard.bestInCategory(score.team, category, limitToTeamIds) %}
-                                    {% set hasBadges = true %}
-                                {% endif %}
-                            {% endfor %}
-                            {% if hasBadges %}<span class="category-badges">{% endif %}
-                            {% for category in score.team.badgeCategories %}
-                                <span class="badge text-bg-warning category-badge">
-                                {{ category.name }}
-                            </span>
-                            {% endfor %}
-                            {% for category in score.team.topBadgeCategories %}
-                                {% if scoreboard.bestInCategory(score.team, category, limitToTeamIds) %}
-                                    <span class="badge text-bg-warning category-best">
-                                        {{ category.name }}
-                                    </span>
-                                {% endif %}
-                            {% endfor %}
-                            {% if hasBadges %}</span>{% endif %}
-                        {% endif %}
+                        {% set hasBadges = score.team.badgeCategories | length > 0 %}
+                        {% for category in score.team.topBadgeCategories %}
+                            {% if scoreboard.bestInCategory(score.team, category, limitToTeamIds) %}
+                                {% set hasBadges = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if hasBadges %}<span class="category-badges">{% endif %}
+                        {% for category in score.team.badgeCategories %}
+                            <span class="badge text-bg-warning category-badge">
+                            {{ category.name }}
+                        </span>
+                        {% endfor %}
+                        {% for category in score.team.topBadgeCategories %}
+                            {% if scoreboard.bestInCategory(score.team, category, limitToTeamIds) %}
+                                <span class="badge text-bg-warning category-best">
+                                    {{ category.name }}
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                        {% if hasBadges %}</span>{% endif %}
                         {{ score.team.effectiveName }}
                     </span>
             {% if showAffiliations %}
