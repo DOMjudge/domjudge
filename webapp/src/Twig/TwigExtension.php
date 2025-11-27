@@ -204,7 +204,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Print a time formatted as specified. The format is according to date().
-     * @param Contest|null $contest If given, print time relative to that contest start.
      * @param bool $maskOutsideContest When true and contest is given replace time with before/after.
      */
     public function printtime(string|float|null $datetime, ?string $format = null, ?Contest $contest = null, bool $maskOutsideContest = true): string
