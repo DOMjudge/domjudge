@@ -2,9 +2,8 @@ parameters:
     level: 6
     paths:
         - src
+        - migrations
         - tests
-    excludePaths:
-        - src/Utils/Adminer.php
     ignoreErrors:
         -
             message: '#Method .* return type has no value type specified in iterable type array#'

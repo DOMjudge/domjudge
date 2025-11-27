@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
-use App\Service\ConfigurationService;
+use App\Migrations\Factory\ConfigurationServiceAwareInterface;
+use App\Migrations\Factory\ConfigurationServiceAwareTrait;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20200111104226 extends AbstractMigration implements ContainerAwareInterface
+final class Version20200111104226 extends AbstractMigration implements ConfigurationServiceAwareInterface
 {
-    use ContainerAwareTrait;
+    use ConfigurationServiceAwareTrait;
 
     public function isTransactional(): bool
     {
@@ -51,8 +50,7 @@ final class Version20200111104226 extends AbstractMigration implements Container
         $this->addSql('CREATE INDEX public ON configuration (public)');
 
         // We also need to add back the type, category,  public and description values
-        $configService = $this->container->get(ConfigurationService::class);
-        $specs         = $configService->getConfigSpecification();
+        $specs         = $this->configurationService->getConfigSpecification();
         foreach ($specs as $name => $spec) {
             $this->addSql(
                 'UPDATE configuration SET type = :type, category = :category, public = :public, description = :description WHERE name = :name',

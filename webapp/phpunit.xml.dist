@@ -14,7 +14,7 @@
         <!-- ###+ symfony/framework-bundle ### -->
         <server name="APP_ENV" value="test" force="true"/>
         <!-- ###- symfony/framework-bundle ### -->
-        <server name="SHELL_VERBOSITY" value="-1"/>
+        <server name="SHELL_VERBOSITY" value="0"/>
         <server name="SYMFONY_PHPUNIT_REMOVE" value=""/>
         <server name="SYMFONY_PHPUNIT_VERSION" value="9.6" />
 
