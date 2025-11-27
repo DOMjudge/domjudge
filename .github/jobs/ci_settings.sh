@@ -24,14 +24,9 @@ section_end_internal () {
     trace_on
 }
 
-mysql_root () {
+mysql_log () {
     # shellcheck disable=SC2086
-    echo "$1" | mysql -uroot -proot ${2:-} | tee -a "$ARTIFACTS"/mysql.txt
-}
-
-mysql_user () {
-    # shellcheck disable=SC2086
-    echo "$1" | mysql -udomjudge -pdomjudge ${2:-} | tee -a "$ARTIFACTS"/mysql.txt
+    echo "$1" | mysql -uroot -p${MYSQL_ROOT_PASSWORD} ${2:-} | tee -a "$ARTIFACTS"/mysql.txt
 }
 
 show_phpinfo() {
