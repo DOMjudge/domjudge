@@ -363,6 +363,10 @@ number of processes
 
     PageBreak
 
+.. raw:: latex
+
+    \clearpage
+
 .. _codeexamples:
 
 Code examples
@@ -397,10 +401,6 @@ for different programming languages.
 .. literalinclude:: ../examples/example.c
    :language: c
    :caption: *A solution in C*
-
-.. raw:: latex
-
-   \clearpage
 
 .. literalinclude:: ../examples/example.cc
    :language: cpp
