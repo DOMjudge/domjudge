@@ -1339,8 +1339,9 @@ function initDiffEditor(editorId) {
 
     const download = wrapper.find(".download")[0];
     const edit = wrapper.find(".edit")[0];
-    const updateTabRank = (rank) => {
-        if (rank !== undefined) {
+    wrapper.find(".nav").on('show.bs.tab', (e) => {
+        if (e.target.dataset.rank.length > 0) {
+            const rank = parseInt(e.target.dataset.rank);
             let url = new URL(download.href);
             url.searchParams.set("fetch", rank);
             enableButton(download, url);
@@ -1351,14 +1352,6 @@ function initDiffEditor(editorId) {
         } else {
             disableButton(download);
             disableButton(edit);
-        }
-    };
-    wrapper.find(".nav").on('show.bs.tab', (e) => {
-        if (e.target.dataset.rank.length > 0) {
-            const rank = parseInt(e.target.dataset.rank);
-            updateTabRank(rank);
-        } else {
-            updateTabRank(undefined);
         }
     })
 
