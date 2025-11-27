@@ -29,11 +29,13 @@
 
 #include "config.h"
 
+#include "lib.error.hpp"
 #include "lib.misc.h"
 
 /* Some system/site specific config: VALID_USERS, CHROOT_PREFIX */
 #include "runguard-config.h"
 
+#include <iostream>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/param.h>
@@ -69,6 +71,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <format>
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
@@ -102,10 +105,9 @@ const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
 const struct timespec cg_delete_delay = { 0, 10000000L }; /* 0.01 seconds */
 
 extern int errno;
+extern int verbose;
 
-const int exit_failure = -1;
-
-char  *progname;
+std::string_view progname;
 char  *cmdname;
 char **cmdargs;
 char  *rootdir;
@@ -135,8 +137,6 @@ int outputmeta;
 int outputtimetype;
 int no_coredump;
 int preserve_environment;
-int be_verbose;
-int be_quiet;
 int show_help;
 int show_version;
 int in_error_handling = 0;
@@ -188,70 +188,34 @@ struct option const long_opts[] = {
 	{ nullptr,     0,                 nullptr,          0 }
 };
 
-static void warning(   const char *, ...) __attribute__((format (printf, 1, 2)));
-static void verbose(   const char *, ...) __attribute__((format (printf, 1, 2)));
-static void error(int, const char *, ...) __attribute__((format (printf, 2, 3)));
-void write_meta(const char *, const char *, ...) __attribute__((format (printf, 2, 3)));
-
-static void warning(const char *format, ...)
-{
-	va_list ap;
-	va_start(ap,format);
-
-	if ( ! be_quiet ) {
-		fprintf(stderr,"%s: warning: ",progname);
-		vfprintf(stderr,format,ap);
-		fprintf(stderr,"\n");
-	}
-
-	va_end(ap);
-}
-
-static void verbose(const char *format, ...)
-{
-	va_list ap;
-	va_start(ap,format);
-
-	if ( ! be_quiet && be_verbose ) {
-        struct timeval currtime{};
-		gettimeofday(&currtime,nullptr);
-		double runtime = (currtime.tv_sec  - progstarttime.tv_sec ) +
-		                 (currtime.tv_usec - progstarttime.tv_usec)*1E-6;
-		fprintf(stderr,"%s [%d @ %10.6lf]: verbose: ",progname,getpid(),runtime);
-		vfprintf(stderr,format,ap);
-		fprintf(stderr,"\n");
-	}
-
-	va_end(ap);
-}
+template<typename... Args>
+void write_meta(const std::string& key, std::format_string<Args...> fmt, Args&&... args);
 
 // These functions are called from signal handlers, so they
 // must only call async-signal-safe functions.
 // write() is async-signal-safe, printf and variants are not.
 void verbose_from_signalhandler(const char* msg)
 {
-	if (!be_quiet && be_verbose) {
+	if (verbose >= LOG_DEBUG) {
 		[[maybe_unused]] auto r = write(STDERR_FILENO, msg, strlen(msg));
 	}
 }
 
 void warning_from_signalhandler(const char* msg)
 {
-	if (!be_quiet) {
+	if (verbose >= LOG_WARNING) {
 		// Do not include timing here, as it wouldn't be safe from a signalhandler.
 		// TODO: Consider rewriting using clock_gettime in the future.
 		[[maybe_unused]] auto r = write(STDERR_FILENO, msg, strlen(msg));
 	}
 }
 
-static void error(int errnum, const char *format, ...)
+template<typename... Args>
+void die(int errnum, std::format_string<Args...> fmt, Args&&... args)
 {
 	// Silently ignore errors that happen while handling other errors.
 	if (in_error_handling) return;
 	in_error_handling = 1;
-
-	va_list ap;
-	va_start(ap,format);
 
 	/*
 	 * Make sure the signal handler for these (terminate()) does not
@@ -262,54 +226,43 @@ static void error(int errnum, const char *format, ...)
 	sigaddset(&sigs, SIGTERM);
 	sigprocmask(SIG_BLOCK, &sigs, nullptr);
 
-	/* First print to string to be able to reuse the message. */
-	size_t errlen = strlen(progname)+255;
-	if ( format!=nullptr ) errlen += strlen(format);
-
-	char *errstr = (char *)malloc(errlen);
-	if ( errstr==nullptr ) abort();
-
-	sprintf(errstr,"%s",progname);
-	size_t errpos = strlen(errstr);
-
-	if ( format!=nullptr ) {
-		snprintf(errstr+errpos,errlen-errpos,": ");
-		errpos += 2;
-		vsnprintf(errstr+errpos,errlen-errpos,format,ap);
-		errpos += strlen(errstr+errpos);
+	std::string errstr(progname);
+	errstr += ": ";
+	try {
+		errstr += std::format(fmt, std::forward<Args>(args)...);
+	} catch (const std::exception& e) {
+		errstr += "Error formatting error message: " + std::string(e.what());
 	}
-	if ( errnum!=0 ) {
+
+	if (errnum == 0) {
+		errstr += ": unknown error";
+	} else {
 		/* Special case libcgroup error codes. */
 		if ( errnum==ECGOTHER ) {
-			snprintf(errstr+errpos,errlen-errpos,": libcgroup");
-			errpos += strlen(errstr+errpos);
+			errstr += ": libcgroup";
 			errnum = errno;
 		}
 		if ( errnum>=ECGROUPNOTCOMPILED && errnum<=ECGROUPNOTCOMPILED ) {
-			snprintf(errstr+errpos,errlen-errpos,": %s",cgroup_strerror(errnum));
+			errstr += ": ";
+			errstr += cgroup_strerror(errnum);
 		} else {
-			snprintf(errstr+errpos,errlen-errpos,": %s",strerror(errnum));
+			errstr += ": ";
+			errstr += strerror(errnum);
 		}
-		errpos += strlen(errstr+errpos);
-	}
-	if ( format==nullptr && errnum==0 ) {
-		snprintf(errstr+errpos,errlen-errpos,": unknown error");
 	}
 
-	fprintf(stderr,"%s\nTry `%s --help' for more information.\n",errstr,progname);
-	va_end(ap);
+	std::cerr << errstr << std::endl;
 
-	write_meta("internal-error","%s",errstr);
+	write_meta("internal-error","{}", errstr);
 	if ( outputmeta && metafile != nullptr && fclose(metafile)!=0 ) {
 		fprintf(stderr,"\nError writing to metafile '%s'.\n",metafilename);
 	}
 
 	/* Make sure that all children are killed before terminating */
 	if ( child_pid > 0) {
-		verbose("sending SIGKILL");
+		logmsg(LOG_DEBUG, "sending SIGKILL");
 		if ( kill(-child_pid,SIGKILL)!=0 && errno!=ESRCH ) {
-			fprintf(stderr,"unable to send SIGKILL to children while terminating "
-					"due to previous error: %s\n", strerror(errno));
+			logmsg(LOG_ERR, "unable to send SIGKILL to children while terminating due to previous error: {}", strerror(errno));
 			/*
 			 * continue, there is not much we can do here.
 			 * In the worst case, this will trigger an error
@@ -325,27 +278,26 @@ static void error(int errnum, const char *format, ...)
 	exit(exit_failure);
 }
 
-void write_meta(const char *key, const char *format, ...)
+template<typename... Args>
+void write_meta(const std::string& key, std::format_string<Args...> fmt, Args&&... args)
 {
 	if ( !outputmeta ) return;
 
-	va_list ap;
-	va_start(ap,format);
-
-	if ( fprintf(metafile,"%s: ",key)<=0 ) {
+	if ( fprintf(metafile,"%s: ",key.c_str())<=0 ) {
 		outputmeta = 0;
-		error(0,"cannot write to file `%s'",metafilename);
-	}
-	if ( vfprintf(metafile,format,ap)<0 ) {
-		outputmeta = 0;
-		error(0,"cannot write to file `%s'(vfprintf)",metafilename);
-	}
-	if ( fprintf(metafile,"\n")<=0 ) {
-		outputmeta = 0;
-		error(0,"cannot write to file `%s'",metafilename);
+		die(0,"cannot write to file `{}'",metafilename);
 	}
 
-	va_end(ap);
+	try {
+		std::string value = std::format(fmt, std::forward<Args>(args)...);
+		if ( fprintf(metafile, "%s\n", value.c_str()) <= 0 ) {
+			outputmeta = 0;
+			die(0,"cannot write to file `{}'", metafilename);
+		}
+	} catch (const std::exception& e) {
+		outputmeta = 0;
+		die(0, "Error formatting meta value for key {}: {}", key, e.what());
+	}
 }
 
 void usage()
@@ -353,7 +305,7 @@ void usage()
 	printf("\
 Usage: %s [OPTION]... COMMAND...\n\
 Run COMMAND with restrictions.\n\
-\n", progname);
+\n", progname.data());
 	printf("\
   -r, --root=ROOT        run COMMAND with root directory set to ROOT\n\
   -u, --user=USER        run COMMAND as user with username or ID USER\n\
@@ -397,11 +349,11 @@ real user ID.\n");
 
 void output_exit_time(int exitcode, double cpudiff)
 {
-	verbose("command exited with exitcode %d",exitcode);
-	write_meta("exitcode","%d",exitcode);
+	logmsg(LOG_DEBUG, "command exited with exitcode {}",exitcode);
+	write_meta("exitcode","{}",exitcode);
 
 	if (received_signal != -1) {
-		write_meta("signal", "%d", received_signal);
+		write_meta("signal", "{}", (int)received_signal);
 	}
 
 	double walldiff = (endtime.tv_sec  - starttime.tv_sec ) +
@@ -411,22 +363,22 @@ void output_exit_time(int exitcode, double cpudiff)
 	double userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
 	double sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
 
-	write_meta("wall-time","%.3f", walldiff);
-	write_meta("user-time","%.3f", userdiff);
-	write_meta("sys-time", "%.3f", sysdiff);
-	write_meta("cpu-time", "%.3f", cpudiff);
+	write_meta("wall-time","{:.3f}", walldiff);
+	write_meta("user-time","{:.3f}", userdiff);
+	write_meta("sys-time", "{:.3f}", sysdiff);
+	write_meta("cpu-time", "{:.3f}", cpudiff);
 
-	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys",
+	logmsg(LOG_DEBUG, "runtime is {:.3f} seconds real, {:.3f} user, {:.3f} sys",
 	        walldiff, userdiff, sysdiff);
 
 	if ( use_walltime && walldiff > walltimelimit[0] ) {
 		walllimit_reached |= soft_timelimit;
-		warning("timelimit exceeded (soft wall time)");
+		warning(0, "timelimit exceeded (soft wall time)");
 	}
 
 	if ( use_cputime && cpudiff > cputimelimit[0] ) {
 		cpulimit_reached |= soft_timelimit;
-		warning("timelimit exceeded (soft cpu time)");
+		warning(0, "timelimit exceeded (soft cpu time)");
 	}
 
 	int timelimit_reached = 0;
@@ -440,7 +392,7 @@ void output_exit_time(int exitcode, double cpudiff)
 		timelimit_reached = cpulimit_reached;
 		break;
 	default:
-		error(0,"cannot write unknown time type `%d' to file",outputtimetype);
+		die(0,"cannot write unknown time type `{}' to file",outputtimetype);
 	}
 
 	/* Hard limitlimit reached always has precedence. */
@@ -448,7 +400,7 @@ void output_exit_time(int exitcode, double cpudiff)
 		timelimit_reached |= hard_timelimit;
 	}
 
-	write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
+	write_meta("time-result","{}",output_timelimit_str[timelimit_reached]);
 }
 
 std::set<unsigned> parse_cpuset(std::string cpus)
@@ -464,14 +416,14 @@ std::set<unsigned> parse_cpuset(std::string cpus)
 			std::string token2 = token.substr(split+1);
 			size_t len;
 			unsigned cpu1 = std::stoul(token1, &len);
-			if ( len<token1.length() ) error(0, "failed to parse cpuset `%s'", cpus.c_str());
+			if ( len<token1.length() ) die(0, "failed to parse cpuset `{}'", cpus);
 			unsigned cpu2 = std::stoul(token2, &len);
-			if ( len<token2.length() ) error(0, "failed to parse cpuset `%s'", cpus.c_str());
+			if ( len<token2.length() ) die(0, "failed to parse cpuset `{}'", cpus);
 			for(unsigned i=cpu1; i<=cpu2; i++) result.insert(i);
 		} else {
 			size_t len;
 			unsigned cpu = std::stoul(token, &len);
-			if ( len<token.length() ) error(0, "failed to parse cpuset `%s'", cpus.c_str());
+			if ( len<token.length() ) die(0, "failed to parse cpuset `{}'", cpus);
 			result.insert(cpu);
 		}
 	}
@@ -482,15 +434,15 @@ std::set<unsigned> parse_cpuset(std::string cpus)
 std::set<unsigned> read_cpuset(const char *path)
 {
 	FILE *file = fopen(path, "r");
-	if (file == nullptr) error(errno, "opening file `%s'", path);
+	if (file == nullptr) die(errno, "opening file `{}'", path);
 
 	char cpuset[1024];
-	if (fgets(cpuset, 1024, file) == nullptr) error(errno, "reading from file `%s'", path);
+	if (fgets(cpuset, 1024, file) == nullptr) die(errno, "reading from file `{}'", path);
 
 	size_t len = strlen(cpuset);
 	if (len > 0 && cpuset[len-1] == '\n') cpuset[len-1] = 0;
 
-	if (fclose(file) != 0) error(errno, "closing file `%s'", path);
+	if (fclose(file) != 0) die(errno, "closing file `{}'", path);
 
 	return parse_cpuset(cpuset);
 }
@@ -502,50 +454,50 @@ void check_remaining_procs()
 
 	FILE *file = fopen(path, "r");
 	if (file == nullptr) {
-		error(errno, "opening cgroups file `%s'", path);
+		die(errno, "opening cgroups file `{}'", path);
 	}
 
 	fseek(file, 0L, SEEK_END);
 	if (ftell(file) > 0) {
-		error(0, "found left-over processes in cgroup controller, please check!");
+		die(0, "found left-over processes in cgroup controller, please check!");
 	}
-	if (fclose(file) != 0) error(errno, "closing file `%s'", path);
+	if (fclose(file) != 0) die(errno, "closing file `{}'", path);
 }
 
 
 void output_cgroup_stats(double *cputime)
 {
 	struct cgroup *cg;
-	if ( (cg = cgroup_new_cgroup(cgroupname))==nullptr ) error(0,"cgroup_new_cgroup");
+	if ( (cg = cgroup_new_cgroup(cgroupname))==nullptr ) die(0,"cgroup_new_cgroup");
 
 	int ret;
-	if ((ret = cgroup_get_cgroup(cg)) != 0) error(ret,"get cgroup information");
+	if ((ret = cgroup_get_cgroup(cg)) != 0) die(ret,"get cgroup information");
 
 	struct cgroup_controller *cg_controller = cgroup_get_controller(cg, "memory");
 	int64_t max_usage = 0;
 	ret = cgroup_get_value_int64(cg_controller, "memory.peak", &max_usage);
 	if ( ret == ECGROUPVALUENOTEXIST ) {
-		error(ret, "kernel too old and does not support memory.peak");
+		die(ret, "kernel too old and does not support memory.peak");
 	} else if ( ret!=0 ) {
-		error(ret,"get cgroup value memory.peak");
+		die(ret,"get cgroup value memory.peak");
 	}
 
 	// There is no need to check swap usage, as we limit it to 0.
-	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
-	write_meta("memory-bytes","%" PRId64, max_usage);
+	logmsg(LOG_DEBUG, "total memory used: {} kB", max_usage/1024);
+	write_meta("memory-bytes","{}", max_usage);
 
 	struct cgroup_stat stat;
 	void *handle;
 	ret = cgroup_read_stats_begin("cpu", cgroupname, &handle, &stat);
 	while (ret == 0) {
-		verbose("cpu.stat: %s = %s", stat.name, stat.value);
+		logmsg(LOG_DEBUG, "cpu.stat: {} = {}", stat.name, stat.value);
 		if (strcmp(stat.name, "usage_usec") == 0) {
 			long long usec = strtoll(stat.value, nullptr, 10);
 			*cputime = usec / 1e6;
 		}
 		ret = cgroup_read_stats_next(&handle, &stat);
 	}
-	if ( ret!=ECGEOF ) error(ret,"get cgroup value cpu.stat");
+	if ( ret!=ECGEOF ) die(ret,"get cgroup value cpu.stat");
 	cgroup_read_stats_end(&handle);
 
 	cgroup_free(&cg);
@@ -554,19 +506,19 @@ void output_cgroup_stats(double *cputime)
 /* Temporary shorthand define for error handling. */
 #define cgroup_add_value(type,name,value) \
 	ret = cgroup_add_value_ ## type(cg_controller, name, value); \
-	if ( ret!=0 ) error(ret,"set cgroup value " #name);
+	if ( ret!=0 ) die(ret,"set cgroup value " #name);
 
 void cgroup_create()
 {
 	struct cgroup *cg;
 	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) error(0,"cgroup_new_cgroup");
+	if (!cg) die(0,"cgroup_new_cgroup");
 
 	/* Set up the memory restrictions; these two options limit ram use
 	   and ram+swap use. They are the same so no swapping can occur */
 	struct cgroup_controller *cg_controller;
 	if ( (cg_controller = cgroup_add_controller(cg, "memory"))==nullptr ) {
-		error(0,"cgroup_add_controller memory");
+		die(0,"cgroup_add_controller memory");
 	}
 
 	int ret;
@@ -584,7 +536,7 @@ void cgroup_create()
 	   no limits on memory nodes */
 	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
 		if ( (cg_controller = cgroup_add_controller(cg, "cpuset"))==nullptr ) {
-			error(0,"cgroup_add_controller cpuset");
+			die(0,"cgroup_add_controller cpuset");
 		}
 		/* To make a cpuset exclusive, some additional setup outside of domjudge is
 		   required, so for now, we will leave this commented out. */
@@ -592,14 +544,14 @@ void cgroup_create()
 		cgroup_add_value(string, "cpuset.mems", "0");
 		cgroup_add_value(string, "cpuset.cpus", cpuset);
 	} else {
-		verbose("cpuset undefined");
+		logmsg(LOG_DEBUG, "cpuset undefined");
 	}
 
 	/* Perform the actual creation of the cgroup */
-	if ( (ret = cgroup_create_cgroup(cg, 1))!=0 ) error(ret,"creating cgroup");
+	if ( (ret = cgroup_create_cgroup(cg, 1))!=0 ) die(ret,"creating cgroup");
 
 	cgroup_free(&cg);
-	verbose("created cgroup '%s'",cgroupname);
+	logmsg(LOG_DEBUG, "created cgroup `{}'",cgroupname);
 }
 
 #undef cgroup_setval
@@ -613,7 +565,7 @@ void cgroup_kill()
 	do {
 		pid_t* pids;
 		int ret = cgroup_get_procs(cgroupname, mem_controller, &pids, &size);
-		if (ret != 0) error(ret, "cgroup_get_procs");
+		if(ret != 0) die(ret, "cgroup_get_procs");
 		for(int i = 0; i < size; i++) {
 			kill(pids[i], SIGKILL);
 		}
@@ -625,23 +577,23 @@ void cgroup_delete()
 {
 	struct cgroup *cg;
 	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) error(0,"cgroup_new_cgroup");
+	if (!cg) die(0,"cgroup_new_cgroup");
 
-	if (cgroup_add_controller(cg, "cpu") == nullptr) error(0, "cgroup_add_controller cpu");
-	if ( cgroup_add_controller(cg, "memory")==nullptr ) error(0,"cgroup_add_controller memory");
+	if (cgroup_add_controller(cg, "cpu") == nullptr) die(0, "cgroup_add_controller cpu");
+	if ( cgroup_add_controller(cg, "memory")==nullptr ) die(0,"cgroup_add_controller memory");
 
 	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
-		if ( cgroup_add_controller(cg, "cpuset")==nullptr ) error(0,"cgroup_add_controller cpuset");
+		if ( cgroup_add_controller(cg, "cpuset")==nullptr ) die(0,"cgroup_add_controller cpuset");
 	}
 	/* Clean up our cgroup */
 	nanosleep(&cg_delete_delay,nullptr);
 	int ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
 	// TODO: is this actually benign to ignore ECGOTHER here?
-	if ( ret!=0 && ret!=ECGOTHER ) error(ret,"deleting cgroup");
+	if ( ret!=0 && ret!=ECGOTHER ) die(ret,"deleting cgroup");
 
 	cgroup_free(&cg);
 
-	verbose("deleted cgroup '%s'",cgroupname);
+	logmsg(LOG_DEBUG, "deleted cgroup `{}'",cgroupname);
 }
 
 void terminate(int sig)
@@ -736,7 +688,7 @@ char *username()
 	struct passwd *pwd;
 	pwd = getpwuid(getuid());
 
-	if ( pwd==nullptr || errno ) error(errno,"failed to get username");
+	if ( pwd==nullptr || errno ) die(errno,"failed to get username");
 	errno = saved_errno;
 
 	return pwd->pw_name;
@@ -749,7 +701,7 @@ long read_optarg_int(const char *desc, long minval, long maxval)
 	errno = 0;
 	long arg = strtol(optarg,&ptr,10);
 	if ( errno || *ptr!='\0' || arg<minval || arg>maxval ) {
-		error(errno,"invalid %s specified: `%s'",desc,optarg);
+		die(errno,"invalid {} specified: `{}'",desc,optarg);
 	}
 
 	return arg;
@@ -758,7 +710,7 @@ long read_optarg_int(const char *desc, long minval, long maxval)
 void read_optarg_time(const char *desc, double *times)
 {
 	char *optcopy;
-	if ( (optcopy=strdup(optarg))==nullptr ) error(0,"strdup() failed");
+	if ( (optcopy=strdup(optarg))==nullptr ) die(0,"strdup() failed");
 
 	/* Check for soft:hard limit separator and cut string. */
 	char *sep;
@@ -768,7 +720,7 @@ void read_optarg_time(const char *desc, double *times)
 	errno = 0;
 	times[0] = strtod(optcopy,&ptr);
 	if ( errno || *ptr!='\0' || !finite(times[0]) || times[0]<=0 ) {
-		error(errno,"invalid %s specified: `%s'",desc,optarg);
+		die(errno,"invalid {} specified: `{}'",desc,optarg);
 	}
 
 	/* And repeat for hard limit if we found the ':' separator. */
@@ -776,10 +728,10 @@ void read_optarg_time(const char *desc, double *times)
 		errno = 0;
 		times[1] = strtod(sep+1,&ptr);
 		if ( errno || *(sep+1)=='\0' || *ptr!='\0' || !finite(times[1]) || times[1]<=0 ) {
-			error(errno,"invalid %s specified: `%s'",desc,optarg);
+			die(errno,"invalid {} specified: `{}'",desc,optarg);
 		}
 		if ( times[1]<times[0] ) {
-			error(0,"invalid %s specified: hard limit is lower than soft limit",desc);
+			die(0,"invalid {} specified: hard limit is lower than soft limit",desc);
 		}
 	} else {
 		/* Set soft and hard limits equal. */
@@ -806,7 +758,7 @@ void setrestrictions()
 		// strdup as putenv does not copy that string, but uses it as is.
 		char *token = strtok(strdup(tokens.c_str()), ";");
 		while (token != nullptr) {
-			verbose("setting environment variable: %s", token);
+			logmsg(LOG_DEBUG, "setting environment variable: {}", token);
 			putenv(token);
 			token = strtok(nullptr, ";");
 		}
@@ -820,9 +772,9 @@ void setrestrictions()
 #define setlim(type) \
 	if ( setrlimit(RLIMIT_ ## type, &lim)!=0 ) { \
 		if ( errno==EPERM ) { \
-			warning("no permission to set resource RLIMIT_" #type); \
+			warning(0, "no permission to set resource RLIMIT_" #type); \
 		} else { \
-			error(errno,"setting resource RLIMIT_" #type); \
+			die(errno,"setting resource RLIMIT_" #type); \
 		} \
 	}
 
@@ -835,7 +787,7 @@ void setrestrictions()
 		   not by default and gives us a reliable way to detect if the
 		   CPU-time limit was reached. */
 		rlim_t cputime_limit = (rlim_t)ceil(cputimelimit[1]);
-		verbose("setting hard CPU-time limit to %d(+1) seconds",(int)cputime_limit);
+		logmsg(LOG_DEBUG, "setting hard CPU-time limit to {}(+1) seconds",(int)cputime_limit);
 		lim.rlim_cur = cputime_limit;
 		lim.rlim_max = cputime_limit+1;
 		setlim(CPU);
@@ -851,13 +803,13 @@ void setrestrictions()
 	setlim(STACK);
 
 	if ( filesize!=RLIM_INFINITY ) {
-		verbose("setting filesize limit to %lu bytes",filesize);
+		logmsg(LOG_DEBUG, "setting filesize limit to {} bytes",filesize);
 		lim.rlim_cur = lim.rlim_max = filesize;
 		setlim(FSIZE);
 	}
 
 	if ( nproc!=RLIM_INFINITY ) {
-		verbose("setting process limit to %d",(int)nproc);
+		logmsg(LOG_DEBUG, "setting process limit to {}",(int)nproc);
 		lim.rlim_cur = lim.rlim_max = nproc;
 		setlim(NPROC);
 	}
@@ -865,77 +817,77 @@ void setrestrictions()
 #undef setlim
 
 	if ( no_coredump ) {
-		verbose("disabling core dumps");
+		logmsg(LOG_DEBUG, "disabling core dumps");
 		lim.rlim_cur = lim.rlim_max = 0;
-		if ( setrlimit(RLIMIT_CORE,&lim)!=0 ) error(errno,"disabling core dumps");
+		if ( setrlimit(RLIMIT_CORE,&lim)!=0 ) die(errno,"disabling core dumps");
 	}
 
 	/* Put the child process in the cgroup */
 	const char *controllers[] = { "memory", nullptr };
 	if (cgroup_change_cgroup_path(cgroupname, getpid(), controllers) != 0) {
-		error(0, "Failed to move the process to the cgroup");
+		die(0, "Failed to move the process to the cgroup");
 	}
 
 	/* Run the command in a separate process group so that the command
 	   and all its children can be killed off with one signal. */
-	if ( setsid()==-1 ) error(errno,"setsid failed");
+	if ( setsid()==-1 ) die(errno,"setsid failed");
 
 	/* Set root-directory and change directory to there. */
 	if ( use_root ) {
 		/* Small security issue: when running setuid-root, people can find
 		   out which directories exist from error message. */
-		if ( chdir(rootdir)!=0 ) error(errno,"cannot chdir to `%s'",rootdir);
+		if ( chdir(rootdir)!=0 ) die(errno,"cannot chdir to `{}'",rootdir);
 
 		/* Get absolute pathname of rootdir, by reading it. */
 		char  cwd[PATH_MAX+1];
-		if ( getcwd(cwd,PATH_MAX)==nullptr ) error(errno,"cannot get directory");
+		if ( getcwd(cwd,PATH_MAX)==nullptr ) die(errno,"cannot get directory");
 		if ( cwd[strlen(cwd)-1]!='/' ) strcat(cwd,"/");
 
 		/* Canonicalize CHROOT_PREFIX. */
 		char *path;
 		if ( (path = (char *) malloc(PATH_MAX+1))==nullptr ) {
-			error(errno,"allocating memory");
+			die(errno,"allocating memory");
 		}
 		if ( realpath(CHROOT_PREFIX,path)==nullptr ) {
-			error(errno,"cannot canonicalize path '%s'",CHROOT_PREFIX);
+			die(errno,"cannot canonicalize path `{}'",CHROOT_PREFIX);
 		}
 
 		/* Check that we are within prescribed path. */
 		if ( strncmp(cwd,path,strlen(path))!=0 ) {
-			error(0,"invalid root: must be within `%s'",path);
+			die(0,"invalid root: must be within `{}'",path);
 		}
 		free(path);
 
-		if ( chroot(".")!=0 ) error(errno,"cannot change root to `%s'",cwd);
-		if ( chdir("/")!=0 ) error(errno,"cannot chdir to `/' in chroot");
+		if ( chroot(".")!=0 ) die(errno,"cannot change root to `{}'",cwd);
+		if ( chdir("/")!=0 ) die(errno,"cannot chdir to `/' in chroot");
 		if ( rootchdir!=nullptr ) {
-			if ( chdir(rootchdir)!=0 ) error(errno,"cannot chdir to `%s' in chroot", rootchdir);
+			if ( chdir(rootchdir)!=0 ) die(errno,"cannot chdir to `{}' in chroot", rootchdir);
 		}
-		verbose("using root-directory `%s'",cwd);
+		logmsg(LOG_DEBUG, "using root-directory `{}'",cwd);
 	}
 
 	/* Set group-id (must be root for this, so before setting user). */
 	if ( use_group ) {
-		if ( setgid(rungid) ) error(errno,"cannot set group ID to `%d'",rungid);
-		if ( setgroups(0, nullptr) ) error(errno,"cannot clear auxiliary groups");
+		if ( setgid(rungid) ) die(errno,"cannot set group ID to `{}'",rungid);
+		if ( setgroups(0, nullptr) ) die(errno,"cannot clear auxiliary groups");
 
-		verbose("using group ID `%d'",rungid);
+		logmsg(LOG_DEBUG, "using group ID `{}'",rungid);
 	}
 	/* Set user-id (must be root for this). */
 	if ( use_user ) {
-		if ( setuid(runuid) ) error(errno,"cannot set user ID to `%d'",runuid);
-		verbose("using user ID `%d' for command",runuid);
+		if ( setuid(runuid) ) die(errno,"cannot set user ID to `{}'",runuid);
+		logmsg(LOG_DEBUG, "using user ID `{}' for command",runuid);
 	} else {
 		/* Permanently reset effective uid to real uid, to prevent
 		   child command from having root privileges.
 		   Note that this means that the child runs as the same user
 		   as the watchdog process and can thus manipulate it, e.g. by
 		   sending SIGSTOP/SIGCONT! */
-		if ( setuid(getuid()) ) error(errno,"cannot reset real user ID");
-		verbose("reset user ID to `%d' for command",getuid());
+		if ( setuid(getuid()) ) die(errno,"cannot reset real user ID");
+		logmsg(LOG_DEBUG, "reset user ID to `{}' for command",getuid());
 	}
 	if ( geteuid()==0 || getuid()==0 ) {
-		error(0,"root privileges not dropped. Do not run judgedaemon as root.");
+		die(0,"root privileges not dropped. Do not run judgedaemon as root.");
 	}
 }
 
@@ -968,7 +920,7 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 
 					if ( nread==-1 && errno==EINVAL ) {
 						use_splice = 0;
-						verbose("splice failed, switching to read/write");
+						logmsg(LOG_DEBUG, "splice failed, switching to read/write");
 						/* Setting errno here to repeat the copy. */
 						errno = EAGAIN;
 					}
@@ -997,17 +949,17 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 
 				/* print message if we're at the streamsize limit */
 				if (limit_streamsize && data_passed[i] == streamsize) {
-					verbose("child fd %i limit reached",i);
+					logmsg(LOG_DEBUG, "child fd {} limit reached",i);
 				}
 			}
 			if ( nread==-1 ) {
 				if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) continue;
-				error(errno,"copying data fd %d",i);
+				die(errno,"copying data fd {}",i);
 			}
 			if ( nread==0 ) {
 				/* EOF detected: close fd and indicate this with -1 */
 				if ( close(child_pipefd[i][PIPE_OUT])!=0 ) {
-					error(errno,"closing pipe for fd %d",i);
+					die(errno,"closing pipe for fd {}",i);
 				}
 				child_pipefd[i][PIPE_OUT] = -1;
 				continue;
@@ -1035,7 +987,7 @@ int main(int argc, char **argv)
 
 	progname = argv[0];
 
-	if ( gettimeofday(&progstarttime,nullptr) ) error(errno,"getting time");
+	if ( gettimeofday(&progstarttime,nullptr) ) die(errno,"getting time");
 
 	/* Parse command-line options */
 	use_root = use_walltime = use_cputime = use_user = no_coredump = 0;
@@ -1044,7 +996,6 @@ int main(int argc, char **argv)
 	preserve_environment = 0;
 	memsize = filesize = nproc = RLIM_INFINITY;
 	redir_stdout = redir_stderr = limit_streamsize = 0;
-	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
 	char *ptr;
@@ -1055,38 +1006,38 @@ int main(int argc, char **argv)
 		case 'r': /* rootdir option */
 			use_root = 1;
 			rootdir = (char *) malloc(strlen(optarg)+2);
-			if ( rootdir==nullptr ) error(errno,"allocating memory");
+			if ( rootdir==nullptr ) die(errno,"allocating memory");
 			strcpy(rootdir,optarg);
 			break;
 		case 'u': /* user option: uid or string */
 			use_user = 1;
 			runuser = strdup(optarg);
-			if ( runuser==nullptr ) error(errno,"strdup() failed");
+			if ( runuser==nullptr ) die(errno,"strdup() failed");
 			errno = 0;
 			runuid = strtol(optarg,&ptr,10);
 			if ( errno || *ptr!='\0' ) {
 				runuid = userid(optarg);
 				if ( regcomp(&userregex,"^[A-Za-z][A-Za-z0-9\\._-]*$", REG_NOSUB)!=0 ) {
-					error(0,"could not create username regex");
+					die(0,"could not create username regex");
 				}
 				if ( regexec(&userregex, runuser, 0, nullptr, 0)!=0 ) {
-					error(0,"username `%s' does not match POSIX pattern", runuser);
+					die(0,"username `{}' does not match POSIX pattern", runuser);
 				}
 			}
-			if ( runuid<0 ) error(0,"invalid username or ID specified: `%s'",optarg);
+			if ( runuid<0 ) die(0,"invalid username or ID specified: `{}'",optarg);
 			break;
 		case 'g': /* group option: gid or string */
 			use_group = 1;
 			rungroup = strdup(optarg);
-			if ( rungroup==nullptr ) error(errno,"strdup() failed");
+			if ( rungroup==nullptr ) die(errno,"strdup() failed");
 			errno = 0;
 			rungid = strtol(optarg,&ptr,10);
 			if ( errno || *ptr!='\0' ) rungid = groupid(optarg);
-			if ( rungid<0 ) error(0,"invalid groupname or ID specified: `%s'",optarg);
+			if ( rungid<0 ) die(0,"invalid groupname or ID specified: `{}'",optarg);
 			break;
 		case 'd': /* chdir option */
 			rootchdir = (char *) malloc(strlen(optarg)+2);
-			if ( rootchdir==nullptr ) error(errno,"allocating memory");
+			if ( rootchdir==nullptr ) die(errno,"allocating memory");
 			strcpy(rootchdir,optarg);
 			break;
 		case 't': /* wallclock time option */
@@ -1155,46 +1106,46 @@ int main(int argc, char **argv)
 			metafilename = strdup(optarg);
 			break;
 		case 'v': /* verbose option */
-			be_verbose = 1;
+			verbose = LOG_DEBUG;
 			break;
 		case 'q': /* quiet option */
-			be_quiet = 1;
+			verbose = LOG_ERR;
 			break;
 		case 'U':
 			runpipe_pid = strtol(optarg, &ptr, 10);
 			break;
 		case ':': /* getopt error */
 		case '?':
-			error(0,"unknown option or missing argument `%c'",optopt);
+			die(0,"unknown option or missing argument `{}'",optopt);
 			break;
 		default:
-			error(0,"getopt returned character code `%c' ??",(char)opt);
+			die(0,"getopt returned character code `{:c}' ??",opt);
 		}
 	}
 
-	verbose("starting in verbose mode, PID = %d", getpid());
+	logmsg(LOG_DEBUG, "starting in verbose mode, PID = {}", getpid());
 
 	/* Make sure that we change from group root if we change to an
 	   unprivileged user to prevent unintended permissions. */
 	if ( use_user && !use_group ) {
-		verbose("using unprivileged user `%s' also as group",runuser);
+		logmsg(LOG_DEBUG, "using unprivileged user `{}' also as group",runuser);
 		use_group = 1;
 		rungroup = strdup(runuser);
 		rungid = groupid(rungroup);
-		if ( rungid<0 ) error(0,"invalid groupname or ID specified: `%s'",rungroup);
+		if ( rungid<0 ) die(0,"invalid groupname or ID specified: `{}'",rungroup);
 	}
 
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
 
-	if ( argc<=optind ) error(0,"no command specified");
+	if ( argc<=optind ) die(0,"no command specified");
 
 	/* Command to be executed */
 	cmdname = argv[optind];
 	cmdargs = argv+optind;
 
 	if ( outputmeta && (metafile = fopen(metafilename,"w"))==nullptr ) {
-		error(errno,"cannot open `%s'",metafilename);
+		die(errno,"cannot open `{}'",metafilename);
 	}
 
 	/* Check that new uid is in list of valid uid's. When the new user
@@ -1209,26 +1160,26 @@ int main(int argc, char **argv)
 				ret = fnmatch(ptr,runuser,0);
 				if ( ret==0 ) break;
 				if ( ret!=FNM_NOMATCH ) {
-					error(0,"matching username `%s' against `%s'",runuser,ptr);
+					die(0,"matching username `{}' against `{}'",runuser,ptr);
 				}
 			}
 		}
-		if ( ptr==nullptr || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
+		if ( ptr==nullptr || runuid<=0 ) die(0,"illegal user specified: {}",runuid);
 	}
 
 	/* Setup pipes connecting to child stdout/err streams (ignore stdin). */
 	for(int i=1; i<=2; i++) {
-		if ( pipe(child_pipefd[i])!=0 ) error(errno,"creating pipe for fd %d",i);
+		if ( pipe(child_pipefd[i])!=0 ) die(errno,"creating pipe for fd {}",i);
 	}
 
 	sigset_t emptymask;
-	if ( sigemptyset(&emptymask)!=0 ) error(errno,"creating empty signal mask");
+	if ( sigemptyset(&emptymask)!=0 ) die(errno,"creating empty signal mask");
 
 	/* unmask all signals, except SIGCHLD: detected in pselect() below */
 	sigset_t sigmask = emptymask;
-	if ( sigaddset(&sigmask, SIGCHLD)!=0 ) error(errno,"setting signal mask");
+	if ( sigaddset(&sigmask, SIGCHLD)!=0 ) die(errno,"setting signal mask");
 	if ( sigprocmask(SIG_SETMASK, &sigmask, nullptr)!=0 ) {
-		error(errno,"unmasking signals");
+		die(errno,"unmasking signals");
 	}
 
 	/* Construct signal handler for SIGCHLD detection in pselect(). */
@@ -1237,7 +1188,7 @@ int main(int argc, char **argv)
 	sigact.sa_flags   = 0;
 	sigact.sa_mask    = emptymask;
 	if ( sigaction(SIGCHLD,&sigact,nullptr)!=0 ) {
-		error(errno,"installing signal handler");
+		die(errno,"installing signal handler");
 	}
 
 	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
@@ -1246,7 +1197,7 @@ int main(int argc, char **argv)
 
 		for(unsigned cpu : cpus) {
 			if ( !online_cpus.count(cpu) ) {
-				error(0, "requested pinning on CPU %u which is not online", cpu);
+				die(0, "requested pinning on CPU {} which is not online", cpu);
 			}
 		}
 	}
@@ -1254,7 +1205,7 @@ int main(int argc, char **argv)
 	/* Make libcgroup ready for use */
 	ret = cgroup_init();
 	if ( ret!=0 ) {
-		error(0,"libcgroup initialization failed: %s(%d)\n", cgroup_strerror(ret), ret);
+		die(0,"libcgroup initialization failed: {}({})\n", cgroup_strerror(ret), ret);
 	}
 	/* Define the cgroup name that we will use and make sure it will
 	 * be unique. Note: group names must have slashes!
@@ -1270,7 +1221,7 @@ int main(int argc, char **argv)
 	cgroup_create();
 
 	if ( unshare(CLONE_FILES|CLONE_FS|CLONE_NEWIPC|CLONE_NEWNET|CLONE_NEWNS|CLONE_NEWUTS|CLONE_SYSVSEM)!=0 ) {
-		error(errno, "calling unshare");
+		die(errno, "calling unshare");
 	}
 
 	/* Check if any Linux Out-Of-Memory killer adjustments have to
@@ -1281,68 +1232,68 @@ int main(int argc, char **argv)
 	FILE *fp = nullptr;
 	const char *oom_score_path = "/proc/self/oom_score_adj";
 	if ( (fp = fopen(oom_score_path, "r+"))!=nullptr ) {
-		if ( fscanf(fp,"%d", &ret)!=1 ) error(errno,"cannot read from `%s'", oom_score_path);
+		if ( fscanf(fp,"%d", &ret)!=1 ) die(errno,"cannot read from `{}'", oom_score_path);
 		if ( ret<0 ) {
 			int oom_reset_value = 0;
-			verbose("resetting `%s' from %d to %d", oom_score_path, ret, oom_reset_value);
+			die(0, "resetting `{}' from {} to {}", oom_score_path, ret, oom_reset_value);
 			rewind(fp);
 			if ( fprintf(fp,"%d\n", oom_reset_value) <= 0 ) {
-				error(errno, "cannot write to `%s'", oom_score_path);
+				die(errno, "cannot write to `{}'", oom_score_path);
 			}
 		}
-		if ( fclose(fp)!=0 ) error(errno, "closing file `%s'", oom_score_path);
+		if ( fclose(fp)!=0 ) die(errno, "closing file `{}'", oom_score_path);
 	}
 
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
-		error(errno,"cannot fork");
+		die(errno,"cannot fork");
 	case  0: /* run controlled command */
 		/* Apply all restrictions for child process. */
 		setrestrictions();
-		verbose("setrestrictions() done");
+		logmsg(LOG_DEBUG, "setrestrictions() done");
 
 		/* Connect pipes to command (stdin/)stdout/stderr and close
 		 * unneeded fd's. Do this after setting restrictions to let
 		 * any messages not go to command stderr pipe. */
 		for(int i=1; i<=2; i++) {
 			if ( dup2(child_pipefd[i][PIPE_IN],i)<0 ) {
-				error(errno,"redirecting child fd %d",i);
+				die(errno,"redirecting child fd {}",i);
 			}
 			if ( close(child_pipefd[i][PIPE_IN] )!=0 ||
 			     close(child_pipefd[i][PIPE_OUT])!=0 ) {
-				error(errno,"closing pipe for fd %d",i);
+				die(errno,"closing pipe for fd {}",i);
 			}
 		}
-		verbose("pipes closed in child");
+		logmsg(LOG_DEBUG, "pipes closed in child");
 
 		if ( outputmeta ) {
 			if ( fclose(metafile)!=0 ) {
-				error(errno,"closing file `%s'",metafilename);
+				die(errno,"closing file `{}'",metafilename);
 			}
-			verbose("metafile closed in child");
+			logmsg(LOG_DEBUG, "metafile closed in child");
 		}
 
 		/* And execute child command. */
 		execvp(cmdname,cmdargs);
-		error(errno,"cannot start `%s' as user `%s'", cmdname, username());
+		die(errno,"cannot start `{}' as user `{}'", cmdname, username());
 
 	default: /* become watchdog */
-		verbose("child pid = %d", child_pid);
+		logmsg(LOG_DEBUG, "child pid = {}", child_pid);
 		/* Shed privileges, only if not using a separate child uid,
 		   because in that case we may need root privileges to kill
 		   the child process. Do not use Linux specific setresuid()
 		   call with saved set-user-ID. */
 		if ( !use_user ) {
-			if ( setuid(getuid())!=0 ) error(errno, "setting watchdog uid");
-			verbose("watchdog using user ID `%d'",getuid());
+			if ( setuid(getuid())!=0 ) die(errno, "setting watchdog uid");
+			logmsg(LOG_DEBUG, "watchdog using user ID `{}'",getuid());
 		}
 
-		if ( gettimeofday(&starttime,nullptr) ) error(errno,"getting time");
+		if ( gettimeofday(&starttime,nullptr) ) die(errno,"getting time");
 
 		/* Close unused file descriptors */
 		for(int i=1; i<=2; i++) {
 			if ( close(child_pipefd[i][PIPE_IN])!=0 ) {
-				error(errno,"closing pipe for fd %i",i);
+				die(errno,"closing pipe for fd {}",i);
 			}
 		}
 
@@ -1355,24 +1306,24 @@ int main(int argc, char **argv)
 		if ( redir_stdout ) {
 			child_redirfd[STDOUT_FILENO] = creat(stdoutfilename, S_IRUSR | S_IWUSR);
 			if ( child_redirfd[STDOUT_FILENO]<0 ) {
-				error(errno,"opening file '%s'",stdoutfilename);
+				die(errno,"opening file `{}'",stdoutfilename);
 			}
 		}
 		if ( redir_stderr ) {
 			child_redirfd[STDERR_FILENO] = creat(stderrfilename, S_IRUSR | S_IWUSR);
 			if ( child_redirfd[STDERR_FILENO]<0 ) {
-				error(errno,"opening file '%s'",stderrfilename);
+				die(errno,"opening file `{}'",stderrfilename);
 			}
 		}
-		verbose("redirection done in parent");
+		logmsg(LOG_DEBUG, "redirection done in parent");
 
-		if ( sigemptyset(&emptymask)!=0 ) error(errno,"creating empty signal mask");
+		if ( sigemptyset(&emptymask)!=0 ) die(errno,"creating empty signal mask");
 
 		/* Construct one-time signal handler to terminate() for TERM
 		   and ALRM signals. */
 		sigset_t sigmask = emptymask;
 		if ( sigaddset(&sigmask,SIGALRM)!=0 ||
-		     sigaddset(&sigmask,SIGTERM)!=0 ) error(errno,"setting signal mask");
+		     sigaddset(&sigmask,SIGTERM)!=0 ) die(errno,"setting signal mask");
 
 		sigact.sa_handler = terminate;
 		sigact.sa_flags   = SA_RESETHAND | SA_RESTART;
@@ -1380,13 +1331,13 @@ int main(int argc, char **argv)
 
 		/* Kill child command when we receive SIGTERM */
 		if ( sigaction(SIGTERM,&sigact,nullptr)!=0 ) {
-			error(errno,"installing signal handler");
+			die(errno,"installing signal handler");
 		}
 
 		if ( use_walltime ) {
 			/* Kill child when we receive SIGALRM */
 			if ( sigaction(SIGALRM,&sigact,nullptr)!=0 ) {
-				error(errno,"installing signal handler");
+				die(errno,"installing signal handler");
 			}
 
 			/* Trigger SIGALRM via setitimer:  */
@@ -1396,13 +1347,13 @@ int main(int argc, char **argv)
 			itimer.it_value.tv_usec = (int)(modf(walltimelimit[1],&tmpd) * 1E6);
 
 			if ( setitimer(ITIMER_REAL,&itimer,nullptr)!=0 ) {
-				error(errno,"setting timer");
+				die(errno,"setting timer");
 			}
-			verbose("setting hard wall-time limit to %.3f seconds",walltimelimit[1]);
+			logmsg(LOG_DEBUG, "setting hard wall-time limit to {:.3f} seconds",walltimelimit[1]);
 		}
 
 		if ( times(&startticks)==(clock_t) -1 ) {
-			error(errno,"getting start clock ticks");
+			die(errno,"getting start clock ticks");
 		}
 
 		/* Wait for child data or exit.
@@ -1427,14 +1378,14 @@ int main(int argc, char **argv)
 			}
 
 			int r = pselect(nfds+1, &readfds, nullptr, nullptr, nullptr, &emptymask);
-			if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
+			if ( r==-1 && errno!=EINTR ) die(errno,"waiting for child data");
 			if (error_in_signalhandler) {
-				error(errno, "error in signal handler, exiting");
+				die(errno, "error in signal handler, exiting");
 			}
 
 			if ( received_SIGCHLD || received_signal == SIGALRM ) {
 				pid_t pid;
-				if ( (pid = wait(&status))<0 ) error(errno,"waiting on child");
+				if ( (pid = wait(&status))<0 ) die(errno,"waiting on child");
 				if ( pid==child_pid ) break;
 			}
 
@@ -1448,11 +1399,11 @@ int main(int argc, char **argv)
 				FD_SET(child_pipefd[i][PIPE_OUT],&readfds);
 				int r = fcntl(child_pipefd[i][PIPE_OUT], F_GETFL);
 				if (r == -1) {
-					error(errno, "fcntl, getting flags");
+					die(errno, "fcntl, getting flags");
 				}
 				r = fcntl(child_pipefd[i][PIPE_OUT], F_SETFL, r ^ O_NONBLOCK);
 				if (r == -1) {
-					error(errno, "fcntl, setting flags");
+					die(errno, "fcntl, setting flags");
 				}
 			}
 		}
@@ -1465,14 +1416,14 @@ int main(int argc, char **argv)
 		/* Close the output files */
 		for(int i=1; i<=2; i++) {
 			ret = close(child_redirfd[i]);
-			if( ret!=0 ) error(errno,"closing output fd %d", i);
+			if( ret!=0 ) die(errno,"closing output fd {}", i);
 		}
 
 		if ( times(&endticks)==(clock_t) -1 ) {
-			error(errno,"getting end clock ticks");
+			die(errno,"getting end clock ticks");
 		}
 
-		if ( gettimeofday(&endtime,nullptr) ) error(errno,"getting time");
+		if ( gettimeofday(&endtime,nullptr) ) die(errno,"getting time");
 
 		/* Test whether command has finished abnormally */
 		int exitcode = 0;
@@ -1480,22 +1431,22 @@ int main(int argc, char **argv)
 			if ( WIFSIGNALED(status) ) {
 				if ( WTERMSIG(status)==SIGXCPU ) {
 					cpulimit_reached |= hard_timelimit;
-					warning("timelimit exceeded (hard cpu time)");
+					warning(0, "timelimit exceeded (hard cpu time)");
 				} else {
-					warning("command terminated with signal %d",WTERMSIG(status));
+					warning(0, "command terminated with signal {}",WTERMSIG(status));
 				}
 				exitcode = 128+WTERMSIG(status);
 			} else
 			if ( WIFSTOPPED(status) ) {
-				warning("command stopped with signal %d",WSTOPSIG(status));
+				warning(0, "command stopped with signal {}",WSTOPSIG(status));
 				exitcode = 128+WSTOPSIG(status);
 			} else {
-				error(0,"command exit status unknown: %d",status);
+				die(0,"command exit status unknown: {}",status);
 			}
 		} else {
 			exitcode = WEXITSTATUS(status);
 		}
-		verbose("child exited with exit code %d", exitcode);
+		logmsg(LOG_DEBUG, "child exited with exit code {}", exitcode);
 
 		if ( use_walltime ) {
 			/* Disarm timer we set previously so if any of the
@@ -1507,7 +1458,7 @@ int main(int argc, char **argv)
 			itimer.it_value.tv_usec = 0;
 
 			if ( setitimer(ITIMER_REAL,&itimer,nullptr)!=0 ) {
-				error(errno,"disarming timer");
+				die(errno,"disarming timer");
 			}
 		}
 
@@ -1519,7 +1470,7 @@ int main(int argc, char **argv)
 		cgroup_delete();
 
 		/* Drop root before writing to output file(s). */
-		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
+		if ( setuid(getuid())!=0 ) die(errno,"dropping root privileges");
 
 		output_exit_time(exitcode, cputime);
 
@@ -1534,15 +1485,15 @@ int main(int argc, char **argv)
 				if ( ptr!=str ) ptr = stpcpy(ptr,",");
 				ptr = stpcpy(ptr,"stderr");
 			}
-			write_meta("output-truncated","%s",str);
+			write_meta("output-truncated","{}",str);
 		}
 
-		write_meta("stdin-bytes", "%zu",data_read[0]);
-		write_meta("stdout-bytes","%zu",data_read[1]);
-		write_meta("stderr-bytes","%zu",data_read[2]);
+		write_meta("stdin-bytes", "{}",data_read[0]);
+		write_meta("stdout-bytes","{}",data_read[1]);
+		write_meta("stderr-bytes","{}",data_read[2]);
 
 		if ( outputmeta && fclose(metafile)!=0 ) {
-			error(errno,"closing file `%s'",metafilename);
+			die(errno,"closing file `{}'",metafilename);
 		}
 
 		/* Return the exitstatus of the command */
@@ -1550,5 +1501,5 @@ int main(int argc, char **argv)
 	}
 
 	/* This should never be reached */
-	error(0,"unexpected end of program");
+	die(0,"unexpected end of program");
 }
