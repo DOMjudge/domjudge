@@ -20,7 +20,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 /**
  * @extends AbstractRestController<TeamCategory, TeamCategory>
  */
-#[Rest\Route('/contests/{cid}/groups')]
+#[Rest\Route(path: '/contests/{cid}/groups')]
 #[OA\Tag(name: 'Groups')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -34,7 +34,7 @@ class GroupController extends AbstractRestController
      * Get all the groups for this contest.
      * @throws NonUniqueResultException
      */
-    #[Rest\Get('')]
+    #[Rest\Get(path: '')]
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
     #[OA\Parameter(
         name: 'public',
@@ -60,7 +60,7 @@ class GroupController extends AbstractRestController
      * Get the given group for this contest
      * @throws NonUniqueResultException
      */
-    #[Rest\Get('/{id}')]
+    #[Rest\Get(path: '/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given group for this contest',
@@ -122,7 +122,7 @@ class GroupController extends AbstractRestController
      * Update an existing group or create one with the given ID
      */
     #[IsGranted('ROLE_API_WRITER')]
-    #[Rest\Put('/{id}')]
+    #[Rest\Put(path: '/{id}')]
     #[OA\RequestBody(
         required: true,
         content: [

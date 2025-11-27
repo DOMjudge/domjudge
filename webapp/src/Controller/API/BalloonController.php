@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER') or is_granted('ROLE_BALLOON')"))]
-#[Rest\Route('/contests/{cid}/balloons')]
+#[Rest\Route(path: '/contests/{cid}/balloons')]
 #[OA\Tag(name: 'Balloons')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
@@ -31,7 +31,7 @@ class BalloonController extends AbstractApiController
      * @throws NonUniqueResultException
      * @return Balloon[]
      */
-    #[Rest\Get('')]
+    #[Rest\Get(path: '')]
     #[OA\Response(
         response: 200,
         description: 'Returns the balloons for this contest.',
@@ -84,7 +84,7 @@ class BalloonController extends AbstractApiController
      * Mark a specific balloon as done.
      */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')"))]
-    #[Rest\Post('/{balloonId<\d+>}/done')]
+    #[Rest\Post(path: '/{balloonId<\d+>}/done')]
     #[OA\Response(
         response: 204,
         description: 'The balloon was now marked as done or already marked as such.'

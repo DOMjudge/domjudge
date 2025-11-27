@@ -35,7 +35,7 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * @extends AbstractRestController<ContestProblem, ContestProblem|ContestProblemWrapper>
  */
-#[Rest\Route('/contests/{cid}/problems')]
+#[Rest\Route(path: '/contests/{cid}/problems')]
 #[OA\Tag(name: 'Problems')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -64,7 +64,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Post('/add-data')]
+    #[Rest\Post(path: '/add-data')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -119,7 +119,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * Get all the problems for this contest.
      * @throws NonUniqueResultException
      */
-    #[Rest\Get('')]
+    #[Rest\Get(path: '')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the problems for this contest',
@@ -180,7 +180,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Post('')]
+    #[Rest\Post(path: '')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -241,7 +241,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * Unlink a problem from this contest.
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Delete('/{id}')]
+    #[Rest\Delete(path: '/{id}')]
     #[OA\Response(response: 204, description: 'Problem unlinked from contest succeeded')]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function unlinkProblemAction(Request $request, string $id): Response
@@ -294,7 +294,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * Link an existing problem to this contest.
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Put('/{id}')]
+    #[Rest\Put(path: '/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the linked problem for this contest',
@@ -367,7 +367,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * Get the given problem for this contest.
      * @throws NonUniqueResultException
      */
-    #[Rest\Get('/{id}')]
+    #[Rest\Get(path: '/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given problem for this contest',
@@ -402,7 +402,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * Get the statement for given problem for this contest.
      * @throws NonUniqueResultException
      */
-    #[Rest\Get('/{id}/statement')]
+    #[Rest\Get(path: '/{id}/statement')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given problem statement for this contest',
@@ -441,7 +441,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * Get an attachment for given problem for this contest.
      * @throws NonUniqueResultException
      */
-    #[Rest\Get('/{id}/attachment/{filename}')]
+    #[Rest\Get(path: '/{id}/attachment/{filename}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given problem attachment for this contest'
