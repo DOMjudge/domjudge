@@ -126,7 +126,7 @@ class ContestType extends AbstractExternalIdEntityType
             'multiple' => true,
             'choice_label' => fn(TeamCategory $category) => $category->getName(),
             'help' => 'List of team categories that will receive medals for this contest.',
-            'query_builder' => function(EntityRepository $er) {
+            'query_builder' => function (EntityRepository $er) {
                 return $er->createQueryBuilder('c')
                     ->andWhere('BIT_AND(c.types, :scoring) = :scoring')
                     ->setParameter('scoring', TeamCategory::TYPE_SCORING);
