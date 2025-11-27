@@ -12,10 +12,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 class YamlConfigLoader extends FileLoader
 {
-    /**
-     * @return mixed
-     */
-    public function load(mixed $resource, ?string $type = null)
+    public function load(mixed $resource, ?string $type = null): mixed
     {
         return Yaml::parse(file_get_contents($resource));
     }

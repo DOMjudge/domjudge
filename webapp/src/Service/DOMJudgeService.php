@@ -175,7 +175,7 @@ class DOMJudgeService
     public function getCurrentContestCookie(): ?string
     {
         $request = $this->requestStack->getCurrentRequest();
-        if ($request === null || $request->cookies === null) {
+        if ($request === null) {
             return null;
         }
         return $request->cookies->get('domjudge_cid');
@@ -261,6 +261,9 @@ class DOMJudgeService
         return $user;
     }
 
+    /**
+     * @return bool|float|int|string|InputBag<string|int|float|bool|null>|null
+     */
     public function getCookie(string $cookieName): bool|float|int|string|InputBag|null
     {
         if (!$this->requestStack->getCurrentRequest()) {

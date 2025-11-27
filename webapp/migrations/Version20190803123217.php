@@ -4,8 +4,6 @@ namespace DoctrineMigrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 final class Version20190803123217 extends AbstractMigration
 {
@@ -39,7 +37,7 @@ final class Version20190803123217 extends AbstractMigration
         );
     }
 
-    protected function createTables()
+    protected function createTables(): void
     {
         // Table structure for table `auditlog`
         $this->addSql(<<<SQL

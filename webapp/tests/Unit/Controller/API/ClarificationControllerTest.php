@@ -142,7 +142,7 @@ class ClarificationControllerTest extends BaseTestCase
 
     public function provideAddInvalidData(): Generator
     {
-        yield ['demo', [], ""];
+        yield ['demo', [], 'Request payload contains invalid "json" data.'];
         yield ['demo', ['invalidfield' => 'value'], "/text:\n.*This value should be of type string./"];
         yield ['demo', ['text' => 'This is a clarification', 'from_team_id' => 'domjudge'], "Can not create a clarification from a different team."];
         yield ['demo', ['text' => 'This is a clarification', 'to_team_id' => 'exteam'], "Can not create a clarification that is sent to a team."];
