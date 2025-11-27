@@ -1233,7 +1233,6 @@ class ImportExportService
                             $propertyAccessor = PropertyAccess::createPropertyAccessor();
                             foreach ($teamItem['team_affiliation'] as $field => $value) {
                                 $propertyAccessor->setValue($teamAffiliation, $field, $value);
-                                assert($teamAffiliation instanceof TeamAffiliation);
                             }
                         } else {
                             $teamAffiliation
@@ -1331,7 +1330,6 @@ class ImportExportService
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             foreach ($teamItem['team'] as $field => $value) {
                 $propertyAccessor->setValue($team, $field, $value);
-                assert($team instanceof Team);
             }
 
             $errors = $this->validator->validate($team);
@@ -1491,7 +1489,6 @@ class ImportExportService
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             foreach ($accountItem['user'] as $field => $value) {
                 $propertyAccessor->setValue($user, $field, $value);
-                assert($user instanceof User);
             }
 
             $errors = $this->validator->validate($user);
