@@ -877,7 +877,7 @@ class ImportExportService
             if (in_array(TeamCategory::TYPE_SCORING, $types, true) && $sortOrder === null) {
                 $sortOrder = 0;
             }
-            if ($sortOrder !== null && !in_array(TeamCategory::TYPE_SCORING, $types, true)) {
+            if (!($sortOrder === null || in_array(TeamCategory::TYPE_SCORING, $types, true))) {
                 $types = [TeamCategory::TYPE_SCORING];
             }
             if (isset($groupItem['color']) && !in_array(TeamCategory::TYPE_BACKGROUND, $types, true)) {
