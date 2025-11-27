@@ -49,7 +49,7 @@
                 <td>
                     {%- if not balloon.data.done -%}
                     {%- set link = path('jury_balloons_setdone', {balloonId: balloon.data.balloonid}) %}
-                    <a href="{{ link }}" title="mark balloon as done">
+                    <a href="{{ link }}" title="mark balloon as done" onclick="printThenRedirect({{ balloon.data | json_encode() }}, '{{ balloon.data.team.effectiveName }}', '{{ balloon.data.contestproblem.color }}', this.href)">
                     <i class="fas fa-running"></i>
                     </a>
                 </td>

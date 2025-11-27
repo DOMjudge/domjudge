@@ -29,6 +29,9 @@
                 <i class="fas fa-filter"></i> Filter
             </label>
         </div>
+        <button class="btn btn-secondary" id="connect-printer">
+            Connect printer
+        </button>
         <div class="card mt-3{% if not hasFilters %} d-none{% endif %}" id="filter-card">
             <div class="card-body">
                 <div class="row">
@@ -83,7 +86,298 @@
 {% block extrafooter %}
     {% if current_contest is not null %}
         <script>
+            let port = null;
+            let isConnected = false;
+
+            async function checkForPreviousPermissions() {
+                try {
+                    // Get previously authorized ports
+                    const ports = await navigator.serial.getPorts();
+
+                    if (ports.length > 0) {
+                        console.log('Found previously authorized port');
+                        return ports[0]; // Return the first available port
+                    }
+
+                    return null;
+                } catch (error) {
+                    console.error('Error checking permissions:', error);
+                    return null;
+                }
+            }
+
+            $(document).ready(async function() {
+                if (!navigator.serial) {
+                    $('#connect-printer').hide();
+                    return;
+                }
+
+                $('#connect-printer').text('Checking for previous printer connection...');
+
+                try {
+                    // Check for previously granted permissions
+                    const previousPort = await checkForPreviousPermissions();
+
+                    if (previousPort) {
+                        // Attempt to reconnect automatically
+                        port = previousPort;
+
+                        try {
+                            // Open the port with TM-88II settings
+                            await port.open({
+                                baudRate: 9600,  // TM-88II default
+                                dataBits: 8,
+                                stopBits: 1,
+                                parity: 'none',
+                                flowControl: 'none'
+                            });
+
+                            $('#connect-printer').text('Reconnected to printer');
+                            isConnected = true;
+                        } catch (error) {
+                            $('#status').text('Failed to reconnect');
+                        }
+                    } else {
+                        $('#status').text('Connect printer');
+                    }
+                } catch (error) {
+                    console.error('Auto-reconnect failed:', error);
+                    $('#status').text('Connect printer');
+                }
+            });
+
+            async function connectPrinter() {
+                try {
+                    // Request port access
+                    port = await navigator.serial.requestPort();
+
+                    // Open the port with TM-88II settings
+                    await port.open({
+                        baudRate: 9600,  // TM-88II default
+                        dataBits: 8,
+                        stopBits: 1,
+                        parity: 'none',
+                        flowControl: 'none'
+                    });
+
+                    console.log('Printer connected!');
+                    $('#connect-printer').text('Connected to printer');
+                    return true;
+                } catch (error) {
+                    console.error('Connection failed:', error);
+                    return false;
+                }
+            }
+
+            async function sendCommand(command) {
+                if (!port) {
+                    console.error('Printer not connected');
+                    return;
+                }
+
+                const writer = port.writable.getWriter();
+                try {
+                    await writer.write(new Uint8Array(command));
+                    // Small delay to ensure command is processed
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                } catch (error) {
+                    console.error('Write failed:', error);
+                } finally {
+                    writer.releaseLock();
+                }
+            }
+
+            // Map German umlauts to CP850 encoding
+            function convertToCP850(text) {
+                const charMap = {
+                    '<C3><A4>': String.fromCharCode(0x84),  // <C3><A4> -> 132
+                    '<C3><B6>': String.fromCharCode(0x94),  // <C3><B6> -> 148
+                    '<C3><BC>': String.fromCharCode(0x81),  // <C3><BC> -> 129
+                    '<C3><84>': String.fromCharCode(0x8E),  // <C3><84> -> 142
+                    '<C3><96>': String.fromCharCode(0x99),  // <C3><96> -> 153
+                    '<C3><9C>': String.fromCharCode(0x9A),  // <C3><9C> -> 154
+                    '<C3><9F>': String.fromCharCode(0xE1),  // <C3><9F> -> 225
+                    '<E2><82><AC>': String.fromCharCode(0xD5),  // Euro symbol (for CP858)
+
+                    // French characters
+                    '<C3><A9>': String.fromCharCode(0x82),  // <C3><A9> -> 130
+                    '<C3><A8>': String.fromCharCode(0x8A),  // <C3><A8> -> 138
+                    '<C3><A0>': String.fromCharCode(0x85),  // <C3><A0> -> 133
+                    '<C3><A7>': String.fromCharCode(0x87),  // <C3><A7> -> 135
+
+                    // Spanish characters
+                    '<C3><B1>': String.fromCharCode(0xA4),  // <C3><B1> -> 164
+                    '<C3><A1>': String.fromCharCode(0xA0),  // <C3><A1> -> 160
+                    '<C3><AD>': String.fromCharCode(0xA1),  // <C3><AD> -> 161
+                    '<C3><B3>': String.fromCharCode(0xA2),  // <C3><B3> -> 162
+                    '<C3><BA>': String.fromCharCode(0xA3)   // <C3><BA> -> 163
+                };
+
+                return text.replace(/[<C3><A4><C3><B6><C3><BC><C3><84><C3><96><C3><9C><C3><9F><C3><A9><C3><A8><C3><A0><C3><A7><C3><B1><C3><A1><C3><AD><C3><B3><C3><BA><E2><82<82><AC>]/g, match => charMap[match] || match);
+            }
+
+            // Send text with automatic encoding
+            async function sendText(text) {
+                const convertedText = convertToCP850(text);
+                const textBytes = new Uint8Array([...convertedText].map(char => char.charCodeAt(0)));
+                await sendCommand([...textBytes]);
+            }
+
+            // ESC/POS command constants
+            const ESC = 0x1B;
+            const GS = 0x1D;
+            const FS = 0x1C;
+
+            // Working commands for TM-88II
+            const commands = {
+                // Code page commands for TM-88II
+                codePage: {
+                    cp850: [ESC, 0x74, 0x02],  // Western Europe (supports umlauts)
+                    cp858: [ESC, 0x74, 0x13],  // Western Europe + Euro symbol
+                    cp437: [ESC, 0x74, 0x00],  // US (default, no umlauts)
+                    iso8859_1: [ESC, 0x74, 0x06] // Latin-1
+                },
+
+                // Initialization
+                init: [ESC, 0x40],
+
+                // Text emphasis (these work better than bold)
+                emphasis: {
+                    on: [ESC, 0x45, 0x01],    // Bold on
+                    off: [ESC, 0x45, 0x00]    // Bold off
+                },
+
+                // Double size (more reliable than bold)
+                doubleWidth: {
+                    on: [ESC, 0x21, 0x20],    // Double width on
+                    off: [ESC, 0x21, 0x00]    // Normal width
+                },
+
+                doubleHeight: {
+                    on: [ESC, 0x21, 0x10],    // Double height on
+                    off: [ESC, 0x21, 0x00]    // Normal height
+                },
+
+                // Both double width and height
+                doubleSize: {
+                    on: [ESC, 0x21, 0x30],    // Double both
+                    off: [ESC, 0x21, 0x00]    // Normal
+                },
+
+                // Alignment (these should work)
+                align: {
+                    left: [ESC, 0x61, 0x30],     // or 0x00
+                    center: [ESC, 0x61, 0x31],   // or 0x01
+                    right: [ESC, 0x61, 0x32]     // or 0x02
+                },
+
+                // Alternative alignment commands
+                justification: {
+                    left: [ESC, 0x61, 0x00],
+                    center: [ESC, 0x61, 0x01],
+                    right: [ESC, 0x61, 0x02]
+                },
+
+                // Paper handling
+                feedLines: (n) => [ESC, 0x64, n],
+                cutPaper: [GS, 0x56, 0x00],       // Full cut
+                cutPaperPartial: [GS, 0x56, 0x01], // Partial cut
+
+                // Line feed and carriage return
+                lf: [0x0A],
+                cr: [0x0D],
+                crlf: [0x0D, 0x0A]
+            };
+
+            async function printReceipt(balloon, team, color) {
+                try {
+                    // Initialize printer
+                    await sendCommand(commands.init);
+                    await sendCommand(commands.codePage.cp850);
+
+                    // Center-aligned header with double size
+                    await sendCommand(commands.align.center);
+                    await sendCommand(commands.doubleSize.on);
+                    await sendText('NWERC 2025');
+                    await sendCommand(commands.crlf);
+                    await sendCommand(commands.doubleSize.off);
+
+                    // Normal size subtitle
+                    await sendText(`Balloon #${balloon.balloonid}`);
+                    await sendCommand(commands.crlf);
+                    await sendCommand(commands.crlf);
+
+                    // Left align for items
+                    await sendCommand(commands.align.left);
+                    await sendText('Date: ' + new Date().toLocaleDateString());
+                    await sendCommand(commands.crlf);
+                    await sendText('Time: ' + new Date().toLocaleTimeString());
+                    await sendCommand(commands.crlf);
+                    await sendCommand(commands.crlf);
+
+                    // Items with emphasis
+                    await sendCommand(commands.emphasis.on);
+                    await sendText(`    Location:                 Problem:    `);
+                    await sendCommand(commands.emphasis.off);
+                    await sendCommand(commands.crlf);
+                    await sendCommand(commands.doubleSize.on);
+                    await sendText(`    ${balloon.location || 'Z7'}          ${balloon.problem}    `);
+                    await sendCommand(commands.doubleSize.off);
+                    await sendCommand(commands.crlf);
+                    await sendCommand(commands.crlf);
+                    await sendCommand(commands.emphasis.on);
+                    await sendText('Team Details:');
+                    await sendCommand(commands.emphasis.off);
+                    await sendCommand(commands.crlf);
+                    await sendText(`Name: ${team}`);
+                    await sendCommand(commands.crlf);
+                    await sendText(`Location: ${balloon.location || 'Z7'}`);
+                    await sendCommand(commands.crlf);
+                    await sendText(`Affiliation: ${balloon.affiliation}`);
+                    await sendCommand(commands.crlf);
+                    await sendText(`Category: ${balloon.category}`);
+                    await sendCommand(commands.crlf);
+                    await sendText(`#Balloons: ${Object.keys(balloon.total).length}`);
+                    await sendCommand(commands.crlf);
+                    await sendCommand(commands.crlf);
+                    await sendCommand(commands.emphasis.on);
+                    await sendText('Balloon Details:');
+                    await sendCommand(commands.emphasis.off);
+                    await sendCommand(commands.crlf);
+                    await sendText(`Problem: ${balloon.problem}`);
+                    await sendCommand(commands.crlf);
+                    await sendText(`Color: ${color}`);
+                    await sendCommand(commands.crlf);
+
+                    // Separator line
+                    await sendText('------------------------');
+                    await sendCommand(commands.crlf);
+
+                    // Feed and cut
+                    await sendCommand(commands.feedLines(3));
+                    await sendCommand(commands.cutPaper);
+
+                    console.log('Receipt printed successfully');
+                } catch (error) {
+                    console.error('Print failed:', error);
+                }
+            }
+
+            async function printThenRedirect(balloon, team, color, url) {
+                event.preventDefault();
+                console.log(balloon, team, color);
+                console.log(JSON.stringify(balloon));
+                console.log(JSON.stringify(team));
+                console.log(JSON.stringify(color));
+                await printReceipt(balloon, team, color);
+                window.location.href = url;
+            }
+
             $(function () {
+                $('#connect-printer').on('click', async function () {
+                    await connectPrinter();
+                });
+
                 $('#filter-toggle').on('change', function () {
                     if ($(this).is(':checked')) {
                         $('#filter-card').removeClass('d-none');
