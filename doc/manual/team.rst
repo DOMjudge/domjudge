@@ -363,6 +363,10 @@ number of processes
 
     PageBreak
 
+.. raw:: latex
+
+    \clearpage
+
 .. _codeexamples:
 
 Code examples
