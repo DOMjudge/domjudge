@@ -402,10 +402,6 @@ for different programming languages.
    :language: c
    :caption: *A solution in C*
 
-.. raw:: latex
-
-   \clearpage
-
 .. literalinclude:: ../examples/example.cc
    :language: cpp
    :caption: *A solution in C++*
@@ -436,6 +432,7 @@ for different programming languages.
   .. literalinclude:: ../examples/example.hs
    :language: hs
    :caption: *A solution in Haskell*
+
 
 Improvements to DOMjudge
 ------------------------
