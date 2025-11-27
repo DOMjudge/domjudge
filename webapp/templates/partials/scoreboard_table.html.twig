@@ -624,7 +624,6 @@
 {% if showLegends %}
     <p><br/><br/></p>
 
-    {# only print legend when there's more than one category #}
     {% if limitToTeamIds is null and colorCategories | length > 0 and hasDifferentCategoryColors %}
         <table id="categ_legend" class="scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
             <thead>
