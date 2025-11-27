@@ -395,15 +395,18 @@ for different programming languages.
    :language: python
    :caption: *A solution in Python*
 
-.. literalinclude:: ../examples/example.cs
+..
+  .. literalinclude:: ../examples/example.cs
    :language: csharp
    :caption: *A solution in C#*
 
-.. literalinclude:: ../examples/example.pas
+..
+  .. literalinclude:: ../examples/example.pas
    :language: pas
    :caption: *A solution in Pascal*
 
-.. literalinclude:: ../examples/example.hs
+..
+  .. literalinclude:: ../examples/example.hs
    :language: hs
    :caption: *A solution in Haskell*
 
