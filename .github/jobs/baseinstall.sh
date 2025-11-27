@@ -33,8 +33,8 @@ cd ..
 section_end
 
 section_start "Set simple admin password"
-echo "password" > ./etc/initial_admin_password.secret
-echo "default login admin password password" > ~/.netrc
+echo "admin_password" > ./etc/initial_admin_password.secret
+echo "default login admin password admin_password" > ~/.netrc
 section_end
 
 section_start "Install domserver"
