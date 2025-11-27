@@ -10,6 +10,7 @@ jobs:
   integration:
     runs-on: ubuntu-24.04
     env:
+      ADMIN_PASSWORD: admin_password
       MYSQL_ROOT_PASSWORD: mysql_root_password
     timeout-minutes: 30
     container:
@@ -57,11 +58,10 @@ jobs:
       - name: Check nginx
         run: curl -v https://localhost/domjudge/
       - name: Configure print command
-        working-directory: submit
         run: |
-          curl --fail -u 'admin:password' -X 'GET' 'http://localhost/domjudge/api/v4/config?strict=false' \
+          curl --fail -u "admin:${ADMIN_PASSWORD}" -X 'GET' 'http://localhost/domjudge/api/v4/config?strict=false' \
             | jq '.print_command |= "cp [file] /tmp/dj-printfile"' \
-            | curl --fail -u 'admin:password' -X 'PUT' -T - 'http://localhost/domjudge/api/v4/config?strict=false' \
+            | curl --fail -u "admin:${ADMIN_PASSWORD}" -X 'PUT' -T - 'http://localhost/domjudge/api/v4/config?strict=false' \
       - name: Testing submit client
         working-directory: submit
         run: make check-full
@@ -127,7 +127,7 @@ jobs:
           # Make an initial request which will get us a session id, and grab the csrf token from it
           CSRFTOKEN=$(curl $CURLOPTS -c /tmp/cookiejar "http://localhost/domjudge/login" | sed -n 's/.*_csrf_token.*value="\(.*\)".*/\1/p')
           # Make a second request with our session + csrf token to actually log in
-          curl $CURLOPTS -c /tmp/cookiejar -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F "_password=password" "http://localhost/domjudge/login"
+          curl $CURLOPTS -c /tmp/cookiejar -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F "_password=${ADMIN_PASSWORD}" "http://localhost/domjudge/login"
           # Send a general clarification to later test if we see the event.
           curl $CURLOPTS -F "sendto=" -F "problem=1-" -F "bodytext=Testing" -F "submit=Send" \
                "http://localhost/domjudge/jury/clarifications/send" -o /dev/null
@@ -172,4 +172,4 @@ jobs:
           export CCS_SPECS_PINNED_SHA1='a68aff54c4e60fc2bff2fc5c36c119bffa4d30f1'
           ( cd ccs-specs && git reset --hard $CCS_SPECS_PINNED_SHA1 )
           export CHECK_API="${HOME}/ccs-specs/check-api.sh -j ${HOME}/yajsv"
-          $CHECK_API -n -C -e -a 'strict=1' http://admin:password@localhost/domjudge/api
+          $CHECK_API -n -C -e -a 'strict=1' "http://admin:${ADMIN_PASSWORD}@localhost/domjudge/api"
