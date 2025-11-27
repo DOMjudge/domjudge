@@ -123,7 +123,7 @@ class Team extends BaseApiEntity implements
     #[Serializer\Exclude]
     private string $addUserForTeam = self::DONT_ADD_USER;
 
-    #[Assert\Regex('/^[a-z0-9@._-]+$/i', message: 'Only alphanumeric characters and _-@. are allowed')]
+    #[Assert\Regex(pattern: '/^[a-z0-9@._-]+$/i', message: 'Only alphanumeric characters and _-@. are allowed')]
     #[Serializer\Exclude]
     private ?string $newUsername = null;
 

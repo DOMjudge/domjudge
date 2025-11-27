@@ -115,10 +115,10 @@ class RejudgingType extends AbstractType
             'choices' => array_combine($verdicts, $verdicts),
         ]);
         $relativeTimeConstraints = [
-            new Regex([
-                'pattern' => '/^[+-][0-9]+:[0-9]{2}(:[0-9]{2}(\.[0-9]{0,6})?)?$/',
-                'message' => 'Invalid relative time format'
-            ])
+            new Regex(
+                pattern: '/^[+-][0-9]+:[0-9]{2}(:[0-9]{2}(\.[0-9]{0,6})?)?$/',
+                message: 'Invalid relative time format'
+            )
         ];
         $builder->add('after', TextType::class, [
             'label' => 'after',

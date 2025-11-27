@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
@@ -21,7 +22,7 @@ final class Version20200131064449 extends AbstractMigration
 
     public function up(Schema $schema) : void
     {
-        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
+        $this->abortIf(!$this->connection->getDatabasePlatform() instanceof AbstractMySQLPlatform, 'Migration can only be executed safely on \'mysql\'.');
 
         // Note: can't use ConfigurationService::get on 'registration_category_name' because the specification has been removed from db-config.yaml
         $registrationCategoryNameConfig = $this->connection->fetchAssociative('SELECT * FROM configuration WHERE name = :registration_category_name', ['registration_category_name' => 'registration_category_name']);
@@ -44,7 +45,7 @@ final class Version20200131064449 extends AbstractMigration
 
     public function down(Schema $schema) : void
     {
-        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
+        $this->abortIf(!$this->connection->getDatabasePlatform() instanceof AbstractMySQLPlatform, 'Migration can only be executed safely on \'mysql\'.');
 
         $selfRegistrationCategories = $this->connection->fetchAllAssociative('SELECT * FROM team_category WHERE allow_self_registration = 1 ORDER BY sortorder');
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
@@ -25,7 +26,7 @@ final class Version20201113094653 extends AbstractMigration
     public function up(Schema $schema) : void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
+        $this->abortIf(!$this->connection->getDatabasePlatform() instanceof AbstractMySQLPlatform, 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('CREATE TABLE problem_attachment_content (attachmentid INT UNSIGNED NOT NULL COMMENT \'Attachment ID\', content LONGBLOB NOT NULL COMMENT \'Attachment content(DC2Type:blobtext)\', PRIMARY KEY(attachmentid)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB COMMENT = \'Stores contents of problem attachments\' ');
         $this->addSql('CREATE TABLE problem_attachment (attachmentid INT UNSIGNED AUTO_INCREMENT NOT NULL COMMENT \'Attachment ID\', probid INT UNSIGNED DEFAULT NULL COMMENT \'Problem ID\', name VARCHAR(255) NOT NULL COMMENT \'Filename of attachment\', type VARCHAR(4) NOT NULL COMMENT \'File type of attachment\', INDEX IDX_317299FEEF049279 (probid), INDEX name (attachmentid, name(190)), PRIMARY KEY(attachmentid)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB COMMENT = \'Attachments belonging to problems\' ');
@@ -36,7 +37,7 @@ final class Version20201113094653 extends AbstractMigration
     public function down(Schema $schema) : void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
+        $this->abortIf(!$this->connection->getDatabasePlatform() instanceof AbstractMySQLPlatform, 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE problem_attachment_content DROP FOREIGN KEY FK_C097D9BF4707030C');
         $this->addSql('DROP TABLE problem_attachment_content');
