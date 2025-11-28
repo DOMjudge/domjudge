@@ -237,8 +237,8 @@ create_db_users()
 	# in etc/domserver-config.php updated after installation.
 	echo "CREATE DATABASE IF NOT EXISTS \`$DBNAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-	echo "CREATE USER IF NOT EXISTS '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
-	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER'@'localhost';"
+	echo "CREATE USER IF NOT EXISTS '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
+	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER'@'%';"
 
 	echo "FLUSH PRIVILEGES;"
 	) | mysql
@@ -249,7 +249,7 @@ remove_db_users()
 {
 	(
 	echo "DROP DATABASE IF EXISTS \`$DBNAME\`;"
-	echo "DROP USER IF EXISTS '$domjudge_DBUSER'@'localhost';"
+	echo "DROP USER IF EXISTS '$domjudge_DBUSER'@'%';"
 	echo "FLUSH PRIVILEGES;"
 	) | mysql -f
 	verbose "DOMjudge database and user(s) removed."
@@ -259,10 +259,10 @@ update_password()
 {
 	read_dbpasswords
 	(
-    echo "ALTER USER '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+    echo "ALTER USER '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
 	echo "FLUSH PRIVILEGES;"
 	) | mysql
-    verbose "ALTER USER '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+    verbose "ALTER USER '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
 	verbose "Database user password updated from credentials file."
 }
 
