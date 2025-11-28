@@ -330,6 +330,11 @@ class PublicController extends BaseController
         }
 
         $scoreboard = $this->scoreboardService->getScoreboard($contest);
+
+        if ($scoreboard === null) {
+            throw $this->createNotFoundException('No submission data found');
+        }
+
         $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $scoreboard->getTeamsInDescendingOrder());
 
         /** @var Submission[] $submissions */
