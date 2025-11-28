@@ -744,7 +744,7 @@ class SubmissionService
             $this->dj->maybeCreateJudgeTasks($judging, $priority, valid: !$start_invalid);
         }
 
-        $this->em->wrapInTransaction(function () use ($contest, $submission) {
+        $this->em->wrapInTransaction(function () use ($contest, $submission): void {
             $this->em->flush();
             $this->eventLogService->log('submission', $submission->getSubmitid(),
                                         EventLogService::ACTION_CREATE, $contest->getCid());
@@ -898,7 +898,7 @@ class SubmissionService
         $filename = $file->getFilename();
         $sourceCode = $file->getSourcecode();
 
-        return new StreamedResponse(function () use ($sourceCode) {
+        return new StreamedResponse(function () use ($sourceCode): void {
             echo $sourceCode;
         }, 200, [
             'Content-Type'        => 'text/plain',

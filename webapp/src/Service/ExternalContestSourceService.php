@@ -474,7 +474,7 @@ class ExternalContestSourceService
                 $eventsToSkip,
                 &$skipEventsUpTo,
                 $progressReporter
-            ) {
+            ): void {
                 $lastEventId          = $this->getLastReadEventId();
                 $readingToLastEventId = false;
                 $event = $this->serializer->deserialize($line, Event::class, 'json', ['api_version' => $this->getApiVersion()]);

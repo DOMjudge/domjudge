@@ -6,6 +6,7 @@ use Doctrine\Inflector\InflectorFactory;
 use enshrined\svgSanitize\Sanitizer as SvgSanitizer;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Twig\Attribute\AsTwigFilter;
 
 /**
  * Generic utility class.
@@ -510,6 +511,7 @@ class Utils
      * Print (file) size in human-readable format by using B,KB,MB,GB suffixes.
      * Input is an integer (the size in bytes), output a string with suffix.
      */
+    #[AsTwigFilter('printSize', isSafe: ['html'])]
     public static function printsize(int $size, int $decimals = 1): string
     {
         $factor = 1024;
@@ -600,8 +602,8 @@ class Utils
         $tokens2 = preg_split('/\s+/', $line2);
         $cutoff = 100; // a) LCS gets in-performant, b) the output is no longer readable.
 
-        $n1 = min($cutoff, sizeof($tokens1));
-        $n2 = min($cutoff, sizeof($tokens2));
+        $n1 = min($cutoff, count($tokens1));
+        $n2 = min($cutoff, count($tokens2));
 
         // compute longest common sequence length
         $dp = array_fill(0, $n1+1, array_fill(0, $n2+1, 0));
@@ -638,7 +640,7 @@ class Utils
 
         // Reconstruct diff.
         $diff = "";
-        $l = sizeof($lcs);
+        $l = count($lcs);
         $i = 0;
         $j = 0;
         for ($k = 0; $k < $l; $k++) {
@@ -663,7 +665,7 @@ class Utils
             $j++;
         }
 
-        if ($cutoff < sizeof($tokens1) || $cutoff < sizeof($tokens2)) {
+        if ($cutoff < count($tokens1) || $cutoff < count($tokens2)) {
             $diff .= "[cut off rest of line...]";
         }
         $diff .= "\n";
@@ -907,7 +909,7 @@ class Utils
     public static function streamAsBinaryFile(string $content, string $filename, string $type = 'octet-stream'): StreamedResponse
     {
         $response = new StreamedResponse();
-        $response->setCallback(function () use ($content) {
+        $response->setCallback(function () use ($content): void {
             echo $content;
         });
         $response->headers->set('Content-Type', 'application/' . $type);
@@ -923,7 +925,7 @@ class Utils
     public static function streamZipFile(string $tempFilename, string $zipFilename): StreamedResponse
     {
         $response = new StreamedResponse();
-        $response->setCallback(function () use ($tempFilename) {
+        $response->setCallback(function () use ($tempFilename): void {
             $fp = fopen($tempFilename, 'rb');
             fpassthru($fp);
             unlink($tempFilename);
@@ -973,7 +975,7 @@ class Utils
     public static function reindex(array $array, callable $callback): array
     {
         $reindexed = [];
-        array_walk($array, function ($item, $key) use (&$reindexed, $callback) {
+        array_walk($array, function ($item, $key) use (&$reindexed, $callback): void {
             $reindexed[$callback($item, $key)] = $item;
         });
         return $reindexed;
@@ -1024,7 +1026,7 @@ class Utils
         };
 
         $response = new StreamedResponse();
-        $response->setCallback(function () use ($text) {
+        $response->setCallback(function () use ($text): void {
             echo $text;
         });
         $response->headers->set('Content-Type', sprintf('%s; name="%s"', $mimetype, $filename));

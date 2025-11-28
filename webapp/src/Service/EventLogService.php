@@ -315,7 +315,7 @@ class EventLogService
                 $query = ['ids' => $ids];
             }
 
-            $this->dj->withAllRoles(function () use ($query, $url, &$response) {
+            $this->dj->withAllRoles(function () use ($query, $url, &$response): void {
                 $response = $this->dj->internalApiRequest($url, Request::METHOD_GET, $query);
             });
 
@@ -485,7 +485,7 @@ class EventLogService
                 // Insert all awards events.
                 $url = sprintf('/contests/%s/awards', $contest->getExternalid());
                 $awards = [];
-                $this->dj->withAllRoles(function () use ($url, &$awards) {
+                $this->dj->withAllRoles(function () use ($url, &$awards): void {
                     $response = $this->dj->internalApiRequest($url);
                     if (!empty($response)) {
                         $awards = Utils::jsonDecode($response);
@@ -629,7 +629,7 @@ class EventLogService
                 // of the endpoint to get current data.
                 $urlPart = $endpoint === 'contests' ? '' : ('/' . $endpoint);
                 $url = sprintf('/contests/%s%s', $contestId, $urlPart);
-                $this->dj->withAllRoles(function () use ($url, &$data) {
+                $this->dj->withAllRoles(function () use ($url, &$data): void {
                     $response = $this->dj->internalApiRequest($url);
                     $data = (empty($response) ? null : Utils::jsonDecode($response));
                 });

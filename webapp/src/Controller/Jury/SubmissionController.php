@@ -1148,7 +1148,7 @@ class SubmissionController extends BaseController
         Request $request,
         int $judgingId
     ): RedirectResponse {
-        $this->em->wrapInTransaction(function () use ($eventLogService, $request, $judgingId) {
+        $this->em->wrapInTransaction(function () use ($eventLogService, $request, $judgingId): void {
             /** @var Judging $judging */
             $judging  = $this->em->getRepository(Judging::class)->find($judgingId);
             $verified = $request->request->getBoolean('verified');
@@ -1216,7 +1216,7 @@ class SubmissionController extends BaseController
     ): RedirectResponse {
         /** @var ExternalJudgement $judgement */
         $judgement  = $this->em->getRepository(ExternalJudgement::class)->find($extjudgementid);
-        $this->em->wrapInTransaction(function () use ($request, $judgement) {
+        $this->em->wrapInTransaction(function () use ($request, $judgement): void {
             $verified = $request->request->getBoolean('verified');
             $comment  = $request->request->get('comment');
             $judgement

@@ -2,31 +2,34 @@
 
 namespace App\Command;
 
+use Doctrine\Bundle\FixturesBundle\Command\LoadDataFixturesDoctrineCommand;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 #[AsCommand(
     name: 'domjudge:load-default-data',
     description: 'Load the data needed by all DOMjudge installations'
 )]
-class LoadDefaultDataCommand extends Command
+readonly class LoadDefaultDataCommand
 {
+    public function __construct(
+        #[Autowire(service: 'doctrine.fixtures_load_command')]
+        private LoadDataFixturesDoctrineCommand $loadDataFixturesDoctrineCommand
+    ) {}
+
     /**
      * @throws Exception
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(OutputInterface $output): int
     {
-        $command   = $this->getApplication()->find('doctrine:fixtures:load');
         $arguments = [
-            'command'  => 'doctrine:fixtures:load',
             '--group'  => ['default'],
             '--append' => null,
         ];
 
-        return $command->run(new ArrayInput($arguments), $output);
+        return $this->loadDataFixturesDoctrineCommand->run(new ArrayInput($arguments), $output);
     }
 }

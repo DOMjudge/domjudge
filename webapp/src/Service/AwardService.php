@@ -6,6 +6,7 @@ use App\DataTransferObject\Award;
 use App\Entity\Contest;
 use App\Entity\Team;
 use App\Utils\Scoreboard\Scoreboard;
+use Twig\Attribute\AsTwigFilter;
 
 class AwardService
 {
@@ -139,6 +140,7 @@ class AwardService
         return null;
     }
 
+    #[AsTwigFilter('medalType')]
     public function medalType(Team $team, Contest $contest, Scoreboard $scoreboard): ?string
     {
         $teamid = $team->getExternalid();

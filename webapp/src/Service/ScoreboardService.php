@@ -609,7 +609,7 @@ class ScoreboardService
         $this->dj->auditlog('contest', $contest->getCid(), 'refresh scoreboard cache');
 
         if ($progressReporter === null) {
-            $progressReporter = static function (int $progress, string $log, ?string $message = null) {
+            $progressReporter = static function (int $progress, string $log, ?string $message = null): void {
                 // no-op
             };
         }

@@ -75,7 +75,7 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
         ]);
         $builder->add('save', SubmitType::class);
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
             /** @var TeamAffiliation|null $affiliation */
             $affiliation = $event->getData();
             $form = $event->getForm();
