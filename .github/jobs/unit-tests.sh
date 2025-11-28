@@ -25,6 +25,9 @@ cp webapp/composer.json /opt/domjudge/domserver/webapp/
 
 cd /opt/domjudge/domserver
 
+# The tests add a '_test' suffix to the database name already.
+sed -i "s!:domjudge_test:!:domjudge:!" /opt/domjudge/domserver/etc/dbpasswords.secret
+
 # Run phpunit tests.
 pcov=""
 phpcov=""
