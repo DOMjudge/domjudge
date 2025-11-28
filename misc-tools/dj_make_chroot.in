@@ -97,6 +97,7 @@ Ubuntu: $UBUNTU_ARCHLIST
 Environment Overrides:
 DEBPROXY: Sets http(s) proxy to be used for package installation (Overridden if -p argument is used)
 DEBMIRROR: Sets mirror URL to be used for package registry (Overridden if -m argument is used)
+KEYRING: Sets the keyring to use for the package registry, useful for custom repositories (Overridden if -k argument is used)
 
 EOF
 }
@@ -113,7 +114,7 @@ FORCEYES=0
 FORCEDOWNLOAD=0
 
 # Read command-line parameters:
-while getopts 'a:d:D:R:i:r:l:s:p:m:Hyfh' OPT ; do
+while getopts 'a:d:D:R:i:r:l:s:p:m:k:Hyfh' OPT ; do
     case $OPT in
         a) ARCH=$OPTARG ;;
         d) CHROOTDIR=$OPTARG ;;
@@ -125,6 +126,7 @@ while getopts 'a:d:D:R:i:r:l:s:p:m:Hyfh' OPT ; do
         s) REPOLISTS=$OPTARG ;;
         p) DEBPROXY=$OPTARG ;;
         m) DEBMIRROR=$OPTARG ;;
+        k) KEYRING=$OPTARG ;;
         H) HOSTLISTS=1 ;;
         y) FORCEYES=1 ;;
         f) FORCEDOWNLOAD=1 ;;
@@ -303,6 +305,10 @@ EXCLUDEOPT=""
 if [ -n "$EXCLUDEDEBS" ]; then
     EXCLUDEOPT="--exclude=$EXCLUDEDEBS"
 fi
+KEYRINGOPT=""
+if [ -n "$KEYRING" ]; then
+    KEYRINGOPT="--keyring=$KEYRING"
+fi
 
 if [ -n "$DEBPROXY" ]; then
     BOOTSTRAP_COMMAND="http_proxy=\"$DEBPROXY\" $BOOTSTRAP_COMMAND"
@@ -313,7 +319,7 @@ echo "Running debootstrap to install base system, this may take a while..."
 # Add extra paths that are not set by default on Redhat-like systems.
 # shellcheck disable=SC2086
 eval PATH="$PATH:/bin:/sbin:/usr/sbin" $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
-    --variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
+    "$KEYRINGOPT" --variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 
 if [ -n "$WORKDIR" ] && [ -d "$WORKDIR" ]; then
     rm -rf "$WORKDIR"
