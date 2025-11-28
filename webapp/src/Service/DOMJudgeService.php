@@ -370,7 +370,7 @@ class DOMJudgeService
             }
 
             $judgehosts = $this->em->createQueryBuilder()
-                ->select('j.hostname', 'j.polltime')
+                ->select('j.judgehostid', 'j.hostname', 'j.polltime')
                 ->from(Judgehost::class, 'j')
                 ->andWhere('j.enabled = 1')
                 ->andWhere('j.hidden = 0')

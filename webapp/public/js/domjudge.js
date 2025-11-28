@@ -759,7 +759,7 @@ function updateMenuJudgehosts(data)
             sendNotification('Judgehost down.',
                 {'tag': 'host_'+data[i].hostname+'@'+
                     Math.floor(data[i].polltime),
-                    'link': domjudge_base_url + '/jury/judgehosts/' + encodeURIComponent(data[i].hostname),
+                    'link': domjudge_base_url + '/jury/judgehosts/' + encodeURIComponent(data[i].judgehostid),
                     'body': data[i].hostname + ' is down'});
         }
     }
