@@ -47,7 +47,7 @@ use Twig\TwigFunction;
 class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
     /**
-     * @param array<string> $latexFound
+     * @var array<string>
      */
     private array $latexFound;
 
