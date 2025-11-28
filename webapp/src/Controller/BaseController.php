@@ -239,7 +239,7 @@ abstract class BaseController extends AbstractController
         }
 
         // Now actually delete the entity.
-        $this->em->wrapInTransaction(function () use ($entity) {
+        $this->em->wrapInTransaction(function () use ($entity): void {
             if ($entity instanceof Problem) {
                 // Deleting a problem is a special case:
                 // Its dependent tables do not form a tree (but something like a diamond shape),
@@ -610,7 +610,7 @@ abstract class BaseController extends AbstractController
         $mainRequest = $requestStack->getMainRequest();
         $response = new StreamedResponse();
         $response->headers->set('X-Accel-Buffering', 'no');
-        $response->setCallback(function () use ($requestStack, $callback, $mainRequest) {
+        $response->setCallback(function () use ($requestStack, $callback, $mainRequest): void {
             $requestStack->push($mainRequest);
             $callback();
         });

@@ -468,7 +468,7 @@ class ImportProblemService
             }
             if ($numCases > 0) {
                 $messages['info'][] = sprintf("Added/updated %d %s testcase(s): {%s}.{in,ans}",
-                    $numCases, $type, join(',', $testcaseNames));
+                    $numCases, $type, implode(',', $testcaseNames));
             }
         }
 
@@ -484,7 +484,7 @@ class ImportProblemService
 
         if (!empty($removedTestcases)) {
             $messages['info'][] = sprintf("Removed %d testcase(s): {%s}.{in,ans}",
-                count($removedTestcases), join(',', $removedTestcases));
+                count($removedTestcases), implode(',', $removedTestcases));
         }
 
         // Load the current attachments to see if we need to delete, update or insert attachments
@@ -593,10 +593,10 @@ class ImportProblemService
 
         if (!empty($removedAttachments)) {
             $messages['info'][] = sprintf("Removed %d attachments(s): {%s}",
-                count($removedAttachments), join(',', $removedAttachments));
+                count($removedAttachments), implode(',', $removedAttachments));
         }
 
-        $this->em->wrapInTransaction(function () use ($testcases, $startRank) {
+        $this->em->wrapInTransaction(function () use ($testcases, $startRank): void {
             $this->em->flush();
             // Set actual ranks if needed.
             if ($startRank !== 1) {
@@ -796,15 +796,15 @@ class ImportProblemService
 
             if ($numJurySolutions > 0) {
                 $messages['info'][] = sprintf('Added %d jury solution(s): %s', $numJurySolutions,
-                    join(', ', $successful_subs));
+                    implode(', ', $successful_subs));
             }
             if (!empty($subs_with_unknown_lang)) {
                 $messages['warning'][] = sprintf("Could not add jury solution(s) due to unknown language: %s",
-                    join(', ', $subs_with_unknown_lang));
+                    implode(', ', $subs_with_unknown_lang));
             }
             if (!empty($too_large_subs)) {
                 $messages['warning'][] = sprintf("Could not add jury solution(s) because they are too large: %s",
-                    join(', ', $too_large_subs));
+                    implode(', ', $too_large_subs));
             }
         } else {
             $messages['warning'][] = 'No jury solutions added: problem not submittable.';
@@ -916,7 +916,7 @@ class ImportProblemService
                 }
             }
         }
-        if (sizeof($validatorFiles) == 0) {
+        if (count($validatorFiles) == 0) {
             if ($validationMode === 'default') {
                 return true;
             } else {

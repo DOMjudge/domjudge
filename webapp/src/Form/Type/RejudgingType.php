@@ -143,7 +143,7 @@ class RejudgingType extends AbstractType
             'label' => 'Add',
         ]);
 
-        $formProblemModifier = function (FormInterface $form, $contests = []) {
+        $formProblemModifier = function (FormInterface $form, $contests = []): void {
             /** @var Contest[] $contests */
             $problems = $this->em->createQueryBuilder()
                 ->from(Problem::class, 'p')
@@ -200,14 +200,14 @@ class RejudgingType extends AbstractType
         };
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA,
-            function (FormEvent $event) use ($formProblemModifier) {
+            function (FormEvent $event) use ($formProblemModifier): void {
                 $data = $event->getData();
                 $formProblemModifier($event->getForm(), $data['contests'] ?? []);
             }
         );
 
         $builder->get('contests')->addEventListener(FormEvents::POST_SUBMIT,
-            function (FormEvent $event) use ($formProblemModifier) {
+            function (FormEvent $event) use ($formProblemModifier): void {
                 $contests = $event->getForm()->getData();
                 $formProblemModifier($event->getForm()->getParent(), $contests);
             }

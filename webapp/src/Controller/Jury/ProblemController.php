@@ -570,7 +570,7 @@ class ProblemController extends BaseController
         if ($request->isMethod('POST')) {
             if (!empty($lockedContests)) {
                 $this->addFlash('danger', 'Cannot edit problem / testcases, it belongs to locked contest(s) '
-                    . join(', ', $lockedContests));
+                    . implode(', ', $lockedContests));
                 return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
             }
             $messages      = [];
@@ -788,7 +788,7 @@ class ProblemController extends BaseController
         if (!empty($lockedContests)) {
             $this->addFlash('warning',
                 'Problem belongs to locked contest ('
-                . join($lockedContests)
+                . implode($lockedContests)
                 . ', disallowing editing.');
         }
         $data = [
@@ -856,7 +856,7 @@ class ProblemController extends BaseController
 
         if ($current !== null && $other !== null) {
             // (probid, rank) is a unique key, so we must switch via a temporary rank, and use a transaction.
-            $this->em->wrapInTransaction(function () use ($current, $other, $numTestcases) {
+            $this->em->wrapInTransaction(function () use ($current, $other, $numTestcases): void {
                 $otherRank   = $other->getRank();
                 $currentRank = $current->getRank();
                 $other->setRank($numTestcases + 1);
@@ -919,7 +919,7 @@ class ProblemController extends BaseController
         }
 
         $response = new StreamedResponse();
-        $response->setCallback(function () use ($content) {
+        $response->setCallback(function () use ($content): void {
             echo $content;
         });
         $response->headers->set('Content-Type', sprintf('%s; name="%s', $mimetype, $filename));

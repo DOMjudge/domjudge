@@ -113,7 +113,7 @@ class LanguageType extends AbstractExternalIdEntityType
         $builder->add('save', SubmitType::class);
 
         // Remove ID field when doing an edit.
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
             /** @var Language|null $language */
             $language = $event->getData();
             $form     = $event->getForm();

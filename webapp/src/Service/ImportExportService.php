@@ -1133,7 +1133,7 @@ class ImportExportService
         $accountData = [];
         foreach ($data as $idx => $account) {
             foreach (['username', 'type'] as $required) {
-                if (!key_exists($required, $account)) {
+                if (!array_key_exists($required, $account)) {
                     $message = sprintf("Missing key: '%s' for block: %d.", $required, $idx);
                     return -1;
                 }
