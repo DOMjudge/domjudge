@@ -188,10 +188,10 @@
                     {% if score.team.affiliation %}
                         {% set link = null %}
                         {% if jury %}
-                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
+                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}, relative = static) %}
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
-                            {{ score.team.affiliation.country|countryFlag }}
+                            {{ score.team.affiliation.country|countryFlag(false, static) }}
                         </a>
                     {% endif %}
                 {% endif %}
@@ -201,14 +201,14 @@
                     {% if score.team.affiliation %}
                         {% set link = null %}
                         {% if jury %}
-                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
+                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}, relative = static) %}
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
                             {% set affiliationId = score.team.affiliation.externalid %}
                             {% set affiliationImage = affiliationId | assetPath('affiliation') %}
                             {% if affiliationImage %}
                                 <img loading="lazy" class="affiliation-logo"
-                                     src="{{ asset(affiliationImage) }}" alt="{{ score.team.affiliation.name }}"
+                                     src="{{ asset(affiliationImage) | relativePath(static) }}" alt="{{ score.team.affiliation.name }}"
                                      title="{{ score.team.affiliation.name }}">
                             {% else %}
                                 {{ affiliationId }}
@@ -325,7 +325,7 @@
                         {% set link = path('jury_team', {teamId: score.team.teamid, restrict: restrict}) %}
                     {% elseif static %}
                         {% set link = '#' %}
-                        {% set extra = 'data-submissions-url="' ~ path('public_submissions_data') ~ '"' %}
+                        {% set extra = 'data-submissions-url="' ~ path('public_submissions_data', relative = true) ~ '"' %}
                         {% set extra = extra ~ ' data-team-id="' ~ score.team.externalid ~ '"' %}
                         {% set extra = extra ~ ' data-problem-id="' ~ problem.externalid ~ '"' %}
                     {% elseif public %}
@@ -466,7 +466,7 @@
                         {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
                     {% endif %}
                     <a {% if link %}href="{{ link }}"{% endif %}>
-                        {{ score.team.affiliation.country|countryFlag }}
+                        {{ score.team.affiliation.country|countryFlag(false, static) }}
                     </a>
                 {% endif %}
             {% endif %}
@@ -483,7 +483,7 @@
                         {% set affiliationImage = affiliationId | assetPath('affiliation') %}
                         {% if affiliationImage %}
                             <img loading="lazy" width="16px" height="16px"
-                                 src="{{ asset(affiliationImage) }}" alt="{{ score.team.affiliation.name }}"
+                                 src="{{ asset(affiliationImage) | relativePath(static) }}" alt="{{ score.team.affiliation.name }}"
                                  title="{{ score.team.affiliation.name }}">
                         {% else %}
                             {{ affiliationId }}
