@@ -14,7 +14,7 @@ unittest=$2
 export unit=1
 
 # Add team to admin user
-echo "UPDATE user SET teamid = 1 WHERE userid = 1;" | mysql domjudge_test
+mysql_log "UPDATE user SET teamid = 1 WHERE userid = 1;" domjudge_test
 
 # Copy the .env.test file, as this is normally not done during
 # installation and we need it.
@@ -33,7 +33,6 @@ if [ "$CODECOVERAGE" -eq 1 ]; then
     pcov="--coverage-html=${DIR}/coverage-html --coverage-clover coverage.xml"
 fi
 set +e
-echo "unused:sqlserver:domjudge:domjudge:domjudge:3306" > /opt/domjudge/domserver/etc/dbpasswords.secret
 php $phpcov webapp/bin/phpunit -c webapp/phpunit.xml.dist webapp/tests/$unittest --log-junit ${ARTIFACTS}/unit-tests.xml --colors=never $pcov | tee "$ARTIFACTS"/phpunit.out
 UNITSUCCESS=$?
 
