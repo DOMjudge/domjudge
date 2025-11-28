@@ -230,7 +230,7 @@ class JudgehostController extends BaseController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route(path: '/{judgehostid}', methods: ['GET'], name: 'jury_judgehost')]
+    #[Route(path: '/{judgehostid<\d+>}', methods: ['GET'], name: 'jury_judgehost')]
     public function viewAction(Request $request, int $judgehostid): Response
     {
         /** @var Judgehost|null $judgehost */
@@ -302,7 +302,7 @@ class JudgehostController extends BaseController
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{judgehostid}/delete', name: 'jury_judgehost_delete')]
+    #[Route(path: '/{judgehostid<\d+>}/delete', name: 'jury_judgehost_delete')]
     public function deleteAction(Request $request, int $judgehostid): Response
     {
         /** @var Judgehost $judgehost */
@@ -318,7 +318,7 @@ class JudgehostController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{judgehostid}/enable', name: 'jury_judgehost_enable')]
+    #[Route(path: '/{judgehostid<\d+>}/enable', name: 'jury_judgehost_enable')]
     public function enableAction(RouterInterface $router, Request $request, int $judgehostid): RedirectResponse
     {
         /** @var Judgehost $judgehost */
@@ -330,7 +330,7 @@ class JudgehostController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{judgehostid}/disable', name: 'jury_judgehost_disable')]
+    #[Route(path: '/{judgehostid<\d+>}/disable', name: 'jury_judgehost_disable')]
     public function disableAction(RouterInterface $router, Request $request, int $judgehostid): RedirectResponse
     {
         /** @var Judgehost $judgehost */
