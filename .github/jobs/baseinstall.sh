@@ -74,11 +74,9 @@ cat ~/.my.cnf
 # TODO: Remove after fixing https://github.com/DOMjudge/domjudge/issues/2848
 mysql_log "SET GLOBAL innodb_snapshot_isolation = OFF;"
 
-mysql_log "CREATE DATABASE IF NOT EXISTS \`$DATABASE_NAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql_log "CREATE USER IF NOT EXISTS \`domjudge\`@'%' IDENTIFIED BY 'domjudge';"
-mysql_log "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DATABASE_NAME\`.* TO 'domjudge'@'%';"
-mysql_log "FLUSH PRIVILEGES;"
 echo "unused:sqlserver:$DATABASE_NAME:domjudge:"'domjudge_db-pw+% #$*)@(!/;,.:3306' > /opt/domjudge/domserver/etc/dbpasswords.secret
+
+/opt/domjudge/domserver/bin/dj_setup_database create-db-users
 
 # Show some MySQL debugging
 mysql_log "show databases"
@@ -96,7 +94,6 @@ if [ "${db}" = "install" ]; then
     section_end
 elif [ "${db}" = "upgrade" ]; then
     section_start "Upgrade DOMjudge database"
-    /opt/domjudge/domserver/bin/dj_setup_database update-password
     /opt/domjudge/domserver/bin/dj_setup_database upgrade
     /opt/domjudge/domserver/webapp/bin/console domjudge:reset-user-password admin "${ADMIN_PASSWORD}"
     section_end
