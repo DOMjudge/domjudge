@@ -105,7 +105,7 @@ class ProblemType extends AbstractExternalIdEntityType
         $builder->add('save', SubmitType::class);
 
         // Remove clearProblemstatement field when we do not have a problem text.
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
             /** @var Problem|null $problem */
             $problem = $event->getData();
             $form    = $event->getForm();

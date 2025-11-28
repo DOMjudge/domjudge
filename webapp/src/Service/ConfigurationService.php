@@ -121,7 +121,7 @@ class ConfigurationService
         // more information.
         $cacheFile = $this->cacheDir . '/djDbConfig.php';
         $this->configCache->cache($cacheFile,
-            function (ConfigCacheInterface $cache) {
+            function (ConfigCacheInterface $cache): void {
                 // @codeCoverageIgnoreStart
                 $yamlDbConfigFile = $this->etcDir . '/db-config.yaml';
                 $fileLocator      = new FileLocator($this->etcDir);

@@ -16,7 +16,9 @@ use App\Service\ScoreboardService;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Utils;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -43,57 +45,18 @@ use ZipArchive;
     name: 'scoreboard:merge',
     description: 'Merges scoreboards from multiple sites from API endpoints.'
 )]
-class ScoreboardMergeCommand extends Command
+readonly class ScoreboardMergeCommand
 {
     public function __construct(
-        protected readonly DOMJudgeService $dj,
-        protected readonly ConfigurationService $config,
-        protected readonly Environment $twig,
-        protected readonly HttpClientInterface $client,
-        protected readonly ScoreboardService $scoreboardService,
-        protected readonly RouterInterface $router,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected Environment $twig,
+        protected HttpClientInterface $client,
+        protected ScoreboardService $scoreboardService,
+        protected RouterInterface $router,
         #[Autowire('%kernel.project_dir%')]
-        protected readonly string $projectDir,
-        ?string $name = null
+        protected string $projectDir,
     ) {
-        parent::__construct($name);
-    }
-
-    protected function configure(): void
-    {
-        $this
-            ->setHelp(
-                'Usage example: scoreboard:merge "BAPC preliminaries" ' .
-                'https://judge.gehack.nl/api/v4/contests/3/ 3 ' .
-                'http://ragnargrootkoerkamp.nl/upload/uva 2' . PHP_EOL . PHP_EOL .
-                'This fetches teams and scoreboard data from API endpoints and prints a merged HTML scoreboard. It assumes times in minutes.'
-            )
-            ->addOption(
-                'category',
-                'c',
-                InputOption::VALUE_REQUIRED,
-                'Name of the team category to use',
-                'Participant'
-            )
-            ->addArgument(
-                'output-file',
-                InputArgument::REQUIRED,
-                'Where to store the ZIP file with the merged scoreboard'
-            )
-            ->addArgument(
-                'contest-name',
-                InputArgument::REQUIRED,
-                'Title of the merged contest.'
-            )
-            ->addArgument(
-                'feed-url',
-                InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'Alternating URL location of the scoreboard to merge and a comma separated list of group_ids to include.' . PHP_EOL .
-                'If an URL and it requires authentication, use username:password@ in the URL' . PHP_EOL .
-                'URL should have the form https://<domain>/api/v4/contests/<contestid>/ for DOMjudge or point to any ICPC Contest API compatible contest' . PHP_EOL .
-                'Only the /teams, /organizations, /problems and /scoreboard endpoint are used, so manually putting files in those locations can work as well.' . PHP_EOL .
-                'Alternatively, you can mount local files directly in the container: add "- /path/to/scoreboards:/scoreboards" to "docker-compose.yml" and use "/scoreboards/eindhoven" as path.'
-            );
     }
 
     /**
@@ -116,6 +79,7 @@ class ScoreboardMergeCommand extends Command
     }
 
     /**
+     * @param list<string> $feedUrl
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
@@ -125,9 +89,22 @@ class ScoreboardMergeCommand extends Command
      * @throws RuntimeError
      * @throws SyntaxError
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $style = new SymfonyStyle($input, $output);
+    public function __invoke(
+        #[Argument(description: 'Where to store the ZIP file with the merged scoreboard')]
+        string $outputFile,
+        #[Argument(description: 'Title of the merged contest.')]
+        string $contestName,
+        #[Argument(description: 'Alternating URL location of the scoreboard to merge and a comma separated list of group_ids to include.' . PHP_EOL .
+            'If an URL and it requires authentication, use username:password@ in the URL' . PHP_EOL .
+            'URL should have the form https://<domain>/api/v4/contests/<contestid>/ for DOMjudge or point to any ICPC Contest API compatible contest' . PHP_EOL .
+            'Only the /teams, /organizations, /problems and /scoreboard endpoint are used, so manually putting files in those locations can work as well.' . PHP_EOL .
+            'Alternatively, you can mount local files directly in the container: add "- /path/to/scoreboards:/scoreboards" to "docker-compose.yml" and use "/scoreboards/eindhoven" as path.')]
+        array $feedUrl,
+        OutputInterface $output,
+        SymfonyStyle $style,
+        #[Option(description: 'Name of the team category to use', shortcut: 'c')]
+        string $category = 'Participant',
+    ): int {
         $teams = [];
         $nextTeamId = 0;
         $problems = [];
@@ -141,29 +118,26 @@ class ScoreboardMergeCommand extends Command
         $affiliations = [];
         $firstSolve = [];
         $contest = (new Contest())
-            ->setName($input->getArgument('contest-name'));
+            ->setName($contestName);
         $freezeData = null;
 
         $category = (new TeamCategory())
-            ->setName($input->getOption('category'))
+            ->setName($category)
             ->setCategoryid(0);
-
-        /** @var string[] $siteArguments */
-        $siteArguments = $input->getArgument('feed-url');
 
         // Convert from flat list to list of (url, groups) pairs
         $sites = [];
 
-        if (count($siteArguments) % 2 != 0) {
+        if (count($feedUrl) % 2 != 0) {
             $style->error("Provide an even number of arguments: all pairs of url and comma separated group ids.");
             return Command::FAILURE;
         }
 
-        for ($i = 0; $i < count($siteArguments); $i += 2) {
+        for ($i = 0; $i < count($feedUrl); $i += 2) {
             $site = [];
-            $site['path'] = $siteArguments[$i];
+            $site['path'] = $feedUrl[$i];
             # Some simple validation to make sure we're actually parsing group ids.
-            $groupsString = $siteArguments[$i + 1];
+            $groupsString = $feedUrl[$i + 1];
             $site['group_ids'] = explode(',', $groupsString);
             $sites[] = $site;
         }
@@ -404,7 +378,7 @@ class ScoreboardMergeCommand extends Command
         }
 
         $zip = new ZipArchive();
-        $result = $zip->open($input->getArgument('output-file'),
+        $result = $zip->open($outputFile,
                              ZipArchive::CREATE | ZipArchive::OVERWRITE);
         if ($result !== true) {
             $style->error('Can not open output file to write ZIP to: ' . $result);
@@ -434,8 +408,7 @@ class ScoreboardMergeCommand extends Command
 
         $zip->close();
 
-        $style->success(sprintf('Merged scoreboard data written to %s',
-                                $input->getArgument('output-file')));
+        $style->success(sprintf('Merged scoreboard data written to %s', $outputFile));
         return Command::SUCCESS;
     }
 }

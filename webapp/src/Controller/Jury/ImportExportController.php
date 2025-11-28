@@ -198,7 +198,7 @@ class ImportExportController extends BaseController
             /** @var Contest $contest */
             $contest  = $contestExportForm->get('contest')->getData();
             $response = new StreamedResponse();
-            $response->setCallback(function () use ($contest) {
+            $response->setCallback(function () use ($contest): void {
                 echo Yaml::dump($this->importExportService->getContestYamlData($contest), 3);
             });
             $response->headers->set('Content-Type', 'application/x-yaml');
@@ -299,7 +299,7 @@ class ImportExportController extends BaseController
                 $sortOrder,
                 $individuallyRanked,
                 $honors
-            ) {
+            ): void {
                 if ($format === 'tsv') {
                     $data = $this->importExportService->getResultsData(
                         $sortOrder->sort_order,
@@ -360,7 +360,7 @@ class ImportExportController extends BaseController
         }
 
         $response = new StreamedResponse();
-        $response->setCallback(function () use ($tsvType, $data) {
+        $response->setCallback(function () use ($tsvType, $data): void {
             $version = 1;
             echo sprintf("%s\t%s\n", $tsvType, $version);
             foreach ($data as $row) {

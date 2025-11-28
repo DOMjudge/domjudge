@@ -161,12 +161,12 @@ class InternalErrorController extends BaseController
 
         if ($request->isXmlHttpRequest()) {
             $profiler?->disable();
-            $progressReporter = function (int $progress, string $log, ?string $message = null) {
+            $progressReporter = function (int $progress, string $log, ?string $message = null): void {
                 echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]);
                 ob_flush();
                 flush();
             };
-            return $this->streamResponse($this->requestStack, function () use ($progressReporter, $internalError) {
+            return $this->streamResponse($this->requestStack, function () use ($progressReporter, $internalError): void {
                 $internalError->setStatus(InternalErrorStatusType::STATUS_RESOLVED);
                 $this->dj->setInternalError(
                     $internalError->getDisabled(),
