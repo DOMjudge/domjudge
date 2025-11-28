@@ -1,6 +1,4 @@
 name: PHP CodeSniffer
-
-# Controls when the action will run. 
 on: 
   merge_group:
   pull_request:

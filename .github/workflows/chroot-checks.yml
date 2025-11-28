@@ -1,6 +1,6 @@
 name: Chroot checks
 on:
-  push:
+  merge_group:
   pull_request:
     branches:
       - main

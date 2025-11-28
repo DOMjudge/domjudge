@@ -1,5 +1,4 @@
 name: Database Upgrade Test
-
 on:
   merge_group:
   pull_request:

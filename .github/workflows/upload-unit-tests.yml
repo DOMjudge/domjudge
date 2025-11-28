@@ -1,5 +1,4 @@
 name: Publish unit test results
-
 on:
   workflow_run:
     workflows: ["Unit tests"]
