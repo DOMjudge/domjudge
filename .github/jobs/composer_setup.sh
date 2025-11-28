@@ -8,6 +8,7 @@ section_start "Configure PHP"
 PHPVERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION."\n";')
 export PHPVERSION
 echo "$PHPVERSION" | tee -a "$ARTIFACTS"/phpversion.txt
+sudo apt-get -y remove "php$PHPVERSION-redis"
 section_end
 
 section_start "Run composer"
