@@ -435,7 +435,6 @@ tr.ignore td, td.ignore, span.ignore {
 
 .banner {
     max-width: 98%;
-    max-height: 12ex;
     height: auto;
     display: block;
     margin-bottom: 2rem;
