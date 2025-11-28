@@ -509,7 +509,7 @@ class ContestController extends AbstractRestController
     {
         $contest      = $this->getContestWithId($request, $cid);
         $response     = new StreamedResponse();
-        $response->setCallback(function () use ($contest) {
+        $response->setCallback(function () use ($contest): void {
             echo Yaml::dump($this->importExportService->getContestYamlData($contest, false), 3);
         });
         $response->headers->set('Content-Type', 'application/x-yaml');
@@ -653,7 +653,7 @@ class ContestController extends AbstractRestController
         $response = new StreamedResponse();
         $response->headers->set('X-Accel-Buffering', 'no');
         $response->headers->set('Content-Type', 'application/x-ndjson');
-        $response->setCallback(function () use ($format, $cid, $contest, $request, $since_id, $types, $strict, $stream, $metadataFactory, $kernel) {
+        $response->setCallback(function () use ($format, $cid, $contest, $request, $since_id, $types, $strict, $stream, $metadataFactory, $kernel): void {
             $lastUpdate = 0;
             $lastIdSent = max(0, $since_id);
             $lastIdExists = $since_id !== -1; // Don't try to look for event_id=0

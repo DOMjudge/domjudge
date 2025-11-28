@@ -66,6 +66,8 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Twig\Attribute\AsTwigFilter;
+use Twig\Attribute\AsTwigFunction;
 use Twig\Environment;
 use ZipArchive;
 
@@ -1375,6 +1377,7 @@ class DOMJudgeService
      * @param bool $fullPath If true, get the full path. If false, get the webserver relative path
      * @param string|null $forceExtension If set, also return the asset path if it does not exist currently and use the given extension
      */
+    #[AsTwigFilter('assetPath')]
     public function assetPath(?string $name, string $type, bool $fullPath = false, ?string $forceExtension = null): ?string
     {
         $prefix = $fullPath ? ($this->getDomjudgeWebappDir() . '/public/') : '';
@@ -1402,6 +1405,7 @@ class DOMJudgeService
         return null;
     }
 
+    #[AsTwigFunction('globalBannerAssetPath')]
     public function globalBannerAssetPath(): ?string
     {
         // This is put in a separate method (and not as a special case in assetPath) since

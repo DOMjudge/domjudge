@@ -165,11 +165,11 @@ class MetricsController extends AbstractFOSRestController
             reset($teamsusers);
 
             // Total number of teams in the contest.
-            $total_teams = sizeof($teams);
+            $total_teams = count($teams);
             $m['teams']->set($total_teams, $labels);
 
             // Total number of users in teams in the contest.
-            $total_teams_users = sizeof($teamsusers);
+            $total_teams_users = count($teamsusers);
             $m['teams_users']->set($total_teams_users, $labels);
 
             // Figure out how many of the teams have users that logged in.
@@ -234,7 +234,7 @@ class MetricsController extends AbstractFOSRestController
                 ->setParameter('cid', $contest->getCid())
                 ->getQuery()
                 ->getResult();
-            $m['balloons_waiting']->set(sizeof($balloons_waiting), $labels);
+            $m['balloons_waiting']->set(count($balloons_waiting), $labels);
 
             $balloons_longest_waitingtime = 0.0;
             $n = Utils::now();
@@ -250,7 +250,7 @@ class MetricsController extends AbstractFOSRestController
             ->from(QueueTask::class, 'qt')
             ->getQuery()->getResult();
 
-        $m['queuetasks']->set(sizeof($queueTasks));
+        $m['queuetasks']->set(count($queueTasks));
 
         // Kinda ugly that we have to go to the registry directly to get the metrics out for
         // rendering, but it seems to work well enough.

@@ -33,7 +33,6 @@ use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\AbstractQuery;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -316,7 +315,7 @@ class JudgehostController extends AbstractFOSRestController
             // Note: we use ->get here instead of ->has since entry_point can be the empty string and then we do not
             // want to update the submission or send out an update event
             if ($request->request->get('entry_point')) {
-                $this->em->wrapInTransaction(function () use ($query, $request, &$judging) {
+                $this->em->wrapInTransaction(function () use ($query, $request, &$judging): void {
                     $submission = $judging->getSubmission();
                     if ($submission->getEntryPoint() === $request->request->get('entry_point')) {
                         return;
@@ -390,7 +389,7 @@ class JudgehostController extends AbstractFOSRestController
                     $query,
                     $output_compile,
                     $compileMetadata
-                ) {
+                ): void {
                     if ($judging->getOutputCompile() === null) {
                         $judging
                             ->setOutputCompile($output_compile)
@@ -811,7 +810,7 @@ class JudgehostController extends AbstractFOSRestController
 
         if ($field_name !== null) {
             // Disable any outstanding judgetasks with the same script that have not been claimed yet.
-            $this->em->wrapInTransaction(function (EntityManager $em) use ($field_name, $disabled_id, $error) {
+            $this->em->wrapInTransaction(function (EntityManagerInterface $em) use ($field_name, $disabled_id, $error): void {
                 $judgingids = $em->getConnection()->executeQuery(
                     'SELECT DISTINCT jobid'
                     . ' FROM judgetask'
@@ -865,7 +864,7 @@ class JudgehostController extends AbstractFOSRestController
     {
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ($judging) {
-            $this->em->wrapInTransaction(function () use ($judging, $judgehost) {
+            $this->em->wrapInTransaction(function () use ($judging, $judgehost): void {
                 /** @var JudgingRun $run */
                 foreach ($judging->getRuns() as $run) {
                     if ($judgehost === null) {
@@ -960,7 +959,7 @@ class JudgehostController extends AbstractFOSRestController
             $metadata,
             $testcasedir,
             $compareMeta
-        ) {
+        ): void {
             $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
                 ['judgetaskid' => $judgeTaskId]);
             if ($judgingRun === null) {
@@ -1360,7 +1359,7 @@ class JudgehostController extends AbstractFOSRestController
             $reportedVersions,
             $language,
             $judgeTask
-        ) {
+        ): void {
             $activeVersion = $this->em->getRepository(Version::class)
                 ->findOneBy(['language' => $language, 'judgehost' => $judgehost, 'active' => true]);
 
@@ -1773,7 +1772,7 @@ class JudgehostController extends AbstractFOSRestController
             );
         }
 
-        if ($numUpdated == sizeof($judgeTasks)) {
+        if ($numUpdated == count($judgeTasks)) {
             // We got everything, let's ship it!
             return $judgeTasks;
         }

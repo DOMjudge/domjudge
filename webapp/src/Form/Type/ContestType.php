@@ -220,7 +220,7 @@ class ContestType extends AbstractExternalIdEntityType
 
         $builder->add('save', SubmitType::class);
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
             /** @var Contest|null $contest */
             $contest = $event->getData();
             $form = $event->getForm();

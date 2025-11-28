@@ -638,7 +638,7 @@ class ContestController extends BaseController
                     return $response;
                 }
 
-                $this->em->wrapInTransaction(function () use ($contest) {
+                $this->em->wrapInTransaction(function () use ($contest): void {
                     // A little 'hack': we need to first persist and save the
                     // contest, before we can persist and save the problem,
                     // because we need a contest ID.

@@ -108,7 +108,7 @@ class ShadowDifferencesController extends BaseController
             ->getResult();
 
         // Helper function to add verdicts.
-        $addVerdict = function ($unknownVerdict) use ($verdicts, &$verdictTable) {
+        $addVerdict = function ($unknownVerdict) use ($verdicts, &$verdictTable): void {
             // Add column to existing rows.
             foreach ($verdicts as $verdict => $abbreviation) {
                 $verdictTable[$verdict][$unknownVerdict] = [];
