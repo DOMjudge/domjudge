@@ -25,14 +25,14 @@ if [ ! -x /usr/bin/shellcheck ]; then
 fi
 
 find . \( \
-       -path ./webapp/vendor     -prune \
-	-o -path ./webapp/var        -prune \
-	-o -path ./output            -prune \
-	-o -path ./.git              -prune \
-	-o -path ./webapp/migrations -prune \
-	-o -path ./example_problems  -prune \
-    -o -type f \) \
-	-a -type f |  \
+	   -path ./webapp/vendor               -prune \
+	-o -path ./webapp/var                  -prune \
+	-o -path ./output                      -prune \
+	-o -path ./.git                        -prune \
+	-o -path ./webapp/migrations           -prune \
+	-o -path ./example_problems            -prune \
+	-o -path ./webapp/config/reference.php \
+	-o -type f -print \) |  \
 while read -r i ; do
 	if [[ "$i" == *\.php ]] || grep -q "^#\\!.*php" "$i" && \
 		echo "$i" | grep -qvE '(^\./(webapp/resources/adminer)\.php)'; then
