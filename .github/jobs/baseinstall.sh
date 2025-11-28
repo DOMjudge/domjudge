@@ -92,11 +92,11 @@ section_end
 
 if [ "${db}" = "install" ]; then
     section_start "Install DOMjudge database"
-    /opt/domjudge/domserver/bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} bare-install
+    /opt/domjudge/domserver/bin/dj_setup_database bare-install
     section_end
 elif [ "${db}" = "upgrade" ]; then
     section_start "Upgrade DOMjudge database"
-    /opt/domjudge/domserver/bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} upgrade
+    /opt/domjudge/domserver/bin/dj_setup_database upgrade
     /opt/domjudge/domserver/webapp/bin/console domjudge:reset-user-password admin "${ADMIN_PASSWORD}"
     section_end
 fi
@@ -139,7 +139,7 @@ if [ "${db}" = "install" ]; then
 	    # Make sure admin has no team associated so we will not insert submissions during unit tests.
 	    mysql_log "UPDATE user SET teamid=null WHERE userid=1;" $DATABASE_NAME
     fi
-    /opt/domjudge/domserver/bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} install-examples | tee -a "$ARTIFACTS/mysql.txt"
+    /opt/domjudge/domserver/bin/dj_setup_database install-examples | tee -a "$ARTIFACTS/mysql.txt"
     section_end
 fi
 

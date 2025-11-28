@@ -95,7 +95,7 @@ jobs:
           done
       - name: dump the db
         if: ${{ !cancelled() }}
-        run: mysqldump -uroot -p${{ env.MYSQL_ROOT_PASSWORD }} --quick --max_allowed_packet=1024M domjudge > /tmp/db.sql
+        run: mysqldump --quick --max_allowed_packet=1024M domjudge > /tmp/db.sql
       - name: Upload database dump for debugging
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
