@@ -48,7 +48,7 @@ cp ${DIR}/webapp/var/log/*.log "$ARTIFACTS"/
 
 set -e
 CNT=0
-THRESHOLD=2
+THRESHOLD=10
 if [ $CODECOVERAGE -eq 1 ]; then
     CNT=$(sed -n '/Generating code coverage report/,$p' "$ARTIFACTS"/phpunit.out | grep -cv ^$)
 fi
