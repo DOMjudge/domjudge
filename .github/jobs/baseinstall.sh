@@ -74,7 +74,7 @@ cat ~/.my.cnf
 # TODO: Remove after fixing https://github.com/DOMjudge/domjudge/issues/2848
 mysql_log "SET GLOBAL innodb_snapshot_isolation = OFF;"
 
-echo "unused:sqlserver:$DATABASE_NAME:domjudge:"'domjudge_db-pw+% #$*)@(!/;,.:3306' > /opt/domjudge/domserver/etc/dbpasswords.secret
+echo "unused:sqlserver:$DATABASE_NAME:domjudge:"'domjudge_db-pw+% #$*")@(!/;,.ßéçü主機:3306' > /opt/domjudge/domserver/etc/dbpasswords.secret
 
 /opt/domjudge/domserver/bin/dj_setup_database create-db-users
 
