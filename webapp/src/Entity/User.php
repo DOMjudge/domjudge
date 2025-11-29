@@ -39,8 +39,7 @@ class User extends BaseApiEntity implements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'User ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('userid')]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\Exclude]
     private ?int $userid = null;
 
     #[ORM\Column(
