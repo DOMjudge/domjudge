@@ -198,6 +198,11 @@ class ClarificationController extends AbstractRestController
         }
 
         $time = Utils::now();
+        if ($contest->getStartTime() > $time) {
+            throw new BadRequestHttpException(
+                "Sending clarifications via API before the contest is not allowed."
+            );
+        }
         if ($timeString = $clarificationPost->time) {
             if ($this->isGranted('ROLE_API_WRITER')) {
                 try {
