@@ -44,6 +44,37 @@
                 {{ button(path('jury_judgehost_edit'), 'Edit all judgehosts', 'secondary', 'edit') }}
             </div>
         </div>
+        <div>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th rowspan="2">Executable</th>
+                        <th colspan="{{ judgehosts | length + 1}}">Judgehost</th>
+                    </tr>
+                    <tr>
+                        <th>All</th>
+                        {% for judgehost in judgehosts %}
+                            <th>{{ judgehost.data.hostname.value }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for executable in executables %}
+                        <tr>
+                            <td>{{ executable.executable.description }}</td>
+                            <td>
+                                <a href="{{ path('jury_request_generic', {'execid': executable.execid}) }}">All</a>
+                            </td>
+                            {% for judgehost in judgehosts %}
+                                <td>
+                                    <a href="{{ path('jury_request_judgehost_generic', {'execid': executable.execid, 'judgehostid': judgehost.data.judgehostid.value}) }}">{{ judgehost.data.hostname.value }}</a>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
     {%- endif %}
 
