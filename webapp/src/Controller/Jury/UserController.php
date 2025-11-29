@@ -35,8 +35,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route(path: '/jury/users')]
 class UserController extends BaseController
 {
-    public const MIN_PASSWORD_LENGTH = 10;
-
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,

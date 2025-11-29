@@ -437,7 +437,7 @@ compile_assertions_finished () {
   assert_line " * judgehost...........: /opt/domjudge/judgehost"
   assert_line " * runguard group......: domjudge-run"
   run make domserver
-  assert_failure
+  assert_failure 2
   run make judgehost
   assert_success
 }
@@ -456,5 +456,5 @@ compile_assertions_finished () {
   run make domserver
   assert_success
   run make judgehost
-  assert_failure
+  assert_failure 2
 }

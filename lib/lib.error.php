@@ -10,6 +10,7 @@ if (! defined('SCRIPT_ID')) {
 }
 
 // Default verbosity and loglevels:
+global $verbose, $loglevel;
 $verbose  = LOG_NOTICE;
 $loglevel = LOG_DEBUG;
 
