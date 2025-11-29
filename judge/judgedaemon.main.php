@@ -22,7 +22,7 @@ class JudgeDaemon
 {
     private static ?JudgeDaemon $instance = null;
 
-    private array $endpoints = [];
+    private ?array $endpoint = null;
     private array $domjudge_config = [];
     private string $myhost;
     private int $verbose = LOG_INFO;
@@ -34,8 +34,6 @@ class JudgeDaemon
 
     private ?string $lastrequest = '';
     private float $waittime = self::INITIAL_WAITTIME_SEC;
-
-    private ?string $endpointID = null;
 
     private array $langexts = [];
 
@@ -221,10 +219,7 @@ class JudgeDaemon
             error("chroot validation check failed");
         }
 
-        foreach (array_keys($this->endpoints) as $id) {
-            $this->endpointID = $id;
-            $this->registerJudgehost();
-        }
+        $this->registerJudgehost();
 
         // Populate the DOMjudge configuration initially
         $this->djconfigRefresh();
@@ -248,33 +243,20 @@ class JudgeDaemon
 
     private function loop(): void
     {
-        $endpointIDs = array_keys($this->endpoints);
-        $currentEndpoint = 0;
         $lastWorkdir = null;
+        $workdirpath = JUDGEDIR . "/$this->myhost/endpoint-" . $this->endpoint['id'];
+
         while (true) {
-            // If all endpoints are waiting, sleep for a bit.
-            $dosleep = true;
-            foreach ($this->endpoints as $id => $endpoint) {
-                if ($endpoint['errorred']) {
-                    $this->endpointID = $id;
-                    $this->registerJudgehost();
-                }
-                if (!$endpoint['waiting']) {
-                    $dosleep = false;
-                    $this->waittime = self::INITIAL_WAITTIME_SEC;
-                    break;
-                }
-            }
-            // Sleep only if everything is "waiting" and only if we're looking at the first endpoint again.
-            if ($dosleep && $currentEndpoint == 0) {
-                dj_sleep($this->waittime);
-                $this->waittime = min($this->waittime * 2, self::MAXIMAL_WAITTIME_SEC);
+            if ($this->endpoint['errorred']) {
+                $this->registerJudgehost();
             }
 
-            // Cycle through endpoints.
-            $currentEndpoint = ($currentEndpoint + 1) % count($this->endpoints);
-            $this->endpointID = $endpointIDs[$currentEndpoint];
-            $workdirpath = JUDGEDIR . "/$this->myhost/endpoint-$this->endpointID";
+            if ($this->endpoint['waiting']) {
+                dj_sleep($this->waittime);
+                $this->waittime = min($this->waittime * 2, self::MAXIMAL_WAITTIME_SEC);
+            } else {
+                $this->waittime = self::INITIAL_WAITTIME_SEC;
+            }
 
             // Check whether we have received an exit signal
             if (function_exists('pcntl_signal_dispatch')) {
@@ -308,12 +290,12 @@ class JudgeDaemon
                 exit;
             }
 
-            if ($this->endpoints[$this->endpointID]['errorred']) {
+            if ($this->endpoint['errorred']) {
                 continue;
             }
 
 
-            if ($this->endpoints[$this->endpointID]['waiting'] === false) {
+            if ($this->endpoint['waiting'] === false) {
                 $this->checkDiskSpace($workdirpath);
             }
 
@@ -330,13 +312,13 @@ class JudgeDaemon
 
             // Nothing returned -> no open work for us.
             if (empty($row)) {
-                if (!$this->endpoints[$this->endpointID]["waiting"]) {
-                    $this->endpoints[$this->endpointID]["waiting"] = true;
+                if (!$this->endpoint["waiting"]) {
+                    $this->endpoint["waiting"] = true;
                     if ($lastWorkdir !== null) {
                         $this->cleanupJudging($lastWorkdir);
                         $lastWorkdir = null;
                     }
-                    logmsg(LOG_INFO, "No submissions in queue (for endpoint $this->endpointID), waiting...");
+                    logmsg(LOG_INFO, "No submissions in queue (for endpoint " . $this->endpoint['id'] . "), waiting...");
                     $judgehosts = $this->request('judgehosts', 'GET');
                     if ($judgehosts !== null) {
                         $judgehosts = dj_json_decode($judgehosts);
@@ -350,7 +332,7 @@ class JudgeDaemon
             }
 
             // We have gotten a work packet.
-            $this->endpoints[$this->endpointID]["waiting"] = false;
+            $this->endpoint["waiting"] = false;
 
             // All tasks are guaranteed to be of the same type.
             // If $row is empty, we already continued.
@@ -542,16 +524,16 @@ class JudgeDaemon
     private function handleTask(string $type, array $row, ?string &$lastWorkdir, string $workdirpath): void
     {
         if ($type == 'try_again') {
-            if (!$this->endpoints[$this->endpointID]['retrying']) {
+            if (!$this->endpoint['retrying']) {
                 logmsg(LOG_INFO, "API indicated to retry fetching work (this might take a while to clean up).");
             }
-            $this->endpoints[$this->endpointID]['retrying'] = true;
+            $this->endpoint['retrying'] = true;
             return;
         }
-        $this->endpoints[$this->endpointID]['retrying'] = false;
+        $this->endpoint['retrying'] = false;
 
         logmsg(LOG_INFO,
-            "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint $this->endpointID)");
+            "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint " . $this->endpoint['id'] . ")");
 
         if ($type == 'prefetch') {
             $this->handlePrefetchTask($row, $lastWorkdir, $workdirpath);
@@ -657,10 +639,12 @@ class JudgeDaemon
                 error("Error parsing REST API credentials. Invalid format in line $lineno.");
             }
             [$endpointID, $resturl, $restuser, $restpass] = $items;
-            if (array_key_exists($endpointID, $this->endpoints)) {
-                error("Error parsing REST API credentials. Duplicate endpoint ID '$endpointID' in line $lineno.");
+
+            if ($this->endpoint !== null) {
+                error("Error parsing REST API credentials. Multiple endpoints are not supported.");
             }
-            $this->endpoints[$endpointID] = [
+            $this->endpoint = [
+                "id" => $endpointID,
                 "url" => $resturl,
                 "user" => $restuser,
                 "pass" => $restpass,
@@ -670,7 +654,7 @@ class JudgeDaemon
                 "retrying" => false,
             ];
         }
-        if (count($this->endpoints) <= 0) {
+        if ($this->endpoint === null) {
             error("Error parsing REST API credentials: no endpoints found.");
         }
     }
@@ -687,11 +671,9 @@ class JudgeDaemon
 
     private function closeCurlHandles(): void
     {
-        foreach ($this->endpoints as $id => $endpoint) {
-            if (!empty($endpoint['ch'])) {
-                curl_close($endpoint['ch']);
-                unset($this->endpoints[$id]['ch']);
-            }
+        if (!empty($this->endpoint['ch'])) {
+            curl_close($this->endpoint['ch']);
+            unset($this->endpoint['ch']);
         }
     }
 
@@ -708,8 +690,8 @@ class JudgeDaemon
             $this->lastrequest = $url;
         }
 
-        $requestUrl = $this->endpoints[$this->endpointID]['url'] . "/" . $url;
-        $curl_handle = $this->endpoints[$this->endpointID]['ch'];
+        $requestUrl = $this->endpoint['url'] . "/" . $url;
+        $curl_handle = $this->endpoint['ch'];
         if ($verb == 'GET') {
             $requestUrl .= '?' . $data;
         }
@@ -778,15 +760,15 @@ class JudgeDaemon
                 error($errstr);
             } else {
                 warning($errstr);
-                $this->endpoints[$this->endpointID]['errorred'] = true;
+                $this->endpoint['errorred'] = true;
                 return null;
             }
         }
 
-        if ($this->endpoints[$this->endpointID]['errorred']) {
-            $this->endpoints[$this->endpointID]['errorred'] = false;
-            $this->endpoints[$this->endpointID]['waiting'] = false;
-            logmsg(LOG_NOTICE, "Reconnected to endpoint $this->endpointID.");
+        if ($this->endpoint['errorred']) {
+            $this->endpoint['errorred'] = false;
+            $this->endpoint['waiting'] = false;
+            logmsg(LOG_NOTICE, "Reconnected to endpoint " . $this->endpoint['id'] . ".");
         }
 
         return $response;
@@ -1081,7 +1063,7 @@ class JudgeDaemon
 
     private function registerJudgehost(): void
     {
-        $endpoint = &$this->endpoints[$this->endpointID];
+        $endpoint = &$this->endpoint;
 
         // Only try to register every 30s.
         $now = time();
@@ -1091,11 +1073,11 @@ class JudgeDaemon
         }
         $endpoint['last_attempt'] = $now;
 
-        logmsg(LOG_NOTICE, "Registering judgehost on endpoint $this->endpointID: " . $endpoint['url']);
-        $this->endpoints[$this->endpointID]['ch'] = $this->setupCurlHandle($endpoint['user'], $endpoint['pass']);
+        logmsg(LOG_NOTICE, "Registering judgehost on endpoint " . $this->endpoint['id'] . ": " . $endpoint['url']);
+        $this->endpoint['ch'] = $this->setupCurlHandle($endpoint['user'], $endpoint['pass']);
 
         // Create directory where to test submissions
-        $workdirpath = JUDGEDIR . "/$this->myhost/endpoint-$this->endpointID";
+        $workdirpath = JUDGEDIR . "/$this->myhost/endpoint-" . $this->endpoint['id'];
         if (!$this->runCommandSafe(['mkdir', '-p', "$workdirpath/testcase"])) {
             error("Could not create $workdirpath");
         }
@@ -1106,7 +1088,7 @@ class JudgeDaemon
         // they have and will not be finished. Give them back.
         $unfinished = $this->request('judgehosts', 'POST', ['hostname' => urlencode($this->myhost)], false);
         if ($unfinished === null) {
-            logmsg(LOG_WARNING, "Registering judgehost on endpoint $this->endpointID failed.");
+            logmsg(LOG_WARNING, "Registering judgehost on endpoint " . $this->endpoint['id'] . " failed.");
         } else {
             $unfinished = dj_json_decode($unfinished);
             foreach ($unfinished as $jud) {
@@ -1679,8 +1661,8 @@ class JudgeDaemon
 
                 // The child should use its own curl handle to avoid issues with sharing handles
                 // between processes.
-                $endpoint = $this->endpoints[$this->endpointID];
-                $this->endpoints[$this->endpointID]['ch'] = $this->setupCurlHandle($endpoint['user'], $endpoint['pass']);
+                $endpoint = $this->endpoint;
+                $this->endpoint['ch'] = $this->setupCurlHandle($endpoint['user'], $endpoint['pass']);
             }
         } elseif ($asynchronous) {
             logmsg(LOG_WARNING, "pcntl extension not available, reporting result for jt$judgeTaskId synchronously.");
