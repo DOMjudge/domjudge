@@ -44,9 +44,6 @@ use Twig\TwigFunction;
 
 class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
-    /**
-     * @param array<int, bool> $renderedSources
-     */
     public function __construct(
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
@@ -61,7 +58,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         protected readonly SerializerInterface $serializer,
         #[Autowire('%kernel.project_dir%')]
         protected readonly string $projectDir,
-        protected array $renderedSources = []
     ) {}
 
     public function getFunctions(): array
@@ -931,39 +927,6 @@ JS;
                             $mode,
                             $extraForEdit
         ));
-    }
-
-    /**
-     * Gets the JavaScript to get a Monaco model instance for the submission file.
-     * Renders the source code of the file as Monaco model, if not already rendered.
-     * @return string The JavaScript source assignable to a model variable.
-     */
-    public function getMonacoModel(SubmissionFile $file): string
-    {
-        if (array_key_exists($file->getSubmitfileid(), $this->renderedSources)) {
-            return sprintf(
-                <<<JS
-monaco.editor.getModel(monaco.Uri.parse("diff/%d/%s"));
-JS,
-                $file->getSubmitfileid(),
-                $file->getFilename(),
-            );
-        }
-        $this->renderedSources[$file->getSubmitfileid()] = true;
-
-        $source = Utils::reencodeUtf8($file->getSourcecode());
-        return sprintf(
-            <<<JS
-monaco.editor.createModel(
-    %s,
-    undefined,
-    monaco.Uri.parse("diff/%d/%s")
-);
-JS,
-            $this->serializer->serialize($source, 'json'),
-            $file->getSubmitfileid(),
-            $file->getFilename(),
-        );
     }
 
     /** @param array<int, array{
