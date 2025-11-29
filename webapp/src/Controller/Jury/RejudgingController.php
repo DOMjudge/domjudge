@@ -709,7 +709,7 @@ class RejudgingController extends BaseController
             'judgehost' => 'jt.judgehost',
             'language' => 'l.externalid',
             'problem' => 'p.externalid',
-            'submission' => 's.submitid',
+            'submission' => 's.externalid',
             'team' => 's.team',
             'user' => 's.user',
             'rejudging' => 'j2.rejudging',

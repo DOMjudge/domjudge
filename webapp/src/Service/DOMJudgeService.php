@@ -1257,7 +1257,7 @@ class DOMJudgeService
         // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
         $judgings = $this->helperUnblockJudgeTasks()
             ->join(Submission::class, 's', Join::WITH, 'j.submission = s.submitid')
-            ->andWhere('j.submission = :submissionid')
+            ->andWhere('s.externalid = :submissionid')
             ->setParameter('submissionid', $submissionId)
             ->getQuery()
             ->getResult();
