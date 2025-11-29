@@ -217,7 +217,7 @@ class JudgeDaemon
 
         // Check basic prerequisites for chroot at judgehost startup
         logmsg(LOG_INFO, "🔏 Executing chroot script: '" . self::CHROOT_SCRIPT . " check'");
-        if (!$this->run_command_safe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'check'])) {
+        if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'check'])) {
             error("chroot validation check failed");
         }
 
@@ -227,7 +227,7 @@ class JudgeDaemon
         }
 
         // Populate the DOMjudge configuration initially
-        $this->djconfig_refresh();
+        $this->djconfigRefresh();
 
         // Prepopulate default language extensions, afterwards update based on
         // domserver config.
@@ -282,13 +282,28 @@ class JudgeDaemon
             }
             if (function_exists('pcntl_waitpid')) {
                 // Reap any finished child processes.
-                while (pcntl_waitpid(-1, $status, WNOHANG) > 0) {
-                    // Do nothing.
+                while (true) {
+                    $ret = pcntl_waitpid(-1, $status, WNOHANG);
+                    if ($ret <= 0) {
+                        if ($ret < 0) {
+                            $errno = pcntl_get_last_error();
+                            // 10 is ECHLD (not defined in PHP unfortunately),
+                            // indicating that we didn't find any child to be
+                            // reaped
+                            if ($errno != 10) {
+                                logmsg(LOG_WARNING,
+                                    "pcntl_waitpid returned $ret when trying to reap child processes: "
+                                    . pcntl_strerror($errno));
+                            }
+                        }
+
+                        break;
+                    }
                 }
             }
             if ($this->exitsignalled) {
                 logmsg(LOG_NOTICE, "Received signal, exiting.");
-                $this->close_curl_handles();
+                $this->closeCurlHandles();
                 fclose($this->lockfile);
                 exit;
             }
@@ -306,7 +321,7 @@ class JudgeDaemon
             // Any errors will be treated as non-fatal: we will just keep on retrying in this loop.
             $row = $this->fetchWork();
 
-            // If $judging is null, an error occurred; we marked the endpoint already as errorred above.
+            // If $row is null, an error occurred; we marked the endpoint already as errorred above.
             if (is_null($row)) {
                 continue;
             } else {
@@ -318,7 +333,7 @@ class JudgeDaemon
                 if (!$this->endpoints[$this->endpointID]["waiting"]) {
                     $this->endpoints[$this->endpointID]["waiting"] = true;
                     if ($lastWorkdir !== null) {
-                        $this->cleanup_judging($lastWorkdir);
+                        $this->cleanupJudging($lastWorkdir);
                         $lastWorkdir = null;
                     }
                     logmsg(LOG_INFO, "No submissions in queue (for endpoint $this->endpointID), waiting...");
@@ -386,12 +401,12 @@ class JudgeDaemon
         }
 
         if ($needs_cleanup && $lastWorkdir !== null) {
-            $this->cleanup_judging($lastWorkdir);
+            $this->cleanupJudging($lastWorkdir);
             $lastWorkdir = null;
         }
 
 
-        if (!$this->run_command_safe(['mkdir', '-p', "$workdir/compile"])) {
+        if (!$this->runCommandSafe(['mkdir', '-p', "$workdir/compile"])) {
             error("Could not create '$workdir/compile'");
         }
 
@@ -404,14 +419,14 @@ class JudgeDaemon
         if ($lastWorkdir !== $workdir) {
             // create chroot environment
             logmsg(LOG_INFO, "  🔒 Executing chroot script: '" . self::CHROOT_SCRIPT . " start'");
-            if (!$this->run_command_safe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'start'], $retval)) {
+            if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'start'], $retval)) {
                 logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                 $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
                 return;
             }
 
             // Refresh config at start of each batch.
-            $this->djconfig_refresh();
+            $this->djconfigRefresh();
 
             $lastWorkdir = $workdir;
         }
@@ -419,13 +434,13 @@ class JudgeDaemon
         // Make sure the workdir is accessible for the domjudge-run user.
         // Will be revoked again after this run finished.
         foreach ($row as $judgetask) {
-            if (!$this->compile_and_run_submission($judgetask, $workdirpath)) {
+            if (!$this->compileAndRunSubmission($judgetask, $workdirpath)) {
                 // Potentially return remaining outstanding judgetasks here.
                 $returnedJudgings = $this->request('judgehosts', 'POST', ['hostname' => urlencode($this->myhost)], false);
                 if ($returnedJudgings !== null) {
                     $returnedJudgings = dj_json_decode($returnedJudgings);
                     foreach ($returnedJudgings as $jud) {
-                        $workdir = $this->judging_directory($workdirpath, $jud);
+                        $workdir = $this->judgingDirectory($workdirpath, $jud);
                         @chmod($workdir, 0700);
                         logmsg(LOG_WARNING, "  🔙 Returned unfinished judging with jobid " . $jud['jobid'] .
                             " in my name; given back unfinished runs from me.");
@@ -440,7 +455,7 @@ class JudgeDaemon
         // Check if we were interrupted while judging, if so, exit (to avoid sleeping)
         if ($this->exitsignalled) {
             logmsg(LOG_NOTICE, "Received signal, exiting.");
-            $this->close_curl_handles();
+            $this->closeCurlHandles();
             fclose($this->lockfile);
             exit;
         }
@@ -449,7 +464,7 @@ class JudgeDaemon
     private function handleDebugInfoTask(array $row, ?string &$lastWorkdir, string $workdirpath, string $workdir): void
     {
         if ($lastWorkdir !== null) {
-            $this->cleanup_judging($lastWorkdir);
+            $this->cleanupJudging($lastWorkdir);
             $lastWorkdir = null;
         }
         foreach ($row as $judgeTask) {
@@ -457,7 +472,7 @@ class JudgeDaemon
                 // Full debug package requested.
                 $run_config = dj_json_decode($judgeTask['run_config']);
                 $tmpfile = tempnam(TMPDIR, 'full_debug_package_');
-                [$runpath, $error] = $this->fetch_executable(
+                [$runpath, $error] = $this->fetchExecutable(
                     $workdirpath,
                     'debug',
                     $judgeTask['run_script_id'],
@@ -465,7 +480,7 @@ class JudgeDaemon
                     $judgeTask['judgetaskid']
                 );
 
-                if (!$this->run_command_safe([$runpath, $workdir, $tmpfile])) {
+                if (!$this->runCommandSafe([$runpath, $workdir, $tmpfile])) {
                     $this->disable('run_script', 'run_script_id', $judgeTask['run_script_id'], "Running '$runpath' failed.");
                 }
 
@@ -473,7 +488,7 @@ class JudgeDaemon
                     sprintf('judgehosts/add-debug-info/%s/%s', urlencode($this->myhost),
                         urlencode((string)$judgeTask['judgetaskid'])),
                     'POST',
-                    ['full_debug' => $this->rest_encode_file($tmpfile, false)],
+                    ['full_debug' => $this->restEncodeFile($tmpfile, false)],
                     false
                 );
                 unlink($tmpfile);
@@ -486,7 +501,7 @@ class JudgeDaemon
                     sprintf('judgehosts/add-debug-info/%s/%s', urlencode($this->myhost),
                         urlencode((string)$judgeTask['judgetaskid'])),
                     'POST',
-                    ['output_run' => $this->rest_encode_file($testcasedir . '/program.out', false)],
+                    ['output_run' => $this->restEncodeFile($testcasedir . '/program.out', false)],
                     false
                 );
                 logmsg(LOG_INFO, "  ⇡ Uploading full output of testcase $judgeTask[testcase_id].");
@@ -497,7 +512,7 @@ class JudgeDaemon
     private function handlePrefetchTask(array $row, ?string &$lastWorkdir, string $workdirpath): void
     {
         if ($lastWorkdir !== null) {
-            $this->cleanup_judging($lastWorkdir);
+            $this->cleanupJudging($lastWorkdir);
             $lastWorkdir = null;
         }
         foreach ($row as $judgeTask) {
@@ -506,7 +521,7 @@ class JudgeDaemon
                     $config = dj_json_decode($judgeTask[$script_type . '_config']);
                     $combined_run_compare = $script_type == 'run' && ($config['combined_run_compare'] ?? false);
                     if (!empty($config['hash'])) {
-                        [$execrunpath, $error] = $this->fetch_executable(
+                        [$execrunpath, $error] = $this->fetchExecutable(
                             $workdirpath,
                             $script_type,
                             $judgeTask[$script_type . '_script_id'],
@@ -545,7 +560,7 @@ class JudgeDaemon
 
         if ($type == 'debug_info') {
             // Create workdir for debugging only if needed.
-            $workdir = $this->judging_directory($workdirpath, $row[0]);
+            $workdir = $this->judgingDirectory($workdirpath, $row[0]);
             logmsg(LOG_INFO, "  Working directory: $workdir");
 
             $this->handleDebugInfoTask($row, $lastWorkdir, $workdirpath, $workdir);
@@ -553,7 +568,7 @@ class JudgeDaemon
         }
 
         // Create workdir for judging.
-        $workdir = $this->judging_directory($workdirpath, $row[0]);
+        $workdir = $this->judgingDirectory($workdirpath, $row[0]);
         logmsg(LOG_INFO, "  Working directory: $workdir");
         $this->handleJudgingTask($row, $lastWorkdir, $workdirpath, $workdir);
     }
@@ -567,7 +582,7 @@ class JudgeDaemon
     {
         // Check for available disk space
         $free_space = disk_free_space(JUDGEDIR);
-        $allowed_free_space = $this->djconfig_get_value('diskspace_error'); // in kB
+        $allowed_free_space = $this->djconfigGetValue('diskspace_error'); // in kB
         if ($free_space < 1024 * $allowed_free_space) {
             $after = disk_free_space(JUDGEDIR);
             if (!isset($this->options['diskspace-error'])) {
@@ -585,7 +600,7 @@ class JudgeDaemon
                 foreach ($candidateDirs as $d) {
                     $cnt++;
                     logmsg(LOG_INFO, "  - deleting $d");
-                    if (!$this->run_command_safe(['rm', '-rf', $d])) {
+                    if (!$this->runCommandSafe(['rm', '-rf', $d])) {
                         logmsg(LOG_WARNING, "Deleting '$d' was unsuccessful.");
                     }
                     $after = disk_free_space(JUDGEDIR);
@@ -607,7 +622,7 @@ class JudgeDaemon
         }
     }
 
-    private function judging_directory(string $workdirpath, array $judgeTask): string
+    private function judgingDirectory(string $workdirpath, array $judgeTask): string
     {
         if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_INT) === false ||
             filter_var($judgeTask['jobid'], FILTER_VALIDATE_INT) === false) {
@@ -660,7 +675,7 @@ class JudgeDaemon
         }
     }
 
-    private function setup_curl_handle(string $restuser, string $restpass): \CurlHandle|false
+    private function setupCurlHandle(string $restuser, string $restpass): \CurlHandle|false
     {
         $curl_handle = curl_init();
         curl_setopt($curl_handle, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
@@ -670,7 +685,7 @@ class JudgeDaemon
         return $curl_handle;
     }
 
-    private function close_curl_handles(): void
+    private function closeCurlHandles(): void
     {
         foreach ($this->endpoints as $id => $endpoint) {
             if (!empty($endpoint['ch'])) {
@@ -777,17 +792,17 @@ class JudgeDaemon
         return $response;
     }
 
-    private function djconfig_refresh(): void
+    private function djconfigRefresh(): void
     {
         $res = $this->request('config', 'GET');
         $res = dj_json_decode($res);
         $this->domjudge_config = $res;
     }
 
-    private function djconfig_get_value(string $name)
+    private function djconfigGetValue(string $name)
     {
         if (empty($this->domjudge_config)) {
-            $this->djconfig_refresh();
+            $this->djconfigRefresh();
         }
 
         if (!array_key_exists($name, $this->domjudge_config)) {
@@ -796,11 +811,11 @@ class JudgeDaemon
         return $this->domjudge_config[$name];
     }
 
-    private function rest_encode_file(string $file, $sizelimit = true): string
+    private function restEncodeFile(string $file, $sizelimit = true): string
     {
         $maxsize = null;
         if ($sizelimit === true) {
-            $maxsize = (int)$this->djconfig_get_value('output_storage_limit');
+            $maxsize = (int)$this->djconfigGetValue('output_storage_limit');
         } elseif ($sizelimit === false || $sizelimit == -1) {
             $maxsize = -1;
         } elseif (is_int($sizelimit) && $sizelimit > 0) {
@@ -835,14 +850,14 @@ class JudgeDaemon
         exit;
     }
 
-    private function read_judgehostlog(int $numLines = 20): string
+    private function readJudgehostLog(int $numLines = 20): string
     {
         ob_start();
         passthru("tail -n $numLines " . dj_escapeshellarg(LOGFILE));
         return trim(ob_get_clean());
     }
 
-    private function run_command_safe(array $command_parts, & $retval = DONT_CARE, $log_nonzero_exitcode = true): bool
+    private function runCommandSafe(array $command_parts, & $retval = DONT_CARE, $log_nonzero_exitcode = true): bool
     {
         if (empty($command_parts)) {
             logmsg(LOG_WARNING, "Need at least the command that should be called.");
@@ -866,7 +881,7 @@ class JudgeDaemon
         return true;
     }
 
-    private function fetch_executable(
+    private function fetchExecutable(
         string $workdirpath,
         string $type,
         string $execid,
@@ -875,7 +890,7 @@ class JudgeDaemon
         bool   $combined_run_compare = false
     ): array
     {
-        [$execrunpath, $error, $buildlogpath] = $this->fetch_executable_internal($workdirpath, $type, $execid, $hash, $combined_run_compare);
+        [$execrunpath, $error, $buildlogpath] = $this->fetchExecutableInternal($workdirpath, $type, $execid, $hash, $combined_run_compare);
         if (isset($error)) {
             $extra_log = null;
             if ($buildlogpath !== null) {
@@ -896,7 +911,7 @@ class JudgeDaemon
         return [$execrunpath, $error];
     }
 
-    private function fetch_executable_internal(
+    private function fetchExecutableInternal(
         string $workdirpath,
         string $type,
         string $execid,
@@ -918,10 +933,10 @@ class JudgeDaemon
         $execrunjurypath = $execbuilddir . '/runjury';
         if (!is_dir($execdir) || !file_exists($execdeploypath) ||
             ($combined_run_compare && file_get_contents(LIBJUDGEDIR . '/run-interactive.sh') !== file_get_contents($execrunpath))) {
-            if (!$this->run_command_safe(['rm', '-rf', $execdir, $execbuilddir])) {
+            if (!$this->runCommandSafe(['rm', '-rf', $execdir, $execbuilddir])) {
                 $this->disable('judgehost', 'hostname', $this->myhost, "Deleting '$execdir' or '$execbuilddir' was unsuccessful.");
             }
-            if (!$this->run_command_safe(['mkdir', '-p', $execbuilddir])) {
+            if (!$this->runCommandSafe(['mkdir', '-p', $execbuilddir])) {
                 $this->disable('judgehost', 'hostname', $this->myhost, "Could not create directory '$execbuilddir'");
             }
 
@@ -1027,11 +1042,11 @@ class JudgeDaemon
             if ($do_compile) {
                 logmsg(LOG_DEBUG, "Building executable in $execdir, under 'build/'");
 
-                putenv('SCRIPTTIMELIMIT=' . $this->djconfig_get_value('script_timelimit'));
-                putenv('SCRIPTMEMLIMIT=' . $this->djconfig_get_value('script_memory_limit'));
-                putenv('SCRIPTFILELIMIT=' . $this->djconfig_get_value('script_filesize_limit'));
+                putenv('SCRIPTTIMELIMIT=' . $this->djconfigGetValue('script_timelimit'));
+                putenv('SCRIPTMEMLIMIT=' . $this->djconfigGetValue('script_memory_limit'));
+                putenv('SCRIPTFILELIMIT=' . $this->djconfigGetValue('script_filesize_limit'));
 
-                if (!$this->run_command_safe([LIBJUDGEDIR . '/build_executable.sh', $execdir])) {
+                if (!$this->runCommandSafe([LIBJUDGEDIR . '/build_executable.sh', $execdir])) {
                     return [null, "Failed to build executable in $execdir.", "$execdir/build.log"];
                 }
                 chmod($execrunpath, 0755);
@@ -1079,11 +1094,11 @@ class JudgeDaemon
         $endpoint['last_attempt'] = $now;
 
         logmsg(LOG_NOTICE, "Registering judgehost on endpoint $this->endpointID: " . $endpoint['url']);
-        $this->endpoints[$this->endpointID]['ch'] = $this->setup_curl_handle($endpoint['user'], $endpoint['pass']);
+        $this->endpoints[$this->endpointID]['ch'] = $this->setupCurlHandle($endpoint['user'], $endpoint['pass']);
 
         // Create directory where to test submissions
         $workdirpath = JUDGEDIR . "/$this->myhost/endpoint-$this->endpointID";
-        if (!$this->run_command_safe(['mkdir', '-p', "$workdirpath/testcase"])) {
+        if (!$this->runCommandSafe(['mkdir', '-p', "$workdirpath/testcase"])) {
             error("Could not create $workdirpath");
         }
         chmod("$workdirpath/testcase", 0700);
@@ -1097,7 +1112,7 @@ class JudgeDaemon
         } else {
             $unfinished = dj_json_decode($unfinished);
             foreach ($unfinished as $jud) {
-                $workdir = $this->judging_directory($workdirpath, $jud);
+                $workdir = $this->judgingDirectory($workdirpath, $jud);
                 @chmod($workdir, 0700);
                 logmsg(LOG_WARNING, "Found unfinished judging with jobid " . $jud['jobid'] .
                     " in my name; given back unfinished runs from me.");
@@ -1115,7 +1130,7 @@ class JudgeDaemon
     ): void
     {
         $disabled = dj_json_encode(['kind' => $kind, $idcolumn => $id]);
-        $judgehostlog = $this->read_judgehostlog();
+        $judgehostlog = $this->readJudgehostLog();
         if (isset($extra_log)) {
             $judgehostlog .= "\n\n"
                 . "--------------------------------------------------------------------------------"
@@ -1134,7 +1149,7 @@ class JudgeDaemon
         logmsg(LOG_ERR, "=> internal error " . $error_id);
     }
 
-    private function read_metadata(string $filename): ?array
+    private function readMetadata(string $filename): ?array
     {
         if (!is_readable($filename)) {
             return null;
@@ -1153,14 +1168,14 @@ class JudgeDaemon
         return $res;
     }
 
-    private function cleanup_judging(string $workdir): void
+    private function cleanupJudging(string $workdir): void
     {
         // revoke readablity for domjudge-run user to this workdir
         chmod($workdir, 0700);
 
         // destroy chroot environment
         logmsg(LOG_INFO, "  🔓 Executing chroot script: '" . self::CHROOT_SCRIPT . " stop'");
-        if (!$this->run_command_safe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'stop'], $retval)) {
+        if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'stop'], $retval)) {
             logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
             $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
             // Just continue here: even though we might continue a current
@@ -1170,7 +1185,7 @@ class JudgeDaemon
         }
 
         // Evict all contents of the workdir from the kernel fs cache
-        if (!$this->run_command_safe([LIBJUDGEDIR . '/evict', $workdir])) {
+        if (!$this->runCommandSafe([LIBJUDGEDIR . '/evict', $workdir])) {
             warning("evict script failed, continuing gracefully");
         }
     }
@@ -1208,7 +1223,7 @@ class JudgeDaemon
                     file_put_contents($vcscript, $vcscript_content);
                     chmod($vcscript, 0755);
 
-                    $this->run_command_safe([LIBJUDGEDIR . "/version_check.sh", $vcscript, $workdir], $retval);
+                    $this->runCommandSafe([LIBJUDGEDIR . "/version_check.sh", $vcscript, $workdir], $retval);
 
                     $versions[$type] = trim(file_get_contents($version_output_file));
                     if ($retval !== 0) {
@@ -1282,7 +1297,7 @@ class JudgeDaemon
             error("No submission files could be downloaded.");
         }
 
-        [$execrunpath, $error] = $this->fetch_executable(
+        [$execrunpath, $error] = $this->fetchExecutable(
             $workdirpath,
             'compile',
             $judgeTask['compile_script_id'],
@@ -1301,7 +1316,7 @@ class JudgeDaemon
         }
         array_push($compile_command_parts, $execrunpath, $workdir, ...$files);
         // Note that the $retval is handled further down after reading/writing metadata.
-        $this->run_command_safe($compile_command_parts, $retval, log_nonzero_exitcode: false);
+        $this->runCommandSafe($compile_command_parts, $retval, log_nonzero_exitcode: false);
 
         $compile_output = '';
         if (is_readable($workdir . '/compile.out')) {
@@ -1312,7 +1327,7 @@ class JudgeDaemon
         }
 
         // Try to read metadata from file
-        $metadata = $this->read_metadata($workdir . '/compile.meta');
+        $metadata = $this->readMetadata($workdir . '/compile.meta');
         if (isset($metadata['internal-error'])) {
             alert('error');
             $internalError = $metadata['internal-error'];
@@ -1350,8 +1365,8 @@ class JudgeDaemon
 
         // Pop the compilation result back into the judging table.
         $args = 'compile_success=' . $compile_success .
-            '&output_compile=' . urlencode($this->rest_encode_file($workdir . '/compile.out', $output_storage_limit)) .
-            '&compile_metadata=' . urlencode($this->rest_encode_file($workdir . '/compile.meta', false));
+            '&output_compile=' . urlencode($this->restEncodeFile($workdir . '/compile.out', $output_storage_limit)) .
+            '&compile_metadata=' . urlencode($this->restEncodeFile($workdir . '/compile.meta', false));
         if (isset($metadata['entry_point'])) {
             $args .= '&entry_point=' . urlencode($metadata['entry_point']);
         }
@@ -1369,7 +1384,7 @@ class JudgeDaemon
         return true;
     }
 
-    private function compile_and_run_submission(array $judgeTask, string $workdirpath): bool
+    private function compileAndRunSubmission(array $judgeTask, string $workdirpath): bool
     {
         $startTime = microtime(true);
 
@@ -1393,21 +1408,21 @@ class JudgeDaemon
         } else {
             putenv('ENTRY_POINT');
         }
-        $output_storage_limit = (int)$this->djconfig_get_value('output_storage_limit');
+        $output_storage_limit = (int)$this->djconfigGetValue('output_storage_limit');
 
         $cpuset_opt = "";
         if (isset($this->options['daemonid'])) {
             $cpuset_opt = '-n ' . dj_escapeshellarg($this->options['daemonid']);
         }
 
-        $workdir = $this->judging_directory($workdirpath, $judgeTask);
+        $workdir = $this->judgingDirectory($workdirpath, $judgeTask);
         $compile_success = $this->compile($judgeTask, $workdir, $workdirpath, $compile_config, $this->options['daemonid'] ?? null, $output_storage_limit);
         if (!$compile_success) {
             return false;
         }
 
         // TODO: How do we plan to handle these?
-        $overshoot = $this->djconfig_get_value('timelimit_overshoot');
+        $overshoot = $this->djconfigGetValue('timelimit_overshoot');
 
         // Check whether we have received an exit signal (but not a graceful exit signal).
         if (function_exists('pcntl_signal_dispatch')) {
@@ -1426,10 +1441,10 @@ class JudgeDaemon
             return false;
         }
 
-        return $this->run_testcase($judgeTask, $workdir, $workdirpath, $run_config, $compare_config, $output_storage_limit, $overshoot, $startTime);
+        return $this->runTestcase($judgeTask, $workdir, $workdirpath, $run_config, $compare_config, $output_storage_limit, $overshoot, $startTime);
     }
 
-    private function run_testcase(
+    private function runTestcase(
         array $judgeTask,
         string $workdir,
         string $workdirpath,
@@ -1449,7 +1464,7 @@ class JudgeDaemon
 
         // do the actual test-run
         $combined_run_compare = $compare_config['combined_run_compare'];
-        [$run_runpath, $error] = $this->fetch_executable(
+        [$run_runpath, $error] = $this->fetchExecutable(
             $workdirpath,
             'run',
             $judgeTask['run_script_id'],
@@ -1465,7 +1480,7 @@ class JudgeDaemon
             // run script also acts as compare script
             $compare_runpath = '';
         } else {
-            [$compare_runpath, $error] = $this->fetch_executable(
+            [$compare_runpath, $error] = $this->fetchExecutable(
                 $workdirpath,
                 'compare',
                 $judgeTask['compare_script_id'],
@@ -1516,19 +1531,19 @@ class JudgeDaemon
             // after the first (note that $passCnt starts at 1).
             if ($passCnt > 1) {
                 $prevPassdir = $testcasedir . '/' . ($passCnt - 1) . '/feedback';
-                $this->run_command_safe(['cp', '-R', $prevPassdir, $passdir . '/']);
-                $this->run_command_safe(['rm', $passdir . '/feedback/nextpass.in']);
+                $this->runCommandSafe(['cp', '-R', $prevPassdir, $passdir . '/']);
+                $this->runCommandSafe(['rm', $passdir . '/feedback/nextpass.in']);
             }
 
             // Copy program with all possible additional files to testcase
             // dir. Use hardlinks to preserve space with big executables.
             $programdir = $passdir . '/execdir';
-            if (!$this->run_command_safe(['mkdir', '-p', $programdir])) {
+            if (!$this->runCommandSafe(['mkdir', '-p', $programdir])) {
                 error("Could not create directory '$programdir'");
             }
 
             foreach (glob("$workdir/compile/*") as $compile_file) {
-                if (!$this->run_command_safe(['cp', '-PRl', $compile_file, $programdir])) {
+                if (!$this->runCommandSafe(['cp', '-PRl', $compile_file, $programdir])) {
                     error("Could not copy program to '$programdir'");
                 }
             }
@@ -1548,7 +1563,7 @@ class JudgeDaemon
                 $compare_runpath,
                 $compare_config['compare_args']
             );
-            $this->run_command_safe($run_command_parts, $retval, log_nonzero_exitcode: false);
+            $this->runCommandSafe($run_command_parts, $retval, log_nonzero_exitcode: false);
 
             // What does the exitcode mean?
             if (!isset($this->EXITCODES[$retval])) {
@@ -1559,14 +1574,14 @@ class JudgeDaemon
 
             // Try to read metadata from file
             $runtime = null;
-            $metadata = $this->read_metadata($passdir . '/program.meta');
+            $metadata = $this->readMetadata($passdir . '/program.meta');
 
             if (isset($metadata['time-used']) && array_key_exists($metadata['time-used'], $metadata)) {
                 $runtime = $metadata[$metadata['time-used']];
             }
 
             if ($result === 'compare-error') {
-                $compareMeta = $this->read_metadata($passdir . '/compare.meta');
+                $compareMeta = $this->readMetadata($passdir . '/compare.meta');
                 $compareExitCode = 'n/a';
                 if (isset($compareMeta['exitcode'])) {
                     $compareExitCode = $compareMeta['exitcode'];
@@ -1589,18 +1604,18 @@ class JudgeDaemon
                 'start_time' => urlencode((string)$startTime),
                 'end_time' => urlencode((string)microtime(true)),
                 'runtime' => urlencode((string)$runtime),
-                'output_run' => $this->rest_encode_file($passdir . '/program.out', $output_storage_limit),
-                'output_error' => $this->rest_encode_file($passdir . '/program.err', $output_storage_limit),
-                'output_system' => $this->rest_encode_file($passdir . '/system.out', $output_storage_limit),
-                'metadata' => $this->rest_encode_file($passdir . '/program.meta', false),
-                'output_diff' => $this->rest_encode_file($passdir . '/feedback/judgemessage.txt', $output_storage_limit),
+                'output_run' => $this->restEncodeFile($passdir . '/program.out', $output_storage_limit),
+                'output_error' => $this->restEncodeFile($passdir . '/program.err', $output_storage_limit),
+                'output_system' => $this->restEncodeFile($passdir . '/system.out', $output_storage_limit),
+                'metadata' => $this->restEncodeFile($passdir . '/program.meta', false),
+                'output_diff' => $this->restEncodeFile($passdir . '/feedback/judgemessage.txt', $output_storage_limit),
                 'hostname' => $this->myhost,
                 'testcasedir' => $testcasedir,
-                'compare_metadata' => $this->rest_encode_file($passdir . '/compare.meta', false),
+                'compare_metadata' => $this->restEncodeFile($passdir . '/compare.meta', false),
             ];
 
             if (file_exists($passdir . '/feedback/teammessage.txt')) {
-                $new_judging_run['team_message'] = $this->rest_encode_file($passdir . '/feedback/teammessage.txt', $output_storage_limit);
+                $new_judging_run['team_message'] = $this->restEncodeFile($passdir . '/feedback/teammessage.txt', $output_storage_limit);
             }
 
             if ($passLimit > 1) {
@@ -1669,7 +1684,7 @@ class JudgeDaemon
                 // The child should use its own curl handle to avoid issues with sharing handles
                 // between processes.
                 $endpoint = $this->endpoints[$this->endpointID];
-                $this->endpoints[$this->endpointID]['ch'] = $this->setup_curl_handle($endpoint['user'], $endpoint['pass']);
+                $this->endpoints[$this->endpointID]['ch'] = $this->setupCurlHandle($endpoint['user'], $endpoint['pass']);
             }
         } elseif ($asynchronous) {
             logmsg(LOG_WARNING, "pcntl extension not available, reporting result for jt$judgeTaskId synchronously.");
