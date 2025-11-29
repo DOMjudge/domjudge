@@ -241,6 +241,10 @@ class TeamController extends BaseController
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
 
+        if (!$team->getEnabled()) {
+            $this->addFlash('danger', 'Team is disabled and currently excluded from the scoreboard');
+        }
+
         $data = [
             'refresh' => [
                 'after' => 15,
