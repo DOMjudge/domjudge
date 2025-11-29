@@ -28,7 +28,7 @@ class Judgehost
     private int $judgehostid;
 
     #[ORM\Column(length: 64, options: ['comment' => 'Resolvable hostname of judgehost'])]
-    #[Assert\Regex('/^[A-Za-z0-9_\-.]*$/', message: 'Invalid hostname. Only characters in [A-Za-z0-9_\-.] are allowed.')]
+    #[Assert\Regex(pattern: '/^[A-Za-z0-9_\-.]*$/', message: 'Invalid hostname. Only characters in [A-Za-z0-9_\-.] are allowed.')]
     private string $hostname;
 
     #[ORM\Column(options: ['comment' => 'Should this host take on judgings?', 'default' => 1])]

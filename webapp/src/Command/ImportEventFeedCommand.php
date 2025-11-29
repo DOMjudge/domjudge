@@ -2,21 +2,23 @@
 
 namespace App\Command;
 
-use App\Controller\API\GeneralInfoController as GI;
 use App\Entity\Contest;
 use App\Entity\ExternalContestSource;
 use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ExternalContestSourceService;
+use Doctrine\Bundle\DoctrineBundle\Middleware\DebugMiddleware;
+use Doctrine\DBAL\Driver\Middleware as MiddlewareInterface;
+use Doctrine\DBAL\Logging\Middleware;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
@@ -30,7 +32,7 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
     name: 'import:eventfeed',
     description: 'Import contest data from an event feed following the Contest API specification'
 )]
-class ImportEventFeedCommand extends Command
+class ImportEventFeedCommand
 {
     protected SymfonyStyle $style;
 
@@ -43,55 +45,36 @@ class ImportEventFeedCommand extends Command
         protected readonly TokenStorageInterface $tokenStorage,
         protected readonly ?Profiler $profiler,
         protected readonly ExternalContestSourceService $sourceService,
-        ?string $name = null
     ) {
-        parent::__construct($name);
-    }
-
-    protected function configure(): void
-    {
-        $this
-            ->setHelp(
-                'Import contest data from an event feed following the Contest API specification:' . PHP_EOL .
-                GI::CCS_SPEC_API_URL . ' or any version starting from "2021-11"' . PHP_EOL . PHP_EOL .
-                'Note the following assumptions and caveats:' . PHP_EOL .
-                '- Configuration data will only be verified.' . PHP_EOL .
-                '- Team members will not be imported.' . PHP_EOL .
-                '- Awards will not be imported.' . PHP_EOL .
-                '- State will not be imported.'
-            )
-            ->addArgument(
-                'contestid',
-                InputArgument::OPTIONAL,
-                'The ID of the contest to use.'
-            )
-            ->addOption(
-                'from-start',
-                's',
-                InputOption::VALUE_NONE,
-                'Restart importing events from the beginning. ' .
-                'If this option is not given, importing will resume where it left off.'
-            )
-            ->addOption(
-                'skip-event-id',
-                'k',
-                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                "ID('s) of events to skip."
-            );
     }
 
     /**
+     * @param list<string> $eventsToSkip
      * @throws ClientExceptionInterface
      * @throws NonUniqueResultException
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        InputInterface $input,
+        OutputInterface $output,
+        #[Option(description: "ID('s) of events to skip.", shortcut: 'k')]
+        array $eventsToSkip = [],
+        #[Argument(description: 'The ID of the contest to use.')]
+        ?string $contestId = null,
+        #[Option(description: 'Restart importing events from the beginning. If this option is not given, importing will resume where it left off.', shortcut: 's')]
+        bool $fromStart = false,
+    ): int {
         $this->style = new SymfonyStyle($input, $output);
         // Disable SQL logging and profiling. This would cause a serious memory leak otherwise
         // since this is a long-running process.
-        $this->em->getConnection()->getConfiguration()->setSQLLogger();
+        $configuration = $this->em->getConnection()->getConfiguration();
+        $middlewares = $configuration->getMiddlewares();
+        $middlewares = array_filter(
+            $middlewares,
+            static fn (MiddlewareInterface $middleware): bool => !$middleware instanceof Middleware && !$middleware instanceof DebugMiddleware
+        );
+        $this->em->getConnection()->getConfiguration()->setMiddlewares($middlewares);
         $this->profiler?->disable();
 
         $output->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
@@ -99,7 +82,7 @@ class ImportEventFeedCommand extends Command
         pcntl_signal(SIGTERM, $this->stopCommand(...));
         pcntl_signal(SIGINT, $this->stopCommand(...));
 
-        if (!$this->loadSource($input, $output)) {
+        if (!$this->loadSource($input, $contestId)) {
             return Command::FAILURE;
         }
 
@@ -126,9 +109,6 @@ class ImportEventFeedCommand extends Command
         $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
         $this->tokenStorage->setToken($token);
 
-        $fromStart    = $input->getOption('from-start');
-        $eventsToSkip = $input->getOption('skip-event-id');
-
         if (!$this->compareContestId()) {
             return Command::FAILURE;
         }
@@ -140,7 +120,7 @@ class ImportEventFeedCommand extends Command
         $progressBar->setMessage('Start reading feed...');
         $progressBar->start();
 
-        $progressReporter = function ($readingToLastEventId) use ($progressBar) {
+        $progressReporter = function ($readingToLastEventId) use ($progressBar): void {
             if ($readingToLastEventId) {
                 $progressBar->setMessage('Scanning file for start event ' . $this->sourceService->getLastReadEventId());
             } else {
@@ -166,9 +146,9 @@ class ImportEventFeedCommand extends Command
      *
      * @return bool False if the import should stop, true otherwise.
      */
-    protected function loadSource(InputInterface $input, OutputInterface $output): bool
+    protected function loadSource(InputInterface $input, ?string $contestId = null): bool
     {
-        if (!$input->getArgument('contestid')) {
+        if (!$contestId) {
             if ($input->isInteractive()) {
                 /** @var Contest[] $contests */
                 $contests = $this->em->getRepository(Contest::class)->findAll();
@@ -190,8 +170,6 @@ class ImportEventFeedCommand extends Command
                 $this->style->error('No contestid provided and not running in interactive mode.');
                 return false;
             }
-        } else {
-            $contestId = $input->getArgument('contestid');
         }
 
         /** @var ExternalContestSource|null $source */

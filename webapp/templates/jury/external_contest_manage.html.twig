@@ -41,7 +41,7 @@
             var typeChanged = function () {
                 var ccsApiFields = $('[data-type-ccs-api]');
                 switch (type.val()) {
-                    case '{{ constant('\App\\Entity\\ExternalContestSource::TYPE_CCS_API') }}':
+                    case '{{ constant('\\App\\Entity\\ExternalContestSource::TYPE_CCS_API') }}':
                         ccsApiFields.show();
                         break;
                     default:

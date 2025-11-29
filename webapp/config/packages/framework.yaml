@@ -24,6 +24,9 @@ framework:
     assets:
         version: "v=%domjudge.version%"
 
+    property_info:
+        with_constructor_extractor: true
+
 when@test:
     framework:
         test: true

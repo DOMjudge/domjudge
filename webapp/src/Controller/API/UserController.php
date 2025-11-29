@@ -28,7 +28,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 /**
  * @extends AbstractRestController<User, User>
  */
-#[Rest\Route('/users', defaults: ['_format' => 'json'])]
+#[Rest\Route(path: '/users', defaults: ['_format' => 'json'])]
 #[OA\Tag(name: 'Users')]
 #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
 #[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
@@ -50,7 +50,7 @@ class UserController extends AbstractRestController
      * Add one or more groups.
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Post('/groups')]
+    #[Rest\Post(path: '/groups')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -98,7 +98,7 @@ class UserController extends AbstractRestController
      * Add one or more organizations.
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Post('/organizations')]
+    #[Rest\Post(path: '/organizations')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -136,7 +136,7 @@ class UserController extends AbstractRestController
      * Add one or more teams.
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Post('/teams')]
+    #[Rest\Post(path: '/teams')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -185,7 +185,7 @@ class UserController extends AbstractRestController
      * @throws BadRequestHttpException
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Rest\Post('/accounts')]
+    #[Rest\Post(path: '/accounts')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -249,7 +249,7 @@ class UserController extends AbstractRestController
      * @throws NonUniqueResultException
      */
     #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')"))]
-    #[Rest\Get('')]
+    #[Rest\Get(path: '')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the users for this contest',
@@ -275,7 +275,7 @@ class UserController extends AbstractRestController
      * @throws NonUniqueResultException
      */
     #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')"))]
-    #[Rest\Get('/{id}')]
+    #[Rest\Get(path: '/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given user',
@@ -318,7 +318,7 @@ class UserController extends AbstractRestController
      * Update an existing User or create one with the given ID
      */
     #[IsGranted('ROLE_API_WRITER')]
-    #[Rest\Put('/{id}')]
+    #[Rest\Put(path: '/{id}')]
     #[OA\RequestBody(
         required: true,
         content: [

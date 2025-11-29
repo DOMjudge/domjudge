@@ -68,7 +68,7 @@ class SubmitProblemType extends AbstractType
             'help' => 'The entry point for your code.',
             'row_attr' => ['data-entry-point' => ''],
             'constraints' => [
-                new Callback(function ($value, ExecutionContextInterface $context) {
+                new Callback(function ($value, ExecutionContextInterface $context): void {
                     /** @var Form $form */
                     $form = $context->getRoot();
                     /** @var Language $language */
@@ -85,7 +85,7 @@ class SubmitProblemType extends AbstractType
             ]
         ]);
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($problemConfig) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($problemConfig): void {
             if (isset($event->getData()['problem'])) {
                 $problemConfig += ['row_attr' => ['class' => 'd-none']];
                 $event->getForm()->add('problem', EntityType::class, $problemConfig);

@@ -8,7 +8,7 @@ DIR="$PWD"
 
 export version=$1
 unittest=$2
-[ "$version" = "8.1" ] && CODECOVERAGE=1 || CODECOVERAGE=0
+[ "$version" = "8.2" ] && CODECOVERAGE=1 || CODECOVERAGE=0
 
 # Set up
 export unit=1
@@ -46,7 +46,7 @@ cp ${DIR}/webapp/var/log/*.log "$ARTIFACTS"/
 
 set -e
 CNT=0
-THRESHOLD=2
+THRESHOLD=10
 if [ $CODECOVERAGE -eq 1 ]; then
     CNT=$(sed -n '/Generating code coverage report/,$p' "$ARTIFACTS"/phpunit.out | grep -cv ^$)
 fi

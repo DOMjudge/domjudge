@@ -17,14 +17,8 @@
     "dflydev/dot-access-data": {
         "version": "v3.0.1"
     },
-    "doctrine/cache": {
-        "version": "v1.8.0"
-    },
     "doctrine/collections": {
         "version": "v1.6.2"
-    },
-    "doctrine/common": {
-        "version": "v2.10.0"
     },
     "doctrine/data-fixtures": {
         "version": "v1.3.2"
@@ -553,9 +547,6 @@
         "version": "v1.18.1"
     },
     "symfony/polyfill-mbstring": {
-        "version": "v1.11.0"
-    },
-    "symfony/polyfill-php72": {
         "version": "v1.11.0"
     },
     "symfony/polyfill-php80": {

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
-use App\Service\ConfigurationService;
+use App\Migrations\Factory\ConfigurationServiceAwareInterface;
+use App\Migrations\Factory\ConfigurationServiceAwareTrait;
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20200111104226 extends AbstractMigration implements ContainerAwareInterface
+final class Version20200111104226 extends AbstractMigration implements ConfigurationServiceAwareInterface
 {
-    use ContainerAwareTrait;
+    use ConfigurationServiceAwareTrait;
 
     public function isTransactional(): bool
     {
@@ -30,7 +30,7 @@ final class Version20200111104226 extends AbstractMigration implements Container
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql',
+        $this->abortIf(!$this->connection->getDatabasePlatform() instanceof AbstractMySQLPlatform,
             'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('DROP INDEX public ON configuration');
@@ -40,7 +40,7 @@ final class Version20200111104226 extends AbstractMigration implements Container
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql',
+        $this->abortIf(!$this->connection->getDatabasePlatform() instanceof AbstractMySQLPlatform,
             'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE configuration
@@ -51,8 +51,7 @@ final class Version20200111104226 extends AbstractMigration implements Container
         $this->addSql('CREATE INDEX public ON configuration (public)');
 
         // We also need to add back the type, category,  public and description values
-        $configService = $this->container->get(ConfigurationService::class);
-        $specs         = $configService->getConfigSpecification();
+        $specs         = $this->configurationService->getConfigSpecification();
         foreach ($specs as $name => $spec) {
             $this->addSql(
                 'UPDATE configuration SET type = :type, category = :category, public = :public, description = :description WHERE name = :name',
