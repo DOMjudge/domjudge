@@ -722,6 +722,7 @@ blockquote {
     padding: 20px;
     border-radius: 5px;
     z-index: 1001;
+    overflow: auto;
 }
 
 #keyhelp code {

@@ -965,6 +965,7 @@ $(function () {
 function initializeKeyboardShortcuts() {
     var $body = $('body');
     var ignore = false;
+    const validKeys = new Set(['c', 'd', 'j', 'p', 's', 't']);
     $body.on('keydown', function(e) {
         var keysCookie = getCookie('domjudge_keys');
         if (keysCookie != 1 && keysCookie != "") {
@@ -1010,7 +1011,7 @@ function initializeKeyboardShortcuts() {
                 parts[parts.length - 1] += '?' + params[1];
             }
             window.location = parts.join('/');
-        } else if (!ignore && (key === 's' || key === 't' || key === 'p' || key === 'j' || key === 'c')) {
+        } else if (!ignore && validKeys.has(key)) {
             if (e.shiftKey && key === 's') {
                 window.location = domjudge_base_url + '/jury/scoreboard';
                 return;
@@ -1053,6 +1054,27 @@ function initializeKeyboardShortcuts() {
                     $body.on('keydown', oldFunc);
                     if (e.key === 'Enter') {
                         switch (type) {
+                            case 'd':
+                                if (editors) {
+                                    const editorId = Object.keys(editors)[0];
+                                    const diffEditor =  editors[editorId];
+                                    const select = diffEditor.submissionSelect;
+                                    if (typedSequence.length === 0) {
+                                        // Reset to no-diff.
+                                        select.selectedIndex = 0;
+                                        select.dispatchEvent(new Event('change'));
+                                        return;
+                                    }
+                                    const url = domjudge_base_url + `/jury/submissions/${typedSequence}`;
+                                    for (let i = 0; i < select.options.length; i++) {
+                                        if (select.options[i].dataset.url === url) {
+                                            select.selectedIndex = i;
+                                            select.dispatchEvent(new Event('change'));
+                                            return;
+                                        }
+                                    }
+                                }
+                                return;
                             case 's':
                                 type = 'submissions';
                                 break;
@@ -1360,6 +1382,7 @@ function initDiffEditor(editorId) {
     const diffLink = diffTitle.querySelector('a.diff-link');
 
     const editor = {
+        'submissionSelect': select[0],
         'getDiffMode': () => {
             for (let radio of radios) {
                 if (radio.checked) {
