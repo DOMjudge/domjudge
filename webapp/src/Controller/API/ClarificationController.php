@@ -202,6 +202,11 @@ class ClarificationController extends AbstractRestController
             if ($this->isGranted('ROLE_API_WRITER')) {
                 try {
                     $time = Utils::toEpochFloat($timeString);
+                    if ($contest->getStartTime() > $time) {
+                        throw new BadRequestHttpException(
+                            "Sending clarifications before the contest is only possible via the UI."
+                        );
+                    }
                 } catch (Exception) {
                     throw new BadRequestHttpException(sprintf("Can not parse time '%s'.", $timeString));
                 }
