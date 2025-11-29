@@ -13,11 +13,11 @@ setup() {
 @test "contest via parameter overrides environment" {
     run ./submit -c bestaatniet
     assert_failure 1
-    assert_partial "error: No (valid) contest specified"
+    assert_partial "ERROR: No (valid) contest specified"
 
     run ./submit --contest=bestaatookniet
     assert_failure 1
-    assert_partial "error: No (valid) contest specified"
+    assert_partial "ERROR: No (valid) contest specified"
 }
 
 @test "hello problem id and name are in help output" {
@@ -78,14 +78,14 @@ setup() {
     cp ../example_problems/hello/submissions/accepted/test-hello.java $BATS_TMPDIR/A.java
     run ./submit -p nonexistent -l cpp $BATS_TMPDIR/A.java <<< "n"
     assert_failure 1
-    assert_partial "error: No known problem specified or detected"
+    assert_partial "ERROR: No known problem specified or detected"
 }
 
 @test "non existing language name emits error" {
     cp ../example_problems/hello/submissions/accepted/test-hello.java $BATS_TMPDIR/hello.java
     run ./submit -p C -l nonexistent $BATS_TMPDIR/hello.java <<< "n"
     assert_failure 1
-    assert_partial "error: No known language specified or detected"
+    assert_partial "ERROR: No known language specified or detected"
 }
 
 @test "detect entry point Java" {
