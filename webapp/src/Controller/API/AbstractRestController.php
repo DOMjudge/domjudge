@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\Entity\BaseApiEntity;
+use App\Utils\CcsApiVersion;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -73,7 +74,9 @@ abstract class AbstractRestController extends AbstractApiController
         $view->getContext()->setAttribute('domjudge_service', $this->dj);
         $view->getContext()->setAttribute('config_service', $this->config);
 
-        $groups = [static::GROUP_DEFAULT];
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+        $groups = [static::GROUP_DEFAULT, $ccsApiVersion->value];
         if (!$request->query->has('strict') || !$request->query->getBoolean('strict')) {
             $groups[] = static::GROUP_NONSTRICT;
         }

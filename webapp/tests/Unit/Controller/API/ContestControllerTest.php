@@ -12,7 +12,7 @@ class ContestControllerTest extends BaseTestCase
     protected array $expectedObjects = [
         'demo' => [
             'formal_name'                => 'Demo contest',
-            'penalty_time'               => 20,
+            'penalty_time'               => '0:20:00',
             // 'start_time'                 => '2021-01-01T11:00:00+00:00',
             // 'end_time'                   => '2024-01-01T16:00:00+00:00',
             'duration'                   => '5:00:00.000',
