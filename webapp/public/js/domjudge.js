@@ -1422,7 +1422,7 @@ function initDiffEditor(editorId) {
         });
 
         const selected = select[0].options[select[0].selectedIndex];
-        if (selected && selected.dataset.tag) {
+        if (!select[0].disabled && selected && selected.dataset.tag) {
             setDiffTag(selected.dataset.tag);
         }
 
