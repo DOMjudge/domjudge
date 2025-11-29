@@ -27,6 +27,7 @@ use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
+use Ramsey\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Exception\MissingResourceException;
@@ -38,12 +39,18 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
+use Twig\Extra\Markdown\MarkdownRuntime;
 use Twig\Runtime\EscaperRuntime;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
+    /**
+     * @param array<string> $latexFound
+     */
+    private array $latexFound;
+
     /**
      * @param array<int, bool> $renderedSources
      */
@@ -126,6 +133,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('medalType', $this->awards->medalType(...)),
             new TwigFilter('numTableActions', $this->numTableActions(...)),
             new TwigFilter('extensionToMime', $this->extensionToMime(...)),
+            new TwigFilter('domjudgeMarkdownToHtml', $this->domjudgeMarkdownToHTML(...), ['is_safe' => ['html']]),
         ];
     }
 
@@ -1380,5 +1388,36 @@ EOF;
     public function extensionToMime(string $extension): string
     {
         return DOMJudgeService::EXTENSION_TO_MIMETYPE[$extension];
+    }
+
+    /**
+     * Extract all LaTeX code from the given string, sanitize the markdown and
+     * inject the original LaTeX code back so MathJax can render it.
+     */
+    public function domjudgeMarkdownToHTML(string $markdown): string
+    {
+        $latexPlaceholder = Uuid::uuid4()->toString();
+        while (str_contains($markdown, $latexPlaceholder)) {
+            $latexPlaceholder = Uuid::uuid4()->toString();
+        }
+
+        $markdown = preg_replace_callback(
+            '/(\$[\s\S]*?\$)/',
+            function (array $matches) use ($latexPlaceholder) {
+                // Store and replace matches
+                $this->latexFound[] = $matches[1];
+                return $latexPlaceholder;
+            },
+            $markdown
+        );
+
+        /** @var MarkdownRuntime $runtime */
+        $runtime = $this->twig->getRuntime(MarkdownRuntime::class);
+        $markdown = (string)$runtime->convert($markdown);
+
+        return preg_replace_callback(
+            '/'.$latexPlaceholder.'/',
+            fn() => array_shift($this->latexFound), $markdown
+        );
     }
 }
