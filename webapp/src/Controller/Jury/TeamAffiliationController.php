@@ -137,6 +137,10 @@ class TeamAffiliationController extends BaseController
 
         $data = [
             'teamAffiliation' => $teamAffiliation,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                TeamAffiliation::class,
+                $teamAffiliation->getExternalid(),
+            ),
             'showFlags' => $this->config->get('show_flags'),
             'refresh' => [
                 'after' => 30,

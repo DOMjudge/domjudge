@@ -280,6 +280,12 @@ class JudgehostController extends BaseController
 
         $data = [
             'judgehost' => $judgehost,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                Judgehost::class,
+                $judgehost->getJudgehostid(),
+                'judgehostid',
+                ['e.judgehostid' => 'ASC'],
+            ),
             'status' => $status,
             'statusIcon' => $statusIcon,
             'judgings' => $judgings,

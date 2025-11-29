@@ -142,6 +142,10 @@ class TeamCategoryController extends BaseController
 
         $data = [
             'teamCategory' => $teamCategory,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                TeamCategory::class,
+                $teamCategory->getExternalid(),
+            ),
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,

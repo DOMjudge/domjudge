@@ -563,7 +563,7 @@ abstract class BaseController extends AbstractController
                     '<input type="checkbox" name="ids[]" value="%s" class="%s">',
                     $identifierValue,
                     $checkboxClass
-                )
+                ),
             ];
         }
     }
@@ -664,5 +664,121 @@ abstract class BaseController extends AbstractController
         }
 
         return null;
+    }
+
+    /**
+     * Get the previous and next object IDs for navigation.
+     *
+     * @param class-string                $entityClass     Entity class to query
+     * @param mixed                       $currentIdValue  Current value of the ID field
+     * @param string                      $idField         Field to return as the ID (e.g., 'externalid', 'submitid')
+     * @param array<string, 'ASC'|'DESC'> $orderBy         Sort criteria as field => direction (e.g., ['e.submittime' => 'ASC', 'e.submitid' => 'ASC'])
+     * @param bool                        $filterOnContest Whether to filter results by current contests
+     *
+     * @return array{previous: string|int|null, next: string|int|null}
+     */
+    protected function getPreviousAndNextObjectIds(
+        string $entityClass,
+        mixed $currentIdValue,
+        string $idField = 'externalid',
+        array $orderBy = ['e.externalid' => 'ASC'],
+        bool $filterOnContest = false,
+    ): array {
+        $result = ['previous' => null, 'next' => null];
+
+        // Fetch the current entity once to get field values
+        $currentEntity = $this->em->getRepository($entityClass)->findOneBy([$idField => $currentIdValue]);
+        if ($currentEntity === null) {
+            return $result;
+        }
+
+        $accessor = PropertyAccess::createPropertyAccessor();
+
+        // Pre-compute field values for comparison
+        $fieldValues = [];
+        foreach (array_keys($orderBy) as $field) {
+            $fieldName = str_replace('e.', '', $field);
+            $fieldValues[$field] = $accessor->getValue($currentEntity, $fieldName);
+        }
+
+        // Build the comparison conditions based on the sort criteria.
+        // For multi-column ordering, we need: (col1 < val1) OR (col1 = val1 AND col2 < val2) etc.
+        $buildComparisonConditions = function (string $operator) use ($orderBy, $fieldValues): array {
+            $conditions = [];
+            $parameters = [];
+            $fields = array_keys($orderBy);
+            $directions = array_values($orderBy);
+
+            for ($i = 0; $i < count($fields); $i++) {
+                $equalityParts = [];
+                // Add equality conditions for all previous columns
+                for ($j = 0; $j < $i; $j++) {
+                    $field = $fields[$j];
+                    $paramName = 'eq_' . $j;
+                    $equalityParts[] = "$field = :$paramName";
+                    $parameters[$paramName] = $fieldValues[$field];
+                }
+
+                // Add the comparison for this column
+                $field = $fields[$i];
+                $direction = $directions[$i];
+                // For "previous": if ASC, we want < ; if DESC, we want >
+                // For "next": if ASC, we want > ; if DESC, we want <
+                $compOp = ($operator === 'previous')
+                    ? ($direction === 'ASC' ? '<' : '>')
+                    : ($direction === 'ASC' ? '>' : '<');
+                $paramName = 'cmp_' . $i;
+                $comparisonPart = "$field $compOp :$paramName";
+                $parameters[$paramName] = $fieldValues[$field];
+
+                if (!empty($equalityParts)) {
+                    $conditions[] = '(' . implode(' AND ', $equalityParts) . ' AND ' . $comparisonPart . ')';
+                } else {
+                    $conditions[] = '(' . $comparisonPart . ')';
+                }
+            }
+
+            return ['condition' => implode(' OR ', $conditions), 'parameters' => $parameters];
+        };
+
+        foreach (['previous', 'next'] as $direction) {
+            $qb = $this->em->createQueryBuilder()
+                ->select("e.$idField")
+                ->from($entityClass, 'e');
+
+            // Build and apply the comparison conditions
+            $comp = $buildComparisonConditions($direction);
+            if (!empty($comp['condition'])) {
+                $qb->andWhere($comp['condition']);
+                foreach ($comp['parameters'] as $param => $value) {
+                    $qb->setParameter($param, $value);
+                }
+            }
+
+            // Apply contest filter
+            if ($filterOnContest && $contest = $this->dj->getCurrentContest()) {
+                $qb->andWhere('e.contest = :contest')
+                    ->setParameter('contest', $contest);
+            }
+
+            // Apply ordering (reversed for previous)
+            foreach ($orderBy as $field => $dir) {
+                $actualDir = $direction === 'previous'
+                    ? ($dir === 'ASC' ? 'DESC' : 'ASC')
+                    : $dir;
+                $qb->addOrderBy($field, $actualDir);
+            }
+
+            $qb->setMaxResults(1);
+
+            try {
+                $value = $qb->getQuery()->getSingleScalarResult();
+                $result[$direction] = $value;
+            } catch (NoResultException) {
+                // No previous/next found, leave as null
+            }
+        }
+
+        return $result;
     }
 }
