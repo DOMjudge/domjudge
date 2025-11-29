@@ -174,8 +174,16 @@ class PublicController extends BaseController
     public function teamAction(Request $request, int $teamId): Response
     {
         /** @var Team|null $team */
-        $team             = $this->em->getRepository(Team::class)->find($teamId);
-        if ($team && $team->getCategory() && !$team->getCategory()->getVisible()) {
+        $team = $this->em->createQueryBuilder()
+                         ->from(Team::class, 't')
+                         ->innerJoin('t.categories', 'tc')
+                         ->select('t, tc')
+                         ->andWhere('tc.visible = 1')
+                         ->andWhere('t.teamid = :teamId')
+                         ->setParameter('teamId', $teamId)
+                         ->getQuery()
+                         ->getOneOrNullResult();
+        if ($team?->getHidden()) {
             $team = null;
         }
         $showFlags        = (bool)$this->config->get('show_flags');
@@ -286,7 +294,7 @@ class PublicController extends BaseController
 
         /** @var Team|null $team */
         $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
-        if ($team && $team->getCategory() && !$team->getCategory()->getVisible()) {
+        if ($team && $team->getScoringCategory() && !$team->getScoringCategory()->getVisible()) {
             $team = null;
         }
 
