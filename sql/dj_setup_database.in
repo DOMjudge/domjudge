@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # @configure_input@
 
 # This script allows one to perform DOMjudge database setup actions.
@@ -52,30 +52,50 @@ not have to pass any of the options above.
 EOF
 }
 
+urlencode()
+{
+	# We need to escape for PHP ' and \ by prefixing them with a \.
+	local str="${1//\\/\\\\}"
+	str="${str//\'/\\\'}"
+	php -r "echo rawurlencode('$str');"
+}
+
+# This is global variable to be able to return the output from
+# mysql_options() below as an array, which is not possible otherwise.
+declare -a _mysql_options
+
 mysql_options()
 {
+	local user pass
+	_mysql_options=()
+
 	# shellcheck disable=SC2153
 	if [ -n "$DBUSER" ]; then
-		_user="-u $DBUSER"
-	else
-		_user="${DBA_USER:+-u ${DBA_USER}}"
+		_mysql_options+=('-u' "$DBUSER")
+	elif [ -n "$DBA_USER" ]; then
+		_mysql_options+=('-u' "$DBA_USER")
 	fi
 	# shellcheck disable=SC2153
 	if [ -n "$PASSWD" ]; then
-		_pass="-p$PASSWD"
-	else
-		[ -n "$PROMPT_PASSWD" ] && _pass="-p"
-		[ -n "$DBA_PASSWD" ]    && _pass="-p$DBA_PASSWD"
+		_mysql_options+=("-p$PASSWD")
+	elif [ -n "$DBA_PASSWD" ]; then
+		_mysql_options+=("-p$DBA_PASSWD")
+	elif [ -n "$PROMPT_PASSWD" ]; then
+		_mysql_options+=('-p')
 	fi
 
-	[ -z "$USE_SOCKET" ] && port="-P$DBPORT"
-	echo $_user ${_pass:+"$_pass"} -h "$DBHOST" ${port:+"$port"}
+	_mysql_options+=('-h' "$DBHOST")
+
+	if [ -z "$USE_SOCKET" ]; then
+		_mysql_options+=("-P$DBPORT")
+	fi
 }
 
 # Wrapper around mysql command to allow setting options, user, etc.
 mysql()
 {
-	command mysql $(mysql_options) --silent --skip-column-names "$@"
+	mysql_options
+	command mysql "${_mysql_options[@]}" --silent --skip-column-names "$@"
 }
 
 # Quick shell hack to get a key from an INI file.
@@ -126,12 +146,17 @@ symfony_console()
 		fi
 
 		if [ -n "$DBA_USER" ]; then
+			user=$(urlencode "${DBA_USER}")
+			host=$(urlencode "${domjudge_DBHOST}")
+			db=$(urlencode "${domjudge_DBNAME}")
 			if [ -n "$DBA_PASSWD" ]; then
-				DATABASE_URL=mysql://${DBA_USER}:${DBA_PASSWD}@${domjudge_DBHOST}:${domjudge_DBPORT}/${domjudge_DBNAME}
+				DATABASE_URL="mysql://$user:$(urlencode "${DBA_PASSWD}")@$host:${domjudge_DBPORT}/$db"
 			else
-				DATABASE_URL=mysql://${DBA_USER}@${domjudge_DBHOST}:${domjudge_DBPORT}/${domjudge_DBNAME}
+				DATABASE_URL="mysql://$user@$host:${domjudge_DBPORT}/$db"
 			fi
 		fi
+	else
+		DATABASE_URL="mysql://$DBUSER:$(urlencode "${PASSWD}")@$host:${domjudge_DBPORT}/$db"
 	fi
 
 	if [ -n "$DATABASE_URL" ]; then
@@ -216,8 +241,8 @@ create_db_users()
 	# in etc/domserver-config.php updated after installation.
 	echo "CREATE DATABASE IF NOT EXISTS \`$DBNAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-	echo "CREATE USER IF NOT EXISTS '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
-	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER'@'localhost';"
+	echo "CREATE USER IF NOT EXISTS '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
+	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER'@'%';"
 
 	echo "FLUSH PRIVILEGES;"
 	) | mysql
@@ -228,7 +253,7 @@ remove_db_users()
 {
 	(
 	echo "DROP DATABASE IF EXISTS \`$DBNAME\`;"
-	echo "DROP USER IF EXISTS '$domjudge_DBUSER'@'localhost';"
+	echo "DROP USER IF EXISTS '$domjudge_DBUSER'@'%';"
 	echo "FLUSH PRIVILEGES;"
 	) | mysql -f
 	verbose "DOMjudge database and user(s) removed."
@@ -236,18 +261,17 @@ remove_db_users()
 
 update_password()
 {
-	read_dbpasswords
 	(
-    echo "ALTER USER '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+    echo "ALTER USER '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
 	echo "FLUSH PRIVILEGES;"
 	) | mysql
-    verbose "ALTER USER '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+    verbose "ALTER USER '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
 	verbose "Database user password updated from credentials file."
 }
 
 install_examples()
 {
-	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-example-data
+	symfony_console domjudge:load-example-data
 	"$EXAMPLEPROBDIR"/generate-contest-yaml
 	( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
 }
@@ -321,8 +345,8 @@ install-loadtest)
 	read_dbpasswords
 	create_db_users
 	symfony_console doctrine:migrations:migrate -n
-	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
-	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-gatling-data
+	symfony_console domjudge:load-default-data
+	symfony_console domjudge:load-gatling-data
 	;;
 
 create-db-users)
@@ -331,6 +355,7 @@ create-db-users)
 	;;
 
 update-password)
+	read_dbpasswords
 	update_password
 	;;
 
@@ -338,7 +363,7 @@ bare-install|install)
 	read_dbpasswords
 	create_db_users
 	symfony_console doctrine:migrations:migrate -n
-	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
+	symfony_console domjudge:load-default-data
 	if [ "$1" = "install" ]; then
 		install_examples
 		verbose "SQL structure and default/example data installed."
@@ -356,15 +381,14 @@ upgrade)
 		# shellcheck disable=SC2016,SC2028
 		echo 'INSERT INTO `doctrine_migration_versions`
 			(version, executed_at, execution_time)
-			SELECT concat("DoctrineMigrations\\\\Version", version), executed_at, 1
+			SELECT concat("DoctrineMigrations\\Version", version), executed_at, 1
 			FROM migration_versions;' | mysql "$DBNAME"
 		echo "DROP TABLE \`migration_versions\`" | mysql "$DBNAME"
 	fi
 
 	symfony_console doctrine:migrations:migrate -n
-	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
-
 	symfony_console domjudge:refresh-cache
+	symfony_console domjudge:load-default-data
 	verbose "DOMjudge database upgrade completed."
 	;;
 
