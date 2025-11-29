@@ -1547,7 +1547,8 @@ class DOMJudgeService
         $assetRegex = '|/CHANGE_ME/([/a-z0-9_\-\.]*)(\??[/a-z0-9_\-\.=]*)|i';
         preg_match_all($assetRegex, $contestPage, $assetMatches);
         $contestPage = preg_replace($assetRegex, '$1$2', $contestPage);
-        $contestPage = str_replace('/public/submissions-data.json', 'submissions-data.json', $contestPage);
+        $contestPage = preg_replace('|data-submissions-url="[^"]*/public/submissions-data\.json"|',
+            'data-submissions-url="submissions-data.json"', $contestPage);
 
         $zip = new ZipArchive();
         if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "contest-"))) {
