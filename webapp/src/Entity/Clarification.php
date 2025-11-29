@@ -40,8 +40,7 @@ class Clarification extends BaseApiEntity implements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Clarification ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('clarid')]
-    #[Serializer\Groups([ARC::GROUP_RESTRICTED_NONSTRICT])]
+    #[Serializer\Exclude]
     protected int $clarid;
 
     #[ORM\Column(

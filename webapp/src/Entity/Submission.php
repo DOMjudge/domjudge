@@ -45,8 +45,7 @@ class Submission extends BaseApiEntity implements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Submission ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('submitid')]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\Exclude]
     protected int $submitid;
 
     #[ORM\Column(

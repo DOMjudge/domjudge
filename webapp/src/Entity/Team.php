@@ -39,8 +39,7 @@ class Team extends BaseApiEntity implements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Team ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('teamid')]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\Exclude]
     protected ?int $teamid = null;
 
     #[ORM\Column(
