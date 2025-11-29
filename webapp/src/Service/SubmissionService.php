@@ -89,7 +89,7 @@ class SubmissionService
             ->join('s.contest_problem', 'cp')
             ->join('s.language', 'l')
             ->andWhere('s.contest IN (:contests)')
-            ->setParameter('contests', array_keys($contests))
+            ->setParameter('contests', $contests)
             ->orderBy('s.submittime', 'DESC')
             ->addOrderBy('s.submitid', 'DESC');
 
