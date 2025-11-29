@@ -308,7 +308,8 @@ class TeamController extends AbstractRestController
             ->leftJoin('t.category', 'tc')
             ->leftJoin('t.contests', 'c')
             ->leftJoin('tc.contests', 'cc')
-            ->select('t, ta');
+            ->select('t, ta')
+            ->andWhere('t.enabled = 1');
 
         if ($request->query->has('category')) {
             $queryBuilder
