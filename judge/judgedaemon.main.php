@@ -624,7 +624,7 @@ class JudgeDaemon
 
     private function judgingDirectory(string $workdirpath, array $judgeTask): string
     {
-        if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_INT) === false ||
+        if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => '/^[a-zA-Z0-9_.-]+$/']]) === false ||
             filter_var($judgeTask['jobid'], FILTER_VALIDATE_INT) === false) {
             error("Malformed data returned in judgeTask IDs: " . var_export($judgeTask, true));
         }
@@ -1289,7 +1289,7 @@ class JudgeDaemon
 
             // Revoke readablity for domjudge-run user to this workdir.
             chmod($workdir, 0700);
-            logmsg(LOG_NOTICE, "Judging s$judgeTask[submitid], task $judgeTask[judgetaskid]: compile error");
+            logmsg(LOG_NOTICE, "Judging $judgeTask[submitid], task $judgeTask[judgetaskid]: compile error");
             return false;
         }
 
@@ -1353,7 +1353,7 @@ class JudgeDaemon
         // What does the exitcode mean?
         if (!isset($this->EXITCODES[$retval])) {
             alert('error');
-            $description = "Unknown exitcode from compile.sh for s$judgeTask[submitid]: $retval";
+            $description = "Unknown exitcode from compile.sh for $judgeTask[submitid]: $retval";
             logmsg(LOG_ERR, $description);
             $this->disable('compile_script', 'compile_script_id', $judgeTask['compile_script_id'], $description, $judgeTask['judgetaskid'], $compile_output);
 
@@ -1568,7 +1568,7 @@ class JudgeDaemon
             // What does the exitcode mean?
             if (!isset($this->EXITCODES[$retval])) {
                 alert('error');
-                error("Unknown exitcode ($retval) from testcase_run.sh for s$judgeTask[submitid]");
+                error("Unknown exitcode ($retval) from testcase_run.sh for $judgeTask[submitid]");
             }
             $result = $this->EXITCODES[$retval];
 

@@ -114,7 +114,7 @@ class JudgehostController extends AbstractFOSRestController
      * Add a new judgehost to the list of judgehosts.
      * Also restarts (and returns) unfinished judgings.
      *
-     * @return array<array{jobid: int, submitid: int}>
+     * @return array<array{jobid: int, submitid: string}>
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_JUDGEHOST')]
@@ -127,7 +127,7 @@ class JudgehostController extends AbstractFOSRestController
             items: new OA\Items(
                 properties: [
                     new OA\Property(property: 'jobid', type: 'integer'),
-                    new OA\Property(property: 'submitid', type: 'integer'),
+                    new OA\Property(property: 'submitid', type: 'string'),
                 ],
                 type: 'object'
             )
@@ -188,7 +188,7 @@ class JudgehostController extends AbstractFOSRestController
 
         return array_map(fn(Judging $judging) => [
             'jobid' => $judging->getJudgingid(),
-            'submitid' => $judging->getSubmission()->getSubmitid(),
+            'submitid' => $judging->getSubmission()->getExternalid(),
         ], $judgings);
     }
 
@@ -460,8 +460,8 @@ class JudgehostController extends AbstractFOSRestController
                     $problem    = $submission->getProblem();
                     $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
 
-                    $message = sprintf("submission %d, judging %d: compiler-error",
-                                       $submission->getSubmitid(), $judging->getJudgingid());
+                    $message = sprintf("submission %s, judging %d: compiler-error",
+                                       $submission->getExternalid(), $judging->getJudgingid());
                     $this->dj->alert('reject', $message);
                 });
             }
@@ -1119,7 +1119,7 @@ class JudgehostController extends AbstractFOSRestController
                 // this means that these alert messages should be treated as
                 // confidential information.
                 $msg = sprintf("submission %s, judging %s: %s",
-                               $submission->getSubmitid(), $judging->getJudgingid(), $result);
+                               $submission->getExternalid(), $judging->getJudgingid(), $result);
                 $this->dj->alert($result === 'correct' ? 'accept' : 'reject', $msg);
 
                 // Potentially send a balloon, i.e. if no verification required (case of verification required is
@@ -1224,7 +1224,7 @@ class JudgehostController extends AbstractFOSRestController
      * @return JudgehostFile[]
      */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
-    #[Rest\Get('/get_files/{type}/{id<\d+>}')]
+    #[Rest\Get('/get_files/{type}/{id}')]
     #[OA\Response(
         response: 200,
         description: 'The files for the submission, testcase or script.',
@@ -1271,7 +1271,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $submission = $this->em->getRepository(Submission::class)
-            ->findOneBy(['submitid' => $judgeTask->getSubmitid()]);
+            ->findByExternalId($judgeTask->getSubmitid());
         if (!$submission) {
             throw new HttpException(500, 'Unknown submission with submitid ' . $judgeTask->getSubmitid());
         }
@@ -1335,7 +1335,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $submission = $this->em->getRepository(Submission::class)
-            ->findOneBy(['submitid' => $judgeTask->getSubmitid()]);
+            ->findByExternalId($judgeTask->getSubmitid());
         if (!$submission) {
             throw new BadRequestHttpException('Unknown submission with submitid ' . $judgeTask->getSubmitid());
         }
@@ -1419,7 +1419,8 @@ class JudgehostController extends AbstractFOSRestController
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(SubmissionFile::class, 'f')
             ->select('f')
-            ->andWhere('f.submission = :submitid')
+            ->join('f.submission', 's')
+            ->andWhere('s.externalid = :submitid')
             ->setParameter('submitid', $id)
             ->orderBy('f.ranknumber');
 
@@ -1837,7 +1838,7 @@ class JudgehostController extends AbstractFOSRestController
                 ->getQuery()
                 ->execute();
             $this->em->flush();
-            $this->dj->auditlog('queuetask', $jobId, 'deleted');
+            $this->dj->auditlog('queuetask', (string)$jobId, 'deleted');
         } else {
             return $this->serializeJudgeTasks($judgetasks, $judgehost);
         }
