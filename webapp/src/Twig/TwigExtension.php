@@ -861,7 +861,7 @@ JS;
      *      renamedFrom?: string
      * }> $files */
     #[AsTwigFunction('showDiff', isSafe: ['html'])]
-    public function showDiff(string $editorId, string $diffId, int $submissionId, string $filename, array $files): string
+    public function showDiff(string $editorId, string $diffId, string $submissionId, string $filename, array $files): string
     {
         $editor = <<<HTML
 <div class="editor" id="$diffId"></div>
@@ -869,7 +869,7 @@ JS;
 $(function() {
     const editorId = '%s';
     const diffId = '%s';
-    const submissionId = %d;
+    const submissionId = '%s';
     const models = %s;
     require(['vs/editor/editor.main'], () => {
         initDiffEditorTab(editorId, diffId, submissionId, models);
