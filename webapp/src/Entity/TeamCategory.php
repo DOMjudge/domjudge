@@ -39,8 +39,7 @@ class TeamCategory extends BaseApiEntity implements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Team category ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('categoryid')]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\Exclude]
     protected ?int $categoryid = null;
 
     #[ORM\Column(

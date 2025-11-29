@@ -57,7 +57,7 @@ class Contest extends BaseApiEntity implements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Contest ID', 'unsigned' => true])]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\Exclude]
     protected ?int $cid = null;
 
     #[ORM\Column(

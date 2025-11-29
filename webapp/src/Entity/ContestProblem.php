@@ -27,11 +27,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\Index(columns: ['cid'], name: 'cid')]
 #[ORM\Index(columns: ['probid'], name: 'probid')]
 #[ORM\UniqueConstraint(name: 'shortname', columns: ['cid', 'shortname'], options: ['lengths' => [null, 190]])]
-#[Serializer\VirtualProperty(
-    name: 'probid',
-    exp: 'object.getProblem().getProbid()',
-    options: [new Serializer\Groups([ARC::GROUP_NONSTRICT])]
-)]
 
 #[Serializer\VirtualProperty(
     name: 'short_name',

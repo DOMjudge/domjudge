@@ -43,8 +43,7 @@ class TeamAffiliation extends BaseApiEntity implements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Team affiliation ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('affilid')]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\Exclude]
     protected ?int $affilid = null;
 
     #[ORM\Column(
