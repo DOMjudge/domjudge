@@ -45,6 +45,7 @@ class SubmissionsFilterType extends AbstractType
             "class" => Problem::class,
             "required" => false,
             "choice_label" => "name",
+            "choice_value" => "externalid",
             "choices" => $problems,
             "attr" => ["data-filter-field" => "problem-id"],
         ]);
@@ -54,6 +55,7 @@ class SubmissionsFilterType extends AbstractType
             "class" => Language::class,
             "required" => false,
             "choice_label" => "name",
+            "choice_value" => "externalid",
             "query_builder" => fn(EntityRepository $er) => $er
                 ->createQueryBuilder("l")
                 ->where("l.allowSubmit = 1")
@@ -66,6 +68,7 @@ class SubmissionsFilterType extends AbstractType
             "class" => TeamCategory::class,
             "required" => false,
             "choice_label" => "name",
+            "choice_value" => "externalid",
             "query_builder" => fn(EntityRepository $er) => $er
                 ->createQueryBuilder("tc")
                 ->orderBy("tc.name"),
@@ -77,6 +80,7 @@ class SubmissionsFilterType extends AbstractType
             "class" => TeamAffiliation::class,
             "required" => false,
             "choice_label" => "name",
+            "choice_value" => "externalid",
             "query_builder" => fn(EntityRepository $er) => $er
                 ->createQueryBuilder("ta")
                 ->orderBy("ta.name"),
@@ -114,6 +118,7 @@ class SubmissionsFilterType extends AbstractType
             "class" => Team::class,
             "required" => false,
             "choice_label" => "name",
+            "choice_value" => "externalid",
             "choices" => $teams,
             "attr" => ["data-filter-field" => "team-id"],
         ]);

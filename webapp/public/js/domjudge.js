@@ -1403,7 +1403,7 @@ function initDiffEditor(editorId) {
         'onDiffSelectChange': (f) => {
             select.change((e) => {
                 const noDiff = e.target.value === "";
-                const submitId = parseInt(e.target.value);
+                const submitId = e.target.value;
                 f(submitId, noDiff);
             });
         }
@@ -1432,10 +1432,10 @@ function initDiffEditor(editorId) {
             diffTitle.style.display = 'inline';
             diffTag.innerText = selected.dataset.tag;
             diffLink.href = selected.dataset.url;
-            diffLink.innerText = `s${submitId}`;
+            diffLink.innerText = submitId;
         }
     };
-    updateSelect(parseInt(select[0].value), select[0].value === "");
+    updateSelect(select[0].value, select[0].value === "");
     editor.onDiffSelectChange(updateSelect);
 }
 
@@ -1559,7 +1559,7 @@ function initDiffEditorTab(editorId, diffId, submissionId, models) {
             return;
         }
 
-        const submitId = parseInt(editors[editorId].getDiffSelection());
+        const submitId = editors[editorId].getDiffSelection();
         const noDiff = editors[editorId].getDiffSelection() === "";
         if (noDiff) {
             setIcon('file');

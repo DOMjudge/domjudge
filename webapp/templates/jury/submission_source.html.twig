@@ -1,25 +1,25 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Source s{{ submission.submitid }} - {{ parent() }}{% endblock %}
+{% block title %}Source {{ submission.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
 {% endblock %}
 
 {% block content %}
-    {% set editor_id = "diffw" ~ submission.submitid %}
+    {% set editor_id = "diffw" ~ submission.externalid %}
     <h1>
         Source code for submission
-        <a href="{{ path('jury_submission', {submitId: submission.submitid}) }}">s{{ submission.submitid }}</a>
+        <a href="{{ path('jury_submission', {submitId: submission.externalid}) }}">{{ submission.externalid }}</a>
         {%- if submission.originalSubmission %}
             (resubmit of
-            <a href="{{ path('jury_submission', {submitId: submission.originalSubmission.submitid}) }}">s{{ submission.originalSubmission.submitid }}</a>)
+            <a href="{{ path('jury_submission', {submitId: submission.originalSubmission.externalid}) }}">{{ submission.originalSubmission.externalid }}</a>)
         {%- endif %}
         {% if submission.resubmissions is not empty %}
             (resubmitted as
             {%- for resubmission in submission.resubmissions %}
-                <a href="{{ path('jury_submission', {submitId: resubmission.originalSubmission.submitid}) }}">s{{ resubmission.submitid }}</a>
+                <a href="{{ path('jury_submission', {submitId: resubmission.originalSubmission.externalid}) }}">{{ resubmission.externalid }}</a>
                 {%- if not loop.last -%},{%- endif -%}
             {%- endfor -%}
             )

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
 use App\DataTransferObject\FileWithName;
+use App\Repository\SubmissionRepository;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -16,7 +17,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * All incoming submissions.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: SubmissionRepository::class)]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
