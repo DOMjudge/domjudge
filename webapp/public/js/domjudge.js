@@ -1308,7 +1308,7 @@ const disableButton = (btn) => {
     btn.ariaDisabled=true;
 }
 
-const editors = [];
+const editors = {};
 function initDiffEditor(editorId) {
     const wrapper = $(`#${editorId}-wrapper`);
 
