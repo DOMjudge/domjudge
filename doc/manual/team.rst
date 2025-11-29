@@ -23,7 +23,7 @@ become of importance when you run into problems.
 .. admonition:: Summary
 
    The web interface of DOMjudge can be found at
-   |baseurlteam|. See the two figures on the next page for
+   |baseurlteam|. See the three figures on the next pages for
    an impression.
 
    Solutions have to read all input from 'standard in' and write all
@@ -54,6 +54,14 @@ become of importance when you run into problems.
    requests and replies is done through the web interface at
    |baseurlteam|.
 
+   Use the problemset page to get:
+
+     - get all attachments such as 'testing tools' for each problem,
+     - view indicators for problem difficulty (submission and acceptance rates) across
+       contest intervals (hover over the boxes for exact numbers),
+     - get the problem statement and clarifications on those statements
+     - see the time & memory limits.
+
 
 .. raw:: pdf
 
@@ -75,6 +83,11 @@ Overview of the interface
    :width: 80%
 
    The scoreboard webpage.
+
+.. figure:: team-problemset.png
+   :width: 80%
+
+   The problemset webpage.
 
 .. raw:: pdf
 
@@ -128,6 +141,16 @@ an error message otherwise.
 
 Web interface
 `````````````
+Judges may distribute the digital versions of the problems either individually
+per or as full problemset through DOMjudge. If the judges issue a clarification
+for a problem, it will be sent out and displayed in the corresponding problem card.
+The judges may provide additional files for a problem, such as extra inputs,
+testing tools, or other relevant attachments. You can use the problemset page to
+help decide which problem to solve next. DOMjudge shows the live contest progress,
+including the number of successful and failed submissions for each problem. Use the
+info from the problemset page and the scoreboard to gauge problem difficulty. A good
+rule of thumb is: Problems solved often and early in the contest are likely easier.
+Problems solved infrequently or only later in the contest are typically more difficult.
 
 Solutions can be submitted from the web interface at |baseurlteam|.
 Click the green *Submit* button at the menu bar on every page.
@@ -297,7 +320,7 @@ This will be documented in the problem description.
 Restrictions
 ````````````
 
-Submissions are run in a sandbox to prevent abuse, keep the jury system
+Submissions are run in a sandbox to prevent abuse, keep the judging system
 stable and give everyone clear and equal environments. There
 are some restrictions to which all submissions are subjected:
 
@@ -340,6 +363,10 @@ number of processes
 
     PageBreak
 
+.. raw:: latex
+
+    \clearpage
+
 .. _codeexamples:
 
 Code examples
@@ -375,10 +402,6 @@ for different programming languages.
    :language: c
    :caption: *A solution in C*
 
-.. raw:: latex
-
-   \clearpage
-
 .. literalinclude:: ../examples/example.cc
    :language: cpp
    :caption: *A solution in C++*
@@ -395,17 +418,21 @@ for different programming languages.
    :language: python
    :caption: *A solution in Python*
 
-.. literalinclude:: ../examples/example.cs
+..
+  .. literalinclude:: ../examples/example.cs
    :language: csharp
    :caption: *A solution in C#*
 
-.. literalinclude:: ../examples/example.pas
+..
+  .. literalinclude:: ../examples/example.pas
    :language: pas
    :caption: *A solution in Pascal*
 
-.. literalinclude:: ../examples/example.hs
+..
+  .. literalinclude:: ../examples/example.hs
    :language: hs
    :caption: *A solution in Haskell*
+
 
 Improvements to DOMjudge
 ------------------------
