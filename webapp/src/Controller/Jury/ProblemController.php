@@ -503,6 +503,10 @@ class ProblemController extends BaseController
 
         $data = [
             'problem' => $problem,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                Problem::class,
+                $problem->getExternalid(),
+            ),
             'problemAttachmentForm' => $problemAttachmentForm->createView(),
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,

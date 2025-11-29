@@ -352,6 +352,10 @@ class ContestController extends BaseController
 
         return $this->render('jury/contest.html.twig', [
             'contest' => $contest,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                Contest::class,
+                $contest->getExternalid(),
+            ),
             'allowRemovedIntervals' => $this->getParameter('removed_intervals'),
             'removedIntervalForm' => $form,
             'removedIntervals' => $removedIntervals,

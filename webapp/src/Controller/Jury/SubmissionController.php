@@ -568,6 +568,12 @@ class SubmissionController extends BaseController
 
         $twigData = [
             'submission' => $submission,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                Submission::class,
+                $submission->getExternalid(),
+                orderBy: ['e.submittime' => 'ASC', 'e.submitid' => 'ASC'],
+                filterOnContest: true,
+            ),
             'lastSubmission' => $lastSubmission,
             'judgings' => $judgings,
             'maxRunTimes' => $maxRunTimes,
@@ -773,8 +779,7 @@ class SubmissionController extends BaseController
         #[MapEntity(mapping: ['contest' => 'externalid'])]
         Contest $contest,
         JudgingRun $run,
-    ): StreamedResponse
-    {
+    ): StreamedResponse {
         if ($run->getJudging()->getSubmission()->getSubmitid() !== $submission->getSubmitid() || $submission->getContest()->getCid() !== $contest->getCid()) {
             throw new BadRequestHttpException('Integrity problem while fetching team output.');
         }

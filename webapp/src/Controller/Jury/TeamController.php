@@ -253,6 +253,10 @@ class TeamController extends BaseController
                 'ajax' => true,
             ],
             'team' => $team,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                Team::class,
+                $team->getExternalid(),
+            ),
             'showAffiliations' => (bool)$this->config->get('show_affiliations'),
             'showFlags' => (bool)$this->config->get('show_flags'),
             'showContest' => count($this->dj->getCurrentContests()) > 1,

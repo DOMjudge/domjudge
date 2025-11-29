@@ -392,6 +392,12 @@ class RejudgingController extends BaseController
 
         $data = [
             'rejudging' => $rejudging,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                Rejudging::class,
+                $rejudging->getRejudgingid(),
+                'rejudgingid',
+                ['e.rejudgingid' => 'ASC'],
+            ),
             'todo' => $todo,
             'done' => $done,
             'verdicts' => $verdicts,
