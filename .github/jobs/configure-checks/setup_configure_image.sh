@@ -10,6 +10,8 @@ case $distro_id in
         dnf install pkg-config make bats autoconf automake util-linux -y ;;
     *)
         apt-get update; apt-get full-upgrade -y
+        # Install g++-12 to make sure we can use -std=c++20
+        version=$(g++ -dumpversion 2>/dev/null | awk -F'.' '{print $1}' 2>/dev/null || echo 0); [ "${version}" -lt 12 ] && apt install -y g++-12
         apt-get install pkg-config make bats autoconf -y ;;
 esac
 
