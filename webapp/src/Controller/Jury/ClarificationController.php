@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Controller\BaseController;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\Problem;
@@ -20,19 +21,23 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_CLARIFICATION_RW')]
 #[Route(path: '/jury/clarifications')]
-class ClarificationController extends AbstractController
+class ClarificationController extends BaseController
 {
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
-        protected readonly EventLogService $eventLogService
-    ) {}
+        EventLogService $eventLogService,
+        KernelInterface $kernel,
+    ) {
+        parent::__construct($em, $eventLogService, $dj, $kernel);
+    }
 
     #[Route(path: '', name: 'jury_clarifications')]
     public function indexAction(
@@ -236,6 +241,11 @@ class ClarificationController extends AbstractController
             ->getQuery()
             ->getSingleResult()['jury_member'];
 
+        $parameters['previousNext'] = $this->getPreviousAndNextObjectIds(
+            Clarification::class,
+            $clarification->getExternalid(),
+        );
+
         return $this->render('jury/clarification.html.twig', $parameters);
     }
 
@@ -429,7 +439,7 @@ class ClarificationController extends AbstractController
 
         $clarId = $clarification->getClarId();
         $this->dj->auditlog('clarification', $clarification->getExternalid(), 'added', null, null, $contest->getExternalid());
-        $this->eventLogService->log('clarification', $clarId, 'create', $contest->getCid());
+        $this->eventLog->log('clarification', $clarId, 'create', $contest->getCid());
         // Reload clarification to make sure we have a fresh one after calling the event log service.
         $clarification = $this->em->getRepository(Clarification::class)->find($clarId);
 

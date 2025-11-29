@@ -191,6 +191,11 @@ class UserController extends BaseController
 
         return $this->render('jury/user.html.twig', [
             'user' => $user,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                User::class,
+                $user->getExternalid(),
+                orderBy: ['e.username' => 'ASC'],
+            ),
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
