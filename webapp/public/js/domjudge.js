@@ -999,14 +999,16 @@ function initializeKeyboardShortcuts() {
             var parts = window.location.href.split('/');
             var lastPart = parts[parts.length - 1];
             var params = lastPart.split('?');
-            var currentNumber = parseInt(params[0]);
-            if (isNaN(currentNumber)) {
-                return;
-            }
             if (key === 'j') {
-                parts[parts.length - 1] = currentNumber + 1;
+                if (!window.nextEntity) {
+                    return;
+                }
+                parts[parts.length - 1] = window.nextEntity;
             } else if (key === 'k') {
-                parts[parts.length - 1] = currentNumber - 1;
+                if (!window.previousEntity) {
+                    return;
+                }
+                parts[parts.length - 1] = window.previousEntity;
             }
             if (params.length > 1) {
                 parts[parts.length - 1] += '?' + params[1];
@@ -1040,8 +1042,12 @@ function initializeKeyboardShortcuts() {
                     sequence = '';
                     return;
                 }
-                if (e.key >= '0' && e.key <= '9') {
+                if (/^[a-zA-Z0-9_.-]$/.test(e.key)) {
                     sequence += e.key;
+                    box.text(type + sequence);
+                } else if (e.key === 'Backspace') {
+                    e.preventDefault();
+                    sequence = sequence.slice(0, -1);
                     box.text(type + sequence);
                 } else {
                     ignore = false;

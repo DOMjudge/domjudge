@@ -86,8 +86,7 @@ class AnalysisController extends AbstractController
     public function teamAction(
         #[MapEntity(mapping: ['team' => 'externalid'])]
         Team $team,
-    ): Response
-    {
+    ): Response {
         $contest = $this->dj->getCurrentContest();
 
         if ($contest === null) {

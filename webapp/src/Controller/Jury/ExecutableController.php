@@ -359,6 +359,12 @@ class ExecutableController extends BaseController
             'uploadForm' => $uploadForm->createView(),
             'selected' => $index,
             'executable' => $executable,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                Executable::class,
+                $executable->getExecid(),
+                'execid',
+                ['e.execid' => 'ASC'],
+            ),
             'default_compare' => (string)$this->config->get('default_compare'),
             'default_run' => (string)$this->config->get('default_run'),
             'default_full_debug' => (string)$this->config->get('default_full_debug'),

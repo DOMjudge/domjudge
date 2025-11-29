@@ -198,6 +198,10 @@ class LanguageController extends BaseController
 
         $data = [
             'language' => $language,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                Language::class,
+                $language->getExternalid(),
+            ),
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
