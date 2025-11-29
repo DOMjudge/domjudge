@@ -60,7 +60,7 @@ def warn_user(msg: str) -> None:
 
 
 def usage(msg: str) -> NoReturn:
-    logging.error(f'error: {msg}')
+    logging.error(f'\n\033[1;31mERROR: {msg}\033[0m\n')
     print(f"Type '{sys.argv[0]} --help' to get help.")
     exit(1)
 
