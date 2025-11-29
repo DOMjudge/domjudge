@@ -29,6 +29,25 @@ body.static {
     padding-top: 1rem;
 }
 
+/* Some browsers have a rounding error in flex, so waste 1px to prevent scrollbars. */
+.fill-height {
+    box-sizing: border-box;
+    display: flex;
+    min-height: calc(100vh - 1px);
+}
+
+.flex-pass,
+.flex-pass > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Override the bootstrap active tab to be flex instead of block by a more specific selector. */
+.fill-height .flex-pass.tab-pane.active {
+  display: flex;
+}
+
 /* menu */
 #menuDefault ul li.nav-item {
     white-space: nowrap;
@@ -753,7 +772,9 @@ blockquote {
 }
 
 .editor {
-    width: 100%;
-    height: 80vh;
     border: 1px solid grey;
+    flex: 1;
+    height: 0;
+    min-height: 100px; /* Prefer a double scrollbar over not displaying code at all */
+    width: 100%;
 }

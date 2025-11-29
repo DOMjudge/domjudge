@@ -1,4 +1,4 @@
-<div id="{{ editor_id }}-wrapper">
+<div id="{{ editor_id }}-wrapper" class="flex-pass">
     {# Mark the first tab that is shown as active. #}
     {% set extra_css_classes = "active" %}
     <ul class="nav nav-tabs source-tab-nav align-items-end">
@@ -52,10 +52,10 @@
     });
     </script>
     {% set extra_css_classes = "show active" %}
-    <div class="tab-content source-tab">
+    <div class="tab-content source-tab flex-pass">
         {%- for name, name_files in files %}
             {% set diff_id = "diff-" ~ name %}
-            <div class="tab-pane fade {{ extra_css_classes }}" id="{{ diff_id }}-tab" role="tabpanel">
+            <div class="tab-pane fade flex-pass {{ extra_css_classes }}" id="{{ diff_id }}-tab" role="tabpanel">
                 {{ showDiff(editor_id, diff_id, submission.submitid, name, name_files) }}
             </div>
             {% set extra_css_classes = "" %}
