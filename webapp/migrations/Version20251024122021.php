@@ -23,7 +23,7 @@ final class Version20251024122021 extends AbstractMigration
         // - First we drop the foreign keys from tables referencing langid. We also drop compound
         // - Then we add a temporary integer langid column to all these tables, since we can't
         //   change the langid column itself, because MySQL will try to convert the strings to
-        //   integers and fail. We set the langid column in the langauge table to auto increment,
+        //   integers and fail. We set the langid column in the language table to auto increment,
         //   so it's filled by MySQL.
         // - Now we copy the langid_int values to other tables.
         // - Then we drop the old langid columns and drop any (compound) primary keys that use it.
