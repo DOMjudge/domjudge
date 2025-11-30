@@ -21,8 +21,8 @@ final class Version20250309122806 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE rankcache ADD sort_key_public TEXT DEFAULT \'\' NOT NULL COMMENT \'Opaque sort key for public audience.\', ADD sort_key_restricted TEXT DEFAULT \'\' NOT NULL COMMENT \'Opaque sort key for restricted audience.\'');
-        $this->addSql('CREATE INDEX sortKeyPublic ON rankcache (sort_key_public)');
-        $this->addSql('CREATE INDEX sortKeyRestricted ON rankcache (sort_key_restricted)');
+        $this->addSql('CREATE INDEX sortKeyPublic ON rankcache (sort_key_public(768))');
+        $this->addSql('CREATE INDEX sortKeyRestricted ON rankcache (sort_key_restricted(768))');
     }
 
     public function down(Schema $schema): void

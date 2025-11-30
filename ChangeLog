@@ -1,5 +1,9 @@
 DOMjudge Programming Contest Judging System
 
+Version 9.0.1DEV
+---------------------------
+ - Backport adding key size to rankcache table
+
 Version 9.0.0 - 5 October 2025
 ---------------------------
  - API and integration:
