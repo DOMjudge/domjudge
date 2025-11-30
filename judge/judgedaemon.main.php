@@ -857,7 +857,7 @@ class JudgeDaemon
         return trim(ob_get_clean());
     }
 
-    private function runCommandSafe(array $command_parts, & $retval = DONT_CARE, $log_nonzero_exitcode = true): bool
+    private function runCommandSafe(array $command_parts, &$retval = DONT_CARE, $log_nonzero_exitcode = true): bool
     {
         if (empty($command_parts)) {
             logmsg(LOG_WARNING, "Need at least the command that should be called.");
@@ -869,7 +869,7 @@ class JudgeDaemon
 
         logmsg(LOG_DEBUG, "Executing command: $command");
         system($command, $retval_local);
-        if ($retval !== DONT_CARE) $retval = $retval_local;
+        if ($retval !== DONT_CARE) $retval = $retval_local; // phpcs:ignore Generic.ControlStructures.InlineControlStructure.NotAllowed
 
         if ($retval_local !== 0) {
             if ($log_nonzero_exitcode) {
@@ -888,8 +888,7 @@ class JudgeDaemon
         string $hash,
         int    $judgeTaskId,
         bool   $combined_run_compare = false
-    ): array
-    {
+    ): array {
         [$execrunpath, $error, $buildlogpath] = $this->fetchExecutableInternal($workdirpath, $type, $execid, $hash, $combined_run_compare);
         if (isset($error)) {
             $extra_log = null;
@@ -917,8 +916,7 @@ class JudgeDaemon
         string $execid,
         string $hash,
         bool   $combined_run_compare = false
-    ): array
-    {
+    ): array {
         $execdir = join('/', [
             $workdirpath,
             'executable',
@@ -1123,12 +1121,11 @@ class JudgeDaemon
     private function disable(
         string  $kind,
         string  $idcolumn,
-                $id,
+        mixed   $id,
         string  $description,
         ?int    $judgeTaskId = null,
         ?string $extra_log = null
-    ): void
-    {
+    ): void {
         $disabled = dj_json_encode(['kind' => $kind, $idcolumn => $id]);
         $judgehostlog = $this->readJudgehostLog();
         if (isset($extra_log)) {
@@ -1197,8 +1194,7 @@ class JudgeDaemon
         array   $compile_config,
         ?string $daemonid,
         int     $output_storage_limit
-    ): bool
-    {
+    ): bool {
         // Reuse compilation if it already exists.
         if (file_exists("$workdir/compile.success")) {
             return true;
