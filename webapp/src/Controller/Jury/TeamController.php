@@ -218,7 +218,7 @@ class TeamController extends BaseController
                 'data' => $teamdata,
                 'actions' => $teamactions,
                 'link' => $this->generateUrl('jury_team', ['teamId' => $t->getExternalid()]),
-                'cssclass' => ($t->getCategory() ? ("category" . $t->getCategory()->getCategoryId()) : '') .
+                'cssclass' => ($t->getCategory() ? ("category" . $t->getCategory()->getExternalid()) : '') .
                     ($t->getEnabled() ? '' : ' disabled'),
             ];
         }

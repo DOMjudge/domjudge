@@ -85,8 +85,8 @@ class BalloonService
 
     /**
      * @return array<array{data: array{balloonid: int, time: string, problem: string, contestproblem: ContestProblem,
-     *                                 team: Team, teamid: int, location: string|null, affiliation: string|null,
-     *                                 affiliationid: int, category: string, categoryid: int, total: array<string, ContestProblem>,
+     *                                 team: Team, teamid: string, location: string|null, affiliation: string|null,
+     *                                 affiliationid: string, category: string, categoryid: string, total: array<string, ContestProblem>,
      *                                 done: bool}}>
     */
     public function collectBalloonTable(Contest $contest, bool $todo = false): array
