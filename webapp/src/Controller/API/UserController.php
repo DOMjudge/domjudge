@@ -362,7 +362,6 @@ class UserController extends AbstractRestController
         $user
             ->setUsername($addUser->username)
             ->setName($addUser->name)
-            ->setEmail($addUser->email)
             ->setIpAddress($addUser->ip)
             ->setPlainPassword($addUser->password)
             ->setEnabled($addUser->enabled ?? true);
