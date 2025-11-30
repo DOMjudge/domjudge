@@ -34,7 +34,7 @@ class Adminer extends \Adminer\Adminer
         return true;
     }
 
-    public function tableName($tableStatus): array|string
+    public function tableName($tableStatus): string
     {
         return h($tableStatus['Name']);
     }
@@ -44,10 +44,11 @@ class Adminer extends \Adminer\Adminer
         return 'domjudge';
     }
 
-    public function loginForm()
+    public function loginForm(): void
     {
-        $db = $this->getDatabaseCredentials()['db'];
+        ['db' => $db, 'user' => $user] = $this->getDatabaseCredentials();
         echo "<input type='hidden' value='server' name='auth[driver]'/>";
+        echo "<input type='hidden' value='$user' name='auth[username]'/>";
         echo "<input type='hidden' value='$db' name='auth[db]'/>";
         echo "<p><input type='submit' value='" . lang('Click to Login') . "'>\n";
     }
