@@ -154,7 +154,7 @@ if [ "$DISTRO" = "Debian" ] && [ -z "$RELEASE" ]; then
     echo "Defaulting to '$RELEASE' release for Debian"
 fi
 if [ "$DISTRO" = "Ubuntu" ] && [ -z "$RELEASE" ]; then
-    RELEASE="jammy"
+    RELEASE="noble"
     echo "Defaulting to '$RELEASE' release for Ubuntu"
 fi
 
