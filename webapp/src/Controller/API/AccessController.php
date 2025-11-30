@@ -222,7 +222,6 @@ class AccessController extends AbstractApiController
                         'team',
                         'roles',
                         'userid',
-                        'email',
                         'last_ip',
                         'enabled',
                     ]

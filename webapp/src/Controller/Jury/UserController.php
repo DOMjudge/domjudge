@@ -64,7 +64,6 @@ class UserController extends BaseController
             'username'   => ['title' => 'username', 'sort' => true, 'default_sort' => true],
             'externalid' => ['title' => 'external ID', 'sort' => true],
             'name'       => ['title' => 'name', 'sort' => true],
-            'email'      => ['title' => 'email', 'sort' => true],
             'user_roles' => ['title' => 'roles', 'sort' => true],
             'teamid'     => ['title' => '', 'sort' => false, 'render' => 'entity_id_badge'],
             'team'       => ['title' => 'team', 'sort' => true],
