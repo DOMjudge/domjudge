@@ -13,7 +13,7 @@ use Symfony\Component\DomCrawler\Crawler;
 class ProblemControllerTest extends JuryControllerTestCase
 {
     protected static string  $baseUrl                  = '/jury/problems';
-    protected static array   $exampleEntries           = ['Hello World', 'default', 5, 3, 2, 1];
+    protected static array   $exampleEntries           = ['Hello World', 'default', 5, 'boolfind', 'fltcmp', 'hello'];
     protected static string  $shortTag                 = 'problem';
     protected static array   $deleteEntities           = ['Hello World','Float special compare test'];
     protected static string  $deleteEntityIdentifier   = 'name';
