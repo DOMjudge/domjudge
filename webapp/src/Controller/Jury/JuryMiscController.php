@@ -17,6 +17,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Utils\Utils;
+use Composer\InstalledVersions;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -361,7 +362,7 @@ class JuryMiscController extends BaseController
     #[IsGranted("ROLE_ADMIN")]
     public function adminer(
         #[Autowire('%domjudge.etcdir%')] string $etcDir,
-        #[Autowire('%kernel.project_dir%')] string $projectDir,
+        #[Autowire('%domjudge.vendordir%')] string $vendorDir,
         ConfigurationService $config
     ): Response {
         if (!$config->get('adminer_enabled')) {
@@ -371,9 +372,11 @@ class JuryMiscController extends BaseController
         // The adminer_object method needs this variable to know where to find the credentials
         $GLOBALS['etcDir'] = $etcDir;
 
+        $adminerVersion = ltrim(InstalledVersions::getPrettyVersion('vrana/adminer'), 'v');
+
         // Use output buffering since the streamed response doesn't work because Adminer needs the session
         ob_start();
-        include_once $projectDir . '/resources/adminer.php';
+        include_once "$vendorDir/vrana/adminer/adminer-$adminerVersion-mysql.php";
         $resp = ob_get_clean();
 
         return new Response($resp);

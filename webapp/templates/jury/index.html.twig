@@ -90,7 +90,7 @@
           <li><a href="{{ path('jury_refresh_cache') }}">Refresh scoreboard cache</a></li>
           <li><a href="{{ path('jury_auditlog') }}">Audit log</a></li>
           {% if adminer_enabled %}
-            <li><a href="{{ path('jury_adminer', {username: '', db: 'domjudge'}) }}">Adminer Database Editor</a></li>
+            <li><a href="{{ path('jury_adminer') }}">Adminer Database Editor</a></li>
           {% endif %}
         </ul>
       </div>

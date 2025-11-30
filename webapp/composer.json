@@ -101,7 +101,8 @@
 		"twig/extra-bundle": "^3.5",
 		"twig/markdown-extra": "^3.5",
 		"twig/string-extra": "^3.5",
-		"twig/twig": "^3.6"
+		"twig/twig": "^3.6",
+		"vrana/adminer": "^5.4"
 	},
 	"require-dev": {
 		"ext-dom": "*",
@@ -155,7 +156,8 @@
 	"scripts": {
 		"auto-scripts": {
 			"cache:clear": "symfony-cmd",
-			"assets:install %PUBLIC_DIR%": "symfony-cmd"
+			"assets:install %PUBLIC_DIR%": "symfony-cmd",
+			"adminer:compile": "symfony-cmd"
 		},
 		"post-install-cmd": [
 			"@auto-scripts"
