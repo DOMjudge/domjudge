@@ -36,16 +36,6 @@
                         <th>Full name</th>
                         <td>{{ user.name ?: '-' }}</td>
                     </tr>
-                    <tr>
-                        <th>Email</th>
-                        <td>
-                            {% if user.email %}
-                                <a href="mailto:{{ user.email }}">{{ user.email }}</a>
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                    </tr>
 
                     {{ _self.section_header('key', 'Authentication') }}
                     <tr>
