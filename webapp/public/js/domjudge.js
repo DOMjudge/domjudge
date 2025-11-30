@@ -1459,6 +1459,14 @@ function initDiffEditorTab(editorId, diffId, submissionId, models) {
     const navItem = document.getElementById(`${diffId}-link`);
     const isDeleted = !(submissionId in models);
 
+    // Set breakpoint to bootstrap's md, subtract the 2*1.5rem page padding, 4px borders,
+    // and 1px for difference in inclusion/exclusion of the breakpoint in monaco vs bootstrap.
+    const computedStyle = getComputedStyle(document.body)
+    const breakpointMd = parseInt(computedStyle.getPropertyValue('--bs-breakpoint-md'));
+    const rootPadding = parseInt(computedStyle.fontSize) * 3;
+    const borders = 4;
+    const breakpoint = breakpointMd - rootPadding + borders - 1;
+
     const diffEditor = monaco.editor.createDiffEditor(
         document.getElementById(diffId), {
         scrollbar: {
@@ -1470,6 +1478,8 @@ function initDiffEditorTab(editorId, diffId, submissionId, models) {
         automaticLayout: true,
         readOnly: true,
         theme: getCurrentEditorTheme(),
+        renderSideBySideInlineBreakpoint: breakpoint,
+        useInlineViewWhenSpaceIsLimited: true,
     });
 
     const updateMode = (diffMode) => {
