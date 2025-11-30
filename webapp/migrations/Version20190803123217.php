@@ -593,7 +593,6 @@ CREATE TABLE `user` (
     `userid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
     `username` varchar(255) NOT NULL COMMENT 'User login name',
     `name` varchar(255) NOT NULL COMMENT 'Name',
-    `email` varchar(255) DEFAULT NULL COMMENT 'Email address',
     `last_login` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of last successful login',
     `first_login` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of first login',
     `last_ip_address` varchar(255) DEFAULT NULL COMMENT 'Last IP address of successful login',
