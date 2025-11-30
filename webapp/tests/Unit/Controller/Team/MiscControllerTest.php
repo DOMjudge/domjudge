@@ -103,7 +103,7 @@ class MiscControllerTest extends BaseTestCase
 
                 $crawler = $this->client->submitForm('Print code', [
                     'print[code]' => $code,
-                    'print[langid]' => '12',
+                    'print[langid]' => 'kotlin',
                 ]);
 
                 static::assertSelectorTextContains('div.alert.alert-success',

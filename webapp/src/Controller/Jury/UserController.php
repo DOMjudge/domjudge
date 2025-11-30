@@ -403,7 +403,7 @@ class UserController extends BaseController
         return $this->deleteMultiple(
             $request,
             User::class,
-            'userid',
+            'externalid',
             'jury_users',
             'No users could be deleted (you cannot delete your own account).',
             fn(User $user) => $user->getUserid() !== $this->dj->getUser()->getUserid()
