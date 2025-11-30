@@ -10,7 +10,7 @@ jobs:
   debian-family:
     strategy:
       matrix:
-        version: [jammy, rolling]
+        version: [noble, rolling]
         os: [ubuntu]
         releaseBranch:
           - ${{ contains(github.ref, 'gh-readonly-queue') }}
