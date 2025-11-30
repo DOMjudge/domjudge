@@ -17,7 +17,7 @@ class LanguagesControllerTest extends JuryControllerTestCase
     protected static string  $shortTag                 = 'language';
     protected static array   $deleteEntities           = ['C++','C#','C','Kotlin'];
     protected static string  $deleteEntityIdentifier   = 'name';
-    protected static string  $getIDFunc                = 'getLangid';
+    protected static string  $getIDFunc                = 'getExternalid';
     protected static string  $className                = Language::class;
     protected static array   $DOM_elements             = ['h1' => ['Enabled languages', 'Disabled languages']];
     protected static ?string $addPlus                  = 'extensions';
@@ -94,7 +94,7 @@ class LanguagesControllerTest extends JuryControllerTestCase
         self::assertEquals(4, $judgeTaskQuery->getSingleScalarResult());
 
         // Now, disable the language.
-        $url = "/jury/languages/4/edit";
+        $url = "/jury/languages/c/edit";
         $this->verifyPageResponse('GET', $url, 200);
 
         $crawler = $this->getCurrentCrawler();
@@ -138,7 +138,7 @@ class LanguagesControllerTest extends JuryControllerTestCase
         self::assertEquals(4, $judgeTaskQuery->getSingleScalarResult());
 
         // Now, disable the language.
-        $url = "/jury/languages/4/toggle-judge";
+        $url = "/jury/languages/c/toggle-judge";
         $this->client->request(Request::METHOD_POST, $url, ['value' => false]);
 
         // Submit again.

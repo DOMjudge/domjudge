@@ -16,7 +16,7 @@ class UserControllerTest extends JuryControllerTestCase
     protected static string  $shortTag                 = 'user';
     protected static array   $deleteEntities           = ['demo','judgehost'];
     protected static string  $deleteEntityIdentifier   = 'username';
-    protected static string  $getIDFunc                = 'getUserid';
+    protected static string  $getIDFunc                = 'getExternalid';
     protected static string  $className                = User::class;
     protected static array   $DOM_elements             = ['h1' => ['Users']];
     protected static string  $addForm                  = 'user[';
@@ -28,7 +28,7 @@ class UserControllerTest extends JuryControllerTestCase
                                                            'plainPassword' => 'plainpassword',
                                                            'ipAddress'     => '10.0.0.0',
                                                            'enabled'       => '1',
-                                                           'team'          => '0',
+                                                           'team'          => '',
                                                            'user_roles'    => ['0' => true, '1' => true]],
                                                           ['username' => 'ABCabc123_-@', 'name' => 'Allowed username'],
                                                           ['username' => 'nem', 'name' => 'No Email',
@@ -124,7 +124,7 @@ class UserControllerTest extends JuryControllerTestCase
 
         // Get the IDs of the newly created users
         foreach ($createdUsers as $user) {
-            $userIds[] = $user->getUserid();
+            $userIds[] = $user->getExternalid();
         }
 
         $user1Id = $userIds[0];

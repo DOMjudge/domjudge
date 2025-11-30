@@ -1393,7 +1393,7 @@ EOF;
         /** @var RequestStack $requestStack */
         $requestStack = static::getContainer()->get(RequestStack::class);
         $request = new Request();
-        $request->cookies->set('domjudge_cid', (string)$contest->getCid());
+        $request->cookies->set('domjudge_cid', (string)$contest->getExternalid());
         $requestStack->push($request);
 
         $results = $importExportService->getResultsData(37, $full, $honors);
