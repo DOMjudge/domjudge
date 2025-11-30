@@ -215,7 +215,7 @@ class User extends BaseApiEntity implements
 
     public function getShortDescription(): string
     {
-        return $this->getName();
+        return $this->getName() ?: $this->getUsername();
     }
 
     public function setEmail(?string $email): User

@@ -78,7 +78,7 @@ class ClarificationControllerTest extends BaseTestCase
                            trim($clarificationText[1]));
 
         $this->verifyLinkToURL('Example teamname',
-                               'http://localhost/jury/teams/2');
+                               'http://localhost/jury/teams/exteam');
     }
 
     /**
@@ -107,7 +107,7 @@ class ClarificationControllerTest extends BaseTestCase
 
         $this->client->submitForm('Send', [
             'jury_clarification[recipient]' => '',
-            'jury_clarification[subject]' => '1-tech',
+            'jury_clarification[subject]' => 'demo#tech',
             'jury_clarification[message]' => 'This is a clarification',
         ]);
 
