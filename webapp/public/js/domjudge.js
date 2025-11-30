@@ -1477,6 +1477,7 @@ function initDiffEditorTab(editorId, diffId, submissionId, models) {
         scrollBeyondLastLine: false,
         automaticLayout: true,
         readOnly: true,
+        domReadOnly: true,
         theme: getCurrentEditorTheme(),
         renderSideBySideInlineBreakpoint: breakpoint,
         useInlineViewWhenSpaceIsLimited: true,
