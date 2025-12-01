@@ -1,3 +1,4 @@
+{% import 'macros.html.twig' as macros %}
 <!DOCTYPE html>
 <html lang="en" xml:lang="en">
 <head>
@@ -108,7 +109,7 @@
             color: darkgrey;
         }
     </style>
-    {% include 'partials/mathjaxhead.html.twig' %}
+    {{ macros.mathjax_head() }}
 </head>
 <body>
 <main role="main" class="">

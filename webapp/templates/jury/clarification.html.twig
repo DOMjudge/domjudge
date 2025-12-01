@@ -1,4 +1,5 @@
 {% extends "jury/base.html.twig" %}
+{% import 'macros.html.twig' as base_macros %}
 
 {% set origclar = list | first %}
 {% set claimed = not origclar.answered and origclar.from_jurymember is defined %}
@@ -7,6 +8,7 @@
 
 {% block extrahead %}
     {{ parent() }}
+    {{ base_macros.mathjax_head() }}
 {% endblock %}
 
 {% block content %}
