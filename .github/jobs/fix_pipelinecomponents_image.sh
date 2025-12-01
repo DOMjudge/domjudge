@@ -20,5 +20,5 @@ sed -i 's/"squizlabs\/php_codesniffer": "3.13.2"/"squizlabs\/php_codesniffer": "
 echo "After /app/composer.json:"
 cat /app/composer.json
 
-cd /app; composer update
+cd /app; composer -W update
 cd $mydir
