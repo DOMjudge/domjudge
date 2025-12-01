@@ -1,9 +1,11 @@
 {% extends 'team/base.html.twig' %}
+{% import 'macros.html.twig' as macros %}
 
 {% block title %}{{ team.effectiveName }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
+    {{ macros.mathjax_head() }}
     <style>
         .data-table td a, .data-table td a:hover {
             display: block;

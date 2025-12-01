@@ -1,6 +1,12 @@
 {% extends 'team/base.html.twig' %}
+{% import 'macros.html.twig' as macros %}
 
 {% block title %}View clarifications for problem {{ problem.name }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.mathjax_head() }}
+{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
