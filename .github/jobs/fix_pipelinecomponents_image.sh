@@ -16,7 +16,7 @@ mydir=$(pwd)
 echo "Before /app/composer.json:"
 cat /app/composer.json
 sed -i 's/"phpcompatibility\/php-compatibility": "9.3.5"/"phpcompatibility\/php-compatibility": "dev-develop"/g' /app/composer.json
-sed -i 's/"squizlabs\/php_codesniffer": "3.13.2"/"squizlabs\/php_codesniffer": "^3.13.3"/g' /app/composer.json
+sed -i 's/"squizlabs\/php_codesniffer": "3.13.2"/"squizlabs\/php_codesniffer": "^4.0.1"/g' /app/composer.json
 echo "After /app/composer.json:"
 cat /app/composer.json
 
