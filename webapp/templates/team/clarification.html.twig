@@ -1,6 +1,12 @@
 {% extends 'team/base.html.twig' %}
+{% import 'macros.html.twig' as macros %}
 
 {% block title %}View clarification - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.mathjax_head() }}
+{% endblock %}
 
 {% block content %}
     <h1 class="text-center mt-4">Clarification
