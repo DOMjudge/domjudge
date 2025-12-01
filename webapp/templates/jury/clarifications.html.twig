@@ -1,11 +1,13 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
+{% import 'macros.html.twig' as base_macros %}
 
 {% block title %}Clarifications - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
     {{ macros.table_extrahead() }}
+    {{ base_macros.mathjax_head() }}
     <style>
         .data-table td a, .data-table td a:hover {
             display: inline;

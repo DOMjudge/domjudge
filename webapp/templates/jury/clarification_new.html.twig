@@ -1,9 +1,11 @@
 {% extends "jury/base.html.twig" %}
+{% import 'macros.html.twig' as base_macros %}
 
 {% block title %}Send clarification - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
+    {{ base_macros.mathjax_head() }}
 {% endblock %}
 
 {% block content %}
