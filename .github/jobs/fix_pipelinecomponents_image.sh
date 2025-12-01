@@ -20,5 +20,6 @@ sed -i 's/"phpcompatibility\/php-compatibility": "9.3.5"/"phpcompatibility\/php-
 echo "After /app/composer.json:"
 cat /app/composer.json
 
-cd /app; composer -W update
+# We have 1 tool we need, so we can break whatever we want here.
+cd /app; composer -W upgrade
 cd $mydir
