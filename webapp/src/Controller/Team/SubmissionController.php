@@ -150,7 +150,7 @@ class SubmissionController extends BaseController
         }
 
         $runs = [];
-        if ($showSampleOutput && $judging && $judging->getResult() !== 'compiler-error') {
+        if ($showSampleOutput && $judging?->getResult() !== 'compiler-error') {
             $outputDisplayLimit    = (int)$this->config->get('output_display_limit');
             $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
 
@@ -192,7 +192,7 @@ class SubmissionController extends BaseController
         }
 
         $actuallyShowCompile = $showCompile == self::ALWAYS_SHOW_COMPILE_OUTPUT
-            || ($showCompile == self::ONLY_SHOW_COMPILE_OUTPUT_ON_ERROR && $judging->getResult() === 'compiler-error');
+            || ($showCompile == self::ONLY_SHOW_COMPILE_OUTPUT_ON_ERROR && $judging?->getResult() === 'compiler-error');
 
         $data = [
             'judging' => $judging,
