@@ -55,6 +55,42 @@
             $('[data-bs-toggle="tooltip"]').tooltip();
 
             applyEditorTheme();
+
+            $('[data-conditional-field]').each(function () {
+                const $field = $(this);
+                const $wrapper = $field.closest('div.mb-3');
+                const conditionalFieldName = $field.data('conditional-field');
+                const conditionalFieldRequiredValue = $field.data('conditional-field-value').toString();
+                const $form = $field.closest('form');
+                const formName = $form.attr('name');
+                const fullConditionalFieldName = `${formName}_${conditionalFieldName}`;
+                const $conditionalField = $field.closest('form').find(`#${fullConditionalFieldName}`);
+
+                const toggleBasedOnConditional = function($field, $wrapper, $conditionalField, conditionalFieldRequiredValue) {
+                    // Check if the conditional field has the value
+                    const conditionalFieldValue = $conditionalField.val();
+                    let matches;
+                    // Check if the conditionalFieldValue is an array, for multi selects
+                    if (conditionalFieldValue instanceof Array) {
+                        matches = conditionalFieldValue.indexOf(conditionalFieldRequiredValue) !== -1;
+                    } else {
+                        matches = conditionalFieldValue === conditionalFieldRequiredValue;
+                    }
+
+                    if (matches) {
+                        $wrapper.removeClass('d-none');
+                        $field.attr('disabled', false);
+                    } else {
+                        $wrapper.addClass('d-none');
+                        $field.attr('disabled', true);
+                    }
+                };
+
+                toggleBasedOnConditional($field, $wrapper, $conditionalField, conditionalFieldRequiredValue);
+                $conditionalField.on('change', () => {
+                    toggleBasedOnConditional($field, $wrapper, $conditionalField, conditionalFieldRequiredValue);
+                });
+            });
         });
 
         initializeKeyboardShortcuts();
