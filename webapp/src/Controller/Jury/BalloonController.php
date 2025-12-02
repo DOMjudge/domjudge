@@ -88,7 +88,7 @@ class BalloonController extends AbstractController
             $filteredAffiliations = $this->em->createQueryBuilder()
                 ->from(TeamAffiliation::class, 'a')
                 ->select('a')
-                ->where('a.affilid IN (:affilIds)')
+                ->where('a.externalid IN (:affilIds)')
                 ->setParameter('affilIds', $filters['affiliation-id'])
                 ->getQuery()
                 ->getResult();
@@ -123,7 +123,7 @@ class BalloonController extends AbstractController
             $filteredCategories = $this->em->createQueryBuilder()
                 ->from(TeamCategory::class, 'c')
                 ->select('c')
-                ->where('c.categoryid IN (:categories)')
+                ->where('c.externalid IN (:categories)')
                 ->setParameter('categories', $filters['category-id'])
                 ->getQuery()
                 ->getResult();
@@ -131,7 +131,7 @@ class BalloonController extends AbstractController
             $availableCategories = $this->em->createQueryBuilder()
                 ->from(TeamCategory::class, 'c')
                 ->select('c')
-                ->where('c.categoryid NOT IN (:categories)')
+                ->where('c.externalid NOT IN (:categories)')
                 ->setParameter('categories', $filters['category-id'])
                 ->getQuery()
                 ->getResult();
@@ -145,11 +145,11 @@ class BalloonController extends AbstractController
         }
         $defaultCategories = $this->em->createQueryBuilder()
             ->from(TeamCategory::class, 'c')
-            ->select('c.categoryid')
+            ->select('c.externalid')
             ->where('c.visible = true')
             ->getQuery()
             ->getArrayResult();
-        $defaultCategories = array_column($defaultCategories, "categoryid");
+        $defaultCategories = array_column($defaultCategories, "externalid");
 
         return $this->render('jury/balloons.html.twig', [
             'refresh' => [

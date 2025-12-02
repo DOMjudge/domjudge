@@ -1,13 +1,13 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Edit source of s{{ submission.submitid }} - {{ parent() }}{% endblock %}
+{% block title %}Edit source of {{ submission.externalid }} - {{ parent() }}{% endblock %}
 
 {% block content %}
 
     <h1>
         Edit submission
-        <a href="{{ path('jury_submission', {submitId: submission.submitid}) }}">s{{ submission.submitid }}</a>
+        <a href="{{ path('jury_submission', {submitId: submission.externalid}) }}">{{ submission.externalid }}</a>
         source files
     </h1>
 

@@ -17,14 +17,14 @@ class ContestControllerTest extends JuryControllerTestCase
     protected static string  $shortTag                 = 'contest';
     protected static array   $deleteEntities           = ['Demo contest'];
     protected static string  $deleteEntityIdentifier   = 'name';
-    protected static string  $getIDFunc                = 'getCid';
+    protected static string  $getIDFunc                = 'getExternalid';
     protected static string  $className                = Contest::class;
     protected static array $DOM_elements               = ['h1'                            => ['Contests'],
                                                           'h3'                            => ['admin' => ['Current contests', 'All available contests'],
                                                              'jury' => []],
                                                           'a.btn[title="Import contest"]' => ['admin' => [" Import contest"],'jury'=>[]]];
-    protected static ?array $deleteExtra               = ['pageurl'   => '/jury/contests/1',
-                                                          'deleteurl' => '/jury/contests/1/problems/3/delete',
+    protected static ?array $deleteExtra               = ['pageurl'   => '/jury/contests/demo',
+                                                          'deleteurl' => '/jury/contests/demo/problems/boolfind/delete',
                                                           'selector'  => 'Boolean switch search',
                                                           'fixture'   => null];
     protected static string $addForm                   = 'contest[';
@@ -48,7 +48,7 @@ class ContestControllerTest extends JuryControllerTestCase
                                                            'goldMedals'               => '1',
                                                            'silverMedals'             => '1',
                                                            'bronzeMedals'             => '1',
-                                                           'medalCategories'          => ['0' => '2']],
+                                                           'medalCategories'          => ['0' => 'self-registered']],
                                                           ['shortname'            => 'CLICS_offset_HMM',
                                                            'name'                 => 'No Timezone but only offset',
                                                            'activatetimeString'   => '2021-07-17 16:08:00+1:11',
@@ -246,7 +246,7 @@ class ContestControllerTest extends JuryControllerTestCase
                                                            'silverMedals' => '0',
                                                            'bronzeMedals' => '0',
                                                            'medalsEnabled' => '1',
-                                                           'medalCategories' => ['0' => '2']],
+                                                           'medalCategories' => ['0' => 'self-registered']],
                                                           ['shortname' => 'prob',
                                                            'problems' => ['0' => ['shortname' => 'boolfind',
                                                                                   'points' => '1',
@@ -254,24 +254,24 @@ class ContestControllerTest extends JuryControllerTestCase
                                                                                   'allowJudge' => '1',
                                                                                   'color' => '#ffffff',
                                                                                   'lazyEvalResults' => '0',
-                                                                                  'problem' => '2']]],
+                                                                                  'problem' => 'fltcmp']]],
                                                           ['shortname' => 'multprob',
                                                            'name' => 'Contest with problems',
-                                                           'problems' => ['0' => ['problem' => '2',
+                                                           'problems' => ['0' => ['problem' => 'fltcmp',
                                                                                   'shortname' => 'fcmp',
                                                                                   'points' => '2',
                                                                                   'allowSubmit' => '1',
                                                                                   'allowJudge' => '1',
                                                                                   'color' => '#000000',
                                                                                   'lazyEvalResults' => '0'],
-                                                                          '1' => ['problem' => '1',
+                                                                          '1' => ['problem' => 'hello',
                                                                                   'shortname' => 'hw',
                                                                                   'points' => '1',
                                                                                   'allowSubmit' => '0',
                                                                                   'allowJudge' => '1',
                                                                                   'color' => '#000000',
                                                                                   'lazyEvalResults' => '0'],
-                                                                          '2' => ['problem' => '3',
+                                                                          '2' => ['problem' => 'boolfind',
                                                                                   'shortname' => 'p3',
                                                                                   'points' => '1',
                                                                                   'allowSubmit' => '1',
@@ -280,7 +280,7 @@ class ContestControllerTest extends JuryControllerTestCase
                                                                                   'lazyEvalResults' => '1']]],
                                                           ['shortname' => 'singleprobspecialchars',
                                                            'name' => 'Contest shortname with special chars',
-                                                           'problems' => ['0' => ['problem' => '2',
+                                                           'problems' => ['0' => ['problem' => 'fltcmp',
                                                                                   'shortname' => '!@#$%^&*()chars<>',
                                                                                   'points' => '2',
                                                                                   'allowSubmit' => '1',
@@ -342,7 +342,7 @@ class ContestControllerTest extends JuryControllerTestCase
 
         // Now, disable the problem.
         $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
-        $contestId = $contest->getCid();
+        $contestId = $contest->getExternalid();
         $url = "/jury/contests/$contestId/edit";
         $this->verifyPageResponse('GET', $url, 200);
 
@@ -444,7 +444,7 @@ class ContestControllerTest extends JuryControllerTestCase
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         $contest->setIsLocked(false);
-        $contestId = $contest->getCid();
+        $contestId = $contest->getExternalid();
         $editUrl = "/jury/contests/$contestId/edit";
         $deleteUrl = "/jury/contests/$contestId/delete";
         $contestUrl = "/jury/contests/$contestId";

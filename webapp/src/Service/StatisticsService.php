@@ -96,12 +96,12 @@ class StatisticsService
      *               problem_num_testcases: int[], team_num_submissions: int[],
      *               team_attempted_n_problems: int[], teams_solved_n_problems: int[],
      *               problem_attempts: int[], problem_solutions: int[],
-     *               problem_stats: array{teams_attempted: array<int[]>, teams_solved: array<int[]>},
+     *               problem_stats: array{teams_attempted: array<string, array<string, string>>, teams_solved: array<string, array<string, string>>},
      *               submissions: Submission[], misery_index: float,
      *               team_stats: array<array{total_submitted: int, total_accepted: int,
      *                                       problems_submitted: int[], problems_accepted: int[]}>,
      *               language_stats: array{total_submissions: array<string, int>, total_solutions: array<string, int>,
-     *                                     teams_attempted: array<string, int[]>, teams_solved: array<string, int[]>}}
+     *                                     teams_attempted: array<string, array<string, string>>, teams_solved: array<string, array<string, string>>}}
      */
     public function getMiscContestStatistics(
         Contest $contest,
@@ -177,14 +177,14 @@ class StatisticsService
                 $misc['total_submissions']++;
                 $teamStats['total_submitted']++;
                 static::setOrIncrement($misc['problem_attempts'],
-                    $s->getProblem()->getProbId());
+                    $s->getProblem()->getExternalid());
                 static::setOrIncrement($teamStats['problems_submitted'],
-                    $s->getProblem()->getProbId());
-                $misc['problem_stats']['teams_attempted'][$s->getProblem()->getProbId()][$team->getTeamId()] = $team->getTeamId();
+                    $s->getProblem()->getExternalid());
+                $misc['problem_stats']['teams_attempted'][$s->getProblem()->getExternalid()][$team->getExternalid()] = $team->getExternalid();
 
                 static::setOrIncrement($misc['language_stats']['total_submissions'],
                     $s->getLanguage()->getName());
-                $misc['language_stats']['teams_attempted'][$s->getLanguage()->getName()][$team->getTeamId()] = $team->getTeamId();
+                $misc['language_stats']['teams_attempted'][$s->getLanguage()->getName()][$team->getExternalid()] = $team->getExternalid();
 
                 if ($s->getResult() != 'correct') {
                     continue;
@@ -192,12 +192,12 @@ class StatisticsService
                 $misc['total_accepted']++;
                 $teamStats['total_accepted']++;
                 static::setOrIncrement($teamStats['problems_accepted'],
-                    $s->getProblem()->getProbId());
+                    $s->getProblem()->getExternalid());
                 static::setOrIncrement($misc['problem_solutions'],
-                    $s->getProblem()->getProbId());
-                $misc['problem_stats']['teams_solved'][$s->getProblem()->getProbId()][$team->getTeamId()] = $team->getTeamId();
+                    $s->getProblem()->getExternalid());
+                $misc['problem_stats']['teams_solved'][$s->getProblem()->getExternalid()][$team->getExternalid()] = $team->getExternalid();
 
-                $misc['language_stats']['teams_solved'][$s->getLanguage()->getName()][$team->getTeamId()] = $team->getTeamId();
+                $misc['language_stats']['teams_solved'][$s->getLanguage()->getName()][$team->getExternalid()] = $team->getExternalid();
                 static::setOrIncrement($misc['language_stats']['total_solutions'],
                     $s->getLanguage()->getName());
 
@@ -205,7 +205,7 @@ class StatisticsService
                     $lastSubmission = $s;
                 }
             }
-            $misc['team_stats'][$team->getTeamId()] = $teamStats;
+            $misc['team_stats'][$team->getExternalid()] = $teamStats;
             static::setOrIncrement($misc['team_attempted_n_problems'],
                 count($teamStats['problems_submitted']));
             static::setOrIncrement($misc['teams_solved_n_problems'],
@@ -222,7 +222,7 @@ class StatisticsService
             }
             $miseryMinutes = ($miserySeconds / 60) * 3;
 
-            $misc['team_stats'][$team->getTeamId()]['misery_index'] = $miseryMinutes;
+            $misc['team_stats'][$team->getExternalid()]['misery_index'] = $miseryMinutes;
             $totalMiseryMinutes += $miseryMinutes;
         }
         $misc['misery_index'] = count($teams) > 0 ? $totalMiseryMinutes / count($teams) : 0;
@@ -656,7 +656,7 @@ class StatisticsService
         // Need to query directly the count, otherwise symfony memory explodes
         // I think because it tries to load the testdata if you do this the naive way.
         $results = $this->em->createQueryBuilder()
-            ->select('p.probid, count(tc.testcaseid) as num_testcases')
+            ->select('p.externalid, count(tc.testcaseid) as num_testcases')
             ->from(Contest::class, 'c')
             ->join('c.problems', 'cp')
             ->join('cp.problem', 'p')
@@ -667,7 +667,7 @@ class StatisticsService
             ->getQuery()->getResult();
         $numTestcases = [];
         foreach ($results as $r) {
-            $numTestcases[$r['probid']] = $r['num_testcases'];
+            $numTestcases[$r['externalid']] = $r['num_testcases'];
         }
 
         return $numTestcases;

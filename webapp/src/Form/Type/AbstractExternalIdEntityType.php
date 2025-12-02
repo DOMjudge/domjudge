@@ -24,7 +24,7 @@ class AbstractExternalIdEntityType extends AbstractType
     protected function addExternalIdField(FormBuilderInterface $builder, string $entity): void
     {
         $builder->add('externalid', TextType::class, [
-            'label' => 'External ID',
+            'label' => 'ID',
             'help' => 'Leave empty to generate automatically.',
             'required' => false,
             'empty_data' => '',
