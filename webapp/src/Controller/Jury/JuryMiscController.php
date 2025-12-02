@@ -16,6 +16,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use Composer\InstalledVersions;
 use Doctrine\ORM\EntityManagerInterface;
@@ -41,6 +42,7 @@ class JuryMiscController extends BaseController
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService,
         protected readonly RequestStack $requestStack,
         KernelInterface $kernel,
@@ -64,9 +66,12 @@ class JuryMiscController extends BaseController
             $this->addFlash('info', 'New release ' . $newestVersion . ' available at: https://www.domjudge.org/download.');
         }
 
+        /** @var CcsApiVersion $ccsApiVersion */
+        $ccsApiVersion = $this->config->get('ccs_api_version');
+
         return $this->render('jury/index.html.twig', [
             'adminer_enabled' => $config->get('adminer_enabled'),
-            'CCS_SPEC_API_URL' => GI::CCS_SPEC_API_URL,
+            'CCS_SPEC_API_URL' => $ccsApiVersion->getCcsSpecsApiUrl(),
         ]);
     }
 

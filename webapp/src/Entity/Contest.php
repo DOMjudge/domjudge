@@ -422,7 +422,7 @@ class Contest extends BaseApiEntity implements
     private Collection $externalContestSources;
 
     #[Serializer\SerializedName('penalty_time')]
-    private ?int $penaltyTimeForApi = null;
+    private int|string|null $penaltyTimeForApi = null;
 
     // This field gets filled by the contest visitor with a data transfer
     // object that represents the banner
@@ -1590,13 +1590,13 @@ class Contest extends BaseApiEntity implements
         return $this->contestProblemsetType;
     }
 
-    public function setPenaltyTimeForApi(?int $penaltyTimeForApi): Contest
+    public function setPenaltyTimeForApi(int|string|null $penaltyTimeForApi): Contest
     {
         $this->penaltyTimeForApi = $penaltyTimeForApi;
         return $this;
     }
 
-    public function getPenaltyTimeForApi(): ?int
+    public function getPenaltyTimeForApi(): int|string|null
     {
         return $this->penaltyTimeForApi;
     }
