@@ -8,7 +8,7 @@ DIR="$PWD"
 
 export version=$1
 unittest=$2
-[ "$version" = "8.1" ] && CODECOVERAGE=1 || CODECOVERAGE=0
+[ "$version" = "8.2" ] && CODECOVERAGE=1 || CODECOVERAGE=0
 
 # Set up
 export unit=1
