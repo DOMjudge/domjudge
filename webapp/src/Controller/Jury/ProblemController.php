@@ -570,7 +570,7 @@ class ProblemController extends BaseController
         if ($request->isMethod('POST')) {
             if (!empty($lockedContests)) {
                 $this->addFlash('danger', 'Cannot edit problem / testcases, it belongs to locked contest(s) '
-                    . implode(', ', $lockedContests));
+                    . join(', ', $lockedContests));
                 return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
             }
             $messages      = [];
@@ -788,7 +788,7 @@ class ProblemController extends BaseController
         if (!empty($lockedContests)) {
             $this->addFlash('warning',
                 'Problem belongs to locked contest ('
-                . implode($lockedContests)
+                . join($lockedContests)
                 . ', disallowing editing.');
         }
         $data = [
