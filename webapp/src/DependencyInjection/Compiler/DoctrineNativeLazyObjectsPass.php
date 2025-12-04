@@ -9,6 +9,7 @@ class DoctrineNativeLazyObjectsPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
+        // native lazy objects only work in PHP 8.4+
         if (PHP_VERSION_ID < 80400) {
             return;
         }
