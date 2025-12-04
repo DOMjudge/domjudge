@@ -7,6 +7,9 @@ use function Adminer\lang;
 if (!function_exists('adminer_object')) {
     function adminer_object(): Adminer
     {
+        // Use anonymous class to extend Adminer with our own settings.
+        // We can't use a normal class since the base class only exists when
+        // the adminer code is include in JuryMiscController.
         return new class extends Adminer {
             public function name(): string
             {
