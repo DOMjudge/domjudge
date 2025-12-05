@@ -75,12 +75,12 @@
                                         {% endif %}
                                         <li class="list-group-item cl{{ colorClass }}">
                                             {% if showFlags and affiliation.country is defined %}
-                                                {{ affiliation.country|countryFlag }}
+                                                {{ affiliation.country|countryFlag(false, static) }}
                                             {% endif %}
                                             {% set affiliationLogo = affiliation.id | assetPath('affiliation') %}
                                             {% if affiliationLogo %}
                                                 <img loading="lazy" class="affiliation-logo"
-                                                     src="{{ asset(affiliationLogo) }}" alt="{{ affiliation.name }}"
+                                                     src="{{ asset(affiliationLogo) | relativePath(static) }}" alt="{{ affiliation.name }}"
                                                      title="{{ affiliation.name }}">
                                             {% endif %}
                                             {{ affiliation.name }}

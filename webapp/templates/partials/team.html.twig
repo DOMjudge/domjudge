@@ -1,3 +1,6 @@
+{% if static is not defined %}
+    {% set static = false %}
+{% endif %}
 {% if team is empty %}
     <div class="alert alert-danger mt-4">
         No team found by this id.
@@ -28,7 +31,7 @@
                         {% set affiliationId = team.affiliation.externalid %}
                         {% set affiliationLogo = affiliationId | assetPath('affiliation') %}
                         {% if affiliationLogo %}
-                            <img src="{{ asset(affiliationLogo) }}" alt="{{ team.affiliation.shortname }}"
+                            <img src="{{ asset(affiliationLogo) | relativePath(static) }}" alt="{{ team.affiliation.shortname }}"
                                  title="{{ team.affiliation.shortname }}" class="affiliation-logo">
                         {% endif %}
 {{ team.affiliation.name }}</td>
@@ -37,7 +40,7 @@
                         <tr>
                             <th>Country</th>
                             <td>
-                                {{ team.affiliation.country | countryFlag(true) }}
+                                {{ team.affiliation.country | countryFlag(true, static) }}
                             </td>
                         </tr>
                     {% endif %}
