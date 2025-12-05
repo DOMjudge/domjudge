@@ -36,7 +36,7 @@ UPDATE configuration
       description = 'If not empty, enable teams and jury to send source code to this command. See admin manual for allowed arguments.'
   WHERE name      = 'enable_printing';
 SQL
-);
+        );
     }
 
     public function down(Schema $schema) : void
@@ -52,6 +52,6 @@ UPDATE configuration
       description = 'Enable teams and jury to send source code to a printer via the DOMjudge web interface.'
   WHERE name      = 'print_command';
 SQL
-);
+        );
     }
 }
