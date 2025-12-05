@@ -21,11 +21,17 @@ if (!function_exists('adminer_object')) {
                 return $this->getDatabaseCredentials()['db'];
             }
 
-            public function databases($flush = true): array
+            /**
+             * @return list<string>
+             */
+            public function databases(bool $flush = true): array
             {
                 return [$this->getDatabaseCredentials()['db']];
             }
 
+            /**
+             * @return array{string, string, string}
+             */
             public function credentials(): array
             {
                 ['host' => $host, 'user' => $user, 'pass' => $pass] = $this->getDatabaseCredentials();
@@ -33,17 +39,12 @@ if (!function_exists('adminer_object')) {
                 return [$host, $user, $pass];
             }
 
-            public function login($login, $password): bool
+            public function login(string $login, string $password): bool
             {
                 return true;
             }
 
-            public function tableName($tableStatus): string
-            {
-                return h($tableStatus['Name']);
-            }
-
-            public function permanentLogin($create = false): string
+            public function permanentLogin(bool $create = false): string
             {
                 return 'domjudge';
             }

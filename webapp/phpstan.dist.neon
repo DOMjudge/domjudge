@@ -3,7 +3,12 @@ parameters:
     paths:
         - src
         - migrations
+        - resources/functions.php
         - tests
+    scanFiles:
+        - vendor/vrana/adminer/adminer/include/functions.inc.php
+    scanDirectories:
+        - vendor/vrana/adminer/adminer/include
     ignoreErrors:
         -
             message: '#Method .* return type has no value type specified in iterable type array#'
