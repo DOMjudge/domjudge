@@ -91,7 +91,7 @@ class UserType extends AbstractExternalIdEntityType
         $builder->add('save', SubmitType::class);
 
         // Remove ID field when doing an edit
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
             /** @var User|null $user */
             $user = $event->getData();
             $form = $event->getForm();

@@ -3,7 +3,6 @@ twig:
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
     form_themes: ['form_theme.html.twig']
-    exception_controller: null
     globals:
         DOMJUDGE_VERSION: '%domjudge.version%'
         DJ_CHARACTER_SET: 'utf-8'

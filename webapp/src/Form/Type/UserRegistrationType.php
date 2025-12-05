@@ -75,7 +75,7 @@ class UserRegistrationType extends AbstractType
                 ],
                 'constraints' => [
                     new NotBlank(),
-                    new Callback(function ($teamName, ExecutionContext $context) {
+                    new Callback(function ($teamName, ExecutionContext $context): void {
                         if ($this->em->getRepository(Team::class)->findOneBy(['name' => $teamName])) {
                             $context->buildViolation('This team name is already in use.')
                                 ->addViolation();
@@ -200,7 +200,7 @@ class UserRegistrationType extends AbstractType
             ]);
 
         // Make sure the user has the team role to make validation work
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
             /** @var User $user */
             $user = $event->getData();
             /** @var Role $role */
@@ -217,7 +217,7 @@ class UserRegistrationType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $validateAffiliation = function ($data, ExecutionContext $context) {
+        $validateAffiliation = function ($data, ExecutionContext $context): void {
             if ($this->config->get('show_affiliations')) {
                 /** @var Form $form */
                 $form = $context->getRoot();

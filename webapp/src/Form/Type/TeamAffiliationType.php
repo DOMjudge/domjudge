@@ -44,10 +44,8 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
             'help'        => 'Optional ID of the organization in the ICPC CMS.',
             'constraints' => [
                 new Regex(
-                    [
-                        'pattern' => '/^[a-zA-Z0-9_-]+$/i',
-                        'message' => 'Only letters, numbers, dashes and underscores are allowed.',
-                    ]
+                    pattern: '/^[a-zA-Z0-9_-]+$/i',
+                    message: 'Only letters, numbers, dashes and underscores are allowed.',
                 )
             ]
         ]);
@@ -77,7 +75,7 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
         ]);
         $builder->add('save', SubmitType::class);
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
             /** @var TeamAffiliation|null $affiliation */
             $affiliation = $event->getData();
             $form = $event->getForm();

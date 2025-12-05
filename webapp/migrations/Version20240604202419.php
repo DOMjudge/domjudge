@@ -42,7 +42,7 @@ final class Version20240604202419 extends AbstractMigration
         }
     }
 
-    protected function setExternalIds(string $table, string $column, string $prefix = '')
+    protected function setExternalIds(string $table, string $column, string $prefix = ''): void
     {
         $entries = $this->connection->fetchAllAssociative("SELECT $column FROM $table WHERE externalid IS NULL");
         foreach ($entries as $entry) {
