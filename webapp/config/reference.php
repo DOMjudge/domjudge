@@ -361,7 +361,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         datetime?: array{
  *             default_format?: scalar|null, // Default: "Y-m-d\\TH:i:sP"
  *             default_deserialization_formats?: list<scalar|null>,
- *             default_timezone?: scalar|null, // Default: "Europe/Berlin"
+ *             default_timezone?: scalar|null, // Default: "Europe/Amsterdam"
  *             cdata?: scalar|null, // Default: true
  *         },
  *         array_collection?: array{
@@ -461,7 +461,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *             datetime?: array{
  *                 default_format?: scalar|null, // Default: "Y-m-d\\TH:i:sP"
  *                 default_deserialization_formats?: list<scalar|null>,
- *                 default_timezone?: scalar|null, // Default: "Europe/Berlin"
+ *                 default_timezone?: scalar|null, // Default: "Europe/Amsterdam"
  *                 cdata?: scalar|null, // Default: true
  *             },
  *             array_collection?: array{
