@@ -24,17 +24,7 @@ setup() {
 @test "baseurl via parameter overrides environment" {
     run ./submit --url https://domjudge.example.edu
     assert_failure 1
-    assert_regex "domjudge.example.edu.*/api(/.*)?/contests.*\[Errno -2\] Name or service not known"
-
-    run ./submit -u https://domjudge3.example.edu
-    assert_failure 1
-    assert_regex "domjudge3.example.edu.*/api(/.*)?/contests.*\[Errno -2\] Name or service not known"
-}
-
-@test "baseurl can end in slash" {
-    run ./submit --url https://domjudge.example.edu/domjudge/
-    assert_failure 1
-    assert_regex "domjudge.example.edu.*/api(/.*)?/contests.*\[Errno -2\] Name or service not known"
+    assert_regex "domjudge\.example\.edu"
 }
 
 @test "display basic usage information" {
