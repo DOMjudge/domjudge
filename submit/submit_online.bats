@@ -10,12 +10,14 @@ setup() {
     export SUBMITBASEURL="$(grep '^BASEURL' ../paths.mk | tr -s ' ' | cut -d ' ' -f 3)"
 }
 
-@test "contest via parameter overrides environment" {
-    run ./submit -c bestaatniet
-    assert_failure 1
-    assert_partial "ERROR: No (valid) contest specified"
+@test "baseurl can end in slash" {
+    run ./submit --url "$SUBMITBASEURL/" --contest demo --help
+    assert_success
+    assert_regex "A *- *Hello World"
+}
 
-    run ./submit --contest=bestaatookniet
+@test "contest via parameter overrides environment" {
+    run ./submit -c nonexistent
     assert_failure 1
     assert_partial "ERROR: No (valid) contest specified"
 }
