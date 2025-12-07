@@ -273,9 +273,11 @@ class JudgeDaemon
                             // indicating that we didn't find any child to be
                             // reaped
                             if ($errno != 10) {
-                                logmsg(LOG_WARNING,
+                                logmsg(
+                                    LOG_WARNING,
                                     "pcntl_waitpid returned $ret when trying to reap child processes: "
-                                    . pcntl_strerror($errno));
+                                    . pcntl_strerror($errno)
+                                );
                             }
                         }
 
@@ -322,7 +324,7 @@ class JudgeDaemon
                     $judgehosts = $this->request('judgehosts', 'GET');
                     if ($judgehosts !== null) {
                         $judgehosts = dj_json_decode($judgehosts);
-                        $judgehost = array_values(array_filter($judgehosts, fn($j) => $j['hostname'] === $this->myhost))[0];
+                        $judgehost = array_values(array_filter($judgehosts, fn ($j) => $j['hostname'] === $this->myhost))[0];
                         if (!isset($judgehost['enabled']) || !$judgehost['enabled']) {
                             logmsg(LOG_WARNING, "Judgehost needs to be enabled in web interface.");
                         }
@@ -467,8 +469,11 @@ class JudgeDaemon
                 }
 
                 $this->request(
-                    sprintf('judgehosts/add-debug-info/%s/%s', urlencode($this->myhost),
-                        urlencode((string)$judgeTask['judgetaskid'])),
+                    sprintf(
+                        'judgehosts/add-debug-info/%s/%s',
+                        urlencode($this->myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])
+                    ),
                     'POST',
                     ['full_debug' => $this->restEncodeFile($tmpfile, false)],
                     false
@@ -480,8 +485,11 @@ class JudgeDaemon
                 // Retrieving full team output for a particular testcase.
                 $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
                 $this->request(
-                    sprintf('judgehosts/add-debug-info/%s/%s', urlencode($this->myhost),
-                        urlencode((string)$judgeTask['judgetaskid'])),
+                    sprintf(
+                        'judgehosts/add-debug-info/%s/%s',
+                        urlencode($this->myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])
+                    ),
                     'POST',
                     ['output_run' => $this->restEncodeFile($testcasedir . '/program.out', false)],
                     false
@@ -532,8 +540,10 @@ class JudgeDaemon
         }
         $this->endpoint['retrying'] = false;
 
-        logmsg(LOG_INFO,
-            "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint " . $this->endpoint['id'] . ")");
+        logmsg(
+            LOG_INFO,
+            "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint " . $this->endpoint['id'] . ")"
+        );
 
         if ($type == 'prefetch') {
             $this->handlePrefetchTask($row, $lastWorkdir, $workdirpath);
@@ -574,10 +584,12 @@ class JudgeDaemon
                         $candidateDirs[] = $workdirpath . "/" . $subdir;
                     }
                 }
-                uasort($candidateDirs, fn($a, $b) => filemtime($a) <=> filemtime($b));
+                uasort($candidateDirs, fn ($a, $b) => filemtime($a) <=> filemtime($b));
                 $after = $before = disk_free_space(JUDGEDIR);
-                logmsg(LOG_INFO,
-                    "🗑 Low on diskspace, cleaning up (" . count($candidateDirs) . " potential candidates).");
+                logmsg(
+                    LOG_INFO,
+                    "🗑 Low on diskspace, cleaning up (" . count($candidateDirs) . " potential candidates)."
+                );
                 $cnt = 0;
                 foreach ($candidateDirs as $d) {
                     $cnt++;
@@ -590,7 +602,9 @@ class JudgeDaemon
                         break;
                     }
                 }
-                logmsg(LOG_INFO, "🗑 Cleaned up $cnt old judging directories; reduced disk space by " .
+                logmsg(
+                    LOG_INFO,
+                    "🗑 Cleaned up $cnt old judging directories; reduced disk space by " .
                     sprintf("%01.2fMB.", ($after - $before) / (1024 * 1024))
                 );
             }
@@ -851,7 +865,9 @@ class JudgeDaemon
 
         logmsg(LOG_DEBUG, "Executing command: $command");
         system($command, $retval_local);
-        if ($retval !== DONT_CARE) $retval = $retval_local; // phpcs:ignore Generic.ControlStructures.InlineControlStructure.NotAllowed
+        if ($retval !== DONT_CARE) {
+            $retval = $retval_local;
+        } // phpcs:ignore Generic.ControlStructures.InlineControlStructure.NotAllowed
 
         if ($retval_local !== 0) {
             if ($log_nonzero_exitcode) {
@@ -877,8 +893,10 @@ class JudgeDaemon
             if ($buildlogpath !== null) {
                 $extra_log = dj_file_get_contents($buildlogpath, 4096);
             }
-            logmsg(LOG_ERR,
-                "Fetching executable failed for $type script '$execid': " . $error);
+            logmsg(
+                LOG_ERR,
+                "Fetching executable failed for $type script '$execid': " . $error
+            );
             $description = "$execid: fetch, compile, or deploy of $type script failed.";
             $this->disable(
                 $type . '_script',
@@ -939,11 +957,11 @@ class JudgeDaemon
                 ];
             }
             unset($files);
-            uasort($filesArray, fn(array $a, array $b) => strcmp($a['filename'], $b['filename']));
+            uasort($filesArray, fn (array $a, array $b) => strcmp($a['filename'], $b['filename']));
             $computedHash = md5(
                 join(
                     array_map(
-                        fn($file) => $file['hash'] . $file['filename'] . $file['is_executable'],
+                        fn ($file) => $file['hash'] . $file['filename'] . $file['is_executable'],
                         $filesArray
                     )
                 )
@@ -1448,7 +1466,8 @@ class JudgeDaemon
             $judgeTask['run_script_id'],
             $run_config['hash'],
             $judgeTask['judgetaskid'],
-            $combined_run_compare);
+            $combined_run_compare
+        );
         if (isset($error)) {
             return false;
         }
@@ -1532,7 +1551,8 @@ class JudgeDaemon
                 $run_command_parts[] = '-n';
                 $run_command_parts[] = $this->options['daemonid'];
             }
-            array_push($run_command_parts,
+            array_push(
+                $run_command_parts,
                 $input,
                 $output,
                 $timelimit_str,
@@ -1677,8 +1697,11 @@ class JudgeDaemon
                 dj_sleep(0.001 * $sleep_ms);
             }
             $response = $this->request(
-                sprintf('judgehosts/add-judging-run/%s/%s', $new_judging_run['hostname'],
-                    urlencode((string)$judgeTaskId)),
+                sprintf(
+                    'judgehosts/add-judging-run/%s/%s',
+                    $new_judging_run['hostname'],
+                    urlencode((string)$judgeTaskId)
+                ),
                 'POST',
                 $new_judging_run,
                 false
