@@ -7,6 +7,7 @@
  * @EXPECTED_RESULTS@: WRONG-ANSWER
  */
 
+#define _GNU_SOURCE
 #include <errno.h>
 #include <unistd.h>
 #include <sched.h>
