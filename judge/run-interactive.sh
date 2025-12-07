@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Run wrapper-script to be called from 'testcase_run.sh'.
+# Run wrapper-script to be called from the judgedaemon
 #
 # This script is meant to simplify writing interactive problems where the
 # contestants' solution bi-directionally communicates with a jury program, e.g.
