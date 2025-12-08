@@ -1779,5 +1779,10 @@ class JudgeDaemon
     }
 }
 
+$result = "Hello World"
+    |> strtoupper(...)
+    |> str_shuffle(...)
+    |> trim(...);
+
 $daemon = new JudgeDaemon();
 $daemon->run();
