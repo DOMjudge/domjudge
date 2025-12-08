@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Leave urly to show the currently failing steps
-exit 0
-
 # We can't convert this script to bash as GHA doesn't have bash installed
 #
 # The current script doesn't use a piped command so the "benefit" of using
