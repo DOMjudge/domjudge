@@ -686,7 +686,6 @@ class JudgeDaemon
     private function closeCurlHandles(): void
     {
         if (!empty($this->endpoint['ch'])) {
-            curl_close($this->endpoint['ch']);
             unset($this->endpoint['ch']);
         }
     }
