@@ -51,7 +51,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Detect compatibility with supported PHP version
         run: >
-          ./vendor/bin/phpcs -s -p --colors
+          /app/vendor/bin/phpcs -s -p --colors
           --standard=PHPCompatibility
           --extensions=php
           --runtime-set testVersion ${{ matrix.PHPVERSION }}
