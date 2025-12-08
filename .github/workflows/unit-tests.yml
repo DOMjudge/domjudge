@@ -44,7 +44,7 @@ jobs:
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
     strategy:
       matrix:
-        PHPVERSION: [8.1, 8.4]
+        PHPVERSION: [8.2, 8.5]
         TEST: [Unit, E2E]
     steps:
       - uses: actions/checkout@v4
