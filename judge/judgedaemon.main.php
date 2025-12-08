@@ -1784,5 +1784,25 @@ $result = "Hello World"
     |> str_shuffle(...)
     |> trim(...);
 
+interface I {
+    // We may naively assume that the PHP constant is always a string.
+    const PHP = 'PHP 8.2';
+}
+
+class Foo implements I {
+    // But implementing classes may define it as an array.
+    const PHP = [];
+}
+
+class Foo2 {
+    const PHP = 'PHP 8.3';
+}
+
+$searchableConstant = 'PHP';
+
+var_dump(json_validate('{ "test": { "foo": "bar" } }')); // true
+
+var_dump(Foo2::{$searchableConstant});
+
 $daemon = new JudgeDaemon();
 $daemon->run();
