@@ -879,8 +879,64 @@ class DOMJudgeService
         return Utils::streamAsBinaryFile($zipFileContent, $outputFilename, 'zip');
     }
 
+    public function checkIfSamplesZipForContest(Contest $contest): bool
+    {
+        // Note, we reload the contest with the problems and attachments, to reduce the number of queries
+        // We do not load the testcases here since addSamplesToZip loads them
+        $contestQuery = $this->em->createQueryBuilder()
+            ->from(Contest::class, 'c')
+            ->innerJoin('c.problems', 'cp')
+            ->innerJoin('cp.problem', 'p')
+            ->leftJoin('p.attachments', 'a')
+            ->leftJoin('p.problemStatementContent', 'content')
+            ->select('c', 'cp', 'p', 'a', 'content')
+            ->andWhere('c.cid = :cid')
+            ->andWhere('cp.allowSubmit = 1') // Do we need this...
+            ->setParameter('cid', $contest->getCid());
+
+        /** @var Contest $contest */
+        $contest = $contestQuery->getQuery()->getOneOrNullResult();
+        if ($contest->getContestProblemsetType()) {
+            return true;
+        }
+
+        /** @var Problem[] $nonInteractiveProblems */
+        $nonInteractiveProblems = $contestQuery
+            ->innerJoin('p.testcases', 'tc')
+            ->andWhere('tc.sample = 1')
+            ->andWhere('BIT_AND(p.types, :interactiveType) = 0')
+            ->setParameter('interactiveType', Problem::TYPE_INTERACTIVE)
+            ->getQuery()
+            ->getResult();
+        if (!empty($nonInteractiveProblems)) {
+            return true;
+        }
+
+        /** @var Problem[] $problemsWithProblemStatement */
+        $problemsWithProblemStatement = $contestQuery
+            ->andWhere('p.problemstatementFile IS NOT NULL')
+            ->getQuery()
+            ->getResult();
+        if (!empty($problemsWithProblemStatement)) {
+            return true;
+        }
+
+        /** @var Problem[] $problemsWithAttachments */
+        $problemsWithAttachments = $contestQuery
+            ->innerJoin('p.attachments', 'a')
+            ->getQuery()
+            ->getResult();
+        if (!empty($problemsWithAttachments)) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function getSamplesZipForContest(Contest $contest): StreamedResponse
     {
+        // When updating this, also update checkIfSamplesZipForContest.
+
         // Note, we reload the contest with the problems and attachments, to reduce the number of queries
         // We do not load the testcases here since addSamplesToZip loads them
         /** @var Contest $contest */
@@ -1097,6 +1153,7 @@ class DOMJudgeService
             'problems' => $problems,
             'samples' => $samples,
             'showLimits' => $showLimits,
+            'showSamples' => $contest && $this->checkIfSamplesZipForContest($contest),
             'defaultMemoryLimit' => $defaultMemoryLimit,
             'timeFactorDiffers' => $timeFactorDiffers,
             'clarifications' => $clars,
