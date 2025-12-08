@@ -84,7 +84,7 @@ class TeamController extends AbstractRestController
     )]
     public function listAction(Request $request): Response
     {
-        if (!$this->config->get('enable_ranking') && !$this->dj->checkrole('jury')) {
+        if (!$this->config->get('enable_ranking') && !$this->dj->checkrole('api_reader')) {
             throw new BadRequestHttpException("teams list not available.");
         }
         return parent::performListAction($request);
