@@ -1,33 +1,35 @@
+{% if static is not defined %}
+    {% set static = false %}
+{% endif %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- DOMjudge version {{ DOMJUDGE_VERSION }} -->
     <meta charset="{{ DJ_CHARACTER_SET }}">
-    <title>{% block title %}DOMjudge{% endblock %}</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    <title>{% block title %}DOMjudge {% endblock %}</title>
+    <link rel="icon" href="{{ asset('favicon.ico') | relativePath(static) }}">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ asset("css/bootstrap.min.css") | relativePath(static) }}">
+    <link rel="stylesheet" href="{{ asset("css/fontawesome-all.min.css") | relativePath(static) }}">
+    <link rel="stylesheet" href="{{ path('scoreboard_category_color_css', relative=static) }}">
+    <script src="{{ asset("js/jquery.min.js") | relativePath(static) }}"></script>
+    <script src="{{ asset("js/jquery.debounce.min.js") | relativePath(static) }}"></script>
+    <script src="{{ asset("js/bootstrap.bundle.min.js") | relativePath(static) }}"></script>
 
-    <link rel="stylesheet" href="{{ asset("css/bootstrap.min.css") }}">
-    <link rel="stylesheet" href="{{ asset("css/fontawesome-all.min.css") }}">
-    <link rel="stylesheet" href="{{ path('scoreboard_category_color_css') }}">
-    <script src="{{ asset("js/jquery.min.js") }}"></script>
-    <script src="{{ asset("js/jquery.debounce.min.js") }}"></script>
-    <script src="{{ asset("js/bootstrap.bundle.min.js") }}"></script>
-
-    <script src="{{ asset("js/domjudge.js") }}"></script>
+    <script src="{{ asset("js/domjudge.js") | relativePath(static) }}"></script>
     {% for file in customAssetFiles('js') %}
-        <script src="{{ asset('js/custom/' ~ file) }}"></script>
+        <script src="{{ asset('js/custom/' ~ file) | relativePath(static) }}"></script>
     {% endfor %}
     {% block extrahead %}
-        <link rel="stylesheet" href="{{ asset('style_domjudge.css') }}">
+        <link rel="stylesheet" href="{{ asset('style_domjudge.css') | relativePath(static) }}">
 
         {{ extrahead | default('') }}
     {% endblock %}
     {% for file in customAssetFiles('css') %}
-        <link rel="stylesheet" href="{{ asset('css/custom/' ~ file) }}">
+        <link rel="stylesheet" href="{{ asset('css/custom/' ~ file) | relativePath(static) }}">
     {% endfor %}
 </head>
-<body{% if static is defined and static %} class="static"{% endif %}>
+<body{% if static %} class="static"{% endif %}>
 {% block menu %}{% endblock %}
 {% block body %}
     <div class="container-fluid">
