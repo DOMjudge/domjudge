@@ -19,6 +19,7 @@ cat /app/composer.json
 echo "Install the only needed tool"
 rm /app/composer.json
 cd /app
+composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer
 composer require phpcompatibility/php-compatibility:dev-develop
 
 echo "After /app/composer.json:"
