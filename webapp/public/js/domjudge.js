@@ -976,7 +976,7 @@ function initializeKeyboardShortcuts() {
             return;
         }
         // Check if the user is not typing in an input field.
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || document.activeElement.role === 'textbox') {
             return;
         }
         var key = e.key.toLowerCase();
