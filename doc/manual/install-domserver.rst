@@ -24,7 +24,7 @@ System requirements
 
 Software requirements
 `````````````````````
-* A web server with support for PHP >= 8.1.0 and the ``mysqli``, ``curl``, ``gd``,
+* A web server with support for PHP >= 8.2.0 and the ``mysqli``, ``curl``, ``gd``,
   ``mbstring``, ``intl``, ``zip``, ``xml`` and ``json`` extensions for PHP.
 * MySQL or MariaDB database. This can be on the same machine, but for
   advanced setups can also run on a dedicated machine.
@@ -109,7 +109,7 @@ with it. Refer to the documentation of your web server and PHP for
 details. In the examples below, replace |phpversion| with the PHP version
 you're installing.
 
-To configure the nginx web server for DOMjudge, use the nginx configuration snippet in 
+To configure the nginx web server for DOMjudge, use the nginx configuration snippet in
 ``etc/nginx-conf``.  You still need ``htpasswd`` from ``apache2-utils``
 though. To use this configuration, perform the following steps:
 
