@@ -40,6 +40,35 @@ jobs:
           webapp/public
           webapp/config
 
+  phpcs_compatibility_new_style:
+    runs-on: ubuntu-latest
+    container:
+      image: domjudge/gitlabci:24.04
+    strategy:
+      matrix:
+        PHPVERSION: ["8.1", "8.2", "8.3", "8.4", "8.5"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trigger the plugin
+        run: |
+          olddir=`pwd`
+          cd /
+          composer install
+          cd "$olddir"
+      - name: Detect compatibility with supported PHP version
+        run: >
+          /vendor/bin/phpcs -s -p --colors
+          --standard=PHPCompatibility
+          --extensions=php
+          --runtime-set testVersion ${{ matrix.PHPVERSION }}
+          lib/lib.*.php
+          etc
+          judge
+          webapp/src
+          webapp/tests
+          webapp/public
+          webapp/config
+
   phpcs_compatibility:
     runs-on: ubuntu-latest
     container:
