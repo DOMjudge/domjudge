@@ -50,7 +50,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Trigger the plugin
-        run: composer install
+        run: >
+          olddir=`pwd`
+          cd /
+          composer install
+          cd "$olddir"
       - name: Detect compatibility with supported PHP version
         run: >
           /vendor/bin/phpcs -s -p --colors
