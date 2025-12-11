@@ -950,6 +950,7 @@ class SubmissionController extends BaseController
             'originalSubmission' => $originalSubmission,
             'allowEdit' => $this->allowEdit(),
             'otherSubmissions' => $otherSubmissions,
+            'fill_height' => true,
         ]);
     }
 
@@ -1069,6 +1070,7 @@ class SubmissionController extends BaseController
             'files' => $files,
             'form' => $form,
             'selected' => $rank,
+            'fill_height' => true,
         ];
         if ($request->isXmlHttpRequest()) {
             return $this->render('jury/submission_edit_source_modal.html.twig', $twigData);

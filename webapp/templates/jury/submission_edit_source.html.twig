@@ -43,10 +43,10 @@
         }
     }
     </script>
-    <div class="tab-content source-tab">
+    <div class="tab-content source-tab flex-pass">
         {%- for idx, file in files %}
 
-            <div class="tab-pane fade {% if (selected is null and loop.first) or selected == file.rank %}show active{% endif %}"
+            <div class="tab-pane flex-pass fade {% if (selected is null and loop.first) or selected == file.rank %}show active{% endif %}"
                  id="source-{{ file.rank }}" data-rank="{{ file.rank }}" role="tabpanel">
                 {{ file.sourcecode | codeEditor(idx, submission.language.editorLanguage, true) }}
             </div>
