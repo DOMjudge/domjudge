@@ -101,7 +101,9 @@
         var $body = $('body');
         $body.on('change', '#submit_problem_code', processFile);
         $body.on('change', '#submit_problem_language', function () {
-            maybeShowEntryPoint();
+            let filename = $('#submit_problem_code').val();
+            filename = filename.replace(/^.*[\\\/]/, '');
+            maybeShowEntryPoint(filename);
         });
 
         $body.on('submit', 'form[name=submit_problem]', function () {
