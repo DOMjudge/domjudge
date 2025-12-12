@@ -865,9 +865,9 @@ class ExternalContestSourceService
 
             if ($data->extensions !== null) {
                 $toCheck = ['extensions' => $data->extensions];
-            }
 
-            $this->compareOrCreateValues($event, $data->id, $language, $toCheck);
+                $this->compareOrCreateValues($event, $data->id, $language, $toCheck);
+            }
         }
     }
 
