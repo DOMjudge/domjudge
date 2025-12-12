@@ -16,5 +16,6 @@ class TeamEvent implements EventData
         public readonly ?string $organizationId,
         public readonly ?array $groupIds,
         public readonly ?string $displayName,
+        public readonly ?bool $hidden,
     ) {}
 }

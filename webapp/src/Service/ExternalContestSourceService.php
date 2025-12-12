@@ -1153,6 +1153,11 @@ class ExternalContestSourceService
 
         $this->compareOrCreateValues($event, $data->id, $team, $toCheck);
 
+        // For now assume the whole category of the team is hidden when the team is hidden
+        if ($data->hidden && $team->getCategory() && $team->getCategory()->getVisible()) {
+            $team->getCategory()->setVisible(false);
+        }
+
         $this->em->flush();
         $this->eventLog->log('teams', $team->getTeamid(), $action, $this->getSourceContestId());
 
