@@ -766,7 +766,7 @@ class ExternalContestSourceService
 
         // Also compare the penalty time
         $penaltyTime = $data->penaltyTime;
-        if ($this->config->get('penalty_time') != $penaltyTime) {
+        if ($penaltyTime !== null & $this->config->get('penalty_time') != $penaltyTime) {
             $this->logger->warning(
                 'Penalty time does not match between feed (%d) and local (%d)',
                 [$penaltyTime, $this->config->get('penalty_time')]
