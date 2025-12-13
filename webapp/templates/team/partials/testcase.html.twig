@@ -1,0 +1,71 @@
+{% set judgingRun = run.0.judgingRuns.first %}
+{% if judgingRun == null or judgingRun.runresult == null %}
+    <p class="nodata">Run not finished yet.</p>
+{% else %}
+    <div class="row">
+        <div class="col-md-{{ size|default(4) }}">
+            <table class="table table-sm table-striped">
+                {% if run.0.description(true) %}
+                    <tr>
+                        <th>Description</th>
+                        <td>{{ run.0.description(true) }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Runtime</th>
+                    <td>{{ judgingRun.runtime }} sec</td>
+                </tr>
+                {% if metadata[idx] is defined %}
+                    <tr>
+                        <th>Memory usage</th>
+                        <td>{{ metadata[idx]['memory-bytes'] | printSize }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Result</th>
+                    <td>
+                        {{ judgingRun.runresult | printResult }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    {% if run.0.sample %}
+        {% if judging.submission.problem.interactiveProblem %}
+            <h6 class="mt-3">Jury/Submission interaction</h6>
+            {% if run.output_run is empty %}
+                <p class="nodata">There was no interaction log.</p>
+            {% else %}
+                {{ run.output_run | interactiveLog(true) }}
+            {% endif %}
+            {% if run.team_message is not empty %}
+                <h6 class="mt-3">Judge message</h6>
+                <pre class="output_text">
+{{  run.team_message }}</pre>
+            {%  endif %}
+        {% else %}
+            <h6 class="mt-3">Program output</h6>
+            {% if run.output_run is not empty %}
+                <pre class="output_text">
+{{ run.output_run }}</pre>
+            {% else %}
+                <p class="nodata">There was no program output.</p>
+            {% endif %}
+
+            {% if run.team_message is not empty %}
+                <h6 class="mt-3">Judge message</h6>
+                <pre class="output_text">
+{{  run.team_message }}</pre>
+            {%  endif %}
+
+            <h6 class="mt-3">Error output (info/debug/errors)</h6>
+            {% if run.output_error is not empty %}
+                <pre class="output_text">
+{{ run.output_error }}</pre>
+            {% else %}
+                <p class="nodata">There was no stderr output.</p>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endif %}
