@@ -12,7 +12,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Rest\Route('/contests/{cid}/access')]
+#[Rest\Route(path: '/contests/{cid}/access')]
 #[OA\Tag(name: 'Access')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -31,7 +31,7 @@ class AccessController extends AbstractApiController
      * @return Access
      */
     #[IsGranted('ROLE_API_READER')]
-    #[Rest\Get('')]
+    #[Rest\Get(path: '')]
     #[OA\Response(
         response: 200,
         description: 'Access information for the given contest',

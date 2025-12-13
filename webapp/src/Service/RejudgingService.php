@@ -261,7 +261,7 @@ class RejudgingService
             $index++;
 
             if ($action === self::ACTION_APPLY) {
-                $this->em->wrapInTransaction(function () use ($submission, $rejudgingId, &$scoreboardRowsToUpdate) {
+                $this->em->wrapInTransaction(function () use ($submission, $rejudgingId, &$scoreboardRowsToUpdate): void {
                     // First invalidate old judging, may be different from prevjudgingid!
                     $this->em->getConnection()->executeQuery(
                         'UPDATE judging SET valid=0 WHERE submitid = :submitid',

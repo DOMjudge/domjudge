@@ -4,8 +4,6 @@ namespace DoctrineMigrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 final class Version20190803123217 extends AbstractMigration
 {
@@ -22,7 +20,7 @@ final class Version20190803123217 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $this->skipIf(
-            $this->connection->getSchemaManager()->tablesExist(['contest']),
+            $this->connection->createSchemaManager()->tablesExist(['contest']),
             'table contest already exists'
         );
 
@@ -39,7 +37,7 @@ final class Version20190803123217 extends AbstractMigration
         );
     }
 
-    protected function createTables()
+    protected function createTables(): void
     {
         // Table structure for table `auditlog`
         $this->addSql(<<<SQL

@@ -2,10 +2,9 @@
 
 namespace App\Tests\Unit\Command;
 
-use App\Command\ResetUserPasswordCommand;
 use App\Tests\Unit\BaseTestCase as BaseTestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LazyCommand;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Exception\RuntimeException;
@@ -19,7 +18,7 @@ class ResetUserPasswordCommandTest extends BaseTestCase
     public static string $demoPassword = 'demo';
     public static string $commandName = 'domjudge:reset-user-password';
     protected Application $app;
-    protected ResetUserPasswordCommand $command;
+    protected Command $command;
     protected CommandTester $commandTester;
 
     protected function setUp(): void
@@ -28,9 +27,7 @@ class ResetUserPasswordCommandTest extends BaseTestCase
         $this->app = new Application(self::$kernel);
         /** @var LazyCommand $command */
         $command = $this->app->find(static::$commandName);
-        /** @var ResetUserPasswordCommand $resetCommand */
-        $resetCommand = $command->getCommand();
-        $this->command = $resetCommand;
+        $this->command = $command->getCommand();
         $this->commandTester = new CommandTester($this->command);
     }
 

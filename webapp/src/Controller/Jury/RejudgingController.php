@@ -261,7 +261,7 @@ class RejudgingController extends BaseController
         /** @var Judging[] $newVerdicts */
         $newVerdicts = [];
 
-        $this->em->wrapInTransaction(function () use ($rejudging, &$originalVerdicts, &$newVerdicts) {
+        $this->em->wrapInTransaction(function () use ($rejudging, &$originalVerdicts, &$newVerdicts): void {
             $expr             = $this->em->getExpressionBuilder();
             $originalVerdicts = $this->em->createQueryBuilder()
                 ->from(Judging::class, 'j')
@@ -298,7 +298,7 @@ class RejudgingController extends BaseController
         });
 
         // Helper function to add verdicts.
-        $addVerdict = function ($unknownVerdict) use ($verdicts, &$verdictTable) {
+        $addVerdict = function ($unknownVerdict) use ($verdicts, &$verdictTable): void {
             // Add column to existing rows.
             foreach ($verdicts as $verdict => $abbreviation) {
                 $verdictTable[$verdict][$unknownVerdict] = [];
@@ -450,12 +450,12 @@ class RejudgingController extends BaseController
             ->getOneOrNullResult();
 
         if ($request->isXmlHttpRequest()) {
-            $progressReporter = function (int $progress, string $log, ?string $message = null) {
+            $progressReporter = function (int $progress, string $log, ?string $message = null): void {
                 echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => htmlspecialchars($message ?? '')]);
                 ob_flush();
                 flush();
             };
-            return $this->streamResponse($this->requestStack, function () use ($progressReporter, $rejudging, $rejudgingService, $action) {
+            return $this->streamResponse($this->requestStack, function () use ($progressReporter, $rejudging, $rejudgingService, $action): void {
                 $timeStart = microtime(true);
                 if ($rejudgingService->finishRejudging($rejudging, $action, $progressReporter)) {
                     $timeEnd      = microtime(true);
@@ -538,12 +538,12 @@ class RejudgingController extends BaseController
             ]);
         }
         if ($isCreateRejudgingAjax) {
-            $progressReporter = function (int $progress, string $log, ?string $redirect = null) {
+            $progressReporter = function (int $progress, string $log, ?string $redirect = null): void {
                 echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'redirect' => $redirect]);
                 ob_flush();
                 flush();
             };
-            return $this->streamResponse($this->requestStack, function () use ($request, $progressReporter) {
+            return $this->streamResponse($this->requestStack, function () use ($request, $progressReporter): void {
                 $reason = $request->request->get('reason');
                 $data   = $request->request->all();
 
@@ -723,13 +723,13 @@ class RejudgingController extends BaseController
             ]);
         }
 
-        $progressReporter = function (int $progress, string $log, ?string $redirect = null) {
+        $progressReporter = function (int $progress, string $log, ?string $redirect = null): void {
             echo Utils::jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'redirect' => $redirect]);
             ob_flush();
             flush();
         };
 
-        return $this->streamResponse($this->requestStack, function () use ($priority, $progressReporter, $repeat, $reason, $overshoot, $request, $autoApply, $includeAll, $id, $table, $tablemap) {
+        return $this->streamResponse($this->requestStack, function () use ($priority, $progressReporter, $repeat, $reason, $overshoot, $request, $autoApply, $includeAll, $id, $table, $tablemap): void {
             // Only rejudge submissions in active contests.
             $contests = $this->dj->getCurrentContests();
 

@@ -30,10 +30,8 @@ class AbstractExternalIdEntityType extends AbstractType
             'empty_data' => '',
             'constraints' => [
                 new Regex(
-                    [
-                        'pattern' => DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX,
-                        'message' => 'Only letters, numbers, dashes, underscores and dots are allowed.',
-                    ]
+                    pattern: DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX,
+                    message: 'Only letters, numbers, dashes, underscores and dots are allowed.',
                 ),
             ]
         ]);

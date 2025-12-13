@@ -46,7 +46,7 @@ jobs:
       image: pipelinecomponents/php-codesniffer:latest
     strategy:
       matrix:
-        PHPVERSION: ["8.1", "8.2", "8.3", "8.4"]
+        PHPVERSION: ["8.2", "8.3", "8.4"]
     steps:
       - run: apk add git
       - uses: actions/checkout@v4

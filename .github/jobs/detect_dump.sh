@@ -8,6 +8,7 @@ OUT=$(find ./ -name ".git*" -type d -prune -o \
               -name "bundles" -prune -o \
               -name "cache" -type d -prune -o \
               -name "ace" -type d -prune -o \
+              -path "./webapp/config/reference.php" -prune -o \
               -type f -print0 | xargs -0 grep --color "dump(" | grep -v "Yaml::dump(") || true
 
 # Show detected debug statements
