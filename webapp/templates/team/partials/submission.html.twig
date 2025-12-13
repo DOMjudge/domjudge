@@ -104,10 +104,18 @@
             {% if runs is empty %}
                 <p class="nodata">No runs available.</p>
             {% else %}
+                {% set stop = false %}
                 {% for idx, run in runs %}
-                    <h5 id="run-{{ run.0.rank }}" class="text-center mt-4">Run {{ run.0.rank }}</h5>
+                    {% if not stop %}
+                        <h5 id="run-{{ run.0.rank }}" class="text-center mt-4">Run {{ run.0.rank }}</h5>
 
-                    {% include 'team/partials/testcase.html.twig' %}
+                        {% include 'team/partials/testcase.html.twig' %}
+
+                        {% set judgingRun = run.0.judgingRuns.first %}
+                        {% if judgingRun.runresult != 'correct' %}
+                            {% set stop = true %}
+                        {% endif %}
+                    {% endif %}
                 {% endfor %}
             {% endif %} {# not runs is empty #}
         {% endif %} {# showSampleOutput and judging.result != 'compiler-error' #}
