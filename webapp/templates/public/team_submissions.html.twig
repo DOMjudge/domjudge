@@ -14,7 +14,7 @@
         data-problem-id="{{ problem.externalId }}"
         data-submissions-url="{{ path('public_submissions_data_cell', {teamId: team.externalid, problemId: problem.externalId}) }}">
         <div class="spinner-border" role="status">
-            <span class="sr-only">Loading...</span>
+            <span class="visually-hidden">Loading...</span>
         </div>
         {% include 'public/partials/submission_list_template.html.twig' %}
     </div>
