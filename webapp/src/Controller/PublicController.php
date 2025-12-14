@@ -400,12 +400,17 @@ class PublicController extends BaseController
         if ($contest->getFreezetime() && $submission->getSubmittime() >= $contest->getFreezetime() && !$contest->getFreezeData()->showFinal()) {
             return $this->twigExtension->printResult('');
         }
-        if (!$submission->getJudgings()->first() || !$submission->getJudgings()->first()->getResult()) {
+        if ($this->dj->shadowMode()) {
+            $judgings = $submission->getExternalJudgements();
+        } else {
+            $judgings = $submission->getJudgings();
+        }
+        if (!$judgings->first() || !$judgings->first()->getResult()) {
             return $this->twigExtension->printResult('');
         }
-        if ($verificationRequired && !$submission->getJudgings()->first()->getVerified()) {
+        if ($verificationRequired && !$judgings->first()->getVerified()) {
             return $this->twigExtension->printResult('');
         }
-        return $this->twigExtension->printResult($submission->getJudgings()->first()->getResult(), onlyRejectedForIncorrect: true);
+        return $this->twigExtension->printResult($judgings->first()->getResult(), onlyRejectedForIncorrect: true);
     }
 }
