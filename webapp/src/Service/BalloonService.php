@@ -208,7 +208,7 @@ class BalloonService
         uasort($teamSummary, function ($a, $b) {
             $aKey = $a['location'] ?? $a['team']->getExternalId();
             $bKey = $b['location'] ?? $b['team']->getExternalId();
-            return strcasecmp((string)$aKey, (string)$bKey);
+            return strnatcasecmp((string)$aKey, (string)$bKey);
         });
 
         return $teamSummary;
