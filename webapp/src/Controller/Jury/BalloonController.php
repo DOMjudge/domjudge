@@ -59,6 +59,7 @@ class BalloonController extends AbstractController
         }
 
         $balloons_table = $balloonService->collectBalloonTable($contest);
+        $teamSummary = $balloonService->collectTeamBalloonSummary($balloons_table);
 
         // Add CSS class and actions.
         foreach ($balloons_table as $element) {
@@ -165,7 +166,8 @@ class BalloonController extends AbstractController
             'filteredCategories' => $filteredCategories,
             'availableCategories' => $availableCategories,
             'defaultCategories' => $defaultCategories,
-            'balloons' => $balloons_table
+            'balloons' => $balloons_table,
+            'teamSummary' => $teamSummary,
         ]);
     }
 
