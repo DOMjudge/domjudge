@@ -83,6 +83,16 @@
 {% block extrafooter %}
     {% if current_contest is not null %}
         <script>
+            const selectedBalloons = new Set();
+            function updateMarkMultipleDone() {
+                const anyChecked = $('.balloons-table input[type="checkbox"]:checked').length > 0;
+                if (anyChecked) {
+                    $('.mark-multiple-done-button').attr('disabled', false);
+                } else {
+                    $('.mark-multiple-done-button').attr('disabled', true);
+                }
+            }
+
             $(function () {
                 $('#filter-toggle').on('change', function () {
                     if ($(this).is(':checked')) {
@@ -159,6 +169,34 @@
                             })
                             .show();
                     }
+
+                    $('.balloons-table input[type="checkbox"]').on('change', function () {
+                        updateMarkMultipleDone();
+                        const balloonId = $(this).data('balloon-id');
+                        if ($(this).is(':checked')) {
+                            selectedBalloons.add(balloonId);
+                        } else {
+                            selectedBalloons.delete(balloonId);
+                        }
+                    });
+
+                    // Restore any selected balloons and clear any selectedBalloons that don't exist anymore
+                    const existingBalloonIds = new Set();
+                    $('.balloons-table input[type="checkbox"]').each(function() {
+                        existingBalloonIds.add($(this).data('balloon-id'));
+                    });
+
+                    for (const balloonId of selectedBalloons) {
+                        if (existingBalloonIds.has(balloonId)) {
+                            // Restore the selection
+                            $('.balloons-table input[type="checkbox"][data-balloon-id="' + balloonId + '"]').prop('checked', true);
+                        } else {
+                            // Remove from selectedBalloons as it no longer exists
+                            selectedBalloons.delete(balloonId);
+                        }
+                    }
+
+                    updateMarkMultipleDone();
                 };
 
                 $('select[data-filter-field]').on('change', process_balloons_filter);

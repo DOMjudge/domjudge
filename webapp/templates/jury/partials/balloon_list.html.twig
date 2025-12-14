@@ -4,60 +4,70 @@
 {% if balloons is empty %}
     <div class="alert alert-warning">No balloons</div>
 {% else %}
-    <table class="data-table table table-hover table-striped table-sm balloons-table" style="width:auto">
-        <thead class="thead-light">
-        <tr>
-            <th scope="col">&nbsp;</th>
-            <th scope="col">ID</th>
-            <th scope="col">time</th>
-            <th scope="col">solved</th>
-            <th scope="col">team</th>
-            <th scope="col">affiliation</th>
-            <th scope="col">location</th>
-            <th scope="col">category</th>
-            <th scope="col">total</th>
-            <th scope="col"></th>
-        </tr>
-        </thead>
-        <tbody>
-        {%- for balloon in balloons %}
-            <tr class="{% if balloon.data.done %}disabled{% endif %}"
-                data-affiliation-id="{{ balloon.data.affiliationid }}"
-                data-location-str="{{ balloon.data.location }}"
-                data-category-id="{{ balloon.data.categoryid }}">
-                <td>
-                {%- if balloon.data.done -%}
-                    <i class="far fa-check-circle"></i>
-                {%- else -%}
-                    <i class="far fa-hourglass"></i>
-                {%- endif -%}
-                <td>{{ balloon.data.balloonid }}</td>
-                <td data-order="{{ balloon.data.time }}">{{ balloon.data.time | printtime }}</td>
-                <td>{{ balloon.data.contestproblem | problemBadge }}</td>
-                <td>
-                    {{ balloon.data.team | entityIdBadge('t') }}
-                    {{ balloon.data.team.effectiveName | u.truncate(teamname_max_length, '…') }}
-                </td>
-                <td>{{ balloon.data.affiliation }}</td>
-                <td>{{ balloon.data.location }}</td>
-                <td>{{ balloon.data.category }}</td>
-                <td>
-                {%- for totalballoon in balloon.data.total -%}
-                    {{ totalballoon | problemBadge }}&nbsp;
-                {%- endfor -%}
-                </td>
-                <td>
-                    {%- if not balloon.data.done -%}
-                    {%- set link = path('jury_balloons_setdone', {balloonId: balloon.data.balloonid}) %}
-                    <a href="{{ link }}" title="mark balloon as done">
-                    <i class="fas fa-running"></i>
-                    </a>
-                </td>
-                {%- endif -%}
-            </tr>
-        {%- endfor %}
+    <form action="{{ path('jury_balloons_setdone_multiple') }}" method="post">
+        <input type="submit" class="btn btn-primary mark-multiple-done-button" value="Mark selected as done" />
 
-        </tbody>
-    </table>
+        <table class="data-table table table-hover table-striped table-sm balloons-table" style="width:auto">
+            <thead class="thead-light">
+            <tr>
+                <th scope="col">&nbsp;</th>
+                <th scope="col">ID</th>
+                <th scope="col">time</th>
+                <th scope="col">solved</th>
+                <th scope="col">team</th>
+                <th scope="col">affiliation</th>
+                <th scope="col">location</th>
+                <th scope="col">category</th>
+                <th scope="col">total</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {%- for balloon in balloons %}
+                <tr class="{% if balloon.data.done %}disabled{% endif %}"
+                    data-affiliation-id="{{ balloon.data.affiliationid }}"
+                    data-location-str="{{ balloon.data.location }}"
+                    data-category-id="{{ balloon.data.categoryid }}">
+                    <td>
+                    {%- if balloon.data.done -%}
+                        <i class="far fa-check-circle"></i>
+                    {%- else -%}
+                        <i class="far fa-hourglass"></i>
+                    {%- endif -%}
+                    </td>
+                    <td>{{ balloon.data.balloonid }}</td>
+                    <td data-order="{{ balloon.data.time }}">{{ balloon.data.time | printtime }}</td>
+                    <td>{{ balloon.data.contestproblem | problemBadge }}</td>
+                    <td>
+                        {{ balloon.data.team | entityIdBadge('t') }}
+                        {{ balloon.data.team.effectiveName | u.truncate(teamname_max_length, '…') }}
+                    </td>
+                    <td>{{ balloon.data.affiliation }}</td>
+                    <td>{{ balloon.data.location }}</td>
+                    <td>{{ balloon.data.category }}</td>
+                    <td>
+                    {%- for totalballoon in balloon.data.total -%}
+                        {{ totalballoon | problemBadge }}&nbsp;
+                    {%- endfor -%}
+                    </td>
+                    <td>
+                        {%- if not balloon.data.done -%}
+                        {%- set link = path('jury_balloons_setdone', {balloonId: balloon.data.balloonid}) %}
+                        <a href="{{ link }}" title="mark balloon as done">
+                        <i class="fas fa-running"></i>
+                        </a>
+                        {%- endif -%}
+                    </td>
+                    <td>
+                        {% if not balloon.data.done %}
+                            <input type="checkbox" name="balloonIds[]" data-balloon-id="{{ balloon.data.balloonid }}" value="{{ balloon.data.balloonid }}" />
+                        {% endif %}
+                    </td>
+                </tr>
+            {%- endfor %}
+
+            </tbody>
+        </table>
+    </form>
 
 {% endif %}
