@@ -1,0 +1,37 @@
+name: Judge unit tests
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+
+jobs:
+  judge-unit-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: webapp/vendor
+          key: composer-${{ hashFiles('webapp/composer.lock') }}
+          restore-keys: |
+            composer-
+
+      - name: Install composer dependencies
+        working-directory: webapp
+        run: composer install --no-scripts --ignore-platform-reqs
+
+      - name: Run judge unit tests
+        working-directory: judge/tests
+        run: ../../webapp/vendor/bin/phpunit --configuration phpunit.xml --testdox

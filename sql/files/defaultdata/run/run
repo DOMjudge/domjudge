@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Run wrapper-script called from 'testcase_run.sh'.
+# Run wrapper-script called from judgedaemon
 # See that script for more info.
 #
 # Usage: $0 <testin> <progout> <program>...

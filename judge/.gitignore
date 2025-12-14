@@ -6,3 +6,4 @@
 /evict
 /create-cgroups.service
 /domjudge-judgedaemon@.service
+/tests/.phpunit.result.cache

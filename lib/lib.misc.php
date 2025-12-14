@@ -129,3 +129,15 @@ function version() : never
         "General Public Licence for details.\n";
     exit(0);
 }
+
+/**
+ * Append content to a file.
+ *
+ * @param string $filename The file to append to
+ * @param string $content  The content to append
+ * @return int|false       The number of bytes that were written to the file, or false on failure.
+ */
+function appendToFile(string $filename, string $content)
+{
+    return file_put_contents($filename, $content, FILE_APPEND);
+}
