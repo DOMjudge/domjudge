@@ -31,6 +31,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Exception\MissingResourceException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -122,6 +124,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('medalType', $this->awards->medalType(...)),
             new TwigFilter('numTableActions', $this->numTableActions(...)),
             new TwigFilter('extensionToMime', $this->extensionToMime(...)),
+            new TwigFilter('relativePath', $this->relativePath(...), ['is_safe' => ['html']]),
         ];
     }
 
@@ -359,7 +362,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                        $status);
     }
 
-    public function countryFlag(?string $alpha3CountryCode, bool $showFullname = false): string
+    public function countryFlag(?string $alpha3CountryCode, bool $showFullname = false, bool $relative = false): string
     {
         if (empty($alpha3CountryCode)) {
             return '';
@@ -372,6 +375,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
         $assetFunction  = $this->twig->getFunction('asset')->getCallable();
         $countryFlagUrl = call_user_func($assetFunction, sprintf('flags/4x3/%s.svg', $countryAlpha2));
+        $countryFlagUrl = $this->relativePath($countryFlagUrl, $relative);
 
         $countryName    = Countries::getAlpha3Name($alpha3CountryCode);
 
@@ -383,11 +387,12 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
            $countryFlagUrl, $alpha3CountryCode, $countryName);
     }
 
-    public function affiliationLogo(string $affiliationId, string $shortName): string
+    public function affiliationLogo(string $affiliationId, string $shortName, bool $relative = false): string
     {
         if ($asset = $this->dj->assetPath($affiliationId, 'affiliation')) {
             $assetFunction = $this->twig->getFunction('asset')->getCallable();
             $assetUrl      = call_user_func($assetFunction, $asset);
+            $assetUrl      = $this->relativePath($assetUrl, $relative);
             return sprintf('<img src="%s" alt="%s" class="affiliation-logo">',
                            htmlspecialchars($assetUrl), htmlspecialchars($shortName));
         }
@@ -1158,7 +1163,7 @@ EOF;
         }
 
         $submissionsUrl = $static
-            ? $this->router->generate('public_submissions_data')
+            ? $this->router->generate('public_submissions_data', referenceType: UrlGeneratorInterface::RELATIVE_PATH)
             : $this->router->generate('public_submissions_data_cell', [
                 'teamId' => $score->team->getExternalid(),
                 'problemId' => $problem->getExternalId(),
@@ -1343,5 +1348,15 @@ EOF;
     public function extensionToMime(string $extension): string
     {
         return DOMJudgeService::EXTENSION_TO_MIMETYPE[$extension];
+    }
+
+    public function relativePath(string $path, bool $relative = true) : string
+    {
+        if (!$relative) {
+            return $path;
+        }
+        return UrlGenerator::getRelativePath(
+            $this->router->getContext()->getBaseUrl()
+            . $this->router->getContext()->getPathInfo(), $path);
     }
 }
