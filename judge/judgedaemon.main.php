@@ -18,6 +18,19 @@ require(LIBDIR . '/lib.misc.php');
 
 define('DONT_CARE', new class {});
 
+enum Verdict
+{
+    case CORRECT;
+    case COMPILER_ERROR;
+    case TIMELIMIT;
+    case RUN_ERROR;
+    case NO_OUTPUT;
+    case WRONG_ANSWER;
+    case OUTPUT_LIMIT;
+    case COMPARE_ERROR;
+    case INTERNAL_ERROR;
+}
+
 class JudgeDaemon
 {
     private static ?JudgeDaemon $instance = null;
@@ -852,7 +865,7 @@ class JudgeDaemon
         return trim(ob_get_clean());
     }
 
-    private function runCommandSafe(array $command_parts, &$retval = DONT_CARE, $log_nonzero_exitcode = true): bool
+    private function runCommandSafe(array $command_parts, &$retval = DONT_CARE, $log_nonzero_exitcode = true, $stdin_source = null, $stdout_target = null, $stderr_target = null): bool
     {
         if (empty($command_parts)) {
             logmsg(LOG_WARNING, "Need at least the command that should be called.");
@@ -861,6 +874,17 @@ class JudgeDaemon
         }
 
         $command = implode(' ', array_map('dj_escapeshellarg', $command_parts));
+        if ($stdin_source !== null) {
+            $command .= ' < ' . dj_escapeshellarg($stdin_source);
+        }
+        if ($stdout_target !== null) {
+            $command .= ' > ' . dj_escapeshellarg($stdout_target);
+        }
+        if ($stderr_target !== null) {
+            $command .= ' 2> ' . dj_escapeshellarg($stderr_target);
+        } else {
+            $command .= ' 2>&1';
+        }
 
         logmsg(LOG_DEBUG, "Executing command: $command");
         system($command, $retval_local);
@@ -1405,11 +1429,6 @@ class JudgeDaemon
         }
         $output_storage_limit = (int)$this->djconfigGetValue('output_storage_limit');
 
-        $cpuset_opt = "";
-        if (isset($this->options['daemonid'])) {
-            $cpuset_opt = '-n ' . dj_escapeshellarg($this->options['daemonid']);
-        }
-
         $workdir = $this->judgingDirectory($workdirpath, $judgeTask);
         $compile_success = $this->compile($judgeTask, $workdir, $workdirpath, $compile_config, $this->options['daemonid'] ?? null, $output_storage_limit);
         if (!$compile_success) {
@@ -1437,6 +1456,423 @@ class JudgeDaemon
         }
 
         return $this->runTestcase($judgeTask, $workdir, $workdirpath, $run_config, $compare_config, $output_storage_limit, $overshoot, $startTime);
+    }
+
+    private function testcaseRunInternal(
+        $input,
+        $output,
+        $timelimit,
+        $passdir,
+        $run_runpath,
+        $combined_run_compare,
+        $compare_runpath,
+        $compare_args
+    ) : Verdict {
+        // Record some state so that we can properly reset it later in the finally block
+        $oldCwd = getcwd();
+        $oldTmpDir = getenv('TMPDIR');
+        $oldVerbose = getenv('VERBOSE');
+        $resourceInfo = null;
+        $realWorkdir = null;
+
+        try {
+            if (!is_readable($input)) {
+                logmsg(LOG_WARNING, "Test input not found at '$input'.");
+                return Verdict::INTERNAL_ERROR;
+            }
+            if (!is_readable($output)) {
+                logmsg(LOG_WARNING, "Test output not found at '$output'.");
+                return Verdict::INTERNAL_ERROR;
+            }
+            if (!is_dir($passdir) || !is_writable($passdir) || !is_executable($passdir)) {
+                logmsg(LOG_WARNING, "Pass directory '$passdir' not found or not writable/executable.");
+                return Verdict::INTERNAL_ERROR;
+            }
+
+            $realWorkdir = realpath($passdir);
+            $prefix = '/' . basename(dirname($realWorkdir)) . '/' . basename($realWorkdir);
+            if (!chdir($realWorkdir)) {
+                logmsg(LOG_WARNING, "Could not chdir to '$realWorkdir'.");
+                return Verdict::INTERNAL_ERROR;
+            }
+            if (!chmod($realWorkdir, 0755)) {
+                logmsg(LOG_WARNING, "Could not chmod '$realWorkdir' to 0755.");
+                return Verdict::INTERNAL_ERROR;
+            }
+
+            if (is_dir("$realWorkdir/execdir") && !chmod("$realWorkdir/execdir", 0755)) {
+                logmsg(LOG_WARNING, "Could not chmod '$realWorkdir/execdir' to 0755.");
+                return Verdict::INTERNAL_ERROR;
+            }
+
+            $program = "execdir/program";
+            if (!is_executable($program)) {
+                logmsg(LOG_WARNING, "Program '$program' not found or not executable, our current path is: " . getcwd());
+                return Verdict::INTERNAL_ERROR;
+            }
+            if (!is_executable($run_runpath)) {
+                logmsg(LOG_WARNING, "Run script '$run_runpath' not found or not executable.");
+                return Verdict::INTERNAL_ERROR;
+            }
+            if (!$combined_run_compare && !is_executable($compare_runpath)) {
+                logmsg(LOG_WARNING, "Compare script '$compare_runpath' not found or not executable.");
+                return Verdict::INTERNAL_ERROR;
+            }
+
+            foreach ([
+                         'system.out',                   # Judging system output (info/debug/error)
+                         'program.out','program.err',    # Program output and stderr (for extra information)
+                         'program.meta', 'runguard.err', # Metadata and runguard stderr
+                         'compare.meta', 'compare.err'   # Compare runguard metadata and stderr
+                     ] as $file) {
+                if (!touch($file)) {
+                    logmsg(LOG_WARNING, "Could not create '$file'.");
+                    return Verdict::INTERNAL_ERROR;
+                }
+            }
+
+            logmsg(LOG_DEBUG, "setting up testing (chroot) environment");
+
+            if (!copy($input, "$realWorkdir/testdata.in")) {
+                logmsg(LOG_WARNING, "Could not copy '$input' to '$realWorkdir/testdata.in'.");
+                return Verdict::INTERNAL_ERROR;
+            }
+
+            foreach (['bin', 'dj-bin', 'dev'] as $dir) {
+                $actualDir = '../../' . $dir;
+                if (!is_dir($actualDir)) {
+                    if (!mkdir($actualDir, 0711, true)) {
+                        logmsg(LOG_WARNING, "Could not create '$actualDir'.");
+                        return Verdict::INTERNAL_ERROR;
+                    }
+                }
+            }
+
+            // Support for interactive problems
+            if ($combined_run_compare) {
+                if (!copy(BINDIR . '/runpipe', "../../dj-bin/runpipe")) {
+                    logmsg(LOG_WARNING, "Could not copy 'runpipe' to '../../dj-bin/runpipe'.");
+                    return Verdict::INTERNAL_ERROR;
+                }
+                if (!chmod("../../dj-bin/runpipe", 0755)) {
+                    logmsg(LOG_WARNING, "Could not chmod '../../dj-bin/runpipe' to 0755.");
+                    return Verdict::INTERNAL_ERROR;
+                }
+            }
+
+            // If we need to create a writable temp directory, do so
+            if (CREATE_WRITABLE_TEMP_DIR) {
+                putenv("TMPDIR=$prefix/write_tmp");
+                if (!is_dir("$realWorkdir/write_tmp")) {
+                    if (!mkdir("$realWorkdir/write_tmp", 0777, true)) {
+                        logmsg(LOG_WARNING, "Could not create '$realWorkdir/write_tmp'.");
+                        return Verdict::INTERNAL_ERROR;
+                    }
+                }
+            }
+
+            logmsg(LOG_DEBUG, "Running program");
+            $run_args = [
+                $run_runpath,
+                'testdata.in', 'program.out'
+            ];
+            if ($combined_run_compare) {
+                // A combined run and compare script may now already need the
+                // feedback directory, and perhaps access to the test answers (but
+                // only the original that lives outside the chroot).
+                mkdir('feedback', 0755, true);
+                array_push($run_args, "$output", 'compare.meta', 'feedback');
+            }
+
+            $cpu_limit = implode(':', $timelimit['cpu']);
+            $wall_limit = implode(':', $timelimit['wall']);
+
+            // TODO: Clean this up in a follow-up change, and pass it more directly.
+            $proclimit = getenv('PROCLIMIT');
+            $memlimit = getenv('MEMLIMIT');
+            $filelimit = getenv('FILELIMIT');
+            $debug = getenv('DEBUG');
+            $runuser = getenv('RUNUSER');
+            $rungroup = getenv('RUNGROUP');
+
+            if ($debug) {
+                putenv('VERBOSE=7');
+            }
+
+            $gainroot = ['sudo', '-n'];
+            $cpuset = is_null($this->daemonid) ? [] : ['-P', $this->daemonid];
+
+            $runguard_args = [BINDIR . "/runguard"];
+            if (CREATE_WRITABLE_TEMP_DIR) {
+                $runguard_args[] = '-V';
+                $runguard_args[] = "TMPDIR=$prefix/write_tmp";
+            }
+            if ($debug) {
+                $runguard_args[] = '-v';
+                $runguard_args[] = '-V';
+                $runguard_args[] = "DEBUG=$debug";
+            }
+
+            $run_args = array_merge(
+                $run_args,
+                $gainroot,
+                $runguard_args,
+                $cpuset,
+                [
+                    '-r', "$realWorkdir/../../",
+                    "--nproc=$proclimit",
+                    "--no-core",
+                    "--streamsize=$filelimit",
+                    "--user=$runuser",
+                    "--group=$rungroup",
+                    "--walltime=$wall_limit",
+                    "--cputime=$cpu_limit",
+                    "--memsize=$memlimit",
+                    "--filesize=$filelimit",
+                    "--stderr=program.err",
+                    "--outmeta=program.meta",
+                    "--",
+                    "$prefix/execdir/program",
+                ]
+            );
+
+            $this->runCommandSafe($run_args, $exitcode, log_nonzero_exitcode: false, stderr_target: "runguard.err");
+
+            if (CREATE_WRITABLE_TEMP_DIR) {
+                // Revoke access to the TMPDIR as security measure
+                if (!chown("$realWorkdir/write_tmp", posix_getpwuid(posix_geteuid())['uid'])) {
+                    logmsg(LOG_WARNING, "Could not chown '$realWorkdir/write_tmp' to us");
+                    return Verdict::INTERNAL_ERROR;
+                }
+                if (!chmod("$realWorkdir/write_tmp", 0700)) {
+                    logmsg(LOG_WARNING, "Could not chmod '$realWorkdir/write_tmp' to 0700");
+                    return Verdict::INTERNAL_ERROR;
+                }
+            }
+
+            if (!$combined_run_compare) {
+                logmsg(LOG_DEBUG, "Comparing output");
+
+                if (!copy($output, "$realWorkdir/testdata.out")) {
+                    logmsg(LOG_WARNING, "Could not copy '$output' to '$realWorkdir/testdata.out'.");
+                    return Verdict::INTERNAL_ERROR;
+                }
+
+                logmsg(LOG_DEBUG, "Starting compare script '" . $compare_runpath ."'");
+
+                if (!is_dir('feedback')) {
+                    if (!mkdir('feedback', 0777, true)) {
+                        logmsg(LOG_WARNING, "Could not create 'feedback'.");
+                        return Verdict::INTERNAL_ERROR;
+                    }
+                }
+                // We need to set permissions explicitly for two reasons:
+                // `umask` might block them from being 0777, and for multi-pass problems there is the implicit contract
+                // of keeping files around between passes. This is ugly, but what the spec currently dictates.
+                // Cannot use `chmod` here directly because of recursion.
+                if (!$this->runCommandSafe(
+                    [
+                        'chmod',
+                        '-R',
+                        'go+w',
+                        'feedback',
+                    ]
+                )) {
+                    logmsg(LOG_WARNING, "Could not chmod 'feedback' to go+w.");
+                    return Verdict::INTERNAL_ERROR;
+                }
+
+                // TODO: Clean this up in a follow-up change, and pass it more directly.
+                $scriptmemlimit = (string)getenv('SCRIPTMEMLIMIT');
+                $scripttimelimit = (string)getenv('SCRIPTTIMELIMIT');
+                $scriptfilelimit = (string)getenv('SCRIPTFILELIMIT');
+                // TODO: Perhaps we should change this in the database to be an array of args?
+                $orig_compare_args = [];
+                if ($compare_args !== null && strlen($compare_args) > 0) {
+                    $orig_compare_args = explode(' ', $compare_args);
+                }
+
+                $compare_args = array_merge(
+                    $gainroot,
+                    [BINDIR . "/runguard"],
+                    $cpuset,
+                    [
+                        "--user=$runuser",
+                        "--group=$rungroup",
+                        "-m", $scriptmemlimit,
+                        "-t", $scripttimelimit,
+                        "-f", $scriptfilelimit,
+                        "-s", $scriptfilelimit,
+                        "--no-core",
+                        "-M", "compare.meta",
+                        "--",
+                        $compare_runpath,
+                        "testdata.in",
+                        "testdata.out",
+                        "feedback/",
+                    ],
+                    $orig_compare_args,
+                );
+                $this->runCommandSafe($compare_args, $exitcode, log_nonzero_exitcode: false, stdin_source: "program.out", stdout_target: "compare.tmp");
+            }
+
+            $this->runCommandSafe(
+                array_merge(
+                    $gainroot,
+                    [
+                        'chown',
+                        '-R',
+                        posix_getpwuid(posix_geteuid())['name'] . ":",
+                        "$realWorkdir/feedback"
+                    ]
+                )
+            );
+
+            // Cannot use chmod directly here for recursion.
+            if (!$this->runCommandSafe(
+                [
+                    'chmod',
+                    '-R',
+                    'go-w',
+                    'feedback',
+                ]
+            )) {
+                logmsg(LOG_WARNING, "Could not chmod 'feedback' to go-w.");
+                return Verdict::INTERNAL_ERROR;
+            }
+
+            // Make sure that feedback file exists, since we assume this later.
+            logmsg(LOG_DEBUG, "$realWorkdir/feedback/judgemessage.txt");
+            if (!touch("$realWorkdir/feedback/judgemessage.txt")) {
+                logmsg(LOG_WARNING, "Could not create '$realWorkdir/feedback/judgemessage.txt'.");
+                return Verdict::INTERNAL_ERROR;
+            }
+
+            if (is_readable("$realWorkdir/feedback/judgeerror.txt") && filesize("$realWorkdir/feedback/judgeerror.txt") > 0) {
+                appendToFile("$realWorkdir/feedback/judgemessage.txt", "\n---------- output validator (error) messages ----------\n");
+                appendToFile("$realWorkdir/feedback/judgemessage.txt", file_get_contents("$realWorkdir/feedback/judgeerror.txt"));
+            }
+
+            logmsg(LOG_DEBUG, "checking compare script exit status: $exitcode");
+            $compare_meta = file_get_contents("compare.meta");
+            $compare_tmp = is_readable("compare.tmp") ? file_get_contents("compare.tmp") : "";
+            if (preg_match('/time-result: .*timelimit/', $compare_meta)) {
+                logmsg(LOG_ERR, "Comparing aborted after the script timelimit of %s seconds, compare script output:\n%s", $scripttimelimit, $compare_tmp);
+                return Verdict::COMPARE_ERROR;
+            }
+
+            // Append output validator stdin/stderr - display separately?
+            if ($compare_tmp && strlen($compare_tmp) > 0) {
+                appendToFile("$realWorkdir/feedback/judgemessage.txt", "\n---------- output validator (error) messages ----------\n");
+                appendToFile("$realWorkdir/feedback/judgemessage.txt", $compare_tmp);
+            }
+
+            if (!is_readable("program.meta")) {
+                logmsg(LOG_ERR, "'program.meta' is not readable");
+                return Verdict::INTERNAL_ERROR;
+            }
+            logmsg(LOG_DEBUG, "checking program exit status");
+            $program_meta_ini = $this->readMetadata('program.meta');
+            logmsg(LOG_DEBUG, "parsed program meta: " . var_export($program_meta_ini, true));
+            $resourceInfo = "\nruntime: "
+                . $program_meta_ini['cpu-time'] . 's cpu, '
+                . $program_meta_ini['wall-time'] . "s wall\n"
+                . 'memory: ' . $program_meta_ini['memory-bytes'] . ' bytes';
+
+            $compare_meta_ini = $this->readMetadata('compare.meta');
+            logmsg(LOG_DEBUG, "parsed compare meta: " . var_export($compare_meta_ini, true));
+
+            if ($combined_run_compare && $compare_meta_ini['validator-exited-first'] == 'true' && $compare_meta_ini['exitcode'] == '43') {
+                // For interactive problems with combined run/compare scripts, a
+                // WA may override TLE and RTE.
+                // FIXME: Maybe we are interested in when what program exited. If so, we
+                // can write this to compare.meta
+                if (preg_match('/.*timelimit.*/', $program_meta_ini['time-result'])) {
+                    appendToFile("system.out", "Timelimit exceeded, but validator exited first with WA.");
+                } elseif ($program_meta_ini['exitcode'] != 0) {
+                    appendToFile("system.out", "Non-zero exitcode " . $program_meta_ini['exitcode'] . ", but validator exited first with WA.");
+                }
+                appendToFile("system.out", "Wrong answer!");
+                return Verdict::WRONG_ANSWER;
+            }
+
+            if (preg_match('/.*timelimit.*/', $program_meta_ini['time-result'])) {
+                appendToFile("system.out", "Timelimit exceeded.");
+                return Verdict::TIMELIMIT;
+            }
+
+            if ($program_meta_ini['exitcode'] !== '0') {
+                appendToFile("system.out", "Non-zero exitcode " . $program_meta_ini['exitcode']);
+                return Verdict::RUN_ERROR;
+            }
+
+            // Check whether stdout is in the list of truncated output streams
+            // These could be either 'stdout', 'stderr,stdout', or 'stdout,stderr'
+            $outputTruncated = $program_meta_ini['output-truncated'] ?? '';
+            $truncatedStreams = explode(',', $outputTruncated);
+            if (in_array('stdout', $truncatedStreams, true)) {
+                appendToFile("system.out", "Output limit exceeded: " . $program_meta_ini['stdout-bytes'] . " bytes more than the limit of " .  $filelimit*1024 . " bytes");
+                return Verdict::OUTPUT_LIMIT;
+            }
+
+            if ($exitcode === 42) {
+                appendToFile("system.out", "Correct!");
+                return Verdict::CORRECT;
+            }
+            if ($exitcode === 43) {
+                if (!$combined_run_compare && filesize("program.out") === 0) {
+                    appendToFile("system.out", "Program produced no output.");
+                    return Verdict::NO_OUTPUT;
+                }
+                appendToFile("system.out", "Wrong answer!");
+                return Verdict::WRONG_ANSWER;
+            }
+
+            return Verdict::COMPARE_ERROR;
+        } finally {
+            if ($realWorkdir) {
+                if ($resourceInfo !== null) {
+                    appendToFile("$realWorkdir/system.out", $resourceInfo);
+                }
+
+                if (is_readable("$realWorkdir/runguard.err") && filesize("$realWorkdir/runguard.err") > 0) {
+                    appendToFile("$realWorkdir/system.out", "\n********** runguard stderr follows **********\n");
+                    appendToFile("$realWorkdir/system.out", file_get_contents("$realWorkdir/runguard.err"));
+                }
+
+                $runpipePath = dirname($realWorkdir, 2) . '/dj-bin/runpipe';
+                if (file_exists($runpipePath)) {
+                    unlink($runpipePath);
+                }
+
+                if (file_exists("$realWorkdir/testdata.in")) {
+                    unlink("$realWorkdir/testdata.in");
+                    symlink($input, "$realWorkdir/testdata.in");
+                }
+
+                if (file_exists("$realWorkdir/testdata.out")) {
+                    unlink("$realWorkdir/testdata.out");
+                    symlink($output, "$realWorkdir/testdata.out");
+                }
+
+                // Remove access to workdir for next runs
+                chmod($realWorkdir, 0700);
+            }
+
+            if ($oldTmpDir === false) {
+                putenv('TMPDIR');
+            } else {
+                putenv("TMPDIR=$oldTmpDir");
+            }
+
+            if ($oldVerbose === false) {
+                putenv('VERBOSE');
+            } else {
+                putenv("VERBOSE=$oldVerbose");
+            }
+
+            chdir($oldCwd);
+        }
     }
 
     private function runTestcase(
@@ -1472,7 +1908,7 @@ class JudgeDaemon
         }
 
         if ($combined_run_compare) {
-            // set to empty string to signal the testcase_run script that the
+            // set to empty string to signal that the
             // run script also acts as compare script
             $compare_runpath = '';
         } else {
@@ -1544,30 +1980,18 @@ class JudgeDaemon
                 }
             }
 
-            $timelimit_str = implode(':', $timelimit['cpu']) . ',' . implode(':', $timelimit['wall']);
-            $run_command_parts = [LIBJUDGEDIR . '/testcase_run.sh'];
-            if (isset($this->options['daemonid'])) {
-                $run_command_parts[] = '-n';
-                $run_command_parts[] = $this->options['daemonid'];
-            }
-            array_push(
-                $run_command_parts,
+            $verdict = $this->testcaseRunInternal(
                 $input,
                 $output,
-                $timelimit_str,
+                $timelimit,
                 $passdir,
                 $run_runpath,
+                $combined_run_compare,
                 $compare_runpath,
                 $compare_config['compare_args']
             );
-            $this->runCommandSafe($run_command_parts, $retval, log_nonzero_exitcode: false);
 
-            // What does the exitcode mean?
-            if (!isset($this->EXITCODES[$retval])) {
-                alert('error');
-                error("Unknown exitcode ($retval) from testcase_run.sh for s$judgeTask[submitid]");
-            }
-            $result = $this->EXITCODES[$retval];
+            $result = str_replace('_', '-', strtolower($verdict->name));
 
             // Try to read metadata from file
             $runtime = null;
