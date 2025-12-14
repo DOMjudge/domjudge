@@ -5,6 +5,8 @@
     <div class="alert alert-warning">No balloons</div>
 {% else %}
     <form action="{{ path('jury_balloons_setdone_multiple') }}" method="post">
+        <input type="submit" class="btn btn-primary mark-multiple-done-button" value="Mark selected as done" />
+
         <table class="data-table table table-hover table-striped table-sm balloons-table" style="width:auto">
             <thead class="thead-light">
             <tr>
@@ -66,8 +68,6 @@
 
             </tbody>
         </table>
-
-        <input type="submit" class="btn btn-primary mark-multiple-done-button" value="Mark selected as done" />
     </form>
 
     {% if teamSummary is defined and teamSummary is not empty %}
