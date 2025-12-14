@@ -175,14 +175,25 @@ class BalloonService
         return $balloons_table;
     }
 
-    public function setDone(int $balloonId): void
+    /**
+     * @param int|list<int> $balloonId
+     */
+    public function setDone(int|array $balloonId): void
     {
         $em = $this->em;
-        $balloon = $em->getRepository(Balloon::class)->find($balloonId);
-        if (!$balloon) {
-            throw new NotFoundHttpException('balloon not found');
+        $balloons = $em->createQueryBuilder()
+            ->from(Balloon::class, 'b')
+            ->select('b')
+            ->andWhere('b.balloonid IN (:balloonIds)')
+            ->setParameter('balloonIds', $balloonId)
+            ->getQuery()
+            ->getResult();
+        if (empty($balloons)) {
+            throw new NotFoundHttpException('balloon(s) not found');
         }
-        $balloon->setDone(true);
+        foreach ($balloons as $balloon) {
+            $balloon->setDone(true);
+        }
         $em->flush();
     }
 }

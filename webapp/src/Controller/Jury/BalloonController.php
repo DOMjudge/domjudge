@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -153,7 +154,7 @@ class BalloonController extends AbstractController
 
         return $this->render('jury/balloons.html.twig', [
             'refresh' => [
-                'after' => 60,
+                'after' => 3,
                 'url' => $this->generateUrl('jury_balloons'),
                 'ajax' => true
             ],
@@ -172,6 +173,15 @@ class BalloonController extends AbstractController
     public function setDoneAction(int $balloonId, BalloonService $balloonService): RedirectResponse
     {
         $balloonService->setDone($balloonId);
+
+        return $this->redirectToRoute("jury_balloons");
+    }
+
+    #[Route(path: '/done', name: 'jury_balloons_setdone_multiple', methods: ['POST'])]
+    public function setMultipleDoneAction(Request $request, BalloonService $balloonService): RedirectResponse
+    {
+        $balloonIds = $request->request->all('balloonIds');
+        $balloonService->setDone($balloonIds);
 
         return $this->redirectToRoute("jury_balloons");
     }
