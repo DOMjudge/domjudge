@@ -223,7 +223,7 @@ To allow for problems that do not fit within the standard scheme of
 fixed input and/or output, DOMjudge has the possibility to change the
 way submissions are run and checked for correctness.
 
-The back end script ``testcase_run.sh`` that handles
+The judgedaemon that handles
 the running and checking of submissions, calls separate programs
 for running submissions and comparison of the results. These can be
 specialised and adapted to the requirements per problem. For this, one
@@ -257,8 +257,7 @@ output. The validator program should not make any assumptions on its
 working directory.
 
 For more details on writing and modifying a compare (or validator)
-script, see the ``boolfind_cmp`` example and the comments at the
-top of the file ``testcase_run.sh``.
+script, see the ``boolfind_cmp`` example.
 
 Run programs
 ------------
