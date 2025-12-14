@@ -155,7 +155,7 @@ class BalloonController extends AbstractController
 
         return $this->render('jury/balloons.html.twig', [
             'refresh' => [
-                'after' => 3,
+                'after' => 60,
                 'url' => $this->generateUrl('jury_balloons'),
                 'ajax' => true
             ],
