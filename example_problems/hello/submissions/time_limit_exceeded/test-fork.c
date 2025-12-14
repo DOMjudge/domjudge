@@ -4,7 +4,7 @@
  * timeout.
  *
  * The result should be a TIMELIMIT and the running forked programs
- * killed by testcase_run.
+ * killed by the judgedaemon.
  *
  * @EXPECTED_RESULTS@: TIMELIMIT
  */

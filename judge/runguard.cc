@@ -266,7 +266,7 @@ void die(int errnum, std::format_string<Args...> fmt, Args&&... args)
 			/*
 			 * continue, there is not much we can do here.
 			 * In the worst case, this will trigger an error
-			 * in testcase_run.sh, as the runuser may still be
+			 * in the judgedaemon, as the runuser may still be
 			 * running processes
 			 */
 		}
