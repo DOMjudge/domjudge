@@ -70,4 +70,38 @@
         <input type="submit" class="btn btn-primary mark-multiple-done-button" value="Mark selected as done" />
     </form>
 
+    {% if teamSummary is defined and teamSummary is not empty %}
+        <h3 class="mt-4">Team Summary</h3>
+        <table class="data-table table table-hover table-striped table-sm team-summary-table" style="width:auto">
+            <thead class="thead-light">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">team</th>
+                <th scope="col">affiliation</th>
+                <th scope="col">location</th>
+                <th scope="col">category</th>
+                <th scope="col">total</th>
+            </tr>
+            </thead>
+            <tbody>
+            {%- for teamId, summary in teamSummary %}
+                <tr data-affiliation-id="{{ summary.affiliationid }}"
+                    data-location-str="{{ summary.location }}"
+                    data-category-id="{{ summary.categoryid }}">
+                    <td>{{ summary.team | entityIdBadge('t') }}</td>
+                    <td>{{ summary.team.effectiveName | u.truncate(teamname_max_length, '…') }}</td>
+                    <td>{{ summary.affiliation }}</td>
+                    <td>{{ summary.location }}</td>
+                    <td>{{ summary.category }}</td>
+                    <td>
+                    {%- for problem in summary.total -%}
+                        {{ problem | problemBadge }}&nbsp;
+                    {%- endfor -%}
+                    </td>
+                </tr>
+            {%- endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
 {% endif %}

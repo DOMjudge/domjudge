@@ -176,6 +176,45 @@ class BalloonService
     }
 
     /**
+     * Collect a summary of balloons per team, sorted by location (or external ID if no location).
+     *
+     * @param array<array{data: array{balloonid: int, time: string, problem: string, contestproblem: ContestProblem,
+     *                                team: Team, teamid: int, location: string|null, affiliation: string|null,
+     *                                affiliationid: int, category: string, categoryid: int, total: array<string, ContestProblem>,
+     *                                done: bool}}> $balloons
+     * @return array<int, array{team: Team, affiliation: string|null, affiliationid: int|null, location: string|null,
+     *                          category: string, categoryid: int, total: array<string, ContestProblem>}>
+     */
+    public function collectTeamBalloonSummary(array $balloons): array
+    {
+        $teamSummary = [];
+        foreach ($balloons as $balloon) {
+            $data = $balloon['data'];
+            $teamId = $data['teamid'];
+
+            if (!isset($teamSummary[$teamId])) {
+                $teamSummary[$teamId] = [
+                    'team' => $data['team'],
+                    'affiliation' => $data['affiliation'],
+                    'affiliationid' => $data['affiliationid'],
+                    'location' => $data['location'],
+                    'category' => $data['category'],
+                    'categoryid' => $data['categoryid'],
+                    'total' => $data['total'],
+                ];
+            }
+        }
+
+        uasort($teamSummary, function ($a, $b) {
+            $aKey = $a['location'] ?? $a['team']->getExternalId();
+            $bKey = $b['location'] ?? $b['team']->getExternalId();
+            return strcasecmp((string)$aKey, (string)$bKey);
+        });
+
+        return $teamSummary;
+    }
+
+    /**
      * @param int|list<int> $balloonId
      */
     public function setDone(int|array $balloonId): void
