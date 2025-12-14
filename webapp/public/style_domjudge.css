@@ -758,3 +758,9 @@ blockquote {
     height: 80vh;
     border: 1px solid grey;
 }
+
+.submissions-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

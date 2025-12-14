@@ -1291,7 +1291,7 @@ function loadSubmissions(dataElement, $displayElement) {
                     $item.find('[data-verdict]').html(submission.verdict);
                     $submissionList.append($item);
                 }
-                $displayElement.find('.spinner-border').remove();
+                $displayElement.find('.submissions-loading').remove();
                 $displayElement.append($table);
             }
         });
