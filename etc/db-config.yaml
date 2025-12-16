@@ -255,11 +255,11 @@
             default_value: false
             public: true
             description: Show results of TOO-LATE submissions in team interface?
-        -   name: show_balloons_postfreeze
-            type: bool
-            default_value: false
+        -   name: minimum_number_of_balloons
+            type: int
+            default_value: 0
             public: true
-            description: Give out balloon notifications after the scoreboard has been frozen?
+            description: How many balloons to hand out ignoring freeze time. Only hands out balloons for problems solved pre-freeze.
         -   name: show_relative_time
             type: bool
             default_value: false
