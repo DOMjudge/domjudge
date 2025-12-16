@@ -85,7 +85,7 @@
             {% if runs is empty %}
                 <p class="nodata">No sample cases available.</p>
             {% else %}
-                {% for run in runs %}
+                {% for idx, run in runs %}
                     <h5 id="run-{{ run.0.rank }}" class="text-center mt-4">Run {{ run.0.rank }}</h5>
 
                     {% set judgingRun = run.0.judgingRuns.first %}
@@ -99,10 +99,18 @@
                                         <th>Description</th>
                                         <td>{{ run.0.description(true) }}</td>
                                     </tr>
-                                    <tr>
-                                        <th>Runtime</th>
-                                        <td>{{ judgingRun.runtime }} sec</td>
-                                    </tr>
+                                    {% if showLimits %}
+                                        <tr>
+                                            <th>Runtime</th>
+                                            <td>{{ judgingRun.runtime }} sec</td>
+                                        </tr>
+                                        {% if metadata[idx] is defined %}
+                                            <tr>
+                                                <th>Memory usage</th>
+                                                <td>{{ metadata[idx]['memory-bytes'] | printSize }}</td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endif %}
                                     <tr>
                                         <th>Result</th>
                                         <td>
