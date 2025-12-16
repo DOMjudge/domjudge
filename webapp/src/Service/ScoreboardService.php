@@ -67,7 +67,7 @@ class ScoreboardService
         if (!$freezeData->started() && !$jury && !$forceUnfrozen) {
             return null;
         }
-        $restricted = ($jury || $freezeData->showFinal(false));
+        $restricted = ($jury || $freezeData->showFinal(false) || $forceUnfrozen);
 
         $teams      = $this->getTeamsInOrder($contest, $jury && !$visibleOnly, $filter, $restricted);
         $problems   = $this->getProblems($contest);
