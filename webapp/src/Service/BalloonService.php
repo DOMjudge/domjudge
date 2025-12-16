@@ -125,6 +125,12 @@ class BalloonService
                 continue;
             }
 
+            $stime = $balloonsData['submittime'];
+
+            if (isset($freezetime) && $stime >= $freezetime) {
+                continue;
+            }
+
             $TOTAL_BALLOONS[$balloonsData['teamid']][$balloonsData['probshortname']] = $balloonsData[0]->getSubmission()->getContestProblem();
         }
 
