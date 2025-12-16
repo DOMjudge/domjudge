@@ -529,7 +529,13 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         $problem       = $object[0];
         $testDataCount = (int)$object['testdatacount'];
         if ($this->dj->checkrole('jury')) {
-            return new ContestProblemWrapper($problem, $testDataCount);
+            return new ContestProblemWrapper(
+                $problem,
+                (int)round(($problem->getProblem()->getMemlimit() === null ? $this->config->get('memory_limit') : $problem->getProblem()->getMemlimit()) / 1024),
+                (int)round(($problem->getProblem()->getOutputlimit() === null ? $this->config->get('output_limit') : $problem->getProblem()->getOutputlimit()) / 1024),
+                $this->config->get('sourcesize_limit'),
+                $testDataCount,
+            );
         } else {
             return $problem;
         }
