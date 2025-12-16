@@ -250,6 +250,13 @@
             default_value: false
             public: true
             description: Should teams be able to view a diff of their and the reference output on sample testcases?
+        -   name: show_all_testcase_verdicts
+            type: bool
+            default_value: false
+            public: true
+            description: |
+                Show verdicts for all testcases on the team interface.
+                If `show_limits_on_team_page` is also set, also display runtime and memory usage.
         -   name: show_too_late_result
             type: bool
             default_value: false
@@ -281,7 +288,7 @@
             type: bool
             default_value: true
             public: true
-            description: Show time and memory limit on the team problems page.
+            description: Show time and memory limit on the team problems and submission details page.
         -   name: allow_team_submission_download
             type: bool
             default_value: false

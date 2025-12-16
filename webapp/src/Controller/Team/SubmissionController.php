@@ -4,6 +4,7 @@ namespace App\Controller\Team;
 
 use App\Controller\BaseController;
 use App\Entity\Judging;
+use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
@@ -14,6 +15,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
@@ -121,6 +123,7 @@ class SubmissionController extends BaseController
         $verificationRequired = (bool)$this->config->get('verification_required');
         $showCompile          = $this->config->get('show_compile');
         $showSampleOutput     = $this->config->get('show_sample_output');
+        $showAllTestcases     = $this->config->get('show_all_testcase_verdicts');
         $allowDownload        = (bool)$this->config->get('allow_team_submission_download');
         $showTooLateResult    = $this->config->get('show_too_late_result');
         $user                 = $this->dj->getUser();
@@ -150,7 +153,7 @@ class SubmissionController extends BaseController
         }
 
         $runs = [];
-        if ($showSampleOutput && $judging && $judging->getResult() !== 'compiler-error') {
+        if (($showSampleOutput || $showAllTestcases) && $judging && $judging->getResult() !== 'compiler-error') {
             $outputDisplayLimit    = (int)$this->config->get('output_display_limit');
             $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
 
@@ -159,9 +162,9 @@ class SubmissionController extends BaseController
                 ->join('t.content', 'tc')
                 ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
                 ->leftJoin('jr.output', 'jro')
-                ->select('t', 'jr', 'tc')
+                ->select('t', 'jr', 'jro', 'tc')
                 ->andWhere('t.problem = :problem')
-                ->andWhere('t.sample = 1')
+                ->andWhere('jr.runresult IS NOT NULL')
                 ->setParameter('judging', $judging)
                 ->setParameter('problem', $judging->getSubmission()->getProblem())
                 ->orderBy('t.ranknumber');
@@ -191,6 +194,15 @@ class SubmissionController extends BaseController
                 ->getResult();
         }
 
+        $metadata = [];
+        foreach ($runs as $index => $runData) {
+            /** @var JudgingRun|null $run */
+            $run = $runData[0]->getJudgingRuns()->first();
+            if ($run?->getOutput()?->getMetadata()) {
+                $metadata[$index] = Utils::parseMetadata($run->getOutput()->getMetadata());
+            }
+        }
+
         $actuallyShowCompile = $showCompile == self::ALWAYS_SHOW_COMPILE_OUTPUT
             || ($showCompile == self::ONLY_SHOW_COMPILE_OUTPUT_ON_ERROR && $judging->getResult() === 'compiler-error');
 
@@ -200,9 +212,12 @@ class SubmissionController extends BaseController
             'showCompile' => $actuallyShowCompile,
             'allowDownload' => $allowDownload,
             'showSampleOutput' => $showSampleOutput,
+            'showAllTestcases' => $showAllTestcases,
             'runs' => $runs,
+            'metadata' => $metadata,
             'showTooLateResult' => $showTooLateResult,
             'thumbnailSize' => $this->config->get('thumbnail_size'),
+            'showLimits' => (bool)$this->config->get('show_limits_on_team_page')
         ];
         if ($actuallyShowCompile) {
             $data['size'] = 'xl';
