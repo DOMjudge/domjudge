@@ -123,6 +123,7 @@ class SubmissionController extends BaseController
         $verificationRequired = (bool)$this->config->get('verification_required');
         $showCompile          = $this->config->get('show_compile');
         $showSampleOutput     = $this->config->get('show_sample_output');
+        $showAllTestcases     = $this->config->get('show_all_testcase_verdicts');
         $allowDownload        = (bool)$this->config->get('allow_team_submission_download');
         $showTooLateResult    = $this->config->get('show_too_late_result');
         $user                 = $this->dj->getUser();
@@ -152,7 +153,7 @@ class SubmissionController extends BaseController
         }
 
         $runs = [];
-        if ($showSampleOutput && $judging && $judging->getResult() !== 'compiler-error') {
+        if (($showSampleOutput || $showAllTestcases) && $judging && $judging->getResult() !== 'compiler-error') {
             $outputDisplayLimit    = (int)$this->config->get('output_display_limit');
             $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
 
@@ -163,7 +164,7 @@ class SubmissionController extends BaseController
                 ->leftJoin('jr.output', 'jro')
                 ->select('t', 'jr', 'jro', 'tc')
                 ->andWhere('t.problem = :problem')
-                ->andWhere('t.sample = 1')
+                ->andWhere('jr.runresult IS NOT NULL')
                 ->setParameter('judging', $judging)
                 ->setParameter('problem', $judging->getSubmission()->getProblem())
                 ->orderBy('t.ranknumber');
@@ -211,6 +212,7 @@ class SubmissionController extends BaseController
             'showCompile' => $actuallyShowCompile,
             'allowDownload' => $allowDownload,
             'showSampleOutput' => $showSampleOutput,
+            'showAllTestcases' => $showAllTestcases,
             'runs' => $runs,
             'metadata' => $metadata,
             'showTooLateResult' => $showTooLateResult,
