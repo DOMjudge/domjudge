@@ -23,7 +23,7 @@
             {% if submission.resubmissions is not empty %}
                 (resubmitted as
                 {%- for resubmission in submission.resubmissions %}
-                    <a href="{{ path('jury_submission', {submitId: resubmission.originalSubmission.submitid}) }}">s{{ resubmission.submitid }}</a>
+                    <a href="{{ path('jury_submission', {submitId: resubmission.submitid}) }}">s{{ resubmission.submitid }}</a>
                     {%- if not loop.last -%},{%- endif -%}
                 {%- endfor -%}
                 )
