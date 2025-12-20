@@ -53,8 +53,6 @@ jobs:
         run: pstree -p
       - name: Install DOMjudge
         run: .github/jobs/baseinstall.sh all
-      - name: Set up chroot
-        run: sudo misc-tools/dj_make_chroot -a amd64
       - name: Check nginx
         run: curl -v https://localhost/domjudge/
       - name: Configure print command
