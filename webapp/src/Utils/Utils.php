@@ -761,9 +761,6 @@ class Utils
             return false;
         }
 
-        imagedestroy($orig);
-        imagedestroy($thumb);
-
         return $thumbstr;
     }
 
