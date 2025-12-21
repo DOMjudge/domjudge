@@ -1574,6 +1574,10 @@ class DOMJudgeService
             if ($filepath === false) {
                 throw new Exception("Could not find (possibly symlinked) file: " . $file . ", at: " . $publicPath);
             }
+            if (!in_array(filetype($filepath), ['file', 'link'])) {
+                // Ignore special filetypes
+                continue;
+            }
             if (!(str_starts_with($filepath, $publicPath) ||
                   str_starts_with($filepath, $this->vendorDir) ||
                   str_starts_with($filepath, $this->nodeModulesDir))
