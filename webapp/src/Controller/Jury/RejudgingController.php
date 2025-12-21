@@ -126,7 +126,7 @@ class RejudgingController extends BaseController
                 $status = $rejudging->getValid() ? 'applied' : 'canceled';
                 $sort_order = 2;
             } elseif ($todo > 0) {
-                $perc   = (int)(100 * ((double)$done / (double)($done + $todo)));
+                $perc   = (int)(100 * ((float)$done / (float)($done + $todo)));
                 $status = sprintf("%d%% done", $perc);
                 $sort_order = 0;
             } else {
