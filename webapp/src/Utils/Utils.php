@@ -994,8 +994,6 @@ class Utils
 
             [$type] = explode('; ', finfo_file($finfo, $realPath));
 
-            finfo_close($finfo);
-
             switch ($type) {
                 case 'application/pdf':
                     $textType = 'pdf';
