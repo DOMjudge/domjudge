@@ -8,7 +8,6 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
 use App\Utils\Utils;
-use DateTime;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
