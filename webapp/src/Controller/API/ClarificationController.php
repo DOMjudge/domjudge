@@ -214,17 +214,6 @@ class ClarificationController extends AbstractRestController
             } else {
                 throw new BadRequestHttpException('A team can not assign time.');
             }
-        } elseif ($this->isGranted('ROLE_API_WRITER') && $contest->getStartTime() > $time) {
-            $startTime = $contest->getStarttimeString();
-            $startTimeTimeZone = DateTime::createFromFormat('Y-m-d h:i:s e', $startTime)->getTimezone();
-            $now = DateTime::createFromFormat('U.u', (string) $time);
-            $now->setTimezone($startTimeTimeZone); // We can't the timezone in createFromFormat as it always picks UTC.
-            throw new BadRequestHttpException(
-                "Sending a clarification before the contest can disclose restricted information, "
-                . "provide an explicit time when this clarification should be visible. "
-                . "For the start of this contest: " . $contest->getStarttimeString() . ", "
-                . "for the current time: " . $now->format('Y-m-d H:i:s e') . "."
-            );
         }
 
         $clarification->setSubmittime($time);
