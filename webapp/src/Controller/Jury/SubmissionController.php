@@ -368,7 +368,9 @@ class SubmissionController extends BaseController
                 ->from(JudgeTask::class, 'jt')
                 ->select('jt.testcase_id')
                 ->andWhere('jt.jobid = :judging')
+                ->andWhere('jt.type = :type')
                 ->setParameter('judging', $selectedJudging)
+                ->setParameter('type', JudgeTaskType::JUDGING_RUN)
                 ->orderBy('jt.judgetaskid')
                 ->getQuery()
                 ->getScalarResult();
