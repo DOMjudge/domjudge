@@ -260,6 +260,11 @@
             default_value: 0
             public: true
             description: How many balloons to hand out ignoring freeze time. Only hands out balloons for problems solved pre-freeze.
+        -   name: any_balloon_postfreeze
+            type: bool
+            default_value: false
+            public: true
+            description: Hand out balloons during the freeze for problems that have not been solved pre-freeze.
         -   name: show_relative_time
             type: bool
             default_value: false

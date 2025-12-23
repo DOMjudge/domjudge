@@ -118,6 +118,7 @@ class BalloonService
         $balloons = $query->getQuery()->getResult();
 
         $minimumNumberOfBalloons = (int)$this->config->get('minimum_number_of_balloons');
+        $ignorePreFreezeSolves = (bool)$this->config->get('any_balloon_postfreeze');
         $freezetime = $contest->getFreezeTime();
 
         $balloonsTable = [];
@@ -148,7 +149,7 @@ class BalloonService
             //   2. Check whether the team has exceeded minimum number of balloons.
             //   3. Check whether the problem been solved pre-freeze.
             $stime = $balloonsData['submittime'];
-            if (isset($freezetime) && $stime >= $freezetime) {
+            if ($ignorePreFreezeSolves === false && isset($freezetime) && $stime >= $freezetime) {
                 if (count($relevantBalloonSummaries[$balloonsData['teamid']] ?? []) >= $minimumNumberOfBalloons) {
                     continue;
                 }

@@ -113,6 +113,13 @@ happens when the team problem has not received the amount of balloons
 set by the configuration option and the newly solved problem must have
 been solved before the freeze. This is to prevent an information leak.
 
+To hand balloons for any and all correct submissions during the freeze
+set the ``any_balloon_postfreeze`` global configuration option to `true`.
+This sends out balloons as long as ``minimum_number_of_balloons`` has not
+been met. By setting ``minimum_number_of_balloons`` to a value greater or
+equal to the number of problems in the contest ensures any submission
+results in a balloon notification.
+
 Static scoreboard
 -----------------
 The public scoreboard can be output in 'static' form meaning it does
