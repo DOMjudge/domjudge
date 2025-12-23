@@ -74,16 +74,20 @@ jobs:
           cd /tmp
           git clone --depth=1 https://github.com/Kattis/problemtools.git
           cd problemtools/examples
-          mv hello hello_kattis
-          # Remove 2 submissions that will not pass validation. The first is because it is
-          # a Python 2 submission. The latter has a judgement type we do not understand.
-          rm different/submissions/accepted/different_py2.py different/submissions/slow_accepted/different_slow.py
-          for i in hello_kattis different guess; do
+          # Remove submissions that will not pass validation. The first is
+          # because it is a Python 2 submission. The latter two have a
+          # judgement type we do not understand.
+          rm different/submissions/accepted/different_py2.py \
+            different/submissions/slow_accepted/different_slow.py \
+            oddecho/submissions/partially_accepted/sol.py
+          for i in */problem.yaml; do
+              dir="$(dirname $i)"
               (
-                  cd "$i"
-                  zip -r "../${i}.zip" -- *
+                  mv "$dir" "kattis_${dir}"
+                  cd "kattis_${dir}"
+                  zip -r "../kattis_${dir}.zip" -- *
               )
-              curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/demo/problems
+              curl --fail -X POST -n -N -F zip=@kattis_${dir}.zip http://localhost/domjudge/api/contests/demo/problems
           done
       - name: Monitor judgehost log and stop once all submissions are judged
         run: |
