@@ -17,6 +17,9 @@ Version 10.0.0DEV
    API requests without file uploads to make them work with PUT/PATCH requests.
  - Removed email collection for selfregistered users.
  - Make penalty time a per contest setting.
+ - Configuration changes
+   - `show_balloons_postfreeze` configuration variable superseded by
+     `minimum_number_of_balloons` and `any_balloon_postfreeze`.
 
 Version 9.0.0 - 5 October 2025
 ------------------------------
