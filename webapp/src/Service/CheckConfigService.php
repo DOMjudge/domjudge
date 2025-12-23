@@ -67,6 +67,7 @@ class CheckConfigService
             'debugdisabled' => $this->checkDebugDisabled(),
             'tmpdirwritable' => $this->checkTmpdirWritable(),
             'hashtime' => $this->checkHashTime(),
+            'balloonsduringfreeze' => $this->checkBalloonsDuringFreeze(),
         ];
 
         foreach (['affiliations', 'banners', 'countries', 'teams'] as $key) {
@@ -473,6 +474,28 @@ class CheckConfigService
             caption: 'User password hashing',
             result: 'O',
             desc: sprintf('Hashing cost is reasonable (Did %d hashes).', $counter)
+        );
+    }
+
+    public function checkBalloonsDuringFreeze(): ConfigCheckItem
+    {
+        $balloonsDuringFreeze = (int)$this->config->get('minimum_number_of_balloons');
+
+        $desc = '- Handing out any balloons while the scoreboard is frozen can lead to data inconsistencies and information leaking.'
+            . sprintf("\n - Currently handing out up-to `%d` balloons during the freeze.", $balloonsDuringFreeze);
+
+        if ($balloonsDuringFreeze !== 0) {
+            return new ConfigCheckItem(
+                caption: 'Balloons during freeze',
+                result: 'W',
+                desc: $desc,
+            );
+        }
+
+        return new ConfigCheckItem(
+            caption: 'Balloons during freeze',
+            result: 'O',
+            desc: $desc,
         );
     }
 

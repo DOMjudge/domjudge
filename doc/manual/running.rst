@@ -106,6 +106,16 @@ show for submissions after the freeze. It is possible that new
 entries appear for some times after the freeze, if the result of
 a submission before the freeze is only known after (this can also
 happen in case of a :ref:`rejudging`).
+
+.. warning::
+
+  Using the features as described below results in data inconsistencies.
+  e.g. balloon notifications are available through the API while no
+  judgement is available. Using these features can also lead to undesirable
+  information leaking to contestants and observers. Use with caution!
+
+Balloons during frozen scoreboard
+`````````````````````
 The global configuration option ``minimum_number_of_balloons`` will
 ignore a contest freeze for purposes of balloons and new correct
 submissions will trigger a balloon entry in the table. This only
