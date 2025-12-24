@@ -1,6 +1,12 @@
 {% extends 'team/base.html.twig' %}
+{% import 'macros.html.twig' as macros %}
 
 {% block title %}Send clarification request - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.mathjax_head() }}
+{% endblock %}
 
 {% block content %}
     <div class="mt-3 container">
