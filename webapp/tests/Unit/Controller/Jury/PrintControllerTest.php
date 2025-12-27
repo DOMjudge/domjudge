@@ -35,7 +35,7 @@ class PrintControllerTest extends BaseTestCase
     public function testPrintingEnabledJuryIndexPage(): void
     {
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
-            function () {
+            function (): void {
                 $this->verifyPageResponse('GET', '/jury', 200);
                 static::assertSelectorExists('a:contains("Print")');
             });
@@ -47,7 +47,7 @@ class PrintControllerTest extends BaseTestCase
     public function testPrintingEnabledSubmitForm(): void
     {
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
-            function () {
+            function (): void {
                 $this->verifyPageResponse('GET', '/jury/print', 200);
 
                 $testFile = __DIR__ . '/PrintControllerTest.php';

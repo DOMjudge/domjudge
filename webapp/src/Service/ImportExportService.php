@@ -741,7 +741,7 @@ class ImportExportService
         $content = file_get_contents($file->getRealPath());
         try {
             $data = Utils::jsonDecode($content);
-        } catch (JsonException $e) {
+        } catch (JsonException) {
             // Check if we can parse it as YAML
             try {
                 $data = Yaml::parse($content, Yaml::PARSE_DATETIME);

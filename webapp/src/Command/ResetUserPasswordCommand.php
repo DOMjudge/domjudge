@@ -37,7 +37,7 @@ readonly class ResetUserPasswordCommand
             $style->error('Can not find user with username ' . $username);
             return Command::FAILURE;
         }
-        $password = $password ?? Utils::generatePassword();
+        $password ??= Utils::generatePassword();
         $user->setPassword(
             $this->passwordHasher->hashPassword($user, $password)
         );

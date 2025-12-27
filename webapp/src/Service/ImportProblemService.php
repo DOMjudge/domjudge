@@ -269,7 +269,7 @@ class ImportProblemService
         }
 
         $validationMode = 'default';
-        if (!$this->parseYaml($problemYaml, $messages, $validationMode, $propertyAccessor, $problem)) {
+        if (!static::parseYaml($problemYaml, $messages, $validationMode, $propertyAccessor, $problem)) {
             return null;
         }
         if (!$this->searchAndAddValidator($zip, $zipEntries, $messages, $externalId, $validationMode, $problem)) {

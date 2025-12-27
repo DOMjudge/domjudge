@@ -56,7 +56,7 @@ class ProblemControllerTest extends BaseTestCase
                 $descriptions,
                 $withLimits,
                 $letters
-            ) {
+            ): void {
                 $crawler = $this->client->request('GET', '/team/problems');
 
                 // Check that the correct menu item is selected.

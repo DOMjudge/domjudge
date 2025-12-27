@@ -129,7 +129,7 @@ class GeneralInfoControllerTest extends BaseTestCase
      */
     public function testCountryFlagExists(string $countryCode, string $size): void
     {
-        $this->withChangedConfiguration('show_flags', true, function () use ($countryCode, $size) {
+        $this->withChangedConfiguration('show_flags', true, function () use ($countryCode, $size): void {
             $this->client->request('GET', "/api/country-flags/$countryCode/$size");
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
@@ -161,7 +161,7 @@ class GeneralInfoControllerTest extends BaseTestCase
      */
     public function testCountryFlagNotFound(string $countryCode, string $size): void
     {
-        $this->withChangedConfiguration('show_flags', true, function () use ($countryCode, $size) {
+        $this->withChangedConfiguration('show_flags', true, function () use ($countryCode, $size): void {
             $this->client->request('GET', "/api/country-flags/$countryCode/$size");
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
@@ -183,7 +183,7 @@ class GeneralInfoControllerTest extends BaseTestCase
      */
     public function testCountryNotFound(string $countryCode, string $size): void
     {
-        $this->withChangedConfiguration('show_flags', true, function () use ($countryCode, $size) {
+        $this->withChangedConfiguration('show_flags', true, function () use ($countryCode, $size): void {
             $this->client->request('GET', "/api/country-flags/$countryCode/$size");
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
@@ -207,7 +207,7 @@ class GeneralInfoControllerTest extends BaseTestCase
      */
     public function testCountryFlagDisabled(string $countryCode, string $size): void
     {
-        $this->withChangedConfiguration('show_flags', false, function () use ($countryCode, $size) {
+        $this->withChangedConfiguration('show_flags', false, function () use ($countryCode, $size): void {
             $this->client->request('GET', "/api/country-flags/$countryCode/$size");
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();

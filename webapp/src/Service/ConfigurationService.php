@@ -150,7 +150,7 @@ EOF;
             });
 
         return array_map(
-            fn(array $item) => ConfigurationSpecification::fromArray($item),
+            ConfigurationSpecification::fromArray(...),
             require $cacheFile
         );
     }
@@ -177,8 +177,7 @@ EOF;
         }
         unset($spec);
 
-        /** @var array<string, Configuration> $options */
-        $options = $options ?? $this->em->createQueryBuilder()
+        $options ??= $this->em->createQueryBuilder()
             ->from(Configuration::class, 'c', 'c.name')
             ->select('c')
             ->getQuery()
