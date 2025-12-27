@@ -1123,7 +1123,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         max_host_connections?: int, // The maximum number of connections to a single host.
  *         default_options?: array{
  *             headers?: array<string, mixed>,
- *             vars?: list<mixed>,
+ *             vars?: array<string, mixed>,
  *             max_redirects?: int, // The maximum number of redirects to follow.
  *             http_version?: scalar|null, // The default HTTP version, typically 1.1 or 2.0, leave to null for the best version.
  *             resolve?: array<string, scalar|null>,
@@ -1146,7 +1146,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *                 md5?: mixed,
  *             },
  *             crypto_method?: scalar|null, // The minimum version of TLS to accept; must be one of STREAM_CRYPTO_METHOD_TLSv*_CLIENT constants.
- *             extra?: list<mixed>,
+ *             extra?: array<string, mixed>,
  *             rate_limiter?: scalar|null, // Rate limiter name to use for throttling requests. // Default: null
  *             caching?: bool|array{ // Caching configuration.
  *                 enabled?: bool, // Default: false
@@ -1199,7 +1199,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *                 md5?: mixed,
  *             },
  *             crypto_method?: scalar|null, // The minimum version of TLS to accept; must be one of STREAM_CRYPTO_METHOD_TLSv*_CLIENT constants.
- *             extra?: list<mixed>,
+ *             extra?: array<string, mixed>,
  *             rate_limiter?: scalar|null, // Rate limiter name to use for throttling requests. // Default: null
  *             caching?: bool|array{ // Caching configuration.
  *                 enabled?: bool, // Default: false
@@ -1836,6 +1836,12 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     generate_final_classes?: bool, // Default: true
  *     generate_final_entities?: bool, // Default: false
  * }
+ * @psalm-type DamaDoctrineTestConfig = array{
+ *     enable_static_connection?: mixed, // Default: true
+ *     enable_static_meta_data_cache?: bool, // Default: true
+ *     enable_static_query_cache?: bool, // Default: true
+ *     connection_keys?: list<mixed>,
+ * }
  * @psalm-type TwigExtraConfig = array{
  *     cache?: bool|array{
  *         enabled?: bool, // Default: false
@@ -1882,62 +1888,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         },
  *         ...<mixed>
  *     },
- * }
- * @psalm-type NelmioCorsConfig = array{
- *     defaults?: array{
- *         allow_credentials?: bool, // Default: false
- *         allow_origin?: list<scalar|null>,
- *         allow_headers?: list<scalar|null>,
- *         allow_methods?: list<scalar|null>,
- *         allow_private_network?: bool, // Default: false
- *         expose_headers?: list<scalar|null>,
- *         max_age?: scalar|null, // Default: 0
- *         hosts?: list<scalar|null>,
- *         origin_regex?: bool, // Default: false
- *         forced_allow_origin_value?: scalar|null, // Default: null
- *         skip_same_as_origin?: bool, // Default: true
- *     },
- *     paths?: array<string, array{ // Default: []
- *         allow_credentials?: bool,
- *         allow_origin?: list<scalar|null>,
- *         allow_headers?: list<scalar|null>,
- *         allow_methods?: list<scalar|null>,
- *         allow_private_network?: bool,
- *         expose_headers?: list<scalar|null>,
- *         max_age?: scalar|null, // Default: 0
- *         hosts?: list<scalar|null>,
- *         origin_regex?: bool,
- *         forced_allow_origin_value?: scalar|null, // Default: null
- *         skip_same_as_origin?: bool,
- *     }>,
- * }
- * @psalm-type KnpPaginatorConfig = array{
- *     default_options?: array{
- *         sort_field_name?: scalar|null, // Default: "sort"
- *         sort_direction_name?: scalar|null, // Default: "direction"
- *         filter_field_name?: scalar|null, // Default: "filterField"
- *         filter_value_name?: scalar|null, // Default: "filterValue"
- *         page_name?: scalar|null, // Default: "page"
- *         distinct?: bool, // Default: true
- *         page_out_of_range?: scalar|null, // Default: "ignore"
- *         default_limit?: scalar|null, // Default: 10
- *     },
- *     template?: array{
- *         pagination?: scalar|null, // Default: "@KnpPaginator/Pagination/sliding.html.twig"
- *         rel_links?: scalar|null, // Default: "@KnpPaginator/Pagination/rel_links.html.twig"
- *         filtration?: scalar|null, // Default: "@KnpPaginator/Pagination/filtration.html.twig"
- *         sortable?: scalar|null, // Default: "@KnpPaginator/Pagination/sortable_link.html.twig"
- *     },
- *     page_range?: scalar|null, // Default: 5
- *     page_limit?: scalar|null, // Default: null
- *     convert_exception?: bool, // Default: false
- *     remove_first_page_param?: bool, // Default: false
- * }
- * @psalm-type DamaDoctrineTestConfig = array{
- *     enable_static_connection?: mixed, // Default: true
- *     enable_static_meta_data_cache?: bool, // Default: true
- *     enable_static_query_cache?: bool, // Default: true
- *     connection_keys?: list<mixed>,
  * }
  * @psalm-type SentryConfig = array{
  *     dsn?: scalar|null, // If this value is not provided, the SDK will try to read it from the SENTRY_DSN environment variable. If that variable also does not exist, the SDK will not send any events.
@@ -2015,6 +1965,56 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *             excluded_commands?: list<scalar|null>,
  *         },
  *     },
+ * }
+ * @psalm-type NelmioCorsConfig = array{
+ *     defaults?: array{
+ *         allow_credentials?: bool, // Default: false
+ *         allow_origin?: list<scalar|null>,
+ *         allow_headers?: list<scalar|null>,
+ *         allow_methods?: list<scalar|null>,
+ *         allow_private_network?: bool, // Default: false
+ *         expose_headers?: list<scalar|null>,
+ *         max_age?: scalar|null, // Default: 0
+ *         hosts?: list<scalar|null>,
+ *         origin_regex?: bool, // Default: false
+ *         forced_allow_origin_value?: scalar|null, // Default: null
+ *         skip_same_as_origin?: bool, // Default: true
+ *     },
+ *     paths?: array<string, array{ // Default: []
+ *         allow_credentials?: bool,
+ *         allow_origin?: list<scalar|null>,
+ *         allow_headers?: list<scalar|null>,
+ *         allow_methods?: list<scalar|null>,
+ *         allow_private_network?: bool,
+ *         expose_headers?: list<scalar|null>,
+ *         max_age?: scalar|null, // Default: 0
+ *         hosts?: list<scalar|null>,
+ *         origin_regex?: bool,
+ *         forced_allow_origin_value?: scalar|null, // Default: null
+ *         skip_same_as_origin?: bool,
+ *     }>,
+ * }
+ * @psalm-type KnpPaginatorConfig = array{
+ *     default_options?: array{
+ *         sort_field_name?: scalar|null, // Default: "sort"
+ *         sort_direction_name?: scalar|null, // Default: "direction"
+ *         filter_field_name?: scalar|null, // Default: "filterField"
+ *         filter_value_name?: scalar|null, // Default: "filterValue"
+ *         page_name?: scalar|null, // Default: "page"
+ *         distinct?: bool, // Default: true
+ *         page_out_of_range?: scalar|null, // Default: "ignore"
+ *         default_limit?: scalar|null, // Default: 10
+ *     },
+ *     template?: array{
+ *         pagination?: scalar|null, // Default: "@KnpPaginator/Pagination/sliding.html.twig"
+ *         rel_links?: scalar|null, // Default: "@KnpPaginator/Pagination/rel_links.html.twig"
+ *         filtration?: scalar|null, // Default: "@KnpPaginator/Pagination/filtration.html.twig"
+ *         sortable?: scalar|null, // Default: "@KnpPaginator/Pagination/sortable_link.html.twig"
+ *     },
+ *     page_range?: scalar|null, // Default: 5
+ *     page_limit?: scalar|null, // Default: null
+ *     convert_exception?: bool, // Default: false
+ *     remove_first_page_param?: bool, // Default: false
  * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
