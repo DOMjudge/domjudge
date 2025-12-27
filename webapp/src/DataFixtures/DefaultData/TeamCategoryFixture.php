@@ -4,15 +4,10 @@ namespace App\DataFixtures\DefaultData;
 
 use App\Entity\TeamCategory;
 use Doctrine\Persistence\ObjectManager;
-use Psr\Log\LoggerInterface;
 
 class TeamCategoryFixture extends AbstractDefaultDataFixture
 {
     final public const SYSTEM_REFERENCE = 'system';
-
-    public function __construct(protected readonly LoggerInterface $logger)
-    {
-    }
 
     public function load(ObjectManager $manager): void
     {
@@ -33,8 +28,6 @@ class TeamCategoryFixture extends AbstractDefaultDataFixture
                     ->setExternalid($item[4]);
                 $manager->persist($category);
                 $manager->flush();
-            } else {
-                $this->logger->info('Category %s already exists, not created', [ $item[0] ]);
             }
 
             // Make sure we have a reference to the system category, since we need it to create the admin user.
