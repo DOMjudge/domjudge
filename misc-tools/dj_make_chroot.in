@@ -17,9 +17,10 @@ set -e
 
 cleanup() {
     # Unmount things on cleanup
-    umount -f "$CHROOTDIR/proc" >/dev/null 2>&1  || /bin/true
-    umount -f "$CHROOTDIR/sys" >/dev/null 2>&1  || /bin/true
+    umount -f "$CHROOTDIR/dev/null" >/dev/null 2>&1  || /bin/true
     umount -f "$CHROOTDIR/dev/pts" >/dev/null 2>&1  || /bin/true
+    umount -f "$CHROOTDIR/sys" >/dev/null 2>&1  || /bin/true
+    umount -f "$CHROOTDIR/proc" >/dev/null 2>&1  || /bin/true
 }
 trap cleanup EXIT
 
@@ -385,6 +386,9 @@ mount -t sysfs sysfs "$CHROOTDIR/sys"
 # Required for some warning messages about writing to log files
 mount --bind /dev/pts "$CHROOTDIR/dev/pts"
 
+# Required for apt-key interaction during bootstrap in ubuntu docker container
+mount --bind /dev/null "$CHROOTDIR/dev/null"
+
 # Prevent perl locale warnings in the chroot:
 export LC_ALL=C
 
@@ -485,6 +489,7 @@ echo "This file should not be readable inside the judging environment!" \
     > "$CHROOTDIR/etc/root-permission-test.txt"
 chmod 0640 "$CHROOTDIR/etc/root-permission-test.txt"
 
+umount "$CHROOTDIR/dev/null"
 umount "$CHROOTDIR/dev/pts"
 umount "$CHROOTDIR/sys"
 umount "$CHROOTDIR/proc"
