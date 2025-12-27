@@ -185,11 +185,11 @@ class BalloonService
      * Collect a summary of balloons per team, sorted by location (or external ID if no location).
      *
      * @param array<array{data: array{balloonid: int, time: string, problem: string, contestproblem: ContestProblem,
-     *                                team: Team, teamid: int, location: string|null, affiliation: string|null,
-     *                                affiliationid: int, category: string, categoryid: int, total: array<string, ContestProblem>,
+     *                                team: Team, teamid: string, location: string|null, affiliation: string|null,
+     *                                affiliationid: string, category: string, categoryid: string, total: array<string, ContestProblem>,
      *                                done: bool}}> $balloons
-     * @return array<int, array{team: Team, affiliation: string|null, affiliationid: int|null, location: string|null,
-     *                          category: string, categoryid: int, total: array<string, ContestProblem>}>
+     * @return array<string, array{team: Team, affiliation: string|null, affiliationid: string|null, location: string|null,
+     *                          category: string, categoryid: string, total: array<string, ContestProblem>}>
      */
     public function collectTeamBalloonSummary(array $balloons): array
     {
