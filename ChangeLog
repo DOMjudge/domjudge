@@ -2,6 +2,9 @@ DOMjudge Programming Contest Judging System
 
 Version 10.0.0DEV
 ---------------------------
+ - Configuration changes
+   - `show_balloons_postfreeze` configuration variable superseded by
+     `minimum_number_of_balloons` and `any_balloon_postfreeze`.
 
 Version 9.0.0 - 5 October 2025
 ---------------------------

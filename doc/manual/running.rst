@@ -106,9 +106,29 @@ show for submissions after the freeze. It is possible that new
 entries appear for some times after the freeze, if the result of
 a submission before the freeze is only known after (this can also
 happen in case of a :ref:`rejudging`).
-The global configuration option ``show_balloons_postfreeze`` will
+
+.. warning::
+
+  Using the features as described below results in data inconsistencies.
+  e.g. balloon notifications are available through the API while no
+  judgement is available. Using these features can also lead to undesirable
+  information leaking to contestants and observers. Use with caution!
+
+Balloons during frozen scoreboard
+`````````````````````
+The global configuration option ``minimum_number_of_balloons`` will
 ignore a contest freeze for purposes of balloons and new correct
-submissions will trigger a balloon entry in the table.
+submissions will trigger a balloon entry in the table. This only
+happens when the team problem has not received the amount of balloons
+set by the configuration option and the newly solved problem must have
+been solved before the freeze. This is to prevent an information leak.
+
+To hand balloons for any and all correct submissions during the freeze
+set the ``any_balloon_postfreeze`` global configuration option to `true`.
+This sends out balloons as long as ``minimum_number_of_balloons`` has not
+been met. By setting ``minimum_number_of_balloons`` to a value greater or
+equal to the number of problems in the contest ensures any submission
+results in a balloon notification.
 
 Static scoreboard
 -----------------
