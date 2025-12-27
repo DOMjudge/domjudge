@@ -16,7 +16,10 @@
         }
     }
 
-    function maybeShowEntryPoint(filename) {
+    function maybeShowEntryPoint() {
+        let filename = $('#submit_problem_code').val() ?? '';
+        filename = filename.replace(/^.*[\\\/]/, '');
+
         var langid = $('#submit_problem_language').val();
         if (langid === "") {
             return;
@@ -80,7 +83,7 @@
                     }
                 }
 
-                maybeShowEntryPoint(filename);
+                maybeShowEntryPoint();
 
                 // Problem ID
 
