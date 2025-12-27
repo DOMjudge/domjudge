@@ -16,17 +16,17 @@ class TeamControllerTest extends JuryControllerTestCase
     protected static string  $shortTag                 = 'team';
     protected static array   $deleteEntities           = ['DOMjudge','Example teamname'];
     protected static string  $deleteEntityIdentifier   = 'name';
-    protected static string  $getIDFunc                = 'getTeamid';
+    protected static string  $getIDFunc                = 'getExternalid';
     protected static string  $className                = Team::class;
     protected static array   $DOM_elements             = ['h1' => ['Teams']];
     protected static string  $addForm                  = 'team[';
     protected static array   $addEntitiesShown         = ['icpcid', 'label', 'displayName', 'location'];
-    protected static array   $overviewSingleNotShown   = ['addUserForTeam'];
+    protected static array   $overviewSingleNotShown   = ['addUserForTeam', 'category'];
     protected static array   $overviewGeneralNotShown  = ['icpcid'];
     protected static array   $addEntitiesCount         = ['contests'];
     protected static array   $addEntities              = [['name' => 'New Team',
                                                            'displayName' => 'New Team Display Name',
-                                                           'category' => '3',
+                                                           'category' => 'participants',
                                                            'publicdescription' => 'Some members',
                                                            'penalty' => '0',
                                                            'location' => 'The first room',
@@ -37,7 +37,7 @@ class TeamControllerTest extends JuryControllerTestCase
                                                            'icpcid' => ''],
                                                           ['name' => 'Another Team',
                                                            'displayName' => 'Another Team Display Name',
-                                                           'category' => '1',
+                                                           'category' => 'system',
                                                            'publicdescription' => 'More members',
                                                            'penalty' => '20',
                                                            'location' => 'Another room',
@@ -47,12 +47,12 @@ class TeamControllerTest extends JuryControllerTestCase
                                                            'newUsername' => 'linkeduser'],
                                                           ['name' => 'Team linked to existing user',
                                                            'displayName' => 'Third team display name',
-                                                           'category' => '1',
+                                                           'category' => 'system',
                                                            'publicdescription' => 'Members of this team',
                                                            'penalty' => '0',
                                                            'enabled' => '1',
                                                            'addUserForTeam' => Team::ADD_EXISTING_USER,
-                                                           'existingUser' => 3],
+                                                           'existingUser' => 'demo'],
                                                           ['name' => 'external_ID',
                                                            'label' => 'teamlabel',
                                                            'displayName' => 'With External ID'],
@@ -124,7 +124,7 @@ class TeamControllerTest extends JuryControllerTestCase
 
         // Get the IDs of the newly created teams
         foreach ($createdTeams as $team) {
-            $teamIds[] = $team->getTeamid();
+            $teamIds[] = $team->getExternalid();
         }
 
         $team1Id = $teamIds[0];

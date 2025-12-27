@@ -3,6 +3,8 @@ DOMjudge Programming Contest Judging System
 Version 10.0.0DEV
 ---------------------------
 
+ - Do not expose internal IDs in interface or API anymore.
+
 Version 9.0.0 - 5 October 2025
 ---------------------------
  - API and integration:
@@ -346,7 +348,7 @@ Version 7.1.0 - 25 September 2019
  - Upgrade Symfony and dependencies to version 4.3.
  - Use Doctrine for migrations and initial data.
  - Add option (enabled by default) to limit files passed to
-   language compilers by langauge extension list.
+   language compilers by language extension list.
  - Add option to add a whole team category to a contest.
  - Allow admin to specify print command using configuration setting.
  - Show metadata for judging runs.

@@ -124,6 +124,7 @@ class ContestType extends AbstractExternalIdEntityType
             'class' => TeamCategory::class,
             'multiple' => true,
             'choice_label' => fn(TeamCategory $category) => $category->getName(),
+            'choice_value' => 'externalid',
             'help' => 'List of team categories that will receive medals for this contest.',
         ]);
         foreach (['gold', 'silver', 'bronze'] as $medalType) {
@@ -158,7 +159,8 @@ class ContestType extends AbstractExternalIdEntityType
             'required' => false,
             'class' => Team::class,
             'multiple' => true,
-            'choice_label' => fn(Team $team) => sprintf('%s (t%d)', $team->getEffectiveName(), $team->getTeamid()),
+            'choice_label' => fn(Team $team) => sprintf('%s (%s)', $team->getEffectiveName(), $team->getExternalid()),
+            'choice_value' => 'externalid',
             'help' => 'List of teams participating in the contest, in case it is not open to all teams.',
         ]);
         $builder->add('teamCategories', EntityType::class, [
@@ -166,6 +168,7 @@ class ContestType extends AbstractExternalIdEntityType
             'class' => TeamCategory::class,
             'multiple' => true,
             'choice_label' => fn(TeamCategory $category) => $category->getName(),
+            'choice_value' => 'externalid',
             'help' => 'List of team categories participating in the contest, in case it is not open to all teams.',
         ]);
         $builder->add('enabled', ChoiceType::class, [
@@ -215,6 +218,7 @@ class ContestType extends AbstractExternalIdEntityType
             'class' => Language::class,
             'multiple' => true,
             'choice_label' => fn(Language $language) => sprintf('%s (%s)', $language->getName(), $language->getExternalid()),
+            'choice_value' => 'externalid',
             'help' => 'List of languages that can be used in this contest. Leave empty to allow all languages that are enabled globally.',
         ]);
 

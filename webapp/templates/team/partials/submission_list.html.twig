@@ -23,7 +23,7 @@
         {%- for submission in submissions %}
             {% set link = null %}
             {% if (submission.submittime < current_team_contest.endtime or showTooLateResult) and submission.result and submission.judgings.first is not empty and submission.judgings.first.result is not empty and (not verificationRequired or submission.judgings.first.verified) %}
-                {% set link = path('team_submission', {submitId: submission.submitid}) %}
+                {% set link = path('team_submission', {submitId: submission.externalid}) %}
             {% endif %}
 
             {% set classes = '' %}
@@ -43,7 +43,7 @@
                 </td>
                 <td class="langid">
                     <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %} title="{{ submission.language.name }}">
-                        {{ submission.language.langid }}
+                        {{ submission.language.name }}
                     </a>
                 </td>
                 <td>
@@ -78,7 +78,7 @@
         {% endif %}
         {% if allowDownload %}
                 <td>
-                    <a title="Download submission ZIP" aria-label="download submission zip" href="{{ path('team_submission_download', {'submitId': submission.submitid}) }}">
+                    <a title="Download submission ZIP" aria-label="download submission zip" href="{{ path('team_submission_download', {'submitId': submission.externalid}) }}">
                         <i class="fa fa-file-archive"></i>
                     </a>
                 </td>

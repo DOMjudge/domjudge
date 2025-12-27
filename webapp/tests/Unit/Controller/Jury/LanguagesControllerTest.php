@@ -17,14 +17,13 @@ class LanguagesControllerTest extends JuryControllerTestCase
     protected static string  $shortTag                 = 'language';
     protected static array   $deleteEntities           = ['C++','C#','C','Kotlin'];
     protected static string  $deleteEntityIdentifier   = 'name';
-    protected static string  $getIDFunc                = 'getLangid';
+    protected static string  $getIDFunc                = 'getExternalid';
     protected static string  $className                = Language::class;
     protected static array   $DOM_elements             = ['h1' => ['Enabled languages', 'Disabled languages']];
     protected static ?string $addPlus                  = 'extensions';
     protected static string  $addForm                  = 'language[';
-    protected static array   $addEntitiesShown         = ['langid', 'externalid', 'name', 'timefactor'];
-    protected static array   $addEntities              = [['langid' => 'simple',
-                                                           'name' => 'Simple',
+    protected static array   $addEntitiesShown         = ['externalid', 'name', 'timefactor'];
+    protected static array   $addEntities              = [['name' => 'Simple',
                                                            'externalid' => 'extSimple',
                                                            'requireEntryPoint' => '0',
                                                            'entryPointDescription' => '',
@@ -34,53 +33,33 @@ class LanguagesControllerTest extends JuryControllerTestCase
                                                            'compileExecutable' => 'java_javac',
                                                            'extensions' => ['1' => 'extension'],
                                                            'filterCompilerFiles' => '1'],
-                                                          ['langid' => 'ext',
-                                                           'externalid' => 'diffext',
+                                                          ['externalid' => 'diffext',
                                                            'name' => 'External'],
-                                                          ['langid' => 'lang123_.-',
-                                                           'name' => 'langid_expected_chars'],
-                                                          ['langid' => 'external_expected_chars',
-                                                           'externalid' => 'ext123_.-'],
-                                                          ['langid' => 'name_special_chars',
-                                                           'name' => '🕑ড|{}()*'],
-                                                          ['langid' => 'entry',
-                                                           'requireEntryPoint' => '1',
+                                                          ['name' => 'langid_expected_chars'],
+                                                          ['externalid' => 'ext123_.-'],
+                                                          ['name' => '🕑ড|{}()*'],
+                                                          ['requireEntryPoint' => '1',
                                                            'entryPointDescription' => 'shell'],
-                                                          ['langid' => 'entry_nodesc',
-                                                           'requireEntryPoint' => '1',
+                                                          ['requireEntryPoint' => '1',
                                                            'entryPointDescription' => ''],
-                                                          ['langid' => 'nosub',
-                                                           'allowSubmit' => '0'],
-                                                          ['langid' => 'nojud',
-                                                           'allowJudge' => '0'],
-                                                          ['langid' => 'timef1',
-                                                           'timeFactor' => '3'],
-                                                          ['langid' => 'timef2',
-                                                           'timeFactor' => '1.3'],
-                                                          ['langid' => 'timef3',
-                                                           'timeFactor' => '0.5'],
-                                                          ['langid' => 'comp',
-                                                           'compileExecutable' => 'swift'],
-                                                          ['langid' => 'multex',
-                                                           'extensions' => ['0' => 'a', '1' => 'b',
+                                                          ['allowSubmit' => '0'],
+                                                          ['allowJudge' => '0'],
+                                                          ['timeFactor' => '3'],
+                                                          ['timeFactor' => '1.3'],
+                                                          ['timeFactor' => '0.5'],
+                                                          ['compileExecutable' => 'swift'],
+                                                          ['extensions' => ['0' => 'a', '1' => 'b',
                                                                             '2' => '1', '3' => ',']],
-                                                          ['langid' => 'extunicode',
-                                                           'extensions' => ['0' => '🕑']],
-                                                          ['langid' => 'nofilt',
-                                                           'filterCompilerFiles' => '0'],
-                                                          ['langid' => 'compVers',
-                                                           'compilerVersionCommand' => 'unit -V'],
-                                                          ['langid' => 'runVers',
-                                                           'runnerVersionCommand' => 'run -x |yes|tr "\n" "\`true\`"']];
-    protected static array   $addEntitiesFailure       = ['Only alphanumeric characters and ._- are allowed' => [['langid' => '§$#`"'],
-                                                                                                                 ['langid' => '()*&']],
-                                                          'Only letters, numbers, dashes, underscores and dots are allowed.' => [['externalid' => '§$#'],
+                                                          ['extensions' => ['0' => '🕑']],
+                                                          ['filterCompilerFiles' => '0'],
+                                                          ['compilerVersionCommand' => 'unit -V'],
+                                                          ['runnerVersionCommand' => 'run -x |yes|tr "\n" "\`true\`"']];
+    protected static array   $addEntitiesFailure       = ['Only letters, numbers, dashes, underscores and dots are allowed.' => [['externalid' => '§$#'],
                                                                                                                                 ['externalid' => '@#()|']],
                                                           'This value should be positive.' => [['timeFactor' => '0'],
                                                                                                ['timeFactor' => '-1'],
                                                                                                ['timeFactor' => '-.1']],
-                                                          'This value should not be blank.' => [['langid' => ''],
-                                                                                                ['name' => '']]];
+                                                          'This value should not be blank.' => [['name' => '']]];
 
     public function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {

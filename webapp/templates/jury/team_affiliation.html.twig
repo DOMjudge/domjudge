@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Affiliation {{ teamAffiliation.affilid }} - {{ parent() }}{% endblock %}
+{% block title %}Affiliation {{ teamAffiliation.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -17,10 +17,6 @@
             <table class="table table-sm table-striped">
                 <tr>
                     <th>ID</th>
-                    <td>{{ teamAffiliation.affilid }}</td>
-                </tr>
-                <tr>
-                    <th>External ID</th>
                     <td>{{ teamAffiliation.externalid }}</td>
                 </tr>
                 <tr>
@@ -70,8 +66,8 @@
 
     {%- if is_granted('ROLE_ADMIN') -%}
         <p>
-            {{ button(path('jury_team_affiliation_edit', {'affilId': teamAffiliation.affilid}), 'Edit', 'primary', 'edit') }}
-            {{ button(path('jury_team_affiliation_delete', {'affilId': teamAffiliation.affilid}), 'Delete', 'danger', 'trash-alt', true) }}
+            {{ button(path('jury_team_affiliation_edit', {'affilId': teamAffiliation.externalid}), 'Edit', 'primary', 'edit') }}
+            {{ button(path('jury_team_affiliation_delete', {'affilId': teamAffiliation.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
         </p>
     {% endif %}
 
@@ -92,10 +88,10 @@
                     {% for team in teamAffiliation.teams %}
                         <tr>
                             <td style="text-align: right;">
-                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team | entityIdBadge('t') }}</a>
+                                <a href="{{ path('jury_team', {'teamId': team.externalid}) }}">{{ team | entityIdBadge }}</a>
                             </td>
                             <td>
-                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team.effectiveName }}</a>
+                                <a href="{{ path('jury_team', {'teamId': team.externalid}) }}">{{ team.effectiveName }}</a>
                             </td>
                         </tr>
                     {% endfor %}

@@ -110,7 +110,7 @@ class JuryMiscControllerTest extends BaseTestCase
                 }
             }
         }
-        foreach (range(1, 3) as $id) {
+        foreach (['hello', 'fltcmp', 'boolfind'] as $id) {
             $statusCode = in_array($contestStage, ['preActivation','preStart','postDeactivate']) || !$public ? 404 : 200;
             $this->verifyPageResponse('HEAD', '/public/problems/'.$id.'/statement', $statusCode);
         }
@@ -175,44 +175,44 @@ class JuryMiscControllerTest extends BaseTestCase
     {
         foreach ([200 => ['balloon','jury','admin'], 403 => ['team']] as $status => $roles) {
             foreach ($roles as $role) {
-                yield ['affiliations', $status, [$role], ['results' => [0 => ['id' => 1,
-                                                                              'text' => 'Utrecht University (1)']
+                yield ['affiliations', $status, [$role], ['results' => [0 => ['id' => 'utrecht',
+                                                                              'text' => 'Utrecht University (utrecht)']
                                                                        ]]];
                 yield ['locations', $status, [$role], ['results' => []]];
             }
         }
         foreach ([200 => ['jury','admin'], 403 => ['balloon','team']] as $status => $roles) {
             foreach ($roles as $role) {
-                yield ['problems', $status, [$role], ['results' => [0 => ['id' => 3, 'text' => 'Boolean switch search (p3)'],
-                                                                    1 => ['id' => 2,
-                                                                          'text' => 'Float special compare test (p2)'],
-                                                                    2 => ['id' => 1, 'text' => 'Hello World (p1)']]]];
-                yield ['teams', $status, [$role], ['results' => [0 => ['id' => 1, 'text' => 'DOMjudge (t1)'],
-                                                                 1 => ['id' => 2, 'text' => 'Example teamname (t2)']]]];
-                yield ['languages', $status, [$role], ['results' => [0 => ['id' => 'adb', 'text' => 'Ada (adb)'],
+                yield ['problems', $status, [$role], ['results' => [0 => ['id' => 'boolfind', 'text' => 'Boolean switch search (boolfind)'],
+                                                                    1 => ['id' => 'fltcmp',
+                                                                          'text' => 'Float special compare test (fltcmp)'],
+                                                                    2 => ['id' => 'hello', 'text' => 'Hello World (hello)']]]];
+                yield ['teams', $status, [$role], ['results' => [0 => ['id' => 'domjudge', 'text' => 'DOMjudge (domjudge)'],
+                                                                 1 => ['id' => 'exteam', 'text' => 'Example teamname (exteam)']]]];
+                yield ['languages', $status, [$role], ['results' => [0 => ['id' => 'ada', 'text' => 'Ada (ada)'],
                                                                      1 => ['id' => 'awk', 'text' => 'AWK (awk)'],
                                                                      2 => ['id' => 'bash', 'text' => 'Bash shell (bash)'],
                                                                      3 => ['id' => 'c', 'text' => 'C (c)'],
                                                                      4 => ['id' => 'csharp', 'text' => 'C# (csharp)'],
                                                                      5 => ['id' => 'cpp', 'text' => 'C++ (cpp)'],
                                                                      6 => ['id' => 'f95', 'text' => 'Fortran (f95)'],
-                                                                     7 => ['id' => 'hs', 'text' => 'Haskell (hs)'],
+                                                                     7 => ['id' => 'haskell', 'text' => 'Haskell (haskell)'],
                                                                      8 => ['id' => 'java', 'text' => 'Java (java)'],
-                                                                     9 => ['id' => 'js', 'text' => 'JavaScript (js)'],
-                                                                     10 => ['id' => 'kt', 'text' => 'Kotlin (kt)'],
+                                                                     9 => ['id' => 'javascript', 'text' => 'JavaScript (javascript)'],
+                                                                     10 => ['id' => 'kotlin', 'text' => 'Kotlin (kotlin)'],
                                                                      11 => ['id' => 'lua', 'text' => 'Lua (lua)'],
                                                                      12 => ['id' => 'ocaml', 'text' => 'OCaml (ocaml)'],
-                                                                     13 => ['id' => 'pas', 'text' => 'Pascal (pas)'],
+                                                                     13 => ['id' => 'pascal', 'text' => 'Pascal (pascal)'],
                                                                      14 => ['id' => 'pl', 'text' => 'Perl (pl)'],
                                                                      15 => ['id' => 'sh', 'text' => 'POSIX shell (sh)'],
-                                                                     16 => ['id' => 'plg', 'text' => 'Prolog (plg)'],
-                                                                     17 => ['id' => 'py3', 'text' => 'Python 3 (py3)'],
+                                                                     16 => ['id' => 'prolog', 'text' => 'Prolog (prolog)'],
+                                                                     17 => ['id' => 'python3', 'text' => 'Python 3 (python3)'],
                                                                      18 => ['id' => 'r', 'text' => 'R (r)'],
-                                                                     19 => ['id' => 'rb', 'text' => 'Ruby (rb)'],
-                                                                     20 => ['id' => 'rs', 'text' => 'Rust (rs)'],
+                                                                     19 => ['id' => 'ruby', 'text' => 'Ruby (ruby)'],
+                                                                     20 => ['id' => 'rust', 'text' => 'Rust (rust)'],
                                                                      21 => ['id' => 'scala', 'text' => 'Scala (scala)'],
                                                                      22 => ['id' => 'swift', 'text' => 'Swift (swift)']]]];
-                yield ['contests', $status, [$role], ['results' => [0 => ['id' => 1, 'text' => 'Demo contest (demo - c1)']
+                yield ['contests', $status, [$role], ['results' => [0 => ['id' => 'demo', 'text' => 'Demo contest (demo - demo)']
                                                                    ]]];
             }
         }

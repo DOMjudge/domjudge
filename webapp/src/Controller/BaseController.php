@@ -8,6 +8,7 @@ use App\Entity\CalculatedExternalIdBasedOnRelatedFieldInterface;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\ExternalIdFromInternalIdInterface;
+use App\Entity\HasExternalIdInterface;
 use App\Entity\Problem;
 use App\Entity\RankCache;
 use App\Entity\ScoreCache;
@@ -151,7 +152,12 @@ abstract class BaseController extends AbstractController
             }
         }
 
-        $this->dj->auditlog($auditLogType, $id, $isNewEntity ? 'added' : 'updated');
+        if ($entity instanceof HasExternalIdInterface) {
+            $dataid = $entity->getExternalId();
+        } else {
+            $dataid = $id;
+        }
+        $this->dj->auditlog($auditLogType, (string)$dataid, $isNewEntity ? 'added' : 'updated');
     }
 
     /**
@@ -216,7 +222,12 @@ abstract class BaseController extends AbstractController
 
         // Add an audit log entry.
         $auditLogType = Utils::tableForEntity($entity);
-        $this->dj->auditlog($auditLogType, implode(', ', $primaryKeyData), 'deleted');
+        if ($entity instanceof HasExternalIdInterface) {
+            $dataid = $entity->getExternalId();
+        } else {
+            $dataid = implode(', ', $primaryKeyData);
+        }
+        $this->dj->auditlog($auditLogType, $dataid, 'deleted');
 
         // Trigger the delete event. We need to do this before deleting the entity to make
         // sure we can still find the entity in the table.
@@ -296,7 +307,7 @@ abstract class BaseController extends AbstractController
      * @param Object[] $entities
      * @param array<string, array<string, array{'target': string, 'targetColumn': string, 'type': string}>> $relations
      *
-     * @return array{0: bool, 1: array<int[]>, 2: string[]}
+     * @return array{0: bool, 1: array<int[]>, 2: string[], 3: array<string>}
      */
     protected function buildDeleteTree(array $entities, array $relations): array {
         $isError = false;
@@ -305,9 +316,13 @@ abstract class BaseController extends AbstractController
         $readableType = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
         $metadata = $this->em->getClassMetadata($entities[0]::class);
         $primaryKeyData = [];
+        $externalIdData = [];
         $messages = [];
         foreach ($entities as $entity) {
             $primaryKeyDataTemp = [];
+            if ($entity instanceof HasExternalIdInterface) {
+                $externalIdData[] = $entity->getExternalId();
+            }
             foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
                 $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
                 $primaryKeyDataTemp[] = $primaryKeyColumnValue;
@@ -372,7 +387,7 @@ abstract class BaseController extends AbstractController
             }
             $primaryKeyData[] = $primaryKeyDataTemp;
         }
-        return [$isError, $primaryKeyData, array_values(array_unique($messages))];
+        return [$isError, $primaryKeyData, array_values(array_unique($messages)), $externalIdData];
     }
 
     /**
@@ -404,6 +419,7 @@ abstract class BaseController extends AbstractController
             $isError,
             $primaryKeyData,
             $deleteTreeMessages,
+            $externalIdData,
         ] = $this->buildDeleteTree($entities, $relations);
         if (!empty($deleteTreeMessages)) {
             $messages = $deleteTreeMessages;
@@ -419,7 +435,7 @@ abstract class BaseController extends AbstractController
                 $this->commitDeleteEntity($entity, $primaryKeyData[$id]);
                 $description = $entity->getShortDescription();
                 $msgList[] = sprintf('Successfully deleted %s %s "%s"',
-                    $readableType, implode(', ', $primaryKeyData[$id]), $description);
+                    $readableType, $externalIdData[$id] ?? implode(', ', $primaryKeyData[$id]), $description);
             }
 
             $msg = implode("\n", $msgList);
@@ -438,7 +454,7 @@ abstract class BaseController extends AbstractController
 
         $data = [
             'type' => $readableType,
-            'primaryKey' => implode(', ', array_merge(...$primaryKeyData)),
+            'primaryKey' => !empty($externalIdData) ? implode(', ', $externalIdData) : implode(', ', array_merge(...$primaryKeyData)),
             'description' => implode(',', $descriptions),
             'messages' => $messages,
             'isError' => $isError,
@@ -547,7 +563,7 @@ abstract class BaseController extends AbstractController
                     '<input type="checkbox" name="ids[]" value="%s" class="%s">',
                     $identifierValue,
                     $checkboxClass
-                )
+                ),
             ];
         }
     }
@@ -648,5 +664,121 @@ abstract class BaseController extends AbstractController
         }
 
         return null;
+    }
+
+    /**
+     * Get the previous and next object IDs for navigation.
+     *
+     * @param class-string                $entityClass     Entity class to query
+     * @param mixed                       $currentIdValue  Current value of the ID field
+     * @param string                      $idField         Field to return as the ID (e.g., 'externalid', 'submitid')
+     * @param array<string, 'ASC'|'DESC'> $orderBy         Sort criteria as field => direction (e.g., ['e.submittime' => 'ASC', 'e.submitid' => 'ASC'])
+     * @param bool                        $filterOnContest Whether to filter results by current contests
+     *
+     * @return array{previous: string|int|null, next: string|int|null}
+     */
+    protected function getPreviousAndNextObjectIds(
+        string $entityClass,
+        mixed $currentIdValue,
+        string $idField = 'externalid',
+        array $orderBy = ['e.externalid' => 'ASC'],
+        bool $filterOnContest = false,
+    ): array {
+        $result = ['previous' => null, 'next' => null];
+
+        // Fetch the current entity once to get field values
+        $currentEntity = $this->em->getRepository($entityClass)->findOneBy([$idField => $currentIdValue]);
+        if ($currentEntity === null) {
+            return $result;
+        }
+
+        $accessor = PropertyAccess::createPropertyAccessor();
+
+        // Pre-compute field values for comparison
+        $fieldValues = [];
+        foreach (array_keys($orderBy) as $field) {
+            $fieldName = str_replace('e.', '', $field);
+            $fieldValues[$field] = $accessor->getValue($currentEntity, $fieldName);
+        }
+
+        // Build the comparison conditions based on the sort criteria.
+        // For multi-column ordering, we need: (col1 < val1) OR (col1 = val1 AND col2 < val2) etc.
+        $buildComparisonConditions = function (string $operator) use ($orderBy, $fieldValues): array {
+            $conditions = [];
+            $parameters = [];
+            $fields = array_keys($orderBy);
+            $directions = array_values($orderBy);
+
+            for ($i = 0; $i < count($fields); $i++) {
+                $equalityParts = [];
+                // Add equality conditions for all previous columns
+                for ($j = 0; $j < $i; $j++) {
+                    $field = $fields[$j];
+                    $paramName = 'eq_' . $j;
+                    $equalityParts[] = "$field = :$paramName";
+                    $parameters[$paramName] = $fieldValues[$field];
+                }
+
+                // Add the comparison for this column
+                $field = $fields[$i];
+                $direction = $directions[$i];
+                // For "previous": if ASC, we want < ; if DESC, we want >
+                // For "next": if ASC, we want > ; if DESC, we want <
+                $compOp = ($operator === 'previous')
+                    ? ($direction === 'ASC' ? '<' : '>')
+                    : ($direction === 'ASC' ? '>' : '<');
+                $paramName = 'cmp_' . $i;
+                $comparisonPart = "$field $compOp :$paramName";
+                $parameters[$paramName] = $fieldValues[$field];
+
+                if (!empty($equalityParts)) {
+                    $conditions[] = '(' . implode(' AND ', $equalityParts) . ' AND ' . $comparisonPart . ')';
+                } else {
+                    $conditions[] = '(' . $comparisonPart . ')';
+                }
+            }
+
+            return ['condition' => implode(' OR ', $conditions), 'parameters' => $parameters];
+        };
+
+        foreach (['previous', 'next'] as $direction) {
+            $qb = $this->em->createQueryBuilder()
+                ->select("e.$idField")
+                ->from($entityClass, 'e');
+
+            // Build and apply the comparison conditions
+            $comp = $buildComparisonConditions($direction);
+            if (!empty($comp['condition'])) {
+                $qb->andWhere($comp['condition']);
+                foreach ($comp['parameters'] as $param => $value) {
+                    $qb->setParameter($param, $value);
+                }
+            }
+
+            // Apply contest filter
+            if ($filterOnContest && $contest = $this->dj->getCurrentContest()) {
+                $qb->andWhere('e.contest = :contest')
+                    ->setParameter('contest', $contest);
+            }
+
+            // Apply ordering (reversed for previous)
+            foreach ($orderBy as $field => $dir) {
+                $actualDir = $direction === 'previous'
+                    ? ($dir === 'ASC' ? 'DESC' : 'ASC')
+                    : $dir;
+                $qb->addOrderBy($field, $actualDir);
+            }
+
+            $qb->setMaxResults(1);
+
+            try {
+                $value = $qb->getQuery()->getSingleScalarResult();
+                $result[$direction] = $value;
+            } catch (NoResultException) {
+                // No previous/next found, leave as null
+            }
+        }
+
+        return $result;
     }
 }

@@ -2,6 +2,7 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
+use App\Repository\UserRepository;
 use App\Utils\Utils;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -18,7 +19,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Users that have access to DOMjudge.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -38,8 +39,7 @@ class User extends BaseApiEntity implements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'User ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('userid')]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\Exclude]
     private ?int $userid = null;
 
     #[ORM\Column(
@@ -215,7 +215,7 @@ class User extends BaseApiEntity implements
 
     public function getShortDescription(): string
     {
-        return $this->getName();
+        return $this->getName() ?: $this->getUsername();
     }
 
     public function setEmail(?string $email): User

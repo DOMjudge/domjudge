@@ -79,9 +79,9 @@ class JudgeTask
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('submitid')]
     #[Serializer\Type('string')]
-    public function getSubmitid(): ?int
+    public function getSubmitid(): ?string
     {
-        return $this->submission?->getSubmitid();
+        return $this->submission?->getExternalid();
     }
 
 

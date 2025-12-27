@@ -40,12 +40,12 @@
                                         {% for team in language.teams %}
                                             <tr>
                                                 <td>
-                                                    <a href="{{ path('jury_team', {'teamId': team.team.teamid}) }}">
-                                                        {{ team.team | entityIdBadge('t') }}
+                                                    <a href="{{ path('jury_team', {'teamId': team.team.externalid}) }}">
+                                                        {{ team.team | entityIdBadge }}
                                                     </a>
                                                 </td>
                                                 <td>
-                                                    <a href="{{ path('jury_team', {'teamId': team.team.teamid}) }}">
+                                                    <a href="{{ path('jury_team', {'teamId': team.team.externalid}) }}">
                                                         {{ team.team.effectiveName }}
                                                     </a>
                                                 </td>
