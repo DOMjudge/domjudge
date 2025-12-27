@@ -18,4 +18,4 @@ when@test:
             # Do not collect profiling information, since we don't need it
             collect: false
             # But do collect serializer data, since it's deprecated to not set it to true
-            collect_serializer_data: false
+            collect_serializer_data: true
