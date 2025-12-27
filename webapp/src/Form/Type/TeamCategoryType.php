@@ -28,14 +28,43 @@ class TeamCategoryType extends AbstractExternalIdEntityType
             ]
         ]);
         $builder->add('name', null, ['empty_data' => '']);
-        $builder->add('sortorder', IntegerType::class);
+
+        $builder->add('types', ChoiceType::class, [
+            'label' => 'Category Types',
+            'choices' => array_flip(TeamCategory::TYPES_TO_HUMAN_STRING),
+            'multiple' => true,
+            'expanded' => false,
+            'required' => false,
+            'help'     => 'Leave empty to use only for categorization.'
+        ]);
+
+        $builder->add('sortorder', IntegerType::class, [
+            'required' => false,
+            'attr' => [
+                'data-conditional-field' => 'types',
+                'data-conditional-field-value' => TeamCategory::TYPE_SCORING,
+            ],
+        ]);
+
         $builder->add('color', TextType::class, [
             'required' => false,
             'attr' => [
                 'data-color-picker' => '',
+                'data-conditional-field' => 'types',
+                'data-conditional-field-value' => TeamCategory::TYPE_BACKGROUND,
             ],
             'help' => '<a target="_blank" href="https://en.wikipedia.org/wiki/Web_colors"><i class="fas fa-question-circle"></i></a>',
             'help_html' => true,
+        ]);
+
+        $builder->add('css_class', TextType::class, [
+            'label' => 'CSS Class',
+            'required' => false,
+            'attr' => [
+                'data-conditional-field' => 'types',
+                'data-conditional-field-value' => TeamCategory::TYPE_CSS_CLASS,
+            ],
+            'help' => 'CSS class to apply to scoreboard rows for teams in this category.',
         ]);
         $builder->add('visible', ChoiceType::class, [
             'expanded' => true,

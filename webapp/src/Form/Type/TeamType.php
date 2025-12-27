@@ -63,8 +63,12 @@ class TeamType extends AbstractExternalIdEntityType
             'required' => false,
             'help'     => 'If provided, will display this instead of the team name in certain places, like the scoreboard.',
         ]);
-        $builder->add('category', EntityType::class, [
-            'class' => TeamCategory::class,
+        $builder->add('categories', EntityType::class, [
+            'class'         => TeamCategory::class,
+            'required'      => false,
+            'choice_label'  => 'name',
+            'multiple'      => true,
+            'by_reference'  => false,
         ]);
         $builder->add('publicdescription', TextareaType::class, [
             'label' => 'Public description',

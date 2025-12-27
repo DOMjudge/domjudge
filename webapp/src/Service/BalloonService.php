@@ -10,6 +10,7 @@ use App\Entity\Problem;
 use App\Entity\ScoreCache;
 use App\Entity\Submission;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -110,10 +111,11 @@ class BalloonService
             ->leftJoin('b.contest', 'co')
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
             ->leftJoin('b.team', 't')
-            ->leftJoin('t.category', 'c')
+            ->leftJoin('t.categories', 'c', Join::WITH, 'BIT_AND(c.types, :scoring) = :scoring')
             ->leftJoin('t.affiliation', 'a')
             ->andWhere('co.cid = :cid')
             ->setParameter('cid', $contest->getCid())
+            ->setParameter('scoring', TeamCategory::TYPE_SCORING)
             ->orderBy('b.done', 'ASC')
             ->addOrderBy('s.submittime', 'DESC');
 
