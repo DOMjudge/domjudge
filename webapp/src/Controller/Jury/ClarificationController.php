@@ -211,7 +211,7 @@ class ClarificationController extends AbstractController
                 $data['subject'] = $clarcontest;
             }
             $data['categoryid'] = $concernssubject;
-            $data['queue'] = $queues[$clar->getQueue()] ?? 'Unassigned issues';
+            $data['queue'] = $queues[$clar->getQueue() ?? ''] ?? 'Unassigned issues';
             $data['queueid'] = $clar->getQueue() ?? '';
 
             $data['answered'] = $clar->getAnswered();

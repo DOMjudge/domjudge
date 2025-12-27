@@ -539,7 +539,7 @@ class ImportExportController extends BaseController
         }
 
         $queues              = (array)$this->config->get('clar_queues');
-        $clarificationQueues = [null => 'Unassigned issues'];
+        $clarificationQueues = ['' => 'Unassigned issues'];
         foreach ($queues as $key => $val) {
             $clarificationQueues[$key] = $val;
         }
@@ -568,7 +568,7 @@ class ImportExportController extends BaseController
         $grouped = [];
 
         foreach ($clarifications as $clarification) {
-            $queue = $clarification->getQueue();
+            $queue = $clarification->getQueue() ?? '';
 
             if (!$clarification->getInReplyTo()) {
                 if (!isset($grouped[$queue])) {

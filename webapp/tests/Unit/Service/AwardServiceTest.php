@@ -31,6 +31,9 @@ class AwardServiceTest extends KernelTestCase
             ->setGoldMedals(2)
             ->setSilverMedals(1)
             ->setBronzeMedals(1);
+        // Make sure the contest has a cid, so we don't get deprecation warnings
+        $reflectionContest = new ReflectionClass(Contest::class);
+        $reflectionContest->getProperty('cid')->setValue($this->contest, 1234567890);
         $categoryA = (new TeamCategory())
             ->setName('Category A')
             ->setExternalid('cat_A');
@@ -45,7 +48,6 @@ class AwardServiceTest extends KernelTestCase
             ->addMedalCategory($categoryC);
         $reflectedProblem = new ReflectionClass(TeamCategory::class);
         $categoryIdProperty = $reflectedProblem->getProperty('categoryid');
-        $categoryIdProperty->setAccessible(true);
         $categoryIdProperty->setValue($categoryA, 1);
         $categoryIdProperty->setValue($categoryB, 2);
         $categoryIdProperty->setValue($categoryC, 3);
@@ -67,7 +69,6 @@ class AwardServiceTest extends KernelTestCase
                 ->setAffiliation(); // No affiliation needed
             $reflectedProblem = new ReflectionClass(Team::class);
             $teamIdProperty = $reflectedProblem->getProperty('teamid');
-            $teamIdProperty->setAccessible(true);
             $teamIdProperty->setValue($team, count($teams));
             $teams[] = $team;
         }
@@ -85,7 +86,6 @@ class AwardServiceTest extends KernelTestCase
             $this->contest->addProblem($problem);
             $reflectedProblem = new ReflectionClass(Problem::class);
             $probIdProperty = $reflectedProblem->getProperty('probid');
-            $probIdProperty->setAccessible(true);
             $probIdProperty->setValue($problem->getProblem(), count($problems));
             $problems[] = $problem;
         }

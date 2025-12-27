@@ -1544,7 +1544,6 @@ class DOMJudgeService
         // all requested and assets
         $requestReflection = new ReflectionClass($request);
         $basePathProperty  = $requestReflection->getProperty('basePath');
-        $basePathProperty->setAccessible(true);
         $basePathProperty->setValue($request, '/CHANGE_ME');
         $requestStack->push($request);
 
