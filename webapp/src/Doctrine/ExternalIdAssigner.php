@@ -31,7 +31,7 @@ class ExternalIdAssigner
             return;
         }
 
-        $entityClass = get_class($entity);
+        $entityClass = $entity::class;
         if ($entity instanceof CalculatedExternalIdBasedOnRelatedFieldInterface) {
             $externalid = $entity->getCalculatedExternalId();
         } else {

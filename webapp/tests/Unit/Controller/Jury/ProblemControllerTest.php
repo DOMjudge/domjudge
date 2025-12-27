@@ -139,7 +139,7 @@ class ProblemControllerTest extends JuryControllerTestCase
         $problemIds = [];
         $createdProblems = [];
 
-        foreach ($problemsData as $index => $data) {
+        foreach ($problemsData as $data) {
             $problem = new Problem();
             $problem->setName($data['name']);
             $problem->setExternalid($data['externalid']);

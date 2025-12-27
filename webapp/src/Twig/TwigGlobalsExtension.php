@@ -69,7 +69,7 @@ class TwigGlobalsExtension extends AbstractExtension implements GlobalsInterface
             'alpha3_countries'              => Countries::getAlpha3Names(),
             'alpha3_alpha2_country_mapping' => array_combine(
                 Countries::getAlpha3Codes(),
-                array_map(fn($alpha3) => Countries::getAlpha2Code($alpha3), Countries::getAlpha3Codes())
+                array_map(Countries::getAlpha2Code(...), Countries::getAlpha3Codes())
             ),
             'show_shadow_differences'       => $this->tokenStorage->getToken() &&
                 $this->authorizationChecker->isGranted('ROLE_ADMIN') &&

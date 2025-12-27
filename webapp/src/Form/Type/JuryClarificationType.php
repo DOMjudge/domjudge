@@ -115,7 +115,7 @@ class JuryClarificationType extends AbstractType
 
         $builder->add('jurymember', HiddenType::class, [
             'constraints' => [
-                new Callback([$this, 'checkJuryMember'])
+                new Callback($this->checkJuryMember(...))
             ]
         ]);
     }

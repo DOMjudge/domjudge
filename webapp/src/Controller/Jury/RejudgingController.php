@@ -383,7 +383,7 @@ class RejudgingController extends BaseController
 
         // Only load the statistics if desired. The query is quite long and can result in much data, so only have it run
         // when needed or when we don't have a lot of data to load.
-        $showStatistics = $showStatistics ?? $onlyAHandfulOfSubmissions;
+        $showStatistics ??= $onlyAHandfulOfSubmissions;
         if ($showStatistics && count($repetitions) > 0) {
             $stats = $this->getStats($rejudging);
         } else {

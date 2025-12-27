@@ -4,6 +4,7 @@ parameters:
         - src
         - migrations
         - resources/functions.php
+        - rector.php
         - tests
     scanFiles:
         - vendor/vrana/adminer/adminer/include/functions.inc.php

@@ -45,7 +45,7 @@ class ConfigControllerTest extends BaseTestCase
     public function testChangedPenaltyTime(): void
     {
         $this->withChangedConfiguration('penalty_time', "30",
-            function ($errors) {
+            function ($errors): void {
                 static::assertEmpty($errors);
                 $this->verifyPageResponse('GET', '/jury/config', 200);
                 $crawler = $this->getCurrentCrawler();
@@ -60,7 +60,7 @@ class ConfigControllerTest extends BaseTestCase
     public function testChangedLongConfigName(): void
     {
         $this->withChangedConfiguration('config_external_contest_sources_allow_untrusted_certificates', 'on',
-            function ($errors) {
+            function ($errors): void {
                 static::assertEmpty($errors);
                 $this->verifyPageResponse('GET', '/jury/config', 200);
             });
@@ -72,7 +72,7 @@ class ConfigControllerTest extends BaseTestCase
     public function testChangedPenaltyTimeInvalid(): void
     {
         $this->withChangedConfiguration('penalty_time', "-1",
-            function ($errors) {
+            function ($errors): void {
                 static::assertEquals(['penalty_time' => 'A non-negative number is required.'], $errors);
                 $this->verifyPageResponse('GET', '/jury/config', 200);
                 $crawler = $this->getCurrentCrawler();

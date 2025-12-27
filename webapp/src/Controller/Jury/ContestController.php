@@ -967,7 +967,7 @@ class ContestController extends BaseController
                         $fields = explode('+', $tmpValue);
                     } elseif (str_contains($tmpValue, '-')) {
                         $fields = explode('-', $tmpValue);
-                    } elseif (substr($tmpValue, -1) === 'Z') {
+                    } elseif (str_ends_with($tmpValue, 'Z')) {
                         $timeZones[] = 'UTC';
                         continue;
                     }

@@ -389,9 +389,9 @@ class Utils
         [$r, $g, $b] = static::parseHexColor($rgb);
 
         [$lr, $lg, $lb] = [
-            pow($r / 255, 2.4),
-            pow($g / 255, 2.4),
-            pow($b / 255, 2.4),
+            ($r / 255) ** 2.4,
+            ($g / 255) ** 2.4,
+            ($b / 255) ** 2.4,
         ];
 
         return 0.2126 * $lr + 0.7152 * $lg + 0.0722 * $lb;
@@ -404,8 +404,8 @@ class Utils
         $luminanceBackground = static::relativeLuminance($bgColor);
 
         $contrast = ($luminanceBackground > $luminanceForeground)
-            ? (pow($luminanceBackground, 0.56) - pow($luminanceForeground, 0.57)) * 1.14
-            : (pow($luminanceBackground, 0.65) - pow($luminanceForeground, 0.62)) * 1.14;
+            ? ($luminanceBackground ** 0.56 - $luminanceForeground ** 0.57) * 1.14
+            : ($luminanceBackground ** 0.65 - $luminanceForeground ** 0.62) * 1.14;
 
         return round($contrast * 100, 2);
     }
@@ -959,7 +959,7 @@ class Utils
      */
     public static function parseTsvLine(string $line): array
     {
-        return array_map('stripcslashes', explode("\t", rtrim($line, "\r\n")));
+        return array_map(stripcslashes(...), explode("\t", rtrim($line, "\r\n")));
     }
 
     /**

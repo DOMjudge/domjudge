@@ -640,7 +640,7 @@ class TwigExtension
         $prefix_len = strlen($common_prefix);
 
         // Extract the longest common suffix.
-        $reversed = array_map('strrev', $local_parts);
+        $reversed = array_map(strrev(...), $local_parts);
         $common_suffix = strrev($this->getCommonPrefix($reversed));
         $suffix_len = strlen($common_suffix);
 
@@ -648,7 +648,7 @@ class TwigExtension
         // $common_suffix, then $common_prefix = $common_suffix = the entire string.
         $middle_parts = array_map(fn($host) => substr($host, $prefix_len, strlen($host) - $prefix_len - $suffix_len), $local_parts);
         // Usually the middle parts contain numbers, so use natural sort for them.
-        usort($middle_parts, 'strnatcmp');
+        usort($middle_parts, strnatcmp(...));
 
         if (empty($common_prefix) && empty($common_suffix)) {
             // No common prefix nor suffix: list all the names without "{}".
@@ -1020,7 +1020,7 @@ EOF;
                 $opacity = hexdec(array_pop($m));
                 // no-break
             case 3:
-                $vals   = array_map("hexdec", $m);
+                $vals   = array_map(hexdec(...), $m);
                 $vals[] = $opacity;
 
                 return "rgba(" . implode(",", $vals) . ")";

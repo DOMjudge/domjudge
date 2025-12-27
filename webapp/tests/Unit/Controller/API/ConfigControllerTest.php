@@ -71,7 +71,7 @@ class ConfigControllerTest extends BaseTestCase
         static::assertEquals(false, $response['compile_penalty']);
         static::assertEquals(20, $response['penalty_time']);
 
-        $this->withChangedConfiguration('penalty_time', 100, function () {
+        $this->withChangedConfiguration('penalty_time', 100, function (): void {
             $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200);
 
             static::assertIsArray($response);

@@ -83,7 +83,7 @@ class Submission extends BaseApiEntity implements
         options: ['comment' => 'JSON encoded list of expected results - used to validate jury submissions']
     )]
     #[Serializer\Exclude]
-    private ?array $expected_results;
+    private ?array $expected_results = null;
 
     #[ORM\Column(
         nullable: true,

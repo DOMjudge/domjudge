@@ -758,14 +758,14 @@ class JudgeDaemon
                 }
             }
             if ($trial == BACKOFF_STEPS) {
-                $errstr = $errstr . " Retry limit reached.";
+                $errstr .= " Retry limit reached.";
             } else {
                 $retry_in_sec = $delay_in_sec + BACKOFF_JITTER_SEC * random_int(0, mt_getrandmax()) / mt_getrandmax();
                 $warnstr = $errstr . " This request will be retried after about " .
                     round($retry_in_sec, 2) . "sec... (" . $trial . "/" . BACKOFF_STEPS . ")";
                 warning($warnstr);
                 dj_sleep($retry_in_sec);
-                $delay_in_sec = $delay_in_sec * BACKOFF_FACTOR;
+                $delay_in_sec *= BACKOFF_FACTOR;
             }
         }
         if (!$succeeded) {
@@ -860,7 +860,7 @@ class JudgeDaemon
             return false;
         }
 
-        $command = implode(' ', array_map('dj_escapeshellarg', $command_parts));
+        $command = implode(' ', array_map(dj_escapeshellarg(...), $command_parts));
 
         logmsg(LOG_DEBUG, "Executing command: $command");
         system($command, $retval_local);
@@ -1771,10 +1771,10 @@ class JudgeDaemon
 
     private function initsignals(): void
     {
-        pcntl_signal(SIGTERM, [self::class, 'signalHandler']);
-        pcntl_signal(SIGINT, [self::class, 'signalHandler']);
-        pcntl_signal(SIGHUP, [self::class, 'signalHandler']);
-        pcntl_signal(SIGUSR1, [self::class, 'signalHandler']);
+        pcntl_signal(SIGTERM, self::signalHandler(...));
+        pcntl_signal(SIGINT, self::signalHandler(...));
+        pcntl_signal(SIGHUP, self::signalHandler(...));
+        pcntl_signal(SIGUSR1, self::signalHandler(...));
     }
 }
 

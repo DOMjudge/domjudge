@@ -68,7 +68,7 @@ class GroupControllerTest extends BaseTestCase
         }
 
         $objectsAfterTest  = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
-        $newItems = array_map('unserialize', array_diff(array_map('serialize', $objectsAfterTest), array_map('serialize', $objectsBeforeTest)));
+        $newItems = array_map(unserialize(...), array_diff(array_map(serialize(...), $objectsAfterTest), array_map(serialize(...), $objectsBeforeTest)));
         self::assertEquals(1, count($newItems));
         $listKey = array_keys($newItems)[0];
         foreach ($newGroupPostData as $key => $value) {
@@ -102,7 +102,7 @@ class GroupControllerTest extends BaseTestCase
         }
 
         $objectsAfterTest  = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
-        $newItems = array_map('unserialize', array_diff(array_map('serialize', $objectsAfterTest), array_map('serialize', $objectsBeforeTest)));
+        $newItems = array_map(unserialize(...), array_diff(array_map(serialize(...), $objectsAfterTest), array_map(serialize(...), $objectsBeforeTest)));
         self::assertEquals(1, count($newItems));
         $listKey = array_keys($newItems)[0];
         foreach ($newGroupPostData as $key => $value) {

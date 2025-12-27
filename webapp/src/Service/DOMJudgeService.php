@@ -1781,8 +1781,8 @@ class DOMJudgeService
 
         $cache = new FilesystemAdapter();
         try {
-             $versions = $cache->get('domjudge_versions', [$this, 'cacherCheckNewVersion']);
-        } catch (InvalidArgumentException $e) {
+             $versions = $cache->get('domjudge_versions', $this->cacherCheckNewVersion(...));
+        } catch (InvalidArgumentException) {
             return false;
         }
 
