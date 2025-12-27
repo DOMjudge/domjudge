@@ -13,16 +13,15 @@ use Symfony\Component\Process\Process;
     name: 'adminer:compile',
     description: 'Compile adminer in vendor',
 )]
-class AdminerCompileCommand extends Command
+class AdminerCompileCommand
 {
     public function __construct(
         #[Autowire('%domjudge.vendordir%')]
-        private readonly string $vendorDir,
+        private readonly string $vendorDir
     ) {
-        parent::__construct();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(OutputInterface $output): int
     {
         $process = new Process(
             ['php', 'compile.php', 'mysql'],

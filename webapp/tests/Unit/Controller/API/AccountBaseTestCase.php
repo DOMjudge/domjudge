@@ -259,7 +259,7 @@ EOF;
 
     public function provideNewAccountFileMissingField(): Generator
     {
-        foreach ($this->provideNewAccount() as $index => $testUser) {
+        foreach ($this->provideNewAccount() as $testUser) {
             if (isset($testUser[0]['skipImportFile'])) {
                 // Not all properties which we can set via the API account endpoint can also
                 // be imported via the API file import.

@@ -74,7 +74,7 @@ class ExecutableController extends BaseController
         foreach (['compare', 'run', 'full_debug'] as $config_script) {
             try {
                 $configScripts[] = (string)$this->config->get('default_' . $config_script);
-            } catch (PHPInvalidArgumentException $e) {
+            } catch (PHPInvalidArgumentException) {
                 // If not found this is an older database, as we only use this for visual changes ignore this error;
             }
         }
@@ -129,22 +129,13 @@ class ExecutableController extends BaseController
             }
             $execdata['execid']['cssclass'] = 'execid';
             $type = $execdata['type']['value'];
-            switch ($type) {
-                case 'compare':
-                    $execdata['icon']['icon'] = 'code-compare';
-                    break;
-                case 'compile':
-                    $execdata['icon']['icon'] = 'language';
-                    break;
-                case 'debug':
-                    $execdata['icon']['icon'] = 'bug';
-                    break;
-                case 'run':
-                    $execdata['icon']['icon'] = 'person-running';
-                    break;
-                default:
-                    $execdata['icon']['icon'] = 'question';
-            }
+            $execdata['icon']['icon'] = match ($type) {
+                'compare' => 'code-compare',
+                'compile' => 'language',
+                'debug' => 'bug',
+                'run' => 'person-running',
+                default => 'question',
+            };
             $execdata['badges']['value'] = $badges;
 
             if ($this->isGranted('ROLE_ADMIN')) {

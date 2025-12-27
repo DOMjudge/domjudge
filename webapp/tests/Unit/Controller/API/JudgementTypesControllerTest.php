@@ -31,7 +31,7 @@ class JudgementTypesControllerTest extends BaseTestCase
 
     public function testJudgementTypeChangedPenalty(): void
     {
-        $this->withChangedConfiguration('compile_penalty', true, function () {
+        $this->withChangedConfiguration('compile_penalty', true, function (): void {
             $contestId = $this->getDemoContestId();
             $endpointId = $this->apiEndpoint;
 

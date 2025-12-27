@@ -78,7 +78,7 @@ class BalloonService
             $this->em->persist($balloon);
             try {
                 $this->em->flush();
-            } catch (UniqueConstraintViolationException $e) {
+            } catch (UniqueConstraintViolationException) {
             }
         }
     }

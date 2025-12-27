@@ -110,6 +110,7 @@
 		"phpstan/phpstan": "^2.0",
 		"phpstan/phpstan-doctrine": "^2.0",
 		"phpunit/phpunit": "^9.6",
+		"rector/rector": "^2.2",
 		"sebastian/diff": "*",
 		"squizlabs/php_codesniffer": "*",
 		"symfony/debug-bundle": "7.4.*",

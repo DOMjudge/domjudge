@@ -42,32 +42,20 @@ enum EventType: string
      */
     public function getEventClass(): ?string
     {
-        switch ($this) {
-            case self::CLARIFICATIONS:
-                return ClarificationEvent::class;
-            case self::CONTESTS:
-                return ContestEvent::class;
-            case self::GROUPS:
-                return GroupEvent::class;
-            case self::JUDGEMENTS:
-                return JudgementEvent::class;
-            case self::JUDGEMENT_TYPES:
-                return JudgementTypeEvent::class;
-            case self::LANGUAGES:
-                return LanguageEvent::class;
-            case self::ORGANIZATIONS:
-                return OrganizationEvent::class;
-            case self::PROBLEMS:
-                return ProblemEvent::class;
-            case self::RUNS:
-                return RunEvent::class;
-            case self::STATE:
-                return StateEvent::class;
-            case self::SUBMISSIONS:
-                return SubmissionEvent::class;
-            case self::TEAMS:
-                return TeamEvent::class;
-        }
-        return null;
+        return match ($this) {
+            self::CLARIFICATIONS => ClarificationEvent::class,
+            self::CONTESTS => ContestEvent::class,
+            self::GROUPS => GroupEvent::class,
+            self::JUDGEMENTS => JudgementEvent::class,
+            self::JUDGEMENT_TYPES => JudgementTypeEvent::class,
+            self::LANGUAGES => LanguageEvent::class,
+            self::ORGANIZATIONS => OrganizationEvent::class,
+            self::PROBLEMS => ProblemEvent::class,
+            self::RUNS => RunEvent::class,
+            self::STATE => StateEvent::class,
+            self::SUBMISSIONS => SubmissionEvent::class,
+            self::TEAMS => TeamEvent::class,
+            default => null,
+        };
     }
 }

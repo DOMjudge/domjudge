@@ -109,7 +109,7 @@ class OrganizationControllerTest extends BaseTestCase
      */
     public function testCountryAbsentWhenDisabled(): void
     {
-        $this->withChangedConfiguration('show_flags', false, function () {
+        $this->withChangedConfiguration('show_flags', false, function (): void {
             $apiEndpoint = $this->apiEndpoint;
             $contestId = $this->getDemoContestId();
             // The hardcoded 1 here is the team affiliation from the TeamAffiliationFixture example data fixture.
@@ -233,7 +233,7 @@ class OrganizationControllerTest extends BaseTestCase
         $this->verifyApiJsonResponse('POST', $url, 201, 'admin', $newOrganizationPostData);
 
         $objectsAfterTest  = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
-        $newItems = array_map('unserialize', array_diff(array_map('serialize', $objectsAfterTest), array_map('serialize', $objectsBeforeTest)));
+        $newItems = array_map(unserialize(...), array_diff(array_map(serialize(...), $objectsAfterTest), array_map(serialize(...), $objectsBeforeTest)));
         self::assertEquals(1, count($newItems));
         $listKey = array_keys($newItems)[0];
         foreach ($newOrganizationPostData as $key => $value) {

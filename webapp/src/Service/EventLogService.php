@@ -849,10 +849,6 @@ class EventLogService
             $entity = substr($entity, strlen('Proxies\\__CG__\\'));
         }
 
-        if (isset($this->entityToEndpoint[$entity])) {
-            return $this->entityToEndpoint[$entity];
-        }
-
-        return null;
+        return $this->entityToEndpoint[$entity] ?? null;
     }
 }

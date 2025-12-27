@@ -83,7 +83,7 @@ class Contest extends BaseApiEntity implements
         options: ['comment' => 'Time contest becomes visible in team/public views', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float|null $activatetime;
+    private string|float|null $activatetime = null;
 
     #[ORM\Column(
         type: 'decimal',
@@ -118,7 +118,7 @@ class Contest extends BaseApiEntity implements
         options: ['comment' => 'Time after which no more submissions are accepted', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private string|float|null $endtime;
+    private string|float|null $endtime = null;
 
     #[ORM\Column(
         type: 'decimal',
