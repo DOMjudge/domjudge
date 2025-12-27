@@ -9,7 +9,7 @@ if (!function_exists('adminer_object')) {
     {
         // Use anonymous class to extend Adminer with our own settings.
         // We can't use a normal class since the base class only exists when
-        // the adminer code is include in JuryMiscController.
+        // the adminer code is included in JuryMiscController.
         return new class extends Adminer {
             public function name(): string
             {
@@ -22,6 +22,8 @@ if (!function_exists('adminer_object')) {
             }
 
             /**
+             * Note: the $flush parameter comes from the parent class.
+             *
              * @return list<string>
              */
             public function databases(bool $flush = true): array
@@ -39,11 +41,17 @@ if (!function_exists('adminer_object')) {
                 return [$host, $user, $pass];
             }
 
+            /**
+             *  Note: the $login and $password parameters comes from the parent class.
+             */
             public function login(string $login, string $password): bool
             {
                 return true;
             }
 
+            /**
+             *  Note: the $create parameter comes from the parent class.
+             */
             public function permanentLogin(bool $create = false): string
             {
                 return 'domjudge';
