@@ -282,7 +282,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
         // Get the underlying object to inject elements not currently in the DOM.
         $rawValues = $form->getPhpValues();
-        if (key_exists(static::$addPlus, $element)) {
+        if (static::$addPlus !== null && key_exists(static::$addPlus, $element)) {
             $rawValues[$formName][static::$addPlus] = $element[static::$addPlus];
         }
         return $this->client->request($form->getMethod(), $form->getUri(), $rawValues, $form->getPhpFiles());
