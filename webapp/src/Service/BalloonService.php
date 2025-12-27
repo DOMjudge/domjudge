@@ -212,9 +212,9 @@ class BalloonService
         }
 
         uasort($teamSummary, function ($a, $b) {
-            $aKey = $a['location'] ?? $a['team']->getExternalId();
-            $bKey = $b['location'] ?? $b['team']->getExternalId();
-            return strnatcasecmp((string)$aKey, (string)$bKey);
+            $aKey = join('-', array_filter([$a['location'], $a['team']->getExternalId()]));
+            $bKey = join('-', array_filter([$b['location'], $b['team']->getExternalId()]));
+            return strnatcasecmp($aKey, $bKey);
         });
 
         return $teamSummary;
@@ -233,7 +233,7 @@ class BalloonService
             ->setParameter('balloonIds', $balloonId)
             ->getQuery()
             ->getResult();
-        if (empty($balloons)) {
+        if (count($balloons) !== count((array)$balloonId)) {
             throw new NotFoundHttpException('balloon(s) not found');
         }
         foreach ($balloons as $balloon) {
