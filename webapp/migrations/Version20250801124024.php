@@ -28,6 +28,8 @@ final class Version20250801124024 extends AbstractMigration
             SQL);
 
         // Now update the types for existing categories based on whether the color is set
+        // 7 = scoring + background + badge top
+        // 5 = scoring + badge top
         $this->addSql('UPDATE team_category SET types = 7 WHERE color IS NOT NULL');
         $this->addSql('UPDATE team_category SET types = 5 WHERE color IS NULL');
     }
