@@ -12,5 +12,5 @@ section_end
 
 section_start "Run composer"
 cd webapp
-composer install --no-scripts 2>&1 | tee -a "$ARTIFACTS/composer_log.txt"
+composer install --no-scripts --ignore-platform-reqs 2>&1 | tee -a "$ARTIFACTS/composer_log.txt"
 section_end
