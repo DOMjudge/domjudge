@@ -8,9 +8,18 @@ ifndef GLOBALINCLUDED
 GLOBALINCLUDED=1
 
 # Check for QUIET environment variable:
-ifneq ($(QUIET),)
+ifeq ($(QUIET),0)
+# Ignore this, allow all other values QUIET=1...inf
+QUIET_FLAG =
+QUIET_FLAG_CAPITAL =
+else ifneq ($(QUIET),)
 export QUIET=1
 MAKEFLAGS += --no-print-directory --quiet
+QUIET_FLAG = -q
+QUIET_FLAG_CAPITAL = -Q
+else
+QUIET_FLAG =
+QUIET_FLAG_CAPITAL =
 endif
 
 # Define the 'default' target here: because of inclusion of this file,
