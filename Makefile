@@ -236,7 +236,7 @@ inplace-conf-common: configure
 		echo "         make maintainer-conf CONFIGURE_FLAGS=\"--with-instance-name=NAME --with-baseurl=http://NAME.localhost/\""; \
 		exit 1; \
 	fi
-	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
+	./configure $(QUIET_FLAG) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
 	            --with-judgehost_root=$(CURDIR) \
 	            --with-domjudge_docdir=$(CURDIR)/doc \
