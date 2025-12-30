@@ -34,6 +34,22 @@ class ClarificationController extends AbstractController
         protected readonly EventLogService $eventLogService
     ) {}
 
+    private function warnClarificationBeforeContestStart(): void
+    {
+        $cc = $this->dj->getCurrentContest();
+        $message = "Generic clarifications are visible before contest start.";
+        if ($cc && $cc->getStartTime() > Utils::now()) {
+            $this->addFlash('warning', $message);
+        } elseif (!$cc) {
+            foreach ($this->dj->getCurrentContests() as $cc) {
+                if ($cc->getStartTime() > Utils::now()) {
+                    $this->addFlash('warning', $message);
+                    return;
+                }
+            }
+        }
+    }
+
     #[Route(path: '', name: 'jury_clarifications')]
     public function indexAction(
         #[MapQueryParameter(name: 'filter')]
@@ -41,6 +57,7 @@ class ClarificationController extends AbstractController
         #[MapQueryParameter(name: 'queue')]
         string $currentQueue = 'all',
     ): Response {
+        $this->warnClarificationBeforeContestStart();
         $categories = $this->config->get('clar_categories');
         if ($contest = $this->dj->getCurrentContest()) {
             $contestIds = [$contest->getCid()];
@@ -116,6 +133,7 @@ class ClarificationController extends AbstractController
     #[Route(path: '/{id<\d+>}', name: 'jury_clarification')]
     public function viewAction(Request $request, int $id): Response
     {
+        $this->warnClarificationBeforeContestStart();
         $clarification = $this->em->getRepository(Clarification::class)->find($id);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %s not found', $id));
@@ -239,6 +257,7 @@ class ClarificationController extends AbstractController
         #[MapQueryParameter]
         ?string $teamto = null,
     ): Response {
+        $this->warnClarificationBeforeContestStart();
         $formData = ['recipient' => JuryClarificationType::RECIPIENT_MUST_SELECT];
 
         if ($teamto !== null) {
