@@ -14,8 +14,6 @@ class AddUser
     public function __construct(
         public readonly string $username,
         public readonly string $name,
-        #[OA\Property(format: 'email', nullable: true)]
-        public readonly ?string $email,
         #[OA\Property(nullable: true)]
         public readonly ?string $ip,
         #[OA\Property(format: 'password', nullable: true)]

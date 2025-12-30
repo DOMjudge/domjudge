@@ -20,19 +20,16 @@ class UserControllerTest extends JuryControllerTestCase
     protected static string  $className                = User::class;
     protected static array   $DOM_elements             = ['h1' => ['Users']];
     protected static string  $addForm                  = 'user[';
-    protected static array   $addEntitiesShown         = ['name', 'username', 'email'];
+    protected static array   $addEntitiesShown         = ['name', 'username'];
     protected static array   $overviewSingleNotShown   = ['plainPassword'];
     protected static array   $addEntities              = [['username'      => 'un',
                                                            'name'          => 'Alice',
-                                                           'email'         => 'alice@example.org',
                                                            'plainPassword' => 'plainpassword',
                                                            'ipAddress'     => '10.0.0.0',
                                                            'enabled'       => '1',
                                                            'team'          => '0',
                                                            'user_roles'    => ['0' => true, '1' => true]],
                                                           ['username' => 'ABCabc123_-@', 'name' => 'Allowed username'],
-                                                          ['username' => 'nem', 'name' => 'No Email',
-                                                           'email' => ''],
                                                           ['username' => 'npw', 'name' => 'No password',
                                                            'plainPassword' => ''],
                                                           ['username' => 'specialchar', 'name' => 'Special char in password',
