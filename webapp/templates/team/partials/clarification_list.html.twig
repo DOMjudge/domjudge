@@ -17,7 +17,7 @@
         </thead>
         <tbody>
         {%- for clarification in clarifications %}
-            {%- set link = path('team_clarification', {clarId: clarification.clarid}) %}
+            {%- set link = path('team_clarification', {clarId: clarification.externalid}) %}
 
             <tr class="{% if team.unreadClarifications.contains(clarification) %}unseen{% endif %}">
                 <td>

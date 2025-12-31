@@ -1338,7 +1338,7 @@ EOF;
             $contestProblemsById[$contestProblem->getExternalid()] = $contestProblem;
         }
 
-        $cpp = $em->getRepository(Language::class)->find('cpp');
+        $cpp = $em->getRepository(Language::class)->findByExternalId('cpp');
 
         // We use direct queries here to speed this up
         $submissionInsertQuery = $em->getConnection()->prepare('INSERT INTO submission (teamid, cid, probid, langid, submittime) VALUES (:teamid, :cid, :probid, :langid, :submittime)');
@@ -1393,7 +1393,7 @@ EOF;
         /** @var RequestStack $requestStack */
         $requestStack = static::getContainer()->get(RequestStack::class);
         $request = new Request();
-        $request->cookies->set('domjudge_cid', (string)$contest->getCid());
+        $request->cookies->set('domjudge_cid', (string)$contest->getExternalid());
         $requestStack->push($request);
 
         $results = $importExportService->getResultsData(37, $full, $honors);

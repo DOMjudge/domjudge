@@ -108,8 +108,8 @@ class CheckConfigService
         $this->stopwatch->stopSection('Teams');
 
         $this->stopwatch->openSection();
-        $results['External identifiers'] = $this->checkAllExternalIdentifiers();
-        $this->stopwatch->stopSection('External identifiers');
+        $results['Identifiers'] = $this->checkAllExternalIdentifiers();
+        $this->stopwatch->stopSection('Identifiers');
 
         return $results;
     }
@@ -492,7 +492,7 @@ class CheckConfigService
         $this->stopwatch->stop(__FUNCTION__);
         $desc = '';
         foreach ($contests as $contest) {
-            $desc .= '  - c' . $contest->getCid() . ' (' . $contest->getShortname() . ")\n";
+            $desc .= '  - `' . $contest->getExternalid() . '` (' . $contest->getShortname() . ")\n";
         }
         return new ConfigCheckItem(
             caption: 'Active contests',
@@ -510,7 +510,7 @@ class CheckConfigService
         $contesterrors = $cperrors = [];
         $result = 'O';
         foreach ($contests as $contest) {
-            $cid = $contest->getCid();
+            $cid = $contest->getExternalid();
             $errors = $this->validator->validate($contest);
             if (count($errors)) {
                 $result = 'E';
@@ -528,7 +528,7 @@ class CheckConfigService
 
         $desc = '';
         foreach ($contesterrors as $cid => $errors) {
-            $desc .= "Contest: c$cid: ";
+            $desc .= "Contest: `$cid`: ";
             if (count($errors) == 0 && empty($cperrors[$cid])) {
                 $desc .= "no errors\n";
             } else {
@@ -560,7 +560,7 @@ class CheckConfigService
         foreach ($contests as $contest) {
             if ($cid = $contest->getExternalid()) {
                 $bannerpath = $this->dj->assetPath($cid, 'contest', true);
-                $contestName = 'c' . $contest->getCid() . ' (' . $contest->getShortname() . ')';
+                $contestName = $contest->getExternalid() . ' (' . $contest->getShortname() . ')';
                 if ($bannerpath) {
                     if (($filesize = filesize($bannerpath)) > 2 * 1024 * 1024) {
                         $result = 'W';
@@ -599,7 +599,7 @@ class CheckConfigService
         $problemerrors = $moreproblemerrors = [];
         $result = 'O';
         foreach ($problems as $problem) {
-            $probid = $problem->getProbid();
+            $probid = $problem->getExternalid();
             $errors = $this->validator->validate($problem);
             if (count($errors)) {
                 $result = 'E';
@@ -639,20 +639,21 @@ class CheckConfigService
                 ->select('tc.testcaseid', 'tc.ranknumber', 'length(tcc.output) as output_size' )
                 ->from(Testcase::class, 'tc')
                 ->join('tc.content', 'tcc')
-                ->andWhere('tc.problem = :probid')
+                ->join('tc.problem', 'p')
+                ->andWhere('p.externalid = :probid')
                 ->setParameter('probid', $probid)
                 ->getQuery()
                 ->getResult();
             if (count($tcs_size) === 0) {
                 $result = 'E';
-                $moreproblemerrors[$probid] .= sprintf("  - No testcases for `p%s`\n", $probid);
+                $moreproblemerrors[$probid] .= sprintf("  - No testcases for `%s`\n", $probid);
             } else {
                 $problem_output_limit = 1024 * ($problem->getOutputLimit() ?: $output_limit);
                 foreach ($tcs_size as $row) {
                     if ($row['output_size'] > $problem_output_limit) {
                         $result = 'E';
                         $moreproblemerrors[$probid] .= sprintf(
-                            "  - Testcase `%s` for `p%s` exceeds output limit of `%s`\n",
+                            "  - Testcase `%s` for `%s` exceeds output limit of `%s`\n",
                             $row['rank'], $probid, $problem_output_limit
                         );
                     }
@@ -663,7 +664,7 @@ class CheckConfigService
                 if (!$contestProblem->getAllowJudge()) {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf(
-                        "  - `p%s` is disabled in contest `%s`\n",
+                        "  - `%s` is disabled in contest `%s`\n",
                         $probid, $contestProblem->getContest()->getName()
                     );
                 }
@@ -672,7 +673,7 @@ class CheckConfigService
 
         $desc = '';
         foreach ($problemerrors as $probid => $errors) {
-            $desc .= "  - Problem `p$probid`:\n";
+            $desc .= "  - Problem `$probid`:\n";
             if (count($errors) > 0 || !empty($moreproblemerrors[$probid])) {
                 $desc .= (string)$errors . " " .
                     $moreproblemerrors[$probid] . "\n";
@@ -698,7 +699,7 @@ class CheckConfigService
         $languageerrors = $morelanguageerrors = [];
         $result = 'O';
         foreach ($languages as $language) {
-            $langid = $language->getLangid();
+            $langid = $language->getExternalid();
             $errors = $this->validator->validate($language);
             if (count($errors)) {
                 $result = 'E';
@@ -999,7 +1000,7 @@ class CheckConfigService
                     $getter              = sprintf('get%s', ucfirst($column));
                     $routeParams[$param] = $entity->{$getter}();
                 }
-                $description .= sprintf("  - [%s %s](%s) does not have an external ID\n",
+                $description .= sprintf("  - [%s %s](%s) does not have an ID\n",
                                         ucfirst(str_replace('_', ' ', $inflector->tableize($entityType))),
                                         htmlspecialchars(implode(', ', $metadata->getIdentifierValues($entity))),
                                         $this->router->generate($route, $routeParams)

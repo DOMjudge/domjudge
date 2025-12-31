@@ -19,7 +19,7 @@
     <h1>Balloons - {{ current_contest.name }}</h1>
 
     {% if isfrozen %}
-        <div class="alert alert-info"><i class="fas fa-snowflake"></i> Scoreboard of c{{ current_contest.cid }} ({{ current_contest.shortname }}) is now frozen.</div>
+        <div class="alert alert-info"><i class="fas fa-snowflake"></i> Scoreboard of {{ current_contest.externalid }} ({{ current_contest.shortname }}) is now frozen.</div>
     {% endif %}
 
     <div class="mb-3">
@@ -37,8 +37,8 @@
                         <select id="affiliation-filter" class="select2 form-control" multiple data-filter-field="affiliation-id"
                                 data-ajax-url="{{ path('jury_ajax_data', {datatype: 'affiliations', select2: true}) }}">
                             {%- for affiliation in filteredAffiliations %}
-                                <option value="{{ affiliation.affilid }}" selected>
-                                    {{ affiliation.name }} (a{{ affiliation.affilid }})
+                                <option value="{{ affiliation.externalid }}" selected>
+                                    {{ affiliation.name }} ({{ affiliation.externalid }})
                                 </option>
                             {%- endfor %}
                         </select>
@@ -54,12 +54,12 @@
                         <label for="category-filter">Filter on category(s)</label>
                         <select id="category-filter" class="select2" multiple data-filter-field="category-id" style="width:100%">
                             {%- for category in filteredCategories %}
-                                <option value="{{ category.categoryid }}" selected>
+                                <option value="{{ category.externalid }}" selected>
                                     {{ category.name }}
                                 </option>
                             {%- endfor %}
                             {%- for category in availableCategories %}
-                                <option value="{{ category.categoryid }}">
+                                <option value="{{ category.externalid }}">
                                     {{ category.name }}
                                 </option>
                             {%- endfor %}
@@ -121,7 +121,7 @@
                     $('select[data-filter-field]').each(function () {
                         var $filterField = $(this);
                         if ($filterField.data('filter-field') == "category-id") {
-                            $filterField.val({{- defaultCategories | json_encode() -}}).trigger('change');
+                            $filterField.val({{- defaultCategories | json_encode() | raw -}}).trigger('change');
                         } else {
                             $filterField.val([]).trigger('change');
                         }

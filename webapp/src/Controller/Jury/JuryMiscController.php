@@ -86,7 +86,7 @@ class JuryMiscController extends BaseController
 
         if ($datatype === 'affiliations') {
             $affiliations = $qb->from(TeamAffiliation::class, 'a')
-                ->select('a.affilid', 'a.name', 'a.shortname')
+                ->select('a.externalid', 'a.name', 'a.shortname')
                 ->where($qb->expr()->like('a.name', '?1'))
                 ->orWhere($qb->expr()->like('a.shortname', '?1'))
                 ->orWhere($qb->expr()->eq('a.affilid', '?2'))
@@ -96,9 +96,9 @@ class JuryMiscController extends BaseController
                 ->getResult();
 
             $results = array_map(function (array $affiliation) {
-                $displayname = $affiliation['name'] . " (" . $affiliation['affilid'] . ")";
+                $displayname = $affiliation['name'] . " (" . $affiliation['externalid'] . ")";
                 return [
-                    'id' => $affiliation['affilid'],
+                    'id' => $affiliation['externalid'],
                     'text' => $displayname,
                 ];
             }, $affiliations);
@@ -118,7 +118,7 @@ class JuryMiscController extends BaseController
             throw new AccessDeniedHttpException('Permission denied');
         } elseif ($datatype === 'problems') {
             $problems = $qb->from(Problem::class, 'p')
-                ->select('p.probid', 'p.name')
+                ->select('p.externalid', 'p.name')
                 ->where($qb->expr()->like('p.name', '?1'))
                 ->orWhere($qb->expr()->eq('p.probid', '?2'))
                 ->orderBy('p.name', 'ASC')
@@ -127,15 +127,15 @@ class JuryMiscController extends BaseController
                 ->getResult();
 
             $results = array_map(function (array $problem) {
-                $displayname = $problem['name'] . " (p" . $problem['probid'] . ")";
+                $displayname = $problem['name'] . " (" . $problem['externalid'] . ")";
                 return [
-                    'id' => $problem['probid'],
+                    'id' => $problem['externalid'],
                     'text' => $displayname,
                 ];
             }, $problems);
         } elseif ($datatype === 'teams') {
             $teams = $qb->from(Team::class, 't')
-                ->select('t.teamid', 't.display_name', 't.name', 'COALESCE(t.display_name, t.name) AS order')
+                ->select('t.externalid', 't.display_name', 't.name', 'COALESCE(t.display_name, t.name) AS order')
                 ->where($qb->expr()->like('t.name', '?1'))
                 ->orWhere($qb->expr()->like('t.display_name', '?1'))
                 ->orWhere($qb->expr()->eq('t.teamid', '?2'))
@@ -145,32 +145,32 @@ class JuryMiscController extends BaseController
                 ->getResult();
 
             $results = array_map(function (array $team) {
-                $displayname = ($team['display_name'] ?? $team['name']) . " (t" . $team['teamid'] . ")";
+                $displayname = ($team['display_name'] ?? $team['name']) . " (" . $team['externalid'] . ")";
                 return [
-                    'id' => $team['teamid'],
+                    'id' => $team['externalid'],
                     'text' => $displayname,
                 ];
             }, $teams);
         } elseif ($datatype === 'languages') {
             $languages = $qb->from(Language::class, 'l')
-                ->select('l.langid', 'l.name')
+                ->select('l.externalid', 'l.name')
                 ->where($qb->expr()->like('l.name', '?1'))
-                ->orWhere($qb->expr()->eq('l.langid', '?2'))
+                ->orWhere($qb->expr()->eq('l.externalid', '?2'))
                 ->orderBy('l.name', 'ASC')
                 ->getQuery()->setParameter(1, '%' . $q . '%')
                 ->setParameter(2, $q)
                 ->getResult();
 
             $results = array_map(function (array $language) {
-                $displayname = $language['name'] . " (" . $language['langid'] . ")";
+                $displayname = $language['name'] . " (" . $language['externalid'] . ")";
                 return [
-                    'id' => $language['langid'],
+                    'id' => $language['externalid'],
                     'text' => $displayname,
                 ];
             }, $languages);
         } elseif ($datatype === 'contests') {
             $query = $qb->from(Contest::class, 'c')
-                ->select('c.cid', 'c.name', 'c.shortname')
+                ->select('c.externalid', 'c.name', 'c.shortname')
                 ->where($qb->expr()->like('c.name', '?1'))
                 ->orWhere($qb->expr()->like('c.shortname', '?1'))
                 ->orWhere($qb->expr()->eq('c.cid', '?2'))
@@ -188,9 +188,9 @@ class JuryMiscController extends BaseController
             $contests = $query->getResult();
 
             $results = array_map(function (array $contest) {
-                $displayname = $contest['name'] . " (" . $contest['shortname'] . " - c" . $contest['cid'] . ")";
+                $displayname = $contest['name'] . " (" . $contest['shortname'] . " - " . $contest['externalid'] . ")";
                 return [
-                    'id' => $contest['cid'],
+                    'id' => $contest['externalid'],
                     'text' => $displayname,
                 ];
             }, $contests);
@@ -216,7 +216,7 @@ class JuryMiscController extends BaseController
             $contests = [$cid => $contests[$cid]];
         } elseif ($request->cookies->has('domjudge_cid') &&
                   ($contest = $this->dj->getCurrentContest())) {
-            $contests = [$contest->getCid() => $contest];
+            $contests = [$contest->getExternalid() => $contest];
         }
 
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
@@ -289,7 +289,7 @@ class JuryMiscController extends BaseController
             $judging         = $submission->getJudgings()->first();
             /** @var string[] $expectedResults */
             $expectedResults = $submission->getExpectedResults();
-            $submissionId    = $submission->getSubmitid();
+            $submissionId    = $submission->getExternalid();
             $submissionFiles = $submission->getFiles();
 
             $result = mb_strtoupper($judging->getResult());
@@ -341,20 +341,20 @@ class JuryMiscController extends BaseController
             'nomatch' => $nomatch,
             'earlier' => $earlier,
             'problems' => $problems,
-            'contestId' => $this->dj->getCurrentContest()?->getCid(),
+            'contestId' => $this->dj->getCurrentContest()?->getExternalid(),
             'verifyMultiple' => $verifyMultiple,
         ]);
     }
 
-    #[Route(path: '/change-contest/{contestId<-?\d+>}', name: 'jury_change_contest')]
-    public function changeContestAction(Request $request, RouterInterface $router, int $contestId): Response
+    #[Route(path: '/change-contest/{contestId}', name: 'jury_change_contest')]
+    public function changeContestAction(Request $request, RouterInterface $router, string $contestId): Response
     {
         if ($this->isLocalReferer($router, $request)) {
             $response = new RedirectResponse($request->headers->get('referer'));
         } else {
             $response = $this->redirectToRoute('jury_index');
         }
-        return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
+        return $this->dj->setCookie('domjudge_cid', $contestId, 0, null, '', false, false,
                                                  $response);
     }
 

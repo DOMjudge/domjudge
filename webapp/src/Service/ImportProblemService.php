@@ -682,7 +682,7 @@ class ImportProblemService
                     $extension = end($parts);
                     foreach ($allowedLanguages as $language) {
                         if (in_array($extension, $language->getExtensions())) {
-                            $languageToUse = $language->getLangid();
+                            $languageToUse = $language->getExternalid();
                             break 2;
                         }
                     }
@@ -881,7 +881,7 @@ class ImportProblemService
             );
             $allMessages = array_merge($allMessages, $messages);
             if ($newProblem) {
-                $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
+                $this->dj->auditlog('problem', $newProblem->getExternalid(), 'upload zip', $clientName);
                 $probId = $newProblem->getExternalid();
             } else {
                 $errors = array_merge($errors, $messages);

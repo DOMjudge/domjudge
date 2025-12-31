@@ -1,9 +1,9 @@
-<span class="badge text-bg-secondary id-badge" data-bs-toggle="tooltip" data-bs-placement="top" title="{% if label is defined and label | length %}Label: {{ label }}, {% endif %}{% if externalId is not null %}External ID: {{ externalId }}, {% endif %}Internal ID: {{ idPrefix }}{{ id }}">
+<span class="badge text-bg-secondary id-badge" data-bs-toggle="tooltip" data-bs-placement="top" title="{% if label is defined and label | length %}Label: {{ label }}, {% endif %}{% if externalId is not null %}ID: {{ externalId }}{% else %}ID: {{ id }}{% endif %}">
     {% if label is defined and label | length %}
         {{ label }}
     {% elseif externalId is not null %}
         {{ externalId }}
     {% else %}
-        {{ idPrefix }}{{ id }}
+        {{ id }}
     {% endif %}
 </span>

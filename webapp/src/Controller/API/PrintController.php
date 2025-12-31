@@ -80,10 +80,11 @@ class PrintController extends AbstractFOSRestController
     ): JsonResponse {
         $langid = null;
         if ($print->language !== null) {
+            /** @var string|null $langid */
             $langid = $this->em
                 ->createQueryBuilder()
                 ->from(Language::class, "l")
-                ->select("l.langid")
+                ->select("l.externalid")
                 ->andWhere("l.name = :name")
                 ->setParameter("name", $print->language)
                 ->getQuery()

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
 use App\DataTransferObject\FileWithName;
+use App\Repository\SubmissionRepository;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -16,7 +17,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * All incoming submissions.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: SubmissionRepository::class)]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -44,8 +45,7 @@ class Submission extends BaseApiEntity implements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Submission ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('submitid')]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\Exclude]
     protected int $submitid;
 
     #[ORM\Column(

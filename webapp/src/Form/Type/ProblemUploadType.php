@@ -17,8 +17,9 @@ class ProblemUploadType extends AbstractType
             'class' => Contest::class,
             'required' => false,
             'placeholder' => 'Do not add / update contest data',
+            'choice_value' => 'externalid',
             'choice_label' => fn(Contest $contest) => sprintf(
-                'c%d: %s - %s', $contest->getCid(), $contest->getShortname(), $contest->getName()
+                '%s: %s - %s', $contest->getExternalid(), $contest->getShortname(), $contest->getName()
             ),
         ]);
         $builder->add('archive', FileType::class, [

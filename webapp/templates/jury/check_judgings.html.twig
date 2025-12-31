@@ -40,7 +40,7 @@
                 {% for submitId,result in results %}
                     {% set link = path('jury_submission', {'submitId': submitId}) %}
                     <tr>
-                        <td><a href="{{ link }}">s{{ submitId }}</a></td>
+                        <td><a href="{{ link }}">{{ submitId }}</a></td>
                         <td>
                             <a href="{{ link }}">
                                 {% if result.contestProblem is defined %}
@@ -111,7 +111,7 @@
         After this compare the maximum runtime for <code>Accepted</code>
         solutions and tune those against expected <code>Time Limit Exceeded</code> solutions.<br>
         {% for p in problems %}
-            {% set link = path('analysis_problem', {'probid': p.probid, 'view': 'hidden'}) %}
+            {% set link = path('analysis_problem', {'probid': p.externalId, 'view': 'hidden'}) %}
             <a href="{{ link }}">{{ p | problemBadge }}</a>
         {% endfor %}
     {% endif %}

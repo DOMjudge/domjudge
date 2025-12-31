@@ -113,7 +113,7 @@ $(function() {
             </thead>
             <tbody>
             {% for p in problems %}
-              {% set id=p.probid %}
+              {% set id=p.externalId %}
               <tr>
                 {% set link = path('analysis_problem', {'probid': id, 'view': view}) %}
                 <td scope="row"><a href="{{ path('analysis_problem', {'probid': id, 'view': view}) }}">{{ id }}</a></td>
@@ -149,10 +149,10 @@ $(function() {
             </thead>
             <tbody>
             {% for t in teams %}
-              {% set id=t.teamid %}
+              {% set id=t.externalid %}
               <tr>
                 {% set link = path('analysis_team', {'team':id}) %}
-                <td scope="row" style="text-align: right;"><a href="{{ link }}">{{ t | entityIdBadge('t') }}</a></td>
+                <td scope="row" style="text-align: right;"><a href="{{ link }}">{{ t | entityIdBadge }}</a></td>
                 <td><a href="{{ link }}">{% if t.affiliation %}{{ t.affiliation.name }}{% else %}-{% endif %}</a></td>
                 <td class="truncate" style="max-width: 200px"><a href="{{ link }}">{{ t.effectiveName }}</a></td>
                 <td><a href="{{ link }}">{{ misc.team_stats[id].total_submitted }} / {{ misc.team_stats[id].total_accepted }}</a></td>
@@ -186,7 +186,7 @@ $(function() {
                           </thead>
                           <tbody>
                           {% for j in delayed_judgings.data %}
-                              {% set id=j.submitid %}
+                              {% set id=j.submitexternalid %}
                               <tr>
                                   {% set link = path('jury_submission', {'submitId': id}) %}
                                   <td scope="row"><a href="{{ link }}">{{ id }}</a></td>
@@ -289,7 +289,7 @@ var problem_stats = [
       {% for prob in problems %}
         {
           "label" : "{{ prob.shortname }}",
-          "value" : {{ misc.problem_stats.teams_attempted[prob.probid] | default([]) | length }},
+          "value" : {{ misc.problem_stats.teams_attempted[prob.externalId] | default([]) | length }},
         },
       {% endfor %}
     ]
@@ -301,7 +301,7 @@ var problem_stats = [
       {% for prob in problems %}
         {
           "label" : "{{ prob.shortname }}",
-          "value" : {{ misc.problem_stats.teams_solved[prob.probid] | default([]) | length }},
+          "value" : {{ misc.problem_stats.teams_solved[prob.externalid] | default([]) | length }},
         },
       {% endfor %}
     ]

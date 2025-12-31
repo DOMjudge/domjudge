@@ -3,6 +3,7 @@ namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
 use App\DataTransferObject\ImageFile;
+use App\Repository\TeamAffiliationRepository;
 use App\Validator\Constraints\Country;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -16,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Affilitations for teams (e.g.: university, company).
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: TeamAffiliationRepository::class)]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -42,8 +43,7 @@ class TeamAffiliation extends BaseApiEntity implements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Team affiliation ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('affilid')]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    #[Serializer\Exclude]
     protected ?int $affilid = null;
 
     #[ORM\Column(
