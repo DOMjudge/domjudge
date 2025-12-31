@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Doctrine\ExternalIdAlreadyExistsException;
+use App\Entity\AbstractJudgement;
+use App\Entity\AbstractRun;
 use App\Entity\BaseApiEntity;
 use App\Entity\CalculatedExternalIdBasedOnRelatedFieldInterface;
 use App\Entity\Contest;
@@ -168,13 +170,20 @@ abstract class BaseController extends AbstractController
      * @return array<string, array<array{'target': string, 'targetColumn': string, 'type': string}>>
      */
     protected function getDatabaseRelations(array $files): array {
+        $skippedClasses = [
+            RankCache::class,
+            ScoreCache::class,
+            BaseApiEntity::class,
+            AbstractJudgement::class,
+            AbstractRun::class,
+        ];
         $relations = [];
         foreach ($files as $file) {
             $parts = explode('/', $file);
             $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
             $class = sprintf('App\\Entity\\%s', $shortClass);
             if (class_exists($class) &&
-                !in_array($class, [RankCache::class, ScoreCache::class, BaseApiEntity::class]) &&
+                !in_array($class, $skippedClasses) &&
                 !enum_exists($class)) {
                 $metadata = $this->em->getClassMetadata($class);
 

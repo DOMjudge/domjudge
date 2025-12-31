@@ -12,7 +12,6 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
 use App\Entity\ExecutableFile;
-use App\Entity\ExternalContestSource;
 use App\Entity\ExternalSourceWarning;
 use App\Entity\ImmutableExecutable;
 use App\Entity\InternalError;
@@ -422,22 +421,22 @@ class DOMJudgeService
                 }
 
                 $down_external_contest_source = $this->em->createQueryBuilder()
-                    ->select('ecs.extsourceid', 'ecs.lastPollTime')
-                    ->from(ExternalContestSource::class, 'ecs')
-                    ->andWhere('ecs.contest = :contest')
-                    ->andWhere('ecs.lastPollTime < :i OR ecs.lastPollTime is NULL OR ecs.lastHTTPCode != 200')
+                    ->select('c.cid', 'c.externalSourceLastPollTime')
+                    ->from(Contest::class, 'c')
+                    ->andWhere('c = :contest')
+                    ->andWhere('c.externalSourceEnabled = true')
+                    ->andWhere('c.externalSourceLastPollTime < :i OR c.externalSourceLastPollTime is NULL OR c.externalSourceLastHTTPCode != 200')
                     ->setParameter('contest', $contest)
                     ->setParameter('i', time() - $this->config->get('external_contest_source_critical'))
                     ->getQuery()->getOneOrNullResult();
 
                 $external_source_warning_count = $this->em->createQueryBuilder()
-                                                     ->select('COUNT(w.extwarningid)')
-                                                     ->from(ExternalSourceWarning::class, 'w')
-                                                     ->innerJoin('w.externalContestSource', 'ecs')
-                                                     ->andWhere('ecs.contest = :contest')
-                                                     ->setParameter('contest', $contest)
-                                                     ->getQuery()
-                                                     ->getSingleScalarResult();
+                    ->select('COUNT(w.extwarningid)')
+                    ->from(ExternalSourceWarning::class, 'w')
+                    ->andWhere('w.contest = :contest')
+                    ->setParameter('contest', $contest)
+                    ->getQuery()
+                    ->getSingleScalarResult();
             }
         }
 
@@ -1771,7 +1770,8 @@ class DOMJudgeService
 
     public function shadowMode(): bool
     {
-        return (bool)$this->config->get('shadow_mode');
+        $contest = $this->getCurrentContest();
+        return $contest !== null && $contest->isExternalSourceEnabled();
     }
 
     /** @return Language[] */

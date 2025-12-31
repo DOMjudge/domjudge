@@ -2,24 +2,24 @@
     <div class="col-lg-6">
         <table class="table table-sm table-striped">
             <tr>
-                <th>ID</th>
-                <td>{{ externalContestSource.extsourceid }}</td>
-            </tr>
-            <tr>
                 <th>Source</th>
                 <td>
-                    {{ externalContestSource.getReadableType }}
+                    {{ contest.externalSourceType.readable }}
                     at
-                    <code>{{ externalContestSource.source }}</code>
+                    <code>{{ contest.externalSourceSource }}</code>
                 </td>
             </tr>
-            {% if externalContestSource.username %}
+            <tr>
+                <th>Use external judgements</th>
+                <td>{{ contest.externalSourceUseJudgements | printYesNo }}</td>
+            </tr>
+            {% if contest.externalSourceUsername %}
                 <tr>
                     <th>Username</th>
-                    <td><code>{{ externalContestSource.username }}</code></td>
+                    <td><code>{{ contest.externalSourceUsername }}</code></td>
                 </tr>
             {% endif %}
-            {% if externalContestSource.password %}
+            {% if contest.externalSourcePassword %}
                 <tr>
                     <th>Password</th>
                     <td>
@@ -27,7 +27,7 @@
                             ••••••••
                         </code>
                         <code data-password class="d-none">
-                            {{ externalContestSource.password }}
+                            {{ contest.externalSourcePassword }}
                         </code>
                     </td>
                 </tr>
@@ -35,25 +35,25 @@
             <tr>
                 <th>Command</th>
                 <td>
-                    <code>{{ webappDir }}/bin/console import:eventfeed {{ current_contest.cid }}</code>
+                    <code>{{ webappDir }}/bin/console import:eventfeed {{ contest.externalid }}</code>
                 </td>
             </tr>
             <tr>
                 <th>Status</th>
                 <td>
-                    {% if not externalContestSource.lastPollTime %}
+                    {% if not contest.externalSourceLastPollTime %}
                         Event feed reader never checked in.
-                    {% elseif externalContestSource.lastHTTPCode is not same as(200) %}
-                        Received {{ externalContestSource.lastHTTPCode }} HTTP code.
+                    {% elseif contest.externalSourceLastHTTPCode is not same as(200) %}
+                        Received {{ contest.externalSourceLastHTTPCode }} HTTP code.
                     {% else %}
-                        {{ status }}, last checked in {{ externalContestSource.lastPollTime | printtimediff }}s ago.
+                        {{ status }}, last checked in {{ contest.externalSourceLastPollTime | printtimediff }}s ago.
                     {% endif %}
                 </td>
             </tr>
             <tr>
                 <th>Last event ID</th>
                 <td>
-                    {{ externalContestSource.lastEventId | default('-') }}
+                    {{ contest.externalSourceLastEventId | default('-') }}
                 </td>
             </tr>
             {% if sourceService.validContestSource and sourceService.apiVersion %}

@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController as ARC;
+use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -24,17 +26,19 @@ use JMS\Serializer\Annotation as Serializer;
     columns: ['cid', 'externalid'],
     options: ['lengths' => [null, 190]]
 )]
-class ExternalJudgement
+class ExternalJudgement extends AbstractJudgement
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'External judgement ID', 'unsigned' => true])]
+    #[Serializer\Exclude]
     private int $extjudgementid;
 
     #[ORM\Column(
         nullable: true,
         options: ['comment' => 'Judgement ID in external system, should be unique inside a single contest', 'collation' => 'utf8mb4_bin']
     )]
+    #[Serializer\SerializedName('id')]
     protected string $externalid;
 
     #[ORM\Column(
@@ -42,6 +46,7 @@ class ExternalJudgement
         nullable: true,
         options: ['comment' => 'Result string as obtained from external system. null if not finished yet']
     )]
+    #[Serializer\Exclude]
     private ?string $result = null;
 
     #[ORM\Column(options: ['comment' => 'Result / difference verified?', 'default' => 0])]
@@ -68,6 +73,7 @@ class ExternalJudgement
         scale: 9,
         options: ['comment' => 'Time judging started', 'unsigned' => true]
     )]
+    #[Serializer\Exclude]
     private string|float $starttime;
 
     #[ORM\Column(
@@ -77,11 +83,13 @@ class ExternalJudgement
         nullable: true,
         options: ['comment' => 'Time judging ended, null = still busy', 'unsigned' => true]
     )]
+    #[Serializer\Exclude]
     private string|float|null $endtime = null;
 
     #[ORM\Column(
         options: ['comment' => 'Old external judgement is marked as invalid when receiving a new one', 'default' => 1]
     )]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private bool $valid = true;
 
     #[ORM\Column(
@@ -97,16 +105,19 @@ class ExternalJudgement
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
+    #[Serializer\Exclude]
     private Contest $contest;
 
     #[ORM\ManyToOne(inversedBy: 'external_judgements')]
     #[ORM\JoinColumn(name: 'submitid', referencedColumnName: 'submitid', onDelete: 'CASCADE')]
+    #[Serializer\Exclude]
     private Submission $submission;
 
     /**
      * @var Collection<int, ExternalRun>
      */
     #[ORM\OneToMany(mappedBy: 'external_judgement', targetEntity: ExternalRun::class)]
+    #[Serializer\Exclude]
     private Collection $external_runs;
 
     public function __construct()
@@ -207,6 +218,17 @@ class ExternalJudgement
         return $this->valid;
     }
 
+    public function getScore(): string
+    {
+        return (string)$this->score;
+    }
+
+    public function setScore(string|float $score): ExternalJudgement
+    {
+        $this->score = $score;
+        return $this;
+    }
+
     public function setContest(?Contest $contest = null): ExternalJudgement
     {
         $this->contest = $contest;
@@ -243,32 +265,21 @@ class ExternalJudgement
         return $this->external_runs;
     }
 
-    public function getMaxRuntime(): float
+    /**
+     * @return Collection<int, ExternalRun>
+     * @phpstan-ignore method.childReturnType (ExternalRun is a subtype of AbstractRun)
+     */
+    public function getRuns(): Collection
     {
-        $max = 0;
-        foreach ($this->external_runs as $run) {
-            $max = max($run->getRuntime(), $max);
-        }
-        return $max;
+        return $this->external_runs;
     }
 
-    public function getSumRuntime(): float
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('max_run_time')]
+    #[Serializer\Type('float')]
+    public function getApiMaxRunTime(): ?float
     {
-        $sum = 0;
-        foreach ($this->external_runs as $run) {
-            $sum += $run->getRuntime();
-        }
-        return $sum;
-    }
-
-    public function getScore(): string
-    {
-        return (string)$this->score;
-    }
-
-    public function setScore(string|float $score): ExternalJudgement
-    {
-        $this->score = $score;
-        return $this;
+        $maxRuntime = $this->getMaxRuntime();
+        return $maxRuntime > 0 ? Utils::roundedFloat($maxRuntime) : null;
     }
 }

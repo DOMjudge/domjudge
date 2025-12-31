@@ -23,7 +23,7 @@ use Ramsey\Uuid\Uuid;
 #[ORM\Index(columns: ['cid'], name: 'cid')]
 #[ORM\Index(columns: ['rejudgingid'], name: 'rejudgingid')]
 #[ORM\Index(columns: ['prevjudgingid'], name: 'prevjudgingid')]
-class Judging extends BaseApiEntity
+class Judging extends AbstractJudgement
 {
     final public const RESULT_CORRECT = 'correct';
     final public const RESULT_COMPILER_ERROR = 'compiler-error';
@@ -127,6 +127,17 @@ class Judging extends BaseApiEntity
     #[Serializer\Exclude]
     private string $uuid;
 
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        options: [
+            'comment' => 'Optional score for this run, e.g. for partial scoring',
+            'default' => '0.000000000',
+        ]
+    )]
+    private string|float $score = 0;
+
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
@@ -176,50 +187,6 @@ class Judging extends BaseApiEntity
     #[Serializer\Exclude]
     private ?InternalError $internalError = null;
 
-    #[ORM\Column(
-        type: 'decimal',
-        precision: 32,
-        scale: 9,
-        options: [
-            'comment' => 'Optional score for this run, e.g. for partial scoring',
-            'default' => '0.000000000',
-        ]
-    )]
-    private string|float $score = 0;
-
-    public function setScore(string|float $score): Judging
-    {
-        $this->score = $score;
-        return $this;
-    }
-
-    public function getScore(): string
-    {
-        return (string)$this->score;
-    }
-
-    public function getMaxRuntime(): ?float
-    {
-        if ($this->runs->isEmpty()) {
-            return null;
-        }
-        $max = 0;
-        foreach ($this->runs as $run) {
-            // JudgingRun::getRuntime can be null if it didn't run. We exclude these for the max runtime.
-            $max = max($run->getRuntime() ?? 0, $max);
-        }
-        return $max;
-    }
-
-    public function getSumRuntime(): float
-    {
-        $sum = 0;
-        foreach ($this->runs as $run) {
-            $sum += $run->getRuntime();
-        }
-        return $sum;
-    }
-
     public function getJudgingid(): int
     {
         return $this->judgingid;
@@ -236,23 +203,6 @@ class Judging extends BaseApiEntity
         return $this->starttime;
     }
 
-    #[OA\Property(nullable: true)]
-    #[Serializer\VirtualProperty]
-    #[Serializer\SerializedName('start_time')]
-    #[Serializer\Type('string')]
-    public function getAbsoluteStartTime(): ?string
-    {
-        return Utils::absTime($this->getStarttime());
-    }
-
-    #[Serializer\VirtualProperty]
-    #[Serializer\SerializedName('start_contest_time')]
-    #[Serializer\Type('string')]
-    public function getRelativeStartTime(): string
-    {
-        return Utils::relTime($this->getStarttime() - $this->getContest()->getStarttime());
-    }
-
     public function setEndtime(string|float $endtime): Judging
     {
         $this->endtime = $endtime;
@@ -262,24 +212,6 @@ class Judging extends BaseApiEntity
     public function getEndtime(): string|float|null
     {
         return $this->endtime;
-    }
-
-    #[OA\Property(nullable: true)]
-    #[Serializer\VirtualProperty]
-    #[Serializer\SerializedName('end_time')]
-    #[Serializer\Type('string')]
-    public function getAbsoluteEndTime(): ?string
-    {
-        return $this->getEndtime() ? Utils::absTime($this->getEndtime()) : null;
-    }
-
-    #[OA\Property(nullable: true)]
-    #[Serializer\VirtualProperty]
-    #[Serializer\SerializedName('end_contest_time')]
-    #[Serializer\Type('string')]
-    public function getRelativeEndTime(): ?string
-    {
-        return $this->getEndtime() ? Utils::relTime($this->getEndtime() - $this->getContest()->getStarttime()) : null;
     }
 
     public function setMaxRuntimeForVerdict(string|float $maxRuntimeForVerdict): Judging
@@ -418,13 +350,6 @@ class Judging extends BaseApiEntity
         return $this->getSubmission()->getSubmitid();
     }
 
-    #[Serializer\VirtualProperty]
-    #[Serializer\SerializedName('submission_id')]
-    public function getApiSubmissionId(): string
-    {
-        return $this->getSubmission()->getExternalid();
-    }
-
     public function setContest(?Contest $contest = null): Judging
     {
         $this->contest = $contest;
@@ -478,6 +403,7 @@ class Judging extends BaseApiEntity
 
     /**
      * @return Collection<int, JudgingRun>
+     * @phpstan-ignore method.childReturnType (JudgingRun is a subtype of AbstractRun)
      */
     public function getRuns(): Collection
     {
@@ -556,6 +482,17 @@ class Judging extends BaseApiEntity
     public function setCompileMetadata(?string $compile_metadata): self
     {
         $this->compile_metadata = $compile_metadata;
+        return $this;
+    }
+
+    public function getScore(): string
+    {
+        return (string)$this->score;
+    }
+
+    public function setScore(string|float $score): Judging
+    {
+        $this->score = $score;
         return $this;
     }
 }

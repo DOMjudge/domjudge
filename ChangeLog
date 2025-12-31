@@ -10,6 +10,9 @@ Version 10.0.0DEV
  - Allow LaTeX inline math in clarifications.
  - Allow teams to be in more than one category and add more category types.
  - Do not expose internal IDs in interface or API anymore.
+ - Make shadow mode a per contest setting.
+ - Allow to specify whether to use internal or external judgings and runs in
+   shadow mode.
 
 Version 9.0.0 - 5 October 2025
 ------------------------------

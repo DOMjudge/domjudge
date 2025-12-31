@@ -211,7 +211,7 @@ class ScoreboardService
         }
 
         // Determine whether we will use external judgements instead of judgings.
-        $useExternalJudgements = $this->dj->shadowMode();
+        $useExternalJudgements = $contest->isExternalSourceUseJudgements();
 
         // Note the clause 's.submittime < c.endtime': this is used to
         // filter out TOO-LATE submissions from pending, but it also means

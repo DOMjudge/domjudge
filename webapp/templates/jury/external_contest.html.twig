@@ -23,7 +23,7 @@
     </div>
 
     <p>
-        {{ button(path('jury_external_contest_manage'), 'Edit', 'primary', 'edit') }}
+        {{ button(path('jury_contest_edit', {contestId: contest.externalid}) ~ '#externalSourceEnabled', 'Edit contest settings', 'primary', 'edit') }}
     </p>
 
     <div data-warning-header>

@@ -3,6 +3,9 @@
 namespace App\Controller\API;
 
 use App\DataTransferObject\JudgingRunWrapper;
+use App\Entity\AbstractRun;
+use App\Entity\Contest;
+use App\Entity\ExternalRun;
 use App\Entity\JudgingRun;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -20,7 +23,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
- * @extends AbstractRestController<JudgingRun, JudgingRunWrapper>
+ * @extends AbstractRestController<AbstractRun, JudgingRunWrapper>
  */
 #[Rest\Route(path: '/contests/{cid}/runs')]
 #[OA\Tag(name: 'Runs')]
@@ -36,6 +39,8 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * @var string[]
      */
     protected readonly array $verdicts;
+
+    private ?bool $useExternalRuns = null;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -112,34 +117,48 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
 
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        $queryBuilder = $this->em->createQueryBuilder()
-            ->from(JudgingRun::class, 'jr')
-            ->leftJoin('jr.judging', 'j')
-            ->leftJoin('jr.testcase', 'tc')
-            ->leftJoin('j.submission', 's')
-            ->leftJoin('j.contest', 'c')
-            ->select('jr, j, tc, c')
-            ->andWhere('j.contest = :cid')
-            // With the new judgehost API we pre-create the judging_runs; only expose those who correspond to a real run
-            // on a judgehost.
-            ->andWhere('jr.endtime IS NOT NULL')
-            ->setParameter('cid', $this->getContestId($request));
+        $contestId = $this->getContestId($request);
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $this->useExternalRuns = $contest?->isExternalSourceUseJudgements() ?? false;
+
+        $queryBuilder = $this->em->createQueryBuilder();
+        if ($this->useExternalRuns) {
+            $queryBuilder
+                ->from(ExternalRun::class, 'jr')
+                ->leftJoin('jr.external_judgement', 'j')
+                ->leftJoin('jr.contest', 'c')
+                ->andWhere('jr.contest = :cid');
+        } else {
+            $queryBuilder
+                ->from(JudgingRun::class, 'jr')
+                ->leftJoin('jr.judging', 'j')
+                ->leftJoin('j.contest', 'c')
+                ->andWhere('j.contest = :cid')
+                // With the new judgehost API we pre-create the judging_runs; only expose those who correspond to a real run
+                // on a judgehost.
+                ->andWhere('jr.endtime IS NOT NULL');
+        }
+        $queryBuilder
+                ->leftJoin('jr.testcase', 'tc')
+                ->leftJoin('j.submission', 's')
+                ->select('jr, j, tc, c')
+                ->setParameter('cid', $contestId);
 
         if ($request->query->has('first_id')) {
             $queryBuilder
-                ->andWhere('jr.runid >= :first_id')
+                ->andWhere($this->useExternalRuns ? 'jr.externalid >= :first_id' : 'jr.runid >= :first_id')
                 ->setParameter('first_id', $request->query->get('first_id'));
         }
 
         if ($request->query->has('last_id')) {
             $queryBuilder
-                ->andWhere('jr.runid = :last_id')
+                ->andWhere($this->useExternalRuns ? 'jr.externalid = :last_id' : 'jr.runid = :last_id')
                 ->setParameter('last_id', $request->query->get('last_id'));
         }
 
         if ($request->query->has('judging_id')) {
             $queryBuilder
-                ->andWhere('jr.judging = :judging_id')
+                ->andWhere($this->useExternalRuns ? 'j.externalid = :judging_id' : 'jr.judging = :judging_id')
                 ->setParameter('judging_id', $request->query->get('judging_id'));
         }
 
@@ -153,9 +172,12 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
 
         // If an ID has not been given directly, only show runs before contest end.
         if (!$request->attributes->has('id') && !$request->query->has('ids')) {
-            $queryBuilder
-                ->andWhere('s.submittime < c.endtime')
-                ->andWhere('j.rejudging IS NULL OR j.valid = 1');
+            $queryBuilder->andWhere('s.submittime < c.endtime');
+            if (!$this->useExternalRuns) {
+                $queryBuilder->andWhere('j.rejudging IS NULL OR j.valid = 1');
+            } else {
+                $queryBuilder->andWhere('j.valid = 1');
+            }
             if ($this->config->get('verification_required')) {
                 $queryBuilder->andWhere('j.verified = 1');
             }
@@ -166,14 +188,17 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
 
     protected function getIdField(): string
     {
+        if ($this->useExternalRuns) {
+            return 'jr.externalid';
+        }
         return 'jr.runid';
     }
 
     public function transformObject($object): JudgingRunWrapper
     {
-        /** @var JudgingRun $judgingRun */
-        $judgingRun      = $object;
-        $judgementTypeId = $judgingRun->getRunresult() ? $this->verdicts[$judgingRun->getRunresult()] : null;
+        /** @var AbstractRun $judgingRun */
+        $judgingRun = $object;
+        $judgementTypeId = $judgingRun->getResult() ? $this->verdicts[$judgingRun->getResult()] : null;
         return new JudgingRunWrapper($judgingRun, $judgementTypeId);
     }
 }

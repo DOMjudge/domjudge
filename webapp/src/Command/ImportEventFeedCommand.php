@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\Entity\Contest;
-use App\Entity\ExternalContestSource;
 use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -36,7 +35,7 @@ class ImportEventFeedCommand
 {
     protected SymfonyStyle $style;
 
-    protected ?ExternalContestSource $source = null;
+    protected ?Contest $contest = null;
 
     public function __construct(
         protected readonly EntityManagerInterface $em,
@@ -83,11 +82,6 @@ class ImportEventFeedCommand
         pcntl_signal(SIGINT, $this->stopCommand(...));
 
         if (!$this->loadSource($input, $contestId)) {
-            return Command::FAILURE;
-        }
-
-        if (!$this->dj->shadowMode()) {
-            $this->style->error("shadow_mode configuration setting is set to 'false' but should be 'true'.");
             return Command::FAILURE;
         }
 
@@ -156,7 +150,7 @@ class ImportEventFeedCommand
                 foreach ($contests as $contest) {
                     $choices[] = sprintf(
                         '%s: %s',
-                        $contest->getCid(),
+                        $contest->getExternalid(),
                         $contest->getName()
                     );
                 }
@@ -165,27 +159,24 @@ class ImportEventFeedCommand
                 // not return them (only if they are strings and even casting them to strings makes PHP change them back
                 // to integers).
                 // We start the answers with the ID, so we can just cast them.
-                $contestId = (int)$answer;
+                $contestId = $answer;
             } else {
                 $this->style->error('No contestid provided and not running in interactive mode.');
                 return false;
             }
         }
 
-        /** @var ExternalContestSource|null $source */
-        $source = $this->em->createQueryBuilder()
-            ->from(ExternalContestSource::class, 'ecs')
-            ->select('ecs')
-            ->join('ecs.contest', 'c')
-            ->andWhere('c.cid = :cid')
-            ->setParameter('cid', $contestId)
-            ->getQuery()
-            ->getOneOrNullResult();
-        if ($source === null) {
-            $this->style->error('Contest does not have an external contest configured yet');
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($contestId);
+        if ($contest === null) {
+            $this->style->error('Contest not found.');
             return false;
         }
-        $this->sourceService->setSource($source);
+        if (!$contest->isExternalSourceEnabled()) {
+            $this->style->error('Contest does not have shadow mode enabled.');
+            return false;
+        }
+        $this->contest = $contest;
+        $this->sourceService->setSourceContest($contest);
 
         return true;
     }
@@ -202,7 +193,7 @@ class ImportEventFeedCommand
         $theirId = $this->sourceService->getContestId();
         if ($ourId !== $theirId) {
             $this->style->warning(
-                "Contest ID in external system $theirId does not match external ID in DOMjudge ($ourId)."
+                "Contest ID in external system $theirId does not match ID in DOMjudge ($ourId)."
             );
             if (!$this->style->confirm('Do you want to continue anyway?', default: false)) {
                 return false;

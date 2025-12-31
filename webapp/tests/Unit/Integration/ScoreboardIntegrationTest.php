@@ -69,7 +69,6 @@ class ScoreboardIntegrationTest extends KernelTestCase
             'compile_penalty'          => false,
             'penalty_time'             => 20,
             'score_in_seconds'         => false,
-            'shadow_mode'              => 0,
             'show_teams_on_scoreboard' => 0,
             'submission_rate_limit'    => [],
         ];

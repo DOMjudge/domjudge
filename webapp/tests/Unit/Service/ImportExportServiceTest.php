@@ -8,6 +8,7 @@ use App\DataFixtures\Test\TeamWithExternalIdEqualsTwoFixture;
 use App\DataTransferObject\ResultRow;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\ExternalContestSourceType;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Team;
@@ -272,6 +273,201 @@ class ImportExportServiceTest extends BaseTestCase
             'score-test',
             '2020-01-01 10:34:56 UTC',
             null,
+        ];
+    }
+
+    /**
+     * @dataProvider provideImportContestDataWithShadow
+     */
+    public function testImportContestDataWithShadow(
+        mixed $data,
+        bool $expectedEnabled,
+        bool $expectedUseJudgements,
+        ?ExternalContestSourceType $expectedType,
+        ?string $expectedSource
+    ): void {
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        self::assertTrue($importExportService->importContestData($data, $message, $cid), 'Importing failed: ' . $message);
+        self::assertNull($message);
+        self::assertIsString($cid);
+
+        $contest = $this->getContest($cid);
+
+        self::assertEquals($expectedEnabled, $contest->isExternalSourceEnabled());
+        self::assertEquals($expectedUseJudgements, $contest->isExternalSourceUseJudgements());
+        self::assertEquals($expectedType, $contest->getExternalSourceType());
+        self::assertEquals($expectedSource, $contest->getExternalSourceSource());
+    }
+
+    public function provideImportContestDataWithShadow(): Generator
+    {
+        // Presence of shadow key enables shadow mode automatically
+        yield [
+            [
+                'name'       => 'Shadow contest CCS API',
+                'short-name' => 'shadow-ccs',
+                'duration'   => '5:00:00',
+                'start-time' => '2020-01-01T12:34:56+02:00',
+                'shadow'     => [
+                    'type'   => 'ccs-api',
+                    'source' => 'https://example.com/api/contests/test',
+                ],
+            ],
+            true,
+            false,
+            ExternalContestSourceType::CCS_API,
+            'https://example.com/api/contests/test',
+        ];
+        // With useJudgements enabled
+        yield [
+            [
+                'name'       => 'Shadow contest with judgements',
+                'short-name' => 'shadow-judge',
+                'duration'   => '5:00:00',
+                'start-time' => '2020-01-01T12:34:56+02:00',
+                'shadow'     => [
+                    'type'           => 'ccs-api',
+                    'source'         => 'https://example.com/api/contests/test',
+                    'use_judgements' => true,
+                ],
+            ],
+            true,
+            true,
+            ExternalContestSourceType::CCS_API,
+            'https://example.com/api/contests/test',
+        ];
+        // Contest package type
+        yield [
+            [
+                'name'       => 'Shadow contest package',
+                'short-name' => 'shadow-pkg',
+                'duration'   => '5:00:00',
+                'start-time' => '2020-01-01T12:34:56+02:00',
+                'shadow'     => [
+                    'type'   => 'contest-archive',
+                    'source' => '/path/to/contest',
+                ],
+            ],
+            true,
+            false,
+            ExternalContestSourceType::CONTEST_PACKAGE,
+            '/path/to/contest',
+        ];
+        // Contest without shadow key - shadow mode should be disabled
+        yield [
+            [
+                'name'       => 'Normal contest',
+                'short-name' => 'normal',
+                'duration'   => '5:00:00',
+                'start-time' => '2020-01-01T12:34:56+02:00',
+            ],
+            false,
+            false,
+            null,
+            null,
+        ];
+    }
+
+    /**
+     * @dataProvider provideExportContestYamlDataWithShadow
+     */
+    public function testExportContestYamlDataWithShadow(
+        bool $enabled,
+        bool $useJudgements,
+        ?ExternalContestSourceType $type,
+        ?string $source,
+        ?string $username,
+        ?string $password,
+        ?array $expectedShadow
+    ): void {
+        // First create a contest
+        $contestData = [
+            'name'       => 'Export test contest',
+            'short-name' => 'export-test',
+            'duration'   => '5:00:00',
+            'start-time' => '2020-01-01T12:34:56+02:00',
+        ];
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        self::assertTrue($importExportService->importContestData($contestData, $message, $cid), 'Importing failed: ' . $message);
+
+        $contest = $this->getContest($cid);
+        $contest->setExternalSourceEnabled($enabled);
+        $contest->setExternalSourceUseJudgements($useJudgements);
+        $contest->setExternalSourceType($type);
+        $contest->setExternalSourceSource($source);
+        $contest->setExternalSourceUsername($username);
+        $contest->setExternalSourcePassword($password);
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $em->flush();
+
+        $data = $importExportService->getContestYamlData($contest, false);
+
+        if ($expectedShadow === null) {
+            self::assertArrayNotHasKey('shadow', $data);
+        } else {
+            self::assertArrayHasKey('shadow', $data);
+            self::assertEquals($expectedShadow, $data['shadow']);
+        }
+    }
+
+    public function provideExportContestYamlDataWithShadow(): Generator
+    {
+        // Shadow mode disabled - no shadow key in export
+        yield [
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+        ];
+        // Shadow mode enabled with CCS API and all fields
+        yield [
+            true,
+            true,
+            ExternalContestSourceType::CCS_API,
+            'https://example.com/api/contests/test',
+            'admin',
+            'secret123',
+            [
+                'type'           => 'ccs-api',
+                'source'         => 'https://example.com/api/contests/test',
+                'use_judgements' => true,
+                'username'       => 'admin',
+                'password'       => 'secret123', // ggignore
+            ],
+        ];
+        // Shadow mode enabled with contest archive, no useJudgements
+        yield [
+            true,
+            false,
+            ExternalContestSourceType::CONTEST_PACKAGE,
+            '/path/to/archive',
+            null,
+            null,
+            [
+                'type'   => 'contest-archive',
+                'source' => '/path/to/archive',
+            ],
+        ];
+        // Shadow mode enabled with CCS API, only username (no password)
+        yield [
+            true,
+            false,
+            ExternalContestSourceType::CCS_API,
+            'https://example.com/api/contests/test',
+            'readonly',
+            null,
+            [
+                'type'     => 'ccs-api',
+                'source'   => 'https://example.com/api/contests/test',
+                'username' => 'readonly',
+            ],
         ];
     }
 
