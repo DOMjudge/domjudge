@@ -2,7 +2,9 @@
 
 namespace App\Entity;
 
+use App\Utils\Utils;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Run in external system.
@@ -20,23 +22,26 @@ use Doctrine\ORM\Mapping as ORM;
     columns: ['cid', 'externalid'],
     options: ['lengths' => [null, 190]]
 )]
-class ExternalRun
+class ExternalRun extends AbstractRun
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'External run ID', 'unsigned' => true])]
+    #[Serializer\Exclude]
     private int $extrunid;
 
     #[ORM\Column(
         nullable: true,
         options: ['comment' => 'Run ID in external system, should be unique inside a single contest', 'collation' => 'utf8mb4_bin']
     )]
+    #[Serializer\SerializedName('id')]
     protected ?string $externalid = null;
 
     #[ORM\Column(
         length: 32,
         options: ['comment' => 'Result string as obtained from external system']
     )]
+    #[Serializer\Exclude]
     private string $result;
 
     #[ORM\Column(
@@ -45,21 +50,26 @@ class ExternalRun
         scale: 9,
         options: ['comment' => 'Time run ended', 'unsigned' => true]
     )]
+    #[Serializer\Exclude]
     private string|float $endtime;
 
     #[ORM\Column(options: ['comment' => 'Running time on this testcase'])]
+    #[Serializer\Exclude]
     private float $runtime;
 
     #[ORM\ManyToOne(inversedBy: 'external_runs')]
     #[ORM\JoinColumn(name: 'extjudgementid', referencedColumnName: 'extjudgementid', onDelete: 'CASCADE')]
+    #[Serializer\Exclude]
     private ExternalJudgement $external_judgement;
 
     #[ORM\ManyToOne(inversedBy: 'external_runs')]
     #[ORM\JoinColumn(name: 'testcaseid', referencedColumnName: 'testcaseid', onDelete: 'CASCADE')]
+    #[Serializer\Exclude]
     private Testcase $testcase;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
+    #[Serializer\Exclude]
     private Contest $contest;
 
     #[ORM\Column(
@@ -164,5 +174,21 @@ class ExternalRun
     public function getScore(): string
     {
         return (string)$this->score;
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('run_time')]
+    #[Serializer\Type('float')]
+    public function getApiRuntime(): float
+    {
+        return Utils::roundedFloat($this->runtime);
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('judgement_id')]
+    #[Serializer\Type('string')]
+    public function getJudgementId(): string
+    {
+        return $this->getExternalJudgement()->getExternalid();
     }
 }

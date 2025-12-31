@@ -405,7 +405,7 @@ class PublicController extends BaseController
         if ($contest->getFreezetime() && $submission->getSubmittime() >= $contest->getFreezetime() && !$contest->getFreezeData()->showFinal()) {
             return $this->twigExtension->printResult('');
         }
-        if ($this->dj->shadowMode()) {
+        if ($contest->isExternalSourceUseJudgements()) {
             $judgings = $submission->getExternalJudgements();
         } else {
             $judgings = $submission->getJudgings();

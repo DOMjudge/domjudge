@@ -4,6 +4,7 @@ namespace App\Form\Type;
 
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\ExternalContestSourceType;
 use App\Entity\Language;
 use App\Entity\ScoreboardType;
 use App\Entity\Team;
@@ -15,6 +16,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -209,6 +211,44 @@ class ContestType extends AbstractExternalIdEntityType
             'required' => false,
             'label' => 'Scoreboard warning message',
             'help' => 'When set, a warning message displayed above all scoreboards for this contest.',
+        ]);
+        $builder->add('externalSourceEnabled', ChoiceType::class, [
+            'expanded' => true,
+            'label' => 'Enable shadow mode',
+            'choices' => [
+                'Yes' => true,
+                'No' => false,
+            ],
+            'help' => 'When enabled, this contest will shadow an external contest source.',
+        ]);
+        $builder->add('externalSourceUseJudgements', ChoiceType::class, [
+            'expanded' => true,
+            'label' => 'Use external judgements',
+            'choices' => [
+                'Yes' => true,
+                'No' => false,
+            ],
+            'help' => 'When enabled, external judgements will be used for results and scoring instead of local judgings.',
+        ]);
+        $builder->add('externalSourceType', EnumType::class, [
+            'class' => ExternalContestSourceType::class,
+            'required' => false,
+            'placeholder' => false,
+            'label' => 'External source type',
+            'choice_label' => 'readable',
+        ]);
+        $builder->add('externalSourceSource', TextType::class, [
+            'required' => false,
+            'label' => 'External source',
+            'help' => 'For contest package: directory on disk to use. For CCS API: URL to contest in API.',
+        ]);
+        $builder->add('externalSourceUsername', TextType::class, [
+            'required' => false,
+            'label' => 'External source username',
+        ]);
+        $builder->add('externalSourcePassword', TextType::class, [
+            'required' => false,
+            'label' => 'External source password',
         ]);
         $builder->add('problems', CollectionType::class, [
             'entry_type' => ContestProblemType::class,

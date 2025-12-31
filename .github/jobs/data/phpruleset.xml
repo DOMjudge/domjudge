@@ -20,6 +20,10 @@
     <rule ref="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore">
         <severity>0</severity>
     </rule>
+    <!-- Temporary as we have readonly classes, duplicated with below as that one should stay -->
+    <rule ref="PSR1.Files.SideEffects">
+        <severity>0</severity>
+    </rule>
     <!-- The judgedaemon does this to keep it selfcontained -->
     <rule ref="PSR1.Files.SideEffects">
         <exclude-pattern>judge/judgedaemon\.main\.php</exclude-pattern>

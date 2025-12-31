@@ -2,15 +2,15 @@
 
 namespace App\DataTransferObject;
 
-use App\Entity\JudgingRun;
+use App\Entity\AbstractRun;
 use JMS\Serializer\Annotation as Serializer;
 
-class JudgingRunWrapper
+readonly class JudgingRunWrapper
 {
     public function __construct(
         #[Serializer\Inline]
-        protected readonly JudgingRun $judgingRun,
+        protected AbstractRun $judgingRun,
         #[Serializer\SerializedName('judgement_type_id')]
-        protected readonly ?string $judgementTypeId = null
+        protected ?string $judgementTypeId = null
     ) {}
 }

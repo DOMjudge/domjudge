@@ -211,6 +211,16 @@
                     <td></td>
                 </tr>
                 <tr>
+                    <th>Shadow mode</th>
+                    <td>
+                        {{ contest.externalSourceEnabled | printYesNo }}
+                        {% if contest.externalSourceEnabled %}
+                            (<a href="{{ path('jury_external_contest') }}">external contest</a>)
+                        {% endif %}
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
                     <th>Public static scoreboard ZIP</th>
                     <td>
                         <a class="btn btn-sm btn-secondary" href="{{ path('jury_scoreboard_data_zip', {contestId: contest.externalid, type: 'public'}) }}">

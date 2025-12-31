@@ -326,6 +326,57 @@ class Contest extends BaseApiEntity implements
     #[Serializer\Exclude]
     private bool $isLocked = false;
 
+    #[ORM\Column(options: ['comment' => 'Is shadow mode enabled for this contest?', 'default' => 0])]
+    #[Serializer\Exclude]
+    private bool $externalSourceEnabled = false;
+
+    #[ORM\Column(options: ['comment' => 'Use external judgements for results and scoring?', 'default' => 0])]
+    #[Serializer\Exclude]
+    private bool $externalSourceUseJudgements = false;
+
+    #[ORM\Column(
+        type: 'string',
+        nullable: true,
+        enumType: ExternalContestSourceType::class,
+        options: ['comment' => 'Type of the external source']
+    )]
+    #[Serializer\Exclude]
+    private ?ExternalContestSourceType $externalSourceType = null;
+
+    #[ORM\Column(nullable: true, options: ['comment' => 'Source for external contest data'])]
+    #[Serializer\Exclude]
+    private ?string $externalSourceSource = null;
+
+    #[ORM\Column(nullable: true, options: ['comment' => 'Username for external source, if any'])]
+    #[Serializer\Exclude]
+    private ?string $externalSourceUsername = null;
+
+    #[ORM\Column(nullable: true, options: ['comment' => 'Password for external source, if any'])]
+    #[Serializer\Exclude]
+    private ?string $externalSourcePassword = null;
+
+    #[ORM\Column(nullable: true, options: ['comment' => 'Last encountered event ID from external source, if any'])]
+    #[Serializer\Exclude]
+    private ?string $externalSourceLastEventId = null;
+
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: true,
+        options: ['comment' => 'Time of last poll by event feed reader', 'unsigned' => true]
+    )]
+    #[Serializer\Exclude]
+    private string|float|null $externalSourceLastPollTime = null;
+
+    #[ORM\Column(
+        type: 'smallint',
+        nullable: true,
+        options: ['comment' => 'Last HTTP code received by event feed reader', 'unsigned' => true]
+    )]
+    #[Serializer\Exclude]
+    private ?int $externalSourceLastHttpCode = null;
+
     #[Assert\File]
     #[Serializer\Exclude]
     private ?UploadedFile $contestProblemsetFile = null;
@@ -415,12 +466,11 @@ class Contest extends BaseApiEntity implements
     private Collection $removedIntervals;
 
     /**
-     * @var Collection<int, ExternalContestSource>
+     * @var Collection<int, ExternalSourceWarning>
      */
-    #[ORM\OneToMany(mappedBy: 'contest', targetEntity: ExternalContestSource::class)]
-    #[Assert\Valid]
+    #[ORM\OneToMany(mappedBy: 'contest', targetEntity: ExternalSourceWarning::class)]
     #[Serializer\Exclude]
-    private Collection $externalContestSources;
+    private Collection $externalSourceWarnings;
 
     #[Serializer\SerializedName('penalty_time')]
     private ?int $penaltyTimeForApi = null;
@@ -462,7 +512,7 @@ class Contest extends BaseApiEntity implements
         $this->internal_errors          = new ArrayCollection();
         $this->team_categories          = new ArrayCollection();
         $this->medal_categories         = new ArrayCollection();
-        $this->externalContestSources   = new ArrayCollection();
+        $this->externalSourceWarnings   = new ArrayCollection();
         $this->contestProblemsetContent = new ArrayCollection();
     }
 
@@ -901,6 +951,127 @@ class Contest extends BaseApiEntity implements
     public function setIsLocked(bool $isLocked): Contest
     {
         $this->isLocked = $isLocked;
+        return $this;
+    }
+
+    public function isExternalSourceEnabled(): bool
+    {
+        return $this->externalSourceEnabled;
+    }
+
+    public function setExternalSourceEnabled(bool $externalSourceEnabled): Contest
+    {
+        $this->externalSourceEnabled = $externalSourceEnabled;
+        return $this;
+    }
+
+    public function isExternalSourceUseJudgements(): bool
+    {
+        return $this->externalSourceUseJudgements;
+    }
+
+    public function setExternalSourceUseJudgements(bool $externalSourceUseJudgements): Contest
+    {
+        $this->externalSourceUseJudgements = $externalSourceUseJudgements;
+        return $this;
+    }
+
+    public function getExternalSourceType(): ?ExternalContestSourceType
+    {
+        return $this->externalSourceType;
+    }
+
+    public function setExternalSourceType(?ExternalContestSourceType $externalSourceType): Contest
+    {
+        $this->externalSourceType = $externalSourceType;
+        return $this;
+    }
+
+    public function getExternalSourceSource(): ?string
+    {
+        return $this->externalSourceSource;
+    }
+
+    public function setExternalSourceSource(?string $source): Contest
+    {
+        if ($source !== null) {
+            while (str_ends_with($source, '/')) {
+                $source = substr($source, 0, -1);
+            }
+        }
+        $this->externalSourceSource = $source;
+        return $this;
+    }
+
+    public function getExternalSourceUsername(): ?string
+    {
+        return $this->externalSourceUsername;
+    }
+
+    public function setExternalSourceUsername(?string $externalSourceUsername): Contest
+    {
+        $this->externalSourceUsername = $externalSourceUsername;
+        return $this;
+    }
+
+    public function getExternalSourcePassword(): ?string
+    {
+        return $this->externalSourcePassword;
+    }
+
+    public function setExternalSourcePassword(?string $externalSourcePassword): Contest
+    {
+        $this->externalSourcePassword = $externalSourcePassword;
+        return $this;
+    }
+
+    public function getExternalSourceLastEventId(): ?string
+    {
+        return $this->externalSourceLastEventId;
+    }
+
+    public function setExternalSourceLastEventId(?string $externalSourceLastEventId): Contest
+    {
+        $this->externalSourceLastEventId = $externalSourceLastEventId;
+        return $this;
+    }
+
+    public function getExternalSourceLastPollTime(): string|float|null
+    {
+        return $this->externalSourceLastPollTime;
+    }
+
+    public function setExternalSourceLastPollTime(string|float|null $externalSourceLastPollTime): Contest
+    {
+        $this->externalSourceLastPollTime = $externalSourceLastPollTime;
+        return $this;
+    }
+
+    public function getExternalSourceLastHttpCode(): ?int
+    {
+        return $this->externalSourceLastHttpCode;
+    }
+
+    public function setExternalSourceLastHttpCode(?int $externalSourceLastHttpCode): Contest
+    {
+        $this->externalSourceLastHttpCode = $externalSourceLastHttpCode;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ExternalSourceWarning>
+     */
+    public function getExternalSourceWarnings(): Collection
+    {
+        return $this->externalSourceWarnings;
+    }
+
+    public function addExternalSourceWarning(ExternalSourceWarning $warning): self
+    {
+        if (!$this->externalSourceWarnings->contains($warning)) {
+            $this->externalSourceWarnings[] = $warning;
+        }
+
         return $this;
     }
 
@@ -1349,6 +1520,45 @@ class Contest extends BaseApiEntity implements
             }
         }
 
+        if ($this->externalSourceEnabled) {
+            if ($this->externalSourceType === null) {
+                $context
+                    ->buildViolation('External source type is required when shadow mode is enabled.')
+                    ->atPath('externalSourceType')
+                    ->addViolation();
+            }
+            if (empty($this->externalSourceSource)) {
+                $context
+                    ->buildViolation('External source is required when shadow mode is enabled.')
+                    ->atPath('externalSourceSource')
+                    ->addViolation();
+            } elseif ($this->externalSourceType !== null) {
+                switch ($this->externalSourceType) {
+                    case ExternalContestSourceType::CCS_API:
+                        if (!filter_var($this->externalSourceSource, FILTER_VALIDATE_URL)) {
+                            $context
+                                ->buildViolation('This is not a valid URL')
+                                ->atPath('externalSourceSource')
+                                ->addViolation();
+                        }
+                        break;
+                    case ExternalContestSourceType::CONTEST_PACKAGE:
+                        // Clear username and password for contest package
+                        $this
+                            ->setExternalSourceUsername(null)
+                            ->setExternalSourcePassword(null);
+
+                        if (!is_dir($this->externalSourceSource)) {
+                            $context
+                                ->buildViolation('This directory does not exist')
+                                ->atPath('externalSourceSource')
+                                ->addViolation();
+                        }
+                        break;
+                }
+            }
+        }
+
         /** @var ContestProblem $problem */
         foreach ($this->problems as $idx => $problem) {
             // Check if the problem ID is unique.
@@ -1431,23 +1641,6 @@ class Contest extends BaseApiEntity implements
     {
         if (!$this->team_categories->contains($teamCategory)) {
             $this->team_categories[] = $teamCategory;
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, ExternalContestSource>
-     */
-    public function getExternalContestSources(): Collection
-    {
-        return $this->externalContestSources;
-    }
-
-    public function addExternalContestSource(ExternalContestSource $externalContestSource): self
-    {
-        if (!$this->externalContestSources->contains($externalContestSource)) {
-            $this->externalContestSources[] = $externalContestSource;
         }
 
         return $this;

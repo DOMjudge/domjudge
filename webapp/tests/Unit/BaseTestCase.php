@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit;
 
+use App\Entity\Contest;
 use App\Entity\HasExternalIdInterface;
 use App\Entity\Role;
 use App\Entity\User;
@@ -318,10 +319,13 @@ abstract class BaseTestCase extends WebTestCase
 
     protected function setupShadowMode(bool $shadowMode): void
     {
-        $config   = self::getContainer()->get(ConfigurationService::class);
-        $eventLog = self::getContainer()->get(EventLogService::class);
-        $dj       = self::getContainer()->get(DOMJudgeService::class);
-        $config->saveChanges(['shadow_mode'=>$shadowMode], $eventLog, $dj, treatMissingBooleansAsFalse: false);
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        $dj = self::getContainer()->get(DOMJudgeService::class);
+        $contest = $dj->getCurrentContest();
+        if ($contest) {
+            $contest->setExternalSourceEnabled($shadowMode);
+            $em->flush();
+        }
     }
 
     protected function checkStatusAndFollowRedirect(): Crawler

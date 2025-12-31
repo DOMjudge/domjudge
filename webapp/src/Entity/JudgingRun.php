@@ -19,7 +19,7 @@ use JMS\Serializer\Annotation as Serializer;
 #[ORM\Index(columns: ['judgingid'], name: 'judgingid')]
 #[ORM\Index(columns: ['testcaseid'], name: 'testcaseid_2')]
 #[ORM\UniqueConstraint(name: 'testcaseid', columns: ['judgingid', 'testcaseid'])]
-class JudgingRun extends BaseApiEntity
+class JudgingRun extends AbstractRun
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -195,16 +195,6 @@ class JudgingRun extends BaseApiEntity
         return $this->endtime;
     }
 
-    public function setScore(string|float $score): JudgingRun
-    {
-        $this->score = $score;
-        return $this;
-    }
-    public function getScore(): string
-    {
-        return (string)$this->score;
-    }
-
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('time')]
     #[Serializer\Type('string')]
@@ -232,12 +222,22 @@ class JudgingRun extends BaseApiEntity
         return $this->judging;
     }
 
-    #[Serializer\VirtualProperty]
-    #[Serializer\SerializedName('judgement_id')]
-    #[Serializer\Type('string')]
     public function getJudgingId(): int
     {
         return $this->getJudging()->getJudgingid();
+    }
+
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('judgement_id')]
+    #[Serializer\Type('string')]
+    public function getJudgementId(): int
+    {
+        return $this->getJudgingId();
+    }
+
+    public function getResult(): ?string
+    {
+        return $this->getRunresult();
     }
 
     public function setTestcase(?Testcase $testcase = null): JudgingRun
@@ -251,12 +251,9 @@ class JudgingRun extends BaseApiEntity
         return $this->testcase;
     }
 
-    #[Serializer\VirtualProperty]
-    #[Serializer\SerializedName('ordinal')]
-    #[Serializer\Type('int')]
-    public function getTestcaseRank(): int
+    public function getContest(): Contest
     {
-        return $this->getTestcase()->getRank();
+        return $this->getJudging()->getContest();
     }
 
     public function setOutput(JudgingRunOutput $output): JudgingRun
@@ -282,5 +279,15 @@ class JudgingRun extends BaseApiEntity
     public function getTestcaseDir(): ?string
     {
         return $this->testcaseDir;
+    }
+
+    public function setScore(string|float $score): JudgingRun
+    {
+        $this->score = $score;
+        return $this;
+    }
+    public function getScore(): string
+    {
+        return (string)$this->score;
     }
 }

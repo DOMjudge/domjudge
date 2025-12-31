@@ -3,6 +3,9 @@
 namespace App\Controller\API;
 
 use App\DataTransferObject\JudgingWrapper;
+use App\Entity\AbstractJudgement;
+use App\Entity\Contest;
+use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -19,7 +22,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
- * @extends AbstractRestController<Judging, JudgingWrapper>
+ * @extends AbstractRestController<AbstractJudgement, JudgingWrapper>
  */
 #[Rest\Route(path: '/')]
 #[OA\Tag(name: 'Judgements')]
@@ -35,6 +38,8 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * @var string[]
      */
     protected readonly array $verdicts;
+
+    private bool $useExternalJudgements = false;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -100,20 +105,40 @@ class JudgementController extends AbstractRestController implements QueryObjectT
 
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        $queryBuilder = $this->em->createQueryBuilder()
-            ->from(Judging::class, 'j')
-            ->select('j, c, s')
-            ->leftJoin('j.contest', 'c')
-            ->leftJoin('j.submission', 's')
-            ->leftJoin('j.rejudging', 'r')
-            ->leftJoin('j.runs', 'jr')
-            ->groupBy('j.judgingid')
-            ->orderBy('j.judgingid');
-
+        $contestId = null;
         if ($request->attributes->has('cid')) {
+            $contestId = $this->getContestId($request);
+            $contest = $this->em->getRepository(Contest::class)->find($contestId);
+            $this->useExternalJudgements = $contest?->isExternalSourceUseJudgements() ?? false;
+        } else {
+            $this->useExternalJudgements = false;
+        }
+
+        if ($this->useExternalJudgements) {
+            $queryBuilder = $this->em->createQueryBuilder()
+                ->from(ExternalJudgement::class, 'j')
+                ->select('j, c, s')
+                ->leftJoin('j.contest', 'c')
+                ->leftJoin('j.submission', 's')
+                ->leftJoin('j.external_runs', 'jr')
+                ->groupBy('j.extjudgementid')
+                ->orderBy('j.extjudgementid');
+        } else {
+            $queryBuilder = $this->em->createQueryBuilder()
+                ->from(Judging::class, 'j')
+                ->select('j, c, s')
+                ->leftJoin('j.contest', 'c')
+                ->leftJoin('j.submission', 's')
+                ->leftJoin('j.rejudging', 'r')
+                ->leftJoin('j.runs', 'jr')
+                ->groupBy('j.judgingid')
+                ->orderBy('j.judgingid');
+        }
+
+        if ($contestId !== null) {
             $queryBuilder
                 ->andWhere('j.contest = :cid')
-                ->setParameter('cid', $this->getContestId($request));
+                ->setParameter('cid', $contestId);
         }
 
         $roleAllowsVisibility = $this->dj->checkrole('api_reader')
@@ -134,7 +159,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
 
         if ($request->query->has('submission_id')) {
             $queryBuilder
-                ->andWhere('j.submission = :submission')
+                ->andWhere('s.externalid = :submission')
                 ->setParameter('submission', $request->query->get('submission_id'));
         }
 
@@ -156,12 +181,15 @@ class JudgementController extends AbstractRestController implements QueryObjectT
 
     protected function getIdField(): string
     {
+        if ($this->useExternalJudgements) {
+            return 'j.externalid';
+        }
         return 'j.judgingid';
     }
 
     public function transformObject($judging): JudgingWrapper
     {
-        /** @var Judging $judging */
+        /** @var AbstractJudgement $judging */
         $judgementTypeId = $judging->getResult() ? $this->verdicts[$judging->getResult()] : null;
         return new JudgingWrapper($judging, $judgementTypeId);
     }

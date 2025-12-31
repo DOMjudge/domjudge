@@ -17,18 +17,33 @@ and that should work are `Kattis`_ and `PC-Squared`_.
 Configuring DOMjudge
 --------------------
 
-In the DOMjudge admin interface, go to *Configuration settings* page and modify
-the settings to mimic the system to shadow from. Also make sure to set
-*shadow_mode* to ``true``. This tells DOMjudge
-that it will be a shadow for an external system. This will:
+Shadow mode is configured per contest. In the DOMjudge admin interface, go to
+the contest edit page and configure the shadow mode settings:
 
-* Add a *Shadow Differences* and *External Contest Sources* item to the jury
-  menu and homepage for admins.
-* Expose additional information in the submission overview and detail pages.
+* **Enable shadow mode**: Set this to *Yes* to enable shadow mode for this contest.
+  This will:
 
-You can also set the *external_ccs_submission_url* to a URL template. If you set
-this, the submission detail page will show a link to the external system. If you
-use DOMjudge as system to shadow from, you should enter
+  * Add a *Shadow Differences* item to the jury menu and homepage for admins.
+  * Expose additional information in the submission overview and detail pages.
+
+* **Use external judgements**: When set to *Yes*, external judgements will be used
+  for results and scoring instead of local judgings. This also affects the API
+  responses for judgements and runs endpoints.
+
+* **External source type**: Select *CCS API (URL)* to shadow from a Contest API
+  endpoint, or *Contest package (directory)* to shadow from a local directory
+  containing a CLICS-compliant contest archive.
+
+* **External source**: For CCS API, enter the URL to the contest in the external
+  system's API (e.g., ``https://example.com/api/contests/wf2024``). For contest
+  package, enter the path to the directory on disk.
+
+* **External source username/password**: For CCS API sources, enter the credentials
+  to authenticate with the external system.
+
+You can also set the *external_ccs_submission_url* configuration setting to a URL
+template. If you set this, the submission detail page will show a link to the
+external system. If you use DOMjudge as the system to shadow from, you should enter
 ``https://url.to.domjudge/jury/submissions/[id]``.
 
 Importing or creating the contest and problems
@@ -45,17 +60,12 @@ team linked to your account, it will complain that it can't import jury
 submissions because you have no team linked to your account. That is fine since
 these submissions will be read using the event feed later on.
 
-Configuration the external contest source
------------------------------------------
-
-In the DOMjudge admin interface, go to the *External Contest Sources* page and
-create an external contest source. Select the contest to import into and enter
-the source you want to import from.
-
-Another alternative is to use these DOMjudge only keys in the `contest.yaml`::
+You can also configure shadow mode settings via the ``contest.yaml`` file using
+these DOMjudge-specific keys::
 
   shadow:
-    type: contest-api
+    use_judgements: true
+    type: ccs-api
     source: http(s)://url_to_external_system/api/contests/<contest_id>
     username: user_in_external_system
     password: password_for_user
@@ -63,8 +73,9 @@ Another alternative is to use these DOMjudge only keys in the `contest.yaml`::
 or::
 
   shadow:
+    use_judgements: false
     type: contest-archive
-    source: /path/on/domjudge/filestem/to/clics/compliant/archive
+    source: /path/on/domjudge/filesystem/to/clics/compliant/archive
 
 Running the event feed import command
 -------------------------------------

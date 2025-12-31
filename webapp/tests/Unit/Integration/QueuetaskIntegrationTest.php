@@ -57,7 +57,6 @@ class QueuetaskIntegrationTest extends KernelTestCase
             'compile_penalty' => false,
             'penalty_time' => 20,
             'score_in_seconds' => false,
-            'shadow_mode' => 0,
             'sourcefiles_limit' => 1,
             'sourcesize_limit' => 1024*256,
             'lazy_eval_results' => 1,

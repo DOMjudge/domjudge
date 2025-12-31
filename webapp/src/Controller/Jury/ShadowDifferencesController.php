@@ -4,7 +4,6 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
-use App\Entity\ExternalContestSource;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
 use App\Entity\Submission;
@@ -56,33 +55,20 @@ class ShadowDifferencesController extends BaseController
         #[MapQueryParameter]
         string $local = 'all',
     ): Response {
-        if (!$this->dj->shadowMode()) {
-            $this->addFlash('danger', 'Shadow differences only supported when shadow_mode is true');
-            return $this->redirectToRoute('jury_index');
-        }
-
-        if (!$this->dj->getCurrentContest()) {
+        $contest = $this->dj->getCurrentContest();
+        if (!$contest) {
             $this->addFlash('danger', 'Shadow differences need an active contest.');
             return $this->redirectToRoute('jury_index');
         }
 
-        /** @var ExternalContestSource|null $externalContestSource */
-        $externalContestSource = $this->em->createQueryBuilder()
-            ->from(ExternalContestSource::class, 'ecs')
-            ->select('ecs')
-            ->andWhere('ecs.contest = :contest')
-            ->setParameter('contest', $this->dj->getCurrentContest())
-            ->getQuery()->getOneOrNullResult();
-
-        if (!$externalContestSource) {
-            $this->addFlash('warning', 'No external contest present yet, please configure one first');
-            return $this->redirectToRoute('jury_external_contest_manage');
+        if (!$contest->isExternalSourceEnabled()) {
+            $this->addFlash('warning', 'Shadow mode is not enabled for this contest, please configure it first.');
+            return $this->redirect($this->generateUrl('jury_contest_edit', ['contestId' => $contest->getCid()]) . '#externalSourceEnabled');
         }
 
         // Close the session, as this might take a while and we don't need the session below.
         $this->requestStack->getSession()->save();
 
-        $contest  = $this->dj->getCurrentContest();
         $verdicts = $this->config->getVerdicts(['final', 'error', 'external', 'in_progress']);
 
         $used         = [];
