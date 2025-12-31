@@ -3,8 +3,9 @@
 namespace App\Form\Type;
 
 use App\Entity\ExternalContestSource;
+use App\Entity\ExternalContestSourceType as ExternalContestSourceTypeEnum;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -14,14 +15,12 @@ class ExternalContestSourceType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('type', ChoiceType::class, [
-            'choices' => [
-                ExternalContestSource::readableType(ExternalContestSource::TYPE_CCS_API)         => ExternalContestSource::TYPE_CCS_API,
-                ExternalContestSource::readableType(ExternalContestSource::TYPE_CONTEST_PACKAGE) => ExternalContestSource::TYPE_CONTEST_PACKAGE,
-            ],
+        $builder->add('type', EnumType::class, [
+            'class' => ExternalContestSourceTypeEnum::class,
+            'choice_label' => 'readable',
         ]);
         $builder->add('source', TextType::class, [
-            'help' => 'For contest package: directory on disk to use. For CCS API: URL to contest in API.'
+            'help' => 'For contest package: directory on disk to use. For CCS API: URL to contest in API.',
         ]);
         $builder->add('username', TextType::class, [
             'required' => false,

@@ -24,6 +24,7 @@ use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\ExternalContestSource;
+use App\Entity\ExternalContestSourceType;
 use App\Entity\ExternalJudgement;
 use App\Entity\ExternalRun;
 use App\Entity\ExternalSourceWarning;
@@ -309,9 +310,8 @@ class ExternalContestSourceService
 
         $this->loadPendingEvents();
         return match ($this->source->getType()) {
-            ExternalContestSource::TYPE_CCS_API => $this->importFromCcsApi($eventsToSkip, $progressReporter),
-            ExternalContestSource::TYPE_CONTEST_PACKAGE => $this->importFromContestArchive($eventsToSkip, $progressReporter),
-            default => false,
+            ExternalContestSourceType::CCS_API => $this->importFromCcsApi($eventsToSkip, $progressReporter),
+            ExternalContestSourceType::CONTEST_PACKAGE => $this->importFromContestArchive($eventsToSkip, $progressReporter),
         };
     }
 
@@ -548,7 +548,7 @@ class ExternalContestSourceService
             return;
         }
         switch ($this->source->getType()) {
-            case ExternalContestSource::TYPE_CCS_API:
+            case ExternalContestSourceType::CCS_API:
                 try {
                     // The base URL is the URL of the CCS API root.
                     if (preg_match('/^(.*\/)contests\/.*/',
@@ -583,7 +583,7 @@ class ExternalContestSourceService
                 }
                 $this->contestLoaded = true;
                 break;
-            case ExternalContestSource::TYPE_CONTEST_PACKAGE:
+            case ExternalContestSourceType::CONTEST_PACKAGE:
                 $this->cachedContestData = null;
                 $contestFile = $this->source->getSource() . '/contest.json';
                 $eventFeedFile = $this->source->getSource() . '/event-feed.ndjson';
@@ -1479,7 +1479,7 @@ class ExternalContestSourceService
                     $zipUrl = ($this->basePath ?? '') . $zipUrl;
                 }
 
-                if ($this->source->getType() === ExternalContestSource::TYPE_CONTEST_PACKAGE && $data->files[0]->filename) {
+                if ($this->source->getType() === ExternalContestSourceType::CONTEST_PACKAGE && $data->files[0]->filename) {
                     $zipUrl = $this->source->getSource() . '/submissions/' . $data->id . '/' . $data->files[0]->filename;
                     if (!file_exists($zipUrl)) {
                         // Common case: submissions are in submissions/<id>.zip

@@ -17,16 +17,13 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\UniqueConstraint(name: 'cid', columns: ['cid'])]
 class ExternalContestSource
 {
-    final public const TYPE_CCS_API         = 'ccs-api';
-    final public const TYPE_CONTEST_PACKAGE = 'contest-archive';
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'External contest source ID', 'unsigned' => true])]
     private ?int $extsourceid = null;
 
-    #[ORM\Column(options: ['comment' => 'Type of this contest source'])]
-    private string $type;
+    #[ORM\Column(type: 'string', enumType: ExternalContestSourceType::class, options: ['comment' => 'Type of this contest source'])]
+    private ExternalContestSourceType $type;
 
     #[ORM\Column(options: ['comment' => 'Source for this contest'])]
     private string $source;
@@ -76,17 +73,17 @@ class ExternalContestSource
         return $this->extsourceid;
     }
 
-    public function getType(): string
+    public function getType(): ExternalContestSourceType
     {
         return $this->type;
     }
 
     public function getReadableType(): string
     {
-        return static::readableType($this->getType());
+        return $this->type->readable();
     }
 
-    public function setType(string $type): ExternalContestSource
+    public function setType(ExternalContestSourceType $type): ExternalContestSource
     {
         $this->type = $type;
         return $this;
@@ -198,7 +195,7 @@ class ExternalContestSource
     public function validate(ExecutionContextInterface $context): void
     {
         switch ($this->getType()) {
-            case static::TYPE_CCS_API:
+            case ExternalContestSourceType::CCS_API:
                 if (!filter_var($this->getSource(), FILTER_VALIDATE_URL)) {
                     $context
                         ->buildViolation('This is not a valid URL')
@@ -208,7 +205,7 @@ class ExternalContestSource
                 // Note: we could validate we have a valid CCS endpoint by checking the actual URL,
                 // but that seems overkill
                 break;
-            case static::TYPE_CONTEST_PACKAGE:
+            case ExternalContestSourceType::CONTEST_PACKAGE:
                 // Clear username and password
                 $this
                     ->setUsername(null)
@@ -224,14 +221,5 @@ class ExternalContestSource
                 }
                 break;
         }
-    }
-
-    public static function readableType(string $type): string
-    {
-        $mapping = [
-            ExternalContestSource::TYPE_CCS_API         => 'CCS API (URL)',
-            ExternalContestSource::TYPE_CONTEST_PACKAGE => 'Contest package (directory)',
-        ];
-        return $mapping[$type];
     }
 }
