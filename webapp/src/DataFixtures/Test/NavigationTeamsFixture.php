@@ -19,7 +19,7 @@ class NavigationTeamsFixture extends AbstractTestDataFixture implements Dependen
             $team
                 ->setExternalid($id)
                 ->setName(ucfirst($id) . ' Team')
-                ->setCategory($category);
+                ->addCategory($category);
             $manager->persist($team);
         }
 
