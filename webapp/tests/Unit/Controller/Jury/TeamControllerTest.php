@@ -202,7 +202,7 @@ class TeamControllerTest extends JuryControllerTestCase
     {
         $this->loadFixture(NonSortOrderTeamCategoryFixture::class);
         $teamToAdd = static::$addEntities[0];
-        $teamToAdd['categories'][] = $this->resolveReference(NonSortOrderTeamCategoryFixture::class . ':0', TeamCategory::class);
+        $teamToAdd['categories'][] = $this->resolveReference(NonSortOrderTeamCategoryFixture::class . ':0', TeamCategory::class, preferExternalId: true);
         [$combinedValues, $element] = $this->helperProvideMergeAddEntity($teamToAdd);
         [$combinedValues, $element] = $this->helperProvideTranslateAddEntity($combinedValues, $element);
         $this->testCheckAddEntityAdmin($combinedValues, $element);
