@@ -32,9 +32,4 @@ class TinyIntType extends Type
     {
         return ParameterType::INTEGER;
     }
-
-    public function getMappedDatabaseTypes(AbstractPlatform $platform): array
-    {
-        return ['tinyint'];
-    }
 }

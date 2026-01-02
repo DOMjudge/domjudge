@@ -56,7 +56,7 @@ class Problem extends BaseApiEntity implements
 
     #[ORM\Column(options: [
         'comment' => 'Maximum run time (in seconds) for this problem',
-        'default' => 0,
+        'default' => '0',
         'unsigned' => true,
     ])]
     #[Assert\GreaterThan(0)]
