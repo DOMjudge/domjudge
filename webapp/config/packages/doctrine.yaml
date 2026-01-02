@@ -9,6 +9,7 @@ doctrine:
 
         url: '%env(DATABASE_URL)%'
         profiling_collect_backtrace: '%kernel.debug%'
+        schema_manager_factory: App\Doctrine\DBAL\Schema\SchemaManagerFactory
         types:
             tinyint: App\Doctrine\DBAL\Types\TinyIntType
             blobtext: App\Doctrine\DBAL\Types\BlobTextType
