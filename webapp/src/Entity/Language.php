@@ -90,7 +90,7 @@ class Language extends BaseApiEntity implements
 
     #[ORM\Column(options: [
         'comment' => 'Language-specific factor multiplied by problem run times',
-        'default' => 1,
+        'default' => '1',
     ]
     )]
     #[Assert\Positive]
