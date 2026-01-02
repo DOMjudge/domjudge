@@ -44,6 +44,7 @@ class JudgingRun extends BaseApiEntity
     private ?string $runresult = null;
 
     #[ORM\Column(
+        type: 'float',
         nullable: true,
         options: ['comment' => 'Submission running time on this testcase']
     )]
