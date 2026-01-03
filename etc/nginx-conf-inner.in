@@ -16,6 +16,9 @@ set $domjudgeRoot @domserver_webappdir@/public;
 # Set this to '' instead of /domjudge when running in the root of your system
 set $prefix /domjudge;
 
+# Disallow opening .php files directly
+location ~ \.php$ { return 404; }
+
 # Uncomment to run it out of the root of your system
 # location / {
 # 	root $domjudgeRoot;
