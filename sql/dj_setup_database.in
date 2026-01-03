@@ -241,6 +241,8 @@ create_db_users()
 
 	echo "CREATE USER IF NOT EXISTS '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
 	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER'@'%';"
+	echo "CREATE USER IF NOT EXISTS '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER'@'localhost';"
 
 	echo "FLUSH PRIVILEGES;"
 	) | mysql
@@ -252,6 +254,7 @@ remove_db_users()
 	(
 	echo "DROP DATABASE IF EXISTS \`$DBNAME\`;"
 	echo "DROP USER IF EXISTS '$domjudge_DBUSER'@'%';"
+	echo "DROP USER IF EXISTS '$domjudge_DBUSER'@'localhost';"
 	echo "FLUSH PRIVILEGES;"
 	) | mysql -f
 	verbose "DOMjudge database and user(s) removed."
@@ -260,10 +263,10 @@ remove_db_users()
 update_password()
 {
 	(
-    echo "ALTER USER '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
+	echo "ALTER USER '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
+	echo "ALTER USER '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
 	echo "FLUSH PRIVILEGES;"
 	) | mysql
-    verbose "ALTER USER '$domjudge_DBUSER'@'%' IDENTIFIED BY '$domjudge_PASSWD';"
 	verbose "Database user password updated from credentials file."
 }
 
