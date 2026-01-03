@@ -66,9 +66,14 @@ class RejudgingController extends BaseController
     public function indexAction(): Response
     {
         $curContest = $this->dj->getCurrentContest();
+        // Note that we are eagerly selecting and joining on the users to avoid
+        // integrity violations, as doctrine proxy objects could be uninitialized
+        // but dirty and the following flush in calculateTodo would fail.
         $queryBuilder = $this->em->createQueryBuilder()
-            ->select('r')
-            ->from(Rejudging::class, 'r');
+            ->select('r', 'su', 'fu')
+            ->from(Rejudging::class, 'r')
+            ->leftJoin('r.start_user', 'su')
+            ->leftJoin('r.finish_user', 'fu');
         if ($curContest !== null) {
             $queryBuilder = $queryBuilder->leftJoin(Judging::class, 'j', Join::WITH, 'j.rejudging = r')
                 ->andWhere('j.contest = :contest')
