@@ -79,7 +79,7 @@
 
 {% for test,testresult in groupresults %}
   <div class="card">
-    <h6 class="card-header result {{ testresult.result }}" role="tab" id="heading{{ test }}">
+    <h4 class="card-header result {{ testresult.result }}" role="tab" id="heading{{ test }}">
       <a class="collapsed d-block text-dark pt-0 pb-0" data-bs-toggle="collapse" href="#collapse{{ test }}" aria-expanded="true" aria-controls="collapse{{ test }}" data-parent="#{{ resultgroup | replace({' ':''}) }}">
         {% if testresult.result == 'O' %}
         <i class="fas fa-check text-success"></i>
@@ -91,7 +91,7 @@
         <i class="fa fa-chevron-down float-end"></i>
         {{ testresult.caption }}
       </a>
-    </h6>
+    </h4>
 
     <div id="collapse{{ test }}" class="collapse {{ ( testresult.result == 'E' ) ? 'show' : '' }}" role="tabpanel" aria-labelledby="heading{{ test }}">
       <div class="card-body">
