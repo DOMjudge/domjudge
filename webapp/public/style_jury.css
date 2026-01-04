@@ -253,3 +253,7 @@ table.table-full-clickable-cell tr .table-button-head-right-right{
 .diff-title {
     display: none;
 }
+
+h2.card-header {
+    font-size: 1rem;
+}
