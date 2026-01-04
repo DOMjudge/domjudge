@@ -783,3 +783,7 @@ blockquote {
     min-height: 100px; /* Prefer a double scrollbar over not displaying code at all */
     width: 100%;
 }
+
+h2.modal-title {
+    font-size: 1.25rem;
+}
