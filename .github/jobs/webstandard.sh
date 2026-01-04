@@ -127,9 +127,9 @@ if [ "$TEST" = "w3cval" ]; then
     do
         section_start "Analyse with $typ"
         # shellcheck disable=SC2086
-        "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
+        "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json "$URL" 2> result.json
         # shellcheck disable=SC2086
-        NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | tee "$ARTIFACTS/w3c_${typ}_${URL}.log" | wc -l)
+        NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu "$URL" 2>&1 | tee "$ARTIFACTS/w3c_${typ}_${URL}.log" | wc -l)
         FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
         python3 -m "json.tool" < result.json > "$ARTIFACTS/w3c$typ$URL.json"
         trace_off; python3 .github/jobs/jsontogha.py "$ARTIFACTS/w3c$typ$URL.json"; trace_on
