@@ -261,3 +261,7 @@ h2.card-header {
 .smaller_h2_as_h6 {
     font-size: 1rem;
 }
+
+.smaller_h2_as_h5 {
+    font-size: 1.25rem;
+}
