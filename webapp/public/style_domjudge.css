@@ -787,3 +787,7 @@ blockquote {
 h2.modal-title {
     font-size: 1.25rem;
 }
+
+.smaller_h2_as_h3 {
+    font-size: 1.75rem;
+}
