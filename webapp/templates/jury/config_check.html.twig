@@ -23,7 +23,7 @@
 
 <div class="card m-3 bg-light">
   <div class="card-body">
-  <h5 class="card-title">Installation locations</h5>
+  <h2 class="card-title smaller_h2_as_h5">Installation locations</h2>
   <table class="w-100">
   <tr><td>Base url (use in submit client):</td><td><kbd>{{ url('root') }}</kbd></td></tr>
   <tr><td>API url (use in <kbd>restapi.secret</kbd>):</td><td><kbd>{{ url('current_api_root') | trim('/', 'right') }}</kbd></td></tr>
@@ -38,7 +38,7 @@
   </table>
 
       {% if logFilesWithSize is not empty %}
-          <h5 class="card-title mt-3">Log files</h5>
+          <h2 class="smaller_h2_as_h5 card-title mt-3">Log files</h2>
           <table class="w-100">
               <thead>
               <tr>
