@@ -16,9 +16,6 @@ set $domjudgeRoot @domserver_webappdir@/public;
 # Set this to '' instead of /domjudge when running in the root of your system
 set $prefix /domjudge;
 
-# Disallow opening .php files directly
-location ~ ^/+[^/]+\.php$ { return 404; }
-
 # Uncomment to run it out of the root of your system
 # # Disallow opening .php files directly
 # location ~ ^/+[^/]+\.php$ { return 404; }
@@ -32,7 +29,7 @@ location ~ ^/+[^/]+\.php$ { return 404; }
 #		error_log /var/log/nginx/domjudge-api.log;
 #		access_log /var/log/nginx/domjudge-api.log;
 #	}
-#	}
+# }
 
 # Or you can install it with a prefix
 location /domjudge { return 301 /domjudge/; }
