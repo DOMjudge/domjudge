@@ -7,7 +7,7 @@
 
     {% set current_route = app.request.attributes.get('_route') %}
 
-    <div class="collapse navbar-collapse" id="menuDefault" data-update-url="{{ path('jury_ajax_updates') }}">
+    <div role="menu" class="collapse navbar-collapse" id="menuDefault" data-update-url="{{ path('jury_ajax_updates') }}">
         <ul class="navbar-nav me-auto">
 
             {% if is_granted('ROLE_BALLOON') %}
@@ -26,7 +26,7 @@
                         <span class="badge text-bg-warning" id="num-alerts-judgehosts"></span>
                         <span class="badge text-bg-danger" id="num-alerts-internalerrors"></span>
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div role="menuitem" class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item {% if current_route starts with 'jury_judgehost' %}active{% endif %}" href="{{ path('jury_judgehosts') }}" id="menu_judgehosts">
                             <i class="fas fa-server fa-fw"></i> judgehosts <span class="badge text-bg-warning" id="num-alerts-judgehosts-sub"></span>
                         </a>
