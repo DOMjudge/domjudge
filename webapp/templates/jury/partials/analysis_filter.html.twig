@@ -1,7 +1,7 @@
 <div class="btn-group btn-group-sm mb-3" role="group">
     <span class="input-group-text listtoggles">Filter:</span>
     {%- for key, label in filters %}
-        <input type="radio" autocomplete="off" class="btn-check"
+        <input type="radio" class="btn-check"
             name="viewtype" value="{{ key }}" id="viewtype{{ key }}"
             {% if key == view %}checked{% endif %}>
         <label class="btn btn-secondary" for="viewtype{{ key }}">{{ label }}</label>

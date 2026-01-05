@@ -36,7 +36,7 @@
         <div class="btn-group btn-group-sm mb-3" role="group">
             <span class="input-group-text listtoggles">Filter:</span>
             {% for type in ['all', 'new', 'handled', 'general'] %}
-                <input type="radio" name="filter" autocomplete="off" class="btn-check" value="{{ type }}" id="filter{{ type }}"
+                <input type="radio" name="filter" class="btn-check" value="{{ type }}" id="filter{{ type }}"
                        {% if type == 'all' and currentFilter == null %}checked{% endif %}
                        {% if type != 'all' and currentFilter == type %}checked{% endif %}
                 >
@@ -47,14 +47,14 @@
         {% if queues | length > 0 %}
             <div class="btn-group btn-group-sm mb-3" role="group">
                 <span class="input-group-text listtoggles">Queue:</span>
-                <input type="radio" name="queue" autocomplete="off" id="queueall" class="btn-check" value="all"
+                <input type="radio" name="queue" id="queueall" class="btn-check" value="all"
                        {% if currentQueue == "all" %}checked{% endif %}>
                 <label class="btn btn-secondary" for="queueall">All</label>
-                <input type="radio" name="queue" autocomplete="off" id="queueunassigned" class="btn-check" value="unassigned"
+                <input type="radio" name="queue" id="queueunassigned" class="btn-check" value="unassigned"
                        {% if currentQueue == "unassigned" %}checked{% endif %}>
                 <label class="btn btn-secondary" for="queueunassigned">Unassigned</label>
                 {%- for queue, name in queues %}
-                    <input type="radio" name="queue" autocomplete="off" class="btn-check" id="queue{{ queue }}" value="{{ queue }}"
+                    <input type="radio" name="queue" class="btn-check" id="queue{{ queue }}" value="{{ queue }}"
                            {% if currentQueue == queue %}checked{% endif %}>
                     <label class="btn btn-secondary" for="queue{{ queue }}">{{ name }}</label>
                 {%- endfor %}

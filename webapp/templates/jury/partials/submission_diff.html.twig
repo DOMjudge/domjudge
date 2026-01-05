@@ -38,7 +38,7 @@
             <div class="diff-mode btn-group d-none d-md-inline-flex">
                 <a href="#" role="button" class="btn btn-secondary btn-sm pe-none" aria-disabled="true"><i class="fas fa-plus-minus"></i></a>
                 {%- for mode_id, mode in diff_modes %}
-                    <input type="radio" class="btn-check" name="{{ editor_id }}-mode" id="{{ editor_id }}-{{ mode_id }}" value="{{ mode_id }}" autocomplete="off">
+                    <input type="radio" class="btn-check" name="{{ editor_id }}-mode" id="{{ editor_id }}-{{ mode_id }}" value="{{ mode_id }}">
                     <label class="btn btn-outline-secondary btn-sm" for="{{ editor_id }}-{{ mode_id }}">{{ mode.name }}</label>
                 {%- endfor %}
             </div>

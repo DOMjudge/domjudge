@@ -26,7 +26,7 @@
         Show submissions:
         <div class="btn-group btn-group-sm mb-3" role="group">
             {%- for idx, type in viewTypes %}
-                <input type="radio" autocomplete="off" class="btn-check"
+                <input type="radio" class="btn-check"
                     name="viewtype" id="viewtype{{ idx }}" value="{{ type }}"
                     {% if idx == view %}checked{% endif %}>
                 <label class="btn btn-secondary" for="viewtype{{ idx }}">{{ type }}</label>
@@ -34,7 +34,7 @@
         </div>
         <div class="btn-group btn-group-sm mb-3" role="group">
             {%- for idx, type in verificationViewTypes %}
-                    <input type="radio" autocomplete="off" class="btn-check"
+                    <input type="radio" class="btn-check"
                         name="verificationviewtype" id="verificationviewtype{{idx}}" value="{{ type }}"
                         {% if idx == verificationView %}checked{% endif %}>
                 <label class="btn btn-secondary" for="verificationviewtype{{idx}}">{{ type }}</label>
