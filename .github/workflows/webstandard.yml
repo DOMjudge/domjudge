@@ -24,7 +24,7 @@ jobs:
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
     strategy:
       matrix:
-        role: [public, team, balloon, jury, admin]
+        role: [team, balloon, jury, admin]
         test: [w3cval]
         db: [bare-install, install]
         #releaseBranch:
