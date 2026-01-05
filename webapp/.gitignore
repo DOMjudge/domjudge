@@ -1,4 +1,5 @@
 /config/autoload.php
+/config/references.php
 /config/static.yaml
 /build/
 !/var/cache
