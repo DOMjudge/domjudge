@@ -56,7 +56,7 @@
                             <span class="badge text-bg-danger" id="num-alerts-shadowdifferences"></span>
                             <span class="badge text-bg-warning" id="num-alerts-externalcontest"></span>
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <div role="menuitem" class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item {% if current_contest is null %}dropdown-disabled{% endif %} {% if current_route == 'jury_shadow_differences' %}active{% endif %}"
                                 {% if current_contest is not null %}href="{{ path('jury_shadow_differences') }}"{% endif %} id="menu_shadow_differences">
                                 <i class="fas fa-not-equal fa-fw"></i> shadow differences <span class="badge text-bg-danger" id="num-alerts-shadowdifferences-sub"></span>
@@ -102,7 +102,7 @@
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-user"></i> {{ app.user.getUsername() }}
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div role="menuitem" class="dropdown-menu" aria-labelledby="navbarDropdown">
                         {% if app.user and app.user.getName() %}
                             <a class="dropdown-item disabled" href="#">{{ app.user.getName() }}</a>
                         {% endif %}
@@ -137,7 +137,7 @@
 
                         <div class="dropdown">
                             <div class="dropstart">
-                                <div class="dropdown-menu" aria-labelledby="themeDropdown">
+                                <div role="menuitem" class="dropdown-menu" aria-labelledby="themeDropdown">
                                     {% for theme, config in editor_themes %}
                                         <a class="dropdown-item" href="#" data-editor-theme="{{ theme }}" onclick="applyEditorTheme('{{ theme }}', {{ config.external | default(false) }})">{{ config.name }}</a>
                                     {% endfor %}
