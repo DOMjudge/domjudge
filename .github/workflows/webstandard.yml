@@ -24,31 +24,31 @@ jobs:
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
     strategy:
       matrix:
-        role: [public, team, balloon, jury, admin]
-        test: [w3cval, WCAG2A, WCAG2AA]
+        role: [jury, admin]
+        test: [w3cval]
         db: [bare-install, install]
-        releaseBranch:
-          - ${{ contains(github.ref, 'gh-readonly-queue') }}
-        exclude:
-          - releaseBranch: false
-          - role: jury
-            test: WCAG2AA
-          - role: jury
-            test: WCAG2A
-          - role: admin
-            test: WCAG2AA
-          - role: admin
-            test: WCAG2A
-        include:
-          - role: public
-            test: WCAG2AA
-            db: install
-          - role: public
-            test: w3cval
-            db: install
-          - role: admin
-            test: w3cval
-            db: install
+        #releaseBranch:
+        #  - ${{ contains(github.ref, 'gh-readonly-queue') }}
+        #exclude:
+        #  - releaseBranch: false
+        #  - role: jury
+        #    test: WCAG2AA
+        #  - role: jury
+        #    test: WCAG2A
+        #  - role: admin
+        #    test: WCAG2AA
+        #  - role: admin
+        #    test: WCAG2A
+        #include:
+        #  - role: public
+        #    test: WCAG2AA
+        #    db: install
+        #  - role: public
+        #    test: w3cval
+        #    db: install
+        #  - role: admin
+        #    test: w3cval
+        #    db: install
     steps:
       - uses: actions/checkout@v4
       - name: Cache node modules

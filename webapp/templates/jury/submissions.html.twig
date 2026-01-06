@@ -17,7 +17,7 @@
     <div class="btn-group btn-group-sm mb-3" role="group">
         <span class="input-group-text listtoggles">Show:</span>
         {%- for idx, type in viewTypes %}
-            <input type="radio" autocomplete="off" class="btn-check"
+            <input type="radio" class="btn-check"
                 name="viewtype" id="viewtype{{ idx }}" value="{{ type }}"
                 {% if idx == view %}checked{% endif %}>
             <label class="btn btn-secondary" for="viewtype{{ idx }}">{{ type }}</label>
@@ -26,7 +26,7 @@
 
     <div class="mb-3">
         <div class="btn-group" role="group">
-            <input type="checkbox" class="btn-check" id="filter-toggle" {% if hasFilters %}checked{% endif %} autocomplete="off">
+            <input type="checkbox" class="btn-check" id="filter-toggle" {% if hasFilters %}checked{% endif %} >
             <label for="filter-toggle" class="btn btn-outline-secondary">
                 <i class="fas fa-filter"></i> Filter
             </label>

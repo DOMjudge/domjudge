@@ -36,7 +36,7 @@
         <div class="btn-group btn-group-sm mb-3" role="group">
             <span class="input-group-text listtoggles">Filter:</span>
             {% for type in ['all', 'new', 'handled', 'general'] %}
-                <input type="radio" name="filter" autocomplete="off" class="btn-check" value="{{ type }}" id="filter{{ type }}"
+                <input type="radio" name="filter" class="btn-check" value="{{ type }}" id="filter{{ type }}"
                        {% if type == 'all' and currentFilter == null %}checked{% endif %}
                        {% if type != 'all' and currentFilter == type %}checked{% endif %}
                 >
@@ -47,14 +47,14 @@
         {% if queues | length > 0 %}
             <div class="btn-group btn-group-sm mb-3" role="group">
                 <span class="input-group-text listtoggles">Queue:</span>
-                <input type="radio" name="queue" autocomplete="off" id="queueall" class="btn-check" value="all"
+                <input type="radio" name="queue" id="queueall" class="btn-check" value="all"
                        {% if currentQueue == "all" %}checked{% endif %}>
                 <label class="btn btn-secondary" for="queueall">All</label>
-                <input type="radio" name="queue" autocomplete="off" id="queueunassigned" class="btn-check" value="unassigned"
+                <input type="radio" name="queue" id="queueunassigned" class="btn-check" value="unassigned"
                        {% if currentQueue == "unassigned" %}checked{% endif %}>
                 <label class="btn btn-secondary" for="queueunassigned">Unassigned</label>
                 {%- for queue, name in queues %}
-                    <input type="radio" name="queue" autocomplete="off" class="btn-check" id="queue{{ queue }}" value="{{ queue }}"
+                    <input type="radio" name="queue" class="btn-check" id="queue{{ queue }}" value="{{ queue }}"
                            {% if currentQueue == queue %}checked{% endif %}>
                     <label class="btn btn-secondary" for="queue{{ queue }}">{{ name }}</label>
                 {%- endfor %}
@@ -62,7 +62,7 @@
         {% endif %}
 
         {% if currentFilter is null or currentFilter == 'new' %}
-            <h3 id="newrequests">New requests</h3>
+            <h2 class="smaller_h2_as_h3" id="newrequests">New requests</h2>
             {%- if newClarifications | length == 0 %}
                 <p class="nodata">No new clarification requests.</p>
             {%- else %}
@@ -71,7 +71,7 @@
         {% endif %}
 
         {% if currentFilter is null or currentFilter == 'handled' %}
-            <h3 id="oldrequests" class="mt-4">Handled requests</h3>
+            <h2 id="oldrequests" class="smaller_h2_as_h3 mt-4">Handled requests</h2>
             {%- if oldClarifications | length == 0 %}
                 <p class="nodata">No old clarification requests.</p>
             {%- else %}
@@ -80,7 +80,7 @@
         {% endif %}
 
         {% if currentFilter is null or currentFilter == 'general' %}
-            <h3 id="clarifications" class="mt-4">General clarifications</h3>
+            <h2 id="clarifications" class="smaller_h2_as_h3 mt-4">General clarifications</h2>
             {%- if generalClarifications | length == 0 %}
                 <p class="nodata">No general clarifications.</p>
             {%- else %}
