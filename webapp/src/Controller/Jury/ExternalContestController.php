@@ -3,9 +3,8 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
-use App\Entity\ExternalContestSource;
+use App\Entity\Contest;
 use App\Entity\ExternalSourceWarning;
-use App\Form\Type\ExternalContestSourceType;
 use App\Form\Type\ExternalSourceWarningsFilterType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -38,20 +37,19 @@ class ExternalContestController extends BaseController
     #[Route(path: '/', name: 'jury_external_contest')]
     public function indexAction(Request $request): Response
     {
-        /** @var ExternalContestSource|null $externalContestSource */
-        $externalContestSource = $this->em->createQueryBuilder()
-            ->from(ExternalContestSource::class, 'ecs')
-            ->select('ecs')
-            ->andWhere('ecs.contest = :contest')
-            ->setParameter('contest', $this->dj->getCurrentContest())
-            ->getQuery()->getOneOrNullResult();
+        $contest = $this->dj->getCurrentContest();
 
-        if (!$externalContestSource) {
-            $this->addFlash('warning', 'No external contest present yet, please configure one first');
-            return $this->redirectToRoute('jury_external_contest_manage');
+        if (!$contest) {
+            $this->addFlash('warning', 'No active contest. Please select or create a contest first.');
+            return $this->redirectToRoute('jury_contests');
         }
 
-        $reltime = floor(Utils::difftime(Utils::now(), (float)$externalContestSource->getLastPollTime()));
+        if (!$contest->isExternalSourceEnabled()) {
+            $this->addFlash('warning', 'Shadow mode is not enabled for this contest. Configure it in contest settings.');
+            return $this->redirect($this->generateUrl('jury_contest_edit', ['contestId' => $contest->getCid()]) . '#externalSourceEnabled');
+        }
+
+        $reltime = floor(Utils::difftime(Utils::now(), (float)$contest->getExternalSourceLastPollTime()));
         $status = $reltime < $this->config->get('external_contest_source_critical') ? 'OK' : 'Critical';
 
         $warningTableFields = [
@@ -66,7 +64,7 @@ class ExternalContestController extends BaseController
         $warningTable = [];
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
-        foreach ($externalContestSource->getExternalSourceWarnings() as $warning) {
+        foreach ($contest->getExternalSourceWarnings() as $warning) {
             $warningData = [];
             foreach ($warningTableFields as $k => $v) {
                 if ($propertyAccessor->isReadable($warning, $k)) {
@@ -99,7 +97,7 @@ class ExternalContestController extends BaseController
             ];
         }
 
-        $this->sourceService->setSource($externalContestSource);
+        $this->sourceService->setSourceContest($contest);
 
         // Load preselected filters
         $filters = Utils::jsonDecode((string)$this->dj->getCookie('domjudge_external_source_filter') ?: '[]');
@@ -108,7 +106,7 @@ class ExternalContestController extends BaseController
         $form = $this->createForm(ExternalSourceWarningsFilterType::class, $filters);
 
         $data = [
-            'externalContestSource' => $externalContestSource,
+            'contest' => $contest,
             'status' => $status,
             'sourceService' => $this->sourceService,
             'webappDir' => $this->dj->getDomjudgeWebappDir(),
@@ -128,43 +126,5 @@ class ExternalContestController extends BaseController
         } else {
             return $this->render('jury/external_contest.html.twig', $data);
         }
-    }
-
-    #[Route(path: '/manage', name: 'jury_external_contest_manage')]
-    public function manageAction(Request $request): Response
-    {
-        /** @var ExternalContestSource $externalContestSource */
-        $externalContestSource = $this->em->createQueryBuilder()
-            ->from(ExternalContestSource::class, 'ecs')
-            ->select('ecs')
-            ->andWhere('ecs.contest = :contest')
-            ->setParameter('contest', $this->dj->getCurrentContest())
-            ->getQuery()->getOneOrNullResult() ?? new ExternalContestSource();
-
-        if (!$this->dj->getCurrentContest()) {
-            if (empty($this->dj->getCurrentContests(alsofuture: true))) {
-                $this->addFlash('warning', 'No current contest selected, please create one first.');
-                return $this->redirectToRoute('jury_contest_add');
-            } else {
-                $this->addFlash('warning', 'No current contest selected, please select one first.');
-            }
-        } else {
-            $externalContestSource->setContest($this->dj->getCurrentContest());
-        }
-
-        $form = $this->createForm(ExternalContestSourceType::class, $externalContestSource);
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->persist($externalContestSource);
-            $this->saveEntity($externalContestSource, null, true);
-            return $this->redirectToRoute('jury_external_contest');
-        }
-
-        return $this->render('jury/external_contest_manage.html.twig', [
-            'externalContestSource' => $externalContestSource,
-            'form' => $form,
-        ]);
     }
 }

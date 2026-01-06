@@ -6,7 +6,7 @@ use App\DataTransferObject\ResultRow;
 use App\Entity\Configuration;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
-use App\Entity\ExternalContestSource;
+use App\Entity\ExternalContestSourceType;
 use App\Entity\Problem;
 use App\Entity\Role;
 use App\Entity\Team;
@@ -353,17 +353,18 @@ class ImportExportService
 
         $shadow = $data['shadow'] ?? null;
         if ($shadow) {
-            $externalSource = $this->em->getRepository(ExternalContestSource::class)->findOneBy(['contest' => $contest]) ?: new ExternalContestSource();
-            $externalSource->setContest($contest);
+            $contest->setExternalSourceEnabled(true);
             foreach ($shadow as $field => $value) {
-                // Overwrite the existing value if the property is defined in the data: $externalSource-setSource($data['shadow']['source'])
-                $fieldFunc = 'set'.ucwords($field);
-                $fieldArgs = [$value];
-                if (method_exists($externalSource, $fieldFunc)) {
-                    $externalSource->$fieldFunc(...$fieldArgs);
+                // Map shadow fields to Contest setter methods
+                $fieldFunc = 'setExternalSource' . ucwords($field);
+                if ($field === 'type') {
+                    // Type is now an enum
+                    $value = ExternalContestSourceType::from($value);
+                }
+                if (method_exists($contest, $fieldFunc)) {
+                    $contest->$fieldFunc($value);
                 }
             }
-            $this->em->persist($externalSource);
         }
 
         $this->em->flush();

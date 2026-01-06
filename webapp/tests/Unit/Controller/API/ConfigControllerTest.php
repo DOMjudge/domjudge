@@ -40,7 +40,7 @@ class ConfigControllerTest extends BaseTestCase
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200, $user);
 
         static::assertIsArray($response);
-        $secretvars = ['script_memory_limit', 'clar_answers', 'external_ccs_submission_url', 'shadow_mode'];
+        $secretvars = ['script_memory_limit', 'clar_answers', 'external_ccs_submission_url'];
         foreach ($secretvars as $secretvar) {
             static::assertArrayNotHasKey($secretvar, $response);
         }
@@ -56,7 +56,6 @@ class ConfigControllerTest extends BaseTestCase
         static::assertIsArray($response['clar_answers']);
         static::assertEquals($answers, $response['clar_answers']);
         static::assertEquals("", $response['external_ccs_submission_url']);
-        static::assertEquals(0, $response['shadow_mode']);
     }
 
     /**
@@ -90,7 +89,6 @@ class ConfigControllerTest extends BaseTestCase
         static::assertIsArray($response);
         static::assertEquals(false, $response['compile_penalty']);
         static::assertEquals(20, $response['penalty_time']);
-        static::assertEquals(0, $response['shadow_mode']);
 
         $proposedChange = ['compile_penalty' => true, 'penalty_time' => 21];
         $response = $this->verifyApiJsonResponse('PUT', $this->endpoint, 200, 'admin', $proposedChange);
@@ -98,7 +96,6 @@ class ConfigControllerTest extends BaseTestCase
         static::assertIsArray($response);
         static::assertEquals(true, $response['compile_penalty']);
         static::assertEquals(21, $response['penalty_time']);
-        static::assertEquals(0, $response['shadow_mode']);
     }
 
     /**
