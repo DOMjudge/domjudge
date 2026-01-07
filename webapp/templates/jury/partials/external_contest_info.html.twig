@@ -9,6 +9,10 @@
                     <code>{{ contest.externalSourceSource }}</code>
                 </td>
             </tr>
+            <tr>
+                <th>Use external judgements</th>
+                <td>{{ contest.externalSourceUseJudgements | printYesNo }}</td>
+            </tr>
             {% if contest.externalSourceUsername %}
                 <tr>
                     <th>Username</th>

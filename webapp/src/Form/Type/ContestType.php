@@ -218,6 +218,15 @@ class ContestType extends AbstractExternalIdEntityType
             ],
             'help' => 'When enabled, this contest will shadow an external contest source.',
         ]);
+        $builder->add('externalSourceUseJudgements', ChoiceType::class, [
+            'expanded' => true,
+            'label' => 'Use external judgements',
+            'choices' => [
+                'Yes' => true,
+                'No' => false,
+            ],
+            'help' => 'When enabled, external judgements will be used for results and scoring instead of local judgings.',
+        ]);
         $builder->add('externalSourceType', EnumType::class, [
             'class' => ExternalContestSourceType::class,
             'required' => false,
