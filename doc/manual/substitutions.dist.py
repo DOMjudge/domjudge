@@ -6,6 +6,7 @@
 rst_prolog = """
 .. |DOMjudge| replace:: DOMjudge
 
+.. |phpversion| replace:: 8.3
 .. |baseurlteam| replace:: https://example.com/domjudge/team
 
 .. |SOURCESIZE| replace:: 256
