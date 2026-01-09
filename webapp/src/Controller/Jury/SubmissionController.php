@@ -841,7 +841,7 @@ class SubmissionController extends BaseController
         /** @var array{
          *      submitid: string,
          *      tag?: string
-         * } otherSubmissions
+         * } $otherSubmissions
          */
         $otherSubmissions = [];
         $originalSubmission = $submission->getOriginalSubmission();
