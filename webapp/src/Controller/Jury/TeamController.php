@@ -298,10 +298,13 @@ class TeamController extends BaseController
                     default => throw new BadRequestHttpException(sprintf('Restriction on %s not allowed.', $key)),
                 };
                 $restrictionValue = match ($key) {
-                    'problemId' => $this->em->getRepository(Problem::class)->findByExternalId($value)->getProbid(),
-                    'languageId' => $this->em->getRepository(Language::class)->findByExternalId($value)->getLangid(),
+                    'problemId' => $this->em->getRepository(Problem::class)->findByExternalId($value)?->getProbid(),
+                    'languageId' => $this->em->getRepository(Language::class)->findByExternalId($value)?->getLangid(),
                     default => $value,
                 };
+                if ($restrictionValue === null) {
+                    throw $this->createNotFoundException(sprintf('No %s with ID %s found.', $restrictionKeyText, $value));
+                }
                 $restrictions->$key = is_numeric($restrictionValue) ? (int)$restrictionValue : $restrictionValue;
                 $restrictionTexts[] = sprintf('%s %s', $restrictionKeyText, $value);
             }
