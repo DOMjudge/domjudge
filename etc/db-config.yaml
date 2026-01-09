@@ -172,6 +172,11 @@
             default_value: true
             public: false
             description: Activate a judgehost when it registers for the first time.
+        -   name: submission_rate_limit
+            type: array_keyval
+            default_value: []
+            public: true
+            description: Limit the number of submissions per team in certain time windows. The key is the window in seconds, the value is the maximum number of submissions allowed during that window. Note that DOMjudge down-prioritizes submissions from teams who submit frequently, so any limit set here should be generous.
 -   category: Clarifications
     description: Options related to clarifications.
     items:

@@ -15,6 +15,17 @@
             {% else %}
 
                 {{ form_start(form) }}
+                {% if rateLimitStatus is not empty %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Submission limit reached - if you submit now, it will likely be rejected:</strong>
+                        <ul class="mb-0">
+                            {% for limit in rateLimitStatus %}
+                                <li>Maximum of {{ limit.limit }} submission(s) per {{ limit.period }} allowed.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
                 {{ form_row(form.code) }}
                 {{ form_row(form.problem) }}
                 {{ form_row(form.language) }}
