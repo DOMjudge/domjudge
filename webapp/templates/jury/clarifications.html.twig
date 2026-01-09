@@ -62,7 +62,7 @@
         {% endif %}
 
         {% if currentFilter is null or currentFilter == 'new' %}
-            <h3 id="newrequests">New requests</h3>
+            <h2 class="smaller_h2_as_h3" id="newrequests">New requests</h2>
             {%- if newClarifications | length == 0 %}
                 <p class="nodata">No new clarification requests.</p>
             {%- else %}
@@ -71,7 +71,7 @@
         {% endif %}
 
         {% if currentFilter is null or currentFilter == 'handled' %}
-            <h3 id="oldrequests" class="mt-4">Handled requests</h3>
+            <h2 id="oldrequests" class="smaller_h2_as_h3 mt-4">Handled requests</h2>
             {%- if oldClarifications | length == 0 %}
                 <p class="nodata">No old clarification requests.</p>
             {%- else %}
@@ -80,7 +80,7 @@
         {% endif %}
 
         {% if currentFilter is null or currentFilter == 'general' %}
-            <h3 id="clarifications" class="mt-4">General clarifications</h3>
+            <h2 id="clarifications" class="smaller_h2_as_h3 mt-4">General clarifications</h2>
             {%- if generalClarifications | length == 0 %}
                 <p class="nodata">No general clarifications.</p>
             {%- else %}
