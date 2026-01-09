@@ -74,7 +74,14 @@ class ImportExportService
      *         name: string,
      *         color: string|null,
      *         rgb: string|null,
-     *     }>
+     *     }>,
+     *     shadow?: array{
+     *         type: string,
+     *         source: string,
+     *         useJudgements?: bool,
+     *         username?: string,
+     *         password?: string,
+     *     }
      * }
      */
     public function getContestYamlData(Contest $contest, bool $includeProblems = true): array
@@ -128,6 +135,23 @@ class ImportExportService
             $data['deactivate_time'] = Utils::isRelTime($contest->getDeactivatetimeString())
                 ? $contest->getDeactivatetimeString()
                 : Utils::absTime($contest->getDeactivatetime(), true);
+        }
+
+        if ($contest->isExternalSourceEnabled()) {
+            $shadow = [
+                'type' => $contest->getExternalSourceType()->value,
+                'source' => $contest->getExternalSourceSource(),
+            ];
+            if ($contest->isExternalSourceUseJudgements()) {
+                $shadow['useJudgements'] = true;
+            }
+            if ($contest->getExternalSourceUsername()) {
+                $shadow['username'] = $contest->getExternalSourceUsername();
+            }
+            if ($contest->getExternalSourcePassword()) {
+                $shadow['password'] = $contest->getExternalSourcePassword();
+            }
+            $data['shadow'] = $shadow;
         }
 
         if ($includeProblems) {
