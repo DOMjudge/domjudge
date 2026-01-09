@@ -755,7 +755,7 @@ class RejudgingController extends BaseController
                 ->leftJoin('s.user', 'u')
                 ->leftJoin('j.runs', 'jr')
                 ->leftJoin('jr.judgetask', 'jt')
-                ->select('j', 's', 'r', 't')
+                ->select('j', 's', 'r', 'c', 'l', 'p', 't', 'u', 'jr', 'jt')
                 ->distinct()
                 ->andWhere('j.contest IN (:contests)')
                 ->andWhere('j.valid = 1')
