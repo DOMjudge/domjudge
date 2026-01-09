@@ -158,7 +158,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
 
         if ($request->query->has('submission_id')) {
             $queryBuilder
-                ->andWhere('j.submission = :submission')
+                ->andWhere('s.externalid = :submission')
                 ->setParameter('submission', $request->query->get('submission_id'));
         }
 

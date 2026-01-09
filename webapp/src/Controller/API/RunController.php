@@ -147,19 +147,19 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
 
         if ($request->query->has('first_id')) {
             $queryBuilder
-                ->andWhere($this->useExternalRuns ? 'jr.extrunid >= :first_id' : 'jr.runid >= :first_id')
+                ->andWhere($this->useExternalRuns ? 'jr.externalid >= :first_id' : 'jr.runid >= :first_id')
                 ->setParameter('first_id', $request->query->get('first_id'));
         }
 
         if ($request->query->has('last_id')) {
             $queryBuilder
-                ->andWhere($this->useExternalRuns ? 'jr.extrunid = :last_id' : 'jr.runid = :last_id')
+                ->andWhere($this->useExternalRuns ? 'jr.externalid = :last_id' : 'jr.runid = :last_id')
                 ->setParameter('last_id', $request->query->get('last_id'));
         }
 
         if ($request->query->has('judging_id')) {
             $queryBuilder
-                ->andWhere($this->useExternalRuns ? 'jr.external_judgement = :judging_id' : 'jr.judging = :judging_id')
+                ->andWhere($this->useExternalRuns ? 'j.externalid = :judging_id' : 'jr.judging = :judging_id')
                 ->setParameter('judging_id', $request->query->get('judging_id'));
         }
 
