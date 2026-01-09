@@ -51,9 +51,9 @@ class ClarificationController extends BaseController
             $contestIds = [$contest->getExternalid()];
         } else {
             $contestIds = array_keys($this->dj->getCurrentContests());
-            // cid @ will never happen, but otherwise the array is empty and that is not supported.
+            // cid '' will never happen, but otherwise the array is empty and that is not supported.
             if (empty($contestIds)) {
-                $contestIds = ['@'];
+                $contestIds = [''];
             }
         }
 
