@@ -230,6 +230,7 @@ class ContestType extends AbstractExternalIdEntityType
         $builder->add('externalSourceType', EnumType::class, [
             'class' => ExternalContestSourceType::class,
             'required' => false,
+            'placeholder' => false,
             'label' => 'External source type',
             'choice_label' => 'readable',
         ]);
