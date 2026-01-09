@@ -166,6 +166,7 @@ class RejudgingType extends AbstractType
                 'class' => Problem::class,
                 'required' => false,
                 'choice_label' => 'name',
+                'choice_value' => 'externalid',
                 'choices' => $problems,
             ]);
 
@@ -200,6 +201,7 @@ class RejudgingType extends AbstractType
                 'class' => Team::class,
                 'required' => false,
                 'choice_label' => 'name',
+                'choice_value' => 'externalid',
                 'choices' => $teams,
             ]);
         };
