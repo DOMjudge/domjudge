@@ -21,6 +21,7 @@ use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
+use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
@@ -78,7 +79,7 @@ class ImportExportService
      *     shadow?: array{
      *         type: string,
      *         source: string,
-     *         useJudgements?: bool,
+     *         use_judgements?: bool,
      *         username?: string,
      *         password?: string,
      *     }
@@ -143,7 +144,7 @@ class ImportExportService
                 'source' => $contest->getExternalSourceSource(),
             ];
             if ($contest->isExternalSourceUseJudgements()) {
-                $shadow['useJudgements'] = true;
+                $shadow['use_judgements'] = true;
             }
             if ($contest->getExternalSourceUsername()) {
                 $shadow['username'] = $contest->getExternalSourceUsername();
@@ -378,9 +379,10 @@ class ImportExportService
         $shadow = $data['shadow'] ?? null;
         if ($shadow) {
             $contest->setExternalSourceEnabled(true);
+            $inflector = InflectorFactory::create()->build();
             foreach ($shadow as $field => $value) {
                 // Map shadow fields to Contest setter methods
-                $fieldFunc = 'setExternalSource' . ucwords($field);
+                $fieldFunc = 'setExternalSource' . ucfirst($inflector->camelize($field));
                 if ($field === 'type') {
                     // Type is now an enum
                     $value = ExternalContestSourceType::from($value);

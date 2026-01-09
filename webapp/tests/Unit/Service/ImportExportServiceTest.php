@@ -310,9 +310,9 @@ class ImportExportServiceTest extends BaseTestCase
                 'duration'   => '5:00:00',
                 'start-time' => '2020-01-01T12:34:56+02:00',
                 'shadow'     => [
-                    'type'          => 'ccs-api',
-                    'source'        => 'https://example.com/api/contests/test',
-                    'useJudgements' => true,
+                    'type'           => 'ccs-api',
+                    'source'         => 'https://example.com/api/contests/test',
+                    'use_judgements' => true,
                 ],
             ],
             true,
@@ -418,11 +418,11 @@ class ImportExportServiceTest extends BaseTestCase
             'admin',
             'secret123',
             [
-                'type'          => 'ccs-api',
-                'source'        => 'https://example.com/api/contests/test',
-                'useJudgements' => true,
-                'username'      => 'admin',
-                'password'      => 'secret123',
+                'type'           => 'ccs-api',
+                'source'         => 'https://example.com/api/contests/test',
+                'use_judgements' => true,
+                'username'       => 'admin',
+                'password'       => 'secret123',
             ],
         ];
         // Shadow mode enabled with contest archive, no useJudgements
