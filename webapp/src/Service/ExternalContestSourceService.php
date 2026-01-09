@@ -464,6 +464,11 @@ class ExternalContestSourceService
     {
         $file = fopen($this->contest->getExternalSourceSource() . '/event-feed.ndjson', 'r');
 
+        if ($file === false) {
+            $this->logger->error('Could not open event feed file: %s', [$this->contest->getExternalSourceSource() . '/event-feed.ndjson']);
+            return false;
+        }
+
         $skipEventsUpTo = $this->getLastReadEventId();
 
         $this->readEventsFromFile($file,
