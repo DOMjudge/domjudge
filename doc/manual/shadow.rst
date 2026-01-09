@@ -64,7 +64,7 @@ You can also configure shadow mode settings via the ``contest.yaml`` file using
 these DOMjudge-specific keys::
 
   shadow:
-    useJudgements: true
+    use_judgements: true
     type: ccs-api
     source: http(s)://url_to_external_system/api/contests/<contest_id>
     username: user_in_external_system
@@ -73,7 +73,7 @@ these DOMjudge-specific keys::
 or::
 
   shadow:
-    useJudgements: false
+    use_judgements: false
     type: contest-archive
     source: /path/on/domjudge/filesystem/to/clics/compliant/archive
 
