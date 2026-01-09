@@ -441,9 +441,9 @@ class JudgehostController extends AbstractFOSRestController
 
                     $judgingId = $judging->getJudgingid();
                     $contestId = $judging->getSubmission()->getContest()->getCid();
-                    $contestExernalid = $judging->getSubmission()->getContest()->getExternalid();
+                    $contestExternalid = $judging->getSubmission()->getContest()->getExternalid();
                     $this->dj->auditlog('judging', (string)$judgingId, 'judged',
-                                        'compiler-error', $judgehost->getHostname(), $contestExernalid);
+                                        'compiler-error', $judgehost->getHostname(), $contestExternalid);
 
                     $this->maybeUpdateActiveJudging($judging);
                     $this->em->flush();
