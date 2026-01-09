@@ -40,8 +40,8 @@ final class Version20251024122021 extends AbstractMigration
         // - Now we copy the langid_int values to other tables.
         $this->addSql('UPDATE contestlanguage c JOIN language l ON c.langid = l.langid SET c.langid_int = l.langid_int');
         $this->addSql('UPDATE problemlanguage p JOIN language l ON p.langid = l.langid SET p.langid_int = l.langid_int');
-        $this->addSql('UPDATE submission s JOIN language l ON s.langid = l.langid SET s.langid_int = l.langid_int WHERE s.langid IS NOT NULL');
-        $this->addSql('UPDATE version v JOIN language l ON v.langid = l.langid SET v.langid_int = l.langid_int WHERE v.langid IS NOT NULL');
+        $this->addSql('UPDATE submission s JOIN language l ON s.langid = l.langid SET s.langid_int = l.langid_int');
+        $this->addSql('UPDATE version v JOIN language l ON v.langid = l.langid SET v.langid_int = l.langid_int');
         $this->addSql('UPDATE auditlog a JOIN language l ON a.dataid = l.langid AND a.datatype = "language" SET a.dataid = l.langid_int WHERE a.dataid IS NOT NULL');
 
         // - Then we drop the old langid columns and drop any (compound) primary keys that use it.
