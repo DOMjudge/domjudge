@@ -1565,7 +1565,7 @@ class JudgeDaemon
             // What does the exitcode mean?
             if (!isset($this->EXITCODES[$retval])) {
                 alert('error');
-                error("Unknown exitcode ($retval) from testcase_run.sh for $judgeTask[submitid]");
+                error("Unknown exitcode ($retval) from testcase_run.sh for submission $judgeTask[submitid]");
             }
             $result = $this->EXITCODES[$retval];
 
