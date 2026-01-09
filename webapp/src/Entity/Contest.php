@@ -374,7 +374,7 @@ class Contest extends BaseApiEntity implements
         options: ['comment' => 'Last HTTP code received by event feed reader', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
-    private ?int $externalSourceLastHTTPCode = null;
+    private ?int $externalSourceLastHttpCode = null;
 
     #[Assert\File]
     #[Serializer\Exclude]
@@ -1046,14 +1046,14 @@ class Contest extends BaseApiEntity implements
         return $this;
     }
 
-    public function getExternalSourceLastHTTPCode(): ?int
+    public function getExternalSourceLastHttpCode(): ?int
     {
-        return $this->externalSourceLastHTTPCode;
+        return $this->externalSourceLastHttpCode;
     }
 
-    public function setExternalSourceLastHTTPCode(?int $externalSourceLastHTTPCode): Contest
+    public function setExternalSourceLastHttpCode(?int $externalSourceLastHttpCode): Contest
     {
-        $this->externalSourceLastHTTPCode = $externalSourceLastHTTPCode;
+        $this->externalSourceLastHttpCode = $externalSourceLastHttpCode;
         return $this;
     }
 

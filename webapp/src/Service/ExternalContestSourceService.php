@@ -363,7 +363,7 @@ class ExternalContestSourceService
             }
             $response = $this->httpClient->request('GET', $fullUrl, ['buffer' => false]);
             $statusCode = $response->getStatusCode();
-            $this->contest->setExternalSourceLastHTTPCode($statusCode);
+            $this->contest->setExternalSourceLastHttpCode($statusCode);
             $this->em->flush();
             if ($statusCode !== 200) {
                 $this->logger->warning(
