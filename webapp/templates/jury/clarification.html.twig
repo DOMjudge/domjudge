@@ -96,7 +96,7 @@
                                         <select name="queue" class="queue form-select w-auto form-select-sm" id="qselect">
                                             <option value="unassigned">Unassigned issues</option>
                                             {% for qid,queue in queues %}
-                                                <option value="{{ qid }}"{% if clar.queue == qid %} selected{% endif %}>{{ queue }}</option>
+                                                <option value="{{ qid }}"{% if clar.queueid == qid %} selected{% endif %}>{{ queue }}</option>
                                             {% endfor %}
                                             </select>
                                         <button type="button" class="btn-close clarification-queue-cancel-button ms-2 w-auto" aria-label="Cancel"></button>
