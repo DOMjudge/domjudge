@@ -20,33 +20,31 @@ final class Version20251024122021 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // We need to do some juggling to get this to work:
-        // - First we drop the foreign keys from tables referencing langid. We also drop compound
-        // - Then we add a temporary integer langid column to all these tables, since we can't
-        //   change the langid column itself, because MySQL will try to convert the strings to
-        //   integers and fail. We set the langid column in the language table to auto increment,
-        //   so it's filled by MySQL.
-        // - Now we copy the langid_int values to other tables.
-        // - Then we drop the old langid columns and drop any (compound) primary keys that use it.
-        // - Next, we rename the langid_int columns back to langid.
-        // - Finally we add back all primary and foreign keys.
 
+        // - First we drop the foreign keys from tables referencing langid. We also drop compound
         $this->addSql('ALTER TABLE submission DROP FOREIGN KEY submission_ibfk_4');
         $this->addSql('ALTER TABLE problemlanguage DROP FOREIGN KEY FK_46B150BB2271845');
         $this->addSql('ALTER TABLE version DROP FOREIGN KEY FK_BF1CD3C32271845');
         $this->addSql('ALTER TABLE contestlanguage DROP FOREIGN KEY FK_ADCB43232271845');
 
+        // - Then we add a temporary integer langid column to all these tables, since we can't
+        //   change the langid column itself, because MySQL will try to convert the strings to
+        //   integers and fail. We set the langid column in the language table to auto increment,
+        //   so it's filled by MySQL.
         $this->addSql('ALTER TABLE language ADD langid_int INT UNSIGNED AUTO_INCREMENT UNIQUE AFTER langid');
         $this->addSql('ALTER TABLE contestlanguage ADD langid_int INT UNSIGNED NOT NULL AFTER langid');
         $this->addSql('ALTER TABLE problemlanguage ADD langid_int INT UNSIGNED NOT NULL AFTER langid');
         $this->addSql('ALTER TABLE submission ADD langid_int INT UNSIGNED DEFAULT NULL AFTER langid');
         $this->addSql('ALTER TABLE version ADD langid_int INT UNSIGNED DEFAULT NULL AFTER langid');
 
+        // - Now we copy the langid_int values to other tables.
         $this->addSql('UPDATE contestlanguage c JOIN language l ON c.langid = l.langid SET c.langid_int = l.langid_int');
         $this->addSql('UPDATE problemlanguage p JOIN language l ON p.langid = l.langid SET p.langid_int = l.langid_int');
         $this->addSql('UPDATE submission s JOIN language l ON s.langid = l.langid SET s.langid_int = l.langid_int WHERE s.langid IS NOT NULL');
         $this->addSql('UPDATE version v JOIN language l ON v.langid = l.langid SET v.langid_int = l.langid_int WHERE v.langid IS NOT NULL');
         $this->addSql('UPDATE auditlog a JOIN language l ON a.dataid = l.langid AND a.datatype = "language" SET a.dataid = l.langid_int WHERE a.dataid IS NOT NULL');
 
+        // - Then we drop the old langid columns and drop any (compound) primary keys that use it.
         $this->addSql('ALTER TABLE language DROP PRIMARY KEY');
         $this->addSql('ALTER TABLE language DROP COLUMN langid');
         $this->addSql('ALTER TABLE contestlanguage DROP PRIMARY KEY');
@@ -56,12 +54,14 @@ final class Version20251024122021 extends AbstractMigration
         $this->addSql('ALTER TABLE submission DROP COLUMN langid');
         $this->addSql('ALTER TABLE version DROP COLUMN langid');
 
+        // - Next, we rename the langid_int columns back to langid.
         $this->addSql('ALTER TABLE language CHANGE langid_int langid INT UNSIGNED AUTO_INCREMENT NOT NULL COMMENT \'Language ID\'');
         $this->addSql('ALTER TABLE contestlanguage CHANGE langid_int langid INT UNSIGNED NOT NULL COMMENT \'Language ID\'');
         $this->addSql('ALTER TABLE problemlanguage CHANGE langid_int langid INT UNSIGNED NOT NULL COMMENT \'Language ID\'');
         $this->addSql('ALTER TABLE submission CHANGE langid_int langid INT UNSIGNED DEFAULT NULL COMMENT \'Language ID\'');
         $this->addSql('ALTER TABLE version CHANGE langid_int langid INT UNSIGNED DEFAULT NULL COMMENT \'Language ID\'');
 
+        // - Finally we add back all primary and foreign keys.
         $this->addSql('ALTER TABLE language ADD PRIMARY KEY (langid), DROP INDEX langid_int');
         $this->addSql('ALTER TABLE contestlanguage ADD PRIMARY KEY (cid, langid)');
         $this->addSql('ALTER TABLE problemlanguage ADD PRIMARY KEY (probid, langid)');
