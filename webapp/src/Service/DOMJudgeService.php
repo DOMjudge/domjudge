@@ -143,7 +143,7 @@ class DOMJudgeService
         if ($honorCookie) {
             $contest = $this->getCurrentContest(onlyOfTeam: $onlyOfTeam, onlyPublic: $onlyPublic);
             if ($contest) {
-                return [$contest->getCid() => $contest];
+                return [$contest->getExternalid() => $contest];
             }
         }
 
