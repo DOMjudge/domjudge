@@ -433,6 +433,68 @@ class SubmissionService
     }
 
     /**
+     * @return array<int, array{count: int, limit: int, period: string}>
+     */
+    public function getRateLimitStatus(Team $team, Contest $contest): array
+    {
+        $rateLimits = $this->config->get('submission_rate_limit');
+        if (empty($rateLimits) || $this->dj->checkrole('jury')) {
+            return [];
+        }
+
+        $submitTime = Utils::now();
+        $maxSeconds = max(array_keys($rateLimits));
+        $startTime = $submitTime - $maxSeconds;
+
+        $submissions = $this->em->createQueryBuilder()
+            ->select('s.submittime')
+            ->from(Submission::class, 's')
+            ->where('s.team = :team')
+            ->andWhere('s.contest = :contest')
+            ->andWhere('s.submittime >= :startTime')
+            ->andWhere('s.valid = 1')
+            ->setParameter('team', $team)
+            ->setParameter('contest', $contest)
+            ->setParameter('startTime', $startTime)
+            ->getQuery()
+            ->getResult();
+
+        $subTimes = array_column($submissions, 'submittime');
+
+        $status = [];
+        foreach ($rateLimits as $seconds => $limit) {
+            $seconds = (int) $seconds;
+            $limit = (int) $limit;
+            $windowStart = $submitTime - $seconds;
+
+            $count = 0;
+            foreach ($subTimes as $subTime) {
+                if ($subTime >= $windowStart) {
+                    $count++;
+                }
+            }
+
+            if ($count >= $limit) {
+                $minutes = (float) $seconds / 60.0;
+                if ($seconds < 60) {
+                    $period = sprintf("%d seconds", $seconds);
+                } elseif ($seconds == 60) {
+                    $period = "1 minute";
+                } else {
+                    $period = sprintf("%g minutes", round($minutes, 1));
+                }
+                $status[] = [
+                    'count' => $count,
+                    'limit' => $limit,
+                    'period' => $period,
+                ];
+            }
+        }
+
+        return $status;
+    }
+
+    /**
      * This function takes a (set of) temporary file(s) of a submission,
      * validates it and puts it into the database. Additionally it
      * moves it to a backup storage.
@@ -604,6 +666,16 @@ class SubmissionService
         // to add the submission to the event table. To fix this, reload the user if this is the case.
         if ($user && !$this->em->contains($user)) {
             $user = $this->em->getRepository(User::class)->find($user->getUserid());
+        }
+
+        // Submission rate limiting
+        $rateLimitStatus = $this->getRateLimitStatus($team, $contest);
+        if (!empty($rateLimitStatus)) {
+            $violation = $rateLimitStatus[0];
+            throw new BadRequestHttpException(
+                sprintf("Submission limit reached: maximum of %d submissions per %s allowed.",
+                    $violation['limit'], $violation['period'])
+            );
         }
 
         // Reindex array numerically to make sure we can index it in order

@@ -61,6 +61,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
             'sourcefiles_limit' => 1,
             'sourcesize_limit' => 1024*256,
             'lazy_eval_results' => 1,
+            'submission_rate_limit' => [],
         ];
 
         $this->config = $this->createMock(ConfigurationService::class);
