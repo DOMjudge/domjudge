@@ -1284,7 +1284,7 @@ class JudgeDaemon
 
             // Revoke readablity for domjudge-run user to this workdir.
             chmod($workdir, 0700);
-            logmsg(LOG_NOTICE, "Judging $judgeTask[submitid], task $judgeTask[judgetaskid]: compile error");
+            logmsg(LOG_NOTICE, "Submission $judgeTask[submitid], task $judgeTask[judgetaskid]: compile error");
             return false;
         }
 
