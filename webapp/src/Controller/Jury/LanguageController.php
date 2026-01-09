@@ -305,7 +305,7 @@ class LanguageController extends BaseController
             if ($language->getAllowJudge()) {
                 $this->dj->unblockJudgeTasksForLanguage($language->getLangid());
             }
-            return $this->redirectToRoute('jury_language', ['langId' => $language->getLangid()]);
+            return $this->redirectToRoute('jury_language', ['langId' => $langId]);
         }
 
         return $this->render('jury/language_edit.html.twig', [

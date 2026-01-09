@@ -347,7 +347,7 @@ class TeamController extends BaseController
             $this->possiblyAddUser($team);
             $this->assetUpdater->updateAssets($team);
             $this->saveEntity($team, $team->getTeamid(), false);
-            return $this->redirectToRoute('jury_team', ['teamId' => $team->getExternalid()]);
+            return $this->redirectToRoute('jury_team', ['teamId' => $teamId]);
         }
 
         return $this->render('jury/team_edit.html.twig', [

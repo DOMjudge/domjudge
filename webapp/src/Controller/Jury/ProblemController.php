@@ -580,7 +580,7 @@ class ProblemController extends BaseController
             if (!empty($lockedContests)) {
                 $this->addFlash('danger', 'Cannot edit problem / testcases, it belongs to locked contest(s) '
                     . join(', ', $lockedContests));
-                return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
+                return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
             }
             $messages      = [];
             $maxrank       = 0;
@@ -824,7 +824,7 @@ class ProblemController extends BaseController
             /** @var ContestProblem $contestProblem */
             if ($contestProblem->getContest()->isLocked()) {
                 $this->addFlash('danger', 'Cannot edit problem, it belongs to locked contest c' . $contestProblem->getContest()->getCid());
-                return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
+                return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
             }
         }
 
@@ -952,7 +952,7 @@ class ProblemController extends BaseController
             /** @var ContestProblem $contestProblem */
             if ($contestProblem->getContest()->isLocked()) {
                 $this->addFlash('danger', 'Cannot edit problem, it belongs to locked contest ' . $contestProblem->getContest()->getExternalid());
-                return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
+                return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
             }
         }
 
@@ -962,7 +962,7 @@ class ProblemController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->saveEntity($problem, $problem->getProbid(), false);
-            return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
+            return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
         }
 
         $data       = [];
@@ -994,7 +994,7 @@ class ProblemController extends BaseController
                     $this->dj->auditlog('problem', $problem->getExternalid(), 'upload zip', $clientName);
                 } else {
                     $this->postMessages($messages);
-                    return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
+                    return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
                 }
             } catch (Exception $e) {
                 $messages['danger'][] = $e->getMessage();
@@ -1005,7 +1005,7 @@ class ProblemController extends BaseController
             }
             $this->postMessages($messages);
 
-            return $this->redirectToRoute('jury_problem', ['probId' => $problem->getExternalid()]);
+            return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
         }
 
         return $this->render('jury/problem_edit.html.twig', [

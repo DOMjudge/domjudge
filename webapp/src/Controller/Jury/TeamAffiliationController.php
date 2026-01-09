@@ -186,7 +186,7 @@ class TeamAffiliationController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->assetUpdater->updateAssets($teamAffiliation);
             $this->saveEntity($teamAffiliation, $teamAffiliation->getAffilid(), false);
-            return $this->redirectToRoute('jury_team_affiliation', ['affilId' => $teamAffiliation->getExternalid()]);
+            return $this->redirectToRoute('jury_team_affiliation', ['affilId' => $affilId]);
         }
 
         return $this->render('jury/team_affiliation_edit.html.twig', [

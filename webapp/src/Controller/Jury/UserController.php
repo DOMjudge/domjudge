@@ -252,7 +252,7 @@ class UserController extends BaseController
                 $this->tokenStorage->setToken($token);
             }
 
-            return $this->redirectToRoute('jury_user', ['userId' => $user->getExternalid()]);
+            return $this->redirectToRoute('jury_user', ['userId' => $userId]);
         }
 
         return $this->render('jury/user_edit.html.twig', [

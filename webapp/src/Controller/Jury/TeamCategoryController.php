@@ -198,7 +198,7 @@ class TeamCategoryController extends BaseController
                 }
             }
             $this->addFlash('scoreboard_refresh', 'If the category sort order was changed, it may be necessary to recalculate any cached scoreboards.');
-            return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getExternalid()]);
+            return $this->redirectToRoute('jury_team_category', ['categoryId' => $categoryId]);
         }
 
         return $this->render('jury/team_category_edit.html.twig', [
