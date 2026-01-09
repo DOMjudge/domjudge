@@ -15,7 +15,6 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,6 +28,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route(path: '/jury/clarifications')]
 class ClarificationController extends BaseController
 {
+
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -139,9 +139,9 @@ class ClarificationController extends BaseController
         $parameters = ['list' => []];
 
         if ($clarification->getProblem()?->getExternalid()) {
-            $subject = sprintf('%s|%s', $clarification->getContest()->getExternalid(), $clarification->getProblem()->getExternalid());
+            $subject = sprintf('%s%s%s', $clarification->getContest()->getExternalid(), Clarification::PROBLEM_BASED_SEPARATOR, $clarification->getProblem()->getExternalid());
         } else {
-            $subject = sprintf('%s#%s', $clarification->getContest()->getExternalid(), $clarification->getCategory());
+            $subject = sprintf('%s%s%s', $clarification->getContest()->getExternalid(), Clarification::CATEGORY_BASED_SEPARATOR, $clarification->getCategory());
         }
         $formData = [
             'recipient' => JuryClarificationType::RECIPIENT_MUST_SELECT,
@@ -205,14 +205,14 @@ class ClarificationController extends BaseController
             $data['subjectlink'] = null;
             if ($clar->getProblem()) {
                 if ($clar->getContestProblem()) {
-                    $concernssubject = $contest->getExternalid() . "|" . $clar->getProblem()->getExternalid();
+                    $concernssubject = $contest->getExternalid() . Clarification::PROBLEM_BASED_SEPARATOR . $clar->getProblem()->getExternalid();
                 } else {
                     // Very special case, this problem is unlinked.
                     $concernssubject = "";
                 }
                 $data['subjectlink'] = $this->generateUrl('jury_problem', ['probId' => $clar->getProblem()->getExternalid()]);
             } elseif ($clar->getCategory()) {
-                $concernssubject = $contest->getExternalid() . "#" . $clar->getCategory();
+                $concernssubject = $contest->getExternalid() . Clarification::CATEGORY_BASED_SEPARATOR . $clar->getCategory();
             } else {
                 $concernssubject = "";
             }
@@ -321,10 +321,10 @@ class ClarificationController extends BaseController
         $subject = $request->request->get('subject');
         $problemId = null;
         $category = null;
-        if (str_contains($subject, '#')) {
-            [$cid, $category] = explode('#', $subject);
+        if (str_contains($subject, Clarification::CATEGORY_BASED_SEPARATOR)) {
+            [$cid, $category] = explode(Clarification::CATEGORY_BASED_SEPARATOR, $subject);
         } else {
-            [$cid, $problemId] = explode('|', $subject);
+            [$cid, $problemId] = explode(Clarification::PROBLEM_BASED_SEPARATOR, $subject);
         }
 
         $contest = $this->em->getRepository(Contest::class)->findByExternalId($cid);
@@ -393,10 +393,10 @@ class ClarificationController extends BaseController
         $subject = $formData['subject'];
         $problemId = null;
         $category = null;
-        if (str_contains($subject, '#')) {
-            [$cid, $category] = explode('#', $subject);
+        if (str_contains($subject, Clarification::CATEGORY_BASED_SEPARATOR)) {
+            [$cid, $category] = explode(Clarification::CATEGORY_BASED_SEPARATOR, $subject);
         } else {
-            [$cid, $problemId] = explode('|', $subject);
+            [$cid, $problemId] = explode(Clarification::PROBLEM_BASED_SEPARATOR, $subject);
         }
 
         $contest = $this->em->getRepository(Contest::class)->findByExternalId($cid);

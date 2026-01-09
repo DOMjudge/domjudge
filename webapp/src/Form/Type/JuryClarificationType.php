@@ -14,8 +14,8 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotEqualTo;
 use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\NotEqualTo;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class JuryClarificationType extends AbstractType
@@ -82,14 +82,14 @@ class JuryClarificationType extends AbstractType
                 };
             }
             foreach ($categories as $name => $desc) {
-                $subjectOptions["$namePrefix $desc"] = "$cid#$name";
+                $subjectOptions["$namePrefix $desc"] = $cid . Clarification::CATEGORY_BASED_SEPARATOR . $name;
             }
 
             foreach ($contestproblems as $cp) {
                 if ($cp->getContest()->getExternalid() != $cid) {
                     continue;
                 }
-                $subjectOptions[$namePrefix . $cp->getShortname() . ': ' . $cp->getProblem()->getName()] = "$cid|" . $cp->getProblem()->getExternalid();
+                $subjectOptions[$namePrefix . $cp->getShortname() . ': ' . $cp->getProblem()->getName()] = $cid . Clarification::PROBLEM_BASED_SEPARATOR . $cp->getProblem()->getExternalid();
             }
         }
 

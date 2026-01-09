@@ -37,6 +37,9 @@ class Clarification extends BaseApiEntity implements
     ExternalIdFromInternalIdInterface,
     PrefixedExternalIdInShadowModeInterface
 {
+    public const CATEGORY_BASED_SEPARATOR = '#';
+    public const PROBLEM_BASED_SEPARATOR = '|';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Clarification ID', 'unsigned' => true])]
