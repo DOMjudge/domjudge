@@ -202,7 +202,7 @@ class UserController extends BaseController
             'showExternalResult' => $this->dj->shadowMode(),
             'refresh' => [
                 'after' => 3,
-                'url' => $this->generateUrl('jury_user', ['userId' => $user->getUserid()]),
+                'url' => $this->generateUrl('jury_user', ['userId' => $userId]),
                 'ajax' => true,
             ],
         ]);
