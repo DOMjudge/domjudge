@@ -127,9 +127,9 @@ class ClarificationController extends BaseController
         $formData = [];
         if ($clarification) {
             if ($clarification->getProblem()) {
-                $formData['subject'] = sprintf('%s|%s', $clarification->getContest()->getExternalid(), $clarification->getProblem()->getExternalid());
+                $formData['subject'] = sprintf('%s%s%s', $clarification->getContest()->getExternalid(), Clarification::PROBLEM_BASED_SEPARATOR, $clarification->getProblem()->getExternalid());
             } else {
-                $formData['subject'] = sprintf('%s#%s', $clarification->getContest()->getExternalid(), $clarification->getCategory());
+                $formData['subject'] = sprintf('%s%s%s', $clarification->getContest()->getExternalid(), Clarification::CATEGORY_BASED_SEPARATOR, $clarification->getCategory());
             }
 
             $formData['message'] = "> " . str_replace("\n", "\n> ", Utils::wrapUnquoted($clarification->getBody())) . "\n\n";
@@ -232,9 +232,9 @@ class ClarificationController extends BaseController
         $category = null;
         $queue = null;
         if (str_contains($formData['subject'], '#')) {
-            [, $category] = explode('#', $formData['subject']);
+            [, $category] = explode(Clarification::CATEGORY_BASED_SEPARATOR, $formData['subject']);
         } else {
-            [, $problemId] = explode('|', $formData['subject']);
+            [, $problemId] = explode(Clarification::PROBLEM_BASED_SEPARATOR, $formData['subject']);
             $problem = $this->em->getRepository(Problem::class)->findByExternalId($problemId);
             $queue = $this->config->get('clar_default_problem_queue');
             if ($queue === "") {
