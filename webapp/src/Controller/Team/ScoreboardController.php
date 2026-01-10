@@ -71,6 +71,7 @@ class ScoreboardController extends BaseController
                          ->from(Team::class, 't')
                          ->innerJoin('t.categories', 'tc')
                          ->select('t, tc')
+                         ->andWhere('tc.visible = 1')
                          ->andWhere('t.externalid = :teamId')
                          ->setParameter('teamId', $teamId)
                          ->getQuery()
