@@ -25,9 +25,11 @@ std::string_view progname;
 int be_verbose;
 int show_help;
 int show_version;
+int one_file_system;
 
 struct option const long_opts[] = {
 	{"verbose", no_argument,       NULL,         'v'},
+	{"one-file-system", no_argument, NULL,       'x'},
 	{"help",    no_argument,       &show_help,    1 },
 	{"version", no_argument,       &show_version, 1 },
 	{ NULL,     0,                 NULL,          0 }
@@ -37,13 +39,14 @@ void usage()
 {
     std::cout << "Usage: " << progname << " [OPTION]... DIRECTORY" << std::endl
               << "Evicts all files in a directory tree from the kernel filesystem cache." << std::endl << std::endl
-              << "  -v, --verbose        display some extra warnings and information" << std::endl
-              << "      --help           display this help and exit" << std::endl
-              << "      --version        output version information and exit" << std::endl << std::endl;
+              << "  -v, --verbose          display some extra warnings and information" << std::endl
+              << "  -x, --one-file-system  stay on this filesystem" << std::endl
+              << "      --help             display this help and exit" << std::endl
+              << "      --version          output version information and exit" << std::endl << std::endl;
 	exit(0);
 }
 
-void evict_directory(const std::string& dirname) {
+void evict_directory(const std::string& dirname, dev_t root_dev) {
 	DIR *dir;
 	struct dirent *entry;
 	int fd = -1;
@@ -62,33 +65,42 @@ void evict_directory(const std::string& dirname) {
 
 			/* Construct the full file path */
 			std::string entry_path = dirname + "/" + entry->d_name;
-			fd = open(entry_path.c_str(), O_RDONLY, 0);
-			if (fd == -1) {
-				warning(errno, "Unable to open file: {}", entry_path);
+
+			if (lstat(entry_path.c_str(), &s) < 0) {
+				if (be_verbose) logerror(errno, "Unable to stat file/directory: {}\n", entry_path);
 				continue;
 			}
 
-			if (fstat(fd, &s) < 0) {
-				if (be_verbose) logerror(errno, "Unable to stat file/directory: {}\n", entry_path);
-				if ( close(fd)!=0 ) {
-					warning(errno, "Unable to close file: {}", entry_path);
-				}
+			if (one_file_system && s.st_dev != root_dev) {
+				if (be_verbose) logmsg(LOG_DEBUG, "Skipping {}: different filesystem", entry_path);
 				continue;
 			}
+
 			if (S_ISDIR(s.st_mode)) {
 				/* Recurse into subdirectories */
-				evict_directory(entry_path);
-			} else {
+				evict_directory(entry_path, root_dev);
+			} else if (S_ISREG(s.st_mode)) {
 				/* evict this file from the cache */
+				fd = open(entry_path.c_str(), O_RDONLY, 0);
+				if (fd == -1) {
+					warning(errno, "Unable to open file: {}", entry_path);
+					continue;
+				}
+
 				if (posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED)) {
 					warning(errno, "Unable to evict file: {}\n", entry_path);
 				} else {
 					if (be_verbose) logmsg(LOG_DEBUG, "Evicted file: {}", entry_path);
 				}
-			}
 
-			if ( close(fd)!=0 ) {
-				warning(errno, "Unable to close file: {}", entry_path);
+				if ( close(fd)!=0 ) {
+					warning(errno, "Unable to close file: {}", entry_path);
+				}
+			} else {
+				/* We should never encounter other file types like symlinks,
+				 * devices, or sockets in the judging directory, and they
+				 * don't need to be evicted from the cache anyway. */
+				if (be_verbose) logmsg(LOG_DEBUG, "Skipping {}: not a directory or regular file", entry_path);
 			}
 		}
 		if ( closedir(dir)!=0 ) {
@@ -106,15 +118,18 @@ int main(int argc, char *argv[])
 	progname = argv[0];
 
 	/* Parse command-line options */
-	be_verbose = show_help = show_version = 0;
+	be_verbose = show_help = show_version = one_file_system = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+v",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+vx",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
 		case 'v': /* verbose option */
 			be_verbose = 1;
 			verbose = LOG_DEBUG;
+			break;
+		case 'x': /* one-file-system option */
+			one_file_system = 1;
 			break;
 		case ':': /* getopt error */
 		case '?':
@@ -136,7 +151,17 @@ int main(int argc, char *argv[])
 	/* directory to evict */
 	std::string dirname = argv[optind];
 
-	evict_directory(dirname);
+	dev_t root_dev = 0;
+	if (one_file_system) {
+		struct stat s;
+		if (stat(dirname.c_str(), &s) < 0) {
+			logerror(errno, "Unable to stat directory: {}\n", dirname);
+			return 1;
+		}
+		root_dev = s.st_dev;
+	}
+
+	evict_directory(dirname, root_dev);
 
 	return 0;
 }
