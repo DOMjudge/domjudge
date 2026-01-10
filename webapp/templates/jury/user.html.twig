@@ -29,16 +29,6 @@
                     <td class="teamid">{{ user.username }}</td>
                 </tr>
                 <tr>
-                    <th>Email</th>
-                    <td>
-                        {% if user.email %}
-                            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
                     <th>Password</th>
                     <td>
                         {% if user.password %}
