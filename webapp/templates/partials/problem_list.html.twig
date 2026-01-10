@@ -18,7 +18,7 @@
             </a>
         {% endif %}
         {% if showSamples %}
-            <a class="btn btn-secondary" href="{{ path('current_samples_data_zip', {cid: contest.cid}) }}" title="Contains samples, attachments and statement for all problems.">
+            <a class="btn btn-secondary" href="{{ path('current_samples_data_zip', {cid: contest.externalid}) }}" title="Contains samples, attachments and statement for all problems.">
                 <i class="fas fa-download"></i> samples
             </a>
         {% endif %}
