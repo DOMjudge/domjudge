@@ -422,7 +422,7 @@ class ImportExportServiceTest extends BaseTestCase
                 'source'         => 'https://example.com/api/contests/test',
                 'use_judgements' => true,
                 'username'       => 'admin',
-                'password'       => 'secret123',
+                'password'       => 'secret123', // ggignore
             ],
         ];
         // Shadow mode enabled with contest archive, no useJudgements
