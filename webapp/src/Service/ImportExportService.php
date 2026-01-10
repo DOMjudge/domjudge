@@ -6,7 +6,7 @@ use App\DataTransferObject\ResultRow;
 use App\Entity\Configuration;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
-use App\Entity\ExternalContestSource;
+use App\Entity\ExternalContestSourceType;
 use App\Entity\Problem;
 use App\Entity\Role;
 use App\Entity\Team;
@@ -21,6 +21,7 @@ use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
+use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
@@ -74,7 +75,14 @@ class ImportExportService
      *         name: string,
      *         color: string|null,
      *         rgb: string|null,
-     *     }>
+     *     }>,
+     *     shadow?: array{
+     *         type: string,
+     *         source: string,
+     *         use_judgements?: bool,
+     *         username?: string,
+     *         password?: string,
+     *     }
      * }
      */
     public function getContestYamlData(Contest $contest, bool $includeProblems = true): array
@@ -128,6 +136,23 @@ class ImportExportService
             $data['deactivate_time'] = Utils::isRelTime($contest->getDeactivatetimeString())
                 ? $contest->getDeactivatetimeString()
                 : Utils::absTime($contest->getDeactivatetime(), true);
+        }
+
+        if ($contest->isExternalSourceEnabled()) {
+            $shadow = [
+                'type' => $contest->getExternalSourceType()->value,
+                'source' => $contest->getExternalSourceSource(),
+            ];
+            if ($contest->isExternalSourceUseJudgements()) {
+                $shadow['use_judgements'] = true;
+            }
+            if ($contest->getExternalSourceUsername()) {
+                $shadow['username'] = $contest->getExternalSourceUsername();
+            }
+            if ($contest->getExternalSourcePassword()) {
+                $shadow['password'] = $contest->getExternalSourcePassword();
+            }
+            $data['shadow'] = $shadow;
         }
 
         if ($includeProblems) {
@@ -353,17 +378,19 @@ class ImportExportService
 
         $shadow = $data['shadow'] ?? null;
         if ($shadow) {
-            $externalSource = $this->em->getRepository(ExternalContestSource::class)->findOneBy(['contest' => $contest]) ?: new ExternalContestSource();
-            $externalSource->setContest($contest);
+            $contest->setExternalSourceEnabled(true);
+            $inflector = InflectorFactory::create()->build();
             foreach ($shadow as $field => $value) {
-                // Overwrite the existing value if the property is defined in the data: $externalSource-setSource($data['shadow']['source'])
-                $fieldFunc = 'set'.ucwords($field);
-                $fieldArgs = [$value];
-                if (method_exists($externalSource, $fieldFunc)) {
-                    $externalSource->$fieldFunc(...$fieldArgs);
+                // Map shadow fields to Contest setter methods
+                $fieldFunc = 'setExternalSource' . ucfirst($inflector->camelize($field));
+                if ($field === 'type') {
+                    // Type is now an enum
+                    $value = ExternalContestSourceType::from($value);
+                }
+                if (method_exists($contest, $fieldFunc)) {
+                    $contest->$fieldFunc($value);
                 }
             }
-            $this->em->persist($externalSource);
         }
 
         $this->em->flush();

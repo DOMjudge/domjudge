@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\Entity\Contest;
-use App\Entity\ExternalContestSource;
 use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -36,7 +35,7 @@ class ImportEventFeedCommand
 {
     protected SymfonyStyle $style;
 
-    protected ?ExternalContestSource $source = null;
+    protected ?Contest $contest = null;
 
     public function __construct(
         protected readonly EntityManagerInterface $em,
@@ -83,11 +82,6 @@ class ImportEventFeedCommand
         pcntl_signal(SIGINT, $this->stopCommand(...));
 
         if (!$this->loadSource($input, $contestId)) {
-            return Command::FAILURE;
-        }
-
-        if (!$this->dj->shadowMode()) {
-            $this->style->error("shadow_mode configuration setting is set to 'false' but should be 'true'.");
             return Command::FAILURE;
         }
 
@@ -172,20 +166,17 @@ class ImportEventFeedCommand
             }
         }
 
-        /** @var ExternalContestSource|null $source */
-        $source = $this->em->createQueryBuilder()
-            ->from(ExternalContestSource::class, 'ecs')
-            ->select('ecs')
-            ->join('ecs.contest', 'c')
-            ->andWhere('c.cid = :cid')
-            ->setParameter('cid', $contestId)
-            ->getQuery()
-            ->getOneOrNullResult();
-        if ($source === null) {
-            $this->style->error('Contest does not have an external contest configured yet');
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        if ($contest === null) {
+            $this->style->error('Contest not found');
             return false;
         }
-        $this->sourceService->setSource($source);
+        if (!$contest->isExternalSourceEnabled()) {
+            $this->style->error('Contest does not have shadow mode enabled');
+            return false;
+        }
+        $this->contest = $contest;
+        $this->sourceService->setSourceContest($contest);
 
         return true;
     }
