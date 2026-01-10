@@ -7,7 +7,7 @@
     {% if contest and show_contest_problemset %}
         {% if contest.contestProblemsetType is not empty %}
             {% if contest_problemset_add_cid %}
-                {% set contest_problemset_url = path(contest_problemset_path, {'cid': contest.cid}) %}
+                {% set contest_problemset_url = path(contest_problemset_path, {'cid': contest.externalid}) %}
             {% else %}
                 {% set contest_problemset_url = path(contest_problemset_path) %}
             {% endif %}
