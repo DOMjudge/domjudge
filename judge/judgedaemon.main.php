@@ -1181,7 +1181,7 @@ class JudgeDaemon
         }
 
         // Evict all contents of the workdir from the kernel fs cache
-        if (!$this->runCommandSafe([LIBJUDGEDIR . '/evict', $workdir])) {
+        if (!$this->runCommandSafe([LIBJUDGEDIR . '/evict', '-x', $workdir])) {
             warning("evict script failed, continuing gracefully");
         }
     }
