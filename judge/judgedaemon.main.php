@@ -20,6 +20,8 @@ define('DONT_CARE', new class {});
 
 class JudgeDaemon
 {
+    private const EXTERNAL_IDENTIFIER_REGEX = '/^[a-zA-Z0-9_.-]+$/';
+
     private static ?JudgeDaemon $instance = null;
 
     private ?array $endpoint = null;
@@ -620,7 +622,7 @@ class JudgeDaemon
 
     private function judgingDirectory(string $workdirpath, array $judgeTask): string
     {
-        if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => '/^[a-zA-Z0-9_.-]+$/']]) === false ||
+        if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => static::EXTERNAL_IDENTIFIER_REGEX]]) === false ||
             filter_var($judgeTask['jobid'], FILTER_VALIDATE_INT) === false) {
             error("Malformed data returned in judgeTask IDs: " . var_export($judgeTask, true));
         }
