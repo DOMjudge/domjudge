@@ -1239,20 +1239,9 @@ EOF;
      * Get the entity ID badge to display for the given entity.
      */
     #[AsTwigFilter('entityIdBadge', isSafe: ['html'])]
-    public function entityIdBadge(BaseApiEntity $entity): string
+    public function entityIdBadge(BaseApiEntity&HasExternalIdInterface $entity): string
     {
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $metadata = $this->em->getClassMetadata($entity::class);
-        $primaryKeyColumn = $metadata->getIdentifierColumnNames()[0];
-
-        $data = [
-            'id' => $propertyAccessor->getValue($entity, $primaryKeyColumn),
-            'externalId' => null,
-        ];
-
-        if ($entity instanceof HasExternalIdInterface) {
-            $data['externalId'] = $entity->getExternalid();
-        }
+        $data = ['externalId' => $entity->getExternalid()];
 
         if ($entity instanceof Team) {
             $data['label'] = $entity->getLabel();
