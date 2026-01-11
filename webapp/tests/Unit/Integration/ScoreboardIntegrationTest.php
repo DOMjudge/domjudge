@@ -71,6 +71,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
             'score_in_seconds'         => false,
             'shadow_mode'              => 0,
             'show_teams_on_scoreboard' => 0,
+            'submission_rate_limit'    => [],
         ];
 
         $this->config = $this->createMock(ConfigurationService::class);

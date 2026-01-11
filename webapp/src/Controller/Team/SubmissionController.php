@@ -104,6 +104,9 @@ class SubmissionController extends BaseController
 
         $data = ['form' => $form->createView(), 'problem' => $problem];
         $data['validFilenameRegex'] = SubmissionService::FILENAME_REGEX;
+        if ($contest && $team) {
+            $data['rateLimitStatus'] = $this->submissionService->getRateLimitStatus($team, $contest);
+        }
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('team/submit_modal.html.twig', $data);
