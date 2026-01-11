@@ -14,15 +14,15 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotEqualTo;
 use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\NotEqualTo;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class JuryClarificationType extends AbstractType
 {
     public const RECIPIENT_MUST_SELECT = 'domjudge-must-select';
 
-    /** @var int The clarification entity id if the entity exists in the database */
+    /** @var string The clarification entity id if the entity exists in the database */
     private $clarid;
 
     public function __construct(
@@ -41,12 +41,12 @@ class JuryClarificationType extends AbstractType
 
         $limitToTeam = $options['limit_to_team'] ?? null;
         if ($limitToTeam) {
-            $recipientOptions[$this->getTeamLabel($limitToTeam)] = $limitToTeam->getTeamid();
+            $recipientOptions[$this->getTeamLabel($limitToTeam)] = $limitToTeam->getExternalid();
         } else {
             /** @var Team|null $limitToTeam */
             $teams = $this->dj->getTeamsForContest($this->dj->getCurrentContest());
             foreach ($teams as $team) {
-                $recipientOptions[$this->getTeamLabel($team)] = $team->getTeamid();
+                $recipientOptions[$this->getTeamLabel($team)] = $team->getExternalid();
             }
         }
 
@@ -57,7 +57,7 @@ class JuryClarificationType extends AbstractType
         $contest = $this->dj->getCurrentContest();
         $hasCurrentContest = $contest !== null;
         if ($hasCurrentContest) {
-            $contests = [$contest->getCid() => $contest];
+            $contests = [$contest->getExternalid() => $contest];
         } else {
             $contests = $this->dj->getCurrentContests();
         }
@@ -82,14 +82,14 @@ class JuryClarificationType extends AbstractType
                 };
             }
             foreach ($categories as $name => $desc) {
-                $subjectOptions["$namePrefix $desc"] = "$cid-$name";
+                $subjectOptions["$namePrefix $desc"] = $cid . Clarification::CATEGORY_BASED_SEPARATOR . $name;
             }
 
             foreach ($contestproblems as $cp) {
-                if ($cp->getCid() != $cid) {
+                if ($cp->getContest()->getExternalid() != $cid) {
                     continue;
                 }
-                $subjectOptions[$namePrefix . $cp->getShortname() . ': ' . $cp->getProblem()->getName()] = "$cid-" . $cp->getProbid();
+                $subjectOptions[$namePrefix . $cp->getShortname() . ': ' . $cp->getProblem()->getName()] = $cid . Clarification::PROBLEM_BASED_SEPARATOR . $cp->getProblem()->getExternalid();
             }
         }
 
@@ -141,7 +141,7 @@ class JuryClarificationType extends AbstractType
             $juryMember = $this->em->createQueryBuilder()
                 ->select('clar.jury_member')
                 ->from(Clarification::class, 'clar')
-                ->where('clar.clarid = :clarid')
+                ->where('clar.externalid = :clarid')
                 ->setParameter('clarid', $this->clarid)
                 ->getQuery()
                 ->getSingleResult()['jury_member'];

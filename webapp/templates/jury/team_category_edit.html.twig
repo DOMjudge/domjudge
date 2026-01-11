@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Edit category {{ teamCategory.categoryid }} - {{ parent() }}{% endblock %}
+{% block title %}Edit category {{ teamCategory.externalid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -11,7 +11,7 @@
 
 {% block content %}
 
-    <h1>Edit category {{ teamCategory.categoryid }}</h1>
+    <h1>Edit category {{ teamCategory.externalid }}</h1>
 
     {% include 'jury/partials/team_category_form.html.twig' %}
 

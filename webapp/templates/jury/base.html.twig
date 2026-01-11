@@ -27,6 +27,16 @@
         require.config({ paths: { vs: '{{ asset('js/monaco/vs') }}'.replace(/\?.*/, '') } });
         window.editorThemeFolder = '{{ asset('js/monaco/themes') }}'.replace(/\?.*/, '');
     </script>
+    {% if previousNext is defined %}
+        <script>
+            {% if previousNext.previous %}
+            window.previousEntity = '{{ previousNext.previous }}';
+            {% endif %}
+            {% if previousNext.next %}
+            window.nextEntity = '{{ previousNext.next }}';
+            {% endif %}
+        </script>
+    {% endif %}
     <script>
         $(function () {
             /* Show the notification options if the browser supports it */
@@ -107,26 +117,26 @@
         <br/>
 
         <code>d</code> <code>↵</code> switch diff viewer to no diff <br/>
-        <code>d</code> <code>[0-9]+</code> <code>↵</code> switch to diff against a submission, e.g. <code>d42↵</code> shows diff against submission 42 <br/>
+        <code>d</code> <code>[a-zA-Z0-9_.-]+</code> <code>↵</code> switch to diff against a submission, e.g. <code>d42↵</code> shows diff against submission 42 <br/>
         <br/>
 
         <code>s</code> <code>↵</code> open the list of submissions <br/>
-        <code>s</code> <code>[0-9]+</code> <code>↵</code> open a specific submission, e.g. <code>s42↵</code> to go to submission 42 <br/>
+        <code>s</code> <code>[a-zA-Z0-9_.-]+</code> <code>↵</code> open a specific submission, e.g. <code>s42↵</code> to go to submission 42 <br/>
         <br/>
 
         <code>t</code> <code>↵</code> open the list of teams <br/>
-        <code>t</code> <code>[0-9]+</code> <code>↵</code> open to a specific team <br/>
+        <code>t</code> <code>[a-zA-Z0-9_.-]+</code> <code>↵</code> open to a specific team <br/>
         <br/>
 
         <code>p</code> <code>↵</code> open the list of problems <br/>
-        <code>p</code> <code>[0-9]+</code> <code>↵</code> open a specific problem <br/>
+        <code>p</code> <code>[a-zA-Z0-9_.-]+</code> <code>↵</code> open a specific problem <br/>
         <br/>
 
         <code>c</code> <code>↵</code> open the list of clarifications <br/>
-        <code>c</code> <code>[0-9]+</code> <code>↵</code> open a specific clarification <br/>
+        <code>c</code> <code>[a-zA-Z0-9_.-]+</code> <code>↵</code> open a specific clarification <br/>
         <br/>
 
-        <code>Shift + j</code> <code>[0-9]+</code> <code>↵</code> open a specific judging <br/>
+        <code>Shift + j</code> <code>[a-zA-Z0-9_.-]+</code> <code>↵</code> open a specific judging <br/>
         <br/>
 
         <code>Shift + s</code> open the scoreboard<br/>

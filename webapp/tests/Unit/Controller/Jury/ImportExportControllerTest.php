@@ -130,7 +130,7 @@ problems:
         rgb: '#9B630C'
 
 HEREDOC;
-        yield ["1", $yaml];
+        yield ["demo", $yaml];
     }
 
     /**

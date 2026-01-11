@@ -86,8 +86,8 @@ class BalloonService
 
     /**
      * @return array<array{data: array{balloonid: int, time: string, problem: string, contestproblem: ContestProblem,
-     *                                 team: Team, teamid: int, location: string|null, affiliation: string|null,
-     *                                 affiliationid: int, category: string, categoryid: int, total: array<string, ContestProblem>,
+     *                                 team: Team, teamid: string, location: string|null, affiliation: string|null,
+     *                                 affiliationid: string, category: string, categoryid: string, total: array<string, ContestProblem>,
      *                                 done: bool}}>
     */
     public function collectBalloonTable(Contest $contest, bool $todo = false): array
@@ -100,11 +100,11 @@ class BalloonService
 
         $query = $em->createQueryBuilder()
             ->select('b', 's.submittime', 'p.probid',
-                't.teamid', 's', 't', 't.location',
-                'c.categoryid AS categoryid', 'c.name AS catname',
-                'co.cid', 'co.shortname',
+                't.externalid as teamid', 's', 't', 't.location',
+                'c.externalid AS categoryid', 'c.name AS catname',
+                'co.externalid as cid', 'co.shortname',
                 'cp.shortname AS probshortname', 'cp.color',
-                'a.affilid AS affilid', 'a.shortname AS affilshort')
+                'a.externalid AS affilid', 'a.shortname AS affilshort')
             ->from(Balloon::class, 'b')
             ->leftJoin('b.submission', 's')
             ->leftJoin('b.problem', 'p')
@@ -187,11 +187,11 @@ class BalloonService
      * Collect a summary of balloons per team, sorted by location (or external ID if no location).
      *
      * @param array<array{data: array{balloonid: int, time: string, problem: string, contestproblem: ContestProblem,
-     *                                team: Team, teamid: int, location: string|null, affiliation: string|null,
-     *                                affiliationid: int, category: string, categoryid: int, total: array<string, ContestProblem>,
+     *                                team: Team, teamid: string, location: string|null, affiliation: string|null,
+     *                                affiliationid: string, category: string, categoryid: string, total: array<string, ContestProblem>,
      *                                done: bool}}> $balloons
-     * @return array<int, array{team: Team, affiliation: string|null, affiliationid: int|null, location: string|null,
-     *                          category: string, categoryid: int, total: array<string, ContestProblem>}>
+     * @return array<string, array{team: Team, affiliation: string|null, affiliationid: string|null, location: string|null,
+     *                          category: string, categoryid: string, total: array<string, ContestProblem>}>
      */
     public function collectTeamBalloonSummary(array $balloons): array
     {

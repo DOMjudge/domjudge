@@ -4,7 +4,7 @@
         return filename.replace(/\.[^\.]*$/, '');
     }
 
-    function entryPointDetectKt(filename) {
+    function entryPointDetectKotlin(filename) {
         var filebase = filename.replace(/\.[^\.]*$/, '');
         if (filebase === '') return '_Kt';
 
@@ -47,8 +47,8 @@
                 case 'java':
                     $entryPointInput.val(entryPointDetectJava(filename));
                     break;
-                case 'kt':
-                    $entryPointInput.val(entryPointDetectKt(filename));
+                case 'kotlin':
+                    $entryPointInput.val(entryPointDetectKotlin(filename));
                     break;
                 default:
                     $entryPointInput.val(filename);

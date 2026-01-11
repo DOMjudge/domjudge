@@ -13,6 +13,7 @@ use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\Loader;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
@@ -66,7 +67,11 @@ abstract class BaseTestCase extends WebTestCase
             $this->fixtureExecutor = new ORMExecutor(static::getContainer()->get(EntityManagerInterface::class));
         }
 
-        $loader = new Loader();
+        // Use the Symfony fixture loader so the fixtures can be autowired as a service
+        $loader = static::getContainer()->get('doctrine.fixtures.loader');
+        // Use reflection on the base class to clear the enabled fixtures, so we can only add what we want
+        $loaderReflection = new ReflectionClass(Loader::class);
+        $loaderReflection->getProperty('fixtures')->setValue($loader, []);
         foreach ($fixtures as $fixture) {
             if (!is_subclass_of($fixture, FixtureInterface::class)) {
                 throw new Exception(sprintf('%s is not a fixture', $fixture));

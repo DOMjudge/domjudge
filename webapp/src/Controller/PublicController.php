@@ -74,7 +74,7 @@ class PublicController extends BaseController
 
             if ($requestedContest = $this->getContestFromRequest($contestId)) {
                 $contest                  = $requestedContest;
-                $refreshParams['contest'] = $contest->getCid();
+                $refreshParams['contest'] = $contest->getExternalid();
             }
 
             $refreshUrl = sprintf('?%s', http_build_query($refreshParams));
@@ -143,7 +143,7 @@ class PublicController extends BaseController
             } else {
                 // Find the contest with the given ID.
                 foreach ($this->dj->getCurrentContests(onlyPublic: true) as $possibleContest) {
-                    if ($possibleContest->getCid() == $contestId || $possibleContest->getExternalid() == $contestId) {
+                    if ($possibleContest->getExternalid() === $contestId) {
                         $contest = $possibleContest;
                         break;
                     }
@@ -158,20 +158,20 @@ class PublicController extends BaseController
         return $contest;
     }
 
-    #[Route(path: '/change-contest/{contestId<-?\d+>}', name: 'public_change_contest')]
-    public function changeContestAction(Request $request, RouterInterface $router, int $contestId): Response
+    #[Route(path: '/change-contest/{contestId}', name: 'public_change_contest')]
+    public function changeContestAction(Request $request, RouterInterface $router, string $contestId): Response
     {
         if ($this->isLocalReferer($router, $request)) {
             $response = new RedirectResponse($request->headers->get('referer'));
         } else {
             $response = $this->redirectToRoute('public_index');
         }
-        return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
+        return $this->dj->setCookie('domjudge_cid', $contestId, 0, null, '', false, false,
                                                  $response);
     }
 
-    #[Route(path: '/team/{teamId<\d+>}', name: 'public_team')]
-    public function teamAction(Request $request, int $teamId): Response
+    #[Route(path: '/team/{teamId}', name: 'public_team')]
+    public function teamAction(Request $request, string $teamId): Response
     {
         /** @var Team|null $team */
         $team = $this->em->createQueryBuilder()
@@ -179,7 +179,7 @@ class PublicController extends BaseController
                          ->innerJoin('t.categories', 'tc')
                          ->select('t, tc')
                          ->andWhere('tc.visible = 1')
-                         ->andWhere('t.teamid = :teamId')
+                         ->andWhere('t.externalid = :teamId')
                          ->setParameter('teamId', $teamId)
                          ->getQuery()
                          ->getOneOrNullResult();
@@ -211,11 +211,11 @@ class PublicController extends BaseController
             $this->dj->getTwigDataForProblemsAction($this->stats));
     }
 
-    #[Route(path: '/problems/{probId<\d+>}/statement', name: 'public_problem_statement')]
-    public function problemStatementAction(int $probId): StreamedResponse
+    #[Route(path: '/problems/{probId}/statement', name: 'public_problem_statement')]
+    public function problemStatementAction(string $probId): StreamedResponse
     {
         return $this->getBinaryFile($probId, function (
-            int $probId,
+            string $probId,
             Contest $contest,
             ContestProblem $contestProblem
         ) {
@@ -243,20 +243,20 @@ class PublicController extends BaseController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route(path: '/{probId<\d+>}/attachment/{attachmentId<\d+>}', name: 'public_problem_attachment')]
-    public function attachmentAction(int $probId, int $attachmentId): StreamedResponse
+    #[Route(path: '/{probId}/attachment/{attachmentId<\d+>}', name: 'public_problem_attachment')]
+    public function attachmentAction(string $probId, int $attachmentId): StreamedResponse
     {
         return $this->getBinaryFile($probId, fn(
-            int $probId,
+            string $probId,
             Contest $contest,
             ContestProblem $contestProblem
         ) => $this->dj->getAttachmentStreamedResponse($contestProblem, $attachmentId));
     }
 
-    #[Route(path: '/{probId<\d+>}/samples.zip', name: 'public_problem_sample_zip')]
-    public function sampleZipAction(int $probId): StreamedResponse
+    #[Route(path: '/{probId}/samples.zip', name: 'public_problem_sample_zip')]
+    public function sampleZipAction(string $probId): StreamedResponse
     {
-        return $this->getBinaryFile($probId, function (int $probId, Contest $contest, ContestProblem $contestProblem) {
+        return $this->getBinaryFile($probId, function (string $probId, Contest $contest, ContestProblem $contestProblem) {
             return $this->dj->getSamplesZipStreamedResponse($contestProblem);
         });
     }
@@ -266,16 +266,13 @@ class PublicController extends BaseController
      *
      * Shared code between testcases, problem text and attachments.
      */
-    protected function getBinaryFile(int $probId, callable $response): StreamedResponse
+    protected function getBinaryFile(string $probId, callable $response): StreamedResponse
     {
         $contest = $this->dj->getCurrentContest(onlyPublic: true);
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
-        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-            'problem' => $probId,
-            'contest' => $contest,
-        ]);
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->findByProblemAndContest($contest, $probId);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -293,7 +290,7 @@ class PublicController extends BaseController
         }
 
         /** @var Team|null $team */
-        $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
+        $team = $this->em->getRepository(Team::class)->findByExternalId($teamId);
         if ($team && $team->getScoringCategory() && !$team->getScoringCategory()->getVisible()) {
             $team = null;
         }
@@ -387,7 +384,7 @@ class PublicController extends BaseController
             }
             $submissionData[$teamKey][$problemKey][] = [
                 'time' => $this->twigExtension->printtime($submission->getSubmittime(), contest: $contest),
-                'language' => $submission->getLanguageId(),
+                'language' => $submission->getLanguage()->getName(),
                 'verdict' => $this->submissionVerdict($submission, $contest, $verificationRequired),
             ];
         }

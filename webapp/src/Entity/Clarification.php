@@ -2,6 +2,7 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
+use App\Repository\ClarificationRepository;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -13,7 +14,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * Clarification requests by teams and responses by the jury.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ClarificationRepository::class)]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -36,11 +37,13 @@ class Clarification extends BaseApiEntity implements
     ExternalIdFromInternalIdInterface,
     PrefixedExternalIdInShadowModeInterface
 {
+    public const CATEGORY_BASED_SEPARATOR = '#';
+    public const PROBLEM_BASED_SEPARATOR = '|';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(options: ['comment' => 'Clarification ID', 'unsigned' => true])]
-    #[Serializer\SerializedName('clarid')]
-    #[Serializer\Groups([ARC::GROUP_RESTRICTED_NONSTRICT])]
+    #[Serializer\Exclude]
     protected int $clarid;
 
     #[ORM\Column(

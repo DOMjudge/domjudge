@@ -16,7 +16,7 @@ class ClarificationControllerTest extends BaseTestCase
         $this->client->click($link);
 
         $this->client->submitForm('Send', [
-            'team_clarification[subject]' => '1-3',
+            'team_clarification[subject]' => 'demo|boolfind',
             'team_clarification[message]' => "I don't understand this problem",
         ]);
 

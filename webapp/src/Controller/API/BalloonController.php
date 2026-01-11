@@ -59,14 +59,14 @@ class BalloonController extends AbstractApiController
         foreach ($balloonsData as $b) {
             /** @var Team $team */
             $team = $b['data']['team'];
-            $teamName = "t" . $team->getTeamid() . ": " . $team->getEffectiveName();
+            $teamName = $team->getExternalid() . ": " . $team->getEffectiveName();
             $balloons[] = new Balloon(
                 balloonid: $b['data']['balloonid'],
                 time: $b['data']['time'],
                 problem: $b['data']['problem'],
                 contestproblem: $b['data']['contestproblem'],
                 team: $teamName,
-                teamid: $team->getTeamid(),
+                teamid: $team->getExternalid(),
                 location: $b['data']['location'],
                 affiliation: $b['data']['affiliation'],
                 affiliationid: $b['data']['affiliationid'],

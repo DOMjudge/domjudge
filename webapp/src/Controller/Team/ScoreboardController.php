@@ -59,8 +59,8 @@ class ScoreboardController extends BaseController
         return $this->render('team/scoreboard.html.twig', $data, $response);
     }
 
-    #[Route(path: '/team/{teamId<\d+>}', name: 'team_team')]
-    public function teamAction(Request $request, int $teamId): Response
+    #[Route(path: '/team/{teamId}', name: 'team_team')]
+    public function teamAction(Request $request, string $teamId): Response
     {
         if (!$this->config->get('enable_ranking')) {
             throw new BadRequestHttpException('Scoreboard is not available.');
@@ -72,11 +72,11 @@ class ScoreboardController extends BaseController
                          ->innerJoin('t.categories', 'tc')
                          ->select('t, tc')
                          ->andWhere('tc.visible = 1')
-                         ->andWhere('t.teamid = :teamId')
+                         ->andWhere('t.externalid = :teamId')
                          ->setParameter('teamId', $teamId)
                          ->getQuery()
                          ->getOneOrNullResult();
-        if ($team?->getHidden() && $teamId !== $this->dj->getUser()->getTeamId()) {
+        if ($team?->getHidden() && $teamId !== $this->dj->getUser()->getTeam()->getExternalid()) {
             $team = null;
         }
         $showFlags        = (bool)$this->config->get('show_flags');

@@ -32,7 +32,7 @@
             </p>
             <form action="{{ path('jury_refresh_cache') }}" method="post">
                 {% if current_contest is not empty %}
-                    <input type="hidden" name="cid" value="{{ current_contest.cid }}"/>
+                    <input type="hidden" name="cid" value="{{ current_contest.externalid }}"/>
                 {% endif %}
                 <button type="submit" class="btn btn-danger" name="refresh">
                     <i class="fas fa-sync-alt"></i> Refresh now!
@@ -46,7 +46,7 @@
     {% if doRefresh %}
         {% set progressUrl = path('jury_refresh_cache') %}
         {% if current_contest is not empty %}
-            {% set progressUrl = progressUrl ~ '?cid=' ~ current_contest.cid %}
+            {% set progressUrl = progressUrl ~ '?cid=' ~ current_contest.externalid %}
         {% endif %}
         {{ macros.progress_loader(progressUrl) }}
     {% endif %}

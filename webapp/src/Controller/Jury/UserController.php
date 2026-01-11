@@ -62,7 +62,7 @@ class UserController extends BaseController
 
         $table_fields = [
             'username'   => ['title' => 'username', 'sort' => true, 'default_sort' => true],
-            'externalid' => ['title' => 'external ID', 'sort' => true],
+            'externalid' => ['title' => 'ID', 'sort' => true],
             'name'       => ['title' => 'name', 'sort' => true],
             'email'      => ['title' => 'email', 'sort' => true],
             'user_roles' => ['title' => 'roles', 'sort' => true],
@@ -86,7 +86,7 @@ class UserController extends BaseController
             $userdata    = [];
             $useractions = [];
 
-            $this->addEntityCheckbox($userdata, $u, $u->getUserid(), 'user-checkbox', fn(User $user) => $user->getUserid() !== $this->dj->getUser()->getUserid());
+            $this->addEntityCheckbox($userdata, $u, $u->getExternalid(), 'user-checkbox', fn(User $user) => $user->getUserid() !== $this->dj->getUser()->getUserid());
 
             // Get whatever fields we can from the user object itself.
             foreach ($table_fields as $k => $v) {
@@ -105,13 +105,12 @@ class UserController extends BaseController
             if ($u->getTeam()) {
                 $userdata['teamid'] = [
                     'value' => $u->getTeam(),
-                    'idPrefix' => 't',
                 ];
                 $userdata['team'] = [
                     'value' => $u->getTeamName(),
-                    'sortvalue' => $u->getTeam()->getTeamid(),
+                    'sortvalue' => $u->getTeam()->getExternalid(),
                     'link' => $this->generateUrl('jury_team', [
-                        'teamId' => $u->getTeam()->getTeamid(),
+                        'teamId' => $u->getTeam()->getExternalid(),
                     ]),
                     'title' => $u->getTeam()->getEffectiveName(),
                 ];
@@ -139,14 +138,14 @@ class UserController extends BaseController
                     'icon' => 'edit',
                     'title' => 'edit this user',
                     'link' => $this->generateUrl('jury_user_edit', [
-                        'userId' => $u->getUserid(),
+                        'userId' => $u->getExternalid(),
                     ])
                 ];
                 $useractions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this user',
                     'link' => $this->generateUrl('jury_user_delete', [
-                        'userId' => $u->getUserid(),
+                        'userId' => $u->getExternalid(),
                     ]),
                     'ajaxModal' => true,
                 ];
@@ -164,7 +163,7 @@ class UserController extends BaseController
             $users_table[] = [
                 'data' => $userdata,
                 'actions' => $useractions,
-                'link' => $this->generateUrl('jury_user', ['userId' => $u->getUserid()]),
+                'link' => $this->generateUrl('jury_user', ['userId' => $u->getExternalid()]),
                 'cssclass' => $u->getEnabled() ? '' : 'disabled',
             ];
         }
@@ -175,10 +174,10 @@ class UserController extends BaseController
         ]);
     }
 
-    #[Route(path: '/{userId<\d+>}', name: 'jury_user')]
-    public function viewAction(Request $request, int $userId, SubmissionService $submissionService): Response
+    #[Route(path: '/{userId}', name: 'jury_user')]
+    public function viewAction(Request $request, string $userId, SubmissionService $submissionService): Response
     {
-        $user = $this->em->getRepository(User::class)->find($userId);
+        $user = $this->em->getRepository(User::class)->findByExternalId($userId);
         if (!$user) {
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
@@ -192,13 +191,18 @@ class UserController extends BaseController
 
         return $this->render('jury/user.html.twig', [
             'user' => $user,
+            'previousNext' => $this->getPreviousAndNextObjectIds(
+                User::class,
+                $user->getExternalid(),
+                orderBy: ['e.username' => 'ASC'],
+            ),
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($this->dj->getCurrentContests(honorCookie: true)) > 1,
             'showExternalResult' => $this->dj->shadowMode(),
             'refresh' => [
                 'after' => 3,
-                'url' => $this->generateUrl('jury_user', ['userId' => $user->getUserid()]),
+                'url' => $this->generateUrl('jury_user', ['userId' => $userId]),
                 'ajax' => true,
             ],
         ]);
@@ -219,10 +223,10 @@ class UserController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{userId<\d+>}/edit', name: 'jury_user_edit')]
-    public function editAction(Request $request, int $userId): Response
+    #[Route(path: '/{userId}/edit', name: 'jury_user_edit')]
+    public function editAction(Request $request, string $userId): Response
     {
-        $user = $this->em->getRepository(User::class)->find($userId);
+        $user = $this->em->getRepository(User::class)->findByExternalId($userId);
         if (!$user) {
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
@@ -248,7 +252,7 @@ class UserController extends BaseController
                 $this->tokenStorage->setToken($token);
             }
 
-            return $this->redirectToRoute('jury_user', ['userId' => $user->getUserid()]);
+            return $this->redirectToRoute('jury_user', ['userId' => $userId]);
         }
 
         return $this->render('jury/user_edit.html.twig', [
@@ -258,10 +262,10 @@ class UserController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{userId<\d+>}/delete', name: 'jury_user_delete')]
-    public function deleteAction(Request $request, int $userId): Response
+    #[Route(path: '/{userId}/delete', name: 'jury_user_delete')]
+    public function deleteAction(Request $request, string $userId): Response
     {
-        $user = $this->em->getRepository(User::class)->find($userId);
+        $user = $this->em->getRepository(User::class)->findByExternalId($userId);
         if (!$user) {
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
@@ -270,7 +274,7 @@ class UserController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/add', name: 'jury_user_add')]
+    #[Route(path: '/add', name: 'jury_user_add', priority: 1)]
     public function addAction(
         Request $request,
         #[MapQueryParameter]
@@ -287,7 +291,7 @@ class UserController extends BaseController
 
         if ($response = $this->processAddFormForExternalIdEntity(
             $form, $user,
-            fn() => $this->generateUrl('jury_user', ['userId' => $user->getUserid()]),
+            fn() => $this->generateUrl('jury_user', ['userId' => $user->getExternalid()]),
             function () use ($user, $form) {
                 if ($errorResult = $this->checkPasswordLength($user, $form)) {
                     return $errorResult;
@@ -307,7 +311,7 @@ class UserController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/generate-passwords', name: 'jury_generate_passwords')]
+    #[Route(path: '/generate-passwords', name: 'jury_generate_passwords', priority: 1)]
     public function generatePasswordsAction(Request $request): Response
     {
         $form = $this->createForm(GeneratePasswordsType::class);
@@ -345,7 +349,7 @@ class UserController extends BaseController
                 if ($doit) {
                     $newpass = Utils::generatePassword(false);
                     $user->setPlainPassword($newpass);
-                    $this->dj->auditlog('user', $user->getUserid(), 'set password');
+                    $this->dj->auditlog('user', $user->getExternalid(), 'set password');
                     $changes[] = [
                             'type' => $role,
                             'fullname' => $user->getName(),
@@ -372,7 +376,7 @@ class UserController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/reset_login_status', name: 'jury_reset_login_status')]
+    #[Route(path: '/reset_login_status', name: 'jury_reset_login_status', priority: 1)]
     public function resetTeamLoginStatus(Request $request): Response
     {
         /** @var Role $teamRole */
@@ -393,13 +397,13 @@ class UserController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/delete-multiple', name: 'jury_user_delete_multiple', methods: ['GET', 'POST'])]
+    #[Route(path: '/delete-multiple', name: 'jury_user_delete_multiple', methods: ['GET', 'POST'], priority: 1)]
     public function deleteMultipleAction(Request $request): Response
     {
         return $this->deleteMultiple(
             $request,
             User::class,
-            'userid',
+            'externalid',
             'jury_users',
             'No users could be deleted (you cannot delete your own account).',
             fn(User $user) => $user->getUserid() !== $this->dj->getUser()->getUserid()

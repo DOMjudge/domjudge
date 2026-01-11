@@ -2,6 +2,7 @@
 
 namespace App\Form\Type;
 
+use App\Entity\Clarification;
 use App\Entity\ContestProblem;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -32,7 +33,7 @@ class TeamClarificationType extends AbstractType
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         if ($contest) {
             foreach ($categories as $categoryId => $categoryName) {
-                $subjects[$categoryName] = sprintf('%d-%s', $contest->getCid(), $categoryId);
+                $subjects[$categoryName] = sprintf('%s%s%s', $contest->getExternalid(), Clarification::PROBLEM_BASED_SEPARATOR, $categoryId);
             }
             if ($contest->getFreezeData()->started()) {
                 /** @var ContestProblem $problem */
@@ -40,7 +41,7 @@ class TeamClarificationType extends AbstractType
                     if ($problem->getAllowSubmit()) {
                         $problemName = sprintf('%s: %s', $problem->getShortname(),
                             $problem->getProblem()->getName());
-                        $subjects[$problemName] = sprintf('%d-%d', $contest->getCid(), $problem->getProbid());
+                        $subjects[$problemName] = sprintf('%s%s%s', $contest->getExternalid(), Clarification::PROBLEM_BASED_SEPARATOR, $problem->getExternalId());
                     }
                 }
             }

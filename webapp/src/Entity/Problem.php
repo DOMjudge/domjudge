@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\DataTransferObject\FileWithName;
+use App\Repository\ProblemRepository;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -18,7 +19,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Stores testcases per problem.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ProblemRepository::class)]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
