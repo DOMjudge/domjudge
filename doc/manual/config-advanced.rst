@@ -223,18 +223,16 @@ To allow for problems that do not fit within the standard scheme of
 fixed input and/or output, DOMjudge has the possibility to change the
 way submissions are run and checked for correctness.
 
-The back end script ``testcase_run.sh`` that handles
-the running and checking of submissions, calls separate programs
-for running submissions and comparison of the results. These can be
-specialised and adapted to the requirements per problem. For this, one
+The judgedaemon that handles the running and checking of submissions, calls
+separate programs for running submissions and comparison of the results. These
+can be specialised and adapted to the requirements per problem. For this, one
 has to create executable archives as described above.
-Then the executable must be
-selected in the ``special_run`` and/or ``special_compare``
-fields of the problem (an empty value means that the default run and
-compare scripts should be used; the defaults can be set in the global
-configuration settings). When creating custom run and compare
-programs, we recommend reusing wrapper scripts that handle the
-tedious, standard part. See the boolfind example for details.
+Then the executable must be selected in the ``special_run`` and/or
+``special_compare`` fields of the problem (an empty value means that the
+default run and compare scripts should be used; the defaults can be set in the
+global configuration settings). When creating custom run and compare programs,
+we recommend reusing wrapper scripts that handle the tedious, standard part.
+See the boolfind example for details.
 
 Compare programs
 ----------------
@@ -257,8 +255,7 @@ output. The validator program should not make any assumptions on its
 working directory.
 
 For more details on writing and modifying a compare (or validator)
-script, see the ``boolfind_cmp`` example and the comments at the
-top of the file ``testcase_run.sh``.
+script, see the ``boolfind_cmp`` example.
 
 Run programs
 ------------

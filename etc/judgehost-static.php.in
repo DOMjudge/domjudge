@@ -20,7 +20,7 @@ define('CHROOTDIR',   '@judgehost_chrootdir@');
 define('RUNUSER',     '@RUNUSER@');
 define('RUNGROUP',    '@RUNGROUP@');
 
-// Possible exitcodes from testcase_run.sh and their meaning.
+// Possible exitcodes from compile scripts and their meaning.
 $EXITCODES = array (
     0   => 'correct',
     101 => 'compiler-error',
