@@ -22,7 +22,7 @@
             <tr class="{% if team.unreadClarifications.contains(clarification) %}unseen{% endif %}">
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}">
-                        {{ clarification.submittime | printtime(null, clarification.contest) }}
+                        {{ clarification.submittime | printtime(null, clarification.contest, true) }}
                     </a>
                 </td>
 
