@@ -8,6 +8,7 @@
 
 import java.lang.reflect.*;
 import java.net.*;
+import java.nio.file.*;
 
 public class DetectMain {
 	public static void main ( String[] args ) {
@@ -22,8 +23,8 @@ public class DetectMain {
 		// Load classes from specific directory
 		URL dir;
 		try {
-			dir = new URL("file://" + args[0] + "/");
-		} catch ( MalformedURLException e ) {
+			dir = Paths.get(args[0]).toUri().toURL();
+		} catch ( Exception e ) {
 			System.err.println("Error: malformed directory '" + args[0] + "'");
 			System.exit(1);
 			return;
