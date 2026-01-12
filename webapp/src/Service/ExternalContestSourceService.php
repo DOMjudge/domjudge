@@ -23,7 +23,7 @@ use App\Entity\BaseApiEntity;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
-use App\Entity\ExternalContestSource;
+use App\Entity\ExternalContestSourceType;
 use App\Entity\ExternalJudgement;
 use App\Entity\ExternalRun;
 use App\Entity\ExternalSourceWarning;
@@ -72,7 +72,7 @@ class ExternalContestSourceService
 {
     protected HttpClientInterface $httpClient;
 
-    protected ?ExternalContestSource $source = null;
+    protected ?Contest $contest = null;
 
     protected LoggerInterface $logger;
 
@@ -145,9 +145,9 @@ class ExternalContestSourceService
         $this->httpClient = $httpClient->withOptions($clientOptions);
     }
 
-    public function setSource(ExternalContestSource $source): void
+    public function setSourceContest(Contest $contest): void
     {
-        $this->source = $source;
+        $this->contest = $contest;
     }
 
     public function getSourceContest(): Contest
@@ -156,7 +156,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->source->getContest();
+        return $this->contest;
     }
 
     public function getSourceContestId(): int
@@ -165,7 +165,7 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        return $this->source->getContest()->getCid();
+        return $this->contest->getCid();
     }
 
     public function isValidContestSource(): bool
@@ -277,12 +277,12 @@ class ExternalContestSourceService
             throw new LogicException('The contest source is not valid');
         }
 
-        // We use a direct query to not have to reload the source.
+        // We use a direct query to not have to reload the contest.
         return $this->em->createQuery(
-            'SELECT ecs.lastEventId
-                FROM App\Entity\ExternalContestSource ecs
-                WHERE ecs.extsourceid = :extsourceid')
-                        ->setParameter('extsourceid', $this->source->getExtsourceid())
+            'SELECT c.externalSourceLastEventId
+                FROM App\Entity\Contest c
+                WHERE c.cid = :cid')
+                        ->setParameter('cid', $this->contest->getCid())
                         ->getSingleScalarResult();
     }
 
@@ -304,14 +304,14 @@ class ExternalContestSourceService
             $this->setLastEvent(null);
         } else {
             // We do this to mark the reader active.
-            $this->setLastEvent($this->source->getLastEventId());
+            $this->setLastEvent($this->contest->getExternalSourceLastEventId());
         }
 
         $this->loadPendingEvents();
-        return match ($this->source->getType()) {
-            ExternalContestSource::TYPE_CCS_API => $this->importFromCcsApi($eventsToSkip, $progressReporter),
-            ExternalContestSource::TYPE_CONTEST_PACKAGE => $this->importFromContestArchive($eventsToSkip, $progressReporter),
-            default => false,
+        return match ($this->contest->getExternalSourceType()) {
+            ExternalContestSourceType::CCS_API => $this->importFromCcsApi($eventsToSkip, $progressReporter),
+            ExternalContestSourceType::CONTEST_PACKAGE => $this->importFromContestArchive($eventsToSkip, $progressReporter),
+            null => throw new LogicException('External source type is not set'),
         };
     }
 
@@ -331,13 +331,13 @@ class ExternalContestSourceService
         // take more queries.
         $this->em
             ->createQuery(
-                'UPDATE App\Entity\ExternalContestSource ecs
-                SET ecs.lastEventId = :lastEventId, ecs.lastPollTime = :lastPollTime
-                WHERE ecs.extsourceid = :extsourceid'
+                'UPDATE App\Entity\Contest c
+                SET c.externalSourceLastEventId = :lastEventId, c.externalSourceLastPollTime = :lastPollTime
+                WHERE c.cid = :cid'
             )
             ->setParameter('lastEventId', $eventId)
             ->setParameter('lastPollTime', Utils::now())
-            ->setParameter('extsourceid', $this->source->getExtsourceid())
+            ->setParameter('cid', $this->contest->getCid())
             ->execute();
     }
 
@@ -355,7 +355,7 @@ class ExternalContestSourceService
                 return true;
             }
 
-            $fullUrl = $this->source->getSource() . '/event-feed';
+            $fullUrl = $this->contest->getExternalSourceSource() . '/event-feed';
             if ($this->getLastReadEventId() !== null) {
                 // Pass both since_id and since_token to support both versions of the event feed
                 $fullUrl .= '?since_id=' . $this->getLastReadEventId();
@@ -363,7 +363,7 @@ class ExternalContestSourceService
             }
             $response = $this->httpClient->request('GET', $fullUrl, ['buffer' => false]);
             $statusCode = $response->getStatusCode();
-            $this->source->setLastHTTPCode($statusCode);
+            $this->contest->setExternalSourceLastHttpCode($statusCode);
             $this->em->flush();
             if ($statusCode !== 200) {
                 $this->logger->warning(
@@ -462,7 +462,12 @@ class ExternalContestSourceService
      */
     protected function importFromContestArchive(array $eventsToSkip, ?callable $progressReporter = null): bool
     {
-        $file = fopen($this->source->getSource() . '/event-feed.ndjson', 'r');
+        $file = fopen($this->contest->getExternalSourceSource() . '/event-feed.ndjson', 'r');
+
+        if ($file === false) {
+            $this->logger->error('Could not open event feed file: %s', [$this->contest->getExternalSourceSource() . '/event-feed.ndjson']);
+            return false;
+        }
 
         $skipEventsUpTo = $this->getLastReadEventId();
 
@@ -541,18 +546,18 @@ class ExternalContestSourceService
 
     protected function loadContest(): void
     {
-        if ($this->source === null) {
-            throw new LogicException('You need to call setSource() first');
+        if ($this->contest === null) {
+            throw new LogicException('You need to call setSourceContest() first');
         }
         if ($this->contestLoaded) {
             return;
         }
-        switch ($this->source->getType()) {
-            case ExternalContestSource::TYPE_CCS_API:
+        switch ($this->contest->getExternalSourceType()) {
+            case ExternalContestSourceType::CCS_API:
                 try {
                     // The base URL is the URL of the CCS API root.
                     if (preg_match('/^(.*\/)contests\/.*/',
-                                   $this->source->getSource(), $matches) === 0) {
+                                   $this->contest->getExternalSourceSource(), $matches) === 0) {
                         $this->loadingError      = 'Cannot determine base URL. Did you pass a CCS API contest URL?';
                         $this->cachedContestData = null;
                     } else {
@@ -560,17 +565,17 @@ class ExternalContestSourceService
                             'base_uri' => $matches[1],
                         ];
                         $this->basePath = $matches[1];
-                        if ($this->source->getUsername()) {
-                            $auth = [$this->source->getUsername()];
-                            if (is_string($this->source->getPassword())) {
-                                $auth[] = $this->source->getPassword();
+                        if ($this->contest->getExternalSourceUsername()) {
+                            $auth = [$this->contest->getExternalSourceUsername()];
+                            if (is_string($this->contest->getExternalSourcePassword())) {
+                                $auth[] = $this->contest->getExternalSourcePassword();
                             }
                             $clientOptions['auth_basic'] = $auth;
                         } else {
                             $clientOptions['auth_basic'] = null;
                         }
                         $this->httpClient = $this->httpClient->withOptions($clientOptions);
-                        $contestResponse = $this->httpClient->request('GET', $this->source->getSource());
+                        $contestResponse = $this->httpClient->request('GET', $this->contest->getExternalSourceSource());
                         $this->cachedContestData = $this->serializer->deserialize($contestResponse->getContent(), ContestData::class, 'json');
 
                         $apiInfoResponse = $this->httpClient->request('GET', '');
@@ -583,12 +588,12 @@ class ExternalContestSourceService
                 }
                 $this->contestLoaded = true;
                 break;
-            case ExternalContestSource::TYPE_CONTEST_PACKAGE:
+            case ExternalContestSourceType::CONTEST_PACKAGE:
                 $this->cachedContestData = null;
-                $contestFile = $this->source->getSource() . '/contest.json';
-                $eventFeedFile = $this->source->getSource() . '/event-feed.ndjson';
-                $apiInfoFile = $this->source->getSource() . '/api.json';
-                if (!is_dir($this->source->getSource())) {
+                $contestFile = $this->contest->getExternalSourceSource() . '/contest.json';
+                $eventFeedFile = $this->contest->getExternalSourceSource() . '/event-feed.ndjson';
+                $apiInfoFile = $this->contest->getExternalSourceSource() . '/api.json';
+                if (!is_dir($this->contest->getExternalSourceSource())) {
                     $this->loadingError = 'Contest package directory not found';
                 } elseif (!is_file($contestFile)) {
                     $this->loadingError = 'contest.json not found in archive';
@@ -829,7 +834,7 @@ class ExternalContestSourceService
         }
 
         // Entity doesn't matter, since we do not compare anything besides the extra data
-        $this->compareOrCreateValues($event, $data->id, $this->source->getContest(), [], $extraDiff, false);
+        $this->compareOrCreateValues($event, $data->id, $this->contest, [], $extraDiff, false);
     }
 
     /**
@@ -1479,11 +1484,11 @@ class ExternalContestSourceService
                     $zipUrl = ($this->basePath ?? '') . $zipUrl;
                 }
 
-                if ($this->source->getType() === ExternalContestSource::TYPE_CONTEST_PACKAGE && $data->files[0]->filename) {
-                    $zipUrl = $this->source->getSource() . '/submissions/' . $data->id . '/' . $data->files[0]->filename;
+                if ($this->contest->getExternalSourceType() === ExternalContestSourceType::CONTEST_PACKAGE && $data->files[0]->filename) {
+                    $zipUrl = $this->contest->getExternalSourceSource() . '/submissions/' . $data->id . '/' . $data->files[0]->filename;
                     if (!file_exists($zipUrl)) {
                         // Common case: submissions are in submissions/<id>.zip
-                        $zipUrl = $this->source->getSource() . '/submissions/' . $data->id . '.zip';
+                        $zipUrl = $this->contest->getExternalSourceSource() . '/submissions/' . $data->id . '.zip';
                     }
                 }
 
@@ -1954,9 +1959,9 @@ class ExternalContestSourceService
         $warning = $this->em
             ->getRepository(ExternalSourceWarning::class)
             ->findOneBy([
-                            'externalContestSource' => $this->source,
-                            'hash'                  => $hash,
-                        ]);
+                'contest' => $this->contest,
+                'hash'    => $hash,
+            ]);
 
         $dependencies = [];
         if ($warning) {
@@ -1990,9 +1995,9 @@ class ExternalContestSourceService
         $warnings = $this->em
             ->getRepository(ExternalSourceWarning::class)
             ->findBy([
-                         'externalContestSource' => $this->source,
-                         'type'                  => ExternalSourceWarning::TYPE_DEPENDENCY_MISSING,
-                     ]);
+                'contest' => $this->contest,
+                'type'    => ExternalSourceWarning::TYPE_DEPENDENCY_MISSING,
+            ]);
         foreach ($warnings as $warning) {
             $dependencies = $warning->getContent()['dependencies'];
             foreach ($dependencies as $dependency) {
@@ -2135,15 +2140,15 @@ class ExternalContestSourceService
         $hash    = ExternalSourceWarning::calculateHash($type, $event->type->value, $entityId);
         $warning = $this->em
             ->getRepository(ExternalSourceWarning::class)
-            ->findOneBy(['externalContestSource' => $this->source, 'hash' => $hash]);
+            ->findOneBy(['contest' => $this->contest, 'hash' => $hash]);
         if (!$warning) {
             $warning = new ExternalSourceWarning();
-            // Reload the source since the entity manager might have lost it.
-            $this->source = $this->em
-                ->getRepository(ExternalContestSource::class)
-                ->find($this->source->getExtsourceid());
+            // Reload the contest since the entity manager might have lost it.
+            $this->contest = $this->em
+                ->getRepository(Contest::class)
+                ->find($this->contest->getCid());
             $warning
-                ->setExternalContestSource($this->source)
+                ->setContest($this->contest)
                 ->setType($type)
                 ->setEntityType($event->type->value)
                 ->setEntityId($entityId);
@@ -2163,7 +2168,7 @@ class ExternalContestSourceService
         $hash = ExternalSourceWarning::calculateHash($type, $eventType->value, $entityId);
         $warning = $this->em
             ->getRepository(ExternalSourceWarning::class)
-            ->findOneBy(['externalContestSource' => $this->source, 'hash' => $hash]);
+            ->findOneBy(['contest' => $this->contest, 'hash' => $hash]);
         if ($warning) {
             $this->em->remove($warning);
             $this->em->flush();

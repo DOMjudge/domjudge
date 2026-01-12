@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 ])]
 #[ORM\UniqueConstraint(
     name: 'hash',
-    columns: ['extsourceid', 'hash'],
+    columns: ['cid', 'hash'],
     options: ['lengths' => [null, 190]]
 )]
 #[ORM\HasLifecycleCallbacks]
@@ -61,9 +61,9 @@ class ExternalSourceWarning
     )]
     private array $content;
 
-    #[ORM\ManyToOne(inversedBy: 'warnings')]
-    #[ORM\JoinColumn(name: 'extsourceid', referencedColumnName: 'extsourceid', onDelete: 'CASCADE')]
-    private ExternalContestSource $externalContestSource;
+    #[ORM\ManyToOne(inversedBy: 'externalSourceWarnings')]
+    #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
+    private Contest $contest;
 
     public function getExtwarningid(): ?int
     {
@@ -153,14 +153,14 @@ class ExternalSourceWarning
         return $this;
     }
 
-    public function getExternalContestSource(): ExternalContestSource
+    public function getContest(): Contest
     {
-        return $this->externalContestSource;
+        return $this->contest;
     }
 
-    public function setExternalContestSource(ExternalContestSource $externalContestSource): ExternalSourceWarning
+    public function setContest(Contest $contest): ExternalSourceWarning
     {
-        $this->externalContestSource = $externalContestSource;
+        $this->contest = $contest;
         return $this;
     }
 

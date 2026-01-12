@@ -43,6 +43,27 @@
             {{ form_row(form.clearContestProblemset) }}
         {% endif %}
         {{ form_row(form.warningMessage) }}
+        <div id="externalSourceEnabled">
+            {{ form_row(form.externalSourceEnabled) }}
+        </div>
+        <div data-external-source-field>
+            {{ form_row(form.externalSourceUseJudgements) }}
+            {{ form_row(form.externalSourceType) }}
+            {{ form_row(form.externalSourceSource) }}
+            <div data-external-source-ccs-api>
+                {{ form_row(form.externalSourceUsername) }}
+                <div class="mb-3">
+                    {{ form_label(form.externalSourcePassword) }}
+                    <div class="input-group">
+                        {{ form_widget(form.externalSourcePassword) }}
+                        <button class="btn btn-outline-secondary" type="button" data-show-hide-password>
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                    {{ form_help(form.externalSourcePassword) }}
+                </div>
+            </div>
+        </div>
     </div>
     <div class="col-lg-6">
         <h5>Specification of contest times</h5>
@@ -157,5 +178,41 @@
 
         $('#contest_medalsEnabled_1, #contest_medalsEnabled_0').on('change', showHideMedals);
         showHideMedals();
+
+        function showHideExternalSource() {
+            if ($('#contest_externalSourceEnabled_0').is(':checked')) {
+                $('[data-external-source-field]').show();
+            } else {
+                $('[data-external-source-field]').hide();
+            }
+        }
+
+        $('#contest_externalSourceEnabled_1, #contest_externalSourceEnabled_0').on('change', showHideExternalSource);
+        showHideExternalSource();
+
+        var $externalSourceType = $('#contest_externalSourceType');
+        function showHideExternalSourceType() {
+            var ccsApiFields = $('[data-external-source-ccs-api]');
+            if ($externalSourceType.val() === '{{ constant('\\App\\Entity\\ExternalContestSourceType::CCS_API').value }}') {
+                ccsApiFields.show();
+            } else {
+                ccsApiFields.hide();
+            }
+        }
+        $externalSourceType.on('change', showHideExternalSourceType);
+        showHideExternalSourceType();
+
+        var $passwordField = $('#contest_externalSourcePassword');
+        $passwordField.attr('type', 'password');
+
+        $('[data-show-hide-password]').on('click', function() {
+            if ($passwordField.attr('type') === 'password') {
+                $passwordField.attr('type', 'text');
+                $('i', $(this)).attr('class', 'fa fa-eye-slash');
+            } else {
+                $passwordField.attr('type', 'password');
+                $('i', $(this)).attr('class', 'fa fa-eye');
+            }
+        });
     })
 </script>
