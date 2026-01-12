@@ -31,14 +31,14 @@ final class Version20251026092516 extends AbstractMigration
     {
         // Note: this migration only works for entities that still exist. For others, it will not work but there is nothing we can do
         $this->addSql('ALTER TABLE auditlog CHANGE cid cid VARCHAR(255) DEFAULT NULL COMMENT \'External contest ID associated to this entry\', CHANGE dataid dataid VARCHAR(64) DEFAULT NULL COMMENT \'(External) identifier in reference table\'');
-        $this->addSql('UPDATE auditlog INNER JOIN contest ON CAST(contest.cid AS CHAR) = auditlog.cid SET auditlog.cid = contest.externalid');
+        $this->addSql('UPDATE auditlog INNER JOIN contest ON CAST(contest.cid AS CHAR) = CAST(auditlog.cid AS CHAR) SET auditlog.cid = contest.externalid');
         foreach (static::ENTITIES as $table => $fields) {
             if (!is_array($fields)) {
                 $fields = [$fields];
             }
             foreach ($fields as $field) {
                 $this->addSql(sprintf(
-                    'UPDATE auditlog INNER JOIN %s ON CAST(%s.%s AS CHAR) = auditlog.dataid AND auditlog.datatype = "%s" SET auditlog.dataid = %s.externalid',
+                    'UPDATE auditlog INNER JOIN %s ON CAST(%s.%s AS CHAR) = CAST(auditlog.dataid AS CHAR) AND auditlog.datatype = "%s" SET auditlog.dataid = %s.externalid',
                     $table, $table, $field, $table, $table
                 ));
             }
