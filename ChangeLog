@@ -3,11 +3,10 @@ DOMjudge Programming Contest Judging System
 Version 10.0.0DEV
 -----------------
  - Removed support for multiple endpoints from judgedaemon.
- - Remove support for cgroup v1.
+ - Removed support for cgroup v1.
  - Various fixes to the Monaco submission comparison viewer.
  - Drop support for PHP 8.1, upgraded to Symfony 7.4.
  - Allow LaTeX inline math in clarifications.
-
  - Allow teams to be in more than one category and add more category types.
  - Do not expose internal IDs in interface or API anymore.
 
