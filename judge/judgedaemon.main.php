@@ -2026,8 +2026,8 @@ class JudgeDaemon
 
             // Log compare errors
             if ($verdict === Verdict::COMPARE_ERROR && !$compareTimedOut) {
-                logmsg(LOG_ERR, "Comparing failed with exitcode %d, compare script output:\n%s",
-                    $exitcode, file_get_contents("$realWorkdir/feedback/judgemessage.txt"));
+                logmsg(LOG_ERR, sprintf("Comparing failed with exitcode %d, compare script output:\n%s",
+                    $exitcode, file_get_contents("$realWorkdir/feedback/judgemessage.txt")));
             }
 
             return $verdict;
