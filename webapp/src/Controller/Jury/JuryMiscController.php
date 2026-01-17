@@ -287,18 +287,44 @@ class JuryMiscController extends BaseController
             // As we only load the needed judging, this will automatically be the first one
             /** @var Judging $judging */
             $judging         = $submission->getJudgings()->first();
-            /** @var string[] $expectedResults */
+            /** @var string[]|null $expectedResults */
             $expectedResults = $submission->getExpectedResults();
+            $expectedScore   = $submission->getExpectedScore();
             $submissionId    = $submission->getExternalid();
             $submissionFiles = $submission->getFiles();
 
             $result = mb_strtoupper($judging->getResult());
-            $entry = ['files' => $submissionFiles, 'actual' => $result, 'expected' => $expectedResults, 'contestProblem' => $submission->getContestProblem()];
-            if (!empty($expectedResults) && !$judging->getVerified()) {
+            $actualScore = $judging->getScore();
+            $entry = [
+                'files' => $submissionFiles,
+                'actual' => $result,
+                'expected' => $expectedResults,
+                'actualScore' => $actualScore,
+                'expectedScore' => $expectedScore,
+                'contestProblem' => $submission->getContestProblem(),
+            ];
+
+            $hasExpectation = !empty($expectedResults) || $expectedScore !== null;
+
+            if ($hasExpectation && !$judging->getVerified()) {
                 $numChecked++;
-                if (!in_array($result, $expectedResults)) {
+
+                // Check expected results (for result-based verification)
+                $resultMatches = true;
+                if (!empty($expectedResults)) {
+                    $resultMatches = in_array($result, $expectedResults);
+                }
+
+                // Check expected score (for score-based verification)
+                $scoreMatches = true;
+                if ($expectedScore !== null) {
+                    // Use bccomp for precise decimal comparison
+                    $scoreMatches = bccomp((string)$actualScore, (string)$expectedScore, 9) === 0;
+                }
+
+                if (!$resultMatches || !$scoreMatches) {
                     $unexpected[$submissionId] = $entry;
-                } elseif (count($expectedResults) > 1) {
+                } elseif (!empty($expectedResults) && count($expectedResults) > 1) {
                     if ($verifyMultiple) {
                         // Judging result is as expected, set judging to verified.
                         $judging
@@ -310,7 +336,7 @@ class JuryMiscController extends BaseController
                     }
                     $multiple[$submissionId] = $entry;
                 } else {
-                    // Judging result is as expected, set judging to verified.
+                    // Judging result/score is as expected, set judging to verified.
                     $judging
                         ->setVerified(true)
                         ->setJuryMember($verifier);
@@ -320,7 +346,7 @@ class JuryMiscController extends BaseController
             } else {
                 $numUnchecked++;
 
-                if (empty($expectedResults)) {
+                if (!$hasExpectation) {
                     $entry['verified'] = false;
                     $nomatch[$submissionId] = $entry;
                 } else {
