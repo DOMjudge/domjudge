@@ -29,6 +29,92 @@
 
 {% block content %}
 
+    {% macro render_scoring_group(group, depth) %}
+        <div class="scoring-group mb-1 {{ depth > 0 ? 'scoring-group-indent' : 'scoring-group-root' }}">
+            <div class="scoring-group-header mb-1 d-flex align-items-center flex-wrap">
+                <i class="fas {{ depth == 0 ? 'fa-sitemap' : 'fa-folder-open' }} me-2 text-muted"></i>
+                <strong title="{{ group.name }}">{{ group.display_name }}</strong>
+                <span class="badge ms-2 scoring-agg-pill scoring-agg-{{ group.aggregation }}">{{ group.aggregation | upper }}</span>
+                {% if group.accept_score is not null %}
+                    <span class="badge badge-info ms-2 scoring-accept-pill">Accept score: {{ group.accept_score }}</span>
+                {% endif %}
+            </div>
+            <div class="text-muted mb-1 scoring-info">
+                <div class="d-flex align-items-center flex-wrap">
+                    <span class="badge text-bg-{{ group.result == 'correct' ? 'success' : 'danger' }} badge-testcase me-2">
+                        {{ group.result == 'correct' ? '✓' : (group.result ? group.result|slice(0,1) : '?') }}
+                    </span>
+                    <span class="text-dark">
+                        <strong title="{{ group.score is not null ? 'Full score: ' ~ group.score : '' }}">
+                            {% if group.score is not null %}
+                                <span class="rounded-precision">{{ "%.2f" | format(group.score) }}</span>
+                                <span class="full-precision">{{ group.score }}</span>
+                            {% else %}
+                                ?
+                            {% endif %}
+                        </strong>
+                        {% if group.child_scores is not empty and (group.child_scores | length > 1 or group.child_scores[0] != group.score) %}
+                            <span class="text-muted ms-1 scoring-equation">
+                                =
+                                {% if group.aggregation == 'avg' or group.aggregation == 'min' or group.aggregation == 'max' -%}
+                                    {{ group.aggregation == 'avg' ? '(' : group.aggregation ~ '(' -}}
+                                {%- endif %}
+                                {%- for s in group.child_scores -%}
+                                    <span class="rounded-precision">{{ "%.2f" | format(s) }}</span>
+                                    <span class="full-precision">{{ s }}</span>
+                                    {{- not loop.last ? (group.aggregation == 'min' or group.aggregation == 'max' ? ', ' : ' + ') : '' -}}
+                                {%- endfor %}
+                                {%- if group.aggregation == 'avg' %}) / {{ group.child_scores | length }}{% elseif group.aggregation == 'min' or group.aggregation == 'max' %}){% endif %}
+                            </span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <div>
+                {% if group.children is not empty %}
+                    <div>
+                        {% for child in group.children %}
+                            {{ _self.render_scoring_group(child, depth + 1) }}
+                        {% endfor %}
+                    </div>
+                {% elseif group.testcases is not empty %}
+                    <div class="ms-2">
+                        <ul class="list-unstyled mb-0 scoring-testcase-list">
+                            {% for tc in group.testcases %}
+                                <li class="d-flex align-items-center mb-0">
+                                    <i class="far fa-file me-1 text-muted scoring-testcase-icon"></i>
+                                    <span class="scoring-testcase-name">
+                                        <a href="#run-{{ tc.rank }}" title="{{ tc.orig_input_filename }}">
+                                            {% if tc.display_name is not empty %}
+                                                {{ tc.display_name }}
+                                            {% else %}
+                                                #{{ tc.rank }}
+                                            {% endif %}
+                                        </a>
+                                    </span>
+                                    <span class="ms-1 scoring-testcase-result">
+                                        {{ tc.result | displayScoringTestcaseResult(tc.rank) }}
+                                    </span>
+                                    {% if group.accept_score is null %}
+                                        <span class="ms-1 scoring-testcase-score text-muted" title="{{ tc.score is not null ? 'Full score: ' ~ tc.score : '' }}">
+                                            {% if tc.score is not null %}
+                                                <span class="rounded-precision">{{ "%.2f" | format(tc.score) }}</span>
+                                                <span class="full-precision">{{ tc.score }}</span>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </span>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endmacro %}
+
     {% if submission.externalJudgements.empty %}
         {% set externalJudgement = null %}
     {% else %}
@@ -47,7 +133,19 @@
         </div>
     {% endif %}
 
-    {% if selectedJudging is not null and selectedJudging.result is not empty and submission.expectedResults %}
+    {% if selectedJudging is not null and selectedJudging.result is not empty and submission.expectedScore is not null %}
+        {# Expected score comparison for scoring problems #}
+        {% if selectedJudging.score == submission.expectedScore %}
+            <div class="alert alert-success">
+                Actual score matches the expected score ({{ selectedJudging.score }}).
+            </div>
+        {% else %}
+            <div class="alert alert-danger">
+                Actual score {{ selectedJudging.score }} does NOT match expected score: {{ submission.expectedScore }}.
+            </div>
+        {% endif %}
+    {% elseif selectedJudging is not null and selectedJudging.result is not empty and submission.expectedResults %}
+        {# Expected verdict comparison for pass/fail problems #}
         {% if selectedJudging.result|upper not in submission.expectedResults %}
             <div class="alert alert-danger">
                 Actual result {{ selectedJudging.result | printValidJuryResult }} does NOT match expected result(s):
@@ -278,6 +376,9 @@
                 <th scope="col">max runtime</th>
                 <th scope="col">judgehost</th>
                 <th scope="col">result</th>
+                {% if submission.problem.scoringProblem %}
+                    <th scope="col">score</th>
+                {% endif %}
                 <th scope="col">rejudging</th>
             </tr>
             </thead>
@@ -316,6 +417,17 @@
                             {% endif %}
                         </a>
                     </td>
+                    {% if submission.problem.scoringProblem %}
+                        <td class="right">
+                            <a href="{{ link }}">
+                                {% if judging.score is not null %}
+                                    {{ "%.2f" | format(judging.score) }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </a>
+                        </td>
+                    {% endif %}
                     <td>
                         <a href="{{ link }}">
                             {% if judging.rejudging is not null %}
@@ -362,6 +474,9 @@
                             {%- else %}
                                 {{- selectedJudging.result | printValidJuryResult -}}
                             {%- endif %}
+                            {% if submission.problem.scoringProblem %}
+                                (score: <span title="{{ selectedJudging.score }}">{{ "%.2f" | format(selectedJudging.score) }}</span>)
+                            {% endif %}
                             {%- if submission.stillBusy -%}
                                 (&hellip;)
                             {%- endif -%}
@@ -376,7 +491,11 @@
                             {% if submission.importError %}
                                 External result: {{ externalJudgement.result | printValidJuryResult }}
                             {% else %}
-                                (external: {{ externalJudgement.result | printValidJuryResult }})
+                                (external: {{ externalJudgement.result | printValidJuryResult }}
+                                {% if submission.problem.scoringProblem %}
+                                    , score: {{ "%.2f" | format(externalJudgement.score) }}
+                                {% endif %}
+                                )
                             {% endif %}
                         {%- endif %}
                         {%- if selectedJudging is not null and judgehosts is not empty -%}
@@ -569,6 +688,42 @@
             {% endif %}
         </div>
 
+        {% if scoringHierarchy is defined and scoringHierarchy is not empty %}
+            <div class="mb-3">
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseScoringDetails" aria-expanded="false" aria-controls="collapseScoringDetails">
+                    <i class="fas fa-list-ol mr-1"></i> Show Scoring Details
+                </button>
+                <div class="collapse mt-2" id="collapseScoringDetails">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>Scoring Details</span>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" id="precisionToggle">
+                                <label class="form-check-label small text-muted" for="precisionToggle">Full precision</label>
+                            </div>
+                        </div>
+                        <div class="card-body scoring-details-container rounded-precision">
+                            {{ _self.render_scoring_group(scoringHierarchy, 0) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                .scoring-details-container .full-precision { display: none; }
+                .scoring-details-container.show-full .rounded-precision { display: none; }
+                .scoring-details-container.show-full .full-precision { display: inline; }
+            </style>
+
+            <script>
+                $(function() {
+                    $('#precisionToggle').on('change', function() {
+                        $('.scoring-details-container').toggleClass('show-full', this.checked);
+                    });
+                });
+            </script>
+        {% endif %}
+
         {# Show verify info, but only when a result is known #}
         {% if selectedJudging is not null and selectedJudging.result is not empty %}
             {% include 'jury/partials/verify_form.html.twig' with {
@@ -646,6 +801,14 @@
                                        judging
                                    {% endif %}
                                 </span>
+                            {% endif %}
+                            {% if submission.problem.scoringProblem %}
+                                | Score:
+                                {% if run.firstJudgingRun.score is not null %}
+                                    {{ "%.2f" | format(run.firstJudgingRun.score) }}
+                                {% else %}
+                                    -
+                                {% endif %}
                             {% endif %}
                         {% endif %}
                         {% if runsOutput[runIdx].hostname is not null %}
