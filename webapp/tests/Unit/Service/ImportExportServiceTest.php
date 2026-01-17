@@ -134,6 +134,10 @@ class ImportExportServiceTest extends BaseTestCase
         self::assertEquals($expectedActivateTimeString, $contest->getActivatetimeString());
         self::assertEquals($expectedDeactivateTimeString, $contest->getDeactivatetimeString());
 
+        if (isset($data['scoreboard_type']) || isset($data['scoreboard-type'])) {
+            self::assertEquals($data['scoreboard_type'] ?? $data['scoreboard-type'], $contest->getScoreboardType()->value);
+        }
+
         $problems = [];
         /** @var ContestProblem $problem */
         foreach ($contest->getProblems() as $problem) {
@@ -253,6 +257,19 @@ class ImportExportServiceTest extends BaseTestCase
                 'public'                     => false,
             ],
             'test-contest',
+            '2020-01-01 10:34:56 UTC',
+            null,
+        ];
+        // Testing scoreboard-type (with hyphen)
+        yield [
+            [
+                'name'            => 'Scoreboard Type Test',
+                'short-name'      => 'score-test',
+                'duration'        => '5:00:00',
+                'start-time'      => '2020-01-01T12:34:56+02:00',
+                'scoreboard-type' => 'score',
+            ],
+            'score-test',
             '2020-01-01 10:34:56 UTC',
             null,
         ];

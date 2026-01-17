@@ -58,8 +58,20 @@ class SingleTeamScoreboard extends Scoreboard
                 $this->penaltyTime, $this->scoreIsInSeconds
             );
 
+            $contestProblem = $scoreRow->getContest()->getContestProblem($scoreRow->getProblem());
+            $isCorrect = $scoreRow->getIsCorrect($this->restricted);
+
+            if ($scoreRow->getProblem()->isScoringProblem()) {
+                $points = $scoreRow->getScore($this->restricted);
+            } else {
+                $points = strval(
+                    $isCorrect ?
+                        $contestProblem->getPoints() : 0
+                );
+            }
+
             $this->matrix[$scoreRow->getTeam()->getTeamid()][$scoreRow->getProblem()->getProbid()] = new ScoreboardMatrixItem(
-                isCorrect: $scoreRow->getIsCorrect($this->restricted),
+                isCorrect: $isCorrect,
                 isFirst: $scoreRow->getIsCorrect($this->showRestrictedFts) && $scoreRow->getIsFirstToSolve(),
                 numSubmissions: $scoreRow->getSubmissions($this->restricted),
                 numSubmissionsPending: $scoreRow->getPending($this->restricted),
@@ -67,6 +79,7 @@ class SingleTeamScoreboard extends Scoreboard
                 penaltyTime: $penalty,
                 runtime: $scoreRow->getRuntime($this->restricted),
                 numSubmissionsInFreeze: $scoreRow->getPending(false),
+                points: $points,
             );
         }
 
