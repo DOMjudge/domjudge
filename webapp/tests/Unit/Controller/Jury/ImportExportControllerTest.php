@@ -100,6 +100,7 @@ end_time: '+5:00:00'
 duration: '5:00:00.000'
 penalty_time: 20
 activate_time: '{$pastYear}-01-01T08:00:00+00:00'
+scoreboard_type: pass-fail
 medals:
     gold: 4
     silver: 4
