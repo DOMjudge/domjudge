@@ -1,0 +1,2 @@
+on_reject: continue
+grader_flags: sum

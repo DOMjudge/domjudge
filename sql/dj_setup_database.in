@@ -10,6 +10,7 @@ BINDIR="@domserver_bindir@"
 ETCDIR="@domserver_etcdir@"
 WEBAPPDIR="@domserver_webappdir@"
 EXAMPLEPROBDIR="@domserver_exampleprobdir@"
+SCORINGEXAMPLEPROBDIR="@domserver_scoringexampleprobdir@"
 DATABASEDUMPDIR="@domserver_databasedumpdir@"
 
 PASSWDFILE="$ETCDIR/dbpasswords.secret"
@@ -34,6 +35,7 @@ Commands:
   bare-install     create database, setup defaults if not existing
   uninstall        remove database users and database, INCLUDING ALL DATA!
   install-examples install examples only
+  install-scoring-examples install scoring examples only (IOI-style problems)
   install-loadtest configure for load testing. WARNING: CREATES A LOT OF EXTRA ITEMS!
   upgrade          upgrade MySQL database schema to current version
   dump [filename]  backup the current database to file (without .sql.gz suffix)
@@ -274,6 +276,13 @@ install_examples()
 	( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
 }
 
+install_scoring_examples()
+{
+	symfony_console domjudge:load-example-data
+	"$SCORINGEXAMPLEPROBDIR"/generate-contest-yaml
+	( cd "$SCORINGEXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
+}
+
 ### Script starts here ###
 
 # Parse command-line options:
@@ -337,6 +346,11 @@ uninstall)
 install-examples)
 	read_dbpasswords
 	install_examples
+	;;
+
+install-scoring-examples)
+	read_dbpasswords
+	install_scoring_examples
 	;;
 
 install-loadtest)

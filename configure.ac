@@ -169,17 +169,18 @@ fi
 # These are defaults that can still be overridden below!
 if test "x$FHS_ENABLED" = xyes ; then
 	if test "x$DOMSERVER_BUILD_ENABLED" = xyes; then
-	AC_SUBST(domserver_root,            '')
-	AC_SUBST(domserver_bindir,          $bindir)
-	AC_SUBST(domserver_etcdir,          $sysconfdir/${PACKAGE_TARNAME})
-	AC_SUBST(domserver_webappdir,       $datadir/${PACKAGE_TARNAME}/webapp)
-	AC_SUBST(domserver_sqldir,          $datadir/${PACKAGE_TARNAME}/sql)
-	AC_SUBST(domserver_libdir,          $libdir/${PACKAGE_TARNAME})
-	AC_SUBST(domserver_logdir,          $localstatedir/log/${PACKAGE_TARNAME})
-	AC_SUBST(domserver_rundir,          $localstatedir/run/${PACKAGE_TARNAME})
-	AC_SUBST(domserver_tmpdir,          /tmp)
-	AC_SUBST(domserver_exampleprobdir,  $datadir/${PACKAGE_TARNAME}/example_problems)
-	AC_SUBST(domserver_databasedumpdir, $localstatedir/lib/${PACKAGE_TARNAME}/db-dumps)
+	AC_SUBST(domserver_root,                   '')
+	AC_SUBST(domserver_bindir,                 $bindir)
+	AC_SUBST(domserver_etcdir,                 $sysconfdir/${PACKAGE_TARNAME})
+	AC_SUBST(domserver_webappdir,              $datadir/${PACKAGE_TARNAME}/webapp)
+	AC_SUBST(domserver_sqldir,                 $datadir/${PACKAGE_TARNAME}/sql)
+	AC_SUBST(domserver_libdir,                 $libdir/${PACKAGE_TARNAME})
+	AC_SUBST(domserver_logdir,                 $localstatedir/log/${PACKAGE_TARNAME})
+	AC_SUBST(domserver_rundir,                 $localstatedir/run/${PACKAGE_TARNAME})
+	AC_SUBST(domserver_tmpdir,                 /tmp)
+	AC_SUBST(domserver_exampleprobdir,         $datadir/${PACKAGE_TARNAME}/example_problems)
+	AC_SUBST(domserver_scoringexampleprobdir,  $datadir/${PACKAGE_TARNAME}/example_scoring_problems)
+	AC_SUBST(domserver_databasedumpdir,        $localstatedir/lib/${PACKAGE_TARNAME}/db-dumps)
 	fi
 
 	if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
@@ -230,6 +231,7 @@ AX_PATH(domserver_logdir,          [$domserver_root/log])
 AX_PATH(domserver_rundir,          [$domserver_root/run])
 AX_PATH(domserver_tmpdir,          [$domserver_root/tmp])
 AX_PATH(domserver_exampleprobdir,  [$domserver_root/example_problems])
+AX_PATH(domserver_scoringexampleprobdir,  [$domserver_root/example_scoring_problems])
 AX_PATH(domserver_databasedumpdir, [$domserver_root/db-dumps])
 fi
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
@@ -372,6 +374,7 @@ echo "    - sql..............: AX_VAR_EXPAND($domserver_sqldir)"
 echo "    - tmp..............: AX_VAR_EXPAND($domserver_tmpdir)"
 echo "    - webapp...........: AX_VAR_EXPAND($domserver_webappdir)"
 echo "    - example_problems.: AX_VAR_EXPAND($domserver_exampleprobdir)"
+echo "    - scoring_examples.: AX_VAR_EXPAND($domserver_scoringexampleprobdir)"
 echo "    - database_dumps...: AX_VAR_EXPAND($domserver_databasedumpdir)"
 fi
 if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
