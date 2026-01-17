@@ -36,6 +36,8 @@
                     <th></th><th>problem</th><th>file(s)</th>
                     <th>actual</th>
                     <th>expected (one of)</th>
+                    <th>actual score</th>
+                    <th>expected score</th>
                 </tr>
                 {% for submitId,result in results %}
                     {% set link = path('jury_submission', {'submitId': submitId}) %}
@@ -66,11 +68,31 @@
                         </td>
                         <td>
                             <a href="{{ link }}">
-                                {% if result is defined and result.expected is defined %}
+                                {% if result is defined and result.expected is defined and result.expected is not empty %}
                                     {% for r in result.expected %}
                                         {{ r | printResult }}
                                         {% if not loop.last %}, {% endif %}
                                     {% endfor %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ link }}">
+                                {% if result is defined and result.expectedScore is defined and result.expectedScore is not null %}
+                                    {{ result.actualScore | number_format(2) }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ link }}">
+                                {% if result is defined and result.expectedScore is defined and result.expectedScore is not null %}
+                                    {{ result.expectedScore | number_format(2) }}
+                                {% else %}
+                                    -
                                 {% endif %}
                             </a>
                         </td>
