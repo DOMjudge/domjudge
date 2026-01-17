@@ -8,6 +8,7 @@ use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\RankCache;
+use App\Entity\ScoreboardType;
 use App\Entity\ScoreCache;
 use App\Entity\Submission;
 use App\Entity\Team;
@@ -260,12 +261,30 @@ class ScoreboardService
 
         $contestStartTime = $contest->getStarttime();
 
+        $pointsJury      = "0";
+        $pointsPubl      = "0";
+
+        $firstAbsSubmitTime = null;
+
         foreach ($submissions as $submission) {
             /** @var Judging|ExternalJudgement|null $judging */
             if ($useExternalJudgements) {
                 $judging = $submission->getValidExternalJudgement();
             } else {
                 $judging = $submission->getValidJudging();
+            }
+
+            if ($problem->isScoringProblem()) {
+                $score = $judging?->getScore();
+                if ($score !== null) {
+                    if (bccomp($pointsJury, $score, scale: self::SCALE) < 0) {
+                        $pointsJury = $score;
+                    }
+                    if (!$submission->isAfterFreeze() &&
+                        bccomp($pointsPubl, $score, scale: self::SCALE) < 0) {
+                        $pointsPubl = $score;
+                    }
+                }
             }
 
             // three things will happen in the loop in this order:
@@ -285,7 +304,7 @@ class ScoreboardService
 
             // If there is a public and correct submission, we can stop counting
             // submissions or looking for a correct one (skip steps 2,3)
-            if ($correctPubl) {
+            if (!$problem->isScoringProblem() && $correctPubl) {
                 continue;
             }
 
@@ -309,11 +328,11 @@ class ScoreboardService
             // to count compiler penalties and the judging is a compiler error.
             $countSubmission = $compilePenalty || $judging->getResult() != Judging::RESULT_COMPILER_ERROR;
 
-            if (!$correctJury && $countSubmission) {
+            if (($problem->isScoringProblem() || !$correctJury) && $countSubmission) {
                 // For the jury: only consider it as a submission if we don't
                 // have a correct one yet. This is needed because during the
                 // freeze we consider submissions after the correct one for
-                // the public to not leak any info.
+                // the public to not leak any info. Note that this only holds for pass-fail problems.
                 $submissionsJury++;
             }
             if ($submission->isAfterFreeze()) {
@@ -328,7 +347,7 @@ class ScoreboardService
 
             // If we encountered a correct submission during the whole contest,
             // do not consider the submissions after that one for correctness.
-            if ($correctJury) {
+            if (!$problem->isScoringProblem() && $correctJury) {
                 continue;
             }
 
@@ -337,6 +356,13 @@ class ScoreboardService
             // Negative numbers don't make sense on the scoreboard, cap them to the contest start.
             $absSubmitTime = max($absSubmitTime, $contestStartTime);
             $submitTime    = $contest->getContestTime($absSubmitTime);
+
+            // For scoring problems we consider submissions after the first correct one. So we need to
+            // keep track of when the first correct submission occurred.
+            // TODO: is this actually what 'first to solve' for scoring problems means?
+            if ($firstAbsSubmitTime === null) {
+                $firstAbsSubmitTime = $absSubmitTime;
+            }
 
             if ($judging->getResult() == Judging::RESULT_CORRECT) {
                 $correctJury = true;
@@ -415,27 +441,29 @@ class ScoreboardService
             'solvetimeRestricted' => (int)$timeJury,
             'runtimeRestricted' => $runtimeJury === PHP_INT_MAX ? 0 : $runtimeJury,
             'isCorrectRestricted' => (int)$correctJury,
+            'scoreRestricted' => $pointsJury,
             'submissionsPublic' => $submissionsPubl,
             'pendingPublic' => $pendingPubl,
             'solvetimePublic' => (int)$timePubl,
             'runtimePublic' => $runtimePubl === PHP_INT_MAX ? 0 : $runtimePubl,
             'isCorrectPublic' => (int)$correctPubl,
+            'scorePublic' => $pointsPubl,
             'isFirstToSolve' => (int)$firstToSolve,
         ];
         $this->em->getConnection()->executeQuery('REPLACE INTO scorecache
             (cid, teamid, probid,
-             submissions_restricted, pending_restricted, solvetime_restricted, runtime_restricted, is_correct_restricted,
-             submissions_public, pending_public, solvetime_public, runtime_public, is_correct_public, is_first_to_solve)
-            VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :runtimeRestricted, :isCorrectRestricted,
-            :submissionsPublic, :pendingPublic, :solvetimePublic, :runtimePublic, :isCorrectPublic, :isFirstToSolve)', $params);
+             submissions_restricted, pending_restricted, solvetime_restricted, runtime_restricted, is_correct_restricted, score_restricted,
+             submissions_public, pending_public, solvetime_public, runtime_public, is_correct_public, score_public, is_first_to_solve)
+            VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :runtimeRestricted, :isCorrectRestricted, :scoreRestricted,
+            :submissionsPublic, :pendingPublic, :solvetimePublic, :runtimePublic, :isCorrectPublic, :scorePublic, :isFirstToSolve)', $params);
 
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                                                     ['lock' => $lockString]) != 1) {
             throw new Exception('ScoreboardService::calculateScoreRow failed to release lock');
         }
 
-        // If we found a new correct result, update the rank cache too.
-        if ($updateRankCache && ($correctJury || $correctPubl)) {
+        // If we found a new correct result (or any result for scoring problems), update the rank cache too.
+        if ($updateRankCache && (($correctJury || $correctPubl) || $problem->isScoringProblem())) {
             $this->updateRankCache($contest, $team);
         }
     }
@@ -484,11 +512,13 @@ class ScoreboardService
         $totalTime = [];
         $totalRuntime = [];
         $timeOfLastCorrect = [];
+        $score = [];
         foreach ($variants as $variant => $isRestricted) {
             $numPoints[$variant] = 0;
             $totalTime[$variant] = $team->getPenalty();
             $totalRuntime[$variant] = 0;
             $timeOfLastCorrect[$variant] = 0;
+            $score[$variant] = "0";
         }
 
         $penaltyTime      = (int) $this->config->get('penalty_time');
@@ -510,7 +540,17 @@ class ScoreboardService
         foreach ($scoreCacheCells as $scoreCacheCell) {
             foreach ($variants as $variant => $isRestricted) {
                 $probId = $scoreCacheCell->getProblem()->getProbid();
-                if (isset($contestProblems[$probId]) && $scoreCacheCell->getIsCorrect($isRestricted)) {
+                if (!isset($contestProblems[$probId])) {
+                    continue;
+                }
+
+                // For scoring contests, add the score even if not fully correct (partial scores)
+                if ($contest->getScoreboardType() === ScoreboardType::SCORE) {
+                    $score[$variant] = bcadd($score[$variant], $scoreCacheCell->getScore($isRestricted), self::SCALE);
+                }
+
+                // For pass-fail contests (and correct submissions in scoring contests), add points/time
+                if ($scoreCacheCell->getIsCorrect($isRestricted)) {
                     $penalty = Utils::calcPenaltyTime($scoreCacheCell->getIsCorrect($isRestricted),
                                                       $scoreCacheCell->getSubmissions($isRestricted),
                                                       $penaltyTime, $scoreIsInSeconds);
@@ -523,16 +563,27 @@ class ScoreboardService
                     $timeOfLastCorrect[$variant] = max($timeOfLastCorrect[$variant], $solveTimeForProblem);
                     $totalTime[$variant] += $solveTimeForProblem + $penalty;
                     $totalRuntime[$variant] += $scoreCacheCell->getRuntime($isRestricted);
+                    // For pass-fail contests, also add the score here (even though it's not really used)
+                    if ($contest->getScoreboardType() !== ScoreboardType::SCORE) {
+                        $score[$variant] = bcadd($score[$variant], $scoreCacheCell->getScore($isRestricted), self::SCALE);
+                    }
                 }
             }
         }
 
         foreach ($variants as $variant => $isRestricted) {
-            $scoreKey[$variant] = self::getICPCScoreKey(
-                $numPoints[$variant],
-                $totalTime[$variant],
-                $timeOfLastCorrect[$variant]
-            );
+            if ($contest->getScoreboardType() === ScoreboardType::PASS_FAIL) {
+                $scoreKey[$variant] = self::getICPCScoreKey(
+                    $numPoints[$variant],
+                    $totalTime[$variant],
+                    $timeOfLastCorrect[$variant]
+                );
+            } else {
+                // TODO: Any tie breakers?
+                $scoreKey[$variant] = self::getScoringScoreKey(
+                    $score[$variant],
+                );
+            }
         }
 
         // Use a direct REPLACE INTO query to drastically speed this up.
@@ -547,12 +598,14 @@ class ScoreboardService
             'totalRuntimePublic' => $totalRuntime['public'],
             'sortKeyRestricted' => $scoreKey['restricted'],
             'sortKeyPublic' => $scoreKey['public'],
+            'scoreRestricted' => $score['restricted'],
+            'scorePublic' => $score['public'],
         ];
         $this->em->getConnection()->executeQuery('REPLACE INTO rankcache (cid, teamid,
-            points_restricted, totaltime_restricted, totalruntime_restricted,
-            points_public, totaltime_public, totalruntime_public, sort_key_restricted, sort_key_public)
-            VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :totalRuntimeRestricted,
-            :pointsPublic, :totalTimePublic, :totalRuntimePublic, :sortKeyRestricted, :sortKeyPublic)', $params);
+            points_restricted, totaltime_restricted, totalruntime_restricted, score_restricted,
+            points_public, totaltime_public, totalruntime_public, sort_key_restricted, sort_key_public, score_public)
+            VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :totalRuntimeRestricted, :scoreRestricted,
+            :pointsPublic, :totalTimePublic, :totalRuntimePublic, :sortKeyRestricted, :sortKeyPublic, :scorePublic)', $params);
 
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                                                     ['lock' => $lockString]) != 1) {
@@ -599,6 +652,16 @@ class ScoreboardService
             self::convertToScoreKeyElement($numSolved),
             self::convertToScoreKeyElement($totalTime, Order::Ascending),
             self::convertToScoreKeyElement($timeOfLastSolved, Order::Ascending),
+        ];
+        return implode(',', $scoreKeyArray);
+    }
+
+    public static function getScoringScoreKey(string $score): string
+    {
+        // For scoring problems, we only use the score as the key (for now).
+        // We assume that the score is a valid bcmath number.
+        $scoreKeyArray = [
+            self::convertToScoreKeyElement($score, Order::Descending),
         ];
         return implode(',', $scoreKeyArray);
     }

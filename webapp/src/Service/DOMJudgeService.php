@@ -1542,17 +1542,20 @@ class DOMJudgeService
         );
     }
 
-    public function getCompareConfig(ContestProblem $problem): string
+    public function getCompareConfig(ContestProblem $contestProblem, ?string $outputValidatorFlags = null): string
     {
-        $compareExecutable = $this->getImmutableCompareExecutable($problem);
+        $compareExecutable = $this->getImmutableCompareExecutable($contestProblem);
+        $problem = $contestProblem->getProblem();
+        $outputValidatorFlags = $outputValidatorFlags ?? $problem->getSpecialCompareArgs();
         return Utils::jsonEncode(
             [
                 'script_timelimit' => $this->config->get('script_timelimit'),
                 'script_memory_limit' => $this->config->get('script_memory_limit'),
                 'script_filesize_limit' => $this->config->get('script_filesize_limit'),
-                'compare_args' => $problem->getProblem()->getSpecialCompareArgs(),
-                'combined_run_compare' => $problem->getProblem()->isInteractiveProblem(),
+                'compare_args' => $outputValidatorFlags,
+                'combined_run_compare' => $problem->isInteractiveProblem(),
                 'hash' => $compareExecutable->getHash(),
+                'is_scoring_problem' => $problem->isScoringProblem(),
             ]
         );
     }
@@ -1710,8 +1713,8 @@ class DOMJudgeService
             ':run_script_id' => $this->getImmutableRunExecutable($problem)->getImmutableExecId(),
             ':compile_config' => $this->getCompileConfig($submission),
             ':run_config' => $this->getRunConfig($problem, $submission, $overshoot),
-            ':compare_config' => $this->getCompareConfig($problem),
         ];
+        $defaultCompareConfig = $this->getCompareConfig($problem);
 
         $judgetaskDefaultParamNames = array_keys($judgetaskInsertParams);
 
@@ -1725,17 +1728,26 @@ class DOMJudgeService
         /** @var Testcase $testcase */
         foreach ($testcases as $testcase) {
             $judgetaskInsertParts[] = sprintf(
-                '(%s, :testcase_id%d, :testcase_hash%d)',
+                '(%s, :testcase_id%d, :testcase_hash%d, :compare_config%d)',
                 implode(', ', $judgetaskDefaultParamNames),
                 $testcase->getTestcaseid(),
-                $testcase->getTestcaseid()
+                $testcase->getTestcaseid(),
+                $testcase->getTestcaseid(),
             );
+            $compareConfig = $defaultCompareConfig;
+            if ($testcase->getTestcaseGroup() !== null) {
+                $tcGroup = $testcase->getTestcaseGroup();
+                if ($tcGroup->getOutputValidatorFlags() != '') {
+                    $compareConfig = $this->getCompareConfig($problem, $tcGroup->getOutputValidatorFlags());
+                }
+            }
             $judgetaskInsertParams[':testcase_id' . $testcase->getTestcaseid()] = $testcase->getTestcaseid();
             $judgetaskInsertParams[':testcase_hash' . $testcase->getTestcaseid()] = $testcase->getTestcaseHash();
+            $judgetaskInsertParams[':compare_config' . $testcase->getTestcaseid()] = $compareConfig;
         }
         $judgetaskColumns = array_map(fn(string $column) => substr($column, 1), $judgetaskDefaultParamNames);
         $judgetaskInsertQuery = sprintf(
-            'INSERT INTO judgetask (%s, testcase_id, testcase_hash) VALUES %s',
+            'INSERT INTO judgetask (%s, testcase_id, testcase_hash, compare_config) VALUES %s',
             implode(', ', $judgetaskColumns),
             implode(', ', $judgetaskInsertParts)
         );

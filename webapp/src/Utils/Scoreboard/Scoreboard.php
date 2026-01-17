@@ -186,12 +186,14 @@ class Scoreboard
             );
 
             $contestProblem = $scoreCell->getContest()->getContestProblem($scoreCell->getProblem());
-            // TODO: For actual scoring problems, we need to calculate the score here and
-            // output it with the correct precision. For now, this is always an integer.
-            $points = strval(
-                $isCorrect ?
-                $contestProblem->getPoints() : 0
-            );
+            if ($scoreCell->getProblem()->isScoringProblem()) {
+                $points = $scoreCell->getScore($this->restricted);
+            } else {
+                $points = strval(
+                    $isCorrect ?
+                        $contestProblem->getPoints() : 0
+                );
+            }
 
             $this->matrix[$teamId][$probId] = new ScoreboardMatrixItem(
                 isCorrect: $isCorrect,
@@ -294,7 +296,7 @@ class Scoreboard
 
     public function isScoring(): bool
     {
-        return $this->contest->getScoreboardType() === ScoreboardType::SCORING;
+        return $this->contest->getScoreboardType() === ScoreboardType::SCORE;
     }
 
     /**

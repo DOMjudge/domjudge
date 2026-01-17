@@ -86,6 +86,16 @@ class Submission extends BaseApiEntity implements
     private ?array $expected_results = null;
 
     #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: true,
+        options: ['comment' => 'Expected score for scoring problems - used to validate jury submissions']
+    )]
+    #[Serializer\Exclude]
+    private string|float|null $expected_score = null;
+
+    #[ORM\Column(
         nullable: true,
         options: ['comment' => 'Optional entry point. Can be used e.g. for java main class.']
     )]
@@ -209,6 +219,16 @@ class Submission extends BaseApiEntity implements
         return null;
     }
 
+    public function getScore(): ?string
+    {
+        foreach ($this->judgings as $j) {
+            if ($j->getValid()) {
+                return $j->getScore();
+            }
+        }
+        return null;
+    }
+
     public function getSubmitid(): int
     {
         return $this->submitid;
@@ -285,6 +305,17 @@ class Submission extends BaseApiEntity implements
     public function getExpectedResults(): ?array
     {
         return $this->expected_results;
+    }
+
+    public function setExpectedScore(string|float|null $expectedScore): Submission
+    {
+        $this->expected_score = $expectedScore;
+        return $this;
+    }
+
+    public function getExpectedScore(): string|float|null
+    {
+        return $this->expected_score;
     }
 
     public function setEntryPoint(?string $entryPoint): Submission
