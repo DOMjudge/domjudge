@@ -14,7 +14,7 @@
     {% for lang in data %}
         <div class="card mb-3">
             <div class="card-header">
-                Language <code>{{ lang.language.langid }}</code>
+                Language <code>{{ lang.language.name }}</code>
                 {% if is_granted('ROLE_ADMIN') %}
                 <span style="float: right">
                     {{ button(path('jury_language_edit', {'langId': lang.language.externalid}), 'Edit version command(s)', 'primary btn-sm', 'edit') }}
