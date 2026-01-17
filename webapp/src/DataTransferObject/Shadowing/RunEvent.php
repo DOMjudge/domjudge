@@ -11,5 +11,6 @@ class RunEvent implements EventData
         public readonly ?string $judgementTypeId,
         public readonly ?string $time,
         public readonly ?float $runTime,
+        public readonly string|float|null $score,
     ) {}
 }
