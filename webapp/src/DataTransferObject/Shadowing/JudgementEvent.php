@@ -10,5 +10,6 @@ class JudgementEvent implements EventData
         public readonly string $submissionId,
         public readonly ?string $endTime,
         public readonly ?string $judgementTypeId,
+        public readonly string|float|null $score,
     ) {}
 }

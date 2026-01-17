@@ -52,7 +52,7 @@ class EventDenormalizer implements DenormalizerInterface, SerializerAwareInterfa
         $eventType = EventType::fromString($data['type']);
         if ($this->getEventFeedFormat($data, $context) === EventFeedFormat::Format_2022_07) {
             $operation = isset($data['data']) ? Operation::CREATE : Operation::DELETE;
-            if (isset($data['data']) && !isset($data['data'][0])) {
+            if (isset($data['data']) && !isset($data['data'][0]) && !empty($data['data'])) {
                 $data['data'] = [$data['data']];
             }
             if ($operation === Operation::CREATE && count($data['data']) === 1) {
