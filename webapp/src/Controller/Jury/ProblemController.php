@@ -973,6 +973,7 @@ class ProblemController extends BaseController
             $data = $uploadForm->getData();
             /** @var UploadedFile $archive */
             $archive  = $data['archive'];
+            /** @var array<string, string[]> $messages */
             $messages = [];
 
             /** @var Contest|null $contest */

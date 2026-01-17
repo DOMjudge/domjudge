@@ -2251,6 +2251,12 @@ class JudgeDaemon
                 $new_judging_run['team_message'] = $this->restEncodeFile($passdir . '/feedback/teammessage.txt', $output_storage_limit);
             }
 
+            $score = "";
+            if ($result === 'correct' && file_exists($passdir . '/feedback/score.txt')) {
+                $new_judging_run['score'] = $this->restEncodeFile($passdir . '/feedback/score.txt', false);
+                $score = ", score: " . trim(dj_file_get_contents($passdir . '/feedback/score.txt'));
+            }
+
             if ($passLimit > 1) {
                 $walltime = $metadata['wall-time'] ?? '?';
                 logmsg(LOG_INFO, ' ' . ($result === 'correct' ? "   \033[0;32m✔\033[0m" : "   \033[1;31m✗\033[0m")
@@ -2287,7 +2293,7 @@ class JudgeDaemon
         if ($passLimit == 1) {
             $walltime = $metadata['wall-time'] ?? '?';
             logmsg(LOG_INFO, ' ' . ($result === 'correct' ? " \033[0;32m✔\033[0m" : " \033[1;31m✗\033[0m")
-                . '  ...done in ' . $walltime . 's (CPU: ' . $runtime . 's), result: ' . $result);
+                . '  ...done in ' . $walltime . 's (CPU: ' . $runtime . 's), result: ' . $result . $score);
         }
 
         // done!
