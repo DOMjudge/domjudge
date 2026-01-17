@@ -7,12 +7,15 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
+use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\SubmissionSource;
 use App\Entity\Team;
+use App\Entity\TestcaseAggregationType;
+use App\Entity\TestcaseGroup;
 use App\Entity\User;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
@@ -25,6 +28,7 @@ use InvalidArgumentException;
 use Knp\Component\Pager\Pagination\PaginationInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -55,6 +59,244 @@ class SubmissionService
         protected readonly ScoreboardService $scoreboardService,
         protected readonly PaginatorInterface $paginator,
     ) {}
+
+    /**
+     * Returns a two-element array [score, result], or [null, null] if not all scores/results are ready.
+     * @param array<int, JudgingRun[]>|null $runsByGroup
+     * @return array{string|null, string|null}
+     */
+    public static function maybeSetScoringResult(TestcaseGroup $testcaseGroup, Judging $judging, ?array $runsByGroup = null): array
+    {
+        if ($runsByGroup === null) {
+            $runsByGroup = [];
+            foreach ($judging->getRuns() as $run) {
+                $group = $run->getTestcase()->getTestcaseGroup();
+                if ($group !== null) {
+                    $runsByGroup[$group->getTestcaseGroupId()][] = $run;
+                }
+            }
+        }
+
+        $allResultsReady = true;
+        $allCorrect = true;
+        $firstIncorrectVerdict = null;
+        $results = [];
+        $ignoreSample = $testcaseGroup->isIgnoreSample();
+
+        if ($testcaseGroup->getChildren()->isEmpty()) {
+            $relevantRuns = $runsByGroup[$testcaseGroup->getTestcaseGroupId()] ?? [];
+            if ($testcaseGroup->getAcceptScore() !== null) {
+                $acceptScore = $testcaseGroup->getAcceptScore();
+                foreach ($relevantRuns as $run) {
+                    if ($run->getRunresult() === null || $run->getRunresult() === '') {
+                        $allResultsReady = false;
+                    } elseif ($run->getRunresult() !== 'correct') {
+                        $allCorrect = false;
+                        if ($firstIncorrectVerdict === null) {
+                            $firstIncorrectVerdict = $run->getRunresult();
+                        }
+                    }
+                }
+                if (count($relevantRuns) > 0) {
+                    if ($allCorrect) {
+                        $results[] = $acceptScore;
+                    } else {
+                        $results[] = '0';
+                    }
+                }
+            } else {
+                foreach ($relevantRuns as $run) {
+                    $results[] = $run->getScore();
+                    if ($run->getRunresult() === null || $run->getRunresult() === '') {
+                        $allResultsReady = false;
+                    } elseif ($run->getRunresult() !== 'correct') {
+                        $allCorrect = false;
+                        if ($firstIncorrectVerdict === null) {
+                            $firstIncorrectVerdict = $run->getRunresult();
+                        }
+                    }
+                }
+            }
+        } else {
+            foreach ($testcaseGroup->getChildren() as $childGroup) {
+                if ($ignoreSample && $childGroup->getName() === 'data/sample') {
+                    continue;
+                }
+                $childScoreAndResult = self::maybeSetScoringResult(
+                    $childGroup,
+                    $judging,
+                    $runsByGroup
+                );
+                $childScore = $childScoreAndResult[0];
+                $childResult = $childScoreAndResult[1];
+                if ($childResult === null || $childResult === '') {
+                    $allResultsReady = false;
+                } else {
+                    // Always add the child score for aggregation (partial scoring)
+                    $results[] = $childScore;
+                    if ($childResult !== 'correct') {
+                        $allCorrect = false;
+                        if ($firstIncorrectVerdict === null) {
+                            $firstIncorrectVerdict = $childResult;
+                        }
+                    }
+                }
+            }
+        }
+
+        $testcaseAggregationType = $testcaseGroup->getAggregationType();
+        switch ($testcaseAggregationType) {
+            case TestcaseAggregationType::SUM:
+            case TestcaseAggregationType::AVG:
+                $score = "0";
+                foreach ($results as $result) {
+                    if ($result === null) {
+                        $allResultsReady = false;
+                        break;
+                    } else {
+                        $score = bcadd($score, $result, ScoreboardService::SCALE);
+                    }
+                }
+                if ($testcaseAggregationType === TestcaseAggregationType::AVG && count($results) > 0) {
+                    $score = bcdiv($score, (string)count($results), ScoreboardService::SCALE);
+                }
+                break;
+            case TestcaseAggregationType::MIN:
+            case TestcaseAggregationType::MAX:
+                $score = null;
+                foreach ($results as $result) {
+                    if ($result === null) {
+                        $allResultsReady = false;
+                        break;
+                    } elseif ($score === null) {
+                        $score = $result;
+                    } else {
+                        if ($testcaseAggregationType === TestcaseAggregationType::MIN
+                            && bccomp($result, $score, ScoreboardService::SCALE) < 0) {
+                            $score = $result;
+                        }
+                        if ($testcaseAggregationType === TestcaseAggregationType::MAX
+                            && bccomp($result, $score, ScoreboardService::SCALE) > 0) {
+                            $score = $result;
+                        }
+                    }
+                }
+                break;
+            default:
+                throw new InvalidArgumentException(sprintf("Unknown testcase aggregation type '%s'.",
+                    $testcaseAggregationType->name));
+        }
+
+        if ($allResultsReady || (!$allCorrect && !$testcaseGroup->isOnRejectContinue())) {
+            // Normalize score to string with proper scale; default to '0' for empty MIN/MAX results
+            $score = bcadd($score ?? '0', '0', ScoreboardService::SCALE);
+            $result = $allCorrect ? 'correct' : $firstIncorrectVerdict ?? 'judge-error';
+            return [$score, $result];
+        }
+        return [null, null];
+    }
+
+    /**
+     * Get the scoring hierarchy for the given problem and judging.
+     * @return array<string, mixed>|null
+     */
+    public function getScoringHierarchy(Problem $problem, Judging $judging): ?array
+    {
+        $parentGroup = $problem->getParentTestcaseGroup();
+        if ($parentGroup === null) {
+            return null;
+        }
+
+        $runsByGroup = [];
+        foreach ($judging->getRuns() as $run) {
+            $group = $run->getTestcase()->getTestcaseGroup();
+            if ($group !== null) {
+                $runsByGroup[$group->getTestcaseGroupId()][] = $run;
+            }
+        }
+
+        return $this->getScoringHierarchyForGroup($parentGroup, $judging, null, $runsByGroup);
+    }
+
+    /**
+     * Get the scoring hierarchy for the given group and judging.
+     * @param array<int, JudgingRun[]>|null $runsByGroup
+     * @return array<string, mixed>
+     */
+    private function getScoringHierarchyForGroup(TestcaseGroup $group, Judging $judging, ?string $parentName = null, ?array $runsByGroup = null): array
+    {
+        $name = $group->getName();
+        $displayName = $name;
+        if ($parentName !== null && str_starts_with($name, $parentName)) {
+            $displayName = ltrim(substr($name, strlen($parentName)), '/');
+        }
+
+        $hierarchy = [
+            'name' => $name,
+            'display_name' => $displayName,
+            'aggregation' => $group->getAggregationType()->value,
+            'accept_score' => $group->getAcceptScore(),
+            'on_reject_continue' => $group->isOnRejectContinue(),
+            'ignore_sample' => $group->isIgnoreSample(),
+            'children' => [],
+            'testcases' => [],
+            'child_scores' => [],
+        ];
+
+        [$score, $result] = self::maybeSetScoringResult($group, $judging, $runsByGroup);
+        $hierarchy['score'] = $score;
+        $hierarchy['result'] = $result;
+
+        if ($group->getChildren()->isEmpty()) {
+            if ($group->getAcceptScore() !== null) {
+                // Leaf group with accept score
+                if ($result !== null) {
+                    if ($result === 'correct') {
+                        $hierarchy['child_scores'][] = (string)bcadd($group->getAcceptScore(), '0', ScoreboardService::SCALE);
+                    } else {
+                        $hierarchy['child_scores'][] = (string)bcadd('0', '0', ScoreboardService::SCALE);
+                    }
+                }
+            }
+
+            $relevantRuns = $runsByGroup[$group->getTestcaseGroupId()] ?? [];
+            foreach ($relevantRuns as $run) {
+                $tc_score = (string)bcadd((string)$run->getScore(), '0', ScoreboardService::SCALE);
+                $tc_name = $run->getTestcase()->getOrigInputFilename();
+                if ($tc_name !== null) {
+                    $lastSlash = strrpos($tc_name, '/');
+                    if ($lastSlash !== false) {
+                        $tc_name = substr($tc_name, $lastSlash + 1);
+                    }
+                }
+                $hierarchy['testcases'][] = [
+                    'rank' => $run->getTestcase()->getRank(),
+                    'result' => $run->getRunresult(),
+                    'score' => $tc_score,
+                    'orig_input_filename' => $run->getTestcase()->getOrigInputFilename(),
+                    'display_name' => $tc_name,
+                ];
+                if ($group->getAcceptScore() === null) {
+                    $hierarchy['child_scores'][] = $tc_score;
+                }
+            }
+            // Sort testcases by rank
+            usort($hierarchy['testcases'], fn($a, $b) => $a['rank'] <=> $b['rank']);
+        } else {
+            foreach ($group->getChildren() as $childGroup) {
+                if ($group->isIgnoreSample() && $childGroup->getName() === 'data/sample') {
+                    continue;
+                }
+                $child_hierarchy = $this->getScoringHierarchyForGroup($childGroup, $judging, $name, $runsByGroup);
+                $hierarchy['children'][] = $child_hierarchy;
+                if ($child_hierarchy['score'] !== null) {
+                    $hierarchy['child_scores'][] = $child_hierarchy['score'];
+                }
+            }
+        }
+
+        return $hierarchy;
+    }
 
     /**
      * Get a list of submissions that can be displayed in the interface using
@@ -736,27 +978,42 @@ class SubmissionService
 
         $this->logger->info('Submission input verified');
 
-        // First look up any expected results in all submission files to minimize the
+        // First look up any expected results/score in all submission files to minimize the
         // SQL transaction time below.
         // Only do this for problem import submissions, as we do not want this for re-submitted submissions nor
         // submissions that come through the API, e.g. when doing a replay of an old contest.
+        $expectedResults = null;
+        $expectedScore = null;
         if ($this->dj->checkrole('jury') && $source === SubmissionSource::PROBLEM_IMPORT) {
-            $results = null;
+            $annotation = null;
             foreach ($files as $file) {
-                $fileResult = self::getExpectedResults(file_get_contents($file->getRealPath()),
-                    $this->config->get('results_remap'));
-                if ($fileResult === false) {
-                        $message = sprintf("Found more than one @EXPECTED_RESULTS@ in file '%s'.",
-                            $file->getClientOriginalName());
-                        return null;
+                $fileAnnotation = self::parseExpectedAnnotation(
+                    file_get_contents($file->getRealPath()),
+                    $this->config->get('results_remap')
+                );
+                if ($fileAnnotation === false) {
+                    $message = sprintf(
+                        "Found more than one @EXPECTED_RESULTS@/@EXPECTED_SCORE@ in file '%s'.",
+                        $file->getClientOriginalName()
+                    );
+                    return null;
                 }
-                if ($fileResult !== null) {
-                    if ($results !== null) {
-                        $message = sprintf("Found more than one file with @EXPECTED_RESULTS@, e.g. in '%s'.",
-                            $file->getClientOriginalName());
+                if ($fileAnnotation !== null) {
+                    if ($annotation !== null) {
+                        $message = sprintf(
+                            "Found more than one file with @EXPECTED_RESULTS@/@EXPECTED_SCORE@, e.g. in '%s'.",
+                            $file->getClientOriginalName()
+                        );
                         return null;
                     }
-                    $results = $fileResult;
+                    $annotation = $fileAnnotation;
+                }
+            }
+            if ($annotation !== null) {
+                if ($annotation['type'] === 'score') {
+                    $expectedScore = $annotation['value'];
+                } else {
+                    $expectedResults = $annotation['value'];
                 }
             }
         }
@@ -776,10 +1033,15 @@ class SubmissionService
             ->setImportError($importError)
             ->setSource($source);
 
-        // Add expected results from source. We only do this for jury submissions
+        // Add expected results/score from source. We only do this for jury submissions
         // to prevent accidental auto-verification of team submissions.
-        if ($this->dj->checkrole('jury') && !empty($results)) {
-            $submission->setExpectedResults($results);
+        if ($this->dj->checkrole('jury')) {
+            if (!empty($expectedResults)) {
+                $submission->setExpectedResults($expectedResults);
+            }
+            if ($expectedScore !== null) {
+                $submission->setExpectedScore($expectedScore);
+            }
         }
         $this->em->persist($submission);
 
@@ -913,6 +1175,71 @@ class SubmissionService
             return self::PROBLEM_RESULT_REMAP[$result];
         }
         return $result;
+    }
+
+    /**
+     * Parse expected annotation from source file, returning structured data.
+     *
+     * Returns an array with:
+     *   - 'type': 'score' if @EXPECTED_SCORE@ with numeric value, 'results' otherwise
+     *   - 'value': numeric score (for type=score) or array of result names (for type=results)
+     * Returns false if multiple annotations found, null if no annotation found.
+     *
+     * @param array<string, string> $resultsRemap
+     * @return array{type: string, value: string|string[]}|false|null
+     */
+    public static function parseExpectedAnnotation(string $source, array $resultsRemap): array|false|null
+    {
+        $matchstring = null;
+        $pos = false;
+        foreach (self::PROBLEM_RESULT_MATCHSTRING as $pattern) {
+            $currentPos = mb_stripos($source, $pattern);
+            if ($currentPos !== false) {
+                // Check if we find another match after the first one, since
+                // that is not allowed.
+                if (mb_stripos($source, $pattern, $currentPos + 1) !== false) {
+                    return false;
+                }
+                // Check that another pattern did not give a match already.
+                if ($pos !== false) {
+                    return false;
+                }
+                $pos = $currentPos;
+                $matchstring = $pattern;
+            }
+        }
+
+        if ($pos === false) {
+            return null;
+        }
+
+        $beginpos = $pos + mb_strlen($matchstring);
+        $endpos = mb_strpos($source, "\n", $beginpos);
+        $str = trim(mb_substr($source, $beginpos, $endpos - $beginpos));
+
+        // If @EXPECTED_SCORE@ is used with a numeric value, treat it as an expected score
+        if ($matchstring === '@EXPECTED_SCORE@: ' && is_numeric($str)) {
+            return [
+                'type' => 'score',
+                'value' => $str,
+            ];
+        }
+
+        // Otherwise, treat as expected results (list of result names)
+        $results = explode(',', mb_strtoupper($str));
+        foreach ($results as $key => $val) {
+            $result = self::normalizeExpectedResult($val);
+            $lowerResult = mb_strtolower($result);
+            if (isset($resultsRemap[$lowerResult])) {
+                $result = mb_strtoupper($resultsRemap[$lowerResult]);
+            }
+            $results[$key] = $result;
+        }
+
+        return [
+            'type' => 'results',
+            'value' => $results,
+        ];
     }
 
     /**

@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 10.0.0DEV
 -----------------
+ - Added support for IOI style partial scoring and optimization problems.
  - Removed support for multiple endpoints from judgedaemon.
  - Removed support for cgroup v1.
  - Various fixes to the Monaco submission comparison viewer.
