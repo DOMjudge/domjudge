@@ -445,6 +445,27 @@ class TwigExtension
         return $results;
     }
 
+    /**
+     * Render a single testcase result as a badge (box).
+     */
+    #[AsTwigFilter('displayScoringTestcaseResult', isSafe: ['html'])]
+    public function displayScoringTestcaseResult(?string $runResult, int $rank): string
+    {
+        $class = 'secondary';
+        $text  = '?';
+        if ($runResult !== null) {
+            $text  = substr($runResult, 0, 1);
+            $class = 'danger';
+            if ($runResult === Judging::RESULT_CORRECT) {
+                $text  = '✓';
+                $class = 'success';
+            }
+        }
+
+        return sprintf('<a href="#run-%d"><span class="badge text-bg-%s badge-testcase">%s</span></a>',
+            $rank, $class, $text);
+    }
+
     #[AsTwigFilter('printResult', isSafe: ['html'])]
     public function printResult(
         ?string $result,

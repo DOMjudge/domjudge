@@ -42,6 +42,18 @@
                 <div class="p-2">
                     Result: {{ judging.result | printResult }}
                 </div>
+                {% if current_team_contest.scoreboardTypeString == 'score' %}
+                    <div class="p-2">
+                        Score:
+                        <b>
+                            {% if judging.score is not null %}
+                                {{ judging.score | number_format(2, '.', '') }}
+                            {% else %}
+                                {{ '-' }}
+                            {% endif %}
+                        </b>
+                    </div>
+                {% endif %}
                 {% if judging.result == 'correct' and judging.submission.contest.getRuntimeAsScoreTiebreaker() %}
                     <div class="p-2">
                         Max. Runtime: <b>{{ "%0.3f s" | format(judging.getMaxRuntime()) }}</b>

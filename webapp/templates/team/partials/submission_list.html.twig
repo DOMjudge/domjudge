@@ -4,6 +4,11 @@
 {% if submissions is empty %}
     <div class="alert alert-warning">No submissions</div>
 {% else %}
+    {% set is_scoring = false %}
+    {% if contest.scoreboardTypeString == 'score' %}
+        {% set is_scoring = true %}
+    {% endif %}
+
     <table class="data-table table table-hover table-sm submissions-table">
         <thead class="thead-light">
         <tr>
@@ -11,6 +16,9 @@
             <th scope="col">problem</th>
             <th scope="col">lang</th>
             <th scope="col">result</th>
+            {% if is_scoring %}
+                <th scope="col" class="right">score</th>
+            {% endif %}
             {% if contest.getRuntimeAsScoreTiebreaker() %}
                 <th scope="col">runtime</th>
             {% endif %}
@@ -65,6 +73,15 @@
                         {%- endif %}
                     </a>
                 </td>
+                {% if is_scoring %}
+                    <td class="right">
+                        {% if submission.score is not null %}
+                            {{ submission.score | number_format(2, '.', '') }}
+                        {% else %}
+                            {{ '-' }}
+                        {% endif %}
+                    </td>
+                {% endif %}
         {% if contest.getRuntimeAsScoreTiebreaker() %}
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>

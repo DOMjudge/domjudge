@@ -15,6 +15,11 @@
     {% set tdExtraClass = ' thick-border' %}
 {% endif %}
 
+{% set is_scoring = false %}
+{% if current_contest and current_contest.scoreboardTypeString == 'score' %}
+    {% set is_scoring = true %}
+{% endif %}
+
 {% if submissions is empty %}
     <div class="alert alert-warning">No submissions</div>
 {% else %}
@@ -72,8 +77,14 @@
             {% else %}
                 <th scope="col">{%- if rejudging is defined %}new {% endif %}result</th>
             {% endif %}
+            {% if is_scoring %}
+                <th scope="col">score</th>
+            {% endif %}
             {% if showExternalResult and not showExternalTestcases %}
-                <th scope="col">external result</th>
+                <th scope="col">ext. result</th>
+                {% if is_scoring %}
+                    <th scope="col">ext. score</th>
+                {% endif %}
             {% endif %}
             {% if not showExternalResult or not showExternalTestcases %}
                 <th scope="col" class="table-button-head-left">verified</th>
@@ -157,6 +168,15 @@
                         {{ submission | printValidJurySubmissionResult }}
                     </a>
                 </td>
+                {% if is_scoring %}
+                    <td class="{{ tdExtraClass }} right">
+                        {% if submission.score is not null %}
+                            {{ submission.score | number_format(2, '.', '') }}
+                        {% else %}
+                            {{ '-' }}
+                        {% endif %}
+                    </td>
+                {% endif %}
                 {% if showExternalResult and not showExternalTestcases %}
                     {% if submission.externalJudgements.empty %}
                         {% set externalJudgement = null %}
@@ -174,6 +194,15 @@
                             {% endif %}
                         </a>
                     </td>
+                    {% if is_scoring %}
+                        <td class="{{ tdExtraClass }}">
+                            {% if externalJudgement is not null and externalJudgement.score is not null %}
+                                {{ externalJudgement.score | number_format(2, '.', '') }}
+                            {% else %}
+                                {{ '-' }}
+                            {% endif %}
+                        </td>
+                    {% endif %}
                 {% endif %}
                 {% if not showExternalResult or not showExternalTestcases %}
                     {%- set claim = false %}
@@ -260,12 +289,21 @@
                             {% endif %}
                         </a>
                     </td>
+                    {% if is_scoring %}
+                        <td class="right">
+                            {% if externalJudgement.score is not null %}
+                                {{ externalJudgement.score | number_format(2, '.', '') }}
+                            {% else %}
+                                {{ '-' }}
+                            {% endif %}
+                        </td>
+                    {% endif %}
                     <td class="testcase-results">
                         {{- submission | testcaseResults(true) -}}
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="3" class="inline-verify-form">
+                    <td colspan="{% if is_scoring %}4{% else %}3{% endif %}" class="inline-verify-form">
                         {% if externalJudgement is not null and (not submission.judgings.first or submission.judgings.first.result != externalJudgement.result) %}
                             {% include 'jury/partials/verify_form.html.twig' with {
                                 label: 'Shadow difference verified',
