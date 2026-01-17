@@ -9,9 +9,28 @@ on:
 jobs:
   integration:
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - mode: default
+            contest: demo
+            install_scoring: ''
+            submit_check: check-full
+            expected_unverified: 2
+            expected_no_magic: 1
+            artifact_suffix: ''
+          - mode: scoring
+            contest: scoringdemo
+            install_scoring: '1'
+            submit_check: check
+            expected_unverified: 0
+            expected_no_magic: 0
+            artifact_suffix: '-scoring'
     env:
       ADMIN_PASSWORD: admin_password
       MYSQL_ROOT_PASSWORD: mysql_root_password
+      INSTALL_SCORING: ${{ matrix.install_scoring }}
     timeout-minutes: 30
     container:
       image: domjudge/gitlabci:24.04
@@ -62,7 +81,7 @@ jobs:
             | curl --fail -u "admin:${ADMIN_PASSWORD}" -X 'PUT' -T - 'http://localhost/domjudge/api/v4/config?strict=false' \
       - name: Testing submit client
         working-directory: submit
-        run: make check-full
+        run: make ${{ matrix.submit_check }}
       - name: Configure judgehost
         run: sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/ && sudo chmod 400 /etc/sudoers.d/sudoers-domjudge && cat /opt/domjudge/judgehost/etc/sudoers-domjudge
       - name: Create user
@@ -70,6 +89,7 @@ jobs:
       - name: Start judging
         run: sudo -u domjudge sh -c 'cd /opt/domjudge/judgehost/ && nohup bin/judgedaemon -n 0 &'
       - name: Import Kattis example problems
+        if: matrix.mode == 'default'
         run: |
           cd /tmp
           git clone --depth=1 https://github.com/Kattis/problemtools.git
@@ -102,7 +122,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: DB-dump
+          name: DB-dump${{ matrix.artifact_suffix }}
           path: /tmp/db.sql
       - name: Get SQL logs
         run: docker logs "${{ job.services.sqlserver.id }}"
@@ -115,7 +135,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Logs
+          name: Logs${{ matrix.artifact_suffix }}
           path: |
             /var/log/nginx
             /opt/domjudge/domserver/webapp/var/log/*.log
@@ -130,6 +150,8 @@ jobs:
           CSRFTOKEN=$(curl $CURLOPTS -c /tmp/cookiejar "http://localhost/domjudge/login" | sed -n 's/.*_csrf_token.*value="\(.*\)".*/\1/p')
           # Make a second request with our session + csrf token to actually log in
           curl $CURLOPTS -c /tmp/cookiejar -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F "_password=${ADMIN_PASSWORD}" "http://localhost/domjudge/login"
+          # Select contest (needed for scoring mode to switch to scoringdemo)
+          curl $CURLOPTS "http://localhost/domjudge/jury/change-contest/${{ matrix.contest }}" -o /dev/null
           # Send a general clarification to later test if we see the event.
           curl $CURLOPTS -F "sendto=" -F "problem=1-" -F "bodytext=Testing" -F "submit=Send" \
                "http://localhost/domjudge/jury/clarifications/send" -o /dev/null
@@ -137,15 +159,12 @@ jobs:
           NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked"     | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
           NUMVERIFIED=$(   curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
           NUMNOMAGIC=$(    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string"    | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
-          NUMSUBS=$(curl $CURLOPTS http://localhost/domjudge/api/contests/demo/submissions | python3 -mjson.tool | grep -c '"id":')
-          # We expect
-          # - two submissions with ambiguous outcome,
-          # - one submissions submitted through the submit client, and thus the magic string ignored,
-          # - and all submissions to be judged.
-          if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 1 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
+          NUMSUBS=$(curl $CURLOPTS http://localhost/domjudge/api/contests/${{ matrix.contest }}/submissions | python3 -mjson.tool | grep -c '"id":')
+          # Verify expected results
+          if [ $NUMNOTVERIFIED -ne ${{ matrix.expected_unverified }} ] || [ $NUMNOMAGIC -ne ${{ matrix.expected_no_magic }} ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
             echo "verified subs: $NUMVERIFIED, unverified subs: $NUMNOTVERIFIED, total subs: $NUMSUBS"
-            echo "(expected 2 submissions to be unverified, but all to be processed)"
-            echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 1)."
+            echo "(expected ${{ matrix.expected_unverified }} submissions to be unverified, but all to be processed)"
+            echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS/EXPECTED_SCORE string (should be ${{ matrix.expected_no_magic }})."
             curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" | w3m -dump -T text/html
             exit 1
           fi
@@ -153,10 +172,12 @@ jobs:
         shell: bash
         run: |
           set -x
-          export CURLOPTS="--fail -m 30 -b $COOKIEJAR"
-          curl $CURLOPTS http://localhost/domjudge/jury/contests/1/freeze/doNow || true
-          curl $CURLOPTS http://localhost/domjudge/jury/contests/1/end/doNow || true
-          curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/1/finalize
+          export CURLOPTS="--fail -m 30 -b /tmp/cookiejar"
+          # Get contest ID from API
+          CID=$(curl -sq "http://localhost/domjudge/api/contests/${{ matrix.contest }}" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+          curl $CURLOPTS http://localhost/domjudge/jury/contests/$CID/freeze/doNow || true
+          curl $CURLOPTS http://localhost/domjudge/jury/contests/$CID/end/doNow || true
+          curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/$CID/finalize
       - name: Verify no errors in symfony {prod,test,dev}.log
         shell: bash
         run: |

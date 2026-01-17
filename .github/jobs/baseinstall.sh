@@ -137,7 +137,11 @@ if [ "${db}" = "install" ]; then
 	    # Make sure admin has no team associated so we will not insert submissions during unit tests.
 	    mysql_log "UPDATE user SET teamid=null WHERE userid=1;" $DATABASE_NAME
     fi
-    /opt/domjudge/domserver/bin/dj_setup_database install-examples | tee -a "$ARTIFACTS/mysql.txt"
+    INSTALL_CMD="install-examples"
+    if [ "${INSTALL_SCORING:-}" = "1" ]; then
+        INSTALL_CMD="install-scoring-examples"
+    fi
+    /opt/domjudge/domserver/bin/dj_setup_database "$INSTALL_CMD" | tee -a "$ARTIFACTS/mysql.txt"
     section_end
 fi
 
