@@ -62,6 +62,17 @@ class ExternalRun
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     private Contest $contest;
 
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        options: [
+            'comment' => 'Optional score for this run, e.g. for partial scoring',
+            'default' => '0.000000000',
+        ]
+    )]
+    private string|float $score = 0;
+
     public function getExtrunid(): int
     {
         return $this->extrunid;
@@ -142,5 +153,16 @@ class ExternalRun
     public function getContest(): Contest
     {
         return $this->contest;
+    }
+
+    public function setScore(string|float $score): ExternalRun
+    {
+        $this->score = $score;
+        return $this;
+    }
+
+    public function getScore(): string
+    {
+        return (string)$this->score;
     }
 }

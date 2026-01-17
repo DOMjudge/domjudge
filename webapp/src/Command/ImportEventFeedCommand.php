@@ -109,7 +109,7 @@ class ImportEventFeedCommand
         $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
         $this->tokenStorage->setToken($token);
 
-        if (!$this->compareContestId()) {
+        if (!$this->validateContestSource()) {
             return Command::FAILURE;
         }
 
@@ -191,11 +191,11 @@ class ImportEventFeedCommand
     }
 
     /**
-     * Compare the external contest ID of the configured contest to the source.
+     * Validate the configured contest to the source.
      *
      * @return bool False if the import should stop, true otherwise.
      */
-    protected function compareContestId(): bool
+    protected function validateContestSource(): bool
     {
         $contest = $this->sourceService->getSourceContest();
         $ourId   = $contest->getExternalid();
@@ -204,6 +204,17 @@ class ImportEventFeedCommand
             $this->style->warning(
                 "Contest ID in external system $theirId does not match external ID in DOMjudge ($ourId)."
             );
+            if (!$this->style->confirm('Do you want to continue anyway?', default: false)) {
+                return false;
+            }
+        }
+
+        if ($contest->getScoreboardType() !== $this->sourceService->getScoreboardType()) {
+            $this->style->warning(sprintf(
+                "Scoreboard type in external system (%s) does not match type in DOMjudge (%s).",
+                $this->sourceService->getScoreboardType()->value,
+                $contest->getScoreboardType()->value,
+            ));
             if (!$this->style->confirm('Do you want to continue anyway?', default: false)) {
                 return false;
             }

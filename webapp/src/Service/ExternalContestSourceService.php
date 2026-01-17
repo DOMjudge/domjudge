@@ -31,6 +31,7 @@ use App\Entity\JudgeTask;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\QueueTask;
+use App\Entity\ScoreboardType;
 use App\Entity\Submission;
 use App\Entity\SubmissionSource;
 use App\Entity\Team;
@@ -181,6 +182,15 @@ class ExternalContestSourceService
         }
 
         return $this->cachedContestData->id;
+    }
+
+    public function getScoreboardType(): ScoreboardType
+    {
+        if (!$this->isValidContestSource()) {
+            throw new LogicException('The contest source is not valid.');
+        }
+
+        return $this->cachedContestData->scoreboardType ?? ScoreboardType::PASS_FAIL;
     }
 
     public function getContestName(): string
@@ -1552,6 +1562,10 @@ class ExternalContestSourceService
                 for ($zipFileIdx = 0; $zipFileIdx < $zip->numFiles; $zipFileIdx++) {
                     $filename = $zip->getNameIndex($zipFileIdx);
                     $content = $zip->getFromName($filename);
+                    // Do not add directories to the submission
+                    if (str_ends_with($filename, '/')) {
+                        continue;
+                    }
 
                     if (!($tmpSubmissionFile = tempnam($tmpdir, "submission_source_"))) {
                         $this->addOrUpdateWarning($event, $data->id, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
@@ -1718,6 +1732,10 @@ class ExternalContestSourceService
             ->setEndtime($endTime)
             ->setResult($judgementTypeId === null ? null : $verdictsFlipped[$judgementTypeId]);
 
+        if (isset($data->score)) {
+            $judgement->setScore($data->score);
+        }
+
         if ($persist) {
             $this->em->persist($judgement);
         }
@@ -1867,6 +1885,10 @@ class ExternalContestSourceService
             ->setEndtime($time)
             ->setRuntime($runTime)
             ->setResult($judgementTypeId === null ? null : $verdictsFlipped[$judgementTypeId]);
+
+        if (isset($data->score)) {
+            $run->setScore($data->score);
+        }
 
         if ($persist) {
             $this->em->persist($run);
