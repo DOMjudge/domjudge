@@ -49,6 +49,21 @@ command to reset the password of a user to a random value::
 Replace ``admin`` with the username of the user you want to reset the password for.
 The password will be displayed.
 
+Allowing users to change their password
+---------------------------------------
+
+By default, self-service password changing is disabled for all users. You can enable
+it in two ways:
+
+- Globally per role: In *Configuration settings* under the *Authentication* section,
+  add roles (such as ``jury`` or ``admin``) to the ``password_change_roles`` option.
+- Per team category: When adding or editing a category under *Categories*, enable
+  the *Allow password change* option to permit all teams in that category to change
+  their password.
+
+When enabled, users with permission can change their password using the *Change password*
+button in the user menu or via the REST API (``POST /api/v4/users/{id}/change-password``).
+
 Adding a contest
 ----------------
 You configure a new contest by adding it under the Contests link
