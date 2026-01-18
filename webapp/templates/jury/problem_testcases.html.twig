@@ -39,149 +39,122 @@
             </tr>
             </thead>
             <tbody>
-            {% set lastLineage = [] %}
-            {% for rank, testcase in testcases %}
-                {% set lineage = [] %}
-                {% set g = testcase.testcaseGroup %}
-                {% for i in 0..10 %}
-                    {% if g %}
-                        {% set lineage = [g]|merge(lineage) %}
-                        {% set g = g.parent %}
-                    {% endif %}
-                {% endfor %}
-
-                {% set commonPrefixLength = 0 %}
-                {% set foundDiff = false %}
-                {% for i in 0..10 %}
-                    {% if not foundDiff %}
-                        {% if lastLineage[i] is defined and lineage[i] is defined and lastLineage[i].testcaseGroupId == lineage[i].testcaseGroupId %}
-                            {% set commonPrefixLength = i + 1 %}
-                        {% else %}
-                            {% set foundDiff = true %}
-                        {% endif %}
-                    {% endif %}
-                {% endfor %}
-
-                {% for i in 0..10 %}
-                    {% if i >= commonPrefixLength and i < lineage|length %}
-                        {% set group = lineage[i] %}
-                        {% set dispName = group.name | split('/') | last %}
-
-                        <tr class="table-secondary">
-                            <td colspan="{{ allowEdit ? 8 : 6 }}" style="padding-left: {{ (i * 1.5) + 0.5 }}rem;">
-                                <i class="fas {{ i == 0 ? 'fa-sitemap' : 'fa-folder-open' }} me-1"></i>
-                                <strong>{{ dispName }}</strong>
-                                <span class="badge ms-2 scoring-agg-pill scoring-agg-{{ group.aggregationType.value }}">{{ group.aggregationType.value | upper }}</span>
-                                {% if group.acceptScore is not null %}
-                                    <span class="badge ms-2 scoring-accept-badge">Accept score: {{ (group.acceptScore + 0) }}</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endif %}
-                {% endfor %}
-
-                {% if lineage|length == 0 and lastLineage|length > 0 %}
+            {% for row in rows %}
+                {% if row.type == 'group' %}
+                    {% set group = row.group %}
+                    {% set dispName = group.name | split('/') | last %}
+                    <tr class="table-secondary">
+                        <td colspan="{{ allowEdit ? 8 : 6 }}" style="padding-left: {{ (row.level * 1.5) + 0.5 }}rem;">
+                            <i class="fas {{ row.level == 0 ? 'fa-sitemap' : 'fa-folder-open' }} me-1"></i>
+                            <strong>{{ dispName }}</strong>
+                            <span class="badge ms-2 scoring-agg-pill scoring-agg-{{ group.aggregationType.value }}">{{ group.aggregationType.value | upper }}</span>
+                            {% if group.acceptScore is not null %}
+                                <span class="badge ms-2 scoring-accept-badge">Accept score: {{ (group.acceptScore + 0) }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% elseif row.type == 'no_group' %}
                     <tr class="table-secondary">
                         <td colspan="{{ allowEdit ? 8 : 6 }}">
                             <strong>No group</strong>
                         </td>
                     </tr>
-                {% endif %}
-
-                {% set lastLineage = lineage %}
-                <tr>
-                    {% if allowEdit %}
-                        <td rowspan="2">
-                            <a href="{{  path('jury_testcase_delete', {'testcaseId': testcase.testcaseid}) }}"
-                               title="delete testcase {{ testcase.testcaseid }}"
-                               onclick="confirm('Proceed with the deletion of testcase {{ testcase.testcaseid }}?');">
-                                <i class="fas fa-trash-alt"></i>
+                {% else %}
+                    {% set testcase = row.testcase %}
+                    <tr>
+                        {% if allowEdit %}
+                            <td rowspan="2">
+                                <a href="{{  path('jury_testcase_delete', {'testcaseId': testcase.testcaseid}) }}"
+                                   title="delete testcase {{ testcase.testcaseid }}"
+                                   onclick="confirm('Proceed with the deletion of testcase {{ testcase.testcaseid }}?');">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                        {% endif %}
+                        <td rowspan="2" class="testrank">
+                            {% if allowEdit %}
+                                <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'up'}) }}"
+                                   title="Move testcase up"><i class="fas fa-arrow-up"></i></a><br>
+                            {% endif %}
+                            {{ testcase.rank }}
+                            {% if allowEdit %}
+                                <br>
+                                <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'down'}) }}"
+                                   title="Move testcase down"><i class="fas fa-arrow-down"></i></a>
+                            {% endif %}
+                        </td>
+                        <td rowspan="2" class="testsample">
+                            <input type="checkbox" name="sample[{{ testcase.rank }}]" value="sample"
+                                   {% if testcase.sample %}checked{% endif %} />
+                        </td>
+                        <td class="filename">
+                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'input'}) }}">
+                                {{ testcase.downloadName | split('/') | last }}.{{ extensionMapping.input }}
                             </a>
                         </td>
-                    {% endif %}
-                    <td rowspan="2" class="testrank">
+                        <td class="size">
+                            {{ row.inputSize | printSize }}
+                        </td>
+                        <td class="md5 small">
+                            {{ testcase.md5sumInput }}
+                        </td>
                         {% if allowEdit %}
-                            <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'up'}) }}"
-                               title="Move testcase up"><i class="fas fa-arrow-up"></i></a><br>
+                            <td><div class="input-group">
+                                <label class="form-control text-truncate" for="update_input_{{testcase.rank}}" id="update_input_label_{{testcase.rank}}">new input file</label>
+                                <input type="file" class="d-none custom-file-input" name="update_input[{{ testcase.rank }}]" id="update_input_{{testcase.rank}}">
+                            </div></td>
                         {% endif %}
-                        {{ testcase.rank }}
-                        {% if allowEdit %}
-                            <br>
-                            <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'down'}) }}"
-                               title="Move testcase down"><i class="fas fa-arrow-down"></i></a>
-                        {% endif %}
-                    </td>
-                    <td rowspan="2" class="testsample">
-                        <input type="checkbox" name="sample[{{ testcase.rank }}]" value="sample"
-                               {% if testcase.sample %}checked{% endif %} />
-                    </td>
-                    <td class="filename">
-                        <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'input'}) }}">
-                            {{ testcase.downloadName | split('/') | last }}.{{ extensionMapping.input }}
-                        </a>
-                    </td>
-                    <td class="size">
-                        {{ testcaseData[testcase.rank].input_size | printSize }}
-                    </td>
-                    <td class="md5 small">
-                        {{ testcase.md5sumInput }}
-                    </td>
-                    {% if allowEdit %}
-                        <td><div class="input-group">
-                            <label class="form-control text-truncate" for="update_input_{{testcase.rank}}" id="update_input_label_{{testcase.rank}}">new input file</label>
-                            <input type="file" class="d-none custom-file-input" name="update_input[{{ testcase.rank }}]" id="update_input_{{testcase.rank}}">
-                        </div></td>
-                    {% endif %}
-                    <td class="testdesc">
-                        <span class="testcase-description">{{ testcase.description(true) | descriptionExpand }}</span>
-                        {% if allowEdit %}
-                            <textarea class="d-none form-control testcase-description-field" name="description[{{ testcase.rank }}]">{{ testcase.description(true) }}</textarea>
-                            <button type="button" class="float-end testcase-edit-description btn btn-secondary btn-sm">Edit</button>
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="filename">
-                        <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'output'}) }}">
-                            {{ testcase.downloadName | split('/') | last }}.{{ extensionMapping.output }}
-                        </a>
-                    </td>
-                    <td class="size">
-                        {{ testcaseData[testcase.rank].output_size | printSize }}
-                    </td>
-                    <td class="md5 small">
-                        {{ testcase.md5sumOutput }}
-                    </td>
-                    {% if allowEdit %}
-                        <td><div class="input-group">
-                            <label class="form-control text-truncate" for="update_output_{{testcase.rank}}" id="update_output_label_{{testcase.rank}}">new output file</label>
-                            <input type="file" class="d-none custom-file-input" name="update_output[{{ testcase.rank }}]" id="update_output_{{testcase.rank}}">
-                        </div></td>
-                    {% endif %}
-                    <td class="testimage">
-                        {% if testcaseData[testcase.rank].image_size > 0 %}
-                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'image'}) }}">
-                                <span class="filename">p{{ problem.probid }}.t{{ testcase.rank }}.{{ testcaseData[testcase.rank].image_type }}</span>
+                        <td class="testdesc">
+                            <span class="testcase-description">{{ testcase.description(true) | descriptionExpand }}</span>
+                            {% if allowEdit %}
+                                <textarea class="d-none form-control testcase-description-field" name="description[{{ testcase.rank }}]">{{ testcase.description(true) }}</textarea>
+                                <button type="button" class="float-end testcase-edit-description btn btn-secondary btn-sm">Edit</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="filename">
+                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'output'}) }}">
+                                {{ testcase.downloadName | split('/') | last }}.{{ extensionMapping.output }}
                             </a>
-                            {% if allowEdit %}
-                            &nbsp;
-                            <div class="input-group">
-                                <label class="form-control text-truncate" for="update_image_{{testcase.rank}}" id="update_imapge_label_{{testcase.rank}}">replace image</label>
-                                <input type="file" class="d-none custom-file-input" name="update_image[{{ testcase.rank }}]" id="update_image_{{testcase.rank}}" accept="image/*">
-                            </div>
-                            {% endif %}
-                        {% else %}
-                            {% if allowEdit %}
-                            <div class="input-group">
-                                <label class="form-control text-truncate" for="update_image_{{testcase.rank}}" id="update_imapge_label_{{testcase.rank}}">add an image</label>
-                                <input type="file" class="d-none custom-file-input" name="update_image[{{ testcase.rank }}]" id="update_image_{{testcase.rank}}" accept="image/*">
-                            </div>
-                            {% else %}
-                            <span class="nodata">No image</span>
-                            {% endif %}
+                        </td>
+                        <td class="size">
+                            {{ row.outputSize | printSize }}
+                        </td>
+                        <td class="md5 small">
+                            {{ testcase.md5sumOutput }}
+                        </td>
+                        {% if allowEdit %}
+                            <td><div class="input-group">
+                                <label class="form-control text-truncate" for="update_output_{{testcase.rank}}" id="update_output_label_{{testcase.rank}}">new output file</label>
+                                <input type="file" class="d-none custom-file-input" name="update_output[{{ testcase.rank }}]" id="update_output_{{testcase.rank}}">
+                            </div></td>
                         {% endif %}
-                    </td>
-                </tr>
+                        <td class="testimage">
+                            {% if row.imageSize > 0 %}
+                                <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'image'}) }}">
+                                    <span class="filename">p{{ problem.probid }}.t{{ testcase.rank }}.{{ testcase.imageType }}</span>
+                                </a>
+                                {% if allowEdit %}
+                                &nbsp;
+                                <div class="input-group">
+                                    <label class="form-control text-truncate" for="update_image_{{testcase.rank}}" id="update_imapge_label_{{testcase.rank}}">replace image</label>
+                                    <input type="file" class="d-none custom-file-input" name="update_image[{{ testcase.rank }}]" id="update_image_{{testcase.rank}}" accept="image/*">
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                {% if allowEdit %}
+                                <div class="input-group">
+                                    <label class="form-control text-truncate" for="update_image_{{testcase.rank}}" id="update_imapge_label_{{testcase.rank}}">add an image</label>
+                                    <input type="file" class="d-none custom-file-input" name="update_image[{{ testcase.rank }}]" id="update_image_{{testcase.rank}}" accept="image/*">
+                                </div>
+                                {% else %}
+                                <span class="nodata">No image</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
             {% endfor %}
             </tbody>
         </table>
