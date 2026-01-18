@@ -27,19 +27,20 @@ usage() {
 Usage: $0 [option]... <command> [argument]
 
 Commands:
-  status           check database installation status
-  genpass          generate DB,API,Symfony,admin password files
-  create-db-users  create (empty) database and users
-  update-password  update DB user database to that in 'etc/dbpasswords.secret'
-  install          create database, example contest and users if not existing
-  bare-install     create database, setup defaults if not existing
-  uninstall        remove database users and database, INCLUDING ALL DATA!
-  install-examples install examples only
-  install-scoring-examples install scoring examples only (IOI-style problems)
-  install-loadtest configure for load testing. WARNING: CREATES A LOT OF EXTRA ITEMS!
-  upgrade          upgrade MySQL database schema to current version
-  dump [filename]  backup the current database to file (without .sql.gz suffix)
-  load [filename]  load a backup from file (without .sql.gz suffix), REMOVES ALL PREVIOUS DATA!
+  status                      check database installation status
+  genpass                     generate DB,API,Symfony,admin password files
+  create-db-users             create (empty) database and users
+  update-password             update DB user database to that in 'etc/dbpasswords.secret'
+  install                     create database, example contest and users if not existing
+  bare-install                create database, setup defaults if not existing
+  uninstall                   remove database users and database, INCLUDING ALL DATA!
+  install-examples            install both pass-fail and scoring examples
+  install-pass-fail-examples  install pass-fail examples only
+  install-scoring-examples    install scoring examples only (IOI-style problems)
+  install-loadtest            configure for load testing. WARNING: CREATES A LOT OF EXTRA ITEMS!
+  upgrade                     upgrade MySQL database schema to current version
+  dump [filename]             backup the current database to file (without .sql.gz suffix)
+  load [filename]             load a backup from file (without .sql.gz suffix), REMOVES ALL PREVIOUS DATA!
 
 Options:
   -u <user>  connect to MySQL with DB admin <user>
@@ -269,18 +270,35 @@ update_password()
 	verbose "Database user password updated from credentials file."
 }
 
-install_examples()
+install_pass_fail_problems()
 {
-	symfony_console domjudge:load-example-data
 	"$EXAMPLEPROBDIR"/generate-contest-yaml
 	( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
+}
+
+install_scoring_problems()
+{
+	"$SCORINGEXAMPLEPROBDIR"/generate-contest-yaml
+	( cd "$SCORINGEXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
+}
+
+install_pass_fail_examples()
+{
+	symfony_console domjudge:load-example-data
+	install_pass_fail_problems
 }
 
 install_scoring_examples()
 {
 	symfony_console domjudge:load-example-data
-	"$SCORINGEXAMPLEPROBDIR"/generate-contest-yaml
-	( cd "$SCORINGEXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest )
+	install_scoring_problems
+}
+
+install_examples()
+{
+	symfony_console domjudge:load-example-data
+	install_pass_fail_problems
+	install_scoring_problems
 }
 
 ### Script starts here ###
@@ -346,6 +364,11 @@ uninstall)
 install-examples)
 	read_dbpasswords
 	install_examples
+	;;
+
+install-pass-fail-examples)
+	read_dbpasswords
+	install_pass_fail_examples
 	;;
 
 install-scoring-examples)
