@@ -137,7 +137,7 @@ if [ "${db}" = "install" ]; then
 	    # Make sure admin has no team associated so we will not insert submissions during unit tests.
 	    mysql_log "UPDATE user SET teamid=null WHERE userid=1;" $DATABASE_NAME
     fi
-    INSTALL_CMD="install-examples"
+    INSTALL_CMD="install-pass-fail-examples"
     if [ "${INSTALL_SCORING:-}" = "1" ]; then
         INSTALL_CMD="install-scoring-examples"
     fi
