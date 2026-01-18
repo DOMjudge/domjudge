@@ -125,6 +125,13 @@ class TeamCategory extends BaseApiEntity implements
     #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private bool $allow_self_registration = false;
 
+    #[ORM\Column(options: [
+        'comment' => 'Are teams in this category allowed to change their own password?',
+        'default' => 0,
+    ])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    private bool $allow_password_change = false;
+
     #[ORM\Column(
         nullable: true,
         options: ['comment' => 'CSS class to apply to scoreboard rows (only for TYPE_CSS_CLASS)']
@@ -260,6 +267,17 @@ class TeamCategory extends BaseApiEntity implements
     public function getAllowSelfRegistration(): bool
     {
         return $this->allow_self_registration;
+    }
+
+    public function setAllowPasswordChange(bool $allowPasswordChange): TeamCategory
+    {
+        $this->allow_password_change = $allowPasswordChange;
+        return $this;
+    }
+
+    public function getAllowPasswordChange(): bool
+    {
+        return $this->allow_password_change;
     }
 
 

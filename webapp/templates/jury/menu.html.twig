@@ -155,6 +155,10 @@
                             </a>
                         </div>
 
+                        {% if can_change_password %}
+                            <a class="dropdown-item" href="{{ path('profile_index') }}"><i class="fas fa-key fa-fw"></i> Change password</a>
+                        {% endif %}
+
                         <a class="dropdown-item" href="{{ path('logout') }}"><i class="fas fa-sign-out-alt fa-fw"></i>Logout </a>
                     </div>
                 </li>
