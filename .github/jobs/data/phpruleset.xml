@@ -6,6 +6,10 @@
     <rule ref="PSR2.Methods.FunctionCallSignature.Indent">
         <severity>0</severity>
     </rule>
+    <!-- We have the JudgeDaemon where we do this with intent. -->
+    <rule ref="PSR1.Classes.ClassDeclaration.MultipleClasses">
+      <severity>0</severity>
+    </rule>
     <!-- We have multiple lines of +120 where splitting is not trivial -->
     <rule ref="Generic.Files.LineLength">
         <severity>0</severity>
