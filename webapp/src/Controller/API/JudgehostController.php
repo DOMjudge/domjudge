@@ -18,6 +18,7 @@ use App\Entity\QueueTask;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
+use App\Entity\TestcaseAggregationType;
 use App\Entity\TestcaseContent;
 use App\Entity\Version;
 use App\Service\BalloonService;
@@ -654,7 +655,9 @@ class JudgehostController extends AbstractFOSRestController
         $teamMessage  = $request->request->get('team_message');
         $metadata     = $request->request->get('metadata');
         $testcasedir  = $request->request->get('testcasedir');
-        $compareMeta = $request->request->get('compare_metadata');
+        $compareMeta  = $request->request->get('compare_metadata');
+        // TODO: We probably want to fail if we receive a score for a problem where we don't expect one.
+        $score        = $request->request->get('score');
 
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
@@ -662,7 +665,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime, $startTime, $endTime,
-            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta);
+            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta, $score);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
@@ -936,6 +939,7 @@ class JudgehostController extends AbstractFOSRestController
         string  $metadata,
         ?string $testcasedir,
         ?string $compareMeta,
+        ?string $score = null
     ): bool {
         $resultsRemap = $this->config->get('results_remap');
         $resultsPrio  = $this->config->get('results_prio');
@@ -959,7 +963,8 @@ class JudgehostController extends AbstractFOSRestController
             $teamMessage,
             $metadata,
             $testcasedir,
-            $compareMeta
+            $compareMeta,
+            $score
         ): void {
             $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
                 ['judgetaskid' => $judgeTaskId]);
@@ -988,6 +993,10 @@ class JudgehostController extends AbstractFOSRestController
 
             if ($teamMessage) {
                 $judgingRunOutput->setTeamMessage(base64_decode($teamMessage));
+            }
+
+            if ($score) {
+                $judgingRun->setScore(base64_decode($score));
             }
 
             $judging = $judgingRun->getJudging();
@@ -1026,15 +1035,30 @@ class JudgehostController extends AbstractFOSRestController
         $oldResult = $judging->getResult();
 
         $lazyEval = DOMJudgeService::EVAL_LAZY;
-        if (($result = SubmissionService::getFinalResult($runresults, $resultsPrio)) !== null) {
+        $problem = $judging->getSubmission()->getProblem();
+        if ($problem->isScoringProblem()) {
+            $parentGroup = $problem->getParentTestcaseGroup();
+            $scoreAndResult = SubmissionService::maybeSetScoringResult(
+                $parentGroup,
+                $judging
+            );
+            $score = $scoreAndResult[0];
+            $result = $scoreAndResult[1];
+        } else {
+            $result = SubmissionService::getFinalResult($runresults, $resultsPrio);
+        }
+        if ($result !== null) {
             // Lookup global lazy evaluation of results setting and possible problem specific override.
-            $lazyEval    = $this->config->get('lazy_eval_results');
+            $lazyEval = $this->config->get('lazy_eval_results');
             $problemLazy = $judging->getSubmission()->getContestProblem()->getLazyEvalResults();
             if ($problemLazy !== DOMJudgeService::EVAL_DEFAULT) {
                 $lazyEval = $problemLazy;
             }
 
             $judging->setResult($result);
+            if ($problem->isScoringProblem()) {
+                $judging->setScore($score);
+            }
 
             $hasNullResults = false;
             foreach ($runresults as $runresult) {
@@ -1109,9 +1133,9 @@ class JudgehostController extends AbstractFOSRestController
                 }
 
                 $submission = $judging->getSubmission();
-                $contest    = $submission->getContest();
-                $team       = $submission->getTeam();
-                $problem    = $submission->getProblem();
+                $contest = $submission->getContest();
+                $team = $submission->getTeam();
+                $problem = $submission->getProblem();
                 $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
 
                 // We call alert here before possible validation. Note that

@@ -252,3 +252,61 @@ table.table-full-clickable-cell tr .table-button-head-right-right{
 .diff-title {
     display: none;
 }
+
+/* Scoring hierarchy styles */
+.scoring-group {
+    border-left: 2px solid #dee2e6;
+    padding-left: 0.75rem;
+}
+.scoring-group-indent {
+    margin-left: 0.75rem;
+}
+.scoring-group-root {
+    margin-left: 0;
+}
+.scoring-group-header {
+    font-size: 1rem;
+}
+.scoring-group-root > .scoring-group-header {
+    font-size: 1.1rem;
+}
+.scoring-agg-pill {
+    font-size: 0.7rem;
+}
+.scoring-agg-sum { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+.scoring-agg-avg { background-color: #e7f3ff; color: #004085; border: 1px solid #b8daff; }
+.scoring-agg-min { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+.scoring-agg-max { background-color: #f3e5f5; color: #4a148c; border: 1px solid #d1c4e9; }
+
+.scoring-accept-badge {
+    background-color: #cfe2ff;
+    color: #084298;
+    border: 1px solid #b6d4fe;
+    font-size: 0.7rem;
+}
+
+.scoring-accept-pill {
+    font-size: 0.7rem;
+}
+.scoring-info {
+    font-size: 0.85rem;
+}
+.scoring-equation {
+    font-weight: normal;
+}
+.scoring-testcase-list {
+    font-size: 0.8rem;
+}
+.scoring-testcase-icon {
+    font-size: 0.7rem;
+}
+.scoring-testcase-name {
+    font-family: monospace;
+}
+.scoring-testcase-result {
+    text-align: left;
+    background: none;
+}
+.scoring-testcase-score {
+    font-weight: bold;
+}

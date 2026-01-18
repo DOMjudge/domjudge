@@ -209,6 +209,17 @@ class ImportEventFeedCommand
             }
         }
 
+        if ($contest->getScoreboardType() !== $this->sourceService->getScoreboardType()) {
+            $this->style->warning(sprintf(
+                "Scoreboard type in external system (%s) does not match type in DOMjudge (%s).",
+                $this->sourceService->getScoreboardType()->value,
+                $contest->getScoreboardType()->value,
+            ));
+            if (!$this->style->confirm('Do you want to continue anyway?', default: false)) {
+                return false;
+            }
+        }
+
         return true;
     }
 }

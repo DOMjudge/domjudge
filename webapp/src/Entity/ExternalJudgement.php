@@ -84,6 +84,17 @@ class ExternalJudgement
     )]
     private bool $valid = true;
 
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        options: [
+            'comment' => 'Optional score for this run, e.g. for partial scoring',
+            'default' => '0.000000000',
+        ]
+    )]
+    private string|float $score = 0;
+
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     private Contest $contest;
@@ -248,5 +259,16 @@ class ExternalJudgement
             $sum += $run->getRuntime();
         }
         return $sum;
+    }
+
+    public function getScore(): string
+    {
+        return (string)$this->score;
+    }
+
+    public function setScore(string|float $score): ExternalJudgement
+    {
+        $this->score = $score;
+        return $this;
     }
 }

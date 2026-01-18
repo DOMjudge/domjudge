@@ -82,7 +82,7 @@ class ContestType extends AbstractExternalIdEntityType
             'label' => 'Scoreboard type',
             'choices' => [
                 'pass-fail' => ScoreboardType::PASS_FAIL,
-                'scoring' => ScoreboardType::SCORING,
+                'score' => ScoreboardType::SCORE,
             ],
             'help' => 'The type of scoreboard to use for this contest.',
         ]);

@@ -73,7 +73,7 @@ jobs:
       - name: Check codestyle in python files
         run: >
           python3 /tmp/pycodestyle.py \
-            --exclude='./example_problems/,./doc/,./gitlab/,./webapp/vendor/' \
+            --exclude='./example_problems/,./example_scoring_problems/,./doc/,./gitlab/,./webapp/vendor/' \
             --max-line-length 120 \
             --show-pep8 --show-source \
             .

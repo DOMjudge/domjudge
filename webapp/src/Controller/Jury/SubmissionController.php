@@ -602,6 +602,10 @@ class SubmissionController extends BaseController
             'isAnalystMode' => $this->config->get('lazy_eval_results') === DOMJudgeService::EVAL_ANALYST,
         ];
 
+        if ($selectedJudging) {
+            $twigData['scoringHierarchy'] = $this->submissionService->getScoringHierarchy($submission->getProblem(), $selectedJudging);
+        }
+
         if ($selectedJudging === null) {
             // Automatically refresh page while we wait for judging data.
             $twigData['refresh'] = [

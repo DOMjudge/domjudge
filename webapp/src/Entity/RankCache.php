@@ -81,6 +81,28 @@ class RankCache
     )]
     private string $sortKeyRestricted = '';
 
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        options: [
+            'comment' => 'Optional score for this run, e.g. for partial scoring',
+            'default' => '0.000000000',
+        ]
+    )]
+    private string|float $scorePublic = 0;
+
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        options: [
+            'comment' => 'Optional score for this run, e.g. for partial scoring (for restricted audience)',
+            'default' => '0.000000000',
+        ]
+    )]
+    private string|float $scoreRestricted = 0;
+
     public function setPointsRestricted(int $pointsRestricted): RankCache
     {
         $this->points_restricted = $pointsRestricted;
@@ -189,5 +211,27 @@ class RankCache
     public function getSortKeyRestricted(): string
     {
         return $this->sortKeyRestricted;
+    }
+
+    public function setScorePublic(string|float $scorePublic): RankCache
+    {
+        $this->scorePublic = $scorePublic;
+        return $this;
+    }
+
+    public function getScorePublic(): string|float
+    {
+        return $this->scorePublic;
+    }
+
+    public function setScoreRestricted(string|float $scoreRestricted): RankCache
+    {
+        $this->scoreRestricted = $scoreRestricted;
+        return $this;
+    }
+
+    public function getScoreRestricted(): string|float
+    {
+        return $this->scoreRestricted;
     }
 }

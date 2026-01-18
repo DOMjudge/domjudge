@@ -278,8 +278,12 @@
                 {% set totalTime = totalTime | printTimeRelative %}
             {% endif %}
             {% if enable_ranking %}
-                {% set totalPoints = score.numPoints %}
-                <td class="scorenc">{{ totalPoints }}</td>
+                {% if scoringScoreboard %}
+                    {% set totalPoints = "%.2f" | format(score.score) %}
+                {% else %}
+                    {% set totalPoints = score.numPoints %}
+                {% endif %}
+                <td class="scorenc" {% if scoringScoreboard %}title="Full score: {{ score.score }}"{% endif %}>{{ totalPoints }}</td>
                 {% if not scoringScoreboard %}
                     {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
                         <td class="scorett">{{ "%0.3f s" | format(score.totalRuntime/1000.0) }}</td>
@@ -358,12 +362,13 @@
                             <a {% if link %}href="{{ link }}"{% endif %} {% if extra %}{{ extra | raw }}{% endif %}>
                                 <div
                                     class="{{ scoreCssClass }}"
-                                {% if scoringScoreboard %}
-                                    title="{% if matrixItem.isCorrect %}{{ time }} mins{% endif %}"
-                                {% endif %}
+                                    {% if scoringScoreboard %}
+                                        title="{% if matrixItem.isCorrect %}Full score: {{ matrixItem.points }}{% if time != '' %} ({{ time }} mins){% endif %}{% endif %}"
+                                    {% endif %}
                                 >
                                     {% if scoringScoreboard %}
-                                        {% if matrixItem.isCorrect %}{{ matrixItem.points }}{% else %}&nbsp;{% endif %}
+                                        {# TODO: Decide on precision or make it configurable. #}
+                                        {% if matrixItem.isCorrect %}{{ matrixItem.points | round(2) }}{% else %}&nbsp;{% endif %}
                                     {% else %}
                                         {% if matrixItem.isCorrect %}{{ time }}{% else %}&nbsp;{% endif %}
                                     {% endif %}

@@ -176,6 +176,28 @@ class Judging extends BaseApiEntity
     #[Serializer\Exclude]
     private ?InternalError $internalError = null;
 
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        options: [
+            'comment' => 'Optional score for this run, e.g. for partial scoring',
+            'default' => '0.000000000',
+        ]
+    )]
+    private string|float $score = 0;
+
+    public function setScore(string|float $score): Judging
+    {
+        $this->score = $score;
+        return $this;
+    }
+
+    public function getScore(): string
+    {
+        return (string)$this->score;
+    }
+
     public function getMaxRuntime(): ?float
     {
         if ($this->runs->isEmpty()) {
