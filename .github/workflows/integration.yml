@@ -7,7 +7,8 @@ on:
       - '[0-9]+.[0-9]+'
 
 jobs:
-  integration:
+  run-integration:
+    name: integration (${{ matrix.mode }})
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -199,3 +200,9 @@ jobs:
           ( cd ccs-specs && git reset --hard $CCS_SPECS_PINNED_SHA1 )
           export CHECK_API="${HOME}/ccs-specs/check-api.sh -j ${HOME}/yajsv"
           $CHECK_API -n -C -e -a 'strict=1' "http://admin:${ADMIN_PASSWORD}@localhost/domjudge/api"
+
+  integration:
+    needs: run-integration
+    runs-on: ubuntu-latest
+    steps:
+      - run: true
