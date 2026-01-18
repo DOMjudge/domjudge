@@ -29,7 +29,7 @@ domserver: apache.conf nginx-conf nginx-conf-inner $(SECRETS)
 judgehost: restapi.secret
 
 $(SECRETS):
-	./gen_all_secrets $(subst 1,-q,$(QUIET))
+	./gen_all_secrets $(QUIET_FLAG)
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
