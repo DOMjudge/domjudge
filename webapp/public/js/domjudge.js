@@ -666,7 +666,7 @@ function toggleRefresh($url, $after, usingAjax) {
     $('#refresh-toggle').text(text);
 }
 
-function updateClarifications()
+function updateTeamNotifications()
 {
     $.ajax({
         url: $('#menuDefault').data('update-url'),
@@ -682,6 +682,14 @@ function updateClarifications()
                  {'tag': 'clar_' + data[i].clarid,
                         'link': domjudge_base_url + '/team/clarifications/'+data[i].clarid,
                         'body': data[i].body });
+            }
+            data = json['unread_submissions'];
+            num = data.length;
+            for (let i = 0; i < num; i++) {
+                sendNotification(`Submission ${data[i].submissionid}: ${data[i].result}`,
+                 {'tag': 'sub_' + data[i].submissionid + '_judge_' + data[i].judgingid,
+                        'link': domjudge_base_url + '/team/submission/'+data[i].submissionid,
+                        'body': `Submission ${data[i].submissionid} received a new result: ${data[i].result}` });
             }
         }
     })
