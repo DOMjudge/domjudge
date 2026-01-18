@@ -207,4 +207,18 @@ class TestcaseGroup
         $this->onRejectContinue = $onRejectContinue;
         return $this;
     }
+
+    /**
+     * @return TestcaseGroup[]
+     */
+    public function getLineage(): array
+    {
+        $lineage = [$this];
+        $parent  = $this->getParent();
+        while ($parent !== null) {
+            array_unshift($lineage, $parent);
+            $parent = $parent->getParent();
+        }
+        return $lineage;
+    }
 }
