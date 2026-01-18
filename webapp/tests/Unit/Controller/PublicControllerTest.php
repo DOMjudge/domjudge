@@ -22,7 +22,7 @@ class PublicControllerTest extends BaseTestCase
     protected static string $urlTeams        = '/jury/teams';
     protected static string $urlAffil        = '/jury/affiliations';
     protected static array  $requiredFields  = ['teamName','affiliationName','affiliationShortName','existingAffiliation'];
-    protected static array  $formFields      = ['username','name','email','teamName','affiliation','affiliationName',
+    protected static array  $formFields      = ['username','name','teamName','affiliation','affiliationName',
                                                 'affiliationShortName','affiliationCountry','existingAffiliation'];
     protected static array  $duplicateFields = ['username'=>['input'=>'selfregister','error'=>'The username \'"selfregistered"\' is already in use.'],
                                                 'teamName'=>['input'=>'Example teamname','error'=>'This team name is already in use.'],
@@ -199,7 +199,7 @@ class PublicControllerTest extends BaseTestCase
         self::assertSelectorExists($selector);
     }
 
-    // username, name, email, teamName, affiliation, affiliationName
+    // username, name, teamName, affiliation, affiliationName
     // affiliationShortName, affiliationCountry, existingAffiliation
     // plainPassword
     public function selfRegisterProvider(): Generator
@@ -211,7 +211,7 @@ class PublicControllerTest extends BaseTestCase
                 }
                 yield[['username'=>'minimaluser', 'teamName'=>'NewTeam','affiliation'=>'none'],'shirt-recognize-bar-together', $fixtures, $category];
                 yield[['username'=>'bruteforce', 'teamName'=>'Fib(9)','affiliation'=>'none'],'01123581321', $fixtures, $category];
-                yield[['username'=>'fullUser', 'name'=>'Full User', 'email'=>'email@domain.com','teamName'=>'Trial','affiliation'=>'none'],'..........', $fixtures, $category];
+                yield[['username'=>'fullUser', 'name'=>'Full User', 'teamName'=>'Trial','affiliation'=>'none'],'..........', $fixtures, $category];
                 yield[['username'=>'student@', 'teamName'=>'Student@Uni',
                        'affiliation'=>'new','affiliationName'=>'NewUni','affiliationShortName'=>'nu'],'p@ssword_Is_long', $fixtures, $category];
                 yield[['username'=>'winner@', 'teamName'=>'FunnyTeamname',
@@ -220,7 +220,7 @@ class PublicControllerTest extends BaseTestCase
                 yield[['username'=>'newinstsamecountry', 'name'=>'CompetingDutchTeam', 'teamName'=>'SupperT3@m','affiliation'=>'new','affiliationName'=>'Vrije Universiteit',
                        'affiliationShortName'=>'vu','affiliationCountry'=>'NLD'],'demodemodemo', $fixtures, $category];
                 if (count($fixtures)===1) {
-                    yield[['username'=>'reusevaluesofexistinguser', 'name'=>'selfregistered user for example team','email'=>'electronic@mail.tld','teamName'=>'EasyEnough','affiliation'=>'none'],'demodemodemo', [...$fixtures, SelfRegisteredUserFixture::class],''];
+                    yield[['username'=>'reusevaluesofexistinguser', 'name'=>'selfregistered user for example team','teamName'=>'EasyEnough','affiliation'=>'none'],'demodemodemo', [...$fixtures, SelfRegisteredUserFixture::class],''];
                 }
             }
         }
