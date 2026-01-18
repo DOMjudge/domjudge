@@ -44,7 +44,26 @@
                 {{ button(path('jury_judgehost_edit'), 'Edit all judgehosts', 'secondary', 'edit') }}
             </div>
         </div>
-
     {%- endif %}
+
+    <div class="card mb-3">
+        <div class="card-header">
+            Judgehost Activity (last 24h)
+        </div>
+        <div class="card-body">
+            <div id="judgehost-timeline" style="height: 400px; width: 100%;">
+                <svg></svg>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="{{ asset('js/d3.min.js') }}"></script>
+    <script src="{{ asset('js/judgehost-timeline.js') }}"></script>
+    <script>
+        $(function() {
+            initJudgehostTimeline('{{ path('jury_judgehost_timeline_data') }}');
+        });
+    </script>
 
 {% endblock %}
