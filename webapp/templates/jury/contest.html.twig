@@ -125,12 +125,12 @@
                     <td>
                         {% if contest.medalsEnabled %}
                             <div class="card">
-                                <h6 class="card-header" id="categories">
+                                <h2 class="card-header" id="categories">
                                     <a class="collapsed d-block text-dark pt-0 pb-0" data-bs-toggle="collapse" href="#collapsecategories" aria-expanded="true" aria-controls="collapsecategories" id="collapseheader">
                                         {{ (contest.goldMedals > 0) + (contest.silverMedals > 0) + (contest.bronzeMedals > 0) }} different types of medals (Show/Hide details)
                                         <i class="fa fa-chevron-down float-end"></i>
                                     </a>
-                                </h6>
+                                </h2>
                                 <div id="collapsecategories" class="collapse collapsed" aria-labelledby="categories">
                                     <div class="card-body pb-1">
                                         <a>{{ contest.goldMedals }} Gold Medal(s)</a>
