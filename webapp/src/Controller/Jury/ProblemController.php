@@ -4,6 +4,7 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
+use App\DataTransferObject\TestcaseViewRow;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judging;
@@ -576,6 +577,43 @@ class ProblemController extends BaseController
         /** @var Testcase[] $testcases */
         $testcases = array_map(fn($data) => $data[0], $testcaseData);
 
+        $rows        = [];
+        $lastLineage = [];
+        foreach ($testcaseData as $data) {
+            /** @var Testcase $testcase */
+            $testcase = $data[0];
+            $lineage  = $testcase->getTestcaseGroup() ? $testcase->getTestcaseGroup()->getLineage() : [];
+
+            $commonPrefixLength = 0;
+            $foundDiff          = false;
+            foreach ($lineage as $i => $group) {
+                if (!$foundDiff && isset($lastLineage[$i]) && $lastLineage[$i]->getTestcaseGroupId() === $group->getTestcaseGroupId()) {
+                    $commonPrefixLength = $i + 1;
+                } else {
+                    $foundDiff = true;
+                    $rows[]    = new TestcaseViewRow(
+                        type: TestcaseViewRow::TYPE_GROUP,
+                        group: $group,
+                        level: $i
+                    );
+                }
+            }
+
+            if (empty($lineage) && !empty($lastLineage)) {
+                $rows[] = new TestcaseViewRow(type: TestcaseViewRow::TYPE_NO_GROUP);
+            }
+
+            $rows[] = new TestcaseViewRow(
+                type: TestcaseViewRow::TYPE_TESTCASE,
+                testcase: $testcase,
+                inputSize: (int)$data['input_size'],
+                outputSize: (int)$data['output_size'],
+                imageSize: (int)$data['image_size'],
+            );
+
+            $lastLineage = $lineage;
+        }
+
         if ($request->isMethod('POST')) {
             if (!empty($lockedContests)) {
                 $this->addFlash('danger', 'Cannot edit problem / testcases, it belongs to locked contest(s) '
@@ -804,6 +842,7 @@ class ProblemController extends BaseController
             'problem' => $problem,
             'testcases' => $testcases,
             'testcaseData' => $testcaseData,
+            'rows' => $rows,
             'extensionMapping' => Testcase::EXTENSION_MAPPING,
             'allowEdit' => $this->isGranted('ROLE_ADMIN') && empty($lockedContests),
         ];
