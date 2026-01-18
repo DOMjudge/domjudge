@@ -62,6 +62,7 @@ class TeamCategoryController extends BaseController
             'num_teams' => ['title' => '# teams', 'sort' => true],
             'visible' => ['title' => 'visible', 'sort' => true],
             'allow_self_registration' => ['title' => 'self-registration', 'sort' => true],
+            'allow_password_change' => ['title' => 'password-change', 'sort' => true],
         ];
 
         $this->addSelectAllCheckbox($table_fields, 'categories');
@@ -105,6 +106,7 @@ class TeamCategoryController extends BaseController
             $categorydata['num_teams']               = ['value' => $teamCategoryData['num_teams']];
             $categorydata['visible']                 = ['value' => $teamCategory->getVisible() ? 'yes' : 'no'];
             $categorydata['allow_self_registration'] = ['value' => $teamCategory->getAllowSelfRegistration() ? 'yes' : 'no'];
+            $categorydata['allow_password_change']   = ['value' => $teamCategory->getAllowPasswordChange() ? 'yes' : 'no'];
 
             $team_categories_table[] = [
                 'data' => $categorydata,
@@ -297,6 +299,23 @@ class TeamCategoryController extends BaseController
         $this->em->flush();
 
         $this->dj->auditlog('team_category', $teamCategory->getExternalid(), 'set allow self-registration',
+            $request->request->getBoolean('value') ? 'yes' : 'no');
+        return $this->redirectToRoute('jury_team_category', ['categoryId' => $categoryId]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{categoryId}/toggle-password-change', name: 'jury_team_category_toggle_password_change', methods: ['POST'])]
+    public function togglePasswordChangeAction(Request $request, string $categoryId): Response
+    {
+        $teamCategory = $this->em->getRepository(TeamCategory::class)->findByExternalId($categoryId);
+        if (!$teamCategory) {
+            throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
+        }
+
+        $teamCategory->setAllowPasswordChange($request->request->getBoolean('value'));
+        $this->em->flush();
+
+        $this->dj->auditlog('team_category', $teamCategory->getExternalid(), 'set allow password-change',
             $request->request->getBoolean('value') ? 'yes' : 'no');
         return $this->redirectToRoute('jury_team_category', ['categoryId' => $categoryId]);
     }
