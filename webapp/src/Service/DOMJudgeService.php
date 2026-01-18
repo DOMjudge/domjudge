@@ -274,6 +274,32 @@ class DOMJudgeService
         return $this->requestStack->getCurrentRequest()->cookies->get($cookieName);
     }
 
+    public function canChangePassword(): bool
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return false;
+        }
+
+        $roles        = $user->getRoleList();
+        $allowedRoles = $this->config->get('password_change_roles');
+        foreach ($roles as $role) {
+            if (in_array($role, $allowedRoles)) {
+                return true;
+            }
+        }
+
+        if ($team = $user->getTeam()) {
+            foreach ($team->getCategories() as $category) {
+                if ($category->getAllowPasswordChange()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public function setCookie(
         string $cookieName,
         string $value = '',
