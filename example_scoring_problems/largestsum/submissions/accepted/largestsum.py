@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Correct solution using Kadane's algorithm
 # Handles all cases: basic, efficiency (small/medium/large), and robustness (negative/single/overflow)
+# @EXPECTED_RESULTS@: CORRECT
 # @EXPECTED_SCORE@: 100
 
 def kadane(arr):

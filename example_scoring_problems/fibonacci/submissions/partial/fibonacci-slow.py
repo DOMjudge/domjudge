@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Partial solution - O(n) iteration, times out on extreme cases
+# @EXPECTED_RESULTS@: TIMELIMIT
 # @EXPECTED_SCORE@: 75
 
 def fibonacci(n):

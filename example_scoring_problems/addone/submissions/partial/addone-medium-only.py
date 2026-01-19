@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Handles medium numbers correctly, fails on small and large
 # Uses 32-bit integer simulation
+# @EXPECTED_RESULTS@: WRONG-ANSWER
 # @EXPECTED_SCORE@: 20
 
 import sys

@@ -2,6 +2,7 @@
 # Only handles basic tests correctly (small arrays)
 # Intentionally produces wrong answers for n > 50
 # basic (20) + efficiency avg(0, 0, 0) = 0 + robustness min(50, 50, 50) = 50
+# @EXPECTED_RESULTS@: WRONG-ANSWER
 # @EXPECTED_SCORE@: 70
 
 def kadane(arr):

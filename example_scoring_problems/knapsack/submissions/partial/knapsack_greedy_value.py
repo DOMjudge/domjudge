@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Greedy solution: pick items by value only (ignoring weight efficiency)
 # Achieves suboptimal results
+# @EXPECTED_RESULTS@: CORRECT
 # @EXPECTED_SCORE@: 88.37
 
 def solve():

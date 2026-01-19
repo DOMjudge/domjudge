@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Correct for basic+medium (n <= 45), but wrong for hard+extreme
 # Uses simple iteration with modulo, but has a bug for n > 45
+# @EXPECTED_RESULTS@: WRONG-ANSWER
 # @EXPECTED_SCORE@: 50
 
 MOD = 10**9 + 7

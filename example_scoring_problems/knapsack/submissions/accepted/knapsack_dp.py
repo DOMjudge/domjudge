@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Optimal solution using dynamic programming
 # Achieves maximum possible value
+# @EXPECTED_RESULTS@: CORRECT
 # @EXPECTED_SCORE@: 100
 
 def solve():

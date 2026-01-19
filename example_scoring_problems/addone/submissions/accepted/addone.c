@@ -1,4 +1,5 @@
 /* Correct solution using long long for large numbers
+ * @EXPECTED_RESULTS@: CORRECT
  * @EXPECTED_SCORE@: 60
  */
 #include <stdio.h>

@@ -784,27 +784,29 @@ class ImportProblemService
                     } elseif ($annotation === null) {
                         // No annotation found - use directory-based expected result
                         $expectedResults = [$expectedResult];
-                    } elseif ($annotation['type'] === 'score') {
-                        // Numeric score annotation
-                        $expectedScore = $annotation['value'];
                     } else {
-                        // Result-based annotation
-                        $results = $annotation['value'];
-                        if (!in_array($expectedResult, $results)) {
-                            $messages['danger'][] = sprintf(
-                                "Annotated result '%s' does not match directory for %s",
-                                implode(', ', $results), $path
-                            );
-                        } elseif (!empty($expectedResult)) {
-                            if (count($results) > 1) {
-                                $messages['warning'][] = sprintf(
-                                    "Annotated results '%s' restricted to match directory for %s",
+                        $expectedScore = $annotation['score'];
+                        if ($annotation['results'] !== null) {
+                            $results = $annotation['results'];
+                            if (!in_array($expectedResult, $results)) {
+                                $messages['danger'][] = sprintf(
+                                    "Annotated result '%s' does not match directory for %s",
                                     implode(', ', $results), $path
                                 );
+                            } elseif (!empty($expectedResult)) {
+                                if (count($results) > 1) {
+                                    $messages['warning'][] = sprintf(
+                                        "Annotated results '%s' restricted to match directory for %s",
+                                        implode(', ', $results), $path
+                                    );
+                                }
+                                $results = [$expectedResult];
                             }
-                            $results = [$expectedResult];
+                            $expectedResults = $results;
+                        } elseif ($expectedScore === null) {
+                            // This case should actually not happen if annotation is not null
+                            $expectedResults = [$expectedResult];
                         }
-                        $expectedResults = $results;
                     }
                     $jury_team_id = $this->dj->getUser()->getTeam()->getTeamid();
                     $jury_user = $this->dj->getUser();
