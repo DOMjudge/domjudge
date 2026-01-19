@@ -1,5 +1,6 @@
 /* Solution that crashes (RTE) on large inputs but works for basic
  * Demonstrates partial scoring with runtime error
+ * @EXPECTED_RESULTS@: WRONG-ANSWER
  * @EXPECTED_SCORE@: 25
  */
 #include <stdio.h>

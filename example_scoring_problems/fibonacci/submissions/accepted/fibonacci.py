@@ -2,6 +2,7 @@
 # Correct solution using matrix exponentiation for large n
 # For n <= 90, regular iteration works fine
 # For n > 90, we use matrix exponentiation with modulo
+# @EXPECTED_RESULTS@: CORRECT
 # @EXPECTED_SCORE@: 100
 
 MOD = 10**9 + 7

@@ -2,6 +2,7 @@
 # Handles basic, efficiency/small, and efficiency/medium correctly
 # Intentionally produces wrong answers for n > 5000
 # basic (20) + efficiency avg(15, 30, 0) = 15 + robustness min(50, 50, 50) = 50
+# @EXPECTED_RESULTS@: WRONG-ANSWER
 # @EXPECTED_SCORE@: 85
 
 def kadane(arr):

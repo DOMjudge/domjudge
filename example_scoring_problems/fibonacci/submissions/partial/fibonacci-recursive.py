@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Partial solution - naive recursion, only works for very small n
+# @EXPECTED_RESULTS@: TIMELIMIT
 # @EXPECTED_SCORE@: 25
 import sys
 sys.setrecursionlimit(100)

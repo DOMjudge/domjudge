@@ -4,6 +4,7 @@
 # - Single element: works
 # - Overflow: works (Python handles big ints)
 # Since robustness uses MIN aggregation and we fail negative, we get 0 for robustness
+# @EXPECTED_RESULTS@: WRONG-ANSWER
 # @EXPECTED_SCORE@: 50
 
 def kadane_buggy(arr):

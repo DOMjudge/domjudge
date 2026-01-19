@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Simple first-fit: pick items in order until full
 # Achieves low partial score
+# @EXPECTED_RESULTS@: CORRECT
 # @EXPECTED_SCORE@: 74.42
 
 def solve():

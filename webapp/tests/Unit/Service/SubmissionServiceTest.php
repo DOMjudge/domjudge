@@ -428,8 +428,8 @@ class SubmissionServiceTest extends KernelTestCase
 
         self::assertNotNull($result);
         self::assertNotFalse($result);
-        self::assertEquals('results', $result['type']);
-        self::assertEquals(['CORRECT'], $result['value']);
+        self::assertEquals(['CORRECT'], $result['results']);
+        self::assertNull($result['score']);
     }
 
     /**
@@ -442,8 +442,8 @@ class SubmissionServiceTest extends KernelTestCase
 
         self::assertNotNull($result);
         self::assertNotFalse($result);
-        self::assertEquals('results', $result['type']);
-        self::assertEquals(['CORRECT', 'WRONG-ANSWER'], $result['value']);
+        self::assertEquals(['CORRECT', 'WRONG-ANSWER'], $result['results']);
+        self::assertNull($result['score']);
     }
 
     /**
@@ -456,8 +456,8 @@ class SubmissionServiceTest extends KernelTestCase
 
         self::assertNotNull($result);
         self::assertNotFalse($result);
-        self::assertEquals('results', $result['type']);
-        self::assertEquals(['CORRECT'], $result['value']);
+        self::assertEquals(['CORRECT'], $result['results']);
+        self::assertNull($result['score']);
     }
 
     /**
@@ -470,8 +470,8 @@ class SubmissionServiceTest extends KernelTestCase
 
         self::assertNotNull($result);
         self::assertNotFalse($result);
-        self::assertEquals('score', $result['type']);
-        self::assertEquals(60.0, $result['value']);
+        self::assertNull($result['results']);
+        self::assertEquals('60', $result['score']);
     }
 
     /**
@@ -484,8 +484,8 @@ class SubmissionServiceTest extends KernelTestCase
 
         self::assertNotNull($result);
         self::assertNotFalse($result);
-        self::assertEquals('score', $result['type']);
-        self::assertEquals(75.5, $result['value']);
+        self::assertNull($result['results']);
+        self::assertEquals('75.5', $result['score']);
     }
 
     /**
@@ -511,14 +511,17 @@ class SubmissionServiceTest extends KernelTestCase
     }
 
     /**
-     * Test parsing with both annotation types returns false.
+     * Test parsing with both annotation types.
      */
     public function testParseExpectedAnnotationMixedTags(): void
     {
         $source = "// @EXPECTED_RESULTS@: CORRECT\n// @EXPECTED_SCORE@: 60\nint main() {}";
         $result = SubmissionService::parseExpectedAnnotation($source, []);
 
-        self::assertFalse($result);
+        self::assertNotNull($result);
+        self::assertNotFalse($result);
+        self::assertEquals(['CORRECT'], $result['results']);
+        self::assertEquals('60', $result['score']);
     }
 
     /**
@@ -532,8 +535,8 @@ class SubmissionServiceTest extends KernelTestCase
 
         self::assertNotNull($result);
         self::assertNotFalse($result);
-        self::assertEquals('results', $result['type']);
-        self::assertEquals(['CORRECT'], $result['value']);
+        self::assertEquals(['CORRECT'], $result['results']);
+        self::assertNull($result['score']);
     }
 
     // =========================================================================

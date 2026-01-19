@@ -1,3 +1,4 @@
+// @EXPECTED_RESULTS@: CORRECT
 // @EXPECTED_SCORE@: 60
 import java.util.Scanner;
 

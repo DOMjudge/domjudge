@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Wrong solution - off-by-one error
+# @EXPECTED_RESULTS@: WRONG-ANSWER
 # @EXPECTED_SCORE@: 0
 def fibonacci(n):
     if n <= 1:

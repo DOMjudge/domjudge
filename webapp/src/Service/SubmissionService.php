@@ -1010,11 +1010,8 @@ class SubmissionService
                 }
             }
             if ($annotation !== null) {
-                if ($annotation['type'] === 'score') {
-                    $expectedScore = $annotation['value'];
-                } else {
-                    $expectedResults = $annotation['value'];
-                }
+                $expectedResults = $annotation['results'];
+                $expectedScore = $annotation['score'];
             }
         }
 
@@ -1118,54 +1115,6 @@ class SubmissionService
     }
 
     /**
-     * Checks given source file for expected results string
-     *
-     * @param array<string, string> $resultsRemap
-     * @return string[]|false|null Array of expected results if found, false when multiple matches are found, or null otherwise.
-     */
-    public static function getExpectedResults(string $source, array $resultsRemap): array|false|null
-    {
-        $matchstring = null;
-        $pos         = false;
-        foreach (self::PROBLEM_RESULT_MATCHSTRING as $pattern) {
-            $currentPos = mb_stripos($source, $pattern);
-            if ($currentPos !== false) {
-                // Check if we find another match after the first one, since
-                // that is not allowed.
-                if (mb_stripos($source, $pattern, $currentPos+1) !== false) {
-                    return false;
-                }
-                // Check that another pattern did not give a match already.
-                if ($pos !== false) {
-                    return false;
-                }
-                $pos = $currentPos;
-                $matchstring = $pattern;
-            }
-        }
-
-        if ($pos === false) {
-            return null;
-        }
-
-        $beginpos = $pos + mb_strlen($matchstring);
-        $endpos   = mb_strpos($source, "\n", $beginpos);
-        $str      = mb_substr($source, $beginpos, $endpos - $beginpos);
-        $results  = explode(',', trim(mb_strtoupper($str)));
-
-        foreach ($results as $key => $val) {
-            $result = self::normalizeExpectedResult($val);
-            $lowerResult = mb_strtolower($result);
-            if (isset($resultsRemap[$lowerResult])) {
-                $result = mb_strtoupper($resultsRemap[$lowerResult]);
-            }
-            $results[$key] = $result;
-        }
-
-        return $results;
-    }
-
-    /**
      * Normalize the given expected result.
      */
     public static function normalizeExpectedResult(string $result): string
@@ -1181,64 +1130,66 @@ class SubmissionService
      * Parse expected annotation from source file, returning structured data.
      *
      * Returns an array with:
-     *   - 'type': 'score' if @EXPECTED_SCORE@ with numeric value, 'results' otherwise
-     *   - 'value': numeric score (for type=score) or array of result names (for type=results)
-     * Returns false if multiple annotations found, null if no annotation found.
+     *   - 'results': array of result names (if found)
+     *   - 'score': numeric score (if found)
+     * Returns false if multiple annotations of the same type found, null if no annotation found.
      *
      * @param array<string, string> $resultsRemap
-     * @return array{type: string, value: string|string[]}|false|null
+     * @return array{results: string[]|null, score: string|null}|false|null
      */
     public static function parseExpectedAnnotation(string $source, array $resultsRemap): array|false|null
     {
-        $matchstring = null;
-        $pos = false;
+        $expectedResults = null;
+        $expectedScore = null;
+
         foreach (self::PROBLEM_RESULT_MATCHSTRING as $pattern) {
-            $currentPos = mb_stripos($source, $pattern);
-            if ($currentPos !== false) {
+            $pos = mb_stripos($source, $pattern);
+            if ($pos !== false) {
                 // Check if we find another match after the first one, since
                 // that is not allowed.
-                if (mb_stripos($source, $pattern, $currentPos + 1) !== false) {
+                if (mb_stripos($source, $pattern, $pos + mb_strlen($pattern)) !== false) {
                     return false;
                 }
-                // Check that another pattern did not give a match already.
-                if ($pos !== false) {
-                    return false;
+
+                $beginpos = $pos + mb_strlen($pattern);
+                $endpos = mb_strpos($source, "\n", $beginpos);
+                if ($endpos === false) {
+                    $endpos = mb_strlen($source);
                 }
-                $pos = $currentPos;
-                $matchstring = $pattern;
+                $str = trim(mb_substr($source, $beginpos, $endpos - $beginpos));
+
+                // If @EXPECTED_SCORE@ is used with a numeric value, treat it as an expected score
+                if ($pattern === '@EXPECTED_SCORE@: ' && is_numeric($str)) {
+                    if ($expectedScore !== null) {
+                        return false;
+                    }
+                    $expectedScore = $str;
+                } else {
+                    // Otherwise, treat as expected results (list of result names)
+                    $results = explode(',', mb_strtoupper($str));
+                    foreach ($results as $key => $val) {
+                        $result = self::normalizeExpectedResult($val);
+                        $lowerResult = mb_strtolower($result);
+                        if (isset($resultsRemap[$lowerResult])) {
+                            $result = mb_strtoupper($resultsRemap[$lowerResult]);
+                        }
+                        $results[$key] = $result;
+                    }
+                    if ($expectedResults !== null) {
+                        return false;
+                    }
+                    $expectedResults = $results;
+                }
             }
         }
 
-        if ($pos === false) {
+        if ($expectedResults === null && $expectedScore === null) {
             return null;
         }
 
-        $beginpos = $pos + mb_strlen($matchstring);
-        $endpos = mb_strpos($source, "\n", $beginpos);
-        $str = trim(mb_substr($source, $beginpos, $endpos - $beginpos));
-
-        // If @EXPECTED_SCORE@ is used with a numeric value, treat it as an expected score
-        if ($matchstring === '@EXPECTED_SCORE@: ' && is_numeric($str)) {
-            return [
-                'type' => 'score',
-                'value' => $str,
-            ];
-        }
-
-        // Otherwise, treat as expected results (list of result names)
-        $results = explode(',', mb_strtoupper($str));
-        foreach ($results as $key => $val) {
-            $result = self::normalizeExpectedResult($val);
-            $lowerResult = mb_strtolower($result);
-            if (isset($resultsRemap[$lowerResult])) {
-                $result = mb_strtoupper($resultsRemap[$lowerResult]);
-            }
-            $results[$key] = $result;
-        }
-
         return [
-            'type' => 'results',
-            'value' => $results,
+            'results' => $expectedResults,
+            'score' => $expectedScore,
         ];
     }
 

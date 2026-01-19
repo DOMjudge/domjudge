@@ -1,4 +1,5 @@
 /* Partial solution - only handles small numbers (int overflow for large)
+ * @EXPECTED_RESULTS@: WRONG-ANSWER
  * @EXPECTED_SCORE@: 30
  */
 #include <stdio.h>

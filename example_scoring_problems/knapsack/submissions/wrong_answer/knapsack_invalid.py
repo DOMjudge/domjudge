@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Invalid solution: tries to take everything (exceeds capacity)
+# @EXPECTED_RESULTS@: WRONG-ANSWER
 # @EXPECTED_SCORE@: 0
 
 def solve():

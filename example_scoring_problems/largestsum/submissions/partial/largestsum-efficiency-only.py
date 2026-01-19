@@ -2,6 +2,7 @@
 # Efficient Kadane's but fails on all robustness edge cases
 # Since robustness uses MIN and we fail all, we get 0 for robustness
 # basic (20) + efficiency (30) + robustness (0) = 50
+# @EXPECTED_RESULTS@: WRONG-ANSWER
 # @EXPECTED_SCORE@: 50
 
 def kadane_efficiency(arr):
