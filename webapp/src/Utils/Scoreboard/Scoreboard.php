@@ -395,4 +395,110 @@ class Scoreboard
     {
         return $this->contest->getRuntimeAsScoreTiebreaker();
     }
+
+    /**
+     * Get the maximum score achieved by any team for a given problem.
+     * Returns 0 if no team has a positive score.
+     */
+    public function getMaxScoreForProblem(ContestProblem $problem): float
+    {
+        $maxScore = 0.0;
+        $problemId = $problem->getProbid();
+
+        foreach ($this->scores as $teamScore) {
+            $teamId = $teamScore->team->getTeamid();
+            if (isset($this->matrix[$teamId][$problemId])) {
+                $maxScore = max($maxScore, $this->matrix[$teamId][$problemId]->getScore());
+            }
+        }
+
+        return $maxScore;
+    }
+
+    /**
+     * Get the CSS class for a scoreboard cell.
+     */
+    public function getCellCssClass(
+        Team $team,
+        ContestProblem $problem,
+        bool $showPending = true,
+        bool $jury = false
+    ): string {
+        $matrixItem = $this->matrix[$team->getTeamid()][$problem->getProbid()] ?? null;
+        if ($matrixItem === null) {
+            return 'score_neutral';
+        }
+
+        $cssClass = 'score_neutral';
+
+        if ($this->isScoring()) {
+            // For scoring problems: green if score > 0, red if score = 0 and attempted
+            if ($matrixItem->hasPositiveScore()) {
+                $cssClass = 'score_correct';
+            } elseif ($showPending && $matrixItem->numSubmissionsPending > 0) {
+                $cssClass = 'score_pending';
+            } elseif ($matrixItem->numSubmissions > 0) {
+                $cssClass = 'score_incorrect';
+            }
+        } else {
+            // For pass-fail problems: use original logic
+            if ($matrixItem->isCorrect) {
+                $cssClass = 'score_correct';
+                if (!$this->getRuntimeAsScoreTiebreaker() && $matrixItem->isFirst) {
+                    $cssClass .= ' score_first';
+                } elseif ($this->getRuntimeAsScoreTiebreaker() && $this->isFastestSubmission($team, $problem)) {
+                    $cssClass .= ' score_first';
+                }
+            } elseif ($showPending && $matrixItem->numSubmissionsPending > 0) {
+                $cssClass = 'score_pending';
+            } elseif ($matrixItem->numSubmissions > 0) {
+                $cssClass = 'score_incorrect';
+            }
+        }
+
+        // Add pending indicator for jury view during freeze
+        if ($jury && $showPending && $matrixItem->numSubmissionsInFreeze > 0) {
+            if (!str_contains($cssClass, 'score_pending')) {
+                $cssClass .= ' score_pending';
+            }
+        }
+
+        return $cssClass;
+    }
+
+    /**
+     * Get the inline background style for a scoreboard cell (for scoring gradient).
+     * Returns empty string if no gradient is needed.
+     */
+    public function getCellStyle(Team $team, ContestProblem $problem): string
+    {
+        if (!$this->isScoring()) {
+            return '';
+        }
+
+        $matrixItem = $this->matrix[$team->getTeamid()][$problem->getProbid()] ?? null;
+        if ($matrixItem === null) {
+            return '';
+        }
+
+        $maxScore = $this->getMaxScoreForProblem($problem);
+        return $matrixItem->getGradientColor($maxScore);
+    }
+
+    /**
+     * Check if a cell should display score/time (has positive score for scoring, is correct for pass-fail).
+     */
+    public function cellHasScore(Team $team, ContestProblem $problem): bool
+    {
+        $matrixItem = $this->matrix[$team->getTeamid()][$problem->getProbid()] ?? null;
+        if ($matrixItem === null) {
+            return false;
+        }
+
+        if ($this->isScoring()) {
+            return $matrixItem->hasPositiveScore();
+        }
+
+        return $matrixItem->isCorrect;
+    }
 }

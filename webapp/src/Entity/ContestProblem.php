@@ -262,4 +262,32 @@ class ContestProblem extends BaseApiEntity
                 ->addViolation();
         }
     }
+
+    /**
+     * Get the score range lower bound from the problem's testcase group.
+     */
+    public function getRangeLowerBound(): ?float
+    {
+        $value = $this->getProblem()?->getParentTestcaseGroup()?->getRangeLowerBound();
+        return $value !== null ? (float)$value : null;
+    }
+
+    /**
+     * Get the score range upper bound from the problem's testcase group.
+     */
+    public function getRangeUpperBound(): ?float
+    {
+        $value = $this->getProblem()?->getParentTestcaseGroup()?->getRangeUpperBound();
+        return $value !== null ? (float)$value : null;
+    }
+
+    /**
+     * Check if this problem has a defined score range.
+     */
+    public function hasScoreRange(): bool
+    {
+        $upper = $this->getRangeUpperBound();
+        $lower = $this->getRangeLowerBound() ?? 0.0;
+        return $upper !== null && $upper > $lower;
+    }
 }

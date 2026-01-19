@@ -228,6 +228,7 @@ del {
 .scoreboard td.score_cell {
     min-width: 4.2em;
     border-right: none;
+    position: relative;
 }
 .scoreboard a {
     display: block;
@@ -311,6 +312,28 @@ img.affiliation-logo {
 .score_correct.score_first { background: #1daa1d; }
 .score_incorrect           { background: #e87272; }
 .score_pending             { background: #6666ff; }
+
+/* Progress bar showing score position within problem range */
+.scoreboard td div.score-range-bar {
+    position: absolute;
+    bottom: 2px;
+    left: 4px;
+    right: 4px;
+    width: auto;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 2px;
+    overflow: hidden;
+    display: block;
+    font-size: inherit;
+}
+.score-range-bar .score-range-fill {
+    width: 0;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 2px;
+    display: block;
+}
 
 .gold-medal   { color: #eec710 }
 .silver-medal { color: #aaa }
