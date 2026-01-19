@@ -1,0 +1,63 @@
+<div class="mt-4 mb-4">
+    <h2>Score Changes</h2>
+
+    {# Heatmap #}
+    <div id="score-heatmap"></div>
+
+    {# Slider filter #}
+    <div class="form-inline mb-3">
+        <label for="delta-threshold" class="form-label me-2">Minimum absolute delta:</label>
+        <input type="range" class="form-range" id="delta-threshold" min="0" max="{{ maxScore }}" value="0" step="0.1">
+        <span id="delta-threshold-value" class="badge bg-secondary ms-2">0</span>
+        <span id="filtered-count" class="text-muted ms-3">
+            showing <strong>0</strong> of <strong>0</strong> submissions with score changes
+        </span>
+    </div>
+
+    {# Submissions table #}
+    <h4>Submissions with Score Changes</h4>
+    <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover" id="score-changes-table">
+            <thead>
+                <tr>
+                    <th class="sortable" data-sort="submitId">Submission</th>
+                    <th class="sortable" data-sort="teamName">Team</th>
+                    <th class="sortable" data-sort="problemName">Problem</th>
+                    <th class="sortable text-end" data-sort="oldScore">Old Score</th>
+                    <th class="sortable text-end" data-sort="newScore">New Score</th>
+                    <th class="sortable text-end sorted-desc" data-sort="absDelta">Delta</th>
+                </tr>
+            </thead>
+            <tbody id="score-changes-tbody">
+                {% for change in scoreChanges %}
+                    <tr data-abs-delta="{{ change.absDelta }}" data-submit-id="{{ change.submitId }}" class="score-change-row" data-delta="{{ change.delta }}">
+                        <td>
+                            <a href="{{ path('jury_submission', {submitId: change.submitId}) }}">s{{ change.submitId }}</a>
+                        </td>
+                        <td>
+                            <a href="{{ path('jury_team', {teamId: change.teamId}) }}">{{ change.teamName }}</a>
+                        </td>
+                        <td>
+                            <a href="{{ path('jury_problem', {probId: change.problemId}) }}">{{ change.problemName }}</a>
+                        </td>
+                        <td class="text-end score-value">{{ change.oldScore | number_format(3) }}</td>
+                        <td class="text-end score-value">{{ change.newScore | number_format(3) }}</td>
+                        <td class="text-end">
+                            {% if change.delta > 0 %}
+                                <span class="badge bg-success">+{{ change.delta | number_format(3) }}</span>
+                            {% elseif change.delta < 0 %}
+                                <span class="badge bg-danger">{{ change.delta | number_format(3) }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">0.000</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{# Pass data to JavaScript - use JSON_HEX_TAG to escape < and > preventing script tag injection #}
+<script id="score-changes-data" type="application/json">{{ scoreChanges | json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP')) | raw }}</script>
+<script id="max-score-data" type="application/json">{{ maxScore | json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP')) | raw }}</script>

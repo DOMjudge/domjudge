@@ -331,7 +331,11 @@ class RejudgingController extends BaseController
             }
         };
 
-        // Build up the verdict matrix.
+        // Build up the verdict matrix and collect score change data.
+        $scoreChanges = [];
+        $hasScoringProblems = false;
+        $maxScore = 0;
+
         foreach ($newVerdicts as $submitid => $newVerdict) {
             $originalVerdict = $originalVerdicts[$submitid];
 
@@ -348,6 +352,30 @@ class RejudgingController extends BaseController
 
             // Append submitid to list of orig->new verdicts.
             $verdictTable[$originalVerdict->getResult()][$newVerdict->getResult()][] = $submitid;
+
+            // Collect score change data for scoring problems.
+            $submission = $newVerdict->getSubmission();
+            $problem = $submission->getProblem();
+            if ($problem->isScoringProblem()) {
+                $hasScoringProblems = true;
+                $oldScore = (float)$originalVerdict->getScore();
+                $newScore = (float)$newVerdict->getScore();
+                $delta = $newScore - $oldScore;
+                $absDelta = abs($delta);
+                $maxScore = max($maxScore, $oldScore, $newScore);
+
+                $scoreChanges[] = [
+                    'submitId' => $submitid,
+                    'teamName' => $submission->getTeam()->getEffectiveName(),
+                    'teamId' => $submission->getTeam()->getTeamid(),
+                    'problemName' => $problem->getName(),
+                    'problemId' => $problem->getProbid(),
+                    'oldScore' => $oldScore,
+                    'newScore' => $newScore,
+                    'delta' => $delta,
+                    'absDelta' => $absDelta,
+                ];
+            }
         }
 
         $viewTypes = [0 => 'unverified', 1 => 'unjudged', 2 => 'diff', 3 => 'all'];
@@ -440,6 +468,9 @@ class RejudgingController extends BaseController
             ],
             'disabledProbs' => $disabledProblems,
             'disabledLangs' => $disabledLangs,
+            'hasScoringProblems' => $hasScoringProblems,
+            'scoreChanges' => $scoreChanges,
+            'maxScore' => $maxScore,
         ];
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;
