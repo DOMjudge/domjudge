@@ -8,6 +8,10 @@
     {{ macros.table_extrahead() }}
     {{ macros.select2_extrahead() }}
     {{ knp_pagination_rel_links(submissions) }}
+    {% if hasScoringProblems is defined and hasScoringProblems and scoreChanges | length > 0 %}
+        <script src="{{ asset('js/d3.min.js') }}"></script>
+        <script src="{{ asset('js/rejudging-scores.js') }}"></script>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -137,6 +141,12 @@
     <div data-rejudging-matrix>
         {% include 'jury/partials/rejudging_matrix.html.twig' %}
     </div>
+
+    {% if hasScoringProblems and scoreChanges | length > 0 %}
+        <div data-rejudging-score-matrix>
+            {% include 'jury/partials/rejudging_score_matrix.html.twig' %}
+        </div>
+    {% endif %}
 
     {% if stats %}
         <h2>Statistics over repeated rejudgings</h2>
@@ -293,6 +303,10 @@
                     $todo.closest('tr').removeClass('d-none');
                 }
             }
+
+            {% if hasScoringProblems and scoreChanges | length > 0 %}
+            initScoreChangesVisualization();
+            {% endif %}
         });
     </script>
 {% endblock %}

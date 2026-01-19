@@ -343,3 +343,51 @@ table.table-full-clickable-cell tr .table-button-head-right-right{
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     z-index: 1000;
 }
+
+/* Score changes heatmap styles */
+#score-heatmap {
+    width: 100%;
+    min-height: 420px;
+    position: relative;
+}
+
+.heatmap-tooltip {
+    position: absolute;
+    visibility: hidden;
+    background: #212529;
+    color: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+#score-changes-table thead th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+#score-changes-table thead th.sortable:hover {
+    background-color: #e9ecef;
+}
+
+#score-changes-table thead th.sorted-asc::after {
+    content: ' \25B2';
+    font-size: 0.7em;
+}
+
+#score-changes-table thead th.sorted-desc::after {
+    content: ' \25BC';
+    font-size: 0.7em;
+}
+
+#score-changes-table .score-value {
+    font-family: monospace;
+}
+
+#delta-threshold {
+    width: 200px;
+    display: inline-block;
+    vertical-align: middle;
+}
