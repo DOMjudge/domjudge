@@ -6,7 +6,7 @@
 {% block content %}
 <div class="card w-40 float-end m-5">
   <div class="card-body">
-  <h5 class="card-title">System information</h5>
+  <h2 class="card-title smaller_h2_as_h5">System information</h2>
   <table class="w-100">
   <tr><td>DOMjudge:</td><td id="dj_version">{{ DOMJUDGE_VERSION }}</td></tr>
   <tr><td>Environment:</td><td>{{ app.environment }}</td></tr>
@@ -23,7 +23,7 @@
 
 <div class="card m-3 bg-light">
   <div class="card-body">
-  <h5 class="card-title">Installation locations</h5>
+  <h2 class="card-title smaller_h2_as_h5">Installation locations</h2>
   <table class="w-100">
   <tr><td>Base url (use in submit client):</td><td><kbd>{{ url('root') }}</kbd></td></tr>
   <tr><td>API url (use in <kbd>restapi.secret</kbd>):</td><td><kbd>{{ url('current_api_root') | trim('/', 'right') }}</kbd></td></tr>
@@ -38,7 +38,7 @@
   </table>
 
       {% if logFilesWithSize is not empty %}
-          <h5 class="card-title mt-3">Log files</h5>
+          <h2 class="smaller_h2_as_h5 card-title mt-3">Log files</h2>
           <table class="w-100">
               <thead>
               <tr>
@@ -79,7 +79,7 @@
 
 {% for test,testresult in groupresults %}
   <div class="card">
-    <h6 class="card-header result {{ testresult.result }}" role="tab" id="heading{{ test }}">
+    <h4 class="card-header result {{ testresult.result }}" role="tab" id="heading{{ test }}">
       <a class="collapsed d-block text-dark pt-0 pb-0" data-bs-toggle="collapse" href="#collapse{{ test }}" aria-expanded="true" aria-controls="collapse{{ test }}" data-parent="#{{ resultgroup | replace({' ':''}) }}">
         {% if testresult.result == 'O' %}
         <i class="fas fa-check text-success"></i>
@@ -91,7 +91,7 @@
         <i class="fa fa-chevron-down float-end"></i>
         {{ testresult.caption }}
       </a>
-    </h6>
+    </h4>
 
     <div id="collapse{{ test }}" class="collapse {{ ( testresult.result == 'E' ) ? 'show' : '' }}" role="tabpanel" aria-labelledby="heading{{ test }}">
       <div class="card-body">

@@ -70,6 +70,7 @@ a.collapse { color: black; text-decoration: none; }
 .O { background-color: #ccfbcc; }
 .W { background-color: #f0e68c; }
 .E { background-color: #fa9972; }
+.result { font-size: 1rem; }
 
 /* diff colors for source contents and filenames */
 .diff-add        { color: green; }
@@ -251,4 +252,16 @@ table.table-full-clickable-cell tr .table-button-head-right-right{
 
 .diff-title {
     display: none;
+}
+
+h2.card-header {
+    font-size: 1rem;
+}
+
+.smaller_h2_as_h6 {
+    font-size: 1rem;
+}
+
+.smaller_h2_as_h5 {
+    font-size: 1.25rem;
 }

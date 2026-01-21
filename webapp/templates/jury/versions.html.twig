@@ -25,7 +25,7 @@
                 <div class="card-title">
                     <div class="row">
                         <div class="col-sm">
-                            <h6>Compiler version(s)</h6>
+                            <h2 class="smaller_h2_as_h6">Compiler version(s)</h2>
                             {% if lang.compiler_outputs | length > 1 %}
                                 <div class="alert alert-danger" role="alert">Versions do not match.</div>
                             {% endif %}
@@ -59,7 +59,7 @@
                             {% endfor %}
                             {% if lang.runner_outputs | length > 0 %}
                                 <br/>
-                                <h6>Runner version(s)</h6>
+                                <h2 class="smaller_h2_as_h6">Runner version(s)</h2>
                                 {% if lang.runner_outputs | length > 1 %}
                                     <div class="alert alert-danger" role="alert">Versions do not match.</div>
                                 {% endif %}
