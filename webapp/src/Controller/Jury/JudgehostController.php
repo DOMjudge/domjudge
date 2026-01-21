@@ -17,6 +17,7 @@ use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -225,6 +226,47 @@ class JudgehostController extends BaseController
         } else {
             return $this->render('jury/judgehosts.html.twig', $data);
         }
+    }
+
+    #[Route(path: '/timeline-data', methods: ['GET'], name: 'jury_judgehost_timeline_data')]
+    public function timelineDataAction(): JsonResponse
+    {
+        $now = Utils::now();
+        $twenty_four_hours_ago = $now - 24 * 60 * 60;
+
+        // Fetch JudgingRuns which are the actual work
+        $query = $this->em->createQueryBuilder()
+            ->select('jh.judgehostid, jh.hostname, jr.startTime, jr.endtime, j.judgingid, s.submitid, c.shortname as contest_shortname, p.name as problem_name, jt.type, jr.runresult, jt.jobid')
+            ->from(JudgingRun::class, 'jr')
+            ->join('jr.judgetask', 'jt')
+            ->join('jt.judgehost', 'jh')
+            ->join('jr.judging', 'j')
+            ->join('j.submission', 's')
+            ->join('s.contest', 'c')
+            ->join('s.problem', 'p')
+            ->andWhere('jr.startTime IS NOT NULL')
+            ->andWhere('jr.endtime IS NOT NULL')
+            ->andWhere('jr.endtime >= :twenty_four_hours_ago')
+            ->setParameter('twenty_four_hours_ago', $twenty_four_hours_ago)
+            ->getQuery();
+
+        $results = $query->getResult();
+
+        $judgehosts = $this->em->getRepository(Judgehost::class)->findBy(['hidden' => 0]);
+        $judgehost_map = [];
+        foreach ($judgehosts as $jh) {
+            $judgehost_map[$jh->getJudgehostid()] = [
+                'hostname' => $jh->getHostname(),
+                'enabled' => $jh->getEnabled(),
+            ];
+        }
+
+        return new JsonResponse([
+            'now' => (float)$now,
+            'twenty_four_hours_ago' => (float)$twenty_four_hours_ago,
+            'judgehosts' => $judgehost_map,
+            'data' => $results,
+        ]);
     }
 
     /**
