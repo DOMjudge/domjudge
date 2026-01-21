@@ -1113,6 +1113,7 @@ class ImportProblemService
         }
         if (isset($yamlData['grader_flags'])) {
             $flags = preg_split('/\s+/', $yamlData['grader_flags']);
+            $unknown_flags = [];
             foreach ($flags as $flag) {
                 if (in_array($flag, ['sum', 'max', 'min', 'avg'])) {
                     try {
@@ -1122,12 +1123,16 @@ class ImportProblemService
                         $messages['danger'][] = sprintf("Invalid aggregation type '%s' in test group '%s'.", $flag, $name);
                         return null;
                     }
-                }
-                if ($flag === 'ignore_sample') {
+                } elseif ($flag === 'ignore_sample') {
                     $testcaseGroup->setIgnoreSample(true);
+                } else {
+                    // TODO: add support for the remaining flags.
+                    $unknown_flags[] = $flag;
                 }
-                // Silently ignore currently unused flags.
-                // TODO: add support for the remaining flags and error out on unknown flags.
+            }
+            if (!empty($unknown_flags)) {
+                $messages['warning'][] = sprintf("Unknown flags '%s' in test group '%s'.",
+                    join(', ', $unknown_flags), $name);
             }
         }
         if (isset($yamlData['output_validator_flags'])) {
