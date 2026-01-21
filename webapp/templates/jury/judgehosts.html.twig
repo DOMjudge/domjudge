@@ -6,6 +6,8 @@
 {% block extrahead %}
     {{ parent() }}
     {{ macros.table_extrahead() }}
+    <script src="{{ asset('js/d3.min.js') }}"></script>
+    <script src="{{ asset('js/judgehost-timeline.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -44,7 +46,30 @@
                 {{ button(path('jury_judgehost_edit'), 'Edit all judgehosts', 'secondary', 'edit') }}
             </div>
         </div>
-
     {%- endif %}
 
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            Judgehost Activity (last 24h)
+            <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" id="toggle-disabled-jh">
+                <label class="form-check-label" for="toggle-disabled-jh">Show disabled</label>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="judgehost-timeline">
+                <svg></svg>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block footer %}
+    {{ parent() }}
+    <script>
+        $(function() {
+            initJudgehostTimeline('{{ path('jury_judgehost_timeline_data') }}');
+        });
+    </script>
 {% endblock %}

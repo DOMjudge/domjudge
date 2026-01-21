@@ -310,3 +310,38 @@ table.table-full-clickable-cell tr .table-button-head-right-right{
 .scoring-testcase-score {
     font-weight: bold;
 }
+
+/* Timeline styles */
+#judgehost-timeline {
+    height: 400px;
+    width: 100%;
+}
+
+#judgehost-timeline svg {
+    font-family: sans-serif;
+    font-size: 10px;
+}
+
+.timeline-axis path,
+.timeline-axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.timeline-rect:hover {
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+.timeline-tooltip {
+    position: absolute;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    pointer-events: none;
+    font-size: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
