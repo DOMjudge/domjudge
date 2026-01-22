@@ -64,7 +64,7 @@ class TestcaseGroup
     /**
      * @var Collection<int, Problem>
      */
-    #[ORM\OneToMany(mappedBy: 'parentTestcaseGroup', targetEntity: Problem::class)]
+    #[ORM\OneToMany(targetEntity: Problem::class, mappedBy: 'parentTestcaseGroup')]
     private Collection $problems;
 
     public function __construct()

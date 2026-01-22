@@ -18,8 +18,8 @@ options: [
     'charset' => 'utf8mb4',
     'comment' => 'Log of judgehost internal errors',
 ])]
-#[ORM\Index(columns: ['judgingid'], name: 'judgingid')]
-#[ORM\Index(columns: ['cid'], name: 'cid')]
+#[ORM\Index(name: 'judgingid', columns: ['judgingid'])]
+#[ORM\Index(name: 'cid', columns: ['cid'])]
 class InternalError
 {
     #[ORM\Id]
@@ -76,7 +76,7 @@ class InternalError
     /**
      * @var Collection<int, Judging>
      */
-    #[ORM\OneToMany(mappedBy: 'internalError', targetEntity: Judging::class)]
+    #[ORM\OneToMany(targetEntity: Judging::class, mappedBy: 'internalError')]
     #[Serializer\Exclude]
     private Collection $affectedJudgings;
 

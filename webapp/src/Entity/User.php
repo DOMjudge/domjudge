@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     'charset' => 'utf8mb4',
     'comment' => 'Users that have access to DOMjudge',
 ])]
-#[ORM\Index(columns: ['teamid'], name: 'teamid')]
+#[ORM\Index(name: 'teamid', columns: ['teamid'])]
 #[ORM\UniqueConstraint(name: 'username', columns: ['username'], options: ['lengths' => [190]])]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[UniqueEntity(fields: 'username', message: "The username '{{ value }}' is already in use.")]
@@ -139,7 +139,7 @@ class User extends BaseApiEntity implements
     /**
      * @var Collection<int, Submission>
      */
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Submission::class)]
+    #[ORM\OneToMany(targetEntity: Submission::class, mappedBy: 'user')]
     #[Serializer\Exclude]
     private Collection $submissions;
 

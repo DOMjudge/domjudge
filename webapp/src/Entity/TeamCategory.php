@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
     'charset' => 'utf8mb4',
     'comment' => 'Categories for teams (e.g.: participants, observers, ...)',
 ])]
-#[ORM\Index(columns: ['sortorder'], name: 'sortorder')]
+#[ORM\Index(name: 'sortorder', columns: ['sortorder'])]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[Serializer\VirtualProperty(
     name: 'hidden',

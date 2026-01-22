@@ -19,7 +19,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
     'charset' => 'utf8mb4',
     'comment' => 'Time intervals removed from the contest for scoring',
 ])]
-#[ORM\Index(columns: ['cid'], name: 'cid')]
+#[ORM\Index(name: 'cid', columns: ['cid'])]
 class RemovedInterval
 {
     #[ORM\Id]

@@ -13,7 +13,7 @@ use JMS\Serializer\Annotation as Serializer;
     'charset' => 'utf8mb4',
     'comment' => 'Balloons to be handed out',
 ])]
-#[ORM\Index(columns: ['submitid'], name: 'submitid')]
+#[ORM\Index(name: 'submitid', columns: ['submitid'])]
 #[ORM\UniqueConstraint(name: 'unique_problem', columns: ['cid', 'teamid', 'probid'])]
 class Balloon
 {

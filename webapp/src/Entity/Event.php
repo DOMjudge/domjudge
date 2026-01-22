@@ -13,9 +13,9 @@ use Doctrine\ORM\Mapping as ORM;
     'charset' => 'utf8mb4',
     'comment' => 'Log of all events during a contest',
 ])]
-#[ORM\Index(columns: ['cid', 'eventtime'], name: 'eventtime')]
-#[ORM\Index(columns: ['cid'], name: 'cid')]
-#[ORM\Index(columns: ['cid', 'endpointtype', 'endpointid'], name: 'endpoint')]
+#[ORM\Index(name: 'eventtime', columns: ['cid', 'eventtime'])]
+#[ORM\Index(name: 'cid', columns: ['cid'])]
+#[ORM\Index(name: 'endpoint', columns: ['cid', 'endpointtype', 'endpointid'])]
 class Event
 {
     #[ORM\Id]

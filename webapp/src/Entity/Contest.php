@@ -35,7 +35,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
     'charset' => 'utf8mb4',
     'comment' => 'Contests that will be run with this install',
 ])]
-#[ORM\Index(columns: ['cid', 'enabled'], name: 'cid')]
+#[ORM\Index(name: 'cid', columns: ['cid', 'enabled'])]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[ORM\UniqueConstraint(name: 'shortname', columns: ['shortname'], options: ['lengths' => [190]])]
 #[ORM\HasLifecycleCallbacks]
@@ -425,14 +425,14 @@ class Contest extends BaseApiEntity implements
     /**
      * @var Collection<int, Clarification>
      */
-    #[ORM\OneToMany(mappedBy: 'contest', targetEntity: Clarification::class)]
+    #[ORM\OneToMany(targetEntity: Clarification::class, mappedBy: 'contest')]
     #[Serializer\Exclude]
     private Collection $clarifications;
 
     /**
      * @var Collection<int, Submission>
      */
-    #[ORM\OneToMany(mappedBy: 'contest', targetEntity: Submission::class)]
+    #[ORM\OneToMany(targetEntity: Submission::class, mappedBy: 'contest')]
     #[Serializer\Exclude]
     private Collection $submissions;
 
@@ -440,8 +440,8 @@ class Contest extends BaseApiEntity implements
      * @var Collection<int, ContestProblem>
      */
     #[ORM\OneToMany(
-        mappedBy: 'contest',
         targetEntity: ContestProblem::class,
+        mappedBy: 'contest',
         cascade: ['persist'],
         orphanRemoval: true)
     ]
@@ -453,14 +453,14 @@ class Contest extends BaseApiEntity implements
     /**
      * @var Collection<int, InternalError>
      */
-    #[ORM\OneToMany(mappedBy: 'contest', targetEntity: InternalError::class)]
+    #[ORM\OneToMany(targetEntity: InternalError::class, mappedBy: 'contest')]
     #[Serializer\Exclude]
     private Collection $internal_errors;
 
     /**
      * @var Collection<int, RemovedInterval>
      */
-    #[ORM\OneToMany(mappedBy: 'contest', targetEntity: RemovedInterval::class)]
+    #[ORM\OneToMany(targetEntity: RemovedInterval::class, mappedBy: 'contest')]
     #[Assert\Valid]
     #[Serializer\Exclude]
     private Collection $removedIntervals;
@@ -488,8 +488,8 @@ class Contest extends BaseApiEntity implements
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
      */
     #[ORM\OneToMany(
-        mappedBy: 'contest',
         targetEntity: ContestProblemsetContent::class,
+        mappedBy: 'contest',
         cascade: ['persist'],
         orphanRemoval: true
     )]

@@ -23,14 +23,14 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
     'charset' => 'utf8mb4',
     'comment' => 'All incoming submissions',
 ])]
-#[ORM\Index(columns: ['cid', 'teamid'], name: 'teamid')]
-#[ORM\Index(columns: ['teamid'], name: 'teamid_2')]
-#[ORM\Index(columns: ['userid'], name: 'userid')]
-#[ORM\Index(columns: ['probid'], name: 'probid')]
-#[ORM\Index(columns: ['langid'], name: 'langid')]
-#[ORM\Index(columns: ['origsubmitid'], name: 'origsubmitid')]
-#[ORM\Index(columns: ['rejudgingid'], name: 'rejudgingid')]
-#[ORM\Index(columns: ['cid', 'probid'], name: 'probid_2')]
+#[ORM\Index(name: 'teamid', columns: ['cid', 'teamid'])]
+#[ORM\Index(name: 'teamid_2', columns: ['teamid'])]
+#[ORM\Index(name: 'userid', columns: ['userid'])]
+#[ORM\Index(name: 'probid', columns: ['probid'])]
+#[ORM\Index(name: 'langid', columns: ['langid'])]
+#[ORM\Index(name: 'origsubmitid', columns: ['origsubmitid'])]
+#[ORM\Index(name: 'rejudgingid', columns: ['rejudgingid'])]
+#[ORM\Index(name: 'probid_2', columns: ['cid', 'probid'])]
 #[ORM\UniqueConstraint(
     name: 'externalid',
     columns: ['cid', 'externalid'],
@@ -153,28 +153,28 @@ class Submission extends BaseApiEntity implements
     /**
      * @var Collection<int, Judging>
      */
-    #[ORM\OneToMany(mappedBy: 'submission', targetEntity: Judging::class)]
+    #[ORM\OneToMany(targetEntity: Judging::class, mappedBy: 'submission')]
     #[Serializer\Exclude]
     private Collection $judgings;
 
     /**
      * @var Collection<int, ExternalJudgement>
      */
-    #[ORM\OneToMany(mappedBy: 'submission', targetEntity: ExternalJudgement::class)]
+    #[ORM\OneToMany(targetEntity: ExternalJudgement::class, mappedBy: 'submission')]
     #[Serializer\Exclude]
     private Collection $external_judgements;
 
     /**
      * @var Collection<int, SubmissionFile>
      */
-    #[ORM\OneToMany(mappedBy: 'submission', targetEntity: SubmissionFile::class)]
+    #[ORM\OneToMany(targetEntity: SubmissionFile::class, mappedBy: 'submission')]
     #[Serializer\Exclude]
     private Collection $files;
 
     /**
      * @var Collection<int, Balloon>
      */
-    #[ORM\OneToMany(mappedBy: 'submission', targetEntity: Balloon::class)]
+    #[ORM\OneToMany(targetEntity: Balloon::class, mappedBy: 'submission')]
     #[Serializer\Exclude]
     private Collection $balloons;
 
@@ -194,7 +194,7 @@ class Submission extends BaseApiEntity implements
     /**
      * @var Collection<int, Submission>
      */
-    #[ORM\OneToMany(mappedBy: 'originalSubmission', targetEntity: Submission::class)]
+    #[ORM\OneToMany(targetEntity: Submission::class, mappedBy: 'originalSubmission')]
     #[Serializer\Exclude]
     private Collection $resubmissions;
 

@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
     'charset' => 'utf8mb4',
     'comment' => 'Stores output of judging run',
 ])]
-#[ORM\Index(columns: ['runid'], name: 'runid')]
+#[ORM\Index(name: 'runid', columns: ['runid'])]
 class JudgingRunOutput
 {
     /**

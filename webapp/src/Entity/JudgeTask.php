@@ -19,16 +19,16 @@ use JMS\Serializer\Annotation as Serializer;
         'comment' => 'Individual judge tasks.',
     ]
 )]
-#[ORM\Index(columns: ['judgehostid'], name: 'judgehostid')]
-#[ORM\Index(columns: ['priority'], name: 'priority')]
-#[ORM\Index(columns: ['jobid'], name: 'jobid')]
-#[ORM\Index(columns: ['submitid'], name: 'submitid')]
-#[ORM\Index(columns: ['valid'], name: 'valid')]
-#[ORM\Index(columns: ['judgehostid', 'jobid'], name: 'judgehostid_jobid')]
-#[ORM\Index(columns: ['judgehostid', 'valid', 'priority'], name: 'judgehostid_valid_priority')]
+#[ORM\Index(name: 'judgehostid', columns: ['judgehostid'])]
+#[ORM\Index(name: 'priority', columns: ['priority'])]
+#[ORM\Index(name: 'jobid', columns: ['jobid'])]
+#[ORM\Index(name: 'submitid', columns: ['submitid'])]
+#[ORM\Index(name: 'valid', columns: ['valid'])]
+#[ORM\Index(name: 'judgehostid_jobid', columns: ['judgehostid', 'jobid'])]
+#[ORM\Index(name: 'judgehostid_valid_priority', columns: ['judgehostid', 'valid', 'priority'])]
 #[ORM\Index(
-    columns: ['judgehostid', 'starttime', 'valid', 'type', 'priority', 'judgetaskid'],
-    name: 'specific_type')
+    name: 'specific_type',
+    columns: ['judgehostid', 'starttime', 'valid', 'type', 'priority', 'judgetaskid'])
 ]
 class JudgeTask
 {
@@ -70,7 +70,7 @@ class JudgeTask
 
 
     #[ORM\ManyToOne()]
-    #[ORM\JoinColumn(name: 'submitid', nullable: true, referencedColumnName: 'submitid', onDelete: 'CASCADE',
+    #[ORM\JoinColumn(name: 'submitid', referencedColumnName: 'submitid', nullable: true, onDelete: 'CASCADE',
         options: ['comment' => 'Submission ID being judged', 'unsigned' => true])
     ]
     #[Serializer\Exclude]
@@ -157,7 +157,7 @@ class JudgeTask
     /**
      * @var Collection<int, JudgingRun>
      */
-    #[ORM\OneToMany(mappedBy: 'judgetask', targetEntity: JudgingRun::class)]
+    #[ORM\OneToMany(targetEntity: JudgingRun::class, mappedBy: 'judgetask')]
     #[Serializer\Exclude]
     private Collection $judging_runs;
 

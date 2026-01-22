@@ -16,8 +16,8 @@ use JMS\Serializer\Annotation as Serializer;
     'charset' => 'utf8mb4',
     'comment' => 'Result of a testcase run within a judging',
 ])]
-#[ORM\Index(columns: ['judgingid'], name: 'judgingid')]
-#[ORM\Index(columns: ['testcaseid'], name: 'testcaseid_2')]
+#[ORM\Index(name: 'judgingid', columns: ['judgingid'])]
+#[ORM\Index(name: 'testcaseid_2', columns: ['testcaseid'])]
 #[ORM\UniqueConstraint(name: 'testcaseid', columns: ['judgingid', 'testcaseid'])]
 class JudgingRun extends AbstractRun
 {
@@ -99,7 +99,7 @@ class JudgingRun extends AbstractRun
      * relation will always be loaded. See the commit message of commit
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
      */
-    #[ORM\OneToMany(mappedBy: 'run', targetEntity: JudgingRunOutput::class, cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: JudgingRunOutput::class, mappedBy: 'run', cascade: ['persist'], orphanRemoval: true)]
     #[Serializer\Exclude]
     private Collection $output;
 

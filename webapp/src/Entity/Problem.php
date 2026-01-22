@@ -25,9 +25,9 @@ use Symfony\Component\Validator\Constraints as Assert;
     'charset' => 'utf8mb4',
     'comment' => 'Problems the teams can submit solutions for',
 ])]
-#[ORM\UniqueConstraint(columns: ['externalid'], name: 'externalid', options: ['lengths' => [190]])]
-#[ORM\Index(columns: ['special_run'], name: 'special_run')]
-#[ORM\Index(columns: ['special_compare'], name: 'special_compare')]
+#[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
+#[ORM\Index(name: 'special_run', columns: ['special_run'])]
+#[ORM\Index(name: 'special_compare', columns: ['special_compare'])]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: 'externalid')]
 class Problem extends BaseApiEntity implements
@@ -136,21 +136,21 @@ class Problem extends BaseApiEntity implements
     /**
      * @var Collection<int, Submission>
      */
-    #[ORM\OneToMany(mappedBy: 'problem', targetEntity: Submission::class)]
+    #[ORM\OneToMany(targetEntity: Submission::class, mappedBy: 'problem')]
     #[Serializer\Exclude]
     private Collection $submissions;
 
     /**
      * @var Collection<int, Clarification>
      */
-    #[ORM\OneToMany(mappedBy: 'problem', targetEntity: Clarification::class)]
+    #[ORM\OneToMany(targetEntity: Clarification::class, mappedBy: 'problem')]
     #[Serializer\Exclude]
     private Collection $clarifications;
 
     /**
      * @var Collection<int, ContestProblem>
      */
-    #[ORM\OneToMany(mappedBy: 'problem', targetEntity: ContestProblem::class)]
+    #[ORM\OneToMany(targetEntity: ContestProblem::class, mappedBy: 'problem')]
     #[Serializer\Exclude]
     private Collection $contest_problems;
 
@@ -167,7 +167,7 @@ class Problem extends BaseApiEntity implements
     /**
      * @var Collection<int, Testcase>
      */
-    #[ORM\OneToMany(mappedBy: 'problem', targetEntity: Testcase::class)]
+    #[ORM\OneToMany(targetEntity: Testcase::class, mappedBy: 'problem')]
     #[ORM\OrderBy(['ranknumber' => 'ASC'])]
     #[Serializer\Exclude]
     private Collection $testcases;
@@ -180,8 +180,8 @@ class Problem extends BaseApiEntity implements
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
      */
     #[ORM\OneToMany(
-        mappedBy: 'problem',
         targetEntity: ProblemStatementContent::class,
+        mappedBy: 'problem',
         cascade: ['persist'],
         orphanRemoval: true
     )]
@@ -191,7 +191,7 @@ class Problem extends BaseApiEntity implements
     /**
      * @var Collection<int, ProblemAttachment>
      */
-    #[ORM\OneToMany(mappedBy: 'problem', targetEntity: ProblemAttachment::class, orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: ProblemAttachment::class, mappedBy: 'problem', orphanRemoval: true)]
     #[ORM\OrderBy(['name' => 'ASC'])]
     #[Serializer\Exclude]
     private Collection $attachments;

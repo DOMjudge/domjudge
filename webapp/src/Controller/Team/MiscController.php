@@ -144,7 +144,7 @@ class MiscController extends BaseController
         return $this->render('team/index.html.twig', $data);
     }
 
-    #[Route(path: '/updates', methods: ['GET'], name: 'team_ajax_updates')]
+    #[Route(path: '/updates', name: 'team_ajax_updates', methods: ['GET'])]
     public function updatesAction(): JsonResponse
     {
         return $this->json(['unread_clarifications' => $this->dj->getUnreadClarifications()]);

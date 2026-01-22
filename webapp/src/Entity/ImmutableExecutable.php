@@ -36,7 +36,7 @@ class ImmutableExecutable
     /**
      * @var Collection<int, ExecutableFile>|null
      */
-    #[ORM\OneToMany(mappedBy: 'immutableExecutable', targetEntity: ExecutableFile::class)]
+    #[ORM\OneToMany(targetEntity: ExecutableFile::class, mappedBy: 'immutableExecutable')]
     #[ORM\OrderBy(['filename' => 'ASC'])]
     #[Serializer\Exclude]
     private ?Collection $files;

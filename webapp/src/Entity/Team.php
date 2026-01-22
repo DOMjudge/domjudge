@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
 #[ORM\Table(options: ['collation' => 'utf8mb4_unicode_ci', 'charset' => 'utf8mb4'])]
-#[ORM\Index(columns: ['affilid'], name: 'affilid')]
+#[ORM\Index(name: 'affilid', columns: ['affilid'])]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[ORM\UniqueConstraint(name: 'label', columns: ['label'])]
 #[UniqueEntity(fields: 'externalid')]
@@ -158,7 +158,7 @@ class Team extends BaseApiEntity implements
     /**
      * @var Collection<int, User>
      */
-    #[ORM\OneToMany(mappedBy: 'team', targetEntity: User::class, cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'team', cascade: ['persist'])]
     #[Assert\Valid]
     #[Serializer\Exclude]
     private Collection $users;
@@ -166,21 +166,21 @@ class Team extends BaseApiEntity implements
     /**
      * @var Collection<int, Submission>
      */
-    #[ORM\OneToMany(mappedBy: 'team', targetEntity: Submission::class)]
+    #[ORM\OneToMany(targetEntity: Submission::class, mappedBy: 'team')]
     #[Serializer\Exclude]
     private Collection $submissions;
 
     /**
      * @var Collection<int, Clarification>
      */
-    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Clarification::class)]
+    #[ORM\OneToMany(targetEntity: Clarification::class, mappedBy: 'sender')]
     #[Serializer\Exclude]
     private Collection $sent_clarifications;
 
     /**
      * @var Collection<int, Clarification>
      */
-    #[ORM\OneToMany(mappedBy: 'recipient', targetEntity: Clarification::class)]
+    #[ORM\OneToMany(targetEntity: Clarification::class, mappedBy: 'recipient')]
     #[Serializer\Exclude]
     private Collection $received_clarifications;
 

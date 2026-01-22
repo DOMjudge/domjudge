@@ -18,9 +18,9 @@ use JMS\Serializer\Annotation as Serializer;
     'charset' => 'utf8mb4',
     'comment' => 'Judgement in external system',
 ])]
-#[ORM\Index(columns: ['submitid'], name: 'submitid')]
-#[ORM\Index(columns: ['cid'], name: 'cid')]
-#[ORM\Index(columns: ['verified'], name: 'verified')]
+#[ORM\Index(name: 'submitid', columns: ['submitid'])]
+#[ORM\Index(name: 'cid', columns: ['cid'])]
+#[ORM\Index(name: 'verified', columns: ['verified'])]
 #[ORM\UniqueConstraint(
     name: 'externalid',
     columns: ['cid', 'externalid'],
