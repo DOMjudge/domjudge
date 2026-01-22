@@ -228,7 +228,7 @@ class JudgehostController extends BaseController
         }
     }
 
-    #[Route(path: '/timeline-data', methods: ['GET'], name: 'jury_judgehost_timeline_data')]
+    #[Route(path: '/timeline-data', name: 'jury_judgehost_timeline_data', methods: ['GET'])]
     public function timelineDataAction(): JsonResponse
     {
         $now = Utils::now();
@@ -272,7 +272,7 @@ class JudgehostController extends BaseController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route(path: '/{judgehostid<\d+>}', methods: ['GET'], name: 'jury_judgehost')]
+    #[Route(path: '/{judgehostid<\d+>}', name: 'jury_judgehost', methods: ['GET'])]
     public function viewAction(Request $request, int $judgehostid): Response
     {
         /** @var Judgehost|null $judgehost */
@@ -390,7 +390,7 @@ class JudgehostController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/enable-all', methods: ['POST'], name: 'jury_judgehost_enable_all')]
+    #[Route(path: '/enable-all', name: 'jury_judgehost_enable_all', methods: ['POST'])]
     public function enableAllAction(): RedirectResponse
     {
         $this->em->createQuery('UPDATE App\Entity\Judgehost j set j.enabled = true')->execute();
@@ -399,7 +399,7 @@ class JudgehostController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/disable-all', methods: ['POST'], name: 'jury_judgehost_disable_all')]
+    #[Route(path: '/disable-all', name: 'jury_judgehost_disable_all', methods: ['POST'])]
     public function disableAllAction(): RedirectResponse
     {
         $this->em->createQuery('UPDATE App\Entity\Judgehost j set j.enabled = false')->execute();
@@ -408,7 +408,7 @@ class JudgehostController extends BaseController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/autohide', methods: ['POST'], name: 'jury_judgehost_autohide')]
+    #[Route(path: '/autohide', name: 'jury_judgehost_autohide', methods: ['POST'])]
     public function autohideInactive(): RedirectResponse
     {
         $now = Utils::now();

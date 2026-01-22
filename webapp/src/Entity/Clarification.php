@@ -20,12 +20,12 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
     'charset' => 'utf8mb4',
     'comment' => 'Clarification requests by teams and responses by the jury',
 ])]
-#[ORM\Index(columns: ['respid'], name: 'respid')]
-#[ORM\Index(columns: ['probid'], name: 'probid')]
-#[ORM\Index(columns: ['cid'], name: 'cid')]
-#[ORM\Index(columns: ['cid', 'answered', 'submittime'], name: 'cid_2')]
-#[ORM\Index(columns: ['sender'], name: 'sender')]
-#[ORM\Index(columns: ['recipient'], name: 'recipient')]
+#[ORM\Index(name: 'respid', columns: ['respid'])]
+#[ORM\Index(name: 'probid', columns: ['probid'])]
+#[ORM\Index(name: 'cid', columns: ['cid'])]
+#[ORM\Index(name: 'cid_2', columns: ['cid', 'answered', 'submittime'])]
+#[ORM\Index(name: 'sender', columns: ['sender'])]
+#[ORM\Index(name: 'recipient', columns: ['recipient'])]
 #[ORM\UniqueConstraint(
     name: 'externalid',
     columns: ['cid', 'externalid'],
@@ -107,7 +107,7 @@ class Clarification extends BaseApiEntity implements
     /**
      * @var Collection<int, Clarification>
      */
-    #[ORM\OneToMany(mappedBy: 'in_reply_to', targetEntity: Clarification::class)]
+    #[ORM\OneToMany(targetEntity: Clarification::class, mappedBy: 'in_reply_to')]
     #[Serializer\Exclude]
     private Collection $replies;
 

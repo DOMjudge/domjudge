@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
     'charset' => 'utf8mb4',
     'comment' => 'Debug packages.',
 ])]
-#[ORM\Index(columns: ['judgingid'], name: 'judgingid')]
+#[ORM\Index(name: 'judgingid', columns: ['judgingid'])]
 class DebugPackage
 {
     #[ORM\Id]

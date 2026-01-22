@@ -24,8 +24,8 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
         'comment' => 'Many-to-Many mapping of contests and problems',
     ]
 )]
-#[ORM\Index(columns: ['cid'], name: 'cid')]
-#[ORM\Index(columns: ['probid'], name: 'probid')]
+#[ORM\Index(name: 'cid', columns: ['cid'])]
+#[ORM\Index(name: 'probid', columns: ['probid'])]
 #[ORM\UniqueConstraint(name: 'shortname', columns: ['cid', 'shortname'], options: ['lengths' => [null, 190]])]
 
 #[Serializer\VirtualProperty(
@@ -89,7 +89,7 @@ class ContestProblem extends BaseApiEntity
     /**
      * @var Collection<int, Submission>
      */
-    #[ORM\OneToMany(mappedBy: 'contest_problem', targetEntity: Submission::class)]
+    #[ORM\OneToMany(targetEntity: Submission::class, mappedBy: 'contest_problem')]
     #[Serializer\Exclude]
     private Collection $submissions;
 

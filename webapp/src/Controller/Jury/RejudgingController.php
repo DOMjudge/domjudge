@@ -676,7 +676,7 @@ class RejudgingController extends BaseController
         ]);
     }
 
-    #[Route(path: '/create', methods: ['POST'], name: 'jury_create_rejudge')]
+    #[Route(path: '/create', name: 'jury_create_rejudge', methods: ['POST'])]
     public function createAction(Request $request): Response
     {
         $table      = $request->request->get('table');

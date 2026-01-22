@@ -15,8 +15,8 @@ use JMS\Serializer\Annotation as Serializer;
     'charset' => 'utf8mb4',
     'comment' => 'Stores testcases per problem',
 ])]
-#[ORM\Index(columns: ['probid'], name: 'probid')]
-#[ORM\Index(columns: ['sample'], name: 'sample')]
+#[ORM\Index(name: 'probid', columns: ['probid'])]
+#[ORM\Index(name: 'sample', columns: ['sample'])]
 #[ORM\UniqueConstraint(name: 'rankindex', columns: ['probid', 'ranknumber'])]
 class Testcase
 {
@@ -89,14 +89,14 @@ class Testcase
     /**
      * @var Collection<int, JudgingRun>
      */
-    #[ORM\OneToMany(mappedBy: 'testcase', targetEntity: JudgingRun::class)]
+    #[ORM\OneToMany(targetEntity: JudgingRun::class, mappedBy: 'testcase')]
     #[Serializer\Exclude]
     private Collection $judging_runs;
 
     /**
      * @var Collection<int, ExternalRun>
      */
-    #[ORM\OneToMany(mappedBy: 'testcase', targetEntity: ExternalRun::class)]
+    #[ORM\OneToMany(targetEntity: ExternalRun::class, mappedBy: 'testcase')]
     #[Serializer\Exclude]
     private Collection $external_runs;
 
@@ -107,7 +107,7 @@ class Testcase
      * relation will always be loaded. See the commit message of commit
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation.
      */
-    #[ORM\OneToMany(mappedBy: 'testcase', targetEntity: TestcaseContent::class, cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: TestcaseContent::class, mappedBy: 'testcase', cascade: ['persist'], orphanRemoval: true)]
     #[Serializer\Exclude]
     private Collection $content;
 

@@ -71,14 +71,14 @@ class JuryMiscController extends BaseController
     }
 
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')"))]
-    #[Route(path: '/updates', methods: ['GET'], name: 'jury_ajax_updates')]
+    #[Route(path: '/updates', name: 'jury_ajax_updates', methods: ['GET'])]
     public function updatesAction(): JsonResponse
     {
         return $this->json($this->dj->getUpdates());
     }
 
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')"))]
-    #[Route(path: '/ajax/{datatype}', methods: ['GET'], name: 'jury_ajax_data')]
+    #[Route(path: '/ajax/{datatype}', name: 'jury_ajax_data', methods: ['GET'])]
     public function ajaxDataAction(Request $request, string $datatype): JsonResponse
     {
         $q  = $request->query->get('q');

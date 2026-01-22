@@ -99,7 +99,7 @@ class TeamAffiliation extends BaseApiEntity implements
     /**
      * @var Collection<int, Team>
      */
-    #[ORM\OneToMany(mappedBy: 'affiliation', targetEntity: Team::class)]
+    #[ORM\OneToMany(targetEntity: Team::class, mappedBy: 'affiliation')]
     #[Serializer\Exclude]
     private Collection $teams;
 

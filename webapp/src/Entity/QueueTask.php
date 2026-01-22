@@ -16,12 +16,12 @@ use JMS\Serializer\Annotation as Serializer;
         'comment' => 'Work items.',
     ]
 )]
-#[ORM\Index(columns: ['queuetaskid'], name: 'queuetaskid')]
-#[ORM\Index(columns: ['judgingid'], name: 'judgingid')]
-#[ORM\Index(columns: ['priority'], name: 'priority')]
-#[ORM\Index(columns: ['teampriority'], name: 'teampriority')]
-#[ORM\Index(columns: ['teamid'], name: 'teamid')]
-#[ORM\Index(columns: ['starttime'], name: 'starttime')]
+#[ORM\Index(name: 'queuetaskid', columns: ['queuetaskid'])]
+#[ORM\Index(name: 'judgingid', columns: ['judgingid'])]
+#[ORM\Index(name: 'priority', columns: ['priority'])]
+#[ORM\Index(name: 'teampriority', columns: ['teampriority'])]
+#[ORM\Index(name: 'teamid', columns: ['teamid'])]
+#[ORM\Index(name: 'starttime', columns: ['starttime'])]
 class QueueTask
 {
     #[ORM\Id]

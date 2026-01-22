@@ -64,7 +64,7 @@ class Version
     /**
      * @var Collection<int, JudgeTask>
      */
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: JudgeTask::class)]
+    #[ORM\OneToMany(targetEntity: JudgeTask::class, mappedBy: 'version')]
     #[Serializer\Exclude]
     private Collection $judgeTasks;
 

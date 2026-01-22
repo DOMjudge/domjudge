@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
     'charset' => 'utf8mb4',
     'comment' => 'Attachments belonging to problems',
 ])]
-#[ORM\Index(columns: ['attachmentid', 'name'], name: 'name', options: ['lengths' => [null, 190]])]
+#[ORM\Index(name: 'name', columns: ['attachmentid', 'name'], options: ['lengths' => [null, 190]])]
 class ProblemAttachment
 {
     #[ORM\Id]
@@ -43,8 +43,8 @@ class ProblemAttachment
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
      */
     #[ORM\OneToMany(
-        mappedBy: 'attachment',
         targetEntity: ProblemAttachmentContent::class,
+        mappedBy: 'attachment',
         cascade: ['persist'],
         orphanRemoval: true
     )]

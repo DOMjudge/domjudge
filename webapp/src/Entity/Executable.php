@@ -41,19 +41,19 @@ class Executable
     /**
      * @var Collection<int, Language>
      */
-    #[ORM\OneToMany(mappedBy: 'compile_executable', targetEntity: Language::class)]
+    #[ORM\OneToMany(targetEntity: Language::class, mappedBy: 'compile_executable')]
     private Collection $languages;
 
     /**
      * @var Collection<int, Problem>
      */
-    #[ORM\OneToMany(mappedBy: 'compare_executable', targetEntity: Problem::class)]
+    #[ORM\OneToMany(targetEntity: Problem::class, mappedBy: 'compare_executable')]
     private Collection $problems_compare;
 
     /**
      * @var Collection<int, Problem>
      */
-    #[ORM\OneToMany(mappedBy: 'run_executable', targetEntity: Problem::class)]
+    #[ORM\OneToMany(targetEntity: Problem::class, mappedBy: 'run_executable')]
     private Collection $problems_run;
 
     public function __construct()

@@ -168,14 +168,14 @@ class Judging extends AbstractJudgement
     /**
      * @var Collection<int, JudgingRun>
      */
-    #[ORM\OneToMany(mappedBy: 'judging', targetEntity: JudgingRun::class)]
+    #[ORM\OneToMany(targetEntity: JudgingRun::class, mappedBy: 'judging')]
     #[Serializer\Exclude]
     private Collection $runs;
 
     /**
      * @var Collection<int, DebugPackage>
      */
-    #[ORM\OneToMany(mappedBy: 'judging', targetEntity: DebugPackage::class)]
+    #[ORM\OneToMany(targetEntity: DebugPackage::class, mappedBy: 'judging')]
     #[Serializer\Exclude]
     private Collection $debug_packages;
 

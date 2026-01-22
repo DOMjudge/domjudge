@@ -15,9 +15,9 @@ use Doctrine\ORM\Mapping as ORM;
         'comment' => 'Scoreboard cache',
     ]
 )]
-#[ORM\Index(columns: ['cid'], name: 'cid')]
-#[ORM\Index(columns: ['teamid'], name: 'teamid')]
-#[ORM\Index(columns: ['probid'], name: 'probid')]
+#[ORM\Index(name: 'cid', columns: ['cid'])]
+#[ORM\Index(name: 'teamid', columns: ['teamid'])]
+#[ORM\Index(name: 'probid', columns: ['probid'])]
 class ScoreCache
 {
     #[ORM\Column(options: [

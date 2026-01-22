@@ -15,12 +15,12 @@ use Doctrine\ORM\Mapping as ORM;
         'charset' => 'utf8mb4',
         'comment' => 'Scoreboard rank cache',
     ])]
-#[ORM\Index(columns: ['cid', 'points_restricted', 'totaltime_restricted', 'totalruntime_restricted'], name: 'order_restricted')]
-#[ORM\Index(columns: ['cid', 'points_public', 'totaltime_public', 'totalruntime_public'], name: 'order_public')]
-#[ORM\Index(columns: ['cid'], name: 'cid')]
-#[ORM\Index(columns: ['teamid'], name: 'teamid')]
-#[ORM\Index(columns: ['sort_key_public'], name: 'sortKeyPublic', options: ['lengths' => [self::SORT_KEY_INDEX_SIZE]])]
-#[ORM\Index(columns: ['sort_key_restricted'], name: 'sortKeyRestricted', options: ['lengths' => [self::SORT_KEY_INDEX_SIZE]])]
+#[ORM\Index(name: 'order_restricted', columns: ['cid', 'points_restricted', 'totaltime_restricted', 'totalruntime_restricted'])]
+#[ORM\Index(name: 'order_public', columns: ['cid', 'points_public', 'totaltime_public', 'totalruntime_public'])]
+#[ORM\Index(name: 'cid', columns: ['cid'])]
+#[ORM\Index(name: 'teamid', columns: ['teamid'])]
+#[ORM\Index(name: 'sortKeyPublic', columns: ['sort_key_public'], options: ['lengths' => [self::SORT_KEY_INDEX_SIZE]])]
+#[ORM\Index(name: 'sortKeyRestricted', columns: ['sort_key_restricted'], options: ['lengths' => [self::SORT_KEY_INDEX_SIZE]])]
 class RankCache
 {
     public const SORT_KEY_INDEX_SIZE = 768;

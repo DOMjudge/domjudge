@@ -15,8 +15,8 @@ use JMS\Serializer\Annotation as Serializer;
     'charset' => 'utf8mb4',
     'comment' => 'Rejudge group',
 ])]
-#[ORM\Index(columns: ['userid_start'], name: 'userid_start')]
-#[ORM\Index(columns: ['userid_finish'], name: 'userid_finish')]
+#[ORM\Index(name: 'userid_start', columns: ['userid_start'])]
+#[ORM\Index(name: 'userid_finish', columns: ['userid_finish'])]
 class Rejudging
 {
     #[ORM\Id]
@@ -67,7 +67,7 @@ class Rejudging
      *
      * One rejudging has many judgings.
      */
-    #[ORM\OneToMany(mappedBy: 'rejudging', targetEntity: Judging::class)]
+    #[ORM\OneToMany(targetEntity: Judging::class, mappedBy: 'rejudging')]
     private Collection $judgings;
 
     /**
@@ -75,7 +75,7 @@ class Rejudging
      *
      * One rejudging has many submissions.
      */
-    #[ORM\OneToMany(mappedBy: 'rejudging', targetEntity: Submission::class)]
+    #[ORM\OneToMany(targetEntity: Submission::class, mappedBy: 'rejudging')]
     private Collection $submissions;
 
     #[ORM\Column(options: [

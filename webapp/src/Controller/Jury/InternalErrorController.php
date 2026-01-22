@@ -91,7 +91,7 @@ class InternalErrorController extends BaseController
         ]);
     }
 
-    #[Route(path: '/{errorId<\d+>}', methods: ['GET'], name: 'jury_internal_error')]
+    #[Route(path: '/{errorId<\d+>}', name: 'jury_internal_error', methods: ['GET'])]
     public function viewAction(int $errorId): Response
     {
         $internalError = $this->em->getRepository(InternalError::class)->find($errorId);

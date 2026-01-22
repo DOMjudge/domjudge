@@ -47,7 +47,7 @@ class Judgehost
     /**
      * @var Collection<int, JudgeTask>
      */
-    #[ORM\OneToMany(mappedBy: 'judgehost', targetEntity: JudgeTask::class)]
+    #[ORM\OneToMany(targetEntity: JudgeTask::class, mappedBy: 'judgehost')]
     #[Serializer\Exclude]
     private Collection $judgetasks;
 

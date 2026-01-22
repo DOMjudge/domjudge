@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     'charset' => 'utf8mb4',
     'comment' => 'Programming languages in which teams can submit solutions',
 ])]
-#[ORM\Index(columns: ['compile_script'], name: 'compile_script')]
+#[ORM\Index(name: 'compile_script', columns: ['compile_script'])]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[UniqueEntity(fields: 'langid')]
 #[UniqueEntity(fields: 'externalid')]
@@ -120,14 +120,14 @@ class Language extends BaseApiEntity implements
     /**
      * @var Collection<int, Submission>
      */
-    #[ORM\OneToMany(mappedBy: 'language', targetEntity: Submission::class)]
+    #[ORM\OneToMany(targetEntity: Submission::class, mappedBy: 'language')]
     #[Serializer\Exclude]
     private Collection $submissions;
 
     /**
      * @var Collection<int, Version>
      */
-    #[ORM\OneToMany(mappedBy: 'language', targetEntity: Version::class)]
+    #[ORM\OneToMany(targetEntity: Version::class, mappedBy: 'language')]
     #[Serializer\Exclude]
     private Collection $versions;
 

@@ -14,7 +14,7 @@ use RuntimeException;
     'charset' => 'utf8mb4',
     'comment' => 'Files associated to an executable',
 ])]
-#[ORM\Index(columns: ['immutable_execid'], name: 'immutable_execid')]
+#[ORM\Index(name: 'immutable_execid', columns: ['immutable_execid'])]
 #[ORM\UniqueConstraint(
     name: 'rankindex',
     columns: ['immutable_execid', 'ranknumber']
