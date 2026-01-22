@@ -7,9 +7,9 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
 #[AsEventListener]
-class AddContentSecurityPolicyListener
+readonly class AddContentSecurityPolicyListener
 {
-    public function __construct(protected readonly ?Profiler $profiler) {}
+    public function __construct(protected ?Profiler $profiler) {}
 
     public function __invoke(ResponseEvent $event): void
     {

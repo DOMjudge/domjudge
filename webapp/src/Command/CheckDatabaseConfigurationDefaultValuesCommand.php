@@ -11,10 +11,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
     name: 'domjudge:db-config:check',
     description: 'Check if the default values of the database configuration are valid'
 )]
-class CheckDatabaseConfigurationDefaultValuesCommand
+readonly class CheckDatabaseConfigurationDefaultValuesCommand
 {
     public function __construct(
-        protected readonly ConfigurationService $config,
+        protected ConfigurationService $config,
     ) {}
 
     public function __invoke(SymfonyStyle $style): int

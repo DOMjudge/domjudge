@@ -2,11 +2,11 @@
 
 namespace App\DataTransferObject\Shadowing;
 
-class SubmissionFile
+readonly class SubmissionFile
 {
     public function __construct(
-        public readonly string $href,
-        public readonly ?string $mime,
-        public readonly ?string $filename,
+        public string  $href,
+        public ?string $mime,
+        public ?string $filename,
     ) {}
 }

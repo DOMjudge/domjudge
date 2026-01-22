@@ -2,12 +2,12 @@
 
 namespace App\DataTransferObject;
 
-class DomJudgeApiInfo
+readonly class DomJudgeApiInfo
 {
     public function __construct(
-        public readonly int $apiversion,
-        public readonly string $version,
-        public readonly string $environment,
-        public readonly string $docUrl,
+        public int    $apiversion,
+        public string $version,
+        public string $environment,
+        public string $docUrl,
     ) {}
 }

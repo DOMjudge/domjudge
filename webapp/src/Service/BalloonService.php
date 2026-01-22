@@ -18,11 +18,11 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class BalloonService
+readonly class BalloonService
 {
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly ConfigurationService $config
+        protected EntityManagerInterface $em,
+        protected ConfigurationService   $config
     ) {}
 
     /**

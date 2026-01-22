@@ -4,33 +4,33 @@ namespace App\DataTransferObject;
 
 use OpenApi\Attributes as OA;
 
-class AddTeam
+readonly class AddTeam
 {
     /**
      * @param string[] $groupIds
      */
     public function __construct(
         #[OA\Property(nullable: true)]
-        public readonly ?string $id = null,
+        public ?string          $id = null,
         #[OA\Property(nullable: true)]
-        public readonly ?string $icpcId = null,
+        public ?string          $icpcId = null,
         #[OA\Property(nullable: true)]
-        public readonly ?string $label = null,
+        public ?string          $label = null,
         #[OA\Property(type: 'array', items: new OA\Items(type: 'string'))]
-        public readonly array $groupIds = [],
+        public array            $groupIds = [],
         #[OA\Property(nullable: true)]
-        public readonly ?string $name = null,
+        public ?string          $name = null,
         #[OA\Property(nullable: true)]
-        public readonly ?string $displayName = null,
+        public ?string          $displayName = null,
         #[OA\Property(nullable: true)]
-        public readonly ?string $publicDescription = null,
+        public ?string          $publicDescription = null,
         #[OA\Property(nullable: true)]
-        public readonly ?string $members = null,
+        public ?string          $members = null,
         #[OA\Property(nullable: true)]
-        public readonly ?string $description = null,
+        public ?string          $description = null,
         #[OA\Property(nullable: true)]
-        public readonly ?AddTeamLocation $location = null,
+        public ?AddTeamLocation $location = null,
         #[OA\Property(nullable: true)]
-        public readonly ?string $organizationId = null,
+        public ?string          $organizationId = null,
     ) {}
 }

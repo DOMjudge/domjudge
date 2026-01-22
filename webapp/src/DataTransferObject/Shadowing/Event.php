@@ -5,16 +5,16 @@ namespace App\DataTransferObject\Shadowing;
 /**
  * @template-covariant T of EventData
  */
-class Event
+readonly class Event
 {
     /**
      * @param T[] $data
      */
     public function __construct(
-        public readonly ?string $id,
-        public readonly EventType $type,
-        public readonly Operation $operation,
-        public readonly ?string $objectId,
-        public readonly array $data,
+        public ?string   $id,
+        public EventType $type,
+        public Operation $operation,
+        public ?string   $objectId,
+        public array     $data,
     ) {}
 }

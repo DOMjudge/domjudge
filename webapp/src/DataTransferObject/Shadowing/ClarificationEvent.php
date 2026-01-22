@@ -2,15 +2,15 @@
 
 namespace App\DataTransferObject\Shadowing;
 
-class ClarificationEvent implements EventData
+readonly class ClarificationEvent implements EventData
 {
     public function __construct(
-        public readonly string $id,
-        public readonly string $text,
-        public readonly string $time,
-        public readonly ?string $fromTeamId,
-        public readonly ?string $toTeamId,
-        public readonly ?string $replyToId,
-        public readonly ?string $problemId,
+        public string  $id,
+        public string  $text,
+        public string  $time,
+        public ?string $fromTeamId,
+        public ?string $toTeamId,
+        public ?string $replyToId,
+        public ?string $problemId,
     ) {}
 }

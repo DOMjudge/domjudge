@@ -2,9 +2,9 @@
 
 namespace App\DataTransferObject\Shadowing;
 
-class StateEvent implements EventData
+readonly class StateEvent implements EventData
 {
     public function __construct(
-        public readonly ?string $endOfUpdates,
+        public ?string $endOfUpdates,
     ) {}
 }

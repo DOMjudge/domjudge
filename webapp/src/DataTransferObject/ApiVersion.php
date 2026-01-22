@@ -2,9 +2,9 @@
 
 namespace App\DataTransferObject;
 
-class ApiVersion
+readonly class ApiVersion
 {
     public function __construct(
-        public readonly int $apiVersion
+        public int $apiVersion
     ) {}
 }

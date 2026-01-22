@@ -2,19 +2,19 @@
 
 namespace App\DataTransferObject\Shadowing;
 
-class TeamEvent implements EventData
+readonly class TeamEvent implements EventData
 {
     /**
      * @param string[]|null $groupIds
      */
     public function __construct(
-        public readonly string $id,
-        public readonly string $name,
-        public readonly ?string $formalName,
-        public readonly ?string $icpcId,
-        public readonly ?string $country,
-        public readonly ?string $organizationId,
-        public readonly ?array $groupIds,
-        public readonly ?string $displayName,
+        public string  $id,
+        public string  $name,
+        public ?string $formalName,
+        public ?string $icpcId,
+        public ?string $country,
+        public ?string $organizationId,
+        public ?array  $groupIds,
+        public ?string $displayName,
     ) {}
 }

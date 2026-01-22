@@ -2,18 +2,18 @@
 
 namespace App\DataTransferObject\Shadowing;
 
-class ContestEvent implements EventData
+readonly class ContestEvent implements EventData
 {
     public function __construct(
-        public readonly string $id,
-        public readonly string $name,
-        public readonly string $duration,
-        public readonly ?string $scoreboardType,
-        public readonly ?int $penaltyTime,
-        public readonly ?string $formalName,
-        public readonly ?string $startTime,
-        public readonly ?string $countdownPauseTime,
-        public readonly ?string $scoreboardFreezeDuration,
-        public readonly ?string $scoreboardThawTime,
+        public string  $id,
+        public string  $name,
+        public string  $duration,
+        public ?string $scoreboardType,
+        public ?int    $penaltyTime,
+        public ?string $formalName,
+        public ?string $startTime,
+        public ?string $countdownPauseTime,
+        public ?string $scoreboardFreezeDuration,
+        public ?string $scoreboardThawTime,
     ) {}
 }

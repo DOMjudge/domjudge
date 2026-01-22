@@ -35,17 +35,17 @@ enum Verdict
 /**
  * Represents program execution metadata with validated fields.
  */
-class ProgramMetadata
+readonly class ProgramMetadata
 {
     public function __construct(
-        public readonly string $exitcode,
-        public readonly string $cpuTime,
-        public readonly string $wallTime,
-        public readonly string $memoryBytes,
-        public readonly string $timeResult,
-        public readonly string $stdoutBytes,
-        public readonly string $stderrBytes,
-        public readonly string $outputTruncated,
+        public string $exitcode,
+        public string $cpuTime,
+        public string $wallTime,
+        public string $memoryBytes,
+        public string $timeResult,
+        public string $stdoutBytes,
+        public string $stderrBytes,
+        public string $outputTruncated,
     ) {
     }
 
@@ -94,11 +94,11 @@ class ProgramMetadata
 /**
  * Represents compare script execution metadata with validated fields.
  */
-class CompareMetadata
+readonly class CompareMetadata
 {
     public function __construct(
-        public readonly string $exitcode,
-        public readonly bool $validatorExitedFirst,
+        public string $exitcode,
+        public bool   $validatorExitedFirst,
     ) {
     }
 
@@ -118,15 +118,15 @@ class CompareMetadata
  * Input data for verdict determination, extracted from metadata files.
  * Uses proper value objects instead of raw arrays for type safety and validation.
  */
-class VerdictInput
+readonly class VerdictInput
 {
     public function __construct(
-        public readonly ProgramMetadata $programMeta,
-        public readonly CompareMetadata $compareMeta,
-        public readonly int $compareExitcode,
-        public readonly bool $combinedRunCompare,
-        public readonly int $programOutSize,
-        public readonly bool $compareTimedOut = false,
+        public ProgramMetadata $programMeta,
+        public CompareMetadata $compareMeta,
+        public int             $compareExitcode,
+        public bool            $combinedRunCompare,
+        public int             $programOutSize,
+        public bool            $compareTimedOut = false,
     ) {
     }
 }
@@ -140,7 +140,7 @@ class JudgeDaemon
     // Exit codes from compare scripts
     private const COMPARE_EXITCODE_CORRECT = 42;
     private const COMPARE_EXITCODE_WRONG_ANSWER = 43;
-    
+
     private const EXTERNAL_IDENTIFIER_REGEX = '/^[a-zA-Z0-9_.-]+$/';
 
     private static ?JudgeDaemon $instance = null;
@@ -2007,7 +2007,7 @@ class JudgeDaemon
             $programOutSize = filesize("program.out");
             $programMeta = ProgramMetadata::fromArray($program_meta_ini);
             $compareMeta = CompareMetadata::fromArray($compare_meta_ini);
-            
+
             $verdictInput = new VerdictInput(
                 programMeta: $programMeta,
                 compareMeta: $compareMeta,

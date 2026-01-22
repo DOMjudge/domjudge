@@ -35,15 +35,15 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
-class ImportExportService
+readonly class ImportExportService
 {
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly ScoreboardService $scoreboardService,
-        protected readonly DOMJudgeService $dj,
-        protected readonly ConfigurationService $config,
-        protected readonly EventLogService $eventLogService,
-        protected readonly ValidatorInterface $validator
+        protected EntityManagerInterface $em,
+        protected ScoreboardService      $scoreboardService,
+        protected DOMJudgeService        $dj,
+        protected ConfigurationService   $config,
+        protected EventLogService        $eventLogService,
+        protected ValidatorInterface     $validator
     ) {}
 
     /**

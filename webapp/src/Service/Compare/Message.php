@@ -2,12 +2,12 @@
 
 namespace App\Service\Compare;
 
-class Message
+readonly class Message
 {
     public function __construct(
-        public readonly MessageType $type,
-        public readonly string $message,
-        public readonly ?string $source = null,
-        public readonly ?string $target = null,
+        public MessageType $type,
+        public string      $message,
+        public ?string     $source = null,
+        public ?string     $target = null,
     ) {}
 }

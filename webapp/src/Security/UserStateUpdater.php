@@ -10,12 +10,12 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Event\AuthenticationSuccessEvent;
 
-class UserStateUpdater implements EventSubscriberInterface
+readonly class UserStateUpdater implements EventSubscriberInterface
 {
     public function __construct(
-        protected readonly DOMJudgeService $dj,
-        protected readonly EntityManagerInterface $em,
-        protected readonly RequestStack $requestStack
+        protected DOMJudgeService        $dj,
+        protected EntityManagerInterface $em,
+        protected RequestStack           $requestStack
     ) {}
 
     public static function getSubscribedEvents(): array

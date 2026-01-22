@@ -14,11 +14,11 @@ use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class ContestVisitor implements EventSubscriberInterface
+readonly class ContestVisitor implements EventSubscriberInterface
 {
     public function __construct(
-        protected readonly ConfigurationService $config,
-        protected readonly DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected DOMJudgeService      $dj,
     ) {}
 
     /**

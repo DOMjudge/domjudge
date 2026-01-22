@@ -7,7 +7,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-class AddSubmission
+readonly class AddSubmission
 {
     /**
      * @param AddSubmissionFile[]|null $files
@@ -15,28 +15,28 @@ class AddSubmission
      */
     public function __construct(
         #[OA\Property(description: 'The problem to submit a solution for', nullable: true)]
-        public readonly ?string $problem = null,
+        public ?string $problem = null,
         #[OA\Property(description: 'The problem to submit a solution for', nullable: true)]
-        public readonly ?string $problemId = null,
+        public ?string $problemId = null,
         #[OA\Property(description: 'The language to submit a solution in', nullable: true)]
-        public readonly ?string $language = null,
+        public ?string $language = null,
         #[OA\Property(description: 'The language to submit a solution in', nullable: true)]
-        public readonly ?string $languageId = null,
+        public ?string $languageId = null,
         #[OA\Property(description: 'The team to submit a solution for. Only used when adding a submission as admin', nullable: true)]
-        public readonly ?string $teamId = null,
+        public ?string $teamId = null,
         #[OA\Property(description: 'The user to submit a solution for. Only used when adding a submission as admin', nullable: true)]
-        public readonly ?string $userId = null,
+        public ?string $userId = null,
         #[OA\Property(description: 'The time to use for the submission. Only used when adding a submission as admin', format: 'date-time', nullable: true)]
-        public readonly ?string $time = null,
+        public ?string $time = null,
         // Code is not here, since it is a file upload handled in the controller itself
         #[OA\Property(description: 'The entry point for the submission. Required for languages requiring an entry point', nullable: true)]
-        public readonly ?string $entryPoint = null,
+        public ?string $entryPoint = null,
         #[OA\Property(description: 'The ID to use for the submission. Only used when adding a submission as admin and only allowed with PUT', nullable: true)]
-        public readonly ?string $id = null,
+        public ?string $id = null,
         #[OA\Property(description: 'The base64 encoded ZIP file to submit', type: 'array', items: new OA\Items(ref: new Model(type: AddSubmissionFile::class)), maxItems: 1, minItems: 1, nullable: true)]
-        public readonly ?array $files = null,
+        public ?array  $files = null,
         #[OA\Property(description: 'The file(s) to submit', type: 'array', items: new OA\Items(type: 'string', format: 'binary'), nullable: true)]
-        public readonly ?array $code = null,
+        public ?array  $code = null,
     ) {}
 
     #[Assert\Callback]

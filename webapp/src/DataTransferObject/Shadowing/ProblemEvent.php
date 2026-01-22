@@ -2,13 +2,13 @@
 
 namespace App\DataTransferObject\Shadowing;
 
-class ProblemEvent implements EventData
+readonly class ProblemEvent implements EventData
 {
     public function __construct(
-        public readonly string $id,
-        public readonly string $name,
-        public readonly ?float $timeLimit,
-        public readonly ?string $label,
-        public readonly ?string $rgb,
+        public string  $id,
+        public string  $name,
+        public ?float  $timeLimit,
+        public ?string $label,
+        public ?string $rgb,
     ) {}
 }

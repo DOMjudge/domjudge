@@ -22,20 +22,20 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class CheckConfigService
+readonly class CheckConfigService
 {
-    protected readonly Stopwatch $stopwatch;
+    protected Stopwatch $stopwatch;
 
     public function __construct(
         #[Autowire('%kernel.debug%')]
-        protected readonly bool $debug,
-        protected readonly EntityManagerInterface $em,
-        protected readonly ConfigurationService $config,
-        protected readonly DOMJudgeService $dj,
-        protected readonly EventLogService $eventLogService,
-        protected readonly RouterInterface $router,
-        protected readonly ValidatorInterface $validator,
-        protected readonly UserPasswordHasherInterface $passwordHasher
+        protected bool                        $debug,
+        protected EntityManagerInterface      $em,
+        protected ConfigurationService        $config,
+        protected DOMJudgeService             $dj,
+        protected EventLogService             $eventLogService,
+        protected RouterInterface             $router,
+        protected ValidatorInterface          $validator,
+        protected UserPasswordHasherInterface $passwordHasher
     ) {
         $this->stopwatch       = new Stopwatch();
     }

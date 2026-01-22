@@ -13,11 +13,11 @@ use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class TeamVisitor implements EventSubscriberInterface
+readonly class TeamVisitor implements EventSubscriberInterface
 {
     public function __construct(
-        protected readonly DOMJudgeService $dj,
-        protected readonly RequestStack $requestStack
+        protected DOMJudgeService $dj,
+        protected RequestStack    $requestStack
     ) {}
 
     /**

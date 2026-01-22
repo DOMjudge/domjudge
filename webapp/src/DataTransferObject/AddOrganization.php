@@ -4,20 +4,20 @@ namespace App\DataTransferObject;
 
 use OpenApi\Attributes as OA;
 
-class AddOrganization
+readonly class AddOrganization
 {
     public function __construct(
         #[OA\Property(nullable: true)]
-        public readonly ?string $id = null,
+        public ?string $id = null,
         #[OA\Property(nullable: true)]
-        public readonly ?string $shortname = null,
+        public ?string $shortname = null,
         #[OA\Property(nullable: true)]
-        public readonly ?string $name = null,
+        public ?string $name = null,
         #[OA\Property(nullable: true)]
-        public readonly ?string $formalName = null,
+        public ?string $formalName = null,
         #[OA\Property(nullable: true)]
-        public readonly ?string $country = null,
+        public ?string $country = null,
         #[OA\Property(nullable: true)]
-        public readonly ?string $icpcId = null,
+        public ?string $icpcId = null,
     ) {}
 }
