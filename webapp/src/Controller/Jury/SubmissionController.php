@@ -1090,9 +1090,6 @@ class SubmissionController extends BaseController
         }
     }
 
-    /**
-     * @throws DBALException
-     */
     #[Route(path: '/{judgingId<\d+>}/request-remaining', name: 'jury_submission_request_remaining', methods: ['POST'])]
     public function requestRemainingRuns(Request $request, int $judgingId): RedirectResponse
     {

@@ -593,7 +593,6 @@ class DOMJudgeService
                     /** @var Language $language */
                     $language->setAllowJudge($enabled);
                 }
-                /** @var Problem $problem */
                 foreach ($this->getProblemsForExecutable($executable) as $problem) {
                     /** @var ContestProblem $contestProblem */
                     foreach ($problem->getContestProblems() as $contestProblem) {
@@ -610,7 +609,6 @@ class DOMJudgeService
                         }
                     }
                     foreach ($this->getProblemsForExecutable($executable) as $problem) {
-                        /** @var Problem $problem */
                         $this->unblockJudgeTasksForProblem($problem->getProbid());
                     }
                 }

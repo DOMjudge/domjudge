@@ -144,7 +144,6 @@ class SubmissionController extends AbstractRestController
             if ($this->isGranted('ROLE_API_WRITER')) {
                 /** @var Contest $contest */
                 $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
-                /** @var Team $team */
                 $team = $this->dj->loadTeam($teamId, $contest);
                 $user = $team->getUsers()->first() ?: null;
             } elseif (!$team) {

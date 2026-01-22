@@ -685,7 +685,6 @@ class ImportProblemService
             $contest = $this->em->getRepository(Contest::class)->find($cid);
 
             // First find all submittable languages:
-            /** @var Language[] $allowedLanguages */
             $allowedLanguages = $this->dj->getAllowedLanguagesForContest($contest);
 
             // Read submission details from optional file.

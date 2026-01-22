@@ -543,7 +543,6 @@ class StatisticsService
      */
     public function getLanguagesStats(Contest $contest, string $view): array
     {
-        /** @var Language[] $languages */
         $languages = $this->dj->getAllowedLanguagesForContest($contest);
 
         $languageStats = [];

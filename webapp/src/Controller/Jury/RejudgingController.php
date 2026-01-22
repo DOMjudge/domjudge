@@ -816,7 +816,6 @@ class RejudgingController extends BaseController
      */
     private function generateFlashMessagesForSkippedJudgings(array $skipped): void
     {
-        /** @var Judging $judging */
         foreach ($skipped as $judging) {
             $submission = $judging->getSubmission();
             $submitid = $submission->getExternalid();
