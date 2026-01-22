@@ -171,9 +171,7 @@ class JudgeDaemon
 
     public static function signalHandler(int $signal): void
     {
-        if (self::$instance) {
-            self::$instance->handleSignal($signal);
-        }
+        self::$instance?->handleSignal($signal);
     }
 
     public function handleSignal(int $signal): void
