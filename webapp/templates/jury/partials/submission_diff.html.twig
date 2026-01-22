@@ -26,7 +26,7 @@
             {% endif %}
             <div class="btn-group">
                 <a href="#" role="button" class="btn btn-secondary btn-sm pe-none" aria-disabled="true"><i class="fas fa-code-branch"></i></a>
-                <select class="diff-select btn btn-secondary btn-sm form-select-sm text-start" aria-label="Submission to diff against" {%- if otherSubmissions is empty %}disabled="true" aria-disabled="true"{%- endif %}>
+                <select class="diff-select btn btn-secondary btn-sm form-select-sm text-start" aria-label="Submission to diff against" {%- if otherSubmissions is empty %}disabled="disabled" aria-disabled="true"{%- endif %}>
                     <option value="" data-tag="no-diff">No diff</option>
                     {%- for other in otherSubmissions %}
                         <option value="{{ other.submitid }}" data-url="{{ path('jury_submission', {submitId: other.submitid}) }}" {%- if other.tag %} data-tag="{{ other.tag }}" {%- endif %}>
