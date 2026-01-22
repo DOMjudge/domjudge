@@ -34,7 +34,7 @@ class PublicControllerTest extends BaseTestCase
         $em = static::getContainer()->get(EntityManagerInterface::class);
         /** @var Contest $contest */
         $contest = $em->getRepository(Contest::class)->findOneBy(['externalid' => 'demo']);
-        $contest->setDeactivatetimeString((new \DateTime())->sub(new \DateInterval('PT1H'))->format(DateTimeInterface::ISO8601));
+        $contest->setDeactivatetimeString((new \DateTime())->sub(new \DateInterval('PT1H'))->format(DateTimeInterface::ATOM));
         $em->flush();
 
         $this->verifyPageResponse('GET', '/public', 200);
