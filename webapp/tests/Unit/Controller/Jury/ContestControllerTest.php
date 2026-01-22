@@ -388,48 +388,46 @@ class ContestControllerTest extends JuryControllerTestCase
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         if (static::$add !== '') {
             self::assertSelectorExists('a:contains(' . $this->addButton . ')');
-            foreach ([$input] as $element) {
-                $formFields = [];
-                // First fill with default values, the 0th item of the array
-                // Overwrite with data to test with.
-                foreach ([static::$addEntities[0], $element] as $item) {
-                    foreach ($item as $id => $field) {
-                        // Skip elements which we cannot set yet.
-                        // We can not set checkboxes directly.
-                        // We can not set the fields set by JS directly.
-                        if (is_bool($field) || $id === static::$addPlus) {
-                            continue;
-                        }
-                        $formId = str_replace('.', '][', $id);
-                        $formFields[static::$addForm . $formId . "]"] = $field;
+            $formFields = [];
+            // First fill with default values, the 0th item of the array
+            // Overwrite with data to test with.
+            foreach ([static::$addEntities[0], $input] as $item) {
+                foreach ($item as $id => $field) {
+                    // Skip elements which we cannot set yet.
+                    // We can not set checkboxes directly.
+                    // We can not set the fields set by JS directly.
+                    if (is_bool($field) || $id === static::$addPlus) {
+                        continue;
                     }
+                    $formId = str_replace('.', '][', $id);
+                    $formFields[static::$addForm . $formId . "]"] = $field;
                 }
-                $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
-                $button = $this->client->getCrawler()->selectButton('Save');
-                $form = $button->form($formFields, 'POST');
-                $formName = str_replace('[', '', static::$addForm);
-                // Get the underlying object to inject elements not currently in the DOM.
-                $rawValues = $form->getPhpValues();
-                foreach ([static::$addEntities[0], $element] as $item) {
-                    if (key_exists(static::$addPlus, $item)) {
-                        $rawValues[$formName . static::$addPlus . ']'] = $item[static::$addPlus];
-                    }
-                }
-                // Set checkboxes
-                foreach ([static::$addEntities[0], $element] as $item) {
-                    foreach ($item as $id => $field) {
-                        if (!is_bool($field)) {
-                            continue;
-                        }
-                        if ($field) {
-                            $form[$formName][$id]->tick();
-                        } else {
-                            $form[$formName][$id]->untick();
-                        }
-                    }
-                }
-                $this->client->submit($form);
             }
+            $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
+            $button = $this->client->getCrawler()->selectButton('Save');
+            $form = $button->form($formFields, 'POST');
+            $formName = str_replace('[', '', static::$addForm);
+            // Get the underlying object to inject elements not currently in the DOM.
+            $rawValues = $form->getPhpValues();
+            foreach ([static::$addEntities[0], $input] as $item) {
+                if (key_exists(static::$addPlus, $item)) {
+                    $rawValues[$formName . static::$addPlus . ']'] = $item[static::$addPlus];
+                }
+            }
+            // Set checkboxes
+            foreach ([static::$addEntities[0], $input] as $item) {
+                foreach ($item as $id => $field) {
+                    if (!is_bool($field)) {
+                        continue;
+                    }
+                    if ($field) {
+                        $form[$formName][$id]->tick();
+                    } else {
+                        $form[$formName][$id]->untick();
+                    }
+                }
+            }
+            $this->client->submit($form);
             self::assertSelectorExists('body:contains("Contest should not have multiple timezones.")');
         }
     }

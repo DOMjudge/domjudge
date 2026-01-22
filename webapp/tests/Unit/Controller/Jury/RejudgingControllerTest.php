@@ -124,21 +124,20 @@ class RejudgingControllerTest extends BaseTestCase
         yield [null, $show, [], 3];
 
         // Rejudging during a contest
-        foreach (['demo'] as $contestName) {
-            $show = [];
-            $hidden = [];
-            $todo = 0;
-            foreach (RejudgingStatesFixture::rejudgingStages() as $stage) {
-                if (in_array($contestName, $stage[4])) {
-                    $show[] = $stage[0];
-                    if ($stage[1] === null) {
-                        $todo++;
-                    }
-                } else {
-                    $hidden[] = $stage[0];
+        $contestName = 'demo';
+        $show = [];
+        $hidden = [];
+        $todo = 0;
+        foreach (RejudgingStatesFixture::rejudgingStages() as $stage) {
+            if (in_array($contestName, $stage[4])) {
+                $show[] = $stage[0];
+                if ($stage[1] === null) {
+                    $todo++;
                 }
+            } else {
+                $hidden[] = $stage[0];
             }
-            yield [$contestName, $show, $hidden, $todo];
         }
+        yield [$contestName, $show, $hidden, $todo];
     }
 }
