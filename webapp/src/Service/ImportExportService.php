@@ -218,7 +218,7 @@ class ImportExportService
                     $time = $time->add(new DateInterval(sprintf('PT%sS', $seconds)));
                 }
             } else {
-                $time = date_create_from_format(DateTime::ISO8601, $timeValue) ?:
+                $time = date_create_from_format(DateTimeInterface::ATOM, $timeValue) ?:
                     // Make sure ISO 8601 but with the T replaced with a space also works.
                     date_create_from_format('Y-m-d H:i:sO', $timeValue);
             }
