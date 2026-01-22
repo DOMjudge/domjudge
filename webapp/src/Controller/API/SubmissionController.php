@@ -10,7 +10,6 @@ use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\SubmissionSource;
-use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Service\ConfigurationService;
