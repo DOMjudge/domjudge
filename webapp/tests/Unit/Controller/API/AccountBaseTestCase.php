@@ -69,7 +69,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
                 ) {
                     $newItemValue = array_diff($newItemValue, ['team']);
                     // In development mode we add a team role to admin users for some API endpoints.
-                };
+                }
                 if (is_array($newItemValue)) {
                     sort($newItemValue);
                 }

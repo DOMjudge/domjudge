@@ -1458,7 +1458,7 @@ class Contest extends BaseApiEntity implements
                     ->atPath(strtolower($timeString) . "timeString")
                     ->addViolation();
             }
-        };
+        }
         $this->updateTimes();
         if (Utils::difftime((float)$this->getEndtime(), (float)$this->getStarttime(true)) <= 0) {
             $context
