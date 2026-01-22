@@ -5,7 +5,6 @@ namespace App\Service;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
-use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
 use App\Entity\ProblemAttachmentContent;

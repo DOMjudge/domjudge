@@ -3,7 +3,6 @@
 namespace App\Controller\Team;
 
 use App\Controller\BaseController;
-use App\Entity\Language;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
