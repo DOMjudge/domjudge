@@ -207,7 +207,7 @@ class TwigExtension
         return $val ? 'Yes' : 'No';
     }
 
-    #[\Twig\Attribute\AsTwigFunction('button', isSafe: ['html'])]
+    #[AsTwigFunction('button', isSafe: ['html'])]
     public function button(
         string  $url,
         string  $text,
@@ -921,7 +921,7 @@ HTML;
     /**
      * @return string[]
      */
-    #[\Twig\Attribute\AsTwigFunction('customAssetFiles')]
+    #[AsTwigFunction('customAssetFiles')]
     public function customAssetFiles(string $type): array
     {
         if (in_array($type, ['css', 'js'])) {
@@ -974,7 +974,7 @@ HTML;
         return Utils::scoretime($time, (bool)$this->config->get('score_in_seconds'));
     }
 
-    #[\Twig\Attribute\AsTwigFunction('calculatePenaltyTime')]
+    #[AsTwigFunction('calculatePenaltyTime')]
     public function calculatePenaltyTime(bool $solved, int $num_submissions): int
     {
         return Utils::calcPenaltyTime($solved, $num_submissions, (int)$this->config->get('penalty_time'),
