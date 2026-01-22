@@ -234,7 +234,7 @@ class OrganizationControllerTest extends BaseTestCase
 
         $objectsAfterTest  = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
         $newItems = array_map(unserialize(...), array_diff(array_map(serialize(...), $objectsAfterTest), array_map(serialize(...), $objectsBeforeTest)));
-        self::assertEquals(1, count($newItems));
+        self::assertCount(1, $newItems);
         $listKey = array_keys($newItems)[0];
         foreach ($newOrganizationPostData as $key => $value) {
             self::assertEquals($newItems[$listKey][$key], $value);

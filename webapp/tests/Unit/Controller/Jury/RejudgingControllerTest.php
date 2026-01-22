@@ -111,7 +111,7 @@ class RejudgingControllerTest extends BaseTestCase
         $jsonResponse = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
         /** @var array $rejudgings */
         $rejudgings = $jsonResponse['rejudgings'];
-        static::assertEquals($todo, count($rejudgings));
+        static::assertCount($todo, $rejudgings);
     }
 
     public function provideShownRejudgings(): Generator

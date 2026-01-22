@@ -18,8 +18,8 @@ class ConfigControllerTest extends BaseTestCase
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200, $user);
 
         static::assertIsArray($response);
-        static::assertEquals(false, $response['score_in_seconds']);
-        static::assertEquals(false, $response['compile_penalty']);
+        static::assertFalse($response['score_in_seconds']);
+        static::assertFalse($response['compile_penalty']);
         static::assertEquals(100, $response['sourcefiles_limit']);
         static::assertEquals(2, $response['show_compile']);
         static::assertEquals(20, $response['penalty_time']);
@@ -67,14 +67,14 @@ class ConfigControllerTest extends BaseTestCase
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200);
 
         static::assertIsArray($response);
-        static::assertEquals(false, $response['compile_penalty']);
+        static::assertFalse($response['compile_penalty']);
         static::assertEquals(20, $response['penalty_time']);
 
         $this->withChangedConfiguration('penalty_time', 100, function (): void {
             $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200);
 
             static::assertIsArray($response);
-            static::assertEquals(false, $response['compile_penalty']);
+            static::assertFalse($response['compile_penalty']);
             static::assertEquals(100, $response['penalty_time']);
         });
     }
@@ -87,14 +87,14 @@ class ConfigControllerTest extends BaseTestCase
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200, 'admin');
 
         static::assertIsArray($response);
-        static::assertEquals(false, $response['compile_penalty']);
+        static::assertFalse($response['compile_penalty']);
         static::assertEquals(20, $response['penalty_time']);
 
         $proposedChange = ['compile_penalty' => true, 'penalty_time' => 21];
         $response = $this->verifyApiJsonResponse('PUT', $this->endpoint, 200, 'admin', $proposedChange);
 
         static::assertIsArray($response);
-        static::assertEquals(true, $response['compile_penalty']);
+        static::assertTrue((bool)$response['compile_penalty']);
         static::assertEquals(21, $response['penalty_time']);
     }
 

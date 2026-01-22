@@ -43,7 +43,7 @@ class BalloonsControllerTest extends BaseTestCase
         $this->loadFixtures([BalloonCorrectSubmissionFixture::class,BalloonUserFixture::class]);
         /** @var array $response */
         $response = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
-        self::assertEquals(count($response), 1);
+        self::assertCount(1, $response);
         foreach ($expectedBalloon as $key => $value) {
             static::assertEquals($response[0][$key], $value);
         }
@@ -55,7 +55,7 @@ class BalloonsControllerTest extends BaseTestCase
         $url = "/contests/$contestId/balloons?todo=0";
         /** @var array $response */
         $response = $this->verifyApiJsonResponse('GET', $url, 200, 'balloonuser');
-        self::assertEquals(count($response), 1);
+        self::assertCount(1, $response);
         $this->verifyApiJsonResponse('POST', $postUrl, 204, 'balloonuser');
     }
 
@@ -80,7 +80,7 @@ class BalloonsControllerTest extends BaseTestCase
         $postUrl = "/contests/424242/balloons/$balloonId/done";
         $this->verifyApiJsonResponse('POST', $postUrl, 204, 'balloonuser');
         $response = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
-        self::assertEquals(0, count($response));
+        self::assertCount(0, $response);
     }
 
     /**
