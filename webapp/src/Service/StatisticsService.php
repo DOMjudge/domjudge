@@ -155,7 +155,7 @@ class StatisticsService
             ];
             /** @var Submission $s */
             foreach ($team->getSubmissions() as $s) {
-                if ($s->getContest() != $contest) {
+                if ($s->getContest() !== $contest) {
                     continue;
                 }
                 if ($s->getSubmitTime() > $contest->getEndTime()) {
@@ -565,7 +565,7 @@ class StatisticsService
         $teams = $this->getTeams($contest, $view);
         foreach ($teams as $team) {
             foreach ($team->getSubmissions() as $s) {
-                if ($s->getContest() != $contest) {
+                if ($s->getContest() !== $contest) {
                     continue;
                 }
                 if ($s->getSubmitTime() > $contest->getEndTime()) {

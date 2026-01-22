@@ -282,8 +282,7 @@ class ImportExportController extends BaseController
                 default => throw new BadRequestHttpException('Invalid format'),
             };
             $contentType = match ($format) {
-                'html_inline' => 'text/html',
-                'html_download' => 'text/html',
+                'html_inline', 'html_download' => 'text/html',
                 'tsv' => 'text/csv',
                 default => throw new BadRequestHttpException('Invalid format'),
             };
