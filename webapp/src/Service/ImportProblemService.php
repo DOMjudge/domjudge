@@ -376,7 +376,7 @@ class ImportProblemService
         foreach ($testCaseGroups as $dir => $testCaseGroup) {
             $parentDir = dirname($dir);
             if (isset($testCaseGroups[$parentDir])) {
-                $testCaseGroups[$dir]->setParent($testCaseGroups[$parentDir]);
+                $testCaseGroup->setParent($testCaseGroups[$parentDir]);
             }
         }
         if (array_key_exists('data', $testCaseGroups)) {
