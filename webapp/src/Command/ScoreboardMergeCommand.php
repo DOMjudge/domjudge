@@ -78,10 +78,8 @@ readonly class ScoreboardMergeCommand
     /**
      * @param list<string> $feedUrl
      * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError

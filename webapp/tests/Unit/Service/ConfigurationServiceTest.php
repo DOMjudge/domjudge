@@ -273,8 +273,6 @@ class ConfigurationServiceTest extends KernelTestCase
 
     /**
      * @dataProvider provideAddOptionsExecutables
-     *
-     * @throws ReflectionException
      */
     public function testAddOptionsExecutables(string $item, array $expected): void
     {

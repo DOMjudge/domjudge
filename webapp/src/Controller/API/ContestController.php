@@ -207,7 +207,6 @@ class ContestController extends AbstractRestController
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     public function deleteBannerAction(Request $request, string $cid): Response
     {
-        /** @var Contest $contest */
         $contest = $this->getContestAndCheckIfLocked($request, $cid);
         $contest->setClearBanner(true);
 
