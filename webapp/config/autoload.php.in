@@ -9,7 +9,6 @@
  */
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
-use Composer\Autoload\ClassLoader;
 
 // Load the static domserver file if we don't have the constants from it yet
 if (!defined('VENDORDIR')) {

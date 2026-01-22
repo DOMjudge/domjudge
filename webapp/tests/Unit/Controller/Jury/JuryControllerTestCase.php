@@ -2,14 +2,12 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
-use App\Entity\BaseApiEntity;
 use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Service\SubmissionService;
 use App\Tests\Unit\BaseTestCase;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use DOMElement;
 use Generator;

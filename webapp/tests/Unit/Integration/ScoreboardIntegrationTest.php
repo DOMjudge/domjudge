@@ -14,7 +14,6 @@ use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
-use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\ScoreboardMatrixItem;

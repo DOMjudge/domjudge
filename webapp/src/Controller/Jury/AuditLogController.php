@@ -3,8 +3,6 @@
 namespace App\Controller\Jury;
 
 use App\Entity\AuditLog;
-use App\Entity\Testcase;
-use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;

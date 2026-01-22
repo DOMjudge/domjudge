@@ -15,7 +15,6 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
-use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Service\AwardService;
 use App\Service\ConfigurationService;
@@ -31,7 +30,6 @@ use Ramsey\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Exception\MissingResourceException;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -39,12 +37,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Twig\Attribute\AsTwigFilter;
 use Twig\Attribute\AsTwigFunction;
 use Twig\Environment;
-use Twig\Extension\AbstractExtension;
-use Twig\Extension\GlobalsInterface;
 use Twig\Extra\Markdown\MarkdownRuntime;
-use Twig\Runtime\EscaperRuntime;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
 
 class TwigExtension
 {

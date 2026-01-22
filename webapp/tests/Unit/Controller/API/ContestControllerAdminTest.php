@@ -7,8 +7,6 @@ use App\DataFixtures\Test\DemoPostUnfreezeContestFixture;
 use App\DataFixtures\Test\DemoPreEndContestFixture;
 use App\DataFixtures\Test\DemoPreStartContestFixture;
 use App\Entity\Contest;
-use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
 use App\Utils\Utils;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;

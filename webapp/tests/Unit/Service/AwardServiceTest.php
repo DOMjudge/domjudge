@@ -11,7 +11,6 @@ use App\Entity\ScoreCache;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Service\AwardService;
-use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Utils\Scoreboard\Scoreboard;
 use Doctrine\Common\Collections\Order;

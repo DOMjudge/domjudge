@@ -7,7 +7,6 @@ use App\DataTransferObject\SubmissionRestriction;
 use App\DataTransferObject\TestcaseViewRow;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
-use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
 use App\Entity\ProblemAttachmentContent;

@@ -9,7 +9,6 @@ use DOMjudge\ProgramMetadata;
 use DOMjudge\CompareMetadata;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
-use ReflectionMethod;
 
 class VerdictDeterminationTest extends TestCase
 {

@@ -2,7 +2,6 @@
 
 namespace App\DataFixtures\Test;
 
-use App\DataFixtures\ExampleData\TeamAffiliationFixture;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;

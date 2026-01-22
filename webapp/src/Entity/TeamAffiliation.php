@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Controller\API\AbstractRestController as ARC;
 use App\DataTransferObject\ImageFile;
 use App\Repository\TeamAffiliationRepository;
 use App\Validator\Constraints\Country;

@@ -6,7 +6,6 @@ namespace DoctrineMigrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-use phpDocumentor\Reflection\Types\Static_;
 
 final class Version20251026092516 extends AbstractMigration
 {

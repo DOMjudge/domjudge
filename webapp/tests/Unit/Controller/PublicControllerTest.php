@@ -7,7 +7,6 @@ use App\DataFixtures\Test\EnableSelfregisterSecondCategoryFixture;
 use App\DataFixtures\Test\SampleSubmissionsInBucketsFixture;
 use App\DataFixtures\Test\SelfRegisteredUserFixture;
 use App\Entity\Contest;
-use App\Entity\Submission;
 use App\Entity\User;
 use App\Tests\Unit\BaseTestCase;
 use DateTimeInterface;

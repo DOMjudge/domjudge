@@ -3,7 +3,6 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
-use App\Entity\Language;
 use App\Form\Type\PrintType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
