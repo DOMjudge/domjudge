@@ -11,9 +11,9 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsEntityListener(event: Events::prePersist, entity: User::class)]
 #[AsEntityListener(event: Events::preUpdate, entity: User::class)]
-class UserPasswordHasher
+readonly class UserPasswordHasher
 {
-    public function __construct(protected readonly UserPasswordHasherInterface $passwordHasher) {}
+    public function __construct(protected UserPasswordHasherInterface $passwordHasher) {}
 
 
     public function __invoke(User $user, PrePersistEventArgs|PreUpdateEventArgs $args): void

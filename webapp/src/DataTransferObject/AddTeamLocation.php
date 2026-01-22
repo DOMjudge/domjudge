@@ -4,10 +4,10 @@ namespace App\DataTransferObject;
 
 use OpenApi\Attributes as OA;
 
-class AddTeamLocation
+readonly class AddTeamLocation
 {
     public function __construct(
         #[OA\Property(nullable: true)]
-        public readonly ?string $description = null,
+        public ?string $description = null,
     ) {}
 }

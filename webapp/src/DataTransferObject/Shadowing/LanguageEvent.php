@@ -2,13 +2,13 @@
 
 namespace App\DataTransferObject\Shadowing;
 
-class LanguageEvent implements EventData
+readonly class LanguageEvent implements EventData
 {
     /**
      * @param list<string>|null $extensions
      */
     public function __construct(
-        public readonly string $id,
-        public readonly ?array $extensions = null,
+        public string $id,
+        public ?array $extensions = null,
     ) {}
 }

@@ -4,12 +4,12 @@ namespace App\DataTransferObject;
 
 use JMS\Serializer\Annotation as Serializer;
 
-class ApiInfoProvider
+readonly class ApiInfoProvider
 {
     public function __construct(
-        public readonly string $name,
-        public readonly string $version,
+        public string  $name,
+        public string  $version,
         #[Serializer\Exclude(if: '!object.buildDate')]
-        public readonly ?string $buildDate = null,
+        public ?string $buildDate = null,
     ) {}
 }

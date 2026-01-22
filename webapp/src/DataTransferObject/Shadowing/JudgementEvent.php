@@ -2,14 +2,14 @@
 
 namespace App\DataTransferObject\Shadowing;
 
-class JudgementEvent implements EventData
+readonly class JudgementEvent implements EventData
 {
     public function __construct(
-        public readonly string $startTime,
-        public readonly string $id,
-        public readonly string $submissionId,
-        public readonly ?string $endTime,
-        public readonly ?string $judgementTypeId,
-        public readonly string|float|null $score,
+        public string            $startTime,
+        public string            $id,
+        public string            $submissionId,
+        public ?string           $endTime,
+        public ?string           $judgementTypeId,
+        public string|float|null $score,
     ) {}
 }

@@ -2,15 +2,15 @@
 
 namespace App\DataTransferObject\Shadowing;
 
-class RunEvent implements EventData
+readonly class RunEvent implements EventData
 {
     public function __construct(
-        public readonly string $id,
-        public readonly string $judgementId,
-        public readonly int $ordinal,
-        public readonly ?string $judgementTypeId,
-        public readonly ?string $time,
-        public readonly ?float $runTime,
-        public readonly string|float|null $score,
+        public string            $id,
+        public string            $judgementId,
+        public int               $ordinal,
+        public ?string           $judgementTypeId,
+        public ?string           $time,
+        public ?float            $runTime,
+        public string|float|null $score,
     ) {}
 }

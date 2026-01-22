@@ -4,16 +4,16 @@ namespace App\DataTransferObject\Scoreboard;
 
 use JMS\Serializer\Annotation as Serializer;
 
-class Row
+readonly class Row
 {
     /**
      * @param Problem[] $problems
      */
     public function __construct(
-        public readonly int $rank,
-        public readonly string $teamId,
-        public readonly Score $score,
+        public int    $rank,
+        public string $teamId,
+        public Score  $score,
         #[Serializer\Type("array<App\DataTransferObject\Scoreboard\Problem>")]
-        public readonly array $problems,
+        public array  $problems,
     ) {}
 }

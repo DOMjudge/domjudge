@@ -2,20 +2,20 @@
 
 namespace App\DataTransferObject\Shadowing;
 
-class SubmissionEvent implements EventData
+readonly class SubmissionEvent implements EventData
 {
     /**
      * @param SubmissionFile[] $files
      */
     public function __construct(
-        public readonly string $id,
-        public readonly string $languageId,
-        public readonly string $problemId,
-        public readonly string $teamId,
-        public readonly string $time,
-        public readonly ?string $entryPoint,
+        public string  $id,
+        public string  $languageId,
+        public string  $problemId,
+        public string  $teamId,
+        public string  $time,
+        public ?string $entryPoint,
         // For the analyst instance we lose access to the files
         // during the freeze.
-        public readonly ?array $files,
+        public ?array  $files,
     ) {}
 }

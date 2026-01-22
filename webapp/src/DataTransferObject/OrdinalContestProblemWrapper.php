@@ -8,13 +8,13 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * This class is used to output the ordinal of a contest problem.
  */
-class OrdinalContestProblemWrapper
+readonly class OrdinalContestProblemWrapper
 {
     public function __construct(
         #[Serializer\SerializedName('ordinal')]
-        protected readonly int $ordinal,
+        protected int                                  $ordinal,
         #[Serializer\Inline]
-        protected readonly ContestProblemWrapper|ContestProblem $item
+        protected ContestProblemWrapper|ContestProblem $item
     ) {}
 
     public function getContestProblemWrapper(): ContestProblemWrapper|ContestProblem

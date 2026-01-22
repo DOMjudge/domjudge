@@ -4,14 +4,14 @@ namespace App\DataTransferObject;
 
 use JMS\Serializer\Annotation as Serializer;
 
-class AccessEndpoint
+readonly class AccessEndpoint
 {
     /**
      * @param string[] $properties
      */
     public function __construct(
-        public readonly string $type,
+        public string $type,
         #[Serializer\Type('array<string>')]
-        public readonly array $properties,
+        public array  $properties,
     ) {}
 }

@@ -13,11 +13,11 @@ use Symfony\Component\Config\Resource\SelfCheckingResourceInterface;
  * @see FileResource
  * @see FileExistenceResource
  */
-class OptionalFileResource implements SelfCheckingResourceInterface
+readonly class OptionalFileResource implements SelfCheckingResourceInterface
 {
-    private readonly bool $exists;
+    private bool $exists;
 
-    public function __construct(private readonly string $resource)
+    public function __construct(private string $resource)
     {
         $this->exists = file_exists($resource);
     }

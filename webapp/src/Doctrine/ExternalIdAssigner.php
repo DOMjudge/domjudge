@@ -13,11 +13,11 @@ use Doctrine\ORM\Event\PostPersistEventArgs;
 use Doctrine\ORM\Events;
 
 #[AsDoctrineListener(event: Events::postPersist)]
-class ExternalIdAssigner
+readonly class ExternalIdAssigner
 {
     public function __construct(
-        protected readonly EntityManagerInterface $em,
-        protected readonly DOMJudgeService $dj,
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService        $dj,
     ) {}
 
     public function __invoke(PostPersistEventArgs $args): void

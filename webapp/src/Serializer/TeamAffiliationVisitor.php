@@ -12,12 +12,12 @@ use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class TeamAffiliationVisitor implements EventSubscriberInterface
+readonly class TeamAffiliationVisitor implements EventSubscriberInterface
 {
     public function __construct(
-        protected readonly DOMJudgeService $dj,
-        protected readonly ConfigurationService $config,
-        protected readonly RequestStack $requestStack,
+        protected DOMJudgeService      $dj,
+        protected ConfigurationService $config,
+        protected RequestStack         $requestStack,
     ) {}
 
     /**

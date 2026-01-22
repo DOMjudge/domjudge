@@ -5,13 +5,13 @@ namespace App\DataTransferObject;
 use App\Entity\ContestProblem;
 use JMS\Serializer\Annotation as Serializer;
 
-class ContestProblemWrapper
+readonly class ContestProblemWrapper
 {
     public function __construct(
         #[Serializer\Inline]
-        protected readonly ContestProblem $contestProblem,
+        protected ContestProblem $contestProblem,
         #[Serializer\SerializedName('test_data_count')]
-        protected readonly int $testDataCount
+        protected int            $testDataCount
     ) {}
 
     public function getContestProblem(): ContestProblem

@@ -2,14 +2,14 @@
 
 namespace App\DataTransferObject;
 
-class ContestState
+readonly class ContestState
 {
     public function __construct(
-        public readonly ?string $started = null,
-        public readonly ?string $ended = null,
-        public readonly ?string $frozen = null,
-        public readonly ?string $thawed = null,
-        public readonly ?string $finalized = null,
-        public readonly ?string $endOfUpdates = null,
+        public ?string $started = null,
+        public ?string $ended = null,
+        public ?string $frozen = null,
+        public ?string $thawed = null,
+        public ?string $finalized = null,
+        public ?string $endOfUpdates = null,
     ) {}
 }

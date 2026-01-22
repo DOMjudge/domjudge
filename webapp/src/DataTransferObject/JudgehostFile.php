@@ -2,11 +2,11 @@
 
 namespace App\DataTransferObject;
 
-class JudgehostFile
+readonly class JudgehostFile
 {
     public function __construct(
-        public readonly string $filename,
-        public readonly string $content,
-        public readonly bool $isExecutable = false,
+        public string $filename,
+        public string $content,
+        public bool   $isExecutable = false,
     ) {}
 }

@@ -9,12 +9,12 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
 #[AsEventListener]
-class ProfilerDisableListener
+readonly class ProfilerDisableListener
 {
     public function __construct(
-        protected readonly KernelInterface $kernel,
-        protected readonly DOMJudgeService $dj,
-        protected readonly ?Profiler $profiler
+        protected KernelInterface $kernel,
+        protected DOMJudgeService $dj,
+        protected ?Profiler       $profiler
     ) {}
 
     public function __invoke(RequestEvent $event): void

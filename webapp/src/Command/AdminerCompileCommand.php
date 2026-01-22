@@ -12,11 +12,11 @@ use Symfony\Component\Process\Process;
     name: 'adminer:compile',
     description: 'Compile adminer in vendor',
 )]
-class AdminerCompileCommand
+readonly class AdminerCompileCommand
 {
     public function __construct(
         #[Autowire('%domjudge.vendordir%')]
-        private readonly string $vendorDir
+        private string $vendorDir
     ) {
     }
 

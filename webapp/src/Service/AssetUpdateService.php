@@ -5,9 +5,9 @@ namespace App\Service;
 use App\Entity\AssetEntityInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
-class AssetUpdateService
+readonly class AssetUpdateService
 {
-    public function __construct(protected readonly DOMJudgeService $dj, protected readonly EventLogService $eventLog)
+    public function __construct(protected DOMJudgeService $dj, protected EventLogService $eventLog)
     {
     }
 

@@ -14,13 +14,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 #[AsAlias('fos_rest.serializer.flatten_exception_handler')]
-class FlattenExceptionHandler implements SubscribingHandlerInterface
+readonly class FlattenExceptionHandler implements SubscribingHandlerInterface
 {
     public function __construct(
         #[Autowire(service: 'fos_rest.exception.messages_map')]
-        private readonly ExceptionValueMap $messagesMap,
+        private ExceptionValueMap $messagesMap,
         #[Autowire('%kernel.debug%')]
-        private readonly bool $debug
+        private bool              $debug
     ) {}
 
     /**

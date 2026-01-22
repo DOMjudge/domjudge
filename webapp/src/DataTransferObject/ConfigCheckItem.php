@@ -4,13 +4,13 @@ namespace App\DataTransferObject;
 
 use JMS\Serializer\Annotation as Serializer;
 
-class ConfigCheckItem
+readonly class ConfigCheckItem
 {
     public function __construct(
-        public readonly string $caption,
-        public readonly string $result,
-        public readonly ?string $desc,
+        public string  $caption,
+        public string  $result,
+        public ?string $desc,
         #[Serializer\Exclude]
-        public readonly bool $escape = true,
+        public bool    $escape = true,
     ) {}
 }

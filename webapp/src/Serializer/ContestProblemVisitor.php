@@ -10,9 +10,9 @@ use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
 
-class ContestProblemVisitor implements EventSubscriberInterface
+readonly class ContestProblemVisitor implements EventSubscriberInterface
 {
-    public function __construct(protected readonly DOMJudgeService $dj) {}
+    public function __construct(protected DOMJudgeService $dj) {}
 
     /**
      * @return array<array{event: string, class: string, format: string, method: string}>

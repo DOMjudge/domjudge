@@ -2,9 +2,9 @@
 
 namespace App\DataTransferObject;
 
-class TeamLocation
+readonly class TeamLocation
 {
     public function __construct(
-        public readonly string $description
+        public string $description
     ) {}
 }

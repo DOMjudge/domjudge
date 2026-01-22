@@ -9,9 +9,9 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[AsEventListener]
-class UpdateUserRolesListener
+readonly class UpdateUserRolesListener
 {
-    public function __construct(protected readonly TokenStorageInterface $tokenStorage) {}
+    public function __construct(protected TokenStorageInterface $tokenStorage) {}
 
     public function __invoke(RequestEvent $event): void
     {

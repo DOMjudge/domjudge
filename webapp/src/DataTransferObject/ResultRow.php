@@ -2,16 +2,16 @@
 
 namespace App\DataTransferObject;
 
-class ResultRow
+readonly class ResultRow
 {
     public function __construct(
-        public readonly string $teamId,
-        public readonly ?int $rank,
-        public readonly string $award,
-        public readonly int $numSolved,
-        public readonly int $totalTime,
-        public readonly int $timeOfLastSubmission,
-        public readonly ?string $groupWinner = null,
+        public string  $teamId,
+        public ?int    $rank,
+        public string  $award,
+        public int     $numSolved,
+        public int     $totalTime,
+        public int     $timeOfLastSubmission,
+        public ?string $groupWinner = null,
     ) {}
 
     /**

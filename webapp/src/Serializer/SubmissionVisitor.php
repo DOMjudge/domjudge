@@ -11,11 +11,11 @@ use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
-class SubmissionVisitor implements EventSubscriberInterface
+readonly class SubmissionVisitor implements EventSubscriberInterface
 {
     public function __construct(
-        protected readonly DOMJudgeService $dj,
-        protected readonly EntityManagerInterface $em,
+        protected DOMJudgeService        $dj,
+        protected EntityManagerInterface $em,
     ) {}
 
     /**

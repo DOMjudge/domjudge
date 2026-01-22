@@ -2,11 +2,11 @@
 
 namespace App\DataTransferObject;
 
-class ContestStatus
+readonly class ContestStatus
 {
     public function __construct(
-        public readonly int $numSubmissions,
-        public readonly int $numQueued,
-        public readonly int $numJudging,
+        public int $numSubmissions,
+        public int $numQueued,
+        public int $numJudging,
     ) {}
 }

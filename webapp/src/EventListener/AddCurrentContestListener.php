@@ -7,9 +7,9 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 #[AsEventListener]
-class AddCurrentContestListener
+readonly class AddCurrentContestListener
 {
-    public function __construct(protected readonly DOMJudgeService $dj) {}
+    public function __construct(protected DOMJudgeService $dj) {}
 
     public function __invoke(ResponseEvent $event): void
     {

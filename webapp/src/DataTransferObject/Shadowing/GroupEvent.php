@@ -2,14 +2,14 @@
 
 namespace App\DataTransferObject\Shadowing;
 
-class GroupEvent implements EventData
+readonly class GroupEvent implements EventData
 {
     public function __construct(
-        public readonly string $id,
-        public readonly string $name,
-        public readonly ?string $icpcId,
-        public readonly ?bool $hidden,
-        public readonly ?int $sortorder,
-        public readonly ?string $color,
+        public string  $id,
+        public string  $name,
+        public ?string $icpcId,
+        public ?bool   $hidden,
+        public ?int    $sortorder,
+        public ?string $color,
     ) {}
 }
