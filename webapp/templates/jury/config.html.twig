@@ -55,7 +55,7 @@
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
                             {% for option in category.data %}
-                                <li class="list-group-item" style="padding:0;padding-top:10px;">
+                                <li class="list-group-item" style="padding: 10px 0 0;">
                                     <div class="mb-3">
                                         <label class="form-label"
                                         {% if option.type in ['int','string','bool','enum'] or option.type == 'array_val' and option.options is not null %}
