@@ -55,7 +55,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
                 }
             }
         } else {
-            self::assertEquals(1, count($newItems));
+            self::assertCount(1, $newItems);
         }
         $listKey = array_keys($newItems)[0];
         $newUserPostData = [...$newUserPostData, ...(array)$overwritten];
@@ -146,7 +146,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
 
         $result = $this->verifyApiJsonResponse('POST', $usersURL, 200, 'admin', null, [$type => $tempUploadFile]);
 
-        self::assertEquals($result, "1 new account(s) successfully added.");
+        self::assertEquals("1 new account(s) successfully added.", $result);
         $this->helperVerifyApiUsers($myURL, $objectsBeforeTest, $newUserPostData, $overwritten);
         $url = $this->helperGetEndpointURL('account');
         $this->verifyApiJsonResponse('GET', $url, 200, $newUserPostData['username'], null, [], $newUserPostData['password']);
@@ -321,7 +321,7 @@ EOF;
                     }
                 }
             }
-            self::assertEquals(true, $found);
+            self::assertTrue($found);
         }
     }
 
@@ -335,7 +335,7 @@ EOF;
         $tempUploadFile = new UploadedFile($tempFile, 'accounts.'.$type);
         $usersURL = $this->helperGetEndpointURL('users').'/accounts';
         $result = $this->verifyApiJsonResponse('POST', $usersURL, 200, 'admin', null, [$type => $tempUploadFile]);
-        self::assertEquals($result, "1 new account(s) successfully added.");
+        self::assertEquals("1 new account(s) successfully added.", $result);
 
         // The user has no password so should not be able to login.
         $url = $this->helperGetEndpointURL('account');

@@ -61,7 +61,7 @@ class ScoreboardControllerTest extends BaseTestCase
         /** @var array $scoreboardRows */
         $scoreboardRows = $scoreboard['rows'];
         self::assertNotEmpty($scoreboard);
-        self::assertEquals($expectedCount, count($scoreboardRows));
+        self::assertCount($expectedCount, $scoreboardRows);
     }
 
     public function provideFilters(): Generator
