@@ -421,7 +421,12 @@ class UserController extends AbstractRestController
                                  ->from(User::class, 'u')
                                  ->select('u');
 
-        if ($request->query->has('team')) {
+        if ($request->query->has('team_id')) {
+            $queryBuilder
+                ->leftJoin('u.team', 't')
+                ->andWhere('t.externalid = :team_id')
+                ->setParameter('team_id', $request->query->get('team_id'));
+        } elseif ($request->query->has('team')) {
             $queryBuilder
                 ->andWhere('u.team = :team')
                 ->setParameter('team', $request->query->get('team'));
