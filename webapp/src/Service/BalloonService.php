@@ -7,7 +7,6 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judging;
 use App\Entity\Problem;
-use App\Entity\ScoreCache;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamCategory;

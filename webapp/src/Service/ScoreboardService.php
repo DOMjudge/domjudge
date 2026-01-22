@@ -18,7 +18,6 @@ use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Filter;
 use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\SingleTeamScoreboard;
-use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Order;
 use Doctrine\DBAL\ArrayParameterType;

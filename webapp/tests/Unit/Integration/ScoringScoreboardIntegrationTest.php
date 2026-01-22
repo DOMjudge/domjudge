@@ -21,7 +21,6 @@ use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\TeamScore;
-use App\Utils\Utils;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;

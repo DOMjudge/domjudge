@@ -2,8 +2,6 @@
 
 namespace App\Tests\Unit;
 
-use App\Entity\Contest;
-use App\Entity\HasExternalIdInterface;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Service\ConfigurationService;

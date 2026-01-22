@@ -2,7 +2,6 @@
 
 namespace App\Config;
 
-use Stringable;
 use Symfony\Component\Config\Resource\FileExistenceResource;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\Resource\SelfCheckingResourceInterface;

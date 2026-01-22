@@ -11,10 +11,6 @@ use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
-use Collator;
-use Doctrine\Common\Collections\ArrayCollection;
-use Exception;
-use Ramsey\Collection\Set;
 
 class Scoreboard
 {

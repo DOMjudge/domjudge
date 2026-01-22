@@ -8,7 +8,6 @@ use App\Entity\Clarification;
 use App\Entity\Problem;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
-use Symfony\Component\HttpFoundation\Response;
 
 class ClarificationControllerTest extends BaseTestCase
 {

@@ -2,7 +2,6 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-use App\Service\DOMJudgeService;
 use Generator;
 
 class GroupControllerTest extends BaseTestCase

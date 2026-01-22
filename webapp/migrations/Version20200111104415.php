@@ -6,7 +6,6 @@ namespace DoctrineMigrations;
 
 use App\Migrations\Factory\ConfigurationServiceAwareInterface;
 use App\Migrations\Factory\ConfigurationServiceAwareTrait;
-use App\Service\ConfigurationService;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 

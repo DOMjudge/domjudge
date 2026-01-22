@@ -18,7 +18,6 @@ use App\Entity\QueueTask;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
-use App\Entity\TestcaseAggregationType;
 use App\Entity\TestcaseContent;
 use App\Entity\Version;
 use App\Service\BalloonService;

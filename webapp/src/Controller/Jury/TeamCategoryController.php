@@ -4,7 +4,6 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
-use App\Entity\Judging;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
@@ -20,7 +19,6 @@ use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;

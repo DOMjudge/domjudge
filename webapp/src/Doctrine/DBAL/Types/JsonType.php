@@ -3,7 +3,6 @@
 namespace App\Doctrine\DBAL\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\JsonType as BaseJsonType;
 
 /**

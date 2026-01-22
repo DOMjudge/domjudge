@@ -2,8 +2,6 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-use App\Service\DOMJudgeService;
-
 class UserControllerTest extends AccountBaseTestCase
 {
     protected ?string $apiEndpoint = 'users';

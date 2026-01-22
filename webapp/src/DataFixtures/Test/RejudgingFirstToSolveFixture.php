@@ -8,7 +8,6 @@ use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\Team;
-use App\Utils\Utils;
 use Doctrine\Persistence\ObjectManager;
 
 class RejudgingFirstToSolveFixture extends AbstractTestDataFixture

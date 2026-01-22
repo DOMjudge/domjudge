@@ -9,7 +9,6 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
-use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\RemovedInterval;

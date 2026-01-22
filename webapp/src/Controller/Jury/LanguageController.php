@@ -4,7 +4,6 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\DataTransferObject\SubmissionRestriction;
-use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Submission;
 use App\Form\Type\LanguageType;

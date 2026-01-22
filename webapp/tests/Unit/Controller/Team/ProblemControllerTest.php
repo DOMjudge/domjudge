@@ -3,7 +3,6 @@
 namespace App\Tests\Unit\Controller\Team;
 
 use App\DataFixtures\Test\DemoAboutToStartContestFixture;
-use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
 use App\Entity\Testcase;
