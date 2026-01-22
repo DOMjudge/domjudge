@@ -24,9 +24,7 @@ h1 {
 
 .testcases td {
     vertical-align: middle;
-    padding: 3px;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 3px 5px;
 }
 .testcases_prev { font-size: xx-small; }
 tr.summary td { border-top: 1px solid black; }
@@ -205,7 +203,7 @@ table.submissions-table {
 
 .table-full-clickable-cell {
     border-collapse: separate; /* Because we need to set display:table for <a> we need to override this */
-    border-spacing: 0px 0px;
+    border-spacing: 0 0;
 }
 
 .table-full-clickable-cell tbody td:not(.testcase-results) {
