@@ -26,16 +26,6 @@ class ProblemControllerTest extends BaseTestCase
             'fltcmp',
             'boolfind',
         ];
-        $descriptions = [
-            'Hello World',
-            'Float special compare test',
-            'Boolean switch search',
-        ];
-        $letters = [
-            'A',
-            'B',
-            'C',
-        ];
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
         $problemStatementsData = $em->createQueryBuilder()
@@ -52,10 +42,18 @@ class ProblemControllerTest extends BaseTestCase
         $this->withChangedConfiguration('show_limits_on_team_page', $withLimits,
             function () use (
                 $problemStatements,
-                $descriptions,
                 $withLimits,
-                $letters
             ): void {
+                $descriptions = [
+                    'Hello World',
+                    'Float special compare test',
+                    'Boolean switch search',
+                ];
+                $letters = [
+                    'A',
+                    'B',
+                    'C',
+                ];
                 $crawler = $this->client->request('GET', '/team/problems');
 
                 // Check that the correct menu item is selected.
