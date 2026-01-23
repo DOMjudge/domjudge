@@ -39,8 +39,16 @@ final class Version20260123092747 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        $contest = $this->connection->fetchAssociative('SELECT penalty_time FROM contest WHERE scoreboard_type = :scoreboard_type LIMIT 1', ['scoreboard_type' => ScoreboardType::PASS_FAIL->value]);
-        $penaltyTime = $contest ? (int)$contest['penalty_time'] : 20;
+        $penaltyTimes = $this->connection->fetchFirstColumn(
+            'SELECT DISTINCT penalty_time FROM contest WHERE scoreboard_type = :scoreboard_type',
+            ['scoreboard_type' => ScoreboardType::PASS_FAIL->value]
+        );
+
+        if (count($penaltyTimes) > 1) {
+            throw new \Exception('Cannot migrate down: contests have different penalty times (' . implode(', ', $penaltyTimes) . ')');
+        }
+
+        $penaltyTime = $penaltyTimes ? (int)$penaltyTimes[0] : 20;
 
         if ($penaltyTime !== 20) {
             $this->addSql('INSERT INTO configuration (name, value) VALUES (:name, :value)', [
