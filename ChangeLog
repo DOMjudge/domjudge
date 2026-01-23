@@ -13,6 +13,8 @@ Version 10.0.0DEV
  - Make shadow mode a per contest setting.
  - Allow to specify whether to use internal or external judgings and runs in
    shadow mode.
+ - Use application/x-www-form-urlencoded instead of multipart/form-data for
+   API requests without file uploads to make them work with PUT/PATCH requests.
 
 Version 9.0.0 - 5 October 2025
 ------------------------------

@@ -296,7 +296,7 @@ class UserController extends AbstractRestController
         required: true,
         content: [
             new OA\MediaType(
-                mediaType: 'multipart/form-data',
+                mediaType: 'application/x-www-form-urlencoded',
                 schema: new OA\Schema(ref: new Model(type: AddUser::class))
             ),
         ]
@@ -323,7 +323,7 @@ class UserController extends AbstractRestController
         required: true,
         content: [
             new OA\MediaType(
-                mediaType: 'multipart/form-data',
+                mediaType: 'application/x-www-form-urlencoded',
                 schema: new OA\Schema(ref: new Model(type: UpdateUser::class))
             ),
         ]

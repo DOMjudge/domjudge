@@ -81,7 +81,7 @@ class GroupController extends AbstractRestController
         required: true,
         content: [
             new OA\MediaType(
-                mediaType: 'multipart/form-data',
+                mediaType: 'application/x-www-form-urlencoded',
                 schema: new OA\Schema(ref: new Model(type: TeamCategoryPost::class))
             ),
         ]
@@ -127,7 +127,7 @@ class GroupController extends AbstractRestController
         required: true,
         content: [
             new OA\MediaType(
-                mediaType: 'multipart/form-data',
+                mediaType: 'application/x-www-form-urlencoded',
                 schema: new OA\Schema(ref: new Model(type: TeamCategoryPut::class))
             ),
         ]
