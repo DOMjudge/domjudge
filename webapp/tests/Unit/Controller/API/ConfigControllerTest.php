@@ -22,7 +22,6 @@ class ConfigControllerTest extends BaseTestCase
         static::assertFalse($response['compile_penalty']);
         static::assertEquals(100, $response['sourcefiles_limit']);
         static::assertEquals(2, $response['show_compile']);
-        static::assertEquals(20, $response['penalty_time']);
         $categories = ['general' => 'General issue', 'tech' => 'Technical issue'];
         static::assertIsArray($response['clar_categories']);
         static::assertEquals($categories, $response['clar_categories']);
@@ -68,14 +67,14 @@ class ConfigControllerTest extends BaseTestCase
 
         static::assertIsArray($response);
         static::assertFalse($response['compile_penalty']);
-        static::assertEquals(20, $response['penalty_time']);
+        static::assertFalse($response['score_in_seconds']);
 
-        $this->withChangedConfiguration('penalty_time', 100, function (): void {
+        $this->withChangedConfiguration('score_in_seconds', true, function (): void {
             $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200);
 
             static::assertIsArray($response);
             static::assertFalse($response['compile_penalty']);
-            static::assertEquals(100, $response['penalty_time']);
+            static::assertTrue((bool)$response['score_in_seconds']);
         });
     }
 
@@ -88,14 +87,14 @@ class ConfigControllerTest extends BaseTestCase
 
         static::assertIsArray($response);
         static::assertFalse($response['compile_penalty']);
-        static::assertEquals(20, $response['penalty_time']);
+        static::assertFalse($response['score_in_seconds']);
 
-        $proposedChange = ['compile_penalty' => true, 'penalty_time' => 21];
+        $proposedChange = ['compile_penalty' => true, 'score_in_seconds' => true];
         $response = $this->verifyApiJsonResponse('PUT', $this->endpoint, 200, 'admin', $proposedChange);
 
         static::assertIsArray($response);
         static::assertTrue((bool)$response['compile_penalty']);
-        static::assertEquals(21, $response['penalty_time']);
+        static::assertTrue((bool)$response['score_in_seconds']);
     }
 
     /**
@@ -122,7 +121,6 @@ class ConfigControllerTest extends BaseTestCase
 
     public function configChangeAPIInvalidProvider(): Generator
     {
-        yield ['penalty_time', 20, -1, 'A non-negative number is required.'];
         yield ['memory_limit', 2097152, -1, 'A positive number is required.'];
         yield ['memory_limit', 2097152, 0, 'A positive number is required.'];
     }
@@ -141,7 +139,7 @@ class ConfigControllerTest extends BaseTestCase
      */
     public function testConfigChangeNotAllowedForUnprivilegedUsers(): void
     {
-        $proposedChange = ['compile_penalty' => true, 'penalty_time' => 21];
+        $proposedChange = ['compile_penalty' => true, 'score_in_seconds' => true];
         $this->verifyApiJsonResponse('PUT', $this->endpoint, 401, null, $proposedChange);
         $this->verifyApiJsonResponse('PUT', $this->endpoint, 403, 'demo', $proposedChange);
     }
@@ -191,9 +189,9 @@ class ConfigControllerTest extends BaseTestCase
      */
     public function testConfigReturnsSpecificPublicVariable(): void
     {
-        $response = $this->verifyApiJsonResponse('GET', $this->endpoint . '?name=penalty_time', 200);
+        $response = $this->verifyApiJsonResponse('GET', $this->endpoint . '?name=score_in_seconds', 200);
 
-        $expected = ['penalty_time' => 20];
+        $expected = ['score_in_seconds' => false];
 
         static::assertEquals($expected, $response);
     }

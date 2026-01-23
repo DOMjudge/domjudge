@@ -41,13 +41,6 @@ readonly class ContestVisitor implements EventSubscriberInterface
         /** @var Contest $contest */
         $contest = $event->getObject();
 
-        $property = new StaticPropertyMetadata(
-            Contest::class,
-            'penalty_time',
-            null
-        );
-        $contest->setPenaltyTimeForApi((int)$this->config->get('penalty_time'));
-
         $id = $contest->getExternalid();
 
         // Banner

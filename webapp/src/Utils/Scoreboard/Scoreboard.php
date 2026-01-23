@@ -43,7 +43,6 @@ class Scoreboard
         protected readonly array      $rankCache,
         protected readonly FreezeData $freezeData,
         bool                          $jury,
-        protected readonly int        $penaltyTime,
         protected readonly bool       $scoreIsInSeconds
     ) {
         $this->restricted = $jury || $freezeData->showFinal($jury);
@@ -181,7 +180,7 @@ class Scoreboard
             $penalty = Utils::calcPenaltyTime(
                 $isCorrect,
                 $scoreCell->getSubmissions($this->restricted),
-                $this->penaltyTime, $this->scoreIsInSeconds
+                $this->contest->getPenaltyTime(), $this->scoreIsInSeconds
             );
 
             $contestProblem = $scoreCell->getContest()->getContestProblem($scoreCell->getProblem());

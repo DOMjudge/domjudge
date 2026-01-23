@@ -17,7 +17,7 @@
     {% elseif scoreInSeconds %}
         {% set time = time | scoreTime | printTimeRelative %}
         {% if matrixItem.numSubmissions > 1 %}
-            {% set time = time ~ ' + ' ~ (calculatePenaltyTime(true, matrixItem.numSubmissions) | printTimeRelative) %}
+            {% set time = time ~ ' + ' ~ (calculatePenaltyTime(contest.penaltyTime, true, matrixItem.numSubmissions) | printTimeRelative) %}
         {% endif %}
     {% else %}
         {% set time = time | scoreTime %}
