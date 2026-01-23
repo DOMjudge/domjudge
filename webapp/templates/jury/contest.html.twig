@@ -93,6 +93,13 @@
                         <td>{{ contest.scoreboardType.value }}</td>
                         <td></td>
                     </tr>
+                    {% if contest.scoreboardType == constant('App\\Entity\\ScoreboardType::PASS_FAIL') %}
+                        <tr>
+                            <th>Penalty time</th>
+                            <td>{{ contest.penaltyTime }} minutes</td>
+                            <td></td>
+                        </tr>
+                    {% endif %}
                     <tr>
                         <th>Score diff epsilon</th>
                         <td>{{ contest.scoreDiffEpsilon }}</td>

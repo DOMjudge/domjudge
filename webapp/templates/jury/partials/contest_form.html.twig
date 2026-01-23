@@ -41,6 +41,14 @@
                 {{ _self.section_header('sliders', 'Scoring') }}
                 {{ _self.form_table_row(form.scoreboardType) }}
                 {{ _self.form_table_row(form.scoreDiffEpsilon) }}
+                <tr data-penalty-time-field>
+                    <th>{{ form.penaltyTime.vars.label }}</th>
+                    <td>
+                        {{ form_errors(form.penaltyTime) }}
+                        {{ form_widget(form.penaltyTime) }}
+                        {{ form_help(form.penaltyTime) }}
+                    </td>
+                </tr>
                 {{ _self.form_table_row(form.allowSubmit) }}
                 {{ _self.form_table_row(form.processBalloons) }}
                 {{ _self.form_table_row(form.runtimeAsScoreTiebreaker) }}
@@ -281,5 +289,16 @@
                 $('i', $(this)).attr('class', 'fa fa-eye');
             }
         });
+
+        function showHidePenaltyTime() {
+            if ($('#contest_scoreboardType').val() === 'pass-fail') {
+                $('[data-penalty-time-field]').show();
+            } else {
+                $('[data-penalty-time-field]').hide();
+            }
+        }
+
+        $('#contest_scoreboardType').on('change', showHidePenaltyTime);
+        showHidePenaltyTime();
     });
 </script>

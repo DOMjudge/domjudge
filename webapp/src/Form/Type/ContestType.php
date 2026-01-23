@@ -79,13 +79,16 @@ class ContestType extends AbstractExternalIdEntityType
             'required' => false,
             'help' => 'Time when the contest and scoreboard are hidden again. Usually a few hours/days after the contest ends.',
         ]);
-        $builder->add('scoreboardType', ChoiceType::class, [
+        $builder->add('scoreboardType', EnumType::class, [
             'label' => 'Scoreboard type',
-            'choices' => [
-                'pass-fail' => ScoreboardType::PASS_FAIL,
-                'score' => ScoreboardType::SCORE,
-            ],
+            'class' => ScoreboardType::class,
+            'choice_label' => 'value',
             'help' => 'The type of scoreboard to use for this contest.',
+        ]);
+        $builder->add('penaltyTime', IntegerType::class, [
+            'required' => false,
+            'label' => 'Penalty time',
+            'help' => 'Penalty time in minutes per wrong submission (if eventually solved).',
         ]);
         $builder->add('allowSubmit', CheckboxType::class, [
             'required' => false,
@@ -266,6 +269,16 @@ class ContestType extends AbstractExternalIdEntityType
 
             if ($contest && !$contest->getContestProblemset()) {
                 $form->remove('clearContestProblemset');
+            }
+        });
+
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event): void {
+            $data = $event->getData();
+
+            // For scoring contests, always set penalty time to 0
+            if (isset($data['scoreboardType']) && $data['scoreboardType'] === ScoreboardType::SCORE->value) {
+                $data['penaltyTime'] = 0;
+                $event->setData($data);
             }
         });
     }

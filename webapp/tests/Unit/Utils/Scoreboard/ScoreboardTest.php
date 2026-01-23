@@ -29,7 +29,7 @@ class ScoreboardTest extends BaseBaseTestCase
         $em = self::getContainer()->get('doctrine')->getManager();
         $contest = $em->getRepository(Contest::class)->findOneBy(['name' => $reference]);
         $freezeData = new FreezeData($contest);
-        $scoreBoard = new Scoreboard($contest, [], [], [], [], [], $freezeData, false, 0, true);
+        $scoreBoard = new Scoreboard($contest, [], [], [], [], [], $freezeData, false, true);
         self::assertEquals($scoreBoard->getProgress(), $progress);
     }
 

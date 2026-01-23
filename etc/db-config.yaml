@@ -12,13 +12,6 @@
             default_value: false
             public: true
             description: Should submissions with compiler-error incur penalty time (and be shown on the scoreboard)?
-        -   name: penalty_time
-            type: int
-            default_value: 20
-            public: true
-            description: Penalty time in minutes per wrong submission (if eventually solved).
-            regex: /^\d+$/
-            error_message: A non-negative number is required.
         -   name: results_prio
             type: array_keyval
             default_value:
