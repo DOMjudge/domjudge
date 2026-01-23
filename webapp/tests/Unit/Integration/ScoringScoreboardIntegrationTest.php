@@ -81,7 +81,6 @@ class ScoringScoreboardIntegrationTest extends KernelTestCase
         $this->configValues = [
             'verification_required'    => false,
             'compile_penalty'          => false,
-            'penalty_time'             => 20,
             'score_in_seconds'         => false,
             'shadow_mode'              => 0,
             'show_teams_on_scoreboard' => 0,

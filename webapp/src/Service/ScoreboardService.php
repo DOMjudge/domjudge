@@ -78,7 +78,6 @@ class ScoreboardService
         return new Scoreboard(
             $contest, $teams, $categories, $problems,
             $scoreCache, $rankCache, $freezeData, $jury || $forceUnfrozen,
-            (int)$this->config->get('penalty_time'),
             (bool)$this->config->get('score_in_seconds'),
         );
     }
@@ -109,7 +108,6 @@ class ScoreboardService
         return new SingleTeamScoreboard(
             $contest, $team, $teamRank, $problems,
             $rankCache, $scoreCache, $freezeData, $showFtsInFreeze,
-            (int)$this->config->get('penalty_time'),
             (bool)$this->config->get('score_in_seconds')
         );
     }
@@ -520,7 +518,7 @@ class ScoreboardService
             $score[$variant] = "0";
         }
 
-        $penaltyTime      = (int) $this->config->get('penalty_time');
+        $penaltyTime      = $contest->getPenaltyTime();
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
 
         // Now fetch the ScoreCache entries.

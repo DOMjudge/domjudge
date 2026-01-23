@@ -778,15 +778,7 @@ class ExternalContestSourceService
         }
 
         $toCheck['name'] = $data->name;
-
-        // Also compare the penalty time
-        $penaltyTime = $data->penaltyTime;
-        if ($penaltyTime !== null && $this->config->get('penalty_time') != $penaltyTime) {
-            $this->logger->warning(
-                'Penalty time does not match between feed (%d) and local (%d)',
-                [$penaltyTime, $this->config->get('penalty_time')]
-            );
-        }
+        $toCheck['penalty_time'] = $data->penaltyTime ?? 0;
 
         $this->compareOrCreateValues($event, $data->id, $contest, $toCheck);
 

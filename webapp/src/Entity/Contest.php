@@ -161,6 +161,12 @@ class Contest extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ScoreboardType $scoreboardType = ScoreboardType::PASS_FAIL;
 
+    #[ORM\Column(
+        options: ['comment' => 'Penalty time in minutes per wrong submission (if eventually solved)', 'unsigned' => true, 'default' => 20]
+    )]
+    #[Serializer\SerializedName('penalty_time')]
+    private int $penaltyTime = 20;
+
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('scoreboard_type')]
     #[Serializer\Type('string')]
@@ -471,9 +477,6 @@ class Contest extends BaseApiEntity implements
     #[ORM\OneToMany(mappedBy: 'contest', targetEntity: ExternalSourceWarning::class)]
     #[Serializer\Exclude]
     private Collection $externalSourceWarnings;
-
-    #[Serializer\SerializedName('penalty_time')]
-    private ?int $penaltyTimeForApi = null;
 
     // This field gets filled by the contest visitor with a data transfer
     // object that represents the banner
@@ -925,6 +928,17 @@ class Contest extends BaseApiEntity implements
     public function getScoreboardType(): ScoreboardType
     {
         return $this->scoreboardType;
+    }
+
+    public function getPenaltyTime(): int
+    {
+        return $this->penaltyTime;
+    }
+
+    public function setPenaltyTime(int $penaltyTime): Contest
+    {
+        $this->penaltyTime = $penaltyTime;
+        return $this;
     }
 
     public function setOpenToAllTeams(bool $openToAllTeams): Contest
@@ -1782,17 +1796,6 @@ class Contest extends BaseApiEntity implements
     public function getContestProblemsetType(): ?string
     {
         return $this->contestProblemsetType;
-    }
-
-    public function setPenaltyTimeForApi(?int $penaltyTimeForApi): Contest
-    {
-        $this->penaltyTimeForApi = $penaltyTimeForApi;
-        return $this;
-    }
-
-    public function getPenaltyTimeForApi(): ?int
-    {
-        return $this->penaltyTimeForApi;
     }
 
     public function setBannerForApi(?ImageFile $bannerForApi = null): Contest

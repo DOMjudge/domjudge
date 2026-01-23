@@ -97,6 +97,8 @@ readonly class ScoreboardMergeCommand
         SymfonyStyle $style,
         #[Option(description: 'Name of the team category to use', shortcut: 'c')]
         string $category = 'Participant',
+        #[Option(description: 'Penalty time in minutes', shortcut: 'p')]
+        int $penaltyTime = 20,
     ): int {
         $teams = [];
         $nextTeamId = 0;
@@ -105,7 +107,6 @@ readonly class ScoreboardMergeCommand
         $scoreCache = [];
         /** @var RankCache[] $rankCache */
         $rankCache = [];
-        $penaltyTime = (int)$this->config->get('penalty_time');
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
         $timeOfLastCorrect = [];
         $affiliations = [];
@@ -335,7 +336,6 @@ readonly class ScoreboardMergeCommand
             array_values($rankCache),
             $freezeData,
             false,
-            (int)$this->config->get('penalty_time'),
             false
         );
 

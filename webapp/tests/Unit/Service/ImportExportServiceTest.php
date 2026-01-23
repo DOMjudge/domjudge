@@ -115,7 +115,8 @@ class ImportExportServiceTest extends BaseTestCase
         string $expectedShortName,
         string $expectedActivateTimeString,
         ?string $expectedDeactivateTimeString,
-        array $expectedProblems = []
+        array $expectedProblems = [],
+        int $expectedPenaltyTime = 20,
     ): void {
         /** @var ImportExportService $importExportService */
         $importExportService = static::getContainer()->get(ImportExportService::class);
@@ -130,6 +131,7 @@ class ImportExportServiceTest extends BaseTestCase
         self::assertEquals($expectedShortName, $contest->getShortname());
         self::assertEquals($expectedActivateTimeString, $contest->getActivatetimeString());
         self::assertEquals($expectedDeactivateTimeString, $contest->getDeactivatetimeString());
+        self::assertEquals($expectedPenaltyTime, $contest->getPenaltyTime());
 
         if (isset($data['scoreboard_type']) || isset($data['scoreboard-type'])) {
             self::assertEquals($data['scoreboard_type'] ?? $data['scoreboard-type'], $contest->getScoreboardType()->value);
@@ -269,6 +271,23 @@ class ImportExportServiceTest extends BaseTestCase
             'score-test',
             '2020-01-01 10:34:56 UTC',
             null,
+            [],
+            0,
+        ];
+        // Testing different penalty time
+        yield [
+            [
+                'name'            => 'Penalty Type Test',
+                'short-name'      => 'penalty-time-test',
+                'duration'        => '5:00:00',
+                'start-time'      => '2020-01-01T12:34:56+02:00',
+                'penalty-time'    => '123456',
+            ],
+            'penalty-time-test',
+            '2020-01-01 10:34:56 UTC',
+            null,
+            [],
+            123456,
         ];
     }
 
