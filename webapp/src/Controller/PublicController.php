@@ -340,6 +340,10 @@ class PublicController extends BaseController
             throw $this->createNotFoundException('No submission data found');
         }
 
+        if (!$this->config->get('show_teams_submissions')) {
+            throw $this->createNotFoundException('Submissions are not visible');
+        }
+
         $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $scoreboard->getTeamsInDescendingOrder());
 
         /** @var Submission[] $submissions */

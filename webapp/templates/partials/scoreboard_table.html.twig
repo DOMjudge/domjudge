@@ -588,10 +588,12 @@
                 {% set problemSpan = problemSpan + 1 %}
             {% endif %}
             <td colspan="{{ problemSpan }}">
-                {% for problem in problems %}
-                    {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
-                    {{ problem | problemBadgeMaybe(matrixItem, score, static) }}
-                {% endfor %}
+                {% if showTeamSubmissions or jury %}
+                    {% for problem in problems %}
+                        {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
+                        {{ problem | problemBadgeMaybe(matrixItem, score, static) }}
+                    {% endfor %}
+                {% endif %}
             </td>
         </tr>
     {% endfor %}
