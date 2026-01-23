@@ -101,16 +101,13 @@ class MiscController extends BaseController
                 ->andWhere('c.contest = :contest')
                 ->andWhere('c.sender IS NULL')
                 ->andWhere('c.recipient = :team OR c.recipient IS NULL')
-                ->andWhere('c.submittime <= :time')
                 ->setParameter('contest', $contest)
                 ->setParameter('team', $team)
-                ->setparameter('time', time())
                 ->addOrderBy('c.submittime', 'DESC')
                 ->addOrderBy('c.clarid', 'DESC');
             if ($contest->getStartTimeObject()->getTimestamp() > time()) {
                 $qb->andWhere('c.problem IS NULL');
             }
-
             /** @var Clarification[] $clarifications */
             $clarifications = $qb->getQuery()->getResult();
 
