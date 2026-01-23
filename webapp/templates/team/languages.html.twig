@@ -7,7 +7,10 @@
 
         <div class="container">
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-2">
-    {% for lang in languages %}
+    {% for langarray in languages %}
+        {% set lang = langarray['language'] %}
+        {% set problems = langarray['problems'] %}
+        {% set limitedProblems = langarray['limitedProblems'] %}
                 <div class="col">
                 <div class="card">
                     <div class="card-body">
@@ -18,7 +21,26 @@
                             {% for ext in lang.extensions %}
                                 <code>.{{ ext }}</code>{% if not loop.last %}, {% endif %}
                             {% endfor %}
+                            </span>
                         </h2>
+                        {% if limited %}
+                            <span class="output_test">
+                                {# In case there are many problem we display the problems where the
+                                   language is not allowed #}
+                                {% if problems | length > 25
+                                   and (problems | length) > (limitedProblems | length)
+                                %}
+                                    {% if limitedProblems | length > 0 %}
+                                        {# Can't be in same as the language can be valid for all languages #}
+                                        Not for:
+                                    {% endif %}
+                                    {% set problems = limitedProblems %}
+                                {% endif %}
+                                {% for problem in problems %}
+                                    {{ problem | problemBadge }}
+                                {% endfor %}
+                            </span>
+                        {% endif %}
                     </div>
                     {% if lang.compilerVersion and lang.compilerVersionCommand %}
                         <pre class="output_text" style="background-color: rgba(0,121,54,.1);">$ {{ lang.compilerVersionCommand }}</pre>
