@@ -95,7 +95,11 @@ class ClarificationController extends AbstractRestController
         required: true,
         content: [
             new OA\MediaType(
-                mediaType: 'multipart/form-data',
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(ref: new Model(type: ClarificationPost::class))
+            ),
+            new OA\MediaType(
+                mediaType: 'application/json',
                 schema: new OA\Schema(ref: new Model(type: ClarificationPost::class))
             )
         ]

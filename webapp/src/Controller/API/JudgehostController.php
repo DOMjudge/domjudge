@@ -1344,7 +1344,7 @@ class JudgehostController extends AbstractFOSRestController
         required: true,
         content: [
             new OA\MediaType(
-                mediaType: 'multipart/form-data',
+                mediaType: 'application/x-www-form-urlencoded',
                 schema: new OA\Schema(
                     required: ['hostname', 'compiler', 'runner'],
                     properties: [
