@@ -95,10 +95,7 @@ marked as 'done' by clicking the running person at the end of the row.
 
 Each row will also list the total amount of balloons that team has
 earned so the runner can compare the resulting situation at the
-team's workplace with the expected one. Where applicable there's
-also an indication of whether this balloon is the first in the entire
-contest, or the first for that problem to be handed out, should
-you wish to do something special with these cases.
+team's workplace with the expected one.
 
 Normally balloon distribution stops when the scoreboard is frozen.
 This will be indicated in the interface and no new entries will
