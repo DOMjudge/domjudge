@@ -169,8 +169,12 @@ no separate measures are necessary, and they allow running
 :ref:`multiple judgedaemons <multiple-judgedaemons>`
 on a multi-core machine by using CPU binding.
 
+.. warning::
+
+   DOMjudge requires cgroup v2. Cgroup v1 is no longer supported.
+
 The judgedaemon needs to run a recent Linux kernel (at least 5.19 or 6.0 or
-later). The following steps configure cgroups v2 on Debian. Instructions for
+later). The following steps configure cgroups on Debian. Instructions for
 other distributions may be different (send us your feedback!).
 
 Edit grub config to add cgroup memory and swap accounting to the boot
