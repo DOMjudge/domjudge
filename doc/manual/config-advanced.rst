@@ -411,6 +411,17 @@ full filesystem path of your installation) binary with the `cache:clear` subcomm
 
 Note that this is different than clearing the scoreboard cache.
 
+Checking for new DOMjudge releases
+----------------------------------
+
+DOMjudge can automatically check whether a newer version is available.
+This feature is disabled by default. To enable it, set the
+``check_for_updates`` configuration option to ``true`` in the
+admin interface under *Configuration settings*.
+
+When enabled, the admin interface will display a notification when a
+new version of DOMjudge is available.
+
 Sending errors to Sentry
 ------------------------
 
