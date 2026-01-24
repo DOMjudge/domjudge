@@ -314,6 +314,10 @@ you can use this command::
 
   enscript -b [username] -a 0-10 -f Courier9 [file] 2>&1
 
+Additionally, the command-line submit client also supports printing.
+Run ``submit --help`` to see the available options for printing via
+the submit client.
+
 .. _multiple-judgedaemons:
 
 Multiple judgedaemons per machine
