@@ -83,7 +83,7 @@ def read_contests() -> list:
     """Read all contests from the API.
 
     Returns:
-        The contests or None if an error occurred.
+        The contests or an empty list if an error occurred.
     """
 
     try:
@@ -114,11 +114,11 @@ def read_languages() -> list:
     """Read all languages for the current contest from the API.
 
     Returns:
-        The languages or None if an error occurred.
+        The languages or an empty list if an error occurred.
     """
 
     try:
-        endpoint = 'contests/' + my_contest['id'] + '/languages'
+        endpoint = f"contests/{my_contest['id']}/languages"
         data = do_api_request(endpoint)
     except RuntimeError as e:
         logging.warning(e)
@@ -135,16 +135,15 @@ def read_languages() -> list:
                 or 'extensions' not in item
                 or not item['id']
                 or not isinstance(item['extensions'], list)
-                or len(item['extensions']) == 0):
+                or not item['extensions']):
             logging.warning("DOMjudge's API returned unexpected JSON data for 'languages'.")
             return []
         language = {
             'id': item['id'],
             'name': item['name'],
             'entry_point_required': item['entry_point_required'] or False,
-            'extensions': {item['id']}
+            'extensions': {item['id']} | set(item['extensions'])
         }
-        language['extensions'] |= set([ext for ext in item['extensions']])
         languages.append(language)
 
     logging.info(f'Read {len(languages)} language(s) from the API.')
@@ -156,11 +155,11 @@ def read_problems() -> list:
     """Read all problems for the current contest from the API.
 
     Returns:
-        The problems or None if an error occurred.
+        The problems or an empty list if an error occurred.
     """
 
     try:
-        endpoint = 'contests/' + my_contest['id'] + '/problems'
+        endpoint = f"contests/{my_contest['id']}/problems"
         data = do_api_request(endpoint)
     except RuntimeError as e:
         logging.warning(e)
@@ -233,20 +232,16 @@ def do_api_request(endpoint: str, data=None, files=None):
 
 
 def kotlin_base_entry_point(filebase: str) -> str:
-    if filebase == "":
+    if not filebase:
         return "_"
-    chars = list(filebase)
-    for idx, c in enumerate(chars):
-        if not c.isalnum():
-            chars[idx] = "_"
 
+    chars = [c if c.isalnum() else "_" for c in filebase]
     if chars[0].isalnum():
         chars[0] = chars[0].upper()
-        filebase = "".join(chars)
     else:
-        filebase = "_" + "".join(chars)
+        chars.insert(0, "_")
 
-    return filebase
+    return "".join(chars)
 
 
 def get_epilog() -> str:
@@ -267,7 +262,7 @@ def get_epilog() -> str:
                 contests_part_two = f"Currently this defaults to the only active contest '{contests[0]['shortname']}'"
         else:
             contests_part_one = 'For CONTEST use one of the following:'
-            max_length = max([len(c['shortname']) for c in contests])
+            max_length = max(len(c['shortname']) for c in contests)
             for contest in contests:
                 contests_part_one += f"\n    {contest['shortname']:<{max_length}} - {contest['name']}"
 
@@ -275,7 +270,7 @@ def get_epilog() -> str:
         problem_part = 'For PROBLEM use the label as on the scoreboard.'
     else:
         problem_part = 'For PROBLEM use one of the following:'
-        max_length = max([len(p['label']) for p in problems])
+        max_length = max(len(p['label']) for p in problems)
         for problem in problems:
             problem_part += f"\n    {problem['label']:<{max_length}} - {problem['name']}"
 
@@ -283,7 +278,7 @@ def get_epilog() -> str:
         language_part = 'For LANGUAGE use the ID or a common extension.'
     else:
         language_part = 'For LANGUAGE use one of the following IDs or extensions:'
-        max_length = max([len(lang['name']) for lang in languages])
+        max_length = max(len(lang['name']) for lang in languages)
         for language in languages:
             sorted_exts = ', '.join(sorted(language['extensions']))
             language_part += f"\n    {language['name']:<{max_length}} - {sorted_exts}"
@@ -333,14 +328,14 @@ def do_api_print() -> None:
     with open(filename, 'rb') as file:
         data = {
             'original_name': filename,
-            'file_contents': base64.b64encode(file.read()),
+            'file_contents': base64.b64encode(file.read()).decode('ascii'),
         }
     if my_language:
         data['language'] = my_language['name']
     if entry_point:
         data['entry_point'] = entry_point
 
-    endpoint = f"printing/team"
+    endpoint = "printing/team"
     result = do_api_request(endpoint, data)
 
     if not isinstance(result, dict) or 'success' not in result:
@@ -363,19 +358,24 @@ def do_api_submit() -> None:
     if entry_point:
         data['entry_point'] = entry_point
 
-    files = [('code[]', open(filename, 'rb')) for filename in filenames]
+    file_handles = [open(filename, 'rb') for filename in filenames]
+    try:
+        files = [('code[]', f) for f in file_handles]
+        endpoint = f"contests/{my_contest['id']}/submissions"
+        submission = do_api_request(endpoint, data, files)
+    finally:
+        for f in file_handles:
+            f.close()
 
-    endpoint = f"contests/{my_contest['id']}/submissions"
-    submission = do_api_request(endpoint, data, files)
-
-    if (not isinstance(submission, dict)
+    if (
+            not isinstance(submission, dict)
             or 'id' not in submission
             or not isinstance(submission['id'], str)):
         error('DOMjudge\'s API returned unexpected JSON data.')
 
-    time = datetime.datetime.fromisoformat(submission['time']).strftime('%H:%M:%S')
+    time_str = datetime.datetime.fromisoformat(submission['time']).strftime('%H:%M:%S')
     sid = submission['id']
-    print(f"Submission received: id = s{sid}, time = {time}")
+    print(f"Submission received: id = s{sid}, time = {time_str}")
     print(f"Check {baseurl}team/submission/{sid} for the result.")
 
 
@@ -439,7 +439,7 @@ elif 'SUBMITBASEURL' in os.environ:
     logging.warning(f"Using '{baseurl}' as defined in the 'SUBMITBASEURL' environment variable. "
                     + "Pass '-u <url>' to override.")
 # Make sure that baseurl terminates with a '/' for later concatenation.
-if baseurl and baseurl[-1:] != '/':
+if baseurl and not baseurl.endswith('/'):
     baseurl += '/'
 
 if args.contest:
@@ -466,7 +466,7 @@ if not contest_id:
     elif len(contests) == 1:
         my_contest = contests[0]
     else:
-        shortnames = ', '.join([c['shortname'] for c in contests])
+        shortnames = ', '.join(c['shortname'] for c in contests)
         warn_user(f"Multiple active contests found, please specify one of {shortnames}")
 elif contests:
     contest_id = contest_id.lower()
@@ -506,7 +506,7 @@ if not languages:
 if not problems:
     logging.warning('Could not obtain problem data.')
 
-if len(args.filename) == 0:
+if not args.filename:
     usage('No file(s) specified.')
 
 # Process all source files
@@ -547,17 +547,13 @@ for index, filename in enumerate(args.filename, 1):
 # Try to parse problem and language from first filename.
 
 filebase = os.path.basename(filenames[0])
+filebase, ext = os.path.splitext(filebase)
+ext = ext.lstrip('.')
 
-ext = ""
-if '.' in filebase:
-    dot = filebase.rfind('.')
-    ext = filebase[dot+1:]
-    filebase = filebase[:dot]
-
-    if not problem_id:
-        problem_id = filebase
-    if not language_id:
-        language_id = ext
+if not problem_id:
+    problem_id = filebase
+if not language_id:
+    language_id = ext
 
 # Check for languages matching file extension.
 language_id = language_id.lower()
@@ -590,7 +586,7 @@ if not args.print:
         elif my_language['name'] == 'Kotlin':
             entry_point = kotlin_base_entry_point(filebase) + "Kt"
         elif my_language['name'] == 'Python 3':
-            entry_point = filebase + "." + ext
+            entry_point = f"{filebase}.{ext}"
 
     if not entry_point and my_language['entry_point_required']:
         error('Entry point required but not specified nor detected.')
