@@ -58,6 +58,10 @@ In the DOMjudge configuration under ``clar_answers`` you can set predefined
 clarification responses that can be selected when processing incoming
 clarifications.
 
+Clarifications support Markdown syntax for formatting. Additionally,
+LaTeX inline math can be used by enclosing expressions in ``$...$``
+(e.g. ``$O(n \log n)$``).
+
 Clarification categories and queues
 ```````````````````````````````````
 When sending a clarification request, the team needs to select an
