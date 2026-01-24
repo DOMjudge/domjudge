@@ -125,7 +125,7 @@
                 3: Only on request
                 4: Analyst mode
             regex: /^[1234]$/
-            error_message: A value between 1 and 3 is required.
+            error_message: A value between 1 and 4 is required.
         -   name: judgehost_warning
             type: int
             default_value: 30
