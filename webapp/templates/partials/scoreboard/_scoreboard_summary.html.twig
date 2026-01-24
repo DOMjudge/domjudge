@@ -1,5 +1,28 @@
 {% if limitToTeamIds is null %}
-    {% if showTeamSubmissions or jury %}
+    {% if isMobile is not defined %}{% set isMobile = false %}{% endif %}
+
+    {% if isMobile %}
+        {# Simplified mobile summary - no problem columns #}
+        <tr style="border-top: 2px solid black;">
+            {% set summaryColspan = 2 %}
+            {% if showAffiliationLogos %}
+                {% set summaryColspan = summaryColspan + 1 %}
+            {% endif %}
+            {% if enable_ranking %}
+                {% set summaryColspan = summaryColspan + 1 %}
+            {% endif %}
+            {% if public %}
+                {% set summaryColspan = summaryColspan + 1 %}
+            {% endif %}
+            <td class="scoresummary" colspan="{{ summaryColspan }}">
+                Summary: {{ scoreboard.summary.numberOfPoints(sortOrder) }} solved
+            </td>
+            {% if enable_ranking %}
+                <td></td>
+            {% endif %}
+        </tr>
+    {% elseif showTeamSubmissions or jury %}
+        {# Desktop summary with problem columns #}
         <tr style="border-top: 2px solid black;">
             {% set summaryColspan = 2 %}
             {% if showAffiliationLogos %}

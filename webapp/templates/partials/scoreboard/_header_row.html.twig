@@ -1,0 +1,50 @@
+<tr class="scoreheader" data-static="{{ static }}" {% if isMobile %}style="font-size: 75%;"{% endif %}>
+    {% if enable_ranking %}
+        <th title="rank" scope="col" {% if not isMobile and medalsEnabled %}colspan="2"{% endif %}>rank</th>
+    {% endif %}
+    <th title="team name" scope="col" colspan="{{ teamColspan }}">team</th>
+    {% if enable_ranking %}
+        {% if scoringScoreboard %}
+            <th title="points" colspan="1" scope="col">score</th>
+        {% else %}
+            <th title="# solved / penalty time" colspan="{{ isMobile ? 1 : 2 }}" scope="col">score</th>
+        {% endif %}
+    {% endif %}
+    {% if not isMobile and (showTeamSubmissions or jury) %}
+        {# Problem headers - desktop only #}
+        {% for problem in problems %}
+            {% set link = null %}
+            {% set target = '_self' %}
+            {% if not static %}
+                {% if jury %}
+                    {% set link = path('jury_problem', {'probId': problem.externalid}) %}
+                {% elseif problem.problem.problemstatementType is not empty %}
+                    {% if public %}
+                        {% set link = path('public_problem_statement', {probId: problem.externalid}) %}
+                        {% set target = '_blank' %}
+                    {% else %}
+                        {% set link = path('team_problem_statement', {probId: problem.externalid}) %}
+                        {% set target = '_blank' %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            <th
+                title="problem {{ problem.problem.name }}"
+                scope="col"
+                data-problem-id="{{ problem.externalid }}"
+                data-problem-name="{{ problem.problem.name | escape('html_attr') }}"
+                data-problem-badge="{{ problem | problemBadge | escape('html_attr') }}"
+            >
+                <a {% if link %}href="{{ link }}"{% endif %} target="{{ target }}">
+                    {{  problem | problemBadge }}
+                    {% if showPoints and not scoringScoreboard %}
+                        <br/>
+                        <span class='problempoints'>
+                            [{% if problem.points == 1 %}1 point{% else %}{{ problem.points }} points{% endif %}]
+                        </span>
+                    {% endif %}
+                </a>
+            </th>
+        {% endfor %}
+    {% endif %}
+</tr>
