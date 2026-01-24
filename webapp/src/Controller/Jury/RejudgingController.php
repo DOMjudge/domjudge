@@ -227,6 +227,10 @@ class RejudgingController extends BaseController
             ->getQuery()
             ->getOneOrNullResult();
 
+        if ($rejudging === null) {
+            throw new NotFoundHttpException(sprintf('Rejudging with ID %s not found', $rejudgingId));
+        }
+
         $disabledProblems = [];
         $disabledLangs = [];
         foreach ($rejudging->getJudgings() as $judging) {
@@ -242,9 +246,6 @@ class RejudgingController extends BaseController
             }
         }
 
-        if (!$rejudging) {
-            throw new NotFoundHttpException(sprintf('Rejudging with ID %s not found', $rejudgingId));
-        }
         $todoAndDone = $this->rejudgingService->calculateTodo($rejudging);
         $todo = $todoAndDone['todo'];
         $done = $todoAndDone['done'];
