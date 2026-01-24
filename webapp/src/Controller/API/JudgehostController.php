@@ -995,7 +995,7 @@ class JudgehostController extends AbstractFOSRestController
             }
 
             if ($score) {
-                $judgingRun->setScore(base64_decode($score));
+                $judgingRun->setScore(trim(base64_decode($score)));
             }
 
             $judging = $judgingRun->getJudging();
