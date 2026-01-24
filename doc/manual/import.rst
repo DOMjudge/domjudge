@@ -18,7 +18,7 @@ the ``webapp`` directory of the DOMserver.
 External ID's
 -------------
 
-Most entities in DOMjudge have an `eternal ID`. External ID's are used to link
+Most entities in DOMjudge have an `external ID`. External ID's are used to link
 entities in DOMjudge to entities in an external system, e.g. the ICPC CMS. The
 API uses the external ID's to expose entities to other systems. When you create
 an entity in DOMjudge, specifying the external ID is optional; DOMjudge will
