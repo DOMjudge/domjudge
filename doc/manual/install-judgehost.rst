@@ -211,10 +211,7 @@ username and password whitespace-separated on one line, for example::
 
 The exact URL to use can be found in the Config Checker in the
 admin web interface; the password here must be identical to that of the
-``judgehost`` user. Multiple lines may be specified to allow a
-judgedaemon to work for multiple domservers. The id in the first column
-is used to differentiate between multiple domservers, and should be
-unique within the ``restapi.secret`` file.
+``judgehost`` user.
 
 .. _start-judgedaemon:
 
