@@ -278,6 +278,39 @@ See the ``validate.h`` file in the ``boolfind_run`` executable for some
 convenience functions you might want to use when implementing your own run
 program.
 
+Multi-pass problems
+-------------------
+Multi-pass problems allow a submission to be validated through multiple
+sequential passes.
+
+In a multi-pass problem, the judging process works as follows:
+
+1. The submission runs with the initial testcase input.
+2. The validator checks the output and can write a file ``nextpass.in``
+   in the feedback directory.
+3. If ``nextpass.in`` exists, the submission runs again with this new
+   input.
+4. This continues until no ``nextpass.in`` is created, or the maximum
+   number of passes is reached.
+
+Files in the feedback directory persist between passes, allowing the
+validator to maintain state across rounds.
+
+When importing problems via ``problem.yaml``, use the following fields::
+
+  type: pass-fail multi-pass
+  validation: custom multi-pass
+  limits:
+    validation_passes: 3
+
+See also
+https://icpc.io/problem-package-format/spec/2023-07-draft.html#multi-pass-validation
+
+.. note::
+
+   Multi-pass problems cannot be combined with interactive or
+   submit-answer problem types.
+
 .. _printing:
 
 Printing
