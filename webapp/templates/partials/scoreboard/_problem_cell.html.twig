@@ -1,0 +1,75 @@
+{% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
+{% set scoreCssClass = scoreboard.getCellCssClass(score.team, problem, showPending, jury) %}
+{% set scoreGradientStyle = scoreboard.getCellStyle(score.team, problem) %}
+{% set hasScore = scoreboard.cellHasScore(score.team, problem) %}
+
+{% set numSubmissions = matrixItem.numSubmissions %}
+{% if showPending and matrixItem.numSubmissionsPending > 0 %}
+    {% set numSubmissions = numSubmissions ~ ' + ' ~ matrixItem.numSubmissionsPending %}
+{% endif %}
+
+{# If correct, print time scored. The format will vary depending on the scoreboard resolution setting #}
+{% set time = '' %}
+{% if matrixItem.isCorrect %}
+    {% set time = matrixItem.time %}
+    {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
+        {% set time = "%0.3f s" | format(matrixItem.runtime / 1000.0) %}
+    {% elseif scoreInSeconds %}
+        {% set time = time | scoreTime | printTimeRelative %}
+        {% if matrixItem.numSubmissions > 1 %}
+            {% set time = time ~ ' + ' ~ (calculatePenaltyTime(true, matrixItem.numSubmissions) | printTimeRelative) %}
+        {% endif %}
+    {% else %}
+        {% set time = time | scoreTime %}
+    {% endif %}
+{% endif %}
+
+{% set link = null %}
+{% set extra = null %}
+{% if jury %}
+    {% set restrict = {problemId: problem.externalid} %}
+    {% set link = path('jury_team', {teamId: score.team.externalid, restrict: restrict}) %}
+{% elseif static %}
+    {% set link = '#' %}
+    {% set extra = 'data-submissions-url="' ~ path('public_submissions_data') ~ '"' %}
+    {% set extra = extra ~ ' data-team-id="' ~ score.team.externalid ~ '"' %}
+    {% set extra = extra ~ ' data-problem-id="' ~ problem.externalid ~ '"' %}
+{% elseif public %}
+    {% set link = path('public_submissions', {teamId: score.team.externalid, problemId: problem.externalid}) %}
+    {% set extra = 'data-submissions-url="' ~ path('public_submissions_data_cell', {teamId: score.team.externalid, problemId: problem.externalid}) ~ '"' %}
+    {% set extra = extra ~ ' data-team-id="' ~ score.team.externalid ~ '"' %}
+    {% set extra = extra ~ ' data-problem-id="' ~ problem.externalid ~ '"' %}
+{% endif %}
+
+<td class="score_cell">
+    {% if numSubmissions != '0' %}
+        <a {% if link %}href="{{ link }}"{% endif %} {% if extra %}{{ extra | raw }}{% endif %}>
+            <div
+                class="{{ scoreCssClass }}"
+                {% if scoreGradientStyle %}style="{{ scoreGradientStyle }}"{% endif %}
+                {% if scoringScoreboard %}
+                    title="{% if hasScore %}Full score: {{ matrixItem.points }}{% if problem.rangeUpperBound is not null %} / {{ problem.rangeUpperBound }}{% endif %}{% if time != '' %} ({{ time }} mins){% endif %}{% endif %}"
+                {% endif %}
+            >
+                {% if scoringScoreboard %}
+                    {% if hasScore %}{{ matrixItem.points | round(2) }}{% else %}&nbsp;{% endif %}
+                {% else %}
+                    {% if matrixItem.isCorrect %}{{ time }}{% else %}&nbsp;{% endif %}
+                {% endif %}
+                <span>
+                    {% if numSubmissions == 1 %}
+                        1 try
+                    {% else %}
+                        {{ numSubmissions }} tries
+                    {% endif %}
+                </span>
+                {% if scoringScoreboard and hasScore and problem.hasScoreRange %}
+                    {% set rangePercent = matrixItem.getRangePercent(problem.rangeLowerBound, problem.rangeUpperBound) %}
+                    <div class="score-range-bar">
+                        <div class="score-range-fill" style="width: {{ rangePercent | round(1) }}%"></div>
+                    </div>
+                {% endif %}
+            </div>
+        </a>
+    {% endif %}
+</td>

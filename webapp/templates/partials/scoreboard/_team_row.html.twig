@@ -1,0 +1,122 @@
+{# Detect sort order change and emit summary for previous sort order #}
+{% set previousSortOrder = prevScore ? prevScore.team.sortorder : -1 %}
+{% if prevScore and score.team.sortorder != previousSortOrder %}
+    {% include 'partials/scoreboard/_scoreboard_summary.html.twig' with {sortOrder: previousSortOrder, isMobile: isMobile} %}
+{% endif %}
+
+{# Build row classes #}
+{% set classes = [] %}
+{% if score.team.sortorder != previousSortOrder %}
+    {% set classes = classes | merge(['sortorderswitch']) %}
+{% endif %}
+
+{# Process medal color #}
+{% set medalColor = '' %}
+{% if showLegends %}
+    {% set medalColor = score.team | medalType(contest, scoreboard) %}
+{% endif %}
+
+{# Check whether this is us, otherwise use category colour #}
+{% if myTeamId is defined and myTeamId == score.team.teamid %}
+    {% set classes = classes | merge(['scorethisisme']) %}
+    {% set color = '#FFFF99' %}
+{% else %}
+    {% set color = score.team.backgroundColorCategory.color|default(null) %}
+{% endif %}
+
+{% for category in score.team.cssClassCategories %}
+    {% set classes = classes | merge([category.cssClass]) %}
+{% endfor %}
+
+{# Derive colorClass #}
+{% if color is null %}
+    {% set color = "#FFFFFF" %}
+    {% set colorClass = "_FFFFFF" %}
+{% else %}
+    {% set colorClass = color | replace({"#": "_"}) %}
+{% endif %}
+
+{# Check if rank should be displayed (different from previous team's rank) #}
+{% set previousTeam = prevScore ? prevScore.team : null %}
+{% set showRank = not displayRank ? false : (previousTeam is null or score.team.sortorder != previousSortOrder or scoreboard.scores[previousTeam.teamid].rank != score.rank) %}
+
+{% if isMobile %}
+    {# ===== MOBILE: Two rows per team ===== #}
+    <tr
+        class="{{ classes | join(' ') }}"
+        data-team-id="{{ score.team.externalid }}"
+        data-team-name="{{ score.team.effectiveName | escape('html_attr') }}"
+        style="border-bottom-width: 0; height: 28px;">
+        {% if enable_ranking %}
+            <td class="scorepl">
+                {% if medalsEnabled and medalColor != '' %}
+                    <i class="fa fa-medal {{ medalColor }} d-block me-2" style="font-size: 1.5rem;"></i>
+                {% endif %}
+            </td>
+        {% endif %}
+
+        {% include 'partials/scoreboard/_team_info_cells.html.twig' with {isMobile: true} %}
+        {% include 'partials/scoreboard/_score_cells.html.twig' with {isMobile: true} %}
+    </tr>
+    <tr style="height: 32px;">
+        <td>
+            <span class="d-block me-2 rank">
+                {% if not displayRank %}
+                    ?
+                {% elseif showRank %}
+                    {{ score.rank }}
+                {% endif %}
+            </span>
+        </td>
+        {% if showAffiliationLogos %}
+            {% set problemSpan = 3 %}
+        {% else %}
+            {% set problemSpan = 2 %}
+        {% endif %}
+        {% if public %}
+            {% set problemSpan = problemSpan + 1 %}
+        {% endif %}
+        <td colspan="{{ problemSpan }}">
+            {% if showTeamSubmissions or jury %}
+                {% for problem in problems %}
+                    {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
+                    {{ problem | problemBadgeMaybe(matrixItem, score, static) }}
+                {% endfor %}
+            {% endif %}
+        </td>
+    </tr>
+{% else %}
+    {# ===== DESKTOP: Single row per team ===== #}
+    <tr class="{{ classes | join(' ') }}" data-team-id="{{ score.team.externalid }}" data-team-name="{{ score.team.effectiveName | escape('html_attr') }}">
+        {% if enable_ranking %}
+            {% if medalsEnabled %}
+                <td class="no-border">
+                    {% if medalColor != '' %}
+                        <i class="fa fa-medal {{ medalColor }}" style="font-size: 1.5rem;"></i>
+                    {% endif %}
+                </td>
+            {% endif %}
+            <td class="scorepl rank">
+                {% if not displayRank %}
+                    ?
+                {% elseif showRank %}
+                    {{ score.rank }}
+                {% endif %}
+            </td>
+        {% endif %}
+
+        {% include 'partials/scoreboard/_team_info_cells.html.twig' with {isMobile: false} %}
+        {% include 'partials/scoreboard/_score_cells.html.twig' with {isMobile: false} %}
+
+        {% if showTeamSubmissions or jury %}
+            {% for problem in problems %}
+                {% include 'partials/scoreboard/_problem_cell.html.twig' %}
+            {% endfor %}
+        {% endif %}
+    </tr>
+{% endif %}
+
+{# Emit final summary if this is the last score #}
+{% if isLast %}
+    {% include 'partials/scoreboard/_scoreboard_summary.html.twig' with {sortOrder: score.team.sortorder, isMobile: isMobile} %}
+{% endif %}

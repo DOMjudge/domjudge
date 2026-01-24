@@ -1,0 +1,38 @@
+{% if enable_ranking %}
+    {% set totalTime = score.totalTime %}
+    {% if scoreInSeconds %}
+        {% set totalTime = totalTime | printTimeRelative %}
+    {% endif %}
+
+    {% if scoringScoreboard %}
+        {% set totalPoints = "%.2f" | format(score.score) %}
+    {% else %}
+        {% set totalPoints = score.numPoints %}
+    {% endif %}
+
+    {% if isMobile %}
+        {# Mobile: combined cell with rowspan #}
+        <td class="scorenc" rowspan="2" {% if scoringScoreboard %}title="Full score: {{ score.score }}"{% endif %}>
+            {{ totalPoints }}
+            {% if not scoringScoreboard %}
+                <br/><span class="scorett" style="font-weight: normal;">
+                    {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
+                        {{ "%0.3f s" | format(score.totalRuntime/1000.0) }}
+                    {% else %}
+                        {{ totalTime }}
+                    {% endif %}
+                </span>
+            {% endif %}
+        </td>
+    {% else %}
+        {# Desktop: separate cells #}
+        <td class="scorenc" {% if scoringScoreboard %}title="Full score: {{ score.score }}"{% endif %}>{{ totalPoints }}</td>
+        {% if not scoringScoreboard %}
+            {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
+                <td class="scorett">{{ "%0.3f s" | format(score.totalRuntime/1000.0) }}</td>
+            {% else %}
+                <td class="scorett">{{ totalTime }}</td>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endif %}

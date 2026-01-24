@@ -1,0 +1,94 @@
+{# Flag cell #}
+<td class="scoreaf cl{{ colorClass }}">
+    {% if showFlags %}
+        {% if score.team.affiliation %}
+            {% set link = null %}
+            {% if jury %}
+                {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.externalid}) %}
+            {% endif %}
+            <a {% if link %}href="{{ link }}"{% endif %}>
+                {{ score.team.affiliation.country|countryFlag }}
+            </a>
+        {% endif %}
+    {% endif %}
+</td>
+
+{# Logo cell #}
+{% if showAffiliationLogos %}
+    <td class="scoreaf cl{{ colorClass }}">
+        {% if score.team.affiliation %}
+            {% set link = null %}
+            {% if jury %}
+                {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.externalid}) %}
+            {% endif %}
+            <a {% if link %}href="{{ link }}"{% endif %}>
+                {% set affiliationId = score.team.affiliation.externalid %}
+                {% set affiliationImage = affiliationId | assetPath('affiliation') %}
+                {% if affiliationImage %}
+                    <img loading="lazy" {% if isMobile %}width="16px" height="16px"{% else %}class="affiliation-logo"{% endif %}
+                         src="{{ asset(affiliationImage) }}" alt="{{ score.team.affiliation.name }}"
+                         title="{{ score.team.affiliation.name }}">
+                {% else %}
+                    {{ affiliationId }}
+                {% endif %}
+            </a>
+        {% endif %}
+    </td>
+{% endif %}
+
+{# Heart cell (public only) #}
+{% if public %}
+    <td class="scoreaf heart cl{{ colorClass }}"></td>
+{% endif %}
+
+{# Team name cell with badges #}
+<td class="scoretn cl{{ colorClass }}" title="{{ score.team.effectiveName }}">
+    {% set link = null %}
+    {% set extra = null %}
+    {% if static %}
+        {% set link = '#' %}
+        {% set extra = 'data-bs-toggle="modal" data-bs-target="#team-modal-' ~ score.team.externalid ~ '"' %}
+    {% else %}
+        {% if jury %}
+            {% set link = path('jury_team', {teamId: score.team.externalid}) %}
+        {% elseif public %}
+            {% set link = path('public_team', {teamId: score.team.externalid}) %}
+            {% set extra = 'data-ajax-modal' %}
+        {% else %}
+            {% set link = path('team_team', {teamId: score.team.externalid}) %}
+            {% set extra = 'data-ajax-modal' %}
+        {% endif %}
+    {% endif %}
+    <a {% if extra is not null %}{{ extra | raw }}{% endif %} {% if link is not null %}href="{{ link }}"{% endif %}>
+        <span class="forceWidth">
+            {% set hasBadges = score.team.badgeCategories | length > 0 %}
+            {% for category in score.team.topBadgeCategories %}
+                {% if scoreboard.bestInCategory(score.team, category, limitToTeamIds) %}
+                    {% set hasBadges = true %}
+                {% endif %}
+            {% endfor %}
+            {% if hasBadges %}<span class="category-badges">{% endif %}
+            {% for category in score.team.badgeCategories %}
+                <span class="badge text-bg-warning category-badge">
+                    {{ category.name }}
+                </span>
+            {% endfor %}
+            {% for category in score.team.topBadgeCategories %}
+                {% if scoreboard.bestInCategory(score.team, category, limitToTeamIds) %}
+                    <span class="badge text-bg-warning category-best">
+                        {{ category.name }}
+                    </span>
+                {% endif %}
+            {% endfor %}
+            {% if hasBadges %}</span>{% endif %}
+            {{ score.team.effectiveName }}
+        </span>
+        {% if showAffiliations %}
+            <span class="univ forceWidth">
+                {% if score.team.affiliation %}
+                    {{ score.team.affiliation.name }}
+                {% endif %}
+            </span>
+        {% endif %}
+    </a>
+</td>
