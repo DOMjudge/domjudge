@@ -8,12 +8,17 @@ DOMjudge
 
 This is the Programming Contest Jury System "DOMjudge" version 10.0.0DEV
 
-DOMjudge is a system for running a programming contest, like the
-ICPC regional and world championship programming contests.
+DOMjudge is a system for running a programming contest, like the ICPC regional
+and world championship programming contests. It can also be used to run
+IOI-style (partial scoring) contents.
 
 Installation
 ------------
-We provide [stable releases](https://www.domjudge.org/download) and [daily snapshots](https://www.domjudge.org/snapshot/) of the latest code. Bootstrapping from git is an advanced use case and mostly needed for development. Installing DOMjudge is almost never done via a `git clone`, except for development use cases or testing the latest code. 
+We provide [stable releases](https://www.domjudge.org/download) and [daily
+snapshots](https://www.domjudge.org/snapshot/) of the latest code.
+Bootstrapping from git is an advanced use case and mostly needed for
+development. Installing DOMjudge is almost never done via a `git clone`, except
+for development use cases or testing the latest code. 
 
 Documentation
 -------------
@@ -32,13 +37,14 @@ information, see the documentation.
 
 All documentation is also available online at the DOMjudge homepage:
 	https://www.domjudge.org/documentation
+
 Please note that this documentation is from the latest stable
 release and thus might not apply to your version.
 
 A fresh copy of the repository source tree must first be bootstrapped,
 generating the configure script and documentation. This can be done
-by running 'make dist', see the online documentation, section
-"Developer information" for more details.
+by running `make dist`, see the online documentation, section
+"Development" for more details.
 
 There is a wiki which collects other pieces of information about
 specific configurations or integrations:
@@ -47,7 +53,7 @@ https://github.com/DOMjudge/domjudge/wiki
 Copyright & Licensing
 ---------------------
 
-DOMjudge is Copyright (c) 2004 - 2025 by the DOMjudge developers and
+DOMjudge is Copyright (c) 2004 - 2026 by the DOMjudge developers and
 all respective contributors. The current DOMjudge developers are Jaap
 Eldering, Nicky Gerritsen, Keith Johnson, Thijs Kinkhorst, Mart
 Pluijmaekers, Michael Vasseur and Tobias Werth; see the manual for
