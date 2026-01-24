@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # @configure_input@
 
@@ -26,8 +26,11 @@
 # We always use 'sudo -n <command> < /dev/null' to make sure that sudo
 # doesn't try to ask for a password, but just fails.
 
-# Exit on error:
-set -e
+set -e # bail out on error
+set -E # properly handle trap in functions and subshells
+
+# Add error handler to provide more context when a command fails
+trap 'echo "Error: command \"$BASH_COMMAND\" on line $LINENO failed with exit code $?" >&2' ERR
 
 # Chroot subdirs needed: (optional lib64 only needed for amd64 architecture)
 SUBDIRMOUNTS="etc usr lib bin"
