@@ -981,24 +981,20 @@ class JudgeDaemon
             return false;
         }
 
+        $stderr_temp = null;
+        if ($stderr_target === null && $log_nonzero_exitcode) {
+            $stderr_temp = tempnam(TMPDIR, 'runCommandSafe_stderr_');
+            $stderr_target = $stderr_temp;
+        }
+
         // Use proc_open for secure process execution with proper I/O redirection.
         // We use file redirection instead of pipes to avoid deadlocks when the
         // pipe buffer fills up and we are not reading from it.
         $descriptorspec = [
-            self::FD_STDIN  => ['file', '/dev/null', 'r'],
-            self::FD_STDOUT => ['file', '/dev/null', 'w'],
-            self::FD_STDERR => ['file', '/dev/null', 'w'],
+            self::FD_STDIN  => ['file', $stdin_source  ?: '/dev/null', 'r'],
+            self::FD_STDOUT => ['file', $stdout_target ?: '/dev/null', 'w'],
+            self::FD_STDERR => ['file', $stderr_target ?: '/dev/null', 'w'],
         ];
-
-        if ($stdin_source !== null) {
-            $descriptorspec[self::FD_STDIN] = ['file', $stdin_source, 'r'];
-        }
-        if ($stdout_target !== null) {
-            $descriptorspec[self::FD_STDOUT] = ['file', $stdout_target, 'w'];
-        }
-        if ($stderr_target !== null) {
-            $descriptorspec[self::FD_STDERR] = ['file', $stderr_target, 'w'];
-        }
 
         // For proc_open, we need to pass the command as a string for security
         $command_string = implode(' ', array_map(dj_escapeshellarg(...), $command_parts));
@@ -1008,6 +1004,9 @@ class JudgeDaemon
         $process = proc_open($command_string, $descriptorspec, $pipes);
         if (!is_resource($process)) {
             logmsg(LOG_ERR, "Failed to start process: $command_string");
+            if ($stderr_temp !== null) {
+                unlink($stderr_temp);
+            }
             $retval = -1;
             return false;
         }
@@ -1019,12 +1018,23 @@ class JudgeDaemon
 
         if ($retval_local !== 0) {
             if ($log_nonzero_exitcode) {
-                logmsg(LOG_WARNING, "Command failed with exit code $retval_local: $command_string");
+                $stderr_output = '';
+                if ($stderr_temp !== null && file_exists($stderr_temp)) {
+                    $stderr_output = trim(dj_file_get_contents($stderr_temp, 4096));
+                }
+                $error_msg = "Command failed with exit code $retval_local: $command_string";
+                if ($stderr_output !== '') {
+                    $error_msg .= "\nStderr output:\n" . $stderr_output;
+                }
+                logmsg(LOG_WARNING, $error_msg);
             }
-            return false;
         }
 
-        return true;
+        if ($stderr_temp !== null && file_exists($stderr_temp)) {
+            unlink($stderr_temp);
+        }
+
+        return $retval_local === 0;
     }
 
     private function fetchExecutable(
