@@ -231,20 +231,33 @@ class RejudgingController extends BaseController
             throw new NotFoundHttpException(sprintf('Rejudging with ID %s not found', $rejudgingId));
         }
 
-        $disabledProblems = [];
-        $disabledLangs = [];
-        foreach ($rejudging->getJudgings() as $judging) {
-            $submission = $judging->getSubmission();
-            $problem = $submission->getContestProblem();
-            $language = $submission->getLanguage();
+        // Use targeted queries to find disabled problems/languages instead of loading all judgings.
+        $disabledProblems = $this->em->createQueryBuilder()
+            ->from(Judging::class, 'j')
+            ->join('j.submission', 's')
+            ->join('s.contest_problem', 'cp')
+            ->join('s.problem', 'p')
+            ->select('p.probid', 'p.name')
+            ->andWhere('j.rejudging = :rejudging')
+            ->andWhere('cp.allowJudge = false')
+            ->setParameter('rejudging', $rejudging)
+            ->distinct()
+            ->getQuery()
+            ->getResult();
+        $disabledProblems = array_column($disabledProblems, 'name', 'probid');
 
-            if (!$problem->getAllowJudge()) {
-                $disabledProblems[$submission->getProblemId()] = $submission->getProblem()->getName();
-            }
-            if (!$language->getAllowJudge()) {
-                $disabledLangs[$submission->getLanguage()->getLangid()] = $submission->getLanguage()->getName();
-            }
-        }
+        $disabledLangs = $this->em->createQueryBuilder()
+            ->from(Judging::class, 'j')
+            ->join('j.submission', 's')
+            ->join('s.language', 'l')
+            ->select('l.langid', 'l.name')
+            ->andWhere('j.rejudging = :rejudging')
+            ->andWhere('l.allowJudge = false')
+            ->setParameter('rejudging', $rejudging)
+            ->distinct()
+            ->getQuery()
+            ->getResult();
+        $disabledLangs = array_column($disabledLangs, 'name', 'langid');
 
         $todoAndDone = $this->rejudgingService->calculateTodo($rejudging);
         $todo = $todoAndDone['todo'];
