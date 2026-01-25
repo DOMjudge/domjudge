@@ -391,3 +391,45 @@ table.table-full-clickable-cell tr .table-button-head-right-right{
     display: inline-block;
     vertical-align: middle;
 }
+
+/* Grouped table expand/collapse styles */
+.data-table .group-toggle-column,
+.data-table .group-toggle-cell {
+    width: 2rem;
+    min-width: 2rem;
+    max-width: 2rem;
+    padding: 0;
+    text-align: center;
+}
+
+/* Right-align the ID column in rejudgings table */
+#rejudgings-table td:nth-child(2),
+#rejudgings-table th:nth-child(2) {
+    text-align: right;
+}
+
+.group-toggle {
+    cursor: pointer;
+    display: inline-block;
+    user-select: none;
+}
+
+.group-toggle:hover {
+    color: var(--bs-primary);
+}
+
+.group-chevron {
+    font-size: 0.75rem;
+    width: 1em;
+    display: inline-block;
+    text-align: center;
+}
+
+.data-table .table-row-child td,
+.data-table .table-row-child a {
+    color: var(--bs-secondary);
+}
+
+.data-table .table-row-child .group-toggle-cell {
+    border-left: 3px solid var(--bs-primary);
+}

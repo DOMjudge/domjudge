@@ -15,7 +15,7 @@
     {% if rejudgings is empty %}
         <div class="alert alert-warning">No rejudgings defined</div>
     {% else %}
-        {{ macros.table(rejudgings, table_fields, 0) }}
+        {{ macros.table(rejudgings, table_fields, {grouped: true, id: 'rejudgings-table'}) }}
     {% endif %}
 
     <p>

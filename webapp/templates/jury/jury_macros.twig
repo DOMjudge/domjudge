@@ -85,17 +85,21 @@
 {% endmacro %}
 
 {% macro table(data, fields, options) %}
+    {%- set table_id = options.id|default('table-' ~ random()) %}
     <div class="table-wrapper">
-        <table style="width:auto" class="data-table table table-sm table-striped
+        <table id="{{ table_id }}" style="width:auto" class="data-table table table-sm table-striped
                 {% if options.full_clickable is defined and options.full_clickable %}table-full-clickable-cell{% endif %}">
             <thead class="">
             <tr>
                 {%- set num_actions = data | numTableActions %}
+                {%- if options.grouped|default(false) %}
+                    <th scope="col" class="group-toggle-column"></th>
+                {%- endif %}
                 {%- set default_sort = 0 %}
                 {%- set default_sort_order = 'asc' %}
                 {%- for key,column in fields %}
                     {%- if column.default_sort|default(false) %}
-                        {%- set default_sort = loop.index0 %}
+                        {%- set default_sort = loop.index0 + (options.grouped|default(false) ? 1 : 0) %}
                         {%- if column.default_sort_order is defined %}
                             {%- set default_sort_order = column.default_sort_order %}
                         {%- endif %}
@@ -118,65 +122,14 @@
             </thead>
             <tbody>
             {%- for row in data %}
-
-                <tr class="{{ row.cssclass|default('') }}"
-                        {%- if row.style is defined %} style="{{ row.style }}"{% endif %}>
-                    {%- for key,column in fields %}
-                        {%- set item = attribute(row.data, key) %}
-
-                        <td
-                           class="{{ item.cssclass|default('') }}{% if key == "status" and 'disabled' not in row.cssclass %} {{ item.value|statusClass() }}{% endif %}"
-                                {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
-                                {%- if item.filterKey is defined and item.filterValue is defined %} data-{{ item.filterKey }}="{{ item.filterValue }}"{% endif %}
-                                {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}
-                                {% if (column.render | default('')) == "entity_id_badge" %}style="text-align: right;" {% endif %}>
-                            {%- if item.link is defined %}<a href="{{ item.link }}" {%- if item.showlink is defined %} class="showlink"{% endif %}>
-                            {%- elseif row.link is defined and not item.toggle_partial is defined %}<a href="{{ row.link }}">{% endif %}
-                            {% if item.toggle_partial is defined %}
-                                {% include 'jury/partials/' ~ item.toggle_partial with item.partial_arguments %}
-                            {% elseif key == "status" %}
-                            {{- (item.value|default(item.default|default('')))|statusIcon -}}
-                            {% elseif key == "country" %}
-                            {{- (item.value|default(item.default|default('')))|countryFlag -}}
-                            {% elseif key == "affiliation_logo" %}
-                            {{- (item.value|default(item.default|default('')))|affiliationLogo(item.title) -}}
-                            {% elseif key == "warning_content" %}
-                            {{- item.value|printWarningContent -}}
-                            {% elseif key == "badges" %}
-                                {% for badge in item.value %}
-                                    {{- badge|problemBadge }}
-                                {% endfor %}
-                            {% elseif (column.render | default('')) == "entity_id_badge" %}
-                            {% if item.value %}{{- item.value|entityIdBadge -}}{% endif %}
-                            {% else %}
-                            {%- if column.raw|default(false) %}{{- (item.value|default(item.default|default('')))|raw -}}{% else %}{{- (item.value|default(item.default|default(''))) -}}{% endif -%}
-                            {% endif %}
-                            {% if item.icon is defined %}<i class="fas fa-{{ item.icon }}"></i>{%- endif %}
-                            {%- if item.link is defined or (row.link is defined and not item.toggle_partial is defined) -%}</a>{% endif %}
-                        </td>
-                    {%- endfor %}
-                    {%- for action in row.actions %}
-
-                        <td>
-                            {%- if action %}
-
-                                <a {% if action.disabled is defined and action.disabled %}class="disabled"{% endif %} {% if action.link is defined %}href="{{ action.link }}"{% endif %} title="{{ action.title }}" {% if action.ajaxModal is defined and action.ajaxModal %}data-ajax-modal{% endif %}>
-                                    <i class="fas fa-{{ action.icon }}"></i>
-                                </a>
-                            {%- endif %}
-
-                        </td>
-                    {%- endfor %}
-
-                </tr>
+                {{ _self.table_row(row, fields, num_actions, options) }}
             {%- endfor %}
-
             </tbody>
         </table>
     </div>
     <script>
         $().ready(function () {
-            $('.data-table').DataTable({
+            $('#{{ table_id }}').DataTable({
                 "paging": false,
                 "retrieve": true,
                 "searching": {{ options.searching | default('true') }},
@@ -188,14 +141,83 @@
                     "searchPlaceholder": "filter table",
                     "search": "_INPUT_",
                 },
-                'aoColumnDefs': [
-                    {aTargets: ['sortable'], bSortable: true},
-                    {aTargets: ['searchable'], bSearchable: true},
-                    {aTargets: ['_all'], bSortable: false, bSearchable: false}
+                "aoColumnDefs": [
+                    { "aTargets": ["sortable"], "bSortable": true },
+                    { "aTargets": ["searchable"], "bSearchable": true },
+                    { "aTargets": ["_all"], "bSortable": false, "bSearchable": false }
                 ],
             });
         });
     </script>
+{% endmacro %}
+
+{% macro table_row(row, fields, num_actions, options, is_child = false, parent_expanded = true) %}
+    <tr class="{{ row.cssclass|default('') }}{% if is_child %} table-row-child table-light{% endif %}{% if row.children|default([]) is not empty %} table-row-parent{% endif %}{% if is_child and not parent_expanded %} d-none{% endif %}"
+            {%- if row.style is defined %} style="{{ row.style }}"{% endif %}
+            {%- if row.id is defined %} data-row-id="{{ row.id }}"{% endif %}
+            {%- if is_child and row.parent_id is defined %} data-row-parent-id="{{ row.parent_id }}"{% endif %}>
+        {%- if options.grouped|default(false) %}
+            <td class="group-toggle-cell">
+                {%- if row.children|default([]) is not empty %}
+                    <span class="group-toggle" data-group-toggle="{{ row.id }}">
+                        <i class="fas fa-chevron-{{ row.expanded|default(false) ? 'down' : 'right' }} group-chevron" id="chevron-{{ row.id }}"></i>
+                    </span>
+                {%- endif %}
+            </td>
+        {%- endif %}
+        {%- for key,column in fields %}
+            {%- set item = attribute(row.data, key) %}
+
+            <td
+                    class="{{ item.cssclass|default('') }}{% if key == "status" and 'disabled' not in row.cssclass %} {{ item.value|statusClass() }}{% endif %}"
+                    {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
+                    {%- if item.filterKey is defined and item.filterValue is defined %} data-{{ item.filterKey }}="{{ item.filterValue }}"{% endif %}
+                    {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}
+                    {% if (column.render | default('')) == "entity_id_badge" %}style="text-align: right;" {% endif %}>
+                {%- if item.link is defined %}<a href="{{ item.link }}" {%- if item.showlink is defined %} class="showlink"{% endif %}>
+                {%- elseif row.link is defined and not item.toggle_partial is defined %}<a href="{{ row.link }}">{% endif %}
+                {% if item.toggle_partial is defined %}
+                    {% include 'jury/partials/' ~ item.toggle_partial with item.partial_arguments %}
+                {% elseif key == "status" %}
+                    {{- (item.value|default(item.default|default('')))|statusIcon -}}
+                {% elseif key == "country" %}
+                    {{- (item.value|default(item.default|default('')))|countryFlag -}}
+                {% elseif key == "affiliation_logo" %}
+                    {{- (item.value|default(item.default|default('')))|affiliationLogo(item.title) -}}
+                {% elseif key == "warning_content" %}
+                    {{- item.value|printWarningContent -}}
+                {% elseif key == "badges" %}
+                    {% for badge in item.value %}
+                        {{- badge|problemBadge }}
+                    {% endfor %}
+                {% elseif (column.render | default('')) == "entity_id_badge" %}
+                    {% if item.value %}{{- item.value|entityIdBadge -}}{% endif %}
+                {% else %}
+                    {%- if column.raw|default(false) %}{{- (item.value|default(item.default|default('')))|raw -}}{% else %}{{- (item.value|default(item.default|default(''))) -}}{% endif -%}
+                {% endif %}
+                {% if item.icon is defined %}<i class="fas fa-{{ item.icon }}"></i>{%- endif %}
+                {%- if item.link is defined or (row.link is defined and not item.toggle_partial is defined) -%}</a>{% endif %}
+            </td>
+        {%- endfor %}
+        {%- for action in row.actions %}
+
+            <td>
+                {%- if action %}
+
+                    <a {% if action.disabled is defined and action.disabled %}class="disabled"{% endif %} {% if action.link is defined %}href="{{ action.link }}"{% endif %} title="{{ action.title }}" {% if action.ajaxModal is defined and action.ajaxModal %}data-ajax-modal{% endif %}>
+                        <i class="fas fa-{{ action.icon }}"></i>
+                    </a>
+                {%- endif %}
+
+            </td>
+        {%- endfor %}
+
+    </tr>
+    {%- if row.children|default([]) is not empty %}
+        {%- for child in row.children %}
+            {{ _self.table_row(child, fields, num_actions, options, true, row.expanded|default(false)) }}
+        {%- endfor %}
+    {%- endif %}
 {% endmacro %}
 
 {% macro collection_scripts() %}
