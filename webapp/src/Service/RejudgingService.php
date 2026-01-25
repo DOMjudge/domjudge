@@ -436,4 +436,69 @@ class RejudgingService
 
         return ['todo' => $todo, 'done' => $done];
     }
+
+    /**
+     * Group repeated rejudgings for display purposes.
+     *
+     * @param array<array<string, mixed>> $rejudgingsTable Flat list of rejudging rows
+     * @return array<array<string, mixed>> Grouped table with parent/child relationships
+     */
+    public function groupRepeatedRejudgings(array $rejudgingsTable): array
+    {
+        // Collect rows by group
+        $groups = [];
+        foreach ($rejudgingsTable as $row) {
+            $groups[$row['repeat_rejudgingid'] ?? $row['rejudgingid']][] = $row;
+        }
+
+        $result = [];
+        $processed = [];
+        foreach ($rejudgingsTable as $row) {
+            $groupId = $row['repeat_rejudgingid'] ?? $row['rejudgingid'];
+            if (isset($processed[$groupId])) {
+                continue;
+            }
+            $processed[$groupId] = true;
+            $groupRows = $groups[$groupId];
+
+            // Standalone rejudging
+            if (count($groupRows) === 1) {
+                $row['id'] = $row['rejudgingid'];
+                $row['is_group_parent'] = false;
+                $row['children'] = [];
+                $row['child_count'] = 0;
+                $result[] = $row;
+                continue;
+            }
+
+            // Sort by ID DESC (latest first)
+            usort($groupRows, fn($a, $b) => $b['rejudgingid'] <=> $a['rejudgingid']);
+
+            // Find original (null repeat_rejudgingid) or fallback to oldest
+            $original = current(array_filter($groupRows, fn($r) => $r['repeat_rejudgingid'] === null))
+                        ?: $groupRows[array_key_last($groupRows)];
+
+            $header = $groupRows[0];
+            $header['id'] = $groupId;
+            $header['is_group_parent'] = true;
+            $header['group_id'] = $groupId;
+            $header['child_count'] = count($groupRows);
+            $header['expanded'] = (bool)array_filter($groupRows, fn($r) => $r['active'] ?? false);
+            $header['data']['rejudgingid']['value'] = $original['rejudgingid'] . '…' . $groupRows[0]['rejudgingid'];
+            $header['data']['rejudgingid']['sortvalue'] = $groupRows[0]['rejudgingid'];
+            $header['data']['starttime']['value'] = $original['data']['starttime']['value'];
+            $header['data']['starttime']['sortvalue'] = $original['data']['starttime']['sortvalue'] ?? null;
+            $header['data']['startuser']['value'] = $original['data']['startuser']['value'];
+
+            foreach ($groupRows as &$child) {
+                $child['id'] = $child['rejudgingid'];
+                $child['parent_id'] = $groupId;
+                $child['is_child'] = true;
+            }
+            $header['children'] = $groupRows;
+            $result[] = $header;
+        }
+
+        return $result;
+    }
 }

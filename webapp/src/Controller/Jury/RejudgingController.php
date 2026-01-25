@@ -156,35 +156,17 @@ class RejudgingController extends BaseController
                 'actions' => [],
                 'link' => $this->generateUrl('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]),
                 'cssclass' => $class,
+                'active' => $rejudging->getEndtime() === null,
                 'sort' => $sort_order,
                 'rejudgingid' => $rejudging->getRejudgingid(),
                 'repeat_rejudgingid' => $rejudging->getRepeatedRejudging()?->getRejudgingid(),
             ];
         }
 
-        // Filter the table to include only the rejudgings without repetition and for rejudgings with repetition the one
-        // with the maximal ID since that is the instance that can be cancelled / applied.
-        $maxid_per_repeatid = [];
-        foreach ($rejudgings_table as $row) {
-            if ($row['repeat_rejudgingid'] === null) {
-                continue;
-            }
-            $repeat_rejudgingid = $row['repeat_rejudgingid'];
-            if (isset($maxid_per_repeatid[$repeat_rejudgingid])) {
-                $maxid_per_repeatid[$repeat_rejudgingid] = max($maxid_per_repeatid[$repeat_rejudgingid], $row['rejudgingid']);
-            } else {
-                $maxid_per_repeatid[$repeat_rejudgingid] = $row['rejudgingid'];
-            }
-        }
-        $filtered_table = [];
-        foreach ($rejudgings_table as $row) {
-            if ($row['repeat_rejudgingid'] === null || $maxid_per_repeatid[$row['repeat_rejudgingid']] === $row['rejudgingid']) {
-                $filtered_table[] = $row;
-            }
-        }
+        $grouped_table = $this->rejudgingService->groupRepeatedRejudgings($rejudgings_table);
 
         $twigData = [
-            'rejudgings' => $filtered_table,
+            'rejudgings' => $grouped_table,
             'table_fields' => $table_fields,
             'refresh' => [
                 'after' => 15,

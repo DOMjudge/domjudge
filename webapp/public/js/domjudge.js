@@ -1607,3 +1607,15 @@ if ('ResizeObserver' in window) {
         monacoObserver.observe(document.body);
     });
 }
+
+// Table group expand/collapse
+$(() => {
+    $('.data-table').on('click', '[data-group-toggle]', function(e) {
+        e.preventDefault();
+        const id = $(this).data('group-toggle');
+        const chevron = $('#chevron-' + id);
+        const expanded = chevron.hasClass('fa-chevron-down');
+        $('[data-row-parent-id="' + id + '"]').toggleClass('d-none', expanded);
+        chevron.toggleClass('fa-chevron-down', !expanded).toggleClass('fa-chevron-right', expanded);
+    });
+});
