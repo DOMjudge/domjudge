@@ -40,7 +40,7 @@ class ExternalSourceWarning
         scale: 9,
         options: ['comment' => 'Time this warning happened last', 'unsigned' => true]
     )]
-    private float $lastTime;
+    private string $lastTime;
 
     #[ORM\Column(options: ['comment' => 'Type of the entity for this warning'])]
     private string $entityType;
@@ -81,14 +81,14 @@ class ExternalSourceWarning
         return $this;
     }
 
-    public function getLastTime(): float
+    public function getLastTime(): string
     {
         return $this->lastTime;
     }
 
-    public function setLastTime(float $lastTime): ExternalSourceWarning
+    public function setLastTime(float|string $lastTime): ExternalSourceWarning
     {
-        $this->lastTime = $lastTime;
+        $this->lastTime = (string)$lastTime;
         return $this;
     }
 
