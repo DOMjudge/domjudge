@@ -269,6 +269,8 @@ class SubmissionController extends BaseController
             ->leftJoin('s.originalSubmission', 'os')
             ->select('s', 'os', 't', 'u', 'p', 'l', 'c', 'f', 'cp', 'ej')
             ->andWhere('s.externalid = :submitid')
+            ->andWhere('s.contest = :contest')
+            ->setParameter('contest', $this->dj->getCurrentContest())
             ->setParameter('submitid', $submitId)
             ->getQuery()
             ->getOneOrNullResult();
