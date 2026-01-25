@@ -108,7 +108,11 @@ class ShadowDifferencesController extends BaseController
             }
         };
 
-        // Build up the verdict matrix.
+        // Build up the verdict matrix and collect score change data.
+        $scoreChanges = [];
+        $hasScoringProblems = false;
+        $maxScore = 0;
+
         foreach ($submissions as $submitid => $submission) {
             /** @var ExternalJudgement|null $externalJudgement */
             $externalJudgement = $submission->getExternalJudgements()->first();
@@ -144,6 +148,30 @@ class ShadowDifferencesController extends BaseController
 
             // Append submitid to list of orig->new verdicts.
             $verdictTable[$externalResult][$localResult][] = $submitid;
+
+            // Collect score change data for scoring problems.
+            $problem = $submission->getProblem();
+            if ($problem->isScoringProblem() && $externalJudgement && $localJudging) {
+                $hasScoringProblems = true;
+                $externalScore = (float)$externalJudgement->getScore();
+                $localScore = (float)$localJudging->getScore();
+                $delta = $localScore - $externalScore;
+                $absDelta = abs($delta);
+                $maxScore = max($maxScore, $externalScore, $localScore);
+
+                $scoreChanges[] = [
+                    'submitId' => $submission->getExternalid(),
+                    'contestId' => $contest->getExternalid(),
+                    'teamName' => $submission->getTeam()->getEffectiveName(),
+                    'teamId' => $submission->getTeam()->getExternalid(),
+                    'problemName' => $problem->getName(),
+                    'problemId' => $problem->getExternalid(),
+                    'oldScore' => $externalScore,
+                    'newScore' => $localScore,
+                    'delta' => $delta,
+                    'absDelta' => $absDelta,
+                ];
+            }
         }
 
         $viewTypes = [0 => 'unjudged local', 1 => 'unjudged external', 2 => 'diff', 3 => 'all'];
@@ -216,6 +244,9 @@ class ShadowDifferencesController extends BaseController
                 'url' => $request->getRequestUri(),
                 'ajax' => true,
             ],
+            'hasScoringProblems' => $hasScoringProblems,
+            'scoreChanges' => $scoreChanges,
+            'maxScore' => $maxScore,
         ];
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;
