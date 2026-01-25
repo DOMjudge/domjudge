@@ -1141,15 +1141,25 @@ class ExternalContestSourceService
             $team->setAffiliation($affiliation);
         }
 
-        if (!empty($data->groupIds[0])) {
-            $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $data->groupIds[0]]);
+        $externalGroupIds = $data->groupIds ?? [];
+        foreach ($team->getCategories() as $category) {
+            $extId = $category->getExternalid();
+            if ($extId !== null && !in_array($extId, $externalGroupIds)) {
+                $team->removeCategory($category);
+            }
+        }
+        foreach ($externalGroupIds as $extId) {
+            $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $extId]);
             if (!$category) {
                 // Category does not exist. Create one with a dummy name so we can continue.
                 $category = new TeamCategory();
-                $category->setName($data->groupIds[0]);
+                $category->setName($extId);
+                $category->setExternalid($extId);
                 $this->em->persist($category);
             }
-            $team->addCategory($category);
+            if (!$team->getCategories()->contains($category)) {
+                $team->addCategory($category);
+            }
         }
 
         $this->removeWarning($event->type, $data->id, ExternalSourceWarning::TYPE_ENTITY_NOT_FOUND);
@@ -1159,7 +1169,6 @@ class ExternalContestSourceService
             'name'                   => $data->formalName ?? $data->name,
             'display_name'           => $data->displayName,
             'affiliation.externalid' => $data->organizationId,
-            'category.externalid'    => $data->groupIds[0] ?? null,
             'icpcid'                 => $data->icpcId,
         ];
         if (isset($data->country)) {
