@@ -84,6 +84,13 @@ class JudgeTask
         return $this->submission?->getExternalid();
     }
 
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('contestid')]
+    #[Serializer\Type('string')]
+    public function getContestId(): ?string
+    {
+        return $this->submission?->getContest()->getExternalid();
+    }
 
     // Note that we rely on the fact here that files with an ID are immutable,
     // so clients are allowed to cache them on disk.

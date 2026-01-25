@@ -19,16 +19,11 @@
 
     <h1>Clarifications</h1>
 
-    {%- if current_contests is empty %}
-
-        <div class="alert alert-danger">No active contests</div>
-    {%- else %}
-
         <div class="float-end">
             <a href="{{ path('jury_html_export_clarifications') }}" target="_blank" class="btn btn-secondary btn-sm">
                 <i class="fas fa-print"></i> Print clarifications
             </a>
-            <a href="{{ path('jury_clarification_new') }}" class="btn btn-primary btn-sm">
+            <a href="{{ path('jury_clarification_new', {'contestId': contestId}) }}" class="btn btn-primary btn-sm">
                 <i class="fas fa-envelope"></i> Send clarification
             </a>
         </div>
@@ -87,12 +82,11 @@
                 {%- include 'jury/partials/clarification_list.html.twig' with {clarifications: generalClarifications, direction: 'to'} %}
             {%- endif %}
         {% endif %}
-    {%- endif %}
 
     <script>
         function doSwitch() {
             // Fallback the queue to all, since it might not be defined.
-            window.location = '{{ path('jury_clarifications', {'queue': 'REPLACE_QUEUE', 'filter': 'REPLACE_FILTER'}) }}'
+            window.location = '{{ path('jury_clarifications', {'contestId': contestId, 'queue': 'REPLACE_QUEUE', 'filter': 'REPLACE_FILTER'}) }}'
                 .replace('REPLACE_QUEUE', $('input[name=queue]:checked').val() || 'all')
                 .replace('REPLACE_FILTER', $('input[name=filter]:checked').val())
                 .replace('&amp;', '&');
@@ -104,7 +98,7 @@
                 var parenttd = $(this).closest('td');
                 var parenttr = $(this).closest('tr');
                 var newname = $(this).closest('label').text().trim();
-                $.post("{{ path('jury_clarification_change_queue', {'clarId': 12345}) }}".replace('12345', $(this).attr('data-clarid')),
+                $.post("{{ path('jury_clarification_change_queue', {'contestId': contestId, 'clarId': 12345}) }}".replace('12345', $(this).attr('data-clarid')),
                     {'queue': $(this).val()})
                     .done(function( data ) {
                         if ( data ) {

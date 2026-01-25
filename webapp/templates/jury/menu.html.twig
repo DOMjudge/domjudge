@@ -12,7 +12,7 @@
 
             {% if is_granted('ROLE_BALLOON') %}
                 <li class="nav-item">
-                    <a class="nav-link{% if current_route == 'jury_balloons' %} active{% endif %}" href="{{ path('jury_balloons') }}">
+                    <a class="nav-link{% if current_route starts with 'jury_balloon' %} active{% endif %}" href="{{ path('jury_balloons_legacy') }}">
                         <i class="fas fa-map-marker-alt"></i> balloons
                         <span class="badge text-bg-info" id="num-alerts-balloons"></span>
                     </a>
@@ -39,13 +39,13 @@
 
             {% if is_granted('ROLE_CLARIFICATION_RW') %}
                 <li class="nav-item">
-                    <a class="nav-link{% if current_route starts with 'jury_clarification' %} active{% endif %}" href="{{ path('jury_clarifications') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications <span class="badge text-bg-info" id="num-alerts-clarifications"></span></a>
+                    <a class="nav-link{% if current_route starts with 'jury_clarification' %} active{% endif %}" href="{{ path('jury_clarifications_legacy') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications <span class="badge text-bg-info" id="num-alerts-clarifications"></span></a>
                 </li>
             {% endif %}
 
             {% if is_granted('ROLE_JURY') %}
                 <li class="nav-item">
-                    <a class="nav-link{% if current_route starts with 'jury_submission' %} active{% endif %}" href="{{ path('jury_submissions') }}"><i class="fas fa-file-code"></i> submissions</a>
+                    <a class="nav-link{% if current_route starts with 'jury_submission' %} active{% endif %}" href="{{ path('jury_submissions_legacy') }}"><i class="fas fa-file-code"></i> submissions</a>
                 </li>
 
                 {% if show_shadow_differences %}

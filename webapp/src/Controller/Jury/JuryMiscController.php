@@ -302,6 +302,7 @@ class JuryMiscController extends BaseController
                 'actualScore' => $actualScore,
                 'expectedScore' => $expectedScore,
                 'contestProblem' => $submission->getContestProblem(),
+                'contest' => $submission->getContest(),
             ];
 
             $hasExpectation = !empty($expectedResults) || $expectedScore !== null;
@@ -375,8 +376,12 @@ class JuryMiscController extends BaseController
     #[Route(path: '/change-contest/{contestId}', name: 'jury_change_contest')]
     public function changeContestAction(Request $request, RouterInterface $router, string $contestId): Response
     {
-        if ($this->isLocalReferer($router, $request)) {
-            $response = new RedirectResponse($request->headers->get('referer'));
+        $referer = $request->headers->get('referer');
+        // When changing to "no contest" (-1), don't redirect to contest-scoped URLs
+        // because the ContestCookieListener would override the cookie to that contest's ID.
+        if ($this->isLocalReferer($router, $request) &&
+            !($contestId === '-1' && str_contains($referer, '/jury/contests/'))) {
+            $response = new RedirectResponse($referer);
         } else {
             $response = $this->redirectToRoute('jury_index');
         }

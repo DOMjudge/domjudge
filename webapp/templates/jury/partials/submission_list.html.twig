@@ -99,9 +99,9 @@
         <tbody>
         {%- for submission in submissions %}
             {%- if rejudging is defined %}
-                {%- set link = path('jury_submission', {submitId: submission.externalid, rejudgingid: rejudging.rejudgingid}) %}
+                {%- set link = path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, rejudgingid: rejudging.rejudgingid}) %}
             {%- else %}
-                {%- set link = path('jury_submission', {submitId: submission.externalid}) %}
+                {%- set link = path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid}) %}
             {%- endif %}
 
             {% if submission.team.affiliation %}
@@ -156,7 +156,7 @@
                     </td>
                 {% endif %}
                 {%- if rejudging is defined %}
-                    <td class="{{ tdExtraClass }}"><a href="{{ path('jury_submission', {submitId: submission.externalid}) }}">
+                    <td class="{{ tdExtraClass }}"><a href="{{ path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid}) }}">
                             {{ submission.oldResult | printValidJuryResult }}
                         </a></td>
                 {%- endif %}
@@ -231,9 +231,9 @@
                     {% if not showExternalResult or not showExternalTestcases %}
                         <td class="{{ tdExtraClass }}">
                             {%- if rejudging is defined %}
-                                {%- set claimLink = path('jury_submission', claimArg | merge({submitId: submission.externalid, rejudgingid: rejudging.rejudgingid})) %}
+                                {%- set claimLink = path('jury_submission', claimArg | merge({contestId: submission.contest.externalid, submitId: submission.externalid, rejudgingid: rejudging.rejudgingid})) %}
                             {%- else %}
-                                {%- set claimLink = path('jury_submission', claimArg | merge({submitId: submission.externalid})) %}
+                                {%- set claimLink = path('jury_submission', claimArg | merge({contestId: submission.contest.externalid, submitId: submission.externalid})) %}
                             {%- endif %}
                             {%- if claim -%}
                                 <a class="btn btn-outline-secondary btn-sm"

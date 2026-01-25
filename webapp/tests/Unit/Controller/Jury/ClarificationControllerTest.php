@@ -20,7 +20,8 @@ class ClarificationControllerTest extends BaseTestCase
         $this->verifyPageResponse('GET', '/jury', 200);
         $link = $this->verifyLinkToURL('Clarifications',
                                        'http://localhost/jury/clarifications');
-        $crawler = $this->client->click($link);
+        $this->client->click($link);
+        $crawler = $this->checkStatusAndFollowRedirect();
 
         $h3s = $crawler->filter('h3')->extract(['_text']);
         self::assertEquals('New requests', $h3s[0]);
@@ -37,7 +38,7 @@ class ClarificationControllerTest extends BaseTestCase
     {
         $this->loadFixture(ClarificationFixture::class);
 
-        $this->verifyPageResponse('GET', '/jury/clarifications', 200);
+        $this->verifyPageResponse('GET', '/jury/contests/demo/clarifications', 200);
         $crawler = $this->getCurrentCrawler();
 
         self::assertSelectorTextContains('h3#newrequests ~ div.table-wrapper', 'Is it necessary to');
@@ -50,7 +51,7 @@ class ClarificationControllerTest extends BaseTestCase
     {
         $this->loadFixture(ClarificationFixture::class);
 
-        $this->verifyPageResponse('GET', '/jury/clarifications', 200);
+        $this->verifyPageResponse('GET', '/jury/contests/demo/clarifications', 200);
         $crawler = $this->getCurrentCrawler();
 
         // General clarification to all.
@@ -67,7 +68,7 @@ class ClarificationControllerTest extends BaseTestCase
         $this->loadFixture(ClarificationFixture::class);
         /** @var Clarification $clar */
         $clar = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Clarification::class)->findOneBy(['body' => 'What is 2+2?']);
-        $this->verifyPageResponse('GET', '/jury/clarifications/' . $clar->getClarid(), 200);
+        $this->verifyPageResponse('GET', '/jury/contests/demo/clarifications/' . $clar->getExternalid(), 200);
 
         /** @var Clarification[] $clarifications */
         $clarifications = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Clarification::class)->findAll();
@@ -86,9 +87,9 @@ class ClarificationControllerTest extends BaseTestCase
      */
     public function testClarificationRequestComposeForm(): void
     {
-        $this->verifyPageResponse('GET', '/jury/clarifications', 200);
+        $this->verifyPageResponse('GET', '/jury/contests/demo/clarifications', 200);
         $link = $this->verifyLinkToURL('Send clarification',
-                                       'http://localhost/jury/clarifications/send');
+                                       'http://localhost/jury/contests/demo/clarifications/send');
 
         $crawler = $this->client->click($link);
 

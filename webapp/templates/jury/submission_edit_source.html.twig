@@ -7,7 +7,7 @@
 
     <h1>
         Edit submission
-        <a href="{{ path('jury_submission', {submitId: submission.externalid}) }}">{{ submission.externalid }}</a>
+        <a href="{{ path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid}) }}">{{ submission.externalid }}</a>
         source files
     </h1>
 
@@ -21,7 +21,7 @@
         {%- endfor %}
 
         <li class="nav-item flex-grow-1 text-end mb-1">
-            <a class="btn btn-success btn-sm" data-ajax-modal data-ajax-modal-after="transferSourceToModal" href="{{ path('jury_submission_edit_source', {submission: submission.submitid}) }}">
+            <a class="btn btn-success btn-sm" data-ajax-modal data-ajax-modal-after="transferSourceToModal" href="{{ path('jury_submission_edit_source', {contestId: submission.contest.externalid, submission: submission.externalid}) }}">
                 <i class="fas fa-cloud-upload-alt"></i> Submit
             </a>
         </li>

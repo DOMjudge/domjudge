@@ -188,7 +188,7 @@ $(function() {
                           {% for j in delayed_judgings.data %}
                               {% set id=j.submitexternalid %}
                               <tr>
-                                  {% set link = path('jury_submission', {'submitId': id}) %}
+                                  {% set link = path('jury_submission', {'contestId': contest.externalid, 'submitId': id}) %}
                                   <td scope="row"><a href="{{ link }}">{{ id }}</a></td>
                                   <td><a href="{{ link }}">{{ j.judgingid }}</a></td>
                                   <td><a href="{{ link }}">{{ j.submittime | printtime }}</a></td>

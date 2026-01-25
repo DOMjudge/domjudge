@@ -80,7 +80,7 @@
     <script>
         $(function () {
             $('input[name=viewtype]').on('change', function () {
-                window.location = '{{ path('jury_submissions', {'view': 'REPLACE_ME'}) }}'.replace('REPLACE_ME', $(this).val());
+                window.location = '{{ path('jury_submissions', {'contestId': contestId, 'view': 'REPLACE_ME'}) }}'.replace('REPLACE_ME', $(this).val());
             });
 
             $('#filter-toggle').on('change', function () {

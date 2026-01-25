@@ -58,7 +58,7 @@
                                     </button>
                                 </span>
                                 <span class="clarification-subject-form" data-current-selected-subject="{{ clar.categoryid }}" data-clarification-id="{{ clar.externalid }}">
-                                    <form action="{{ path('jury_clarification_change_subject', {'clarId': clar.externalid }) }}" method="post" class="d-flex">
+                                    <form action="{{ path('jury_clarification_change_subject', {'contestId': contestId, 'clarId': clar.externalid }) }}" method="post" class="d-flex">
                                         <select name="subject" class="subject form-select form-select-sm w-auto" id="subselect">
                                             {% for contest,subject in subjects %}
                                                 <optgroup label="{{ contest }}">
@@ -92,7 +92,7 @@
                                     <button class="btn btn-sm btn-link clarification-queue-change-button"><i class="far fa-edit" title="Change queue"></i></button>
                                 </span>
                                 <span class="clarification-queue-form" data-current-selected-queue="{{ clar.queueid }}" data-clarification-id="{{ clar.externalid }}">
-                                    <form action="{{ path('jury_clarification_change_queue', {'clarId': clar.externalid }) }}" class="d-flex" method="post">
+                                    <form action="{{ path('jury_clarification_change_queue', {'contestId': contestId, 'clarId': clar.externalid }) }}" class="d-flex" method="post">
                                         <select name="queue" class="queue form-select w-auto form-select-sm" id="qselect">
                                             <option value="unassigned">Unassigned issues</option>
                                             {% for qid,queue in queues %}
@@ -125,7 +125,7 @@
                 </div>
 
                 <div class="col-sm text-center">
-                    <form action="{{ path('jury_clarification_claim', {'clarId': origclar.externalid}) }}" method="post">
+                    <form action="{{ path('jury_clarification_claim', {'contestId': contestId, 'clarId': origclar.externalid}) }}" method="post">
                         {% if claimed %}
                             {% if origclar.jurymember_is_me %}
                                 <button class="btn btn-sm btn-outline-success" name="claimed" value="0" type="submit"><i class="fas fa-lock-open"></i> unclaim</button>
@@ -141,7 +141,7 @@
                 </div>
 
                 <div class="col-sm text-end">
-                    <form action="{{ path('jury_clarification_set_answered', {'clarId': origclar.externalid}) }}" method="post">
+                    <form action="{{ path('jury_clarification_set_answered', {'contestId': contestId, 'clarId': origclar.externalid}) }}" method="post">
                         {% if origclar.answered %}
                             <button class="btn btn-sm btn-outline-warning" name="answered" value="0" type="submit">
                                 <i class="fas fa-times"></i> set unanswered

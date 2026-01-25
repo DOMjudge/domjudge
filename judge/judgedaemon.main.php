@@ -1398,7 +1398,7 @@ class JudgeDaemon
         }
 
         // Get the source code from the DB and store in local file(s).
-        $url = sprintf('judgehosts/get_files/source/%s', $judgeTask['submitid']);
+        $url = sprintf('judgehosts/get_files/source/%s/%s', $judgeTask['contestid'], $judgeTask['submitid']);
         $sources = $this->request($url, 'GET');
         $sources = dj_json_decode($sources);
         $files = [];

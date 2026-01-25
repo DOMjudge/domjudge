@@ -19,7 +19,7 @@ class BalloonControllerTest extends BaseTestCase
         $this->roles = [$role];
         $this->logOut();
         $this->logIn();
-        $this->verifyPageResponse('GET', '/jury/balloons', 403);
+        $this->verifyPageResponse('GET', '/jury/contests/demo/balloons', 403);
     }
 
     /**
@@ -32,7 +32,7 @@ class BalloonControllerTest extends BaseTestCase
         $this->roles = [$role];
         $this->logOut();
         $this->logIn();
-        $this->verifyPageResponse('GET', '/jury/balloons', 200);
+        $this->verifyPageResponse('GET', '/jury/contests/demo/balloons', 200);
         self::assertSelectorExists('h1:contains("Balloons - Demo contest")');
 
         // Test database does not contain balloon info.

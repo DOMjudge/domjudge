@@ -188,7 +188,9 @@
             {{ button(path('jury_team_edit', {'teamId': team.externalid}), 'Edit', 'primary', 'edit') }}
             {{ button(path('jury_team_delete', {'teamId': team.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
         {% endif %}
-        {{ button(path('jury_clarification_new', {'teamto': team.externalid}), 'Send message', 'secondary', 'envelope') }}
+        {% if currentContest %}
+            {{ button(path('jury_clarification_new', {'contestId': currentContest.externalid, 'teamto': team.externalid}), 'Send message', 'secondary', 'envelope') }}
+        {% endif %}
         {% include 'jury/partials/rejudge_form.html.twig' with {table: 'team', id: team.externalid, buttonClass: 'btn-secondary'} %}
     </div>
 

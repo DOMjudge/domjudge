@@ -154,7 +154,7 @@ jobs:
           curl $CURLOPTS "http://localhost/domjudge/jury/change-contest/${{ matrix.contest }}" -o /dev/null
           # Send a general clarification to later test if we see the event.
           curl $CURLOPTS -F "sendto=" -F "problem=1-" -F "bodytext=Testing" -F "submit=Send" \
-               "http://localhost/domjudge/jury/clarifications/send" -o /dev/null
+               "http://localhost/domjudge/jury/contests/${{ matrix.contest }}/clarifications/send" -o /dev/null
           curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
           NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked"     | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
           NUMVERIFIED=$(   curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')

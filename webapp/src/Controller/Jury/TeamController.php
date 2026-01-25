@@ -60,6 +60,7 @@ class TeamController extends BaseController
             ->getQuery()->getResult();
 
         $contests                       = $this->dj->getCurrentContests();
+        $currentContest                 = $this->dj->getCurrentContest();
         $num_open_to_all_teams_contests = $this->em->createQueryBuilder()
             ->select('count(c.cid) as num_contests')
             ->from(Contest::class, 'c')
@@ -170,13 +171,16 @@ class TeamController extends BaseController
                     'ajaxModal' => true,
                 ];
             }
-            $teamactions[] = [
-                'icon' => 'envelope',
-                'title' => 'send clarification to this team',
-                'link' => $this->generateUrl('jury_clarification_new', [
-                    'teamto' => $t->getExternalid(),
-                ])
-            ];
+            if ($currentContest) {
+                $teamactions[] = [
+                    'icon' => 'envelope',
+                    'title' => 'send clarification to this team',
+                    'link' => $this->generateUrl('jury_clarification_new', [
+                        'contestId' => $currentContest->getExternalid(),
+                        'teamto' => $t->getExternalid(),
+                    ])
+                ];
+            }
 
             // Add the rest of our row data for the table.
 
@@ -323,6 +327,7 @@ class TeamController extends BaseController
         $data['submissionCounts']   = $submissionCounts;
         $data['showExternalResult'] = $this->dj->shadowMode();
         $data['showContest']        = count($this->dj->getCurrentContests(honorCookie: true)) > 1;
+        $data['currentContest']     = $currentContest;
 
         if ($request->isXmlHttpRequest()) {
             $data['displayRank'] = true;

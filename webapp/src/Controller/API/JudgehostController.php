@@ -1242,7 +1242,28 @@ class JudgehostController extends AbstractFOSRestController
     }
 
     /**
-     * Get files for a given type and id.
+     * Get source files for a given contest and submission id.
+     * @throws NonUniqueResultException
+     * @return JudgehostFile[]
+     */
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
+    #[Rest\Get(path: '/get_files/source/{contestId}/{id}')]
+    #[OA\Response(
+        response: 200,
+        description: 'The source files for the submission.',
+        content: new OA\JsonContent(ref: new Model(type: JudgehostFile::class))
+    )]
+    public function getSourceFilesAction(
+        #[OA\PathParameter(description: 'The contest external ID')]
+        string $contestId,
+        #[OA\PathParameter(description: 'The submission external ID')]
+        string $id
+    ): array {
+        return $this->getSourceFiles($contestId, $id);
+    }
+
+    /**
+     * Get files for a given type and id (non-source types).
      * @throws NonUniqueResultException
      * @return JudgehostFile[]
      */
@@ -1250,7 +1271,7 @@ class JudgehostController extends AbstractFOSRestController
     #[Rest\Get(path: '/get_files/{type}/{id}')]
     #[OA\Response(
         response: 200,
-        description: 'The files for the submission, testcase or script.',
+        description: 'The files for the testcase or script.',
         content: new OA\JsonContent(ref: new Model(type: JudgehostFile::class))
     )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
@@ -1260,7 +1281,7 @@ class JudgehostController extends AbstractFOSRestController
         string $id
     ): array {
         return match ($type) {
-            'source' => $this->getSourceFiles($id),
+            'source' => throw new BadRequestHttpException('Source files require contest ID. Use /get_files/source/{contestId}/{id}'),
             'testcase' => $this->getTestcaseFiles($id),
             'compare', 'compile', 'debug', 'run' => $this->getExecutableFiles($id),
             default => throw new BadRequestHttpException('Unknown type requested.'),
@@ -1293,10 +1314,9 @@ class JudgehostController extends AbstractFOSRestController
             throw new BadRequestHttpException('Unknown judge task with id ' . $judgetaskid);
         }
 
-        $submission = $this->em->getRepository(Submission::class)
-            ->findByExternalId($judgeTask->getSubmitid());
+        $submission = $judgeTask->getSubmission();
         if (!$submission) {
-            throw new HttpException(500, 'Unknown submission with submitid ' . $judgeTask->getSubmitid());
+            throw new HttpException(500, 'Unknown submission for judge task ' . $judgetaskid);
         }
 
         $language = $submission->getLanguage();
@@ -1357,10 +1377,9 @@ class JudgehostController extends AbstractFOSRestController
             throw new BadRequestHttpException('Unknown judge task with id ' . $judgetaskid);
         }
 
-        $submission = $this->em->getRepository(Submission::class)
-            ->findByExternalId($judgeTask->getSubmitid());
+        $submission = $judgeTask->getSubmission();
         if (!$submission) {
-            throw new BadRequestHttpException('Unknown submission with submitid ' . $judgeTask->getSubmitid());
+            throw new BadRequestHttpException('Unknown submission for judge task ' . $judgetaskid);
         }
 
         $language = $submission->getLanguage();
@@ -1437,21 +1456,30 @@ class JudgehostController extends AbstractFOSRestController
     /**
      * @return JudgehostFile[]
      */
-    private function getSourceFiles(string $id): array
+    private function getSourceFiles(string $contestId, string $id): array
     {
+        // First find the contest by external ID
+        $contest = $this->em->getRepository(Contest::class)
+            ->findOneBy(['externalid' => $contestId]);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID \'%s\' not found', $contestId));
+        }
+
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(SubmissionFile::class, 'f')
             ->select('f')
             ->join('f.submission', 's')
             ->andWhere('s.externalid = :submitid')
+            ->andWhere('s.contest = :contest')
             ->setParameter('submitid', $id)
+            ->setParameter('contest', $contest)
             ->orderBy('f.ranknumber');
 
         /** @var SubmissionFile[] $files */
         $files = $queryBuilder->getQuery()->getResult();
 
         if (empty($files)) {
-            throw new NotFoundHttpException(sprintf('Source code for submission with ID \'%s\' not found', $id));
+            throw new NotFoundHttpException(sprintf('Source code for submission with ID \'%s\' in contest \'%s\' not found', $id, $contestId));
         }
 
         $result = [];
