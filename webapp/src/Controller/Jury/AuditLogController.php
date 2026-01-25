@@ -113,7 +113,7 @@ class AuditLogController extends AbstractController
             case 'balloon':
                 return $this->generateUrl('jury_balloons');
             case 'clarification':
-                return $this->generateUrl('jury_clarification', ['id' => $id]);
+                return $this->generateUrl('jury_clarification_legacy', ['id' => $id]);
             case 'configuration':
                 return $this->generateUrl('jury_config');
             case 'contest':
@@ -138,7 +138,7 @@ class AuditLogController extends AbstractController
             case 'problem':
                 return $this->generateUrl('jury_problem', ['probId' => $id]);
             case 'submission':
-                return $this->generateUrl('jury_submission', ['submitId' => $id]);
+                return $this->generateUrl('jury_submission_legacy', ['submitId' => $id]);
             case 'team':
                 return $this->generateUrl('jury_team', ['teamId' => $id]);
             case 'team_affiliation':

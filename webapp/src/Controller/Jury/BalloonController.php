@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Entity\Contest;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
@@ -20,7 +21,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_BALLOON')"))]
-#[Route(path: '/jury/balloons')]
+#[Route(path: '/jury')]
 class BalloonController extends AbstractController
 {
     public function __construct(
@@ -50,13 +51,22 @@ class BalloonController extends AbstractController
         return false;
     }
 
-    #[Route(path: '', name: 'jury_balloons')]
-    public function indexAction(BalloonService $balloonService): Response
+    // Legacy route - redirects to contest-scoped route
+    #[Route(path: '/balloons', name: 'jury_balloons_legacy')]
+    public function legacyIndexAction(): Response
     {
         $contest = $this->dj->getCurrentContest();
-        if (is_null($contest)) {
-            return $this->render('jury/balloons.html.twig');
+        if (!$contest) {
+            $this->addFlash('warning', 'Please select a contest first to view balloons.');
+            return $this->redirectToRoute('jury_index');
         }
+        return $this->redirectToRoute('jury_balloons', ['contestId' => $contest->getExternalid()]);
+    }
+
+    #[Route(path: '/contests/{contestId}/balloons', name: 'jury_balloons')]
+    public function indexAction(string $contestId, BalloonService $balloonService): Response
+    {
+        $contest = $this->dj->getContestByExternalId($contestId);
 
         $balloons_table = $balloonService->collectBalloonTable($contest);
         $teamSummary = $balloonService->collectTeamBalloonSummary($balloons_table);
@@ -72,6 +82,7 @@ class BalloonController extends AbstractController
                     'icon' => 'running',
                     'title' => 'mark balloon as done',
                     'link' => $this->generateUrl('jury_balloons_setdone', [
+                        'contestId' => $contestId,
                         'balloonId' => $element['data']['balloonid'],
                     ])]];
             }
@@ -154,9 +165,10 @@ class BalloonController extends AbstractController
         $defaultCategories = array_column($defaultCategories, "externalid");
 
         return $this->render('jury/balloons.html.twig', [
+            'contestId' => $contestId,
             'refresh' => [
                 'after' => 60,
-                'url' => $this->generateUrl('jury_balloons'),
+                'url' => $this->generateUrl('jury_balloons', ['contestId' => $contestId]),
                 'ajax' => true
             ],
             'isfrozen' => isset($contest->getState()->frozen),
@@ -171,20 +183,22 @@ class BalloonController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/{balloonId}/done', name: 'jury_balloons_setdone')]
-    public function setDoneAction(int $balloonId, BalloonService $balloonService): RedirectResponse
+    #[Route(path: '/contests/{contestId}/balloons/{balloonId}/done', name: 'jury_balloons_setdone')]
+    public function setDoneAction(string $contestId, int $balloonId, BalloonService $balloonService): RedirectResponse
     {
+        $this->dj->getContestByExternalId($contestId); // Validate contest exists
         $balloonService->setDone($balloonId);
 
-        return $this->redirectToRoute("jury_balloons");
+        return $this->redirectToRoute("jury_balloons", ['contestId' => $contestId]);
     }
 
-    #[Route(path: '/done', name: 'jury_balloons_setdone_multiple', methods: ['POST'])]
-    public function setMultipleDoneAction(Request $request, BalloonService $balloonService): RedirectResponse
+    #[Route(path: '/contests/{contestId}/balloons/done', name: 'jury_balloons_setdone_multiple', methods: ['POST'])]
+    public function setMultipleDoneAction(Request $request, string $contestId, BalloonService $balloonService): RedirectResponse
     {
+        $this->dj->getContestByExternalId($contestId); // Validate contest exists
         $balloonIds = $request->request->all('balloonIds');
         $balloonService->setDone($balloonIds);
 
-        return $this->redirectToRoute("jury_balloons");
+        return $this->redirectToRoute("jury_balloons", ['contestId' => $contestId]);
     }
 }

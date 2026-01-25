@@ -11,11 +11,6 @@
 
 {% block content %}
 
-    {% if current_contest is null %}
-        <h1>Balloons</h1>
-        <p class="nodata">No active contest</p>
-    {% else %}
-
     <h1>Balloons - {{ current_contest.name }}</h1>
 
     {% if isfrozen %}
@@ -76,12 +71,10 @@
     <div data-ajax-refresh-target data-ajax-refresh-after="process_balloons_filter">
         {%- include 'jury/partials/balloon_list.html.twig' %}
     </div>
-    {% endif %}
 
 {% endblock %}
 
 {% block extrafooter %}
-    {% if current_contest is not null %}
         <script>
             const selectedBalloons = new Set();
             function updateMarkMultipleDone() {
@@ -203,5 +196,4 @@
                 window.process_balloons_filter();
             });
         </script>
-    {% endif %}
 {% endblock %}

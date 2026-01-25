@@ -46,10 +46,10 @@
             <div class="card-body">
                 <ul>
                     {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_BALLOON') %}
-                        <li><a href="{{ path('jury_balloons') }}">Balloon Status</a></li>
+                        <li><a href="{{ path('jury_balloons_legacy') }}">Balloon Status</a></li>
                     {% endif %}
                     {% if is_granted('ROLE_CLARIFICATION_RW') %}
-                        <li><a href="{{ path('jury_clarifications') }}">Clarifications</a></li>
+                        <li><a href="{{ path('jury_clarifications_legacy') }}">Clarifications</a></li>
                     {% endif %}
                     {% if is_granted('ROLE_JURY') %}
                         <li><a href="{{ path('jury_internal_errors') }}">Internal Errors</a></li>
@@ -61,7 +61,7 @@
                         <li><a href="{{ path('jury_rejudgings') }}">Rejudgings</a></li>
                         <li><a href="{{ path('jury_scoreboard') }}">Scoreboard</a></li>
                         <li><a href="{{ path('analysis_index') }}">Statistics/Analysis</a></li>
-                        <li><a href="{{ path('jury_submissions') }}">Submissions</a></li>
+                        <li><a href="{{ path('jury_submissions_legacy') }}">Submissions</a></li>
                         {% if is_granted('ROLE_ADMIN') %}
                             <li><a href="{{ path('jury_queue_tasks') }}">Queue tasks</a></li>
                         {% endif %}

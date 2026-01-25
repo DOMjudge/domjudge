@@ -6,10 +6,6 @@
         {% if shadowMode() %}
             <th scope="col">external ID</th>
         {% endif %}
-        {%- if current_contest is null and current_contests | length > 1 %}
-            <th scope="col">contest</th>
-        {%- endif %}
-
         <th scope="col">time</th>
         <th scope="col" colspan="2">{{ direction }}</th>
         <th scope="col">subject</th>
@@ -24,14 +20,10 @@
     </thead>
     <tbody>
     {%- for clarification in clarifications %}
-        {%- set link = path('jury_clarification', {id: clarification.externalid}) %}
+        {%- set link = path('jury_clarification', {contestId: clarification.contest.externalid, id: clarification.externalid}) %}
 
         <tr>
             <td><a href="{{ link }}">{{ clarification.externalid }}</a></td>
-            {%- if current_contest is null and current_contests | length > 1 %}
-                <td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>
-            {%- endif %}
-
             <td data-order="{{ clarification.submittime }}"><a href="{{ link }}">{{ clarification.submittime | printtime(null, clarification.contest) }}</a></td>
             {%- if clarification.sender is null %}
                 {%- set recipientBadge = '' %}
@@ -90,7 +82,7 @@
             {%- endif %}
 
             <td><a href="{{ link }}">{{ answered | raw }}</a></td>
-            <td><form action="{{ path('jury_clarification_claim', {clarId: clarification.externalid}) }}" method="post">
+            <td><form action="{{ path('jury_clarification_claim', {contestId: clarification.contest.externalid, clarId: clarification.externalid}) }}" method="post">
                 {%- if claim and clarification.sender -%}
                     <button name="claimed" value="1"
                        class="btn btn-outline-success btn-sm">Claim</button>

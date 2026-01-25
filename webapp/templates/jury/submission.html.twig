@@ -191,13 +191,13 @@
             <h1 style="display: inline;">
                 Submission {{ submission.externalid }}
                 {% if submission.originalSubmission %}
-                    {% set origSubmissionUrl = path('jury_submission', {submitId: submission.originalSubmission.externalid}) %}
+                    {% set origSubmissionUrl = path('jury_submission', {contestId: submission.originalSubmission.contest.externalid, submitId: submission.originalSubmission.externalid}) %}
                     (resubmit of <a href="{{ origSubmissionUrl }}">{{ submission.originalSubmission.externalid }}</a>)
                 {% endif %}
                 {% if submission.resubmissions is not empty %}
                     (resubmitted as
                     {%- for resubmission in submission.resubmissions -%}
-                        {% set resubmissionUrl = path('jury_submission', {submitId: resubmission.externalid}) %}
+                        {% set resubmissionUrl = path('jury_submission', {contestId: resubmission.contest.externalid, submitId: resubmission.externalid}) %}
                         <a href="{{ resubmissionUrl }}">{{ resubmission.externalid }}</a>
                         {%- if not loop.last -%},{%- endif -%}
                     {%- endfor -%}
@@ -215,7 +215,7 @@
                         {% else %}
                             {% set action = 'unignore' %}
                         {% endif %}
-                        <form action="{{ path('jury_submission_update_status', {'submitId': submission.externalid}) }}" method="post"
+                        <form action="{{ path('jury_submission_update_status', {'contestId': submission.contest.externalid, 'submitId': submission.externalid}) }}" method="post"
                               style="display: inline; ">
                             <input type="hidden" name="valid" value="{% if submission.valid %}0{% else %}1{% endif %}"/>
                             <input type="submit" class="btn btn-outline-secondary btn-sm"
@@ -246,7 +246,7 @@
                     </span>
                 {% endif %}
 
-                {% if current_contest.cid != submission.contest.cid %}
+                {% if current_contest and current_contest.cid != submission.contest.cid %}
                     <span>
                         <i class="fas fa-trophy" title="Contest:"></i>
                         <a href="{{ path('jury_contest', {'contestId': submission.contest.externalid}) }}">
@@ -290,7 +290,7 @@
 
                 <span>
                     <i class="fas fa-code" title="Source code:"></i>
-                    <a href="{{ path('jury_submission_source', {submission: submission.externalid}) }}">
+                    <a href="{{ path('jury_submission_source', {contestId: submission.contest.externalid, submission: submission.externalid}) }}">
                         View {{ submission.files | printFiles }}
                     </a>
                 </span>
@@ -384,7 +384,7 @@
             </thead>
             <tbody>
             {% for judging in judgings %}
-                {% set link = path('jury_submission', {submitId: submission.externalid, jid: judging.judgingid}) %}
+                {% set link = path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: judging.judgingid}) %}
                 <tr {% if not judging.valid %}class="disabled"{% endif %}>
                     <td>
                         <a href="{{ link }}">
@@ -482,7 +482,7 @@
                             {%- endif -%}
                         {% endif %}
                         {%- if lastJudging is not null -%}
-                            {% set lastSubmissionLink = path('jury_submission', {submitId: lastSubmission.externalid}) %}{#-
+                            {% set lastSubmissionLink = path('jury_submission', {contestId: lastSubmission.contest.externalid, submitId: lastSubmission.externalid}) %}{#-
                         -#}<span class="lastresult">
                             (<a href="{{ lastSubmissionLink }}">{{ lastSubmission.externalid }}</a>: {{ lastJudging.result | printResult }}){#-
                         -#}</span>
@@ -547,7 +547,7 @@
                     {% endif %}
                 &nbsp;
                 {% if not selectedJudging.verified %}
-                    <form action="{{ path('jury_submission', {submitId: submission.externalid, jid: selectedJudging.judgingid}) }}"
+                    <form action="{{ path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: selectedJudging.judgingid}) }}"
                           method="post" style="display: inline;">
                         {% if selectedJudging.juryMember is not empty %}
                             (claimed by {{ selectedJudging.juryMember }})
@@ -563,7 +563,7 @@
                 &nbsp;
                 {% if selectedJudging is null or selectedJudging.result is empty %}
                     {%- if not selectedJudging or not selectedJudging.started %}
-                        <a href="{{ path('jury_submission_create_tasks', {'submitId': submission.externalid}) }}">
+                        <a href="{{ path('jury_submission_create_tasks', {'contestId': submission.contest.externalid, 'submitId': submission.externalid}) }}">
                             <button class="btn btn-sm btn-outline-secondary" >
                                 <i class="fas fa-gavel"></i>
                                 Judge submission
@@ -842,7 +842,7 @@
                                 </button>
                             </a>
                             {% if run.firstJudgingRun is not null %}
-                                <a href="{{ path('jury_submission_team_output', {'submission': submission.externalid, 'run': run.firstJudgingRun.runid, 'contest': submission.contest.externalid}) }}">
+                                <a href="{{ path('jury_submission_team_output', {'contestId': submission.contest.externalid, 'submission': submission.externalid, 'run': run.firstJudgingRun.runid}) }}">
                                     <button class="btn btn-sm btn-outline-secondary" >
                                         <i class="fas fa-download"></i>
                                         {% if runsOutput[runIdx].is_output_run_truncated_in_db %}

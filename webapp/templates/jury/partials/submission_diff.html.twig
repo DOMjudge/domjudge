@@ -16,11 +16,11 @@
         {%- endfor %}
 
         <li class="nav-item flex-grow-1 text-end mb-1">
-            <a class="download btn btn-secondary btn-sm" href="{{ path('jury_submission_source', {submission: submission.externalid, fetch: 0}) }}">
+            <a class="download btn btn-secondary btn-sm" href="{{ path('jury_submission_source', {contestId: submission.contest.externalid, submission: submission.externalid, fetch: 0}) }}">
                 <i class="fas fa-download"></i> Download
             </a>
             {% if allowEdit %}
-                <a class="edit btn btn-secondary btn-sm" href="{{ path('jury_submission_edit_source', {submission: submission.externalid, rank: 0}) }}">
+                <a class="edit btn btn-secondary btn-sm" href="{{ path('jury_submission_edit_source', {contestId: submission.contest.externalid, submission: submission.externalid, rank: 0}) }}">
                     <i class="fas fa-pencil-alt"></i> Edit
                 </a>
             {% endif %}
@@ -29,7 +29,7 @@
                 <select class="diff-select btn btn-secondary btn-sm form-select-sm text-start" aria-label="Submission to diff against" {%- if otherSubmissions is empty %}disabled="disabled" aria-disabled="true"{%- endif %}>
                     <option value="" data-tag="no-diff">No diff</option>
                     {%- for other in otherSubmissions %}
-                        <option value="{{ other.submitid }}" data-url="{{ path('jury_submission', {submitId: other.submitid}) }}" {%- if other.tag %} data-tag="{{ other.tag }}" {%- endif %}>
+                        <option value="{{ other.submitid }}" data-url="{{ path('jury_submission', {contestId: submission.contest.externalid, submitId: other.submitid}) }}" {%- if other.tag %} data-tag="{{ other.tag }}" {%- endif %}>
                             {{ other.submitid }} {%- if other.tag %} ({{ other.tag }}) {%- endif %}
                         </option>
                     {%- endfor %}

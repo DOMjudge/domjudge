@@ -19,8 +19,8 @@
                     <tr>
                         <th>Submission</th>
                         <td>
-                            <a href="{{ path('jury_submission', {'submitId': firstJudgeTask.firstJudgingRun.judging.submission.submitid }) }}">
-                                {{ firstJudgeTask.firstJudgingRun.judging.submission.submitid }}
+                            <a href="{{ path('jury_submission', {'contestId': firstJudgeTask.firstJudgingRun.judging.submission.contest.externalid, 'submitId': firstJudgeTask.firstJudgingRun.judging.submission.externalid }) }}">
+                                {{ firstJudgeTask.firstJudgingRun.judging.submission.externalid }}
                             </a>
                         </td>
                     </tr>

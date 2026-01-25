@@ -103,6 +103,9 @@ class ControllerRolesTraversalTest extends BaseTestCase
                 self::assertTrue(str_contains($response->headers->get('location'), '/jury/external-contest/manage'));
             } elseif (str_contains($url, '/jury/shadow-differences')) {
                 self::assertTrue(str_contains($response->headers->get('location'), '/jury'));
+            } elseif (str_contains($url, '/jury/submissions') || str_contains($url, '/jury/clarifications') || str_contains($url, '/jury/balloons')) {
+                // Legacy routes redirect to contest-scoped routes
+                self::assertTrue(str_contains($response->headers->get('location'), '/jury/contests/'));
             } else {
                 self::assertTrue(str_contains($response->headers->get('location'), '/public'));
             }
@@ -223,7 +226,9 @@ class ControllerRolesTraversalTest extends BaseTestCase
         $this->client->request('GET', $url);
         $response = $this->client->getResponse();
         self::assertNotEquals(500, $response->getStatusCode(), sprintf('Failed at %s', $url));
-        if ($dropdown && !str_contains($url, '/public')) {
+        // Contest-scoped URLs (e.g., /jury/contests/demo/...) have the contest set from the URL,
+        // so we don't expect "no contest" in the dropdown for those.
+        if ($dropdown && !str_contains($url, '/public') && !str_contains($url, '/jury/contests/')) {
             try {
                 self::assertSelectorExists('a#navbarDropdownContests:contains("no contest")', "Failed at: " . $url);
             } catch (\Exception $e) {

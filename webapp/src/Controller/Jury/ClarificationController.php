@@ -25,7 +25,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_CLARIFICATION_RW')]
-#[Route(path: '/jury/clarifications')]
+#[Route(path: '/jury')]
 class ClarificationController extends BaseController
 {
 
@@ -39,23 +39,31 @@ class ClarificationController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
-    #[Route(path: '', name: 'jury_clarifications')]
+    // Legacy route - redirects to contest-scoped route
+    #[Route(path: '/clarifications', name: 'jury_clarifications_legacy')]
+    public function legacyIndexAction(Request $request): Response
+    {
+        $contest = $this->dj->getCurrentContest();
+        if (!$contest) {
+            $this->addFlash('warning', 'Please select a contest first to view clarifications.');
+            return $this->redirectToRoute('jury_index');
+        }
+        return $this->redirectToRoute('jury_clarifications', array_merge(
+            ['contestId' => $contest->getExternalid()],
+            $request->query->all()
+        ));
+    }
+
+    #[Route(path: '/contests/{contestId}/clarifications', name: 'jury_clarifications')]
     public function indexAction(
+        string $contestId,
         #[MapQueryParameter(name: 'filter')]
         ?string $currentFilter = null,
         #[MapQueryParameter(name: 'queue')]
         string $currentQueue = 'all',
     ): Response {
+        $contest = $this->dj->getContestByExternalId($contestId);
         $categories = $this->config->get('clar_categories');
-        if ($contest = $this->dj->getCurrentContest()) {
-            $contestIds = [$contest->getExternalid()];
-        } else {
-            $contestIds = array_keys($this->dj->getCurrentContests());
-            // cid '' will never happen, but otherwise the array is empty and that is not supported.
-            if (empty($contestIds)) {
-                $contestIds = [''];
-            }
-        }
 
         if ($currentFilter === 'all') {
             $currentFilter = null;
@@ -67,8 +75,8 @@ class ClarificationController extends BaseController
             ->innerJoin('clar.contest', 'c')
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = clar.contest')
             ->select('clar', 'p', 'cp')
-            ->andWhere('c.externalid in (:contestIds)')
-            ->setParameter('contestIds', $contestIds)
+            ->andWhere('c.externalid = :contestId')
+            ->setParameter('contestId', $contestId)
             ->orderBy('clar.submittime', 'DESC')
             ->addOrderBy('clar.clarid', 'DESC');
 
@@ -109,6 +117,7 @@ class ClarificationController extends BaseController
         $queues = $this->config->get('clar_queues');
 
         return $this->render('jury/clarifications.html.twig', [
+            'contestId' => $contestId,
             'newClarifications' => $newClarifications,
             'oldClarifications' => $oldClarifications,
             'generalClarifications' => $generalClarifications,
@@ -119,12 +128,39 @@ class ClarificationController extends BaseController
         ]);
     }
 
-    #[Route(path: '/{id}', name: 'jury_clarification')]
-    public function viewAction(Request $request, string $id): Response
+    // Legacy route - redirects to contest-scoped route
+    #[Route(path: '/clarifications/{id}', name: 'jury_clarification_legacy')]
+    public function legacyViewAction(Request $request, string $id): Response
     {
-        $clarification = $this->em->getRepository(Clarification::class)->findByExternalId($id);
+        // If "no contest" is explicitly selected, redirect to index
+        if ($this->dj->getCurrentContestCookie() === '-1') {
+            $this->addFlash('warning', 'Please select a contest first to view clarifications.');
+            return $this->redirectToRoute('jury_index');
+        }
+
+        $clarification = $this->em->getRepository(Clarification::class)->findOneBy(['externalid' => $id]);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %s not found', $id));
+        }
+        return $this->redirectToRoute('jury_clarification', array_merge(
+            [
+                'contestId' => $clarification->getContest()->getExternalid(),
+                'id' => $id,
+            ],
+            $request->query->all()
+        ));
+    }
+
+    #[Route(path: '/contests/{contestId}/clarifications/{id}', name: 'jury_clarification')]
+    public function viewAction(Request $request, string $contestId, string $id): Response
+    {
+        $contest = $this->dj->getContestByExternalId($contestId);
+        $clarification = $this->em->getRepository(Clarification::class)->findOneBy([
+            'externalid' => $id,
+            'contest' => $contest,
+        ]);
+        if (!$clarification) {
+            throw new NotFoundHttpException(sprintf('Clarification with ID %s not found in contest %s', $id, $contestId));
         }
 
         if ($inReplyTo = $clarification->getInReplyTo()) {
@@ -237,24 +273,28 @@ class ClarificationController extends BaseController
             ->select('clar.jury_member')
             ->from(Clarification::class, 'clar')
             ->where('clar.clarid = :clarid')
-            ->setParameter('clarid', $id)
+            ->setParameter('clarid', $clarification->getClarid())
             ->getQuery()
             ->getSingleResult()['jury_member'];
 
+        $parameters['contestId'] = $contestId;
         $parameters['previousNext'] = $this->getPreviousAndNextObjectIds(
             Clarification::class,
             $clarification->getExternalid(),
+            filterOnContest: true,
         );
 
         return $this->render('jury/clarification.html.twig', $parameters);
     }
 
-    #[Route(path: '/send', name: 'jury_clarification_new', priority: 1)]
+    #[Route(path: '/contests/{contestId}/clarifications/send', name: 'jury_clarification_new', priority: 1)]
     public function composeClarificationAction(
         Request $request,
+        string $contestId,
         #[MapQueryParameter]
         ?string $teamto = null,
     ): Response {
+        $contest = $this->dj->getContestByExternalId($contestId);
         $formData = ['recipient' => JuryClarificationType::RECIPIENT_MUST_SELECT];
 
         if ($teamto !== null) {
@@ -269,34 +309,42 @@ class ClarificationController extends BaseController
             return $this->processSubmittedClarification($form);
         }
 
-        return $this->render('jury/clarification_new.html.twig', ['form' => $form->createView()]);
+        return $this->render('jury/clarification_new.html.twig', ['contestId' => $contestId, 'form' => $form->createView()]);
     }
 
-    #[Route(path: '/{clarId}/claim', name: 'jury_clarification_claim')]
-    public function toggleClaimAction(Request $request, string $clarId): Response
+    #[Route(path: '/contests/{contestId}/clarifications/{clarId}/claim', name: 'jury_clarification_claim')]
+    public function toggleClaimAction(Request $request, string $contestId, string $clarId): Response
     {
-        $clarification = $this->em->getRepository(Clarification::class)->findByExternalId($clarId);
+        $contest = $this->dj->getContestByExternalId($contestId);
+        $clarification = $this->em->getRepository(Clarification::class)->findOneBy([
+            'externalid' => $clarId,
+            'contest' => $contest,
+        ]);
         if (!$clarification) {
-            throw new NotFoundHttpException(sprintf('Clarification with ID %s not found', $clarId));
+            throw new NotFoundHttpException(sprintf('Clarification with ID %s not found in contest %s', $clarId, $contestId));
         }
 
         if ($request->request->getBoolean('claimed')) {
             $clarification->setJuryMember($this->getUser()->getUserIdentifier());
             $this->em->flush();
-            return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
+            return $this->redirectToRoute('jury_clarification', ['contestId' => $contestId, 'id' => $clarId]);
         } else {
             $clarification->setJuryMember(null);
             $this->em->flush();
-            return $this->redirectToRoute('jury_clarifications');
+            return $this->redirectToRoute('jury_clarifications', ['contestId' => $contestId]);
         }
     }
 
-    #[Route(path: '/{clarId}/set-answered', name: 'jury_clarification_set_answered')]
-    public function toggleAnsweredAction(Request $request, string $clarId): Response
+    #[Route(path: '/contests/{contestId}/clarifications/{clarId}/set-answered', name: 'jury_clarification_set_answered')]
+    public function toggleAnsweredAction(Request $request, string $contestId, string $clarId): Response
     {
-        $clarification = $this->em->getRepository(Clarification::class)->findByExternalId($clarId);
+        $contest = $this->dj->getContestByExternalId($contestId);
+        $clarification = $this->em->getRepository(Clarification::class)->findOneBy([
+            'externalid' => $clarId,
+            'contest' => $contest,
+        ]);
         if (!$clarification) {
-            throw new NotFoundHttpException(sprintf('Clarification with ID %s not found', $clarId));
+            throw new NotFoundHttpException(sprintf('Clarification with ID %s not found in contest %s', $clarId, $contestId));
         }
 
         $answered = $request->request->getBoolean('answered');
@@ -304,18 +352,22 @@ class ClarificationController extends BaseController
         $this->em->flush();
 
         if ($answered) {
-            return $this->redirectToRoute('jury_clarifications');
+            return $this->redirectToRoute('jury_clarifications', ['contestId' => $contestId]);
         } else {
-            return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
+            return $this->redirectToRoute('jury_clarification', ['contestId' => $contestId, 'id' => $clarId]);
         }
     }
 
-    #[Route(path: '/{clarId}/change-subject', name: 'jury_clarification_change_subject')]
-    public function changeSubjectAction(Request $request, string $clarId): Response
+    #[Route(path: '/contests/{contestId}/clarifications/{clarId}/change-subject', name: 'jury_clarification_change_subject')]
+    public function changeSubjectAction(Request $request, string $contestId, string $clarId): Response
     {
-        $clarification = $this->em->getRepository(Clarification::class)->findByExternalId($clarId);
+        $contest = $this->dj->getContestByExternalId($contestId);
+        $clarification = $this->em->getRepository(Clarification::class)->findOneBy([
+            'externalid' => $clarId,
+            'contest' => $contest,
+        ]);
         if (!$clarification) {
-            throw new NotFoundHttpException(sprintf('Clarification with ID %s not found', $clarId));
+            throw new NotFoundHttpException(sprintf('Clarification with ID %s not found in contest %s', $clarId, $contestId));
         }
 
         $subject = $request->request->get('subject');
@@ -327,11 +379,17 @@ class ClarificationController extends BaseController
             [$cid, $problemId] = explode(Clarification::PROBLEM_BASED_SEPARATOR, $subject);
         }
 
-        $contest = $this->em->getRepository(Contest::class)->findByExternalId($cid);
-        $clarification->setContest($contest);
+        $newContest = $this->em->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
+        if (!$newContest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID \'%s\' not found', $cid));
+        }
+        $clarification->setContest($newContest);
 
         if ($problemId) {
-            $problem = $this->em->getRepository(Problem::class)->findByExternalId($problemId);
+            $problem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
+            if (!$problem) {
+                throw new NotFoundHttpException(sprintf('Problem with ID \'%s\' not found', $problemId));
+            }
             $clarification->setProblem($problem);
             $clarification->setCategory(null);
         } else {
@@ -341,15 +399,20 @@ class ClarificationController extends BaseController
 
         $this->em->flush();
 
-        return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
+        // Redirect to the new contest if it changed
+        return $this->redirectToRoute('jury_clarification', ['contestId' => $newContest->getExternalid(), 'id' => $clarId]);
     }
 
-    #[Route(path: '/{clarId}/change-queue', name: 'jury_clarification_change_queue')]
-    public function changeQueueAction(Request $request, string $clarId): Response
+    #[Route(path: '/contests/{contestId}/clarifications/{clarId}/change-queue', name: 'jury_clarification_change_queue')]
+    public function changeQueueAction(Request $request, string $contestId, string $clarId): Response
     {
-        $clarification = $this->em->getRepository(Clarification::class)->findByExternalId($clarId);
+        $contest = $this->dj->getContestByExternalId($contestId);
+        $clarification = $this->em->getRepository(Clarification::class)->findOneBy([
+            'externalid' => $clarId,
+            'contest' => $contest,
+        ]);
         if (!$clarification) {
-            throw new NotFoundHttpException(sprintf('Clarification with ID %d not found', $clarId));
+            throw new NotFoundHttpException(sprintf('Clarification with ID %s not found in contest %s', $clarId, $contestId));
         }
 
         $queue = $request->request->get('queue');
@@ -370,7 +433,7 @@ class ClarificationController extends BaseController
         if ($request->isXmlHttpRequest()) {
             return $this->json(true);
         }
-        return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
+        return $this->redirectToRoute('jury_clarification', ['contestId' => $contestId, 'id' => $clarId]);
     }
 
     protected function processSubmittedClarification(
@@ -453,6 +516,6 @@ class ClarificationController extends BaseController
         }
         $this->em->flush();
 
-        return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
+        return $this->redirectToRoute('jury_clarification', ['contestId' => $contest->getExternalid(), 'id' => $clarification->getExternalid()]);
     }
 }

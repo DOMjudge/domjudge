@@ -40,7 +40,7 @@
                     <th>expected score</th>
                 </tr>
                 {% for submitId,result in results %}
-                    {% set link = path('jury_submission', {'submitId': submitId}) %}
+                    {% set link = path('jury_submission', {'contestId': result.contest.externalid, 'submitId': submitId}) %}
                     <tr>
                         <td><a href="{{ link }}">{{ submitId }}</a></td>
                         <td>

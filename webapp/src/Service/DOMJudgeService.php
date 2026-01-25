@@ -176,7 +176,17 @@ class DOMJudgeService
     public function getCurrentContestCookie(): ?string
     {
         $request = $this->requestStack->getCurrentRequest();
-        return $request?->cookies->get('domjudge_cid');
+        if ($request === null) {
+            return null;
+        }
+
+        // Prefer contestId from route over cookie, so the UI matches the current page.
+        $contestId = $request->attributes->get('contestId');
+        if ($contestId !== null) {
+            return $contestId;
+        }
+
+        return $request->cookies->get('domjudge_cid');
     }
 
     /**
@@ -208,6 +218,18 @@ class DOMJudgeService
     public function getContest(int $cid): ?Contest
     {
         return $this->em->getRepository(Contest::class)->find($cid);
+    }
+
+    /**
+     * Get a contest by its external ID, throwing NotFoundHttpException if not found.
+     */
+    public function getContestByExternalId(string $externalId): Contest
+    {
+        $contest = $this->em->getRepository(Contest::class)->findByExternalId($externalId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID \'%s\' not found', $externalId));
+        }
+        return $contest;
     }
 
     public function getTeam(?int $teamid): ?Team
@@ -284,7 +306,7 @@ class DOMJudgeService
             $response = new Response();
         }
         if ($path === null) {
-            $path = $this->requestStack->getCurrentRequest()->getBasePath();
+            $path = $this->requestStack->getCurrentRequest()->getBasePath() ?: '/';
         }
 
         $response->headers->setCookie(Cookie::create($cookieName, $value, $expire, $path, $domain, $secure, $httponly, false, null));
@@ -304,7 +326,7 @@ class DOMJudgeService
             $response = new Response();
         }
         if ($path === null) {
-            $path = $this->requestStack->getCurrentRequest()->getBasePath();
+            $path = $this->requestStack->getCurrentRequest()->getBasePath() ?: '/';
         }
 
         $response->headers->clearCookie($cookieName, $path, $domain, $secure, $httponly);

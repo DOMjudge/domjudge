@@ -57,7 +57,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_JURY')]
-#[Route(path: '/jury/submissions')]
+#[Route(path: '/jury')]
 class SubmissionController extends BaseController
 {
     use JudgeRemainingTrait;
@@ -74,12 +74,30 @@ class SubmissionController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
-    #[Route(path: '', name: 'jury_submissions')]
+    // Legacy route - redirects to contest-scoped route
+    #[Route(path: '/submissions', name: 'jury_submissions_legacy')]
+    public function legacyIndexAction(Request $request): Response
+    {
+        $contest = $this->dj->getCurrentContest();
+        if (!$contest) {
+            $this->addFlash('warning', 'Please select a contest first to view submissions.');
+            return $this->redirectToRoute('jury_index');
+        }
+        return $this->redirectToRoute('jury_submissions', array_merge(
+            ['contestId' => $contest->getExternalid()],
+            $request->query->all()
+        ));
+    }
+
+    #[Route(path: '/contests/{contestId}/submissions', name: 'jury_submissions')]
     public function indexAction(
         Request $request,
+        string $contestId,
         #[MapQueryParameter(name: 'view')]
         ?string $viewFromRequest = null,
     ): Response {
+        $contest = $this->dj->getContestByExternalId($contestId);
+
         $viewTypes = [0 => 'all', 1 => 'unverified', 2 => 'unjudged', 3 => 'judging'];
         $view      = 0;
         if (($submissionViewCookie = $this->dj->getCookie('domjudge_submissionview')) &&
@@ -99,6 +117,7 @@ class SubmissionController extends BaseController
         $refresh = [
             'after' => 15,
             'url' => $this->generateUrl('jury_submissions', [
+                'contestId' => $contestId,
                 'view' => $viewTypes[$view],
                 'page' => $request->query->getInt('page', 1),
             ]),
@@ -116,10 +135,7 @@ class SubmissionController extends BaseController
             $restrictions->judging = true;
         }
 
-        $contests = $this->dj->getCurrentContests();
-        if ($contest = $this->dj->getCurrentContest()) {
-            $contests = [$contest->getExternalid() => $contest];
-        }
+        $contests = [$contest->getExternalid() => $contest];
 
         // Load preselected filters
         $filtersFromCookie = Utils::jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
@@ -198,6 +214,7 @@ class SubmissionController extends BaseController
 
         $data = [
             'refresh' => $refresh,
+            'contestId' => $contestId,
             'viewTypes' => $viewTypes,
             'view' => $view,
             'submissions' => $submissions,
@@ -221,18 +238,51 @@ class SubmissionController extends BaseController
         return $this->render('jury/submissions.html.twig', $data, $response);
     }
 
+    // Legacy route - redirects to contest-scoped route
+    #[Route(path: '/submissions/{submitId}', name: 'jury_submission_legacy')]
+    public function legacyViewAction(
+        Request $request,
+        string $submitId,
+    ): Response {
+        // If "no contest" is explicitly selected, redirect to index
+        if ($this->dj->getCurrentContestCookie() === '-1') {
+            $this->addFlash('warning', 'Please select a contest first to view submissions.');
+            return $this->redirectToRoute('jury_index');
+        }
+
+        // Look up the submission to find its contest
+        /** @var Submission|null $submission */
+        $submission = $this->em->getRepository(Submission::class)
+            ->findOneBy(['externalid' => $submitId]);
+
+        if (!$submission) {
+            throw new NotFoundHttpException(sprintf('No submission found with ID %s', $submitId));
+        }
+
+        return $this->redirectToRoute('jury_submission', array_merge(
+            [
+                'contestId' => $submission->getContest()->getExternalid(),
+                'submitId' => $submitId,
+            ],
+            $request->query->all()
+        ));
+    }
+
     /**
      * @throws NonUniqueResultException
      */
-    #[Route(path: '/{submitId}', name: 'jury_submission')]
+    #[Route(path: '/contests/{contestId}/submissions/{submitId}', name: 'jury_submission')]
     public function viewAction(
         Request $request,
+        string $contestId,
         string $submitId,
         #[MapQueryParameter(name: 'jid')]
         ?int $judgingId = null,
         #[MapQueryParameter(name: 'rejudgingid')]
         ?int $rejudgingId = null,
     ): Response {
+        $contest = $this->dj->getContestByExternalId($contestId);
+
         if (isset($judgingId, $rejudgingId)) {
             throw new BadRequestHttpException("You cannot specify jid and rejudgingid at the same time.");
         }
@@ -246,8 +296,10 @@ class SubmissionController extends BaseController
                 ->innerJoin('j.submission', 's')
                 ->andWhere('j.rejudging = :rejudgingId')
                 ->andWhere('s.externalid = :submitId')
+                ->andWhere('s.contest = :contest')
                 ->setParameter('rejudgingId', $rejudgingId)
                 ->setParameter('submitId', $submitId)
+                ->setParameter('contest', $contest)
                 ->getQuery()
                 ->getOneOrNullResult();
             if ($judging) {
@@ -269,6 +321,8 @@ class SubmissionController extends BaseController
             ->leftJoin('s.originalSubmission', 'os')
             ->select('s', 'os', 't', 'u', 'p', 'l', 'c', 'f', 'cp', 'ej')
             ->andWhere('s.externalid = :submitid')
+            ->andWhere('s.contest = :contest')
+            ->setParameter('contest', $contest)
             ->setParameter('submitid', $submitId)
             ->getQuery()
             ->getOneOrNullResult();
@@ -512,8 +566,6 @@ class SubmissionController extends BaseController
                 ->getOneOrNullResult();
 
             if ($lastJudging !== null) {
-                // Clear the testcases, otherwise Doctrine will use the previous data
-                $this->em->clear();
                 $lastRuns = $this->em->createQueryBuilder()
                     ->from(Testcase::class, 't')
                     ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
@@ -609,7 +661,10 @@ class SubmissionController extends BaseController
             // Automatically refresh page while we wait for judging data.
             $twigData['refresh'] = [
                 'after' => 15,
-                'url' => $this->generateUrl('jury_submission', ['submitId' => $submission->getExternalid()]),
+                'url' => $this->generateUrl('jury_submission', [
+                    'contestId' => $contestId,
+                    'submitId' => $submission->getExternalid(),
+                ]),
             ];
         } else {
             $contestProblem = $submission->getContestProblem();
@@ -700,6 +755,7 @@ class SubmissionController extends BaseController
             $this->em->flush();
         }
         return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_submission', [
+            'contestId' => $jid->getSubmission()->getContest()->getExternalid(),
             'submitId' => $jid->getSubmission()->getExternalid(),
             'jid' => $jid->getJudgingid(),
         ]));
@@ -734,6 +790,7 @@ class SubmissionController extends BaseController
         $this->em->persist($judgeTask);
         $this->em->flush();
         return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_submission', [
+            'contestId' => $jid->getSubmission()->getContest()->getExternalid(),
             'submitId' => $jid->getSubmission()->getExternalid(),
             'jid' => $jid->getJudgingid(),
         ]));
@@ -743,6 +800,7 @@ class SubmissionController extends BaseController
     public function viewForJudgingAction(Judging $jid): RedirectResponse
     {
         return $this->redirectToRoute('jury_submission', [
+            'contestId' => $jid->getSubmission()->getContest()->getExternalid(),
             'submitId' => $jid->getSubmission()->getExternalid(),
             'jid' => $jid->getJudgingid(),
         ]);
@@ -752,6 +810,7 @@ class SubmissionController extends BaseController
     public function viewForExternalJudgementAction(ExternalJudgement $externalJudgement): RedirectResponse
     {
         return $this->redirectToRoute('jury_submission', [
+            'contestId' => $externalJudgement->getSubmission()->getContest()->getExternalid(),
             'submitId' => $externalJudgement->getSubmission()->getExternalid(),
         ]);
     }
@@ -775,18 +834,19 @@ class SubmissionController extends BaseController
         }
 
         return $this->redirectToRoute('jury_submission', [
+            'contestId' => $contest->getExternalid(),
             'submitId' => $submission->getExternalid(),
         ]);
     }
 
-    #[Route(path: '/{submission}/runs/{contest}/{run}/team-output', name: 'jury_submission_team_output')]
+    #[Route(path: '/contests/{contestId}/submissions/{submission}/runs/{run}/team-output', name: 'jury_submission_team_output')]
     public function teamOutputAction(
+        string $contestId,
         #[MapEntity(mapping: ['submission' => 'externalid'])]
         Submission $submission,
-        #[MapEntity(mapping: ['contest' => 'externalid'])]
-        Contest $contest,
         JudgingRun $run,
     ): StreamedResponse {
+        $contest = $this->dj->getContestByExternalId($contestId);
         if ($run->getJudging()->getSubmission()->getSubmitid() !== $submission->getSubmitid() || $submission->getContest()->getCid() !== $contest->getCid()) {
             throw new BadRequestHttpException('Integrity problem while fetching team output.');
         }
@@ -809,13 +869,18 @@ class SubmissionController extends BaseController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route(path: '/{submission}/source', name: 'jury_submission_source')]
+    #[Route(path: '/contests/{contestId}/submissions/{submission}/source', name: 'jury_submission_source')]
     public function sourceAction(
+        string $contestId,
         #[MapEntity(mapping: ['submission' => 'externalid'])]
         Submission $submission,
         #[MapQueryParameter]
         ?int $fetch = null
     ): Response {
+        $contest = $this->dj->getContestByExternalId($contestId);
+        if ($submission->getContest()->getCid() !== $contest->getCid()) {
+            throw new NotFoundHttpException(sprintf('Submission %s not found in contest %s', $submission->getExternalid(), $contestId));
+        }
         if ($fetch !== null) {
             /** @var SubmissionFile|null $file */
             $file = $this->em->createQueryBuilder()
@@ -904,7 +969,9 @@ class SubmissionController extends BaseController
             ->select('file')
             ->join('file.submission', 's')
             ->andWhere('s.externalid in (:submissions)')
+            ->andWhere('s.contest = :contest')
             ->setParameter('submissions', $files_query)
+            ->setParameter('contest', $contest)
             ->orderBy('s.externalid, file.ranknumber')
             ->getQuery()
             ->getResult();
@@ -958,19 +1025,25 @@ class SubmissionController extends BaseController
         ]);
     }
 
-    #[Route(path: '/{submission}/edit-source', name: 'jury_submission_edit_source')]
+    #[Route(path: '/contests/{contestId}/submissions/{submission}/edit-source', name: 'jury_submission_edit_source')]
     public function editSourceAction(
         Request $request,
+        string $contestId,
         #[MapEntity(mapping: ['submission' => 'externalid'])]
         Submission $submission,
         #[MapQueryParameter]
         ?int $rank = null
     ): Response {
+        $contest = $this->dj->getContestByExternalId($contestId);
+        if ($submission->getContest()->getCid() !== $contest->getCid()) {
+            throw new NotFoundHttpException(sprintf('Submission %s not found in contest %s', $submission->getExternalid(), $contestId));
+        }
+
         if (!$this->allowEdit()) {
             $this->addFlash('danger', 'You cannot re-submit code without being a team.');
             return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl(
                 'jury_submission',
-                ['submitId' => $submission->getExternalid()]
+                ['contestId' => $contestId, 'submitId' => $submission->getExternalid()]
             ));
         }
 
@@ -1070,10 +1143,10 @@ class SubmissionController extends BaseController
 
             if (!$submittedSubmission) {
                 $this->addFlash('danger', $message);
-                return $this->redirectToRoute('jury_submission', ['submitId' => $submission->getExternalid()]);
+                return $this->redirectToRoute('jury_submission', ['contestId' => $contestId, 'submitId' => $submission->getExternalid()]);
             }
 
-            return $this->redirectToRoute('jury_submission', ['submitId' => $submittedSubmission->getExternalid()]);
+            return $this->redirectToRoute('jury_submission', ['contestId' => $contestId, 'submitId' => $submittedSubmission->getExternalid()]);
         }
 
         $twigData = [
@@ -1108,35 +1181,42 @@ class SubmissionController extends BaseController
      * @throws DBALException
      */
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{submitId}/update-status', name: 'jury_submission_update_status', methods: ['POST'])]
+    #[Route(path: '/contests/{contestId}/submissions/{submitId}/update-status', name: 'jury_submission_update_status', methods: ['POST'])]
     public function updateStatusAction(
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService,
         Request $request,
+        string $contestId,
         string $submitId
     ): RedirectResponse {
-        $submission = $this->em->getRepository(Submission::class)->findByExternalId($submitId);
+        $contest = $this->dj->getContestByExternalId($contestId);
+        $submission = $this->em->getRepository(Submission::class)->findOneBy([
+            'externalid' => $submitId,
+            'contest' => $contest,
+        ]);
+        if (!$submission) {
+            throw new NotFoundHttpException(sprintf('Submission %s not found in contest %s', $submitId, $contestId));
+        }
+
         $valid      = $request->request->getBoolean('valid');
         $submission->setValid($valid);
         $this->em->flush();
 
-        $contestId = $submission->getContest()->getCid();
         $teamId    = $submission->getTeam()->getTeamid();
         $problemId = $submission->getProblem()->getProbid();
 
         // KLUDGE: We can't log an "undelete", so we re-"create".
         // FIXME: We should also delete/recreate any dependent judging(runs).
         $eventLogService->log('submission', $submission->getSubmitid(), ($valid ? 'create' : 'delete'),
-                              $submission->getContest()->getCid(), null, null, $valid);
+                              $contest->getCid(), null, null, $valid);
         $this->dj->auditlog('submission', $submission->getExternalid(),
                                          'marked ' . ($valid ? 'valid' : 'invalid'));
-        $contest = $this->em->getRepository(Contest::class)->find($contestId);
         $team    = $this->em->getRepository(Team::class)->find($teamId);
         $problem = $this->em->getRepository(Problem::class)->find($problemId);
         $scoreboardService->calculateScoreRow($contest, $team, $problem);
 
         return $this->redirectToLocalReferrer($this->router, $request,
-            $this->generateUrl('jury_submission', ['submitId' => $submission->getExternalid()])
+            $this->generateUrl('jury_submission', ['contestId' => $contestId, 'submitId' => $submission->getExternalid()])
         );
     }
 
@@ -1175,10 +1255,10 @@ class SubmissionController extends BaseController
             }
         });
 
+        $this->em->clear();
+        /** @var Judging $judging */
+        $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ((bool)$this->config->get('verification_required')) {
-            $this->em->clear();
-            /** @var Judging $judging */
-            $judging = $this->em->getRepository(Judging::class)->find($judgingId);
             // We need to update the score for all teams for this problem, since the first to solve might now
             // have changed.
             $teamsQueryBuilder = $this->em->createQueryBuilder()
@@ -1204,7 +1284,7 @@ class SubmissionController extends BaseController
         // Redirect to local referrer page but fall back to same defaults
         if ($request->request->getBoolean('verified')) {
             $this->addFlash('info', "Verified judging j$judgingId");
-            $redirect = $this->generateUrl('jury_submissions');
+            $redirect = $this->generateUrl('jury_submissions', ['contestId' => $judging->getContest()->getExternalid()]);
         } else {
             $this->addFlash('info', "Unmarked judging j$judgingId as verified");
             $redirect = $this->generateUrl('jury_submission_by_judging', ['jid' => $judgingId]);
@@ -1279,10 +1359,13 @@ class SubmissionController extends BaseController
                 $this->dj->auditlog($auditLogType, (string)$auditLogId, $action . 'ed');
 
                 if ($action === 'claim') {
-                    return $this->redirectToRoute('jury_submission', ['submitId' => $judging->getSubmission()->getExternalid()]);
+                    return $this->redirectToRoute('jury_submission', [
+                        'contestId' => $judging->getSubmission()->getContest()->getExternalid(),
+                        'submitId' => $judging->getSubmission()->getExternalid(),
+                    ]);
                 } else {
                     return $this->redirectToLocalReferrer($this->router, $request,
-                        $this->generateUrl('jury_submissions')
+                        $this->generateUrl('jury_submissions', ['contestId' => $judging->getSubmission()->getContest()->getExternalid()])
                     );
                 }
             }
@@ -1291,12 +1374,21 @@ class SubmissionController extends BaseController
         return null;
     }
 
-    #[Route(path: '/{submitId}/create-tasks', name: 'jury_submission_create_tasks')]
-    public function createJudgeTasks(string $submitId): RedirectResponse
+    #[Route(path: '/contests/{contestId}/submissions/{submitId}/create-tasks', name: 'jury_submission_create_tasks')]
+    public function createJudgeTasks(string $contestId, string $submitId): RedirectResponse
     {
-        $this->dj->unblockJudgeTasksForSubmission($submitId);
+        $contest = $this->dj->getContestByExternalId($contestId);
+        $submission = $this->em->getRepository(Submission::class)->findOneBy([
+            'externalid' => $submitId,
+            'contest' => $contest,
+        ]);
+        if (!$submission) {
+            throw new NotFoundHttpException(sprintf('Submission %s not found in contest %s', $submitId, $contestId));
+        }
+
+        $this->dj->unblockJudgeTasksForSubmission((string)$submission->getSubmitid());
         $this->addFlash('info', "Started judging for submission: $submitId");
-        return $this->redirectToRoute('jury_submission', ['submitId' => $submitId]);
+        return $this->redirectToRoute('jury_submission', ['contestId' => $contestId, 'submitId' => $submitId]);
     }
 
     /**

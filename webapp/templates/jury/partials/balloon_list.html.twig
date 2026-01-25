@@ -4,7 +4,7 @@
 {% if balloons is empty %}
     <div class="alert alert-warning">No balloons</div>
 {% else %}
-    <form action="{{ path('jury_balloons_setdone_multiple') }}" method="post">
+    <form action="{{ path('jury_balloons_setdone_multiple', {contestId: contestId}) }}" method="post">
         <input type="submit" class="btn btn-primary mark-multiple-done-button" value="Mark selected as done" />
 
         <table class="data-table table table-hover table-striped table-sm balloons-table" style="width:auto">
@@ -52,7 +52,7 @@
                     </td>
                     <td>
                         {%- if not balloon.data.done -%}
-                        {%- set link = path('jury_balloons_setdone', {balloonId: balloon.data.balloonid}) %}
+                        {%- set link = path('jury_balloons_setdone', {contestId: contestId, balloonId: balloon.data.balloonid}) %}
                         <a href="{{ link }}" title="mark balloon as done">
                         <i class="fas fa-running"></i>
                         </a>

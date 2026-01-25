@@ -9,7 +9,7 @@ use Generator;
 class SubmissionControllerTest extends BaseTestCase
 {
     protected array         $roles   = ['jury'];
-    protected static string $baseURL = '/jury/submissions';
+    protected static string $baseURL = '/jury/contests/demo/submissions';
 
     /**
      * Test that the basic building blocks of the index page are there.
