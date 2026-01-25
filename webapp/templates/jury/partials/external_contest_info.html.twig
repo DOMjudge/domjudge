@@ -43,8 +43,8 @@
                 <td>
                     {% if not contest.externalSourceLastPollTime %}
                         Event feed reader never checked in.
-                    {% elseif contest.externalSourceLastHTTPCode is not same as(200) %}
-                        Received {{ contest.externalSourceLastHTTPCode }} HTTP code.
+                    {% elseif contest.externalSourceLastHttpCode is not same as(200) %}
+                        Received {{ contest.externalSourceLastHttpCode }} HTTP code.
                     {% else %}
                         {{ status }}, last checked in {{ contest.externalSourceLastPollTime | printtimediff }}s ago.
                     {% endif %}
