@@ -266,85 +266,94 @@ class SubmissionController extends AbstractRestController
         }
 
         $tempFiles = [];
+        $tempZipFile = null;
 
-        if ($addSubmission->files) {
-            // CCS spec format, files are a ZIP, get them and transform them into a file object.
-            if (count($addSubmission->files) !== 1 || !isset($addSubmission->files[0]->data)) {
-                throw new BadRequestHttpException("The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field.");
-            }
+        try {
+            if ($addSubmission->files) {
+                // CCS spec format, files are a ZIP, get them and transform them into a file object.
+                if (count($addSubmission->files) !== 1 || !isset($addSubmission->files[0]->data)) {
+                    throw new BadRequestHttpException("The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field.");
+                }
 
-            if ($addSubmission->files[0]->mime && $addSubmission->files[0]->mime !== 'application/zip') {
-                throw new BadRequestHttpException("The 'files[0].mime' attribute must be application/zip if provided.");
-            }
+                if ($addSubmission->files[0]->mime && $addSubmission->files[0]->mime !== 'application/zip') {
+                    throw new BadRequestHttpException("The 'files[0].mime' attribute must be application/zip if provided.");
+                }
 
-            $data        = $addSubmission->files[0]->data;
-            $decodedData = base64_decode($data, true);
-            if ($decodedData === false) {
-                throw new BadRequestHttpException("The 'files[0].data' attribute is not base64 encoded.");
-            }
+                $data        = $addSubmission->files[0]->data;
+                $decodedData = base64_decode($data, true);
+                if ($decodedData === false) {
+                    throw new BadRequestHttpException("The 'files[0].data' attribute is not base64 encoded.");
+                }
 
-            $tmpDir = $this->dj->getDomjudgeTmpDir();
+                $tmpDir = $this->dj->getDomjudgeTmpDir();
 
-            // Now write the data to a temporary ZIP file.
-            if (!($tempZipFile = tempnam($tmpDir, 'submission_zip-'))) {
-                throw new ServiceUnavailableHttpException(null,
-                    sprintf('Could not create temporary file in directory %s', $tmpDir));
-            }
-
-            if (file_put_contents($tempZipFile, $decodedData) === false) {
-                throw new ServiceUnavailableHttpException(
-                    null,
-                    sprintf("Could not write ZIP to temporary file '%s'.", $tempZipFile)
-                );
-            }
-
-            $zip = $this->dj->openZipFile($tempZipFile);
-
-            $files = [];
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $name   = $zip->getNameIndex($i);
-                $source = $zip->getFromIndex($i);
-
-                if (!($tempFileName = tempnam($tmpDir, 'submission-'))) {
+                // Now write the data to a temporary ZIP file.
+                if (!($tempZipFile = tempnam($tmpDir, 'submission_zip-'))) {
                     throw new ServiceUnavailableHttpException(null,
                         sprintf('Could not create temporary file in directory %s', $tmpDir));
                 }
-                if (file_put_contents($tempFileName, $source) === false) {
+
+                if (file_put_contents($tempZipFile, $decodedData) === false) {
                     throw new ServiceUnavailableHttpException(
                         null,
-                        sprintf("Could not write to temporary file '%s'.", $tempFileName)
+                        sprintf("Could not write ZIP to temporary file '%s'.", $tempZipFile)
                     );
                 }
-                $files[]     = new UploadedFile($tempFileName, $name, null, null, true);
-                $tempFiles[] = $tempFileName;
+
+                $zip = $this->dj->openZipFile($tempZipFile);
+
+                $files = [];
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $name   = $zip->getNameIndex($i);
+                    $source = $zip->getFromIndex($i);
+
+                    if (!($tempFileName = tempnam($tmpDir, 'submission-'))) {
+                        throw new ServiceUnavailableHttpException(null,
+                            sprintf('Could not create temporary file in directory %s', $tmpDir));
+                    }
+                    $tempFiles[] = $tempFileName;
+                    if (file_put_contents($tempFileName, $source) === false) {
+                        throw new ServiceUnavailableHttpException(
+                            null,
+                            sprintf("Could not write to temporary file '%s'.", $tempFileName)
+                        );
+                    }
+                    $files[]     = new UploadedFile($tempFileName, $name, null, null, true);
+                }
+
+                $zip->close();
+                unlink($tempZipFile);
+                $tempZipFile = null;
+            } else {
+                // Files are uploaded as actual files, get them.
+                $files = $request->files->get('code') ?: [];
+                if (!is_array($files)) {
+                    $files = [$files];
+                }
             }
 
-            $zip->close();
-            unlink($tempZipFile);
-        } else {
-            // Files are uploaded as actual files, get them.
-            $files = $request->files->get('code') ?: [];
-            if (!is_array($files)) {
-                $files = [$files];
+            // Now submit the solution.
+            $submission = $this->submissionService->submitSolution(
+                $team, $user, $problem, $problem->getContest(), $language,
+                $files, SubmissionSource::API, null, null, $entryPoint, $submissionId, $time, $message
+            );
+
+            if (!$submission) {
+                throw new BadRequestHttpException($message);
+            }
+
+            return $this->renderData($request, $submission);
+        } finally {
+            // Clean up temporary files, even on exception.
+            foreach ($tempFiles as $tempFile) {
+                if (file_exists($tempFile)) {
+                    unlink($tempFile);
+                }
+            }
+            if ($tempZipFile !== null && file_exists($tempZipFile)) {
+                unlink($tempZipFile);
             }
         }
-
-        // Now submit the solution.
-        $submission = $this->submissionService->submitSolution(
-            $team, $user, $problem, $problem->getContest(), $language,
-            $files, SubmissionSource::API, null, null, $entryPoint, $submissionId, $time, $message
-        );
-
-        // Clean up temporary if needed.
-        foreach ($tempFiles as $tempFile) {
-            unlink($tempFile);
-        }
-
-        if (!$submission) {
-            throw new BadRequestHttpException($message);
-        }
-
-        return $this->renderData($request, $submission);
     }
 
     /**
