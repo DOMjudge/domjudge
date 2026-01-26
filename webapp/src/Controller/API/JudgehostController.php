@@ -165,11 +165,12 @@ class JudgehostController extends AbstractFOSRestController
         /** @var Judging[] $judgings */
         $judgings = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
+            ->innerJoin('j.submission', 's')
             ->leftJoin('j.rejudging', 'r')
             ->innerJoin('j.runs', 'jr')
             ->innerJoin('jr.judgetask', 'jt')
             ->innerJoin('jt.judgehost', 'jh')
-            ->select('j')
+            ->select('j', 's')
             ->distinct()
             ->andWhere('jh.hostname = :hostname')
             ->andWhere('j.judgingid = jt.jobid')
