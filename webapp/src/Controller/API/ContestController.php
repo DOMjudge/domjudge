@@ -627,7 +627,7 @@ class ContestController extends AbstractRestController
         // Make sure this script doesn't hit the PHP maximum execution timeout.
         set_time_limit(0);
 
-        if ($sinceToken !== null | $sinceId !== null) {
+        if ($sinceToken !== null || $sinceId !== null) {
             // This parameter is a string in the spec, but we want an integer
             $since_id = (int)($sinceToken ?? $sinceId);
             $event    = $this->em->getRepository(Event::class)->findOneBy([
