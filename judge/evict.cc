@@ -19,20 +19,19 @@
 #define PROGRAM "evict"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
-extern int errno;
 std::string_view progname;
 
-int be_verbose;
+bool be_verbose;
 int show_help;
 int show_version;
-int one_file_system;
+bool one_file_system;
 
 struct option const long_opts[] = {
-	{"verbose", no_argument,       NULL,         'v'},
-	{"one-file-system", no_argument, NULL,       'x'},
-	{"help",    no_argument,       &show_help,    1 },
-	{"version", no_argument,       &show_version, 1 },
-	{ NULL,     0,                 NULL,          0 }
+	{"verbose",         no_argument, nullptr,       'v'},
+	{"one-file-system", no_argument, nullptr,       'x'},
+	{"help",            no_argument, &show_help,     1 },
+	{"version",         no_argument, &show_version,  1 },
+	{ nullptr,          0,           nullptr,        0 }
 };
 
 void usage()
@@ -53,11 +52,11 @@ void evict_directory(const std::string& dirname, dev_t root_dev) {
 	struct stat s;
 
 	dir = opendir(dirname.c_str());
-	if (dir != NULL) {
+	if (dir != nullptr) {
 		if (be_verbose) logmsg(LOG_INFO, "Evicting all files in directory: {}", dirname);
 
 		/* Read everything in the directory */
-		while ( (entry = readdir(dir)) != NULL ) {
+		while ( (entry = readdir(dir)) != nullptr ) {
 			/* skip over current/parent directory entries */
 			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
 				continue;
@@ -118,18 +117,19 @@ int main(int argc, char *argv[])
 	progname = argv[0];
 
 	/* Parse command-line options */
-	be_verbose = show_help = show_version = one_file_system = 0;
+	be_verbose = one_file_system = false;
+	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+vx",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+vx",long_opts,nullptr))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
 		case 'v': /* verbose option */
-			be_verbose = 1;
+			be_verbose = true;
 			verbose = LOG_DEBUG;
 			break;
 		case 'x': /* one-file-system option */
-			one_file_system = 1;
+			one_file_system = true;
 			break;
 		case ':': /* getopt error */
 		case '?':
