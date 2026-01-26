@@ -44,7 +44,6 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include <sys/resource.h>
-#include <sys/types.h>
 #include <cerrno>
 #include <fcntl.h>
 #include <csignal>
@@ -66,18 +65,17 @@
 #include <libcgroup.h>
 #include <sched.h>
 #include <sys/sysinfo.h>
-#include <vector>
+#include <algorithm>
+#include <format>
 #include <set>
 #include <sstream>
 #include <string>
 #include <utility>
-#include <format>
+#include <vector>
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
-#define max(x,y) ((x) > (y) ? (x) : (y))
-#define min(x,y) ((x) < (y) ? (x) : (y))
 
 /* Array indices for input/output file descriptors as used by pipe() */
 #define PIPE_IN  1
@@ -104,7 +102,6 @@ const int hard_timelimit = 2;
 const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
 const struct timespec cg_delete_delay = { 0, 10000000L }; /* 0.01 seconds */
 
-extern int errno;
 extern int verbose;
 
 std::string_view progname;
@@ -125,21 +122,21 @@ char *runuser;
 char *rungroup;
 int runuid;
 int rungid;
-int use_root;
-int use_walltime;
-int use_cputime;
-int use_user;
-int use_group;
-int redir_stdout;
-int redir_stderr;
-int limit_streamsize;
-int outputmeta;
+bool use_root;
+bool use_walltime;
+bool use_cputime;
+bool use_user;
+bool use_group;
+bool redir_stdout;
+bool redir_stderr;
+bool limit_streamsize;
+bool outputmeta;
 int outputtimetype;
-int no_coredump;
-int preserve_environment;
+bool no_coredump;
+bool preserve_environment;
+bool in_error_handling = false;
 int show_help;
 int show_version;
-int in_error_handling = 0;
 pid_t runpipe_pid = -1;
 
 double walltimelimit[2], cputimelimit[2]; /* in seconds, soft and hard limits */
@@ -148,7 +145,7 @@ rlim_t memsize;
 rlim_t filesize;
 rlim_t nproc;
 size_t streamsize;
-int use_splice;
+bool use_splice;
 
 pid_t child_pid = -1;
 
@@ -215,7 +212,7 @@ void die(int errnum, std::format_string<Args...> fmt, Args&&... args)
 {
 	// Silently ignore errors that happen while handling other errors.
 	if (in_error_handling) return;
-	in_error_handling = 1;
+	in_error_handling = true;
 
 	/*
 	 * Make sure the signal handler for these (terminate()) does not
@@ -284,18 +281,18 @@ void write_meta(const std::string& key, std::format_string<Args...> fmt, Args&&.
 	if ( !outputmeta ) return;
 
 	if ( fprintf(metafile,"%s: ",key.c_str())<=0 ) {
-		outputmeta = 0;
+		outputmeta = false;
 		die(0,"cannot write to file `{}'",metafilename);
 	}
 
 	try {
 		std::string value = std::format(fmt, std::forward<Args>(args)...);
 		if ( fprintf(metafile, "%s\n", value.c_str()) <= 0 ) {
-			outputmeta = 0;
+			outputmeta = false;
 			die(0,"cannot write to file `{}'", metafilename);
 		}
 	} catch (const std::exception& e) {
-		outputmeta = 0;
+		outputmeta = false;
 		die(0, "Error formatting meta value for key {}: {}", key, e.what());
 	}
 }
@@ -910,7 +907,7 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 				/* Otherwise copy the output to a file */
 				to_read = BUF_SIZE;
 				if (limit_streamsize) {
-					to_read = min(BUF_SIZE, streamsize-data_passed[i]);
+					to_read = std::min(static_cast<size_t>(BUF_SIZE), streamsize-data_passed[i]);
 				}
 
 				if ( use_splice ) {
@@ -919,7 +916,7 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 					               to_read, SPLICE_F_MOVE | SPLICE_F_NONBLOCK);
 
 					if ( nread==-1 && errno==EINVAL ) {
-						use_splice = 0;
+						use_splice = false;
 						logmsg(LOG_DEBUG, "splice failed, switching to read/write");
 						/* Setting errno here to repeat the copy. */
 						errno = EAGAIN;
@@ -990,27 +987,28 @@ int main(int argc, char **argv)
 	if ( gettimeofday(&progstarttime,nullptr) ) die(errno,"getting time");
 
 	/* Parse command-line options */
-	use_root = use_walltime = use_cputime = use_user = no_coredump = 0;
-	outputmeta = walllimit_reached = cpulimit_reached = 0;
+	use_root = use_walltime = use_cputime = use_user = no_coredump = false;
+	outputmeta = false;
+	walllimit_reached = cpulimit_reached = 0;
 	outputtimetype = CPU_TIME_TYPE;
-	preserve_environment = 0;
+	preserve_environment = false;
 	memsize = filesize = nproc = RLIM_INFINITY;
-	redir_stdout = redir_stderr = limit_streamsize = 0;
+	redir_stdout = redir_stderr = limit_streamsize = false;
 	show_help = show_version = 0;
 	opterr = 0;
 	char *ptr;
-	while ( (opt = getopt_long(argc,argv,"+r:u:g:d:t:C:m:f:p:P:co:e:s:EV:M:vqU:",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:d:t:C:m:f:p:P:co:e:s:EV:M:vqU:",long_opts,nullptr))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
 		case 'r': /* rootdir option */
-			use_root = 1;
+			use_root = true;
 			rootdir = (char *) malloc(strlen(optarg)+2);
 			if ( rootdir==nullptr ) die(errno,"allocating memory");
 			strcpy(rootdir,optarg);
 			break;
 		case 'u': /* user option: uid or string */
-			use_user = 1;
+			use_user = true;
 			runuser = strdup(optarg);
 			if ( runuser==nullptr ) die(errno,"strdup() failed");
 			errno = 0;
@@ -1027,7 +1025,7 @@ int main(int argc, char **argv)
 			if ( runuid<0 ) die(0,"invalid username or ID specified: `{}'",optarg);
 			break;
 		case 'g': /* group option: gid or string */
-			use_group = 1;
+			use_group = true;
 			rungroup = strdup(optarg);
 			if ( rungroup==nullptr ) die(errno,"strdup() failed");
 			errno = 0;
@@ -1041,12 +1039,12 @@ int main(int argc, char **argv)
 			strcpy(rootchdir,optarg);
 			break;
 		case 't': /* wallclock time option */
-			use_walltime = 1;
+			use_walltime = true;
 			outputtimetype = WALL_TIME_TYPE;
 			read_optarg_time("walltime",walltimelimit);
 			break;
 		case 'C': /* CPU time option */
-			use_cputime = 1;
+			use_cputime = true;
 			outputtimetype = CPU_TIME_TYPE;
 			read_optarg_time("cputime",cputimelimit);
 			break;
@@ -1075,18 +1073,18 @@ int main(int argc, char **argv)
 			cpuset = optarg;
 			break;
 		case 'c': /* no-core option */
-			no_coredump = 1;
+			no_coredump = true;
 			break;
 		case 'o': /* stdout option */
-			redir_stdout = 1;
+			redir_stdout = true;
 			stdoutfilename = strdup(optarg);
 			break;
 		case 'e': /* stderr option */
-			redir_stderr = 1;
+			redir_stderr = true;
 			stderrfilename = strdup(optarg);
 			break;
 		case 's': /* streamsize option */
-			limit_streamsize = 1;
+			limit_streamsize = true;
 			streamsize = (size_t) read_optarg_int("streamsize limit",0,LONG_MAX);
 			/* Convert limit from kB to bytes and check for overflow */
 			if ( streamsize!=(streamsize*1024)/1024 ) {
@@ -1096,13 +1094,13 @@ int main(int argc, char **argv)
 			}
 			break;
 		case 'E': /* environment option */
-			preserve_environment = 1;
+			preserve_environment = true;
 			break;
 		case 'V': /* set environment variable */
 			environment_variables.push_back(std::string(optarg));
 			break;
 		case 'M': /* outputmeta option */
-			outputmeta = 1;
+			outputmeta = true;
 			metafilename = strdup(optarg);
 			break;
 		case 'v': /* verbose option */
@@ -1129,7 +1127,7 @@ int main(int argc, char **argv)
 	   unprivileged user to prevent unintended permissions. */
 	if ( use_user && !use_group ) {
 		logmsg(LOG_DEBUG, "using unprivileged user `{}' also as group",runuser);
-		use_group = 1;
+		use_group = true;
 		rungroup = strdup(runuser);
 		rungid = groupid(rungroup);
 		if ( rungid<0 ) die(0,"invalid groupname or ID specified: `{}'",rungroup);
@@ -1364,7 +1362,7 @@ int main(int argc, char **argv)
 		   I/O file descriptors. If that fails (not all I/O
 		   source - dest combinations support it), then we revert to
 		   using read()/write(). */
-		use_splice = 1;
+		use_splice = true;
 		fd_set readfds;
 		while ( 1 ) {
 
@@ -1373,7 +1371,7 @@ int main(int argc, char **argv)
 			for(int i=1; i<=2; i++) {
 				if ( child_pipefd[i][PIPE_OUT]>=0 ) {
 					FD_SET(child_pipefd[i][PIPE_OUT],&readfds);
-					nfds = max(nfds,child_pipefd[i][PIPE_OUT]);
+					nfds = std::max(nfds, child_pipefd[i][PIPE_OUT]);
 				}
 			}
 
