@@ -81,6 +81,15 @@ class TeamCategoryType extends AbstractExternalIdEntityType
                 'No' => false,
             ],
         ]);
+        $builder->add('allow_password_change', ChoiceType::class, [
+            'label' => 'Allow password change',
+            'expanded' => true,
+            'choices' => [
+                'Yes' => true,
+                'No' => false,
+            ],
+            'help' => 'Allow users in this category to change their own password.',
+        ]);
         $builder->add('save', SubmitType::class);
     }
 
