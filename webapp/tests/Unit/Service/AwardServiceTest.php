@@ -190,7 +190,6 @@ class AwardServiceTest extends KernelTestCase
             $rankCache,
             $this->contest->getFreezeData(),
             true,
-            20,
             false
         );
     }

@@ -13,6 +13,7 @@ Version 10.0.0DEV
  - Make shadow mode a per contest setting.
  - Allow to specify whether to use internal or external judgings and runs in
    shadow mode.
+ - Make penalty time a per contest setting.
 
 Version 9.0.0 - 5 October 2025
 ------------------------------
