@@ -450,6 +450,12 @@ readonly class ImportProblemService
                 if (str_contains($testOutput, "\r")) {
                     $messages['warning'][] = "Testcase file '$baseFileName.ans' contains Windows newlines.";
                 }
+                foreach (Utils::detectTestcaseEncoding($testInput, "$baseFileName.in") as $warning) {
+                    $messages['warning'][] = $warning;
+                }
+                foreach (Utils::detectTestcaseEncoding($testOutput, "$baseFileName.ans") as $warning) {
+                    $messages['warning'][] = $warning;
+                }
 
                 $md5in  = md5($testInput);
                 $md5out = md5($testOutput);

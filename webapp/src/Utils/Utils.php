@@ -1071,6 +1071,40 @@ class Utils
     }
 
     /**
+     * Detect non-UTF-8 encoding or BOM in testcase file content.
+     *
+     * @return string[] Warning messages about encoding issues.
+     */
+    public static function detectTestcaseEncoding(string $content, string $filename): array
+    {
+        $warnings = [];
+
+        // UTF-32LE must come before UTF-16LE: its BOM starts with the same 2 bytes.
+        $boms = [
+            "\xEF\xBB\xBF"     => 'UTF-8 BOM',
+            "\xFF\xFE\x00\x00" => 'UTF-32LE',
+            "\x00\x00\xFE\xFF" => 'UTF-32BE',
+            "\xFF\xFE"         => 'UTF-16LE',
+            "\xFE\xFF"         => 'UTF-16BE',
+        ];
+
+        foreach ($boms as $signature => $name) {
+            if (str_starts_with($content, $signature)) {
+                $warnings[] = "Testcase file '$filename' appears to be $name encoded. " .
+                              "This may cause comparison failures. Please convert to standard UTF-8.";
+                return $warnings;
+            }
+        }
+
+        if (!mb_check_encoding($content, 'UTF-8')) {
+            $warnings[] = "Testcase file '$filename' does not appear to be valid UTF-8. " .
+                          "This may cause comparison failures. Please save it with UTF-8 encoding.";
+        }
+
+        return $warnings;
+    }
+
+    /**
      * @return array<string, string>
      */
     public static function parseMetadata(string $raw_metadata): array
