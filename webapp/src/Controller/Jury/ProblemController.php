@@ -699,6 +699,12 @@ class ProblemController extends BaseController
                             );
                         }
 
+                        if ($type !== 'image') {
+                            foreach (Utils::detectTestcaseEncoding($content, $file->getClientOriginalName()) as $encodingWarning) {
+                                $message .= "\nWarning: " . $encodingWarning;
+                            }
+                        }
+
                         $messages[] = $message;
                     }
                 }
@@ -808,6 +814,17 @@ class ProblemController extends BaseController
                     empty($newTestcaseContent->getOutput())) {
                     $message .= "\nWarning: empty testcase file(s)!\n";
                     $haswarnings = true;
+                }
+
+                foreach (['input', 'output'] as $tcType) {
+                    $tcFile = $request->files->get('add_' . $tcType);
+                    $tcContent = $tcType === 'input'
+                        ? $newTestcaseContent->getInput()
+                        : $newTestcaseContent->getOutput();
+                    foreach (Utils::detectTestcaseEncoding($tcContent, $tcFile->getClientOriginalName()) as $encodingWarning) {
+                        $message .= "\nWarning: " . $encodingWarning;
+                        $haswarnings = true;
+                    }
                 }
 
                 $messages[] = $message;
