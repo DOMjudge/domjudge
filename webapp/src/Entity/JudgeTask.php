@@ -30,6 +30,7 @@ use JMS\Serializer\Annotation as Serializer;
     name: 'specific_type',
     columns: ['judgehostid', 'starttime', 'valid', 'type', 'priority', 'judgetaskid'])
 ]
+#[ORM\Index(name: 'judgehostid_type_starttime', columns: ['judgehostid', 'type', 'starttime', 'jobid'])]
 class JudgeTask
 {
     #[ORM\Id]
