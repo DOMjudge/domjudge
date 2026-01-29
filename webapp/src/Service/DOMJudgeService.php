@@ -424,17 +424,23 @@ class DOMJudgeService
 
             if ($this->shadowMode()) {
                 if ($contest) {
+                    $hasDifference = '(j.result IS NOT NULL AND ej.result != j.result)'
+                        . ' OR s.importError IS NOT NULL'
+                        . ' OR (j.result IS NOT NULL AND ABS(j.score - ej.score) > 0.0001'
+                        . '     AND BIT_AND(p.types, :scoringType) > 0)';
                     $shadow_difference_count = $this->em->createQueryBuilder()
                         ->from(Submission::class, 's')
                         ->innerJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1')
                         ->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1')
+                        ->innerJoin('s.problem', 'p')
                         ->select('COUNT(s.submitid)')
                         ->andWhere('s.contest = :contest')
                         ->andWhere('s.externalid IS NOT NULL')
                         ->andWhere('ej.result IS NOT NULL')
-                        ->andWhere('(j.result IS NOT NULL AND ej.result != j.result) OR s.importError IS NOT NULL')
+                        ->andWhere($hasDifference)
                         ->andWhere('ej.verified = false')
                         ->setParameter('contest', $contest)
+                        ->setParameter('scoringType', Problem::TYPE_SCORING)
                         ->getQuery()
                         ->getSingleScalarResult();
                 }
