@@ -546,7 +546,7 @@ class ContestController extends AbstractRestController
      * Get the event feed for the given contest.
      * @throws NonUniqueResultException
      */
-    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')"))]
+    #[IsGranted(new Expression("is_granted('ROLE_API_READER')"))]
     #[Rest\Get(path: '/{cid}/event-feed')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     #[OA\Parameter(
@@ -660,7 +660,6 @@ class ContestController extends AbstractRestController
             if ($types) {
                 $typeFilter = explode(',', $types);
             }
-            $canViewAll = $this->isGranted('ROLE_API_READER');
 
             // Keep track of the last send state event; we may have the same
             // event more than once in our table and we want to make sure we
@@ -797,27 +796,8 @@ class ContestController extends AbstractRestController
                         !in_array($event->getEndpointtype(), $typeFilter)) {
                         continue;
                     }
-                    if (!$canViewAll) {
-                        $restricted_types = ['judgements', 'runs', 'clarifications'];
-                        if ($contest->getStarttime() === null || Utils::now() < $contest->getStarttime()) {
-                            $restricted_types[] = 'problems';
-                        }
-                        if (in_array($event->getEndpointtype(), $restricted_types)) {
-                            continue;
-                        }
-                    }
 
                     $data = $event->getContent();
-                    // Filter fields with specific access restrictions.
-                    if (!$canViewAll) {
-                        if ($event->getEndpointtype() == 'submissions') {
-                            unset($data['entry_point']);
-                            unset($data['language_id']);
-                        }
-                        if ($event->getEndpointtype() == 'problems') {
-                            unset($data['test_data_count']);
-                        }
-                    }
 
                     // Do not send out the same state event twice
                     if ($event->getEndpointtype() === 'state') {
