@@ -291,7 +291,7 @@
                     </td>
                     {% if is_scoring %}
                         <td class="right">
-                            {% if externalJudgement.score is not null %}
+                            {% if externalJudgement is not null and externalJudgement.score is not null %}
                                 {{ externalJudgement.score | number_format(2, '.', '') }}
                             {% else %}
                                 {{ '-' }}
