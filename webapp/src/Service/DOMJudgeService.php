@@ -83,6 +83,9 @@ class DOMJudgeService
     final public const EVAL_DEMAND = 3;
     final public const EVAL_ANALYST = 4;
 
+    // Minimum absolute score difference to consider as a meaningful shadow difference.
+    final public const SCORE_DIFF_EPSILON = 0.0001;
+
     // Regex external identifiers must adhere to. Note that we are not checking whether it
     // does not start with a dot or dash or ends with a dot. We could but it would make the
     // regex way more complicated and would also complicate the logic in ImportExportService::importContestYaml.
@@ -426,7 +429,7 @@ class DOMJudgeService
                 if ($contest) {
                     $hasDifference = '(j.result IS NOT NULL AND ej.result != j.result)'
                         . ' OR s.importError IS NOT NULL'
-                        . ' OR (j.result IS NOT NULL AND ABS(j.score - ej.score) > 0.0001'
+                        . ' OR (j.result IS NOT NULL AND ABS(j.score - ej.score) > ' . self::SCORE_DIFF_EPSILON
                         . '     AND BIT_AND(p.types, :scoringType) > 0)';
                     $shadow_difference_count = $this->em->createQueryBuilder()
                         ->from(Submission::class, 's')
