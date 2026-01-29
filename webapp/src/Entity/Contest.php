@@ -330,7 +330,7 @@ class Contest extends BaseApiEntity implements
     #[Serializer\Exclude]
     private bool $externalSourceEnabled = false;
 
-    #[ORM\Column(options: ['comment' => 'Use external judgements for results and scoring?', 'default' => 0])]
+    #[ORM\Column(options: ['comment' => 'Use external judgements for results and scoring?', 'default' => 1])]
     #[Serializer\Exclude]
     private bool $externalSourceUseJudgements = false;
 
