@@ -151,7 +151,8 @@ class ShadowDifferencesController extends BaseController
 
             // Collect score change data for scoring problems.
             $problem = $submission->getProblem();
-            if ($problem->isScoringProblem() && $externalJudgement && $localJudging) {
+            if ($problem->isScoringProblem()
+                && $externalJudgement?->getResult() && $localJudging?->getResult()) {
                 $hasScoringProblems = true;
                 $externalScore = (float)$externalJudgement->getScore();
                 $localScore = (float)$localJudging->getScore();
