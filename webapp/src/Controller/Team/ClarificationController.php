@@ -124,16 +124,23 @@ class ClarificationController extends BaseController
             ->getQuery()
             ->getOneOrNullResult();
 
-        $formData = [];
-        if ($clarification) {
-            if ($clarification->getProblem()) {
-                $formData['subject'] = sprintf('%s%s%s', $clarification->getContest()->getExternalid(), Clarification::PROBLEM_BASED_SEPARATOR, $clarification->getProblem()->getExternalid());
-            } else {
-                $formData['subject'] = sprintf('%s%s%s', $clarification->getContest()->getExternalid(), Clarification::CATEGORY_BASED_SEPARATOR, $clarification->getCategory());
-            }
-
-            $formData['message'] = "> " . str_replace("\n", "\n> ", Utils::wrapUnquoted($clarification->getBody())) . "\n\n";
+        if ($clarification === null) {
+            throw new NotFoundHttpException(sprintf('Clarification %s not found', $clarId));
         }
+
+        if (!$team->canViewClarification($clarification)) {
+            throw new HttpException(401, 'Permission denied');
+        }
+
+        $formData = [];
+        if ($clarification->getProblem()) {
+            $formData['subject'] = sprintf('%s%s%s', $clarification->getContest()->getExternalid(), Clarification::PROBLEM_BASED_SEPARATOR, $clarification->getProblem()->getExternalid());
+        } else {
+            $formData['subject'] = sprintf('%s%s%s', $clarification->getContest()->getExternalid(), Clarification::CATEGORY_BASED_SEPARATOR, $clarification->getCategory());
+        }
+
+        $formData['message'] = "> " . str_replace("\n", "\n> ", Utils::wrapUnquoted($clarification->getBody())) . "\n\n";
+
         $form = $this->formFactory
             ->createBuilder(TeamClarificationType::class, $formData)
             ->setAction($this->generateUrl('team_clarification', ['clarId' => $clarId]))
@@ -146,14 +153,6 @@ class ClarificationController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->newClarificationHelper($form, $contest, $team);
             return $this->redirectToRoute('team_index');
-        }
-
-        if ($clarification === null) {
-            throw new NotFoundHttpException(sprintf('Clarification %s not found', $clarId));
-        }
-
-        if (!$team->canViewClarification($clarification)) {
-            throw new HttpException(401, 'Permission denied');
         }
 
         // Get the "parent" message if we have one - if we have access to it
