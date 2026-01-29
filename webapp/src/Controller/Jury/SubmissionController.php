@@ -1335,9 +1335,9 @@ class SubmissionController extends BaseController
         $type = ($judging instanceof ExternalJudgement) ?'shadow difference' : 'submission';
 
         if ($judging === null) {
-            $claimWarning = sprintf('Cannot %s this %s: no valid judging found.', $type, $action);
+            $claimWarning = sprintf('Cannot %s this %s: no valid judging found.', $action, $type);
         } elseif ($judging->getVerified()) {
-            $claimWarning = sprintf('Cannot %s this %s: judging already verified.', $type, $action);
+            $claimWarning = sprintf('Cannot %s this %s: judging already verified.', $action, $type);
         } elseif (!$user && $action === 'claim') {
             $claimWarning = sprintf('Cannot claim this %s: no jury member specified.', $type);
         } else {
