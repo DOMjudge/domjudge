@@ -62,10 +62,12 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\Service\ResetInterface;
 use Traversable;
 use ZipArchive;
 
@@ -85,6 +87,15 @@ class ExternalContestSourceService
     /** @var array<string, string> $verdicts */
     protected array $verdicts = [];
     protected ?string $basePath = null;
+    protected int $importedEventsCounter = 0;
+
+    /**
+     * How often to reset services to free memory.
+     * Without periodic resets, the Doctrine identity map and other service
+     * state grows unbounded during long-running imports, causing excessive
+     * memory use and GC pressure.
+     */
+    protected const SERVICES_RESET_INTERVAL = 100;
 
     /**
      * This array will hold all events that are waiting on a dependent event
@@ -133,6 +144,9 @@ class ExternalContestSourceService
         protected readonly string $env,
         #[Autowire('%domjudge.version%')]
         string $domjudgeVersion,
+        protected readonly TokenStorageInterface $tokenStorage,
+        #[Autowire(service: 'services_resetter')]
+        protected readonly ResetInterface $servicesResetter,
     ) {
         $clientOptions = [
             'headers' => [
@@ -681,6 +695,13 @@ class ExternalContestSourceService
 
         foreach ($event->data as $eventData) {
             $method($event, $eventData);
+        }
+
+        // Periodically reset services to prevent unbounded memory growth.
+        // Without this, the identity map and other service state accumulates
+        // during the import, eventually consuming gigabytes of RAM on large contest feeds.
+        if (++$this->importedEventsCounter % self::SERVICES_RESET_INTERVAL === 0) {
+            $this->resetServices();
         }
     }
 
@@ -2156,6 +2177,36 @@ class ExternalContestSourceService
         $this->removeWarning($event->type, $event->id, ExternalSourceWarning::TYPE_UNSUPORTED_ACTION);
 
         return true;
+    }
+
+    /**
+     * Reset all resettable services to free memory and prevent unbounded
+     * growth during long-running imports.
+     *
+     * This resets the Doctrine identity map, debug log processor, traceable
+     * event dispatcher, stopwatch, data collectors, etc. — the same approach
+     * Symfony Messenger workers use.
+     *
+     * After resetting, $this->contest is re-fetched so it remains managed.
+     */
+    protected function resetServices(): void
+    {
+        $contestId = $this->contest->getCid();
+
+        // The security token must be preserved across resets since it was set
+        // once at command startup.
+        $token = $this->tokenStorage->getToken();
+        $this->servicesResetter->reset();
+        $this->tokenStorage->setToken($token);
+
+        $this->contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $this->logger->info('Reset services after %d events, memory: %s MB (real: %s MB, UoW size: %d)',
+            [
+                $this->importedEventsCounter,
+                round(memory_get_usage() / 1024 / 1024),
+                round(memory_get_usage(true) / 1024 / 1024),
+                $this->em->getUnitOfWork()->size(),
+            ]);
     }
 
     /**
