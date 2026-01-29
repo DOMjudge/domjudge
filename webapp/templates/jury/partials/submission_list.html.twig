@@ -170,7 +170,7 @@
                 </td>
                 {% if is_scoring %}
                     <td class="{{ tdExtraClass }} right">
-                        {% if submission.score is not null %}
+                        {% if submission.result is not null and submission.score is not null %}
                             {{ submission.score | number_format(2, '.', '') }}
                         {% else %}
                             {{ '-' }}
