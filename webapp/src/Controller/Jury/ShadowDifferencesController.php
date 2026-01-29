@@ -159,18 +159,20 @@ class ShadowDifferencesController extends BaseController
                 $absDelta = abs($delta);
                 $maxScore = max($maxScore, $externalScore, $localScore);
 
-                $scoreChanges[] = [
-                    'submitId' => $submission->getExternalid(),
-                    'contestId' => $contest->getExternalid(),
-                    'teamName' => $submission->getTeam()->getEffectiveName(),
-                    'teamId' => $submission->getTeam()->getExternalid(),
-                    'problemName' => $problem->getName(),
-                    'problemId' => $problem->getExternalid(),
-                    'oldScore' => $externalScore,
-                    'newScore' => $localScore,
-                    'delta' => $delta,
-                    'absDelta' => $absDelta,
-                ];
+                if ($absDelta > DOMJudgeService::SCORE_DIFF_EPSILON) {
+                    $scoreChanges[] = [
+                        'submitId' => $submission->getExternalid(),
+                        'contestId' => $contest->getExternalid(),
+                        'teamName' => $submission->getTeam()->getEffectiveName(),
+                        'teamId' => $submission->getTeam()->getExternalid(),
+                        'problemName' => $problem->getName(),
+                        'problemId' => $problem->getExternalid(),
+                        'oldScore' => $externalScore,
+                        'newScore' => $localScore,
+                        'delta' => $delta,
+                        'absDelta' => $absDelta,
+                    ];
+                }
             }
         }
 
