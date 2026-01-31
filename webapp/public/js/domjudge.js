@@ -212,41 +212,41 @@ function updateClock()
 {
     var curtime = Math.round((new Date().getTime() - clientOffset) / 1000);
 
-    var fmt = "";
-    if ( timeleftelt.innerHTML=='start delayed' || timeleft.innerHTML == 'no contest' ) { // FIXME
-        var left = 0;
-        var what = timeleftelt.innerHTML;
+    var formattedTime = "";
+    var prefix = timeleftElement.innerHTML;
+    var secondsLeft = 0;
+    if ( prefix === 'start delayed' || prefix === 'no contest' ) {
+        // keep prefix as-is
     } else if (curtime >= starttime && curtime < endtime ) {
-        var left = endtime - curtime;
-        var what = "";
+        secondsLeft = endtime - curtime;
+        prefix = "";
     } else if (curtime >= activatetime && curtime < starttime ) {
-        var left = starttime - curtime;
-        var what = "time to start: ";
+        secondsLeft = starttime - curtime;
+        prefix = "time to start: ";
     } else {
-        var left = 0;
-        var what = "contest over";
+        prefix = "contest over";
     }
 
-    if ( left ) {
-        if ( left > 24*60*60 ) {
-            var d = Math.floor(left/(24*60*60));
-            fmt += d + "d ";
-            left -= d * 24*60*60;
+    if ( secondsLeft ) {
+        if ( secondsLeft > 24*60*60 ) {
+            var d = Math.floor(secondsLeft/(24*60*60));
+            formattedTime += d + "d ";
+            secondsLeft -= d * 24*60*60;
         }
-        if ( left > 60*60 ) {
-            var h = Math.floor(left/(60*60));
-            fmt += h + ":";
-            left -= h * 60*60;
+        if ( secondsLeft > 60*60 ) {
+            var h = Math.floor(secondsLeft/(60*60));
+            formattedTime += h + ":";
+            secondsLeft -= h * 60*60;
         }
-        var m = Math.floor(left/60);
-        if ( m < 10 ) { fmt += "0"; }
-        fmt += m + ":";
-        left -= m * 60;
-        if ( left < 10 ) { fmt += "0"; }
-        fmt += left;
+        var m = Math.floor(secondsLeft/60);
+        if ( m < 10 ) { formattedTime += "0"; }
+        formattedTime += m + ":";
+        secondsLeft -= m * 60;
+        if ( secondsLeft < 10 ) { formattedTime += "0"; }
+        formattedTime += secondsLeft;
     }
 
-    timeleftelt.innerHTML = what + fmt;
+    timeleftElement.innerHTML = prefix + formattedTime;
 }
 
 function setCookie(name, value)

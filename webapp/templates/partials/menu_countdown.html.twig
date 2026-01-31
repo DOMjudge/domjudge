@@ -19,7 +19,7 @@
     var starttime = {{ contest.starttime|default(-1) }};
     var endtime = {{ contest.endtime|default(-1) }};
     var clientOffset = localInitial - new Date(initial * 1000).getTime();
-    var timeleftelt = document.getElementById("timeleft");
+    var timeleftElement = document.getElementById("timeleft");
 
     setInterval(function () {
         updateClock();
