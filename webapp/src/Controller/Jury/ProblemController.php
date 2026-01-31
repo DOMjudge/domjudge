@@ -614,6 +614,7 @@ class ProblemController extends BaseController
         }
 
         if ($request->isMethod('POST')) {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
             if (!empty($lockedContests)) {
                 $this->addFlash('danger', 'Cannot edit problem / testcases, it belongs to locked contest(s) '
                     . join(', ', $lockedContests));
@@ -1254,6 +1255,7 @@ class ProblemController extends BaseController
         return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
     }
 
+    #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{contestId}/{probId}/toggle/{type<judge|submit>}', name: 'jury_problem_toggle')]
     public function toggleSubmitAction(
         RouterInterface $router,
