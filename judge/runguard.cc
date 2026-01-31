@@ -239,7 +239,9 @@ void die(int errnum, std::format_string<Args...> fmt, Args&&... args)
 			errstr += ": libcgroup";
 			errnum = errno;
 		}
-		if ( errnum>=ECGROUPNOTCOMPILED && errnum<=ECGROUPNOTCOMPILED ) {
+		// The upper bound depends on the libcgroup version, we got the value from
+		// https://github.com/libcgroup/libcgroup/blob/b26f58ec3fce95f81b3c0dac4ea44d1c5793670c/include/libcgroup/error.h#L79
+		if ( errnum>=ECGROUPNOTCOMPILED && errnum<=50031 ) {
 			errstr += ": ";
 			errstr += cgroup_strerror(errnum);
 		} else {
