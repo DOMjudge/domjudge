@@ -614,6 +614,7 @@ class ProblemController extends BaseController
         }
 
         if ($request->isMethod('POST')) {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
             if (!empty($lockedContests)) {
                 $this->addFlash('danger', 'Cannot edit problem / testcases, it belongs to locked contest(s) '
                     . join(', ', $lockedContests));
@@ -1262,6 +1263,7 @@ class ProblemController extends BaseController
         string $probId,
         string $type
     ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $contestProblem = $this->em->getRepository(ContestProblem::class)->findByProblemAndContest($contestId, $probId);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found for contest %s', $probId, $contestId));
