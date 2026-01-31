@@ -7,14 +7,17 @@
     {{ parent() }}
     {{ macros.select2_extrahead() }}
     {{ macros.coloris_extrahead() }}
+    {{ macros.toggle_extrahead() }}
 {% endblock %}
 
 {% block content %}
 
-    <h1>Add contest</h1>
+    <div class="contest-form">
+        <h1>Add contest</h1>
 
-    {% include 'jury/partials/contest_form.html.twig' %}
+        {% include 'jury/partials/contest_form.html.twig' %}
 
-    {{ macros.collection_scripts() }}
+        {{ macros.collection_scripts() }}
+    </div>
 
 {% endblock %}

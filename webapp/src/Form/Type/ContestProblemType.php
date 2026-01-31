@@ -8,6 +8,7 @@ use App\Service\DOMJudgeService as DJS;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -31,29 +32,28 @@ class ContestProblemType extends AbstractType
         $builder->add('shortname', TextType::class, [
             'label' => 'Short name',
             'empty_data' => '',
+            'attr' => ['size' => 4],
         ]);
         $builder->add('points', IntegerType::class, [
             'label' => 'Points',
+            'attr' => ['style' => 'width: 5em;'],
         ]);
-        $builder->add('allowSubmit', ChoiceType::class, [
+        $builder->add('allowSubmit', CheckboxType::class, [
             'label' => 'Allow submit',
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
+            'required' => false,
+            'attr' => ContestType::TOGGLE_ATTRS,
         ]);
-        $builder->add('allowJudge', ChoiceType::class, [
+        $builder->add('allowJudge', CheckboxType::class, [
             'label' => 'Allow judge',
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
+            'required' => false,
+            'attr' => ContestType::TOGGLE_ATTRS,
         ]);
         $builder->add('color', TextType::class, [
             'required' => false,
             'label' => 'Colour',
             'attr' => [
                 'data-color-picker' => '',
+                'size' => 6,
             ],
         ]);
         $builder->add('lazyEvalResults', ChoiceType::class, [

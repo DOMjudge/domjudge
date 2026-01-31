@@ -38,13 +38,13 @@ class ContestControllerTest extends JuryControllerTestCase
                                                            'endtimeString'            => '2021-07-17 16:11:00 Europe/Amsterdam',
                                                            'unfreezetimeString'       => '2021-07-17 16:12:00 Europe/Amsterdam',
                                                            'deactivatetimeString'     => '2021-07-17 16:13:00 Europe/Amsterdam',
-                                                           'processBalloons'          => '1',
-                                                           'medalsEnabled'            => '1',
-                                                           'enabled'                  => '1',
-                                                           'runtimeAsScoreTiebreaker' => '1',
-                                                           'openToAllTeams'           => '1',
-                                                           'public'                   => '1',
-                                                           'starttimeEnabled'         => '1',
+                                                           'processBalloons'          => true,
+                                                           'medalsEnabled'            => true,
+                                                           'enabled'                  => true,
+                                                           'runtimeAsScoreTiebreaker' => true,
+                                                           'openToAllTeams'           => true,
+                                                           'public'                   => true,
+                                                           'starttimeEnabled'         => true,
                                                            'goldMedals'               => '1',
                                                            'silverMedals'             => '1',
                                                            'bronzeMedals'             => '1',
@@ -215,29 +215,29 @@ class ContestControllerTest extends JuryControllerTestCase
                                                            'name' => "\\''"],
                                                           ['shortname' => 'na',
                                                            'name' => 'No Medals',
-                                                           'medalsEnabled' => '0',
+                                                           'medalsEnabled' => false,
                                                            'medalCategories' => []],
                                                           ['shortname' => 'na2',
                                                            'name' => 'No Medals 2',
-                                                           'medalsEnabled' => '0'],
+                                                           'medalsEnabled' => false],
                                                           ['shortname' => 'npub',
                                                            'name' => 'Not Public',
-                                                           'public' => '0'],
+                                                           'public' => false],
                                                           ['shortname' => 'dst',
                                                            'name' => 'Disable startTime',
-                                                           'starttimeEnabled' => '0'],
+                                                           'starttimeEnabled' => false],
                                                           ['shortname' => 'nbal',
                                                            'name' => 'No balloons',
-                                                           'processBalloons' => '0'],
+                                                           'processBalloons' => false],
                                                           ['shortname' => 'dis',
                                                            'name' => 'Disabled',
-                                                           'enabled' => '0'],
+                                                           'enabled' => false],
                                                           ['shortname' => 'nall',
                                                            'name' => 'Private contest',
-                                                           'openToAllTeams' => '0'],
+                                                           'openToAllTeams' => false],
                                                           ['shortname' => 'runtimeTie',
                                                            'name' => 'Runtime_as*tie',
-                                                           'runtimeAsScoreTiebreaker' => '1'],
+                                                           'runtimeAsScoreTiebreaker' => true],
                                                           ['shortname' => 'contest_warning',
                                                            'warningMessage' => 'This is not a contest, this is an Unit test'],
                                                           ['shortname' => 'za',
@@ -245,7 +245,7 @@ class ContestControllerTest extends JuryControllerTestCase
                                                            'goldMedals' => '0',
                                                            'silverMedals' => '0',
                                                            'bronzeMedals' => '0',
-                                                           'medalsEnabled' => '1',
+                                                           'medalsEnabled' => true,
                                                            'medalCategories' => ['0' => 'self-registered']],
                                                           ['shortname' => 'prob',
                                                            'problems' => ['0' => ['shortname' => 'boolfind',
@@ -348,16 +348,16 @@ class ContestControllerTest extends JuryControllerTestCase
 
         $crawler = $this->getCurrentCrawler();
         $form = $crawler->filter('form')->form();
-        $formData = $form->getValues();
+        $formData = $form->getPhpValues();
         $problemIndex = null;
-        foreach ($formData as $key => $value) {
-            if (preg_match('/^contest\[problems\]\[(\d+)\]\[shortname\]$/', $key, $matches) === 1 && $value === 'B') {
-                $problemIndex = $matches[1];
-                $formData["contest[problems][$problemIndex][allowJudge]"] = '0';
+        foreach ($formData['contest']['problems'] as $index => $problem) {
+            if (($problem['shortname'] ?? null) === 'B') {
+                $problemIndex = $index;
+                unset($formData['contest']['problems'][$index]['allowJudge']);
             }
         }
 
-        $this->client->submit($form, $formData);
+        $this->client->request($form->getMethod(), $form->getUri(), $formData, $form->getPhpFiles());
 
         // Submit again.
         $this->addSubmission('DOMjudge', 'fltcmp');
@@ -367,8 +367,8 @@ class ContestControllerTest extends JuryControllerTestCase
         self::assertEquals(4, $judgeTaskQuery->getSingleScalarResult());
 
         // Enable judging again.
-        $formData["contest[problems][$problemIndex][allowJudge]"] = '1';
-        $this->client->submit($form, $formData);
+        $formData['contest']['problems'][$problemIndex]['allowJudge'] = '1';
+        $this->client->request($form->getMethod(), $form->getUri(), $formData, $form->getPhpFiles());
 
         // This should add more queue and judge tasks.
         self::assertEquals(2, $queueTaskQuery->getSingleScalarResult());

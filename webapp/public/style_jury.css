@@ -167,6 +167,45 @@ div.submission-summary > span {
     font-size: 22px;
 }
 
+/* Contest form styles */
+.contest-form-section-header td {
+    background-color: #e9ecef !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #495057;
+    padding: 0.5rem 0.75rem !important;
+    border-bottom: 2px solid #dee2e6;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+.contest-form-section-header td i {
+    color: #6c757d;
+    width: 1.25em;
+    text-align: center;
+}
+.contest-fields-table th {
+    vertical-align: top;
+    padding-top: 0.6rem;
+    white-space: nowrap;
+    width: 1%;
+}
+.contest-fields-table td .form-text {
+    font-size: 0.8rem;
+    margin-top: 0.15rem;
+}
+.contest-fields-table td .form-check { padding-left: 0; }
+.contest-form .page-header-bar {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+}
+.contest-form .page-header-bar h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
 .clr-field {
     display: block !important;
 }
