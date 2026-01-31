@@ -33,7 +33,7 @@ class TeamClarificationType extends AbstractType
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         if ($contest) {
             foreach ($categories as $categoryId => $categoryName) {
-                $subjects[$categoryName] = sprintf('%s%s%s', $contest->getExternalid(), Clarification::PROBLEM_BASED_SEPARATOR, $categoryId);
+                $subjects[$categoryName] = sprintf('%s%s%s', $contest->getExternalid(), Clarification::CATEGORY_BASED_SEPARATOR, $categoryId);
             }
             if ($contest->getFreezeData()->started()) {
                 /** @var ContestProblem $problem */
