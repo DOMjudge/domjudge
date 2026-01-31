@@ -7,25 +7,19 @@
     {{ parent() }}
     {{ macros.select2_extrahead() }}
     {{ macros.coloris_extrahead() }}
+    {{ macros.toggle_extrahead() }}
 {% endblock %}
 
 {% block content %}
 
-    <h1>Edit contest {{ contest.cid }}</h1>
-
-    <div class="row">
-        <div class="col-lg-4">
-            <table class="table table-sm table-striped">
-                <tr>
-                    <th>Contest ID</th>
-                    <td>{{ contest.cid }}</td>
-                </tr>
-            </table>
+    <div class="contest-form">
+        <div class="page-header-bar">
+            <h1>Edit contest #{{ contest.cid }} ({{ contest.name }} / {{ contest.externalid }})</h1>
         </div>
+
+        {% include 'jury/partials/contest_form.html.twig' %}
+
+        {{ macros.collection_scripts() }}
     </div>
-
-    {% include 'jury/partials/contest_form.html.twig' %}
-
-    {{ macros.collection_scripts() }}
 
 {% endblock %}
