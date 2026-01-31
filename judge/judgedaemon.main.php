@@ -867,7 +867,10 @@ class JudgeDaemon
                 } elseif ($status < 200 || $status >= 300) {
                     $json = dj_json_try_decode($response);
                     if ($json !== null) {
-                        $response = var_export($json, true);
+                        $response = $json['message'] ?? $response;
+                        if (isset($json['trace'][0]['file'])) {
+                            $response .= ' at ' . $json['trace'][0]['file'] . ':' . ($json['trace'][0]['line'] ?? '?');
+                        }
                     }
                     $errstr = "Error while executing curl $verb to url " . $requestUrl .
                         ": http status code: " . $status .
@@ -879,10 +882,10 @@ class JudgeDaemon
                 }
             }
             if ($trial == BACKOFF_STEPS) {
-                $errstr .= " Retry limit reached.";
+                $errstr .= ", Retry limit reached.";
             } else {
                 $retry_in_sec = $delay_in_sec + BACKOFF_JITTER_SEC * random_int(0, mt_getrandmax()) / mt_getrandmax();
-                $warnstr = $errstr . " This request will be retried after about " .
+                $warnstr = $errstr . ", Retrying after " .
                     round($retry_in_sec, 2) . "sec... (" . $trial . "/" . BACKOFF_STEPS . ")";
                 warning($warnstr);
                 dj_sleep($retry_in_sec);
