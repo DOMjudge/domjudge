@@ -197,7 +197,7 @@ struct process_t {
 
   string exit_info_to_string() const {
     if (!exited) {
-      return "not exited yed";
+      return "not exited yet";
     }
     if (WIFEXITED(exitInfo)) {
       return string("exited with status ") + to_string(WEXITSTATUS(exitInfo));
