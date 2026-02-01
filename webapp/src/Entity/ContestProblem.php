@@ -261,6 +261,23 @@ class ContestProblem extends BaseApiEntity
                 ->atPath('color')
                 ->addViolation();
         }
+
+        if ($this->problem !== null && $this->contest !== null) {
+            $contestIsScoring = $this->contest->getScoreboardType() === ScoreboardType::SCORE;
+            $problemIsScoring = $this->problem->isScoringProblem();
+
+            if ($contestIsScoring && !$problemIsScoring) {
+                $context
+                    ->buildViolation('Cannot add a pass-fail problem to a scoring contest.')
+                    ->atPath('problem')
+                    ->addViolation();
+            } elseif (!$contestIsScoring && $problemIsScoring) {
+                $context
+                    ->buildViolation('Cannot add a scoring problem to a pass-fail contest.')
+                    ->atPath('problem')
+                    ->addViolation();
+            }
+        }
     }
 
     /**

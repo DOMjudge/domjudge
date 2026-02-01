@@ -9,6 +9,7 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
+use App\Entity\ScoreboardType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -342,6 +343,15 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         }
 
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
+
+        $contestIsScoring = $contest->getScoreboardType() === ScoreboardType::SCORE;
+        $problemIsScoring = $problem->isScoringProblem();
+        if ($contestIsScoring && !$problemIsScoring) {
+            throw new BadRequestHttpException('Cannot add a pass-fail problem to a scoring contest.');
+        }
+        if (!$contestIsScoring && $problemIsScoring) {
+            throw new BadRequestHttpException('Cannot add a scoring problem to a pass-fail contest.');
+        }
 
         $contestProblem = (new ContestProblem())
             ->setContest($contest)

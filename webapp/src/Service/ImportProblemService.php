@@ -233,6 +233,13 @@ readonly class ImportProblemService
             $propertyAccessor->setValue($problem, $key, $value);
         }
 
+        // Parse YAML before validation so that all problem properties (including
+        // types) are set before the entity validation callbacks fire.
+        $validationMode = 'default';
+        if (!static::parseYaml($problemYaml, $messages, $validationMode, $propertyAccessor, $problem)) {
+            return null;
+        }
+
         $hasErrors = false;
         $errors    = $this->validator->validate($problem);
         if ($errors->count()) {
@@ -270,10 +277,6 @@ readonly class ImportProblemService
             return null;
         }
 
-        $validationMode = 'default';
-        if (!static::parseYaml($problemYaml, $messages, $validationMode, $propertyAccessor, $problem)) {
-            return null;
-        }
         if (!$this->searchAndAddValidator($zip, $zipEntries, $messages, $externalId, $validationMode, $problem)) {
             return null;
         }

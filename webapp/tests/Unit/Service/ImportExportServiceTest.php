@@ -11,6 +11,7 @@ use App\Entity\ContestProblem;
 use App\Entity\ExternalContestSourceType;
 use App\Entity\Language;
 use App\Entity\Problem;
+use App\Entity\ScoreboardType;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
@@ -136,9 +137,18 @@ class ImportExportServiceTest extends BaseTestCase
         }
 
         $problems = [];
-        /** @var ContestProblem $problem */
-        foreach ($contest->getProblems() as $problem) {
-            $problems[$problem->getShortname()] = $problem->getProblem()->getExternalid();
+        /** @var ContestProblem $contestProblem */
+        foreach ($contest->getProblems() as $contestProblem) {
+            $problems[$contestProblem->getShortname()] = $contestProblem->getProblem()->getExternalid();
+
+            // Verify problem types match the contest scoreboard type.
+            if ($contest->getScoreboardType() === ScoreboardType::SCORE) {
+                self::assertTrue($contestProblem->getProblem()->isScoringProblem(),
+                    sprintf('Problem %s should be scoring type for a scoring contest', $contestProblem->getShortname()));
+            } else {
+                self::assertTrue($contestProblem->getProblem()->isPassFailProblem(),
+                    sprintf('Problem %s should be pass-fail type for a pass-fail contest', $contestProblem->getShortname()));
+            }
         }
 
         self::assertEquals($expectedProblems, $problems);
@@ -269,6 +279,32 @@ class ImportExportServiceTest extends BaseTestCase
             'score-test',
             '2020-01-01 10:34:56 UTC',
             null,
+        ];
+        // Scoring contest with problems: verify problems get scoring type.
+        yield [
+            [
+                'name'             => 'Scoring Contest With Problems',
+                'short-name'       => 'scoring-problems',
+                'duration'         => '5:00:00',
+                'start-time'       => '2020-01-01T12:34:56+02:00',
+                'scoreboard_type'  => 'score',
+                'problems'         => [
+                    [
+                        'letter'     => 'A',
+                        'short-name' => 'scoreprobA',
+                        'color'      => '#FF0000',
+                    ],
+                    [
+                        'letter'     => 'B',
+                        'short-name' => 'scoreprobB',
+                        'color'      => '#00FF00',
+                    ],
+                ],
+            ],
+            'scoring-problems',
+            '2020-01-01 10:34:56 UTC',
+            null,
+            ['A' => 'scoreprobA', 'B' => 'scoreprobB'],
         ];
     }
 
