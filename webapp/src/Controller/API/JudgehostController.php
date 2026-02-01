@@ -361,15 +361,15 @@ class JudgehostController extends AbstractFOSRestController
                         if ($run->getJudgeTask() &&
                             $run->getJudgeTask()->getJudgehost() &&
                             $run->getJudgeTask()->getJudgehost()->getHostname() !== $judgehost->getHostname()) {
-                            $hostname = $run->getJudgeTask()->getJudgehost()->getHostname();
-                            $disableHostnames[$hostname] = $hostname;
+                            $otherHostname = $run->getJudgeTask()->getJudgehost()->getHostname();
+                            $disableHostnames[$otherHostname] = $otherHostname;
                         }
                     }
 
-                    foreach ($disableHostnames as $hostname) {
+                    foreach ($disableHostnames as $disableHostname) {
                         $disabled = [
                             'kind' => 'judgehost',
-                            'hostname' => $hostname,
+                            'hostname' => $disableHostname,
                         ];
                         $error = new InternalError();
                         $error
