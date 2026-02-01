@@ -553,7 +553,7 @@ void cgroup_create()
 	logmsg(LOG_DEBUG, "created cgroup `{}'",cgroupname);
 }
 
-#undef cgroup_setval
+#undef cgroup_add_value
 
 
 void cgroup_kill()
