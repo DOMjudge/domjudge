@@ -347,16 +347,17 @@ class UserController extends AbstractRestController
             throw new BadRequestHttpException('`id` field is required');
         }
 
-        if ($this->em->getRepository(User::class)->findOneBy(['username' => $addUser->username])) {
-            throw new BadRequestHttpException(sprintf("User %s already exists", $addUser->username));
-        }
-
         $user = new User();
         if ($addUser instanceof UpdateUser) {
             $existingUser = $this->em->getRepository(User::class)->findOneBy(['externalid' => $addUser->id]);
             if ($existingUser) {
                 $user = $existingUser;
             }
+        }
+
+        $existingUsername = $this->em->getRepository(User::class)->findOneBy(['username' => $addUser->username]);
+        if ($existingUsername && $existingUsername !== $user) {
+            throw new BadRequestHttpException(sprintf("User %s already exists", $addUser->username));
         }
         $user
             ->setUsername($addUser->username)
@@ -384,6 +385,13 @@ class UserController extends AbstractRestController
                 throw new BadRequestHttpException(sprintf("Team %s not found", $addUser->teamId));
             }
             $user->setTeam($team);
+        }
+
+        // Clear existing roles on update to avoid duplicate join table entries.
+        if ($addUser instanceof UpdateUser) {
+            foreach ($user->getUserRoles() as $existingRole) {
+                $user->removeUserRole($existingRole);
+            }
         }
 
         $roles = $addUser->roles;
