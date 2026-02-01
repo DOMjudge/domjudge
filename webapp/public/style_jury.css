@@ -173,7 +173,7 @@ div.submission-summary > span {
     font-weight: 600;
     font-size: 0.9rem;
     color: #495057;
-    padding: 0.5rem 0.75rem !important;
+    padding: 0.5rem 0.3rem !important;
     border-bottom: 2px solid #dee2e6;
     letter-spacing: 0.03em;
     text-transform: uppercase;
@@ -188,6 +188,13 @@ div.submission-summary > span {
     padding-top: 0.6rem;
     white-space: nowrap;
     width: 1%;
+}
+.contest-fields-table td {
+    padding-right: 0 !important;
+}
+.contest-fields-table td .form-control,
+.contest-fields-table td .form-select {
+    width: 100%;
 }
 .contest-fields-table td .form-text {
     font-size: 0.8rem;
