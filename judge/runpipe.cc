@@ -807,7 +807,7 @@ struct state_t {
         int time_millis = time % 1000;
         char direction = from.index == 0 ? ']' : '[';
         char eofbuf[128];
-        sprintf(eofbuf, "[%3d.%03ds/%ld]%c", time_sec, time_millis, 0L, direction);
+        snprintf(eofbuf, sizeof(eofbuf), "[%3d.%03ds/%ld]%c", time_sec, time_millis, 0L, direction);
         write_all(output_file.output_file, eofbuf, strlen(eofbuf));
 
         warning(0, "EOF from process #{}", from.index);
