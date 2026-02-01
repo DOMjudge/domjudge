@@ -460,6 +460,11 @@ readonly class ImportExportService
                 ->setTimelimit($problemData['time_limit'] ?? 10)
                 ->setExternalid($problemData['id'] ?? $problemData['short-name'] ?? $problemLabel ?? null);
 
+            // Set the problem type to match the contest scoreboard type.
+            if ($contest->getScoreboardType() === ScoreboardType::SCORE) {
+                $problem->setTypesAsString(['scoring']);
+            }
+
             $errors           = $this->validator->validate($problem);
             $hasProblemErrors = $errors->count();
             if ($hasProblemErrors) {

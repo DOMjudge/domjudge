@@ -103,6 +103,7 @@ jobs:
           for i in */problem.yaml; do
               dir="$(dirname $i)"
               (
+                  sed -i -e 's|type: scoring|type: pass-fail|' "$dir/problem.yaml"
                   mv "$dir" "kattis_${dir}"
                   cd "kattis_${dir}"
                   zip -r "../kattis_${dir}.zip" -- *
