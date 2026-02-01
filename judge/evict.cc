@@ -66,7 +66,7 @@ void evict_directory(const std::string& dirname, dev_t root_dev) {
 			std::string entry_path = dirname + "/" + entry->d_name;
 
 			if (lstat(entry_path.c_str(), &s) < 0) {
-				if (be_verbose) logerror(errno, "Unable to stat file/directory: {}\n", entry_path);
+				if (be_verbose) logerror(errno, "Unable to stat file/directory: {}", entry_path);
 				continue;
 			}
 
@@ -87,7 +87,7 @@ void evict_directory(const std::string& dirname, dev_t root_dev) {
 				}
 
 				if (posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED)) {
-					warning(errno, "Unable to evict file: {}\n", entry_path);
+					warning(errno, "Unable to evict file: {}", entry_path);
 				} else {
 					if (be_verbose) logmsg(LOG_DEBUG, "Evicted file: {}", entry_path);
 				}
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 	if (one_file_system) {
 		struct stat s;
 		if (stat(dirname.c_str(), &s) < 0) {
-			logerror(errno, "Unable to stat directory: {}\n", dirname);
+			logerror(errno, "Unable to stat directory: {}", dirname);
 			return 1;
 		}
 		root_dev = s.st_dev;
