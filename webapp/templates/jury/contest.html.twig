@@ -11,466 +11,507 @@
 
 {% block content %}
 
-    <h1>Contest {{ contest.name }}</h1>
+    {% macro section_header(icon, title) %}
+        <tr class="contest-form-section-header">
+            <td colspan="3"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
+        </tr>
+    {% endmacro %}
 
-    {% if contest.isActive %}
-        <div class="alert alert-success">
-            This contest is currently active.
+    <div class="contest-form">
+        <div class="page-header-bar">
+            <h1>Contest #{{ contest.cid }} ({{ contest.name }} / {{ contest.externalid }})</h1>
         </div>
-    {% endif %}
-    {% if not contest.enabled %}
-        <div class="alert alert-danger">
-            This contest is disabled.
-        </div>
-    {% endif %}
-    {% if contest.finalizetime is not empty %}
-        <div class="alert alert-info">
-            This contest is final.
-        </div>
-    {% endif %}
-    {%- if is_granted('ROLE_ADMIN') and contest.isLocked -%}
-        <div class="alert alert-warning">
-            This contest is locked. Unlock it to edit contest data.
-        </div>
-    {% endif %}
 
-    <div class="row">
-        <div class="col-lg-5">
-            <table class="table table-sm table-striped">
-                <tr>
-                    <th>ID</th>
-                    <td>{{ contest.externalid }}</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Short name</th>
-                    <td>{{ contest.shortname }}</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Scoreboard type</th>
-                    <td>{{ contest.scoreboardType.value }}</td>
-                    <td></td>
-                </tr>
-                {% for type, data in contest.dataForJuryInterface %}
+        {% if contest.isActive %}
+            <div class="alert alert-success">
+                This contest is currently active.
+            </div>
+        {% endif %}
+        {% if not contest.enabled %}
+            <div class="alert alert-danger">
+                This contest is disabled.
+            </div>
+        {% endif %}
+        {% if contest.finalizetime is not empty %}
+            <div class="alert alert-info">
+                This contest is final.
+            </div>
+        {% endif %}
+        {%- if is_granted('ROLE_ADMIN') and contest.isLocked -%}
+            <div class="alert alert-warning">
+                This contest is locked. Unlock it to edit contest data.
+            </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-lg-6">
+                <table class="table table-sm mb-0 contest-fields-table">
+                    {{ _self.section_header('tag', 'Identity') }}
                     <tr>
-                        <td class="{{ data.class | default('') }}"><b>{{ data.label }}:</b></td>
-                        <td class="{{ data.class | default('') }}">
-                            {{ data.time }}
-                            {% if data.icon is defined %}
-                                <i class="fas fa-{{ data.icon }}"></i>
-                            {% endif %}
-                        </td>
-                        {% if is_granted('ROLE_ADMIN') %}
-                            <td>
-                                {% if data.show_button %}
-                                    {% set button_label = type ~ " now" %}
-                                    {{ button(path('jury_contest_donow', {'contestId': contest.externalid, 'time': type}), button_label, 'primary btn-sm timebutton') }}
-                                {% endif %}
-                                {% if data.extra_button is defined %}
-                                    {{ button(path('jury_contest_donow', {'contestId': contest.externalid, 'time': data.extra_button.type}), data.extra_button.label, 'primary btn-sm timebutton') }}
-                                {% endif %}
-                                {% if type == 'finalize' %}
-                                    {% if contest.finalizetime %}
-                                        {{ button(path('jury_contest_finalize', {'contestId': contest.externalid}), 'Update finalization', 'secondary btn-sm timebutton') }}
-                                    {% endif %}
+                        <th>ID</th>
+                        <td>{{ contest.externalid }}</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>Short name</th>
+                        <td>{{ contest.shortname }}</td>
+                        <td></td>
+                    </tr>
+                    {{ _self.section_header('clock', 'Times') }}
+                    {% for type, data in contest.dataForJuryInterface %}
+                        <tr>
+                            <td class="{{ data.class | default('') }}"><b>{{ data.label }}:</b></td>
+                            <td class="{{ data.class | default('') }}">
+                                {{ data.time }}
+                                {% if data.icon is defined %}
+                                    <i class="fas fa-{{ data.icon }}"></i>
                                 {% endif %}
                             </td>
-                        {% else %}
-                            <td></td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-                <tr>
-                    <th>Allow submit</th>
-                    <td>
-                        {% include 'jury/partials/contest_toggle.html.twig' with {type: 'submit', enabled: contest.allowSubmit} %}
-                    </td>
-                    <td></td>
-                </tr>
-                {% if contest.contestProblemsetType is not empty %}
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <td>
+                                    {% if data.show_button %}
+                                        {% set button_label = type ~ " now" %}
+                                        {{ button(path('jury_contest_donow', {'contestId': contest.externalid, 'time': type}), button_label, 'primary btn-sm timebutton') }}
+                                    {% endif %}
+                                    {% if data.extra_button is defined %}
+                                        {{ button(path('jury_contest_donow', {'contestId': contest.externalid, 'time': data.extra_button.type}), data.extra_button.label, 'primary btn-sm timebutton') }}
+                                    {% endif %}
+                                    {% if type == 'finalize' %}
+                                        {% if contest.finalizetime %}
+                                            {{ button(path('jury_contest_finalize', {'contestId': contest.externalid}), 'Update finalization', 'secondary btn-sm timebutton') }}
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    {{ _self.section_header('sliders', 'Scoring') }}
                     <tr>
-                        <th>Problemset document</th>
+                        <th>Scoreboard type</th>
+                        <td>{{ contest.scoreboardType.value }}</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>Allow submit</th>
                         <td>
-                            <a href="{{ path('jury_contest_problemset', {'cid': contest.externalid}) }}">
-                                <i title="view problemset document of the contest"
-                                   class="fas fa-file-{{ contest.contestProblemsetType }}"></i>
+                            {% include 'jury/partials/contest_toggle.html.twig' with {type: 'submit', enabled: contest.allowSubmit} %}
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>Process balloons</th>
+                        <td>
+                            {% include 'jury/partials/contest_toggle.html.twig' with {type: 'balloons', enabled: contest.processBalloons} %}
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>Runtime as tiebreaker</th>
+                        <td>
+                            {% include 'jury/partials/contest_toggle.html.twig' with {type: 'tiebreaker', enabled: contest.runtimeAsScoreTiebreaker} %}
+                        </td>
+                    </tr>
+                    {{ _self.section_header('medal', 'Medals') }}
+                    <tr>
+                        <th>Process medals</th>
+                        <td>
+                            {% include 'jury/partials/contest_toggle.html.twig' with {type: 'medals', enabled: contest.medalsEnabled} %}
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>Medals</th>
+                        <td>
+                            {% if contest.medalsEnabled %}
+                                <div class="card">
+                                    <h6 class="card-header" id="categories">
+                                        <a class="collapsed d-block text-dark pt-0 pb-0" data-bs-toggle="collapse" href="#collapsecategories" aria-expanded="true" aria-controls="collapsecategories" id="collapseheader">
+                                            {{ (contest.goldMedals > 0) + (contest.silverMedals > 0) + (contest.bronzeMedals > 0) }} different types of medals (Show/Hide details)
+                                            <i class="fa fa-chevron-down float-end"></i>
+                                        </a>
+                                    </h6>
+                                    <div id="collapsecategories" class="collapse collapsed" aria-labelledby="categories">
+                                        <div class="card-body pb-1">
+                                            <a>{{ contest.goldMedals }} Gold Medal(s)</a>
+                                            <br>
+                                            <a>{{ contest.silverMedals }} Silver Medal(s)</a>
+                                            <br>
+                                            <a>{{ contest.bronzeMedals }} Bronze Medal(s)</a>
+                                            <br>
+                                            For all teams from the following categories:
+                                            <ul>
+                                                {% for category in contest.medalCategories %}
+                                                    <li>
+                                                        <a href="{{ path('jury_team_category', {'categoryId': category.externalid}) }}">
+                                                            {{ category.name }}
+                                                        </a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <em>none</em>
+                            {% endif %}
+                        </td>
+                        <td></td>
+                    </tr>
+                    {{ _self.section_header('users', 'Access & Visibility') }}
+                    <tr>
+                        <th>Publicly visible</th>
+                        <td>
+                            {% include 'jury/partials/contest_toggle.html.twig' with {type: 'public', enabled: contest.public} %}
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>Open to all teams</th>
+                        <td>{{ contest.openToAllTeams | printYesNo }}</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>Teams</th>
+                        <td>
+                            {% if contest.openToAllTeams %}
+                                <em>all teams</em>
+                            {% else %}
+                                {% for team in contest.teams %}
+                                    <a href="{{ path('jury_team', {'teamId': team.externalid}) }}">
+                                        {{ team.effectiveName }} {{ team | entityIdBadge }}
+                                    </a>
+                                    <br>
+                                {% endfor %}
+                                {% for category in contest.teamCategories %}
+                                    All teams from
+                                    <a href="{{ path('jury_team_category', {'categoryId': category.externalid}) }}">
+                                        {{ category.name }}
+                                    </a>
+                                    <br>
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>Languages</th>
+                        <td>
+                            {% if contest.languages is empty %}
+                                <em>All globally enabled languages:</em>
+                                {% set allowedLanguages = languages %}
+                            {% else %}
+                                {% set allowedLanguages = contest.languages %}
+                            {% endif %}
+                            <ul>
+                                {% for language in allowedLanguages %}
+                                    <li><a href="{{ path('jury_language', {"langId": language.externalid}) }}">{{ language.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>Warning message</th>
+                        <td>{{ contest.warningMessage }}</td>
+                        <td></td>
+                    </tr>
+                    {{ _self.section_header('file', 'Files & Downloads') }}
+                    {% if contest.contestProblemsetType is not empty %}
+                        <tr>
+                            <th>Problemset document</th>
+                            <td>
+                                <a href="{{ path('jury_contest_problemset', {'cid': contest.externalid}) }}">
+                                    <i title="view problemset document of the contest"
+                                       class="fas fa-file-{{ contest.contestProblemsetType }}"></i>
+                                </a>
+                            </td>
+                            <td></td>
+                        </tr>
+                    {% endif %}
+                    {% set contestId = contest.externalid %}
+                    {% set banner = contestId | assetPath('contest') %}
+                    {% if not banner %}
+                        {% set banner = globalBannerAssetPath() %}
+                    {% endif %}
+                    {% if banner %}
+                        <tr>
+                            <th>Banner</th>
+                            <td><img style="max-width: 300px;" src="{{ asset(banner) }}" title="{{ contest.name }}" /></td>
+                            <td></td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Public static scoreboard ZIP</th>
+                        <td>
+                            <a class="btn btn-sm btn-secondary" href="{{ path('jury_scoreboard_data_zip', {contestId: contest.externalid, type: 'public'}) }}">
+                                <i class="fas fa-download"></i> Download
                             </a>
                         </td>
                         <td></td>
                     </tr>
-                {% endif %}
-                <tr>
-                    <th>Process balloons</th>
-                    <td>
-                        {% include 'jury/partials/contest_toggle.html.twig' with {type: 'balloons', enabled: contest.processBalloons} %}
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Runtime as tiebreaker</th>
-                    <td>
-                        {% include 'jury/partials/contest_toggle.html.twig' with {type: 'tiebreaker', enabled: contest.runtimeAsScoreTiebreaker} %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Process medals</th>
-                    <td>
-                        {% include 'jury/partials/contest_toggle.html.twig' with {type: 'medals', enabled: contest.medalsEnabled} %}
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Medals</th>
-                    <td>
-                        {% if contest.medalsEnabled %}
-                            <div class="card">
-                                <h6 class="card-header" id="categories">
-                                    <a class="collapsed d-block text-dark pt-0 pb-0" data-bs-toggle="collapse" href="#collapsecategories" aria-expanded="true" aria-controls="collapsecategories" id="collapseheader">
-                                        {{ (contest.goldMedals > 0) + (contest.silverMedals > 0) + (contest.bronzeMedals > 0) }} different types of medals (Show/Hide details)
-                                        <i class="fa fa-chevron-down float-end"></i>
-                                    </a>
-                                </h6>
-                                <div id="collapsecategories" class="collapse collapsed" aria-labelledby="categories">
-                                    <div class="card-body pb-1">
-                                        <a>{{ contest.goldMedals }} Gold Medal(s)</a>
-                                        <br>
-                                        <a>{{ contest.silverMedals }} Silver Medal(s)</a>
-                                        <br>
-                                        <a>{{ contest.bronzeMedals }} Bronze Medal(s)</a>
-                                        <br>
-                                        For all teams from the following categories:
-                                        <ul>
-                                            {% for category in contest.medalCategories %}
-                                                <li>
-                                                    <a href="{{ path('jury_team_category', {'categoryId': category.externalid}) }}">
-                                                        {{ category.name }}
-                                                    </a>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        {% else %}
-                            <em>none</em>
-                        {% endif %}
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Publicly visible</th>
-                    <td>
-                        {% include 'jury/partials/contest_toggle.html.twig' with {type: 'public', enabled: contest.public} %}
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Open to all teams</th>
-                    <td>{{ contest.openToAllTeams | printYesNo }}</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Teams</th>
-                    <td>
-                        {% if contest.openToAllTeams %}
-                            <em>all teams</em>
-                        {% else %}
-                            {% for team in contest.teams %}
-                                <a href="{{ path('jury_team', {'teamId': team.externalid}) }}">
-                                    {{ team.effectiveName }} {{ team | entityIdBadge }}
-                                </a>
-                                <br>
-                            {% endfor %}
-                            {% for category in contest.teamCategories %}
-                                All teams from
-                                <a href="{{ path('jury_team_category', {'categoryId': category.externalid}) }}">
-                                    {{ category.name }}
-                                </a>
-                                <br>
-                            {% endfor %}
-                        {% endif %}
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Languages</th>
-                    <td>
-                        {% if contest.languages is empty %}
-                            <em>All globally enabled languages:</em>
-                            {% set allowedLanguages = languages %}
-                        {% else %}
-                            {% set allowedLanguages = contest.languages %}
-                        {% endif %}
-                        <ul>
-                            {% for language in allowedLanguages %}
-                                <li><a href="{{ path('jury_language', {"langId": language.externalid}) }}">{{ language.name }}</a></li>
-                            {% endfor %}
-                        </ul>
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Shadow mode</th>
-                    <td>
-                        {{ contest.externalSourceEnabled | printYesNo }}
-                        {% if contest.externalSourceEnabled %}
-                            (<a href="{{ path('jury_external_contest') }}">external contest</a>)
-                        {% endif %}
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Public static scoreboard ZIP</th>
-                    <td>
-                        <a class="btn btn-sm btn-secondary" href="{{ path('jury_scoreboard_data_zip', {contestId: contest.externalid, type: 'public'}) }}">
-                            <i class="fas fa-download"></i> Download
-                        </a>
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Jury (unfrozen) static scoreboard ZIP</th>
-                    <td>
-                        <a class="btn btn-sm btn-secondary" href="{{ path('jury_scoreboard_data_zip', {contestId: contest.externalid, type: 'unfrozen'}) }}">
-                            <i class="fas fa-download"></i> Download
-                        </a>
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Sample data ZIP</th>
-                    <td>
-                        <a class="btn btn-sm btn-secondary" href="{{ path('jury_contest_samples_data_zip', {contestId: contest.externalid}) }}">
-                            <i class="fas fa-download"></i> Download
-                        </a>
-                        <br/>
-                        <small class="text-muted">
-                            Contains samples, attachments and statement for all problems.
-                        </small>
-                    </td>
-                    <td></td>
-                </tr>
-                {% set contestId = contest.externalid %}
-                {% set banner = contestId | assetPath('contest') %}
-                {% if not banner %}
-                    {% set banner = globalBannerAssetPath() %}
-                {% endif %}
-                {% if banner %}
                     <tr>
-                        <th>Banner</th>
-                        <td><img style="max-width: 300px;" src="{{ asset(banner) }}" title="{{ contest.name }}" /></td>
+                        <th>Jury (unfrozen) static scoreboard ZIP</th>
+                        <td>
+                            <a class="btn btn-sm btn-secondary" href="{{ path('jury_scoreboard_data_zip', {contestId: contest.externalid, type: 'unfrozen'}) }}">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </td>
                         <td></td>
                     </tr>
-                {% endif %}
-                <tr>
-                    <th>Warning message</th>
-                    <td>{{ contest.warningMessage }}</td>
-                    <td></td>
-                </tr>
-            </table>
-        </div>
-    </div>
-
-    {% if contest.finalizetime %}
-        <h2>Finalized</h2>
-
-        <div class="row">
-            <div class="col-lg-4">
-                <table class="table table-sm table-striped">
                     <tr>
-                        <th>Finalized at</th>
-                        <td>{{ contest.finalizetime | printtime('Y-m-d H:i:s (T)') }}</td>
+                        <th>Sample data ZIP</th>
+                        <td>
+                            <a class="btn btn-sm btn-secondary" href="{{ path('jury_contest_samples_data_zip', {contestId: contest.externalid}) }}">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                            <br/>
+                            <small class="text-muted">
+                                Contains samples, attachments and statement for all problems.
+                            </small>
+                        </td>
+                        <td></td>
                     </tr>
+                    {{ _self.section_header('cloud-arrow-down', 'Shadowing') }}
                     <tr>
-                        <th>B</th>
-                        <td>{{ contest.b }}</td>
-                    </tr>
-                    <tr>
-                        <th>Comment</th>
-                        <td>{{ contest.finalizecomment | nl2br }}</td>
+                        <th>Shadow mode</th>
+                        <td>
+                            {{ contest.externalSourceEnabled | printYesNo }}
+                            {% if contest.externalSourceEnabled %}
+                                (<a href="{{ path('jury_external_contest') }}">external contest</a>)
+                            {% endif %}
+                        </td>
+                        <td></td>
                     </tr>
                 </table>
             </div>
         </div>
-    {% endif %}
 
-    {% if allowRemovedIntervals %}
-        <h2>Removed intervals</h2>
-        {% if not is_granted('ROLE_ADMIN') and contest.removedIntervals is empty %}
-            <p class="nodata">None.</p>
-        {% else %}
-            {% if removedIntervalForm is defined %}
-                {{ form_start(removedIntervalForm) }}
+        {% if contest.finalizetime %}
+            <div class="row mt-3">
+                <div class="col-lg-6">
+                    <table class="table table-sm mb-0 contest-fields-table">
+                        <tr class="contest-form-section-header">
+                            <td><i class="fas fa-flag-checkered me-2"></i>Finalized</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4">
+                    <table class="table table-sm table-striped">
+                        <tr>
+                            <th>Finalized at</th>
+                            <td>{{ contest.finalizetime | printtime('Y-m-d H:i:s (T)') }}</td>
+                        </tr>
+                        <tr>
+                            <th>B</th>
+                            <td>{{ contest.b }}</td>
+                        </tr>
+                        <tr>
+                            <th>Comment</th>
+                            <td>{{ contest.finalizecomment | nl2br }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if allowRemovedIntervals %}
+            <div class="row mt-3">
+                <div class="col-lg-6">
+                    <table class="table table-sm mb-0 contest-fields-table">
+                        <tr class="contest-form-section-header">
+                            <td><i class="fas fa-hourglass me-2"></i>Removed intervals</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            {% if not is_granted('ROLE_ADMIN') and contest.removedIntervals is empty %}
+                <p class="nodata">None.</p>
+            {% else %}
+                {% if removedIntervalForm is defined %}
+                    {{ form_start(removedIntervalForm) }}
+                {% endif %}
+                <div class="row">
+                    <div class="col-lg-6">
+                        <table class="table data-table table-sm table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>From</th>
+                                <th></th>
+                                <th>To</th>
+                                <th>Duration</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for removedInterval in removedIntervals %}
+                                <tr>
+                                    <td>{{ removedInterval.intervalid }}</td>
+                                    <td>{{ removedInterval.starttimeString }}</td>
+                                    <td><i class="fas fa-arrow-right"></i></td>
+                                    <td>{{ removedInterval.endtimeString }}</td>
+                                    <td>{{ removedInterval.starttime | printtimediff(removedInterval.endtime) }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger remove-interval-button" type="button"
+                                                data-submit-url="{{ path('jury_contest_remove_interval', {'contestId': contest.externalid, 'intervalId': removedInterval.intervalid}) }}">
+                                            <i class="fas fa-trash-alt"></i></button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <tr>
+                                    <td>new</td>
+                                    <td>
+                                        {{ form_errors(removedIntervalForm.starttimeString) }}
+                                        {{ form_widget(removedIntervalForm.starttimeString) }}
+                                    </td>
+                                    <td><i class="fas fa-arrow-right"></i></td>
+                                    <td>
+                                        {{ form_errors(removedIntervalForm.endtimeString) }}
+                                        {{ form_widget(removedIntervalForm.endtimeString) }}
+                                    </td>
+                                    <td></td>
+                                    <td>{{ form_widget(removedIntervalForm.add) }}</td>
+                                </tr>
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% if removedIntervalForm is defined %}
+                    <small class="text-muted">Use the format <b><code>YYYY-MM-DD HH:MM:SS[.uuuuuu] timezone</code></b> for
+                        start/end times.
+                    </small>
+                    {{ form_end(removedIntervalForm) }}
+                {% endif %}
             {% endif %}
+
+            <script>
+                $(function () {
+                    $('.remove-interval-button').on('click', function () {
+                        if (confirm('Really delete interval?')) {
+                            var $form = $('<form method="post" />');
+                            $form.attr('action', $(this).data('submit-url'));
+                            // Some browsers require the form to be present in the DOM,
+                            // so append it to the body
+                            $(document.body).append($form);
+                            $form.submit();
+                        }
+                        return false;
+                    });
+                });
+            </script>
+
+        {% endif %}
+
+        <div class="row mt-3">
+            <div class="col-lg-6">
+                <table class="table table-sm mb-0 contest-fields-table">
+                    <tr class="contest-form-section-header">
+                        <td><i class="fas fa-puzzle-piece me-2"></i>Problems</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        {% if problems is empty %}
+            <p class="nodata">No problems added yet</p>
+        {% else %}
             <div class="row">
                 <div class="col-lg-6">
                     <table class="table data-table table-sm table-striped table-hover">
                         <thead>
                         <tr>
                             <th>ID</th>
-                            <th>From</th>
+                            <th>Name</th>
+                            <th>Shortname</th>
+                            <th>Points</th>
+                            <th>Allow<br>submit</th>
+                            <th>Allow<br>judge</th>
+                            <th>Color</th>
+                            <th>Lazy eval</th>
                             <th></th>
-                            <th>To</th>
-                            <th>Duration</th>
+                            <th></th>
                             <th></th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for removedInterval in removedIntervals %}
+                        {% for problem in problems %}
                             <tr>
-                                <td>{{ removedInterval.intervalid }}</td>
-                                <td>{{ removedInterval.starttimeString }}</td>
-                                <td><i class="fas fa-arrow-right"></i></td>
-                                <td>{{ removedInterval.endtimeString }}</td>
-                                <td>{{ removedInterval.starttime | printtimediff(removedInterval.endtime) }}</td>
+                                {% set link = path('jury_problem', {'probId': problem.externalId}) %}
+                                <td><a href="{{ link }}">{{ problem.externalId }}</a></td>
+                                <td><a href="{{ link }}">{{ problem.problem.name }}</a></td>
+                                <td><a href="{{ link }}">{{ problem.shortname }}</a></td>
+                                <td><a href="{{ link }}">{{ problem.points }}</a></td>
                                 <td>
-                                    <button class="btn btn-sm btn-danger remove-interval-button" type="button"
-                                            data-submit-url="{{ path('jury_contest_remove_interval', {'contestId': contest.externalid, 'intervalId': removedInterval.intervalid}) }}">
-                                        <i class="fas fa-trash-alt"></i></button>
+                                    {% include 'jury/partials/problem_toggle.html.twig' with {contestProblem: problem, type: 'submit', enabled: problem.allowSubmit} %}
+                                </td>
+                                <td>
+                                    {% include 'jury/partials/problem_toggle.html.twig' with {contestProblem: problem, type: 'judge', enabled: problem.allowJudge} %}
+                                </td>
+                                {% if problem.color is empty %}
+                                    <td><a href="{{ link }}">&nbsp;</a></td>
+                                {% else %}
+                                    <td title="{{ problem.color }}">
+                                        <a href="{{ link }}">
+                                            {{ problem | problemBadge }}
+                                        </a>
+                                    </td>
+                                {% endif %}
+                                <td>
+                                    <a href="{{ link }}">
+                                        {{ problem.lazyEvalResults | printLazyMode }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if problem.problem.problemstatementType %}
+                                        <a title="view problem statement" href="{{ path('jury_problem_statement', {'probId': problem.externalId}) }}">
+                                            <i class="fas fa-file-{{ problem.problem.problemstatementType }}"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if is_granted('ROLE_ADMIN') and not contest.isLocked %}
+                                        <a title="Unlink problem from contest" href="{{ path('jury_contest_problem_delete', {'contestId': contest.externalid, 'probId': problem.externalId}) }}"
+                                           data-ajax-modal>
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <a title="Judge remaining testcases" href="{{ path('jury_contest_problem_request_remaining', {'contestId': contest.externalid, 'probId': problem.externalId}) }}">
+                                            <i class="fas fa-gavel"></i>
+                                        </a>
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% endfor %}
-                        {% if is_granted('ROLE_ADMIN') %}
-                            <tr>
-                                <td>new</td>
-                                <td>
-                                    {{ form_errors(removedIntervalForm.starttimeString) }}
-                                    {{ form_widget(removedIntervalForm.starttimeString) }}
-                                </td>
-                                <td><i class="fas fa-arrow-right"></i></td>
-                                <td>
-                                    {{ form_errors(removedIntervalForm.endtimeString) }}
-                                    {{ form_widget(removedIntervalForm.endtimeString) }}
-                                </td>
-                                <td></td>
-                                <td>{{ form_widget(removedIntervalForm.add) }}</td>
-                            </tr>
-                        {% endif %}
                         </tbody>
                     </table>
                 </div>
             </div>
-            {% if removedIntervalForm is defined %}
-                <small class="text-muted">Use the format <b><code>YYYY-MM-DD HH:MM:SS[.uuuuuu] timezone</code></b> for
-                    start/end times.
-                </small>
-                {{ form_end(removedIntervalForm) }}
-            {% endif %}
         {% endif %}
 
-        <script>
-            $(function () {
-                $('.remove-interval-button').on('click', function () {
-                    if (confirm('Really delete interval?')) {
-                        var $form = $('<form method="post" />');
-                        $form.attr('action', $(this).data('submit-url'));
-                        // Some browsers require the form to be present in the DOM,
-                        // so append it to the body
-                        $(document.body).append($form);
-                        $form.submit();
-                    }
-                    return false;
-                });
-            });
-        </script>
-
-    {% endif %}
-
-    <h2 class="mt-2">Problems</h2>
-
-    {% if problems is empty %}
-        <p class="nodata">No problems added yet</p>
-    {% else %}
-        <div class="row">
-            <div class="col-lg-6">
-                <table class="table data-table table-sm table-striped table-hover">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Shortname</th>
-                        <th>Points</th>
-                        <th>Allow<br>submit</th>
-                        <th>Allow<br>judge</th>
-                        <th>Color</th>
-                        <th>Lazy eval</th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for problem in problems %}
-                        <tr>
-                            {% set link = path('jury_problem', {'probId': problem.externalId}) %}
-                            <td><a href="{{ link }}">{{ problem.externalId }}</a></td>
-                            <td><a href="{{ link }}">{{ problem.problem.name }}</a></td>
-                            <td><a href="{{ link }}">{{ problem.shortname }}</a></td>
-                            <td><a href="{{ link }}">{{ problem.points }}</a></td>
-                            <td>
-                                {% include 'jury/partials/problem_toggle.html.twig' with {contestProblem: problem, type: 'submit', enabled: problem.allowSubmit} %}
-                            </td>
-                            <td>
-                                {% include 'jury/partials/problem_toggle.html.twig' with {contestProblem: problem, type: 'judge', enabled: problem.allowJudge} %}
-                            </td>
-                            {% if problem.color is empty %}
-                                <td><a href="{{ link }}">&nbsp;</a></td>
-                            {% else %}
-                                <td title="{{ problem.color }}">
-                                    <a href="{{ link }}">
-                                        {{ problem | problemBadge }}
-                                    </a>
-                                </td>
-                            {% endif %}
-                            <td>
-                                <a href="{{ link }}">
-                                    {{ problem.lazyEvalResults | printLazyMode }}
-                                </a>
-                            </td>
-                            <td>
-                                {% if problem.problem.problemstatementType %}
-                                    <a title="view problem statement" href="{{ path('jury_problem_statement', {'probId': problem.externalId}) }}">
-                                        <i class="fas fa-file-{{ problem.problem.problemstatementType }}"></i>
-                                    </a>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if is_granted('ROLE_ADMIN') and not contest.isLocked %}
-                                    <a title="Unlink problem from contest" href="{{ path('jury_contest_problem_delete', {'contestId': contest.externalid, 'probId': problem.externalId}) }}"
-                                       data-ajax-modal>
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if is_granted('ROLE_ADMIN') %}
-                                    <a title="Judge remaining testcases" href="{{ path('jury_contest_problem_request_remaining', {'contestId': contest.externalid, 'probId': problem.externalId}) }}">
-                                        <i class="fas fa-gavel"></i>
-                                    </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="button-row">
+            {%- if is_granted('ROLE_ADMIN') -%}
+                {% if contest.isLocked %}
+                    {{ button(path('jury_contest_unlock', {'contestId': contest.externalid}), 'Unlock', 'danger', 'unlock') }}
+                {% else %}
+                    {{ button(path('jury_contest_edit', {'contestId': contest.externalid}), 'Edit', 'primary', 'edit') }}
+                    {{ button(path('jury_contest_delete', {'contestId': contest.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
+                    {{ button(path('jury_contest_lock', {'contestId': contest.externalid}), 'Lock', 'secondary', 'lock') }}
+                {% endif %}
+                {{ button(path('jury_contest_request_remaining', {'contestId': contest.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
+            {% endif %}
+            {{ button(path('jury_contest_prefetch', {'contestId': contest.externalid}), 'Heat up judgehosts with contest data', 'secondary', 'download') }}
+            {% include 'jury/partials/rejudge_form.html.twig' with {table: 'contest', id: contest.externalid, buttonClass: 'btn-secondary'} %}
         </div>
-    {% endif %}
-
-    <div class="button-row">
-        {%- if is_granted('ROLE_ADMIN') -%}
-            {% if contest.isLocked %}
-                {{ button(path('jury_contest_unlock', {'contestId': contest.externalid}), 'Unlock', 'danger', 'unlock') }}
-            {% else %}
-                {{ button(path('jury_contest_edit', {'contestId': contest.externalid}), 'Edit', 'primary', 'edit') }}
-                {{ button(path('jury_contest_delete', {'contestId': contest.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
-                {{ button(path('jury_contest_lock', {'contestId': contest.externalid}), 'Lock', 'secondary', 'lock') }}
-            {% endif %}
-            {{ button(path('jury_contest_request_remaining', {'contestId': contest.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
-        {% endif %}
-        {{ button(path('jury_contest_prefetch', {'contestId': contest.externalid}), 'Heat up judgehosts with contest data', 'secondary', 'download') }}
-        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'contest', id: contest.externalid, buttonClass: 'btn-secondary'} %}
     </div>
 
 {% endblock %}
@@ -478,4 +519,3 @@
 {% block extrafooter %}
     {{ macros.toggle_autosubmit_extrafooter() }}
 {% endblock %}
-

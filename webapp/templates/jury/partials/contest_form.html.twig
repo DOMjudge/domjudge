@@ -11,8 +11,7 @@
 
 {% macro section_header(icon, title) %}
 <tr class="contest-form-section-header">
-    <td><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
-    <td></td>
+    <td colspan="2"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
 </tr>
 {% endmacro %}
 
@@ -121,17 +120,13 @@
         </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-lg-6">
-        <table class="table table-sm mb-0">
-            <tbody>
-                <tr class="contest-form-section-header">
-                    <td><i class="fas fa-puzzle-piece me-2"></i>Problems</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+<table class="table table-sm mb-0 contest-fields-table">
+    <tbody>
+        <tr class="contest-form-section-header">
+            <td><i class="fas fa-puzzle-piece me-2"></i>Problems</td>
+        </tr>
+    </tbody>
+</table>
 <table class="table table-sm w-auto">
     <thead>
     <tr>
