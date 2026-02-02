@@ -8,6 +8,7 @@ use App\DataTransferObject\Scoreboard\Score;
 use App\DataTransferObject\Scoreboard\Scoreboard;
 use App\Entity\Contest;
 use App\Entity\Event;
+use App\Entity\ScoreboardType;
 use App\Entity\TeamCategory;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -175,15 +176,20 @@ class ScoreboardController extends AbstractApiController
                 continue;
             }
 
+            $isScoring = $contest->getScoreboardType() === ScoreboardType::SCORE;
+            $totalScore = $isScoring ? (float)$teamScore->score : null;
+
             if ($contest->getRuntimeAsScoreTiebreaker()) {
                 $score = new Score(
                     numSolved: $teamScore->numPoints,
                     totalRuntime: $teamScore->totalRuntime,
+                    totalScore: $totalScore,
                 );
             } else {
                 $score = new Score(
                     numSolved: $teamScore->numPoints,
-                    totalTime: $teamScore->totalTime,
+                    totalTime: $isScoring ? null : $teamScore->totalTime,
+                    totalScore: $totalScore,
                 );
             }
 
@@ -208,6 +214,10 @@ class ScoreboardController extends AbstractApiController
                     if ($matrixItem->isCorrect) {
                         $problem->time = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
                     }
+                }
+
+                if ($contestProblem->getProblem()->isScoringProblem() && $matrixItem->points !== "") {
+                    $problem->score = (float)$matrixItem->points;
                 }
 
                 $problems[] = $problem;

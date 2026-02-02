@@ -14,5 +14,8 @@ readonly class Score
         #[Serializer\Exclude(if: 'object.totalRuntime === null')]
         #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
         public ?int $totalRuntime = null,
+        #[Serializer\Exclude(if: 'object.totalScore === null')]
+        #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+        public ?float $totalScore = null,
     ) {}
 }
