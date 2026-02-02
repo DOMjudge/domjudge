@@ -294,6 +294,9 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgetaskid]);
+        if (!$judgingRun) {
+            throw new BadRequestHttpException("Unknown judging run for judgetaskid $judgetaskid.");
+        }
         $query = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
