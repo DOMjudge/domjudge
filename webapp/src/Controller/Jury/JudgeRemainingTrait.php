@@ -32,7 +32,7 @@ trait JudgeRemainingTrait
             } elseif (!$judging->getValid()) {
                 $invalidJudgings[] = $judgingId;
             } else {
-                $numRequested = $this->em->getConnection()->executeStatement(
+                $numRequested += $this->em->getConnection()->executeStatement(
                     'UPDATE judgetask SET valid=1'
                     . ' WHERE jobid=:jobid'
                     . ' AND judgehostid IS NULL',
