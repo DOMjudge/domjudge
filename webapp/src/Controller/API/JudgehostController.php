@@ -996,7 +996,16 @@ class JudgehostController extends AbstractFOSRestController
             }
 
             if ($score) {
-                $judgingRun->setScore(trim(base64_decode($score)));
+                $decodedScore = trim(base64_decode($score));
+                if (!is_numeric($decodedScore)) {
+                    throw new BadRequestHttpException(
+                        sprintf("Invalid score '%s' for judgetask %d: not a numeric value.", $decodedScore, $judgeTaskId));
+                }
+                if (bccomp($decodedScore, '0', ScoreboardService::SCALE) < 0) {
+                    throw new BadRequestHttpException(
+                        sprintf("Invalid score '%s' for judgetask %d: must not be negative.", $decodedScore, $judgeTaskId));
+                }
+                $judgingRun->setScore($decodedScore);
             }
 
             $judging = $judgingRun->getJudging();
