@@ -377,11 +377,17 @@ class JuryMiscController extends BaseController
     public function changeContestAction(Request $request, RouterInterface $router, string $contestId): Response
     {
         $referer = $request->headers->get('referer');
-        // When changing to "no contest" (-1), don't redirect to contest-scoped URLs
-        // because the ContestCookieListener would override the cookie to that contest's ID.
-        if ($this->isLocalReferer($router, $request) &&
-            !($contestId === '-1' && str_contains($referer, '/jury/contests/'))) {
-            $response = new RedirectResponse($referer);
+        if ($this->isLocalReferer($router, $request)) {
+            if ($contestId === '-1' && str_contains($referer, '/jury/contests/')) {
+                // When changing to "no contest", don't redirect to contest-scoped URLs
+                // because the ContestCookieListener would override the cookie.
+                $response = $this->redirectToRoute('jury_index');
+            } else {
+                // When switching between contests, rewrite the contest ID in the URL
+                // so the ContestCookieListener doesn't override the new selection.
+                $newReferer = preg_replace('#(/jury/contests/)[^/?\#/]+#', '$1' . $contestId, $referer);
+                $response = new RedirectResponse($newReferer);
+            }
         } else {
             $response = $this->redirectToRoute('jury_index');
         }
