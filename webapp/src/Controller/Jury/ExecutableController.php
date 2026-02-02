@@ -218,6 +218,12 @@ class ExecutableController extends BaseController
                     $ini_array = [];
                 }
                 if (!empty($ini_array)) {
+                    if (!isset($ini_array['execid'], $ini_array['description'], $ini_array['type'])) {
+                        throw new InvalidArgumentException('Executable INI file is missing required fields (execid, description, type).');
+                    }
+                    if (!preg_match('#^[a-z0-9_-]+$#i', $ini_array['execid'])) {
+                        throw new InvalidArgumentException(sprintf("INI execid '%s' must contain only alphanumerics", $ini_array['execid']));
+                    }
                     $id          = $ini_array['execid'];
                     $description = $ini_array['description'];
                     $type        = $ini_array['type'];
