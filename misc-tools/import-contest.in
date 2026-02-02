@@ -157,8 +157,6 @@ if import_file('teams', ['teams.json', 'teams2.tsv']):
     import_images('teams', 'photo', ['^photo\\.jpg$', '^photo\\.(png|svg)$'])
 import_file('accounts', ['accounts.json', 'accounts.yaml', 'accounts.tsv'])
 
-problems_imported = False
-
 # Contest import is a special case: we can also gather the contest ID.
 if os.path.exists('contest.yaml'):
     if dj_utils.confirm('Import contest metadata (from contest.yaml)?', True):
@@ -195,14 +193,13 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
                 print(f"'{c['name']}' with cid: {c['id']}")
             cid = answer = input('Please specify the contest id: ')
 
-        if not problems_imported:
-            if os.path.exists('problems.yaml'):
-                problems_file = 'problems.yaml'
-            elif os.path.exists('problems.json'):
-                problems_file = 'problems.json'
-            else:
-                problems_file = 'problemset.yaml'
-            dj_utils.upload_file(f'contests/{cid}/problems/add-data', 'data', problems_file)
+        if os.path.exists('problems.yaml'):
+            problems_file = 'problems.yaml'
+        elif os.path.exists('problems.json'):
+            problems_file = 'problems.json'
+        else:
+            problems_file = 'problemset.yaml'
+        dj_utils.upload_file(f'contests/{cid}/problems/add-data', 'data', problems_file)
 
         if os.path.exists('problems.yaml'):
             with open('problems.yaml') as problemFile:
