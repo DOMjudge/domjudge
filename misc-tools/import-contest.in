@@ -189,8 +189,10 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
             existing_contests = dj_utils.do_api_request('contests')
             if existing_contests:
                 print("The DOMjudge server already has these contests:")
-            for c in existing_contests:
-                print(f"'{c['name']}' with cid: {c['id']}")
+                for c in existing_contests:
+                    print(f"'{c['name']}' with cid: {c['id']}")
+            else:
+                print("No known contests yet.")
             cid = answer = input('Please specify the contest id: ')
 
         if os.path.exists('problems.yaml'):
