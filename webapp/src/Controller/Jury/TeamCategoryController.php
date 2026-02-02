@@ -255,7 +255,7 @@ class TeamCategoryController extends BaseController
     #[Route(path: '/{categoryId}/request-remaining', name: 'jury_team_category_request_remaining')]
     public function requestRemainingRunsWholeTeamCategoryAction(string $categoryId): RedirectResponse
     {
-        $category = $this->em->getRepository(TeamCategory::class)->find($categoryId);
+        $category = $this->em->getRepository(TeamCategory::class)->findByExternalId($categoryId);
         if (!$category) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
