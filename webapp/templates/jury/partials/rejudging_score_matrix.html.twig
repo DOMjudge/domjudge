@@ -32,7 +32,7 @@
                 {% for change in scoreChanges %}
                     <tr data-abs-delta="{{ change.absDelta }}" data-submit-id="{{ change.submitId }}" class="score-change-row" data-delta="{{ change.delta }}">
                         <td>
-                            <a href="{{ path('jury_submission', {submitId: change.submitId}) }}">s{{ change.submitId }}</a>
+                            <a href="{{ path('jury_submission', {contestId: change.contestId, submitId: change.submitId}) }}">s{{ change.submitId }}</a>
                         </td>
                         <td>
                             <a href="{{ path('jury_team', {teamId: change.teamId}) }}">{{ change.teamName }}</a>
