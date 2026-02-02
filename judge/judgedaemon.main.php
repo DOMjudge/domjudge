@@ -2264,8 +2264,29 @@ class JudgeDaemon
 
             $score = "";
             if ($result === 'correct' && file_exists($passdir . '/feedback/score.txt')) {
-                $new_judging_run['score'] = $this->restEncodeFile($passdir . '/feedback/score.txt', false);
-                $score = ", score: " . trim(dj_file_get_contents($passdir . '/feedback/score.txt'));
+                $scoreValue = trim(dj_file_get_contents($passdir . '/feedback/score.txt'));
+                if (!is_numeric($scoreValue)) {
+                    $description = sprintf(
+                        "compare script %s produced invalid (non-numeric) score: '%s'",
+                        $judgeTask['compare_script_id'],
+                        substr($scoreValue, 0, 100)
+                    );
+                    logmsg(LOG_ERR, $description);
+                    $this->disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
+                    return false;
+                }
+                if (bccomp($scoreValue, '0', 9) < 0) {
+                    $description = sprintf(
+                        "compare script %s produced negative score: '%s'",
+                        $judgeTask['compare_script_id'],
+                        $scoreValue
+                    );
+                    logmsg(LOG_ERR, $description);
+                    $this->disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
+                    return false;
+                }
+                $new_judging_run['score'] = base64_encode($scoreValue);
+                $score = ", score: " . $scoreValue;
             }
 
             if ($passLimit > 1) {
