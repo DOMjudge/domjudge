@@ -348,6 +348,7 @@ class RejudgingController extends BaseController
 
                 $scoreChanges[] = [
                     'submitId' => $submitid,
+                    'contestId' => $submission->getContest()->getExternalid(),
                     'teamName' => $submission->getTeam()->getEffectiveName(),
                     'teamId' => $submission->getTeam()->getTeamid(),
                     'problemName' => $problem->getName(),
