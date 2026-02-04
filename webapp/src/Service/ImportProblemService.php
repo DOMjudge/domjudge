@@ -361,7 +361,7 @@ readonly class ImportProblemService
                         }
                         try {
                             $dir = dirname($filename);
-                            $testcaseGroup = $this->parseTestCaseGroupMeta($fileContent, $dir, $messages);
+                            $testcaseGroup = self::parseTestCaseGroupMeta($fileContent, $dir, $messages);
                             if (!$testcaseGroup) {
                                 $messages['danger'][] = sprintf("Could not parse test group metadata file '%s'.", $filename);
                                 return null;
@@ -380,6 +380,10 @@ readonly class ImportProblemService
             if (isset($testCaseGroups[$parentDir])) {
                 $testCaseGroup->setParent($testCaseGroups[$parentDir]);
             }
+            $this->em->persist($testCaseGroup);
+        }
+        if (!empty($testCaseGroups)) {
+            $this->em->flush();
         }
         if (array_key_exists('data', $testCaseGroups)) {
             $problem->setParentTestcaseGroup($testCaseGroups['data']);
@@ -1095,7 +1099,7 @@ readonly class ImportProblemService
     /**
      * @param array<string, string[]> $messages
      */
-    public function parseTestCaseGroupMeta(string $fileContent, string $name, array &$messages): ?TestcaseGroup
+    public static function parseTestCaseGroupMeta(string $fileContent, string $name, array &$messages): ?TestcaseGroup
     {
         $yamlData = Yaml::parse($fileContent);
         if (empty($yamlData)) {
@@ -1109,12 +1113,24 @@ readonly class ImportProblemService
                 $messages['danger'][] = sprintf("Invalid accept_score '%s' in test group '%s'.", $value, $name);
                 return null;
             }
+            if ($value < 0) {
+                $messages['danger'][] = sprintf("Invalid accept_score '%s' in test group '%s': must not be negative.", $value, $name);
+                return null;
+            }
             $testcaseGroup = $testcaseGroup->setAcceptScore(Utils::numericToBcMath($yamlData['accept_score']));
         }
         if (isset($yamlData['range'])) {
-            $range = preg_split('/\s+/', $yamlData['range']);
+            $range = preg_split('/\s+/', (string)$yamlData['range']);
             if (count($range) != 2 || !is_numeric($range[0]) || !is_numeric($range[1])) {
                 $messages['danger'][] = sprintf("Invalid range '%s' in test group '%s'.", $yamlData['range'], $name);
+                return null;
+            }
+            if ($range[0] < 0 || $range[1] < 0) {
+                $messages['danger'][] = sprintf("Invalid range '%s' in test group '%s': bounds must not be negative.", $yamlData['range'], $name);
+                return null;
+            }
+            if ($range[0] > $range[1]) {
+                $messages['danger'][] = sprintf("Invalid range '%s' in test group '%s': lower bound must not exceed upper bound.", $yamlData['range'], $name);
                 return null;
             }
             $testcaseGroup->setRangeLowerBound(Utils::numericToBcMath($range[0]));
@@ -1150,8 +1166,6 @@ readonly class ImportProblemService
         if (isset($yamlData['on_reject'])) {
             $testcaseGroup->setOnRejectContinue($yamlData['on_reject'] === 'continue');
         }
-        $this->em->persist($testcaseGroup);
-        $this->em->flush();
         return $testcaseGroup;
     }
 
