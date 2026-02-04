@@ -106,7 +106,7 @@ class MiscController extends BaseController
                 ->setparameter('time', time())
                 ->addOrderBy('c.submittime', 'DESC')
                 ->addOrderBy('c.clarid', 'DESC');
-            if ($contest->getStartTimeObject()->getTimestamp() > time()) {
+            if ($contest->getStartTimeObject()?->getTimestamp() > time()) {
                 $qb->andWhere('c.problem IS NULL');
             }
 
