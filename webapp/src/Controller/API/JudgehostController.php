@@ -659,7 +659,6 @@ class JudgehostController extends AbstractFOSRestController
         $metadata     = $request->request->get('metadata');
         $testcasedir  = $request->request->get('testcasedir');
         $compareMeta  = $request->request->get('compare_metadata');
-        // TODO: We probably want to fail if we receive a score for a problem where we don't expect one.
         $score        = $request->request->get('score');
 
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
@@ -1007,6 +1006,12 @@ class JudgehostController extends AbstractFOSRestController
                 if (bccomp($decodedScore, '0', ScoreboardService::SCALE) < 0) {
                     throw new BadRequestHttpException(
                         sprintf("Invalid score '%s' for judgetask %d: must not be negative.", $decodedScore, $judgeTaskId));
+                }
+                $problem = $judgingRun->getJudging()->getSubmission()->getProblem();
+                if (!$problem->isScoringProblem()) {
+                    throw new BadRequestHttpException(
+                        sprintf("Received score for judgetask %d, but problem '%s' is not a scoring problem.",
+                            $judgeTaskId, $problem->getExternalid()));
                 }
                 $judgingRun->setScore($decodedScore);
             }
