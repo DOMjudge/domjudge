@@ -204,7 +204,7 @@ class SubmissionController extends BaseController
         $disabledLangs = [];
         foreach ($submissions as $submission) {
             if (!$submission->getContestProblem()->getAllowJudge()) {
-                $disabledProblems[$submission->getExternalid()] = $submission->getProblem()->getName();
+                $disabledProblems[$submission->getProblem()->getExternalid()] = $submission->getProblem()->getName();
             }
             if (!$submission->getLanguage()->getAllowJudge()) {
                 $disabledLangs[$submission->getLanguage()->getExternalid()] = $submission->getLanguage()->getName();
