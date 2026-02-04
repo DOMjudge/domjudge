@@ -302,4 +302,101 @@ YAML;
         $this->assertEquals(null, $problem->getMemlimit());
         $this->assertEquals(null, $problem->getOutputlimit());
     }
+
+    public function testParseTestCaseGroupMetaValidAcceptScore(): void
+    {
+        $yaml = "accept_score: 50";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $this->assertEmpty($messages['danger'] ?? []);
+        $this->assertEquals('50.000000000', $result->getAcceptScore());
+    }
+
+    public function testParseTestCaseGroupMetaNegativeAcceptScoreRejected(): void
+    {
+        $yaml = "accept_score: -10";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('must not be negative', $messages['danger'][0]);
+    }
+
+    public function testParseTestCaseGroupMetaNonNumericAcceptScoreRejected(): void
+    {
+        $yaml = "accept_score: abc";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString("Invalid accept_score 'abc'", $messages['danger'][0]);
+    }
+
+    public function testParseTestCaseGroupMetaValidRange(): void
+    {
+        $yaml = "range: 0 100";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $this->assertEmpty($messages['danger'] ?? []);
+        $this->assertEquals('0.000000000', $result->getRangeLowerBound());
+        $this->assertEquals('100.000000000', $result->getRangeUpperBound());
+    }
+
+    public function testParseTestCaseGroupMetaNegativeRangeLowerBoundRejected(): void
+    {
+        $yaml = "range: -10 100";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('bounds must not be negative', $messages['danger'][0]);
+    }
+
+    public function testParseTestCaseGroupMetaNegativeRangeUpperBoundRejected(): void
+    {
+        $yaml = "range: 0 -50";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('bounds must not be negative', $messages['danger'][0]);
+    }
+
+    public function testParseTestCaseGroupMetaRangeLowerExceedsUpperRejected(): void
+    {
+        $yaml = "range: 100 50";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('lower bound must not exceed upper bound', $messages['danger'][0]);
+    }
+
+    public function testParseTestCaseGroupMetaInvalidRangeFormatRejected(): void
+    {
+        $yaml = "range: 100";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString("Invalid range '100'", $messages['danger'][0]);
+    }
 }
