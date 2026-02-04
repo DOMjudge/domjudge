@@ -1946,7 +1946,7 @@ class JudgeDaemon
                     ],
                     $orig_compare_args,
                 );
-                $this->runCommandSafe($compare_args, $exitcode, log_nonzero_exitcode: false, stdin_source: "program.out", stdout_target: "compare.tmp");
+                $this->runCommandSafe($compare_args, $exitcode, log_nonzero_exitcode: false, stdin_source: "program.out", stdout_target: "compare.tmp", stderr_target: "compare.err");
             }
 
             $this->runCommandSafe(
@@ -1994,10 +1994,15 @@ class JudgeDaemon
                 logmsg(LOG_ERR, "Comparing aborted after the script timelimit of %s seconds, compare script output:\n%s", $scripttimelimit, $compare_tmp);
             }
 
-            // Append output validator stdin/stderr - display separately?
+            // Append output validator stdout
             if ($compare_tmp && strlen($compare_tmp) > 0) {
-                appendToFile("$realWorkdir/feedback/judgemessage.txt", "\n---------- output validator (error) messages ----------\n");
+                appendToFile("$realWorkdir/feedback/judgemessage.txt", "\n---------- output validator (stdout) messages ----------\n");
                 appendToFile("$realWorkdir/feedback/judgemessage.txt", $compare_tmp);
+            }
+            $compare_err = is_readable("compare.err") ? file_get_contents("compare.err") : "";
+            if ($compare_err && strlen($compare_err) > 0) {
+                appendToFile("$realWorkdir/feedback/judgemessage.txt", "\n---------- output validator (stderr) messages ----------\n");
+                appendToFile("$realWorkdir/feedback/judgemessage.txt", $compare_err);
             }
 
             if (!is_readable("program.meta")) {
