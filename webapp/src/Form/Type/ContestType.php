@@ -28,6 +28,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ContestType extends AbstractExternalIdEntityType
 {
+    public const TOGGLE_ATTRS = ['data-toggle' => 'toggle', 'data-size' => 'mini', 'data-on' => 'Yes', 'data-off' => 'No'];
+
     public function __construct(EventLogService $eventLogService, protected readonly DOMJudgeService $dj)
     {
         parent::__construct($eventLogService);
@@ -52,14 +54,11 @@ class ContestType extends AbstractExternalIdEntityType
             'label' => 'Start time',
             'help' => 'Absolute time when the contest starts.',
         ]);
-        $builder->add('starttimeEnabled', ChoiceType::class, [
+        $builder->add('starttimeEnabled', CheckboxType::class, [
             'label' => 'Start time countdown enabled',
-            'expanded' => true,
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
+            'required' => false,
             'help' => 'Disable to delay the contest start and stop the countdown. Enable again after setting a new start time.',
+            'attr' => self::TOGGLE_ATTRS,
         ]);
         $builder->add('freezetimeString', TextType::class, [
             'label' => 'Scoreboard freeze time',
@@ -88,39 +87,27 @@ class ContestType extends AbstractExternalIdEntityType
             ],
             'help' => 'The type of scoreboard to use for this contest.',
         ]);
-        $builder->add('allowSubmit', ChoiceType::class, [
-            'expanded' => true,
+        $builder->add('allowSubmit', CheckboxType::class, [
+            'required' => false,
             'label' => 'Allow submit',
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
             'help' => 'When disabled, users cannot submit to the contest and a warning will be displayed.',
+            'attr' => self::TOGGLE_ATTRS,
         ]);
-        $builder->add('processBalloons', ChoiceType::class, [
-            'expanded' => true,
+        $builder->add('processBalloons', CheckboxType::class, [
+            'required' => false,
             'label' => 'Record balloons',
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
             'help' => 'Disable this to stop recording balloons. Usually you can just leave this enabled.',
+            'attr' => self::TOGGLE_ATTRS,
         ]);
-        $builder->add('runtimeAsScoreTiebreaker', ChoiceType::class, [
-            'expanded' => true,
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
+        $builder->add('runtimeAsScoreTiebreaker', CheckboxType::class, [
+            'required' => false,
             'help' => 'Enable this to show runtimes in seconds on scoreboard and use them as tiebreaker instead of penalty. The runtime of a submission is the maximum over all testcases.',
+            'attr' => self::TOGGLE_ATTRS,
         ]);
-        $builder->add('medalsEnabled', ChoiceType::class, [
-            'expanded' => true,
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
+        $builder->add('medalsEnabled', CheckboxType::class, [
+            'required' => false,
             'help' => 'Whether to enable medals (gold, silver, bronze) for this contest.',
+            'attr' => self::TOGGLE_ATTRS,
         ]);
         $builder->add('medalCategories', EntityType::class, [
             'required' => false,
@@ -145,23 +132,17 @@ class ContestType extends AbstractExternalIdEntityType
                 'help'     => $help,
             ]);
         }
-        $builder->add('public', ChoiceType::class, [
-            'expanded' => true,
+        $builder->add('public', CheckboxType::class, [
+            'required' => false,
             'label' => 'Enable public scoreboard',
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
             'help' => 'When the public scoreboard is enabled, everyone can see it without logging in. When disabled, only logged in users/teams can see the scoreboard.',
+            'attr' => self::TOGGLE_ATTRS,
         ]);
-        $builder->add('openToAllTeams', ChoiceType::class, [
-            'expanded' => true,
+        $builder->add('openToAllTeams', CheckboxType::class, [
+            'required' => false,
             'label' => 'Open contest to all teams',
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
             'help' => 'When enabled, any logged in team is part of the contest. When disabled, only the teams/categories listed below are part of the contest.',
+            'attr' => self::TOGGLE_ATTRS,
         ]);
         $builder->add('teams', EntityType::class, [
             'required' => false,
@@ -179,14 +160,11 @@ class ContestType extends AbstractExternalIdEntityType
             'choice_value' => 'externalid',
             'help' => 'List of team categories participating in the contest, in case it is not open to all teams.',
         ]);
-        $builder->add('enabled', ChoiceType::class, [
-            'expanded' => true,
+        $builder->add('enabled', CheckboxType::class, [
+            'required' => false,
             'label' => 'Enable contest',
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
             'help' => 'When disabled, the contest is hidden from teams (even when active) and judging is disabled. Disabling is a quick way to remove access to it without changing any other settings.',
+            'attr' => self::TOGGLE_ATTRS,
         ]);
         $builder->add('bannerFile', FileType::class, [
             'label' => 'Banner',
@@ -212,23 +190,17 @@ class ContestType extends AbstractExternalIdEntityType
             'label' => 'Scoreboard warning message',
             'help' => 'When set, a warning message displayed above all scoreboards for this contest.',
         ]);
-        $builder->add('externalSourceEnabled', ChoiceType::class, [
-            'expanded' => true,
+        $builder->add('externalSourceEnabled', CheckboxType::class, [
+            'required' => false,
             'label' => 'Enable shadow mode',
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
             'help' => 'When enabled, this contest will shadow an external contest source.',
+            'attr' => self::TOGGLE_ATTRS,
         ]);
-        $builder->add('externalSourceUseJudgements', ChoiceType::class, [
-            'expanded' => true,
+        $builder->add('externalSourceUseJudgements', CheckboxType::class, [
+            'required' => false,
             'label' => 'Use external judgements',
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
             'help' => 'When enabled, external judgements will be used for results and scoring instead of local judgings.',
+            'attr' => self::TOGGLE_ATTRS,
         ]);
         $builder->add('externalSourceType', EnumType::class, [
             'class' => ExternalContestSourceType::class,

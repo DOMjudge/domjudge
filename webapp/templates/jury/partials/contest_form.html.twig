@@ -1,84 +1,133 @@
+{% macro form_table_row(field, attr) %}
+<tr {{ attr | default('') }}>
+    <th>{{ field.vars.label | default(field.vars.name | humanize) }}</th>
+    <td>
+        {{ form_errors(field) }}
+        {{ form_widget(field, {label: false}) }}
+        {{ form_help(field) }}
+    </td>
+</tr>
+{% endmacro %}
+
+{% macro section_header(icon, title) %}
+<tr class="contest-form-section-header">
+    <td colspan="2"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
+</tr>
+{% endmacro %}
+
 {{ form_start(form) }}
 <div class="row">
-    <div class="col-lg-4">
+    <div class="col-lg-6">
 
         {# These are the errors related to removed intervals #}
         {{ form_errors(form) }}
 
-        {{ form_row(form.externalid) }}
-        {{ form_row(form.shortname) }}
-        {{ form_row(form.name) }}
-        {{ form_row(form.activatetimeString) }}
-        {{ form_row(form.starttimeString) }}
-        {{ form_row(form.starttimeEnabled) }}
-        {{ form_row(form.freezetimeString) }}
-        {{ form_row(form.endtimeString) }}
-        {{ form_row(form.unfreezetimeString) }}
-        {{ form_row(form.deactivatetimeString) }}
-        {{ form_row(form.scoreboardType) }}
-        {{ form_row(form.allowSubmit) }}
-        {{ form_row(form.processBalloons) }}
-        {{ form_row(form.runtimeAsScoreTiebreaker) }}
-        {{ form_row(form.medalsEnabled) }}
-        <div data-medals-field>
-            {{ form_row(form.medalCategories) }}
-            {{ form_row(form.goldMedals) }}
-            {{ form_row(form.silverMedals) }}
-            {{ form_row(form.bronzeMedals) }}
-        </div>
-        {{ form_row(form.public) }}
-        {{ form_row(form.openToAllTeams) }}
-        <div data-teams-field>
-            {{ form_row(form.teams) }}
-            {{ form_row(form.teamCategories) }}
-        </div>
-        {{ form_row(form.languages) }}
-        {{ form_row(form.enabled) }}
-        {{ form_row(form.bannerFile) }}
-        {% if form.offsetExists('clearBanner') %}
-            {{ form_row(form.clearBanner) }}
-        {% endif %}
-        {{ form_row(form.contestProblemsetFile) }}
-        {% if form.offsetExists('clearContestProblemset') %}
-            {{ form_row(form.clearContestProblemset) }}
-        {% endif %}
-        {{ form_row(form.warningMessage) }}
-        <div id="externalSourceEnabled">
-            {{ form_row(form.externalSourceEnabled) }}
-        </div>
-        <div data-external-source-field>
-            {{ form_row(form.externalSourceUseJudgements) }}
-            {{ form_row(form.externalSourceType) }}
-            {{ form_row(form.externalSourceSource) }}
-            <div data-external-source-ccs-api>
-                {{ form_row(form.externalSourceUsername) }}
-                <div class="mb-3">
-                    {{ form_label(form.externalSourcePassword) }}
-                    <div class="input-group">
-                        {{ form_widget(form.externalSourcePassword) }}
-                        <button class="btn btn-outline-secondary" type="button" data-show-hide-password>
-                            <i class="fa fa-eye"></i>
-                        </button>
-                    </div>
-                    {{ form_help(form.externalSourcePassword) }}
+        <table class="table table-sm mb-0 contest-fields-table">
+            <tbody>
+                {{ _self.section_header('tag', 'Identity') }}
+                {{ _self.form_table_row(form.externalid) }}
+                {{ _self.form_table_row(form.shortname) }}
+                {{ _self.form_table_row(form.name) }}
+
+                {{ _self.section_header('clock', 'Times') }}
+                {{ _self.form_table_row(form.activatetimeString) }}
+                {{ _self.form_table_row(form.starttimeString) }}
+                {{ _self.form_table_row(form.starttimeEnabled) }}
+                {{ _self.form_table_row(form.freezetimeString) }}
+                {{ _self.form_table_row(form.endtimeString) }}
+                {{ _self.form_table_row(form.unfreezetimeString) }}
+                {{ _self.form_table_row(form.deactivatetimeString) }}
+
+                {{ _self.section_header('sliders', 'Scoring') }}
+                {{ _self.form_table_row(form.scoreboardType) }}
+                {{ _self.form_table_row(form.allowSubmit) }}
+                {{ _self.form_table_row(form.processBalloons) }}
+                {{ _self.form_table_row(form.runtimeAsScoreTiebreaker) }}
+
+                {{ _self.section_header('medal', 'Medals') }}
+                {{ _self.form_table_row(form.medalsEnabled) }}
+                {{ _self.form_table_row(form.medalCategories, 'data-medals-field') }}
+                {{ _self.form_table_row(form.goldMedals, 'data-medals-field') }}
+                {{ _self.form_table_row(form.silverMedals, 'data-medals-field') }}
+                {{ _self.form_table_row(form.bronzeMedals, 'data-medals-field') }}
+
+                {{ _self.section_header('users', 'Access & Visibility') }}
+                {{ _self.form_table_row(form.public) }}
+                {{ _self.form_table_row(form.openToAllTeams) }}
+                {{ _self.form_table_row(form.teams, 'data-teams-field') }}
+                {{ _self.form_table_row(form.teamCategories, 'data-teams-field') }}
+                {{ _self.form_table_row(form.languages) }}
+                {{ _self.form_table_row(form.enabled) }}
+                {{ _self.form_table_row(form.warningMessage) }}
+
+                {{ _self.section_header('file', 'Files') }}
+                {{ _self.form_table_row(form.bannerFile) }}
+                {% if form.offsetExists('clearBanner') %}
+                    {{ _self.form_table_row(form.clearBanner) }}
+                {% endif %}
+                {{ _self.form_table_row(form.contestProblemsetFile) }}
+                {% if form.offsetExists('clearContestProblemset') %}
+                    {{ _self.form_table_row(form.clearContestProblemset) }}
+                {% endif %}
+
+                {{ _self.section_header('cloud-arrow-down', 'Shadowing') }}
+                {{ _self.form_table_row(form.externalSourceEnabled) }}
+                {{ _self.form_table_row(form.externalSourceUseJudgements, 'data-external-source-field') }}
+                {{ _self.form_table_row(form.externalSourceType, 'data-external-source-field') }}
+                {{ _self.form_table_row(form.externalSourceSource, 'data-external-source-field') }}
+                <tr data-external-source-field data-external-source-ccs-api>
+                    <th>{{ form.externalSourceUsername.vars.label }}</th>
+                    <td>
+                        {{ form_errors(form.externalSourceUsername) }}
+                        {{ form_widget(form.externalSourceUsername) }}
+                        {{ form_help(form.externalSourceUsername) }}
+                    </td>
+                </tr>
+                <tr data-external-source-field data-external-source-ccs-api>
+                    <th>{{ form.externalSourcePassword.vars.label }}</th>
+                    <td>
+                        {{ form_errors(form.externalSourcePassword) }}
+                        <div class="input-group">
+                            {{ form_widget(form.externalSourcePassword) }}
+                            <button class="btn btn-outline-secondary" type="button" data-show-hide-password>
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                        {{ form_help(form.externalSourcePassword) }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-lg-4 d-none d-lg-block">
+        <div class="help-sidebar">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i> Specification of contest times
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Each of the contest times can be specified as absolute time or relative
+                    to the start time (except for start time itself). Use up to 6 subsecond
+                    decimals and a timezone from the
+                    <a target="_blank" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">
+                        time zone database</a>.</p>
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr><td class="text-nowrap">Absolute time format:</td><td><kbd>YYYY-MM-DD HH:MM:SS[.uuuuuu] timezone</kbd></td></tr>
+                        <tr><td class="text-nowrap">Relative time format:</td><td><kbd>&plusmn;[HHH]H:MM[:SS[.uuuuuu]]</kbd></td></tr>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-6">
-        <h5>Specification of contest times</h5>
-        <div>Each of the contest times can be specified as absolute time or relative
-        to the start time (except for start time itself). Use up to 6 subsecond
-        decimals and a timezone from the
-        <a target="_blank" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">
-            time zone database</a>.</div>
-        <div class="mt-3"><table>
-        <tr><td>Absolute time format:</td><td><kbd>YYYY-MM-DD HH:MM:SS[.uuuuuu] timezone</kbd></td></tr>
-        <tr><td>Relative time format:</td><td><kbd>±[HHH]H:MM[:SS[.uuuuuu]]</kbd></td></tr>
-        </table></div>
-    </div>
 </div>
-<table class="table table-sm table-striped">
+<table class="table table-sm mb-0 contest-fields-table">
+    <tbody>
+        <tr class="contest-form-section-header">
+            <td><i class="fas fa-puzzle-piece me-2"></i>Problems</td>
+        </tr>
+    </tbody>
+</table>
+<table class="table table-sm w-auto">
     <thead>
     <tr>
         <th>{{ form.problems.vars.prototype.problem.vars.label }}</th>
@@ -87,11 +136,11 @@
         <th>{{ form.problems.vars.prototype.allowSubmit.vars.label }}</th>
         <th>{{ form.problems.vars.prototype.allowJudge.vars.label }}</th>
         <th>{{ form.problems.vars.prototype.color.vars.label }}</th>
-        <th>{{ form.problems.vars.prototype.lazyEvalResults.vars.label }}</th>
+        <th class="text-nowrap">{{ form.problems.vars.prototype.lazyEvalResults.vars.label }}</th>
         <th></th>
     </tr>
     </thead>
-    <tbody data-collection-holder data-after-add="bindColor">
+    <tbody data-collection-holder data-after-add="afterProblemAdd">
     {% for problem in form.problems %}
         <tr>
             <td>
@@ -108,11 +157,11 @@
             </td>
             <td>
                 {{ form_errors(problem.allowSubmit) }}
-                {{ form_widget(problem.allowSubmit) }}
+                {{ form_widget(problem.allowSubmit, {label: false}) }}
             </td>
             <td>
                 {{ form_errors(problem.allowJudge) }}
-                {{ form_widget(problem.allowJudge) }}
+                {{ form_widget(problem.allowJudge, {label: false}) }}
             </td>
             <td>
                 {{ form_errors(problem.color) }}
@@ -143,8 +192,8 @@
         <td>{{ form_widget(form.problems.vars.prototype.problem) }}</td>
         <td>{{ form_widget(form.problems.vars.prototype.shortname) }}</td>
         <td>{{ form_widget(form.problems.vars.prototype.points) }}</td>
-        <td>{{ form_widget(form.problems.vars.prototype.allowSubmit) }}</td>
-        <td>{{ form_widget(form.problems.vars.prototype.allowJudge) }}</td>
+        <td>{{ form_widget(form.problems.vars.prototype.allowSubmit, {label: false}) }}</td>
+        <td>{{ form_widget(form.problems.vars.prototype.allowJudge, {label: false}) }}</td>
         <td>{{ form_widget(form.problems.vars.prototype.color) }}</td>
         <td>{{ form_widget(form.problems.vars.prototype.lazyEvalResults) }}</td>
         <td>
@@ -156,51 +205,63 @@
 {{ form_end(form) }}
 
 <script>
+    function afterProblemAdd() {
+        bindColor();
+        $('[data-toggle="toggle"]').not('.toggle-initialized').bootstrapToggle().addClass('toggle-initialized');
+    }
+
     $(function () {
         function showHideTeams() {
-            if ($('#contest_openToAllTeams_1').is(':checked')) {
-                $('[data-teams-field]').show();
-            } else {
+            if ($('#contest_openToAllTeams').is(':checked')) {
                 $('[data-teams-field]').hide();
+            } else {
+                $('[data-teams-field]').show();
             }
         }
 
-        $('#contest_openToAllTeams_1, #contest_openToAllTeams_0').on('change', showHideTeams);
+        $('#contest_openToAllTeams').on('change', showHideTeams);
         showHideTeams();
 
         function showHideMedals() {
-            if ($('#contest_medalsEnabled_0').is(':checked')) {
+            if ($('#contest_medalsEnabled').is(':checked')) {
                 $('[data-medals-field]').show();
             } else {
                 $('[data-medals-field]').hide();
             }
         }
 
-        $('#contest_medalsEnabled_1, #contest_medalsEnabled_0').on('change', showHideMedals);
+        $('#contest_medalsEnabled').on('change', showHideMedals);
         showHideMedals();
 
-        function showHideExternalSource() {
-            if ($('#contest_externalSourceEnabled_0').is(':checked')) {
-                $('[data-external-source-field]').show();
-            } else {
-                $('[data-external-source-field]').hide();
-            }
-        }
-
-        $('#contest_externalSourceEnabled_1, #contest_externalSourceEnabled_0').on('change', showHideExternalSource);
-        showHideExternalSource();
-
         var $externalSourceType = $('#contest_externalSourceType');
+
         function showHideExternalSourceType() {
             var ccsApiFields = $('[data-external-source-ccs-api]');
-            if ($externalSourceType.val() === '{{ constant('\\App\\Entity\\ExternalContestSourceType::CCS_API').value }}') {
+            if ($('#contest_externalSourceEnabled').is(':checked') &&
+                $externalSourceType.val() === '{{ constant('\\App\\Entity\\ExternalContestSourceType::CCS_API').value }}') {
                 ccsApiFields.show();
             } else {
                 ccsApiFields.hide();
             }
         }
+
+        function showHideExternalSource() {
+            if ($('#contest_externalSourceEnabled').is(':checked')) {
+                $('[data-external-source-field]').show();
+            } else {
+                $('[data-external-source-field]').hide();
+            }
+            showHideExternalSourceType();
+        }
+
+        $('#contest_externalSourceEnabled').on('change', function () {
+            if ($(this).is(':checked')) {
+                $('#contest_externalSourceUseJudgements').bootstrapToggle('on');
+            }
+            showHideExternalSource();
+        });
         $externalSourceType.on('change', showHideExternalSourceType);
-        showHideExternalSourceType();
+        showHideExternalSource();
 
         var $passwordField = $('#contest_externalSourcePassword');
         $passwordField.attr('type', 'password');
@@ -214,5 +275,5 @@
                 $('i', $(this)).attr('class', 'fa fa-eye');
             }
         });
-    })
+    });
 </script>

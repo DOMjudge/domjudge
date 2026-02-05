@@ -22,6 +22,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
+use App\Entity\TestcaseGroup;
 use App\Form\Type\SubmissionsFilterType;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
@@ -705,10 +706,32 @@ class SubmissionController extends BaseController
                     $this->dj->getRunConfig($contestProblem, $submission),
                     $sampleJudgeTask->getRunConfig(),
                     $errors);
-                $this->maybeGetErrors('Compare config',
-                    $this->dj->getCompareConfig($contestProblem),
-                    $sampleJudgeTask->getCompareConfig(),
-                    $errors);
+                // Compare config can vary per testcase group (each group may override
+                // outputValidatorFlags), so check each judge task against its group's config.
+                $testcaseIds = array_map(fn(JudgeTask $jt) => $jt->getTestcaseId(), $judgeTasks);
+                $testcases = $this->em->getRepository(Testcase::class)->findBy(['testcaseid' => $testcaseIds]);
+                $testcaseMap = [];
+                foreach ($testcases as $tc) {
+                    $testcaseMap[$tc->getTestcaseid()] = $tc;
+                }
+                $checkedGroups = [];
+                foreach ($judgeTasks as $judgeTask) {
+                    $tc = $testcaseMap[$judgeTask->getTestcaseId()] ?? null;
+                    $group = $tc?->getTestcaseGroup();
+                    $groupKey = $group?->getTestcaseGroupId() ?? 0;
+                    if (isset($checkedGroups[$groupKey])) {
+                        continue;
+                    }
+                    $checkedGroups[$groupKey] = true;
+                    if ($group !== null && $group->getOutputValidatorFlags() !== '') {
+                        $expectedConfig = $this->dj->getCompareConfig($contestProblem, $group->getOutputValidatorFlags());
+                        $label = 'Compare config (group: ' . $group->getName() . ')';
+                    } else {
+                        $expectedConfig = $this->dj->getCompareConfig($contestProblem);
+                        $label = 'Compare config';
+                    }
+                    $this->maybeGetErrors($label, $expectedConfig, $judgeTask->getCompareConfig(), $errors);
+                }
                 if (!empty($errors)) {
                     if ($selectedJudging->getValid()) {
                         $type = 'danger';
