@@ -28,14 +28,17 @@ class ProblemType extends AbstractExternalIdEntityType
             'empty_data' => ''
         ]);
         $builder->add('timelimit', NumberType::class, [
+            'label' => 'Time',
             'input_group_after' => 'sec',
         ]);
         $builder->add('memlimit', IntegerType::class, [
+            'label' => 'Memory',
             'required' => false,
             'help' => 'leave empty for default',
             'input_group_after' => 'kB',
         ]);
         $builder->add('outputlimit', IntegerType::class, [
+            'label' => 'Output size',
             'required' => false,
             'help' => 'leave empty for default',
             'input_group_after' => 'kB',
