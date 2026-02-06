@@ -6,23 +6,17 @@
 {% block extrahead %}
     {{ parent() }}
     {{ macros.table_extrahead() }}
+    {{ macros.toggle_extrahead() }}
 {% endblock %}
 
 {% block content %}
 
-    <h1>Edit user {{ user.externalid }}</h1>
-
-    <div class="row">
-        <div class="col-lg-4">
-            <table class="table table-sm table-striped">
-                <tr>
-                    <th>Username</th>
-                    <td class="teamid">{{ user.username }}</td>
-                </tr>
-            </table>
+    <div class="contest-form">
+        <div class="page-header-bar">
+            <h1>Edit user {{ user.name }} ({{ user.username }})</h1>
         </div>
-    </div>
 
-    {% include 'jury/partials/user_form.html.twig' %}
+        {% include 'jury/partials/user_form.html.twig' %}
+    </div>
 
 {% endblock %}

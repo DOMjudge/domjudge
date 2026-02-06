@@ -9,6 +9,7 @@ use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -67,11 +68,13 @@ class UserType extends AbstractExternalIdEntityType
             'required' => false,
             'label' => 'IP address',
         ]);
-        $builder->add('enabled', ChoiceType::class, [
-            'expanded' => true,
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
+        $builder->add('enabled', CheckboxType::class, [
+            'required' => false,
+            'attr' => [
+                'data-toggle' => 'toggle',
+                'data-size' => 'mini',
+                'data-on' => 'Yes',
+                'data-off' => 'No',
             ],
         ]);
         $builder->add('team', ChoiceType::class, [

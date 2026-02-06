@@ -3,10 +3,17 @@
 
 {% block title %}Add user - {{ parent() }}{% endblock %}
 
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.toggle_extrahead() }}
+{% endblock %}
+
 {% block content %}
 
-    <h1>Add user</h1>
+    <div class="contest-form">
+        <h1>Add user</h1>
 
-    {% include 'jury/partials/user_form.html.twig' %}
+        {% include 'jury/partials/user_form.html.twig' %}
+    </div>
 
 {% endblock %}
