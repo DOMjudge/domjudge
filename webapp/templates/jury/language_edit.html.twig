@@ -6,12 +6,17 @@
 {% block extrahead %}
     {{ parent() }}
     {{ macros.select2_extrahead() }}
+    {{ macros.toggle_extrahead() }}
 {% endblock %}
 
 {% block content %}
 
-    <h1>Edit language {{ language.externalid }}</h1>
+    <div class="contest-form">
+        <div class="page-header-bar">
+            <h1>Edit language {{ language.name }} ({{ language.externalid }})</h1>
+        </div>
 
-    {% include 'jury/partials/language_form.html.twig' %}
+        {% include 'jury/partials/language_form.html.twig' %}
+    </div>
 
 {% endblock %}
