@@ -7,12 +7,15 @@
     {{ parent() }}
     {{ macros.coloris_extrahead() }}
     {{ macros.select2_extrahead() }}
+    {{ macros.toggle_extrahead() }}
 {% endblock %}
 
 {% block content %}
 
-    <h1>Add category</h1>
+    <div class="contest-form">
+        <h1>Add category</h1>
 
-    {% include 'jury/partials/team_category_form.html.twig' %}
+        {% include 'jury/partials/team_category_form.html.twig' %}
+    </div>
 
 {% endblock %}

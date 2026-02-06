@@ -1,0 +1,4 @@
+<form action="{{ path(route, {'categoryId': teamCategory.externalid}) }}" method="post" class="d-inline">
+    <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
+           name="value" {% if value %}checked{% endif %}>
+</form>
