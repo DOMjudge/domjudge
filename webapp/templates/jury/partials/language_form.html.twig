@@ -1,8 +1,60 @@
+{% macro form_table_row(field, attr) %}
+<tr {{ attr | default('') }}>
+    <th>{{ field.vars.label | default(field.vars.name | humanize) }}</th>
+    <td>
+        {{ form_errors(field) }}
+        {{ form_widget(field, {label: false}) }}
+        {{ form_help(field) }}
+    </td>
+</tr>
+{% endmacro %}
+
+{% macro section_header(icon, title) %}
+<tr class="contest-form-section-header">
+    <td colspan="2"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
+</tr>
+{% endmacro %}
+
+{{ form_start(form) }}
 <div class="row">
-    <div class="col-lg-4">
-        {{ form(form) }}
+    <div class="col-lg-6">
+
+        {{ form_errors(form) }}
+
+        <table class="table table-sm mb-0 contest-fields-table">
+            <tbody>
+                {{ _self.section_header('tag', 'Identity') }}
+                {% if form.externalid is defined %}
+                    {{ _self.form_table_row(form.externalid) }}
+                {% endif %}
+                {{ _self.form_table_row(form.name) }}
+
+                {{ _self.section_header('paper-plane', 'Submitting & Judging') }}
+                {{ _self.form_table_row(form.allowSubmit) }}
+                {{ _self.form_table_row(form.allowJudge) }}
+                {{ _self.form_table_row(form.timeFactor) }}
+                {{ _self.form_table_row(form.requireEntryPoint) }}
+                {{ _self.form_table_row(form.entryPointDescription) }}
+
+                {{ _self.section_header('cogs', 'Compilation') }}
+                {{ _self.form_table_row(form.compileExecutable) }}
+                {{ _self.form_table_row(form.extensions) }}
+                {{ _self.form_table_row(form.filterCompilerFiles) }}
+
+                {{ _self.section_header('info-circle', 'Version Info') }}
+                {{ _self.form_table_row(form.compilerVersionCommand) }}
+                {{ _self.form_table_row(form.runnerVersionCommand) }}
+
+                {{ _self.section_header('filter', 'Restrictions') }}
+                {{ _self.form_table_row(form.contests) }}
+                {{ _self.form_table_row(form.problems) }}
+            </tbody>
+        </table>
     </div>
 </div>
+
+{{ form_widget(form.save) }}
+{{ form_end(form) }}
 
 <script>
     var $extensionsHolder;
