@@ -1,5 +1,92 @@
+{% macro form_table_row(field, attr) %}
+<tr {{ attr | default('') }}>
+    <th>{{ field.vars.label | default(field.vars.name | humanize) }}</th>
+    <td>
+        {{ form_errors(field) }}
+        {{ form_widget(field, {label: false}) }}
+        {{ form_help(field) }}
+    </td>
+</tr>
+{% endmacro %}
+
+{% macro section_header(icon, title) %}
+<tr class="contest-form-section-header">
+    <td colspan="2"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
+</tr>
+{% endmacro %}
+
+{{ form_start(form) }}
 <div class="row">
-    <div class="col-lg-4">
-        {{ form(form) }}
+    <div class="col-lg-6">
+
+        {{ form_errors(form) }}
+
+        <table class="table table-sm mb-0 contest-fields-table">
+            <tbody>
+                {{ _self.section_header('tag', 'Identity') }}
+                {% if form.externalid is defined %}
+                    {{ _self.form_table_row(form.externalid) }}
+                {% endif %}
+                {{ _self.form_table_row(form.name) }}
+
+                {{ _self.section_header('tachometer-alt', 'Limits') }}
+                {{ _self.form_table_row(form.timelimit) }}
+                {{ _self.form_table_row(form.memlimit) }}
+                {{ _self.form_table_row(form.outputlimit) }}
+
+                {{ _self.section_header('cogs', 'Judging') }}
+                {{ _self.form_table_row(form.types) }}
+                {{ _self.form_table_row(form.multipassLimit) }}
+                {{ _self.form_table_row(form.runExecutable) }}
+                {{ _self.form_table_row(form.compareExecutable) }}
+                {{ _self.form_table_row(form.specialCompareArgs) }}
+
+                {{ _self.section_header('file', 'Files') }}
+                <tr>
+                    <th>{{ form.problemstatementFile.vars.label | default('Problem statement') }}</th>
+                    <td>
+                        {{ form_errors(form.problemstatementFile) }}
+                        <div class="input-group">
+                            {{ form_widget(form.problemstatementFile, {label: false}) }}
+                            {% if form.clearProblemstatement is defined %}
+                                <button type="button" class="btn btn-danger" id="clear-problemstatement-btn" title="Delete problem statement">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <div class="d-none">{{ form_widget(form.clearProblemstatement) }}</div>
+                            {% endif %}
+                        </div>
+                        {{ form_help(form.problemstatementFile) }}
+                        {% if form.clearProblemstatement is defined %}
+                            <div id="clear-problemstatement-warning" class="text-danger small mt-1 d-none">
+                                <i class="fas fa-exclamation-triangle"></i> Problem statement will be deleted on save
+                            </div>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {{ _self.section_header('filter', 'Restrictions') }}
+                {{ _self.form_table_row(form.languages) }}
+            </tbody>
+        </table>
     </div>
 </div>
+
+{{ form_widget(form.save) }}
+{{ form_end(form) }}
+
+{% if form.clearProblemstatement is defined %}
+<script>
+$(function() {
+    var $btn = $('#clear-problemstatement-btn');
+    var $checkbox = $('#{{ form.clearProblemstatement.vars.id }}');
+    var $warning = $('#clear-problemstatement-warning');
+
+    $btn.on('click', function() {
+        var isChecked = $checkbox.prop('checked');
+        $checkbox.prop('checked', !isChecked);
+        $btn.toggleClass('btn-danger btn-secondary');
+        $warning.toggleClass('d-none', isChecked);
+    });
+});
+</script>
+{% endif %}
