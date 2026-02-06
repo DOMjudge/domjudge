@@ -11,176 +11,187 @@
 
 {% block content %}
 
+    {% macro section_header(icon, title) %}
+    <tr class="contest-form-section-header">
+        <td colspan="2"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
+    </tr>
+    {% endmacro %}
+
     <h1>Team {{ team.effectiveName }}</h1>
 
     <div class="row">
-        <div class="col">
-            <table class="table table-sm table-striped">
-                <tr>
-                    <th>ID</th>
-                    <td>{{ team.externalid }}</td>
-                </tr>
-                <tr>
-                    <th>ICPC ID</th>
-                    <td>
-                        {% if team.icpcid %}
-                            {{ team.icpcid }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Label</th>
-                    <td>
-                        {% if team.label | length %}
-                            {{ team.label }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Name</th>
-                    <td>{{ team.name }}</td>
-                </tr>
-                <tr>
-                    <th>Display name</th>
-                    <td>
-                        {% if team.displayName %}
-                            {{ team.displayName }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>First login</th>
-                    <td>
-                        {% if team.users is not empty and team.users.first.firstLogin %}
-                            {{ team.users.first.firstLogin | printtime('D d M Y H:i:s T') }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>IP</th>
-                    <td>
-                        {% if team.users is not empty and team.users.first.lastIpAddress %}
-                            {{ team.users.first.lastIpAddress | printHost(true) }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                {% if team.penalty %}
+        <div class="col-lg-5">
+            <table class="table table-sm contest-fields-table">
+                <tbody>
+                    {{ _self.section_header('tag', 'Identity') }}
                     <tr>
-                        <th>Penalty time</th>
-                        <td>{{ team.penalty }}</td>
+                        <th>ID</th>
+                        <td>{{ team.externalid }}</td>
                     </tr>
-                {% endif %}
-                {% if team.location %}
                     <tr>
-                        <th>Location</th>
-                        <td>{{ team.location }}</td>
-                    </tr>
-                {% endif %}
-                <tr>
-                    <th>User</th>
-                    <td>
-                        {% for user in team.users %}
-                            <a href="{{ path('jury_user', {'userId': user.externalid}) }}">{{ user.username }}</a>
-                        {% else %}
-                            {%- if is_granted('ROLE_ADMIN') -%}
-                                <a href="{{ path('jury_user_add', {'team': team.externalid}) }}">
-                                    <i class="fas fa-user-plus"></i> add user
-                                </a>
+                        <th>ICPC ID</th>
+                        <td>
+                            {% if team.icpcid %}
+                                {{ team.icpcid }}
+                            {% else %}
+                                -
                             {% endif %}
-                        {% endfor %}
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Label</th>
+                        <td>
+                            {% if team.label | length %}
+                                {{ team.label }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Name</th>
+                        <td>{{ team.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Display name</th>
+                        <td>
+                            {% if team.displayName %}
+                                {{ team.displayName }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {{ _self.section_header('building', 'Organization') }}
+                    <tr>
+                        <th>Categories</th>
+                        <td>
+                            {% if team.categories.empty %}
+                                -
+                            {% else %}
+                                <ul class="mb-0">
+                                    {% for category in team.categories %}
+                                        <li>
+                                            <a href="{{ path('jury_team_category', {'categoryId': category.externalid}) }}">
+                                                {{ category.name }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% if showAffiliations and team.affiliation %}
+                        <tr>
+                            <th>Affiliation</th>
+                            <td>
+                                {% set affiliationId = team.affiliation.externalid %}
+                                {% set affiliationLogo = affiliationId | assetPath('affilation') %}
+                                {% if affiliationLogo %}
+                                    <img src="{{ asset(affiliationLogo) }}" alt="{{ team.affiliation.shortname }}"
+                                         title="{{ team.affiliation.shortname }}" class="affiliation-logo"/>
+                                {% endif %}
+                                <a href="{{ path('jury_team_affiliation', {'affilId': team.affiliation.externalid}) }}">
+                                    {{ team.affiliation.name }}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% if showFlags and team.affiliation and team.affiliation.country %}
+                        <tr>
+                            <th>Country</th>
+                            <td>
+                                {{ team.affiliation.country | countryFlag(true) }}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    {% if team.contests|length > 0 %}
+                        {{ _self.section_header('trophy', 'Contests') }}
+                        <tr>
+                            <th>Contests</th>
+                            <td>
+                                {% for ucontest in team.contests %}
+                                    <a href="{{ path('jury_contest', {'contestId': ucontest.externalid}) }}">{{ ucontest.shortname }}</a>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    {{ _self.section_header('info-circle', 'Details') }}
+                    {% if team.penalty %}
+                        <tr>
+                            <th>Penalty time</th>
+                            <td>{{ team.penalty }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if team.location %}
+                        <tr>
+                            <th>Location</th>
+                            <td>{{ team.location }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if team.publicdescription is not empty %}
+                        <tr>
+                            <th>Description (Public)</th>
+                            <td>{{ team.publicdescription | nl2br }}</td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <th>First login</th>
+                        <td>
+                            {% if team.users is not empty and team.users.first.firstLogin %}
+                                {{ team.users.first.firstLogin | printtime('D d M Y H:i:s T') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>IP</th>
+                        <td>
+                            {% if team.users is not empty and team.users.first.lastIpAddress %}
+                                {{ team.users.first.lastIpAddress | printHost(true) }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {{ _self.section_header('cog', 'Admin') }}
+                    {% if team.internalcomments is not empty %}
+                        <tr>
+                            <th>Internal comments</th>
+                            <td>{{ team.internalcomments | nl2br }}</td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <th>User</th>
+                        <td>
+                            {% for user in team.users %}
+                                <a href="{{ path('jury_user', {'userId': user.externalid}) }}">{{ user.username }}</a>
+                            {% else %}
+                                {%- if is_granted('ROLE_ADMIN') -%}
+                                    <a href="{{ path('jury_user_add', {'team': team.externalid}) }}">
+                                        <i class="fas fa-user-plus"></i> add user
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
 
-        <div class="col">
-            <table class="table table-sm table-striped">
-                <tr>
-                    <th>Categories</th>
-                    <td>
-                        {% if team.categories.empty %}
-                            -
-                        {% else %}
-                            <ul>
-                                {% for category in team.categories %}
-                                    <li>
-                                        <a href="{{ path('jury_team_category', {'categoryId': category.externalid}) }}">
-                                            {{ category.name }}
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% if showAffiliations and team.affiliation %}
-                    <tr>
-                        <th>Affiliation</th>
-                        <td>
-                            {% set affiliationId = team.affiliation.externalid %}
-                            {% set affiliationLogo = affiliationId | assetPath('affilation') %}
-                            {% if affiliationLogo %}
-                                <img src="{{ asset(affiliationLogo) }}" alt="{{ team.affiliation.shortname }}"
-                                     title="{{ team.affiliation.shortname }}" class="affiliation-logo"/>
-                            {% endif %}
-                            <a href="{{ path('jury_team_affiliation', {'affilId': team.affiliation.externalid}) }}">
-                                {{ team.affiliation.name }}
-                            </a>
-                        </td>
-                    </tr>
-                {% endif %}
-                {% if showFlags and team.affiliation and team.affiliation.country %}
-                    <tr>
-                        <th>Country</th>
-                        <td>
-                            {{ team.affiliation.country | countryFlag(true) }}
-                        </td>
-                    </tr>
-                {% endif %}
-                {% if team.contests|length > 0 %}
-                <tr>
-                    <th>Contests</th>
-                    <td>
-                        {% for ucontest in team.contests %}
-                            <a href="{{ path('jury_contest', {'contestId': ucontest.externalid}) }}">{{ ucontest.shortname }}</a>
-                        {% endfor %}
-                    </td>
-                </tr>
-                {% endif %}
-                {% if team.internalcomments is not empty %}
-                <tr>
-                    <th>Internal comments (Jury only)</th>
-                    <td>
-                        {{ team.internalcomments | nl2br }}
-                    </td>
-                </tr>
-                {% endif %}
-                {% if team.publicdescription is not empty %}
-                    <tr>
-                        <th>Description (Public)</th>
-                        <td>{{ team.publicdescription | nl2br }}</td>
-                    </tr>
-                {% endif %}
-            </table>
-        </div>
-    {% set teamId = team.externalid %}
-    {% set teamImage = teamId | assetPath('team') %}
-    {% if teamImage %}
-        <div class="col">
-        <img loading="lazy" class="teampicture" src="{{ asset(teamImage) }}" alt="Picture of team {{ team.name }}"
-             title="Picture of team {{ team.effectiveName }}">
-        </div>
-    {% endif %}
+        {% set teamId = team.externalid %}
+        {% set teamImage = teamId | assetPath('team') %}
+        {% if teamImage %}
+            <div class="col-lg-3">
+                <img loading="lazy" class="teampicture" src="{{ asset(teamImage) }}" alt="Picture of team {{ team.name }}"
+                     title="Picture of team {{ team.effectiveName }}">
+            </div>
+        {% endif %}
     </div>
 
     <div class="button-row">

@@ -94,7 +94,7 @@ class TeamType extends AbstractExternalIdEntityType
             'label' => 'Internal comments (jury viewable only)',
             'required' => false,
             'attr'     => [
-                'rows' => 10,
+                'rows' => 3,
             ]
         ]);
         $builder->add('contests', EntityType::class, [
@@ -109,11 +109,13 @@ class TeamType extends AbstractExternalIdEntityType
                 ->where('c.openToAllTeams = false')
                 ->orderBy('c.name'),
         ]);
-        $builder->add('enabled', ChoiceType::class, [
-            'expanded' => true,
-            'choices'  => [
-                'Yes' => true,
-                'No'  => false,
+        $builder->add('enabled', CheckboxType::class, [
+            'required' => false,
+            'attr' => [
+                'data-toggle' => 'toggle',
+                'data-size' => 'mini',
+                'data-on' => 'Yes',
+                'data-off' => 'No',
             ],
         ]);
         $builder->add('photoFile', FileType::class, [
