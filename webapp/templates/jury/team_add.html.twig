@@ -6,12 +6,15 @@
 {% block extrahead %}
     {{ parent() }}
     {{ macros.select2_extrahead() }}
+    {{ macros.toggle_extrahead() }}
 {% endblock %}
 
 {% block content %}
 
-    <h1>Add team</h1>
+    <div class="contest-form">
+        <h1>Add team</h1>
 
-    {% include 'jury/partials/team_form.html.twig' %}
+        {% include 'jury/partials/team_form.html.twig' %}
+    </div>
 
 {% endblock %}
