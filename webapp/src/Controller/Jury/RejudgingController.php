@@ -454,6 +454,7 @@ class RejudgingController extends BaseController
             'hasScoringProblems' => $hasScoringProblems,
             'scoreChanges' => $scoreChanges,
             'maxScore' => $maxScore,
+            'scoreDiffEpsilon' => $this->dj->getCurrentContest()?->getScoreDiffEpsilon() ?? 0.0001,
         ];
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;

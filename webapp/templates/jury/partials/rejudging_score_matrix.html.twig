@@ -61,3 +61,4 @@
 {# Pass data to JavaScript - use JSON_HEX_TAG to escape < and > preventing script tag injection #}
 <script id="score-changes-data" type="application/json">{{ scoreChanges | json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP')) | raw }}</script>
 <script id="max-score-data" type="application/json">{{ maxScore | json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP')) | raw }}</script>
+<script id="score-diff-epsilon-data" type="application/json">{{ scoreDiffEpsilon | json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP')) | raw }}</script>
