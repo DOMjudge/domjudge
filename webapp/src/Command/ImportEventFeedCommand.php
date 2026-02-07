@@ -188,6 +188,11 @@ class ImportEventFeedCommand
      */
     protected function validateContestSource(): bool
     {
+        if (!$this->sourceService->isValidContestSource()) {
+            $this->style->error('The contest source is not valid: ' . $this->sourceService->getLoadingError());
+            return false;
+        }
+
         $contest = $this->sourceService->getSourceContest();
         $ourId   = $contest->getExternalid();
         $theirId = $this->sourceService->getContestId();
