@@ -1,8 +1,8 @@
 {% extends "jury/base.html.twig" %}
+{% import "jury/jury_macros.twig" as macros %}
 
 {% block title %}Edit affiliation {{ teamAffiliation.externalid }} - {{ parent() }}{% endblock %}
 
-{% import "jury/jury_macros.twig" as macros %}
 {% block extrahead %}
     {{ parent() }}
     {{ macros.select2_extrahead() }}
@@ -10,8 +10,12 @@
 
 {% block content %}
 
-    <h1>Edit affiliation {{ teamAffiliation.externalid }}</h1>
+    <div class="contest-form">
+        <div class="page-header-bar">
+            <h1>Edit affiliation {{ teamAffiliation.name }} ({{ teamAffiliation.externalid }})</h1>
+        </div>
 
-    {% include 'jury/partials/team_affiliation_form.html.twig' %}
+        {% include 'jury/partials/team_affiliation_form.html.twig' %}
+    </div>
 
 {% endblock %}
