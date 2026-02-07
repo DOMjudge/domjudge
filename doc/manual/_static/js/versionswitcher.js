@@ -1,13 +1,8 @@
 function versionChange(selectList) {
-    url = window.location.href;
-    for (var i = 0; i < 2; i++) {
-        var to = url.lastIndexOf('/');
-        to = to == -1 ? url.length : to;
-        url = url.substring(0, to);
-    }
-    // TODO: Redirect to same page on the other version instead of the
-    // overview.
-    window.location.href = url + '/' + selectList.value + '/index.html'
+    var newVersion = selectList.value;
+    // Replace current version with new version in URL to stay on the same page
+    var newUrl = window.location.href.replace('/' + currentVersion + '/', '/' + newVersion + '/');
+    window.location.href = newUrl;
 }
 
 window.onload = function() {
@@ -15,12 +10,30 @@ window.onload = function() {
     xmlhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             var availableVersions = JSON.parse(this.responseText);
-            var version = document.getElementsByClassName(['version'])[0];
-            currentVersion = version.innerHTML.trim();
-            version.innerHTML = '';
+            var versionElement = document.getElementsByClassName('version')[0];
+
+            // If no version element exists (sphinx_rtd_theme 3.x+), create one
+            if (!versionElement) {
+                var sidebar = document.getElementsByClassName('wy-side-nav-search')[0];
+                if (!sidebar) {
+                    console.warn('Version switcher: No sidebar found');
+                    return;
+                }
+                versionElement = document.createElement('span');
+                versionElement.className = 'version';
+                // Parse version from URL (e.g., /manual/8.2/page.html -> 8.2)
+                var match = window.location.pathname.match(/\/([^/]+)\/[^/]*$/);
+                if (match) {
+                    versionElement.textContent = match[1];
+                }
+                sidebar.appendChild(versionElement);
+            }
+
+            currentVersion = versionElement.textContent.trim();
+            versionElement.innerHTML = '';
             var selectList = document.createElement("select");
             selectList.id = "versionSelect";
-            version.appendChild(selectList);
+            versionElement.appendChild(selectList);
              
             for (var i = 0; i < availableVersions.length; i++) {
                 var option = document.createElement("option");
