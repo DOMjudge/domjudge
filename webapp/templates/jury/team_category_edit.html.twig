@@ -7,12 +7,17 @@
     {{ parent() }}
     {{ macros.coloris_extrahead() }}
     {{ macros.select2_extrahead() }}
+    {{ macros.toggle_extrahead() }}
 {% endblock %}
 
 {% block content %}
 
-    <h1>Edit category {{ teamCategory.externalid }}</h1>
+    <div class="contest-form">
+        <div class="page-header-bar">
+            <h1>Edit category {{ teamCategory.name }} ({{ teamCategory.externalid }})</h1>
+        </div>
 
-    {% include 'jury/partials/team_category_form.html.twig' %}
+        {% include 'jury/partials/team_category_form.html.twig' %}
+    </div>
 
 {% endblock %}

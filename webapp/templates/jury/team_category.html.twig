@@ -6,81 +6,111 @@
 {% block extrahead %}
     {{ parent() }}
     {{ macros.table_extrahead() }}
+    {{ macros.toggle_extrahead() }}
     {{ knp_pagination_rel_links(submissions) }}
 {% endblock %}
 
 {% block content %}
 
+    {% macro section_header(icon, title) %}
+    <tr class="contest-form-section-header">
+        <td colspan="2"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
+    </tr>
+    {% endmacro %}
+
     <h1>Category {{ teamCategory.name }}</h1>
 
     <div class="row">
-        <div class="col-lg-4">
-            <table class="table table-sm table-striped">
-                <tr>
-                    <th>ID</th>
-                    <td>{{ teamCategory.externalid }}</td>
-                </tr>
-                <tr>
-                    <th>ICPC ID</th>
-                    <td>
-                        {% if teamCategory.icpcid %}
-                            {{ teamCategory.icpcid }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Types</th>
-                    <td>
-                        {% if teamCategory.typeHumanNames %}
-                            <ul class="mb-0">
-                                {% for typeName in teamCategory.typeHumanNames %}
-                                    <li>{{ typeName }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                {% if teamCategory.sortorder is not null %}
+        <div class="col-lg-5">
+            <table class="table table-sm contest-fields-table">
+                <tbody>
+                    {{ _self.section_header('tag', 'Identity') }}
+                    <tr>
+                        <th>ID</th>
+                        <td>{{ teamCategory.externalid }}</td>
+                    </tr>
+                    <tr>
+                        <th>ICPC ID</th>
+                        <td>{{ teamCategory.icpcid ?: '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Name</th>
+                        <td>{{ teamCategory.name }}</td>
+                    </tr>
+
+                    {{ _self.section_header('palette', 'Display') }}
+                    <tr>
+                        <th>Types</th>
+                        <td>
+                            {% if teamCategory.typeHumanNames %}
+                                <ul class="mb-0">
+                                    {% for typeName in teamCategory.typeHumanNames %}
+                                        <li>{{ typeName }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
                     <tr>
                         <th>Sortorder</th>
-                        <td>{{ teamCategory.sortorder }}</td>
+                        <td>{{ teamCategory.sortorder ?? '-' }}</td>
                     </tr>
-                {% endif %}
-                {% if teamCategory.color %}
                     <tr>
                         <th>Color</th>
-                        <td style="background-color: {{ teamCategory.color }};">{{ teamCategory.color }}</td>
+                        <td>
+                            {% if teamCategory.color %}
+                                <span style="background-color: {{ teamCategory.color }}; padding: 2px 8px;">{{ teamCategory.color }}</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
                     </tr>
-                {% endif %}
-                {% if teamCategory.cssClass %}
                     <tr>
                         <th>CSS Class</th>
-                        <td><code>{{ teamCategory.cssClass }}</code></td>
+                        <td>
+                            {% if teamCategory.cssClass %}
+                                <code>{{ teamCategory.cssClass }}</code>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
                     </tr>
-                {% endif %}
-                <tr>
-                    <th>Visible</th>
-                    <td>{{ teamCategory.visible | printYesNo }}</td>
-                </tr>
-                <tr>
-                    <th>Allow self-registration</th>
-                    <td>{{ teamCategory.allowSelfRegistration | printYesNo }}</td>
-                </tr>
+
+                    {{ _self.section_header('eye', 'Access') }}
+                    <tr>
+                        <th>Visible</th>
+                        <td>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                {% include 'jury/partials/team_category_toggle.html.twig' with {route: 'jury_team_category_toggle_visible', value: teamCategory.visible} %}
+                            {% else %}
+                                {{ teamCategory.visible | printYesNo }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Allow self-registration</th>
+                        <td>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                {% include 'jury/partials/team_category_toggle.html.twig' with {route: 'jury_team_category_toggle_self_registration', value: teamCategory.allowSelfRegistration} %}
+                            {% else %}
+                                {{ teamCategory.allowSelfRegistration | printYesNo }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
 
-    {%- if is_granted('ROLE_ADMIN') -%}
-        <p>
+    <div class="button-row">
+        {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_team_category_edit', {'categoryId': teamCategory.externalid}), 'Edit', 'primary', 'edit') }}
             {{ button(path('jury_team_category_delete', {'categoryId': teamCategory.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
             {{ button(path('jury_team_category_request_remaining', {'categoryId': teamCategory.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
-        </p>
-    {% endif %}
+        {% endif %}
+    </div>
 
     <h3>Teams</h3>
     {% if teamCategory.teams is empty %}
@@ -118,4 +148,8 @@
         </div>
     {% endif %}
 
+{% endblock %}
+
+{% block extrafooter %}
+    {{ macros.toggle_autosubmit_extrafooter() }}
 {% endblock %}

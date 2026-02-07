@@ -282,6 +282,23 @@ class LanguageController extends BaseController
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
 
+    #[Route(path: '/{langId}/toggle-require-entry-point', name: 'jury_language_toggle_require_entry_point')]
+    public function toggleRequireEntryPointAction(Request $request, string $langId): Response
+    {
+        $language = $this->em->getRepository(Language::class)->findByExternalId($langId);
+        if (!$language) {
+            throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
+        }
+
+        $enabled = $request->request->getBoolean('value');
+        $language->setRequireEntryPoint($enabled);
+        $this->em->flush();
+
+        $this->dj->auditlog('language', $language->getExternalid(), 'set require entry point',
+            $enabled ? 'yes' : 'no');
+        return $this->redirectToRoute('jury_language', ['langId' => $langId]);
+    }
+
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{langId}/edit', name: 'jury_language_edit')]
     public function editAction(Request $request, string $langId): Response

@@ -6,12 +6,17 @@
 {% block extrahead %}
     {{ parent() }}
     {{ macros.select2_extrahead() }}
+    {{ macros.toggle_extrahead() }}
 {% endblock %}
 
 {% block content %}
 
-    <h1>Edit team {{ team.teamid }}</h1>
+    <div class="contest-form">
+        <div class="page-header-bar">
+            <h1>Edit team {{ team.effectiveName }} ({{ team.externalid }})</h1>
+        </div>
 
-    {% include 'jury/partials/team_form.html.twig' %}
+        {% include 'jury/partials/team_form.html.twig' %}
+    </div>
 
 {% endblock %}

@@ -12,255 +12,295 @@
 
 {% block content %}
 
-    <h1>Problem {{ problem.name }}</h1>
+    {% macro section_header(icon, title) %}
+        <tr class="contest-form-section-header">
+            <td colspan="2"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
+        </tr>
+    {% endmacro %}
 
-    <div class="row">
-        <div class="col-lg-4">
-            <table class="table table-sm table-striped">
-                <tr>
-                    <th>ID</th>
-                    <td>{{ problem.externalid }}</td>
-                </tr>
-                <tr>
-                    <th>Testcases</th>
-                    <td>
-                        {% if problem.testcases is empty %}
-                            <em>no testcases</em>
-                        {% else %}
-                            {{ problem.testcases.count }}
-                        {% endif %}
-                        <a href="{{ path('jury_problem_testcases', {'probId': problem.externalid}) }}">details
-                            {%- if is_granted('ROLE_ADMIN') and not lockedProblem %}
-                                / edit
-                            {% endif %}
-                        </a>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Timelimit</th>
-                    <td>{{ problem.timelimit }} sec</td>
-                </tr>
-                <tr>
-                    <th>Memory limit</th>
-                    <td>
-                        {% if problem.memlimit == null %}
-                            {{ defaultMemoryLimit }} kB (default)
-                        {% else %}
-                            {{ problem.memlimit }} kB
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Output limit</th>
-                    <td>
-                        {% if problem.outputlimit == null %}
-                            {{ defaultOutputLimit }} kB (default)
-                        {% else %}
-                            {{ problem.outputlimit }} kB
-                        {% endif %}
-                    </td>
-                </tr>
-                {% if problem.problemstatementType is not empty %}
+    <div class="contest-form">
+        <div class="page-header-bar">
+            <h1>Problem {{ problem.name }} ({{ problem.externalid }})</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <table class="table table-sm mb-0 contest-fields-table">
+                    {{ _self.section_header('tag', 'Identity') }}
                     <tr>
-                        <th>Problem statement</th>
+                        <th>ID</th>
+                        <td>{{ problem.externalid }}</td>
+                    </tr>
+                    {{ _self.section_header('vial', 'Testcases') }}
+                    <tr>
+                        <th>Testcases</th>
                         <td>
-                            <a href="{{ path('jury_problem_statement', {'probId': problem.externalid}) }}">
-                                <i title="view problem statement"
-                                   class="fas fa-file-{{ problem.problemstatementType }}"></i>
+                            {% if problem.testcases is empty %}
+                                <em>no testcases</em>
+                            {% else %}
+                                {{ problem.testcases.count }}
+                            {% endif %}
+                            <a href="{{ path('jury_problem_testcases', {'probId': problem.externalid}) }}">details
+                                {%- if is_granted('ROLE_ADMIN') and not lockedProblem %}
+                                    / edit
+                                {% endif %}
                             </a>
                         </td>
                     </tr>
-                {% endif %}
-                <tr>
-                    <th>Run script</th>
-                    <td class="filename">
-                        {% if problem.runExecutable is not empty %}
-                            <a href="{{ path('jury_executable', {'execId': problem.runExecutable.execid}) }}">{{ problem.runExecutable.execid }}</a>
-                        {% else %}
-                            <a href="{{ path('jury_executable', {'execId': defaultRunExecutable}) }}">{{ defaultRunExecutable }}</a>
-                            (default)
-                        {% endif %}
-                    </td>
-                </tr>
-                {% if problem.isInteractiveProblem %}
+                    {{ _self.section_header('tachometer-alt', 'Limits') }}
                     <tr>
-                        <th>Compare script</th>
-                        <td>Run script combines run and compare script.</td>
+                        <th>Time</th>
+                        <td>{{ problem.timelimit }} sec</td>
                     </tr>
-                {% else %}
                     <tr>
-                        <th>Compare script</th>
-                        <td class="filename">
-                            {% if problem.compareExecutable is not empty %}
-                                <a href="{{ path('jury_executable', {'execId': problem.compareExecutable.execid}) }}">{{ problem.compareExecutable.execid }}</a>
+                        <th>Memory</th>
+                        <td>
+                            {% if problem.memlimit == null %}
+                                {{ defaultMemoryLimit }} kB (default)
                             {% else %}
-                                <a href="{{ path('jury_executable', {'execId': defaultCompareExecutable}) }}">{{ defaultCompareExecutable }}</a>
+                                {{ problem.memlimit }} kB
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Output size</th>
+                        <td>
+                            {% if problem.outputlimit == null %}
+                                {{ defaultOutputLimit }} kB (default)
+                            {% else %}
+                                {{ problem.outputlimit }} kB
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {{ _self.section_header('cogs', 'Judging') }}
+                    {% if type is not empty %}
+                        <tr>
+                            <th>Type</th>
+                            <td>{{ type }}</td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Run script</th>
+                        <td class="filename">
+                            {% if problem.runExecutable is not empty %}
+                                <a href="{{ path('jury_executable', {'execId': problem.runExecutable.execid}) }}">{{ problem.runExecutable.execid }}</a>
+                            {% else %}
+                                <a href="{{ path('jury_executable', {'execId': defaultRunExecutable}) }}">{{ defaultRunExecutable }}</a>
                                 (default)
                             {% endif %}
                         </td>
                     </tr>
-                {% endif %}
-                {% if problem.specialCompareArgs is not empty %}
-                    <tr>
-                        <th>Compare script arguments</th>
-                        <td class="filename">{{ problem.specialCompareArgs }}</td>
-                    </tr>
-                {% endif %}
-                {% if type is not empty %}
-                    <tr>
-                        <th>Type</th>
-                        <td>{{ type }}</td>
-                    </tr>
-                {% endif %}
-                <tr>
-                    <th>Languages</th>
-                    <td>
-                        {% if problem.languages is empty %}
-                            <em>all languages enabled for the corresponding contest</em>
-                        {% else %}
-                            <ul>
-                                {% for language in problem.languages %}
-                                    <li><a href="{{ path('jury_language', {'langId': language.externalid}) }}">{{ language.name }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
-
-    <div class="button-row">
-        {%- if is_granted('ROLE_ADMIN') -%}
-            {%- if not lockedProblem -%}
-                {{ button(path('jury_problem_edit', {'probId': problem.externalid}), 'Edit', 'primary', 'edit') }}
-                {{ button(path('jury_problem_delete', {'probId': problem.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
-            {% endif %}
-            {{ button(path('jury_problem_request_remaining', {'probId': problem.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
-        {% endif %}
-        {{ button(path('jury_export_problem', {'problemId': problem.externalid}), 'Export', 'secondary', 'download') }}
-        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'problem', id: problem.externalid, buttonClass: 'btn-secondary'} %}
-    </div>
-
-    <h3>Contests</h3>
-
-    {% if problem.contestProblems is empty %}
-        <p class="nodata">No contests defined</p>
-    {% else %}
-        <div class="row">
-            <div class="col-md-6">
-                <table
-                    class="data-table table table-hover table-striped table-sm">
-                    <thead class="thead-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Contest<br/>shortname</th>
-                        <th>Contest<br/>name</th>
-                        <th>Problem<br/>shortname</th>
-                        <th>Allow<br/>submit</th>
-                        <th>Allow<br/>judge</th>
-                        <th>Colour</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for contestProblem in problem.contestProblems %}
-                        {% set link = path('jury_contest', {'contestId': contestProblem.contest.externalid}) %}
+                    {% if problem.isInteractiveProblem %}
                         <tr>
-                            <td>
-                                <a href="{{ link }}">{{ contestProblem.contest.externalid }}</a>
-                            </td>
-                            <td>
-                                <a href="{{ link }}">{{ contestProblem.contest.shortname }}</a>
-                            </td>
-                            <td>
-                                <a href="{{ link }}">{{ contestProblem.contest.name }}</a>
-                            </td>
-                            <td>
-                                <a href="{{ link }}">{{ contestProblem.shortname }}</a>
-                            </td>
-                            <td>
-                                {% include 'jury/partials/problem_toggle.html.twig' with {type: 'submit', enabled: contestProblem.allowSubmit} %}
-                            </td>
-                            <td>
-                                {% include 'jury/partials/problem_toggle.html.twig' with {type: 'judge', enabled: contestProblem.allowJudge} %}
-                            </td>
-                            {% if contestProblem.color is empty %}
-                                <td><a href="{{ link }}">&nbsp;</a></td>
-                            {% else %}
-                                <td title="{{ contestProblem.color }}">
-                                    <a href="{{ link }}">
-                                        {{ contestProblem | problemBadge }}
-                                    </a>
-                                </td>
-                            {% endif %}
+                            <th>Compare script</th>
+                            <td>Run script combines run and compare script.</td>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    {% endif %}
-
-    <h3>Attachments</h3>
-
-    <div class="row">
-        <div class="col-md-6">
-            {{ form_start(problemAttachmentForm) }}
-            <table class="table table-sm table-striped table-hover">
-                <thead class="thead-light">
-                <tr>
-                    <th>Name</th>
-                    <th>Mime type</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                {% if problem.attachments is empty %}
-                    <tr>
-                        <td colspan="2">
-                            <p class="nodata">No attachments</p>
-                        </td>
-                    </tr>
-                {% else %}
-                    {% for attachment in problem.attachments %}
+                    {% else %}
                         <tr>
-                            <td>{{ attachment.name }}</td>
-                            <td>{{ attachment.mimeType }}</td>
-                            <td>
-                                <a href="{{ path('jury_attachment_fetch', {'attachmentId': attachment.attachmentid}) }}"
-                                   class="btn btn-sm btn-primary">
-                                    <i class="fas fa-download"></i>
-                                </a>
-                                {% if is_granted('ROLE_ADMIN') and not lockedProblem %}
-                                    <a href="{{ path('jury_attachment_delete', {'attachmentId': attachment.attachmentid}) }}"
-                                       class="btn btn-sm btn-danger"
-                                       data-ajax-modal>
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
+                            <th>Compare script</th>
+                            <td class="filename">
+                                {% if problem.compareExecutable is not empty %}
+                                    <a href="{{ path('jury_executable', {'execId': problem.compareExecutable.execid}) }}">{{ problem.compareExecutable.execid }}</a>
+                                {% else %}
+                                    <a href="{{ path('jury_executable', {'execId': defaultCompareExecutable}) }}">{{ defaultCompareExecutable }}</a>
+                                    (default)
                                 {% endif %}
                             </td>
                         </tr>
-                    {% endfor %}
-                {% endif %}
-
-                {% if is_granted('ROLE_ADMIN') and not lockedProblem %}
+                    {% endif %}
+                    {% if problem.specialCompareArgs is not empty %}
+                        <tr>
+                            <th>Compare script arguments</th>
+                            <td class="filename">{{ problem.specialCompareArgs }}</td>
+                        </tr>
+                    {% endif %}
+                    {{ _self.section_header('filter', 'Restrictions') }}
                     <tr>
-                        <td colspan="2">
-                            {{ form_errors(problemAttachmentForm.content) }}
-                            {{ form_widget(problemAttachmentForm.content) }}
-                        </td>
+                        <th>Languages</th>
                         <td>
-                            {{ form_widget(problemAttachmentForm.add) }}
+                            {% if problem.languages is empty %}
+                                <em>all languages enabled for the corresponding contest</em>
+                            {% else %}
+                                <ul>
+                                    {% for language in problem.languages %}
+                                        <li><a href="{{ path('jury_language', {'langId': language.externalid}) }}">{{ language.name }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
                         </td>
                     </tr>
+                    {{ _self.section_header('file', 'Files') }}
+                    {% if problem.problemstatementType is not empty %}
+                        <tr>
+                            <th>Problem statement</th>
+                            <td>
+                                <a href="{{ path('jury_problem_statement', {'probId': problem.externalid}) }}">
+                                    <i title="view problem statement"
+                                       class="fas fa-file-{{ problem.problemstatementType }}"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg-6">
+                <table class="table table-sm mb-0 contest-fields-table">
+                    <tr class="contest-form-section-header">
+                        <td><i class="fas fa-trophy me-2"></i>Contests</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        {% if problem.contestProblems is empty %}
+            <p class="nodata">No contests defined</p>
+        {% else %}
+            <div class="row">
+                <div class="col-md-6">
+                    <table
+                        class="data-table table table-hover table-striped table-sm">
+                        <thead class="thead-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Contest<br/>shortname</th>
+                            <th>Contest<br/>name</th>
+                            <th>Problem<br/>shortname</th>
+                            <th>Allow<br/>submit</th>
+                            <th>Allow<br/>judge</th>
+                            <th>Colour</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for contestProblem in problem.contestProblems %}
+                            {% set link = path('jury_contest', {'contestId': contestProblem.contest.externalid}) %}
+                            <tr>
+                                <td>
+                                    <a href="{{ link }}">{{ contestProblem.contest.externalid }}</a>
+                                </td>
+                                <td>
+                                    <a href="{{ link }}">{{ contestProblem.contest.shortname }}</a>
+                                </td>
+                                <td>
+                                    <a href="{{ link }}">{{ contestProblem.contest.name }}</a>
+                                </td>
+                                <td>
+                                    <a href="{{ link }}">{{ contestProblem.shortname }}</a>
+                                </td>
+                                <td>
+                                    {% include 'jury/partials/problem_toggle.html.twig' with {type: 'submit', enabled: contestProblem.allowSubmit} %}
+                                </td>
+                                <td>
+                                    {% include 'jury/partials/problem_toggle.html.twig' with {type: 'judge', enabled: contestProblem.allowJudge} %}
+                                </td>
+                                {% if contestProblem.color is empty %}
+                                    <td><a href="{{ link }}">&nbsp;</a></td>
+                                {% else %}
+                                    <td title="{{ contestProblem.color }}">
+                                        <a href="{{ link }}">
+                                            {{ contestProblem | problemBadge }}
+                                        </a>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row mt-3">
+            <div class="col-lg-6">
+                <table class="table table-sm mb-0 contest-fields-table">
+                    <tr class="contest-form-section-header">
+                        <td><i class="fas fa-paperclip me-2"></i>Attachments</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                {{ form_start(problemAttachmentForm) }}
+                <table class="table table-sm table-striped table-hover">
+                    <thead class="thead-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Mime type</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if problem.attachments is empty %}
+                        <tr>
+                            <td colspan="2">
+                                <p class="nodata">No attachments</p>
+                            </td>
+                        </tr>
+                    {% else %}
+                        {% for attachment in problem.attachments %}
+                            <tr>
+                                <td>{{ attachment.name }}</td>
+                                <td>{{ attachment.mimeType }}</td>
+                                <td>
+                                    <a href="{{ path('jury_attachment_fetch', {'attachmentId': attachment.attachmentid}) }}"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    {% if is_granted('ROLE_ADMIN') and not lockedProblem %}
+                                        <a href="{{ path('jury_attachment_delete', {'attachmentId': attachment.attachmentid}) }}"
+                                           class="btn btn-sm btn-danger"
+                                           data-ajax-modal>
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if is_granted('ROLE_ADMIN') and not lockedProblem %}
+                        <tr>
+                            <td colspan="2">
+                                {{ form_errors(problemAttachmentForm.content) }}
+                                {{ form_widget(problemAttachmentForm.content) }}
+                            </td>
+                            <td>
+                                {{ form_widget(problemAttachmentForm.add) }}
+                            </td>
+                        </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+                {{ form_end(problemAttachmentForm) }}
+            </div>
+        </div>
+
+        <div class="button-row">
+            {%- if is_granted('ROLE_ADMIN') -%}
+                {%- if not lockedProblem -%}
+                    {{ button(path('jury_problem_edit', {'probId': problem.externalid}), 'Edit', 'primary', 'edit') }}
+                    {{ button(path('jury_problem_delete', {'probId': problem.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
                 {% endif %}
-                </tbody>
-            </table>
-            {{ form_end(problemAttachmentForm) }}
+                {{ button(path('jury_problem_request_remaining', {'probId': problem.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
+            {% endif %}
+            {{ button(path('jury_export_problem', {'problemId': problem.externalid}), 'Export', 'secondary', 'download') }}
+            {% include 'jury/partials/rejudge_form.html.twig' with {table: 'problem', id: problem.externalid, buttonClass: 'btn-secondary'} %}
         </div>
     </div>
 
-    <h3>Submissions</h3>
+    <div class="row mt-3">
+        <div class="col-lg-6">
+            <table class="table table-sm mb-0 contest-fields-table">
+                <tr class="contest-form-section-header">
+                    <td><i class="fas fa-paper-plane me-2"></i>Submissions</td>
+                </tr>
+            </table>
+        </div>
+    </div>
 
     <div data-ajax-refresh-target>
         {%- include 'jury/partials/submission_list.html.twig' with {showTestcases: false} %}

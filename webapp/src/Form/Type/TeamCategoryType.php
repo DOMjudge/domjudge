@@ -3,6 +3,7 @@
 namespace App\Form\Type;
 
 use App\Entity\TeamCategory;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -66,19 +67,23 @@ class TeamCategoryType extends AbstractExternalIdEntityType
             ],
             'help' => 'CSS class to apply to scoreboard rows for teams in this category.',
         ]);
-        $builder->add('visible', ChoiceType::class, [
-            'expanded' => true,
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
+        $builder->add('visible', CheckboxType::class, [
+            'required' => false,
+            'attr' => [
+                'data-toggle' => 'toggle',
+                'data-size' => 'mini',
+                'data-on' => 'Yes',
+                'data-off' => 'No',
             ],
         ]);
-        $builder->add('allow_self_registration', ChoiceType::class, [
+        $builder->add('allow_self_registration', CheckboxType::class, [
             'label' => 'Allow self-registration',
-            'expanded' => true,
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
+            'required' => false,
+            'attr' => [
+                'data-toggle' => 'toggle',
+                'data-size' => 'mini',
+                'data-on' => 'Yes',
+                'data-off' => 'No',
             ],
         ]);
         $builder->add('save', SubmitType::class);

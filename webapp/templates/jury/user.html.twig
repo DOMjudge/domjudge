@@ -11,122 +11,136 @@
 
 {% block content %}
 
+    {% macro section_header(icon, title) %}
+    <tr class="contest-form-section-header">
+        <td colspan="2"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
+    </tr>
+    {% endmacro %}
+
     <h1>User {{ user.name }}</h1>
 
     <div class="row">
-        <div class="col-lg-4">
-            <table class="table table-sm table-striped">
-                <tr>
-                    <th>ID</th>
-                    <td>{{ user.externalid }}</td>
-                </tr>
-                <tr>
-                    <th>Login</th>
-                    <td class="teamid">{{ user.username }}</td>
-                </tr>
-                <tr>
-                    <th>Email</th>
-                    <td>
-                        {% if user.email %}
-                            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Password</th>
-                    <td>
-                        {% if user.password %}
-                            Set
-                        {% else %}
-                            Not set
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>IP address</th>
-                    <td>
-                        {% if user.ipAddress %}
-                            {{ user.ipAddress }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Enabled</th>
-                    <td>
-                        {{ user.enabled | printYesNo }}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Roles</th>
-                    <td>
-                        {% for role in user.userRoles %}
-                            {{ role.description }}<br>
-                        {% else %}
-                            No roles assigned
-                        {% endfor %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Team</th>
-                    {% if user.team %}
-                        <td class="teamid">
-                            <a href="{{ path('jury_team', {'teamId': user.team.externalid}) }}">
-                                {{ user.team.effectiveName }} {{ user.team | entityIdBadge }}
-                            </a>
+        <div class="col-lg-5">
+            <table class="table table-sm contest-fields-table">
+                <tbody>
+                    {{ _self.section_header('tag', 'Identity') }}
+                    <tr>
+                        <th>ID</th>
+                        <td>{{ user.externalid }}</td>
+                    </tr>
+                    <tr>
+                        <th>Username</th>
+                        <td class="teamid">{{ user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Full name</th>
+                        <td>{{ user.name ?: '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td>
+                            {% if user.email %}
+                                <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                            {% else %}
+                                -
+                            {% endif %}
                         </td>
-                    {% else %}
-                        <td>-</td>
-                    {% endif %}
-                </tr>
-            </table>
-        </div>
+                    </tr>
 
-        <div class="col-lg-4">
-            <table class="table table-sm table-striped">
-                <tr>
-                    <th>First login</th>
-                    <td>
-                        {% if user.firstLogin %}
-                            {{ user.firstLogin | printtime('D d M Y H:i:s T') }}
+                    {{ _self.section_header('key', 'Authentication') }}
+                    <tr>
+                        <th>Password</th>
+                        <td>
+                            {% if user.password %}
+                                Set
+                            {% else %}
+                                Not set
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>IP address</th>
+                        <td>
+                            {% if user.ipAddress %}
+                                {{ user.ipAddress }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Enabled</th>
+                        <td>
+                            {{ user.enabled | printYesNo }}
+                        </td>
+                    </tr>
+
+                    {{ _self.section_header('shield-alt', 'Permissions') }}
+                    <tr>
+                        <th>Roles</th>
+                        <td>
+                            {% for role in user.userRoles %}
+                                {{ role.description }}<br>
+                            {% else %}
+                                No roles assigned
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Team</th>
+                        {% if user.team %}
+                            <td class="teamid">
+                                <a href="{{ path('jury_team', {'teamId': user.team.externalid}) }}">
+                                    {{ user.team.effectiveName }} {{ user.team | entityIdBadge }}
+                                </a>
+                            </td>
                         {% else %}
-                            -
+                            <td>-</td>
                         {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Last login</th>
-                    <td>
-                        {% if user.lastLogin %}
-                            {{ user.lastLogin | printtime('D d M Y H:i:s T') }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Last API login</th>
-                    <td>
-                        {% if user.lastApiLogin %}
-                            {{ user.lastApiLogin | printtime('D d M Y H:i:s T') }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Last IP</th>
-                    <td>
-                        {% if user.lastIpAddress %}
-                            {{ user.lastIpAddress | printHost(true) }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
+                    </tr>
+
+                    {{ _self.section_header('clock', 'Activity') }}
+                    <tr>
+                        <th>First login</th>
+                        <td>
+                            {% if user.firstLogin %}
+                                {{ user.firstLogin | printtime('D d M Y H:i:s T') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Last login</th>
+                        <td>
+                            {% if user.lastLogin %}
+                                {{ user.lastLogin | printtime('D d M Y H:i:s T') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Last API login</th>
+                        <td>
+                            {% if user.lastApiLogin %}
+                                {{ user.lastApiLogin | printtime('D d M Y H:i:s T') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Last IP</th>
+                        <td>
+                            {% if user.lastIpAddress %}
+                                {{ user.lastIpAddress | printHost(true) }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>

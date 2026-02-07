@@ -1,57 +1,108 @@
+{% macro form_table_row(field, attr) %}
+<tr {{ attr | default('') }}>
+    <th>{{ field.vars.label | default(field.vars.name | humanize) }}</th>
+    <td>
+        {{ form_errors(field) }}
+        {{ form_widget(field, {label: false}) }}
+        {{ form_help(field) }}
+    </td>
+</tr>
+{% endmacro %}
+
+{% macro section_header(icon, title) %}
+<tr class="contest-form-section-header">
+    <td colspan="2"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
+</tr>
+{% endmacro %}
+
+{{ form_start(form) }}
 <div class="row">
-    <div class="col-lg-4">
-        {{ form_start(form) }}
-        {{ form_row(form.externalid) }}
-        {{ form_row(form.icpcid) }}
-        {{ form_row(form.label) }}
-        {{ form_row(form.name) }}
-        {{ form_row(form.displayName) }}
-        {{ form_row(form.categories) }}
-        {{ form_row(form.publicdescription) }}
-        {{ form_row(form.affiliation) }}
-        {{ form_row(form.penalty) }}
-        {{ form_row(form.location) }}
-        {{ form_row(form.internalcomments) }}
-        {{ form_row(form.contests) }}
-        {{ form_row(form.enabled) }}
-        {% if form.offsetExists('existingUser') %}
-            {{ form_row(form.addUserForTeam) }}
-            <div data-existing-user>
-                {{ form_row(form.existingUser) }}
-            </div>
-            <div data-new-username>
-                {{ form_row(form.newUsername) }}
-            </div>
-        {% endif %}
-        {{ form_end(form) }}
+    <div class="col-lg-6">
+
+        {{ form_errors(form) }}
+
+        <table class="table table-sm mb-0 contest-fields-table">
+            <tbody>
+                {{ _self.section_header('tag', 'Identity') }}
+                {{ _self.form_table_row(form.externalid) }}
+                {{ _self.form_table_row(form.icpcid) }}
+                {{ _self.form_table_row(form.label) }}
+                {{ _self.form_table_row(form.name) }}
+                {{ _self.form_table_row(form.displayName) }}
+
+                {{ _self.section_header('building', 'Organization') }}
+                {{ _self.form_table_row(form.categories) }}
+                {{ _self.form_table_row(form.affiliation) }}
+
+                {{ _self.section_header('trophy', 'Contests') }}
+                {{ _self.form_table_row(form.contests) }}
+
+                {{ _self.section_header('info-circle', 'Details') }}
+                {{ _self.form_table_row(form.publicdescription) }}
+                {{ _self.form_table_row(form.location) }}
+                {{ _self.form_table_row(form.penalty) }}
+
+                {{ _self.section_header('cog', 'Admin') }}
+                {{ _self.form_table_row(form.internalcomments) }}
+                {{ _self.form_table_row(form.enabled) }}
+                {{ _self.form_table_row(form.photoFile) }}
+                {% if form.clearPhoto is defined %}
+                    {{ _self.form_table_row(form.clearPhoto) }}
+                {% endif %}
+
+                {% if form.addUserForTeam is defined %}
+                    {{ _self.section_header('user', 'User Management') }}
+                    {{ _self.form_table_row(form.addUserForTeam) }}
+                    <tr data-existing-user>
+                        <th>{{ form.existingUser.vars.label | default('User') }}</th>
+                        <td>
+                            {{ form_errors(form.existingUser) }}
+                            {{ form_widget(form.existingUser, {label: false}) }}
+                        </td>
+                    </tr>
+                    <tr data-new-username>
+                        <th>{{ form.newUsername.vars.label | default('Username') }}</th>
+                        <td>
+                            {{ form_errors(form.newUsername) }}
+                            {{ form_widget(form.newUsername, {label: false}) }}
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
     </div>
 </div>
+
+{{ form_widget(form.save) }}
+{{ form_end(form) }}
 
 <script>
     $(function () {
         var $addUserForTeam = $('#team_addUserForTeam');
-        var addUserForTeamChanged = function () {
-            var $existingUserField = $('[data-existing-user]');
-            var $newUsernameField = $('[data-new-username]');
-            switch ($addUserForTeam.val()) {
-                case 'dont-add-user':
-                    $existingUserField.hide();
-                    $newUsernameField.hide();
-                    $newUsernameField.find('input').attr('required', false);
-                    break;
-                case 'create-new-user':
-                    $existingUserField.hide();
-                    $newUsernameField.show();
-                    $newUsernameField.find('input').attr('required', true);
-                    break;
-                case 'add-existing-user':
-                    $existingUserField.show();
-                    $newUsernameField.hide();
-                    $newUsernameField.find('input').attr('required', false);
-                    break;
-            }
-        };
-        $addUserForTeam.on('change', addUserForTeamChanged);
-        addUserForTeamChanged();
+        if ($addUserForTeam.length) {
+            var addUserForTeamChanged = function () {
+                var $existingUserRow = $('[data-existing-user]');
+                var $newUsernameRow = $('[data-new-username]');
+                switch ($addUserForTeam.val()) {
+                    case 'dont-add-user':
+                        $existingUserRow.hide();
+                        $newUsernameRow.hide();
+                        $newUsernameRow.find('input').attr('required', false);
+                        break;
+                    case 'create-new-user':
+                        $existingUserRow.hide();
+                        $newUsernameRow.show();
+                        $newUsernameRow.find('input').attr('required', true);
+                        break;
+                    case 'add-existing-user':
+                        $existingUserRow.show();
+                        $newUsernameRow.hide();
+                        $newUsernameRow.find('input').attr('required', false);
+                        break;
+                }
+            };
+            $addUserForTeam.on('change', addUserForTeamChanged);
+            addUserForTeamChanged();
+        }
     })
 </script>

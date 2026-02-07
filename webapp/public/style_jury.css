@@ -196,6 +196,9 @@ div.submission-summary > span {
 .contest-fields-table td .form-select {
     width: 100%;
 }
+.contest-fields-table td .input-group .form-control {
+    width: auto;
+}
 .contest-fields-table td .form-text {
     font-size: 0.8rem;
     margin-top: 0.15rem;

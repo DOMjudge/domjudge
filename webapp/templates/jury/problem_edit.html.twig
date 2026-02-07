@@ -3,38 +3,56 @@
 
 {% block title %}Edit problem {{ problem.externalid }} - {{ parent() }}{% endblock %}
 
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.select2_extrahead() }}
+{% endblock %}
+
 {% block content %}
 
-    <h1>Edit problem {{ problem.probid }}</h1>
-
-    <div class="row">
-        <div class="col-lg-4">
-            <table class="table table-sm table-striped">
-                <tr>
-                    <th>Testcases</th>
-                    <td>
-                        {% if problem.testcases is empty %}
-                            <em>no testcases</em>
-                        {% else %}
-                            <a href="{{ path('jury_problem_testcases', {'probId': problem.externalid}) }}">details / edit</a>
-                        {% endif %}
-                    </td>
-                </tr>
-            </table>
+    <div class="contest-form">
+        <div class="page-header-bar">
+            <h1>Edit problem {{ problem.name }} ({{ problem.externalid }})</h1>
         </div>
-    </div>
-
-    {% include 'jury/partials/problem_form.html.twig' %}
-
-    {% if is_granted('ROLE_ADMIN') %}
-        <hr>
-        <i>or</i>
 
         <div class="row">
-            <div class="col-lg-4">
-                {{ form(uploadForm) }}
+            <div class="col-lg-6">
+                <table class="table table-sm mb-0 contest-fields-table">
+                    <tr class="contest-form-section-header">
+                        <td colspan="2"><i class="fas fa-vial me-2"></i>Testcases</td>
+                    </tr>
+                    <tr>
+                        <th>Testcases</th>
+                        <td>
+                            {% if problem.testcases is empty %}
+                                <em>no testcases</em>
+                            {% else %}
+                                <a href="{{ path('jury_problem_testcases', {'probId': problem.externalid}) }}">details / edit</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
-    {% endif %}
+
+        {% include 'jury/partials/problem_form.html.twig' %}
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <div class="row mt-3">
+                <div class="col-lg-6">
+                    <table class="table table-sm mb-0 contest-fields-table">
+                        <tr class="contest-form-section-header">
+                            <td><i class="fas fa-upload me-2"></i>Upload Problem Archive</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    {{ form(uploadForm) }}
+                </div>
+            </div>
+        {% endif %}
+    </div>
 
 {% endblock %}

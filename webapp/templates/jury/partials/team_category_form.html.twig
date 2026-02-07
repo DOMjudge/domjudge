@@ -1,5 +1,48 @@
+{% macro form_table_row(field, attr) %}
+<tr {{ attr | default('') }}>
+    <th>{{ field.vars.label | default(field.vars.name | humanize) }}</th>
+    <td>
+        {{ form_errors(field) }}
+        {{ form_widget(field, {label: false}) }}
+        {{ form_help(field) }}
+    </td>
+</tr>
+{% endmacro %}
+
+{% macro section_header(icon, title) %}
+<tr class="contest-form-section-header">
+    <td colspan="2"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
+</tr>
+{% endmacro %}
+
+{{ form_start(form) }}
 <div class="row">
-    <div class="col-lg-4">
-        {{ form(form) }}
+    <div class="col-lg-6">
+
+        {{ form_errors(form) }}
+
+        <table class="table table-sm mb-0 contest-fields-table">
+            <tbody>
+                {{ _self.section_header('tag', 'Identity') }}
+                {% if form.externalid is defined %}
+                    {{ _self.form_table_row(form.externalid) }}
+                {% endif %}
+                {{ _self.form_table_row(form.icpcid) }}
+                {{ _self.form_table_row(form.name) }}
+
+                {{ _self.section_header('palette', 'Display') }}
+                {{ _self.form_table_row(form.types) }}
+                {{ _self.form_table_row(form.sortorder) }}
+                {{ _self.form_table_row(form.color) }}
+                {{ _self.form_table_row(form.css_class) }}
+
+                {{ _self.section_header('eye', 'Access') }}
+                {{ _self.form_table_row(form.visible) }}
+                {{ _self.form_table_row(form.allow_self_registration) }}
+            </tbody>
+        </table>
     </div>
 </div>
+
+{{ form_widget(form.save) }}
+{{ form_end(form) }}

@@ -263,4 +263,38 @@ class TeamCategoryController extends BaseController
         $this->judgeRemaining(contestId: $contestId, categoryId: $categoryId);
         return $this->redirectToRoute('jury_team_category', ['categoryId' => $categoryId]);
     }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{categoryId}/toggle-visible', name: 'jury_team_category_toggle_visible', methods: ['POST'])]
+    public function toggleVisibleAction(Request $request, string $categoryId): Response
+    {
+        $teamCategory = $this->em->getRepository(TeamCategory::class)->findByExternalId($categoryId);
+        if (!$teamCategory) {
+            throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
+        }
+
+        $teamCategory->setVisible($request->request->getBoolean('value'));
+        $this->em->flush();
+
+        $this->dj->auditlog('team_category', $teamCategory->getExternalid(), 'set visible',
+            $request->request->getBoolean('value') ? 'yes' : 'no');
+        return $this->redirectToRoute('jury_team_category', ['categoryId' => $categoryId]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{categoryId}/toggle-self-registration', name: 'jury_team_category_toggle_self_registration', methods: ['POST'])]
+    public function toggleSelfRegistrationAction(Request $request, string $categoryId): Response
+    {
+        $teamCategory = $this->em->getRepository(TeamCategory::class)->findByExternalId($categoryId);
+        if (!$teamCategory) {
+            throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
+        }
+
+        $teamCategory->setAllowSelfRegistration($request->request->getBoolean('value'));
+        $this->em->flush();
+
+        $this->dj->auditlog('team_category', $teamCategory->getExternalid(), 'set allow self-registration',
+            $request->request->getBoolean('value') ? 'yes' : 'no');
+        return $this->redirectToRoute('jury_team_category', ['categoryId' => $categoryId]);
+    }
 }

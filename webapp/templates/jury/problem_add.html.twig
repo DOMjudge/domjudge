@@ -3,10 +3,17 @@
 
 {% block title %}Add problem - {{ parent() }}{% endblock %}
 
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.select2_extrahead() }}
+{% endblock %}
+
 {% block content %}
 
-    <h1>Add problem</h1>
+    <div class="contest-form">
+        <h1>Add problem</h1>
 
-    {% include 'jury/partials/problem_form.html.twig' %}
+        {% include 'jury/partials/problem_form.html.twig' %}
+    </div>
 
 {% endblock %}

@@ -8,7 +8,7 @@ use App\Entity\Language;
 use App\Entity\Problem;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -19,35 +19,28 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class LanguageType extends AbstractExternalIdEntityType
 {
+    private const TOGGLE_ATTRS = ['data-toggle' => 'toggle', 'data-size' => 'mini', 'data-on' => 'Yes', 'data-off' => 'No'];
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $this->addExternalIdField($builder, Language::class);
         $builder->add('name', TextType::class, [
             'empty_data' => ''
         ]);
-        $builder->add('requireEntryPoint', ChoiceType::class, [
-            'expanded' => true,
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
+        $builder->add('requireEntryPoint', CheckboxType::class, [
+            'required' => false,
+            'attr' => self::TOGGLE_ATTRS,
         ]);
         $builder->add('entryPointDescription', TextType::class, [
             'required' => false,
         ]);
-        $builder->add('allowSubmit', ChoiceType::class, [
-            'expanded' => true,
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
+        $builder->add('allowSubmit', CheckboxType::class, [
+            'required' => false,
+            'attr' => self::TOGGLE_ATTRS,
         ]);
-        $builder->add('allowJudge', ChoiceType::class, [
-            'expanded' => true,
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
+        $builder->add('allowJudge', CheckboxType::class, [
+            'required' => false,
+            'attr' => self::TOGGLE_ATTRS,
         ]);
         $builder->add('timeFactor', TextType::class, [
             'input_group_after' => '&times;',
@@ -71,13 +64,10 @@ class LanguageType extends AbstractExternalIdEntityType
             'allow_add' => true,
             'allow_delete' => true,
         ]);
-        $builder->add('filterCompilerFiles', ChoiceType::class, [
+        $builder->add('filterCompilerFiles', CheckboxType::class, [
             'label' => 'Filter files passed to compiler by extension list',
-            'expanded' => true,
-            'choices' => [
-                'Yes' => true,
-                'No' => false,
-            ],
+            'required' => false,
+            'attr' => self::TOGGLE_ATTRS,
         ]);
         $builder->add('compilerVersionCommand', TextType::class, [
             'label' => 'Compiler version command',

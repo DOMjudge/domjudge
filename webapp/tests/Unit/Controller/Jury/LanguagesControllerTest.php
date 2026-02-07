@@ -6,6 +6,7 @@ use App\Entity\JudgeTask;
 use App\Entity\Language;
 use App\Entity\QueueTask;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DomCrawler\Field\ChoiceFormField;
 use Symfony\Component\HttpFoundation\Request;
 
 class LanguagesControllerTest extends JuryControllerTestCase
@@ -25,29 +26,29 @@ class LanguagesControllerTest extends JuryControllerTestCase
     protected static array   $addEntitiesShown         = ['externalid', 'name', 'timefactor'];
     protected static array   $addEntities              = [['name' => 'Simple',
                                                            'externalid' => 'extSimple',
-                                                           'requireEntryPoint' => '0',
+                                                           'requireEntryPoint' => false,
                                                            'entryPointDescription' => '',
-                                                           'allowSubmit' => '1',
-                                                           'allowJudge' => '1',
+                                                           'allowSubmit' => true,
+                                                           'allowJudge' => true,
                                                            'timeFactor' => '1',
                                                            'compileExecutable' => 'java_javac',
                                                            'extensions' => ['1' => 'extension'],
-                                                           'filterCompilerFiles' => '1'],
+                                                           'filterCompilerFiles' => true],
                                                           ['externalid' => 'lang123_.-',
                                                            'name' => 'langid_expected_chars'],
                                                           ['externalid' => 'ext123_.-'],
                                                           ['externalid' => 'name_special_chars',
                                                            'name' => '🕑ড|{}()*'],
                                                           ['externalid' => 'entry',
-                                                           'requireEntryPoint' => '1',
+                                                           'requireEntryPoint' => true,
                                                            'entryPointDescription' => 'shell'],
                                                           ['externalid' => 'entry_nodesc',
-                                                           'requireEntryPoint' => '1',
+                                                           'requireEntryPoint' => true,
                                                            'entryPointDescription' => ''],
                                                           ['externalid' => 'nosub',
-                                                           'allowSubmit' => '0'],
+                                                           'allowSubmit' => false],
                                                           ['externalid' => 'nojud',
-                                                           'allowJudge' => '0'],
+                                                           'allowJudge' => false],
                                                           ['externalid' => 'timef1',
                                                            'timeFactor' => '3'],
                                                           ['externalid' => 'timef2',
@@ -62,7 +63,7 @@ class LanguagesControllerTest extends JuryControllerTestCase
                                                            ['externalid' => 'extunicode',
                                                             'extensions' => ['0' => '🕑']],
                                                            ['externalid' => 'nofilt',
-                                                            'filterCompilerFiles' => '0'],
+                                                            'filterCompilerFiles' => false],
                                                            ['externalid' => 'compVers',
                                                             'compilerVersionCommand' => 'unit -V'],
                                                            ['externalid' => 'runVers',
@@ -112,9 +113,10 @@ class LanguagesControllerTest extends JuryControllerTestCase
 
         $crawler = $this->getCurrentCrawler();
         $form = $crawler->filter('form')->form();
-        $formData = $form->getValues();
-        $formData['language[allowJudge]'] = '0';
-        $this->client->submit($form, $formData);
+        $allowJudgeField = $form['language[allowJudge]'];
+        assert($allowJudgeField instanceof ChoiceFormField);
+        $allowJudgeField->untick();
+        $this->client->submit($form);
 
         // Submit again.
         $this->addSubmission('DOMjudge', 'fltcmp');
@@ -124,8 +126,13 @@ class LanguagesControllerTest extends JuryControllerTestCase
         self::assertEquals(4, $judgeTaskQuery->getSingleScalarResult());
 
         // Enable judging again.
-        $formData['language[allowJudge]'] = '1';
-        $this->client->submit($form, $formData);
+        $this->verifyPageResponse('GET', $url, 200);
+        $crawler = $this->getCurrentCrawler();
+        $form = $crawler->filter('form')->form();
+        $allowJudgeField = $form['language[allowJudge]'];
+        assert($allowJudgeField instanceof ChoiceFormField);
+        $allowJudgeField->tick();
+        $this->client->submit($form);
 
         // This should add more queue and judge tasks.
         self::assertEquals(2, $queueTaskQuery->getSingleScalarResult());
