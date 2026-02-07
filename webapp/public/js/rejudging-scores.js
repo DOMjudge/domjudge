@@ -6,7 +6,7 @@
  */
 
 // Configuration constants
-const PRECISION = 0.0001;
+let PRECISION = 0.0001; // Default, will be overridden by contest setting
 const DELTA_THRESHOLDS = [0.0001, 0.0005, 0.0025, 0.01, 0.05, 0.25, 1, 2, 5, 25, 100, 250];
 const NUM_X_BINS = 20;
 const SLIDER_DEBOUNCE_MS = 50;
@@ -38,6 +38,7 @@ function initScoreChangesVisualization()
 {
     const dataElement = document.getElementById('score-changes-data');
     const maxScoreElement = document.getElementById('max-score-data');
+    const epsilonElement = document.getElementById('score-diff-epsilon-data');
 
     if (!dataElement || !maxScoreElement) {
         return;
@@ -48,6 +49,12 @@ function initScoreChangesVisualization()
     try {
         scoreChangesData = JSON.parse(dataElement.textContent || '[]');
         maxScore = JSON.parse(maxScoreElement.textContent || '0');
+        if (epsilonElement) {
+            const epsilon = JSON.parse(epsilonElement.textContent || '0.0001');
+            if (typeof epsilon === 'number' && !isNaN(epsilon) && epsilon > 0) {
+                PRECISION = epsilon;
+            }
+        }
     } catch (e) {
         console.error('Failed to parse score changes data:', e);
         return;

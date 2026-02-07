@@ -160,7 +160,7 @@ class ShadowDifferencesController extends BaseController
                 $absDelta = abs($delta);
                 $maxScore = max($maxScore, $externalScore, $localScore);
 
-                if ($absDelta > DOMJudgeService::SCORE_DIFF_EPSILON) {
+                if ($absDelta > $contest->getScoreDiffEpsilon()) {
                     $scoreChanges[] = [
                         'submitId' => $submission->getExternalid(),
                         'contestId' => $contest->getExternalid(),
@@ -250,6 +250,7 @@ class ShadowDifferencesController extends BaseController
             'hasScoringProblems' => $hasScoringProblems,
             'scoreChanges' => $scoreChanges,
             'maxScore' => $maxScore,
+            'scoreDiffEpsilon' => $contest->getScoreDiffEpsilon(),
         ];
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;

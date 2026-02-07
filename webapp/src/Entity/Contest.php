@@ -355,6 +355,15 @@ class Contest extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ?string $externalSourcePassword = null;
 
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        options: ['comment' => 'Minimum absolute score difference for shadow differences', 'default' => '0.0001']
+    )]
+    #[Serializer\Exclude]
+    private string|float $scoreDiffEpsilon = 0.0001;
+
     #[ORM\Column(nullable: true, options: ['comment' => 'Last encountered event ID from external source, if any'])]
     #[Serializer\Exclude]
     private ?string $externalSourceLastEventId = null;
@@ -1055,6 +1064,17 @@ class Contest extends BaseApiEntity implements
     public function setExternalSourceLastHttpCode(?int $externalSourceLastHttpCode): Contest
     {
         $this->externalSourceLastHttpCode = $externalSourceLastHttpCode;
+        return $this;
+    }
+
+    public function getScoreDiffEpsilon(): float
+    {
+        return (float)$this->scoreDiffEpsilon;
+    }
+
+    public function setScoreDiffEpsilon(string|float $scoreDiffEpsilon): Contest
+    {
+        $this->scoreDiffEpsilon = $scoreDiffEpsilon;
         return $this;
     }
 

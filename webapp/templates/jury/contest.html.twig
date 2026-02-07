@@ -94,6 +94,11 @@
                         <td></td>
                     </tr>
                     <tr>
+                        <th>Score diff epsilon</th>
+                        <td>{{ contest.scoreDiffEpsilon }}</td>
+                        <td></td>
+                    </tr>
+                    <tr>
                         <th>Allow submit</th>
                         <td>
                             {% include 'jury/partials/contest_toggle.html.twig' with {type: 'submit', enabled: contest.allowSubmit} %}
