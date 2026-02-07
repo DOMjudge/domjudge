@@ -866,18 +866,20 @@ class SubmissionService
             $allowedLanguages = $this->dj->getAllowedLanguagesForContest($contest);
             if (!in_array($language, $allowedLanguages, strict: true)) {
                 throw new BadRequestHttpException(
-                    sprintf("Language '%s' not allowed for contest [c%d].", $language->getLangid(), $contest->getCid()));
+                    sprintf("Language '%s' not allowed for contest '%s'.",
+                        $language->getName(), $contest->getName()));
             }
         } else {
             $allowedLanguages = $allowedLanguages->toArray();
             if (!in_array($language, $allowedLanguages, strict: true)) {
                 throw new BadRequestHttpException(
-                    sprintf("Language '%s' not allowed for problem [p%d].", $language->getLangid(), $problem->getProbid()));
+                    sprintf("Language '%s' not allowed for problem '%s'.",
+                        $language->getName(), $problem->getProblem()->getName()));
             }
         }
 
         if ($language->getRequireEntryPoint() && empty($entryPoint)) {
-            $message = sprintf("Entry point required for '%s' but none given.", $language->getLangid());
+            $message = sprintf("Entry point required for '%s' but none given.", $language->getName());
             if ($forceImportInvalid) {
                 $importError = $message;
             } else {
