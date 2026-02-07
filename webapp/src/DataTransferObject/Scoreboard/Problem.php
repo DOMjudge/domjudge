@@ -13,6 +13,8 @@ class Problem
         public readonly string $problemId,
         public readonly int $numJudged,
         public readonly int $numPending,
+        #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+        public readonly int $numInFreeze,
         public readonly bool $solved,
         #[Serializer\Exclude(if: 'object.time === null')]
         public ?int $time = null,
