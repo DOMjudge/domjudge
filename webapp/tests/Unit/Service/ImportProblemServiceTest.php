@@ -6,6 +6,7 @@ use App\Entity\Problem;
 use App\Service\ImportProblemService;
 use App\Tests\Unit\BaseTestCase;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use ZipArchive;
 
 class ImportProblemServiceTest extends BaseTestCase
 {
@@ -170,6 +171,88 @@ YAML;
         }
     }
 
+    public function testTimeLimit(): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail
+limits:
+  time_limit: 5
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $this->assertEquals(5, $problem->getTimelimit());
+    }
+
+    public function testTimeLimitFloat(): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail
+limits:
+  time_limit: 2.5
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $this->assertEquals(2.5, $problem->getTimelimit());
+    }
+
+    public function testTimeLimitNegativeRejected(): void
+    {
+        $yaml = <<<YAML
+name: test
+limits:
+  time_limit: -5
+YAML;
+        $zipFile = $this->createZipWithContents([
+            'problem.yaml' => $yaml,
+        ]);
+
+        $zip = new ZipArchive();
+        $zip->open($zipFile);
+
+        /** @var ImportProblemService $service */
+        $service = static::getContainer()->get(ImportProblemService::class);
+        /** @var array{info: string[], warning: string[], danger: string[]} $messages */
+        $messages = ['info' => [], 'warning' => [], 'danger' => []];
+
+        $result = $service->importZippedProblem($zip, 'test-problem.zip', null, null, $messages);
+
+        $zip->close();
+        unlink($zipFile);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('timelimit: This value should be greater than 0', $messages['danger'][0]);
+    }
+
+    public function testTimeLimitWithUnitsRejected(): void
+    {
+        $yaml = <<<YAML
+name: test
+limits:
+  time_limit: 5m
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertFalse($ret);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('timelimit: Expected argument of type "float", "string" given', $messages['danger'][0]);
+    }
+
     public function testMemoryLimit(): void
     {
         $yaml = <<<YAML
@@ -232,6 +315,7 @@ type: pass-fail
 validation: custom multi-pass
 validator_flags: 'special flags'
 limits:
+  time_limit: 7
   memory: 23
   output: 42
   validation_passes: 3
@@ -245,6 +329,7 @@ YAML;
         $this->assertEmpty($messages);
         $this->assertEquals('pass-fail, multi-pass', $problem->getTypesAsString());
         $this->assertEquals('custom multi-pass', $validationMode);
+        $this->assertEquals(7, $problem->getTimelimit());
         $this->assertEquals(23*1024, $problem->getMemlimit());
         $this->assertEquals(42*1024, $problem->getOutputlimit());
         $this->assertEquals(3, $problem->getMultipassLimit());
@@ -398,5 +483,85 @@ YAML;
         $this->assertNull($result);
         $this->assertNotEmpty($messages['danger']);
         $this->assertStringContainsString("Invalid range '100'", $messages['danger'][0]);
+    }
+
+    /**
+     * Create a temporary zip file with the given contents.
+     *
+     * @param array<string, string> $files Map of filename => content
+     */
+    private function createZipWithContents(array $files): string
+    {
+        $tempFile = tempnam(sys_get_temp_dir(), 'domjudge-test-') . '.zip';
+        $zip = new ZipArchive();
+        $zip->open($tempFile, ZipArchive::CREATE);
+        foreach ($files as $name => $content) {
+            $zip->addFromString($name, $content);
+        }
+        $zip->close();
+        return $tempFile;
+    }
+
+    public function testTimelimitConflictDetected(): void
+    {
+        $yaml = <<<YAML
+name: test
+limits:
+  time_limit: 5
+YAML;
+        $zipFile = $this->createZipWithContents([
+            'problem.yaml' => $yaml,
+            '.timelimit' => '10',
+        ]);
+
+        $zip = new ZipArchive();
+        $zip->open($zipFile);
+
+        /** @var ImportProblemService $service */
+        $service = static::getContainer()->get(ImportProblemService::class);
+        /** @var array{info: string[], warning: string[], danger: string[]} $messages */
+        $messages = ['info' => [], 'warning' => [], 'danger' => []];
+
+        $result = $service->importZippedProblem($zip, 'test-problem.zip', null, null, $messages);
+
+        $zip->close();
+        unlink($zipFile);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('Conflicting time limits', $messages['danger'][0]);
+        $this->assertStringContainsString('10', $messages['danger'][0]);
+        $this->assertStringContainsString('5', $messages['danger'][0]);
+    }
+
+    public function testTimelimitNoConflictWhenMatching(): void
+    {
+        $yaml = <<<YAML
+name: test
+limits:
+  time_limit: 5
+YAML;
+        $zipFile = $this->createZipWithContents([
+            'problem.yaml' => $yaml,
+            '.timelimit' => '5',
+        ]);
+
+        $zip = new ZipArchive();
+        $zip->open($zipFile);
+
+        /** @var ImportProblemService $service */
+        $service = static::getContainer()->get(ImportProblemService::class);
+        /** @var array{info: string[], warning: string[], danger: string[]} $messages */
+        $messages = ['info' => [], 'warning' => [], 'danger' => []];
+
+        $result = $service->importZippedProblem($zip, 'test-problem.zip', null, null, $messages);
+
+        $zip->close();
+        unlink($zipFile);
+
+        // Should succeed (no conflict)
+        $this->assertInstanceOf(Problem::class, $result);
+        $this->assertEmpty($messages['danger']);
+        $this->assertEquals(5, $result->getTimelimit());
     }
 }
