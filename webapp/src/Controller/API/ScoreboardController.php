@@ -195,6 +195,7 @@ class ScoreboardController extends AbstractApiController
                     problemId: $contestProblem->getProblem()->getExternalid(),
                     numJudged: $matrixItem->numSubmissions,
                     numPending: $matrixItem->numSubmissionsPending,
+                    numInFreeze:  $matrixItem->numSubmissionsInFreeze,
                     solved: $matrixItem->isCorrect,
                 );
 
