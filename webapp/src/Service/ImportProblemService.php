@@ -117,10 +117,21 @@ readonly class ImportProblemService
             unset($contestProblemProperties['short-name']);
         }
 
-        // Set timelimit from alternative source:
-        if (!isset($problemProperties['timelimit']) &&
-            ($str = $zip->getFromName($tleFile)) !== false) {
-            $problemProperties['timelimit'] = trim($str);
+        // Set timelimit from alternative source (.timelimit file):
+        $tleFileValue = null;
+        if (($str = $zip->getFromName($tleFile)) !== false) {
+            $trimmed = trim($str);
+            if (!is_numeric($trimmed)) {
+                $messages['danger'][] = sprintf(
+                    'Invalid time limit in .timelimit file: %s is not a valid number.',
+                    $trimmed
+                );
+                return null;
+            }
+            $tleFileValue = (float)$trimmed;
+            if (!isset($problemProperties['timelimit'])) {
+                $problemProperties['timelimit'] = $tleFileValue;
+            }
         }
 
         // Take problem:externalid from zip filename, and use as backup for
@@ -237,6 +248,15 @@ readonly class ImportProblemService
         // types) are set before the entity validation callbacks fire.
         $validationMode = 'default';
         if (!static::parseYaml($problemYaml, $messages, $validationMode, $propertyAccessor, $problem)) {
+            return null;
+        }
+
+        // Check for conflicting time limits between .timelimit file and problem.yaml.
+        if ($tleFileValue !== null && abs($problem->getTimelimit() - $tleFileValue) > 1e-9) {
+            $messages['danger'][] = sprintf(
+                'Conflicting time limits: .timelimit file specifies %s seconds, but problem.yaml specifies %s seconds.',
+                $tleFileValue, $problem->getTimelimit()
+            );
             return null;
         }
 
@@ -1234,6 +1254,9 @@ readonly class ImportProblemService
         }
 
         if (isset($yamlData['limits'])) {
+            if (isset($yamlData['limits']['time_limit'])) {
+                $yamlProblemProperties['timelimit'] = $yamlData['limits']['time_limit'];
+            }
             if (isset($yamlData['limits']['memory'])) {
                 $yamlProblemProperties['memlimit'] = 1024 * $yamlData['limits']['memory'];
             }
