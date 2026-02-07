@@ -46,7 +46,7 @@
                     {% elseif contest.externalSourceLastHttpCode is not same as(200) %}
                         Received {{ contest.externalSourceLastHttpCode }} HTTP code.
                     {% else %}
-                        {{ status }}, last checked in {{ contest.externalSourceLastPollTime | printtimediff }}s ago.
+                        {{ status }}, last checked in {{ contest.externalSourceLastPollTime | printHumanTimeDiff }}.
                     {% endif %}
                 </td>
             </tr>
