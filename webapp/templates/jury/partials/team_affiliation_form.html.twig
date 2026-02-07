@@ -1,5 +1,55 @@
-<div class="row col-lg-4">
-    {{ form(form) }}
+{% macro form_table_row(field, attr) %}
+<tr {{ attr | default('') }}>
+    <th>{{ field.vars.label | default(field.vars.name | humanize) }}</th>
+    <td>
+        {{ form_errors(field) }}
+        {{ form_widget(field, {label: false}) }}
+        {{ form_help(field) }}
+    </td>
+</tr>
+{% endmacro %}
+
+{% macro section_header(icon, title) %}
+<tr class="contest-form-section-header">
+    <td colspan="2"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
+</tr>
+{% endmacro %}
+
+{{ form_start(form) }}
+<div class="row">
+    <div class="col-lg-6">
+
+        {{ form_errors(form) }}
+
+        <table class="table table-sm mb-0 contest-fields-table">
+            <tbody>
+                {{ _self.section_header('tag', 'Identity') }}
+                {% if form.externalid is defined %}
+                    {{ _self.form_table_row(form.externalid) }}
+                {% endif %}
+                {{ _self.form_table_row(form.icpcid) }}
+                {{ _self.form_table_row(form.shortname) }}
+                {{ _self.form_table_row(form.name) }}
+
+                {% if form.country is defined %}
+                    {{ _self.section_header('globe', 'Location') }}
+                    {{ _self.form_table_row(form.country) }}
+                {% endif %}
+
+                {{ _self.section_header('image', 'Media') }}
+                {{ _self.form_table_row(form.logoFile) }}
+                {% if form.clearLogo is defined %}
+                    {{ _self.form_table_row(form.clearLogo) }}
+                {% endif %}
+
+                {{ _self.section_header('cog', 'Admin') }}
+                {{ _self.form_table_row(form.internalcomments) }}
+            </tbody>
+        </table>
+    </div>
 </div>
+
+{{ form_widget(form.save) }}
+{{ form_end(form) }}
 
 {% include 'jury/partials/country_select.html.twig' with {field: '#team_affiliation_country'} %}

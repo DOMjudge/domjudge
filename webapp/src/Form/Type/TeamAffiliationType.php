@@ -62,7 +62,7 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
             'label' => 'Internal comments (jury viewable only)',
             'required' => false,
             'attr' => [
-                'rows' => 6,
+                'rows' => 3,
             ],
         ]);
         $builder->add('logoFile', FileType::class, [

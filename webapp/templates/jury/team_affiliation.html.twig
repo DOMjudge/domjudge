@@ -10,66 +10,83 @@
 
 {% block content %}
 
+    {% macro section_header(icon, title) %}
+    <tr class="contest-form-section-header">
+        <td colspan="2"><i class="fas fa-{{ icon }} me-2"></i>{{ title }}</td>
+    </tr>
+    {% endmacro %}
+
     <h1>Affiliation {{ teamAffiliation.name }}</h1>
 
     <div class="row">
-        <div class="col-lg-4">
-            <table class="table table-sm table-striped">
-                <tr>
-                    <th>ID</th>
-                    <td>{{ teamAffiliation.externalid }}</td>
-                </tr>
-                <tr>
-                    <th>ICPC ID</th>
-                    <td>
-                        {% if teamAffiliation.icpcid %}
-                            {{ teamAffiliation.icpcid }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Shortname</th>
-                    <td>{{ teamAffiliation.shortname }}</td>
-                </tr>
-                <tr>
-                    <th>Logo</th>
-                    <td class="affiliation-logo">
-                        {% set affiliationId = teamAffiliation.externalid %}
-                        {% set affiliationLogo = affiliationId | assetPath('affiliation') %}
-                        {% if affiliationLogo %}
-                            <img src="{{ asset(affiliationLogo) }}" alt="{{ teamAffiliation.shortname }}"
-                                 title="{{ teamAffiliation.shortname }}" class="affiliation-logo"/>
-                        {% else %}
-                            Not available
-                        {% endif %}
-                    </td>
-                </tr>
-                {% if showFlags and teamAffiliation and teamAffiliation.country %}
+        <div class="col-lg-5">
+            <table class="table table-sm contest-fields-table">
+                <tbody>
+                    {{ _self.section_header('tag', 'Identity') }}
                     <tr>
-                        <th>Country</th>
-                        <td>
-                            {{ teamAffiliation.country | countryFlag(true) }}
+                        <th>ID</th>
+                        <td>{{ teamAffiliation.externalid }}</td>
+                    </tr>
+                    <tr>
+                        <th>ICPC ID</th>
+                        <td>{{ teamAffiliation.icpcid ?: '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Shortname</th>
+                        <td>{{ teamAffiliation.shortname }}</td>
+                    </tr>
+                    <tr>
+                        <th>Name</th>
+                        <td>{{ teamAffiliation.name }}</td>
+                    </tr>
+
+                    {% if showFlags %}
+                        {{ _self.section_header('globe', 'Location') }}
+                        <tr>
+                            <th>Country</th>
+                            <td>
+                                {% if teamAffiliation.country %}
+                                    {{ teamAffiliation.country | countryFlag(true) }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    {{ _self.section_header('image', 'Media') }}
+                    <tr>
+                        <th>Logo</th>
+                        <td class="affiliation-logo">
+                            {% set affiliationId = teamAffiliation.externalid %}
+                            {% set affiliationLogo = affiliationId | assetPath('affiliation') %}
+                            {% if affiliationLogo %}
+                                <img src="{{ asset(affiliationLogo) }}" alt="{{ teamAffiliation.shortname }}"
+                                     title="{{ teamAffiliation.shortname }}" class="affiliation-logo"/>
+                            {% else %}
+                                -
+                            {% endif %}
                         </td>
                     </tr>
-                {% endif %}
-                {% if teamAffiliation.internalcomments is not empty %}
-                    <tr>
-                        <th>Comments</th>
-                        <td>{{ teamAffiliation.internalcomments }}</td>
-                    </tr>
-                {% endif %}
+
+                    {% if teamAffiliation.internalcomments is not empty %}
+                        {{ _self.section_header('cog', 'Admin') }}
+                        <tr>
+                            <th>Internal comments</th>
+                            <td>{{ teamAffiliation.internalcomments | nl2br }}</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
             </table>
         </div>
     </div>
 
-    {%- if is_granted('ROLE_ADMIN') -%}
-        <p>
+    <div class="button-row">
+        {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_team_affiliation_edit', {'affilId': teamAffiliation.externalid}), 'Edit', 'primary', 'edit') }}
             {{ button(path('jury_team_affiliation_delete', {'affilId': teamAffiliation.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
-        </p>
-    {% endif %}
+        {% endif %}
+    </div>
 
     <h3>Teams</h3>
     {% if teamAffiliation.teams is empty %}
