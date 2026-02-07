@@ -115,9 +115,9 @@ class ShadowDifferencesController extends BaseController
 
         foreach ($submissions as $submitid => $submission) {
             /** @var ExternalJudgement|null $externalJudgement */
-            $externalJudgement = $submission->getExternalJudgements()->first();
+            $externalJudgement = $submission->getExternalJudgements()->first() ?: null;
             /** @var Judging|null $localJudging */
-            $localJudging = $submission->getJudgings()->first();
+            $localJudging = $submission->getJudgings()->first() ?: null;
 
             if ($localJudging && $localJudging->getResult()) {
                 $localResult = $localJudging->getResult();
