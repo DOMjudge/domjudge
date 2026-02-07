@@ -34,7 +34,7 @@
                             Judgehost never checked in.
                         {% else %}
                             <span class="{{ statusIcon|statusClass }}">{{ statusIcon|statusIcon }}</span> {{ status }},
-                            last checked in {{ judgehost.polltime | printtimediff }}s ago.
+                            last checked in {{ judgehost.polltime | printHumanTimeDiff }}.
                         {% endif %}
                     </td>
                 </tr>

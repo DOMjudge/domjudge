@@ -516,7 +516,7 @@
                         {%- if externalJudgement is not null %}
                             <span class="judgetime">(external judging started: {{ externalJudgement.starttime | printtime('H:i:s') }}
                                 {%- if externalJudgement.endtime -%}
-                                    , finished in {{ externalJudgement.starttime | printtimediff(externalJudgement.endtime) }}s
+                                    , finished in {{ externalJudgement.starttime | printHumanTimeDiff(externalJudgement.endtime) }}
                                 {%- else -%}
                                     &nbsp;[still judging - busy {{ externalJudgement.starttime | printtimediff }}]
                                 {%- endif -%}
