@@ -162,6 +162,8 @@ class JudgeDaemon
 
     private $lockfile;
     private array $EXITCODES;
+    private string $runuser;
+    private string $rungroup;
 
     const INITIAL_WAITTIME_SEC = 0.1;
     const MAXIMAL_WAITTIME_SEC = 5.0;
@@ -251,13 +253,14 @@ class JudgeDaemon
         global $verbose;
         $verbose = $this->verbose;
 
-        $runuser = RUNUSER;
+        $this->runuser = RUNUSER;
         if (isset($this->options['daemonid'])) {
-            $runuser .= '-' . $this->options['daemonid'];
+            $this->runuser .= '-' . $this->options['daemonid'];
         }
+        $this->rungroup = RUNGROUP;
 
-        if ($runuser === posix_getpwuid(posix_geteuid())['name'] ||
-            RUNGROUP === posix_getgrgid(posix_getegid())['name']
+        if ($this->runuser === posix_getpwuid(posix_geteuid())['name'] ||
+            $this->rungroup === posix_getgrgid(posix_getegid())['name']
         ) {
             error("Do not run the judgedaemon as the runuser or rungroup.");
         }
@@ -270,8 +273,8 @@ class JudgeDaemon
         putenv('DJ_LIBDIR=' . LIBDIR);
         putenv('DJ_LIBJUDGEDIR=' . LIBJUDGEDIR);
         putenv('DJ_LOGDIR=' . LOGDIR);
-        putenv('RUNUSER=' . $runuser);
-        putenv('RUNGROUP=' . RUNGROUP);
+        putenv('RUNUSER=' . $this->runuser);
+        putenv('RUNGROUP=' . $this->rungroup);
 
         global $EXITCODES;
         $this->EXITCODES = $EXITCODES;
@@ -289,8 +292,8 @@ class JudgeDaemon
         // asynchronously. See the handling of the 'e' option below. The code here
         // should only be run during a normal judgedaemon start.
         if (empty($this->options['e'])) {
-            if (!posix_getpwnam($runuser)) {
-                error("runuser $runuser does not exist.");
+            if (!posix_getpwnam($this->runuser)) {
+                error("runuser $this->runuser does not exist.");
             }
 
             define('LOCKFILE', RUNDIR . '/judge.' . $this->myhost . '.lock');
@@ -1549,17 +1552,14 @@ class JudgeDaemon
         $run_config = dj_json_decode($judgeTask['run_config']);
         $compare_config = dj_json_decode($judgeTask['compare_config']);
 
-        // Set configuration variables for called programs
+        // Set configuration variables for shell scripts (compile.sh, build_executable.sh, etc.)
+        // TODO: Consider folding compile.sh into judgedaemon (like compare script execution)
+        // to pass these values directly via CLI args instead of environment variables.
         putenv('CREATE_WRITABLE_TEMP_DIR=' . (CREATE_WRITABLE_TEMP_DIR ? '1' : ''));
-
-        // These are set again below before comparing.
         putenv('SCRIPTTIMELIMIT=' . $compile_config['script_timelimit']);
         putenv('SCRIPTMEMLIMIT=' . $compile_config['script_memory_limit']);
         putenv('SCRIPTFILELIMIT=' . $compile_config['script_filesize_limit']);
-
         putenv('MEMLIMIT=' . $run_config['memory_limit']);
-        putenv('FILELIMIT=' . $run_config['output_limit']);
-        putenv('PROCLIMIT=' . $run_config['process_limit']);
         if ($run_config['entry_point'] !== null) {
             putenv('ENTRY_POINT=' . $run_config['entry_point']);
         } else {
@@ -1695,7 +1695,9 @@ class JudgeDaemon
         $run_runpath,
         $combined_run_compare,
         $compare_runpath,
-        $compare_args
+        $compare_args,
+        array $run_config,
+        array $compare_config
     ) : Verdict {
         // Record some state so that we can properly reset it later in the finally block
         $oldCwd = getcwd();
@@ -1816,13 +1818,12 @@ class JudgeDaemon
             $cpu_limit = implode(':', $timelimit['cpu']);
             $wall_limit = implode(':', $timelimit['wall']);
 
-            // TODO: Clean this up in a follow-up change, and pass it more directly.
-            $proclimit = (int)getenv('PROCLIMIT');
-            $memlimit = (int)getenv('MEMLIMIT');
-            $filelimit = (int)getenv('FILELIMIT');
+            $proclimit = (int)$run_config['process_limit'];
+            $memlimit = (int)$run_config['memory_limit'];
+            $filelimit = (int)$run_config['output_limit'];
             $debug = getenv('DEBUG');
-            $runuser = getenv('RUNUSER');
-            $rungroup = getenv('RUNGROUP');
+            $runuser = $this->runuser;
+            $rungroup = $this->rungroup;
 
             if ($debug) {
                 putenv('VERBOSE=7');
@@ -1882,8 +1883,7 @@ class JudgeDaemon
                 }
             }
 
-            // TODO: Clean this up in a follow-up change, and pass it more directly.
-            $scripttimelimit = (string)getenv('SCRIPTTIMELIMIT');
+            $scripttimelimit = (string)$compare_config['script_timelimit'];
 
             if (!$combined_run_compare) {
                 logmsg(LOG_DEBUG, "Comparing output");
@@ -1917,8 +1917,8 @@ class JudgeDaemon
                     return Verdict::INTERNAL_ERROR;
                 }
 
-                $scriptmemlimit = (string)getenv('SCRIPTMEMLIMIT');
-                $scriptfilelimit = (string)getenv('SCRIPTFILELIMIT');
+                $scriptmemlimit = (string)$compare_config['script_memory_limit'];
+                $scriptfilelimit = (string)$compare_config['script_filesize_limit'];
                 // TODO: Perhaps we should change this in the database to be an array of args?
                 $orig_compare_args = [];
                 if ($compare_args !== null && strlen($compare_args) > 0) {
@@ -2167,12 +2167,6 @@ class JudgeDaemon
             $timelimit['wall'][1] *= 2;
         }
 
-        // While we already set those above to likely the same values from the
-        // compile config, we do set them again from the compare config here.
-        putenv('SCRIPTTIMELIMIT=' . $compare_config['script_timelimit']);
-        putenv('SCRIPTMEMLIMIT=' . $compare_config['script_memory_limit']);
-        putenv('SCRIPTFILELIMIT=' . $compare_config['script_filesize_limit']);
-
         $input = $tcfile['input'];
         $output = $tcfile['output'];
         $passLimit = $run_config['pass_limit'] ?? 1;
@@ -2216,7 +2210,9 @@ class JudgeDaemon
                 $run_runpath,
                 $combined_run_compare,
                 $compare_runpath,
-                $compare_config['compare_args']
+                $compare_config['compare_args'],
+                $run_config,
+                $compare_config
             );
 
             $result = str_replace('_', '-', strtolower($verdict->name));
