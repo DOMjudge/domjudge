@@ -87,7 +87,29 @@ class ExternalContestSourceService
     /** @var array<string, string> $verdicts */
     protected array $verdicts = [];
     protected ?string $basePath = null;
-    protected int $importedEventsCounter = 0;
+    protected int $importedItemsCounter = 0;
+
+    /** @var array<string, int> Counters per entity type */
+    protected array $importCounters = [
+        'state' => 0,
+        'contest' => 0,
+        'judgement-type' => 0,
+        'language' => 0,
+        'group' => 0,
+        'organization' => 0,
+        'problem' => 0,
+        'team' => 0,
+        'clarification' => 0,
+        'submission' => 0,
+        'judgement' => 0,
+        'run' => 0,
+    ];
+
+    /** @var callable|null Progress reporter callback for status updates */
+    protected $progressReporter = null;
+
+    /** @var string Current progress message */
+    protected string $progressMessage = '';
 
     /**
      * How often to reset services to free memory.
@@ -321,9 +343,12 @@ class ExternalContestSourceService
 
     /**
      * @param string[] $eventsToSkip
+     * @param callable|null $progressReporter Called after each event with (bool $readingToLastEventId)
+     * @param callable|null $statusReporter Called with status messages (string $message)
      */
-    public function import(bool $fromStart, array $eventsToSkip, ?callable $progressReporter = null): bool
+    public function import(bool $fromStart, array $eventsToSkip, ?callable $progressReporter = null, ?callable $statusReporter = null): bool
     {
+        $this->progressReporter = $statusReporter;
         $this->configureLogger();
 
         // We need the verdicts to validate judgement-types.
@@ -356,6 +381,61 @@ class ExternalContestSourceService
     public function shouldStopReading(): bool
     {
         return $this->shouldStopReading;
+    }
+
+    /**
+     * Increment the counter for a given entity type.
+     */
+    protected function incrementCounter(string $type): void
+    {
+        if (isset($this->importCounters[$type])) {
+            $this->importCounters[$type]++;
+        }
+    }
+
+    /**
+     * Format the import counters for display.
+     * Only shows counters that are non-zero, using short labels.
+     */
+    protected function formatCounters(): string
+    {
+        $parts = [];
+        $labels = [
+            'submission' => 'S',
+            'judgement' => 'J',
+            'run' => 'R',
+            'team' => 'T',
+            'problem' => 'P',
+            'clarification' => 'C',
+            'group' => 'G',
+            'organization' => 'O',
+        ];
+        foreach ($labels as $type => $label) {
+            if ($this->importCounters[$type] > 0) {
+                $parts[] = $label . ':' . $this->importCounters[$type];
+            }
+        }
+        return $parts ? ' | ' . implode(' ', $parts) : '';
+    }
+
+    /**
+     * Update the progress message shown to the user.
+     */
+    protected function updateProgress(string $message): void
+    {
+        $fullMessage = $message . $this->formatCounters();
+        $this->progressMessage = $fullMessage;
+        if ($this->progressReporter !== null) {
+            ($this->progressReporter)($fullMessage);
+        }
+    }
+
+    /**
+     * Get the current progress message.
+     */
+    public function getProgressMessage(): string
+    {
+        return $this->progressMessage;
     }
 
     protected function setLastEvent(?string $eventId): void
@@ -704,13 +784,13 @@ class ExternalContestSourceService
 
         foreach ($event->data as $eventData) {
             $method($event, $eventData);
-        }
 
-        // Periodically reset services to prevent unbounded memory growth.
-        // Without this, the identity map and other service state accumulates
-        // during the import, eventually consuming gigabytes of RAM on large contest feeds.
-        if (++$this->importedEventsCounter % self::SERVICES_RESET_INTERVAL === 0) {
-            $this->resetServices();
+            // Periodically reset services to prevent unbounded memory growth.
+            // Without this, the identity map and other service state accumulates
+            // during the import, eventually consuming gigabytes of RAM on large contest feeds.
+            if (++$this->importedItemsCounter % self::SERVICES_RESET_INTERVAL === 0) {
+                $this->resetServices();
+            }
         }
     }
 
@@ -730,6 +810,8 @@ class ExternalContestSourceService
         if (!$data instanceof StateEvent) {
             throw new InvalidArgumentException('Invalid event data type');
         }
+        $this->incrementCounter('state');
+        $this->updateProgress('Processing state...');
         if ($data->endOfUpdates) {
             $this->logger->info('End of updates encountered');
         }
@@ -745,6 +827,8 @@ class ExternalContestSourceService
         if (!$data instanceof ContestEvent) {
             throw new InvalidArgumentException('Invalid event data type');
         }
+        $this->incrementCounter('contest');
+        $this->updateProgress(sprintf('Processing contest %s...', $data->id));
         if (!$this->warningIfUnsupported(
             $event,
             $data->id,
@@ -832,6 +916,8 @@ class ExternalContestSourceService
         if (!$data instanceof JudgementTypeEvent) {
             throw new InvalidArgumentException('Invalid event data type');
         }
+        $this->incrementCounter('judgement-type');
+        $this->updateProgress(sprintf('Processing judgement-type %s...', $data->id));
 
         if (!$this->warningIfUnsupported($event, $data->id, [EventLogService::ACTION_CREATE])) {
             return;
@@ -885,6 +971,8 @@ class ExternalContestSourceService
         if (!$data instanceof LanguageEvent) {
             throw new InvalidArgumentException('Invalid event data type');
         }
+        $this->incrementCounter('language');
+        $this->updateProgress(sprintf('Processing language %s...', $data->id));
 
         if (!$this->warningIfUnsupported($event, $data->id, [EventLogService::ACTION_CREATE])) {
             return;
@@ -924,6 +1012,8 @@ class ExternalContestSourceService
         if (!$data instanceof GroupEvent) {
             throw new InvalidArgumentException('Invalid event data type');
         }
+        $this->incrementCounter('group');
+        $this->updateProgress(sprintf('Processing group %s...', $data->id));
 
         $groupId = $data->id;
 
@@ -988,6 +1078,8 @@ class ExternalContestSourceService
         if (!$data instanceof OrganizationEvent) {
             throw new InvalidArgumentException('Invalid event data type');
         }
+        $this->incrementCounter('organization');
+        $this->updateProgress(sprintf('Processing organization %s...', $data->id));
 
         $organizationId = $data->id;
 
@@ -1049,6 +1141,8 @@ class ExternalContestSourceService
         if (!$data instanceof ProblemEvent) {
             throw new InvalidArgumentException('Invalid event data type');
         }
+        $this->incrementCounter('problem');
+        $this->updateProgress(sprintf('Processing problem %s...', $data->id));
 
         if (!$this->warningIfUnsupported($event, $data->id, [
             EventLogService::ACTION_CREATE,
@@ -1126,6 +1220,8 @@ class ExternalContestSourceService
         if (!$data instanceof TeamEvent) {
             throw new InvalidArgumentException('Invalid event data type');
         }
+        $this->incrementCounter('team');
+        $this->updateProgress(sprintf('Processing team %s...', $data->id));
 
         $teamId = $data->id;
 
@@ -1223,6 +1319,8 @@ class ExternalContestSourceService
         if (!$data instanceof ClarificationEvent) {
             throw new InvalidArgumentException('Invalid event data type');
         }
+        $this->incrementCounter('clarification');
+        $this->updateProgress(sprintf('Processing clarification %s...', $data->id));
 
         $clarificationId = $data->id;
 
@@ -1370,6 +1468,8 @@ class ExternalContestSourceService
         if (!$data instanceof SubmissionEvent) {
             throw new InvalidArgumentException('Invalid event data type');
         }
+        $this->incrementCounter('submission');
+        $this->updateProgress(sprintf('Processing submission %s...', $data->id));
 
         $submissionId = $data->id;
 
@@ -1697,6 +1797,8 @@ class ExternalContestSourceService
         if (!$data instanceof JudgementEvent) {
             throw new InvalidArgumentException('Invalid event data type');
         }
+        $this->incrementCounter('judgement');
+        $this->updateProgress(sprintf('Processing judgement %s...', $data->id));
 
         // Note that we do not emit events for imported judgements, as we will generate our own.
         $judgementId = $data->id;
@@ -1830,6 +1932,9 @@ class ExternalContestSourceService
 
         // Note that we do not emit events for imported runs, as we will generate our own.
         $runId = $data->id;
+        $judgementId = $data->judgementId;
+        $this->incrementCounter('run');
+        $this->updateProgress(sprintf('Processing run %s for judgement %s...', $runId, $judgementId));
 
         if ($event->operation->value === EventLogService::ACTION_DELETE) {
             // We need to delete the run.
@@ -1868,7 +1973,6 @@ class ExternalContestSourceService
         }
 
         // Now check if we have all dependent data.
-        $judgementId = $data->judgementId;
         $externalJudgement = $this->em
             ->getRepository(ExternalJudgement::class)
             ->findOneBy([
@@ -2211,7 +2315,7 @@ class ExternalContestSourceService
         $this->contest = $this->em->getRepository(Contest::class)->find($contestId);
         $this->logger->info('Reset services after %d events, memory: %s MB (real: %s MB, UoW size: %d)',
             [
-                $this->importedEventsCounter,
+                $this->importedItemsCounter,
                 round(memory_get_usage() / 1024 / 1024),
                 round(memory_get_usage(true) / 1024 / 1024),
                 $this->em->getUnitOfWork()->size(),
