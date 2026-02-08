@@ -609,13 +609,9 @@ struct state_t {
            read_end);
 
     signal(signum, [](int) {
-      // TODO: Decide whether to keep some logging as the line below. We can't
-      // use logmsg here since that will in turn call syslog which is not safe
-      // to do in a signal handler (see also `man signal-safety`).
-      // logmsg(LOG_DEBUG, "caught signal {}", signum);
-
-      // Notify the main loop that a child exited by sending a message via
-      // the pipe.
+      // Notify the main loop that a signal was received by sending a message
+      // via the pipe. Logging is done in the main loop since syslog is not
+      // async-signal-safe (see `man 7 signal-safety`).
       static char buf[] = {42};
       if (write(write_end, buf, 1) != 1) {
         error(errno, "failed to notify main loop of signal");
@@ -862,6 +858,7 @@ struct state_t {
 
         // The exit signal handler noticed a child's exit.
         if (fd == child_exited_pipe) {
+          logmsg(LOG_DEBUG, "caught SIGCHLD signal");
           // Consume all the exited children.
           while (handle_child_exit()) {
             if (has_everyone_exited()) {
@@ -878,6 +875,7 @@ struct state_t {
           continue;
         }
         if (fd == child_timelimit_pipe) {
+          logmsg(LOG_DEBUG, "caught SIGUSR1 signal");
           static char buffer[1];
           if (read(child_timelimit_pipe, buffer, 1) != 1) {
             if (errno != EAGAIN && errno != EWOULDBLOCK) {
