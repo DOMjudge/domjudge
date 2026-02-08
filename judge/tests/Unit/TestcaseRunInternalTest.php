@@ -24,6 +24,15 @@ class TestcaseRunInternalTest extends TestCase
         $this->method = $reflection->getMethod('testcaseRunInternal');
         $this->method->setAccessible(true);
 
+        // Initialize the runuser and rungroup properties that testcaseRunInternal now uses
+        $runuserProperty = $reflection->getProperty('runuser');
+        $runuserProperty->setAccessible(true);
+        $runuserProperty->setValue($this->daemon, RUNUSER);
+
+        $rungroupProperty = $reflection->getProperty('rungroup');
+        $rungroupProperty->setAccessible(true);
+        $rungroupProperty->setValue($this->daemon, RUNGROUP);
+
         $this->tempDir = sys_get_temp_dir() . '/domjudge-test-' . uniqid();
         mkdir($this->tempDir, 0755, true);
     }
@@ -49,8 +58,13 @@ class TestcaseRunInternalTest extends TestCase
         string $run_runpath,
         bool $combined_run_compare,
         string $compare_runpath,
-        ?string $compare_args
+        ?string $compare_args,
+        ?array $run_config = null,
+        ?array $compare_config = null
     ): Verdict {
+        $run_config = $run_config ?? $this->defaultRunConfig();
+        $compare_config = $compare_config ?? $this->defaultCompareConfig();
+
         return $this->method->invoke(
             $this->daemon,
             $input,
@@ -60,8 +74,28 @@ class TestcaseRunInternalTest extends TestCase
             $run_runpath,
             $combined_run_compare,
             $compare_runpath,
-            $compare_args
+            $compare_args,
+            $run_config,
+            $compare_config
         );
+    }
+
+    private function defaultRunConfig(): array
+    {
+        return [
+            'memory_limit' => 2097152,
+            'output_limit' => 8192,
+            'process_limit' => 64,
+        ];
+    }
+
+    private function defaultCompareConfig(): array
+    {
+        return [
+            'script_timelimit' => 30,
+            'script_memory_limit' => 2097152,
+            'script_filesize_limit' => 2621440,
+        ];
     }
 
     private function createTestFile(string $name, string $content = ''): string
