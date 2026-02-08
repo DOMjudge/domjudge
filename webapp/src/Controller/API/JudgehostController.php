@@ -45,6 +45,7 @@ use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -1386,7 +1387,7 @@ class JudgehostController extends AbstractFOSRestController
             ),
         ]
     )]
-    public function checkVersions(Request $request, string $judgetaskid): array
+    public function checkVersions(Request $request, string $judgetaskid): array|JsonResponse
     {
         $judgeTask = $this->em->getRepository(JudgeTask::class)
             ->findOneBy(['judgetaskid' => $judgetaskid]);
@@ -1415,11 +1416,20 @@ class JudgehostController extends AbstractFOSRestController
         if ($request->request->has('runner')) {
             $reportedVersions['runner'] = base64_decode($request->request->get('runner'));
         }
+
+        // Check config outside transaction to avoid repeated lookups
+        $enforceVersionMatch = $this->config->get('enforce_version_match');
+
+        // Track version mismatch for enforcement check after transaction
+        $versionMismatch = null;
+
         $this->em->wrapInTransaction(function () use (
             $judgehost,
             $reportedVersions,
             $language,
-            $judgeTask
+            $judgeTask,
+            $enforceVersionMatch,
+            &$versionMismatch
         ): void {
             $activeVersion = $this->em->getRepository(Version::class)
                 ->findOneBy(['language' => $language, 'judgehost' => $judgehost, 'active' => true]);
@@ -1462,7 +1472,7 @@ class JudgehostController extends AbstractFOSRestController
                 $this->em->persist($activeVersion);
                 $this->em->flush();
 
-                // TOFU: Trust On First Use - auto-promote first reported version as canonical
+                // Trust On First Use - auto-promote first reported version as canonical.
                 if ($this->config->get('auto_promote_first_version')) {
                     if (isset($reportedVersions['compiler']) && empty($language->getCompilerVersion())) {
                         $language
@@ -1479,8 +1489,108 @@ class JudgehostController extends AbstractFOSRestController
 
             $judgeTask->setVersion($activeVersion);
 
-            // TODO: Optionally check version here against canonical version.
+            // Check version against canonical version (only if enforcement is enabled)
+            if ($enforceVersionMatch) {
+                $mismatchDetails = [];
+                $canonicalCompiler = $language->getCompilerVersion();
+                $canonicalRunner = $language->getRunnerVersion();
+
+                if (isset($reportedVersions['compiler']) && !empty($canonicalCompiler)) {
+                    if ($reportedVersions['compiler'] !== $canonicalCompiler) {
+                        $mismatchDetails['compiler'] = [
+                            'expected' => $canonicalCompiler,
+                            'actual' => $reportedVersions['compiler'],
+                        ];
+                    }
+                }
+                if (isset($reportedVersions['runner']) && !empty($canonicalRunner)) {
+                    if ($reportedVersions['runner'] !== $canonicalRunner) {
+                        $mismatchDetails['runner'] = [
+                            'expected' => $canonicalRunner,
+                            'actual' => $reportedVersions['runner'],
+                        ];
+                    }
+                }
+
+                if (!empty($mismatchDetails)) {
+                    $versionMismatch = $mismatchDetails;
+                }
+            }
         });
+
+        if ($versionMismatch !== null) {
+            $judgingId = $judgeTask->getJobId();
+            $judging = $this->em->getRepository(Judging::class)->find($judgingId);
+
+            $mismatchDescParts = [];
+            foreach ($versionMismatch as $type => $details) {
+                $mismatchDescParts[] = sprintf(
+                    '%s version mismatch for %s',
+                    ucfirst($type),
+                    $language->getName()
+                );
+            }
+            $description = implode('; ', $mismatchDescParts) . ' on ' . $judgehost->getHostname();
+
+            // Build "fake" judgehost log for internal error.
+            $logParts = [];
+            foreach ($versionMismatch as $type => $details) {
+                $logParts[] = sprintf(
+                    "%s version mismatch for %s:\nExpected:\n%s\n\nActual:\n%s",
+                    ucfirst($type),
+                    $language->getName(),
+                    $details['expected'],
+                    $details['actual']
+                );
+            }
+            $judgehostlog = implode("\n\n---\n\n", $logParts);
+
+            $disabled = [
+                'kind' => 'judgehost',
+                'hostname' => $judgehost->getHostname(),
+            ];
+
+            // Check for existing open internal error with same description/disabled to avoid duplicates.
+            $existingError = $this->em->createQueryBuilder()
+                ->from(InternalError::class, 'e')
+                ->select('e')
+                ->andWhere('e.description = :description')
+                ->andWhere('e.disabled = :disabled')
+                ->andWhere('e.status = :status')
+                ->setParameter('description', $description)
+                ->setParameter('disabled', Utils::jsonEncode($disabled))
+                ->setParameter('status', 'open')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            if ($existingError === null) {
+                $error = new InternalError();
+                $error
+                    ->setJudging($judging)
+                    ->setContest($judging?->getContest())
+                    ->setDescription($description)
+                    ->setJudgehostlog(base64_encode($judgehostlog))
+                    ->setTime(Utils::now())
+                    ->setDisabled($disabled);
+                $this->em->persist($error);
+                $judging?->setInternalError($error);
+                $this->em->flush();
+
+                $this->dj->setInternalError($disabled, $judging?->getContest(), false);
+            }
+
+            // Give back the judging so another judgehost can pick it up.
+            if ($judgingId) {
+                $this->giveBackJudging($judgingId, $judgehost);
+            }
+
+            return new JsonResponse(
+                ['message' => $description, 'retry' => false],
+                JsonResponse::HTTP_BAD_REQUEST
+            );
+        }
+
         return [];
     }
 
