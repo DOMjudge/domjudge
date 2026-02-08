@@ -855,6 +855,7 @@ class JudgeDaemon
         $succeeded = false;
         $response = null;
         $errstr = null;
+        $noRetry = false;
 
         for ($trial = 1; $trial <= BACKOFF_STEPS; $trial++) {
             $response = curl_exec($curl_handle);
@@ -870,6 +871,9 @@ class JudgeDaemon
                 } elseif ($status < 200 || $status >= 300) {
                     $json = dj_json_try_decode($response);
                     if ($json !== null) {
+                        if (isset($json['retry']) && $json['retry'] === false) {
+                            $noRetry = true;
+                        }
                         $response = $json['message'] ?? $response;
                         if (isset($json['trace'][0]['file'])) {
                             $response .= ' at ' . $json['trace'][0]['file'] . ':' . ($json['trace'][0]['line'] ?? '?');
@@ -879,6 +883,10 @@ class JudgeDaemon
                         ": http status code: " . $status .
                         ", request size = " . strlen(print_r($data, true)) .
                         ", response: " . $response;
+                    if ($noRetry) {
+                        // Server indicated not to retry this request.
+                        break;
+                    }
                 } else {
                     $succeeded = true;
                     break;
@@ -896,7 +904,11 @@ class JudgeDaemon
             }
         }
         if (!$succeeded) {
-            if ($failonerror) {
+            if ($noRetry) {
+                // Server indicated not to retry; treat as non-fatal.
+                warning($errstr);
+                return null;
+            } elseif ($failonerror) {
                 error($errstr);
             } else {
                 warning($errstr);
@@ -1399,8 +1411,11 @@ class JudgeDaemon
                 }
             }
 
-            // TODO: Add actual check once implemented in the backend.
-            $this->request('judgehosts/check_versions/' . $judgeTaskId, 'PUT', $args);
+            $result = $this->request('judgehosts/check_versions/' . $judgeTaskId, 'PUT', $args, false);
+            if ($result === null) {
+                // Version mismatch or other error; server handles cleanup, just abort here.
+                return false;
+            }
         }
 
         // Get the source code from the DB and store in local file(s).
