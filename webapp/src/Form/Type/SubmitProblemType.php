@@ -9,6 +9,7 @@ use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
+use Ds\Set;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -48,14 +49,18 @@ class SubmitProblemType extends AbstractType
             ]);
         }
 
+        $qb = $this->em->getRepository(Problem::class)->createQueryBuilder('p')
+            ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
+            ->select('p', 'cp')
+            ->andWhere('cp.allowSubmit = 1')
+            ->setParameter('contest', $contest)
+            ->addOrderBy('cp.shortname');
+
+        $problems = $qb->getQuery()->getResult();
+
         $problemConfig = [
             'class' => Problem::class,
-            'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('p')
-                ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
-                ->select('p', 'cp')
-                ->andWhere('cp.allowSubmit = 1')
-                ->setParameter('contest', $contest)
-                ->addOrderBy('cp.shortname'),
+            'query_builder' => $qb,
             'choice_label' => fn(Problem $problem) => sprintf(
                 '%s - %s', $problem->getContestProblems()->first()->getShortName(), $problem->getName()
             ),
@@ -64,7 +69,25 @@ class SubmitProblemType extends AbstractType
         ];
         $builder->add('problem', EntityType::class, $problemConfig);
 
-        $languages = empty($options['data']['languages']) ? $this->dj->getAllowedLanguagesForContest($contest) : $options['data']['languages'];
+        if (empty($options['data']['languages'])) {
+            $languages = new Set();
+            $allProblemsSpecificLanguages = true;
+            foreach ($problems as $problem) {
+                $problemLanguages = new Set($problem->getLanguages());
+                if ($problemLanguages->isEmpty()) {
+                    $allProblemsSpecificLanguages = false;
+                } else {
+                    $languages = $languages->merge($problemLanguages);
+                }
+            }
+            if (!$allProblemsSpecificLanguages) {
+                $languages = $languages->merge($this->dj->getAllowedLanguagesForContest($contest));
+            }
+            $languages->sort();
+        } else {
+            $languages = $options['data']['languages'];
+        }
+            
         $builder->add('language', EntityType::class, [
             'class' => Language::class,
             'choices' => $languages,
