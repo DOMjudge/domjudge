@@ -172,6 +172,11 @@
             default_value: true
             public: false
             description: Activate a judgehost when it registers for the first time.
+        -   name: auto_promote_first_version
+            type: bool
+            default_value: true
+            public: false
+            description: Automatically promote the first reported compiler/runner version as canonical (Trust On First Use).
         -   name: submission_rate_limit
             type: array_keyval
             default_value: []
