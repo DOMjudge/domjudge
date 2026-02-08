@@ -1461,6 +1461,20 @@ class JudgehostController extends AbstractFOSRestController
                 $activeVersion->setLastChangedTime(Utils::now());
                 $this->em->persist($activeVersion);
                 $this->em->flush();
+
+                // TOFU: Trust On First Use - auto-promote first reported version as canonical
+                if ($this->config->get('auto_promote_first_version')) {
+                    if (isset($reportedVersions['compiler']) && empty($language->getCompilerVersion())) {
+                        $language
+                            ->setCompilerVersion($reportedVersions['compiler'])
+                            ->setCompilerVersionCommand($language->getCompilerVersionCommand());
+                    }
+                    if (isset($reportedVersions['runner']) && empty($language->getRunnerVersion())) {
+                        $language
+                            ->setRunnerVersion($reportedVersions['runner'])
+                            ->setRunnerVersionCommand($language->getRunnerVersionCommand());
+                    }
+                }
             }
 
             $judgeTask->setVersion($activeVersion);
