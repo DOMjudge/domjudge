@@ -168,7 +168,7 @@ class ExternalContestSourceService
     public function getSourceContest(): Contest
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid.');
+            $this->throwInvalidSourceException();
         }
 
         return $this->contest;
@@ -177,7 +177,7 @@ class ExternalContestSourceService
     public function getSourceContestId(): int
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid.');
+            $this->throwInvalidSourceException();
         }
 
         return $this->contest->getCid();
@@ -189,10 +189,19 @@ class ExternalContestSourceService
         return ($this->cachedContestData !== null);
     }
 
+    /**
+     * Throws an exception indicating the contest source is invalid, including the actual error message.
+     * This should only be called after isValidContestSource() returns false.
+     */
+    private function throwInvalidSourceException(): never
+    {
+        throw new LogicException('The contest source is not valid: ' . ($this->loadingError ?? 'Unknown error'));
+    }
+
     public function getContestId(): string
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid');
+            $this->throwInvalidSourceException();
         }
 
         return $this->cachedContestData->id;
@@ -201,7 +210,7 @@ class ExternalContestSourceService
     public function getScoreboardType(): ScoreboardType
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid.');
+            $this->throwInvalidSourceException();
         }
 
         return $this->cachedContestData->scoreboardType ?? ScoreboardType::PASS_FAIL;
@@ -210,7 +219,7 @@ class ExternalContestSourceService
     public function getContestName(): string
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid');
+            $this->throwInvalidSourceException();
         }
 
         return $this->cachedContestData->name;
@@ -219,7 +228,7 @@ class ExternalContestSourceService
     public function getContestStartTime(): ?float
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid');
+            $this->throwInvalidSourceException();
         }
         if (isset($this->cachedContestData->startTime)) {
             return Utils::toEpochFloat($this->cachedContestData->startTime);
@@ -235,7 +244,7 @@ class ExternalContestSourceService
     public function getContestDuration(): string
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid');
+            $this->throwInvalidSourceException();
         }
 
         return $this->cachedContestData->duration;
@@ -244,7 +253,7 @@ class ExternalContestSourceService
     public function getApiVersion(): ?string
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid');
+            $this->throwInvalidSourceException();
         }
 
         return $this->cachedApiInfoData?->version;
@@ -253,7 +262,7 @@ class ExternalContestSourceService
     public function getApiVersionUrl(): ?string
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid');
+            $this->throwInvalidSourceException();
         }
 
         return $this->cachedApiInfoData?->versionUrl;
@@ -262,7 +271,7 @@ class ExternalContestSourceService
     public function getApiProviderName(): ?string
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid');
+            $this->throwInvalidSourceException();
         }
 
         return $this->cachedApiInfoData?->provider->name ?? $this->cachedApiInfoData?->name;
@@ -271,7 +280,7 @@ class ExternalContestSourceService
     public function getApiProviderVersion(): ?string
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid');
+            $this->throwInvalidSourceException();
         }
 
         return $this->cachedApiInfoData?->provider->version ?? $this->cachedApiInfoData?->domjudge?->version;
@@ -280,7 +289,7 @@ class ExternalContestSourceService
     public function getApiProviderBuildDate(): ?string
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid');
+            $this->throwInvalidSourceException();
         }
 
         return $this->cachedApiInfoData?->provider?->buildDate;
@@ -298,7 +307,7 @@ class ExternalContestSourceService
     public function getLastReadEventId(): ?string
     {
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid');
+            $this->throwInvalidSourceException();
         }
 
         // We use a direct query to not have to reload the contest.
@@ -321,7 +330,7 @@ class ExternalContestSourceService
         $this->verdicts = $this->config->getVerdicts(['final', 'external']);
 
         if (!$this->isValidContestSource()) {
-            throw new LogicException('The contest source is not valid');
+            $this->throwInvalidSourceException();
         }
 
         if ($fromStart) {
