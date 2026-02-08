@@ -123,7 +123,12 @@ class ImportEventFeedCommand
             $progressBar->advance();
         };
 
-        if (!$this->sourceService->import($fromStart, $eventsToSkip, $progressReporter)) {
+        $statusReporter = function (string $message) use ($progressBar): void {
+            $progressBar->setMessage($message);
+            $progressBar->display();
+        };
+
+        if (!$this->sourceService->import($fromStart, $eventsToSkip, $progressReporter, $statusReporter)) {
             return Command::FAILURE;
         }
 
