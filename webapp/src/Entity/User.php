@@ -58,12 +58,6 @@ class User extends BaseApiEntity implements
     #[ORM\Column(options: ['comment' => 'Name'])]
     private string $name = '';
 
-    #[ORM\Column(nullable: true, options: ['comment' => 'Email address'])]
-    #[Assert\Email]
-    #[OA\Property(nullable: true)]
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
-    private ?string $email = null;
-
     #[ORM\Column(
         type: 'decimal',
         precision: 32,
@@ -216,17 +210,6 @@ class User extends BaseApiEntity implements
     public function getShortDescription(): string
     {
         return $this->getName() ?: $this->getUsername();
-    }
-
-    public function setEmail(?string $email): User
-    {
-        $this->email = $email;
-        return $this;
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
     }
 
     public function setLastLogin(string|float|null $lastLogin): User

@@ -16,7 +16,6 @@ class UserControllerTest extends AccountBaseTestCase
             "id" => "admin",
             "username" => "admin",
             "name" => "Administrator",
-            "email" => null,
             "ip" => null,
             "enabled" => true
         ],
@@ -28,7 +27,6 @@ class UserControllerTest extends AccountBaseTestCase
             "id" => "judgehost",
             "username" => "judgehost",
             "name" => "User for judgedaemons",
-            "email" => null,
             "ip" => null,
             "enabled" => true
         ],
@@ -40,7 +38,6 @@ class UserControllerTest extends AccountBaseTestCase
             "id" => "demo",
             "username" => "demo",
             "name" => "demo user for example team",
-            "email" => null,
             "ip" => null,
             "enabled" => true
         ],

@@ -11,13 +11,12 @@ class UpdateUser extends AddUser
         public readonly string $id,
         string $username,
         string $name,
-        ?string $email,
         ?string $ip,
         ?string $password,
         ?bool $enabled,
         ?string $teamId,
         array $roles
     ) {
-        parent::__construct($username, $name, $email, $ip, $password, $enabled, $teamId, $roles);
+        parent::__construct($username, $name, $ip, $password, $enabled, $teamId, $roles);
     }
 }

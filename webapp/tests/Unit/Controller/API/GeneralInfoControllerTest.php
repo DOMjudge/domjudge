@@ -110,7 +110,7 @@ class GeneralInfoControllerTest extends BaseTestCase
         static::assertTrue($response['enabled']);
         static::assertNull($response['last_login_time']);
         static::assertGreaterThanOrEqual($response['first_login_time'], $response['last_api_login_time']);
-        $keysExpected = ['id', 'ip', 'last_ip', 'email'];
+        $keysExpected = ['id', 'ip', 'last_ip'];
         foreach ($keysExpected as $keyExpected) {
             static::assertArrayHasKey($keyExpected, $response);
         }
