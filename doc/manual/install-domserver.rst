@@ -24,8 +24,8 @@ System requirements
 
 Software requirements
 `````````````````````
-* A web server with support for PHP >= 8.2.0 and the ``mysqli``, ``curl``, ``gd``,
-  ``mbstring``, ``intl``, ``zip``, ``xml`` and ``json`` extensions for PHP.
+* A web server with support for PHP >= 8.2.0 and the ``curl``, ``gd``, ``intl``,
+  ``json``, ``mbstring``, ``mysqli``, ``xml`` and ``zip`` extensions for PHP.
 * MySQL or MariaDB database. This can be on the same machine, but for
   advanced setups can also run on a dedicated machine.
 * An NTP daemon, for keeping the clocks between jury system and team
