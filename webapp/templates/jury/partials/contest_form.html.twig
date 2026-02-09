@@ -208,10 +208,14 @@
 <script>
     function afterProblemAdd() {
         bindColor();
-        $('[data-toggle="toggle"]').not('.toggle-initialized').bootstrapToggle().addClass('toggle-initialized');
+        // Only initialize toggles in the newly added row (last row in the collection)
+        $('[data-collection-holder] tr:last [data-toggle="toggle"]').bootstrapToggle();
     }
 
     $(function () {
+        // Mark all existing toggles as initialized to prevent accidental re-initialization
+        $('[data-toggle="toggle"]').addClass('toggle-initialized');
+
         function showHideTeams() {
             if ($('#contest_openToAllTeams').is(':checked')) {
                 $('[data-teams-field]').hide();
