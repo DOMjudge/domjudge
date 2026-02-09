@@ -36,7 +36,9 @@ function debounce(func, wait)
  */
 function initScoreChangesVisualization()
 {
-    const dataElement = document.getElementById('score-changes-data');
+    // Support both shadow mode (score-comparisons-data) and rejudging (score-changes-data)
+    const dataElement = document.getElementById('score-comparisons-data')
+        || document.getElementById('score-changes-data');
     const maxScoreElement = document.getElementById('max-score-data');
     const epsilonElement = document.getElementById('score-diff-epsilon-data');
 
@@ -44,10 +46,10 @@ function initScoreChangesVisualization()
         return;
     }
 
-    let scoreChangesData;
+    let scoreComparisonsData;
     let maxScore;
     try {
-        scoreChangesData = JSON.parse(dataElement.textContent || '[]');
+        scoreComparisonsData = JSON.parse(dataElement.textContent || '[]');
         maxScore = JSON.parse(maxScoreElement.textContent || '0');
         if (epsilonElement) {
             const epsilon = JSON.parse(epsilonElement.textContent || '0.0001');
@@ -61,7 +63,7 @@ function initScoreChangesVisualization()
     }
 
     // Validate parsed data
-    if (!Array.isArray(scoreChangesData)) {
+    if (!Array.isArray(scoreComparisonsData)) {
         console.error('Score changes data is not an array');
         return;
     }
@@ -69,8 +71,8 @@ function initScoreChangesVisualization()
         maxScore = 0;
     }
 
-    createScoreHeatmap(scoreChangesData, maxScore);
-    const cleanupFilter = initDeltaFilter(scoreChangesData);
+    createScoreHeatmap(scoreComparisonsData, maxScore);
+    const cleanupFilter = initDeltaFilter(scoreComparisonsData);
     const cleanupSorting = initTableSorting();
     
     // Store cleanup functions for potential later use

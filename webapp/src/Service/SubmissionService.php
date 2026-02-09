@@ -412,7 +412,19 @@ class SubmissionService
 
         if (isset($restrictions->externalDifference)) {
             if ($restrictions->externalDifference) {
-                if ($restrictions->result === 'judging' || $restrictions->externalResult === 'judging') {
+                if ($restrictions->shadowCompareByScore) {
+                    // For scoring problems: compare scores, not verdicts
+                    // For non-scoring problems: compare verdicts
+                    $queryBuilder
+                        ->innerJoin('s.problem', 'p_diff')
+                        ->andWhere(
+                            '(BIT_AND(p_diff.types, :scoringType) = 0 AND COALESCE(j.result, :dash) != COALESCE(ej.result, :dash))'
+                            . ' OR (BIT_AND(p_diff.types, :scoringType) > 0 AND ABS(COALESCE(j.score, 0) - COALESCE(ej.score, 0)) > :scoreDiffEpsilon)'
+                        )
+                        ->setParameter('scoringType', Problem::TYPE_SCORING)
+                        ->setParameter('dash', '-')
+                        ->setParameter('scoreDiffEpsilon', $restrictions->scoreDiffEpsilon ?? 0.0001);
+                } elseif ($restrictions->result === 'judging' || $restrictions->externalResult === 'judging') {
                     // When either the local or external result is set to judging explicitly,
                     // coalesce the result with a known non-null value, because in MySQL
                     // 'correct' <> null is not true. By coalescing with '-' we prevent this.

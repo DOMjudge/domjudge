@@ -227,6 +227,12 @@ class ContestType extends AbstractExternalIdEntityType
             'label' => 'Score difference epsilon',
             'help' => 'Minimum absolute score difference to consider as a meaningful shadow difference for scoring problems. Default is 0.0001.',
         ]);
+        $builder->add('shadowCompareByScore', CheckboxType::class, [
+            'required' => false,
+            'label' => 'Compare by score only',
+            'help' => 'When enabled, ignore verdict differences if scores match within epsilon for scoring problems.',
+            'attr' => self::TOGGLE_ATTRS,
+        ]);
         $builder->add('problems', CollectionType::class, [
             'entry_type' => ContestProblemType::class,
             'prototype' => true,

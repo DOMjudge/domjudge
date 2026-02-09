@@ -364,6 +364,10 @@ class Contest extends BaseApiEntity implements
     #[Serializer\Exclude]
     private string|float $scoreDiffEpsilon = 0.0001;
 
+    #[ORM\Column(options: ['comment' => 'For shadow mode, compare by score only (ignore verdict if scores match)?', 'default' => 0])]
+    #[Serializer\Exclude]
+    private bool $shadowCompareByScore = false;
+
     #[ORM\Column(nullable: true, options: ['comment' => 'Last encountered event ID from external source, if any'])]
     #[Serializer\Exclude]
     private ?string $externalSourceLastEventId = null;
@@ -1075,6 +1079,17 @@ class Contest extends BaseApiEntity implements
     public function setScoreDiffEpsilon(string|float $scoreDiffEpsilon): Contest
     {
         $this->scoreDiffEpsilon = $scoreDiffEpsilon;
+        return $this;
+    }
+
+    public function getShadowCompareByScore(): bool
+    {
+        return $this->shadowCompareByScore;
+    }
+
+    public function setShadowCompareByScore(bool $shadowCompareByScore): Contest
+    {
+        $this->shadowCompareByScore = $shadowCompareByScore;
         return $this;
     }
 
