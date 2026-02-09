@@ -1,0 +1,15 @@
+{
+    "require": {
+        "squizlabs/php_codesniffer": "^3.13",
+        "phpcompatibility/php-compatibility": "^9.3",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
+        "moxio/php-codesniffer-sniffs": "^2.6",
+        "slevomat/coding-standard": "^8.15",
+        "php-ds/php-ds": "^1.7"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

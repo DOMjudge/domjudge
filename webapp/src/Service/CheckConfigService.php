@@ -131,13 +131,24 @@ readonly class CheckConfigService
     public function checkPhpExtensions(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
-        $required = ['json', 'mbstring', 'mysqli', 'zip', 'gd', 'intl'];
+        $required = ['ds', 'gd', 'intl', 'json', 'mbstring', 'mysqli', 'zip', 'bob'];
         $state = 'O';
         $remark = '';
+        $missing = [];
         foreach ($required as $ext) {
             if (!extension_loaded($ext)) {
-                $state = 'E';
-                $remark .= sprintf("Required PHP extension `%s` not loaded.\n", $ext);
+                $missing[] = $ext;
+            }
+        }
+        if (count($missing) > 0) {
+            $state = 'E';
+            $template = "Required PHP extension `%s` not loaded.";
+            if (count($missing) == 1) {
+                $remark = sprintf($template, $missing[0]);
+            } else {
+                foreach ($missing as $ext) {
+                    $remark .= sprintf("- " . $template . "\n", $ext);
+                }
             }
         }
         $remark = ($remark ?: 'All required and recommended extensions present.');

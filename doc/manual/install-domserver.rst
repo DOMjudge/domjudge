@@ -24,8 +24,8 @@ System requirements
 
 Software requirements
 `````````````````````
-* A web server with support for PHP >= 8.2.0 and the ``mysqli``, ``curl``, ``gd``,
-  ``mbstring``, ``intl``, ``zip``, ``xml`` and ``json`` extensions for PHP.
+* A web server with support for PHP >= 8.2.0 and the ``curl``, ``ds``, ``gd``, ``intl``,
+  ``json``, ``mbstring``, ``mysqli``, ``xml`` and ``zip`` extensions for PHP.
 * MySQL or MariaDB database. This can be on the same machine, but for
   advanced setups can also run on a dedicated machine.
 * An NTP daemon, for keeping the clocks between jury system and team
@@ -36,7 +36,7 @@ software on the DOMjudge server as mentioned above when using Debian
 GNU/Linux, or one of its derivative distributions like Ubuntu::
 
   sudo apt install libcgroup-dev make acl zip unzip pv mariadb-server nginx \
-        php php-fpm php-gd php-cli php-intl php-mbstring php-mysql \
+        php php-ds php-fpm php-gd php-cli php-intl php-mbstring php-mysql \
         php-curl php-json php-xml php-zip composer ntp python3-yaml php-bcmath
 
 The following command can be used on Fedora, and related distributions like
@@ -45,6 +45,8 @@ Red Hat Enterprise Linux and Rocky Linux (before V9)::
   sudo dnf install libcgroup-devel make acl zip unzip pv mariadb-server httpd \
         php-gd php-cli php-intl php-mbstring php-mysqlnd php-fpm \
         php-xml php-zip composer chronyd python3-pyyaml php-bcmath
+
+For `php-ds` follow the instructions at: https://www.php.net/manual/en/ds.installation.php
 
 `apache2` can be used as an alternate web server.
 
