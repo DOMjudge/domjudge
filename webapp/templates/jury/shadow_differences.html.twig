@@ -8,7 +8,7 @@
     {{ macros.table_extrahead() }}
     {{ macros.select2_extrahead() }}
     {{ knp_pagination_rel_links(submissions) }}
-    {% if hasScoringProblems is defined and hasScoringProblems and scoreChanges | length > 0 %}
+    {% if hasScoringProblems is defined and hasScoringProblems %}
         <script src="{{ asset('js/d3.min.js') }}"></script>
         <script src="{{ asset('js/rejudging-scores.js') }}"></script>
     {% endif %}
@@ -25,7 +25,7 @@
             {% include 'jury/partials/shadow_matrix.html.twig' %}
         </div>
 
-        {% if hasScoringProblems is defined and hasScoringProblems and scoreChanges | length > 0 %}
+        {% if hasScoringProblems is defined and hasScoringProblems %}
             <div data-shadow-score-matrix>
                 {% include 'jury/partials/shadow_score_matrix.html.twig' %}
             </div>
@@ -121,7 +121,7 @@
 
                 $('table.submissions-table').find('[data-bs-toggle="tooltip"]').tooltip();
 
-                {% if hasScoringProblems is defined and hasScoringProblems and scoreChanges | length > 0 %}
+                {% if hasScoringProblems is defined and hasScoringProblems %}
                 initScoreChangesVisualization();
                 {% endif %}
             });

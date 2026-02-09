@@ -424,10 +424,18 @@ class DOMJudgeService
 
             if ($this->shadowMode()) {
                 if ($contest) {
-                    $hasDifference = '(j.result IS NOT NULL AND ej.result != j.result)'
-                        . ' OR s.importError IS NOT NULL'
-                        . ' OR (j.result IS NOT NULL AND ABS(j.score - ej.score) > :scoreDiffEpsilon'
-                        . '     AND BIT_AND(p.types, :scoringType) > 0)';
+                    if ($contest->getShadowCompareByScore()) {
+                        // Score-based comparison: for scoring problems, only score matters
+                        $hasDifference = 's.importError IS NOT NULL'
+                            . ' OR (j.result IS NOT NULL AND BIT_AND(p.types, :scoringType) = 0 AND ej.result != j.result)'
+                            . ' OR (j.result IS NOT NULL AND BIT_AND(p.types, :scoringType) > 0 AND ABS(j.score - ej.score) > :scoreDiffEpsilon)';
+                    } else {
+                        // Verdict-based comparison (current behavior)
+                        $hasDifference = '(j.result IS NOT NULL AND ej.result != j.result)'
+                            . ' OR s.importError IS NOT NULL'
+                            . ' OR (j.result IS NOT NULL AND ABS(j.score - ej.score) > :scoreDiffEpsilon'
+                            . '     AND BIT_AND(p.types, :scoringType) > 0)';
+                    }
                     $shadow_difference_count = $this->em->createQueryBuilder()
                         ->from(Submission::class, 's')
                         ->innerJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1')

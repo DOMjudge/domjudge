@@ -108,8 +108,8 @@ class ShadowDifferencesController extends BaseController
             }
         };
 
-        // Build up the verdict matrix and collect score change data.
-        $scoreChanges = [];
+        // Build up the verdict matrix and collect score comparison data.
+        $scoreComparisons = [];
         $hasScoringProblems = false;
         $maxScore = 0;
 
@@ -149,7 +149,7 @@ class ShadowDifferencesController extends BaseController
             // Append submitid to list of orig->new verdicts.
             $verdictTable[$externalResult][$localResult][] = $submitid;
 
-            // Collect score change data for scoring problems.
+            // Collect score data for scoring problems.
             $problem = $submission->getProblem();
             if ($problem->isScoringProblem()
                 && $externalJudgement?->getResult() && $localJudging?->getResult()) {
@@ -160,20 +160,20 @@ class ShadowDifferencesController extends BaseController
                 $absDelta = abs($delta);
                 $maxScore = max($maxScore, $externalScore, $localScore);
 
-                if ($absDelta > $contest->getScoreDiffEpsilon()) {
-                    $scoreChanges[] = [
-                        'submitId' => $submission->getExternalid(),
-                        'contestId' => $contest->getExternalid(),
-                        'teamName' => $submission->getTeam()->getEffectiveName(),
-                        'teamId' => $submission->getTeam()->getExternalid(),
-                        'problemName' => $problem->getName(),
-                        'problemId' => $problem->getExternalid(),
-                        'oldScore' => $externalScore,
-                        'newScore' => $localScore,
-                        'delta' => $delta,
-                        'absDelta' => $absDelta,
-                    ];
-                }
+                // Include all scoring submissions for the heatmap visualization.
+                // The JS will bucket them appropriately (unchanged in center, differences in outer rows).
+                $scoreComparisons[] = [
+                    'submitId' => $submission->getExternalid(),
+                    'contestId' => $contest->getExternalid(),
+                    'teamName' => $submission->getTeam()->getEffectiveName(),
+                    'teamId' => $submission->getTeam()->getExternalid(),
+                    'problemName' => $problem->getName(),
+                    'problemId' => $problem->getExternalid(),
+                    'oldScore' => $externalScore,
+                    'newScore' => $localScore,
+                    'delta' => $delta,
+                    'absDelta' => $absDelta,
+                ];
             }
         }
 
@@ -204,6 +204,10 @@ class ShadowDifferencesController extends BaseController
         }
         if ($viewTypes[$view] == 'diff') {
             $restrictions->externalDifference = true;
+            if ($contest->getShadowCompareByScore()) {
+                $restrictions->shadowCompareByScore = true;
+                $restrictions->scoreDiffEpsilon = $contest->getScoreDiffEpsilon();
+            }
         }
         if ($verificationViewTypes[$verificationView] == 'unverified') {
             $restrictions->externallyVerified = false;
@@ -248,7 +252,7 @@ class ShadowDifferencesController extends BaseController
                 'ajax' => true,
             ],
             'hasScoringProblems' => $hasScoringProblems,
-            'scoreChanges' => $scoreChanges,
+            'scoreComparisons' => $scoreComparisons,
             'maxScore' => $maxScore,
             'scoreDiffEpsilon' => $contest->getScoreDiffEpsilon(),
         ];

@@ -47,6 +47,9 @@ class SubmissionRestriction
      * @param bool|null                               $externallyVerified  If true, only return verified submissions
      *                                                                     If false, only return unverified or unjudged submissions
      * @param bool|null                               $withExternalId      If true, only return submissions with an external ID.
+     * @param bool|null                               $shadowCompareByScore If true, use score-based comparison for scoring problems
+     *                                                                      in external difference filtering
+     * @param float|null                              $scoreDiffEpsilon    Score difference epsilon for score-based comparison
      */
     public function __construct(
         public ?int $rejudgingId = null,
@@ -76,5 +79,7 @@ class SubmissionRestriction
         public ?bool $externallyVerified = null,
         public ?bool $withExternalId = null,
         public ?bool $valid = null,
+        public ?bool $shadowCompareByScore = null,
+        public ?float $scoreDiffEpsilon = null,
     ) {}
 }
