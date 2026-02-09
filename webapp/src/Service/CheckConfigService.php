@@ -134,10 +134,21 @@ readonly class CheckConfigService
         $required = ['json', 'mbstring', 'mysqli', 'zip', 'gd', 'intl'];
         $state = 'O';
         $remark = '';
+        $missing = [];
         foreach ($required as $ext) {
             if (!extension_loaded($ext)) {
-                $state = 'E';
-                $remark .= sprintf("Required PHP extension `%s` not loaded.\n", $ext);
+                $missing[] = $ext;
+            }
+        }
+        if (count($missing) > 0) {
+            $state = 'E';
+            $template = "Required PHP extension `%s` not loaded";
+            if (count($missing) == 1) {
+                $remark = sprintf($template, $missing[0]) . ".";
+            } else {
+                foreach ($missing as $ext) {
+                    $remark .= sprintf("- " . $template . ",\n", $ext);
+                }
             }
         }
         $remark = ($remark ?: 'All required and recommended extensions present.');
