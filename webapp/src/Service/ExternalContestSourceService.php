@@ -883,7 +883,7 @@ class ExternalContestSourceService
                 'start_time_enabled' => true,
                 'start_time_string'  => preg_replace('/\.000$/', '', $startTime->format('Y-m-d H:i:s.v')) . ' ' . $timezoneToUse,
                 'end_time_string'    => preg_replace('/\.000$/', '', $fullDuration),
-                'freeze_time_string' => preg_replace('/\.000$/', '', $fullFreeze),
+                'freeze_time_string' => $fullFreeze !== null ? preg_replace('/\.000$/', '', $fullFreeze) : null,
             ];
         } else {
             $toCheck = [
