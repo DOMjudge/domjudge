@@ -131,7 +131,7 @@ readonly class CheckConfigService
     public function checkPhpExtensions(): ConfigCheckItem
     {
         $this->stopwatch->start(__FUNCTION__);
-        $required = ['gd', 'intl', 'json', 'mbstring', 'mysqli', 'zip'];
+        $required = ['ds', 'gd', 'intl', 'json', 'mbstring', 'mysqli', 'zip'];
         $state = 'O';
         $remark = '';
         $missing = [];
