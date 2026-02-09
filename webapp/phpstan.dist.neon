@@ -6,6 +6,7 @@ parameters:
         - resources/functions.php
         - rector.php
         - tests
+        - ../judge/judgedaemon.main.php
     scanFiles:
         - vendor/vrana/adminer/adminer/include/functions.inc.php
     scanDirectories:
