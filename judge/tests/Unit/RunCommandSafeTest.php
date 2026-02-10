@@ -18,7 +18,6 @@ class RunCommandSafeTest extends TestCase
         $reflection = new ReflectionClass(JudgeDaemon::class);
         $this->daemon = $reflection->newInstanceWithoutConstructor();
         $this->method = $reflection->getMethod('runCommandSafe');
-        $this->method->setAccessible(true);
 
         $this->tempDir = sys_get_temp_dir() . '/domjudge-test-' . uniqid();
         mkdir($this->tempDir, 0755, true);

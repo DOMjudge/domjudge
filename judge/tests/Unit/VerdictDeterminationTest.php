@@ -24,7 +24,6 @@ class VerdictDeterminationTest extends TestCase
     {
         $reflection = new ReflectionClass(JudgeDaemon::class);
         $method = $reflection->getMethod('getVerdictMessage');
-        $method->setAccessible(true);
         return $method->invoke($this->daemon, $verdict, $input->programMeta, $input->compareMeta, $input->combinedRunCompare, $filelimit);
     }
 

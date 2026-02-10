@@ -22,15 +22,12 @@ class TestcaseRunInternalTest extends TestCase
         $reflection = new ReflectionClass(JudgeDaemon::class);
         $this->daemon = $reflection->newInstanceWithoutConstructor();
         $this->method = $reflection->getMethod('testcaseRunInternal');
-        $this->method->setAccessible(true);
 
         // Initialize the runuser and rungroup properties that testcaseRunInternal now uses
         $runuserProperty = $reflection->getProperty('runuser');
-        $runuserProperty->setAccessible(true);
         $runuserProperty->setValue($this->daemon, RUNUSER);
 
         $rungroupProperty = $reflection->getProperty('rungroup');
-        $rungroupProperty->setAccessible(true);
         $rungroupProperty->setValue($this->daemon, RUNGROUP);
 
         $this->tempDir = sys_get_temp_dir() . '/domjudge-test-' . uniqid();
