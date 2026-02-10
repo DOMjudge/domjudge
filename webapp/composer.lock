@@ -10133,16 +10133,16 @@
         },
         {
             "name": "vrana/adminer",
-            "version": "v5.4.1",
+            "version": "v5.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vrana/adminer.git",
-                "reference": "eaad45a781a3e0d9fa04e3431c1826e81c061699"
+                "reference": "39b339b1b551d2cc100893047fac2498a83d8407"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vrana/adminer/zipball/eaad45a781a3e0d9fa04e3431c1826e81c061699",
-                "reference": "eaad45a781a3e0d9fa04e3431c1826e81c061699",
+                "url": "https://api.github.com/repos/vrana/adminer/zipball/39b339b1b551d2cc100893047fac2498a83d8407",
+                "reference": "39b339b1b551d2cc100893047fac2498a83d8407",
                 "shasum": ""
             },
             "require": {
@@ -10193,7 +10193,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2025-09-26T15:38:02+00:00"
+            "time": "2026-02-08T15:44:05+00:00"
         },
         {
             "name": "webmozart/assert",
