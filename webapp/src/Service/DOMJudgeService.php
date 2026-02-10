@@ -1421,6 +1421,10 @@ class DOMJudgeService
         return substr($route, strlen($apiRootRoute) + $offset);
     }
 
+
+    /** @var array<string, string[]> */
+    private static array $assetFiles = [];
+
     /**
      * Get asset files in the given directory with the given extension
      *
@@ -1428,9 +1432,13 @@ class DOMJudgeService
      */
     public function getAssetFiles(string $path): array
     {
+        if (isset(self::$assetFiles[$path])) {
+            return self::$assetFiles[$path];
+        }
+
         $customDir = sprintf('%s/public/%s', $this->params->get('kernel.project_dir'), $path);
         if (!is_dir($customDir)) {
-            return [];
+            return self::$assetFiles[$path] = [];
         }
 
         $results = [];
@@ -1442,7 +1450,7 @@ class DOMJudgeService
             }
         }
 
-        return $results;
+        return self::$assetFiles[$path] = $results;
     }
 
     /**
