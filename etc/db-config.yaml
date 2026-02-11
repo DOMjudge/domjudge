@@ -356,6 +356,12 @@
             default_value: false
             public: false
             description: Enable to skip the login page when using IP authentication.
+        -   name: password_change_roles
+            type: array_val
+            default_value:
+                - admin
+            public: true
+            description: Roles that are allowed to change their password. Note that password change can also be enabled per team category.
 -   category: External systems
     description: Miscellaneous configuration options.
     items:
