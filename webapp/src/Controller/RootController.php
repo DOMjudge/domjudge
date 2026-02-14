@@ -26,10 +26,10 @@ class RootController extends BaseController
                 return $this->redirectToRoute('team_index');
             }
             if ($this->dj->checkrole('balloon')) {
-                return $this->redirectToRoute('jury_balloons');
+                return $this->redirectToRoute('jury_balloons_legacy');
             }
             if ($this->dj->checkrole('clarification_rw')) {
-                return $this->redirectToRoute('jury_clarifications');
+                return $this->redirectToRoute('jury_clarifications_legacy');
             }
         }
         return $this->redirectToRoute('public_index');
