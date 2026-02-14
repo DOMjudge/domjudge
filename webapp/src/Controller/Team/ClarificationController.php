@@ -52,6 +52,9 @@ class ClarificationController extends BaseController
         $team    = $user->getTeam();
         $teamId  = $team->getTeamid();
         $contest = $this->dj->getCurrentContest($teamId);
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
 
         $problem = $this->em->getRepository(Problem::class)->findByExternalId($probId);
         if ($problem === null) {
@@ -191,6 +194,9 @@ class ClarificationController extends BaseController
         $user       = $this->dj->getUser();
         $team       = $user->getTeam();
         $contest    = $this->dj->getCurrentContest($team->getTeamid());
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
 
         $formData = [];
         $form     = $this->formFactory

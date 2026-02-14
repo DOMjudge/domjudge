@@ -234,7 +234,7 @@ class PublicController extends BaseController
     public function contestProblemsetAction(): StreamedResponse
     {
         $contest = $this->dj->getCurrentContest(onlyPublic: true);
-        if (!$contest->getFreezeData()->started()) {
+        if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException('Contest problemset not found or not available');
         }
         return $contest->getContestProblemsetStreamedResponse();

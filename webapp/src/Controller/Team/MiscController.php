@@ -210,7 +210,7 @@ class MiscController extends BaseController
     {
         $user    = $this->dj->getUser();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
-        if (!$contest->getFreezeData()->started()) {
+        if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException('Contest text not found or not available');
         }
         return $contest->getContestProblemsetStreamedResponse();
