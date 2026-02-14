@@ -411,9 +411,9 @@ class SubmissionController extends AbstractRestController
             ->join('f.submission', 's')
             ->select('f, s')
             ->andWhere('s.contest = :cid')
-            ->andWhere('s.submitid = :submitid')
+            ->andWhere('s.externalid = :id')
             ->setParameter('cid', $this->getContestId($request))
-            ->setParameter('submitid', $id)
+            ->setParameter('id', $id)
             ->orderBy('f.ranknumber');
 
         /** @var SubmissionFile[] $files */
