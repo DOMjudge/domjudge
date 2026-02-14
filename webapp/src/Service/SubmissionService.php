@@ -315,6 +315,8 @@ class SubmissionService
         bool $paginated = true,
         ?int $page = null,
         bool $showShadowUnverified = false,
+        bool $shadowCompareByScore = false,
+        float $scoreDiffEpsilon = 0.0001,
     ): array {
         if (empty($contests)) {
             if ($paginated) {
@@ -412,11 +414,15 @@ class SubmissionService
 
         if (isset($restrictions->externalDifference)) {
             if ($restrictions->externalDifference) {
+                // Always include score differences for scoring problems
+                // When shadowCompareByScore is true: only score differences matter for scoring problems
+                // When shadowCompareByScore is false: both verdict and score differences matter
+                $queryBuilder->innerJoin('s.problem', 'p_diff');
+
                 if ($restrictions->shadowCompareByScore) {
-                    // For scoring problems: compare scores, not verdicts
+                    // For scoring problems: compare scores only (ignore verdict if scores match)
                     // For non-scoring problems: compare verdicts
                     $queryBuilder
-                        ->innerJoin('s.problem', 'p_diff')
                         ->andWhere(
                             '(BIT_AND(p_diff.types, :scoringType) = 0 AND COALESCE(j.result, :dash) != COALESCE(ej.result, :dash))'
                             . ' OR (BIT_AND(p_diff.types, :scoringType) > 0 AND ABS(COALESCE(j.score, 0) - COALESCE(ej.score, 0)) > :scoreDiffEpsilon)'
@@ -424,15 +430,16 @@ class SubmissionService
                         ->setParameter('scoringType', Problem::TYPE_SCORING)
                         ->setParameter('dash', '-')
                         ->setParameter('scoreDiffEpsilon', $restrictions->scoreDiffEpsilon ?? 0.0001);
-                } elseif ($restrictions->result === 'judging' || $restrictions->externalResult === 'judging') {
-                    // When either the local or external result is set to judging explicitly,
-                    // coalesce the result with a known non-null value, because in MySQL
-                    // 'correct' <> null is not true. By coalescing with '-' we prevent this.
-                    $queryBuilder
-                        ->andWhere('COALESCE(j.result, :dash) != COALESCE(ej.result, :dash)')
-                        ->setParameter('dash', '-');
                 } else {
-                    $queryBuilder->andWhere('j.result != ej.result');
+                    // Show verdict differences OR score differences for scoring problems
+                    $queryBuilder
+                        ->andWhere(
+                            'COALESCE(j.result, :dash) != COALESCE(ej.result, :dash)'
+                            . ' OR (BIT_AND(p_diff.types, :scoringType) > 0 AND ABS(COALESCE(j.score, 0) - COALESCE(ej.score, 0)) > :scoreDiffEpsilon)'
+                        )
+                        ->setParameter('scoringType', Problem::TYPE_SCORING)
+                        ->setParameter('dash', '-')
+                        ->setParameter('scoreDiffEpsilon', $restrictions->scoreDiffEpsilon ?? 0.0001);
                 }
             } else {
                 $queryBuilder->andWhere('j.result = ej.result');
@@ -609,10 +616,15 @@ class SubmissionService
             'judging' => 'j.starttime IS NOT NULL AND j.endtime IS NULL'
         ];
         if ($showShadowUnverified) {
-            $countQueryExtras['shadowUnverified'] = 'ej.verified = 0 AND ej.result IS NOT NULL AND (ej.result != j.result OR j.result IS NULL)';
+            // Shadow unverified count handled separately below due to score comparison complexity
+            $countQueryExtras['shadowUnverified'] = null;
             unset($countQueryExtras['unverified']);
         }
         foreach ($countQueryExtras as $count => $countQueryExtra) {
+            // shadowUnverified is handled separately below
+            if ($countQueryExtra === null) {
+                continue;
+            }
             $countQueryBuilder = (clone $queryBuilder)->select('COUNT(s.submitid) AS cnt');
             if (!empty($countQueryExtra)) {
                 $countQueryBuilder->andWhere($countQueryExtra);
@@ -621,6 +633,27 @@ class SubmissionService
                 ->getQuery()
                 ->getSingleScalarResult();
         }
+
+        // Handle shadowUnverified count separately due to score comparison complexity
+        if ($showShadowUnverified) {
+            $shadowCountBuilder = (clone $queryBuilder)->select('COUNT(s.submitid) AS cnt');
+            $shadowCountBuilder->andWhere('ej.verified = 0 AND ej.result IS NOT NULL');
+
+            // Always count score differences for scoring problems as unverified
+            $shadowCountBuilder
+                ->innerJoin('s.problem', 'p_shadow')
+                ->andWhere(
+                    '(j.result IS NULL OR COALESCE(j.result, \'-\') != COALESCE(ej.result, \'-\'))'
+                    . ' OR (BIT_AND(p_shadow.types, :scoringType) > 0 AND ABS(COALESCE(j.score, 0) - COALESCE(ej.score, 0)) > :scoreDiffEpsilon)'
+                )
+                ->setParameter('scoringType', Problem::TYPE_SCORING)
+                ->setParameter('scoreDiffEpsilon', $scoreDiffEpsilon);
+
+            $counts['shadowUnverified'] = (int)$shadowCountBuilder
+                ->getQuery()
+                ->getSingleScalarResult();
+        }
+
         $counts['perteam'] = (clone $queryBuilder)
             ->select('COUNT(DISTINCT s.team) AS cnt')
             ->andWhere($countQueryExtras['queued'])
