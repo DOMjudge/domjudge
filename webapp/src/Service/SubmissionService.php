@@ -446,6 +446,19 @@ class SubmissionService
             }
         }
 
+        if (isset($restrictions->minAbsDelta)) {
+            // Filter by minimum absolute score delta (for scoring problems)
+            // Join problem if not already joined by externalDifference
+            if (!isset($restrictions->externalDifference) || !$restrictions->externalDifference) {
+                $queryBuilder->innerJoin('s.problem', 'p_diff');
+            }
+            $queryBuilder
+                ->andWhere('BIT_AND(p_diff.types, :scoringTypeMinDelta) > 0')
+                ->andWhere('ABS(COALESCE(j.score, 0) - COALESCE(ej.score, 0)) >= :minAbsDelta')
+                ->setParameter('scoringTypeMinDelta', Problem::TYPE_SCORING)
+                ->setParameter('minAbsDelta', $restrictions->minAbsDelta);
+        }
+
         if (isset($restrictions->externalResult)) {
             if ($restrictions->externalResult === 'judging') {
                 $queryBuilder->andWhere('ej.result IS NULL or ej.endtime IS NULL');

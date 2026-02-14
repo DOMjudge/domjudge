@@ -50,6 +50,7 @@ class SubmissionRestriction
      * @param bool|null                               $shadowCompareByScore If true, use score-based comparison for scoring problems
      *                                                                      in external difference filtering
      * @param float|null                              $scoreDiffEpsilon    Score difference epsilon for score-based comparison
+     * @param float|null                              $minAbsDelta         Minimum absolute score delta to filter on
      */
     public function __construct(
         public ?int $rejudgingId = null,
@@ -81,5 +82,6 @@ class SubmissionRestriction
         public ?bool $valid = null,
         public ?bool $shadowCompareByScore = null,
         public ?float $scoreDiffEpsilon = null,
+        public ?float $minAbsDelta = null,
     ) {}
 }
