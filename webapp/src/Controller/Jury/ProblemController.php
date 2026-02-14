@@ -1250,8 +1250,11 @@ class ProblemController extends BaseController
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
-        $contestId = $this->dj->getCurrentContest()->getExternalid();
-        $this->judgeRemaining(contestId: $contestId, probId: $probId);
+        $contest = $this->dj->getCurrentContest();
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
+        $this->judgeRemaining(contestId: $contest->getExternalid(), probId: $probId);
         return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
     }
 

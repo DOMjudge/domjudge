@@ -129,6 +129,9 @@ class SubmissionController extends BaseController
         $user                 = $this->dj->getUser();
         $team                 = $user->getTeam();
         $contest              = $this->dj->getCurrentContest($team->getTeamid());
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
         /** @var Judging|null $judging */
         $judging = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
