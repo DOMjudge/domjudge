@@ -117,6 +117,19 @@
                     var $matrixData = $('[data-new-shadow-matrix]');
                     var $matrix = $('[data-shadow-matrix]');
                     $matrix.html($matrixData.children());
+
+                    // Update score matrix if present
+                    var $scoreMatrixData = $('[data-new-shadow-score-matrix]');
+                    var $scoreMatrix = $('[data-shadow-score-matrix]');
+                    if ($scoreMatrixData.length && $scoreMatrix.length) {
+                        // Cleanup old visualization before replacing
+                        if (window.scoreVisualizationCleanup) {
+                            window.scoreVisualizationCleanup();
+                        }
+                        $scoreMatrix.html($scoreMatrixData.children());
+                        // Re-initialize the score visualization
+                        initScoreChangesVisualization();
+                    }
                 };
 
                 $('table.submissions-table').find('[data-bs-toggle="tooltip"]').tooltip();
