@@ -2,6 +2,11 @@
     <div class="d-none" data-new-shadow-matrix>
         {% include 'jury/partials/shadow_matrix.html.twig' %}
     </div>
+    {% if hasScoringProblems is defined and hasScoringProblems %}
+        <div class="d-none" data-new-shadow-score-matrix>
+            {% include 'jury/partials/shadow_score_matrix.html.twig' %}
+        </div>
+    {% endif %}
 {% endif %}
 
 {%- include 'jury/partials/submission_list.html.twig' %}

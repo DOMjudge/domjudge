@@ -304,7 +304,18 @@
                 </tr>
                 <tr>
                     <td colspan="{% if is_scoring %}4{% else %}3{% endif %}" class="inline-verify-form">
-                        {% if externalJudgement is not null and (not submission.judgings.first or submission.judgings.first.result != externalJudgement.result) %}
+                        {# Check for score difference on scoring problems #}
+                        {% set hasScoreDifference = false %}
+                        {% set validJudging = submission.validJudging %}
+                        {% if submission.problem.scoringProblem
+                            and validJudging
+                            and validJudging.result
+                            and externalJudgement
+                            and externalJudgement.result %}
+                            {% set scoreDiffEpsilon = current_contest.scoreDiffEpsilon|default(0.0001) %}
+                            {% set hasScoreDifference = (validJudging.score - externalJudgement.score)|abs > scoreDiffEpsilon %}
+                        {% endif %}
+                        {% if externalJudgement is not null and (not validJudging or validJudging.result != externalJudgement.result or hasScoreDifference) %}
                             {% include 'jury/partials/verify_form.html.twig' with {
                                 label: 'Shadow difference verified',
                                 judging: externalJudgement,
