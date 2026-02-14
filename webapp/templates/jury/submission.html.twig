@@ -330,26 +330,37 @@
         </div>
     {% endif %}
 
+    {# Check for score difference on scoring problems #}
+    {% set hasScoreDifference = false %}
+    {% if submission.problem.scoringProblem
+        and selectedJudging is not null
+        and selectedJudging.result is not empty
+        and externalJudgement is not null
+        and externalJudgement.result is not empty %}
+        {% set scoreDiffEpsilon = current_contest.scoreDiffEpsilon|default(0.0001) %}
+        {% set hasScoreDifference = (selectedJudging.score - externalJudgement.score)|abs > scoreDiffEpsilon %}
+    {% endif %}
     {% if externalJudgement is not null and externalJudgement.result is not empty and (
         (selectedJudging is not null and selectedJudging.result is not empty and externalJudgement.result != selectedJudging.result)
-        or submission.importError) %}
+        or submission.importError
+        or hasScoreDifference) %}
         <div class="alert alert-danger">
             <strong>Results differ!</strong>
             <hr>
             <p>
                 This submission was judged as
                 {% if external_ccs_submission_url is empty %}
-                    {{ externalJudgement.result | printValidJuryResult }} by the external CCS
+                    {{ externalJudgement.result | printValidJuryResult }}{% if hasScoreDifference %} (score: {{ externalJudgement.score | number_format(3) }}){% endif %} by the external CCS
                 {% else %}
                     <a href="{{ submission | externalCcsUrl }}" target="_blank">
-                        {{ externalJudgement.result | printValidJuryResult }} by the external CCS
+                        {{ externalJudgement.result | printValidJuryResult }}{% if hasScoreDifference %} (score: {{ externalJudgement.score | number_format(3) }}){% endif %} by the external CCS
                     </a>
                 {% endif -%}
                 , but as
                 {% if submission.importError %}
                     {{ 'import-error' | printValidJuryResult }}
                 {% else %}
-                    {{ selectedJudging.result | printValidJuryResult }}
+                    {{ selectedJudging.result | printValidJuryResult }}{% if hasScoreDifference %} (score: {{ selectedJudging.score | number_format(3) }}){% endif %}
                 {% endif %}
                 by DOMjudge.
             </p>

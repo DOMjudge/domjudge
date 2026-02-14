@@ -204,9 +204,9 @@ class ShadowDifferencesController extends BaseController
         }
         if ($viewTypes[$view] == 'diff') {
             $restrictions->externalDifference = true;
+            $restrictions->scoreDiffEpsilon = $contest->getScoreDiffEpsilon();
             if ($contest->getShadowCompareByScore()) {
                 $restrictions->shadowCompareByScore = true;
-                $restrictions->scoreDiffEpsilon = $contest->getScoreDiffEpsilon();
             }
         }
         if ($verificationViewTypes[$verificationView] == 'unverified') {
@@ -227,7 +227,9 @@ class ShadowDifferencesController extends BaseController
             $this->dj->getCurrentContests(honorCookie: true),
             $restrictions,
             page: $request->query->getInt('page', 1),
-            showShadowUnverified: true
+            showShadowUnverified: true,
+            shadowCompareByScore: $contest->getShadowCompareByScore(),
+            scoreDiffEpsilon: $contest->getScoreDiffEpsilon()
         );
 
         $data = [
