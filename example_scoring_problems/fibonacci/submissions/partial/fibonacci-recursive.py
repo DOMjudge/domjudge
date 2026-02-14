@@ -3,7 +3,7 @@
 # @EXPECTED_RESULTS@: TIMELIMIT
 # @EXPECTED_SCORE@: 25
 import sys
-sys.setrecursionlimit(100)
+sys.setrecursionlimit(1000000)
 
 def fibonacci(n):
     if n <= 1:
