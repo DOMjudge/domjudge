@@ -51,7 +51,7 @@
             {%- endfor %}
         </div>
 
-        <form action="{{ path('jury_shadow_differences') }}" method="get">
+        <form action="{{ path('jury_shadow_differences') }}" method="get" id="shadow-filter-form">
             <input type="hidden" name="view" value="{{ viewTypes[view] }}"/>
             <input type="hidden" name="verificationview" value="{{ verificationViewTypes[verificationView] }}"/>
             <div class="row mb-3">
@@ -91,6 +91,19 @@
                        class="btn btn-secondary form-control">Clear</a>
                 </div>
             </div>
+            {% if hasScoringProblems is defined and hasScoringProblems %}
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <label for="minAbsDelta">Minimum absolute score delta</label>
+                        <div class="d-flex align-items-center">
+                            <input type="range" class="form-range flex-grow-1 me-2" id="minAbsDeltaSlider"
+                                   min="0" max="{{ maxScore }}" value="{{ minAbsDelta }}" step="0.1">
+                            <input type="number" class="form-control" style="width: 100px" name="minAbsDelta"
+                                   id="minAbsDelta" min="0" max="{{ maxScore }}" value="{{ minAbsDelta }}" step="0.1">
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </form>
 
         <div data-ajax-refresh-target data-ajax-refresh-after="updateMatrix">
@@ -136,6 +149,20 @@
 
                 {% if hasScoringProblems is defined and hasScoringProblems %}
                 initScoreChangesVisualization();
+
+                // Sync slider with number input
+                var $slider = $('#minAbsDeltaSlider');
+                var $input = $('#minAbsDelta');
+                $slider.on('input', function() {
+                    $input.val($(this).val());
+                });
+                $input.on('input', function() {
+                    $slider.val($(this).val());
+                });
+                // Submit form when slider is released
+                $slider.on('change', function() {
+                    $('#shadow-filter-form').submit();
+                });
                 {% endif %}
             });
         </script>

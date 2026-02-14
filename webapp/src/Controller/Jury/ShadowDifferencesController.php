@@ -54,6 +54,8 @@ class ShadowDifferencesController extends BaseController
         string $external = 'all',
         #[MapQueryParameter]
         string $local = 'all',
+        #[MapQueryParameter]
+        ?float $minAbsDelta = null,
     ): Response {
         $contest = $this->dj->getCurrentContest();
         if (!$contest) {
@@ -221,6 +223,9 @@ class ShadowDifferencesController extends BaseController
         if ($local !== 'all') {
             $restrictions->result = $local;
         }
+        if ($minAbsDelta !== null && $minAbsDelta > 0) {
+            $restrictions->minAbsDelta = $minAbsDelta;
+        }
 
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] = $this->submissions->getSubmissionList(
@@ -257,6 +262,7 @@ class ShadowDifferencesController extends BaseController
             'scoreComparisons' => $scoreComparisons,
             'maxScore' => $maxScore,
             'scoreDiffEpsilon' => $contest->getScoreDiffEpsilon(),
+            'minAbsDelta' => $minAbsDelta ?? 0,
         ];
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;
