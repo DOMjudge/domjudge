@@ -259,8 +259,11 @@ class TeamCategoryController extends BaseController
         if (!$category) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
-        $contestId = $this->dj->getCurrentContest()->getExternalid();
-        $this->judgeRemaining(contestId: $contestId, categoryId: $categoryId);
+        $contest = $this->dj->getCurrentContest();
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
+        $this->judgeRemaining(contestId: $contest->getExternalid(), categoryId: $categoryId);
         return $this->redirectToRoute('jury_team_category', ['categoryId' => $categoryId]);
     }
 
