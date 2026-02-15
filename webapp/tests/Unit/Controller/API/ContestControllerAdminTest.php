@@ -85,6 +85,7 @@ end_time: '+2:00:00'
 duration: 2:00:00.000
 penalty_time: 20
 medals:
+    enabled: true
     gold: 4
     silver: 4
     bronze: 4
@@ -114,6 +115,7 @@ end_time: '+5:00:00'
 duration: 5:00:00.000
 penalty_time: 0
 medals:
+    enabled: true
     gold: 4
     silver: 4
     bronze: 4
