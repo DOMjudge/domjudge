@@ -89,26 +89,33 @@ jobs:
       - name: Start judging
         run: sudo -u domjudge sh -c 'cd /opt/domjudge/judgehost/ && nohup bin/judgedaemon -n 0 &'
       - name: Import Kattis example problems
-        if: matrix.mode == 'default'
         run: |
           cd /tmp
           git clone --depth=1 https://github.com/Kattis/problemtools.git
           cd problemtools/examples
-          # Remove submissions that will not pass validation. The first is
-          # because it is a Python 2 submission. The latter two have a
-          # judgement type we do not understand.
+          # Remove Python 2 submissions that will not pass validation.
           rm different/submissions/accepted/different_py2.py \
-            different/submissions/slow_accepted/different_slow.py \
-            oddecho/submissions/partially_accepted/sol.py
+            different/submissions/slow_accepted/different_slow.py
+          # Add expected results magic string to submission missing it.
+          sed -i '1i# @EXPECTED_RESULTS@: RUN_TIME_ERROR' oddecho/submissions/partially_accepted/sol.py
           for i in */problem.yaml; do
               dir="$(dirname $i)"
+              # Check if problem is scoring type
+              is_scoring=$(grep -q '^type: scoring' "$dir/problem.yaml" && echo "yes" || echo "no")
+              # For default mode: import only pass-fail problems (not scoring)
+              # For scoring mode: import only scoring problems
+              if [ "${{ matrix.mode }}" = "default" ] && [ "$is_scoring" = "yes" ]; then
+                  continue
+              fi
+              if [ "${{ matrix.mode }}" = "scoring" ] && [ "$is_scoring" = "no" ]; then
+                  continue
+              fi
               (
-                  sed -i -e 's|type: scoring|type: pass-fail|' "$dir/problem.yaml"
                   mv "$dir" "kattis_${dir}"
                   cd "kattis_${dir}"
                   zip -r "../kattis_${dir}.zip" -- *
               )
-              curl --fail -X POST -n -N -F zip=@kattis_${dir}.zip http://localhost/domjudge/api/contests/demo/problems
+              curl --fail -X POST -n -N -F zip=@kattis_${dir}.zip http://localhost/domjudge/api/contests/${{ matrix.contest }}/problems
           done
       - name: Monitor judgehost log and stop once all submissions are judged
         run: |
