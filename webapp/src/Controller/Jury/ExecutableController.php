@@ -404,8 +404,9 @@ class ExecutableController extends BaseController
         /** @var ExecutableFile[] $files */
         $files = array_values($executable->getImmutableExecutable()->getFiles()->toArray());
         $fileToDelete = null;
-        foreach ($files as $fileToDelete) {
-            if ($fileToDelete->getRank() == $rankToDelete) {
+        foreach ($files as $file) {
+            if ($file->getRank() == $rankToDelete) {
+                $fileToDelete = $file;
                 break;
             }
         }
