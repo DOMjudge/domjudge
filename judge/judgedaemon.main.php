@@ -1156,6 +1156,9 @@ class JudgeDaemon
         return $retval_local === 0;
     }
 
+    /**
+     * @return array{0: string|null, 1: string|null}
+     */
     private function fetchExecutable(
         string $workdirpath,
         string $type,
@@ -1187,6 +1190,9 @@ class JudgeDaemon
         return [$execrunpath, $error];
     }
 
+    /**
+     * @return array{0: string|null, 1: string|null, 2: string|null}
+     */
     private function fetchExecutableInternal(
         string $workdirpath,
         string $type,
