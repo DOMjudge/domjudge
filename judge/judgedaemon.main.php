@@ -2443,6 +2443,9 @@ class JudgeDaemon
         return $response;
     }
 
+    /**
+     * @return array{input: string, output: string}|null 
+     */
     private function fetchTestcase(string $workdirpath, string $testcase_id, int $judgetaskid, string $testcase_hash): ?array
     {
         // Get both in- and output files, only if we didn't have them already.
