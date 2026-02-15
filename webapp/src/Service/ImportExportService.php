@@ -59,10 +59,12 @@ readonly class ImportExportService
      *     penalty_time: int,
      *     activate_time: string,
      *     warning_message?: string,
+     *     process_balloons?: bool,
      *     medals: array{
-     *         gold: int,
-     *         silver: int,
-     *         bronze: int
+     *         enabled: bool,
+     *         gold?: int,
+     *         silver?: int,
+     *         bronze?: int
      *     },
      *     scoreboard_freeze_time?: string,
      *     scoreboard_freeze_duration?: string,
@@ -83,6 +85,8 @@ readonly class ImportExportService
      *         use_judgements?: bool,
      *         username?: string,
      *         password?: string,
+     *         score_diff_epsilon?: float,
+     *         compare_by_score_only?: bool,
      *     }
      * }
      */
@@ -108,7 +112,11 @@ readonly class ImportExportService
         if ($warnMsg = $contest->getWarningMessage()) {
             $data['warning_message'] = $warnMsg;
         }
+        if (!$contest->getProcessBalloons()) {
+            $data['process_balloons'] = false;
+        }
 
+        $data['medals'] = ['enabled' => $contest->getMedalsEnabled()];
         foreach (['gold', 'silver', 'bronze'] as $medal) {
             $medalCount = $contest->{'get' . ucfirst($medal) . 'Medals'}();
             if ($medalCount) {
@@ -153,6 +161,12 @@ readonly class ImportExportService
             }
             if ($contest->getExternalSourcePassword()) {
                 $shadow['password'] = $contest->getExternalSourcePassword();
+            }
+            if ($contest->getScoreDiffEpsilon() != 0.0001) {
+                $shadow['score_diff_epsilon'] = (float)$contest->getScoreDiffEpsilon();
+            }
+            if ($contest->getShadowCompareByScore()) {
+                $shadow['compare_by_score_only'] = true;
             }
             $data['shadow'] = $shadow;
         }
@@ -323,7 +337,8 @@ readonly class ImportExportService
             ->setStarttimeString(date_format($startTime, 'Y-m-d H:i:s e'))
             ->setActivatetimeString($activateTimeIsRelative ? $activateRelativeTime : date_format($activateTime, 'Y-m-d H:i:s e'))
             ->setEndtimeString(sprintf('+%s', $data['duration']))
-            ->setPublic($data['public'] ?? true);
+            ->setPublic($data['public'] ?? true)
+            ->setProcessBalloons($data['process_balloons'] ?? $data['process-balloons'] ?? true);
         if ($deactivateTime) {
             $contest->setDeactivatetimeString($deactivateTimeIsRelative ? $deactivateRelativeTime : date_format($deactivateTime, 'Y-m-d H:i:s e'));
         }
@@ -342,12 +357,16 @@ readonly class ImportExportService
         // Get all visible categories. For now, we assume these are the ones getting awards
         $visibleCategories = $this->em->getRepository(TeamCategory::class)->findBy(['visible' => true]);
 
-        if (empty($visibleCategories)) {
+        // Check if medals are explicitly enabled/disabled, otherwise infer from visible categories
+        $medalsEnabled = $data['medals']['enabled'] ?? null;
+        if ($medalsEnabled === false) {
+            $contest->setMedalsEnabled(false);
+        } elseif (empty($visibleCategories)) {
             $contest->setMedalsEnabled(false);
         } else {
             foreach ($visibleCategories as $visibleCategory) {
                 $contest
-                    ->setMedalsEnabled(true)
+                    ->setMedalsEnabled($medalsEnabled ?? true)
                     ->addMedalCategory($visibleCategory);
             }
 
@@ -393,13 +412,23 @@ readonly class ImportExportService
         if ($shadow) {
             $contest->setExternalSourceEnabled(true);
             $inflector = InflectorFactory::create()->build();
+
+            // Fields that don't follow the setExternalSource* naming pattern
+            $fieldMapping = [
+                'score_diff_epsilon'    => 'setScoreDiffEpsilon',
+                'score-diff-epsilon'    => 'setScoreDiffEpsilon',
+                'compare_by_score_only' => 'setShadowCompareByScore',
+                'compare-by-score-only' => 'setShadowCompareByScore',
+            ];
+
             foreach ($shadow as $field => $value) {
                 if ($field === 'type') {
-                    // Type is now an enum
                     $value = ExternalContestSourceType::from($value);
                 }
-                // Map shadow fields to Contest setter methods
-                $fieldFunc = 'setExternalSource' . ucfirst($inflector->camelize($field));
+
+                $fieldFunc = $fieldMapping[$field]
+                    ?? 'setExternalSource' . ucfirst($inflector->camelize($field));
+
                 if (method_exists($contest, $fieldFunc)) {
                     $contest->$fieldFunc($value);
                 }

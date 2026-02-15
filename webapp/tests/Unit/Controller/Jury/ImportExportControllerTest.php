@@ -102,6 +102,7 @@ penalty_time: 20
 activate_time: '{$pastYear}-01-01T08:00:00+00:00'
 scoreboard_type: pass-fail
 medals:
+    enabled: true
     gold: 4
     silver: 4
     bronze: 4
