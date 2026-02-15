@@ -36,6 +36,18 @@ enum Verdict
 
 /**
  * Represents program execution metadata with validated fields.
+ *
+ * TODO: We define this twice as we could have the same object with internal-error as last entry and none of the other properties
+ * probably better to test for this and fail instead of returning half of the data.
+ * @phpstan-type MetaData_Program array{
+ *     exitcode: string, memory-bytes: string, time-used: string, time-result: string, signal: string,
+ *     output-truncated: string, stdin-bytes: string, stdout-bytes: string, stderr-bytes: string,
+ *     cpu-time: string, sys-time: string, user-time: string, wall-time: string, output-truncated: string, entry_point?: string,
+ * }|array{internal-error: string,
+ *     exitcode?: string, memory-bytes?: string, time-used?: string, time-result?: string, signal?: string,
+ *     output-truncated?: string, stdin-bytes?: string, stdout-bytes?: string, stderr-bytes?: string,
+ *     cpu-time?: string, sys-time?: string, user-time?: string, wall-time?: string, output-truncated?: string, entry_point?: string,
+ * }
  */
 readonly class ProgramMetadata
 {
@@ -53,6 +65,8 @@ readonly class ProgramMetadata
 
     /**
      * Create from raw metadata array with validation.
+     *
+     * @param MetaData_Program $meta
      */
     public static function fromArray(array $meta): self
     {
@@ -95,6 +109,18 @@ readonly class ProgramMetadata
 
 /**
  * Represents compare script execution metadata with validated fields.
+ *
+ * TODO: We define this twice as we could have the same object with internal-error as last entry and none of the other properties
+ * probably better to test for this and fail instead of returning half of the data.
+ * @phpstan-type MetaData_Compare array{
+ *     exitcode: string, memory-bytes: string, time-used: string, time-result: string, bytes-transferred: string,
+ *     output-truncated: string, stdin-bytes: string, stdout-bytes: string, stderr-bytes: string, validator-exited-first: string,
+ *     cpu-time: string, sys-time: string, user-time: string, wall-time: string, total-duration-use: string
+ * }|array{internal-error: string,
+ *     exitcode?: string, memory-bytes?: string, time-used?: string, time-result?: string, bytes-transferred?: string,
+ *     output-truncated?: string, stdin-bytes?: string, stdout-bytes?: string, stderr-bytes?: string, validator-exited-first?: string,
+ *     cpu-time?: string, sys-time?: string, user-time?: string, wall-time?: string, total-duration-use?: string
+ * }
  */
 readonly class CompareMetadata
 {
@@ -106,6 +132,8 @@ readonly class CompareMetadata
 
     /**
      * Create from raw metadata array with validation.
+     *
+     * @param MetaData_Compare $meta
      */
     public static function fromArray(array $meta): self
     {
@@ -133,6 +161,32 @@ readonly class VerdictInput
     }
 }
 
+/**
+ * @phpstan-type JudgeTask array{submitid: ?string, contestid: ?string, judgetaskid: int, type: string, priority: int, jobid: ?string,
+ *     uuid: ?string, compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string, testcase_id: ?string,
+ *     testcase_hash: ?string, compile_config: ?string, run_config: ?string, compare_config: ?string
+ *  }
+ * @phpstan-type RunConfig array{time_limit: float, memory_limit: int, output_limit: int,
+ *      process_limit: int, entry_point: ?string, pass_limit: int, hash: string, overshoot: int
+ * }
+ * @phpstan-type CompareConfig array{script_timelimit: int, script_memory_limit: int,
+ *      script_filesize_limit: int, compare_args: string, combined_run_compare: bool,
+ *      hash: string, is_scoring_problem: bool
+ * }
+ * TODO: We define this twice as we could have the same object with internal-error as last entry and none of the other properties
+ * probably better to test for this and fail instead of returning half of the data.
+ * @phpstan-import-type MetaData_Compare from CompareMetaData
+ * @phpstan-import-type MetaData_Program from ProgramMetaData
+ * @phpstan-type MetaData MetaData_Compare|MetaData_Program|array{
+ *     exitcode: string, memory-bytes: string, time-used: string, time-result: string,
+ *     output-truncated: string, stdin-bytes: string, stdout-bytes: string, stderr-bytes: string,
+ *     cpu-time: string, sys-time: string, user-time: string, wall-time: string
+ * }|array{internal-error: string,
+ *     exitcode?: string, memory-bytes?: string, time-used?: string, time-result?: string,
+ *     output-truncated?: string, stdin-bytes?: string, stdout-bytes?: string, stderr-bytes?: string,
+ *     cpu-time?: string, sys-time?: string, user-time?: string, wall-time?: string
+ * }
+ */
 class JudgeDaemon
 {
     private const FD_STDIN = 0;
@@ -1334,6 +1388,9 @@ class JudgeDaemon
         logmsg(LOG_ERR, "=> internal error " . $error_id);
     }
 
+    /**
+     * @return MetaData
+     */
     private function readMetadata(string $filename): ?array
     {
         if (!is_readable($filename)) {
