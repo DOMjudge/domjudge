@@ -539,6 +539,7 @@ class ExternalContestSourceService
                         }
                     }
                     if (!$receivedData) {
+                        $this->updateProgress('Waiting for new events (last: ' . ($this->getLastReadEventId() ?? 'none') . ')');
                         $hundred_ms = 100 * 1000 * 1000;
                         time_nanosleep(0, $hundred_ms);
                     } else {
