@@ -133,39 +133,41 @@
         </div>
     {% endif %}
 
-    {% if selectedJudging is not null and selectedJudging.result is not empty and submission.expectedScore is not null %}
-        {# Expected score comparison for scoring problems #}
-        {% if selectedJudging.score == submission.expectedScore %}
-            <div class="alert alert-success">
-                Actual score matches the expected score ({{ selectedJudging.score }}).
-            </div>
-        {% else %}
-            <div class="alert alert-danger">
-                Actual score {{ selectedJudging.score }} does NOT match expected score: {{ submission.expectedScore }}.
-            </div>
+    {% if selectedJudging is not null and selectedJudging.result is not empty %}
+        {% if submission.expectedScore is not null %}
+            {% if selectedJudging.score == submission.expectedScore %}
+                <div class="alert alert-success">
+                    Actual score matches the expected score ({{ selectedJudging.score }}).
+                </div>
+            {% else %}
+                <div class="alert alert-danger">
+                    Actual score {{ selectedJudging.score }} does NOT match expected score: {{ submission.expectedScore }}.
+                </div>
+            {% endif %}
         {% endif %}
-    {% elseif selectedJudging is not null and selectedJudging.result is not empty and submission.expectedResults %}
-        {# Expected verdict comparison for pass/fail problems #}
-        {% if selectedJudging.result|upper not in submission.expectedResults %}
-            <div class="alert alert-danger">
-                Actual result {{ selectedJudging.result | printValidJuryResult }} does NOT match expected result(s):
-                {% for expectedResult in submission.expectedResults %}
-                    {{ expectedResult | printValidJuryResult }}
-                    {% if not loop.last %}or{% endif %}
-                {% endfor %}.
-            </div>
-        {% elseif submission.expectedResults|length > 1 %}
-            <div class="alert alert-warning">
-                Actual result {{ selectedJudging.result | printValidJuryResult }} matches one of multiple expected results:
-                {% for expectedResult in submission.expectedResults %}
-                    {{ expectedResult | printValidJuryResult }}
-                    {% if not loop.last %}or{% endif %}
-                {% endfor %}.
-            </div>
-        {% else %}
-            <div class="alert alert-success">
-                Actual result matches the expected result ({{ selectedJudging.result | printValidJuryResult }}).
-            </div>
+
+        {% if submission.expectedResults %}
+            {% if selectedJudging.result|upper not in submission.expectedResults %}
+                <div class="alert alert-danger">
+                    Actual result {{ selectedJudging.result | printValidJuryResult }} does NOT match expected result(s):
+                    {% for expectedResult in submission.expectedResults %}
+                        {{ expectedResult | printValidJuryResult }}
+                        {% if not loop.last %}or{% endif %}
+                    {% endfor %}.
+                </div>
+            {% elseif submission.expectedResults|length > 1 %}
+                <div class="alert alert-warning">
+                    Actual result {{ selectedJudging.result | printValidJuryResult }} matches one of multiple expected results:
+                    {% for expectedResult in submission.expectedResults %}
+                        {{ expectedResult | printValidJuryResult }}
+                        {% if not loop.last %}or{% endif %}
+                    {% endfor %}.
+                </div>
+            {% else %}
+                <div class="alert alert-success">
+                    Actual result matches the expected result ({{ selectedJudging.result | printValidJuryResult }}).
+                </div>
+            {% endif %}
         {% endif %}
     {% endif %}
 
