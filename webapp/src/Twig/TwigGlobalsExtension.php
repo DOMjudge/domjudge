@@ -94,6 +94,7 @@ class TwigGlobalsExtension extends AbstractExtension implements GlobalsInterface
                 'side-by-side'              => ["name"  => "Side-by-side"],
                 'inline'                    => ["name"  => "Inline"],
             ],
+            'can_change_password'           => $this->dj->canChangePassword(),
         ];
     }
 }
