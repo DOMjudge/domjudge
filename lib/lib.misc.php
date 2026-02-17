@@ -15,7 +15,6 @@ require_once('lib.wrappers.php');
  */
 function overshoot_time(float $timelimit, string $overshoot_cfg) : float
 {
-    /** @var string[] $tokens */
     $tokens = preg_split('/([+&|])/', $overshoot_cfg, -1, PREG_SPLIT_DELIM_CAPTURE);
     if ($tokens === false) {
         error("failed parsing/splitting overshoot string '$overshoot_cfg'");
@@ -77,7 +76,7 @@ function alert(string $msgtype, string $description = ''): void
  * Functions to support (graceful) shutdown of daemons upon receiving a
  * signal.
  */
-function sig_handler(int $signal, $siginfo = null): void
+function sig_handler(int $signal, mixed $siginfo = null): void
 {
     global $exitsignalled, $gracefulexitsignalled;
 
