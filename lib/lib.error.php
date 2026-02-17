@@ -48,7 +48,7 @@ function logmsg(int $msglevel, string $string): void
     // Trim $string to reasonable length
     $string = substr($string, 0, 10000);
 
-    $msec = sprintf("%03d", (int)(explode(' ', microtime())[0]*1000));
+    $msec = sprintf("%03d", (int)(explode(' ', microtime()))[0]*1000);
     $stamp = "[" . date('M d H:i:s') . ".$msec] " . SCRIPT_ID .
         (function_exists('posix_getpid') ? "[" . posix_getpid() . "]" : "") .
         ": ";

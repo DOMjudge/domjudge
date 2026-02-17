@@ -26,7 +26,7 @@ function dj_json_try_decode(string $str): mixed
 /**
  * Encode data to JSON with our preferred settings.
  */
-function dj_json_encode($data) : string
+function dj_json_encode(mixed $data) : string
 {
     return json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 }
