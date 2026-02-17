@@ -43,7 +43,7 @@ if (defined('SYSLOG')) {
  * If this is the web interface: write to the screen with the right CSS class.
  * If this is the command line: write to Standard Error.
  */
-function logmsg(int $msglevel, string $string)
+function logmsg(int $msglevel, string $string): void
 {
     global $verbose, $loglevel;
 
@@ -86,7 +86,7 @@ function error(string $string): never
 /**
  * Log a warning at level LOG_WARNING.
  */
-function warning(string $string)
+function warning(string $string): void
 {
     logmsg(LOG_WARNING, "warning: $string");
 }
@@ -94,7 +94,7 @@ function warning(string $string)
 /**
  * Write debugging output using var_dump(). Uses <pre> in web context.
  */
-function debug()
+function debug(): void
 {
     if (DEBUG===0) {
         return;

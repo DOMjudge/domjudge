@@ -689,7 +689,7 @@ class JudgeDaemon
         $this->handleJudgingTask($row, $lastWorkdir, $workdirpath, $workdir);
     }
 
-    private function fetchWork()
+    private function fetchWork(): string|bool|null
     {
         return $this->request('judgehosts/fetch-work', 'POST', ['hostname' => $this->myhost], false);
     }
@@ -814,7 +814,7 @@ class JudgeDaemon
         }
     }
 
-    private function request(string $url, string $verb = 'GET', $data = '', bool $failonerror = true)
+    private function request(string $url, string $verb = 'GET', $data = '', bool $failonerror = true): string|bool|null
     {
         // Don't flood the log with requests for new judgings every few seconds.
         if (str_starts_with($url, 'judgehosts/fetch-work') && $verb === 'POST') {
@@ -933,7 +933,7 @@ class JudgeDaemon
         $this->domjudge_config = $res;
     }
 
-    private function djconfigGetValue(string $name)
+    private function djconfigGetValue(string $name): mixed
     {
         if (empty($this->domjudge_config)) {
             $this->djconfigRefresh();

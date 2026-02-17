@@ -9,7 +9,7 @@
 /**
  * Decode a JSON string with our preferred settings.
  */
-function dj_json_decode(string $str)
+function dj_json_decode(string $str): mixed
 {
     return json_decode($str, true, 512, JSON_THROW_ON_ERROR);
 }
@@ -18,7 +18,7 @@ function dj_json_decode(string $str)
  * Try to decode a JSON string with our preferred settings.
  * Does not throw error, but errors can be obtained via json_last_error().
  */
-function dj_json_try_decode(string $str)
+function dj_json_try_decode(string $str): mixed
 {
     return json_decode($str, true);
 }
@@ -81,7 +81,7 @@ function dj_escapeshellarg(?string $arg) : string
  * Returns a boolean value for success or if the delay was interrupted by a
  * signal, returns a float with the time remaining, similar to time_nanosleep.
  */
-function dj_sleep(float $seconds)
+function dj_sleep(float $seconds): float
 {
     $second_in_nanoseconds = 1_000_000_000;
 

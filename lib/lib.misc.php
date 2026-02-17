@@ -69,7 +69,7 @@ function overshoot_parse(float $timelimit, string $token) : float
  * Call alert plugin program to perform user configurable action on
  * important system events. See default alert script for more details.
  */
-function alert(string $msgtype, string $description = '')
+function alert(string $msgtype, string $description = ''): void
 {
     system(LIBDIR . "/alert '$msgtype' '$description' &");
 }
@@ -78,7 +78,7 @@ function alert(string $msgtype, string $description = '')
  * Functions to support (graceful) shutdown of daemons upon receiving a
  * signal.
  */
-function sig_handler(int $signal, $siginfo = null)
+function sig_handler(int $signal, $siginfo = null): void
 {
     global $exitsignalled, $gracefulexitsignalled;
 
@@ -95,7 +95,7 @@ function sig_handler(int $signal, $siginfo = null)
     }
 }
 
-function initsignals()
+function initsignals(): void
 {
     global $exitsignalled;
 
@@ -137,7 +137,7 @@ function version() : never
  * @param string $content  The content to append
  * @return int|false       The number of bytes that were written to the file, or false on failure.
  */
-function appendToFile(string $filename, string $content)
+function appendToFile(string $filename, string $content): int|false
 {
     return file_put_contents($filename, $content, FILE_APPEND);
 }
