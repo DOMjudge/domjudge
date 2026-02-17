@@ -32,9 +32,7 @@ if (defined('LOGFILE')) {
 
 // Open syslog connection:
 if (defined('SYSLOG')) {
-    if (!openlog(SCRIPT_ID, LOG_NDELAY | LOG_PID | LOG_CONS, SYSLOG)) {
-        error("cannot open syslog");
-    }
+    openlog(SCRIPT_ID, LOG_NDELAY | LOG_PID | LOG_CONS, SYSLOG);
 }
 
 /**
