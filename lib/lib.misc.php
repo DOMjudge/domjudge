@@ -17,12 +17,15 @@ function overshoot_time(float $timelimit, string $overshoot_cfg) : float
 {
     /** @var string[] $tokens */
     $tokens = preg_split('/([+&|])/', $overshoot_cfg, -1, PREG_SPLIT_DELIM_CAPTURE);
-    if (count($tokens)!=1 && count($tokens)!=3) {
-        error("invalid timelimit overshoot string '$overshoot_cfg'");
+    if ($tokens === false) {
+        error("failed parsing/splitting overshoot string '$overshoot_cfg'");
+    }
+    if (count($tokens) !== 1 && count($tokens) !== 3) {
+        error("expected 1 or 3 tokens got: '" . count($tokens) . "' from timelimit overshoot string '$overshoot_cfg'");
     }
 
     $val1 = overshoot_parse($timelimit, $tokens[0]);
-    if (count($tokens)==1) {
+    if (count($tokens) === 1) {
         return $val1;
     }
 
@@ -43,16 +46,12 @@ function overshoot_time(float $timelimit, string $overshoot_cfg) : float
  */
 function overshoot_parse(float $timelimit, string $token) : float
 {
-    $res = sscanf($token, '%d%c%n');
-    if (count((array) $res)!=3) {
-        error("invalid timelimit overshoot token '$token'");
-    }
-    [$val, $type, $len] = $res;
-    if (strlen($token)!=$len) {
+    $ret = sscanf($token, '%d%c%n', $val, $type, $len);
+    if ($ret === null || $ret !== 3 || strlen($token) !== $len) {
         error("invalid timelimit overshoot token '$token'");
     }
 
-    if ($val<0) {
+    if ($val < 0) {
         error("timelimit overshoot cannot be negative: '$token'");
     }
     switch ($type) {
