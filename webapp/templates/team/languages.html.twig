@@ -3,35 +3,50 @@
 {% block title %}Allowed Languages{% endblock %}
 
 {% block content %}
-    <h1 class="mt-4 text-center">Allowed Languages</h1>
+    <h1 class="mt-4 mb-5 text-center">Allowed Languages</h1>
 
-        <div class="container">
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-2">
-    {% for lang in languages %}
+    <div class="container mb-5">
+        <div class="row row-cols-1 row-cols-lg-2 g-4">
+            {% for lang in languages %}
                 <div class="col">
-                <div class="card">
-                    <div class="card-body">
-                        <h2 class="card-title">
-                            <code>{{ lang.name }}</code>
-                            <span style="font-size:50%; font-weight: normal;"> with
-                                extension{% if lang.extensions|length > 1 %}s{% endif %}:
-                            {% for ext in lang.extensions %}
-                                <code>.{{ ext }}</code>{% if not loop.last %}, {% endif %}
-                            {% endfor %}
-                        </h2>
-                    </div>
-                    {% if lang.compilerVersion and lang.compilerVersionCommand %}
-                        <pre class="output_text" style="background-color: rgba(0,121,54,.1);">$ {{ lang.compilerVersionCommand }}</pre>
-                        <pre class="output_text">{{ lang.compilerVersion }}</pre>
-                    {% endif %}
-                    {% if lang.runnerVersion and lang.runnerVersionCommand %}
-                        <pre class="output_text" style="background-color: rgba(0,121,54,.1);">$ {{ lang.runnerVersionCommand }}</pre>
-                        <pre class="output_text">{{ lang.runnerVersion }}</pre>
-                    {% endif %}
+                    <div class="card language-card">
+                        <div class="card-body p-4">
+                            <div class="mb-4">
+                                <h2 class="lang-name h4">{{ lang.name }}</h2>
+                                <div class="d-flex gap-2 mt-2">
+                                    {% for ext in lang.extensions %}
+                                        <span class="extension-badge">.{{ ext }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
 
+                            {% if lang.compilerVersion and lang.compilerVersionCommand %}
+                                <div class="mb-4">
+                                    <div class="section-label">
+                                        <i class="fas fa-square-binary"></i> Compiler
+                                    </div>
+                                    <div class="terminal-block">
+                                        <div class="terminal-command">{{ lang.compilerVersionCommand }}</div>
+                                        <div class="terminal-output">{{ lang.compilerVersion }}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if lang.runnerVersion and lang.runnerVersionCommand %}
+                                <div>
+                                    <div class="section-label">
+                                        <i class="fas fa-person-running"></i> Runner
+                                    </div>
+                                    <div class="terminal-block">
+                                        <div class="terminal-command">{{ lang.runnerVersionCommand }}</div>
+                                        <div class="terminal-output">{{ lang.runnerVersion }}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                </div>
-    {% endfor %}
-            </div>
+            {% endfor %}
         </div>
+    </div>
 {% endblock %}
