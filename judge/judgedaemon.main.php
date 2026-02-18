@@ -9,6 +9,8 @@
 
 namespace DOMjudge;
 
+use CurlHandle;
+
 if (isset($_SERVER['REMOTE_ADDR'])) {
     die("Commandline use only");
 }
@@ -145,11 +147,19 @@ class JudgeDaemon
 
     private static ?JudgeDaemon $instance = null;
 
+    /**
+     * @var array{id: string, user: string, pass: string, url: string,
+     *        errorred: bool, waiting: bool, retrying: bool, last_attempt: int,
+     *        ch?: CurlHandle|false
+     *      }|null
+     */
     private ?array $endpoint = null;
+    /** @var array<string, mixed> */
     private array $domjudge_config = [];
     private string $myhost;
     private int $verbose = LOG_INFO;
     private ?string $daemonid = null;
+    /** @var array<string, bool|string> */
     private array $options = [];
 
     private bool $exitsignalled = false;
@@ -158,9 +168,11 @@ class JudgeDaemon
     private ?string $lastrequest = '';
     private float $waittime = self::INITIAL_WAITTIME_SEC;
 
+    /** @var array<string, string[]> */
     private array $langexts = [];
 
     private $lockfile;
+    /** @var array<int, string> */
     private array $EXITCODES;
     private string $runuser;
     private string $rungroup;
@@ -797,7 +809,7 @@ class JudgeDaemon
         }
     }
 
-    private function setupCurlHandle(string $restuser, string $restpass): \CurlHandle|false
+    private function setupCurlHandle(string $restuser, string $restpass): CurlHandle|false
     {
         $curl_handle = curl_init();
         curl_setopt($curl_handle, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
