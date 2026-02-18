@@ -171,6 +171,7 @@ class JudgeDaemon
     /** @var array<string, string[]> */
     private array $langexts = [];
 
+    /** @var ?resource */
     private $lockfile;
     /** @var array<int, string> */
     private array $EXITCODES;
