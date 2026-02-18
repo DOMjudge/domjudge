@@ -66,6 +66,7 @@
 		"league/commonmark": "^2.3",
 		"nelmio/api-doc-bundle": "^5.0",
 		"nelmio/cors-bundle": "^2.4",
+		"php-ds/php-ds": "^1.7",
 		"phpdocumentor/reflection-docblock": "^5.3",
 		"phpstan/phpdoc-parser": "^2.0",
 		"promphp/prometheus_client_php": "^2.6",
