@@ -2404,6 +2404,13 @@ class JudgeDaemon
 
     /**
      * @param JudgeTask $judgeTask
+     * @param array{
+     *          runresult: string, start_time: string, end_time: string,
+     *          runtime: string, output_run: string, output_error: string,
+     *          output_system: string, metadata: string, output_diff: string,
+     *          hostname: string, testcasedir: string, compare_metadata: string,
+     *          team_message?: string, score?: int
+     *        } $new_judging_run
      */
     private function reportJudgingRun(array $judgeTask, array $new_judging_run, bool $asynchronous): ?string
     {
