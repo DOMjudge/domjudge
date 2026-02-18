@@ -856,6 +856,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param array<string, string>|string $data
+     */
     private function request(string $url, string $verb = 'GET', string|array $data = '', bool $failonerror = true): string|bool|null
     {
         // Don't flood the log with requests for new judgings every few seconds.
