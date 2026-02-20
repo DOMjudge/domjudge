@@ -620,6 +620,7 @@ class JudgeDaemon
             } else {
                 // Retrieving full team output for a particular testcase.
                 $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
+                // TODO: Properly fix this by sending the pass in the run_config instead of hardcoding 1
                 $this->request(
                     sprintf(
                         'judgehosts/add-debug-info/%s/%s',
@@ -627,7 +628,7 @@ class JudgeDaemon
                         urlencode((string)$judgeTask['judgetaskid'])
                     ),
                     'POST',
-                    ['output_run' => $this->restEncodeFile($testcasedir . '/program.out', false)],
+                    ['output_run' => $this->restEncodeFile($testcasedir . '/1/program.out', false)],
                     false
                 );
                 logmsg(LOG_INFO, "  ⇡ Uploading full output of testcase $judgeTask[testcase_id].");
