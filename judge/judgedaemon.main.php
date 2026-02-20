@@ -1811,6 +1811,8 @@ class JudgeDaemon
 
     /**
      * @param TimeLimit $timelimit
+     * @param RunConfig $run_config
+     * @param CompareConfig $compare_config 
      */
     private function testcaseRunInternal(
         string $input,
@@ -2240,6 +2242,8 @@ class JudgeDaemon
 
     /**
      * @param JudgeTask $judgeTask
+     * @param RunConfig $run_config
+     * @param CompareConfig $compare_config 
      */
     private function runTestcase(
         array $judgeTask,
