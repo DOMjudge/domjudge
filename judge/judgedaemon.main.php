@@ -856,7 +856,7 @@ class JudgeDaemon
         }
     }
 
-    private function request(string $url, string $verb = 'GET', $data = '', bool $failonerror = true): string|bool|null
+    private function request(string $url, string $verb = 'GET', string|array $data = '', bool $failonerror = true): string|bool|null
     {
         // Don't flood the log with requests for new judgings every few seconds.
         if (str_starts_with($url, 'judgehosts/fetch-work') && $verb === 'POST') {
@@ -987,7 +987,7 @@ class JudgeDaemon
         return $this->domjudge_config[$name];
     }
 
-    private function restEncodeFile(string $file, $sizelimit = true): string
+    private function restEncodeFile(string $file, bool|int $sizelimit = true): string
     {
         $maxsize = null;
         if ($sizelimit === true) {
@@ -1033,8 +1033,14 @@ class JudgeDaemon
         return trim(ob_get_clean());
     }
 
-    private function runCommandSafe(array $command_parts, &$retval = DONT_CARE, $log_nonzero_exitcode = true, $stdin_source = null, $stdout_target = null, $stderr_target = null): bool
-    {
+    /**
+     * @param string[] $command_parts
+     * @param int|DONT_CARE $retval
+     */
+    private function runCommandSafe(
+        array $command_parts, &$retval = DONT_CARE, bool $log_nonzero_exitcode = true,
+        ?string $stdin_source = null, ?string $stdout_target = null, ?string $stderr_target = null
+    ): bool {
         if (empty($command_parts)) {
             logmsg(LOG_WARNING, "Need at least the command that should be called.");
             $retval = -1;
@@ -1757,14 +1763,14 @@ class JudgeDaemon
      * @param CompareConfig $compare_config 
      */
     private function testcaseRunInternal(
-        $input,
-        $output,
-        $timelimit,
-        $passdir,
-        $run_runpath,
-        $combined_run_compare,
-        $compare_runpath,
-        $compare_args,
+        string $input,
+        string $output,
+        array $timelimit,
+        string $passdir,
+        string $run_runpath,
+        bool $combined_run_compare,
+        string $compare_runpath,
+        string $compare_args,
         array $run_config,
         array $compare_config
     ) : Verdict {
