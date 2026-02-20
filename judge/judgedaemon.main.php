@@ -2264,6 +2264,19 @@ class JudgeDaemon
         $input = $tcfile['input'];
         $output = $tcfile['output'];
         $passLimit = $run_config['pass_limit'] ?? 1;
+        // All of those are to help PHPStan, it seems to not see that they are defined in the loop
+        // and the loop always runs as tpassLimit >= $passCnt.
+        $score = "";
+        $nextPass = false;
+        $result = Verdict::INTERNAL_ERROR;
+        $runtime = null;
+        $keys = [
+            'runresult', 'start_time', 'end_time', 'runtime', 'output_run',
+            'output_error', 'output_system', 'metadata', 'output_diff',
+            'hostname', 'testcasedir', 'compare_metadata'
+        ];
+        $new_judging_run = array_fill_keys($keys, '');
+
         for ($passCnt = 1; $passCnt <= $passLimit; $passCnt++) {
             $nextPass = false;
             if ($passLimit > 1) {
