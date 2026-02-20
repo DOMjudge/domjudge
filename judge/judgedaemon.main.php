@@ -151,7 +151,12 @@ readonly class VerdictInput
  * @phpstan-type JudgeTask array{submitid: ?string, contestid: ?string, judgetaskid: int, type: string, priority: int, jobid: ?string,
  *     uuid: ?string, compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string, testcase_id: ?string,
  *     testcase_hash: ?string, compile_config: ?string, run_config: ?string, compare_config: ?string
- *  }
+ * }
+ * @phpstan-type JudgingRun array{runresult: string, start_time: string, end_time: string, runtime: string, 
+ *      output_run: string, output_error: string, output_system: string, metadata: string, output_diff: string,
+ *      hostname: string, testcasedir: string, compare_metadata: string,
+ *      team_message?: string, score?: string
+ * }
  * @phpstan-type RunConfig array{time_limit: float, memory_limit: int, output_limit: int,
  *      process_limit: int, entry_point: ?string, pass_limit: int, hash: string, overshoot: int
  * }
@@ -534,6 +539,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask[] $row
+     */
     private function handleJudgingTask(array $row, ?string &$lastWorkdir, string $workdirpath, string $workdir): void
     {
         $success_file = "$workdir/.uuid_pid";
@@ -630,6 +638,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask[] $row
+     */
     private function handleDebugInfoTask(array $row, ?string &$lastWorkdir, string $workdirpath, string $workdir): void
     {
         if ($lastWorkdir !== null) {
@@ -686,6 +697,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask[] $row
+     */
     private function handlePrefetchTask(array $row, ?string &$lastWorkdir, string $workdirpath): void
     {
         if ($lastWorkdir !== null) {
@@ -716,6 +730,9 @@ class JudgeDaemon
         logmsg(LOG_INFO, "  🔥 Pre-heating judgehost completed.");
     }
 
+    /**
+     * @param JudgeTask[] $row
+     */
     private function handleTask(string $type, array $row, ?string &$lastWorkdir, string $workdirpath): void
     {
         if ($type == 'try_again') {
@@ -805,6 +822,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     */
     private function judgingDirectory(string $workdirpath, array $judgeTask): string
     {
         if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => self::EXTERNAL_IDENTIFIER_REGEX]]) === false ||
@@ -1445,6 +1465,10 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     * @param array{script_timelimit: int, script_memory_limit: int, language_extensions: array<string>, filter_compiler_files: bool, hash: string} $compile_config
+     */
     private function compile(
         array   $judgeTask,
         string  $workdir,
@@ -1642,6 +1666,9 @@ class JudgeDaemon
         return true;
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     */
     private function compileAndRunSubmission(array $judgeTask, string $workdirpath): bool
     {
         $startTime = microtime(true);
@@ -1787,6 +1814,8 @@ class JudgeDaemon
 
     /**
      * @param array{cpu: array{0: float, 1: float}, wall: array{0: float, 1: float}} $timelimit
+     * @param RunConfig $run_config
+     * @param CompareConfig $compare_config 
      */
     private function testcaseRunInternal(
         string $input,
@@ -2214,6 +2243,11 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     * @param RunConfig $run_config
+     * @param CompareConfig $compare_config 
+     */
     private function runTestcase(
         array $judgeTask,
         string $workdir,
@@ -2484,6 +2518,10 @@ class JudgeDaemon
         return $ret;
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     * @param JudgingRun $new_judging_run
+     */
     private function reportJudgingRun(array $judgeTask, array $new_judging_run, bool $asynchronous): ?string
     {
         $judgeTaskId = $judgeTask['judgetaskid'];
