@@ -668,6 +668,8 @@ class JudgeDaemon
             } else {
                 // Retrieving full team output for a particular testcase.
                 $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
+                // TODO: Properly fix this by sending the pass number in the run_config instead of hardcoding the first pass,
+                // that way the output for other passes can also be retrieved.
                 $this->request(
                     sprintf(
                         'judgehosts/add-debug-info/%s/%s',
