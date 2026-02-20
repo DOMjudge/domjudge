@@ -536,6 +536,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask[] $row
+     */
     private function handleJudgingTask(array $row, ?string &$lastWorkdir, string $workdirpath, string $workdir): void
     {
         $success_file = "$workdir/.uuid_pid";
@@ -632,6 +635,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask[] $row
+     */
     private function handleDebugInfoTask(array $row, ?string &$lastWorkdir, string $workdirpath, string $workdir): void
     {
         if ($lastWorkdir !== null) {
@@ -688,6 +694,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask[] $row
+     */
     private function handlePrefetchTask(array $row, ?string &$lastWorkdir, string $workdirpath): void
     {
         if ($lastWorkdir !== null) {
@@ -718,6 +727,9 @@ class JudgeDaemon
         logmsg(LOG_INFO, "  🔥 Pre-heating judgehost completed.");
     }
 
+    /**
+     * @param JudgeTask[] $row
+     */
     private function handleTask(string $type, array $row, ?string &$lastWorkdir, string $workdirpath): void
     {
         if ($type == 'try_again') {
@@ -807,6 +819,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     */
     private function judgingDirectory(string $workdirpath, array $judgeTask): string
     {
         if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => self::EXTERNAL_IDENTIFIER_REGEX]]) === false ||
@@ -1447,6 +1462,10 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     * @param array{script_timelimit: int, script_memory_limit: int, language_extensions: array<string>, filter_compiler_files: bool, hash: string} $compile_config
+     */
     private function compile(
         array   $judgeTask,
         string  $workdir,
@@ -1644,6 +1663,9 @@ class JudgeDaemon
         return true;
     }
 
+    /**
+     * @param JudgeTask $judgeTask 
+     */
     private function compileAndRunSubmission(array $judgeTask, string $workdirpath): bool
     {
         $startTime = microtime(true);
@@ -2216,6 +2238,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     */
     private function runTestcase(
         array $judgeTask,
         string $workdir,
@@ -2483,6 +2508,9 @@ class JudgeDaemon
         return $ret;
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     */
     private function reportJudgingRun(array $judgeTask, array $new_judging_run, bool $asynchronous): ?string
     {
         $judgeTaskId = $judgeTask['judgetaskid'];
