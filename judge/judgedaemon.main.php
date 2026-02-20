@@ -138,6 +138,13 @@ readonly class VerdictInput
  *     uuid: ?string, compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string, testcase_id: ?string,
  *     testcase_hash: ?string, compile_config: ?string, run_config: ?string, compare_config: ?string
  *  }
+ * @phpstan-type RunConfig array{time_limit: float, memory_limit: int, output_limit: int,
+ *      process_limit: int, entry_point: ?string, pass_limit: int, hash: string, overshoot: int
+ * }
+ * @phpstan-type CompareConfig array{script_timelimit: int, script_memory_limit: int,
+ *      script_filesize_limit: int, compare_args: string, combined_run_compare: bool,
+ *      hash: string, is_scoring_problem: bool
+ * }
  */
 class JudgeDaemon
 {
@@ -1744,6 +1751,11 @@ class JudgeDaemon
         return $prefix . (empty($prefix) ? "" : " ") . "Wrong answer!";
     }
 
+    /**
+     * @param array{cpu: array{0: float, 1: float}, wall: array{0: float, 1: float}} $timelimit
+     * @param RunConfig $run_config
+     * @param CompareConfig $compare_config 
+     */
     private function testcaseRunInternal(
         $input,
         $output,
@@ -2162,6 +2174,8 @@ class JudgeDaemon
 
     /**
      * @param JudgeTask $judgeTask
+     * @param RunConfig $run_config
+     * @param CompareConfig $compare_config 
      */
     private function runTestcase(
         array $judgeTask,
