@@ -1,0 +1,25 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Constant BACKOFF_FACTOR not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Constant BACKOFF_INITIAL_DELAY_SEC not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Constant BACKOFF_JITTER_SEC not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Constant BACKOFF_STEPS not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: judge/judgedaemon.main.php
