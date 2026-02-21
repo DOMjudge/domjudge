@@ -5,7 +5,10 @@ parameters:
         - lib/lib.error.php
         - lib/lib.misc.php
         - lib/lib.wrappers.php
+        - webapp/bin/console
+        - webapp/config
         - webapp/migrations
+        - webapp/public
         - webapp/rector.php
         - webapp/resources/functions.php
         - webapp/src
