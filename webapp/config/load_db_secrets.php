@@ -28,12 +28,18 @@ function get_db_url(): string
         return 'mysql://cannot_read_dbpasswords_secret:@localhost:3306/';
     }
 
+    $found = false;
     foreach ($db_credentials as $line) {
         if ($line[0] == '#') {
             continue;
         }
+        $found = true;
         list($_, $host, $db, $user, $pass, $port) = array_pad(explode(':', trim($line)), 6, null);
         break;
+    }
+    if (!$found) {
+        # Make sure that this fails with a clear error in Symfony.
+        return 'mysql://no_dbpasswords_found_in_file@localhost:3306/';
     }
 
     return sprintf(
