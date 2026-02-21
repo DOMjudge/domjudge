@@ -167,7 +167,7 @@ readonly class VerdictInput
  *     testcase_hash: ?string, compile_config: ?string, run_config: ?string, compare_config: ?string
  *  }
  * @phpstan-type RunConfig array{time_limit: float, memory_limit: int, output_limit: int,
- *      process_limit: int, entry_point: ?string, pass_limit: int, hash: string, overshoot: int
+ *      process_limit: int, entry_point: ?string, pass_limit?: int, hash: string, overshoot: int
  * }
  * @phpstan-type CompareConfig array{script_timelimit: int, script_memory_limit: int,
  *      script_filesize_limit: int, compare_args: string, combined_run_compare: bool,
