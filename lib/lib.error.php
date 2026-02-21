@@ -94,7 +94,7 @@ function warning(string $string): void
  */
 function debug(): void
 {
-    if (DEBUG===0) {
+    if (!defined('DEBUG') || DEBUG===0) {
         return;
     }
 
