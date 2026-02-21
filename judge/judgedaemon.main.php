@@ -1324,10 +1324,10 @@ class JudgeDaemon
                 }
                 chmod($execrunpath, 0755);
             }
-            if (!is_file($execrunpath) || !is_executable($execrunpath)) {
-                return [null, "Invalid build file, must produce an executable file 'run'.", null];
-            }
             if ($combined_run_compare) {
+                if (!is_file($execrunpath) || !is_executable($execrunpath)) {
+                    return [null, "Invalid build file, must produce an executable file 'run'.", null];
+                }
                 # For combined run and compare (i.e. for interactive problems), we
                 # need to wrap the jury provided 'run' script with 'runpipe' to
                 # handle the bidirectional communication.  First 'run' is renamed to

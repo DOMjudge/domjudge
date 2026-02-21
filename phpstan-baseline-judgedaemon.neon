@@ -25,12 +25,6 @@ parameters:
 			path: judge/judgedaemon.main.php
 
 		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: judge/judgedaemon.main.php
-
-		-
 			message: '#^Strict comparison using \!\=\= between non\-empty\-string\|false and null will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
 			count: 1
