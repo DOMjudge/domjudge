@@ -219,7 +219,7 @@ class JudgeDaemon
     private bool $exitsignalled = false;
     private bool $gracefulexitsignalled = false;
 
-    private ?string $lastrequest = '';
+    private string $lastrequest = '';
     private float $waittime = self::INITIAL_WAITTIME_SEC;
 
     /** @var array<string, string[]> */

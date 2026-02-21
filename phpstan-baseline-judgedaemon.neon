@@ -49,12 +49,6 @@ parameters:
 			path: judge/judgedaemon.main.php
 
 		-
-			message: '#^Property DOMjudge\\JudgeDaemon\:\:\$lastrequest \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
-			identifier: property.unusedType
-			count: 1
-			path: judge/judgedaemon.main.php
-
-		-
 			message: '#^Right side of && is always true\.$#'
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
