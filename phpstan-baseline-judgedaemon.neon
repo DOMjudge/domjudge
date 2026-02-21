@@ -37,12 +37,6 @@ parameters:
 			path: judge/judgedaemon.main.php
 
 		-
-			message: '#^PHPDoc tag @var with type array\<string\> is not subtype of native type list\<array\{string, int\<0, max\>\}\|string\>\|false\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: judge/judgedaemon.main.php
-
-		-
 			message: '#^Right side of && is always true\.$#'
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1

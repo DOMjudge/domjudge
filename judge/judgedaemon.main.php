@@ -854,8 +854,10 @@ class JudgeDaemon
             if ($credential === '' || $credential[0] === '#') {
                 continue;
             }
-            /** @var string[] $items */
             $items = preg_split("/\s+/", $credential);
+            if ($items === false) {
+                error("Failed parsing in line $lineno.");
+            }
             if (count($items) !== 4) {
                 error("Error parsing REST API credentials. Invalid format in line $lineno.");
             }
