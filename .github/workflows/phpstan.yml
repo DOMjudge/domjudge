@@ -19,9 +19,8 @@ jobs:
         run: webapp/vendor/phpstan/phpstan/phpstan --version
       - name: Do basic installation
         run: |
-          make configure
-          ./configure --with-domjudge-user=root
-          make judgehost domserver
+          make inplace-conf CONFIGURE_FLAGS='--with-domjudge-user=root'
+          make inplace-install
       - name: Run PHPStan in the classic way
         shell: bash
         run: |
