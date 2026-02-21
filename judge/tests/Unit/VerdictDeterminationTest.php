@@ -27,6 +27,10 @@ class VerdictDeterminationTest extends TestCase
         return $method->invoke($this->daemon, $verdict, $input->programMeta, $input->compareMeta, $input->combinedRunCompare, $filelimit);
     }
 
+    /**
+     * @param array<string, string> $programMeta
+     * @param array<string, string> $compareMeta
+     */
     private function makeInput(
         array $programMeta = [],
         array $compareMeta = [],

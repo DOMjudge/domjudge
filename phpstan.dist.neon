@@ -2,6 +2,9 @@ parameters:
     level: 6
     paths:
         - etc
+        - judge/tests
         - lib/lib.error.php
         - lib/lib.misc.php
         - lib/lib.wrappers.php
+    scanFiles:
+        - judge/judgedaemon.main.php
