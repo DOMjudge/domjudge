@@ -9,3 +9,4 @@ parameters:
         - lib/lib.wrappers.php
 includes:
     - phpstan-baseline-judgedaemon.neon
+    - phpstan-bug.neon
