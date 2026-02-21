@@ -933,8 +933,6 @@ class JudgeDaemon
         }
         if ($verb == 'POST' || $verb == 'PUT') {
             curl_setopt($curl_handle, CURLOPT_POSTFIELDS, $data);
-        } else {
-            curl_setopt($curl_handle, CURLOPT_POSTFIELDS, null);
         }
 
         $delay_in_sec = BACKOFF_INITIAL_DELAY_SEC;
