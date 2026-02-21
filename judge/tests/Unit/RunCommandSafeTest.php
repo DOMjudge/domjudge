@@ -30,13 +30,16 @@ class RunCommandSafeTest extends TestCase
         }
     }
 
+    /**
+     * @param string[] $command_parts
+     */
     private function runCommandSafe(
         array $command_parts,
-        &$retval = null,
-        $log_nonzero_exitcode = true,
-        $stdin_source = null,
-        $stdout_target = null,
-        $stderr_target = null
+        ?int &$retval = null,
+        bool $log_nonzero_exitcode = true,
+        ?string $stdin_source = null,
+        ?string $stdout_target = null,
+        ?string $stderr_target = null
     ): bool {
         // We need to pass $retval by reference, so we use invokeArgs
         $args = [

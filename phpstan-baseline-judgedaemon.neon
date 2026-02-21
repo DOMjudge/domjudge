@@ -1,0 +1,38 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to function is_int\(\) with int\<min, \-2\>\|int\<0, max\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Method DOMjudge\\JudgeDaemon\:\:handleDebugInfoTask\(\) never assigns string to &\$lastWorkdir so it can be removed from the by\-ref type\.$#'
+			identifier: parameterByRef.unusedType
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Method DOMjudge\\JudgeDaemon\:\:handlePrefetchTask\(\) never assigns string to &\$lastWorkdir so it can be removed from the by\-ref type\.$#'
+			identifier: parameterByRef.unusedType
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between non\-empty\-string\|false and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between array\<string, list\<mixed\>\|string\|false\> and false will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: judge/judgedaemon.main.php
+
