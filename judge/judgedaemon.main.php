@@ -1822,7 +1822,7 @@ class JudgeDaemon
         string $run_runpath,
         bool $combined_run_compare,
         string $compare_runpath,
-        string $compare_args,
+        ?string $compare_args,
         array $run_config,
         array $compare_config,
         ?int $judgetaskid = null
