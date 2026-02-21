@@ -1,0 +1,121 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to function is_int\(\) with int\<min, \-2\>\|int\<0, max\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 2
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Constant BACKOFF_FACTOR not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Constant BACKOFF_INITIAL_DELAY_SEC not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Constant BACKOFF_JITTER_SEC not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Constant BACKOFF_STEPS not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Function logmsg invoked with 4 parameters, 2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Method DOMjudge\\JudgeDaemon\:\:handleDebugInfoTask\(\) never assigns string to &\$lastWorkdir so it can be removed from the by\-ref type\.$#'
+			identifier: parameterByRef.unusedType
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Method DOMjudge\\JudgeDaemon\:\:handlePrefetchTask\(\) never assigns string to &\$lastWorkdir so it can be removed from the by\-ref type\.$#'
+			identifier: parameterByRef.unusedType
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Offset ''pass_limit'' on array\{time_limit\: float, memory_limit\: int, output_limit\: int, process_limit\: int, entry_point\: string\|null, pass_limit\: int, hash\: string, overshoot\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^PHPDoc tag @var with type array\<string\> is not subtype of native type list\<array\{string, int\<0, max\>\}\|string\>\|false\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Parameter \#3 \$data of method DOMjudge\\JudgeDaemon\:\:request\(\) expects array\<string, string\>\|string, array\<string, int\|string\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Parameter \#3 \$value of function curl_setopt expects array\|string, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Property DOMjudge\\JudgeDaemon\:\:\$lastrequest \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between non\-empty\-string\|false and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 3
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between array\<string, list\<mixed\>\|string\|false\> and false will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: judge/judgedaemon.main.php
+
+		-
+			message: '#^Unsafe access to private constant DOMjudge\\JudgeDaemon\:\:EXTERNAL_IDENTIFIER_REGEX through static\:\:\.$#'
+			identifier: staticClassAccess.privateConstant
+			count: 1
+			path: judge/judgedaemon.main.php
