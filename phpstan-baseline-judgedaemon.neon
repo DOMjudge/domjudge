@@ -49,12 +49,6 @@ parameters:
 			path: judge/judgedaemon.main.php
 
 		-
-			message: '#^Parameter \#3 \$value of function curl_setopt expects array\|string, null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: judge/judgedaemon.main.php
-
-		-
 			message: '#^Property DOMjudge\\JudgeDaemon\:\:\$lastrequest \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
 			identifier: property.unusedType
 			count: 1
