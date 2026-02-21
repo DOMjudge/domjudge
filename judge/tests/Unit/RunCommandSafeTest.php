@@ -35,7 +35,7 @@ class RunCommandSafeTest extends TestCase
      */
     private function runCommandSafe(
         array $command_parts,
-        int &$retval = null,
+        ?int &$retval = null,
         bool $log_nonzero_exitcode = true,
         ?string $stdin_source = null,
         ?string $stdout_target = null,
