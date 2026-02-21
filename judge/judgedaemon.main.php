@@ -2119,7 +2119,7 @@ class JudgeDaemon
             $compare_tmp = is_readable("compare.tmp") ? file_get_contents("compare.tmp") : "";
             $compareTimedOut = (bool)preg_match('/time-result: .*timelimit/', $compare_meta_raw);
             if ($compareTimedOut) {
-                logmsg(LOG_ERR, "Comparing aborted after the script timelimit of %s seconds, compare script output:\n%s", $scripttimelimit, $compare_tmp);
+                logmsg(LOG_ERR, sprintf("Comparing aborted after the script timelimit of %s seconds, compare script output:\n%s", $scripttimelimit, $compare_tmp));
             }
 
             // Append output validator stdout
