@@ -51,7 +51,7 @@ parameters:
 		-
 			message: '#^Strict comparison using \!\=\= between string and null will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
-			count: 3
+			count: 2
 			path: judge/judgedaemon.main.php
 
 		-
