@@ -827,7 +827,7 @@ class JudgeDaemon
      */
     private function judgingDirectory(string $workdirpath, array $judgeTask): string
     {
-        if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => static::EXTERNAL_IDENTIFIER_REGEX]]) === false ||
+        if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => self::EXTERNAL_IDENTIFIER_REGEX]]) === false ||
             filter_var($judgeTask['jobid'], FILTER_VALIDATE_INT) === false) {
             error("Malformed data returned in judgeTask IDs: " . var_export($judgeTask, true));
         }
