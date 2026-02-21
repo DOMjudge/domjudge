@@ -38,3 +38,4 @@ parameters:
 includes:
     - webapp/vendor/phpstan/phpstan-doctrine/extension.neon
     - phpstan-baseline-judgedaemon.neon
+    - phpstan-bug.neon
