@@ -13,12 +13,6 @@ parameters:
 			path: judge/judgedaemon.main.php
 
 		-
-			message: '#^Function logmsg invoked with 4 parameters, 2 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: judge/judgedaemon.main.php
-
-		-
 			message: '#^Method DOMjudge\\JudgeDaemon\:\:handleDebugInfoTask\(\) never assigns string to &\$lastWorkdir so it can be removed from the by\-ref type\.$#'
 			identifier: parameterByRef.unusedType
 			count: 1
