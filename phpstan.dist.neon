@@ -1,0 +1,37 @@
+parameters:
+    level: 6
+    paths:
+        - etc
+        - lib/lib.error.php
+        - lib/lib.misc.php
+        - lib/lib.wrappers.php
+        - webapp/bin/console
+        - webapp/config
+        - webapp/migrations
+        - webapp/public
+        - webapp/rector.php
+        - webapp/resources/functions.php
+        - webapp/src
+        - webapp/tests
+    scanFiles:
+        - webapp/vendor/vrana/adminer/adminer/include/functions.inc.php
+    scanDirectories:
+        - webapp/vendor/vrana/adminer/adminer/include
+    ignoreErrors:
+        -
+            message: '#Method .* return type has no value type specified in iterable type array#'
+            path: webapp/tests
+        -
+            message: '#Method .* has parameter .* with no value type specified in iterable type array#'
+            path: webapp/tests
+        -
+            message: '#Property .* type has no value type specified in iterable type array#'
+            path: webapp/tests
+        -
+            message: '#PHPDoc tag @var for variable .* has no value type specified in iterable type array#'
+            path: webapp/tests
+        -
+            message: "#Method .* return type has no value type specified in iterable type array#"
+            path: webapp/src/DataFixtures/Test
+includes:
+    - webapp/vendor/phpstan/phpstan-doctrine/extension.neon
