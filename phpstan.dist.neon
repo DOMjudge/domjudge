@@ -37,3 +37,4 @@ parameters:
             path: webapp/src/DataFixtures/Test
 includes:
     - webapp/vendor/phpstan/phpstan-doctrine/extension.neon
+    - phpstan-baseline-judgedaemon.neon
