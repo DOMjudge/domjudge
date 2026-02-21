@@ -911,13 +911,12 @@ class JudgeDaemon
             if (is_array($data)) {
                 curl_setopt($curl_handle, CURLOPT_HTTPHEADER, ['Content-Type: multipart/form-data']);
             }
-        } else {
-            curl_setopt($curl_handle, CURLOPT_POST, false);
         }
         if ($verb == 'POST' || $verb == 'PUT') {
             curl_setopt($curl_handle, CURLOPT_POSTFIELDS, $data);
         } else {
-            curl_setopt($curl_handle, CURLOPT_POSTFIELDS, null);
+            curl_setopt($curl_handle, CURLOPT_POST, false);
+            curl_setopt($curl_handle, CURLOPT_HTTPGET, true);
         }
 
         $delay_in_sec = BACKOFF_INITIAL_DELAY_SEC;
