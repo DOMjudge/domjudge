@@ -24,8 +24,7 @@ function get_db_url(): string
     $dbsecretsfile = ETCDIR . '/dbpasswords.secret';
     $db_credentials = @file($dbsecretsfile);
     if (!$db_credentials) {
-        # Make sure that this fails with a clear error in Symfony.
-        return 'mysql://cannot_read_dbpasswords_secret:@localhost:3306/';
+        throw new RuntimeException("Cannot read DB passwords/secrets at '" . $dbsecretsfile . "'.");
     }
 
     $found = false;
@@ -39,8 +38,7 @@ function get_db_url(): string
         break;
     }
     if (!$found) {
-        # Make sure that this fails with a clear error in Symfony.
-        return 'mysql://no_dbpasswords_found_in_file@localhost:3306/';
+        throw new RuntimeException("No DB passwords found in: " . $dbsecretsfile);
     }
 
     return sprintf(
