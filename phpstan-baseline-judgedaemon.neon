@@ -31,12 +31,6 @@ parameters:
 			path: judge/judgedaemon.main.php
 
 		-
-			message: '#^Right side of && is always true\.$#'
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: judge/judgedaemon.main.php
-
-		-
 			message: '#^Strict comparison using \!\=\= between non\-empty\-string\|false and null will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
 			count: 1

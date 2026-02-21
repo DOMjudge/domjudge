@@ -351,7 +351,8 @@ class JudgeDaemon
         }
 
         // Pass SYSLOG variable via environment for compare program
-        if (defined('SYSLOG') && SYSLOG) {
+        // In the default config this is always defined in etc/judgehost-config.php but people can disable it.
+        if (defined('SYSLOG') && SYSLOG) { // @phpstan-ignore-line Right side of && is always true.
             putenv('DJ_SYSLOG=' . SYSLOG);
         }
 
