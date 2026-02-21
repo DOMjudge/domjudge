@@ -60,8 +60,3 @@ parameters:
 			count: 1
 			path: judge/judgedaemon.main.php
 
-		-
-			message: '#^Unsafe access to private constant DOMjudge\\JudgeDaemon\:\:EXTERNAL_IDENTIFIER_REGEX through static\:\:\.$#'
-			identifier: staticClassAccess.privateConstant
-			count: 1
-			path: judge/judgedaemon.main.php
