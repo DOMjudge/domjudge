@@ -120,6 +120,9 @@ function initsignals(): void
  */
 function version() : never
 {
+    if (! defined('SCRIPT_ID')) {
+        define('SCRIPT_ID', basename($_SERVER['PHP_SELF'], '.php'));
+    }
     echo SCRIPT_ID . " -- part of DOMjudge version " . DOMJUDGE_VERSION . "\n" .
         "Written by the DOMjudge developers\n\n" .
         "DOMjudge comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\n" .
