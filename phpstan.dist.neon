@@ -7,3 +7,5 @@ parameters:
         - lib/lib.error.php
         - lib/lib.misc.php
         - lib/lib.wrappers.php
+includes:
+    - phpstan-baseline-judgedaemon.neon
