@@ -30,15 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Detect PHP linting issues
-        run: >
-          parallel-lint --colors
-          lib/lib.*.php
-          etc
-          judge
-          webapp/src
-          webapp/tests
-          webapp/public
-          webapp/config
+        run: parallel-lint --colors .
 
   phpcs_compatibility:
     runs-on: ubuntu-latest
@@ -55,13 +47,7 @@ jobs:
           --standard=PHPCompatibility
           --extensions=php
           --runtime-set testVersion ${{ matrix.PHPVERSION }}
-          lib/lib.*.php
-          etc
-          judge
-          webapp/src
-          webapp/tests
-          webapp/public
-          webapp/config
+          .
 
   pycodestyle:
     runs-on: ubuntu-latest
