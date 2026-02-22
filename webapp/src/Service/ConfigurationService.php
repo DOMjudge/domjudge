@@ -19,6 +19,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\VarExporter\VarExporter;
 
 #[Autoconfigure(public: true)]
 class ConfigurationService
@@ -137,11 +138,11 @@ class ConfigurationService
                     }
                 }
 
-                $code          = var_export($config, true);
+                $code          = VarExporter::export($config);
                 $specification = <<<EOF
 <?php
 
-return {$code};
+return {$code};\n
 EOF;
 
                 $cache->write($specification,
