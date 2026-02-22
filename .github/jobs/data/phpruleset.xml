@@ -1,5 +1,12 @@
 <?xml version="1.0"?>
 <ruleset name="DOMjudge">
+    <rule ref="Generic.Functions.FunctionCallArgumentSpacing">
+        <!-- We do this to align the constant definitions to make them easier to read -->
+        <exclude-pattern>etc/domserver-static\.php\.in</exclude-pattern>
+        <exclude-pattern>etc/domserver-static\.php</exclude-pattern>
+        <exclude-pattern>etc/judgehost-static\.php\.in</exclude-pattern>
+        <exclude-pattern>etc/judgehost-static\.php</exclude-pattern>
+    </rule>
     <description>Project specific exclusions.</description>
     <rule ref="PSR2" />
     <!-- Keep indentation up to the author -->
