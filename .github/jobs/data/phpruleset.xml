@@ -31,10 +31,14 @@
     <rule ref="PSR1.Files.SideEffects">
         <severity>0</severity>
     </rule>
-    <!-- The judgedaemon does this to keep it selfcontained -->
-    <rule ref="PSR1.Files.SideEffects">
-        <exclude-pattern>judge/judgedaemon\.main\.php</exclude-pattern>
-    </rule>
+    <!-- Begin: The judgedaemon does this to keep it selfcontained -->
+        <rule ref="PSR1.Classes.ClassDeclaration">
+            <exclude-pattern>judge/judgedaemon\.main\.php</exclude-pattern>
+        </rule>
+        <rule ref="PSR1.Files.SideEffects">
+            <exclude-pattern>judge/judgedaemon\.main\.php</exclude-pattern>
+        </rule>
+    <!-- End -->
     <!-- We use this to have a newline for such cases to keep it readable -->
     <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.OneParamPerLine">
         <exclude-pattern>webapp/tests/Unit/Controller/API/ScoreboardControllerTest.php</exclude-pattern>
