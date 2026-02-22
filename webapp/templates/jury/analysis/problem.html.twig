@@ -35,7 +35,6 @@
         <dl class="row">
           <dt class="col-sm-6"># Submissions</dt>
           <dd class="col-sm-6">{{ submissions | length }}</dd>
-<<<<<<< HEAD
   
           <dt class="col-sm-6"># Correct</dt>
           <dd class="col-sm-6">{{ results['correct'] | default(0) }} <span class="text-muted">({{ misc.correct_percentage | number_format(2) }}%)</span></dd>
@@ -43,15 +42,18 @@
           <dt class="col-sm-6"># Teams Attempted</dt>
           <dd class="col-sm-6">{{ misc.num_teams_attempted }}</dd>
   
-=======
-
           <dt class="col-sm-6"># Correct</dt>
           <dd class="col-sm-6">{{ results['correct'] | default(0) }} <span class="text-muted">({{ misc.correct_percentage | number_format(2) }}%)</span></dd>
 
           <dt class="col-sm-6"># Teams Attempted</dt>
           <dd class="col-sm-6">{{ misc.num_teams_attempted }}</dd>
 
->>>>>>> 8d063ec3a (Document why we close the <div> of the base template)
+          <dt class="col-sm-6"># Correct</dt>
+          <dd class="col-sm-6">{{ results['correct'] | default(0) }} <span class="text-muted">({{ misc.correct_percentage | number_format(2) }}%)</span></dd>
+  
+          <dt class="col-sm-6"># Teams Attempted</dt>
+          <dd class="col-sm-6">{{ misc.num_teams_attempted }}</dd>
+  
           <dt class="col-sm-6"># Teams Correct</dt>
           <dd class="col-sm-6">{{ misc.num_teams_correct }} <span class="text-muted">({{  misc.teams_correct_percentage | number_format(2) }}%)</span></dd>
         </dl>
@@ -89,12 +91,9 @@
         <svg style="height: 600px"></svg>
       </div>
     </div>
-<<<<<<< HEAD
   {# We closed the div from the base template so shouldn't do it here #}
-=======
   </div>
   {# Do not close the div as the main template will close the one from: webapp/templates/base.html.twig@L35 #}
->>>>>>> 8d063ec3a (Document why we close the <div> of the base template)
 {% endblock %}
 
 {% block extrafooter %}
