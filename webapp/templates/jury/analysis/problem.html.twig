@@ -20,63 +20,66 @@
 {% endblock %}
 
 {% block content %}
-      <h1>Problem {{ problem.externalid }}: <span style="font-size: 60%;">{{ contest_problem | problemBadge }}</span> {{ problem.name }}</h1>
-        {% include 'jury/partials/analysis_filter.html.twig' %}
-     </div>
-    <div class="col-lg-3 col-sm-6 mt-3">
-      <div class="card">
-        <div class="card-header">
-          Misc Statistics
-        </div>
-        <div class="card-body">
-          <dl class="row">
-            <dt class="col-sm-6"># Submissions</dt>
-            <dd class="col-sm-6">{{ submissions | length }}</dd>
-
-            <dt class="col-sm-6"># Correct</dt>
-            <dd class="col-sm-6">{{ results['correct'] | default(0) }} <span class="text-muted">({{ misc.correct_percentage | number_format(2) }}%)</span></dd>
-
-            <dt class="col-sm-6"># Teams Attempted</dt>
-            <dd class="col-sm-6">{{ misc.num_teams_attempted }}</dd>
-
-            <dt class="col-sm-6"># Teams Correct</dt>
-            <dd class="col-sm-6">{{ misc.num_teams_correct }} <span class="text-muted">({{  misc.teams_correct_percentage | number_format(2) }}%)</span></dd>
-          </dl>
-        </div>
+    <h1>Problem {{ problem.externalid }}: <span style="font-size: 60%;">{{ contest_problem | problemBadge }}</span> {{ problem.name }}</h1>
+    {% include 'jury/partials/analysis_filter.html.twig' %}
+  {# We close the div from the base template #}
+  </div>
+</div>
+<div class="row equal mt-3">
+  <div class="col-lg-3 col-sm-6 mt-3">
+    <div class="card">
+      <div class="card-header">
+        Misc Statistics
       </div>
-    </div>
-    <div class="col-lg-4 col-sm-6 mt-3" id="judging_results">
-      <div class="card">
-        <div class="card-header">
-          Judging Results
-        </div>
-        <div class="card-body">
-          <svg style="height: 275px"></svg>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-5 col-sm-12 mt-3" id="graph_submissions">
-      <div class="card">
-        <div class="card-header">
-          Submissions over Time
-        </div>
-        <div class="card-body">
-            <svg style="height: 275px"></svg>
-        </div>
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-6"># Submissions</dt>
+          <dd class="col-sm-6">{{ submissions | length }}</dd>
+  
+          <dt class="col-sm-6"># Correct</dt>
+          <dd class="col-sm-6">{{ results['correct'] | default(0) }} <span class="text-muted">({{ misc.correct_percentage | number_format(2) }}%)</span></dd>
+  
+          <dt class="col-sm-6"># Teams Attempted</dt>
+          <dd class="col-sm-6">{{ misc.num_teams_attempted }}</dd>
+  
+          <dt class="col-sm-6"># Teams Correct</dt>
+          <dd class="col-sm-6">{{ misc.num_teams_correct }} <span class="text-muted">({{  misc.teams_correct_percentage | number_format(2) }}%)</span></dd>
+        </dl>
       </div>
     </div>
   </div>
-  <div class="row equal mt-3">
-    <div class="col-12" id="maxruntime">
-      <div class="card">
-        <div class="card-header">
-          Max Runtimes
-        </div>
-        <div class="card-body">
-          <svg style="height: 600px"></svg>
-        </div>
+  <div class="col-lg-4 col-sm-6 mt-3" id="judging_results">
+    <div class="card">
+      <div class="card-header">
+        Judging Results
       </div>
-   </div>
+      <div class="card-body">
+        <svg style="height: 275px"></svg>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5 col-sm-12 mt-3" id="graph_submissions">
+    <div class="card">
+      <div class="card-header">
+        Submissions over Time
+      </div>
+      <div class="card-body">
+          <svg style="height: 275px"></svg>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row equal mt-3">
+  <div class="col-12" id="maxruntime">
+    <div class="card">
+      <div class="card-header">
+        Max Runtimes
+      </div>
+      <div class="card-body">
+        <svg style="height: 600px"></svg>
+      </div>
+    </div>
+  {# We closed the div from the base template so shouldn't do it here #}
 {% endblock %}
 
 {% block extrafooter %}
