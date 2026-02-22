@@ -19,7 +19,7 @@ jobs:
 
       - uses: domjudge/action-php-codesniffer@master
         with:
-          files: "**.php" # you may customize glob as needed
+          files: "**.php,**.php.in" # you may customize glob as needed
           scope: files
           phpcs_path: php phpcs.phar
           standard: .github/jobs/data/phpruleset.xml
