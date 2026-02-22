@@ -984,6 +984,19 @@
                                 <h5>Judge message for the team</h5>
                                 <pre class="output_text">{{  runsOutput[runIdx].team_message | convertUnprintableChars }}</pre>
                             {%  endif %}
+                            {% if run.description is not null %}
+                                <p><em>
+                                    {{ run.description(true) | descriptionExpand }}
+                                </em></p>
+                            {% endif %}
+                            {% if runsOutput[runIdx].image_thumb %}
+                                <span style="float:right; border: 3px solid #438ec3; margin: 5px; padding: 5px;">
+                                    {% set imgUrl = path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'image'}) %}
+                                    <a href="{{ imgUrl }}">
+                                        <img class="image_thumb" src="data:{{ run.imageType | extensionToMime }};base64,{{ runsOutput[runIdx].image_thumb | base64 }}"/>
+                                    </a>
+                                </span>
+                            {% endif %}
                         {% endif %}
 
                         {% set runDone = false %}
