@@ -69,6 +69,12 @@ jobs:
         run: .github/jobs/baseinstall.sh ${{ matrix.role }}
       - name: Run webstandard tests (W3C, WCAG)
         run: .github/jobs/webstandard.sh ${{ matrix.test }} ${{ matrix.role }}
+      - name: Upload database dump for debugging
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: DB-dump${{ matrix.artifact_suffix }}
+          path: /tmp/artifacts/db.sql
       - name: Upload all logs/artifacts
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
