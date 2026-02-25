@@ -91,7 +91,7 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}, decode: 
                 print('Can not verify certificate chain for DOMserver.')
                 exit(1)
             else:
-                return do_api_request(name)
+                return do_api_request(name, method, jsonData, decode)
         except requests.exceptions.RequestException as e:
             raise RuntimeError(e)
         result = parse_api_response(name, response)
