@@ -735,8 +735,8 @@ class TwigExtension
                     . '</td>';
             }
             $idx       += $len + 4;
-            $team      = $is_validator ? '<td/>' : $content;
-            $validator = $is_validator ? $content : '<td/>';
+            $team      = $is_validator ? '<td></td>' : $content;
+            $validator = $is_validator ? $content : '<td></td>';
             $body      .= "<tr>" . ($forTeam ? "" : "<td>$time</td>")
                           . $validator
                           . $team
@@ -776,13 +776,13 @@ class TwigExtension
         $lastErr      = min(count($diffs) - 1, $lastErr);
         $result       = "<br/>\n<table class=\"lcsdiff output_text\">\n";
         if ($firstErr > 0) {
-            $result .= "<tr><td class=\"linenr\">[...]</td><td/></tr>\n";
+            $result .= "<tr><td class=\"linenr\">[...]</td><td></td></tr>\n";
         }
         for ($i = $firstErr; $i <= $lastErr; $i++) {
             $result .= "<tr><td class=\"linenr\">" . ($i + 1) . "</td><td>" . $diffs[$i] . "</td></tr>";
         }
         if ($lastErr < count($diffs) - 1) {
-            $result .= "<tr><td class=\"linenr\">[...]</td><td/></tr>\n";
+            $result .= "<tr><td class=\"linenr\">[...]</td><td></td></tr>\n";
         }
         $result .= "</table>\n";
 
