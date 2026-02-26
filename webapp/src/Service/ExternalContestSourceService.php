@@ -211,12 +211,12 @@ class ExternalContestSourceService
         return ($this->cachedContestData !== null);
     }
 
-    /**
-     * Throws an exception indicating the contest source is invalid, including the actual error message.
-     * This should only be called after isValidContestSource() returns false.
-     */
     private function throwInvalidSourceException(): never
     {
+        if ($this->isValidContestSource()) {
+            throw new LogicException('The contest source is valid, which is unexpected when calling throwInvalidSourceException.');
+        }
+
         throw new LogicException('The contest source is not valid: ' . ($this->loadingError ?? 'Unknown error'));
     }
 
