@@ -74,6 +74,19 @@ class TwigExtension
         return base64_decode($string);
     }
 
+    #[AsTwigFilter('convertUnprintableChars')]
+    public function convertUnprintableChars(string $input): string
+    {
+        $translationChars = ["\x7F" => "\u{2421}"]; // DEL (0x7F) -> ␡
+        for ($i = 0; $i <= 0x1F; $i++) {
+            if ($i === 0xA) {
+                continue; // Skip newline as we can & do show that
+            }
+            $translationChars[chr($i)] = mb_chr(0x2400 + $i, 'UTF-8');
+        }
+        return strtr($input, $translationChars);
+    }
+
     #[AsTwigFilter('printtimediff')]
     public function printtimediff(?float $start, ?float $end = null): string
     {
@@ -754,7 +767,7 @@ class TwigExtension
         // TODO: can be improved using diffposition.txt
         // FIXME: only show when diffposition.txt is set?
         // FIXME: cut off after XXX lines
-        $lines_team = preg_split('/\n/', trim($runOutput['output_run']));
+        $lines_team = preg_split('/\n/', trim($this->convertUnprintableChars($runOutput['output_run'])));
         $lines_ref  = preg_split('/\n/', trim($runOutput['output_reference']));
 
         $diffs    = [];
