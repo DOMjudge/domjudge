@@ -79,7 +79,9 @@ class TwigExtension
     {
         $translationChars = ["\x7F" => "\u{2421}"]; // DEL (0x7F) -> ␡
         for ($i = 0; $i <= 0x1F; $i++) {
-            if ($i === 0xA) continue; // Skip newline as we can & do show that
+            if ($i === 0xA) {
+                continue; // Skip newline as we can & do show that
+            }
             $translationChars[chr($i)] = mb_chr(0x2400 + $i, 'UTF-8');
         }
         return strtr($input, $translationChars);

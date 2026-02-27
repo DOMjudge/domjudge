@@ -909,6 +909,75 @@
                                     <img class="image_thumb" src="data:{{ run.imageType | extensionToMime }};base64,{{ runsOutput[runIdx].image_thumb | base64 }}"/>
                                 </a>
                             </span>
+
+                    {% set runDone = false %}
+                    {% if run is not null and run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
+                        {% set runDone = true %}
+                    {% endif %}
+                    {% if not runDone %}
+                        <p class="nodata">
+                            {% if selectedJudging is not null and selectedJudging.result %}
+                                Run not used for final result.
+                            {% else %}
+                                Run not started/finished yet.
+                            {% endif %}
+                        </p>
+                    {% else %}
+                        {% if run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
+                            {% if combinedRunCompare %}
+                                <h5>Validator output</h5>
+                                {% if runsOutput[runIdx].output_diff is empty %}
+                                    <p class="nodata">There was no validator output.</p>
+                                {% else %}
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_diff | convertUnprintableChars }}</pre>
+                                {% endif %}
+                            {% else %}
+                                <h5>Diff output</h5>
+                                {% if runsOutput[runIdx].output_diff is empty %}
+                                    <p class="nodata">There was no diff output.</p>
+                                {% else %}
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_diff | convertUnprintableChars}}</pre>
+                                {% endif %}
+
+                                {% if run.firstJudgingRun.runresult != 'correct' %}
+                                    {{ runsOutput[runIdx] | runDiff }}
+                                {% endif %}
+                            {% endif %}
+
+                            {% if combinedRunCompare %}
+                                <h5>Validator/Submission interaction</h5>
+                                {% if runsOutput[runIdx].output_run is empty %}
+                                    <p class="nodata">There was no interaction log.</p>
+                                {% else %}
+                                    {{ runsOutput[runIdx].output_run | interactiveLog }}
+                                {% endif %}
+                            {% else %}
+                                <h5>Program output</h5>
+                                {% if runsOutput[runIdx].output_run is empty %}
+                                    <p class="nodata">There was no program output.</p>
+                                {% else %}
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_run | convertUnprintableChars }}</pre>
+                                {% endif %}
+                            {% endif %}
+
+                            <h5>Program error output</h5>
+                            {% if runsOutput[runIdx].output_error is empty %}
+                                <p class="nodata">There was no stderr output.</p>
+                            {% else %}
+                                <pre class="output_text">{{ runsOutput[runIdx].output_error | convertUnprintableChars }}</pre>
+                            {% endif %}
+
+                            <h5>Judging system output (info/debug/errors)</h5>
+                            {% if runsOutput[runIdx].output_system is empty %}
+                                <p class="nodata">There was no judging system output.</p>
+                            {% else %}
+                                <pre class="output_text">{{ runsOutput[runIdx].output_system | convertUnprintableChars }}</pre>
+                            {% endif %}
+
+                            {% if runsOutput[runIdx].team_message is not empty %}
+                                <h5>Judge message for the team</h5>
+                                <pre class="output_text">{{  runsOutput[runIdx].team_message | convertUnprintableChars }}</pre>
+                            {%  endif %}
                         {% endif %}
 
                         {% set runDone = false %}
