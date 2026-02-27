@@ -1002,13 +1002,10 @@
                                 <div class="card card-body output_text">{{ runsOutput[runIdx].validatorMetadata  }}</div>
                             </div>
                         {% endif %}
-<<<<<<< HEAD
-=======
                         {% set runDone = false %}
                         {% if run is not null and run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
                             {% set runDone = true %}
                         {% endif %}
->>>>>>> c7a667978 (Better document why the template closes divs of parent template)
                         {% if not runDone %}
                             <p class="nodata">
                                 {% if selectedJudging is not null and selectedJudging.result %}
@@ -1051,11 +1048,7 @@
                                     {% if runsOutput[runIdx].output_run is empty %}
                                         <p class="nodata">There was no program output.</p>
                                     {% else %}
-<<<<<<< HEAD
                                         <pre class="output_text">{{ runsOutput[runIdx].output_run | convertUnprintableChars }}</pre>
-=======
-                                        <pre class="output_text">{{ runsOutput[runIdx].output_run }}</pre>
->>>>>>> c7a667978 (Better document why the template closes divs of parent template)
                                     {% endif %}
                                 {% endif %}
 
@@ -1063,28 +1056,19 @@
                                 {% if runsOutput[runIdx].output_error is empty %}
                                     <p class="nodata">There was no stderr output.</p>
                                 {% else %}
-<<<<<<< HEAD
                                     <pre class="output_text">{{ runsOutput[runIdx].output_error | convertUnprintableChars }}</pre>
-=======
-                                    <pre class="output_text">{{ runsOutput[runIdx].output_error }}</pre>
->>>>>>> c7a667978 (Better document why the template closes divs of parent template)
                                 {% endif %}
 
                                 <h5>Judging system output (info/debug/errors)</h5>
                                 {% if runsOutput[runIdx].output_system is empty %}
                                     <p class="nodata">There was no judging system output.</p>
                                 {% else %}
-<<<<<<< HEAD
                                     <pre class="output_text">{{ runsOutput[runIdx].output_system | convertUnprintableChars }}</pre>
-=======
-                                    <pre class="output_text">{{ runsOutput[runIdx].output_system }}</pre>
->>>>>>> c7a667978 (Better document why the template closes divs of parent template)
                                 {% endif %}
 
                                 {% if runsOutput[runIdx].team_message is not empty %}
                                     <h5>Judge message for the team</h5>
-                                    <pre class="output_text">
-{{  runsOutput[runId].team_message }}</pre>
+                                    <pre class="output_text">{{  runsOutput[runId].team_message }}</pre>
                                 {%  endif %}
                             {% endif %}
 
