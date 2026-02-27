@@ -634,7 +634,7 @@
             {% if output is empty %}
                 <div class="card-body nodata">There were no compiler errors or warnings.</div>
             {% else %}
-                <div class="card-body"><pre class="output_text">{{ output }}</pre></div>
+                <div class="card-body"><pre class="output_text">{{ output | convertUnprintableChars }}</pre></div>
             {% endif %}
         </div>
 
@@ -957,7 +957,7 @@
                                     {% if runsOutput[runIdx].output_run is empty %}
                                         <p class="nodata">There was no program output.</p>
                                     {% else %}
-                                        <pre class="output_text">{{ runsOutput[runIdx].output_run }}</pre>
+                                        <pre class="output_text">{{ runsOutput[runIdx].output_run | convertUnprintableChars }}</pre>
                                     {% endif %}
                                 {% endif %}
 
@@ -965,14 +965,14 @@
                                 {% if runsOutput[runIdx].output_error is empty %}
                                     <p class="nodata">There was no stderr output.</p>
                                 {% else %}
-                                    <pre class="output_text">{{ runsOutput[runIdx].output_error }}</pre>
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_error | convertUnprintableChars }}</pre>
                                 {% endif %}
 
                                 <h5>Judging system output (info/debug/errors)</h5>
                                 {% if runsOutput[runIdx].output_system is empty %}
                                     <p class="nodata">There was no judging system output.</p>
                                 {% else %}
-                                    <pre class="output_text">{{ runsOutput[runIdx].output_system }}</pre>
+                                    <pre class="output_text">{{ runsOutput[runIdx].output_system | convertUnprintableChars }}</pre>
                                 {% endif %}
 
                                 {% if runsOutput[runIdx].team_message is not empty %}
