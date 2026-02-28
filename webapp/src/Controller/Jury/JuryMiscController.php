@@ -20,6 +20,7 @@ use App\Utils\Utils;
 use Composer\InstalledVersions;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Component\Asset\Packages;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -50,7 +51,7 @@ class JuryMiscController extends BaseController
 
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') or is_granted('ROLE_CLARIFICATION_RW')"))]
     #[Route(path: '', name: 'jury_index')]
-    public function indexAction(ConfigurationService $config): Response
+    public function indexAction(ConfigurationService $config, Packages $assets): Response
     {
         if ($this->isGranted('ROLE_ADMIN')) {
             $innodbSnapshotIsolation = $this->em->getConnection()->executeQuery('SHOW VARIABLES LIKE "innodb_snapshot_isolation"')->fetchAssociative();
@@ -64,9 +65,15 @@ class JuryMiscController extends BaseController
             $this->addFlash('info', 'New release ' . $newestVersion . ' available at: https://www.domjudge.org/download.');
         }
 
+        $assetUrls = [];
+        foreach (['domjudge_manual' => ['doc/manual/html/index.html', 'docs/manual/index.html'], 'team_manual' => ['doc/manual/domjudge-team-manual.pdf', 'docs/manual/team.html']] as $key => $file) {
+            $assetUrls[$key] = file_exists($this->dj->getDomjudgeWebappDir() . '/public/' . $file[0]) ?  $assets->getUrl($file[0]) : 'https://domjudge.org/' . $file[1];
+        };
+
         return $this->render('jury/index.html.twig', [
             'adminer_enabled' => $config->get('adminer_enabled'),
             'CCS_SPEC_API_URL' => GI::CCS_SPEC_API_URL,
+            'asset_urls' => $assetUrls,
         ]);
     }
 
