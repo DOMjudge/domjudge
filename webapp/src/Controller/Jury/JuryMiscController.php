@@ -264,6 +264,7 @@ class JuryMiscController extends BaseController
         $verified   = [];
         $nomatch    = [];
         $earlier    = [];
+        $hasExpectedScore = false;
 
         $verifier = 'auto-verifier';
 
@@ -295,6 +296,9 @@ class JuryMiscController extends BaseController
 
             $result = mb_strtoupper($judging->getResult());
             $actualScore = $judging->getScore();
+            if ($expectedScore !== null) {
+                $hasExpectedScore = true;
+            }
             $entry = [
                 'files' => $submissionFiles,
                 'actual' => $result,
@@ -370,6 +374,7 @@ class JuryMiscController extends BaseController
             'problems' => $problems,
             'contestId' => $this->dj->getCurrentContest()?->getExternalid(),
             'verifyMultiple' => $verifyMultiple,
+            'hasExpectedScore' => $hasExpectedScore,
         ]);
     }
 
