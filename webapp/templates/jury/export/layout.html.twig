@@ -101,13 +101,14 @@
 
         pre > code {
             color: inherit;
-	}
+	      }
 
         blockquote {
             border-left: darkgrey solid .2em;
             padding-left: .5em;
             color: darkgrey;
         }
+        {% block extra_style %}{% endblock %}
     </style>
     {{ macros.mathjax_head() }}
 </head>
