@@ -10,7 +10,7 @@
                 {% set rank = null %}
             {% endif %}
             <li class="nav-item">
-                <a id="{{ diff_id }}-link" class="nav-link {{ extra_css_classes }}" data-bs-toggle="tab" data-rank="{{ rank }}" href="#{{ diff_id }}-tab" role="tab"><i class="fas fa-fw fa-file"></i> {{ name }}</a>
+                <a id="{{ diff_id }}-link" class="nav-link {{ extra_css_classes }}" data-bs-toggle="tab" data-rank="{{ rank }}" href="#{{ diff_id }}-tab"><i class="fas fa-fw fa-file"></i> {{ name }}</a>
             </li>
             {% set extra_css_classes = "" %}
         {%- endfor %}
