@@ -621,4 +621,16 @@ YAML;
         $this->assertEmpty($messages['danger']);
         $this->assertEquals(5, $result->getTimelimit());
     }
+
+    public function testParseTestCaseGroupMetaInvalidRangeTooManyValuesRejected(): void
+    {
+        $yaml = "range: 100 101 102";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString("Invalid range '100 101 102'", $messages['danger'][0]);
+    }
 }
