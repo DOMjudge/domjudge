@@ -42,7 +42,6 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
                 ->setExternalid('admin')
                 ->setUsername('admin')
                 ->setName('Administrator')
-                ->setIpAddress('::1')
                 ->setPassword($this->passwordHasher->hashPassword($adminUser, trim($adminpasswordContents)))
                 ->addUserRole($this->getReference(RoleFixture::ADMIN_REFERENCE, Role::class));
             if ($this->debug) {

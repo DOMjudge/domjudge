@@ -344,7 +344,7 @@
     items:
         -   name: auth_methods
             type: array_val
-            default_value: [ipaddress]
+            default_value: []
             public: false
             description: List of allowed additional authentication methods.
             docdescription: See :ref:`authentication` for more information.
@@ -353,7 +353,7 @@
                 - xheaders
         -   name: ip_autologin
             type: bool
-            default_value: true
+            default_value: false
             public: false
             description: Enable to skip the login page when using IP authentication.
 -   category: External systems

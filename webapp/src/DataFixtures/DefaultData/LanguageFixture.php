@@ -33,7 +33,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
             ['csharp',     'C#',          ['csharp', 'cs'],            false, null,         false,  true,   1,     'csharp',            'mcs --version',      'mono --version'],
             ['f95',        'Fortran',     ['f95', 'f90'],              false, null,         false,  true,   1,     'f95',               'gfortran --version', ''],
             ['haskell',    'Haskell',     ['hs', 'lhs'],               false, null,         false,  true,   1,     'hs',                'ghc --version',      ''],
-            ['java',       'Java',        ['java'],                    false, 'Main class', true,   false,  1,     'java_javac_detect', 'javac -version',     'java -version'],
+            ['java',       'Java',        ['java'],                    false, 'Main class', true,   true,   1,     'java_javac_detect', 'javac -version',     'java -version'],
             ['javascript', 'JavaScript',  ['js', 'mjs'],               false, 'Main file',  false,  true,   1,     'js',                'nodejs --version',   'nodejs --version'],
             ['lua',        'Lua',         ['lua'],                     false, null,         false,  true,   1,     'lua',               'luac -v',            'lua -v'],
             ['kotlin',     'Kotlin',      ['kt'],                      true,  'Main class', false,  true,   1,     'kt',                'kotlinc -version',   'kotlin -version'],
