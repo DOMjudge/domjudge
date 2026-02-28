@@ -853,7 +853,7 @@
                                     Reference Output
                                 </button>
                             </a>
-                            {% if run.firstJudgingRun is not null %}
+                            {% if run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
                                 <a href="{{ path('jury_submission_team_output', {'contestId': submission.contest.externalid, 'submission': submission.externalid, 'run': run.firstJudgingRun.runid}) }}">
                                     <button class="btn btn-sm btn-outline-secondary" >
                                         <i class="fas fa-download"></i>
