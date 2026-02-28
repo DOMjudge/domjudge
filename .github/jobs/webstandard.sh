@@ -147,7 +147,7 @@ if [ "$TEST" = "w3cval" ]; then
 
     rm -rf public/localhost/domjudge/jury/teams/domjudge*.html
     rm -rf public/localhost/domjudge/jury/scoreboard.html
-    FLTR1='--filterpattern .*autocomplete.*|.*role=tab.*|.*descendant.*|.*Stray.*'
+    FLTR1='--filterpattern .*descendant.*|.*Stray.*'
     w3c_analyse "$FLTR1" "Stray" "public" "html"
 
     rm -rf public/localhost/domjudge/jury/request-full-debug/*.html
