@@ -83,7 +83,7 @@ if [ $RET -ne 0 ] && [ $RET -ne 4 ] && [ $RET -ne 8 ]; then
     exit $RET
 fi
 
-EXPECTED_HTTP_CODES="200\|302\|400\|404\|403"
+EXPECTED_HTTP_CODES="200\|302\|400\|403"
 if [ "$ROLE" = "public" ]; then
     # It's expected to encounter a 401 for the login page as we supply the wrong password
     EXPECTED_HTTP_CODES="$EXPECTED_HTTP_CODES\|401"
