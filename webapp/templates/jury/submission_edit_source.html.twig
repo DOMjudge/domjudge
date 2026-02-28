@@ -16,7 +16,7 @@
 
             <li class="nav-item">
                 <a class="nav-link {% if (selected is null and loop.first) or selected == file.rank %}active{% endif %}"
-                   data-bs-toggle="tab" href="#source-{{ file.rank }}" role="tab">{{ file.filename }}</a>
+                   data-bs-toggle="tab" href="#source-{{ file.rank }}">{{ file.filename }}</a>
             </li>
         {%- endfor %}
 
