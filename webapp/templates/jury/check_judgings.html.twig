@@ -13,32 +13,22 @@
 
     <h1>Judging verifier</h1>
 
-    <p>
-        {{ numChecked }} submissions checked:
-        {{ unexpected | length }} unexpected results,
-        {% if verifyMultiple %}
-            {{ multiple | length }} automatically verified (multiple outcomes),
-        {% else %}
-            {{ multiple | length }} to check manually,
-        {% endif %}
-        {{ verified | length }} automatically verified
-        <br>
-        {{ numUnchecked }} submissions not checked:
-        {{ earlier | length }} verified earlier,
-        {{ nomatch | length }} without magic string
-    </p>
-
-    {% macro verifyResults(id, header, results, collapse) %}
-        {% if results is not empty %}
-            <h2><a class="collapse-link" href="javascript:collapse('#detail{{ id }}')">{{ header }}</a></h2>
-            <table id="detail{{ id }}" class="{% if collapse | default(false) %}d-none{% endif %} data-table table table-hover table-striped table-sm submissions-table table-full-clickable-cell">
+    {% macro resultTable(results, hasExpectedScore) %}
+        <table class="data-table table table-hover table-striped table-sm submissions-table table-full-clickable-cell mb-0">
+            <thead>
                 <tr>
-                    <th></th><th>problem</th><th>file(s)</th>
-                    <th>actual</th>
-                    <th>expected (one of)</th>
-                    <th>actual score</th>
-                    <th>expected score</th>
+                    <th scope="col">ID</th>
+                    <th scope="col">problem</th>
+                    <th scope="col">file(s)</th>
+                    <th scope="col">actual</th>
+                    <th scope="col">expected (one of)</th>
+                    {% if hasExpectedScore %}
+                        <th scope="col">actual score</th>
+                        <th scope="col">expected score</th>
+                    {% endif %}
                 </tr>
+            </thead>
+            <tbody>
                 {% for submitId,result in results %}
                     {% set link = path('jury_submission', {'contestId': result.contest.externalid, 'submitId': submitId}) %}
                     <tr>
@@ -61,14 +51,12 @@
                         </td>
                         <td>
                             <a href="{{ link }}">
-                                {% if result is defined and result.actual is defined %}
-                                   {{ result.actual | printResult }}
-                                {% endif %}
+                                {{ result.actual | printResult }}
                             </a>
                         </td>
                         <td>
                             <a href="{{ link }}">
-                                {% if result is defined and result.expected is defined and result.expected is not empty %}
+                                {% if result.expected is defined and result.expected is not empty %}
                                     {% for r in result.expected %}
                                         {{ r | printResult }}
                                         {% if not loop.last %}, {% endif %}
@@ -78,64 +66,177 @@
                                 {% endif %}
                             </a>
                         </td>
-                        <td>
-                            <a href="{{ link }}">
-                                {% if result is defined and result.expectedScore is defined and result.expectedScore is not null %}
-                                    {{ result.actualScore | number_format(2) }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </a>
-                        </td>
-                        <td>
-                            <a href="{{ link }}">
-                                {% if result is defined and result.expectedScore is defined and result.expectedScore is not null %}
-                                    {{ result.expectedScore | number_format(2) }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </a>
-                        </td>
+                        {% if hasExpectedScore %}
+                            <td>
+                                <a href="{{ link }}">
+                                    {% if result.expectedScore is defined and result.expectedScore is not null %}
+                                        {{ result.actualScore | number_format(2) }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ link }}">
+                                    {% if result.expectedScore is defined and result.expectedScore is not null %}
+                                        {{ result.expectedScore | number_format(2) }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </a>
+                            </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
-            </table>
-        {% endif %}
+            </tbody>
+        </table>
     {% endmacro %}
 
-    {{ checkJudgings.verifyResults('unexpected', 'Unexpected results', unexpected) }}
-    {% if verifyMultiple %}
-        {{ checkJudgings.verifyResults('multiple', 'Automatically verified (multiple outcomes)', multiple, true) }}
+    {% if contestId is null %}
+        <div class="alert alert-warning">No active contest selected.</div>
+    {% elseif numChecked == 0 and numUnchecked == 0 %}
+        <div class="alert alert-info">No judged submissions found.</div>
     {% else %}
-        {{ checkJudgings.verifyResults('multiple', 'Check manually', multiple) }}
-        {% if multiple is not empty %}
-            <form action="{{ path('jury_judging_verifier') }}" method="post">
-                <input type="hidden" name="verify_multiple" value="1">
-                <p>
-                    Verify all multiple outcome submissions:
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Verify</button>
-                </p>
-            </form>
-        {% endif %}
-    {% endif %}
-    {{ checkJudgings.verifyResults('verified', 'Automatically verified', verified, true) }}
-    {{ checkJudgings.verifyResults('earlier', 'Verified earlier', earlier, true) }}
-    {{ checkJudgings.verifyResults('nomatch', 'Without magic string', nomatch, true) }}
+        <div class="mb-4 d-flex flex-wrap gap-2 align-items-center">
+            <span class="badge text-bg-info">{{ numChecked + numUnchecked }} total</span>
+            {% if unexpected|length > 0 %}
+                <a href="#detailunexpected"><span class="badge text-bg-danger">{{ unexpected|length }} unexpected</span></a>
+            {% endif %}
+            {% if multiple|length > 0 %}
+                {% if verifyMultiple %}
+                    <a href="#detailmultiple"><span class="badge text-bg-warning">{{ multiple|length }} auto-verified (multiple)</span></a>
+                {% else %}
+                    <a href="#detailmultiple"><span class="badge text-bg-warning">{{ multiple|length }} check manually</span></a>
+                {% endif %}
+            {% endif %}
+            {% if verified|length > 0 %}
+                <a href="#detailverified"><span class="badge text-bg-success">{{ verified|length }} verified</span></a>
+            {% endif %}
+            {% if earlier|length > 0 %}
+                <a href="#detailearlier"><span class="badge text-bg-secondary">{{ earlier|length }} verified earlier</span></a>
+            {% endif %}
+            {% if nomatch|length > 0 %}
+                <a href="#detailnomatch"><span class="badge text-bg-secondary">{{ nomatch|length }} without magic string</span></a>
+            {% endif %}
+        </div>
 
-    {% if problems != [] %}
-        <h2>Problem runtime analytics</h2>
-        You probably want to <a href="{{ path('jury_contest', {'contestId': contestId }) }}">rejudge</a>
-        all submissions with a reasonable overshoot and
-        {%- if not is_granted('ROLE_ADMIN') %} let an admin {% endif %}
-        judge the
-        {%- if is_granted('ROLE_ADMIN') %}<a href="{{ path('jury_contest_request_remaining', {'contestId': contestId}) }}">{% endif %}
-          remaining testcases
-        {%- if is_granted('ROLE_ADMIN') %}</a>{% endif %}.
-        After this compare the maximum runtime for <code>Accepted</code>
-        solutions and tune those against expected <code>Time Limit Exceeded</code> solutions.<br>
-        {% for p in problems %}
-            {% set link = path('analysis_problem', {'probid': p.externalId, 'view': 'hidden'}) %}
-            <a href="{{ link }}">{{ p | problemBadge }}</a>
-        {% endfor %}
+        {% if unexpected is not empty %}
+            <div class="card mb-3" id="detailunexpected">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="text-danger fw-bold">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Unexpected results
+                    </span>
+                    <span class="badge text-bg-danger">{{ unexpected|length }}</span>
+                </div>
+                <div>
+                    {{ checkJudgings.resultTable(unexpected, hasExpectedScore) }}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if multiple is not empty %}
+            <div class="card mb-3" id="detailmultiple">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <a class="collapse-link text-decoration-none text-dark fw-bold" href="javascript:collapse('#detailmultiple-body')">
+                        <i class="fas fa-question-circle me-1 text-warning"></i>
+                        {% if verifyMultiple %}
+                            Automatically verified (multiple outcomes)
+                        {% else %}
+                            Check manually
+                        {% endif %}
+                        <i class="fas fa-chevron-down ms-1 small"></i>
+                    </a>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if not verifyMultiple %}
+                            <form action="{{ path('jury_judging_verifier') }}" method="post">
+                                <input type="hidden" name="verify_multiple" value="1">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-check"></i> Verify all
+                                </button>
+                            </form>
+                        {% endif %}
+                        <span class="badge text-bg-warning">{{ multiple|length }}</span>
+                    </div>
+                </div>
+                <div id="detailmultiple-body"{% if verifyMultiple %} class="d-none"{% endif %}>
+                    {{ checkJudgings.resultTable(multiple, hasExpectedScore) }}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if verified is not empty %}
+            <div class="card mb-3" id="detailverified">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <a class="collapse-link text-decoration-none text-dark fw-bold" href="javascript:collapse('#detailverified-body')">
+                        <i class="fas fa-check-circle me-1 text-success"></i>
+                        Automatically verified
+                        <i class="fas fa-chevron-down ms-1 small"></i>
+                    </a>
+                    <span class="badge text-bg-success">{{ verified|length }}</span>
+                </div>
+                <div id="detailverified-body" class="d-none">
+                    {{ checkJudgings.resultTable(verified, hasExpectedScore) }}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if earlier is not empty %}
+            <div class="card mb-3" id="detailearlier">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <a class="collapse-link text-decoration-none text-dark fw-bold" href="javascript:collapse('#detailearlier-body')">
+                        Verified earlier
+                        <i class="fas fa-chevron-down ms-1 small"></i>
+                    </a>
+                    <span class="badge text-bg-secondary">{{ earlier|length }}</span>
+                </div>
+                <div id="detailearlier-body" class="d-none">
+                    {{ checkJudgings.resultTable(earlier, hasExpectedScore) }}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if nomatch is not empty %}
+            <div class="card mb-3" id="detailnomatch">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <a class="collapse-link text-decoration-none text-dark fw-bold" href="javascript:collapse('#detailnomatch-body')">
+                        Without magic string
+                        <i class="fas fa-chevron-down ms-1 small"></i>
+                    </a>
+                    <span class="badge text-bg-secondary">{{ nomatch|length }}</span>
+                </div>
+                <div id="detailnomatch-body" class="d-none">
+                    {{ checkJudgings.resultTable(nomatch, hasExpectedScore) }}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if problems != [] %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <strong>Problem runtime analytics</strong>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        You probably want to <a href="{{ path('jury_contest', {'contestId': contestId }) }}">rejudge</a>
+                        all submissions with a reasonable overshoot and
+                        {%- if not is_granted('ROLE_ADMIN') %} let an admin {% endif %}
+                        judge the
+                        {%- if is_granted('ROLE_ADMIN') %}<a href="{{ path('jury_contest_request_remaining', {'contestId': contestId}) }}">{% endif %}
+                          remaining testcases
+                        {%- if is_granted('ROLE_ADMIN') %}</a>{% endif %}.
+                        After this compare the maximum runtime for <code>Accepted</code>
+                        solutions and tune those against expected <code>Time Limit Exceeded</code> solutions.
+                    </p>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for p in problems %}
+                            {% set link = path('analysis_problem', {'probid': p.externalId, 'view': 'hidden'}) %}
+                            <a href="{{ link }}">{{ p | problemBadge }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     {% endif %}
 
 {% endblock %}

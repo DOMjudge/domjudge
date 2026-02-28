@@ -164,9 +164,12 @@ jobs:
           curl $CURLOPTS -F "sendto=" -F "problem=1-" -F "bodytext=Testing" -F "submit=Send" \
                "http://localhost/domjudge/jury/contests/${{ matrix.contest }}/clarifications/send" -o /dev/null
           curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
-          NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked"     | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
-          NUMVERIFIED=$(   curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
-          NUMNOMAGIC=$(    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string"    | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
+          VERIFIER_PAGE=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier")
+          NUMTOTAL=$(     echo "$VERIFIER_PAGE" | grep -oP '[0-9]+ total'                | grep -oP '[0-9]+')
+          NUMNOMAGIC=$(   echo "$VERIFIER_PAGE" | grep -oP '[0-9]+ without magic string' | grep -oP '[0-9]+' || echo 0)
+          NUMEARLIER=$(   echo "$VERIFIER_PAGE" | grep -oP '[0-9]+ verified earlier'     | grep -oP '[0-9]+' || echo 0)
+          NUMNOTVERIFIED=$((NUMTOTAL - NUMEARLIER - NUMNOMAGIC))
+          NUMVERIFIED=$((NUMEARLIER + NUMNOMAGIC))
           NUMSUBS=$(curl $CURLOPTS http://localhost/domjudge/api/contests/${{ matrix.contest }}/submissions | python3 -mjson.tool | grep -c '"id":')
           # Verify expected results
           if [ $NUMNOTVERIFIED -ne ${{ matrix.expected_unverified }} ] || [ $NUMNOMAGIC -ne ${{ matrix.expected_no_magic }} ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
