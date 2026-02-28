@@ -62,7 +62,7 @@
                         <i class="fas fa-file-code fa-fw"></i> {{ language.total }} total submission{% if language.total != 1 %}s{% endif %}
                         for {{ language.problems_attempted_count }} problem{% if language.problems_attempted_count != 1 %}s{% endif %}:<br/>
                         {% for problem in problems %}
-                            <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">
+                            <a href="{{ path('jury_problem', {'probId': problem.externalid}) }}">
                                 {{ problem | problemBadge(language.problems_attempted[problem.probid] is not defined) }}
                             </a>
                         {% endfor %}
