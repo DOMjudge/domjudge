@@ -1328,13 +1328,19 @@ class JudgeDaemon
             return null;
         }
 
-        // Don't quite treat it as YAML, but simply key/value pairs.
-        $contents = explode("\n", dj_file_get_contents($filename));
+        $contents = [];
+        $earlier_contents = [];
         $res = [];
-        foreach ($contents as $line) {
-            if (str_contains($line, ":")) {
-                [$key, $value] = explode(":", $line, 2);
-                $res[$key] = trim($value);
+        while (count($contents) === 0 || $contents !== $earlier_contents) {
+            $earlier_contents = $contents;
+            // Don't quite treat it as YAML, but simply key/value pairs.
+            $contents = explode("\n", dj_file_get_contents($filename));
+            $res = [];
+            foreach ($contents as $line) {
+                if (str_contains($line, ":")) {
+                    [$key, $value] = explode(":", $line, 2);
+                    $res[$key] = trim($value);
+                }
             }
         }
 
