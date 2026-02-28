@@ -1,5 +1,46 @@
 {% extends 'jury/export/layout.html.twig' %}
 
+{% block extra_head %}
+    <style>
+        h2 {
+            padding-top: 0;
+        }
+
+        td:first-child {
+            padding-right: 10px;
+        }
+
+        tr.top-line {
+            border-top: 4px solid #ccc;
+        }
+
+        tr.top-line td {
+            padding-top: 8px;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        /* CSS from Bootstrap for the team id badge. */
+        .badge {
+            display: inline-block;
+            padding: .25em .4em;
+            font-size: 75%;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: .25rem;
+        }
+        .bg-secondary {
+            color: #fff;
+            background-color: #6c757d;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     {% for queue, clarifications in grouped %}
         {% if not loop.first %}
