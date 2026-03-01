@@ -343,7 +343,7 @@ class JudgeDaemon
         $this->loop();
     }
 
-    private function handleProgramInternalError(?int $judgetaskid, array $metadata): void
+    private function handleMetaInternalError(?int $judgetaskid, array $metadata): void
     {
         // Unexpected situation during setup of the submission, so disable the judgehost itself as no
         // submission should be able to break runguard
@@ -2024,10 +2024,14 @@ class JudgeDaemon
             }
 
             logmsg(LOG_DEBUG, "checking compare script exit status: $exitcode");
-            $compare_meta_raw = file_get_contents("compare.meta");
             $compare_tmp = is_readable("compare.tmp") ? file_get_contents("compare.tmp") : "";
-            $compareTimedOut = (bool)preg_match('/time-result: .*timelimit/', $compare_meta_raw);
-            if ($compareTimedOut) {
+            $compare_meta_ini = $this->readMetadata('compare.meta');
+            $compareTimedOut = false;
+            if (isset($compare_meta_ini['internal-error'])) {
+                $this->handleMetaInternalError($description, $judgetaskid, $compare_meta_ini);
+                return Verdict::INTERNAL_ERROR;
+            } elseif ($compare_meta_ini['time-result'] === 'timelimit') {
+                $compareTimedOut = true;
                 logmsg(LOG_ERR, "Comparing aborted after the script timelimit of %s seconds, compare script output:\n%s", $scripttimelimit, $compare_tmp);
             }
 
@@ -2049,7 +2053,7 @@ class JudgeDaemon
             logmsg(LOG_DEBUG, "checking program exit status");
             $program_meta_ini = $this->readMetadata('program.meta');
             if (isset($program_meta_ini['internal-error'])) {
-                $this->handleProgramInternalError($judgetaskid, $program_meta_ini);
+                $this->handleMetaInternalError($judgetaskid, $program_meta_ini);
                 return Verdict::INTERNAL_ERROR;
             }
             logmsg(LOG_DEBUG, "parsed program meta: " . var_export($program_meta_ini, true));
@@ -2058,7 +2062,6 @@ class JudgeDaemon
                 . $program_meta_ini['wall-time'] . "s wall\n"
                 . 'memory: ' . $program_meta_ini['memory-bytes'] . ' bytes';
 
-            $compare_meta_ini = $this->readMetadata('compare.meta');
             logmsg(LOG_DEBUG, "parsed compare meta: " . var_export($compare_meta_ini, true));
 
             $programOutSize = filesize("program.out");
@@ -2268,7 +2271,7 @@ class JudgeDaemon
             $metadata = $this->readMetadata($passdir . '/program.meta');
             if (isset($metadata['internal-error'])) {
                 // This should already be handled in `testcaseRunInternal`
-                $this->handleProgramInternalError($judgeTask['judgetaskid'], $metadata);
+                $this->handleMetaInternalError($judgetask['judgetaskid'], $metadata);
                 return false;
             }
 
