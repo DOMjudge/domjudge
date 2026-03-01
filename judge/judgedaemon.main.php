@@ -1779,7 +1779,7 @@ class JudgeDaemon
 
             foreach ([
                          'system.out',                   # Judging system output (info/debug/error)
-                         'program.out', 'program.err',    # Program output and stderr (for extra information)
+                         'program.out',  'program.err',  # Program output and stderr (for extra information)
                          'program.meta', 'runguard.err', # Metadata and runguard stderr
                          'compare.meta', 'compare.err'   # Compare runguard metadata and stderr
                      ] as $file) {
