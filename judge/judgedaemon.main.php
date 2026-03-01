@@ -343,6 +343,15 @@ class JudgeDaemon
         $this->loop();
     }
 
+    private function handleProgramInternalError(?int $judgetaskid, array $metadata): void
+    {
+        // Unexpected situation during setup of the submission, so disable the judgehost itself as no
+        // submission should be able to break runguard
+        // TODO: Add suggestion for what to do in case this submission breaks for all judgehosts, violating above statement
+        // would we advise ignoring the submission or changing the database etc.
+        $this->disable('judgehost', 'hostname', $this->myhost, "Running submission caused a crash/error in runguard: " . $metadata['internal-error'], $judgetaskid);
+    }
+
     private function initialize(): void
     {
         // Set umask to allow group and other access, as this is needed for the
@@ -1724,7 +1733,8 @@ class JudgeDaemon
         $compare_runpath,
         $compare_args,
         array $run_config,
-        array $compare_config
+        array $compare_config,
+        ?int $judgetaskid = null
     ) : Verdict {
         // Record some state so that we can properly reset it later in the finally block
         $oldCwd = getcwd();
@@ -2038,6 +2048,10 @@ class JudgeDaemon
             }
             logmsg(LOG_DEBUG, "checking program exit status");
             $program_meta_ini = $this->readMetadata('program.meta');
+            if (isset($program_meta_ini['internal-error'])) {
+                $this->handleProgramInternalError($judgetaskid, $program_meta_ini);
+                return Verdict::INTERNAL_ERROR;
+            }
             logmsg(LOG_DEBUG, "parsed program meta: " . var_export($program_meta_ini, true));
             $resourceInfo = "\nruntime: "
                 . $program_meta_ini['cpu-time'] . 's cpu, '
@@ -2239,14 +2253,24 @@ class JudgeDaemon
                 $compare_runpath,
                 $compare_config['compare_args'],
                 $run_config,
-                $compare_config
+                $compare_config,
+                $judgeTask['judgetaskid']
             );
 
             $result = str_replace('_', '-', strtolower($verdict->name));
+            if ($result === 'internal-error') {
+                // Don't disable anything as it's unclear how problematic the error is
+                return false;
+            }
 
             // Try to read metadata from file
             $runtime = null;
             $metadata = $this->readMetadata($passdir . '/program.meta');
+            if (isset($metadata['internal-error'])) {
+                // This should already be handled in `testcaseRunInternal`
+                $this->handleProgramInternalError($judgeTask['judgetaskid'], $metadata);
+                return false;
+            }
 
             if (isset($metadata['time-used']) && array_key_exists($metadata['time-used'], $metadata)) {
                 $runtime = $metadata[$metadata['time-used']];
