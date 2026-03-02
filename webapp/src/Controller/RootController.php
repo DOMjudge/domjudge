@@ -35,6 +35,16 @@ class RootController extends BaseController
         return $this->redirectToRoute('public_index');
     }
 
+    #[Route(path: '/doc/manual/html/index.html', name: 'redirect_docsadmin')]
+    public function docsadmin(): RedirectResponse {
+        return $this->redirect('https://www.domjudge.org/docs/manual/index.html');
+    }
+
+    #[Route(path: '/doc/manual/domjudge-team-manual.pdf', name: 'redirect_docsteam')]
+    public function docsteam(): RedirectResponse {
+        return $this->redirect('https://www.domjudge.org/docs/manual/team.html');
+    }
+
     #[Route(path: '/markdown-preview', name: 'markdown_preview', methods: ['POST'])]
     public function markdownPreview(
         Request $request,
