@@ -536,20 +536,16 @@
                 <div style="float: right;">
                     {% if selectedJudging.debugPackages | length > 0 %}
                        {% for debug_package in selectedJudging.debugPackages %}
-                           <a href="{{ path('download_full_debug', {'debug_package_id': debug_package.debugPackageId }) }}">
-                               <button class="btn btn-sm btn-outline-secondary" >
-                                   <i class="fas fa-download"></i>
-                                   Debug Package ({{ debug_package.judgehost.hostname }})
-                               </button>
+                           <a class="btn btn-sm btn-outline-secondary" href="{{ path('download_full_debug', {'debug_package_id': debug_package.debugPackageId }) }}">
+                               <i class="fas fa-download"></i>
+                               Debug Package ({{ debug_package.judgehost.hostname }})
                            </a>
                        {% endfor %}
                     {% else %}
                         {% if not requestedOutputCount %}
-                            <a href="{{ path('request_full_debug', {'jid': selectedJudging.judgingid}) }}">
-                                <button class="btn btn-sm btn-outline-secondary" >
-                                    <i class="fas fa-upload"></i>
-                                    Retrieve Full Debug Package
-                                </button>
+                            <a class="btn btn-sm btn-outline-secondary" href="{{ path('request_full_debug', {'jid': selectedJudging.judgingid}) }}">
+                                <i class="fas fa-upload"></i>
+                                Retrieve Full Debug Package
                             </a>
                         {% endif %}
                     {% endif %}
@@ -571,11 +567,9 @@
                 &nbsp;
                 {% if selectedJudging is null or selectedJudging.result is empty %}
                     {%- if not selectedJudging or not selectedJudging.started %}
-                        <a href="{{ path('jury_submission_create_tasks', {'contestId': submission.contest.externalid, 'submitId': submission.externalid}) }}">
-                            <button class="btn btn-sm btn-outline-secondary" >
-                                <i class="fas fa-gavel"></i>
-                                Judge submission
-                            </button>
+                        <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_submission_create_tasks', {'contestId': submission.contest.externalid, 'submitId': submission.externalid}) }}">
+                            <i class="fas fa-gavel"></i>
+                            Judge submission
                         </a>
                     {%- endif %}
                 {%- endif %}
@@ -837,34 +831,26 @@
                             -#}<button type="button" class="btn btn-link" onclick="navigator.clipboard.writeText('{{ runsOutput[runIdx].testcasedir }}')"><i class="fa-regular fa-copy"></i></button>
                         {% endif %}
                         <div style="float: right;">
-                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'input'}) }}">
-                                <button class="btn btn-sm btn-outline-secondary" >
-                                    <i class="fas fa-download"></i>
-                                    Input
-                                </button>
+                            <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'input'}) }}">
+                                <i class="fas fa-download"></i>
+                                Input
                             </a>
-                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'output'}) }}">
-                                <button class="btn btn-sm btn-outline-secondary" >
-                                    <i class="fas fa-download"></i>
-                                    Reference Output
-                                </button>
+                            <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'output'}) }}">
+                                <i class="fas fa-download"></i>
+                                Reference Output
                             </a>
                             {% if run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
-                                <a href="{{ path('jury_submission_team_output', {'contestId': submission.contest.externalid, 'submission': submission.externalid, 'run': run.firstJudgingRun.runid}) }}">
-                                    <button class="btn btn-sm btn-outline-secondary" >
-                                        <i class="fas fa-download"></i>
-                                        {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
-                                            Truncated
-                                        {% endif %}
-                                        Team Output
-                                    </button>
+                                <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_submission_team_output', {'contestId': submission.contest.externalid, 'submission': submission.externalid, 'run': run.firstJudgingRun.runid}) }}">
+                                    <i class="fas fa-download"></i>
+                                    {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
+                                        Truncated
+                                    {% endif %}
+                                    Team Output
                                 </a>
                                 {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
-                                    <a href="{{ path('request_output', {'jid': run.firstJudgingRun.judgingid, 'jrid': run.firstJudgingRun.runid}) }}">
-                                        <button class="btn btn-sm btn-outline-secondary" >
-                                            <i class="fas fa-upload"></i>
-                                            Retrieve Full Team Output
-                                        </button>
+                                    <a class="btn btn-sm btn-outline-secondary" href="{{ path('request_output', {'jid': run.firstJudgingRun.judgingid, 'jrid': run.firstJudgingRun.runid}) }}">
+                                        <i class="fas fa-upload"></i>
+                                        Retrieve Full Team Output
                                     </a>
                                 {% endif %}
                             {% endif %}
