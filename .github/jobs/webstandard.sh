@@ -106,6 +106,26 @@ if [ "$TEST" = "none" ]; then
     exit $NUM_ERRORS
 fi
 
+w3c_analyse () {
+    FLTR="$1"
+    LOGID="$2"
+    URL="$3"
+    TYP="$4"
+    # shellcheck disable=SC2086
+    for typ in $TYP
+    do
+        section_start "Analyse with $typ"
+        # shellcheck disable=SC2086
+        "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
+        # shellcheck disable=SC2086
+        NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | tee "$ARTIFACTS/w3c_${typ}_${URL}_${LOGID}.log" | wc -l)
+        FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
+        python3 -m "json.tool" < result.json > "$ARTIFACTS/w3c$typ$URL${LOGID}.json"
+        trace_off; python3 .github/jobs/jsontogha.py "$ARTIFACTS/w3c$typ$URL${LOGID}.json"; trace_on
+        section_end
+    done
+}
+
 if [ "$TEST" = "w3cval" ]; then
     section_start "Remove files from upstream with problems"
     rm -rf localhost/domjudge/doc
@@ -125,19 +145,36 @@ if [ "$TEST" = "w3cval" ]; then
     touch vnu.properties
     section_end
 
-    FLTR='--filterpattern .*autocomplete.*|.*role=tab.*|.*descendant.*|.*Stray.*|.*attribute.*|.*Forbidden.*|.*stream.*|.*obsolete.*'
-    for typ in html css svg
-    do
-        section_start "Analyse with $typ"
-        # shellcheck disable=SC2086
-        "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
-        # shellcheck disable=SC2086
-        NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | tee "$ARTIFACTS/w3c_${typ}_${URL}.log" | wc -l)
-        FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
-        python3 -m "json.tool" < result.json > "$ARTIFACTS/w3c$typ$URL.json"
-        trace_off; python3 .github/jobs/jsontogha.py "$ARTIFACTS/w3c$typ$URL.json"; trace_on
-        section_end
-    done
+    rm -rf public/localhost/domjudge/jury/teams/domjudge*.html
+    rm -rf public/localhost/domjudge/jury/scoreboard.html
+    FLTR1='--filterpattern .*autocomplete.*|.*role=tab.*|.*descendant.*|.*Stray.*'
+    w3c_analyse "$FLTR1" "Stray" "public" "html"
+
+    rm -rf public/localhost/domjudge/jury/request-full-debug/*.html
+    rm -rf public/localhost/domjudge/jury/contests/demo/submissions/*/create-tasks.html
+    rm -rf public/localhost/domjudge/jury/contests/demo/submissions/*.html
+    rm -rf public/localhost/domjudge/jury/submissions/*.html
+    rm -rf public/localhost/domjudge/jury/by-judging-id/*.html
+    FLTR2='--filterpattern .*autocomplete.*|.*role=tab.*|.*descendant.*'
+    w3c_analyse "$FLTR2" "descendant" "public" "html"
+
+    rm -rf public/localhost/domjudge/jury/categories.html
+    rm -rf public/localhost/domjudge/jury/problems.html
+    rm -rf public/localhost/domjudge/jury/users.html
+    rm -rf public/localhost/domjudge/jury/teams.html
+    rm -rf public/localhost/domjudge/jury/users/reset_login_status.html
+    rm -rf public/localhost/domjudge/jury/affiliations.html
+    FLTR3='--filterpattern .*autocomplete.*|.*role=tab.*'
+    w3c_analyse "$FLTR3" "role_tab" "public" "html"
+
+    rm -rf public/localhost/domjudge/jury/contests/demo/submissions/*/edit-source*.html
+    rm -rf public/localhost/domjudge/jury/contests/demo/submissions/*/source.html
+    FLTR4='--filterpattern .*autocomplete.*'
+    w3c_analyse "$FLTR4" "autocomplete" "public" "html"
+
+    rm -rf public/localhost/domjudge/jury/submissions.html
+    rm -rf public/localhost/domjudge/jury/clarifications.html
+    w3c_analyse "" "full" "public" "html css svg"
 else
     section_start "Remove files from upstream with problems"
     rm -rf localhost/domjudge/{doc,api}
