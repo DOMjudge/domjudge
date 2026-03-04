@@ -564,7 +564,7 @@ abstract class BaseController extends AbstractController
     {
         if ($this->isGranted('ROLE_ADMIN')) {
             if ($condition !== null && !$condition($entity)) {
-                $data['checkbox'] = ['value' => ''];
+                $data['checkbox'] = ['value' => '', 'link' => false];
                 return;
             }
             $data['checkbox'] = [
@@ -573,6 +573,7 @@ abstract class BaseController extends AbstractController
                     $identifierValue,
                     $checkboxClass
                 ),
+                'link' => false
             ];
         }
     }
