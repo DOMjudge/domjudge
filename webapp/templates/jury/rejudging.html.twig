@@ -235,8 +235,12 @@
                 <select style="width: 100%" class="select2 form-control" name="oldverdict" id="oldverdict">
                     <option value="all" {% if oldverdict == 'all' %}selected{% endif %}>all</option>
                     {%- for verdict, abbreviation in verdicts %}
-                        <option value="{{ verdict }}" {% if oldverdict == verdict %}selected{% endif %}>
-                            {{ verdict }}
+                        <option value="{% if verdict == '' %}judging{% else %}{{ verdict }}{% endif %}" {% if oldverdict == verdict %}selected{% endif %}>
+                            {% if verdict == '' %}
+                                <i>still judging</i>
+                            {% else %}
+                                {{ verdict }}
+                            {% endif %}
                         </option>
                     {%- endfor %}
 
@@ -247,8 +251,12 @@
                 <select style="width: 100%" class="select2 form-control" name="newverdict" id="newverdict">
                     <option value="all" {% if newverdict == 'all' %}selected{% endif %}>all</option>
                     {%- for verdict, abbreviation in verdicts %}
-                        <option value="{{ verdict }}" {% if newverdict == verdict %}selected{% endif %}>
-                            {{ verdict }}
+                        <option value="{% if verdict == '' %}judging{% else %}{{ verdict }}{% endif %}" {% if newverdict == verdict %}selected{% endif %}>
+                            {% if verdict == '' %}
+                                <i>still judging</i>
+                            {% else %}
+                                {{ verdict }}
+                            {% endif %}
                         </option>
                     {%- endfor %}
 
