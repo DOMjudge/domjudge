@@ -99,7 +99,7 @@
             <div class="btn-group" role="group">
                  <span class="input-group-text" id="qig{{clarification.externalid}}"><i class="fab fa-quora"></i></span>
                  {% for qk,qv in queues %}
-                 <input class="qbut btn-check" type="radio" autocomplete="off"
+                 <input class="qbut btn-check" type="radio"
                      name="queue[{{ clarification.externalid }}]" data-clarid="{{ clarification.externalid }}" id="q_{{ clarification.externalid }}{{ qk }}" value="{{ qk }}"
                      {% if qk == clarification.queue %} checked{% endif %}>
                  <label class="btn btn-sm btn-outline-secondary" for="q_{{ clarification.externalid }}{{ qk }}">{{ qv }}</label>
