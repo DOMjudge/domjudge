@@ -24,7 +24,12 @@
             max-width: {{ thumbnailSize }}px;
             max-height: {{ thumbnailSize }}px;
         }
+
+        .scoring-details-container .full-precision { display: none; }
+        .scoring-details-container.show-full .rounded-precision { display: none; }
+        .scoring-details-container.show-full .full-precision { display: inline; }
     </style>
+
 {% endblock %}
 
 {% block content %}
@@ -711,12 +716,6 @@
                     </div>
                 </div>
             </div>
-
-            <style>
-                .scoring-details-container .full-precision { display: none; }
-                .scoring-details-container.show-full .rounded-precision { display: none; }
-                .scoring-details-container.show-full .full-precision { display: inline; }
-            </style>
 
             <script>
                 $(function() {
