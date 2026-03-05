@@ -174,6 +174,7 @@ if [ "$TEST" = "w3cval" ]; then
 
     rm -rf public/localhost/domjudge/jury/submissions.html
     rm -rf public/localhost/domjudge/jury/clarifications.html
+    rm -rf public/localhost/domjudge/jury/contests/demo/submissions*.html
     w3c_analyse "" "full" "public" "html css svg"
 else
     section_start "Remove files from upstream with problems"
