@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Affilitations for teams (e.g.: university, company).
+ * Affiliations for teams (e.g.: university, company).
  */
 #[ORM\Entity(repositoryClass: TeamAffiliationRepository::class)]
 #[ORM\Table(options: [
