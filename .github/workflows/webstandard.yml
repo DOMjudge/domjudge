@@ -27,10 +27,7 @@ jobs:
         role: [public, team, balloon, jury, admin]
         test: [w3cval, WCAG2A, WCAG2AA]
         db: [bare-install, install]
-        releaseBranch:
-          - ${{ contains(github.ref, 'gh-readonly-queue') }}
         exclude:
-          - releaseBranch: false
           - role: jury
             test: WCAG2AA
           - role: jury
@@ -39,19 +36,58 @@ jobs:
             test: WCAG2AA
           - role: admin
             test: WCAG2A
-        include:
           - role: public
-            test: WCAG2AA
-            db: install
-          - role: public
-            test: w3cval
-            db: install
-          - role: admin
-            test: w3cval
-            db: install
+            test: WCAG2A
+          - role: balloon
+            test: WCAG2A
+          - role: team
+            test: WCAG2A
     steps:
       - uses: actions/checkout@v4
+      - name: Compute condition
+        id: filter
+        run: |
+          filter_out() {
+            if [ "${{ matrix.db }}" = "bare-install" ]; then
+                echo "should_run=false" >> $GITHUB_OUTPUT
+            elif [ "${{ matrix.role }}" = "public" ]; then
+              if [ "${{ matrix.test }}" = "WCAG2A" ]; then
+                echo "should_run=false" >> $GITHUB_OUTPUT
+              else
+                echo "should_run=true" >> $GITHUB_OUTPUT
+              fi
+            elif [ "${{ matrix.role }}" = "balloon" ]; then
+              echo "should_run=false" >> $GITHUB_OUTPUT
+            elif [ "${{ matrix.role }}" = "jury" ]; then
+              echo "should_run=false" >> $GITHUB_OUTPUT
+            elif [ "${{ matrix.role }}" = "admin" ]; then
+              if [ "${{ matrix.test }}" = "w3cval" ]; then
+                echo "should_run=true" >> $GITHUB_OUTPUT
+              else
+                echo "should_run=true" >> $GITHUB_OUTPUT
+              fi
+            else
+              # Should never happen
+              echo "should_run=true" >> $GITHUB_OUTPUT
+            fi
+          }
+
+          if [[ "${GITHUB_EVENT_NAME}" == "merge_group" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            filter_out
+          elif [[ "${GITHUB_EVENT_NAME}" == "push" ]] &&
+               [[ "${GITHUB_REPOSITORY}" == "DOMjudge/domjudge" ]] &&
+               [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          else
+            filter_out
+          fi
+      - name: Mark as skipped
+        if: steps.filter.outputs.should_run == 'false'
+        run: echo "Skip job"
       - name: Cache node modules
+        if: steps.filter.outputs.should_run == 'true'
         uses: actions/cache@v4
         with:
           path: webapp/node_modules
@@ -59,6 +95,7 @@ jobs:
           restore-keys: |
             npm-
       - name: Cache composer dependencies
+        if: steps.filter.outputs.should_run == 'true'
         uses: actions/cache@v4
         with:
           path: webapp/vendor
@@ -66,11 +103,13 @@ jobs:
           restore-keys: |
             composer-
       - name: Install DOMjudge
-        run: .github/jobs/baseinstall.sh ${{ matrix.role }}
+        if: steps.filter.outputs.should_run == 'true'
+        run: .github/jobs/baseinstall.sh ${{ matrix.role }} ${{ matrix.db }}
       - name: Run webstandard tests (W3C, WCAG)
+        if: steps.filter.outputs.should_run == 'true'
         run: .github/jobs/webstandard.sh ${{ matrix.test }} ${{ matrix.role }}
       - name: Upload all logs/artifacts
-        if: ${{ !cancelled() }}
+        if: ${{ steps.filter.outputs.should_run == 'true' && !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.role }}-${{ matrix.test }}-${{ matrix.db }}-logs
