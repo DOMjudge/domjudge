@@ -41,8 +41,10 @@
                                     </div>
                                     <ul class="list-group list-group-flush">
                                         <li class="list-group-item">
-                                            <pre class="output_text" style="background-color: rgba(0,121,54,.1);">$ {{ output.command }}</pre>
-                                            <pre class="output_text">{{ output.version }}</pre>
+                                            <div class="terminal-block">
+                                                <div class="terminal-command">{{ output.command }}</div>
+                                                <div class="terminal-output">{{ output.version }}</div>
+                                            </div>
                                         </li>
                                         <li class="list-group-item">
                                             First reported by
@@ -75,8 +77,10 @@
                                         </div>
                                         <ul class="list-group list-group-flush">
                                             <li class="list-group-item">
-                                                <pre class="output_text" style="background-color: rgba(0,121,54,.1);">$ {{ output.command }}</pre>
-                                                <pre class="output_text">{{ output.version }}</pre>
+                                                <div class="terminal-block">
+                                                    <div class="terminal-command">{{ output.command }}</div>
+                                                    <div class="terminal-output">{{ output.version }}</div>
+                                                </div>
                                             </li>
                                             <li class="list-group-item">
                                                 First reported by

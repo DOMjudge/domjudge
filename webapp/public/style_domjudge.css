@@ -873,3 +873,8 @@ blockquote {
     white-space: pre-wrap;
     color: #93a1a1;
 }
+
+.terminal-warning {
+    color: #cb4b16; /* Solarized Orange */
+    font-weight: bold;
+}
