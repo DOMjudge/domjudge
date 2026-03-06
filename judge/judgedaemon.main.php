@@ -2330,6 +2330,17 @@ class JudgeDaemon
                     $this->disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
                     return false;
                 }
+                // Normalize scientific notation (e.g. "1e-3") to fixed-point
+                // decimal, since bccomp does not accept scientific notation.
+                // See: https://github.com/php/php-src/issues/17876
+                if (preg_match('/^([+-]?\d+\.?\d*)[eE]([+-]?\d+)$/', $scoreValue, $m)) {
+                    $exp = (int)$m[2];
+                    if ($exp >= 0) {
+                        $scoreValue = bcmul($m[1], bcpow('10', (string)$exp), 9);
+                    } else {
+                        $scoreValue = bcdiv($m[1], bcpow('10', (string)abs($exp)), 9);
+                    }
+                }
                 if (bccomp($scoreValue, '0', 9) < 0) {
                     $description = sprintf(
                         "compare script %s produced negative score: '%s'",
