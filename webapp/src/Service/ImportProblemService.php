@@ -952,6 +952,12 @@ readonly class ImportProblemService
         if (empty($file)) {
             throw new BadRequestHttpException('ZIP file missing');
         }
+        if (!$file->isValid()) {
+            throw new BadRequestHttpException(
+                sprintf('ZIP file upload failed: %s (check upload_max_filesize and post_max_size in php.ini).',
+                    $file->getErrorMessage()
+                ));
+        }
 
         $contest = null;
         if ($contestId) {
