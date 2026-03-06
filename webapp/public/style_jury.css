@@ -117,7 +117,8 @@ div.submissions-filter ul.token-input-list {
 
 .data-table  td.testcase-results {
     white-space: normal;
-    word-wrap: break-word;
+    min-width: 400px;
+    width: 100%;
 }
 
 .has_tooltip {
@@ -240,6 +241,20 @@ div.submission-summary > span {
 
 table.submissions-table {
     width: auto;
+}
+.submissions-table tbody td {
+    vertical-align: middle;
+}
+
+/* Sticky header for submissions table */
+.submissions-table thead.thead-light {
+    position: sticky;
+    top: 3.5rem; /* below the fixed navbar */
+    z-index: 10;
+}
+.submissions-table thead.thead-light th {
+    background-color: #e9ecef;
+    box-shadow: inset 0 -1px 0 #dee2e6;
 }
 
 .devmode {
