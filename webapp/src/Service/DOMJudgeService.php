@@ -749,8 +749,13 @@ class DOMJudgeService
         } elseif ($res === ZIPARCHIVE::ER_MEMORY) {
             throw new ServiceUnavailableHttpException(null, 'Not enough memory to extract ZIP archive.');
         } elseif ($res !== true) {
+            $fileSize = file_exists($filename) ? filesize($filename) : 'file not found';
             throw new ServiceUnavailableHttpException(null,
-                'Unknown error while extracting ZIP archive: ' . print_r($res, true));
+                sprintf('Unknown error while extracting ZIP archive (error code: %s, file size: %s, path: %s).',
+                    print_r($res, true),
+                    is_int($fileSize) ? sprintf('%d bytes', $fileSize) : $fileSize,
+                    $filename
+                ));
         }
 
         return $zip;
