@@ -83,14 +83,16 @@
                         <th>Compiler version</th>
                         <td>
                             {% if language.compilerVersionCommand %}
-                                <pre class="output_text">$ {{ language.compilerVersionCommand }}</pre>
+                                <div class="terminal-block">
+                                    <div class="terminal-command">{{ language.compilerVersionCommand }}</div>
+                                    {% if language.compilerVersion %}
+                                        <div class="terminal-output">{{ language.compilerVersion }}</div>
+                                    {% else %}
+                                        <div class="terminal-output terminal-warning">No canonical version recorded.</div>
+                                    {% endif %}
+                                </div>
                             {% else %}
                                 <p class="nodata">No command specified.</p>
-                            {% endif %}
-                            {% if language.compilerVersion %}
-                                <pre class="output_text">{{ language.compilerVersion }}</pre>
-                            {% else %}
-                                <p class="nodata">No canonical version recorded.</p>
                             {% endif %}
                         </td>
                     </tr>
@@ -98,14 +100,16 @@
                         <th>Runner version</th>
                         <td>
                             {% if language.runnerVersionCommand %}
-                                <pre class="output_text">$ {{ language.runnerVersionCommand }}</pre>
+                                <div class="terminal-block">
+                                    <div class="terminal-command">{{ language.runnerVersionCommand }}</div>
+                                    {% if language.runnerVersion %}
+                                        <div class="terminal-output">{{ language.runnerVersion }}</div>
+                                    {% else %}
+                                        <div class="terminal-output terminal-warning">No canonical version recorded.</div>
+                                    {% endif %}
+                                </div>
                             {% else %}
                                 <p class="nodata">No command specified.</p>
-                            {% endif %}
-                            {% if language.runnerVersion %}
-                                <pre class="output_text">{{ language.runnerVersion }}</pre>
-                            {% else %}
-                                <p class="nodata">No canonical version recorded.</p>
                             {% endif %}
                         </td>
                     </tr>
