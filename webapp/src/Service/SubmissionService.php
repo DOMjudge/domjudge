@@ -84,37 +84,27 @@ class SubmissionService
 
         if ($testcaseGroup->getChildren()->isEmpty()) {
             $relevantRuns = $runsByGroup[$testcaseGroup->getTestcaseGroupId()] ?? [];
-            if ($testcaseGroup->getAcceptScore() !== null) {
-                $acceptScore = $testcaseGroup->getAcceptScore();
-                foreach ($relevantRuns as $run) {
-                    if ($run->getRunresult() === null || $run->getRunresult() === '') {
-                        $allResultsReady = false;
-                    } elseif ($run->getRunresult() !== 'correct') {
+            $acceptScore = $testcaseGroup->getAcceptScore();
+            $hasScoreTxt = false;
+            foreach ($relevantRuns as $run) {
+                if ($run->getRunresult() === null || $run->getRunresult() === '') {
+                    $allResultsReady = false;
+                } else {
+                    if ($run->getScore() !== null) {
+                        $hasScoreTxt = true;
+                        $results[] = $run->getScore();
+                    }
+                    if ($run->getRunresult() !== 'correct') {
                         $allCorrect = false;
                         if ($firstIncorrectVerdict === null) {
                             $firstIncorrectVerdict = $run->getRunresult();
                         }
                     }
                 }
-                if (count($relevantRuns) > 0) {
-                    if ($allCorrect) {
-                        $results[] = $acceptScore;
-                    } else {
-                        $results[] = '0';
-                    }
-                }
-            } else {
-                foreach ($relevantRuns as $run) {
-                    $results[] = $run->getScore();
-                    if ($run->getRunresult() === null || $run->getRunresult() === '') {
-                        $allResultsReady = false;
-                    } elseif ($run->getRunresult() !== 'correct') {
-                        $allCorrect = false;
-                        if ($firstIncorrectVerdict === null) {
-                            $firstIncorrectVerdict = $run->getRunresult();
-                        }
-                    }
-                }
+            }
+            // If no score.txt was produced, fall back to accept_score / 0.
+            if (!$hasScoreTxt && $acceptScore !== null && count($relevantRuns) > 0) {
+                $results[] = $allCorrect ? $acceptScore : '0';
             }
         } else {
             foreach ($testcaseGroup->getChildren() as $childGroup) {
@@ -247,20 +237,15 @@ class SubmissionService
         $hierarchy['result'] = $result;
 
         if ($group->getChildren()->isEmpty()) {
-            if ($group->getAcceptScore() !== null) {
-                // Leaf group with accept score
-                if ($result !== null) {
-                    if ($result === 'correct') {
-                        $hierarchy['child_scores'][] = (string)bcadd($group->getAcceptScore(), '0', ScoreboardService::SCALE);
-                    } else {
-                        $hierarchy['child_scores'][] = (string)bcadd('0', '0', ScoreboardService::SCALE);
-                    }
-                }
-            }
-
             $relevantRuns = $runsByGroup[$group->getTestcaseGroupId()] ?? [];
+            $hasScoreTxt = false;
             foreach ($relevantRuns as $run) {
-                $tc_score = (string)bcadd((string)$run->getScore(), '0', ScoreboardService::SCALE);
+                $tc_score = $run->getScore() !== null
+                    ? (string)bcadd($run->getScore(), '0', ScoreboardService::SCALE)
+                    : null;
+                if ($tc_score !== null) {
+                    $hasScoreTxt = true;
+                }
                 $tc_name = $run->getTestcase()->getOrigInputFilename();
                 if ($tc_name !== null) {
                     $lastSlash = strrpos($tc_name, '/');
@@ -275,8 +260,17 @@ class SubmissionService
                     'orig_input_filename' => $run->getTestcase()->getOrigInputFilename(),
                     'display_name' => $tc_name,
                 ];
-                if ($group->getAcceptScore() === null) {
+                if ($tc_score !== null) {
                     $hierarchy['child_scores'][] = $tc_score;
+                }
+            }
+            // If no score.txt was produced, fall back to accept_score / 0.
+            $acceptScore = $group->getAcceptScore();
+            if (!$hasScoreTxt && $acceptScore !== null && $result !== null) {
+                if ($result === 'correct') {
+                    $hierarchy['child_scores'][] = (string)bcadd($acceptScore, '0', ScoreboardService::SCALE);
+                } else {
+                    $hierarchy['child_scores'][] = (string)bcadd('0', '0', ScoreboardService::SCALE);
                 }
             }
             // Sort testcases by rank

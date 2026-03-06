@@ -2291,7 +2291,7 @@ class JudgeDaemon
             }
 
             $score = "";
-            if ($result === 'correct' && file_exists($passdir . '/feedback/score.txt')) {
+            if (file_exists($passdir . '/feedback/score.txt')) {
                 $scoreValue = trim(dj_file_get_contents($passdir . '/feedback/score.txt'));
                 if (!is_numeric($scoreValue)) {
                     $description = sprintf(

@@ -76,7 +76,7 @@ class SubmissionServiceTest extends KernelTestCase
         $testcase = $this->createTestcase($problem, $group, 1);
 
         $judging = $this->createJudging();
-        $this->addJudgingRun($judging, $testcase, 'correct', '25');
+        $this->addJudgingRun($judging, $testcase, 'correct', null);
 
         [$score, $result] = SubmissionService::maybeSetScoringResult($group, $judging);
 
@@ -96,12 +96,32 @@ class SubmissionServiceTest extends KernelTestCase
         $testcase = $this->createTestcase($problem, $group, 1);
 
         $judging = $this->createJudging();
-        $this->addJudgingRun($judging, $testcase, 'wrong-answer', '0');
+        $this->addJudgingRun($judging, $testcase, 'wrong-answer', null);
 
         [$score, $result] = SubmissionService::maybeSetScoringResult($group, $judging);
 
         self::assertEquals('0.000000000', $score);
         self::assertEquals('wrong-answer', $result);
+    }
+
+    /**
+     * Test that score.txt takes precedence over accept_score.
+     */
+    public function testMaybeSetScoringResultScoreTxtOverridesAcceptScore(): void
+    {
+        $group = $this->createTestcaseGroup('group1', TestcaseAggregationType::SUM, acceptScore: '25');
+        $problem = new Problem();
+        $problem->setTimelimit(1)->setName('test');
+        $testcase = $this->createTestcase($problem, $group, 1);
+
+        $judging = $this->createJudging();
+        // score.txt produced a score of 15, should override accept_score of 25
+        $this->addJudgingRun($judging, $testcase, 'correct', '15');
+
+        [$score, $result] = SubmissionService::maybeSetScoringResult($group, $judging);
+
+        self::assertEquals('15.000000000', $score);
+        self::assertEquals('correct', $result);
     }
 
     /**
@@ -288,8 +308,8 @@ class SubmissionServiceTest extends KernelTestCase
         $tc2 = $this->createTestcase($problem, $childGroup2, 2);
 
         $judging = $this->createJudging();
-        $this->addJudgingRun($judging, $tc1, 'correct', '30');
-        $this->addJudgingRun($judging, $tc2, 'correct', '70');
+        $this->addJudgingRun($judging, $tc1, 'correct', null);
+        $this->addJudgingRun($judging, $tc2, 'correct', null);
 
         [$score, $result] = SubmissionService::maybeSetScoringResult($parentGroup, $judging);
 
@@ -322,8 +342,8 @@ class SubmissionServiceTest extends KernelTestCase
         $tc2 = $this->createTestcase($problem, $childGroup2, 2);
 
         $judging = $this->createJudging();
-        $this->addJudgingRun($judging, $tc1, 'correct', '30');
-        $this->addJudgingRun($judging, $tc2, 'wrong-answer', '0'); // Group 2 fails
+        $this->addJudgingRun($judging, $tc1, 'correct', null);
+        $this->addJudgingRun($judging, $tc2, 'wrong-answer', null); // Group 2 fails
 
         [$score, $result] = SubmissionService::maybeSetScoringResult($parentGroup, $judging);
 
@@ -353,7 +373,7 @@ class SubmissionServiceTest extends KernelTestCase
         $tc1->setOrigInputFilename('test-input');
 
         $judging = $this->createJudging();
-        $this->addJudgingRun($judging, $tc1, 'correct', '30');
+        $this->addJudgingRun($judging, $tc1, 'correct', null);
 
         $submissionService = new SubmissionService(
             $this->createMock(\Doctrine\ORM\EntityManagerInterface::class),
@@ -392,9 +412,9 @@ class SubmissionServiceTest extends KernelTestCase
         $tc2 = $this->createTestcase($problem, $group, 2);
 
         $judging = $this->createJudging();
-        // Individual testcase scores are 0, but group has accept_score 20
-        $this->addJudgingRun($judging, $tc1, 'correct', '0');
-        $this->addJudgingRun($judging, $tc2, 'correct', '0');
+        // No score.txt produced, group has accept_score 20
+        $this->addJudgingRun($judging, $tc1, 'correct', null);
+        $this->addJudgingRun($judging, $tc2, 'correct', null);
 
         $submissionService = new SubmissionService(
             $this->createMock(\Doctrine\ORM\EntityManagerInterface::class),
@@ -585,7 +605,7 @@ class SubmissionServiceTest extends KernelTestCase
         return $judging;
     }
 
-    private function addJudgingRun(Judging $judging, Testcase $testcase, ?string $result, string $score): JudgingRun
+    private function addJudgingRun(Judging $judging, Testcase $testcase, ?string $result, ?string $score): JudgingRun
     {
         $run = new JudgingRun();
         $run->setJudging($judging);
@@ -594,8 +614,10 @@ class SubmissionServiceTest extends KernelTestCase
         if ($result !== null) {
             $run->setRunresult($result);
         }
-        // Set score as string to match database behavior (decimal column)
-        $run->setScore($score);
+        // Set score if provided (null means no score.txt was produced)
+        if ($score !== null) {
+            $run->setScore($score);
+        }
         $run->setRuntime(0.1);
         $run->setEndtime(1000);
         $judging->addRun($run);
