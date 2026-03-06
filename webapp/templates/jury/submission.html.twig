@@ -96,14 +96,10 @@
                                     <span class="ms-1 scoring-testcase-result">
                                         {{ tc.result | displayScoringTestcaseResult(tc.rank) }}
                                     </span>
-                                    {% if group.accept_score is null %}
-                                        <span class="ms-1 scoring-testcase-score text-muted" title="{{ tc.score is not null ? 'Full score: ' ~ tc.score : '' }}">
-                                            {% if tc.score is not null %}
-                                                <span class="rounded-precision">{{ "%.2f" | format(tc.score) }}</span>
-                                                <span class="full-precision">{{ tc.score }}</span>
-                                            {% else %}
-                                                -
-                                            {% endif %}
+                                    {% if tc.score is not null %}
+                                        <span class="ms-1 scoring-testcase-score text-muted" title="Full score: {{ tc.score }}">
+                                            <span class="rounded-precision">{{ "%.2f" | format(tc.score) }}</span>
+                                            <span class="full-precision">{{ tc.score }}</span>
                                         </span>
                                     {% endif %}
                                 </li>

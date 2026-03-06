@@ -75,12 +75,12 @@ class JudgingRun extends AbstractRun
         type: 'decimal',
         precision: 32,
         scale: 9,
+        nullable: true,
         options: [
             'comment' => 'Optional score for this run, e.g. for partial scoring',
-            'default' => '0.000000000',
         ]
     )]
-    private string|float $score = 0;
+    private string|float|null $score = null;
 
     #[ORM\ManyToOne(inversedBy: 'runs')]
     #[ORM\JoinColumn(name: 'judgingid', referencedColumnName: 'judgingid', onDelete: 'CASCADE')]
@@ -286,8 +286,9 @@ class JudgingRun extends AbstractRun
         $this->score = $score;
         return $this;
     }
-    public function getScore(): string
+
+    public function getScore(): ?string
     {
-        return (string)$this->score;
+        return $this->score !== null ? (string)$this->score : null;
     }
 }
