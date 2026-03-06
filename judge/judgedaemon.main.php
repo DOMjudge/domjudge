@@ -636,7 +636,7 @@ class JudgeDaemon
                         urlencode((string)$judgeTask['judgetaskid'])
                     ),
                     'POST',
-                    ['output_run' => $this->restEncodeFile($testcasedir . '/program.out', false)],
+                    ['output_run' => $this->restEncodeFile($testcasedir . '/1/program.out', false)],
                     false
                 );
                 logmsg(LOG_INFO, "  ⇡ Uploading full output of testcase $judgeTask[testcase_id].");
