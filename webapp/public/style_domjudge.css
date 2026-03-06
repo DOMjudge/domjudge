@@ -89,6 +89,52 @@ a {
     padding-right: 0;
 }
 
+/* Compact test results bar for submission lists */
+.tc-bar {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    height: auto;
+    min-height: 18px;
+    border-radius: 3px;
+    vertical-align: middle;
+    gap: 2px;
+    padding: 3px;
+    background: transparent;
+    width: 100%;
+}
+.tc-seg {
+    flex: 0 0 8px;
+    height: 18px;
+    border-radius: 2px;
+    cursor: default;
+    transition: opacity 0.15s;
+}
+.tc-seg:hover {
+    opacity: 0.75;
+}
+.tc-sep {
+    flex: 0 0 2px;
+    height: 22px;
+    background-color: #6c757d;
+    margin: 0 3px;
+    border-radius: 1px;
+}
+.tc-correct { background-color: #198754; }
+.tc-incorrect { background-color: #dc3545; }
+/* Verdict-specific bar segment colors - currently all red */
+/*
+.tc-r-timelimit { background-color: #e67e22; }
+.tc-r-run-error { background-color: #7b4bbf; }
+.tc-r-compiler-error { background-color: #d63384; }
+.tc-r-output-limit { background-color: #0d8a8a; }
+.tc-r-no-output { background-color: #0d8a8a; }
+*/
+.tc-running { background-color: #0dcaf0; }
+.tc-pending { background-color: #dee2e6; }
+.tc-pending-done { background-color: #ced4da; }
+.tc-invalid { background-color: #dee2e6; }
+
 .sol {
     font-weight: bold;
     font-variant: small-caps;
