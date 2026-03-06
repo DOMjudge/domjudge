@@ -303,7 +303,7 @@ class JuryMiscController extends BaseController
 
             $result = mb_strtoupper($judging->getResult());
             $actualScore = $judging->getScore();
-            if ($expectedScore !== null) {
+            if ($expectedScore !== null || $submission->getProblem()->isScoringProblem()) {
                 $hasExpectedScore = true;
             }
             $entry = [
