@@ -24,7 +24,7 @@
                     <th scope="col">expected (one of)</th>
                     {% if hasExpectedScore %}
                         <th scope="col">actual score</th>
-                        <th scope="col">expected score</th>
+                        <th scope="col">expected score (if set)</th>
                     {% endif %}
                 </tr>
             </thead>
@@ -69,7 +69,7 @@
                         {% if hasExpectedScore %}
                             <td>
                                 <a href="{{ link }}">
-                                    {% if result.expectedScore is defined and result.expectedScore is not null %}
+                                    {% if result.actualScore is defined and result.actualScore is not null %}
                                         {{ result.actualScore | number_format(2) }}
                                     {% else %}
                                         -
