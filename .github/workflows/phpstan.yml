@@ -13,6 +13,13 @@ jobs:
       image: domjudge/gitlabci:24.04
     steps:
       - uses: actions/checkout@v4
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: webapp/vendor
+          key: composer-${{ hashFiles('webapp/composer.lock') }}
+          restore-keys: |
+            composer-
       - name: Setup composer dependencies
         run: .github/jobs/composer_setup.sh
       - name: Show the phpstan version

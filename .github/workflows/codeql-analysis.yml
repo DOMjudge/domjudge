@@ -35,6 +35,24 @@ jobs:
       with:
         languages: ${{ matrix.language }}
 
+    - name: Cache composer dependencies
+      if: ${{ contains(env.COMPILED, matrix.language) }}
+      uses: actions/cache@v4
+      with:
+        path: webapp/vendor
+        key: composer-${{ hashFiles('webapp/composer.lock') }}
+        restore-keys: |
+          composer-
+
+    - name: Cache node modules
+      if: ${{ contains(env.COMPILED, matrix.language) }}
+      uses: actions/cache@v4
+      with:
+        path: webapp/node_modules
+        key: npm-${{ hashFiles('webapp/package-lock.json') }}
+        restore-keys: |
+          npm-
+
     - name: Install composer files
       if: ${{ contains(env.COMPILED, matrix.language) }}
       run: |
