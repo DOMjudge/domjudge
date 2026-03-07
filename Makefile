@@ -335,6 +335,14 @@ endif
 		chcon -R -t httpd_sys_rw_content_t $(CURDIR)/webapp/public/images; \
 		chcon    -t httpd_exec_t $(CURDIR)/lib/alert; \
 	fi
+	@sandbox_err=0; \
+	for service in apache2 nginx php$(PHPVERSION)-fpm php-fpm; do \
+		$(CURDIR)/misc-tools/check-systemd-sandbox $$service $(CURDIR)/webapp/var || sandbox_err=1; \
+	done; \
+	if [ $$sandbox_err -ne 0 ]; then \
+		echo "ERROR: Fix the above systemd sandboxing issue(s) before continuing."; \
+		exit 1; \
+	fi
 
 inplace-postinstall-apache: inplace-postinstall-permissions
 	@if [ ! -d "/etc/apache2/conf-enabled" ]; then echo "Couldn't find directory /etc/apache2/conf-enabled. Is apache installed?"; false; fi
