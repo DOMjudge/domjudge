@@ -258,7 +258,7 @@ class ScoreboardService
         $runtimeJury     = PHP_INT_MAX;
         $runtimePubl     = PHP_INT_MAX;
 
-        $contestStartTime = $contest->getStarttime();
+        $contestStartTime = $contest->getStarttime(false);
 
         $pointsJury      = "0";
         $pointsPubl      = "0";
