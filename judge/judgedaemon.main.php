@@ -36,6 +36,12 @@ enum Verdict
 
 /**
  * Represents program execution metadata with validated fields.
+ * @phpstan-type MetaData_Program array{
+ *     exitcode: string, memory-bytes: string, time-used: string, time-result: string,
+ *     stdin-bytes: string, stdout-bytes: string, stderr-bytes: string,
+ *     cpu-time: string, sys-time: string, user-time: string, wall-time: string,
+ *     entry_point?: string, output-truncated?: string, signal?: string
+ * }
  */
 readonly class ProgramMetadata
 {
@@ -53,6 +59,7 @@ readonly class ProgramMetadata
 
     /**
      * Create from raw metadata array with validation.
+     * @param MetaData_Program $meta
      */
     public static function fromArray(array $meta): self
     {
@@ -95,6 +102,12 @@ readonly class ProgramMetadata
 
 /**
  * Represents compare script execution metadata with validated fields.
+ * @phpstan-type MetaData_Compare array{
+ *     exitcode: string, memory-bytes: string, time-used: string, time-result: string, bytes-transferred: string,
+ *     stdin-bytes: string, stdout-bytes: string, stderr-bytes: string, validator-exited-first: string,
+ *     cpu-time: string, sys-time: string, user-time: string, wall-time: string, total-duration-use: string,
+ *     output-truncated?: string
+ * }
  */
 readonly class CompareMetadata
 {
@@ -106,6 +119,7 @@ readonly class CompareMetadata
 
     /**
      * Create from raw metadata array with validation.
+     * @param MetaData_Compare $meta
      */
     public static function fromArray(array $meta): self
     {
@@ -133,6 +147,31 @@ readonly class VerdictInput
     }
 }
 
+/**
+ * @phpstan-type JudgeTask array{submitid: ?string, contestid: ?string, judgetaskid: int, type: string, priority: int, jobid: ?string,
+ *     uuid: ?string, compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string, testcase_id: ?string,
+ *     testcase_hash: ?string, compile_config: ?string, run_config: ?string, compare_config: ?string
+ *  }
+ * @phpstan-type RunConfig array{time_limit: float, memory_limit: int, output_limit: int,
+ *      process_limit: int, entry_point: ?string, pass_limit: int, hash: string, overshoot: int
+ * }
+ * @phpstan-type CompareConfig array{script_timelimit: int, script_memory_limit: int,
+ *      script_filesize_limit: int, compare_args: string, combined_run_compare: bool,
+ *      hash: string, is_scoring_problem: bool
+ * }
+ * @phpstan-import-type MetaData_Compare from CompareMetaData
+ * @phpstan-import-type MetaData_Program from ProgramMetaData
+ * This is called Generic, but is 1 on 1 connected with compile.meta
+ * @phpstan-type MetaData_Generic array{
+ *     exitcode: string, memory-bytes: string, time-used: string, time-result: string,
+ *     output-truncated: string, stdin-bytes: string, stdout-bytes: string, stderr-bytes: string,
+ *     cpu-time: string, sys-time: string, user-time: string, wall-time: string
+ * }
+ * The MetaData_Error is defined as having only 1 key so we make sure PHPStan triggers us to always handle that key first and 
+ * in case the key is not set, overwrite with a @var to the correct shape MetaData_{Generic,Compare,Program}
+ * @phpstan-type MetaData_Error array{internal-error: string}
+ * @phpstan-type MetaData MetaData_Compare|MetaData_Program|Metadata_Generic|MetaData_Error
+ */
 class JudgeDaemon
 {
     private const FD_STDIN = 0;
@@ -1343,6 +1382,9 @@ class JudgeDaemon
         logmsg(LOG_ERR, "=> internal error " . $error_id);
     }
 
+    /**
+     * @return MetaData
+     */
     private function readMetadata(string $filename): ?array
     {
         if (!is_readable($filename)) {
@@ -1545,6 +1587,7 @@ class JudgeDaemon
 
             return false;
         }
+        /** @var MetaData_Generic $metadata */
 
         // What does the exitcode mean?
         if (!isset($this->EXITCODES[$retval])) {
@@ -2030,7 +2073,10 @@ class JudgeDaemon
             if (isset($compare_meta_ini['internal-error'])) {
                 $this->handleMetaInternalError($description, $judgetaskid, $compare_meta_ini);
                 return Verdict::INTERNAL_ERROR;
-            } elseif ($compare_meta_ini['time-result'] === 'timelimit') {
+            }
+            /** @var MetaData_Compare $compare_meta_ini */
+            logmsg(LOG_DEBUG, "parsed compare meta: " . var_export($compare_meta_ini, true));
+            if ($compare_meta_ini['time-result'] === 'timelimit') {
                 $compareTimedOut = true;
                 logmsg(LOG_ERR, "Comparing aborted after the script timelimit of %s seconds, compare script output:\n%s", $scripttimelimit, $compare_tmp);
             }
@@ -2056,13 +2102,12 @@ class JudgeDaemon
                 $this->handleMetaInternalError($judgetaskid, $program_meta_ini);
                 return Verdict::INTERNAL_ERROR;
             }
+            /** @var MetaData_Program $program_meta_ini */
             logmsg(LOG_DEBUG, "parsed program meta: " . var_export($program_meta_ini, true));
             $resourceInfo = "\nruntime: "
                 . $program_meta_ini['cpu-time'] . 's cpu, '
                 . $program_meta_ini['wall-time'] . "s wall\n"
                 . 'memory: ' . $program_meta_ini['memory-bytes'] . ' bytes';
-
-            logmsg(LOG_DEBUG, "parsed compare meta: " . var_export($compare_meta_ini, true));
 
             $programOutSize = filesize("program.out");
             $programMeta = ProgramMetadata::fromArray($program_meta_ini);
@@ -2272,15 +2317,21 @@ class JudgeDaemon
             if (isset($metadata['internal-error'])) {
                 // This should already be handled in `testcaseRunInternal`
                 $this->handleMetaInternalError($judgetask['judgetaskid'], $metadata);
+                logmsg(LOG_ERR, "Encountered unhandled 'internal-error':" . $metadata['internal-error']);
                 return false;
             }
 
+            /** @var MetaData_Program $metadata */
             if (isset($metadata['time-used']) && array_key_exists($metadata['time-used'], $metadata)) {
                 $runtime = $metadata[$metadata['time-used']];
             }
 
             if ($result === 'compare-error') {
                 $compareMeta = $this->readMetadata($passdir . '/compare.meta');
+                if (isset($compareMeta['internal-error'])) {
+                    logmsg(LOG_ERR, "Encountered unhandled 'internal-error':" . $comparemeta['internal-error']);
+                }
+                /** @var MetaData_Compare $compareMeta */
                 $compareExitCode = 'n/a';
                 if (isset($compareMeta['exitcode'])) {
                     $compareExitCode = $compareMeta['exitcode'];
