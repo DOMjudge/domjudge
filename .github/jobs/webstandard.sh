@@ -155,7 +155,7 @@ if [ "$TEST" = "w3cval" ]; then
     rm -rf public/localhost/domjudge/jury/contests/demo/submissions/*.html
     rm -rf public/localhost/domjudge/jury/submissions/*.html
     rm -rf public/localhost/domjudge/jury/by-judging-id/*.html
-    FLTR2='--filterpattern .*autocomplete.*|.*role=tab.*|.*descendant.*'
+    FLTR2='--filterpattern .*descendant.*'
     w3c_analyse "$FLTR2" "descendant" "public" "html"
 
     rm -rf public/localhost/domjudge/jury/categories.html
@@ -164,14 +164,8 @@ if [ "$TEST" = "w3cval" ]; then
     rm -rf public/localhost/domjudge/jury/teams.html
     rm -rf public/localhost/domjudge/jury/users/reset_login_status.html
     rm -rf public/localhost/domjudge/jury/affiliations.html
-    FLTR3='--filterpattern .*autocomplete.*|.*role=tab.*'
-    w3c_analyse "$FLTR3" "role_tab" "public" "html"
-
     rm -rf public/localhost/domjudge/jury/contests/demo/submissions/*/edit-source*.html
     rm -rf public/localhost/domjudge/jury/contests/demo/submissions/*/source.html
-    FLTR4='--filterpattern .*autocomplete.*'
-    w3c_analyse "$FLTR4" "autocomplete" "public" "html"
-
     rm -rf public/localhost/domjudge/jury/submissions.html
     rm -rf public/localhost/domjudge/jury/clarifications.html
     rm -rf public/localhost/domjudge/jury/contests/demo/submissions*.html
