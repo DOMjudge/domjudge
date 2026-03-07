@@ -790,7 +790,7 @@ class SubmissionController extends BaseController
     ): StreamedResponse {
         $name = 'debug_package.j' . $debugPackage->getJudging()->getJudgingid()
             . '.db' . $debugPackage->getDebugPackageId()
-            . '.jh' . $debugPackage->getJudgehost()->getJudgehostid()
+            . '.jh' . ($debugPackage->getJudgehost()?->getJudgehostid() ?? 'unknown')
             . '.tar.gz';
         return Utils::streamAsBinaryFile(file_get_contents($debugPackage->getFilename()), $name);
     }

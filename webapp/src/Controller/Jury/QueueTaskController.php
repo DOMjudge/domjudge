@@ -210,7 +210,9 @@ class QueueTaskController extends BaseController
             // Add link or set empty value for judgehost.
             if (isset($judgeTaskData['judgehost.hostname']['value'])) {
                 $judgeTaskData['judgehost.hostname']['value'] = Utils::printhost($judgeTaskData['judgehost.hostname']['value']);
-                $judgeTaskData['judgehost.hostname']['link'] = $this->generateUrl('jury_judgehost', ['judgehostid' => $judgeTask->getJudgehost()->getJudgehostid()]);
+                if ($judgeTask->getJudgehost()) {
+                    $judgeTaskData['judgehost.hostname']['link'] = $this->generateUrl('jury_judgehost', ['judgehostid' => $judgeTask->getJudgehost()->getJudgehostid()]);
+                }
             }
 
             $judgeTaskData['judgehost.hostname']['default'] = '-';

@@ -58,7 +58,7 @@ class VersionController extends BaseController
                     ];
                 }
                 $compilerOutputs[$key]['hostdata'][] = [
-                    'hostname' => $version->getJudgehost()->getHostname(),
+                    'hostname' => $version->getJudgehost()?->getHostname() ?? 'unknown host',
                     'last_changed' => $version->getLastChangedTime(),
                 ];
 
@@ -75,7 +75,7 @@ class VersionController extends BaseController
                         ];
                     }
                     $runnerOutputs[$key]['hostdata'][] = [
-                        'hostname' => $version->getJudgehost()->getHostname(),
+                        'hostname' => $version->getJudgehost()?->getHostname() ?? 'unknown host',
                         'last_changed' => $version->getLastChangedTime(),
                     ];
                 }
