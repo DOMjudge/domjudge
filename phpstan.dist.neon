@@ -2,6 +2,8 @@ parameters:
     level: 6
     paths:
         - etc
+        - judge
+        - judge/judgedaemon
         - lib/lib.error.php
         - lib/lib.misc.php
         - lib/lib.wrappers.php
@@ -35,3 +37,5 @@ parameters:
             path: webapp/src/DataFixtures/Test
 includes:
     - webapp/vendor/phpstan/phpstan-doctrine/extension.neon
+    - phpstan-baseline-judgedaemon.neon
+    - phpstan-bug.neon

@@ -36,6 +36,18 @@ enum Verdict
 
 /**
  * Represents program execution metadata with validated fields.
+ *
+ * TODO: We define this twice as we could have the same object with internal-error as last entry and none of the other properties
+ * probably better to test for this and fail instead of returning half of the data.
+ * @phpstan-type MetaData_Program array{
+ *     exitcode: string, memory-bytes: string, time-used: string, time-result: string, signal: string,
+ *     output-truncated: string, stdin-bytes: string, stdout-bytes: string, stderr-bytes: string,
+ *     cpu-time: string, sys-time: string, user-time: string, wall-time: string, output-truncated: string, entry_point?: string,
+ * }|array{internal-error: string,
+ *     exitcode?: string, memory-bytes?: string, time-used?: string, time-result?: string, signal?: string,
+ *     output-truncated?: string, stdin-bytes?: string, stdout-bytes?: string, stderr-bytes?: string,
+ *     cpu-time?: string, sys-time?: string, user-time?: string, wall-time?: string, output-truncated?: string, entry_point?: string,
+ * }
  */
 readonly class ProgramMetadata
 {
@@ -53,6 +65,8 @@ readonly class ProgramMetadata
 
     /**
      * Create from raw metadata array with validation.
+     *
+     * @param MetaData_Program $meta
      */
     public static function fromArray(array $meta): self
     {
@@ -95,6 +109,18 @@ readonly class ProgramMetadata
 
 /**
  * Represents compare script execution metadata with validated fields.
+ *
+ * TODO: We define this twice as we could have the same object with internal-error as last entry and none of the other properties
+ * probably better to test for this and fail instead of returning half of the data.
+ * @phpstan-type MetaData_Compare array{
+ *     exitcode: string, memory-bytes: string, time-used: string, time-result: string, bytes-transferred: string,
+ *     output-truncated: string, stdin-bytes: string, stdout-bytes: string, stderr-bytes: string, validator-exited-first: string,
+ *     cpu-time: string, sys-time: string, user-time: string, wall-time: string, total-duration-use: string
+ * }|array{internal-error: string,
+ *     exitcode?: string, memory-bytes?: string, time-used?: string, time-result?: string, bytes-transferred?: string,
+ *     output-truncated?: string, stdin-bytes?: string, stdout-bytes?: string, stderr-bytes?: string, validator-exited-first?: string,
+ *     cpu-time?: string, sys-time?: string, user-time?: string, wall-time?: string, total-duration-use?: string
+ * }
  */
 readonly class CompareMetadata
 {
@@ -106,6 +132,8 @@ readonly class CompareMetadata
 
     /**
      * Create from raw metadata array with validation.
+     *
+     * @param MetaData_Compare $meta
      */
     public static function fromArray(array $meta): self
     {
@@ -133,6 +161,32 @@ readonly class VerdictInput
     }
 }
 
+/**
+ * @phpstan-type JudgeTask array{submitid: ?string, contestid: ?string, judgetaskid: int, type: string, priority: int, jobid: ?string,
+ *     uuid: ?string, compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string, testcase_id: ?string,
+ *     testcase_hash: ?string, compile_config: ?string, run_config: ?string, compare_config: ?string
+ *  }
+ * @phpstan-type RunConfig array{time_limit: float, memory_limit: int, output_limit: int,
+ *      process_limit: int, entry_point: ?string, pass_limit?: int, hash: string, overshoot: int
+ * }
+ * @phpstan-type CompareConfig array{script_timelimit: int, script_memory_limit: int,
+ *      script_filesize_limit: int, compare_args: string, combined_run_compare: bool,
+ *      hash: string, is_scoring_problem: bool
+ * }
+ * TODO: We define this twice as we could have the same object with internal-error as last entry and none of the other properties
+ * probably better to test for this and fail instead of returning half of the data.
+ * @phpstan-import-type MetaData_Compare from CompareMetaData
+ * @phpstan-import-type MetaData_Program from ProgramMetaData
+ * @phpstan-type MetaData MetaData_Compare|MetaData_Program|array{
+ *     exitcode: string, memory-bytes: string, time-used: string, time-result: string,
+ *     output-truncated: string, stdin-bytes: string, stdout-bytes: string, stderr-bytes: string,
+ *     cpu-time: string, sys-time: string, user-time: string, wall-time: string
+ * }|array{internal-error: string,
+ *     exitcode?: string, memory-bytes?: string, time-used?: string, time-result?: string,
+ *     output-truncated?: string, stdin-bytes?: string, stdout-bytes?: string, stderr-bytes?: string,
+ *     cpu-time?: string, sys-time?: string, user-time?: string, wall-time?: string
+ * }
+ */
 class JudgeDaemon
 {
     private const FD_STDIN = 0;
@@ -165,12 +219,13 @@ class JudgeDaemon
     private bool $exitsignalled = false;
     private bool $gracefulexitsignalled = false;
 
-    private ?string $lastrequest = '';
+    private string $lastrequest = '';
     private float $waittime = self::INITIAL_WAITTIME_SEC;
 
     /** @var array<string, string[]> */
     private array $langexts = [];
 
+    /** @var ?resource */
     private $lockfile;
     /** @var array<int, string> */
     private array $EXITCODES;
@@ -296,7 +351,8 @@ class JudgeDaemon
         }
 
         // Pass SYSLOG variable via environment for compare program
-        if (defined('SYSLOG') && SYSLOG) {
+        // In the default config this is always defined in etc/judgehost-config.php but people can disable it.
+        if (defined('SYSLOG') && SYSLOG) { // @phpstan-ignore-line Right side of && is always true.
             putenv('DJ_SYSLOG=' . SYSLOG);
         }
 
@@ -494,6 +550,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask[] $row
+     */
     private function handleJudgingTask(array $row, ?string &$lastWorkdir, string $workdirpath, string $workdir): void
     {
         $success_file = "$workdir/.uuid_pid";
@@ -590,6 +649,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask[] $row
+     */
     private function handleDebugInfoTask(array $row, ?string &$lastWorkdir, string $workdirpath, string $workdir): void
     {
         if ($lastWorkdir !== null) {
@@ -629,6 +691,7 @@ class JudgeDaemon
             } else {
                 // Retrieving full team output for a particular testcase.
                 $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
+                // TODO: Properly fix this by sending the pass in the run_config instead of hardcoding 1
                 $this->request(
                     sprintf(
                         'judgehosts/add-debug-info/%s/%s',
@@ -644,6 +707,9 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask[] $row
+     */
     private function handlePrefetchTask(array $row, ?string &$lastWorkdir, string $workdirpath): void
     {
         if ($lastWorkdir !== null) {
@@ -674,6 +740,9 @@ class JudgeDaemon
         logmsg(LOG_INFO, "  🔥 Pre-heating judgehost completed.");
     }
 
+    /**
+     * @param JudgeTask[] $row
+     */
     private function handleTask(string $type, array $row, ?string &$lastWorkdir, string $workdirpath): void
     {
         if ($type == 'try_again') {
@@ -763,9 +832,12 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     */
     private function judgingDirectory(string $workdirpath, array $judgeTask): string
     {
-        if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => static::EXTERNAL_IDENTIFIER_REGEX]]) === false ||
+        if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => self::EXTERNAL_IDENTIFIER_REGEX]]) === false ||
             filter_var($judgeTask['jobid'], FILTER_VALIDATE_INT) === false) {
             error("Malformed data returned in judgeTask IDs: " . var_export($judgeTask, true));
         }
@@ -792,8 +864,10 @@ class JudgeDaemon
             if ($credential === '' || $credential[0] === '#') {
                 continue;
             }
-            /** @var string[] $items */
             $items = preg_split("/\s+/", $credential);
+            if ($items === false) {
+                error("Failed parsing in line $lineno.");
+            }
             if (count($items) !== 4) {
                 error("Error parsing REST API credentials. Invalid format in line $lineno.");
             }
@@ -835,7 +909,10 @@ class JudgeDaemon
         }
     }
 
-    private function request(string $url, string $verb = 'GET', $data = '', bool $failonerror = true): string|bool|null
+    /**
+     * @param array<string, string>|string $data
+     */
+    private function request(string $url, string $verb = 'GET', string|array $data = '', bool $failonerror = true): string|bool|null
     {
         // Don't flood the log with requests for new judgings every few seconds.
         if (str_starts_with($url, 'judgehosts/fetch-work') && $verb === 'POST') {
@@ -868,8 +945,6 @@ class JudgeDaemon
         }
         if ($verb == 'POST' || $verb == 'PUT') {
             curl_setopt($curl_handle, CURLOPT_POSTFIELDS, $data);
-        } else {
-            curl_setopt($curl_handle, CURLOPT_POSTFIELDS, null);
         }
 
         $delay_in_sec = BACKOFF_INITIAL_DELAY_SEC;
@@ -966,7 +1041,7 @@ class JudgeDaemon
         return $this->domjudge_config[$name];
     }
 
-    private function restEncodeFile(string $file, $sizelimit = true): string
+    private function restEncodeFile(string $file, bool|int $sizelimit = true): string
     {
         $maxsize = null;
         if ($sizelimit === true) {
@@ -1012,8 +1087,14 @@ class JudgeDaemon
         return trim(ob_get_clean());
     }
 
-    private function runCommandSafe(array $command_parts, &$retval = DONT_CARE, $log_nonzero_exitcode = true, $stdin_source = null, $stdout_target = null, $stderr_target = null): bool
-    {
+    /**
+     * @param string[] $command_parts
+     * @param int|DONT_CARE $retval
+     */
+    private function runCommandSafe(
+        array $command_parts, &$retval = DONT_CARE, bool $log_nonzero_exitcode = true,
+        ?string $stdin_source = null, ?string $stdout_target = null, ?string $stderr_target = null
+    ): bool {
         if (empty($command_parts)) {
             logmsg(LOG_WARNING, "Need at least the command that should be called.");
             $retval = -1;
@@ -1076,6 +1157,9 @@ class JudgeDaemon
         return $retval_local === 0;
     }
 
+    /**
+     * @return array{0: string|null, 1: string|null}
+     */
     private function fetchExecutable(
         string $workdirpath,
         string $type,
@@ -1107,6 +1191,9 @@ class JudgeDaemon
         return [$execrunpath, $error];
     }
 
+    /**
+     * @return array{0: string|null, 1: string|null, 2: string|null}
+     */
     private function fetchExecutableInternal(
         string $workdirpath,
         string $type,
@@ -1246,10 +1333,10 @@ class JudgeDaemon
                 }
                 chmod($execrunpath, 0755);
             }
-            if (!is_file($execrunpath) || !is_executable($execrunpath)) {
-                return [null, "Invalid build file, must produce an executable file 'run'.", null];
-            }
             if ($combined_run_compare) {
+                if (!is_file($execrunpath) || !is_executable($execrunpath)) {
+                    return [null, "Invalid build file, must produce an executable file 'run'.", null];
+                }
                 # For combined run and compare (i.e. for interactive problems), we
                 # need to wrap the jury provided 'run' script with 'runpipe' to
                 # handle the bidirectional communication.  First 'run' is renamed to
@@ -1343,6 +1430,9 @@ class JudgeDaemon
         logmsg(LOG_ERR, "=> internal error " . $error_id);
     }
 
+    /**
+     * @return MetaData
+     */
     private function readMetadata(string $filename): ?array
     {
         if (!is_readable($filename)) {
@@ -1384,6 +1474,10 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     * @param array{script_timelimit: int, script_memory_limit: int, language_extensions: array<string>, filter_compiler_files: bool, hash: string} $compile_config
+     */
     private function compile(
         array   $judgeTask,
         string  $workdir,
@@ -1580,6 +1674,9 @@ class JudgeDaemon
         return true;
     }
 
+    /**
+     * @param JudgeTask $judgeTask 
+     */
     private function compileAndRunSubmission(array $judgeTask, string $workdirpath): bool
     {
         $startTime = microtime(true);
@@ -1723,15 +1820,20 @@ class JudgeDaemon
         return $prefix . (empty($prefix) ? "" : " ") . "Wrong answer!";
     }
 
+    /**
+     * @param array{cpu: array{0: float, 1: float}, wall: array{0: float, 1: float}} $timelimit
+     * @param RunConfig $run_config
+     * @param CompareConfig $compare_config 
+     */
     private function testcaseRunInternal(
-        $input,
-        $output,
-        $timelimit,
-        $passdir,
-        $run_runpath,
-        $combined_run_compare,
-        $compare_runpath,
-        $compare_args,
+        string $input,
+        string $output,
+        array $timelimit,
+        string $passdir,
+        string $run_runpath,
+        bool $combined_run_compare,
+        string $compare_runpath,
+        ?string $compare_args,
         array $run_config,
         array $compare_config,
         ?int $judgetaskid = null
@@ -2036,12 +2138,12 @@ class JudgeDaemon
             }
 
             // Append output validator stdout
-            if ($compare_tmp && strlen($compare_tmp) > 0) {
+            if ($compare_tmp !== '') {
                 appendToFile("$realWorkdir/feedback/judgemessage.txt", "\n---------- output validator (stdout) messages ----------\n");
                 appendToFile("$realWorkdir/feedback/judgemessage.txt", $compare_tmp);
             }
             $compare_err = is_readable("compare.err") ? file_get_contents("compare.err") : "";
-            if ($compare_err && strlen($compare_err) > 0) {
+            if ($compare_err !== '') {
                 appendToFile("$realWorkdir/feedback/judgemessage.txt", "\n---------- output validator (stderr) messages ----------\n");
                 appendToFile("$realWorkdir/feedback/judgemessage.txt", $compare_err);
             }
@@ -2147,6 +2249,11 @@ class JudgeDaemon
         }
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     * @param RunConfig $run_config
+     * @param CompareConfig $compare_config 
+     */
     private function runTestcase(
         array $judgeTask,
         string $workdir,
@@ -2214,6 +2321,15 @@ class JudgeDaemon
         $input = $tcfile['input'];
         $output = $tcfile['output'];
         $passLimit = $run_config['pass_limit'] ?? 1;
+        // All of those are to help PHPStan, it seems to not see that they are defined in the loop
+        // and the loop always runs as tpassLimit >= $passCnt.
+        $score = "";
+        $nextPass = false;
+        $result = Verdict::INTERNAL_ERROR;
+        $runtime = null;
+        $new_judging_run = ['runresult' => '', 'start_time' => '', 'end_time' => '', 'runtime' => '', 'output_run' => '', 'output_error' => '',
+            'output_system' => '', 'metadata' => '', 'output_diff' => '', 'hostname' => '', 'testcasedir' => '', 'compare_metadata' => ''
+        ];
         for ($passCnt = 1; $passCnt <= $passLimit; $passCnt++) {
             $nextPass = false;
             if ($passLimit > 1) {
@@ -2387,6 +2503,16 @@ class JudgeDaemon
         return $ret;
     }
 
+    /**
+     * @param JudgeTask $judgeTask
+     * @param array{
+     *          runresult: string, start_time: string, end_time: string,
+     *          runtime: string, output_run: string, output_error: string,
+     *          output_system: string, metadata: string, output_diff: string,
+     *          hostname: string, testcasedir: string, compare_metadata: string,
+     *          team_message?: string, score?: string
+     *        } $new_judging_run
+     */
     private function reportJudgingRun(array $judgeTask, array $new_judging_run, bool $asynchronous): ?string
     {
         $judgeTaskId = $judgeTask['judgetaskid'];
@@ -2459,6 +2585,9 @@ class JudgeDaemon
         return $response;
     }
 
+    /**
+     * @return array{input: string, output: string}|null 
+     */
     private function fetchTestcase(string $workdirpath, string $testcase_id, int $judgetaskid, string $testcase_hash): ?array
     {
         // Get both in- and output files, only if we didn't have them already.
