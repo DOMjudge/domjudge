@@ -249,7 +249,7 @@ table.submissions-table {
 /* Sticky header for submissions table */
 .submissions-table thead.thead-light {
     position: sticky;
-    top: 3.5rem; /* below the fixed navbar */
+    top: var(--navbar-height);
     z-index: 10;
 }
 .submissions-table thead.thead-light th {

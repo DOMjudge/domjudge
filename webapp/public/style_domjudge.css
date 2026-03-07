@@ -2,6 +2,7 @@
     /** Specify the BG color in one place. **/
     --background-color: white;
     --text-color: black;
+    --navbar-height: 3.5rem;
 }
 
 /** WCAG fixes start **/
@@ -91,22 +92,34 @@ a {
 
 /* Compact test results bar for submission lists */
 .tc-bar {
+    --tc-seg-width: 9px;
+    --tc-seg-height: 20px;
+    --tc-seg-radius: 2px;
+    --tc-gap: 2px;
+    --tc-color-correct: #198754;
+    --tc-color-incorrect: #dc3545;
+    --tc-color-running: #0dcaf0;
+    --tc-color-pending: #dee2e6;
+    --tc-color-pending-done: #ced4da;
+    --tc-sep-height: 24px;
+    --tc-color-sep: #6c757d;
+
     display: inline-flex;
     flex-wrap: wrap;
     align-items: center;
     height: auto;
-    min-height: 18px;
+    min-height: var(--tc-seg-height);
     border-radius: 3px;
     vertical-align: middle;
-    gap: 2px;
+    gap: var(--tc-gap);
     padding: 3px;
     background: transparent;
     width: 100%;
 }
 .tc-seg {
-    flex: 0 0 8px;
-    height: 18px;
-    border-radius: 2px;
+    flex: 0 0 var(--tc-seg-width);
+    height: var(--tc-seg-height);
+    border-radius: var(--tc-seg-radius);
     cursor: default;
     transition: opacity 0.15s;
 }
@@ -115,13 +128,13 @@ a {
 }
 .tc-sep {
     flex: 0 0 2px;
-    height: 22px;
-    background-color: #6c757d;
+    height: var(--tc-sep-height);
+    background-color: var(--tc-color-sep);
     margin: 0 3px;
     border-radius: 1px;
 }
-.tc-correct { background-color: #198754; }
-.tc-incorrect { background-color: #dc3545; }
+.tc-correct { background-color: var(--tc-color-correct); }
+.tc-incorrect { background-color: var(--tc-color-incorrect); }
 /* Verdict-specific bar segment colors - currently all red */
 /*
 .tc-r-timelimit { background-color: #e67e22; }
@@ -130,10 +143,10 @@ a {
 .tc-r-output-limit { background-color: #0d8a8a; }
 .tc-r-no-output { background-color: #0d8a8a; }
 */
-.tc-running { background-color: #0dcaf0; }
-.tc-pending { background-color: #dee2e6; }
-.tc-pending-done { background-color: #ced4da; }
-.tc-invalid { background-color: #dee2e6; }
+.tc-running { background-color: var(--tc-color-running); }
+.tc-pending { background-color: var(--tc-color-pending); }
+.tc-pending-done { background-color: var(--tc-color-pending-done); }
+.tc-invalid { background-color: var(--tc-color-pending); }
 
 .sol {
     font-weight: bold;
@@ -342,7 +355,7 @@ img.affiliation-logo {
     border: none;
     background: var(--background-color);
     position: sticky;
-    top: 0;
+    top: var(--navbar-height);
     z-index: 1;
 }
 
