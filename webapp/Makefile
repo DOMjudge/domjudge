@@ -46,7 +46,8 @@ ifeq (, $(shell command -v yarn || command -v yarnpkg 2> /dev/null))
 endif
 	@YARN_CMD=$(shell command -v yarn || command -v yarnpkg); \
 	$$YARN_CMD install; \
-	$$YARN_CMD licenses generate-disclaimer > LICENSES.txt
+	$$YARN_CMD licenses generate-disclaimer > LICENSES.txt 2>/dev/null || \
+		echo "Warning: 'yarn licenses' not available; skipping LICENSES.txt generation."
 
 # Run Symfony in dev mode (for maintainer-mode):
 .env.local:
