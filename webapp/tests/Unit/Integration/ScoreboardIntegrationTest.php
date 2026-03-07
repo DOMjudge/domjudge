@@ -388,6 +388,33 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
+    /**
+     * Test that delaying the contest start (disabling start time) doesn't cause
+     * negative score key values when a jury test submission exists before the start time.
+     * Regression test for https://github.com/DOMjudge/domjudge/issues/3417
+     */
+    public function testDelayedContestStart(): void
+    {
+        $lang = $this->em->getRepository(Language::class)->findByExternalId('cpp');
+
+        // Submit before the contest start time (negative contest time).
+        $team = $this->teams[0];
+        $this->createSubmission($lang, $this->problems[0], $team, -7*60, 'correct');
+
+        // Delay the contest start.
+        $this->contest->setStarttimeEnabled(false);
+        $this->em->flush();
+
+        // This should not throw "No negative values allowed in score key element".
+        $this->recalcScoreCaches();
+
+        $scoreboard = $this->ss->getScoreboard($this->contest, true);
+        $scores = $scoreboard->getScores();
+        $score = $scores[$team->getTeamid()];
+        static::assertEquals(1, $score->numPoints, 'Team should have solved 1 problem');
+        static::assertEquals(0, $score->totalTime, 'Solve time should be capped to 0');
+    }
+
     protected function assertScoresMatch(array $expected_scores, Scoreboard $scoreboard): void
     {
         $scores = $scoreboard->getScores();
