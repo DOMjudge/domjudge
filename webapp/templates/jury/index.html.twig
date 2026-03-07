@@ -1,5 +1,14 @@
 {% extends "jury/base.html.twig" %}
 
+{% macro tile(href, icon, label) %}
+<div class="col-6 col-sm-4 col-md-3 col-lg-2">
+    <a href="{{ href }}" class="dj-tile text-center text-decoration-none p-3 rounded">
+        <i class="fas fa-{{ icon }} fa-2x d-block mb-2"></i>
+        {{ label }}
+    </a>
+</div>
+{% endmacro %}
+
 {% block title %}{{ parent() }} - Jury Interface{% endblock %}
 
 {% block extrahead %}
@@ -7,109 +16,82 @@
 {% endblock %}
 
 {% block content %}
+<a href="https://www.domjudge.org/">
+    <img src="{{ asset('images/DOMjudgelogo.svg') }}" id="djlogo" alt="DOMjudge logo" class="float-end d-none d-md-block" title="The DOMjudge logo: free as in beer!">
+</a>
+<div class="dj-dashboard">
 <h1>DOMjudge Jury interface</h1>
 
-<a href="https://www.domjudge.org/">
-  <img src="{{ asset('images/DOMjudgelogo.svg') }}" id="djlogo" alt="DOMjudge logo" class="float-end d-none d-md-block" title="The DOMjudge logo: free as in beer!">
-</a>
+{% if is_granted('ROLE_JURY') %}
+<h5 class="mt-4 mb-3">Before contest</h5>
+<div class="row g-2 mb-3">
+    {{ _self.tile(path('jury_contests'), 'trophy', 'Contests') }}
+    {{ _self.tile(path('jury_executables'), 'file-code', 'Executables') }}
+    {{ _self.tile(path('jury_judgehosts'), 'server', 'Judgehosts') }}
+    {{ _self.tile(path('jury_languages'), 'language', 'Languages') }}
+    {{ _self.tile(path('jury_problems'), 'book-open', 'Problems') }}
+    {{ _self.tile(path('jury_problemset'), 'eye', 'Problemset preview') }}
+    {{ _self.tile(path('jury_users'), 'users', 'Users') }}
+    {{ _self.tile(path('jury_teams'), 'user-friends', 'Teams') }}
+    {{ _self.tile(path('jury_team_categories'), 'layer-group', 'Team Categories') }}
+    {{ _self.tile(path('jury_team_affiliations'), 'university', 'Team Affiliations') }}
+    {{ _self.tile(path('jury_judging_verifier'), 'check-double', 'Judging verifier') }}
+    {{ _self.tile(path('jury_versions'), 'square-binary', 'Compiler versions') }}
+</div>
+{% endif %}
 
-<div class="row equal mt-3">
-    <div class="col-lg-4 col-md-5 col-sm-6 mt-3">
-        {% if is_granted('ROLE_JURY') %}
-        <div class="card mb-3">
-            <div class="card-header">
-                Before contest:
-            </div>
-            <div class="card-body">
-                <ul>
-                    <li><a href="{{ path('jury_contests') }}">Contests</a></li>
-                    <li><a href="{{ path('jury_executables') }}">Executables</a></li>
-                    <li><a href="{{ path('jury_judgehosts') }}">Judgehosts</a></li>
-                    <li><a href="{{ path('jury_languages') }}">Languages</a></li>
-                    <li><a href="{{ path('jury_problems') }}">Problems</a></li>
-                    <li><a href="{{ path('jury_problemset') }}">Team problemset page preview</a></li>
-                    <li><a href="{{ path('jury_users') }}">Users</a></li>
-                    <li><a href="{{ path('jury_teams') }}">Teams</a></li>
-                    <li><a href="{{ path('jury_team_categories') }}">Team Categories</a></li>
-                    <li><a href="{{ path('jury_team_affiliations') }}">Team Affiliations</a></li>
-                    <li><a href="{{ path('jury_judging_verifier') }}">Judging verifier</a></li>
-                    <li><a href="{{ path('jury_versions') }}">Compiler and runner versions</a></li>
-                </ul>
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="card mb-3">
-            <div class="card-header">
-                During contest:
-            </div>
-            <div class="card-body">
-                <ul>
-                    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_BALLOON') %}
-                        <li><a href="{{ path('jury_balloons_legacy') }}">Balloon Status</a></li>
-                    {% endif %}
-                    {% if is_granted('ROLE_CLARIFICATION_RW') %}
-                        <li><a href="{{ path('jury_clarifications_legacy') }}">Clarifications</a></li>
-                    {% endif %}
-                    {% if is_granted('ROLE_JURY') %}
-                        <li><a href="{{ path('jury_internal_errors') }}">Internal Errors</a></li>
-                    {% endif %}
-                    {% if have_printing %}
-                        <li><a href="{{ path('jury_print') }}">Print</a></li>
-                    {% endif %}
-                    {% if is_granted('ROLE_JURY') %}
-                        <li><a href="{{ path('jury_rejudgings') }}">Rejudgings</a></li>
-                        <li><a href="{{ path('jury_scoreboard') }}">Scoreboard</a></li>
-                        <li><a href="{{ path('analysis_index') }}">Statistics/Analysis</a></li>
-                        <li><a href="{{ path('jury_submissions_legacy') }}">Submissions</a></li>
-                        {% if is_granted('ROLE_ADMIN') %}
-                            <li><a href="{{ path('jury_queue_tasks') }}">Queue tasks</a></li>
-                        {% endif %}
-                        {% if show_shadow_differences %}
-                            <li><a href="{{ path('jury_shadow_differences') }}">Shadow Differences</a></li>
-                            <li><a href="{{ path('jury_external_contest') }}">External Contest</a></li>
-                        {% endif %}
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </div>
-
-  <div class="col-lg-4 col-md-5 col-sm-6 mt-3">
-    {% if is_granted('ROLE_ADMIN') %}
-    <div class="card mb-3">
-      <div class="card-header">
-        Administrator:
-      </div>
-      <div class="card-body">
-        <ul>
-          <li><a href="{{ path('jury_config') }}">Configuration settings</a></li>
-          <li><a href="{{ path('jury_config_check') }}">Config checker</a></li>
-          <li><a href="{{ path('jury_import_export') }}">Import / export</a></li>
-          <li><a href="{{ path('jury_generate_passwords') }}">Manage team passwords</a></li>
-          <li><a href="{{ path('jury_refresh_cache') }}">Refresh scoreboard cache</a></li>
-          <li><a href="{{ path('jury_auditlog') }}">Audit log</a></li>
-          {% if adminer_enabled %}
-            <li><a href="{{ path('jury_adminer') }}">Adminer Database Editor</a></li>
-          {% endif %}
-        </ul>
-      </div>
-    </div>
+{% if is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') or is_granted('ROLE_CLARIFICATION_RW') or have_printing %}
+<h5 class="mt-4 mb-3">During contest</h5>
+<div class="row g-2 mb-3">
+    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_BALLOON') %}
+    {{ _self.tile(path('jury_balloons_legacy'), 'map-marker-alt', 'Balloon Status') }}
     {% endif %}
+    {% if is_granted('ROLE_CLARIFICATION_RW') %}
+    {{ _self.tile(path('jury_clarifications_legacy'), 'comments', 'Clarifications') }}
+    {% endif %}
+    {% if is_granted('ROLE_JURY') %}
+    {{ _self.tile(path('jury_internal_errors'), 'bolt', 'Internal Errors') }}
+    {% endif %}
+    {% if have_printing %}
+    {{ _self.tile(path('jury_print'), 'file-alt', 'Print') }}
+    {% endif %}
+    {% if is_granted('ROLE_JURY') %}
+    {{ _self.tile(path('jury_rejudgings'), 'sync', 'Rejudgings') }}
+    {{ _self.tile(path('jury_scoreboard'), 'list-ol', 'Scoreboard') }}
+    {{ _self.tile(path('analysis_index'), 'chart-bar', 'Statistics/Analysis') }}
+    {{ _self.tile(path('jury_submissions_legacy'), 'file-code', 'Submissions') }}
+    {% if is_granted('ROLE_ADMIN') %}
+    {{ _self.tile(path('jury_queue_tasks'), 'tasks', 'Queue tasks') }}
+    {% endif %}
+    {% if show_shadow_differences %}
+    {{ _self.tile(path('jury_shadow_differences'), 'not-equal', 'Shadow Differences') }}
+    {{ _self.tile(path('jury_external_contest'), 'laptop-code', 'External Contest') }}
+    {% endif %}
+    {% endif %}
+</div>
+{% endif %}
 
-    <div class="card mb-3">
-      <div class="card-header">
-        Documentation:
-      </div>
-      <div class="card-body">
-        <ul>
-        <li><a href="{{ asset_urls['domjudge_manual'] }}">DOMjudge manual</a></li>
-        <li><a href="{{ asset_urls['team_manual'] }}">Team manual <i class="fas fa-file-pdf"></i></a></li>
-        <li><a href="{{ path('app.swagger_ui') }}">API documentation</a><br />
-            See also the <a href="{{ CCS_SPEC_API_URL }}">ICPC Contest API</a>.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
+{% if is_granted('ROLE_ADMIN') %}
+<h5 class="mt-4 mb-3">Administrator</h5>
+<div class="row g-2 mb-3">
+    {{ _self.tile(path('jury_config'), 'cog', 'Configuration') }}
+    {{ _self.tile(path('jury_config_check'), 'clipboard-check', 'Config checker') }}
+    {{ _self.tile(path('jury_import_export'), 'exchange-alt', 'Import / export') }}
+    {{ _self.tile(path('jury_generate_passwords'), 'key', 'Passwords') }}
+    {{ _self.tile(path('jury_refresh_cache'), 'sync-alt', 'Refresh cache') }}
+    {{ _self.tile(path('jury_auditlog'), 'history', 'Audit log') }}
+    {% if adminer_enabled %}
+    {{ _self.tile(path('jury_adminer'), 'database', 'Adminer') }}
+    {% endif %}
+</div>
+{% endif %}
+
+<h5 class="mt-4 mb-3">Documentation</h5>
+<div class="row g-2 mb-3">
+    {{ _self.tile(asset_urls['domjudge_manual'], 'book', 'DOMjudge manual') }}
+    {{ _self.tile(asset_urls['team_manual'], 'file-pdf', 'Team manual') }}
+    {{ _self.tile(path('app.swagger_ui'), 'code', 'API documentation') }}
+    {{ _self.tile(CCS_SPEC_API_URL, 'globe', 'ICPC Contest API') }}
+</div>
 </div>
 {% endblock %}
