@@ -3,14 +3,14 @@
 
 
 "@fortawesome/fontawesome-free@^7.1.0":
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-free/-/fontawesome-free-7.1.0.tgz#8eb76278515341720aa74485266f8be121089529"
-  integrity sha512-+WxNld5ZCJHvPQCr/GnzCTVREyStrAJjisUPtUxG5ngDA8TMlPnKp6dddlTpai4+1GNmltAeuk1hJEkBohwZYA==
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-free/-/fontawesome-free-7.2.0.tgz#188c1053ce422ad1f934d7df242a973fcb89636d"
+  integrity sha512-3DguDv/oUE+7vjMeTSOjCSG+KeawgVQOHrKRnvUuqYh1mfArrh7s+s8hXW3e4RerBA1+Wh+hBqf8sJNpqNrBWg==
 
-"@mathjax/mathjax-newcm-font@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@mathjax/mathjax-newcm-font/-/mathjax-newcm-font-4.0.0.tgz#01afa8b20f2114665dc1d9a7fbc623a23ddb54e4"
-  integrity sha512-kpsJgIF4FpWiwIkFgOPmWwy5GXfL25spmJJNg27HQxPddmEL8Blx0jn2BuU/nlwjM/9SnYpEfDrWiAMgLPlB8Q==
+"@mathjax/mathjax-newcm-font@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@mathjax/mathjax-newcm-font/-/mathjax-newcm-font-4.1.1.tgz#4e82b3ef8e570b6c8eefb3a8063a656c15e3ee35"
+  integrity sha512-LeV5AWzoR7k/k2tg5mW0Ad3Jr9oK9guW/zBUIP8aoiIZcZIhvAV9dlbtUSqSe1wgEBUP1KOcJXcrE/NxOqkxlQ==
 
 "@melloware/coloris@^0.25.0":
   version "0.25.0"
@@ -38,17 +38,17 @@ d3@3.5.17:
   integrity sha512-yFk/2idb8OHPKkbAL8QaOaqENNoMhIaSHZerk3oQsECwkObkCpJyjYwCe+OHiq6UEdhe1m8ZGARRRO3ljFjlKg==
 
 datatables.net-bs5@^2.3.4:
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/datatables.net-bs5/-/datatables.net-bs5-2.3.5.tgz#96f76dce12b1554664b06bd85f6b3be8d6da509f"
-  integrity sha512-2JA2WZz1tBxdVpYAspiqI8POdqEoAZZzqp7tISKaof2P5ufBJb+OLaahxwuB0sF9qcQh1azlU+JH1zsLBXVwXg==
+  version "2.3.7"
+  resolved "https://registry.yarnpkg.com/datatables.net-bs5/-/datatables.net-bs5-2.3.7.tgz#ddef957ee23b03c2d4bc1d48735b39c6182e5d53"
+  integrity sha512-RiCEMpMXDBeMDwjSrMpmcXDU6mibRMuOn7Wk7k3SlOfLEY3FQHO7S2m+K7teXYeaNlCLyjJMU+6BUUwlBCpLFw==
   dependencies:
-    datatables.net "2.3.5"
+    datatables.net "2.3.7"
     jquery ">=1.7"
 
-datatables.net@2.3.5, datatables.net@^2.3.4:
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-2.3.5.tgz#a35cc1209edb7525ea68ebc3e7d3af6e3f30a758"
-  integrity sha512-Qrwc+vuw8GHo42u1usWTuriNAMW0VvLPSW3j8g3GxvatiD8wS/ZGW32VAYLLfmF4Hz0C/fo2KB3xZBfcpqqVTQ==
+datatables.net@2.3.7, datatables.net@^2.3.4:
+  version "2.3.7"
+  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-2.3.7.tgz#3cd34f6f5d1f40a46b5a20a4ba32604bdbcd6738"
+  integrity sha512-AvsjG/Nkp6OxeyBKYZauemuzQCPogE1kOtKwG4sYjvdqGCSLiGaJagQwXv4YxG+ts5vaJr6qKGG9ec3g6vTo3w==
   dependencies:
     jquery ">=1.7"
 
@@ -75,9 +75,9 @@ jquery-debounce-throttle@^1.0.6-rc.0:
     jquery ">=1.7"
 
 jquery@>=1.7:
-  version "3.7.1"
-  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.7.1.tgz#083ef98927c9a6a74d05a6af02806566d16274de"
-  integrity sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-4.0.0.tgz#95c33ac29005ff72ec444c5ba1cf457e61404fbb"
+  integrity sha512-TXCHVR3Lb6TZdtw1l3RTLf8RBWVGexdxL6AC8/e0xZKEpBflBsjh9/8LXw+dkNFuOyW9B7iB3O1sP7hS0Kiacg==
 
 marked@14.0.0:
   version "14.0.0"
@@ -85,11 +85,11 @@ marked@14.0.0:
   integrity sha512-uIj4+faQ+MgHgwUW1l2PsPglZLOLOT1uErt06dAPtx2kjteLAkbsd/0FiYg/MGS+i7ZKLb7w2WClxHkzOOuryQ==
 
 mathjax@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/mathjax/-/mathjax-4.0.0.tgz#ff7aa8b6bfdc7e97e41091a9ed6d8c8f8eefd2a0"
-  integrity sha512-ThMPHiPl9ibZBInAmfoTCNq9MgCdH7ChIQ9YhKFc325noJ4DMzy9/Q14qdcuPzVJjEmC3kyXhwnERZWX3hbWzQ==
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/mathjax/-/mathjax-4.1.1.tgz#f6b2aa6c94655ed5f08f7292588de057f0262c53"
+  integrity sha512-NyvA8c39LUUM/m+oCg7sfA13hmw7yGkre5kiRWN9qzChCyhce39lecnbjgMA/oEUgq9Vyetk6u78apwcIXpW/A==
   dependencies:
-    "@mathjax/mathjax-newcm-font" "^4.0.0"
+    "@mathjax/mathjax-newcm-font" "^4.1.1"
 
 monaco-editor@^0.54.0:
   version "0.54.0"
