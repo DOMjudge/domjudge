@@ -5,6 +5,15 @@ on:
     branches:
       - main
       - '[0-9]+.[0-9]+'
+    paths:
+      - 'configure.ac'
+      - 'm4/**'
+      - 'Makefile*'
+      - '**/Makefile'
+      - 'paths.mk.in'
+      - 'bootstrap'
+      - '.github/workflows/autoconf-check*.yml'
+      - '.github/jobs/configure-checks/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
