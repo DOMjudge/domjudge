@@ -399,7 +399,7 @@
             <tbody>
             {% for judging in judgings %}
                 {% set link = path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: judging.judgingid}) %}
-                <tr {% if not judging.valid %}class="disabled"{% endif %}>
+                <tr {%- if not judging.valid %} class="disabled"{% endif %}>
                     <td>
                         <a href="{{ link }}">
                             {% if selectedJudging is not null and selectedJudging.judgingid == judging.judgingid %}
