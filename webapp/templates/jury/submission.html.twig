@@ -940,6 +940,13 @@
                                 {% else %}
                                     <pre class="output_text">{{ runsOutput[runIdx].output_diff | convertUnprintableChars }}</pre>
                                 {% endif %}
+
+                                <h5>Validator/Submission interaction</h5>
+                                {% if runsOutput[runIdx].output_run is empty %}
+                                    <p class="nodata">There was no interaction log.</p>
+                                {% else %}
+                                    {{ runsOutput[runIdx].output_run | interactiveLog }}
+                                {% endif %}
                             {% else %}
                                 <h4>Diff output</h4>
                                 {% if runsOutput[runIdx].output_diff is empty %}
@@ -951,16 +958,7 @@
                                 {% if run.firstJudgingRun.runresult != 'correct' %}
                                     {{ runsOutput[runIdx] | runDiff }}
                                 {% endif %}
-                            {% endif %}
 
-                            {% if combinedRunCompare %}
-                                <h5>Validator/Submission interaction</h5>
-                                {% if runsOutput[runIdx].output_run is empty %}
-                                    <p class="nodata">There was no interaction log.</p>
-                                {% else %}
-                                    {{ runsOutput[runIdx].output_run | interactiveLog }}
-                                {% endif %}
-                            {% else %}
                                 <h5>Program output</h5>
                                 {% if runsOutput[runIdx].output_run is empty %}
                                     <p class="nodata">There was no program output.</p>
