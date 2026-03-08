@@ -310,7 +310,11 @@
             </div>
         </div>
     </div>
+<<<<<<< HEAD
     <br />{# TODO: Consider making this a new class="row" #}
+=======
+    <br /> {# TODO: Consider making this a new class="row" #}
+>>>>>>> 92d1dd799 (Fixup)
 
     {% if not submission.valid %}
         <div class="alert alert-danger">This submission is not used during scoreboard calculations.</div>
@@ -523,19 +527,19 @@
                             {%- endif -%}
                         {% endif %}
                         {%- if lastJudging is not null -%}
-                            {% set lastSubmissionLink = path('jury_submission', {contestId: lastSubmission.contest.externalid, submitId: lastSubmission.externalid}) %}{#-
-                        -#}<span class="lastresult">
-                            (<a href="{{ lastSubmissionLink }}">{{ lastSubmission.externalid }}</a>: {{ lastJudging.result | printResult }}){#-
-                        -#}</span>
+                            {% set lastSubmissionLink = path('jury_submission', {contestId: lastSubmission.contest.externalid, submitId: lastSubmission.externalid}) %}
+                            <span class="lastresult">
+                                (<a href="{{ lastSubmissionLink }}">{{ lastSubmission.externalid }}</a>: {{ lastJudging.result | printResult }})
+                            </span>
                         {%- endif -%}
                         {%- if externalJudgement is not null %}
                             {% if submission.importError %}
                                 External result: {{ externalJudgement.result | printValidJuryResult }}
                             {% else %}
                                 (external: {{ externalJudgement.result | printValidJuryResult }}
-                                {% if submission.problem.scoringProblem %}
-                                    , score: {{ "%.2f" | format(externalJudgement.score) }}
-                                {% endif %}
+                                    {% if submission.problem.scoringProblem %}
+                                        , score: {{ "%.2f" | format(externalJudgement.score) }}
+                                    {% endif %}
                                 )
                             {% endif %}
                         {%- endif %}
@@ -752,7 +756,7 @@
             </script>
         {% endif %}
 
-        {# Show verify info, but only when a result is known #}
+        {# Show verify info, but only when a result is known #}#}#}
         {% if selectedJudging is not null and selectedJudging.result is not empty %}
             {% include 'jury/partials/verify_form.html.twig' with {
                 label: 'Verified',
@@ -787,7 +791,6 @@
         {% endif %}
 
         <hr>
-        <br>
 
         {% if externalJudgement is not null or (selectedJudging is not null and selectedJudging.result != 'compiler-error') %}
             {# Show run info. Only when compilation was successful or we have an external judgement #}
@@ -847,14 +850,14 @@
                             {% if externalRun.firstExternalRun is not null %}
                                 (external:
                                 <span class="sol {% if externalRun.firstExternalRun.result == 'correct' %}sol_correct{% else %}sol_incorrect{% endif %}">
-                                    {{ externalRun.firstExternalRun.result }}{#-
-                                -#}</span>{#-
-                                -#})
+                                    {{ externalRun.firstExternalRun.result }}
+                                </span>
+                                )
                             {% endif %}
                         {% endif %}
                         {% if runsOutput[runIdx].testcasedir is defined and runsOutput[runIdx].testcasedir is not null %}
-                          | <code>.../{{ runsOutput[runIdx].testcasedir | split('/') | last }}</code>{#-
-                            -#}<button type="button" class="btn btn-link" onclick="navigator.clipboard.writeText('{{ runsOutput[runIdx].testcasedir }}')"><i class="fa-regular fa-copy"></i></button>
+                          | <code>.../{{ runsOutput[runIdx].testcasedir | split('/') | last }}</code>
+                          <button type="button" class="btn btn-link" onclick="navigator.clipboard.writeText('{{ runsOutput[runIdx].testcasedir }}')"><i class="fa-regular fa-copy"></i></button>
                         {% endif %}
                         <div style="float: right;">
                             <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.externalid, 'rank': run.rank, 'type': 'input'}) }}">
@@ -927,7 +930,7 @@
                         <p class="nodata">
                             {% if selectedJudging is not null and selectedJudging.result %}
                                 Run not used for final result.
-                            {% else %}
+                            {% else %}#}#}
                                 Run not started/finished yet.
                             {% endif %}
                         </p>
