@@ -917,6 +917,7 @@
                                     <img class="image_thumb" src="data:{{ run.imageType | extensionToMime }};base64,{{ runsOutput[runIdx].image_thumb | base64 }}"/>
                                 </a>
                             </span>
+                        {% endif %}
 
                     {% set runDone = false %}
                     {% if run is not null and run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
