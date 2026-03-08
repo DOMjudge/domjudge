@@ -3,7 +3,7 @@
     {%- for key, label in filters %}
         <input type="radio" class="btn-check"
             name="viewtype" value="{{ key }}" id="viewtype{{ key }}"
-            {% if key == view %}checked{% endif %}>
+            {% if key == view %}checked=checked{% endif %}>
         <label class="btn btn-secondary" for="viewtype{{ key }}">{{ label }}</label>
     {%- endfor %}
 </div>
