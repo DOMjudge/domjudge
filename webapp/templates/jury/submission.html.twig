@@ -954,7 +954,8 @@
                             {% if runsOutput[runIdx].team_message is not empty %}
                                 <h5>Judge message for the team</h5>
                                 <pre class="output_text">
-{{  runsOutput[runIdx].team_message | convertUnprintableChars }}</pre>
+                                    {{  runsOutput[runIdx].team_message | convertUnprintableChars }}
+                                </pre>
                             {% endif %}
                         {% endif %}
 
