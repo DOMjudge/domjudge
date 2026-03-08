@@ -551,30 +551,30 @@
                             </a>
                         {% endif %}
                     {% endif %}
-                &nbsp;
-                {% if not selectedJudging.verified %}
-                    <form action="{{ path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: selectedJudging.judgingid}) }}"
-                          method="post" style="display: inline;">
-                        {% if selectedJudging.juryMember is not empty %}
-                            (claimed by {{ selectedJudging.juryMember }})
-                            <input type="hidden" name="forceclaim" value="1"/>
-                        {% endif %}
-                        {% if app.user.username == selectedJudging.juryMember %}
-                            <input type="submit" value="unclaim" name="unclaim" class="btn btn-outline-secondary btn-sm"/>
-                        {% else %}
-                            <input type="submit" value="claim" name="claim" class="btn btn-outline-secondary btn-sm"/>
-                        {% endif %}
-                    </form>
-                {% endif %}
-                &nbsp;
-                {% if selectedJudging is null or selectedJudging.result is empty %}
-                    {%- if not selectedJudging or not selectedJudging.started %}
-                        <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_submission_create_tasks', {'contestId': submission.contest.externalid, 'submitId': submission.externalid}) }}">
-                            <i class="fas fa-gavel"></i>
-                            Judge submission
-                        </a>
+                    &nbsp;
+                    {% if not selectedJudging.verified %}
+                        <form action="{{ path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: selectedJudging.judgingid}) }}"
+                              method="post" style="display: inline;">
+                            {% if selectedJudging.juryMember is not empty %}
+                                (claimed by {{ selectedJudging.juryMember }})
+                                <input type="hidden" name="forceclaim" value="1"/>
+                            {% endif %}
+                            {% if app.user.username == selectedJudging.juryMember %}
+                                <input type="submit" value="unclaim" name="unclaim" class="btn btn-outline-secondary btn-sm"/>
+                            {% else %}
+                                <input type="submit" value="claim" name="claim" class="btn btn-outline-secondary btn-sm"/>
+                            {% endif %}
+                        </form>
+                    {% endif %}
+                    &nbsp;
+                    {% if selectedJudging is null or selectedJudging.result is empty %}
+                        {%- if not selectedJudging or not selectedJudging.started %}
+                            <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_submission_create_tasks', {'contestId': submission.contest.externalid, 'submitId': submission.externalid}) }}">
+                                <i class="fas fa-gavel"></i>
+                                Judge submission
+                            </a>
+                        {%- endif %}
                     {%- endif %}
-                {%- endif %}
                 </div>
             </div>
         {% endif %}
