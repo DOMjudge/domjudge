@@ -29,11 +29,9 @@
         .scoring-details-container.show-full .rounded-precision { display: none; }
         .scoring-details-container.show-full .full-precision { display: inline; }
     </style>
-
 {% endblock %}
 
 {% block content %}
-
     {% macro render_scoring_group(group, depth) %}
         <div class="scoring-group mb-1 {{ depth > 0 ? 'scoring-group-indent' : 'scoring-group-root' }}">
             <div class="scoring-group-header mb-1 d-flex align-items-center flex-wrap">
@@ -461,9 +459,7 @@
     {% endif %}
 
     {% if selectedJudging is not null or externalJudgement is not null %}
-
         {% if selectedJudging is not null %}
-
             {# Show judging information #}
             <div class="mb-2">
                 <h3 style="display: inline;">
@@ -691,7 +687,6 @@
                         </tr>
                     {% endif %}
                 </table>
-
             {% endif %}
         </div>
 
@@ -964,6 +959,18 @@
                         {% set runDone = false %}
                         {% if run is not null and run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
                             {% set runDone = true %}
+                        {% if runsOutput[runIdx].validatorMetadata is not empty %}
+                            <hr/>
+                            <h5>Validator metadata</h5>
+                            {{ runsOutput[runIdx].validatorMetadata | printMetadata }}
+                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseValMeta-{{ runIdx }}"
+                                    aria-expanded="false">
+                                show complete validator metadata
+                            </button>
+                            <div class="collapse" id="collapseValMeta-{{ runIdx }}">
+                                <div class="card card-body output_text">{{ runsOutput[runIdx].validatorMetadata  }}</div>
+                            </div>
                         {% endif %}
                         {% if not runDone %}
                             <p class="nodata">
@@ -1062,6 +1069,5 @@
                 display_correctruns(false);
             </script>
         {% endif %} {# selectedJudging.result != 'compiler-error' #}
-
     {% endif %} {# selectedJudging is not null or externalJudgement is not null #}
 {% endblock %}
