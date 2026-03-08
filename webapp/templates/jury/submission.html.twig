@@ -381,18 +381,18 @@
         <h2>Judgings</h2>
         <table class="judging-table table table-striped table-hover table-sm" style="width: auto;">
             <thead>
-            <tr>
-                <td></td>
-                <th scope="col">ID</th>
-                <th scope="col">start</th>
-                <th scope="col">max runtime</th>
-                <th scope="col">judgehost</th>
-                <th scope="col">result</th>
-                {% if submission.problem.scoringProblem %}
-                    <th scope="col">score</th>
-                {% endif %}
-                <th scope="col">rejudging</th>
-            </tr>
+                <tr>
+                    <td></td>
+                    <th scope="col">ID</th>
+                    <th scope="col">start</th>
+                    <th scope="col">max runtime</th>
+                    <th scope="col">judgehost</th>
+                    <th scope="col">result</th>
+                    {% if submission.problem.scoringProblem %}
+                        <th scope="col">score</th>
+                    {% endif %}
+                    <th scope="col">rejudging</th>
+                </tr>
             </thead>
             <tbody>
             {% for judging in judgings %}
