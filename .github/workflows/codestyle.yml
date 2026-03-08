@@ -5,6 +5,17 @@ on:
     branches:
       - main
       - '[0-9]+.[0-9]+'
+    paths:
+      - '**.php'
+      - '**.php.in'
+      - '**.py'
+      - '**.sh'
+      - 'doc/**'
+      - 'Makefile*'
+      - 'configure.ac'
+      - 'm4/**'
+      - '.github/workflows/codestyle.yml'
+      - '.github/jobs/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
