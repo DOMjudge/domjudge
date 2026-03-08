@@ -179,8 +179,8 @@
                 </p>
                 <p>
                     {% for version in versions %}
-                            <pre class="output_text">{{ version }}</pre>
-                            {% if not loop.last %}<hr />{% endif %}
+                        <pre class="output_text">{{ version }}</pre>
+                        {% if not loop.last %}<hr />{% endif %}
                     {% endfor %}
                 </p>
             </div>
@@ -381,74 +381,106 @@
         <h2>Judgings</h2>
         <table class="judging-table table table-striped table-hover table-sm" style="width: auto;">
             <thead>
-            <tr>
-                <td></td>
-                <th scope="col">ID</th>
-                <th scope="col">start</th>
-                <th scope="col">max runtime</th>
-                <th scope="col">judgehost</th>
-                <th scope="col">result</th>
-                {% if submission.problem.scoringProblem %}
-                    <th scope="col">score</th>
-                {% endif %}
-                <th scope="col">rejudging</th>
-            </tr>
+                <tr>
+                    <td></td>
+                    <th scope="col">ID</th>
+                    <th scope="col">start</th>
+                    <th scope="col">max runtime</th>
+                    <th scope="col">judgehost</th>
+                    <th scope="col">result</th>
+                    {% if submission.problem.scoringProblem %}
+                        <th scope="col">score</th>
+                    {% endif %}
+                    <th scope="col">rejudging</th>
+                </tr>
             </thead>
             <tbody>
-            {% for judging in judgings %}
-                {% set link = path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: judging.judgingid}) %}
-                <tr {%- if not judging.valid %} class="disabled"{% endif %}>
-                    <td>
-                        <a href="{{ link }}">
-                            {% if selectedJudging is not null and selectedJudging.judgingid == judging.judgingid %}
-                                <i class="fas fa-long-arrow-alt-right"></i>
-                            {% else %}
-                                &nbsp;
-                            {% endif %}
-                        </a>
-                    </td>
-                    <td><a href="{{ link }}">j{{ judging.judgingid }}</a></td>
-                    <td><a href="{{ link }}">{{ judging.starttime | printtime(null, submission.contest) }}</a></td>
-                    <td>
-                        <a href="{{ link }}">
-                            {% if maxRunTimes[judging.judgingId] is not null %}
-                                {{ maxRunTimes[judging.judgingId] }}s
-                            {% endif %}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{{ link }}">
-                            {{ judging.judgehosts | printHosts }}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{{ link }}">
-                            {{ judging.result | printResult(judging.valid, true) }}
-                            {% if judging.stillBusy %}
-                                (&hellip;)
-                            {% endif %}
-                        </a>
-                    </td>
-                    {% if submission.problem.scoringProblem %}
-                        <td class="right">
+                {% for judging in judgings %}
+                    {% set link = path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: judging.judgingid}) %}
+                    <tr {%- if not judging.valid %} class="disabled"{% endif %}>
+                        <td>
                             <a href="{{ link }}">
-                                {% if judging.score is not null %}
-                                    {{ "%.2f" | format(judging.score) }}
+                                {% if selectedJudging is not null and selectedJudging.judgingid == judging.judgingid %}
+                                    <i class="fas fa-long-arrow-alt-right"></i>
                                 {% else %}
-                                    -
+                                    &nbsp;
                                 {% endif %}
                             </a>
                         </td>
-                    {% endif %}
-                    <td>
-                        <a href="{{ link }}">
-                            {% if judging.rejudging is not null %}
-                                r{{ judging.rejudging.rejudgingid }} ({{ judging.rejudging.reason }})
-                            {% endif %}
-                        </a>
-                    </td>
-                </tr>
-            {% endfor %}
+                        <td><a href="{{ link }}">j{{ judging.judgingid }}</a></td>
+                        <td><a href="{{ link }}">{{ judging.starttime | printtime(null, submission.contest) }}</a></td>
+                        <td>
+                            <a href="{{ link }}">
+                                {% if maxRunTimes[judging.judgingId] is not null %}
+                                    {{ maxRunTimes[judging.judgingId] }}s
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ link }}">
+                                {{ judging.judgehosts | printHosts }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ link }}">
+                                {{ judging.result | printResult(judging.valid, true) }}
+                                {% if judging.stillBusy %}
+                                    (&hellip;)
+                                {% endif %}
+                            </a>
+                        </td>
+                        {% if submission.problem.scoringProblem %}
+                            <td class="right">
+                            <a href="{{ link }}">
+                                {% if selectedJudging is not null and selectedJudging.judgingid == judging.judgingid %}
+                                    <i class="fas fa-long-arrow-alt-right"></i>
+                                {% else %}
+                                    &nbsp;
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td><a href="{{ link }}">j{{ judging.judgingid }}</a></td>
+                        <td><a href="{{ link }}">{{ judging.starttime | printtime(null, submission.contest) }}</a></td>
+                        <td>
+                            <a href="{{ link }}">
+                                {% if maxRunTimes[judging.judgingId] is not null %}
+                                    {{ maxRunTimes[judging.judgingId] }}s
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ link }}">
+                                {{ judging.judgehosts | printHosts }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ link }}">
+                                {{ judging.result | printResult(judging.valid, true) }}
+                                {% if judging.stillBusy %}
+                                    (&hellip;)
+                                {% endif %}
+                            </a>
+                        </td>
+                        {% if submission.problem.scoringProblem %}
+                            <td class="right">
+                                <a href="{{ link }}">
+                                    {% if judging.score is not null %}
+                                        {{ "%.2f" | format(judging.score) }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </a>
+                            </td>
+                        {% endif %}
+                        <td>
+                            <a href="{{ link }}">
+                                {% if judging.rejudging is not null %}
+                                    r{{ judging.rejudging.rejudgingid }} ({{ judging.rejudging.reason }})
+                                {% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     {% endif %}
@@ -550,30 +582,30 @@
                             </a>
                         {% endif %}
                     {% endif %}
-                &nbsp;
-                {% if not selectedJudging.verified %}
-                    <form action="{{ path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: selectedJudging.judgingid}) }}"
-                          method="post" style="display: inline;">
-                        {% if selectedJudging.juryMember is not empty %}
-                            (claimed by {{ selectedJudging.juryMember }})
-                            <input type="hidden" name="forceclaim" value="1"/>
-                        {% endif %}
-                        {% if app.user.username == selectedJudging.juryMember %}
-                            <input type="submit" value="unclaim" name="unclaim" class="btn btn-outline-secondary btn-sm"/>
-                        {% else %}
-                            <input type="submit" value="claim" name="claim" class="btn btn-outline-secondary btn-sm"/>
-                        {% endif %}
-                    </form>
-                {% endif %}
-                &nbsp;
-                {% if selectedJudging is null or selectedJudging.result is empty %}
-                    {%- if not selectedJudging or not selectedJudging.started %}
-                        <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_submission_create_tasks', {'contestId': submission.contest.externalid, 'submitId': submission.externalid}) }}">
-                            <i class="fas fa-gavel"></i>
-                            Judge submission
-                        </a>
+                    &nbsp;
+                    {% if not selectedJudging.verified %}
+                        <form action="{{ path('jury_submission', {contestId: submission.contest.externalid, submitId: submission.externalid, jid: selectedJudging.judgingid}) }}"
+                              method="post" style="display: inline;">
+                            {% if selectedJudging.juryMember is not empty %}
+                                (claimed by {{ selectedJudging.juryMember }})
+                                <input type="hidden" name="forceclaim" value="1"/>
+                            {% endif %}
+                            {% if app.user.username == selectedJudging.juryMember %}
+                                <input type="submit" value="unclaim" name="unclaim" class="btn btn-outline-secondary btn-sm"/>
+                            {% else %}
+                                <input type="submit" value="claim" name="claim" class="btn btn-outline-secondary btn-sm"/>
+                            {% endif %}
+                        </form>
+                    {% endif %}
+                    &nbsp;
+                    {% if selectedJudging is null or selectedJudging.result is empty %}
+                        {%- if not selectedJudging or not selectedJudging.started %}
+                            <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_submission_create_tasks', {'contestId': submission.contest.externalid, 'submitId': submission.externalid}) }}">
+                                <i class="fas fa-gavel"></i>
+                                Judge submission
+                            </a>
+                        {%- endif %}
                     {%- endif %}
-                {%- endif %}
                 </div>
             </div>
         {% endif %}
