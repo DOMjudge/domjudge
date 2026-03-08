@@ -873,8 +873,8 @@
                                   <div class="card card-body output_text">{{ runsOutput[runIdx].metadata }}</div>
                             </div>
                         {% endif %}
-                    </div>
                     {% endif %}
+                    </div>
                     {% if run.description is not null %}
                         <p><em>
                             {{ run.description(true) | descriptionExpand }}
