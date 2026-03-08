@@ -32,6 +32,7 @@
 {% block body %}
     <div class="container-fluid{% if fill_height is defined and fill_height %} flex-pass{% endif %}">
         <div class="row{% if fill_height is defined and fill_height %} flex-pass{% endif %}">
+            {# Close this in the subtemplate for multiple rows #}
             <div class="col-12{% if fill_height is defined and fill_height %} flex-pass{% endif %}">
                 {% block messages %}
                     {% include 'partials/messages.html.twig' %}
