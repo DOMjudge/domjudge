@@ -1,0 +1,67 @@
+#!/bin/sh
+# Check if a systemd service has sandboxing that would prevent writing
+# to a given directory. This detects ProtectHome, ProtectSystem, etc.
+#
+# Usage: check-systemd-sandbox <service> <writable-path>
+
+set -eu
+
+SERVICE="$1.service"
+WRITABLE_PATH="$2"
+
+if ! command -v systemctl >/dev/null 2>&1; then
+    exit 0
+fi
+
+if ! systemctl cat "$SERVICE" >/dev/null 2>&1; then
+    exit 0
+fi
+
+WARNINGS=""
+
+PROTECT_HOME=$(systemctl show -p ProtectHome --value "$SERVICE" 2>/dev/null || true)
+if [ "$PROTECT_HOME" = "yes" ] || [ "$PROTECT_HOME" = "read-only" ] || [ "$PROTECT_HOME" = "tmpfs" ]; then
+    case "$WRITABLE_PATH" in
+        /home/*|/root/*|/run/user/*)
+            WARNINGS="${WARNINGS}  - ProtectHome=${PROTECT_HOME} makes ${WRITABLE_PATH} read-only/inaccessible
+"
+            ;;
+    esac
+fi
+
+PROTECT_SYSTEM=$(systemctl show -p ProtectSystem --value "$SERVICE" 2>/dev/null || true)
+case "$PROTECT_SYSTEM" in
+    full)
+        case "$WRITABLE_PATH" in
+            /usr/*|/boot/*|/efi/*|/etc/*)
+                WARNINGS="${WARNINGS}  - ProtectSystem=${PROTECT_SYSTEM} makes ${WRITABLE_PATH} read-only
+"
+                ;;
+        esac
+        ;;
+    strict)
+        # strict makes the entire filesystem read-only except /dev, /proc, /sys
+        WARNINGS="${WARNINGS}  - ProtectSystem=strict makes the entire filesystem read-only
+"
+        ;;
+esac
+
+if [ -n "$WARNINGS" ]; then
+    READ_WRITE_PATHS=$(systemctl show -p ReadWritePaths --value "$SERVICE" 2>/dev/null || true)
+    # Check if our path is already in ReadWritePaths
+    if echo "$READ_WRITE_PATHS" | grep -qF "$WRITABLE_PATH"; then
+        exit 0
+    fi
+
+    echo ""
+    echo "WARNING: systemd service '$SERVICE' has sandboxing that may prevent"
+    echo "         DOMjudge from writing to $WRITABLE_PATH:"
+    echo ""
+    printf '%s' "$WARNINGS"
+    echo ""
+    echo "Fix this by running:"
+    printf '    printf '"'"'[Service]\nReadWritePaths=%s\n'"'"' | sudo SYSTEMD_EDITOR=tee systemctl edit %s\n' "$WRITABLE_PATH" "$SERVICE"
+    printf '    sudo systemctl restart %s\n' "$SERVICE"
+    echo ""
+    exit 1
+fi
