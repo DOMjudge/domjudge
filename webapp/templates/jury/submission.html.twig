@@ -906,14 +906,14 @@
                     {% else %}
                         {% if run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
                             {% if combinedRunCompare %}
-                                <h5>Validator output</h5>
+                                <h4>Validator output</h4>
                                 {% if runsOutput[runIdx].output_diff is empty %}
                                     <p class="nodata">There was no validator output.</p>
                                 {% else %}
                                     <pre class="output_text">{{ runsOutput[runIdx].output_diff | convertUnprintableChars }}</pre>
                                 {% endif %}
                             {% else %}
-                                <h5>Diff output</h5>
+                                <h4>Diff output</h4>
                                 {% if runsOutput[runIdx].output_diff is empty %}
                                     <p class="nodata">There was no diff output.</p>
                                 {% else %}

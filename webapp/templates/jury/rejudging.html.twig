@@ -150,7 +150,7 @@
 
     {% if stats %}
         <h2>Statistics over repeated rejudgings</h2>
-        <h4>Runtime spread</h4>
+        <h3>Runtime spread</h3>
             <table class="table table-sm table-striped">
                 <tr><th>submission/testcase</th><th>spread</th><th>#judgings</th><th>result</th></tr>
 		{% for spread in stats.runtime_spread %}
@@ -174,7 +174,7 @@
             {% endif %}
         {% endif %}
         {% if stats.judgehost_stats | length > 1 %}
-            <h4>Judgehost stats</h4>
+            <h3>Judgehost stats</h3>
             <table class="table table-sm table-striped">
                 <tr><th>Judgehost</th><th>#judgings</th><th>avg. runtime</th><th>std.dev.</th><th>avg. duration</th></tr>
                 {% for judgehost in stats.judgehost_stats %}
@@ -189,7 +189,7 @@
             </table>
         {% endif %}
         {% if stats.judgings %}
-            <h4>Judging verdicts</h4>
+            <h3>Judging verdicts</h3>
             <table class="table table-sm table-striped">
                 <tr><th>jID</th><th>rID</th><th>Judgehost</th><th>duration (incl. compile)</th><th>verdict</th></tr>
                 {% for judging in stats.judgings %}
