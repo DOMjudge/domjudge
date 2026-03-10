@@ -237,7 +237,7 @@
                     {%- for verdict, abbreviation in verdicts %}
                         <option value="{% if verdict == '' %}judging{% else %}{{ verdict }}{% endif %}" {% if oldverdict == verdict %}selected{% endif %}>
                             {% if verdict == '' %}
-                                <i>still judging</i>
+                                still judging
                             {% else %}
                                 {{ verdict }}
                             {% endif %}
@@ -253,7 +253,7 @@
                     {%- for verdict, abbreviation in verdicts %}
                         <option value="{% if verdict == '' %}judging{% else %}{{ verdict }}{% endif %}" {% if newverdict == verdict %}selected{% endif %}>
                             {% if verdict == '' %}
-                                <i>still judging</i>
+                                still judging
                             {% else %}
                                 {{ verdict }}
                             {% endif %}
