@@ -167,6 +167,7 @@ readonly class VerdictInput
  *     output-truncated: string, stdin-bytes: string, stdout-bytes: string, stderr-bytes: string,
  *     cpu-time: string, sys-time: string, user-time: string, wall-time: string
  * }
+ * @phpstan-type TimeLimit array{cpu: array{0: float, 1: float}, wall: array{0: float, 1: float}}
  * The MetaData_Error is defined as having only 1 key so we make sure PHPStan triggers us to always handle that key first and
  * in case the key is not set, overwrite with a @var to the correct shape MetaData_{Generic,Compare,Program}
  * @phpstan-type MetaData_Error array{internal-error: string}
@@ -1771,6 +1772,9 @@ class JudgeDaemon
         return $prefix . (empty($prefix) ? "" : " ") . "Wrong answer!";
     }
 
+    /**
+     * @param TimeLimit $timelimit
+     */
     private function testcaseRunInternal(
         $input,
         $output,
