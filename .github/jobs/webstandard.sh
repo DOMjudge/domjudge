@@ -55,8 +55,6 @@ wget \
     --no-clobber \
     --page-requisites \
     --html-extension \
-    --convert-links \
-    --restrict-file-names=windows \
     --domains localhost \
     --no-parent \
     --load-cookies cookies.txt \
@@ -67,7 +65,7 @@ section_end
 
 section_start "Archive downloaded site"
 set +e
-cp -r localhost $ARTIFACTS/
+zip -r $ARTIFACTS/downloaded_site.zip localhost
 set -e
 section_end
 
