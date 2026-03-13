@@ -114,7 +114,7 @@ w3c_analyse () {
     do
         section_start "Analyse with $typ"
         # shellcheck disable=SC2086
-        "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
+        /vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
 
         # Count errors from JSON and produce gnu-format log
         NEWFOUNDERRORS=$(python3 -c "import json; print(len(json.load(open('result.json'))['messages']))")
@@ -146,13 +146,13 @@ if [ "$TEST" = "w3cval" ]; then
     section_end
 
     section_start "Install testsuite"
-    cd "$DIR"
-    wget https://github.com/validator/validator/releases/download/20.6.30/vnu.linux.zip
+    cd /
     unzip -q vnu.linux.zip
     # Remove a warning by creating an empty config.
     touch vnu.properties
     section_end
 
+    cd "$DIR"
     FLTR1='--filterpattern .*descendant.*|.*Stray.*'
     w3c_analyse "$FLTR1" "Stray" "public" "html"
     FLTR2='--filterpattern .*descendant.*'
