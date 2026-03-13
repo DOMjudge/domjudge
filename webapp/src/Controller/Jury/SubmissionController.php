@@ -446,7 +446,7 @@ class SubmissionController extends BaseController
                 ->join('t.content', 'tc')
                 ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
                 ->leftJoin('jr.output', 'jro')
-                ->select('t', 'jr', 'tc.image_thumb AS image_thumb', 'jro.metadata', 'jro.validatorMetadata')
+                ->select('t', 'jr', 'tc.image_thumb AS image_thumb', 'jro.metadata', 'jro.validatorMetadata', 'jr.pass')
                 ->andWhere('t.problem = :problem')
                 ->setParameter('judging', $selectedJudging)
                 ->setParameter('problem', $submission->getProblem())
@@ -795,8 +795,8 @@ class SubmissionController extends BaseController
         return Utils::streamAsBinaryFile(file_get_contents($debugPackage->getFilename()), $name);
     }
 
-    #[Route(path: '/request-output/{jid}/{jrid}', name: 'request_output')]
-    public function requestOutput(Request $request, Judging $jid, JudgingRun $jrid): RedirectResponse
+    #[Route(path: '/request-output/{jid}/{jrid}/{pass}', name: 'request_output')]
+    public function requestOutput(Request $request, Judging $jid, JudgingRun $jrid, int $pass = 1): RedirectResponse
     {
         $submission = $jid->getSubmission();
         $testcase = $jrid->getTestcase();
@@ -808,6 +808,7 @@ class SubmissionController extends BaseController
             ->setPriority(JudgeTask::PRIORITY_HIGH)
             ->setJobId($jid->getJudgingid())
             ->setUuid($jid->getUuid())
+            ->setPass($pass)
             ->setTestcaseId($testcase->getTestcaseid())
             ->setTestcaseHash($testcase->getTestcaseHash());
         $this->em->persist($judgeTask);

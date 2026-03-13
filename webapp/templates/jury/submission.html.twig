@@ -846,15 +846,23 @@
                                 Reference Output
                             </a>
                             {% if run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
+                                {% set pass = "" %}
+                                {% set passnumber = 1 %}
+                                {% if isMultiPassProblem and runsOutput[runIdx].pass is defined and runsOutput[runIdx].pass %}
+                                    {% set pass = " on " ~ runsOutput[runIdx].pass %}
+                                    {% set passnumber = runsOutput[runIdx].pass %}
+                                {% endif %}
                                 <a class="btn btn-sm btn-outline-secondary" href="{{ path('jury_submission_team_output', {'contestId': submission.contest.externalid, 'submission': submission.externalid, 'run': run.firstJudgingRun.runid}) }}">
                                     <i class="fas fa-download"></i>
                                     {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
                                         Truncated
                                     {% endif %}
-                                    Team Output
+                                    Team Output {{- pass }}
                                 </a>
                                 {% if runsOutput[runIdx].is_output_run_truncated_in_db %}
-                                    <a class="btn btn-sm btn-outline-secondary" href="{{ path('request_output', {'jid': run.firstJudgingRun.judgingid, 'jrid': run.firstJudgingRun.runid}) }}">
+                                    <a class="btn btn-sm btn-outline-secondary" href="{{
+                                        path('request_output', {'jid': run.firstJudgingRun.judgingid, 'jrid': run.firstJudgingRun.runid, 'pass': passnumber})
+                                    }}">
                                         <i class="fas fa-upload"></i>
                                         Retrieve Full Team Output
                                     </a>
