@@ -82,6 +82,13 @@ class JudgingRun extends AbstractRun
     )]
     private string|float|null $score = null;
 
+    #[ORM\Column(
+        nullable: true,
+        options: ['comment' => 'Pass number for multipass problems', 'unsigned' => true, 'default' => null]
+    )]
+    #[Serializer\Exclude]
+    private ?int $pass = null;
+
     #[ORM\ManyToOne(inversedBy: 'runs')]
     #[ORM\JoinColumn(name: 'judgingid', referencedColumnName: 'judgingid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
@@ -290,5 +297,16 @@ class JudgingRun extends AbstractRun
     public function getScore(): ?string
     {
         return $this->score !== null ? (string)$this->score : null;
+    }
+
+    public function setPass(int|string|null $pass): JudgingRun
+    {
+        $this->pass = $pass === null ? null : (int)$pass;
+        return $this;
+    }
+
+    public function getPass(): ?int
+    {
+        return $this->pass;
     }
 }

@@ -661,6 +661,7 @@ class JudgehostController extends AbstractFOSRestController
         $testcasedir  = $request->request->get('testcasedir');
         $compareMeta  = $request->request->get('compare_metadata');
         $score        = $request->request->get('score');
+        $pass         = $request->request->get('pass');
 
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
@@ -668,7 +669,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime, $startTime, $endTime,
-            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta, $score);
+            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta, $score, $pass);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
@@ -942,7 +943,8 @@ class JudgehostController extends AbstractFOSRestController
         string  $metadata,
         ?string $testcasedir,
         ?string $compareMeta,
-        ?string $score = null
+        ?string $score = null,
+        ?string $pass = null
     ): bool {
         $resultsRemap = $this->config->get('results_remap');
         $resultsPrio  = $this->config->get('results_prio');
@@ -967,7 +969,8 @@ class JudgehostController extends AbstractFOSRestController
             $metadata,
             $testcasedir,
             $compareMeta,
-            $score
+            $score,
+            $pass
         ): void {
             $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
                 ['judgetaskid' => $judgeTaskId]);
@@ -982,7 +985,8 @@ class JudgehostController extends AbstractFOSRestController
                 ->setRuntime((float)$runTime)
                 ->setStarttime($startTime)
                 ->setEndtime($endTime)
-                ->setTestcasedir($testcasedir);
+                ->setTestcasedir($testcasedir)
+                ->setPass($pass);
             $judgingRunOutput
                 ->setOutputRun(base64_decode($outputRun))
                 ->setOutputDiff(base64_decode($outputDiff))
