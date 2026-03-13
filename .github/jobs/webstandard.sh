@@ -145,30 +145,10 @@ if [ "$TEST" = "w3cval" ]; then
     touch vnu.properties
     section_end
 
-    rm -rf public/localhost/domjudge/jury/teams/domjudge*.html
-    rm -rf public/localhost/domjudge/jury/scoreboard.html
     FLTR1='--filterpattern .*descendant.*|.*Stray.*'
     w3c_analyse "$FLTR1" "Stray" "public" "html"
-
-    rm -rf public/localhost/domjudge/jury/request-full-debug/*.html
-    rm -rf public/localhost/domjudge/jury/contests/demo/submissions/*/create-tasks.html
-    rm -rf public/localhost/domjudge/jury/contests/demo/submissions/*.html
-    rm -rf public/localhost/domjudge/jury/submissions/*.html
-    rm -rf public/localhost/domjudge/jury/by-judging-id/*.html
     FLTR2='--filterpattern .*descendant.*'
     w3c_analyse "$FLTR2" "descendant" "public" "html"
-
-    rm -rf public/localhost/domjudge/jury/categories.html
-    rm -rf public/localhost/domjudge/jury/problems.html
-    rm -rf public/localhost/domjudge/jury/users.html
-    rm -rf public/localhost/domjudge/jury/teams.html
-    rm -rf public/localhost/domjudge/jury/users/reset_login_status.html
-    rm -rf public/localhost/domjudge/jury/affiliations.html
-    rm -rf public/localhost/domjudge/jury/contests/demo/submissions/*/edit-source*.html
-    rm -rf public/localhost/domjudge/jury/contests/demo/submissions/*/source.html
-    rm -rf public/localhost/domjudge/jury/submissions.html
-    rm -rf public/localhost/domjudge/jury/clarifications.html
-    rm -rf public/localhost/domjudge/jury/contests/demo/submissions*.html
     w3c_analyse "" "full" "public" "html css svg"
 else
     section_start "Remove files from upstream with problems"
