@@ -179,6 +179,7 @@
                 {%- elseif row.link is defined and not item.toggle_partial is defined %}<a href="{{ row.link }}">{% endif %}
                 {% if item.toggle_partial is defined %}
                     {% include 'jury/partials/' ~ item.toggle_partial with item.partial_arguments %}
+                    {% if item.suffix is defined and item.suffix %} {{ item.suffix }}{% endif %}
                 {% elseif key == "status" %}
                     {{- (item.value|default(item.default|default('')))|statusIcon -}}
                 {% elseif key == "country" %}
