@@ -3,11 +3,13 @@
 namespace App\Controller\Team;
 
 use App\Controller\BaseController;
+use App\Entity\Contest;
 use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionSource;
+use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Form\Type\SubmitProblemType;
 use App\Service\ConfigurationService;
@@ -19,6 +21,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -62,57 +65,149 @@ class SubmissionController extends BaseController
             $data['problem'] = $problem;
             $data['languages'] = $problem->getLanguages()->toArray();
         }
-        $form    = $this->formFactory
-            ->createBuilder(SubmitProblemType::class, $data)
-            ->setAction($this->generateUrl('team_submit'))
-            ->getForm();
 
-        $form->handleRequest($request);
+        $submitMethods = $this->config->get('submit_methods');
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($contest === null) {
-                $this->addFlash('danger', 'No active contest');
-            } elseif (!$this->dj->checkrole('jury') && !$contest->getFreezeData()->started()) {
-                $this->addFlash('danger', 'Contest has not yet started');
-            } else {
-                /** @var Problem $problem */
-                $problem = $form->get('problem')->getData();
-                /** @var Language $language */
-                $language = $form->get('language')->getData();
-                /** @var UploadedFile[]|UploadedFile $files */
-                $files      = $form->get('code')->getData();
-                if (!is_array($files)) {
-                    $files = [$files];
-                }
-                $entryPoint = $form->get('entry_point')->getData() ?: null;
-                $submission = $this->submissionService->submitSolution(
-                    $team, $this->dj->getUser(), $problem->getProbid(), $contest, $language, $files, SubmissionSource::TEAM_PAGE, null,
-                    null, $entryPoint, null, null, $message
-                );
+        $uploadForm = null;
+        $pasteForm = null;
 
-                if ($submission) {
-                    $this->addFlash(
-                        'success',
-                        'Submission done! Watch for the verdict in the list below.'
-                    );
-                } else {
-                    $this->addFlash('danger', $message);
-                }
-                return $this->redirectToRoute('team_index');
+        if (in_array('upload', $submitMethods)) {
+            $uploadForm = $this->formFactory
+                ->createNamedBuilder('submit_problem', SubmitProblemType::class, $data, ['submission_mode' => 'upload'])
+                ->setAction($this->generateUrl('team_submit'))
+                ->getForm();
+        }
+
+        // Only create the paste form for the full page (not the modal)
+        if (in_array('paste', $submitMethods) && !$request->isXmlHttpRequest()) {
+            $pasteForm = $this->formFactory
+                ->createNamedBuilder('submit_problem_paste', SubmitProblemType::class, $data, ['submission_mode' => 'paste'])
+                ->setAction($this->generateUrl('team_submit'))
+                ->getForm();
+        }
+
+        // Handle upload form submission
+        if ($uploadForm !== null) {
+            $uploadForm->handleRequest($request);
+            if ($uploadForm->isSubmitted() && $uploadForm->isValid()) {
+                return $this->handleSubmission($uploadForm, $team, $contest, 'upload');
             }
         }
 
-        $data = ['form' => $form->createView(), 'problem' => $problem];
-        $data['validFilenameRegex'] = SubmissionService::FILENAME_REGEX;
+        // Handle paste form submission
+        if ($pasteForm !== null) {
+            $pasteForm->handleRequest($request);
+            if ($pasteForm->isSubmitted() && $pasteForm->isValid()) {
+                return $this->handleSubmission($pasteForm, $team, $contest, 'paste');
+            }
+        }
+
+        $templateData = [
+            'problem' => $problem,
+            'upload_form' => $uploadForm?->createView(),
+            'paste_form' => $pasteForm?->createView(),
+            'submit_methods' => $submitMethods,
+        ];
+        $templateData['validFilenameRegex'] = SubmissionService::FILENAME_REGEX;
         if ($contest && $team) {
-            $data['rateLimitStatus'] = $this->submissionService->getRateLimitStatus($team, $contest);
+            $templateData['rateLimitStatus'] = $this->submissionService->getRateLimitStatus($team, $contest);
         }
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('team/submit_modal.html.twig', $data);
+            return $this->render('team/submit_modal.html.twig', $templateData);
         } else {
-            return $this->render('team/submit.html.twig', $data);
+            return $this->render('team/submit.html.twig', $templateData);
         }
+    }
+
+    private function handleSubmission(FormInterface $form, Team $team, ?Contest $contest, string $mode): Response
+    {
+        if ($contest === null) {
+            $this->addFlash('danger', 'No active contest');
+            return $this->redirectToRoute('team_index');
+        }
+        if (!$this->dj->checkrole('jury') && !$contest->getFreezeData()->started()) {
+            $this->addFlash('danger', 'Contest has not yet started');
+            return $this->redirectToRoute('team_index');
+        }
+
+        /** @var Problem $problem */
+        $problem = $form->get('problem')->getData();
+        /** @var Language $language */
+        $language = $form->get('language')->getData();
+        $entryPoint = $form->get('entry_point')->getData() ?: null;
+
+        $tmpFile = null;
+        if ($mode === 'paste') {
+            $result = $this->buildPasteFiles($problem, $language, $contest, $form->get('code_content')->getData(), $entryPoint);
+            if ($result === null) {
+                return $this->redirectToRoute('team_index');
+            }
+            [$files, $tmpFile] = $result;
+        } else {
+            /** @var UploadedFile[]|UploadedFile $files */
+            $files = $form->get('code')->getData();
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+        }
+
+        try {
+            $message = '';
+            $submission = $this->submissionService->submitSolution(
+                $team, $this->dj->getUser(), $problem->getProbid(), $contest, $language, $files, SubmissionSource::TEAM_PAGE, null,
+                null, $entryPoint, null, null, $message
+            );
+
+            if ($submission) {
+                $this->addFlash('success', 'Submission done! Watch for the verdict in the list below.');
+            } else {
+                $this->addFlash('danger', $message);
+            }
+        } finally {
+            if ($tmpFile !== null && file_exists($tmpFile)) {
+                unlink($tmpFile);
+            }
+        }
+
+        return $this->redirectToRoute('team_index');
+    }
+
+    /**
+     * Build an UploadedFile from pasted code content.
+     *
+     * @return array{UploadedFile[], string}|null [files, tmpFilePath], or null if the code content is empty
+     */
+    private function buildPasteFiles(Problem $problem, Language $language, Contest $contest, ?string $codeContent, ?string $entryPoint): ?array
+    {
+        if (empty($codeContent)) {
+            $this->addFlash('danger', 'No code provided.');
+            return null;
+        }
+
+        // Determine filename — find the contest problem for the current contest
+        $contestProblem = $problem->getContestProblems()->filter(
+            fn($cp) => $cp->getContest() === $contest
+        )->first();
+        $extensions = $language->getExtensions();
+        $extension = $extensions[0] ?? 'txt';
+
+        if ($language->getRequireEntryPoint() && $entryPoint !== null) {
+            $filename = $entryPoint . '.' . $extension;
+        } elseif ($contestProblem !== false) {
+            $filename = $contestProblem->getShortname() . '.' . $extension;
+        } else {
+            $filename = 'submission.' . $extension;
+        }
+
+        $filename = SubmissionService::sanitizeFilename($filename);
+
+        // Write to temp file and create UploadedFile
+        $tmpFile = tempnam(sys_get_temp_dir(), 'dj_paste_');
+        file_put_contents($tmpFile, $codeContent);
+        $uploadedFile = new UploadedFile($tmpFile, $filename, null, null, true);
+
+        return [[$uploadedFile], $tmpFile];
     }
 
     /**

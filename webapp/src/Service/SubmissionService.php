@@ -38,6 +38,18 @@ use ZipArchive;
 class SubmissionService
 {
     final public const FILENAME_REGEX = '/^[a-zA-Z0-9_][a-zA-Z0-9+_\.-]*$/';
+
+    /**
+     * Sanitize a filename to match FILENAME_REGEX by replacing invalid characters with underscores.
+     */
+    public static function sanitizeFilename(string $filename): string
+    {
+        if (preg_match(self::FILENAME_REGEX, $filename)) {
+            return $filename;
+        }
+        return preg_replace('/[^a-zA-Z0-9+_.\-]/', '_', $filename);
+    }
+
     final public const PROBLEM_RESULT_MATCHSTRING = ['@EXPECTED_RESULTS@: ', '@EXPECTED_SCORE@: '];
     final public const PROBLEM_RESULT_REMAP = [
         'ACCEPTED' => 'CORRECT',

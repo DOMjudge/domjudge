@@ -1,0 +1,29 @@
+{{ form_start(paste_form, {'attr': {'class': 'd-flex flex-column flex-fill'}}) }}
+<div class="paste-toolbar px-3 py-2 border-bottom d-flex align-items-end gap-3 flex-wrap">
+    <div class="paste-toolbar-field">
+        {{ form_label(paste_form.problem) }}
+        {{ form_widget(paste_form.problem) }}
+    </div>
+    <div class="paste-toolbar-field">
+        {{ form_label(paste_form.language) }}
+        {{ form_widget(paste_form.language) }}
+    </div>
+    <div class="paste-toolbar-field" data-entry-point-toolbar>
+        {{ form_label(paste_form.entry_point) }}
+        {{ form_widget(paste_form.entry_point) }}
+    </div>
+    <div class="paste-toolbar-info align-self-end pb-1">
+        <small class="text-muted">
+            Filename: <code class="paste-derived-filename" data-form-prefix="submit_problem_paste">-</code>
+        </small>
+    </div>
+    <div class="paste-toolbar-submit align-self-end ms-auto">
+        <button type="submit" class="btn btn-success"><i class="fas fa-cloud-upload-alt"></i> Submit</button>
+    </div>
+</div>
+{% include 'team/partials/rate_limit_warning.html.twig' with {'alert_extra_classes': 'mx-3 mt-2 mb-0'} %}
+<div class="paste-editor-container flex-fill">
+    {{ '' | codeEditor('paste_page', null, true, paste_form.code_content.vars.id) }}
+</div>
+{{ form_widget(paste_form.code_content) }}
+{{ form_end(paste_form) }}

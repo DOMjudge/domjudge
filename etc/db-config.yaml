@@ -334,6 +334,15 @@
                 2: After first submission
             regex: /^\d+$/
             error_message: A value between 0 and 2 is required.
+        -   name: submit_methods
+            type: array_val
+            default_value:
+                - upload
+            public: true
+            description: Allowed submission methods in the web interface.
+            options:
+                - upload
+                - paste
         -   name: enable_ranking
             type: bool
             default_value: true
