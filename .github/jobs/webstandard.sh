@@ -115,18 +115,20 @@ w3c_analyse () {
         section_start "Analyse with $typ"
         # shellcheck disable=SC2086
         "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
-        # shellcheck disable=SC2086
-        NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | tee "$ARTIFACTS/w3c_${typ}_${URL}_${LOGID}.log" | wc -l)
+
+        # Count errors from JSON
+        NEWFOUNDERRORS=$(python3 -c "import json; print(len(json.load(open('result.json'))['messages']))")
         FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
-        if [ "$NEWFOUNDERRORS" -gt 0 ]; then
-            echo "::error::$typ validation ($LOGID): found $NEWFOUNDERRORS error(s)"
-            cat "$ARTIFACTS/w3c_${typ}_${URL}_${LOGID}.log"
-        else
-            echo "$typ validation ($LOGID): OK"
-        fi
+
         python3 -m "json.tool" < result.json > "$ARTIFACTS/w3c$typ$URL${LOGID}.json"
         trace_off; python3 .github/jobs/jsontogha.py "$ARTIFACTS/w3c$typ$URL${LOGID}.json"; trace_on
         section_end
+
+        if [ "$NEWFOUNDERRORS" -gt 0 ]; then
+            echo "::error::$typ validation ($LOGID): found $NEWFOUNDERRORS error(s)"
+        else
+            echo "$typ validation ($LOGID): OK"
+        fi
     done
 }
 
@@ -175,10 +177,20 @@ else
     for file in $(find $URL -name "*.html")
     do
         section_start "$file"
-        su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r json -T $ACCEPTEDERR $FLTR $file" | python3 -m json.tool
-        ERR=$(su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r csv -T $ACCEPTEDERR $FLTR $file" | wc -l)
-        FOUNDERR=$((ERR+FOUNDERR-1)) # Remove header row
+        su domjudge -c "/home/domjudge/node_modules/.bin/pa11y --config .github/jobs/pa11y_config.json $STAN -r json -T $ACCEPTEDERR $FLTR $file" > result.json
+
+        # Count errors from JSON
+        NEWFOUNDERRORS=$(python3 -c "import json; data=json.load(open('result.json')); print(len(data))")
+        FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
+
+        LOGNAME=$(echo "$file" | tr '/' '_')
+        cp result.json "$ARTIFACTS/pa11y_${LOGNAME}.json"
+        trace_off; python3 .github/jobs/jsontogha.py result.json; trace_on
         section_end
+
+        if [ "$NEWFOUNDERRORS" -gt 0 ]; then
+            echo "::error::pa11y found $NEWFOUNDERRORS error(s) in $file"
+        fi
     done
 fi
 
