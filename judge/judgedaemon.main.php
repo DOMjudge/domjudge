@@ -2401,7 +2401,7 @@ class JudgeDaemon
             if ($result === 'compare-error') {
                 $compareMeta = $this->readMetadata($passdir . '/compare.meta');
                 if (isset($compareMeta['internal-error'])) {
-                    logmsg(LOG_ERR, "Encountered unhandled 'internal-error':" . $comparemeta['internal-error']);
+                    logmsg(LOG_ERR, "Encountered unhandled 'internal-error':" . $compareMeta['internal-error']);
                 }
                 /** @var MetaData_Compare $compareMeta */
                 $compareExitCode = $compareMeta['exitcode'];
