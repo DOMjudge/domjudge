@@ -2351,7 +2351,7 @@ class JudgeDaemon
             $metadata = $this->readMetadata($passdir . '/program.meta');
             if (isset($metadata['internal-error'])) {
                 // This should already be handled in `testcaseRunInternal`
-                $this->handleMetaInternalError($judgetask['judgetaskid'], $metadata);
+                $this->handleMetaInternalError($judgeTask['judgetaskid'], $metadata);
                 logmsg(LOG_ERR, "Encountered unhandled 'internal-error':" . $metadata['internal-error']);
                 return false;
             }
