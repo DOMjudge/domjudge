@@ -116,16 +116,18 @@ w3c_analyse () {
         # shellcheck disable=SC2086
         "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
 
-        # Count errors from JSON
+        # Count errors from JSON and produce gnu-format log
         NEWFOUNDERRORS=$(python3 -c "import json; print(len(json.load(open('result.json'))['messages']))")
         FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
 
         python3 -m "json.tool" < result.json > "$ARTIFACTS/w3c$typ$URL${LOGID}.json"
-        trace_off; python3 .github/jobs/jsontogha.py "$ARTIFACTS/w3c$typ$URL${LOGID}.json"; trace_on
+        SUMMARYFILE="$ARTIFACTS/w3c_${typ}_${URL}_${LOGID}_summary.log"
+        trace_off; python3 .github/jobs/jsontogha.py --summary-file "$SUMMARYFILE" "$ARTIFACTS/w3c$typ$URL${LOGID}.json"; trace_on
         section_end
 
         if [ "$NEWFOUNDERRORS" -gt 0 ]; then
             echo "::error::$typ validation ($LOGID): found $NEWFOUNDERRORS error(s)"
+            cat "$SUMMARYFILE"
         else
             echo "$typ validation ($LOGID): OK"
         fi
@@ -185,11 +187,13 @@ else
 
         LOGNAME=$(echo "$file" | tr '/' '_')
         cp result.json "$ARTIFACTS/pa11y_${LOGNAME}.json"
-        trace_off; python3 .github/jobs/jsontogha.py result.json; trace_on
+        SUMMARYFILE="$ARTIFACTS/pa11y_${LOGNAME}_summary.log"
+        trace_off; python3 .github/jobs/jsontogha.py --summary-file "$SUMMARYFILE" result.json; trace_on
         section_end
 
         if [ "$NEWFOUNDERRORS" -gt 0 ]; then
             echo "::error::pa11y found $NEWFOUNDERRORS error(s) in $file"
+            cat "$SUMMARYFILE"
         fi
     done
 fi

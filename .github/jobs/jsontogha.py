@@ -1,14 +1,21 @@
+import argparse
 import json
 import sys
 import time
 import hashlib
 import os
 
+parser = argparse.ArgumentParser()
+parser.add_argument('input', help='JSON file to process')
+parser.add_argument('--summary-file', help='Write a concise error summary to this file')
+args = parser.parse_args()
+
 storage1 = {}
 storage2 = {}
 
 # Get the base directory to make file paths relative
 base_dir = os.getcwd()
+summary_lines = []
 
 
 def cleanHash(toHash):
@@ -23,7 +30,7 @@ def sec_end(job):
     print('section_end\r\033[0K')
 
 
-with open(sys.argv[1], 'r') as f:
+with open(args.input, 'r') as f:
     data = json.load(f)
     # Handle both vnu format {"messages": [...]} and pa11y format [...]
     if isinstance(data, dict) and 'messages' in data:
@@ -47,7 +54,9 @@ with open(sys.argv[1], 'r') as f:
             file_path = os.path.relpath(file_path, base_dir)
 
         # Emit GNU-style error for standard logs
-        print(f"{file_path}:{line}.{col}: {mtyp}: {mmes}")
+        gnu_line = f"{file_path}:{line}.{col}: {mtyp}: {mmes}"
+        print(gnu_line)
+        summary_lines.append(gnu_line)
 
         # Emit GHA error annotation
         if mtyp == 'error':
@@ -72,6 +81,10 @@ with open(sys.argv[1], 'r') as f:
         storage2[mtyp]["urls"][murl]["messages"][mmes] += 1
         storage2[mtyp]["urls"][murl]["cnt"] += 1
         storage2[mtyp]["cnt"] += 1
+
+if args.summary_file and summary_lines:
+    with open(args.summary_file, 'w') as sf:
+        sf.write('\n'.join(summary_lines) + '\n')
 
 for key, value in sorted(storage1.items(), key=lambda x: x[1]['cnt']):
     print("Type:  {}, Totalfound:  {}".format(key, value["cnt"]))
