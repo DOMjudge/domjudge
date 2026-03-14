@@ -103,7 +103,7 @@ readonly class ProgramMetadata
 /**
  * Represents compare script execution metadata with validated fields.
  * @phpstan-type MetaData_Compare array{
- *     exitcode: string, memory-bytes: string, time-used: string, time-result: string, bytes-transferred: string,
+ *     exitcode: string, memory-bytes: string, time-used: string, time-result?: string, bytes-transferred: string,
  *     stdin-bytes: string, stdout-bytes: string, stderr-bytes: string, validator-exited-first: string,
  *     cpu-time: string, sys-time: string, user-time: string, wall-time: string, total-duration-use: string,
  *     output-truncated?: string
@@ -2098,7 +2098,7 @@ class JudgeDaemon
             }
             /** @var MetaData_Compare $compare_meta_ini */
             logmsg(LOG_DEBUG, "parsed compare meta: " . var_export($compare_meta_ini, true));
-            if ($compare_meta_ini['time-result'] === 'timelimit') {
+            if (($compare_meta_ini['time-result'] ?? null) === 'timelimit') {
                 $compareTimedOut = true;
                 logmsg(LOG_ERR, "Comparing aborted after the script timelimit of %s seconds, compare script output:\n%s", $scripttimelimit, $compare_tmp);
             }
