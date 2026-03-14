@@ -666,7 +666,7 @@ function toggleRefresh($url, $after, usingAjax) {
     $('#refresh-toggle').text(text);
 }
 
-function updateClarifications()
+function updateTeamNotifications()
 {
     $.ajax({
         url: $('#menuDefault').data('update-url'),
@@ -675,13 +675,31 @@ function updateClarifications()
         if (jqXHR.getResponseHeader('X-Login-Page')) {
             window.location = jqXHR.getResponseHeader('X-Login-Page');
         } else {
-            let data = json['unread_clarifications'];
-            let num = data.length;
-            for (let i = 0; i < num; i++) {
+            let clarData = json['unread_clarifications'];
+            if (clarData) for (let i = 0; i < clarData.length; i++) {
                 sendNotification('New clarification',
-                 {'tag': 'clar_' + data[i].clarid,
-                        'link': domjudge_base_url + '/team/clarifications/'+data[i].clarid,
-                        'body': data[i].body });
+                 {'tag': 'clar_' + clarData[i].clarid,
+                        'link': domjudge_base_url + '/team/clarifications/'+clarData[i].clarid,
+                        'body': clarData[i].body });
+            }
+
+            let subData = json['unread_submissions'];
+            if (subData) {
+                for (let i = 0; i < subData.length; i++) {
+                    let agoText = '';
+                    if (subData[i].submittime) {
+                        let secsAgo = Math.floor(Date.now() / 1000 - subData[i].submittime);
+                        if (secsAgo < 60) {
+                            agoText = ' (submitted ' + secsAgo + ' seconds ago)';
+                        } else {
+                            agoText = ' (submitted ' + Math.floor(secsAgo / 60) + ' minutes ago)';
+                        }
+                    }
+                    sendNotification('Submission judged: ' + subData[i].result,
+                     {'tag': 'c' + subData[i].cid + '_sub_' + subData[i].submitid + '_judge_' + subData[i].judgingid,
+                            'link': domjudge_base_url + '/team/submission/' + subData[i].submitid,
+                            'body': 'Problem ' + subData[i].probname + ': ' + subData[i].result + agoText });
+                }
             }
         }
     })

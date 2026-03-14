@@ -358,6 +358,43 @@ class DOMJudgeService
     }
 
     /**
+     * @return list<array{submitid: int, judgingid: int, cid: int, result: string, probname: string, submittime: float}>
+     */
+    public function getJudgingNotifications(): array
+    {
+        $user    = $this->getUser();
+        $team    = $user->getTeam();
+        if ($team === null) {
+            return [];
+        }
+        $contest = $this->getCurrentContest($team->getTeamId());
+        if ($contest === null) {
+            return [];
+        }
+
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->select('s.submitid', 'j.judgingid', 'IDENTITY(s.contest) AS cid', 'j.result', 'p.name AS probname', 's.submittime')
+            ->from(Judging::class, 'j')
+            ->join('j.submission', 's')
+            ->join('s.contest_problem', 'cp')
+            ->join('cp.problem', 'p')
+            ->andWhere('j.valid = true')
+            ->andWhere('j.result IS NOT NULL')
+            ->andWhere('j.endtime > :since')
+            ->andWhere('s.team = :team')
+            ->andWhere('s.contest = :contest')
+            ->setParameter('since', time() - 10 * 60)
+            ->setParameter('team', $team)
+            ->setParameter('contest', $contest);
+
+        if ($this->config->get('verification_required')) {
+            $queryBuilder->andWhere('j.verified = 1');
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+    /**
      * @return array{clarifications: array<array{clarid: int, body: string}>,
      *               judgehosts: array<array{hostname: string, polltime: float}>,
      *               rejudgings: array<array{rejudgingid: int, starttime: string, endtime: string|float}>,
