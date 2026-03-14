@@ -1039,7 +1039,7 @@ class JudgeDaemon
             $maxsize = (int)$this->djconfigGetValue('output_storage_limit');
         } elseif ($sizelimit === false || $sizelimit == -1) {
             $maxsize = -1;
-        } elseif (is_int($sizelimit) && $sizelimit > 0) {
+        } elseif ($sizelimit > 0) {
             $maxsize = $sizelimit;
         } else {
             error("Invalid argument sizelimit = '$sizelimit' specified.");
