@@ -175,7 +175,7 @@ readonly class VerdictInput
  * The MetaData_Error is defined as having only 1 key so we make sure PHPStan triggers us to always handle that key first and
  * in case the key is not set, overwrite with a @var to the correct shape MetaData_{Generic,Compare,Program}
  * @phpstan-type MetaData_Error array{internal-error: string}
- * @phpstan-type MetaData MetaData_Compare|MetaData_Program|Metadata_Generic|MetaData_Error
+ * @phpstan-type MetaData MetaData_Compare|MetaData_Program|MetaData_Generic|MetaData_Error
  */
 class JudgeDaemon
 {
