@@ -170,7 +170,7 @@ readonly class VerdictInput
  * @phpstan-type MetaData_Generic array{
  *     exitcode: string, memory-bytes: string, time-used: string, time-result: string,
  *     output-truncated: string, stdin-bytes: string, stdout-bytes: string, stderr-bytes: string,
- *     cpu-time: string, sys-time: string, user-time: string, wall-time: string
+ *     cpu-time: string, sys-time: string, user-time: string, wall-time: string, entry_point?: string
  * }
  * The MetaData_Error is defined as having only 1 key so we make sure PHPStan triggers us to always handle that key first and
  * in case the key is not set, overwrite with a @var to the correct shape MetaData_{Generic,Compare,Program}
