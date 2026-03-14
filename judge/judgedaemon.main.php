@@ -1082,6 +1082,36 @@ class JudgeDaemon
     }
 
     /**
+     * Recursively hardlink all entries from $src directory into $dst directory.
+     * Preserves symlinks (no dereference) and recreates subdirectories.
+     */
+    private function hardlinkRecursive(string $src, string $dst): void
+    {
+        foreach (scandir($src) as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+            $srcPath = "$src/$entry";
+            $dstPath = "$dst/$entry";
+            if (is_link($srcPath)) {
+                $target = readlink($srcPath);
+                if (!symlink($target, $dstPath)) {
+                    error("Could not symlink '$srcPath' to '$dstPath'");
+                }
+            } elseif (is_dir($srcPath)) {
+                if (!mkdir($dstPath, 0755, true)) {
+                    error("Could not create directory '$dstPath'");
+                }
+                $this->hardlinkRecursive($srcPath, $dstPath);
+            } else {
+                if (!link($srcPath, $dstPath)) {
+                    error("Could not hardlink '$srcPath' to '$dstPath'");
+                }
+            }
+        }
+    }
+
+    /**
      * @param string[] $command_parts
      * @param int|DONT_CARE $retval
      */
@@ -2353,15 +2383,12 @@ class JudgeDaemon
             // Copy program with all possible additional files to testcase
             // dir. Use hardlinks to preserve space with big executables.
             $programdir = $passdir . '/execdir';
-            if (!$this->runCommandSafe(['mkdir', '-p', $programdir])) {
+            if (!mkdir($programdir, 0755, true)) {
                 error("Could not create directory '$programdir'");
             }
 
-            foreach (glob("$workdir/compile/*") as $compile_file) {
-                if (!$this->runCommandSafe(['cp', '-PRl', $compile_file, $programdir])) {
-                    error("Could not copy program to '$programdir'");
-                }
-            }
+            // Use PHP-native hardlinks instead of forking 'cp -PRl' per file.
+            $this->hardlinkRecursive("$workdir/compile", $programdir);
 
             $verdict = $this->testcaseRunInternal(
                 $input,
