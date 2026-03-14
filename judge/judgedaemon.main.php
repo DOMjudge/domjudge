@@ -644,7 +644,7 @@ class JudgeDaemon
     /**
      * @param JudgeTask[] $row
      */
-    private function handleDebugInfoTask(array $row, ?string &$lastWorkdir, string $workdirpath, string $workdir): void
+    private function handleDebugInfoTask(array $row, ?string $lastWorkdir, string $workdirpath, string $workdir): void
     {
         if ($lastWorkdir !== null) {
             $this->cleanupJudging($lastWorkdir);
@@ -703,7 +703,7 @@ class JudgeDaemon
     /**
      * @param JudgeTask[] $row
      */
-    private function handlePrefetchTask(array $row, ?string &$lastWorkdir, string $workdirpath): void
+    private function handlePrefetchTask(array $row, ?string $lastWorkdir, string $workdirpath): void
     {
         if ($lastWorkdir !== null) {
             $this->cleanupJudging($lastWorkdir);
