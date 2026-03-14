@@ -2122,7 +2122,7 @@ class JudgeDaemon
             $compare_meta_ini = $this->readMetadata('compare.meta');
             $compareTimedOut = false;
             if (isset($compare_meta_ini['internal-error'])) {
-                $this->handleMetaInternalError($description, $judgetaskid, $compare_meta_ini);
+                $this->handleMetaInternalError($judgetaskid, $compare_meta_ini);
                 return Verdict::INTERNAL_ERROR;
             }
             /** @var MetaData_Compare $compare_meta_ini */
