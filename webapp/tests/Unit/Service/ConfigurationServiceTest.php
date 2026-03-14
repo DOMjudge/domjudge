@@ -191,7 +191,7 @@ class ConfigurationServiceTest extends KernelTestCase
 
     public function provideConfigFromDatabase(): Generator
     {
-        yield ['compile_penalty', true, 1];
+        yield ['compile_penalty', true];
         yield ['results_prio', ['no-output' => 37, 'correct' => 1]];
         yield ['clar_categories', ['Category 1', 'Category 2']];
         yield ['show_compile', 1];

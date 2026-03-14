@@ -102,6 +102,10 @@ class ConfigurationService
             }
             // $result[$name] exists iff it should be visible.
             if (isset($result[$name])) {
+                // Cast legacy 0/1 values to proper booleans for bool-typed configs.
+                if (isset($specs[$name]) && $specs[$name]->type === 'bool') {
+                    $value = (bool)$value;
+                }
                 $result[$name] = $value;
             }
         }
