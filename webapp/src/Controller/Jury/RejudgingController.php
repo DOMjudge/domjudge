@@ -352,7 +352,7 @@ class RejudgingController extends BaseController
                     'teamName' => $submission->getTeam()->getEffectiveName(),
                     'teamId' => $submission->getTeam()->getTeamid(),
                     'problemName' => $problem->getName(),
-                    'problemId' => $problem->getProbid(),
+                    'problemId' => $problem->getExternalid(),
                     'oldScore' => $oldScore,
                     'newScore' => $newScore,
                     'delta' => $delta,
