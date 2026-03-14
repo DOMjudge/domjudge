@@ -22,11 +22,13 @@
 
     {{ macros.table(disabled_languages, table_fields) }}
 
-    {% if is_granted('ROLE_ADMIN') %}
-        <p>
+    <p>
+        {% if is_granted('ROLE_ADMIN') %}
             {{ button(path('jury_language_add'), 'Add new language', 'primary', 'plus') }}
-        </p>
-    {% endif %}
+        {% endif %}
+        {{ button(path('jury_versions'), 'Compiler/runner versions', 'outline-secondary', 'server') }}
+        {{ button(path('analysis_languages'), 'Language analysis', 'outline-secondary', 'chart-bar') }}
+    </p>
 
 {% endblock %}
 

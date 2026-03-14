@@ -50,15 +50,35 @@ class LanguageController extends BaseController
             ->from(Language::class, 'lang')
             ->orderBy('lang.name', 'ASC')
             ->getQuery()->getResult();
+        $hasNonDefaultTimefactor = false;
+        $hasEntryPoint = false;
+        foreach ($languages as $lang) {
+            if ($lang->getTimeFactor() != 1) {
+                $hasNonDefaultTimefactor = true;
+            }
+            if ($lang->getRequireEntryPoint()) {
+                $hasEntryPoint = true;
+            }
+            if ($hasNonDefaultTimefactor && $hasEntryPoint) {
+                break;
+            }
+        }
+
         $table_fields = [
             'externalid' => ['title' => 'ID', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true, 'default_sort' => true],
-            'entrypoint' => ['title' => 'entry point', 'sort' => true],
+            'allowsubmit' => ['title' => 'allow submit', 'sort' => true],
             'allowjudge' => ['title' => 'allow judge', 'sort' => true],
-            'timefactor' => ['title' => 'timefactor', 'sort' => true],
-            'extensions' => ['title' => 'extensions', 'sort' => true],
-            'executable' => ['title' => 'executable', 'sort' => true],
         ];
+        if ($hasEntryPoint) {
+            $table_fields['entrypoint'] = ['title' => 'entry point', 'sort' => true];
+            $table_fields['entrypointdescription'] = ['title' => 'entry point description', 'sort' => true];
+        }
+        if ($hasNonDefaultTimefactor) {
+            $table_fields['timefactor'] = ['title' => 'timefactor', 'sort' => true];
+        }
+        $table_fields['extensions'] = ['title' => 'extensions', 'sort' => true];
+        $table_fields['executable'] = ['title' => 'executable', 'sort' => true];
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $enabled_languages  = [];
@@ -93,6 +113,15 @@ class LanguageController extends BaseController
 
             $executable = $lang->getCompileExecutable();
 
+            $allowSubmitOptions = [
+                'toggle_partial' => 'language_toggle.html.twig',
+                'partial_arguments' => [
+                    'path' => 'jury_language_toggle_submit',
+                    'language' => $lang,
+                    'value' => $lang->getAllowSubmit(),
+                ],
+            ];
+
             $allowJudgeOptions = [
                 'toggle_partial' => 'language_toggle.html.twig',
                 'partial_arguments' => [
@@ -108,8 +137,8 @@ class LanguageController extends BaseController
 
             // Merge in the rest of the data.
             $langdata = array_merge($langdata, [
-                'entrypoint' => ['value' => $lang->getRequireEntryPoint() ? 'yes' : 'no'],
-                'extensions' => ['value' => implode(', ', $lang->getExtensions())],
+                'allowsubmit' => $allowSubmitOptions,
+                'extensions' => ['value' => implode(', ', $lang->getExtensions()), 'cssclass' => 'font-monospace'],
                 'allowjudge' => $allowJudgeOptions,
                 'executable' => [
                     'value' => $executable === null ? '-' : $executable->getShortDescription(),
@@ -119,6 +148,22 @@ class LanguageController extends BaseController
                     'showlink' => true,
                     ],
             ]);
+
+            if ($hasEntryPoint) {
+                $langdata['entrypoint'] = [
+                    'toggle_partial' => 'language_toggle.html.twig',
+                    'partial_arguments' => [
+                        'path' => 'jury_language_toggle_require_entry_point',
+                        'language' => $lang,
+                        'value' => $lang->getRequireEntryPoint(),
+                    ],
+                ];
+                $langdata['entrypointdescription'] = [
+                    'value' => $lang->getRequireEntryPoint() && $lang->getEntryPointDescription()
+                        ? $lang->getEntryPointDescription()
+                        : '',
+                ];
+            }
 
             if ($lang->getAllowSubmit()) {
                 $enabled_languages[] = [
@@ -222,7 +267,7 @@ class LanguageController extends BaseController
     }
 
     #[Route(path: '/{langId}/toggle-submit', name: 'jury_language_toggle_submit')]
-    public function toggleSubmitAction(Request $request, string $langId): Response
+    public function toggleSubmitAction(RouterInterface $router, Request $request, string $langId): Response
     {
         $language = $this->em->getRepository(Language::class)->findByExternalId($langId);
         if (!$language) {
@@ -234,7 +279,11 @@ class LanguageController extends BaseController
 
         $this->dj->auditlog('language', $language->getExternalid(), 'set allow submit',
                                          $request->request->getBoolean('value') ? 'yes' : 'no');
-        return $this->redirectToRoute('jury_language', ['langId' => $langId]);
+        return $this->redirectToLocalReferrer(
+            $router,
+            $request,
+            $this->generateUrl('jury_language', ['langId' => $langId])
+        );
     }
 
     #[Route(path: '/{langId}/toggle-judge', name: 'jury_language_toggle_judge')]
@@ -283,7 +332,7 @@ class LanguageController extends BaseController
     }
 
     #[Route(path: '/{langId}/toggle-require-entry-point', name: 'jury_language_toggle_require_entry_point')]
-    public function toggleRequireEntryPointAction(Request $request, string $langId): Response
+    public function toggleRequireEntryPointAction(RouterInterface $router, Request $request, string $langId): Response
     {
         $language = $this->em->getRepository(Language::class)->findByExternalId($langId);
         if (!$language) {
@@ -296,7 +345,11 @@ class LanguageController extends BaseController
 
         $this->dj->auditlog('language', $language->getExternalid(), 'set require entry point',
             $enabled ? 'yes' : 'no');
-        return $this->redirectToRoute('jury_language', ['langId' => $langId]);
+        return $this->redirectToLocalReferrer(
+            $router,
+            $request,
+            $this->generateUrl('jury_language', ['langId' => $langId])
+        );
     }
 
     #[IsGranted('ROLE_ADMIN')]
