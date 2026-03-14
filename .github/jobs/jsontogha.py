@@ -2,9 +2,13 @@ import json
 import sys
 import time
 import hashlib
+import os
 
 storage1 = {}
 storage2 = {}
+
+# Get the base directory to make file paths relative
+base_dir = os.getcwd()
 
 
 def cleanHash(toHash):
@@ -21,10 +25,36 @@ def sec_end(job):
 
 with open(sys.argv[1], 'r') as f:
     data = json.load(f)
-    for message in data['messages']:
-        mtyp = str(message['type'])
-        murl = str(message['url'])
-        mmes = str(message['message'])
+    # Handle both vnu format {"messages": [...]} and pa11y format [...]
+    if isinstance(data, dict) and 'messages' in data:
+        messages = data['messages']
+    elif isinstance(data, list):
+        messages = data
+    else:
+        messages = []
+
+    for message in messages:
+        mtyp = str(message.get('type', 'error'))
+        murl = str(message.get('url', message.get('file', 'unknown')))
+        mmes = str(message.get('message', 'no message'))
+
+        line = message.get('lastLine', message.get('line', 1))
+        col = message.get('lastColumn', message.get('column', 1))
+        file_path = murl
+        if file_path.startswith('file:'):
+            file_path = file_path[5:]
+        if file_path.startswith(base_dir):
+            file_path = os.path.relpath(file_path, base_dir)
+
+        # Emit GNU-style error for standard logs
+        print(f"{file_path}:{line}.{col}: {mtyp}: {mmes}")
+
+        # Emit GHA error annotation
+        if mtyp == 'error':
+            # Escape newlines in message for GHA
+            escaped_mes = mmes.replace('\n', '%0A').replace('\r', '%0D')
+            print(f"::error file={file_path},line={line},col={col}::{escaped_mes}")
+
         if mtyp not in storage1.keys():
             storage1[mtyp] = {"messages": {}, "cnt": 0}
             storage2[mtyp] = {"urls": {}, "cnt": 0}
