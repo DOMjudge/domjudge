@@ -4,9 +4,9 @@ namespace App\Tests\Unit;
 
 use App\Entity\Role;
 use App\Entity\User;
+use App\Entity\Configuration;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
-use App\Service\EventLogService;
 use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\Loader;
@@ -201,18 +201,61 @@ abstract class BaseTestCase extends WebTestCase
         mixed $configValue,
         callable $callback
     ): void {
-        $config = self::getContainer()->get(ConfigurationService::class);
-        $eventLog = self::getContainer()->get(EventLogService::class);
-        $dj = self::getContainer()->get(DOMJudgeService::class);
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        $configService = self::getContainer()->get(ConfigurationService::class);
 
-        // Build up the data to set.
-        $dataToSet = [$configKey => $configValue];
+        // Validate the value against the config specification.
+        $specs = $configService->getConfigSpecification();
+        $errors = [];
+        if (isset($specs[$configKey]) && isset($specs[$configKey]->regex)) {
+            if (preg_match($specs[$configKey]->regex, (string)$configValue) === 0) {
+                $errors[$configKey] = $specs[$configKey]->errorMessage ?? 'This is not a valid value';
+            }
+        }
 
-        // Save the changes.
-        $errors = $config->saveChanges($dataToSet, $eventLog, $dj);
+        // Find or create the configuration entity for this key.
+        $option = $em->getRepository(Configuration::class)->findOneBy(['name' => $configKey]);
+        if ($option === null) {
+            $option = new Configuration();
+            $option->setName($configKey);
+            $em->persist($option);
+        }
+        $oldValue = $option->getValue();
 
-        // Call the callback with the errors.
-        $callback($errors);
+        // Only apply the change if validation passed.
+        if (empty($errors)) {
+            $option->setValue($configValue);
+            $em->flush();
+        }
+
+        // Clear the cached DB values so the new value is picked up.
+        $reflection = new ReflectionClass($configService);
+        $cacheProperty = $reflection->getProperty('dbConfigCache');
+        $cacheProperty->setAccessible(true);
+        $cacheProperty->setValue($configService, null);
+
+        try {
+            $callback($errors);
+        } finally {
+            // Re-fetch the entity manager and config in case the kernel rebooted.
+            $em = self::getContainer()->get(EntityManagerInterface::class);
+            $configService = self::getContainer()->get(ConfigurationService::class);
+            $reflection = new ReflectionClass($configService);
+            $cacheProperty = $reflection->getProperty('dbConfigCache');
+            $cacheProperty->setAccessible(true);
+
+            // Restore the old value.
+            $option = $em->getRepository(Configuration::class)->findOneBy(['name' => $configKey]);
+            if ($option !== null) {
+                if ($oldValue === null) {
+                    $em->remove($option);
+                } else {
+                    $option->setValue($oldValue);
+                }
+                $em->flush();
+            }
+            $cacheProperty->setValue($configService, null);
+        }
     }
 
     protected function verifyPageResponse(

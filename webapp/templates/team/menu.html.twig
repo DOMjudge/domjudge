@@ -71,11 +71,32 @@
         </div>
         <div class="ml-auto me-3">
             {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
+                {% if 'upload' in submit_methods and 'paste' in submit_methods %}
+                    {# Both methods enabled: default to modal (upload), but JS will switch to
+                       direct link if the user's last submit tab was paste. #}
+                    <a class="nav-link" id="submit-btn-modal" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit') }}">
+                        <span class="btn btn-success btn-sm">
+                            <i class="fas fa-cloud-upload-alt"></i> Submit
+                        </span>
+                    </a>
+                    <a class="nav-link d-none" id="submit-btn-paste" href="{{ path('team_submit') }}?tab=paste">
+                        <span class="btn btn-success btn-sm">
+                            <i class="fas fa-paste"></i> Submit
+                        </span>
+                    </a>
+                {% elseif 'upload' in submit_methods %}
                 <a class="nav-link" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit') }}">
                     <span class="btn btn-success btn-sm">
                         <i class="fas fa-cloud-upload-alt"></i> Submit
                     </span>
                 </a>
+                {% else %}
+                <a class="nav-link" href="{{ path('team_submit') }}">
+                    <span class="btn btn-success btn-sm">
+                        <i class="fas fa-paste"></i> Submit
+                    </span>
+                </a>
+                {% endif %}
             {% else %}
                 <a class="nav-link">
                     <span class="btn btn-success btn-sm disabled">

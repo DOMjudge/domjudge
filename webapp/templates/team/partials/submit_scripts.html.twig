@@ -16,15 +16,135 @@
         }
     }
 
-    function maybeShowEntryPoint() {
-        let filename = $('#submit_problem_code').val() ?? '';
-        filename = filename.replace(/^.*[\\\/]/, '');
+    // Derives a default entry point value from a filename and language ID.
+    function deriveEntryPoint(filename, langid) {
+        if (!filename) return '';
+        switch (langid) {
+            case 'java':
+                return entryPointDetectJava(filename);
+            case 'kotlin':
+                return entryPointDetectKotlin(filename);
+            default:
+                return filename;
+        }
+    }
 
-        var langid = $('#submit_problem_language').val();
+    // Map DOMjudge language externalid to its first file extension.
+    // Uses getMainExtension() from javascript_language_detect.html.twig for the
+    // reverse mapping (extension -> langid); this provides langid -> extension.
+    var langExtensionMap = {
+        {% for language in submission_languages %}
+        '{{ language.externalid }}': '{{ language.extensions[0] | default('') }}'{% if not loop.last %},{% endif %}
+
+        {% endfor %}
+    };
+    function getLangExtension(langid) {
+        return langExtensionMap[langid] || '';
+    }
+
+    // Derive a Monaco editor language from a file extension.
+    function getMonacoLanguageForExtension(ext) {
+        if (typeof monaco === 'undefined') return '';
+        var dotExt = '.' + ext;
+        var langs = monaco.languages.getLanguages();
+        for (var i = 0; i < langs.length; i++) {
+            if (langs[i].extensions) {
+                for (var j = 0; j < langs[i].extensions.length; j++) {
+                    if (langs[i].extensions[j] === dotExt) {
+                        return langs[i].id;
+                    }
+                }
+            }
+        }
+        return 'plaintext';
+    }
+
+    // Update the Monaco editor language for paste editors.
+    function updatePasteEditorLanguage(ext) {
+        if (typeof monaco === 'undefined') return;
+        var monacoLang = getMonacoLanguageForExtension(ext);
+        var editors = monaco.editor.getEditors();
+        for (var i = 0; i < editors.length; i++) {
+            var el = editors[i].getDomNode();
+            if (el && el.closest('.paste-editor-container')) {
+                monaco.editor.setModelLanguage(editors[i].getModel(), monacoLang);
+            }
+        }
+    }
+
+    // Get problem shortname from problem select (text is "SHORT - Name").
+    function getProblemShortname(formPrefix) {
+        var probSelect = document.getElementById(formPrefix + '_problem');
+        if (!probSelect || probSelect.selectedIndex < 0) return '';
+        var text = probSelect.options[probSelect.selectedIndex].text;
+        var parts = text.split(/ - /);
+        return parts[0] || '';
+    }
+
+    // Derive filename and entry point for the paste form, update display.
+    function updatePasteDerivedFilename(formPrefix) {
+        var langSelect = document.getElementById(formPrefix + '_language');
+        if (!langSelect) return;
+        var langid = langSelect.value;
+        var ext = getLangExtension(langid);
+        var shortname = getProblemShortname(formPrefix);
+        var filenameEl = document.querySelector('.paste-derived-filename[data-form-prefix="' + formPrefix + '"]');
+
+        if (!langid || !shortname || !ext) {
+            if (filenameEl) filenameEl.textContent = '-';
+            return;
+        }
+
+        var filename = shortname + '.' + ext;
+
+        // Show/hide entry point and derive its value from the filename.
+        // The paste toolbar uses [data-entry-point-toolbar] as wrapper;
+        // fall back to form-rendered [data-entry-point] for the row wrapper.
+        var $form = $(langSelect).closest('form');
+        var $entryPointToolbar = $form.find('[data-entry-point-toolbar]');
+        var $entryPointRow = $form.find('[data-entry-point]');
+        var $entryPointInput = $form.find('#' + formPrefix + '_entry_point');
+        var $entryPointLabel = ($entryPointToolbar.length ? $entryPointToolbar : $entryPointRow).find('label');
+        var entryPointDescription = getEntryPoint(langid);
+
+        if (entryPointDescription) {
+            $entryPointToolbar.show();
+            $entryPointRow.show();
+            var $labelChildren = $entryPointLabel.children();
+            $entryPointLabel.text(entryPointDescription).append($labelChildren);
+            $entryPointInput.attr('required', 'required');
+
+            // Auto-detect entry point from derived filename
+            $entryPointInput.val(deriveEntryPoint(filename, langid));
+        } else {
+            $entryPointToolbar.hide();
+            $entryPointRow.hide();
+            $entryPointInput.attr('required', null);
+            $entryPointInput.val('');
+        }
+
+        if (filenameEl) filenameEl.textContent = filename;
+
+        // Update Monaco syntax highlighting
+        updatePasteEditorLanguage(ext);
+    }
+
+    function maybeShowEntryPoint(formPrefix) {
+        formPrefix = formPrefix || 'submit_problem';
+        let fileInput = document.getElementById(formPrefix + '_code');
+        let filename = '';
+        if (fileInput) {
+            filename = $(fileInput).val() ?? '';
+            filename = filename.replace(/^.*[\\\/]/, '');
+        }
+
+        var langSelect = document.getElementById(formPrefix + '_language');
+        if (!langSelect) return;
+        var langid = langSelect.value;
         if (langid === "") {
             return;
         }
-        var $entryPoint = $('[data-entry-point]');
+        var $entryPoint = $(langSelect).closest('form').find('[data-entry-point]');
         var $entryPointLabel = $entryPoint.find('label');
         var $entryPointInput = $entryPoint.find('input');
         var entryPointDescription = getEntryPoint(langid);
@@ -43,24 +163,31 @@
         }
 
         if (entryPointDescription && filename) {
-            switch (langid) {
-                case 'java':
-                    $entryPointInput.val(entryPointDetectJava(filename));
-                    break;
-                case 'kotlin':
-                    $entryPointInput.val(entryPointDetectKotlin(filename));
-                    break;
-                default:
-                    $entryPointInput.val(filename);
-            }
-        } else {
+            $entryPointInput.val(deriveEntryPoint(filename, langid));
+        } else if (!entryPointDescription) {
             $entryPointInput.val('');
         }
     }
 
+    // Show the correct nav submit button based on the remembered submit tab.
+    function updateSubmitButton() {
+        var modalBtn = document.getElementById('submit-btn-modal');
+        var pasteBtn = document.getElementById('submit-btn-paste');
+        if (!modalBtn || !pasteBtn) return;
+        if (getCookie('domjudge_submit_tab') === 'paste') {
+            modalBtn.classList.add('d-none');
+            pasteBtn.classList.remove('d-none');
+        } else {
+            modalBtn.classList.remove('d-none');
+            pasteBtn.classList.add('d-none');
+        }
+    }
+
     $(function () {
-        var $entryPoint = $('[data-entry-point]');
-        $entryPoint.hide();
+        updateSubmitButton();
+
+        // Hide all entry point fields initially
+        $('[data-entry-point]').hide();
 
         var processFile = function () {
             var filename = $('#submit_problem_code').val();
@@ -71,7 +198,6 @@
                 var lcParts = [parts[0].toLowerCase(), parts[1].toLowerCase()];
 
                 // language ID
-
                 var language = document.getElementById('submit_problem_language');
                 // the "autodetect" option has empty value
                 if (language.value !== '') return;
@@ -83,10 +209,9 @@
                     }
                 }
 
-                maybeShowEntryPoint();
+                maybeShowEntryPoint('submit_problem');
 
                 // Problem ID
-
                 var problem = document.getElementById('submit_problem_problem');
                 // the "autodetect" option has empty value
                 if (problem.value !== '') {
@@ -104,7 +229,12 @@
         var $body = $('body');
         $body.on('change', '#submit_problem_code', processFile);
         $body.on('change', '#submit_problem_language', function () {
-            maybeShowEntryPoint();
+            maybeShowEntryPoint('submit_problem');
+        });
+
+        // Paste form: problem or language change -> update derived filename, entry point, highlighting
+        $body.on('change', '#submit_problem_paste_language, #submit_problem_paste_problem', function () {
+            updatePasteDerivedFilename('submit_problem_paste');
         });
 
         $body.on('submit', 'form[name=submit_problem]', function () {
@@ -154,11 +284,66 @@
             return confirm(question);
         });
 
+        $body.on('submit', 'form[name=submit_problem_paste]', function () {
+            var langelt = document.getElementById("submit_problem_paste_language");
+            var language = langelt.options[langelt.selectedIndex].value;
+            var languagetxt = langelt.options[langelt.selectedIndex].text;
+            var probelt = document.getElementById("submit_problem_paste_problem");
+            var problem = probelt.options[probelt.selectedIndex].value;
+            var problemtxt = probelt.options[probelt.selectedIndex].text;
+            var codeContent = document.getElementById("submit_problem_paste_code_content").value;
+
+            var error = false;
+            if (language === "") {
+                langelt.focus();
+                langelt.className = langelt.className + " errorfield";
+                error = true;
+            }
+            if (problem === "") {
+                probelt.focus();
+                probelt.className = probelt.className + " errorfield";
+                error = true;
+            }
+            if (!codeContent || codeContent.trim() === "") {
+                alert("Please paste your source code in the editor.");
+                error = true;
+            }
+            if (error) return false;
+
+            var filenameEl = document.querySelector('.paste-derived-filename[data-form-prefix="submit_problem_paste"]');
+            var filename = filenameEl ? filenameEl.textContent : '';
+            var question =
+                'File: ' + filename + '\n' +
+                'Problem: ' + problemtxt + '\n' +
+                'Language: ' + languagetxt + '\n' +
+                '\nMake submission?';
+            return confirm(question);
+        });
+
         processFile();
-        maybeShowEntryPoint();
+        maybeShowEntryPoint('submit_problem');
+        updatePasteDerivedFilename('submit_problem_paste');
 
         window.initSubmitModal = function ($elem) {
             $('[data-entry-point]').hide();
         };
+
+        // Tab persistence for standalone page (query param takes priority over cookie)
+        var urlParams = new URLSearchParams(window.location.search);
+        var activeTab = urlParams.get('tab') || getCookie('domjudge_submit_tab');
+        if (activeTab === 'paste') {
+            var pasteTabBtn = document.getElementById('paste-tab-page');
+            if (pasteTabBtn) {
+                var tab = new bootstrap.Tab(pasteTabBtn);
+                tab.show();
+            }
+        }
+        document.querySelectorAll('#upload-tab-page, #paste-tab-page').forEach(function(tabBtn) {
+            tabBtn.addEventListener('shown.bs.tab', function(e) {
+                var tabId = e.target.id.indexOf('paste') >= 0 ? 'paste' : 'upload';
+                setCookie('domjudge_submit_tab', tabId);
+                updateSubmitButton();
+            });
+        });
     });
 </script>
