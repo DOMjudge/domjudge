@@ -2129,7 +2129,7 @@ class JudgeDaemon
             logmsg(LOG_DEBUG, "parsed compare meta: " . var_export($compare_meta_ini, true));
             if (($compare_meta_ini['time-result'] ?? null) === 'timelimit') {
                 $compareTimedOut = true;
-                logmsg(LOG_ERR, "Comparing aborted after the script timelimit of %s seconds, compare script output:\n%s", $scripttimelimit, $compare_tmp);
+                logmsg(LOG_ERR, sprintf("Comparing aborted after the script timelimit of %s seconds, compare script output:\n%s", $scripttimelimit, $compare_tmp));
             }
 
             // Append output validator stdout
