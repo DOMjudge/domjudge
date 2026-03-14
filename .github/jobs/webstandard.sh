@@ -75,7 +75,7 @@ section_start "Analyse failures"
 # Exit code 8 can also be because of HTTP 400 or 404
 if [ $RET -ne 0 ] && [ $RET -ne 4 ] && [ $RET -ne 8 ]; then
     echo "Server log"
-    tail -n1000 /opt/domjude/domserver/webapp/var/log/prod.log
+    tail -n1000 /opt/domjudge/domserver/webapp/var/log/prod.log
     section_end
 
     exit $RET
