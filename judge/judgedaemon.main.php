@@ -388,6 +388,9 @@ class JudgeDaemon
         $this->loop();
     }
 
+    /**
+     * @param MetaData_Error $metadata
+     */
     private function handleMetaInternalError(?int $judgetaskid, array $metadata): void
     {
         // Unexpected situation during setup of the submission, so disable the judgehost itself as no
