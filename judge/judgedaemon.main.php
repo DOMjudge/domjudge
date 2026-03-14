@@ -2401,10 +2401,7 @@ class JudgeDaemon
                     logmsg(LOG_ERR, "Encountered unhandled 'internal-error':" . $comparemeta['internal-error']);
                 }
                 /** @var MetaData_Compare $compareMeta */
-                $compareExitCode = 'n/a';
-                if (isset($compareMeta['exitcode'])) {
-                    $compareExitCode = $compareMeta['exitcode'];
-                }
+                $compareExitCode = $compareMeta['exitcode'];
                 if ($combined_run_compare) {
                     logmsg(LOG_ERR, "comparing failed for combined run/compare script '" . $judgeTask['run_script_id'] . "'");
                     $description = 'combined run/compare script ' . $judgeTask['run_script_id'] . ' crashed with exit code ' . $compareExitCode . ", expected one of 42/43";
