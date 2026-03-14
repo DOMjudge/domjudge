@@ -118,6 +118,12 @@ w3c_analyse () {
         # shellcheck disable=SC2086
         NEWFOUNDERRORS=$("$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR "$URL" 2>&1 | tee "$ARTIFACTS/w3c_${typ}_${URL}_${LOGID}.log" | wc -l)
         FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
+        if [ "$NEWFOUNDERRORS" -gt 0 ]; then
+            echo "::error::$typ validation ($LOGID): found $NEWFOUNDERRORS error(s)"
+            cat "$ARTIFACTS/w3c_${typ}_${URL}_${LOGID}.log"
+        else
+            echo "$typ validation ($LOGID): OK"
+        fi
         python3 -m "json.tool" < result.json > "$ARTIFACTS/w3c$typ$URL${LOGID}.json"
         trace_off; python3 .github/jobs/jsontogha.py "$ARTIFACTS/w3c$typ$URL${LOGID}.json"; trace_on
         section_end
@@ -176,5 +182,5 @@ else
     done
 fi
 
-echo "Found: " $FOUNDERR
+echo "Total errors found: $FOUNDERR"
 [ "$FOUNDERR" -eq 0 ]
