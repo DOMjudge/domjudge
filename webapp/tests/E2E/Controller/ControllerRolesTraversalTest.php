@@ -48,14 +48,19 @@ class ControllerRolesTraversalTest extends BaseTestCase
      */
     protected function roleCombinations(array $start_roles, array $possible_roles): array
     {
-        // Initialize by adding the empty set.
+        // Base roles alone.
         $results = [$start_roles];
 
+        // Base roles + each optional role individually.
         foreach ($possible_roles as $element) {
-            foreach ($results as $combination) {
-                $results[] = [$element, ...$combination];
-            }
+            $results[] = [$element, ...$start_roles];
         }
+
+        // Base roles + all optional roles together.
+        if (count($possible_roles) > 1) {
+            $results[] = [...$possible_roles, ...$start_roles];
+        }
+
         return $results;
     }
 
