@@ -100,7 +100,6 @@ const int soft_timelimit = 1;
 const int hard_timelimit = 2;
 
 const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
-const struct timespec cg_delete_delay = { 0, 10000000L }; /* 0.01 seconds */
 
 extern int verbose;
 
@@ -584,10 +583,19 @@ void cgroup_delete()
 	if ( cpuset!=nullptr && strlen(cpuset)>0 ) {
 		if ( cgroup_add_controller(cg, "cpuset")==nullptr ) die(0,"cgroup_add_controller cpuset");
 	}
-	/* Clean up our cgroup */
-	nanosleep(&cg_delete_delay,nullptr);
-	int ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
-	// TODO: is this actually benign to ignore ECGOTHER here?
+	/* Clean up our cgroup. Try immediately; if the kernel hasn't
+	   finished cleaning up yet, retry with short sleeps. */
+	const struct timespec retry_delay = { 0, 1000000L }; /* 1ms */
+	const int max_retries = 10;
+	int ret;
+	for (int attempt = 0; attempt <= max_retries; attempt++) {
+		if (attempt > 0) nanosleep(&retry_delay, nullptr);
+		ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
+		if (ret == 0 || ret == ECGOTHER) break;
+		if (attempt < max_retries) {
+			logmsg(LOG_DEBUG, "cgroup delete attempt {} failed ({}), retrying...", attempt + 1, ret);
+		}
+	}
 	if ( ret!=0 && ret!=ECGOTHER ) die(ret,"deleting cgroup");
 
 	cgroup_free(&cg);
