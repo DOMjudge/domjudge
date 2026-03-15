@@ -77,6 +77,9 @@ class DOMJudgeService
 
     private string $localVersionString = '';
 
+    /** @var array<string, string[]> */
+    private array $assetFilesCache = [];
+
     final public const EVAL_DEFAULT = 0;
     final public const EVAL_LAZY = 1;
     final public const EVAL_FULL = 2;
@@ -1478,9 +1481,13 @@ class DOMJudgeService
      */
     public function getAssetFiles(string $path): array
     {
+        if (isset($this->assetFilesCache[$path])) {
+            return $this->assetFilesCache[$path];
+        }
+
         $customDir = sprintf('%s/public/%s', $this->params->get('kernel.project_dir'), $path);
         if (!is_dir($customDir)) {
-            return [];
+            return $this->assetFilesCache[$path] = [];
         }
 
         $results = [];
@@ -1492,7 +1499,7 @@ class DOMJudgeService
             }
         }
 
-        return $results;
+        return $this->assetFilesCache[$path] = $results;
     }
 
     /**
