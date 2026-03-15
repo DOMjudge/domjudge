@@ -22,6 +22,8 @@ class Scoreboard
 
     /** @var TeamScore[] */
     protected array $scores = [];
+    /** @var array<int, float> probid => max score */
+    protected array $maxScorePerProblem = [];
     /** @var int[]|null */
     protected ?array $bestInCategoryData = null;
 
@@ -163,8 +165,9 @@ class Scoreboard
      */
     protected function calculateScoreboard(): void
     {
-        // Calculate matrix and update scores.
+        // Calculate matrix, update scores, and track max score per problem.
         $this->matrix = [];
+        $this->maxScorePerProblem = [];
         foreach ($this->scoreCache as $scoreCell) {
             $teamId = $scoreCell->getTeam()->getTeamid();
             $probId = $scoreCell->getProblem()->getProbid();
@@ -191,7 +194,7 @@ class Scoreboard
                 );
             }
 
-            $this->matrix[$teamId][$probId] = new ScoreboardMatrixItem(
+            $matrixItem = new ScoreboardMatrixItem(
                 isCorrect: $isCorrect,
                 isFirst: $isCorrect && $scoreCell->getIsFirstToSolve(),
                 numSubmissions: $scoreCell->getSubmissions($this->restricted),
@@ -201,6 +204,11 @@ class Scoreboard
                 runtime: $scoreCell->getRuntime($this->restricted),
                 numSubmissionsInFreeze: $scoreCell->getPending(false),
                 points: $points,
+            );
+            $this->matrix[$teamId][$probId] = $matrixItem;
+            $this->maxScorePerProblem[$probId] = max(
+                $this->maxScorePerProblem[$probId] ?? 0.0,
+                $matrixItem->getScore()
             );
         }
 
@@ -398,17 +406,7 @@ class Scoreboard
      */
     public function getMaxScoreForProblem(ContestProblem $problem): float
     {
-        $maxScore = 0.0;
-        $problemId = $problem->getProbid();
-
-        foreach ($this->scores as $teamScore) {
-            $teamId = $teamScore->team->getTeamid();
-            if (isset($this->matrix[$teamId][$problemId])) {
-                $maxScore = max($maxScore, $this->matrix[$teamId][$problemId]->getScore());
-            }
-        }
-
-        return $maxScore;
+        return $this->maxScorePerProblem[$problem->getProbid()] ?? 0.0;
     }
 
     /**
