@@ -2246,14 +2246,14 @@ class JudgeDaemon
 
                 if (file_exists("$realWorkdir/testdata.in")) {
                     unlink("$realWorkdir/testdata.in");
-                    if ($input !== null && is_readable($input)) {
+                    if (is_readable($input)) {
                         symlink($input, "$realWorkdir/testdata.in");
                     }
                 }
 
                 if (file_exists("$realWorkdir/testdata.out")) {
                     unlink("$realWorkdir/testdata.out");
-                    if ($output !== null && is_readable($output)) {
+                    if (is_readable($output)) {
                         symlink($output, "$realWorkdir/testdata.out");
                     }
                 }
