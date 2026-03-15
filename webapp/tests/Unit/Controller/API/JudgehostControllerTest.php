@@ -42,6 +42,10 @@ class JudgehostControllerTest extends BaseTestCase
 
     public function provideSingle(): Generator
     {
+        if (empty($this->expectedObjects)) {
+            yield [0, []];
+            return;
+        }
         foreach ($this->expectedObjects as $expectedProperties) {
             yield [$expectedProperties['hostname'], $expectedProperties];
         }

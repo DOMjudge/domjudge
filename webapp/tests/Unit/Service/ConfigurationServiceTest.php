@@ -231,14 +231,15 @@ class ConfigurationServiceTest extends KernelTestCase
         $this->configRepository->expects(self::once())
             ->method('findAll')
             ->willReturn($unknownItems);
-        $matcher = self::exactly(2);
-        $this->logger->expects($matcher)
-            ->method('warning')->willReturnCallback(function (...$parameters) use ($matcher): void {
-                if ($matcher->getInvocationCount() === 1) {
+        $callCount = 0;
+        $this->logger->expects(self::exactly(2))
+            ->method('warning')->willReturnCallback(function (...$parameters) use (&$callCount): void {
+                $callCount++;
+                if ($callCount === 1) {
                     $this->assertSame('Configuration value %s not defined', $parameters[0]);
                     $this->assertSame(['unknown1'], $parameters[1]);
                 }
-                if ($matcher->getInvocationCount() === 2) {
+                if ($callCount === 2) {
                     $this->assertSame('Configuration value %s not defined', $parameters[0]);
                     $this->assertSame(['unknown2'], $parameters[1]);
                 }

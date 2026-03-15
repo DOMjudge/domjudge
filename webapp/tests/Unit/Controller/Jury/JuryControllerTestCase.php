@@ -292,6 +292,9 @@ abstract class JuryControllerTestCase extends BaseTestCase
      */
     public function testCheckAddEntityAdmin(array $element, array $expected): void
     {
+        if (empty($element)) {
+            static::markTestSkipped('No add entities defined.');
+        }
         $this->roles = ['admin'];
         $this->logOut();
         $this->logIn();
@@ -332,6 +335,9 @@ abstract class JuryControllerTestCase extends BaseTestCase
      */
     public function testCheckAddEntityAdminFailure(array $element, string $message): void
     {
+        if (empty($element)) {
+            static::markTestSkipped('No add failure entities defined.');
+        }
         $this->roles = ['admin'];
         $this->logOut();
         $this->logIn();
@@ -351,6 +357,9 @@ abstract class JuryControllerTestCase extends BaseTestCase
      */
     public function testCheckEditEntityAdminCorrect(array $formDataKeys, array $formDataValues): void
     {
+        if (empty($formDataKeys)) {
+            static::markTestSkipped('No edit entities defined.');
+        }
         if (static::$addPlus != '') {
             static::markTestSkipped('Edit not implemented yet for ' . static::$shortTag . '.');
         }
@@ -407,6 +416,9 @@ abstract class JuryControllerTestCase extends BaseTestCase
      */
     public function testCheckEditEntityAdminFailure(array $formDataKeys, array $formDataValues, string $message): void
     {
+        if (empty($formDataKeys)) {
+            static::markTestSkipped('No edit failure entities defined.');
+        }
         if (static::$addPlus != '') {
             static::markTestSkipped('Edit not implemented yet for ' . static::$shortTag . '.');
         }
@@ -451,6 +463,10 @@ abstract class JuryControllerTestCase extends BaseTestCase
     public function provideAddCorrectEntities(): Generator
     {
         $entities = static::$addEntities;
+        if (empty($entities)) {
+            yield [[], []];
+            return;
+        }
         foreach ($entities as $element) {
             [$combinedValues, $element] = $this->helperProvideMergeAddEntity($element);
             [$combinedValues, $element] = $this->helperProvideTranslateAddEntity($combinedValues, $element);
@@ -461,6 +477,10 @@ abstract class JuryControllerTestCase extends BaseTestCase
     public function provideAddFailureEntities(): Generator
     {
         $entities = static::$addEntitiesFailure;
+        if (empty($entities)) {
+            yield [[], ''];
+            return;
+        }
         foreach ($entities as $message => $elementList) {
             foreach ($elementList as $element) {
                 [$entity, $expected] = $this->helperProvideMergeAddEntity($element);
@@ -507,6 +527,10 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     public function provideEditCorrectEntities(): Generator
     {
+        if (empty(static::$addEntities)) {
+            yield [[], []];
+            return;
+        }
         foreach (static::$addEntities as $element) {
             [$formdataKeys, $formdataValues] = $this->helperProvideMergeEditEntity($element);
             yield [$formdataKeys, $formdataValues];
@@ -519,6 +543,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
            [$message => [[$offending_key => $offending_value, $other_key => $other_values...]]]
            is expected to have the offending value, when this is defined in $editEntitiesSkipFields
            we skip this */
+        $yielded = false;
         foreach (static::$addEntitiesFailure as $message => $entityList) {
             foreach ($entityList as $element) {
                 if (in_array(array_key_first($element), static::$editEntitiesSkipFields)) {
@@ -529,7 +554,11 @@ abstract class JuryControllerTestCase extends BaseTestCase
                 }
                 [$formdataKeys, $formdataValues] = $this->helperProvideMergeEditEntity($element);
                 yield [$formdataKeys, $formdataValues, $message];
+                $yielded = true;
             }
+        }
+        if (!$yielded) {
+            yield [[], [], ''];
         }
     }
 

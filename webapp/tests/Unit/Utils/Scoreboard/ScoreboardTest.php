@@ -35,7 +35,7 @@ class ScoreboardTest extends BaseBaseTestCase
 
     public function provideFreezeDataProgress(): Generator
     {
-        $class = new FreezeDataTest();
+        $class = new FreezeDataTest('provideContestProgress');
         return $class->provideContestProgress();
     }
 }

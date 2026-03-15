@@ -197,7 +197,7 @@ class ScoringScoreboardIntegrationTest extends KernelTestCase
     protected function tearDown(): void
     {
         // Preserve the data for inspection if a test failed.
-        if (!$this->hasFailed()) {
+        if (!$this->status()->isFailure() && !$this->status()->isError()) {
             $this->em->remove($this->contest);
             $this->em->remove($this->judgehost);
             foreach ($this->teams as $team) {

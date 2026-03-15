@@ -110,7 +110,7 @@
 		"dama/doctrine-test-bundle": "^8.0",
 		"phpstan/phpstan": "^2.0",
 		"phpstan/phpstan-doctrine": "^2.0",
-		"phpunit/phpunit": "^9.6",
+		"phpunit/phpunit": "^10.0",
 		"rector/rector": "^2.2",
 		"sebastian/diff": "*",
 		"squizlabs/php_codesniffer": "*",
