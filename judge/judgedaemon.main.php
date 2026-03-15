@@ -103,10 +103,10 @@ readonly class ProgramMetadata
 /**
  * Represents compare script execution metadata with validated fields.
  * @phpstan-type MetaData_Compare array{
- *     exitcode: string, memory-bytes: string, time-used: string, time-result?: string, bytes-transferred: string,
- *     stdin-bytes: string, stdout-bytes: string, stderr-bytes: string, validator-exited-first: string,
- *     cpu-time: string, sys-time: string, user-time: string, wall-time: string, total-duration-use: string,
- *     output-truncated?: string
+ *     exitcode: string, memory-bytes: string, time-used: string, bytes-transferred: string,
+ *     stdin-bytes: string, stdout-bytes: string, stderr-bytes: string, cpu-time: string,
+ *     sys-time: string, user-time: string, wall-time: string, total-duration-use: string,
+ *     output-truncated?: string, time-result?: string, validator-exited-first?: string
  * }
  */
 readonly class CompareMetadata
