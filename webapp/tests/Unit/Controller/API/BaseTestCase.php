@@ -324,6 +324,10 @@ abstract class BaseTestCase extends BaseBaseTestCase
 
     public function provideSingle(): Generator
     {
+        if (empty($this->expectedObjects)) {
+            yield [0, []];
+            return;
+        }
         foreach ($this->expectedObjects as $id => $expectedProperties) {
             yield [$id, $expectedProperties];
         }
@@ -366,6 +370,10 @@ abstract class BaseTestCase extends BaseBaseTestCase
 
     public function provideSingleNotFound(): Generator
     {
+        if (empty($this->expectedAbsent)) {
+            yield [''];
+            return;
+        }
         foreach ($this->expectedAbsent as $id) {
             yield [$id];
         }
