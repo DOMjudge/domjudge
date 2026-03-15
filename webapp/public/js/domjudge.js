@@ -686,19 +686,22 @@ function updateTeamNotifications()
             let subData = json['unread_submissions'];
             if (subData) {
                 for (let i = 0; i < subData.length; i++) {
-                    let agoText = '';
+                    let bodyParts = [subData[i].probname];
+                    if (subData[i].score !== null) {
+                        bodyParts.push('Score: ' + parseFloat(subData[i].score).toFixed(2));
+                    }
                     if (subData[i].submittime) {
                         let secsAgo = Math.floor(Date.now() / 1000 - subData[i].submittime);
                         if (secsAgo < 60) {
-                            agoText = ' (submitted ' + secsAgo + ' seconds ago)';
+                            bodyParts.push(secsAgo + ' seconds ago');
                         } else {
-                            agoText = ' (submitted ' + Math.floor(secsAgo / 60) + ' minutes ago)';
+                            bodyParts.push(Math.floor(secsAgo / 60) + ' minutes ago');
                         }
                     }
                     sendNotification('Submission judged: ' + subData[i].result,
                      {'tag': 'c' + subData[i].cid + '_sub_' + subData[i].submitid + '_judge_' + subData[i].judgingid,
                             'link': domjudge_base_url + '/team/submission/' + subData[i].submitid,
-                            'body': 'Problem ' + subData[i].probname + ': ' + subData[i].result + agoText });
+                            'body': bodyParts.join(' · ') });
                 }
             }
         }
