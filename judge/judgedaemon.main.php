@@ -1865,6 +1865,12 @@ class JudgeDaemon
     ) : Verdict {
         // Record some state so that we can properly reset it later in the finally block
         $oldCwd = getcwd();
+        if ($oldCwd === false) {
+            $message = "Failed recording current working directory.";
+            $this->disable('judgehost', 'hostname', $this->myhost, $message);
+            logmsg(LOG_ERR, $message);
+            return Verdict::INTERNAL_ERROR;
+        }
         $oldTmpDir = getenv('TMPDIR');
         $oldVerbose = getenv('VERBOSE');
         $resourceInfo = null;
@@ -2270,7 +2276,7 @@ class JudgeDaemon
             }
 
             // Restore working directory
-            if ($oldCwd !== null && is_dir($oldCwd)) {
+            if (is_dir($oldCwd)) {
                 chdir($oldCwd);
             }
         }
