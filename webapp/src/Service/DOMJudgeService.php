@@ -361,7 +361,7 @@ class DOMJudgeService
     }
 
     /**
-     * @return list<array{submitid: int, judgingid: int, cid: int, result: string, probname: string, submittime: float}>
+     * @return list<array{submitid: int, judgingid: int, cid: int, result: string, probname: string, submittime: float, score: string|null}>
      */
     public function getJudgingNotifications(): array
     {
@@ -376,7 +376,7 @@ class DOMJudgeService
         }
 
         $queryBuilder = $this->em->createQueryBuilder()
-            ->select('s.submitid', 'j.judgingid', 'IDENTITY(s.contest) AS cid', 'j.result', 'p.name AS probname', 's.submittime')
+            ->select('s.submitid', 'j.judgingid', 'IDENTITY(s.contest) AS cid', 'j.result', 'j.score', 'p.name AS probname', 's.submittime')
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
             ->join('s.contest_problem', 'cp')
