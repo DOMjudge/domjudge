@@ -152,7 +152,7 @@ readonly class VerdictInput
  *     uuid: ?string, compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string, testcase_id: ?string,
  *     testcase_hash: ?string, compile_config: ?string, run_config: ?string, compare_config: ?string
  * }
- * @phpstan-type JudgingRun array{runresult: string, start_time: string, end_time: string, runtime: string, 
+ * @phpstan-type JudgingRun array{runresult: string, start_time: string, end_time: string, runtime: string,
  *      output_run: string, output_error: string, output_system: string, metadata: string, output_diff: string,
  *      hostname: string, testcasedir: string, compare_metadata: string,
  *      team_message?: string, score?: string
@@ -1850,7 +1850,7 @@ class JudgeDaemon
     /**
      * @param array{cpu: array{0: float, 1: float}, wall: array{0: float, 1: float}} $timelimit
      * @param RunConfig $run_config
-     * @param CompareConfig $compare_config 
+     * @param CompareConfig $compare_config
      */
     private function testcaseRunInternal(
         string $input,
