@@ -251,11 +251,12 @@ class JudgeDaemon
     {
         self::$instance = $this;
 
-        $this->options = getopt("dv:n:hV", ["diskspace-error"]);
-        if ($this->options === false) {
+        $readOptions = getopt("dv:n:hV", ["diskspace-error"]);
+        if ($readOptions === false) {
             echo "Error: parsing options failed.\n";
             $this->usage();
         }
+        $this->options = $readOptions;
         if (isset($this->options['v'])) {
             $this->options['verbose'] = $this->options['v'];
         }
