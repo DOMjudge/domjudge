@@ -64,13 +64,13 @@ readonly class ProgramMetadata
     public static function fromArray(array $meta): self
     {
         return new self(
-            exitcode: $meta['exitcode'] ?? '0',
-            cpuTime: $meta['cpu-time'] ?? '0',
-            wallTime: $meta['wall-time'] ?? '0',
-            memoryBytes: $meta['memory-bytes'] ?? '0',
-            timeResult: $meta['time-result'] ?? 'pass',
-            stdoutBytes: $meta['stdout-bytes'] ?? '0',
-            stderrBytes: $meta['stderr-bytes'] ?? '0',
+            exitcode: $meta['exitcode'],
+            cpuTime: $meta['cpu-time'],
+            wallTime: $meta['wall-time'],
+            memoryBytes: $meta['memory-bytes'],
+            timeResult: $meta['time-result'],
+            stdoutBytes: $meta['stdout-bytes'],
+            stderrBytes: $meta['stderr-bytes'],
             outputTruncated: $meta['output-truncated'] ?? '',
         );
     }
@@ -124,7 +124,7 @@ readonly class CompareMetadata
     public static function fromArray(array $meta): self
     {
         return new self(
-            exitcode: $meta['exitcode'] ?? '0',
+            exitcode: $meta['exitcode'],
             validatorExitedFirst: ($meta['validator-exited-first'] ?? '') === 'true',
         );
     }
@@ -2347,7 +2347,7 @@ class JudgeDaemon
 
         $input = $tcfile['input'];
         $output = $tcfile['output'];
-        $passLimit = $run_config['pass_limit'] ?? 1;
+        $passLimit = $run_config['pass_limit'];
         // All of those are to help PHPStan, it seems to not see that they are defined in the loop
         // and the loop always runs as tpassLimit >= $passCnt.
         $score = "";
@@ -2421,7 +2421,7 @@ class JudgeDaemon
             }
 
             /** @var MetaData_Program $metadata */
-            if (isset($metadata['time-used']) && array_key_exists($metadata['time-used'], $metadata)) {
+            if (array_key_exists($metadata['time-used'], $metadata)) {
                 $runtime = $metadata[$metadata['time-used']];
             }
 
@@ -2503,9 +2503,8 @@ class JudgeDaemon
             }
 
             if ($passLimit > 1) {
-                $walltime = $metadata['wall-time'] ?? '?';
                 logmsg(LOG_INFO, ' ' . ($result === 'correct' ? "   \033[0;32m✔\033[0m" : "   \033[1;31m✗\033[0m")
-                    . '  ...done in ' . $walltime . 's (CPU: ' . $runtime . 's), result: ' . $result);
+                    . '  ...done in ' . $metadata['wall-time'] . 's (CPU: ' . $runtime . 's), result: ' . $result);
             }
 
             if ($result !== 'correct') {
