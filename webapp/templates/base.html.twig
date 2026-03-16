@@ -26,6 +26,9 @@
     {% for file in customAssetFiles('css') %}
         <link rel="stylesheet" href="{{ asset('css/custom/' ~ file) }}">
     {% endfor %}
+    <style>
+        {% block extra_style %}{% endblock %}
+    </style>
 </head>
 <body class="{% if fill_height is defined and fill_height %} fill-height{% endif %}{% if static is defined and static %} static{% endif %}">
 {% block menu %}{% endblock %}

@@ -1,6 +1,17 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
+{% block extra_style %}
+  .size_h5 {
+      font-size: 1.25rem
+  }
+
+  .size_h6 {
+      font-size: 1rem
+  }
+{% endblock %}
+
+
 {% block title %}Compiler and runner versions overview{% endblock %}
 
 {% block extrahead %}
@@ -25,7 +36,7 @@
                 <div class="card-title">
                     <div class="row">
                         <div class="col-sm">
-                            <h6>Compiler version(s)</h6>
+                            <h2 class="size_h6">Compiler version(s)</h2>
                             {% if lang.compiler_outputs | length > 1 %}
                                 <div class="alert alert-danger" role="alert">Versions do not match.</div>
                             {% endif %}
@@ -61,7 +72,7 @@
                             {% endfor %}
                             {% if lang.runner_outputs | length > 0 %}
                                 <br/>
-                                <h6>Runner version(s)</h6>
+                                <h2 class="size_h6">Runner version(s)</h2>
                                 {% if lang.runner_outputs | length > 1 %}
                                     <div class="alert alert-danger" role="alert">Versions do not match.</div>
                                 {% endif %}
