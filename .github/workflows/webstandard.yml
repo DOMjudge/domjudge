@@ -52,9 +52,7 @@ jobs:
         id: filter
         run: |
           filter_out() {
-            if [ "${{ matrix.db }}" = "bare-install" ]; then
-                echo "should_run=false" >> $GITHUB_OUTPUT
-            elif [ "${{ matrix.role }}" = "public" ]; then
+            if [ "${{ matrix.role }}" = "public" ]; then
               if [ "${{ matrix.test }}" = "WCAG2A" ]; then
                 echo "should_run=false" >> $GITHUB_OUTPUT
               else
