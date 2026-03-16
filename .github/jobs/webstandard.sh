@@ -153,10 +153,9 @@ if [ "$TEST" = "w3cval" ]; then
     section_end
 
     cd "$DIR"
-    FLTR1='--filterpattern .*descendant.*|.*Stray.*'
-    w3c_analyse "$FLTR1" "Stray" "public" "html"
-    FLTR2='--filterpattern .*descendant.*'
-    w3c_analyse "$FLTR2" "descendant" "public" "html"
+    # To filter out certain violations use:
+    # FLTR='--filterpattern .*descendant.*'
+    # w3c_analyse "$FLTR" "jobname"" "public" "html"
     w3c_analyse "" "full" "public" "html css svg"
 else
     section_start "Remove files from upstream with problems"
