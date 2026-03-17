@@ -108,7 +108,9 @@
         {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_team_category_edit', {'categoryId': teamCategory.externalid}), 'Edit', 'primary', 'edit') }}
             {{ button(path('jury_team_category_delete', {'categoryId': teamCategory.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
-            {{ button(path('jury_team_category_request_remaining', {'categoryId': teamCategory.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
+            {% if current_contest %}
+                {{ button(path('jury_team_category_request_remaining', {'categoryId': teamCategory.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
+            {% endif %}
         {% endif %}
     </div>
 
