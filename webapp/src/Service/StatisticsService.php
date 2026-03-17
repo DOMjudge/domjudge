@@ -51,37 +51,32 @@ class StatisticsService
      */
     public function getTeams(Contest $contest, string $filter): array
     {
-        if ($contest->isOpenToAllTeams()) {
-            return $this->applyFilter($this->em->createQueryBuilder()
-                ->select('t', 'ts', 'j', 'lang', 'a')
-                ->from(Team::class, 't')
-                ->join('t.categories', 'tc')
-                ->leftJoin('t.affiliation', 'a')
-                ->join('t.submissions', 'ts')
-                ->join('ts.language', 'l')
-                ->join('ts.judgings', 'j')
-                ->andWhere('j.valid = true')
-                ->join('ts.language', 'lang')
-                ->orderBy('t.teamid'), $filter)
-                ->getQuery()->getResult();
-        } else {
-            return $this->applyFilter($this->em->createQueryBuilder()
-                ->select('t', 'c', 'ts', 'j', 'lang', 'a')
-                ->from(Team::class, 't')
+        $qb = $this->em->createQueryBuilder()
+            ->select('t', 'ts', 'j', 'lang', 'a')
+            ->from(Team::class, 't')
+            ->join('t.categories', 'tc')
+            ->leftJoin('t.affiliation', 'a')
+            ->join('t.submissions', 'ts')
+            ->join('ts.judgings', 'j')
+            ->andWhere('j.valid = true')
+            ->join('ts.language', 'lang')
+            ->andWhere('ts.contest = :contest')
+            ->andWhere('ts.submittime >= :starttime')
+            ->andWhere('ts.submittime <= :endtime')
+            ->orderBy('t.teamid');
+
+        if (!$contest->isOpenToAllTeams()) {
+            $qb->addSelect('c')
                 ->leftJoin('t.contests', 'c')
-                ->leftJoin('t.affiliation', 'a')
-                ->join('t.categories', 'tc')
                 ->leftJoin('tc.contests', 'cc')
-                ->join('t.submissions', 'ts')
-                ->join('ts.language', 'l')
-                ->join('ts.judgings', 'j')
-                ->andWhere('j.valid = true')
-                ->join('ts.language', 'lang')
-                ->andWhere('c = :contest OR cc = :contest'), $filter)
-                ->orderBy('t.teamid')
-                ->setParameter('contest', $contest)
-                ->getQuery()->getResult();
+                ->andWhere('c = :contest OR cc = :contest');
         }
+
+        return $this->applyFilter($qb, $filter)
+            ->setParameter('contest', $contest)
+            ->setParameter('starttime', $contest->getStarttime(false))
+            ->setParameter('endtime', $contest->getEndtime())
+            ->getQuery()->getResult();
     }
 
     /**
@@ -154,16 +149,6 @@ class StatisticsService
             ];
             /** @var Submission $s */
             foreach ($team->getSubmissions() as $s) {
-                if ($s->getContest() !== $contest) {
-                    continue;
-                }
-                if ($s->getSubmitTime() > $contest->getEndTime()) {
-                    continue;
-                }
-                if ($s->getSubmitTime() < $contest->getStartTime()) {
-                    continue;
-                }
-
                 if ($noFrozen && $s->getSubmittime() > $contest->getFreezetime()) {
                     continue;
                 }
@@ -298,8 +283,9 @@ class StatisticsService
         usort($judgings, static fn(Judging $a, Judging $b) => $a->getJudgingid() <=> $b->getJudgingid());
 
         $misc = [];
-        $misc['correct_percentage'] = array_key_exists('correct',
-            $results) ? ($results['correct'] / count($judgings)) * 100.0 : 0;
+        $totalValid = array_sum($results);
+        $misc['correct_percentage'] = $totalValid > 0 && array_key_exists('correct', $results)
+            ? ($results['correct'] / $totalValid) * 100.0 : 0;
 
         return [
             'contest' => $contest,
@@ -569,15 +555,6 @@ class StatisticsService
         $teams = $this->getTeams($contest, $view);
         foreach ($teams as $team) {
             foreach ($team->getSubmissions() as $s) {
-                if ($s->getContest() !== $contest) {
-                    continue;
-                }
-                if ($s->getSubmitTime() > $contest->getEndTime()) {
-                    continue;
-                }
-                if ($s->getSubmitTime() < $contest->getStartTime()) {
-                    continue;
-                }
                 if ($s->getSubmittime() > $contest->getFreezetime()) {
                     continue;
                 }
