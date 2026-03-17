@@ -147,12 +147,14 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
 
         result = parse_api_response(name, response)
 
-    if result is not None:
+    if result is not None and result.strip():
         try:
             result = json.loads(result)
         except json.decoder.JSONDecodeError as e:
             print(result)
             raise RuntimeError(f'Failed to JSON decode the response for API file upload request {name}')
+    else:
+        result = None
 
     return result
 
