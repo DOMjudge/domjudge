@@ -71,8 +71,8 @@ class SubmissionRateLimitTest extends UnitBaseTestCase
             $this->submitSolution('ratelimit-user', 'ratelimit-password', 200);
             $this->submitSolution('ratelimit-user', 'ratelimit-password', 200);
 
-            // Fourth submission should fail with 400 Bad Request
-            $response = $this->submitSolution('ratelimit-user', 'ratelimit-password', 400);
+            // Fourth submission should fail with 429 Too Many Requests
+            $response = $this->submitSolution('ratelimit-user', 'ratelimit-password', 429);
 
             static::assertStringContainsString('Submission limit reached', $response['message']);
             static::assertStringContainsString('3 submissions per 10 seconds', $response['message']);
@@ -103,7 +103,7 @@ class SubmissionRateLimitTest extends UnitBaseTestCase
             // 10s window: OK (0 existing)
             // 60s window: FAIL (2 existing within 60s)
             // 3600s window: OK (2 existing)
-            $response = $this->submitSolution('ratelimit-user', 'ratelimit-password', 400);
+            $response = $this->submitSolution('ratelimit-user', 'ratelimit-password', 429);
 
             static::assertStringContainsString('Submission limit reached', $response['message']);
             static::assertStringContainsString('2 submissions per 1 minute allowed', $response['message']);
