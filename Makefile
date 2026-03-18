@@ -6,7 +6,7 @@ export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
             docs install-docs inplace-install inplace-uninstall maintainer-conf \
-            maintainer-install dependencies dependencies-dev
+            maintainer-install dependencies dependencies-dev dependencies-dist
 
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
@@ -54,7 +54,7 @@ docs: paths.mk config
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
-dist: configure dependencies
+dist: configure dependencies-dist
 
 domserver-configure:
 ifneq "$(DOMSERVER_BUILD_ENABLED)" "yes"
@@ -100,6 +100,7 @@ distclean:                  SUBDIRS=etc doc lib sql judge misc-tools webapp
 maintainer-clean:           SUBDIRS=etc doc lib sql judge misc-tools webapp
 dependencies:               SUBDIRS=                                 webapp
 dependencies-dev:           SUBDIRS=                                 webapp
+dependencies-dist:          SUBDIRS=                                 webapp
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(domserver_dirs))
@@ -413,4 +414,4 @@ clean-autoconf:
 .PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
         $(addprefix inplace-,conf conf-common install uninstall) \
         $(addprefix maintainer-,conf install) clean-autoconf config distdocs \
-        dependencies dependencies-dev coverity-conf coverity-build
+        $(addprefix dependencies-,dev dist) dependencies coverity-conf coverity-build
