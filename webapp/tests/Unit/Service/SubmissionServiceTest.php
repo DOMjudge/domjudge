@@ -2,6 +2,14 @@
 
 namespace App\Tests\Unit\Service;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use App\Service\DOMJudgeService;
+use App\Service\ConfigurationService;
+use App\Service\EventLogService;
+use App\Service\ScoreboardService;
+use Knp\Component\Pager\PaginatorInterface;
 use App\Entity\Contest;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
@@ -24,15 +32,13 @@ class SubmissionServiceTest extends KernelTestCase
         $this->nextGroupId = 1;
     }
 
-    /**
-     * @dataProvider provideRunResults
-     */
+    #[DataProvider('provideRunResults')]
     public function testGetFinalResult(array $runresults, array $resultsPrio, ?string $result): void
     {
         self::assertSame($result, SubmissionService::getFinalResult($runresults, $resultsPrio));
     }
 
-    public function provideRunResults(): Generator
+    public static function provideRunResults(): Generator
     {
         $defaultPrios = [
             'memory-limit' => 99,
@@ -896,15 +902,13 @@ class SubmissionServiceTest extends KernelTestCase
         self::assertNull($result);
     }
 
-    /**
-     * @dataProvider provideNormalizeExpectedResult
-     */
+    #[DataProvider('provideNormalizeExpectedResult')]
     public function testNormalizeExpectedResult(string $input, string $expected): void
     {
         self::assertSame($expected, SubmissionService::normalizeExpectedResult($input));
     }
 
-    public function provideNormalizeExpectedResult(): Generator
+    public static function provideNormalizeExpectedResult(): Generator
     {
         // All 7 PROBLEM_RESULT_REMAP entries
         yield 'ACCEPTED -> CORRECT' => ['ACCEPTED', 'CORRECT'];
@@ -1051,13 +1055,13 @@ class SubmissionServiceTest extends KernelTestCase
     private function createSubmissionService(): SubmissionService
     {
         return new SubmissionService(
-            $this->createMock(\Doctrine\ORM\EntityManagerInterface::class),
-            $this->createMock(\Psr\Log\LoggerInterface::class),
-            $this->createMock(\App\Service\DOMJudgeService::class),
-            $this->createMock(\App\Service\ConfigurationService::class),
-            $this->createMock(\App\Service\EventLogService::class),
-            $this->createMock(\App\Service\ScoreboardService::class),
-            $this->createMock(\Knp\Component\Pager\PaginatorInterface::class),
+            $this->createMock(EntityManagerInterface::class),
+            $this->createMock(LoggerInterface::class),
+            $this->createMock(DOMJudgeService::class),
+            $this->createMock(ConfigurationService::class),
+            $this->createMock(EventLogService::class),
+            $this->createMock(ScoreboardService::class),
+            $this->createMock(PaginatorInterface::class),
         );
     }
 }

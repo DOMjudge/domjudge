@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Integration;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Service\ImportProblemService;
@@ -19,9 +20,7 @@ class ProblemExportImportTest extends BaseTestCase
 {
     protected array $roles = ['admin'];
 
-    /**
-     * @dataProvider provideProblems
-     */
+    #[DataProvider('provideProblems')]
     public function testExportImportRoundtrip(string $problemExternalId): void
     {
         // Select the demo contest.

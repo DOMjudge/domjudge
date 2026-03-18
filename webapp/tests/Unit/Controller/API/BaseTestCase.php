@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Entity\Contest;
 use App\Tests\Unit\BaseTestCase as BaseBaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
@@ -295,9 +296,8 @@ abstract class BaseTestCase extends BaseBaseTestCase
 
     /**
      * Test that the single action returns the correct data.
-     *
-     * @dataProvider provideSingle
      */
+    #[DataProvider('provideSingle')]
     public function testSingle(int|string $id, array $expectedProperties): void
     {
         foreach ($this->entityReferences as $field => $class) {
@@ -355,9 +355,8 @@ abstract class BaseTestCase extends BaseBaseTestCase
 
     /**
      * Test that the endpoint does not return anything for objects that don't exist.
-     *
-     * @dataProvider provideSingleNotFound
      */
+    #[DataProvider('provideSingleNotFound')]
     public function testSingleNotFound(string $id): void
     {
         $id = $this->resolveReference($id);

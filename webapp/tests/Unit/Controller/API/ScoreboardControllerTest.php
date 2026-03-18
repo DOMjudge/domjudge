@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\DemoNonPublicContestFixture;
 use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\DataFixtures\Test\SampleEventsFixture;
@@ -14,9 +15,8 @@ class ScoreboardControllerTest extends BaseTestCase
 
     /**
      * Test that the given user has the correct access to the scoreboard for the given contest.
-     *
-     * @dataProvider provideScoreboardAccess
      */
+    #[DataProvider('provideScoreboardAccess')]
     public function testScoreboardAccess(
         ?string $user, int $contestId, bool $removeTeamFromDemoUser, bool $expectedAllowedAccess, bool $publicContest
     ): void {
@@ -32,7 +32,7 @@ class ScoreboardControllerTest extends BaseTestCase
         self::assertNotEmpty($scoreboard);
     }
 
-    public function provideScoreboardAccess(): Generator
+    public static function provideScoreboardAccess(): Generator
     {
         // Contest 1 is a public contest, everyone should have access.
         yield [null, 1, false, true, true];
@@ -49,9 +49,8 @@ class ScoreboardControllerTest extends BaseTestCase
 
     /**
      * Test that filtering works on the demo scoreboard
-     *
-     * @dataProvider provideFilters
      */
+    #[DataProvider('provideFilters')]
     public function testFilteredScoreboard(array $filters, int $expectedCount): void
     {
         $contestId = $this->resolveEntityId(Contest::class, '1');
@@ -64,7 +63,7 @@ class ScoreboardControllerTest extends BaseTestCase
         self::assertCount($expectedCount, $scoreboardRows);
     }
 
-    public function provideFilters(): Generator
+    public static function provideFilters(): Generator
     {
         yield [['category=participants'], 1];
         yield [['category=system', 'sortorder=9', 'allteams=true'], 1];

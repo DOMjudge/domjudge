@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Team;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\DemoAboutToStartContestFixture;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
@@ -16,9 +17,8 @@ class ProblemControllerTest extends BaseTestCase
 
     /**
      * Test that the problem index page shows the correct information.
-     *
-     * @dataProvider withLimitsProvider
      */
+    #[DataProvider('withLimitsProvider')]
     public function testIndex(bool $withLimits): void
     {
         $problems = [
@@ -91,7 +91,7 @@ class ProblemControllerTest extends BaseTestCase
             });
     }
 
-    public function withLimitsProvider(): Generator
+    public static function withLimitsProvider(): Generator
     {
         yield [false];
         yield [true];

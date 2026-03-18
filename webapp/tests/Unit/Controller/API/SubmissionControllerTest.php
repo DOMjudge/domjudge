@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\AddMoreDemoUsersFixture;
 use App\DataFixtures\Test\EnableKotlinFixture;
 use App\DataFixtures\Test\RemoveTeamFromAdminUserFixture;
@@ -64,9 +65,8 @@ class SubmissionControllerTest extends BaseTestCase
 
     /**
      * Test that if invalid data is supplied, the correct message is returned.
-     *
-     * @dataProvider provideAddInvalidData
      */
+    #[DataProvider('provideAddInvalidData')]
     public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage): void
     {
         if (isset($dataToSend['problem_id'])) {
@@ -90,7 +90,7 @@ class SubmissionControllerTest extends BaseTestCase
         }
     }
 
-    public function provideAddInvalidData(): Generator
+    public static function provideAddInvalidData(): Generator
     {
         yield ['demo', [], 'Request payload contains invalid "json" data.'];
         yield ['demo', ['unknown_key'], "/One of the arguments 'problem', 'problem_id' is required/"];
@@ -218,9 +218,8 @@ class SubmissionControllerTest extends BaseTestCase
 
     /**
      * Test that when submitting as a user without an association team an error is returned.
-     *
-     * @dataProvider provideMissingTeam
      */
+    #[DataProvider('provideMissingTeam')]
     public function testMissingTeam(string $username): void
     {
         $this->loadFixtures([RemoveTeamFromDemoUserFixture::class, RemoveTeamFromAdminUserFixture::class]);
@@ -232,7 +231,7 @@ class SubmissionControllerTest extends BaseTestCase
         static::assertEquals('User does not belong to a team.', $data['message']);
     }
 
-    public function provideMissingTeam(): Generator
+    public static function provideMissingTeam(): Generator
     {
         yield ['demo'];
         yield ['admin'];
@@ -240,9 +239,8 @@ class SubmissionControllerTest extends BaseTestCase
 
     /**
      * Test that adding submissions works as expected.
-     *
-     * @dataProvider provideAddSuccess
      */
+    #[DataProvider('provideAddSuccess')]
     public function testAddSuccess(
         string $user,
         array $dataToSend,
@@ -326,7 +324,7 @@ class SubmissionControllerTest extends BaseTestCase
         $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$submissionId", 200, 'admin');
     }
 
-    public function provideAddSuccess(): Generator
+    public static function provideAddSuccess(): Generator
     {
         // Submit a single file as a file upload.
         yield [

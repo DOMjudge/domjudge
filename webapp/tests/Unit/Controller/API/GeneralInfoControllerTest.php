@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Controller\API\GeneralInfoController;
 use App\DataFixtures\Test\SampleSubmissionsFixture;
 use App\Service\DOMJudgeService;
@@ -97,8 +98,8 @@ class GeneralInfoControllerTest extends BaseTestCase
 
     /**
      * Test user endpoint with different users.
-     * @dataProvider provideUsers
      */
+    #[DataProvider('provideUsers')]
     public function testUserEndpoint(string $username, string $fullname, string $teamname, array $roles): void
     {
         $response = $this->verifyApiJsonResponse('GET', "/user", 200, $username);
@@ -116,7 +117,7 @@ class GeneralInfoControllerTest extends BaseTestCase
         }
     }
 
-    public function provideUsers(): Generator
+    public static function provideUsers(): Generator
     {
         yield ['demo', 'demo user for example team', 'Example teamname', ['team']];
         yield ['admin', 'Administrator', 'DOMjudge', ['admin','team']];
@@ -124,9 +125,8 @@ class GeneralInfoControllerTest extends BaseTestCase
 
     /**
      * Test that when a country flag exists, the correct data is returned.
-     *
-     * @dataProvider provideCountryFlagExists
      */
+    #[DataProvider('provideCountryFlagExists')]
     public function testCountryFlagExists(string $countryCode, string $size): void
     {
         $this->withChangedConfiguration('show_flags', true, function () use ($countryCode, $size): void {
@@ -147,7 +147,7 @@ class GeneralInfoControllerTest extends BaseTestCase
         });
     }
 
-    public function provideCountryFlagExists(): Generator
+    public static function provideCountryFlagExists(): Generator
     {
         yield ['NLD', '4x3'];
         yield ['DEU', '1x1'];
@@ -156,9 +156,8 @@ class GeneralInfoControllerTest extends BaseTestCase
 
     /**
      * Test that when a country flag of given size does not exist, the correct message is returned.
-     *
-     * @dataProvider provideCountryFlagSizeNotFound
      */
+    #[DataProvider('provideCountryFlagSizeNotFound')]
     public function testCountryFlagNotFound(string $countryCode, string $size): void
     {
         $this->withChangedConfiguration('show_flags', true, function () use ($countryCode, $size): void {
@@ -170,7 +169,7 @@ class GeneralInfoControllerTest extends BaseTestCase
         });
     }
 
-    public function provideCountryFlagSizeNotFound(): Generator
+    public static function provideCountryFlagSizeNotFound(): Generator
     {
         yield ['NLD', '2x2'];
         yield ['nld', '2x2'];
@@ -178,9 +177,8 @@ class GeneralInfoControllerTest extends BaseTestCase
 
     /**
      * Test that when a country does not exist, the correct message is returned.
-     *
-     * @dataProvider provideCountryFlagNotFound
      */
+    #[DataProvider('provideCountryFlagNotFound')]
     public function testCountryNotFound(string $countryCode, string $size): void
     {
         $this->withChangedConfiguration('show_flags', true, function () use ($countryCode, $size): void {
@@ -192,7 +190,7 @@ class GeneralInfoControllerTest extends BaseTestCase
         });
     }
 
-    public function provideCountryFlagNotFound(): Generator
+    public static function provideCountryFlagNotFound(): Generator
     {
         yield ['ABC', '4x3'];
         yield ['XX', '1x1'];
@@ -202,9 +200,8 @@ class GeneralInfoControllerTest extends BaseTestCase
 
     /**
      * Test that if flags are disabled, no flag is returned.
-     *
-     * @dataProvider provideCountryFlagExists
      */
+    #[DataProvider('provideCountryFlagExists')]
     public function testCountryFlagDisabled(string $countryCode, string $size): void
     {
         $this->withChangedConfiguration('show_flags', false, function () use ($countryCode, $size): void {

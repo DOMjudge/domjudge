@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Generator;
 
 class GroupControllerTest extends BaseTestCase
@@ -53,9 +54,7 @@ class GroupControllerTest extends BaseTestCase
     // should not be returned for non-admin users.
     protected array $expectedAbsent = ['4242', 'nonexistent', '1', '5'];
 
-    /**
-     * @dataProvider provideNewAddedGroup
-     */
+    #[DataProvider('provideNewAddedGroup')]
     public function testNewAddedGroup(array $newGroupPostData): void
     {
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
@@ -85,9 +84,7 @@ class GroupControllerTest extends BaseTestCase
         self::assertNotEquals($returnedObject['id'], $postWithId['id']);
     }
 
-    /**
-     * @dataProvider provideNewAddedGroup
-     */
+    #[DataProvider('provideNewAddedGroup')]
     public function testNewAddedGroupPut(array $newGroupPostData): void
     {
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
@@ -109,9 +106,7 @@ class GroupControllerTest extends BaseTestCase
         }
     }
 
-    /**
-     * @dataProvider provideNewAddedGroup
-     */
+    #[DataProvider('provideNewAddedGroup')]
     public function testNewAddedGroupPutWithoutId(array $newGroupPostData): void
     {
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
@@ -119,9 +114,7 @@ class GroupControllerTest extends BaseTestCase
         self::assertStringContainsString('ID in URL does not match ID in payload', $returnedObject['message']);
     }
 
-    /**
-     * @dataProvider provideNewAddedGroup
-     */
+    #[DataProvider('provideNewAddedGroup')]
     public function testNewAddedGroupPutWithDifferentId(array $newGroupPostData): void
     {
         $newGroupPostData['id'] = 'someotherid';
