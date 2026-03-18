@@ -8,6 +8,7 @@ use Doctrine\Persistence\ObjectManager;
 class TeamCategoryFixture extends AbstractExampleDataFixture
 {
     final public const PARTICIPANTS_REFERENCE = 'participants';
+    final public const OBSERVERS_REFERENCE = 'observers';
 
     public function load(ObjectManager $manager): void
     {
@@ -41,5 +42,6 @@ class TeamCategoryFixture extends AbstractExampleDataFixture
         $manager->flush();
 
         $this->addReference(self::PARTICIPANTS_REFERENCE, $participants);
+        $this->addReference(self::OBSERVERS_REFERENCE, $observers);
     }
 }
