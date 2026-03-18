@@ -1550,7 +1550,17 @@ function initDiffEditorTab(editorId, diffId, submissionId, models) {
         if (isDeleted) {
             document.getElementById(diffId).parentElement.style.display = exists ? '' : 'none';
             navItem.style.display = exists ? '' : 'none';
-            if (!exists) return;
+            if (!exists) {
+                // If the hidden tab was active, activate the first tab that belongs to the current submission.
+                if (navItem.classList.contains('active')) {
+                    const nav = navItem.closest('ul');
+                    const firstOwned = nav.querySelector('.nav-link[data-rank]:not([data-rank=""])');
+                    if (firstOwned) {
+                        bootstrap.Tab.getOrCreateInstance(firstOwned).show();
+                    }
+                }
+                return;
+            }
         }
 
         const model = models[submitId];
