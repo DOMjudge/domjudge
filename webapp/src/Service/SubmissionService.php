@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use ZipArchive;
 
 class SubmissionService
@@ -979,7 +980,8 @@ class SubmissionService
         $rateLimitStatus = $this->getRateLimitStatus($team, $contest);
         if (!empty($rateLimitStatus)) {
             $violation = $rateLimitStatus[0];
-            throw new BadRequestHttpException(
+            throw new TooManyRequestsHttpException(
+                null,
                 sprintf("Submission limit reached: maximum of %d submissions per %s allowed.",
                     $violation['limit'], $violation['period'])
             );
