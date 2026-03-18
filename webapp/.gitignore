@@ -12,6 +12,7 @@
 /node_modules/
 /.yarn/
 .yarnrc.yml
+/LICENSES.txt
 
 ###> phpunit/phpunit ###
 /phpunit.xml
