@@ -43,6 +43,12 @@ class SubmissionRateLimitTest extends UnitBaseTestCase
         static::assertEquals($status, $response->getStatusCode(),
             sprintf("\nUnexpected status code: %d (expected %d)\nURL: %s\nUser: %s\nResponse: %s\n",
                 $response->getStatusCode(), $status, $apiUri, $user, $response->getContent()));
+
+        if ($status === 429) {
+            static::assertTrue($response->headers->has('Retry-After'), 'Response should have a Retry-After header');
+            static::assertGreaterThan(0, (int)$response->headers->get('Retry-After'), 'Retry-After should be greater than 0');
+        }
+
         return json_decode($response->getContent(), true);
     }
 

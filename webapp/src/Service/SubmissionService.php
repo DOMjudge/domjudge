@@ -739,7 +739,7 @@ class SubmissionService
     }
 
     /**
-     * @return array<int, array{count: int, limit: int, period: string}>
+     * @return array<int, array{count: int, limit: int, period: string, wait_time: int}>
      */
     public function getRateLimitStatus(Team $team, Contest $contest): array
     {
@@ -752,6 +752,9 @@ class SubmissionService
         $maxSeconds = max(array_keys($rateLimits));
         $startTime = $submitTime - $maxSeconds;
 
+        // Fetch all submission times within the maximum configured rate limit window.
+        // We need the full set of times to calculate the current submission count
+        // for each individual rate limit window (e.g., "10 per minute" and "100 per hour").
         $submissions = $this->em->createQueryBuilder()
             ->select('s.submittime')
             ->from(Submission::class, 's')
@@ -774,13 +777,19 @@ class SubmissionService
             $windowStart = $submitTime - $seconds;
 
             $count = 0;
+            $windowSubTimes = [];
             foreach ($subTimes as $subTime) {
                 if ($subTime >= $windowStart) {
                     $count++;
+                    $windowSubTimes[] = (float)$subTime;
                 }
             }
 
             if ($count >= $limit) {
+                rsort($windowSubTimes);
+                $relevantSubTime = $windowSubTimes[$limit - 1];
+                $waitTime = $relevantSubTime + $seconds - $submitTime;
+
                 $minutes = (float) $seconds / 60.0;
                 if ($seconds < 60) {
                     $period = sprintf("%d seconds", $seconds);
@@ -793,6 +802,7 @@ class SubmissionService
                     'count' => $count,
                     'limit' => $limit,
                     'period' => $period,
+                    'wait_time' => (int)ceil($waitTime),
                 ];
             }
         }
@@ -980,8 +990,9 @@ class SubmissionService
         $rateLimitStatus = $this->getRateLimitStatus($team, $contest);
         if (!empty($rateLimitStatus)) {
             $violation = $rateLimitStatus[0];
+            $waitTime = max(array_column($rateLimitStatus, 'wait_time'));
             throw new TooManyRequestsHttpException(
-                null,
+                $waitTime,
                 sprintf("Submission limit reached: maximum of %d submissions per %s allowed.",
                     $violation['limit'], $violation['period'])
             );
