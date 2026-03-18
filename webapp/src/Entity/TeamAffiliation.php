@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use OpenApi\Attributes as OA;
+use Stringable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -37,7 +38,8 @@ class TeamAffiliation extends BaseApiEntity implements
     HasExternalIdInterface,
     AssetEntityInterface,
     ExternalIdFromInternalIdInterface,
-    PrefixedExternalIdInterface
+    PrefixedExternalIdInterface,
+    Stringable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -304,6 +306,6 @@ class TeamAffiliation extends BaseApiEntity implements
 
     public function __toString(): string
     {
-        return $this->getName() ?? $this->getShortname();
+        return $this->getName() ?? $this->getShortname() ?? $this->getExternalid();
     }
 }

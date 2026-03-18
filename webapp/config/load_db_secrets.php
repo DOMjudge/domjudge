@@ -34,7 +34,7 @@ function get_db_url(): string
             continue;
         }
         $found = true;
-        list($_, $host, $db, $user, $pass, $port) = array_pad(explode(':', trim($line)), 6, null);
+        [$_, $host, $db, $user, $pass, $port] = array_pad(explode(':', trim($line)), 6, null);
         break;
     }
     if (!$found) {
@@ -65,5 +65,5 @@ $env = [
 ];
 
 foreach ($env as $k => $v) {
-    $_ENV[$k] = $_ENV[$k] ?? (isset($_SERVER[$k]) && !str_starts_with($k, 'HTTP_') ? $_SERVER[$k] : $v);
+    $_ENV[$k] ??= isset($_SERVER[$k]) && !str_starts_with($k, 'HTTP_') ? $_SERVER[$k] : $v;
 }

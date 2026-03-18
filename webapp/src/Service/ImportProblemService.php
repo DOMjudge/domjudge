@@ -1170,7 +1170,7 @@ readonly class ImportProblemService
                     try {
                         $aggregationType = TestcaseAggregationType::tryFrom($flag);
                         $testcaseGroup->setAggregationType($aggregationType);
-                    } catch (ValueError $e) {
+                    } catch (ValueError) {
                         $messages['danger'][] = sprintf("Invalid aggregation type '%s' in test group '%s'.", $flag, $name);
                         return null;
                     }
