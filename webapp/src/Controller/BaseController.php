@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Doctrine\ORM\EntityRepository;
 use App\Doctrine\ExternalIdAlreadyExistsException;
 use App\Entity\AbstractJudgement;
 use App\Entity\AbstractRun;
@@ -496,7 +497,7 @@ abstract class BaseController extends AbstractController
             throw new BadRequestHttpException('No IDs specified for deletion');
         }
 
-        /** @var \Doctrine\ORM\EntityRepository<T> $repository */
+        /** @var EntityRepository<T> $repository */
         $repository = $this->em->getRepository($entityClass);
         $entities = $repository->findBy([$idProperty => $ids]);
 

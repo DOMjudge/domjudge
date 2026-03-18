@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\SampleSubmissionsMultipleTriesFixture;
 use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
 use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectSameLanguageFixture;
@@ -59,9 +60,7 @@ class JuryMiscControllerTest extends BaseTestCase
         self::assertSelectorExists('html:contains("DOMjudge Jury interface")');
     }
 
-    /**
-     * @dataProvider provideContestStageForBalloon
-     */
+    #[DataProvider('provideContestStageForBalloon')]
     public function testBalloonScoreboard(array $fixtures, bool $public, string $contestStage): void
     {
         //self::assertEquals((string) $public, $contestStage);
@@ -122,7 +121,7 @@ class JuryMiscControllerTest extends BaseTestCase
         }
     }
 
-    public function provideContestStageForBalloon(): Generator
+    public static function provideContestStageForBalloon(): Generator
     {
         foreach (['preActivation'=>[DemoPreActivationContestFixture::class],
                   'preStart'=>[DemoPreStartContestFixture::class],
@@ -153,9 +152,8 @@ class JuryMiscControllerTest extends BaseTestCase
 
     /**
      * Test that the ajax endpoints return the correct data.
-     *
-     * @dataProvider provideJuryAjax
      */
+    #[DataProvider('provideJuryAjax')]
     public function testJuryAjax(string $endpoint, int $status, array $newRoles, array $finalObject): void
     {
         $url = '/jury/ajax/'.$endpoint;
@@ -171,7 +169,7 @@ class JuryMiscControllerTest extends BaseTestCase
         }
     }
 
-    public function provideJuryAjax(): Generator
+    public static function provideJuryAjax(): Generator
     {
         foreach ([200 => ['balloon','jury','admin'], 403 => ['team']] as $status => $roles) {
             foreach ($roles as $role) {

@@ -231,7 +231,6 @@ abstract class BaseTestCase extends WebTestCase
         // Clear the cached DB values so the new value is picked up.
         $reflection = new ReflectionClass($configService);
         $cacheProperty = $reflection->getProperty('dbConfigCache');
-        $cacheProperty->setAccessible(true);
         $cacheProperty->setValue($configService, null);
 
         try {
@@ -242,7 +241,6 @@ abstract class BaseTestCase extends WebTestCase
             $configService = self::getContainer()->get(ConfigurationService::class);
             $reflection = new ReflectionClass($configService);
             $cacheProperty = $reflection->getProperty('dbConfigCache');
-            $cacheProperty->setAccessible(true);
 
             // Restore the old value.
             $option = $em->getRepository(Configuration::class)->findOneBy(['name' => $configKey]);

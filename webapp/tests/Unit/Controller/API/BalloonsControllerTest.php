@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\ContestTimeFixture;
 use App\DataFixtures\Test\BalloonCorrectSubmissionFixture;
 use App\DataFixtures\Test\BalloonUserFixture;
@@ -83,16 +84,14 @@ class BalloonsControllerTest extends BaseTestCase
         self::assertCount(0, $response);
     }
 
-    /**
-     * @dataProvider provideUnprivilegedUsers
-     */
+    #[DataProvider('provideUnprivilegedUsers')]
     public function testBalloonsAccessForPrivilegedUsersOnly(?string $user, int $result): void
     {
         $contestId = $this->getUnitContestId();
         $this->verifyApiJsonResponse('GET', "/contests/$contestId/balloons", $result, $user);
     }
 
-    public function provideUnprivilegedUsers(): Generator
+    public static function provideUnprivilegedUsers(): Generator
     {
         yield [null, 401];
         yield ['demo', 403];

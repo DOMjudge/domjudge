@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\DemoAboutToStartContestFixture;
 use App\DataFixtures\Test\DemoPostUnfreezeContestFixture;
 use App\DataFixtures\Test\DemoPreEndContestFixture;
@@ -27,9 +28,7 @@ class ContestControllerAdminTest extends ContestControllerTest
         return $new;
     }
 
-    /**
-     * @dataProvider provideAddYaml
-     */
+    #[DataProvider('provideAddYaml')]
     public function testAddYaml(string $yaml, string $expectedYaml, string $contestName): void
     {
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
@@ -51,7 +50,7 @@ class ContestControllerAdminTest extends ContestControllerTest
         self::assertNull($this->getContest($cid)->getDeactivatetime());
     }
 
-    public function provideAddYaml(): Generator
+    public static function provideAddYaml(): Generator
     {
         yield [
             <<<EOF
@@ -261,9 +260,7 @@ EOF;
         self::assertArrayNotHasKey('problemset', $object);
     }
 
-    /**
-     * @dataProvider provideChangeTimes
-     */
+    #[DataProvider('provideChangeTimes')]
     public function testChangeTimes(
         array $body,
         int $expectedResponseCode,
@@ -306,7 +303,7 @@ EOF;
         }
     }
 
-    public function provideChangeTimes(): Generator
+    public static function provideChangeTimes(): Generator
     {
         // Note that if the first item contains "id", we replace it with the correct ID in the test
 
@@ -340,9 +337,7 @@ EOF;
         yield [['id' => "demo", 'scoreboard_thaw_time' => '-15 seconds'], 200, 'Demo contest', [], true, true];
     }
 
-    /**
-     * @dataProvider provideNewContest
-     */
+    #[DataProvider('provideNewContest')]
     public function testActivateTimeContestYaml(
         string $activateTime, string $startTime, ?string $deactivateTime,
         bool $setActivate, bool $setDeactivate
@@ -401,7 +396,7 @@ EOF;
         }
     }
 
-    public function provideNewContest(): Generator
+    public static function provideNewContest(): Generator
     {
         // Test Activation in past, present & future
         yield [Utils::printtime(Utils::now()-14*24*60*60, 'Y-m-d H:i:s'), Utils::printtime(Utils::now()-7*24*60*60, 'Y-m-d H:i:s'), null, true, false];

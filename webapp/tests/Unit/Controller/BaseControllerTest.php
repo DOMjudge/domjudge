@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\NavigationTeamsFixture;
 use App\Entity\Team;
 use App\Service\DOMJudgeService;
@@ -30,9 +31,7 @@ class BaseControllerTest extends BaseTestCase
         );
     }
 
-    /**
-     * @dataProvider provideNavigationCases
-     */
+    #[DataProvider('provideNavigationCases')]
     public function testGetPreviousAndNextObjectIds(
         string $currentId,
         array $orderBy,
@@ -50,7 +49,7 @@ class BaseControllerTest extends BaseTestCase
         self::assertEquals($expectedNext, $result['next']);
     }
 
-    public function provideNavigationCases(): Generator
+    public static function provideNavigationCases(): Generator
     {
         yield 'first element ASC' => ['domjudge', ['e.externalid' => 'ASC'], null, 'exteam'];
         yield 'second element ASC' => ['exteam', ['e.externalid' => 'ASC'], 'domjudge', 'nav-alpha'];

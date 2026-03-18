@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\EnableSelfregisterFixture;
 use App\DataFixtures\Test\EnableSelfregisterSecondCategoryFixture;
 use App\DataFixtures\Test\SampleSubmissionsInBucketsFixture;
@@ -95,9 +96,7 @@ class PublicControllerTest extends BaseTestCase
         return $formFields;
     }
 
-    /**
-     * @dataProvider selfRegisterProvider
-     */
+    #[DataProvider('selfRegisterProvider')]
     public function testSelfRegister(array $inputs, string $password, array $fixtures, string $category): void
     {
         $formFields = $this->setupSelfRegisterForm($inputs, $fixtures, $password, $category);
@@ -133,9 +132,7 @@ class PublicControllerTest extends BaseTestCase
         }
     }
 
-    /**
-     * @dataProvider selfRegisterMissingFieldProvider
-     */
+    #[DataProvider('selfRegisterMissingFieldProvider')]
     public function testSelfRegisterMissingField(array $inputs, string $password, array $fixtures, string $category, string $rField): void
     {
         $formFields = $this->setupSelfRegisterForm($inputs, $fixtures, $password, $category);
@@ -148,9 +145,7 @@ class PublicControllerTest extends BaseTestCase
         }
     }
 
-    /**
-     * @dataProvider selfRegisterDuplicateValueProvider
-     */
+    #[DataProvider('selfRegisterDuplicateValueProvider')]
     public function testSelfRegisterDuplicateValue(array $inputs, string $password, array $fixtures, string $category, string $error): void
     {
         $formFields = $this->setupSelfRegisterForm($inputs, $fixtures, $password, $category);
@@ -160,9 +155,7 @@ class PublicControllerTest extends BaseTestCase
         self::assertSelectorExists('html:contains("'.$error.'")');
     }
 
-    /**
-     * @dataProvider selfRegisterNonExistingValuesProvider
-     */
+    #[DataProvider('selfRegisterNonExistingValuesProvider')]
     public function testSelfRegisterNonExistingValues(array $inputs, array $fixtures, string $category): void
     {
         $tmpInputs = $inputs;
@@ -181,9 +174,7 @@ class PublicControllerTest extends BaseTestCase
         self::assertSelectorExists($selector);
     }
 
-    /**
-     * @dataProvider selfRegisterWrongPasswordProvider
-     */
+    #[DataProvider('selfRegisterWrongPasswordProvider')]
     public function testSelfRegisterWrongPassword(
         array $inputs,
         string $password,
@@ -201,7 +192,7 @@ class PublicControllerTest extends BaseTestCase
     // username, name, teamName, affiliation, affiliationName
     // affiliationShortName, affiliationCountry, existingAffiliation
     // plainPassword
-    public function selfRegisterProvider(): Generator
+    public static function selfRegisterProvider(): Generator
     {
         foreach ([[EnableSelfregisterFixture::class],[EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class]] as $fixtures) {
             foreach (['2','4'] as $index => $category) {
@@ -225,7 +216,7 @@ class PublicControllerTest extends BaseTestCase
         }
     }
 
-    public function selfRegisterWrongPasswordProvider(): Generator
+    public static function selfRegisterWrongPasswordProvider(): Generator
     {
         foreach ([[EnableSelfregisterFixture::class],[EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class]] as $fixtures) {
             foreach (['2','4'] as $index => $category) {
@@ -239,7 +230,7 @@ class PublicControllerTest extends BaseTestCase
         }
     }
 
-    public function selfRegisterDuplicateValueProvider(): Generator
+    public static function selfRegisterDuplicateValueProvider(): Generator
     {
         $inputs = ['username'=>'originalUsername', 'teamName'=>'TeamName','affiliation'=>'none'];
         $password = 'foo';
@@ -275,7 +266,7 @@ class PublicControllerTest extends BaseTestCase
         }
     }
 
-    public function selfRegisterNonExistingValuesProvider(): Generator
+    public static function selfRegisterNonExistingValuesProvider(): Generator
     {
         $fixtures = [EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class];
         yield[['username'=>'nonexistingcategory', 'teamName'=>'NewTeam','affiliation'=>'none'], $fixtures, '42'];
@@ -286,9 +277,8 @@ class PublicControllerTest extends BaseTestCase
 
     /**
      * Test that the problem statistics render the correct data
-     *
-     * @dataProvider provideTestProblemStatistics
      */
+    #[DataProvider('provideTestProblemStatistics')]
     public function testProblemStatistics(
         bool $removeFreezeTime,
         bool $removeUnfreezeTime,
@@ -333,7 +323,7 @@ class PublicControllerTest extends BaseTestCase
         self::assertCount($expectedBlueBoxes, $frozenBoxes);
     }
 
-    public function provideTestProblemStatistics(): Generator
+    public static function provideTestProblemStatistics(): Generator
     {
         yield [false, false, 1, 1, 6]; // Keep both times, we expect one green, one red and six blue boxes (2 around the freeze and 4 at the end)
         yield [true, true, 3, 3, 0]; // Remove both times, we expect three green and three red boxes

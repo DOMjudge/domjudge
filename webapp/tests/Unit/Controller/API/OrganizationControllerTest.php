@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\SampleAffiliationsFixture;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
@@ -90,9 +91,7 @@ class OrganizationControllerTest extends BaseTestCase
         parent::testList();
     }
 
-    /**
-     * @dataProvider provideSingle
-     */
+    #[DataProvider('provideSingle')]
     public function testSingle(int|string $id, array $expectedProperties): void
     {
         // Remove country and country flag if not enabled.

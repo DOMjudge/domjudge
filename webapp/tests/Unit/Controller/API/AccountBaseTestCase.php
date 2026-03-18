@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\DataFixtures\Test\TeamWithExternalIdEqualsOneFixture;
 use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -81,9 +82,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
         }
     }
 
-    /**
-     * @dataProvider provideNewAccount
-     */
+    #[DataProvider('provideNewAccount')]
     public function testCreateUser(array $newUserPostData, ?array $overwritten = null): void
     {
         // This is only relevant for another test
@@ -103,7 +102,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
         $this->verifyApiJsonResponse('GET', $url, 200, $newUserPostData['username'], null, [], $newUserPostData['password']);
     }
 
-    public function provideNewAccount(): Generator
+    public static function provideNewAccount(): Generator
     {
         $defaultData = static::$defaultDataUserAdd;
         $accountCombinationsWithFile = static::$accountAddCombinationsWithFile;
@@ -131,9 +130,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
         }
     }
 
-    /**
-     * @dataProvider provideNewAccountFile
-     */
+    #[DataProvider('provideNewAccountFile')]
     public function testCreateUserFileImport(string $newUsersFile, string $type, array $newUserPostData, ?array $overwritten = null): void
     {
         $this->loadFixture(TeamWithExternalIdEqualsOneFixture::class);
@@ -235,9 +232,7 @@ EOF;
         $this->verifyApiJsonResponse('GET', $url, 401, $newUserPostData['username'], null, [], '');
     }
 
-    /**
-     * @dataProvider provideNewAccountFileMissingField
-     */
+    #[DataProvider('provideNewAccountFileMissingField')]
     public function testCreateUserFileImportMissingField(string $newUsersFile, string $type, array $newUserPostData, string $errorMessage, ?array $overwritten = null, int $statusCode = 400): void
     {
         $usersURL = $this->helperGetEndpointURL('users').'/accounts';
@@ -325,9 +320,7 @@ EOF;
         }
     }
 
-    /**
-     * @dataProvider provideNewAccountFileNoPassword
-     */
+    #[DataProvider('provideNewAccountFileNoPassword')]
     public function testUserCreatedWithFileLogonNoPassword(string $newUsersFile, string $type): void
     {
         $tempFile = tempnam(sys_get_temp_dir(), "/accounts-upload-test-");
@@ -344,7 +337,7 @@ EOF;
         unlink($tempFile);
     }
 
-    public function provideNewAccountFileNoPassword(): Generator
+    public static function provideNewAccountFileNoPassword(): Generator
     {
         // We don't properly handle the case where the password is not provided.
         // But we skip this test for TSV as its deprecated and it does not allow to provide the IP

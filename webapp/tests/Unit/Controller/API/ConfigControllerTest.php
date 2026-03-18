@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Generator;
 
 class ConfigControllerTest extends BaseTestCase
@@ -10,9 +11,8 @@ class ConfigControllerTest extends BaseTestCase
 
     /**
      * Test that same public config variables are returned for all role types.
-     *
-     * @dataProvider provideUsers
      */
+    #[DataProvider('provideUsers')]
     public function testConfigReturnsPublicVariables(?string $user): void
     {
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200, $user);
@@ -31,9 +31,8 @@ class ConfigControllerTest extends BaseTestCase
 
     /**
      * Test that secret config variables are not returned for non-admin.
-     *
-     * @dataProvider provideUnprivilegedUsers
      */
+    #[DataProvider('provideUnprivilegedUsers')]
     public function testConfigDoesNotReturnSecretVariables(?string $user): void
     {
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200, $user);
@@ -99,9 +98,8 @@ class ConfigControllerTest extends BaseTestCase
 
     /**
      * Test that changing a config variable via the API to an invalid value produces the correct error.
-     *
-     * @dataProvider configChangeAPIInvalidProvider
      */
+    #[DataProvider('configChangeAPIInvalidProvider')]
     public function testConfigChangeAPIInvalid(
         string $property,
         mixed $currentValue,
@@ -119,7 +117,7 @@ class ConfigControllerTest extends BaseTestCase
         static::assertEquals(['errors' => [$property => $errorMessage]], $response);
     }
 
-    public function configChangeAPIInvalidProvider(): Generator
+    public static function configChangeAPIInvalidProvider(): Generator
     {
         yield ['memory_limit', 2097152, -1, 'A positive number is required.'];
         yield ['memory_limit', 2097152, 0, 'A positive number is required.'];
@@ -204,14 +202,14 @@ class ConfigControllerTest extends BaseTestCase
         $this->verifyApiJsonResponse('GET', $this->endpoint . '?name=not_exist', 400);
     }
 
-    public function provideUsers(): Generator
+    public static function provideUsers(): Generator
     {
         yield [null];
         yield ['demo'];
         yield ['admin'];
     }
 
-    public function provideUnprivilegedUsers(): Generator
+    public static function provideUnprivilegedUsers(): Generator
     {
         yield [null];
         yield ['demo'];

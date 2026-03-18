@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Generator;
 
 class AccountControllerTest extends AccountBaseTestCase
@@ -34,9 +35,7 @@ class AccountControllerTest extends AccountBaseTestCase
         ],
     ];
 
-    /**
-     * @dataProvider provideCurrentAccount
-     */
+    #[DataProvider('provideCurrentAccount')]
     public function testCurrentAccount(string $user, array $expectedData): void
     {
         $url      = $this->helperGetEndpointURL('account');
@@ -54,7 +53,7 @@ class AccountControllerTest extends AccountBaseTestCase
         $this->verifyApiJsonResponse('GET', $url, 404);
     }
 
-    public function provideCurrentAccount(): Generator
+    public static function provideCurrentAccount(): Generator
     {
         yield ['admin', ['id' => 'admin', 'team_id' => 'domjudge', 'username' => 'admin', 'type' => 'admin']];
         yield ['demo', ['id' => 'demo', 'team_id' => 'exteam', 'username' => 'demo', 'type' => 'team']];

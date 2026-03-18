@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Entity\Submission;
@@ -68,8 +69,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test that jury <???> overview page exists.
-     * @dataProvider provideBasePage
      */
+    #[DataProvider('provideBasePage')]
     public function testPageOverview(
         string $role,
         int $statusCode,
@@ -93,9 +94,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
         }
     }
 
-    /**
-     * @dataProvider provideRoleAccessData
-     */
+    #[DataProvider('provideRoleAccessData')]
     public function testHTTPAccessForRole(string $role, string $url, int $statusCode, string $HTTPMethod): void
     {
         $this->roles = [$role];
@@ -112,7 +111,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
      * - expected statusCode for this role,
      * - the method to try (GET, POST).
      */
-    public function provideRoleAccessData(): Generator
+    public static function provideRoleAccessData(): Generator
     {
         foreach (['GET', 'POST', 'HEAD'] as $HTTP) {
             foreach (['admin', 'jury'] as $role) {
@@ -136,7 +135,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
      * - the expected HTTP statusCode,
      * - the pre-existing entry.
      */
-    public function provideBasePage(): Generator
+    public static function provideBasePage(): Generator
     {
         foreach (static::$exampleEntries as $exampleEntry) {
             foreach (static::$rolesView as $role) {
@@ -288,8 +287,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test that admin can add a new entity for this controller.
-     * @dataProvider provideAddCorrectEntities
      */
+    #[DataProvider('provideAddCorrectEntities')]
     public function testCheckAddEntityAdmin(array $element, array $expected): void
     {
         if (empty($element)) {
@@ -331,8 +330,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test failures when the admin provides wrong data.
-     * @dataProvider provideAddFailureEntities
      */
+    #[DataProvider('provideAddFailureEntities')]
     public function testCheckAddEntityAdminFailure(array $element, string $message): void
     {
         if (empty($element)) {
@@ -352,9 +351,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test that admin can add edit an entity for this controller.
-     *
-     * @dataProvider provideEditCorrectEntities
      */
+    #[DataProvider('provideEditCorrectEntities')]
     public function testCheckEditEntityAdminCorrect(array $formDataKeys, array $formDataValues): void
     {
         if (empty($formDataKeys)) {
@@ -411,9 +409,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test that admin can edit an entity for this controller but receives an error when providing wrong data.
-     *
-     * @dataProvider provideEditFailureEntities
      */
+    #[DataProvider('provideEditFailureEntities')]
     public function testCheckEditEntityAdminFailure(array $formDataKeys, array $formDataValues, string $message): void
     {
         if (empty($formDataKeys)) {
@@ -564,9 +561,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
 
     /**
      * Test that the standard user can delete an entity.
-     *
-     * @dataProvider provideDeleteEntity
      */
+    #[DataProvider('provideDeleteEntity')]
     public function testDeleteEntity(string $entityShortName): void
     {
         $this->roles = ['admin'];
@@ -596,7 +592,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
     /**
      * - entityShortname to delete.
      */
-    public function provideDeleteEntity(): Generator
+    public static function provideDeleteEntity(): Generator
     {
         if (static::$delete !== '') {
             foreach (static::$deleteEntities as $entity) {

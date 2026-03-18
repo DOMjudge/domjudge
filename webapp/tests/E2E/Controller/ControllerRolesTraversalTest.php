@@ -2,6 +2,7 @@
 
 namespace App\Tests\E2E\Controller;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Tests\Unit\BaseTestCase;
 use Generator;
 
@@ -203,8 +204,8 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * @param string[] $baseRoles The default role of the user.
      * @param string[] $optionalRoles The roles which should not restrict the viewable pages.
      * @param bool     $shadowMode Put the installation in this shadow mode.
-     * @dataProvider provideRoleAccessData
      */
+    #[DataProvider('provideRoleAccessData')]
     public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages, bool $shadowMode, string $skip): void
     {
         $this->setupShadowMode($shadowMode);
@@ -252,8 +253,8 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * @param string[] $roleOthersBaseURL The base URLs of the other roles.
      * @param string[] $roles The tested roles.
      * @param string[] $rolesOther The other roles.
-     * @dataProvider provideRoleAccessOtherRoles
      */
+    #[DataProvider('provideRoleAccessOtherRoles')]
     public function testRoleAccessOtherRoles(
         string $roleBaseURL,
         array $roleOthersBaseURL,
@@ -278,8 +279,8 @@ class ControllerRolesTraversalTest extends BaseTestCase
 
     /**
      * Test that pages depending on an active contest do not crash on the server.
-     * @dataProvider provideNoContestScenario
      */
+    #[DataProvider('provideNoContestScenario')]
     public function testNoContestAccess(string $roleBaseURL, array $baseRoles, bool $shadowMode, string $skip): void
     {
         $this->setupShadowMode($shadowMode);
