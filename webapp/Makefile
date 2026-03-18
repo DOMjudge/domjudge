@@ -12,6 +12,7 @@ SUBDIRS = config
 domserver: composer-dump-autoload
 
 dependencies: composer-dependencies node-dependencies
+dependencies-dist: composer-dependencies node-dependencies-dist
 
 # Install PHP dependencies
 composer-dependencies:
@@ -40,14 +41,40 @@ vendor/autoload_runtime.php:
 composer-dump-autoload-dev:
 	composer $(subst 1,-q,$(QUIET)) dump-autoload
 
+define detect_yarn
+YARN_CMD=$$(command -v yarn || command -v yarnpkg); \
+if [ -z "$$YARN_CMD" ]; then \
+  echo "Error: neither 'yarnpkg' nor 'yarn' found in PATH"; \
+  exit 1; \
+fi
+endef
+
+define yarn_licenses_warn
+if ! $$YARN_CMD licenses generate-disclaimer > LICENSES.txt 2>/dev/null; then \
+  echo "Warning: 'yarn licenses' not available; skipping LICENSES.txt generation."; \
+fi
+endef
+
+define yarn_licenses_strict
+if ! $$YARN_CMD licenses generate-disclaimer > LICENSES.txt 2>/dev/null; then \
+  echo "Error: 'yarn licenses' not available but required"; \
+  exit 1; \
+fi
+endef
+
 node-dependencies:
-ifeq (, $(shell command -v yarn || command -v yarnpkg 2> /dev/null))
-	$(error "neither 'yarnpkg' nor 'yarn' command found in $(PATH), install it via your package manager or https://yarnpkg.com/cli/node")
-endif
-	@YARN_CMD=$(shell command -v yarn || command -v yarnpkg); \
-	$$YARN_CMD install; \
-	$$YARN_CMD licenses generate-disclaimer > LICENSES.txt 2>/dev/null || \
-		echo "Warning: 'yarn licenses' not available; skipping LICENSES.txt generation."
+	${ \
+		$(detect_yarn); \
+		$$YARN_CMD install; \
+		$(yarn_licenses_warn); \
+	}
+
+node-dependencies-dist:
+	${ \
+		$(detect_yarn); \
+		$$YARN_CMD install; \
+		$(yarn_licenses_strict); \
+	}
 
 # Run Symfony in dev mode (for maintainer-mode):
 .env.local:

@@ -10,6 +10,7 @@
 !var/log/.gitkeep
 /vendor/
 /node_modules/
+/LICENSES.txt
 
 ###> phpunit/phpunit ###
 /phpunit.xml
