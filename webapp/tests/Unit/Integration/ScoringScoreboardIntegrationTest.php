@@ -438,7 +438,7 @@ class ScoringScoreboardIntegrationTest extends KernelTestCase
         // Calculate total score if not provided
         if ($score === null) {
             $totalScore = '0';
-            foreach ($testcaseResults as $tcKey => [$result, $tcScore]) {
+            foreach ($testcaseResults as [$result, $tcScore]) {
                 if ($result === 'correct') {
                     $totalScore = bcadd($totalScore, $tcScore, 9);
                 }

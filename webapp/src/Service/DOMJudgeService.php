@@ -1626,7 +1626,7 @@ class DOMJudgeService
     {
         $compareExecutable = $this->getImmutableCompareExecutable($contestProblem);
         $problem = $contestProblem->getProblem();
-        $outputValidatorFlags = $outputValidatorFlags ?? $problem->getSpecialCompareArgs();
+        $outputValidatorFlags ??= $problem->getSpecialCompareArgs();
         return Utils::jsonEncode(
             [
                 'script_timelimit' => $this->config->get('script_timelimit'),
