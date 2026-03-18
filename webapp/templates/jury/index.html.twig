@@ -88,8 +88,8 @@
 
 <h5 class="mt-4 mb-3">Documentation</h5>
 <div class="row g-2 mb-3">
-    {{ _self.tile(asset_urls['domjudge_manual'], 'book', 'DOMjudge manual') }}
-    {{ _self.tile(asset_urls['team_manual'], 'file-pdf', 'Team manual') }}
+    {{ _self.tile(asset('doc/manual/html/index.html'), 'book', 'DOMjudge manual') }}
+    {{ _self.tile(asset('doc/manual/domjudge-team-manual.pdf'), 'file-pdf', 'Team manual') }}
     {{ _self.tile(path('app.swagger_ui'), 'code', 'API documentation') }}
     {{ _self.tile(CCS_SPEC_API_URL, 'globe', 'ICPC Contest API') }}
 </div>
