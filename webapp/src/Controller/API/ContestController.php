@@ -47,6 +47,10 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
 use TypeError;
 
+use App\Entity\TeamCategory;
+use App\Service\ScoreboardService;
+use Symfony\Component\HttpFoundation\RequestStack;
+
 /**
  * @extends AbstractRestController<Contest, Contest>
  */
@@ -66,9 +70,110 @@ class ContestController extends AbstractRestController
         EventLogService $eventLogService,
         protected readonly ImportExportService $importExportService,
         protected readonly LoggerInterface $logger,
-        protected readonly AssetUpdateService $assetUpdater
+        protected readonly AssetUpdateService $assetUpdater,
+        protected readonly ScoreboardService $scoreboardService
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
+    }
+
+    /**
+     * Get the scoreboard for the given contest as a ZIP archive.
+     * @throws NonUniqueResultException
+     */
+    #[IsGranted('ROLE_API_READER')]
+    #[Rest\Get(path: '/{cid}/scoreboard.zip', name: 'contest_scoreboard_zip')]
+    #[OA\Response(
+        response: 200,
+        description: 'The contest scoreboard as a ZIP archive',
+        content: new OA\MediaType(mediaType: 'application/zip')
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
+    #[OA\Parameter(
+        name: 'unfrozen',
+        description: 'Whether to include unfrozen results',
+        in: 'query',
+        schema: new OA\Schema(type: 'boolean', default: false)
+    )]
+    public function scoreboardZipAction(
+        Request $request,
+        RequestStack $requestStack,
+        string $cid,
+        #[MapQueryParameter] bool $unfrozen = false
+    ): Response {
+        $contest = $this->getContestWithId($request, $cid);
+        return $this->dj->getScoreboardZip($request, $requestStack, $contest, $this->scoreboardService, $unfrozen);
+    }
+
+    /**
+     * Get the results for the given contest as a TSV file.
+     * @throws NonUniqueResultException
+     */
+    #[IsGranted('ROLE_API_READER')]
+    #[Rest\Get(path: '/{cid}/results.tsv', name: 'contest_results_tsv')]
+    #[OA\Response(
+        response: 200,
+        description: 'The contest results as a TSV file',
+        content: new OA\MediaType(mediaType: 'text/tab-separated-values')
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
+    #[OA\Parameter(
+        name: 'sortorder',
+        description: 'The sort order to get the results for',
+        in: 'query',
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\Parameter(
+        name: 'honors',
+        description: 'Whether to include honors',
+        in: 'query',
+        schema: new OA\Schema(type: 'boolean', default: true)
+    )]
+    #[OA\Parameter(
+        name: 'individually_ranked',
+        description: 'Whether to rank individually',
+        in: 'query',
+        schema: new OA\Schema(type: 'boolean', default: false)
+    )]
+    public function resultsTsvAction(
+        Request $request,
+        string $cid,
+        #[MapQueryParameter] ?int $sortorder = null,
+        #[MapQueryParameter] bool $honors = true,
+        #[MapQueryParameter(name: 'individually_ranked')] bool $individuallyRanked = false
+    ): Response {
+        $contest = $this->getContestWithId($request, $cid);
+
+        if ($sortorder === null) {
+            // Get the lowest available sortorder.
+            $sortorder = (int)$this->em->createQueryBuilder()
+                ->from(TeamCategory::class, 'c')
+                ->select('MIN(c.sortorder)')
+                ->getQuery()
+                ->getSingleScalarResult();
+        }
+
+        // We need to set the current contest in DOMJudgeService because ImportExportService::getResultsData()
+        // uses $this->dj->getCurrentContest().
+        // Since we are in an API request for a specific contest, this is appropriate.
+        // However, DOMJudgeService::getCurrentContest() usually relies on cookies or the 'domjudge_cid' attribute.
+        // Let's ensure it's set for this request.
+        $request->attributes->set('cid', $contest->getCid());
+
+        $data = $this->importExportService->getResultsData($sortorder, $individuallyRanked, $honors);
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($data): void {
+            echo "results\t1\n";
+            foreach ($data as $row) {
+                echo implode("\t", array_map(fn($field) => Utils::toTsvField((string)$field), $row->toArray())) . "\n";
+            }
+        });
+
+        $filename = 'results.tsv';
+        $response->headers->set('Content-Type', 'text/plain; name="' . $filename . '"; charset=utf-8');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+        return $response;
     }
 
     /**

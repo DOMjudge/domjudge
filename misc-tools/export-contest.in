@@ -24,45 +24,60 @@ webappdir = '@domserver_webappdir@'
 
 
 def usage():
-    print(f'Usage: {sys.argv[0]} [<domjudge-api-url>]')
+    print(f'Usage: {sys.argv[0]} <contest-id> [<domjudge-api-url>]')
     exit(1)
 
 
 def api_to_file(endpoint: str, filename: str):
     print(f"Fetching '{endpoint}' to '{filename}'")
-    data = dj_utils.do_api_request(endpoint, decode=False)
-    with open(filename, 'wb') as f:
-        f.write(data)
-
-    return data
+    try:
+        data = dj_utils.do_api_request(endpoint, decode=False)
+        with open(filename, 'wb') as f:
+            f.write(data)
+        return data
+    except Exception as e:
+        print(f"Error fetching '{endpoint}': {e}", file=sys.stderr)
+        return None
 
 
 def download_submission(submission):
     d = f'submissions/{submission["id"]}'
     Path(d).mkdir(parents=True, exist_ok=True)
-    for f in submission['files']:
-        if f['mime'] == 'application/zip':
-            print(f"Downloading '{f['href']}'")
-            data = dj_utils.do_api_request(f['href'], decode=False)
-            with open(f'{d}/files.zip', 'wb') as f:
-                f.write(data)
+    zip_count = 0
+    for file_info in submission['files']:
+        if file_info['mime'] == 'application/zip':
+            print(f"Downloading '{file_info['href']}'")
+            try:
+                data = dj_utils.do_api_request(file_info['href'], decode=False)
+                filename = 'files.zip' if zip_count == 0 else f'files_{zip_count}.zip'
+                with open(f'{d}/{filename}', 'wb') as f_handle:
+                    f_handle.write(data)
+                zip_count += 1
+            except Exception as e:
+                print(f"Error downloading submission {submission['id']}: {e}", file=sys.stderr)
 
 
-if len(sys.argv) == 1:
+if len(sys.argv) == 2:
+    contest_id = sys.argv[1]
     dj_utils.domjudge_webapp_folder_or_api_url = webappdir
-elif len(sys.argv) == 2:
-    dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[1]
+elif len(sys.argv) == 3:
+    contest_id = sys.argv[1]
+    dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[2]
 else:
     usage()
 
 
-user_data = dj_utils.do_api_request('user')
-if 'admin' not in user_data['roles']:
-    print('Your user does not have the \'admin\' role, can not export.')
+try:
+    user_data = dj_utils.do_api_request('user')
+    if 'roles' not in user_data or 'admin' not in user_data['roles']:
+        print("Your user does not have the 'admin' role, can not export.", file=sys.stderr)
+        exit(1)
+except Exception as e:
+    print(f"Could not verify user roles: {e}", file=sys.stderr)
     exit(1)
 
 
-contest_id = 'wf48_finals'
+submissions = []
 
 for endpoint in [
         'accounts',
@@ -80,11 +95,17 @@ for endpoint in [
         'teams',
         ]:
     data = api_to_file(f'contests/{contest_id}/{endpoint}', f'{endpoint}.json')
-    if endpoint == 'submissions':
-        submissions = json.loads(data)
+    if endpoint == 'submissions' and data is not None:
+        try:
+            submissions = json.loads(data)
+        except json.JSONDecodeError as e:
+            print(f"Error decoding submissions JSON: {e}", file=sys.stderr)
 
 api_to_file(f'contests/{contest_id}/event-feed?stream=false', 'event-feed.ndjson')
+api_to_file(f'contests/{contest_id}/results.tsv', 'results.tsv')
+api_to_file(f'contests/{contest_id}/scoreboard.zip', 'scoreboard.zip')
 
-with ThreadPoolExecutor(20) as executor:
-    for submission in submissions[:10]:
-        executor.submit(download_submission, submission)
+if submissions:
+    with ThreadPoolExecutor(20) as executor:
+        for submission in submissions:
+            executor.submit(download_submission, submission)
