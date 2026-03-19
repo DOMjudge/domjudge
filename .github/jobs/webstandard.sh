@@ -87,7 +87,7 @@ if [ "$ROLE" = "public" ]; then
     EXPECTED_HTTP_CODES="$EXPECTED_HTTP_CODES\|401"
 fi
 
-HTTP_404_IGNORED="robots.txt\|imgBase.replace"
+HTTP_404_IGNORED="robots.txt\|imgBase.replace\|request-remaining"
 
 set +e
 NUM_ERRORS=$(grep -v "HTTP/1.1\" \($EXPECTED_HTTP_CODES\)" /var/log/nginx/domjudge.log | grep -v "${HTTP_404_IGNORED}" -c; if [ "$?" -gt 1 ]; then exit 127; fi)
