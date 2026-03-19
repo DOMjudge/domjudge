@@ -502,6 +502,10 @@ class JudgeDaemon
 
             // If $row is null, an error occurred; we marked the endpoint already as errorred above.
             if (is_null($row)) {
+                // If fetching work failed, it might still have been assigned to us.
+                // To be sure, we give it back.
+                logmsg(LOG_WARNING, "Fetching work failed, giving back any potentially assigned work.");
+                $this->request('judgehosts', 'POST', ['hostname' => urlencode($this->myhost)], false);
                 continue;
             } else {
                 $row = dj_json_decode($row);
