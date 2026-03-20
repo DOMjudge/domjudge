@@ -40,21 +40,27 @@ jobs:
             -v "$(pwd):$(pwd)" -w "$(pwd)" ${{ matrix.os}}:${{ matrix.version }} \
             $(pwd)/.github/jobs/configure-checks/setup_configure_image.sh 
           docker commit preinstall baseimage
+          echo "Start GCC check"
           docker run --name gcc         -v /tmp/bats_logs/gcc:/tmp/bats_logs \
             -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
             $(pwd)/.github/jobs/configure-checks/run_bats.sh "gcc"
+          echo "Start G++ check"
           docker run --name gpp         -v /tmp/bats_logs/gpp:/tmp/bats_logs \
             -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
             $(pwd)/.github/jobs/configure-checks/run_bats.sh "gpp"
+          echo "Start Clang check"
           docker run --name clang       -v /tmp/bats_logs/clang:/tmp/bats_logs \
             -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
             $(pwd)/.github/jobs/configure-checks/run_bats.sh "clang"
+          echo "Start Apache check"
           docker run --name apache      -v /tmp/bats_logs/apache:/tmp/bats_logs \
             -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
             $(pwd)/.github/jobs/configure-checks/run_bats.sh "apache"
+          echo "Start Nginx check"
           docker run --name nginx       -v /tmp/bats_logs/nginx:/tmp/bats_logs \
             -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
             $(pwd)/.github/jobs/configure-checks/run_bats.sh "nginx"
+          echo "Start all other checks"
           docker run --name all         -v /tmp/bats_logs/all:/tmp/bats_logs \
             -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
             $(pwd)/.github/jobs/configure-checks/run_bats.sh "all"
