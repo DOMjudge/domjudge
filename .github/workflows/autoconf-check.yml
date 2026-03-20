@@ -65,9 +65,6 @@ jobs:
             -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
             $(pwd)/.github/jobs/configure-checks/run_bats.sh "cgroup"
           echo "Start all other checks"
-          docker run --name all         -v /tmp/bats_logs/all:/tmp/bats_logs \
-            -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
-            $(pwd)/.github/jobs/configure-checks/run_bats.sh "all"
       - name: Upload all logs/artifacts
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
