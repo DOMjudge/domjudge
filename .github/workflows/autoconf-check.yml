@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  debian-family:
+  mainstream:
     strategy:
       matrix:
         version: [noble, rolling]
@@ -25,20 +25,24 @@ jobs:
             version: stable
           - os: debian
             version: testing
+          - os: fedora
+            version: latest
     runs-on: ubuntu-latest
     env:
       DEBIAN_FRONTEND: noninteractive
       TZ: Etc/UTC
-    container:
-      image: ${{ matrix.os }}:${{ matrix.version }}
     steps:
-      - name: Install git and ca-certs
-        run: |
-          apt-get update
-          apt-get install -y git ca-certificates
       - uses: actions/checkout@v4
-      - name: Setup image and run bats tests
-        run: .github/jobs/configure-checks/setup_configure_image.sh
+      - name: Run check in OS containers
+        run: |
+          mkdir -p /tmp/bats_logs/all
+          docker run --name preinstall \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" ${{ matrix.os}}:${{ matrix.version }} \
+            $(pwd)/.github/jobs/configure-checks/setup_configure_image.sh 
+          docker commit preinstall baseimage
+          docker run --name gcc         -v /tmp/bats_logs/all:/tmp/bats_logs \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
+            $(pwd)/.github/jobs/configure-checks/run_bats.sh "all"
       - name: Upload all logs/artifacts
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
