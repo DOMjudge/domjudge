@@ -502,6 +502,8 @@ class TwigExtension
             case 'pending':
             case 'aborted':
             case 'n / a':
+            case 'n/a':
+            case 'internal':
                 if (!$jury) {
                     $result = 'pending';
                 }

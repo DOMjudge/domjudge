@@ -183,7 +183,7 @@
                             {% if submission.externalid is null %}
                                 {{- 'n / a' | printValidJuryResult -}}
                             {% elseif externalJudgement is null or externalJudgement.result is empty %}
-                                {{- 'pending' | printValidJuryResult -}}
+                                {{- (submission.externalid starts with 'dj-' ? 'internal' : 'pending') | printValidJuryResult -}}
                             {% else %}
                                 {{- externalJudgement.result | printValidJuryResult -}}
                             {% endif %}
@@ -277,8 +277,10 @@
                     </td>
                     <td>
                         <a {% if externalSubmissionUrl is not null %}href="{{ externalSubmissionUrl }}"{% endif %}>
-                            {% if externalJudgement is null or externalJudgement.result is empty %}
-                                {{- 'pending' | printValidJuryResult -}}
+                            {% if submission.externalid is null %}
+                                {{- 'n / a' | printValidJuryResult -}}
+                            {% elseif externalJudgement is null or externalJudgement.result is empty %}
+                                {{- (submission.externalid starts with 'dj-' ? 'internal' : 'pending') | printValidJuryResult -}}
                             {% else %}
                                 {{- externalJudgement.result | printValidJuryResult -}}
                             {% endif %}
