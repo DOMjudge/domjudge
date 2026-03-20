@@ -863,7 +863,7 @@ blockquote {
     border: 1px solid grey;
     flex: 1;
     height: 0;
-    min-height: 100px; /* Prefer a double scrollbar over not displaying code at all */
+    min-height: 400px; /* Prefer a double scrollbar over not displaying code at all */
     width: 100%;
 }
 
