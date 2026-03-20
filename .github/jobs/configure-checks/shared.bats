@@ -19,3 +19,12 @@ source .github/jobs/configure-checks/functions.sh
     assert_line 'configure: error: no acceptable C compiler found in $PATH'
     assert_regex "See [\`']config.log' for more details"
 }
+
+@test "Run as root discouraged" {
+   setup
+   run su root -c "./configure"
+   discourage_root="checking domjudge-user... configure: error: installing/running as root is STRONGLY DISCOURAGED, use --with-domjudge-user=root to override."
+   assert_line "$discourage_root"
+   run su root -c "./configure --with-domjudge-user=root"
+   refute_line "$discourage_root"
+}

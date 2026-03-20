@@ -4,15 +4,6 @@ load 'assert'
 
 source .github/jobs/configure-checks/functions.sh
 
-@test "Run as root discouraged" {
-   setup
-   run su root -c "./configure"
-   discourage_root="checking domjudge-user... configure: error: installing/running as root is STRONGLY DISCOURAGED, use --with-domjudge-user=root to override."
-   assert_line "$discourage_root"
-   run su root -c "./configure --with-domjudge-user=root"
-   refute_line "$discourage_root"
-}
-
 @test "Check for missing webserver group" {
     if [ "$distro_id" != "ID=fedora" ]; then
         # Debian/Ubuntu start with a www-data group
