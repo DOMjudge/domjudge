@@ -44,12 +44,15 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run check in OS containers
         run: |
-          mkdir -p /tmp/bats_logs/all
+          mkdir -p /tmp/bats_logs/{gcc,all}
           docker run --name preinstall \
             -v "$(pwd):$(pwd)" -w "$(pwd)" ${{ matrix.os}}:${{ matrix.version }} \
             $(pwd)/.github/jobs/configure-checks/setup_configure_image.sh 
           docker commit preinstall baseimage
-          docker run --name gcc         -v /tmp/bats_logs/all:/tmp/bats_logs \
+          docker run --name gcc         -v /tmp/bats_logs/gcc:/tmp/bats_logs \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
+            $(pwd)/.github/jobs/configure-checks/run_bats.sh "gcc"
+          docker run --name all         -v /tmp/bats_logs/all:/tmp/bats_logs \
             -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
             $(pwd)/.github/jobs/configure-checks/run_bats.sh "all"
       - name: Upload all logs/artifacts
