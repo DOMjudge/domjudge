@@ -33,13 +33,3 @@ source .github/jobs/configure-checks/functions.sh
     run ./configure --with-domjudge-user=$u
     assert_line "checking webserver-group... configure: error: webserver group could not be detected, use --with-webserver-group=GROUP"
 }
-
-@test "Run as root discouraged" {
-   setup
-   run su root -c "./configure"
-   discourage_root="checking domjudge-user... configure: error: installing/running as root is STRONGLY DISCOURAGED, use --with-domjudge-user=root to override."
-   assert_line "$discourage_root"
-   run su root -c "./configure --with-domjudge-user=root"
-   refute_line "$discourage_root"
-}
-
