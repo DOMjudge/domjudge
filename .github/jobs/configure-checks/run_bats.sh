@@ -3,7 +3,7 @@
 testsuite="$1"
 
 files=""
-for i in $testsuite shared; do
+for i in shared_pre $testsuite shared_post; do
   files=".github/jobs/configure-checks/${i}.bats $files"
 done
 
