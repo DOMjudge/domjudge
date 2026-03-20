@@ -32,10 +32,19 @@ setup() {
     for shared_file in config.log confdefs.h conftest.err; do
         chmod a+rw $shared_file || true
     done
+    echo "$testsuite"
     if [ "$distro_id" = "ID=fedora" ]; then
-        repo-install httpd
+        if [ "$testsuite" = apache ]; then
+            repo-install httpd
+        else
+            repo-install nginx
+        fi
     fi
-    repo-install gcc g++ libcgroup-dev composer
+    if [ "$testsuite" = clang ]; then
+       repo-install libcgroup-dev composer
+    else
+       repo-install gcc g++ libcgroup-dev composer
+    fi
 }
 
 run_configure () {

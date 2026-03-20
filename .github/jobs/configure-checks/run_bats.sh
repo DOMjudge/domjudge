@@ -1,6 +1,7 @@
 #!/bin/sh
 
 testsuite="$1"
+export testsuite
 
 files=""
 for i in shared_pre $testsuite shared_post; do
