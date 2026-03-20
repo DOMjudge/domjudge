@@ -7,8 +7,7 @@ export testsuite
 
 files=""
 for i in shared_pre $testsuite shared_post; do
-  files=".github/jobs/configure-checks/${i}.bats $files"
+    file=".github/jobs/configure-checks/${i}.bats"
+    # shellcheck disable=SC2086
+    test_path="/home/runner/work/domjudge/domjudge" bats --print-output-on-failure --gather-test-outputs-in /tmp/bats_logs $file
 done
-
-# shellcheck disable=SC2086
-test_path="/home/runner/work/domjudge/domjudge" bats --print-output-on-failure --gather-test-outputs-in /tmp/bats_logs $files
