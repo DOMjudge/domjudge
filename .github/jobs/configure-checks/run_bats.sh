@@ -2,7 +2,10 @@
 
 testsuite="$1"
 
-files=".github/jobs/configure-checks/all.bats"
+files=""
+for i in $testsuite shared; do
+  files=".github/jobs/configure-checks/${i}.bats $files"
+done
 
 # shellcheck disable=SC2086
 test_path="/home/runner/work/domjudge/domjudge" bats --print-output-on-failure --gather-test-outputs-in /tmp/bats_logs $files
