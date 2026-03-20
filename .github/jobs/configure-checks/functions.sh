@@ -4,6 +4,11 @@ u="domjudge-bats-user"
 
 distro_id=$(grep "^ID=" /etc/os-release)
 
+if [ -z "$testsuite" ]; then
+    echo 'Var: testsuite, not set.'
+    exit 1
+fi
+
 cmd="apt-get"
 if [ "$distro_id" = "ID=fedora" ]; then
     cmd=dnf
