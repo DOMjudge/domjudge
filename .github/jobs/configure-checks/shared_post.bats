@@ -4,6 +4,21 @@ load 'assert'
 
 source .github/jobs/configure-checks/functions.sh
 
+@test "Check for missing webserver group" {
+    if [ "$distro_id" != "ID=fedora" ]; then
+        # Debian/Ubuntu start with a www-data group
+        skip
+    fi
+    repo-install gcc g++
+    repo-remove httpd nginx
+    for www_group in nginx apache; do
+        userdel ${www_group} || true
+        groupdel ${www_group} || true
+    done
+    run ./configure --with-domjudge-user=$u
+    assert_line "checking webserver-group... configure: error: webserver group could not be detected, use --with-webserver-group=GROUP"
+}
+
 @test "Run as root discouraged" {
    setup
    run su root -c "./configure"

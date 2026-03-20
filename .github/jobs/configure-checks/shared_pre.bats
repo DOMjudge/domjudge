@@ -19,17 +19,3 @@ source .github/jobs/configure-checks/functions.sh
     assert_line 'configure: error: no acceptable C compiler found in $PATH'
     assert_regex "See [\`']config.log' for more details"
 }
-
-@test "Check for missing webserver group" {
-    if [ "$distro_id" != "ID=fedora" ]; then
-        # Debian/Ubuntu start with a www-data group
-        skip
-    fi
-    repo-remove httpd nginx
-    for www_group in nginx apache; do
-        userdel ${www_group} || true
-        groupdel ${www_group} || true
-    done
-    run ./configure --with-domjudge-user=$u
-    assert_line "checking webserver-group... configure: error: webserver group could not be detected, use --with-webserver-group=GROUP"
-}
