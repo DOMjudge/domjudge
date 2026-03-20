@@ -28,3 +28,18 @@ source .github/jobs/configure-checks/functions.sh
    run su root -c "./configure --with-domjudge-user=root"
    refute_line "$discourage_root"
 }
+
+@test "Check for missing webserver group" {
+    if [ "$distro_id" != "ID=fedora" ]; then
+        # Debian/Ubuntu start with a www-data group
+        skip
+    fi
+    repo-remove httpd nginx
+    for www_group in nginx apache; do
+        userdel ${www_group} || true
+        groupdel ${www_group} || true
+    done
+    run ./configure --with-domjudge-user=$u
+    assert_line "checking webserver-group... configure: error: webserver group could not be detected, use --with-webserver-group=GROUP"
+}
+
