@@ -105,7 +105,15 @@ class SubmissionService
                 } else {
                     if ($run->getScore() !== null) {
                         $hasScoreTxt = true;
-                        $results[] = $run->getScore();
+                        // Only respect score for AC/WA submissions. If the
+                        // submission crashed or ran into the timelimit, we
+                        // should not take the score from the validator (see
+                        // also how we handle it for interactive problems).
+                        if ($run->getRunresult() === 'correct' || $run->getRunresult() === 'wrong-answer') {
+                            $results[] = $run->getScore();
+                        } else {
+                            $results[] = '0';
+                        }
                     }
                     if ($run->getRunresult() !== 'correct') {
                         $allCorrect = false;
