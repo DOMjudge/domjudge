@@ -202,6 +202,13 @@
             default_value: []
             public: true
             description: List of clarification queues.
+        -   name: clar_max_body_length
+            type: int
+            default_value: 10000
+            public: true
+            description: Maximum number of characters allowed in a clarification body. Set to 0 to disable the limit.
+            regex: /^\d+$/
+            error_message: A non-negative number is required.
         -   name: clar_default_problem_queue
             type: string
             default_value: ""

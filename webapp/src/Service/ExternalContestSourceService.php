@@ -1417,13 +1417,25 @@ class ExternalContestSourceService
 
         $submitTime = Utils::toEpochFloat($data->time);
 
+        $body = $data->text;
+        $maxLength = $this->config->get('clar_max_body_length');
+        if ($maxLength > 0 && mb_strlen($body) > $maxLength) {
+            $dropped = mb_strlen($body) - $maxLength;
+            $suffix = sprintf("\n[... body truncated, %d characters dropped]", $dropped);
+            $body = mb_substr($body, 0, $maxLength - mb_strlen($suffix)) . $suffix;
+            $this->logger->warning(
+                'Clarification %s body truncated from %d to %d characters.',
+                [$data->id, mb_strlen($data->text), $maxLength]
+            );
+        }
+
         $clarification
             ->setInReplyTo($inReplyTo)
             ->setSender($fromTeam)
             ->setRecipient($toTeam)
             ->setProblem($problem)
             ->setContest($contest)
-            ->setBody($data->text)
+            ->setBody($body)
             ->setSubmittime($submitTime);
 
         if ($inReplyTo) {
