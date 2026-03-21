@@ -105,7 +105,13 @@ class SubmissionService
                 } else {
                     if ($run->getScore() !== null) {
                         $hasScoreTxt = true;
-                        $results[] = $run->getScore();
+                        // For non-WA verdicts (RTE, TLE, MLE, OLE, etc.), the submission
+                        // didn't complete normally, so the validator's score is unreliable.
+                        if ($run->getRunresult() === 'correct' || $run->getRunresult() === 'wrong-answer') {
+                            $results[] = $run->getScore();
+                        } else {
+                            $results[] = '0';
+                        }
                     }
                     if ($run->getRunresult() !== 'correct') {
                         $allCorrect = false;
