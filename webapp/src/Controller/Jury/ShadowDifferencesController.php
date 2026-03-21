@@ -89,8 +89,7 @@ class ShadowDifferencesController extends BaseController
             ->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1')
             ->select('s', 'ej', 'j')
             ->andWhere('s.contest = :contest')
-            ->andWhere('s.externalid IS NOT NULL')
-            ->andWhere('s.expected_results IS NULL')
+            ->andWhere('s.source = :external')
             ->setParameter('contest', $contest)
             ->getQuery()
             ->getResult();
