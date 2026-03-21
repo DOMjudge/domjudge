@@ -505,10 +505,10 @@
                             {% if submission.importError %}
                                 External result: {{ externalJudgement.result | printValidJuryResult }}
                             {% else %}
-                                (external: {{ externalJudgement.result | printValidJuryResult }}
-                                {% if submission.problem.scoringProblem %}
-                                    , score: {{ "%.2f" | format(externalJudgement.score) }}
-                                {% endif %}
+                                (external: {{ externalJudgement.result | printValidJuryResult -}}
+                                {%- if submission.problem.scoringProblem -%}
+                                    , score: {{ "%.2f" | format(externalJudgement.score) -}}
+                                {%- endif -%}
                                 )
                             {% endif %}
                         {%- endif %}
