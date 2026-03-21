@@ -18,6 +18,14 @@ translate () {
     args="$*"
     if [ "$distro_id" = "ID=fedora" ]; then
         args=${args/libcgroup-dev/libcgroup-devel}
+        args=${args/php-mysql/php-mysqlnd}
+        args=${args/tex-gyre/texlive-tex-gyre}
+        args=${args/python3-sphinx-rtd-theme/python3-sphinx_rtd_theme}
+        args=${args/texlive-latex-extra/texlive-cmap texlive-metafont texlive-fncychap texlive-wrapfig texlive-capt-of texlive-framed texlive-upquote texlive-needspace texlive-tabulary texlive-parskip texlive-oberdiek texlive-makeindex texlive-ellipse texlive-pict2e texlive-collection-fontsextra}
+        args=${args/texlive-latex-recommended/texlive-cmap texlive-metafont texlive-fncychap texlive-wrapfig texlive-capt-of texlive-framed texlive-upquote texlive-needspace texlive-tabulary texlive-parskip texlive-oberdiek texlive-makeindex texlive-ellipse texlive-pict2e texlive-collection-fontsextra}
+    else
+        args=${args/glibc-static/}
+        args=${args/libstdc++-static/}
     fi
     echo "$args"
 }
@@ -37,7 +45,6 @@ setup() {
     for shared_file in config.log confdefs.h conftest.err; do
         chmod a+rw $shared_file || true
     done
-    echo "$testsuite"
     if [ "$distro_id" = "ID=fedora" ]; then
         if [ "$testsuite" = apache ]; then
             repo-install httpd
@@ -62,9 +69,27 @@ composer-install () {
     chmod +x /usr/local/bin/composer
 }
 
+yarn-install () {
+    if [ "$distro_id" = "ID=debian" ]; then
+        apt-get install node-corepack -y
+        echo '#!/bin/sh' > /usr/bin/yarn
+        echo 'exec corepack yarn "$@"' >> /usr/bin/yarn
+        chmod +x /usr/bin/yarn
+    else
+        repo-install yarnpkg
+    fi
+}
+
+repo-optional-install () {
+    if ! dpkg-query --show $1; then
+        repo-install $2
+    fi
+}
+
 repo-install () {
     args=$(translate $@)
     if [ "$distro_id" = "ID=debian" ] && [[ "$args" == *"composer"* ]]; then
+        apt-get update
         args=${args/composer/}
         if ! apt-get install -qq -y composer; then
             composer-install

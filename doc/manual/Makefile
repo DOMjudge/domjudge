@@ -54,7 +54,7 @@ clean-l:
 	-$(MAKE) -C build/team clean
 
 maintainer-clean-l:
-	rm -rf build conf_ref.rst domjudge-team-manual.pdf
+	-rm -rf build conf_ref.rst domjudge-team-manual.pdf
 
 distclean-l:
 	-rm -f $(SUBST_CONFIGS) html team
