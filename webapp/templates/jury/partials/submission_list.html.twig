@@ -180,8 +180,8 @@
                     {% endif %}
                     <td class="{{ tdExtraClass }}">
                         <a href="{{ link }}">
-                            {% if submission.externalid is null %}
-                                {{- 'n / a' | printValidJuryResult -}}
+                            {% if submission.source.value != 'shadowing' %}
+                                {{- 'internal' | printValidJuryResult -}}
                             {% elseif externalJudgement is null or externalJudgement.result is empty %}
                                 {{- 'pending' | printValidJuryResult -}}
                             {% else %}
@@ -277,7 +277,9 @@
                     </td>
                     <td>
                         <a {% if externalSubmissionUrl is not null %}href="{{ externalSubmissionUrl }}"{% endif %}>
-                            {% if externalJudgement is null or externalJudgement.result is empty %}
+                            {% if submission.source.value != 'shadowing' %}
+                                {{- 'internal' | printValidJuryResult -}}
+                            {% elseif externalJudgement is null or externalJudgement.result is empty %}
                                 {{- 'pending' | printValidJuryResult -}}
                             {% else %}
                                 {{- externalJudgement.result | printValidJuryResult -}}

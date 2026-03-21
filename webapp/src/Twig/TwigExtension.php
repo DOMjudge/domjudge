@@ -501,11 +501,18 @@ class TwigExtension
             case 'queued':
             case 'pending':
             case 'aborted':
-            case 'n / a':
                 if (!$jury) {
                     $result = 'pending';
                 }
                 $style = 'sol_queued';
+                break;
+            case 'internal':
+                if (!$jury) {
+                    $result = 'pending';
+                    $style = 'sol_queued';
+                } else {
+                    $style = 'sol_internal';
+                }
                 break;
             case 'correct':
                 $style = 'sol_correct';
