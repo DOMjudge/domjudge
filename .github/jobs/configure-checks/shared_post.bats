@@ -442,12 +442,11 @@ source .github/jobs/configure-checks/functions.sh
       # Fails as libraries are not found
       skip
   fi
-  # Start clean
+  # Start as clean as possible
   run make maintainer-clean distclean clean
-  yarn-install
-  repo-install acl autoconf automake bats composer debootstrap fontconfig g++ gcc glibc-static latexmk libcgroup-dev libstdc++-static lsof make mariadb-server php php-bcmath php-cli php-curl php-fpm php-gd php-intl php-json php-mbstring php-mysql php-xml php-zip pkg-config procps pv python3 python3-sphinx python3-sphinx-rtd-theme python3-yaml tex-gyre texlive-latex-extra texlive-latex-recommended unzip zip
-  #repo-install php php-fpm php-gd php-cli php-intl php-mbstring php-curl php-json php-xml php-zip php-bcmath php-mysql composer yarnpkg glibc-static libstdc++-static python3 make pkg-config sudo debootstrap libcgroup-dev php-cli php-curl php-json php-xml php-zip lsof procps gcc g++ autoconf automake bats python3-sphinx python3-sphinx-rtd-theme fontconfig python3-yaml latexmk texlive-latex-recommended texlive-latex-extra tex-gyre libcgroup-dev make acl zip unzip pv mariadb-server php php-fpm php-gd php-cli php-intl php-mbstring php-mysql php-curl php-json php-xml php-zip composer ntp python3-yaml php-bcmath
-
+  files_cleaned=$(find . -type f | sort)
+  run yarn-install
+  run repo-install acl autoconf automake bats composer debootstrap fontconfig g++ gcc glibc-static latexmk libcgroup-dev libstdc++-static lsof make mariadb-server php php-bcmath php-cli php-curl php-fpm php-gd php-intl php-json php-mbstring php-mysql php-xml php-zip pkg-config procps pv python3 python3-sphinx python3-sphinx-rtd-theme python3-yaml tex-gyre texlive-latex-extra texlive-latex-recommended unzip zip
   assert_success
   expected_custom_files=$(echo ./etc/{dbpasswords,initial_admin_password,restapi,symfony_app}.secret ./webapp/.env.local | tr ' ' '\n')
   files_bare_git=$(find . -type f)
@@ -457,12 +456,14 @@ source .github/jobs/configure-checks/functions.sh
   run make maintainer-install
   assert_success
   files_install=$(find . -type f | sort)
+  refute_equal "$files_install" "$files_expected_git"
   refute_equal "$files_install" "$files_bare_git"
   run make maintainer-clean
   assert_success
   files_after=$(find . -type f | sort)
+  refute_equal "$files_install" "$files_after"
   assert_equal "$files_expected_git" "$files_after"
-  # Remove for next tests
+  # Remove even the customizations for next tests
   rm -f $expected_custom_files
 
   run make dist
@@ -516,6 +517,11 @@ source .github/jobs/configure-checks/functions.sh
   run make distclean
   assert_success
   files_after=$(find . -type f | sort)
+<<<<<<< HEAD
+=======
+  run echo "Left: $files_dist Right: $files_after"
+  assert_failure
+>>>>>>> be8baa7ed (Add simple tests for {,dist,maintainer-}clean cleanup)
   assert_equal "$files_dist" "$files_after"
 
   run make inplace-conf CONFIGURE_FLAGS="--with-domjudge-user=$u"
