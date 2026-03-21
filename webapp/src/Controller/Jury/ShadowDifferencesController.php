@@ -7,6 +7,7 @@ use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
 use App\Entity\Submission;
+use App\Entity\SubmissionSource;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -89,9 +90,9 @@ class ShadowDifferencesController extends BaseController
             ->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1')
             ->select('s', 'ej', 'j')
             ->andWhere('s.contest = :contest')
-            ->andWhere('s.externalid IS NOT NULL')
-            ->andWhere('s.expected_results IS NULL')
+            ->andWhere('s.source = :external')
             ->setParameter('contest', $contest)
+            ->setParameter('external', SubmissionSource::SHADOWING)
             ->getQuery()
             ->getResult();
 

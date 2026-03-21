@@ -354,8 +354,8 @@ class SubmissionService
 
         if ($restrictions->withExternalId ?? false) {
             $queryBuilder
-                ->andWhere('s.externalid IS NOT NULL')
-                ->andWhere('s.expected_results IS NULL');
+                ->andWhere('s.source = :external')
+                ->setParameter('external', SubmissionSource::SHADOWING);
         }
 
         if (isset($restrictions->rejudgingId)) {
