@@ -898,6 +898,14 @@ class JudgeDaemon
         curl_setopt($curl_handle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_setopt($curl_handle, CURLOPT_USERPWD, $restuser . ":" . $restpass);
         curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, true);
+
+        // Forked processes inherit their parents socket state. HTTP2, uses a *single* TCP connection and multiplexes
+        // different 'connections' (streams) over this single connection. A closed stream can cause the entire connection
+        // to close even when it is still used. This causes a 499 error on the DOMserver. 499 is a NGiNX specific status
+        // code signaling the client disconnected before data could be sent back. This can result in (for instance) work
+        // being handed out to a judgehost, but because the connection closes the work is 'lost' causing a submission to
+        // be stuck in judging. Setting this option ensures the next request establishes a fresh TCP connection.
+        curl_setopt($curl_handle, CURLOPT_FRESH_CONNECT, true);
         return $curl_handle;
     }
 
