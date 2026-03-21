@@ -1052,6 +1052,72 @@ class SubmissionServiceTest extends KernelTestCase
         return $run;
     }
 
+    /**
+     * Test that RTE verdict zeroes the score even if score.txt was produced.
+     */
+    public function testMaybeSetScoringResultRteZeroesScore(): void
+    {
+        $group = $this->createTestcaseGroup('group1', TestcaseAggregationType::SUM, onRejectContinue: true);
+        $problem = new Problem();
+        $problem->setTimelimit(1)->setName('test');
+        $tc1 = $this->createTestcase($problem, $group, 1);
+        $tc2 = $this->createTestcase($problem, $group, 2);
+
+        $judging = $this->createJudging();
+        $this->addJudgingRun($judging, $tc1, 'correct', '10');
+        $this->addJudgingRun($judging, $tc2, 'run-error', '15');
+
+        [$score, $result] = SubmissionService::maybeSetScoringResult($group, $judging);
+
+        // RTE score should be zeroed, so total = 10 + 0 = 10
+        self::assertEquals('10.000000000', $score);
+        self::assertEquals('run-error', $result);
+    }
+
+    /**
+     * Test that TLE verdict zeroes the score even if score.txt was produced.
+     */
+    public function testMaybeSetScoringResultTleZeroesScore(): void
+    {
+        $group = $this->createTestcaseGroup('group1', TestcaseAggregationType::SUM, onRejectContinue: true);
+        $problem = new Problem();
+        $problem->setTimelimit(1)->setName('test');
+        $tc1 = $this->createTestcase($problem, $group, 1);
+        $tc2 = $this->createTestcase($problem, $group, 2);
+
+        $judging = $this->createJudging();
+        $this->addJudgingRun($judging, $tc1, 'correct', '10');
+        $this->addJudgingRun($judging, $tc2, 'timelimit', '15');
+
+        [$score, $result] = SubmissionService::maybeSetScoringResult($group, $judging);
+
+        // TLE score should be zeroed, so total = 10 + 0 = 10
+        self::assertEquals('10.000000000', $score);
+        self::assertEquals('timelimit', $result);
+    }
+
+    /**
+     * Test that wrong-answer verdict preserves the score from score.txt.
+     */
+    public function testMaybeSetScoringResultWrongAnswerKeepsScore(): void
+    {
+        $group = $this->createTestcaseGroup('group1', TestcaseAggregationType::SUM, onRejectContinue: true);
+        $problem = new Problem();
+        $problem->setTimelimit(1)->setName('test');
+        $tc1 = $this->createTestcase($problem, $group, 1);
+        $tc2 = $this->createTestcase($problem, $group, 2);
+
+        $judging = $this->createJudging();
+        $this->addJudgingRun($judging, $tc1, 'correct', '10');
+        $this->addJudgingRun($judging, $tc2, 'wrong-answer', '7');
+
+        [$score, $result] = SubmissionService::maybeSetScoringResult($group, $judging);
+
+        // WA score should be preserved, so total = 10 + 7 = 17
+        self::assertEquals('17.000000000', $score);
+        self::assertEquals('wrong-answer', $result);
+    }
+
     private function createSubmissionService(): SubmissionService
     {
         return new SubmissionService(
