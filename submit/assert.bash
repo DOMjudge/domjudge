@@ -64,9 +64,24 @@ assert_success() {
 
 assert_failure() {
 	local -r expected_exit_code="$1"
-	if (( status != "$expected_exit_code" )); then
+	if (( status != expected_exit_code )); then
 		echo "Expected failure with exit code = $expected_exit_code, status=$status."
 		return 1
 	fi
 	return 0
+}
+
+assert_equal() {
+  if [[ "$1" != "$2" ]]; then
+    echo "Values should be equal but got:"
+    diff <(printf "%s\n" $1) <(printf "%s\n" $2)
+    return 1
+  fi
+}
+
+refute_equal() {
+  if [[ "$1" = "$2" ]]; then
+    echo "Values should not be equal but got '$1' twice"
+    return 1
+  fi
 }
