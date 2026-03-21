@@ -24,6 +24,7 @@ use App\Entity\ProblemAttachment;
 use App\Entity\QueueTask;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
+use App\Entity\SubmissionSource;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
@@ -483,7 +484,8 @@ class DOMJudgeService
                         ->innerJoin('s.problem', 'p')
                         ->select('COUNT(s.submitid)')
                         ->andWhere('s.contest = :contest')
-                        ->andWhere('s.externalid IS NOT NULL')
+                        ->andWhere('s.source = :external')
+                        ->setParameter('external', SubmissionSource::SHADOWING)
                         ->andWhere('ej.result IS NOT NULL')
                         ->andWhere($hasDifference)
                         ->andWhere('ej.verified = false')
