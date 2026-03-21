@@ -15,6 +15,10 @@ translate () {
     args="$@"
     if [ "$distro_id" = "ID=fedora" ]; then
         args=${args/libcgroup-dev/libcgroup-devel}
+        args=${args/python3-sphinx-rtd-theme/python3-sphinx_rtd_theme}
+        args=${args/texlive-latex-recommended/texlive texlive-collection-latexextra}
+        args=${args/texlive-latex-extra/texlive texlive-collection-latexrecommended}
+        args=${args/tex-gyre/texlive-tex-gyre}
     fi
     echo "$args"
 }
