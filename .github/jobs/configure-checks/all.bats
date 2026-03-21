@@ -470,18 +470,20 @@ compile_assertions_finished () {
   assert_failure
   run make distclean
   files_after=$(find . -type f | sort)
-  assert_equal "$files_before" = "$files_after"
+  run test "$files_before" = "$files_after"
+  assert_success
 
   # Cleanup of all configure + make targets files
   files_before=$(find . -type f | sort)
   run run_configure
   run make domserver judgehost docs
   files_make_targets=$(find . -type f | sort)
-  assert_not_equal "$files_before" = "$files_make_targets"
+  run test "$files_before" = "$files_make_targets"
   assert_failure
   run make distclean
   files_after=$(find . -type f | sort)
-  assert_equal "$files_before" = "$files_after"
+  run test "$files_before" = "$files_after"
+  assert_success
 }
 
 #@test "maintainer installation with 'make maintainer-clean' cleans the state to the initial state" {
