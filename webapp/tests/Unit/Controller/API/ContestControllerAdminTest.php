@@ -432,4 +432,32 @@ EOF;
         yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), "2099-01-01 10:10:10", null, false, false];
         yield [Utils::printtime(Utils::now(), 'Y-m-d H:i:s'), "2077-01-01 10:10:10", "2099-01-01 10:10:10", false, true];
     }
+
+    public function testResultsTsv(): void
+    {
+        $id = 1;
+        if ($this->objectClassForExternalId !== null) {
+            $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+        }
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, (string)$id);
+
+        $content = $this->verifyApiResponse('GET', $url . '/results.tsv', 200, $this->apiUser, null, [], true);
+        self::assertIsString($content);
+        self::assertStringContainsString("\t", $content);
+    }
+
+    public function testScoreboardZip(): void
+    {
+        $id = 1;
+        if ($this->objectClassForExternalId !== null) {
+            $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+        }
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, (string)$id);
+
+        $content = $this->verifyApiResponse('GET', $url . '/scoreboard.zip', 200, $this->apiUser, null, [], true);
+        self::assertIsString($content);
+
+        $zipContents = $this->unzipString($content);
+        self::assertNotEmpty($zipContents);
+    }
 }

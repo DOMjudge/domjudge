@@ -28,6 +28,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use JsonException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\ConstraintViolationInterface;
@@ -599,6 +600,29 @@ readonly class ImportExportService
         return $data;
     }
 
+    public function getResultsTsvResponse(
+        Contest $contest,
+        int $sortOrder,
+        bool $individuallyRanked = false,
+        bool $honors = true,
+    ): StreamedResponse {
+        $data = $this->getResultsData($sortOrder, $individuallyRanked, $honors, $contest);
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($data): void {
+            echo "results\t1\n";
+            foreach ($data as $row) {
+                echo implode("\t", array_map(fn($field) => Utils::toTsvField((string)$field), $row->toArray())) . "\n";
+            }
+        });
+
+        $filename = 'results.tsv';
+        $response->headers->set('Content-Type', 'text/plain; name="' . $filename . '"; charset=utf-8');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+        return $response;
+    }
+
     /**
      * @return ResultRow[]
      */
@@ -606,8 +630,11 @@ readonly class ImportExportService
         int $sortOrder,
         bool $individuallyRanked = false,
         bool $honors = true,
+        ?Contest $contest = null,
     ): array {
-        $contest = $this->dj->getCurrentContest();
+        if ($contest === null) {
+            $contest = $this->dj->getCurrentContest();
+        }
         if ($contest === null) {
             throw new BadRequestHttpException('No current contest');
         }
