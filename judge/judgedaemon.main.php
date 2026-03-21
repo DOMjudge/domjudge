@@ -2475,6 +2475,9 @@ class JudgeDaemon
             $score = "";
             if (file_exists($passdir . '/feedback/score.txt')) {
                 $scoreValue = trim(dj_file_get_contents($passdir . '/feedback/score.txt'));
+                if (empty($scoreValue)) {
+                    $scoreValue = 0;
+                }
                 if (!is_numeric($scoreValue)) {
                     $description = sprintf(
                         "compare script %s produced invalid (non-numeric) score: '%s'",
