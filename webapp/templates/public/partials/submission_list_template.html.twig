@@ -3,6 +3,10 @@
     <div class="alert alert-warning">No submissions</div>
 </script>
 <script type="text/template" id="submission-list">
+    {% set is_scoring = false %}
+    {% if contest is defined and contest.scoreboardTypeString == 'score' %}
+        {% set is_scoring = true %}
+    {% endif %}
     <table
         class="data-table table table-hover table-striped table-sm submissions-table">
         <thead class="thead-light">
@@ -10,6 +14,9 @@
             <th scope="col">time</th>
             <th scope="col">language</th>
             <th scope="col">result</th>
+            {% if is_scoring %}
+                <th scope="col">score</th>
+            {% endif %}
         </tr>
         </thead>
         <tbody data-submission-list>
@@ -21,5 +28,8 @@
         <td data-time></td>
         <td class="langid" data-language-id></td>
         <td data-verdict></td>
+        {% if is_scoring %}
+            <td data-score></td>
+        {% endif %}
     </tr>
 </script>

@@ -1317,6 +1317,11 @@ function loadSubmissions(dataElement, $displayElement) {
                     $item.find('[data-time]').html(submission.time);
                     $item.find('[data-language-id]').html(submission.language);
                     $item.find('[data-verdict]').html(submission.verdict);
+                    if (submission.score === null) {
+                        $item.find('[data-score]').html('-');
+                    } else {
+                        $item.find('[data-score]').html(parseFloat(submission.score).toFixed(2));
+                    }
                     $submissionList.append($item);
                 }
                 $displayElement.find('.spinner-border').remove();

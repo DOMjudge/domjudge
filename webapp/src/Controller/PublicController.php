@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\ScoreboardType;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
@@ -386,11 +387,15 @@ class PublicController extends BaseController
             if ($problemId && $problemId !== $submission->getProblem()->getExternalid()) {
                 continue;
             }
-            $submissionData[$teamKey][$problemKey][] = [
+            $item = [
                 'time' => $this->twigExtension->printtime($submission->getSubmittime(), contest: $contest),
                 'language' => $submission->getLanguage()->getName(),
                 'verdict' => $this->submissionVerdict($submission, $contest, $verificationRequired),
             ];
+            if ($contest->getScoreboardType() === ScoreboardType::SCORE) {
+                $item['score'] = $submission->getScore();
+            }
+            $submissionData[$teamKey][$problemKey][] = $item;
         }
 
         return new JsonResponse([
