@@ -1184,7 +1184,7 @@ class ExternalContestSourceService
             );
             $contestProblem->setShortname($data->label);
         }
-        if ($data->rgb && preg_match('/^#[[:xdigit:]]{3}(?:[[:xdigit:]]{3}){0,2}$/', $data->rgb)) {
+        if ($data->rgb && !preg_match('/^#[[:xdigit:]]{3}(?:[[:xdigit:]]{3}){0,2}$/', $data->rgb)) {
             $this->logger->warning(
                 'Contest problem color does not match between feed (%s) and local (%s), but feed is invalid.',
                 [$data->rgb, $contestProblem->getColor()]
