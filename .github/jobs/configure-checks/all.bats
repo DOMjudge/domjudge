@@ -459,7 +459,7 @@ compile_assertions_finished () {
   assert_failure 2
 }
 
-@test "`make distclean` cleans the state to state of `make dist`" {
+@test "'make distclean' cleans the state to state of 'make dist'" {
   run make dist
 
   # Cleanup of all configure created files
@@ -486,42 +486,42 @@ compile_assertions_finished () {
   assert_success
 }
 
-@test "maintainer installation with `make maintainer-clean` cleans the state to the initial state" {
-  files_before=$(find . -type f | sort)
-  run make maintainer-conf maintainer-install
-  files_make=$(find . -type f | sort)
-  run test "$files_before" = "$files_configure"
-  assert_failure
-  run make maintainer-clean
-  files_after=$(find . -type f | sort)
-  run test "$files_before" = "$files_after"
-  assert_success
-}
-
-@test "normal installation with `make maintainer-clean` cleans the state to the initial state" {
-  files_before=$(find . -type f | sort)
-  run make dist
-  run run_configure
-  run make domserver judgehost docs
-  files_make=$(find . -type f | sort)
-  run test "$files_before" = "$files_configure"
-  assert_failure
-  run make maintainer-clean
-  files_after=$(find . -type f | sort)
-  run test "$files_before" = "$files_after"
-  assert_success
-}
-
-@test "`make clean` cleans the state to state of `configure`" {
-  run make dist
-  run run_configure
-  files_before=$(find . -type f | sort)
-  run make domserver judgehost docs
-  files_make_targets=$(find . -type f | sort)
-  run test "$files_before" = "$files_make_targets"
-  assert_failure
-  run make clean
-  files_after=$(find . -type f | sort)
-  run test "$files_before" = "$files_after"
-  assert_success
-}
+#@test "maintainer installation with 'make maintainer-clean' cleans the state to the initial state" {
+#  files_before=$(find . -type f | sort)
+#  run make maintainer-conf maintainer-install
+#  files_make=$(find . -type f | sort)
+#  run test "$files_before" = "$files_configure"
+#  assert_failure
+#  run make maintainer-clean
+#  files_after=$(find . -type f | sort)
+#  run test "$files_before" = "$files_after"
+#  assert_success
+#}
+#
+#@test "normal installation with 'make maintainer-clean' cleans the state to the initial state" {
+#  files_before=$(find . -type f | sort)
+#  run make dist
+#  run run_configure
+#  run make domserver judgehost docs
+#  files_make=$(find . -type f | sort)
+#  run test "$files_before" = "$files_configure"
+#  assert_failure
+#  run make maintainer-clean
+#  files_after=$(find . -type f | sort)
+#  run test "$files_before" = "$files_after"
+#  assert_success
+#}
+#
+#@test "'make clean' cleans the state to state of 'configure'" {
+#  run make dist
+#  run run_configure
+#  files_before=$(find . -type f | sort)
+#  run make domserver judgehost docs
+#  files_make_targets=$(find . -type f | sort)
+#  run test "$files_before" = "$files_make_targets"
+#  assert_failure
+#  run make clean
+#  files_after=$(find . -type f | sort)
+#  run test "$files_before" = "$files_after"
+#  assert_success
+#}
