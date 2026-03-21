@@ -978,8 +978,11 @@ class JudgehostController extends AbstractFOSRestController
                 throw new BadRequestHttpException(
                     'Inconsistent data, no judging run known with judgetaskid = ' . $judgeTaskId . '.');
             }
-            $judgingRunOutput = new JudgingRunOutput();
-            $judgingRun->setOutput($judgingRunOutput);
+            $judgingRunOutput = $judgingRun->getOutput();
+            if ($judgingRunOutput === null) {
+                $judgingRunOutput = new JudgingRunOutput();
+                $judgingRun->setOutput($judgingRunOutput);
+            }
             $judgingRun
                 ->setRunresult($runResult)
                 ->setRuntime((float)$runTime)
