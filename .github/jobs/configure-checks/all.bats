@@ -466,7 +466,9 @@ compile_assertions_finished () {
 @test "`make distclean` cleans the state to state of `make dist`" {
   repo-install autoconf automake python3-sphinx python3-sphinx-rtd-theme \
   fontconfig python3-yaml latexmk yarnpkg texlive-latex-recommended \
-  texlive-latex-extra tex-gyre
+  texlive-latex-extra tex-gyre libcgroup-dev make acl zip unzip pv
+  php php-fpm php-gd php-cli php-intl php-mbstring php-mysql php-curl \
+  php-json php-xml php-zip composer php-bcmath
 
   run make dist
   assert_line "show me the full output"
