@@ -276,51 +276,35 @@ class ImportExportController extends BaseController
             $individuallyRanked = $data['individually_ranked'];
             $honors = $data['honors'];
 
-            $extension = match ($format) {
-                'html_inline', 'html_download' => 'html',
-                'tsv' => 'tsv',
-                default => throw new BadRequestHttpException('Invalid format'),
-            };
-            $contentType = match ($format) {
-                'html_inline', 'html_download' => 'text/html',
-                'tsv' => 'text/csv',
-                default => throw new BadRequestHttpException('Invalid format'),
-            };
+            if ($format === 'tsv') {
+                return $this->importExportService->getResultsTsvResponse(
+                    $contest,
+                    $sortOrder->sort_order,
+                    $individuallyRanked,
+                    $honors,
+                );
+            }
+
             $contentDisposition = match ($format) {
                 'html_inline' => 'inline',
-                'html_download', 'tsv' => 'attachment',
+                'html_download' => 'attachment',
                 default => throw new BadRequestHttpException('Invalid format'),
             };
-            $filename = 'results.' . $extension;
 
             $response = new StreamedResponse();
             $response->setCallback(function () use (
-                $format,
                 $sortOrder,
                 $individuallyRanked,
                 $honors
             ): void {
-                if ($format === 'tsv') {
-                    $data = $this->importExportService->getResultsData(
-                        $sortOrder->sort_order,
-                        $individuallyRanked,
-                        $honors,
-                    );
-
-                    echo "results\t1\n";
-                    foreach ($data as $row) {
-                        echo implode("\t", array_map(fn($field) => Utils::toTsvField((string)$field), $row->toArray())) . "\n";
-                    }
-                } else {
-                    echo $this->getResultsHtml(
-                        $sortOrder->sort_order,
-                        $individuallyRanked,
-                        $honors,
-                    );
-                }
+                echo $this->getResultsHtml(
+                    $sortOrder->sort_order,
+                    $individuallyRanked,
+                    $honors,
+                );
             });
-            $response->headers->set('Content-Type', $contentType);
-            $response->headers->set('Content-Disposition', "$contentDisposition; filename=\"$filename\"");
+            $response->headers->set('Content-Type', 'text/html');
+            $response->headers->set('Content-Disposition', "$contentDisposition; filename=\"results.html\"");
             $response->headers->set('Content-Transfer-Encoding', 'binary');
             $response->headers->set('Connection', 'Keep-Alive');
             $response->headers->set('Accept-Ranges', 'bytes');
