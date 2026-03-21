@@ -466,8 +466,7 @@ compile_assertions_finished () {
   files_before=$(find . -type f | sort)
   run run_configure
   files_configure=$(find . -type f | sort)
-  run test "$files_before" = "$files_configure"
-  assert_failure
+  assert_not_equal "$files_before" = "$files_configure"
   run make distclean
   files_after=$(find . -type f | sort)
   assert_equal "$files_before" = "$files_after"
