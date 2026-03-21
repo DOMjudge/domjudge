@@ -460,7 +460,10 @@ compile_assertions_finished () {
 }
 
 @test "`make distclean` cleans the state to state of `make dist`" {
-  repo-install python3
+  repo-install autoconf automake python3-sphinx python3-sphinx-rtd-theme \
+  fontconfig python3-yaml latexmk yarnpkg texlive-latex-recommended \
+  texlive-latex-extra tex-gyre
+
   run make dist
 
   ## Cleanup of all configure created files
