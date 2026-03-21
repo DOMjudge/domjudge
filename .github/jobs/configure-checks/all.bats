@@ -467,6 +467,7 @@ compile_assertions_finished () {
   repo-install autoconf automake python3-sphinx python3-sphinx-rtd-theme \
   fontconfig python3-yaml latexmk yarnpkg texlive-latex-recommended \
   texlive-latex-extra tex-gyre
+  chown -R $u ./
 
   run make dist
 
