@@ -129,4 +129,12 @@ class GroupControllerTest extends BaseTestCase
             yield [$group];
         }
     }
+
+    public function testNewAddedGroupWithInvalidId(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint);
+        $data = ['id' => 'invalid id!', 'name' => 'newGroup', 'hidden' => false, 'sortorder' => 1, 'color' => '#0077B3'];
+        $response = $this->verifyApiJsonResponse('PUT', $url . '/invalid%20id!', 400, 'admin', $data);
+        self::assertStringContainsString('Only letters, numbers, dashes, underscores and dots are allowed.', $response['message']);
+    }
 }

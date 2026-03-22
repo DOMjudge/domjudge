@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use OpenApi\Attributes as OA;
+use App\Validator\Constraints as AppAssert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
@@ -55,6 +56,7 @@ class Clarification extends BaseApiEntity implements
     )]
     #[OA\Property(nullable: true)]
     #[Serializer\SerializedName('id')]
+    #[AppAssert\Identifier]
     protected ?string $externalid = null;
 
     #[ORM\Column(

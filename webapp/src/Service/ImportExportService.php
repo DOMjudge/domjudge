@@ -1456,11 +1456,6 @@ readonly class ImportExportService
                 return -1;
             }
 
-            if (preg_match('/^([a-zA-Z0-9]{1}([a-zA-Z0-9._-]{0,34}[a-zA-Z0-9])?)$/', $teamItem['team']['teamid']) === 0) {
-                $message = 'ID not in CLICS format';
-                return -1;
-            }
-
             $team->setExternalid($teamItem['team']['teamid']);
             unset($teamItem['team']['teamid']);
 
@@ -1627,9 +1622,24 @@ readonly class ImportExportService
                         $team
                             ->setExternalid((string)$teamId)
                             ->setName($teamId . ' - auto-create during import');
-                        $this->em->persist($team);
-                        $this->dj->auditlog('team', $team->getExternalid(),
-                            'added', 'imported from tsv');
+                        $errors = $this->validator->validate($team);
+                        if ($errors->count()) {
+                            $messages = [];
+                            /** @var ConstraintViolationInterface $error */
+                            foreach ($errors as $error) {
+                                $messages[] = sprintf('  • `%s`: %s', $error->getPropertyPath(), $error->getMessage());
+                            }
+
+                            $message .= sprintf("Auto-created team for user at index %d (%s) has errors:\n%s\n\n",
+                                $index,
+                                json_encode($accountItem),
+                                implode("\n", $messages));
+                            $anyErrors = true;
+                        } else {
+                            $this->em->persist($team);
+                            $this->dj->auditlog('team', $team->getExternalid(),
+                                'added', 'imported from tsv');
+                        }
                     }
                 }
                 $accountItem['user']['team'] = $team;

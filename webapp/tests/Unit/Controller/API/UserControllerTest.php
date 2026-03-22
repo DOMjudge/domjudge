@@ -88,4 +88,18 @@ class UserControllerTest extends AccountBaseTestCase
         $response = $this->verifyApiJsonResponse('PUT', $this->helperGetEndpointURL($this->apiEndpoint) . '/someid', 400, 'admin', $data);
         static::assertMatchesRegularExpression('/id:\n.*This value should be of type string./', $response['message']);
     }
+
+    public function testUpdateWithInvalidExternalId(): void
+    {
+        $data = [
+            'id' => 'invalid id!',
+            'username' => 'testuser',
+            'name' => 'Test User',
+            'roles' => ['team'],
+            'password' => 'testpassword',
+        ];
+
+        $response = $this->verifyApiJsonResponse('PUT', $this->helperGetEndpointURL($this->apiEndpoint) . '/invalid%20id!', 400, 'admin', $data);
+        self::assertStringContainsString('Only letters, numbers, dashes, underscores and dots are allowed.', $response['message']);
+    }
 }

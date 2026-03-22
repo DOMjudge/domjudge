@@ -14,6 +14,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Validator\Constraints as AppAssert;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -47,6 +48,7 @@ class User extends BaseApiEntity implements
         options: ['comment' => 'User ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
     #[Serializer\SerializedName('id')]
+    #[AppAssert\Identifier]
     protected ?string $externalid = null;
 
     #[ORM\Column(options: ['comment' => 'User login name'])]

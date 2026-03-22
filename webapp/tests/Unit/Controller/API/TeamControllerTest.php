@@ -91,4 +91,12 @@ class TeamControllerTest extends BaseTestCase
         $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
         self::assertArrayNotHasKey('photo', $object);
     }
+
+    public function testNewAddedTeamWithInvalidId(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint);
+        $data = ['id' => 'invalid id!', 'name' => 'Test Team', 'group_ids' => ['participants']];
+        $response = $this->verifyApiJsonResponse('POST', $url, 400, 'admin', $data);
+        self::assertStringContainsString('Only letters, numbers, dashes, underscores and dots are allowed.', $response['message']);
+    }
 }

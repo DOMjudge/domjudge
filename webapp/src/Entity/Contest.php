@@ -9,6 +9,7 @@ use App\DataTransferObject\ImageFile;
 use App\Repository\ContestRepository;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
+use App\Validator\Constraints as AppAssert;
 use App\Validator\Constraints\Identifier;
 use App\Validator\Constraints\TimeString;
 use DateTime;
@@ -65,6 +66,7 @@ class Contest extends BaseApiEntity implements
         options: ['comment' => 'Contest ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
     #[Serializer\SerializedName('id')]
+    #[AppAssert\Identifier]
     protected ?string $externalid = null;
 
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]

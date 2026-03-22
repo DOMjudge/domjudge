@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @extends AbstractRestController<User, User>
@@ -41,7 +42,8 @@ class UserController extends AbstractRestController
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected readonly ImportExportService $importExportService
+        protected readonly ImportExportService $importExportService,
+        protected readonly ValidatorInterface $validator,
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
     }
@@ -413,6 +415,15 @@ class UserController extends AbstractRestController
                 throw new BadRequestHttpException(sprintf("Role %s not found", $djRole));
             }
             $user->addUserRole($role);
+        }
+
+        $errors = $this->validator->validate($user);
+        if ($errors->count()) {
+            $messages = [];
+            foreach ($errors as $error) {
+                $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
+            }
+            throw new BadRequestHttpException(implode("\n", $messages));
         }
 
         $this->em->persist($user);

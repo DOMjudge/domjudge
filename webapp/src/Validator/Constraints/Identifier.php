@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraint;
 class Identifier extends Constraint
 {
     public function __construct(
-        public string $message = 'Only alphanumeric characters and ._- are allowed',
+        public string $message = 'Only letters, numbers, dashes, underscores and dots are allowed.',
     ) {
         parent::__construct();
     }

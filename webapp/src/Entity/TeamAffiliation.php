@@ -3,6 +3,7 @@ namespace App\Entity;
 
 use App\DataTransferObject\ImageFile;
 use App\Repository\TeamAffiliationRepository;
+use App\Validator\Constraints as AppAssert;
 use App\Validator\Constraints\Country;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -52,6 +53,7 @@ class TeamAffiliation extends BaseApiEntity implements
         options: ['comment' => 'Team affiliation ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
     #[Serializer\SerializedName('id')]
+    #[AppAssert\Identifier]
     protected ?string $externalid = null;
 
     #[ORM\Column(
