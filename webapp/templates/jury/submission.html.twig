@@ -134,6 +134,12 @@
         </div>
     {% endif %}
 
+    {% if submission.source.value == 'shadowing' and (externalJudgement is null or externalJudgement.result is empty) %}
+        <div class="alert alert-warning">
+            This submission was imported from an external source and we are still waiting for the external result.
+        </div>
+    {% endif %}
+
     {% if selectedJudging is not null and selectedJudging.result is not empty %}
         {% if submission.expectedScore is not null %}
             {% if selectedJudging.score == submission.expectedScore %}
