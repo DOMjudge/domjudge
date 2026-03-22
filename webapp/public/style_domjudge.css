@@ -508,7 +508,6 @@ table.rejudgetable td.identical {
 
 table.rejudgetable td.zero {
     color: gray;
-    font-weight: bolder;
 }
 
 tr.ignore td, td.ignore, span.ignore {
