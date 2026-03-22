@@ -10,14 +10,32 @@
 
 {% block content %}
 
-    <div data-ajax-refresh-target data-ajax-refresh-after="pinScoreheader">
-        {% include 'partials/scoreboard.html.twig' with {jury: is_granted('ROLE_JURY'), public: not is_granted('ROLE_JURY'), show_balloon_public_message: not is_granted('ROLE_JURY')} %}
+    <div data-ajax-refresh-target data-ajax-refresh-after="initializeScoreboard">
+        {% include 'partials/scoreboard.html.twig' with {jury: is_granted('ROLE_JURY'), public: not is_granted('ROLE_JURY'), show_balloon_public_message: not is_granted('ROLE_JURY'), submissions_route: 'jury_balloon_submissions', submissions_data_route: 'jury_balloon_submissions_data_cell'} %}
     </div>
+
+    {% if not is_granted('ROLE_JURY') %}
+        <div data-submissions-modal>
+            {% include 'public/team_submissions_modal.html.twig' %}
+        </div>
+        {% include 'public/partials/submission_list_template.html.twig' %}
+    {% endif %}
 
 {% endblock %}
 
 {% block extrafooter %}
     <script>
         pinScoreheader();
+        {% if not is_granted('ROLE_JURY') %}
+        initScoreboardSubmissions();
+        {% endif %}
+        $(function () {
+            window.initializeScoreboard = function () {
+                pinScoreheader();
+                {% if not is_granted('ROLE_JURY') %}
+                initScoreboardSubmissions();
+                {% endif %}
+            };
+        });
     </script>
 {% endblock %}

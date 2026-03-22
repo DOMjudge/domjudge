@@ -1,4 +1,4 @@
-{% extends "public/base.html.twig" %}
+{% extends base_template|default("public/base.html.twig") %}
 
 {% block title %}
     {% if team is not empty %}Submissions for team {{ team.effectiveName }} on problem {{ problem.problem.name }} - {% endif %}{{ parent() }}
@@ -12,7 +12,7 @@
     <div
         data-team-id="{{ team.externalid }}"
         data-problem-id="{{ problem.externalId }}"
-        data-submissions-url="{{ path('public_submissions_data_cell', {teamId: team.externalid, problemId: problem.externalId}) }}">
+        data-submissions-url="{{ path(submissions_data_route|default('public_submissions_data_cell'), {teamId: team.externalid, problemId: problem.externalId}) }}">
         <div class="spinner-border" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
