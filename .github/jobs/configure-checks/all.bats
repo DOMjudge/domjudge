@@ -474,7 +474,7 @@ compile_assertions_finished () {
   chmod +rx /usr/local/bin/yarn
 
   run make dist
-  assert_line "show me the full output"
+  #assert_line "show me the full output"
 
   ## Cleanup of all configure created files
   #files_before=$(find . -type f | sort)
