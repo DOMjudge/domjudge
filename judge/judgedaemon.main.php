@@ -150,7 +150,7 @@ readonly class VerdictInput
 /**
  * @phpstan-type JudgeTask array{submitid: ?string, contestid: ?string, judgetaskid: int, type: string, priority: int, jobid: ?string,
  *     uuid: ?string, compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string, testcase_id: ?string,
- *     testcase_hash: ?string, compile_config: ?string, run_config: ?string, compare_config: ?string
+ *     testcase_hash: ?string, compile_config: ?string, run_config: ?string, compare_config: ?string, pass?: string
  * }
  * @phpstan-type JudgingRun array{runresult: string, start_time: string, end_time: string, runtime: string,
  *      output_run: string, output_error: string, output_system: string, metadata: string, output_diff: string,
@@ -692,8 +692,6 @@ class JudgeDaemon
             } else {
                 // Retrieving full team output for a particular testcase.
                 $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
-                // TODO: Properly fix this by sending the pass number in the run_config instead of hardcoding the first pass,
-                // that way the output for other passes can also be retrieved.
                 $this->request(
                     sprintf(
                         'judgehosts/add-debug-info/%s/%s',
@@ -701,7 +699,7 @@ class JudgeDaemon
                         urlencode((string)$judgeTask['judgetaskid'])
                     ),
                     'POST',
-                    ['output_run' => $this->restEncodeFile($testcasedir . '/1/program.out', false)],
+                    ['output_run' => $this->restEncodeFile($testcasedir . '/' . $judgeTask['pass'] . '/program.out', false)],
                     false
                 );
                 logmsg(LOG_INFO, "  ⇡ Uploading full output of testcase $judgeTask[testcase_id].");
@@ -2482,6 +2480,10 @@ class JudgeDaemon
                 'testcasedir' => $testcasedir,
                 'compare_metadata' => $this->restEncodeFile($passdir . '/compare.meta', false),
             ];
+
+            if ($passLimit > 1) {
+                $new_judging_run['pass'] = $passCnt;
+            }
 
             if (file_exists($passdir . '/feedback/teammessage.txt')) {
                 $new_judging_run['team_message'] = $this->restEncodeFile($passdir . '/feedback/teammessage.txt', $output_storage_limit);
