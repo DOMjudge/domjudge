@@ -173,6 +173,10 @@ a {
     white-space: pre;
 }
 
+.output_text_truncate_columns {
+    column-rule: 1px solid #c0c0c0;
+}
+
 .clarificationform pre {
     border-top: 1px dotted #c0c0c0;
     border-bottom: 1px dotted #c0c0c0;

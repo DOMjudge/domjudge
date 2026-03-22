@@ -527,6 +527,13 @@ class SubmissionController extends BaseController
                 if ($firstJudgingRun) {
                     $runResult['testcasedir'] = $firstJudgingRun->getTestcaseDir();
                 }
+                foreach(['output_run', 'output_error'] as $field) {
+                    $colwidth = 0;
+                    foreach (explode("\n", $runResult[$field] ?? '') as $line) {
+                        $colwidth = max(strlen($line), $colwidth);
+                    }
+                    $runResult[$field . '_colwidth'] = $colwidth;
+                }
                 $runsOutput[] = $runResult;
             }
         }
