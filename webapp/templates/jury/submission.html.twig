@@ -864,7 +864,7 @@
                     </div>
                     <div class="card-body">
                         {% if run.firstJudgingRun is not null %}
-                            {% if run.firstJudgingRun.runresult != 'correct' and isMultiPassProblem %}
+                            {% if run.firstJudgingRun.runresult != 'correct' and isMultiPassProblem and runsOutput[runIdx].output_run %}
                                 <div class="alert alert-warning">Note that this is a multi-pass problem, and only data of the failing pass is presented.</div>
                             {% endif %}
                             {{ runsOutput[runIdx].metadata | printMetadata }}
