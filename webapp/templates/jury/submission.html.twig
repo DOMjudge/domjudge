@@ -938,7 +938,7 @@
                                 {% if runsOutput[runIdx].output_run is empty %}
                                     <p class="nodata">There was no program output.</p>
                                 {% else %}
-                                    <pre class="output_text">{{ runsOutput[runIdx].output_run | convertUnprintableChars }}</pre>
+                                    <pre class="output_text" style="column-width: {{ runsOutput[runIdx].colwidth }}ch; column-count: 20; height: 30em; column-gap: 30xp; column-rule: 4px double #000">{{ runsOutput[runIdx].output_run | convertUnprintableChars }}</pre>
                                 {% endif %}
                             {% endif %}
 
