@@ -2,11 +2,8 @@
 
 namespace App\Controller;
 
-use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
-use App\Entity\ScoreboardType;
-use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Service\ConfigurationService;
@@ -34,6 +31,7 @@ use Symfony\Component\Routing\RouterInterface;
 #[Route(path: '/public')]
 class PublicController extends BaseController
 {
+    use ScoreboardSubmissionsTrait;
     public function __construct(
         DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
@@ -290,39 +288,7 @@ class PublicController extends BaseController
             throw $this->createNotFoundException('No active contest found');
         }
 
-        /** @var Team|null $team */
-        $team = $this->em->getRepository(Team::class)->findByExternalId($teamId);
-        if ($team && $team->getScoringCategory() && !$team->getScoringCategory()->getVisible()) {
-            $team = null;
-        }
-
-        if (!$team) {
-            throw $this->createNotFoundException('Team not found.');
-        }
-
-        /** @var ContestProblem|null $problem */
-        $problem = $this->em->createQueryBuilder()
-            ->from(ContestProblem::class, 'cp')
-            ->select('cp')
-            ->innerJoin('cp.problem', 'p')
-            ->andWhere('cp.contest = :contest')
-            ->andWhere('p.externalid = :problem')
-            ->setParameter('contest', $contest)
-            ->setParameter('problem', $problemId)
-            ->getQuery()
-            ->getOneOrNullResult();
-
-        if (!$problem) {
-            throw $this->createNotFoundException('Problem not found');
-        }
-
-        $data = [
-            'contest' => $contest,
-            'problem' => $problem,
-            'team' => $team,
-        ];
-
-        return $this->render('public/team_submissions.html.twig', $data);
+        return $this->getSubmissionsPageResponse($contest, $teamId, $problemId, 'public_submissions_data_cell');
     }
 
     #[Route(path: '/submissions-data.json', name: 'public_submissions_data')]
@@ -335,96 +301,6 @@ class PublicController extends BaseController
             throw $this->createNotFoundException('No active contest found');
         }
 
-        $scoreboard = $this->scoreboardService->getScoreboard($contest);
-
-        if ($scoreboard === null) {
-            throw $this->createNotFoundException('No submission data found');
-        }
-
-        if (!$this->config->get('show_teams_submissions')) {
-            throw $this->createNotFoundException('Submissions are not visible');
-        }
-
-        $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $scoreboard->getTeamsInDescendingOrder());
-
-        /** @var Submission[] $submissions */
-        $submissions = $this->submissionService->getSubmissionList(
-            [$contest->getCid() => $contest],
-            restrictions: new SubmissionRestriction(
-                teamIds: $teamIds,
-                valid: true,
-            ),
-            paginated: false
-        )[0];
-
-        $submissionData = [];
-
-        // We prepend IDs with team- and problem- to make sure they are not
-        // consecutive integers
-        foreach ($scoreboard->getTeamsInDescendingOrder() as $team) {
-            if ($teamId && $teamId !== $team->getExternalid()) {
-                continue;
-            }
-            $teamKey = 'team-' . $team->getExternalid();
-            $submissionData[$teamKey] = [];
-            foreach ($scoreboard->getProblems() as $problem) {
-                if ($problemId && $problemId !== $problem->getExternalId()) {
-                    continue;
-                }
-                $problemKey = 'problem-' . $problem->getExternalId();
-                $submissionData[$teamKey][$problemKey] = [];
-            }
-        }
-
-        $verificationRequired = (bool)$this->config->get('verification_required');
-
-        foreach ($submissions as $submission) {
-            $teamKey = 'team-' . $submission->getTeam()->getExternalid();
-            $problemKey = 'problem-' . $submission->getProblem()->getExternalid();
-            if ($teamId && $teamId !== $submission->getTeam()->getExternalid()) {
-                continue;
-            }
-            if ($problemId && $problemId !== $submission->getProblem()->getExternalid()) {
-                continue;
-            }
-            $item = [
-                'time' => $this->twigExtension->printtime($submission->getSubmittime(), contest: $contest),
-                'language' => $submission->getLanguage()->getName(),
-                'verdict' => $this->submissionVerdict($submission, $contest, $verificationRequired),
-            ];
-            if ($contest->getScoreboardType() === ScoreboardType::SCORE) {
-                $item['score'] = $submission->getScore();
-            }
-            $submissionData[$teamKey][$problemKey][] = $item;
-        }
-
-        return new JsonResponse([
-            'submissions' => $submissionData,
-        ]);
-    }
-
-    protected function submissionVerdict(
-        Submission $submission,
-        Contest $contest,
-        bool $verificationRequired
-    ): string {
-        if ($submission->getSubmittime() >= $contest->getEndtime()) {
-            return $this->twigExtension->printResult('too-late');
-        }
-        if ($contest->getFreezetime() && $submission->getSubmittime() >= $contest->getFreezetime() && !$contest->getFreezeData()->showFinal()) {
-            return $this->twigExtension->printResult('');
-        }
-        if ($contest->isExternalSourceUseJudgements()) {
-            $judgings = $submission->getExternalJudgements();
-        } else {
-            $judgings = $submission->getJudgings();
-        }
-        if (!$judgings->first() || !$judgings->first()->getResult()) {
-            return $this->twigExtension->printResult('');
-        }
-        if ($verificationRequired && !$judgings->first()->getVerified()) {
-            return $this->twigExtension->printResult('');
-        }
-        return $this->twigExtension->printResult($judgings->first()->getResult(), onlyRejectedForIncorrect: true);
+        return $this->getSubmissionsDataResponse($contest, $teamId, $problemId);
     }
 }
