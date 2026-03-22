@@ -477,20 +477,38 @@ td.scorenc { border-color: silver; border-right: 0; }
 
 table.rejudgetable td {
     text-align: center;
+    min-width: min(5rem, 14vw - 0.5rem);
     padding: .5rem;
 }
-table.rejudgetable td,th {
+
+table.rejudgetable td, table.rejudgetable th {
     padding: .5rem;
+    border: .4rem white solid;
+    font-weight: normal;
+    text-align: center;
+    border-radius: .8rem;
 }
+
+table.rejudgetable th {
+    font-size: 0.8rem;
+}
+
 table.rejudgetable td.changed {
-    background-color: #fdd;
+    background-color: #dc26260f;
     font-weight: bold;
 }
-table.rejudgetable td.identical {
-    background-color: #dfd;
+
+table.rejudgetable td.changed a {
+    color: #dc2626;
 }
+table.rejudgetable td.identical {
+    background-color: #15ad3d10;
+    color: #15803d;
+}
+
 table.rejudgetable td.zero {
-    background-color: #f0f8ff;
+    color: gray;
+    font-weight: bolder;
 }
 
 tr.ignore td, td.ignore, span.ignore {
