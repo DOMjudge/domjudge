@@ -189,7 +189,7 @@ class ShadowDifferencesController extends BaseController
             }
         }
 
-        $verificationViewTypes = [0 => 'all', 1 => 'unverified', 2 => 'verified'];
+        $verificationViewTypes = [0 => 'unverified', 1 => 'verified', 2 => 'all'];
         $verificationView      = 0;
         if ($verificationViewFromRequest) {
             $index = array_search($verificationViewFromRequest, $verificationViewTypes);
