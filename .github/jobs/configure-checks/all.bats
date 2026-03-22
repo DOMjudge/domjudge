@@ -468,7 +468,7 @@ compile_assertions_finished () {
   fontconfig python3-yaml latexmk texlive-latex-recommended \
   texlive-latex-extra tex-gyre libcgroup-dev make acl zip unzip pv \
   php php-fpm php-gd php-cli php-intl php-mbstring php-mysql php-curl \
-  php-json php-xml php-zip composer php-bcmath corepack
+  php-json php-xml php-zip composer php-bcmath node-corepack
   echo "#!/bin/sh" > /usr/local/bin/yarn
   echo 'exec corepack yarn "$@"' >> /usr/local/bin/yarn
   chmod +rx /usr/local/bin/yarn
