@@ -15,6 +15,12 @@
 {{ parent() }}
 {% endblock %}
 
+{% block extra_style %}
+    .size_h5 {
+        font-size: 1.25rem
+    }
+{% endblock %}
+
 {% block content %}
 <a href="https://www.domjudge.org/">
     <img src="{{ asset('images/DOMjudgelogo.svg') }}" id="djlogo" alt="DOMjudge logo" class="float-end d-none d-md-block" title="The DOMjudge logo: free as in beer!">
@@ -23,7 +29,7 @@
 <h1>DOMjudge Jury interface</h1>
 
 {% if is_granted('ROLE_JURY') %}
-<h5 class="mt-4 mb-3">Before contest</h5>
+<h2 class="mt-4 mb-3 size_h5">Before contest</h2>
 <div class="row g-2 mb-3">
     {{ _self.tile(path('jury_contests'), 'trophy', 'Contests') }}
     {{ _self.tile(path('jury_executables'), 'file-code', 'Executables') }}
@@ -41,7 +47,7 @@
 {% endif %}
 
 {% if is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') or is_granted('ROLE_CLARIFICATION_RW') or have_printing %}
-<h5 class="mt-4 mb-3">During contest</h5>
+<h2 class="mt-4 mb-3 style_h5">During contest</h2>
 <div class="row g-2 mb-3">
     {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_BALLOON') %}
     {{ _self.tile(path('jury_balloons_legacy'), 'map-marker-alt', 'Balloon Status') }}
@@ -72,7 +78,7 @@
 {% endif %}
 
 {% if is_granted('ROLE_ADMIN') %}
-<h5 class="mt-4 mb-3">Administrator</h5>
+<h2 class="mt-4 mb-3 style_h5">Administrator</h2>
 <div class="row g-2 mb-3">
     {{ _self.tile(path('jury_config'), 'cog', 'Configuration') }}
     {{ _self.tile(path('jury_config_check'), 'clipboard-check', 'Config checker') }}
@@ -86,7 +92,7 @@
 </div>
 {% endif %}
 
-<h5 class="mt-4 mb-3">Documentation</h5>
+<h2 class="mt-4 mb-3 style_h5">Documentation</h2>
 <div class="row g-2 mb-3">
     {{ _self.tile(asset('doc/manual/html/index.html'), 'book', 'DOMjudge manual') }}
     {{ _self.tile(asset('doc/manual/domjudge-team-manual.pdf'), 'file-pdf', 'Team manual') }}

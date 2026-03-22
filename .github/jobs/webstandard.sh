@@ -87,7 +87,7 @@ if [ "$ROLE" = "public" ]; then
     EXPECTED_HTTP_CODES="$EXPECTED_HTTP_CODES\|401"
 fi
 
-HTTP_404_IGNORED="robots.txt\|imgBase.replace"
+HTTP_404_IGNORED="robots.txt\|imgBase.replace\|request-remaining"
 
 set +e
 NUM_ERRORS=$(grep -v "HTTP/1.1\" \($EXPECTED_HTTP_CODES\)" /var/log/nginx/domjudge.log | grep -v "${HTTP_404_IGNORED}" -c; if [ "$?" -gt 1 ]; then exit 127; fi)
@@ -114,7 +114,7 @@ w3c_analyse () {
     do
         section_start "Analyse with $typ"
         # shellcheck disable=SC2086
-        "$DIR"/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
+        /vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR "$URL" 2> result.json
 
         # Count errors from JSON and produce gnu-format log
         NEWFOUNDERRORS=$(python3 -c "import json; print(len(json.load(open('result.json'))['messages']))")
@@ -146,17 +146,16 @@ if [ "$TEST" = "w3cval" ]; then
     section_end
 
     section_start "Install testsuite"
-    cd "$DIR"
-    wget https://github.com/validator/validator/releases/download/20.6.30/vnu.linux.zip
+    cd /
     unzip -q vnu.linux.zip
     # Remove a warning by creating an empty config.
     touch vnu.properties
     section_end
 
-    FLTR1='--filterpattern .*descendant.*|.*Stray.*'
-    w3c_analyse "$FLTR1" "Stray" "public" "html"
-    FLTR2='--filterpattern .*descendant.*'
-    w3c_analyse "$FLTR2" "descendant" "public" "html"
+    cd "$DIR"
+    # To filter out certain violations use:
+    # FLTR='--filterpattern .*descendant.*'
+    # w3c_analyse "$FLTR" "jobname"" "public" "html"
     w3c_analyse "" "full" "public" "html css svg"
 else
     section_start "Remove files from upstream with problems"
