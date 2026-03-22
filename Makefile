@@ -194,7 +194,7 @@ paths.mk:
 maintainer-conf: inplace-conf-common dependencies-dev
 inplace-conf: inplace-conf-common dependencies
 inplace-conf-common: dist
-	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
+	./configure $(QUIET_FLAG) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
 	            --with-judgehost_root=$(CURDIR) \
 	            --with-domjudge_docdir=$(CURDIR)/doc \
