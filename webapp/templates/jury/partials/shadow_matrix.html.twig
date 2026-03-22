@@ -28,8 +28,10 @@
                             <td class="{{ class }}">
                                 {% if link is not null %}
                                     <a href="{{ link }}">{{ numSubmissions }}</a>
-                                {% else %}
+                                {% elseif numSubmissions > 0 %}
                                     {{ numSubmissions }}
+                                {% else %}
+                                    &centerdot;
                                 {% endif %}
                             </td>
                         {% endif %}
