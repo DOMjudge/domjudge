@@ -239,4 +239,12 @@ class OrganizationControllerTest extends BaseTestCase
             self::assertEquals($newItems[$listKey][$key], $value);
         }
     }
+
+    public function testNewAddedOrganizationWithInvalidId(): void
+    {
+        $url = $this->helperGetEndpointURL('organizations');
+        $data = ['id' => 'invalid id!', 'shortname' => 'newOrg', 'formal_name' => 'newOrgWithName', 'country' => 'NLD'];
+        $response = $this->verifyApiJsonResponse('POST', $url, 400, 'admin', $data);
+        self::assertStringContainsString('Only letters, numbers, dashes, underscores and dots are allowed.', $response['message']);
+    }
 }

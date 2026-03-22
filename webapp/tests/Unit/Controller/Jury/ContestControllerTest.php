@@ -314,7 +314,7 @@ class ContestControllerTest extends JuryControllerTestCase
                                                                                                                         'allowJudge' => '1',
                                                                                                                         'color' => '#000000',
                                                                                                                         'lazyEvalResults' => '0']], 'name' => 'No known problem']],
-                                                          'Only alphanumeric characters and ._- are allowed' => [['shortname' => '"quoted"']]];
+                                                          'Only letters, numbers, dashes, underscores and dots are allowed.' => [['shortname' => '"quoted"']]];
 
     protected function helperProvideTranslateAddEntity(array $entity, array $expected): array
     {

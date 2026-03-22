@@ -2,12 +2,10 @@
 
 namespace App\Form\Type;
 
-use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Validator\Constraints\Regex;
 
 /**
  * Base class that can be used to automatically add an external ID field to forms that need them.
@@ -28,12 +26,6 @@ class AbstractExternalIdEntityType extends AbstractType
             'help' => 'Leave empty to generate automatically.',
             'required' => false,
             'empty_data' => '',
-            'constraints' => [
-                new Regex(
-                    pattern: DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX,
-                    message: 'Only letters, numbers, dashes, underscores and dots are allowed.',
-                ),
-            ]
         ]);
     }
 }
