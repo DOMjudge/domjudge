@@ -883,6 +883,7 @@ blockquote {
     height: 0;
     min-height: 100px; /* Prefer a double scrollbar over not displaying code at all */
     width: 100%;
+    overflow: hidden;
 }
 
 .paste-submit-page {
