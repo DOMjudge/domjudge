@@ -1,10 +1,10 @@
 <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownContests" role="button" data-bs-toggle="dropdown"
+    <a class="nav-link dropdown-toggle" id="navbarDropdownContests" role="button" data-bs-toggle="dropdown"
        aria-haspopup="true" aria-expanded="false">
         <i class="fas fa-trophy"></i> {{ contest.shortname|default('no contest') }}
     </a>
     <div role="menuitem" class="dropdown-menu scrollable-menu" aria-labelledby="navbarDropdown" data-current-contest="{{ current_contest_id }}">
-        <a class="dropdown-item disabled" href="#">Change Contest</a>
+        <a class="dropdown-item disabled">Change Contest</a>
         {% if show_no_contest and contest is not empty %}
             <a class="dropdown-item" href="{{ path(change_path, {'contestId': -1}) }}">no contest</a>
             <div class="dropdown-divider"></div>
