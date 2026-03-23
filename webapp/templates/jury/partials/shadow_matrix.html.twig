@@ -23,7 +23,7 @@
                                 {% set class = 'zero' %}
                             {% else %}
                                 {% set class = 'changed' %}
-                                {% set link = path('jury_shadow_differences', {view: 'all', external: externalVerdict, local: localVerdict}) %}
+                                {% set link = path('jury_shadow_differences', {view: 'all', external: externalVerdict, local: localVerdict, verificationview: 'all'}) %}
                             {% endif %}
                             <td class="{{ class }}">
                                 {% if link is not null %}
