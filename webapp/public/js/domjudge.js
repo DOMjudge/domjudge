@@ -74,6 +74,9 @@ function disableKeys()
 function getEditorThemes()
 {
     const element = document.querySelector('[data-editor-themes]');
+    if (element === null) {
+        return {};
+    }
     return JSON.parse(element.dataset.editorThemes);
 }
 
@@ -81,7 +84,9 @@ function getCurrentEditorTheme()
 {
     const theme = localStorage.getItem('domjudge_editor_theme');
     if (theme === null) {
-        return Object.keys(getEditorThemes())[0];
+        const themes = getEditorThemes();
+        const keys = Object.keys(themes);
+        return keys.length > 0 ? keys[0] : 'vs';
     }
     return theme;
 }
