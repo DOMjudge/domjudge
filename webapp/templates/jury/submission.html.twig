@@ -494,9 +494,9 @@
                             {%- else %}
                                 {{- selectedJudging.result | printValidJuryResult -}}
                             {%- endif %}
-                            {% if submission.problem.scoringProblem %}
+                            {%- if submission.problem.scoringProblem %}
                                 (score: <span title="{{ selectedJudging.score }}">{{ "%.2f" | format(selectedJudging.score) }}</span>)
-                            {% endif %}
+                            {%- endif %}
                             {%- if submission.stillBusy -%}
                                 (&hellip;)
                             {%- endif -%}
