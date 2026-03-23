@@ -1635,11 +1635,21 @@ function initDiffEditorTab(editorId, diffId, submissionId, models) {
 // Force a recompute of the monaco editor height when the display size changes.
 if ('ResizeObserver' in window) {
     $(() => {
-        var monacoObserver = new ResizeObserver(() => {
+        let bodyWidth = document.body.offsetWidth;
+        let bodyHeight = document.body.offsetHeight;
+        var monacoObserver = new ResizeObserver($.debounce(function() {
+            const newWidth = document.body.offsetWidth;
+            const newHeight = document.body.offsetHeight;
+            if (newWidth === bodyWidth && newHeight === bodyHeight) {
+                return;
+            }
+            bodyWidth = newWidth;
+            bodyHeight = newHeight;
+
             document.querySelectorAll('.monaco-editor').forEach(e => {
                 e.style.height = "0";
             });
-        });
+        }, 100));
         monacoObserver.observe(document.body);
     });
 }
