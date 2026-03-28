@@ -3,6 +3,7 @@ namespace App\Utils;
 
 use DateTime;
 use Doctrine\Inflector\InflectorFactory;
+use Ds\Set;
 use enshrined\svgSanitize\Sanitizer as SvgSanitizer;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -1146,5 +1147,14 @@ class Utils
     {
         $value = (string)$value;
         return bcadd($value, '0', $scale);
+    }
+
+    /**
+     * @template V
+     * @param Set<V> $a
+     * @param Set<V> $b
+     */
+    public static function equalSets(Set $a, Set $b): bool {
+        return $a->diff($b)->isEmpty() && $b->diff($a)->isEmpty();
     }
 }

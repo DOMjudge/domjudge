@@ -3,10 +3,14 @@
 namespace App\Controller\Team;
 
 use App\Controller\BaseController;
+use App\Entity\ContestProblem;
+use App\Entity\Language;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Ds\Set;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -32,6 +36,20 @@ class LanguageController extends BaseController
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
 
+    /**
+     * @param array<string, array{'problems': ContestProblem[], 'language': Language}> $languages
+     * @return array<string, array{'problems': ContestProblem[], 'language': Language}>
+     */
+    private function addLanguage(array $languages, Language $language, ContestProblem $problem): array
+    {
+        $langId = $language->getLangid();
+        if (!isset($languages[$langId])) {
+            $languages[$langId] = ['problems' => [], 'language' => $language];
+        }
+        $languages[$langId]['problems'][] = $problem;
+        return $languages;
+    }
+
     #[Route(path: '', name: 'team_languages')]
     public function languagesAction(): Response
     {
@@ -40,7 +58,32 @@ class LanguageController extends BaseController
             throw new BadRequestHttpException("You are not allowed to view this page.");
         }
         $currentContest = $this->dj->getCurrentContest();
-        $languages = $this->dj->getAllowedLanguagesForContest($currentContest);
-        return $this->render('team/languages.html.twig', ['languages' => $languages]);
+        $languages = [];
+        $limited = false;
+        $allLanguages = new Set();
+        // Get all languages specific to the contest, if those are empty all globally enabled languages
+        foreach ($this->dj->getAllowedLanguagesForContest($currentContest) as $language) {
+            $allLanguages->add($language);
+        }
+        // Add the problem specific languages
+        foreach ($this->dj->getCurrentContest()->getProblems() as $problem) {
+            $problemLanguages = new Set($problem->getProblem()->getLanguages());
+            if ($problemLanguages->isEmpty()) {
+                continue;
+            }
+            if (!Utils::equalSets($allLanguages, $problemLanguages)) {
+                if (!$allLanguages->isEmpty()) {
+                    $limited = true;
+                }
+                $allLanguages->merge($problem->getProblem()->getLanguages());
+            }
+        }
+        foreach ($this->dj->getCurrentContest()->getProblems() as $problem) {
+            $problemLanguages = count($problem->getProblem()->getLanguages()) ? new Set($problem->getProblem()->getLanguages()) : $allLanguages;
+            foreach ($problemLanguages as $language) {
+                $languages = $this->addLanguage($languages, $language, $problem);
+            }
+        }
+        return $this->render('team/languages.html.twig', ['languages' => $languages, 'limited' => $limited]);
     }
 }
