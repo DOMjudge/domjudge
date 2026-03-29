@@ -39,6 +39,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use Ds\Set;
 use Exception;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
@@ -1861,9 +1862,25 @@ class DOMJudgeService
     }
 
     /** @return Language[] */
-    public function getAllowedLanguagesForContest(?Contest $contest) : array {
+    public function getAllowedLanguagesForContest(?Contest $contest, bool $alsoProblemSpecific = false) : array {
         if ($contest) {
             $languages = $contest->getLanguages();
+            if ($alsoProblemSpecific) {
+                $limited = true;
+                $allLanguages = new Set();
+                // Add the problem specific languages
+                foreach ($contest->getProblems() as $problem) {
+                    $problemLanguages = new Set($problem->getProblem()->getLanguages());
+                    if ($problemLanguages->isEmpty()) {
+                        $limited = false;
+                    } else {
+                        $allLanguages = $allLanguages->merge($problemLanguages);
+                    }
+                }
+                if ($limited) {
+                    $allLanguages = $allLanguages->merge($languages);
+                }
+            }
             if (!$languages->isEmpty()) {
                 return $languages->toArray();
             }
