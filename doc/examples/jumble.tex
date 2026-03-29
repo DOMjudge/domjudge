@@ -1,0 +1,60 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[scale={0.75,0.77}]{geometry}
+\usepackage[british]{babel}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{verbatim}
+
+\begin{document}
+
+\begin{wrapfigure}[1]{r}{1cm}
+  \includegraphics[height=4cm]{../logos/DOMjudgelogo.pdf}
+\end{wrapfigure}
+~\\
+\begin{center}
+  \Large\bf \textsc{DOM}judge sample problem\\
+  \texttt{jumble} -- `Jumbling words'
+\end{center}
+~\\
+
+\section*{Problem description}
+
+This is a multipass-problem. In a multipass problem your submission runs multiple times for the same
+testcase. For this specific problem you need to encrypt/jumble the given string.  The goal is to
+pass/circumvent our validator. Your output should;
+\begin{itemize}
+  \item be alphanumeric,
+  \item be lowercase,
+  \item not contain the input string.
+\end{itemize}
+
+In the next pass your submission starts again with the output of the earlier pass as input. This way
+the runtime memory of your first pass is reset. In this pass your code must show that you can recover
+the original word. 
+
+\section*{Sample input/output}
+
+You are given a single line with either $jumble$ or $unjumble$ followed by the string with the word $W$.
+You should encrypt in case of $jumble$ and decrypt in the case of $unjumble$. Below is an example
+interaction. There are other solutions available.
+
+~\\
+\begin{tabular}{|p{0.47\textwidth}|p{0.47\textwidth}|}
+\hline
+\textbf{Input} & \textbf{Output} \\
+\hline
+\verbatiminput{jumble.in} &
+\verbatiminput{jumble.out} \\
+\hline
+\verbatiminput{jumble2.in} &
+\verbatiminput{jumble2.out} \\
+\hline
+\end{tabular}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

@@ -11,3 +11,11 @@ problems:
   letter: C
   rgb: '#9B630C'
   short-name: boolfind
+- color: '#541298'
+  letter: D
+  rgb: '#541298'
+  short-name: jumble
+- color: '#6f0'
+  letter: E
+  rgb: '#6f0'
+  short-name: hangman

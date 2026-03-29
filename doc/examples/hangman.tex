@@ -1,0 +1,59 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[scale={0.75,0.77}]{geometry}
+\usepackage[british]{babel}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{verbatim}
+
+\begin{document}
+
+\begin{wrapfigure}[1]{r}{1cm}
+  \includegraphics[height=4cm]{../logos/DOMjudgelogo.pdf}
+\end{wrapfigure}
+~\\
+\begin{center}
+  \Large\bf \textsc{DOM}judge sample problem\\
+  \texttt{hangman} -- `Hangman'
+\end{center}
+~\\
+
+\section*{Problem description}
+
+This is a multipass-problem. In a multipass problem your submission runs multiple times for the same
+testcase. For this specific problem you need to solve the game `hangman`; it should guess the right letter(s)
+and solve the word(s).
+
+\section*{Input specification}
+
+You are given two lines;
+\begin{itemize}
+  \item the first containing the all guessed letters, initially empty.
+  \item the second a line containing `\_` \& ` `, where `\_` must be guessed by your program
+\end{itemize}
+you can guess any character within the lowercase range `a-z` by outputting that one
+character. You must only guess a letter once and can only guess 26 times.
+
+\section*{Sample input/output}
+
+Sample input and output for this problem:
+
+~\\
+\begin{tabular}{|p{0.47\textwidth}|p{0.47\textwidth}|}
+\hline
+\textbf{Input} & \textbf{Output} \\
+\hline
+\verbatiminput{hangman.in} &
+\verbatiminput{hangman.out} \\
+\hline
+\verbatiminput{hangman2.in} &
+\verbatiminput{hangman2.out} \\
+\hline
+\end{tabular}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
