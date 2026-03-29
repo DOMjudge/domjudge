@@ -725,6 +725,7 @@ readonly class ImportProblemService
                 Utils::jsonDecode($submission_file_string);
 
             $numJurySolutions = 0;
+            $deferredSubmissions = [];
             foreach ($zipEntries as $j => $path) {
                 if (!Utils::startsWith($path, 'submissions/')) {
                     // Skipping non-submission files silently.
@@ -870,7 +871,8 @@ readonly class ImportProblemService
                         );
                         $submission     = $this->submissionService->submitSolution(
                             $team, $jury_user, $contestProblem, $contest, $languageToUse, $filesToSubmit, SubmissionSource::PROBLEM_IMPORT, null,
-                            null, $entry_point, null, null, $submissionMessage
+                            null, $entry_point, null, null, $submissionMessage,
+                            deferPostProcessing: true
                         );
 
                         if (!$submission) {
@@ -878,15 +880,13 @@ readonly class ImportProblemService
                                 $messages['danger'][] = $submissionMessage;
                             }
                         } else {
-                            $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
                             if ($expectedResults !== null) {
                                 $submission->setExpectedResults($expectedResults);
                             }
                             if ($expectedScore !== null) {
                                 $submission->setExpectedScore($expectedScore);
                             }
-                            // Flush changes to submission.
-                            $this->em->flush();
+                            $deferredSubmissions[] = $submission;
 
                             $successful_subs[] = "'" . $path . "'";
                             $numJurySolutions++;
@@ -899,6 +899,11 @@ readonly class ImportProblemService
                         unlink($f);
                     }
                 }
+            }
+
+            // Batch post-process all deferred submissions (event logging, scoreboard, audit log).
+            if (!empty($deferredSubmissions)) {
+                $this->submissionService->postProcessSubmissions($deferredSubmissions, $contest);
             }
 
             if ($numJurySolutions > 0) {

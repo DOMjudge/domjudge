@@ -839,7 +839,8 @@ class SubmissionService
         ?string $externalId = null,
         ?float $submitTime = null,
         ?string &$message = null,
-        bool $forceImportInvalid = false
+        bool $forceImportInvalid = false,
+        bool $deferPostProcessing = false
     ): ?Submission {
         if (!$team instanceof Team) {
             $team = $this->em->getRepository(Team::class)->find($team);
@@ -1162,6 +1163,10 @@ class SubmissionService
             $this->dj->maybeCreateJudgeTasks($judging, $priority, valid: !$start_invalid);
         }
 
+        if ($deferPostProcessing) {
+            return $submission;
+        }
+
         $this->em->wrapInTransaction(function () use ($contest, $submission): void {
             $this->em->flush();
             $this->eventLogService->log('submission', $submission->getSubmitid(),
@@ -1198,6 +1203,60 @@ class SubmissionService
         }
 
         return $submission;
+    }
+
+    /**
+     * Batch post-process submissions that were created with deferPostProcessing=true.
+     * Handles event logging, scoreboard calculation, and audit logging in bulk.
+     *
+     * @param Submission[] $submissions
+     */
+    public function postProcessSubmissions(array $submissions, Contest $contest): void
+    {
+        if (empty($submissions)) {
+            return;
+        }
+
+        $contestId = $contest->getCid();
+
+        // Flush any pending changes (e.g. expected results set after submitSolution returned).
+        $this->em->flush();
+
+        // Batch event logging: log all submission events in one call.
+        $submitIds = array_map(fn(Submission $s) => $s->getSubmitid(), $submissions);
+        $this->em->wrapInTransaction(function () use ($submitIds, $contestId): void {
+            $this->em->flush();
+            $this->eventLogService->log(
+                'submission', $submitIds, EventLogService::ACTION_CREATE, $contestId
+            );
+        });
+
+        // Reload contest after EM clear (caused by internal API request in event logging).
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+
+        // Batch scoreboard: calculate once per unique (team, problem) pair.
+        $scoreboardPairs = [];
+        foreach ($submissions as $submission) {
+            $teamId = $submission->getTeam()->getTeamid();
+            $problemId = $submission->getProblem()->getProbid();
+            $key = $teamId . '-' . $problemId;
+            if (!isset($scoreboardPairs[$key])) {
+                $scoreboardPairs[$key] = [$teamId, $problemId];
+            }
+        }
+        foreach ($scoreboardPairs as [$teamId, $problemId]) {
+            $team = $this->em->getRepository(Team::class)->find($teamId);
+            $problem = $this->em->getRepository(Problem::class)->find($problemId);
+            $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+        }
+
+        // Batch audit logging.
+        $contestExternalId = $contest->getExternalid();
+        foreach ($submitIds as $submitId) {
+            $submission = $this->em->getRepository(Submission::class)->find($submitId);
+            $this->dj->auditlog('submission', $submission->getExternalid(), 'added',
+                'via ' . SubmissionSource::PROBLEM_IMPORT->value, null, $contestExternalId);
+        }
     }
 
     /**
