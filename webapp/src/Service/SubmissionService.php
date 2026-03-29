@@ -1149,6 +1149,12 @@ class SubmissionService
                 $judging->setJuryMember($juryMember);
             }
             $this->em->persist($judging);
+
+            if ($deferPostProcessing) {
+                // Defer flush and judge task creation to postProcessSubmissions().
+                return $submission;
+            }
+
             // This is so that we can use the submitid/judgingid below.
             $this->em->flush();
 
@@ -1161,10 +1167,6 @@ class SubmissionService
             // We create invalid judgetasks, and only mark them valid when they are interesting for the analysts.
             $start_invalid = $lazyEval === DOMJudgeService::EVAL_ANALYST && $source == SubmissionSource::SHADOWING;
             $this->dj->maybeCreateJudgeTasks($judging, $priority, valid: !$start_invalid);
-        }
-
-        if ($deferPostProcessing) {
-            return $submission;
         }
 
         $this->em->wrapInTransaction(function () use ($contest, $submission): void {
@@ -1219,8 +1221,20 @@ class SubmissionService
 
         $contestId = $contest->getCid();
 
-        // Flush any pending changes (e.g. expected results set after submitSolution returned).
+        // Single flush for all deferred submissions, judgings, and expected results.
+        // This assigns IDs to all entities at once instead of flushing per submission.
         $this->em->flush();
+
+        // Create judge tasks for all judgings now that they have IDs.
+        foreach ($submissions as $submission) {
+            if ($submission->isImportError()) {
+                continue;
+            }
+            $judging = $submission->getJudgings()->first();
+            if ($judging) {
+                $this->dj->maybeCreateJudgeTasks($judging, JudgeTask::PRIORITY_LOW);
+            }
+        }
 
         // Batch event logging: log all submission events in one call.
         $submitIds = array_map(fn(Submission $s) => $s->getSubmitid(), $submissions);
