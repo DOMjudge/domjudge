@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Ramsey\Uuid\Uuid;
+use Doctrine\Bundle\DoctrineBundle\Middleware\DebugMiddleware;
 
 class RejudgingService
 {
@@ -32,7 +33,7 @@ class RejudgingService
         protected readonly DOMJudgeService $dj,
         protected readonly ScoreboardService $scoreboardService,
         protected readonly EventLogService $eventLogService,
-        protected readonly BalloonService $balloonService
+        protected readonly BalloonService $balloonService,
     ) {}
 
     /**
@@ -60,6 +61,17 @@ class RejudgingService
     ): ?Rejudging {
         // This might take a while. Make sure we do not timeout.
         set_time_limit(0);
+
+        // In dev mode, Doctrine's DebugMiddleware accumulates all SQL queries in memory.
+        // Find the DebugDataHolder so we can periodically reset it during the loop.
+        $debugDataHolder = null;
+        foreach ($this->em->getConnection()->getConfiguration()->getMiddlewares() as $middleware) {
+            if ($middleware instanceof DebugMiddleware) {
+                $ref = new \ReflectionProperty($middleware, 'debugDataHolder');
+                $debugDataHolder = $ref->getValue($middleware);
+                break;
+            }
+        }
 
         $rejudging = new Rejudging();
         $rejudging
@@ -166,6 +178,12 @@ class RejudgingService
             if ($progressReporter !== null) {
                 $progress = (int)round($index / count($judgings) * 100);
                 $progressReporter($progress, $log);
+            }
+
+            // In dev mode, Doctrine's DebugDataHolder accumulates all SQL queries
+            // in memory. Periodically reset it to prevent memory exhaustion.
+            if ($index % 100 === 0) {
+                $debugDataHolder?->reset();
             }
         }
 
