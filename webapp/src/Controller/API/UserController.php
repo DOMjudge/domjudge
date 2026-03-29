@@ -338,8 +338,12 @@ class UserController extends AbstractRestController
     public function updateAction(
         #[MapRequestPayload(validationFailedStatusCode: Response::HTTP_BAD_REQUEST)]
         UpdateUser $updateUser,
-        Request $request
+        Request $request,
+        string $id,
     ): Response {
+        if ($id !== $updateUser->id) {
+            throw new BadRequestHttpException('ID in URL does not match ID in payload');
+        }
         return $this->addOrUpdateUser($updateUser, $request);
     }
 
