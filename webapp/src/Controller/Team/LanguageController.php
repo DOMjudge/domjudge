@@ -40,7 +40,7 @@ class LanguageController extends BaseController
      * @param array<string, array{'problems': ContestProblem[], 'language': Language}> $languages
      * @return array<string, array{'problems': ContestProblem[], 'language': Language}>
      */
-    private function addLanguage(array $languages, Language $language, ContestProblem $problem): array
+    private function addLanguage(array $languages, Language $language, ?ContestProblem $problem = null): array
     {
         $langId = $language->getLangid();
         if (!isset($languages[$langId])) {
@@ -65,23 +65,30 @@ class LanguageController extends BaseController
         foreach ($this->dj->getAllowedLanguagesForContest($currentContest) as $language) {
             $allLanguages->add($language);
         }
-        // Add the problem specific languages
-        foreach ($this->dj->getCurrentContest()->getProblems() as $problem) {
-            $problemLanguages = new Set($problem->getProblem()->getLanguages());
-            if ($problemLanguages->isEmpty()) {
-                continue;
-            }
-            if (!Utils::equalSets($allLanguages, $problemLanguages)) {
-                if (!$allLanguages->isEmpty()) {
-                    $limited = true;
+        if ($currentContest) {
+            // Add the problem specific languages
+            $currentContestProblems = $currentContest?->getProblems() ?? [];
+            foreach ($currentContestProblems as $problem) {
+                $problemLanguages = new Set($problem->getProblem()->getLanguages());
+                if ($problemLanguages->isEmpty()) {
+                    continue;
                 }
-                $allLanguages->merge($problem->getProblem()->getLanguages());
+                if (!Utils::equalSets($allLanguages, $problemLanguages)) {
+                    if (!$allLanguages->isEmpty()) {
+                        $limited = true;
+                    }
+                    $allLanguages->merge($problem->getProblem()->getLanguages());
+                }
             }
-        }
-        foreach ($this->dj->getCurrentContest()->getProblems() as $problem) {
-            $problemLanguages = count($problem->getProblem()->getLanguages()) ? new Set($problem->getProblem()->getLanguages()) : $allLanguages;
-            foreach ($problemLanguages as $language) {
-                $languages = $this->addLanguage($languages, $language, $problem);
+            foreach ($currentContestProblems as $problem) {
+                $problemLanguages = count($problem->getProblem()->getLanguages()) ? new Set($problem->getProblem()->getLanguages()) : $allLanguages;
+                foreach ($problemLanguages as $language) {
+                    $languages = $this->addLanguage($languages, $language, $problem);
+                }
+            }
+        } else {
+            foreach ($allLanguages as $language) {
+                $languages = $this->addLanguage($languages, $language);
             }
         }
         return $this->render('team/languages.html.twig', ['languages' => $languages, 'limited' => $limited]);
