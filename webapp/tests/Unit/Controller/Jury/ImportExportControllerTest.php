@@ -129,6 +129,20 @@ problems:
         name: 'Boolean switch search'
         color: saddlebrown
         rgb: '#9B630C'
+    -
+        id: jumble
+        label: D
+        letter: D
+        name: 'Jumble words'
+        color: indigo
+        rgb: '#541298'
+    -
+        id: hangman
+        label: E
+        letter: E
+        name: Hangman
+        color: chartreuse
+        rgb: '#6f0'
 
 HEREDOC;
         yield ["demo", $yaml];

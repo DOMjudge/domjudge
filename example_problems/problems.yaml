@@ -13,3 +13,13 @@
   ordinal: 3
   rgb: '#9B630C'
   time_limit: 5
+- id: jumble
+  label: D
+  ordinal: 4
+  rgb: '#541298'
+  time_limit: 5
+- id: hangman
+  label: E
+  ordinal: 5
+  rgb: '#6f0'
+  time_limit: 1

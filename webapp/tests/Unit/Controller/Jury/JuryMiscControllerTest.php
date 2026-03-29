@@ -184,7 +184,9 @@ class JuryMiscControllerTest extends BaseTestCase
                 yield ['problems', $status, [$role], ['results' => [0 => ['id' => 'boolfind', 'text' => 'Boolean switch search (boolfind)'],
                                                                     1 => ['id' => 'fltcmp',
                                                                           'text' => 'Float special compare test (fltcmp)'],
-                                                                    2 => ['id' => 'hello', 'text' => 'Hello World (hello)']]]];
+                                                                    2 => ['id' => 'hangman', 'text' => 'Hangman (hangman)'],
+                                                                    3 => ['id' => 'hello', 'text' => 'Hello World (hello)'],
+                                                                    4 => ['id' => 'jumble', 'text' => 'Jumble words (jumble)']]]];
                 yield ['teams', $status, [$role], ['results' => [0 => ['id' => 'domjudge', 'text' => 'DOMjudge (domjudge)'],
                                                                  1 => ['id' => 'exteam', 'text' => 'Example teamname (exteam)']]]];
                 yield ['languages', $status, [$role], ['results' => [0 => ['id' => 'ada', 'text' => 'Ada (ada)'],
