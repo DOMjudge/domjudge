@@ -1155,6 +1155,6 @@ class Utils
      * @param Set<V> $b
      */
     public static function equalSets(Set $a, Set $b): bool {
-        return $a->diff($b)->isEmpty() && $b->diff($a)->isEmpty();
+        return $a->xor($b)->isEmpty();
     }
 }
