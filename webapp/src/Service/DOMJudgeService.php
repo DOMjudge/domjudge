@@ -1177,6 +1177,20 @@ class DOMJudgeService
                 ->getQuery()
                 ->getResult();
 
+            $limited = false;
+            foreach ($problems as $problem) {
+                if (count($problem->getProblem()->getLanguages())) {
+                    $limited = true;
+                }
+            }
+            foreach ($problems as $problem) {
+                if (!count($problem->getProblem()->getLanguages()) && $limited) {
+                    foreach ($this->getAllowedLanguagesForContest($contest) as $language) {
+                        $problem->getProblem()->addLanguage($language);
+                    }
+                }
+            }
+
             $samplesData = $this->em->createQueryBuilder()
                 ->from(ContestProblem::class, 'cp')
                 ->join('cp.problem', 'p')
