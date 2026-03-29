@@ -7,7 +7,9 @@
 
     <div class="container mb-5">
         <div class="row row-cols-1 row-cols-lg-2 g-4">
-            {% for lang in languages %}
+            {% for langarray in languages %}
+                {% set lang = langarray['language'] %}
+                {% set problems = langarray['problems'] %}
                 <div class="col">
                     <div class="card language-card">
                         <div class="card-body p-4">
