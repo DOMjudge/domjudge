@@ -67,7 +67,7 @@ class LanguageController extends BaseController
         }
         if ($currentContest) {
             // Add the problem specific languages
-            $currentContestProblems = $currentContest?->getProblems() ?? [];
+            $currentContestProblems = $currentContest->getProblems();
             foreach ($currentContestProblems as $problem) {
                 $problemLanguages = new Set($problem->getProblem()->getLanguages());
                 if ($problemLanguages->isEmpty()) {
