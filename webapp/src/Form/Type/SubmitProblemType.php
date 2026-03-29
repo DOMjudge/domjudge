@@ -69,25 +69,8 @@ class SubmitProblemType extends AbstractType
         ];
         $builder->add('problem', EntityType::class, $problemConfig);
 
-        if (empty($options['data']['languages'])) {
-            $languages = new Set();
-            $allProblemsSpecificLanguages = true;
-            foreach ($problems as $problem) {
-                $problemLanguages = new Set($problem->getLanguages());
-                if ($problemLanguages->isEmpty()) {
-                    $allProblemsSpecificLanguages = false;
-                } else {
-                    $languages = $languages->merge($problemLanguages);
-                }
-            }
-            if (!$allProblemsSpecificLanguages) {
-                $languages = $languages->merge($this->dj->getAllowedLanguagesForContest($contest));
-            }
-            $languages->sort();
-        } else {
-            $languages = $options['data']['languages'];
-        }
-            
+        $languages = empty($options['data']['languages']) ? $this->dj->getAllowedLanguagesForContest($contest, true) : $options['data']['languages'];
+
         $builder->add('language', EntityType::class, [
             'class' => Language::class,
             'choices' => $languages,
