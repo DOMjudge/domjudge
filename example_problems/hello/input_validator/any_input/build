@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# POSIX shell build wrapper-script for input validation.
+#
+# This script does not actually "compile" the source, but writes a
+# shell script that will function as the executable: when called, it
+# will execute the source with the correct interpreter syntax, thus
+# allowing this interpreted source to be used transparently as if it
+# was compiled to a standalone binary.
+
+cat > "$DEST" <<EOF
+#!/bin/sh
+# Generated shell-script to execute shell interpreter on source.
+
+# Detect dirname and change dir to prevent file not found errors.
+if [ "\${0%/*}" != "\$0" ]; then
+	cd "\${0%/*}"
+fi
+
+# Uncomment the line below if you want it make easier for teams to do local
+# debugging.
+
+exec sh $RUNOPTIONS "$MAINSOURCE" "\$@"
+EOF
+
+chmod a+x "$DEST"
+
+exit 0

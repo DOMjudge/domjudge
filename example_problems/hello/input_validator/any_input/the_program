@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Runas: <input_validator_program> [arguments] < inputfile
+# No arguments expected
+
+# Allow any inputfile
+exit 42

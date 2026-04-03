@@ -1,0 +1,7 @@
+#!/bin/sh
+
+MAINSOURCE="${ENTRY_POINT:-$1}"
+
+exec sh "$MAINSOURCE" "\$@"
+
+exit 0

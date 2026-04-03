@@ -1,0 +1,12 @@
+# This checktestdata script tests output of the "float compare"
+# example problem from DOMjudge. The expected output is a single
+# integer between 1 and 100 on the first line, followed by that many
+# lines, each containing a floating point number, which is possibly
+# "nan" (not a number) or "Inf" (infinity).
+#
+# For up-to-date version see: edu.nl/8fbar
+INT(1,100,n) NEWLINE
+REP(n)
+	REGEX("(Inf|nan|(\\+|-)?([0-9\.])+((E|e)(\\+|-)?[0-9]+)?)") NEWLINE
+END
+EOF
