@@ -67,7 +67,7 @@ jobs:
             -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
             $(pwd)/.github/jobs/configure-checks/run_bats.sh "nginx"
           echo "Start LibCgroup check"
-      - name: Check Nginx checks
+      - name: Cgroup checks
         run: |
           docker run --name cgroup      -v /tmp/bats_logs/cgroup:/tmp/bats_logs \
             -v "$(pwd):$(pwd)" -w "$(pwd)" baseimage \
