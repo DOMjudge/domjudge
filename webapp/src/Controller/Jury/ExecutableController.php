@@ -130,9 +130,11 @@ class ExecutableController extends BaseController
             $execdata['execid']['cssclass'] = 'execid';
             $type = $execdata['type']['value'];
             $execdata['icon']['icon'] = match ($type) {
+                'answer' => 'spell-check',
                 'compare' => 'code-compare',
                 'compile' => 'language',
                 'debug' => 'bug',
+                'input' => 'i',
                 'run' => 'person-running',
                 default => 'question',
             };
