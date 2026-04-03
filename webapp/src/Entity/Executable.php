@@ -16,7 +16,7 @@ use ZipArchive;
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
-    'comment' => 'Compile, compare, and run script executable bundles',
+    'comment' => 'Answer, compile, compare, input and run script executable bundles',
 ])]
 class Executable
 {
@@ -31,7 +31,7 @@ class Executable
     private ?string $description = null;
 
     #[ORM\Column(length: 32, options: ['comment' => 'Type of executable'])]
-    #[Assert\Choice(['compare', 'compile', 'debug', 'run'])]
+    #[Assert\Choice(['answer', 'compare', 'compile', 'debug', 'input', 'run'])]
     private string $type;
 
     #[ORM\OneToOne(targetEntity: ImmutableExecutable::class)]
