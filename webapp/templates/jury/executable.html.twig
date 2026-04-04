@@ -46,8 +46,22 @@
                             <em>default full debug</em>
                             {% set used = true %}
                         {% endif %}
-                        {% if executable.type == 'compare' %}
+                        {% if executable.type == 'answer' %}
+                            {% for problem in executable.problemsAnswerValidator %}
+                                <a href="{{ path('jury_problem', {'probId': problem.externalid}) }}">
+                                    {{ problem.externalid }} {{ problem | problemBadgeForContest }}
+                                </a>
+                                {% set used = true %}
+                            {% endfor %}
+                        {% elseif executable.type == 'compare' %}
                             {% for problem in executable.problemsCompare %}
+                                <a href="{{ path('jury_problem', {'probId': problem.externalid}) }}">
+                                    {{ problem.externalid }} {{ problem | problemBadgeForContest }}
+                                </a>
+                                {% set used = true %}
+                            {% endfor %}
+                        {% elseif executable.type == 'input' %}
+                            {% for problem in executable.problemsInputValidator %}
                                 <a href="{{ path('jury_problem', {'probId': problem.externalid}) }}">
                                     {{ problem.externalid }} {{ problem | problemBadgeForContest }}
                                 </a>

@@ -47,6 +47,18 @@ class Executable
     /**
      * @var Collection<int, Problem>
      */
+    #[ORM\OneToMany(targetEntity: Problem::class, mappedBy: 'answer_validator_executable')]
+    private Collection $problems_answer_validator;
+
+    /**
+     * @var Collection<int, Problem>
+     */
+    #[ORM\OneToMany(targetEntity: Problem::class, mappedBy: 'input_validator_executable')]
+    private Collection $problems_input_validator;
+
+    /**
+     * @var Collection<int, Problem>
+     */
     #[ORM\OneToMany(targetEntity: Problem::class, mappedBy: 'compare_executable')]
     private Collection $problems_compare;
 
@@ -58,9 +70,11 @@ class Executable
 
     public function __construct()
     {
-        $this->languages        = new ArrayCollection();
-        $this->problems_compare = new ArrayCollection();
-        $this->problems_run     = new ArrayCollection();
+        $this->languages                 = new ArrayCollection();
+        $this->problems_answer_validator = new ArrayCollection();
+        $this->problems_compare          = new ArrayCollection();
+        $this->problems_input_validator  = new ArrayCollection();
+        $this->problems_run              = new ArrayCollection();
     }
 
     public function setExecid(string $execid): Executable
@@ -113,6 +127,34 @@ class Executable
     public function getLanguages(): Collection
     {
         return $this->languages;
+    }
+
+    public function addProblemsAnswerValidator(Problem $problemsAnswerValidator): Executable
+    {
+        $this->problems_answer_validator[] = $problemsAnswerValidator;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Problem>
+     */
+    public function getProblemsAnswerValidator(): Collection
+    {
+        return $this->problems_answer_validator;
+    }
+
+    public function addProblemsInputValidator(Problem $problemsInputValidator): Executable
+    {
+        $this->problems_input_validator[] = $problemsInputValidator;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Problem>
+     */
+    public function getProblemsInputValidator(): Collection
+    {
+        return $this->problems_input_validator;
     }
 
     public function addProblemsCompare(Problem $problemsCompare): Executable
@@ -190,7 +232,7 @@ class Executable
         if (in_array($this->execid, $configScripts, true)) {
             return true;
         }
-        if (count($this->problems_compare) || count($this->problems_run)) {
+        if (count($this->problems_compare) || count($this->problems_run) || count($this->problems_input_validator) || count($this->problems_answer_validator)) {
             return true;
         }
         foreach ($this->languages as $lang) {

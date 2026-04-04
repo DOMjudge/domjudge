@@ -47,6 +47,22 @@
                             </a>
                         </td>
                     </tr>
+                    {% if problem.answerValidatorExecutable is not empty %}
+                        <tr>
+                            <th>Answer file validator script</th>
+                            <td class="filename">
+                                <a href="{{ path('jury_executable', {'execId': problem.answerValidatorExecutable.execid}) }}">{{ problem.answerValidatorExecutable.execid }}</a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% if problem.inputValidatorExecutable is not empty %}
+                        <tr>
+                            <th>Input file validator script</th>
+                            <td class="filename">
+                                <a href="{{ path('jury_executable', {'execId': problem.inputValidatorExecutable.execid}) }}">{{ problem.inputValidatorExecutable.execid }}</a>
+                            </td>
+                        </tr>
+                    {% endif %}
                     {{ _self.section_header('tachometer-alt', 'Limits') }}
                     <tr>
                         <th>Time</th>

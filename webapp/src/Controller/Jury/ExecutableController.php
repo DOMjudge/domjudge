@@ -90,17 +90,23 @@ class ExecutableController extends BaseController
                 ->join('cp.problem', 'p')
                 ->leftJoin('p.compare_executable', 'ecomp')
                 ->leftJoin('p.run_executable', 'erun')
-                ->andWhere('ecomp IS NOT NULL OR erun IS NOT NULL')
+                ->leftJoin('p.input_validator_executable', 'einp')
+                ->leftJoin('p.answer_validator_executable', 'eans')
+                ->andWhere('ecomp IS NOT NULL OR erun IS NOT NULL OR einp IS NOT NULL OR eans IS NOT NULL')
                 ->getQuery()->getResult();
             $executablesWithContestProblems = $em->createQueryBuilder()
                 ->select('e')
                 ->from(Executable::class, 'e')
                 ->leftJoin('e.problems_compare', 'pcomp')
                 ->leftJoin('e.problems_run', 'prun')
-                ->where('pcomp IS NOT NULL OR prun IS NOT NULL')
+                ->leftJoin('e.problems_input_validator', 'pinp')
+                ->leftJoin('e.problems_answer_validator', 'pans')
+                ->where('pcomp IS NOT NULL OR prun IS NOT NULL OR pinp IS NOT NULL OR pans IS NOT NULL')
                 ->leftJoin('pcomp.contest_problems', 'cpcomp')
                 ->leftJoin('prun.contest_problems', 'cprun')
-                ->andWhere('cprun.contest = :contest OR cpcomp.contest = :contest')
+                ->leftJoin('pinp.contest_problems', 'cpinp')
+                ->leftJoin('pans.contest_problems', 'cpans')
+                ->andWhere('cprun.contest = :contest OR cpcomp.contest = :contest OR cpinp.contest = :contest OR cpans.contest = :contest')
                 ->setParameter('contest', $this->dj->getCurrentContest())
                 ->getQuery()->getResult();
         }
@@ -108,7 +114,10 @@ class ExecutableController extends BaseController
         foreach ($executables as $e) {
             $badges = [];
             if (in_array($e, $executablesWithContestProblems)) {
-                foreach (array_merge($e->getProblemsRun()->toArray(), $e->getProblemsCompare()->toArray()) as $execProblem) {
+                foreach (array_merge(
+                    $e->getProblemsRun()->toArray(), $e->getProblemsCompare()->toArray(),
+                    $e->getProblemsInputValidator()->toArray(), $e->getProblemsAnswerValidator()->toArray()
+                ) as $execProblem) {
                     $execContestProblems = $execProblem->getContestProblems();
                     foreach ($contestProblemsWithExecutables as $cp) {
                         if ($execContestProblems->contains($cp)) {
