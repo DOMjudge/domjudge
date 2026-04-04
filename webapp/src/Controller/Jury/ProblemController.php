@@ -341,15 +341,21 @@ class ProblemController extends BaseController
                 $problem->getProblemstatement());
         }
 
+        $inputValidatorExecutable = $problem->getInputValidatorExecutable() ?? null;
+        $answerValidatorExecutable = $problem->getAnswerValidatorExecutable() ?? null;
         $compareExecutable = null;
         if ($problem->getCompareExecutable()) {
             $compareExecutable = $problem->getCompareExecutable();
         } elseif ($problem->isInteractiveProblem()) {
             $compareExecutable = $problem->getRunExecutable();
         }
-        if ($compareExecutable) {
-            foreach ($compareExecutable->getImmutableExecutable()->getFiles() as $file) {
-                $filename = sprintf('output_validators/%s/%s', $compareExecutable->getExecid(), $file->getFilename());
+
+        foreach (['input' => $inputValidatorExecutable, 'answer' => $answerValidatorExecutable, 'output' => $compareExecutable] as $type => $validatorExecutable) {
+            if (!$validatorExecutable) {
+                continue;
+            }
+            foreach ($validatorExecutable->getImmutableExecutable()->getFiles() as $file) {
+                $filename = sprintf($type . '_validators/%s/%s', $validatorExecutable->getExecid(), $file->getFilename());
                 $zip->addFromString($filename, $file->getFileContent());
                 if ($file->isExecutable()) {
                     // 100755 = regular file, executable

@@ -1131,7 +1131,11 @@ readonly class ImportProblemService
                 ->setType($validatorType);
             $this->em->persist($executable);
 
-            if ($validatorTag === 'output') {
+            if ($validatorTag === 'answer') {
+                $problem->setAnswerValidatorExecutable($executable);
+            } elseif ($validatorTag === 'input') {
+                $problem->setInputValidatorExecutable($executable);
+            } elseif ($validatorTag === 'output') {
                 if ($combinedRunCompare) {
                     $problem->setRunExecutable($executable);
                 } else {

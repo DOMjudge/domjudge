@@ -156,6 +156,16 @@ class Problem extends BaseApiEntity implements
     #[Serializer\Exclude]
     private Collection $contest_problems;
 
+    #[ORM\ManyToOne(inversedBy: 'problems_input_validator')]
+    #[ORM\JoinColumn(name: 'input_validator', referencedColumnName: 'execid', onDelete: 'SET NULL')]
+    #[Serializer\Exclude]
+    private ?Executable $input_validator_executable = null;
+
+    #[ORM\ManyToOne(inversedBy: 'problems_answer_validator')]
+    #[ORM\JoinColumn(name: 'answer_validator', referencedColumnName: 'execid', onDelete: 'SET NULL')]
+    #[Serializer\Exclude]
+    private ?Executable $answer_validator_executable = null;
+
     #[ORM\ManyToOne(inversedBy: 'problems_compare')]
     #[ORM\JoinColumn(name: 'special_compare', referencedColumnName: 'execid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
@@ -462,6 +472,28 @@ class Problem extends BaseApiEntity implements
     public function getProblemstatementType(): ?string
     {
         return $this->problemstatement_type;
+    }
+
+    public function setInputValidatorExecutable(?Executable $inputValidatorExecutable = null): Problem
+    {
+        $this->input_validator_executable = $inputValidatorExecutable;
+        return $this;
+    }
+
+    public function getInputValidatorExecutable(): ?Executable
+    {
+        return $this->input_validator_executable;
+    }
+
+    public function setAnswerValidatorExecutable(?Executable $answerValidatorExecutable = null): Problem
+    {
+        $this->answer_validator_executable = $answerValidatorExecutable;
+        return $this;
+    }
+
+    public function getAnswerValidatorExecutable(): ?Executable
+    {
+        return $this->answer_validator_executable;
     }
 
     public function setCompareExecutable(?Executable $compareExecutable = null): Problem
