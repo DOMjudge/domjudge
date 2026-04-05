@@ -88,7 +88,7 @@ class ImportExportControllerTest extends BaseTestCase
 
     public static function provideContestYamlContents(): Generator
     {
-        $year = date('Y')+1;
+        $year = (int)date('Y')+1;
         $pastYear = date('Y');
         $yaml =<<<HEREDOC
 id: demo
