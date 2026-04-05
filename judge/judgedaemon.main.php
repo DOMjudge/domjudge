@@ -381,7 +381,7 @@ class JudgeDaemon
         $this->readCredentials();
     }
 
-    public function run(): void
+    public function run(): never
     {
         $this->initialize();
 
@@ -436,7 +436,7 @@ class JudgeDaemon
         }
     }
 
-    private function loop(): void
+    private function loop(): never
     {
         $lastWorkdir = null;
         $workdirpath = JUDGEDIR . "/$this->myhost/endpoint-" . $this->endpoint['id'];
