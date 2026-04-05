@@ -29,7 +29,7 @@ window.onload = function() {
                 sidebar.appendChild(versionElement);
             }
 
-            currentVersion = versionElement.textContent.trim();
+            let currentVersion = versionElement.textContent.trim();
             versionElement.innerHTML = '';
             var selectList = document.createElement("select");
             selectList.id = "versionSelect";
