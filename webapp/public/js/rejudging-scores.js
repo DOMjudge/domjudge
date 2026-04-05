@@ -177,7 +177,7 @@ function createScoreHeatmap(data, maxScore)
         .attr('width', cellWidth - 1)
         .attr('height', cellHeight - 1)
         .attr('rx', 2)
-        .attr('fill', function(d) { return getCellColor(d.count, d.yBin, centerIdx, numDeltaBinsOneSide); })
+        .attr('fill', function(d) { return getCellColor(d.count, d.yBin, centerIdx); })
         .style('cursor', function(d) { return d.count > 0 ? 'pointer' : 'default'; })
         .on('mouseover', function(d) {
             if (d.count > 0) {
@@ -324,7 +324,7 @@ function getDeltaRange(binIdx, centerIdx, maxScore)
 /**
  * Get cell background color based on count and position.
  */
-function getCellColor(count, yBin, centerIdx, numDeltaBinsOneSide)
+function getCellColor(count, yBin, centerIdx)
 {
     if (count === 0) {
         return 'transparent';
