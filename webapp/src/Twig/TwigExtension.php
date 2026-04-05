@@ -350,8 +350,10 @@ class TwigExtension
         }
 
         $total = count($testcases);
+        $separator = '<span class="tc-sep"></span>';
+        $tcBar = '<span class="tc-bar">%s</span>';
         if ($total === 0) {
-            return '';
+            return sprintf($tcBar, $separator);
         }
 
         $segments = '';
@@ -359,7 +361,7 @@ class TwigExtension
 
         foreach ($testcases as $key => $testcase) {
             if ($testcase['sample'] != $lastTypeSample) {
-                $segments       .= '<span class="tc-sep"></span>';
+                $segments       .= $separator;
                 $lastTypeSample = $testcase['sample'];
             }
 
@@ -392,8 +394,11 @@ class TwigExtension
 
             $segments .= sprintf('<span class="tc-seg %s" title="%s"></span>', $class, $title);
         }
+        if (!str_contains($segments, $separator)) {
+            $segments .= $separator;
+        }
 
-        return sprintf('<span class="tc-bar">%s</span>', $segments);
+        return sprintf($tcBar, $segments);
     }
 
     // TODO: this function shares a lot with the above one, unify them?
