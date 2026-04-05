@@ -429,6 +429,8 @@ function initDeltaFilter(data)
         return;
     }
 
+    const totalCount = data.length;
+
     // Set slider max to the maximum delta in the data
     // Use iteration to avoid stack overflow with large arrays
     let maxDelta = 0;
