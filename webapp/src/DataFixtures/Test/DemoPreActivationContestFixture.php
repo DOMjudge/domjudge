@@ -12,13 +12,13 @@ class DemoPreActivationContestFixture extends AbstractTestDataFixture
         $demoContest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         $demoContest->setActivatetimeString(
             sprintf(
-                '%s-01-01 09:00:00 Europe/Amsterdam',
-                date('Y') + 1
+                '%d-01-01 09:00:00 Europe/Amsterdam',
+                (int)date('Y') + 1
             )
         )->setStarttimeString(
             sprintf(
-                '%s-01-01 09:00:00 Europe/Amsterdam',
-                date('Y') + 2
+                '%d-01-01 09:00:00 Europe/Amsterdam',
+                (int)date('Y') + 2
             )
         );
         $manager->persist($demoContest);
