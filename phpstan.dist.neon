@@ -35,6 +35,8 @@ parameters:
         -
             message: "#Method .* return type has no value type specified in iterable type array#"
             path: webapp/src/DataFixtures/Test
+    dynamicConstantNames:
+        SYSLOG: int
 includes:
     - webapp/vendor/phpstan/phpstan-doctrine/extension.neon
     - phpstan-bug.neon
