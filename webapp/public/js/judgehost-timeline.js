@@ -48,8 +48,8 @@ function initJudgehostTimeline(dataUrl) {
             d.endtime = +d.endtime * 1000;
         });
 
-        function render() {
-            const showDisabled = $('#toggle-disabled-jh').is(':checked');
+        function render($element) {
+            const showDisabled = $element.is(':checked');
             
             // Filter judgehosts
             const activeJudgehosts = [];
@@ -150,6 +150,7 @@ function initJudgehostTimeline(dataUrl) {
         }
 
         render();
-        $('#toggle-disabled-jh').on('change', render);
+        $toggleDisabledJh = $('#toggle-disabled-jh')
+        $toggleDisabledJh.on('change', () => render($toggleDisabledJh));
     });
 }
