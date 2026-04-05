@@ -8,7 +8,7 @@ function versionChange(selectList) {
 window.onload = function() {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState === 4 && this.status === 200) {
             var availableVersions = JSON.parse(this.responseText);
             var versionElement = document.getElementsByClassName('version')[0];
 
