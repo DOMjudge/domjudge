@@ -859,7 +859,7 @@ $(function() {
             scrollBeyondLastLine: false,
             automaticLayout: true,
             readOnly: %s,
-            theme: getCurrentEditorTheme(),
+            theme: getCurrentEditorTheme()
         });
         editor.setModel(model);
         %s
