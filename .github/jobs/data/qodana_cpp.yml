@@ -1,1 +1,10 @@
 linter: jetbrains/qodana-cpp:2025.3-eap
+bootstrap: |
+  set -x
+  apt install python3-pip
+  apt update; apt install python3-pip
+  pip3 install compiledb --break-system-packages
+  make configure
+  ./configure --with-domjudge-user=jetbrains
+  compiledb make judgehost
+  cat compile_commands.json 
