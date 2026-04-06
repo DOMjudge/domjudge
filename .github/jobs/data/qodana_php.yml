@@ -19,7 +19,6 @@ exclude:
   - name: JSVoidFunctionReturnValueUsed
   - name: PhpAttributeCanBeAddedToOverriddenMemberInspection
   - name: PhpDqlBuilderUnknownModelInspection
-  - name: PhpDuplicateMatchArmBodyInspection
   - name: PhpInternalEntityUsedInspection
   - name: PhpRedundantCatchClauseInspection
   - name: PhpUndefinedMethodInspection
