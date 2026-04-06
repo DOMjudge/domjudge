@@ -38,8 +38,8 @@ jobs:
           fetch-depth: 0  # a full history is required for pull request analysis
       - name: Gather right Qodana configuration files
         run: |
-          mv .github/jobs/data/qodana_${{ matrix.language }}.yml qodana.yml
-          mv .github/jobs/data/qodana_${{ matrix.language }}.sarif.json qodana.sarif.json
+          mv .github/jobs/data/qodana_${{ matrix.language }}.yml qodana.yml || true
+          mv .github/jobs/data/qodana_${{ matrix.language }}.sarif.json qodana.sarif.json || true
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
         with:
