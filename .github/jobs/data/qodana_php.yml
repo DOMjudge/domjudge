@@ -24,5 +24,4 @@ exclude:
   - name: PhpUndefinedMethodInspection
   - name: PhpUndefinedVariableInspection
   - name: PhpUnusedSwitchBranchInspection
-  - name: PhpWrongStringConcatenationInspection
   - name: RegExpDuplicateCharacterInClass
