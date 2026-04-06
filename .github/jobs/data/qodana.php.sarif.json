@@ -22302,40 +22302,6 @@
                 ]
               },
               {
-                "id": "CommaExpressionJS",
-                "shortDescription": {
-                  "text": "Comma expression"
-                },
-                "fullDescription": {
-                  "text": "Reports a comma expression. Such expressions are often a sign of overly clever code, and may lead to subtle bugs. Comma expressions in the initializer or in the update section of 'for' loops are ignored. Inspection ID: CommaExpressionJS",
-                  "markdown": "Reports a comma expression. Such expressions are often a sign of overly clever code, and may lead to subtle bugs. Comma expressions in the initializer or in the update section of `for` loops are ignored.\n\nInspection ID: CommaExpressionJS"
-                },
-                "defaultConfiguration": {
-                  "enabled": true,
-                  "level": "warning",
-                  "parameters": {
-                    "suppressToolId": "CommaExpressionJS",
-                    "ideaSeverity": "WARNING",
-                    "qodanaSeverity": "High",
-                    "codeQualityCategory": "Code Style"
-                  }
-                },
-                "relationships": [
-                  {
-                    "target": {
-                      "id": "JavaScript and TypeScript/Potentially undesirable code constructs",
-                      "index": 43,
-                      "toolComponent": {
-                        "name": "QDPHP"
-                      }
-                    },
-                    "kinds": [
-                      "superset"
-                    ]
-                  }
-                ]
-              },
-              {
                 "id": "ES6BindWithArrowFunction",
                 "shortDescription": {
                   "text": "Suspicious usage of 'bind' with arrow function"
