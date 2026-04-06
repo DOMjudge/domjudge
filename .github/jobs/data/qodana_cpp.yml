@@ -2,9 +2,9 @@ linter: jetbrains/qodana-cpp:2025.3-eap-clang18-privileged
 bootstrap: |
   set -x
   echo $SHELL
-  #trace_on () {
-  #  set -x
-  #}
+  trace_on () {
+    set -x
+  }
   #trace_off () {
   #  {
   #    set +x
