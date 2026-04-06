@@ -44,7 +44,7 @@ jobs:
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
         with:
-          args: --baseline qodana.sarif.json
+          args: --baseline qodana.sarif.json 
           upload-result: true
           artifact-name: qodana-report-${{ matrix.language }}
           #pr-mode: true
