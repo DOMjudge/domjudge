@@ -21,10 +21,11 @@ jobs:
             secret: QODANA_PYTHON_TOKEN
           - language: js
             secret: QODANA_PYTHON_TOKEN
-          - language: clang
-            secret: QODANA_PYTHON_TOKEN
           - language: jvm
             secret: QODANA_PYTHON_TOKEN
+          # We need a compile_commands.json
+          #- language: clang
+          #  secret: QODANA_PYTHON_TOKEN
           - language: cpp
             secret: QODANA_PYTHON_TOKEN
     permissions:
