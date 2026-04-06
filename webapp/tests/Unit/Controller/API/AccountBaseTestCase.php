@@ -61,24 +61,25 @@ abstract class AccountBaseTestCase extends BaseTestCase
         $listKey = array_keys($newItems)[0];
         $newUserPostData = [...$newUserPostData, ...(array)$overwritten];
         foreach ($newUserPostData as $key => $expectedValue) {
-            if ($key !== 'password') {
-                // For security we don't output the password in the API
-                $newItemValue = $newItems[$listKey][$key];
-                if ($key === 'roles' &&
-                    (in_array('admin', $newItemValue) || in_array('jury', $newItemValue)) &&
-                    self::getContainer()->getParameter('kernel.debug')
-                ) {
-                    $newItemValue = array_diff($newItemValue, ['team']);
-                    // In development mode we add a team role to admin users for some API endpoints.
-                }
-                if (is_array($newItemValue)) {
-                    sort($newItemValue);
-                }
-                if (is_array($expectedValue)) {
-                    sort($expectedValue);
-                }
-                self::assertEquals($expectedValue, $newItemValue);
+            // For security we don't output the password in the API
+            if (strval($key) === 'password') {
+                continue;
             }
+            $newItemValue = $newItems[$listKey][$key];
+            if (strval($key) === 'roles' &&
+                (in_array('admin', $newItemValue) || in_array('jury', $newItemValue)) &&
+                self::getContainer()->getParameter('kernel.debug')
+            ) {
+                $newItemValue = array_diff($newItemValue, ['team']);
+                // In development mode we add a team role to admin users for some API endpoints.
+            }
+            if (is_array($newItemValue)) {
+                sort($newItemValue);
+            }
+            if (is_array($expectedValue)) {
+                sort($expectedValue);
+            }
+            self::assertEquals($expectedValue, $newItemValue);
         }
     }
 
