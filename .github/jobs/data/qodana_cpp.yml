@@ -1,32 +1,34 @@
 linter: jetbrains/qodana-cpp:2025.3-eap-clang18-privileged
 bootstrap: |
-  trace_on () {
-    set -x
-  }
-  trace_off () {
-    {
-      set +x
-    } 2>/dev/null
-  }
-  section_start_internal () {
-    echo "::group::$1"
-    trace_on
-  }
-  section_end_internal () {
-    echo "::endgroup::"
-    trace_on
-  }
+  #trace_on () {
+  #  set -x
+  #}
+  #trace_off () {
+  #  {
+  #    set +x
+  #  } 2>/dev/null
+  #}
+  #section_start_internal () {
+  #  echo "::group::$1"
+  #  trace_on
+  #}
+  #section_end_internal () {
+  #  echo "::endgroup::"
+  #  trace_on
+  #}
   section_start () {
-    if [ "$#" -ne 1 ]; then
-      echo "Only 1 argument is needed for GHA, 2 was needed for GitLab."
-      exit 1
-    fi
-    trace_off
-    section_start_internal "$1"
+    #if [ "$#" -ne 1 ]; then
+    #  echo "Only 1 argument is needed for GHA, 2 was needed for GitLab."
+    #  exit 1
+    #fi
+    #trace_off
+    #section_start_internal "$1"
+    true
   }
   section_end () {
-    trace_off
-    section_end_internal
+    true
+    #trace_off
+    #section_end_internal
   }
 
   set -x
