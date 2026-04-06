@@ -2086,10 +2086,8 @@ class ExternalContestSourceService
      */
     protected function getAnalystRunPriority(ExternalRun $run): int | null {
         return match ($run->getResult()) {
-            // We will not get any new useful information for TLE testcases, while they take a lot of judgedaemon time.
-            'timelimit' => null,
-            // We often do not get new useful information for judging correct testcases.
-            'correct' => null,
+            // We will not get any new useful information for AC/TLE testcases, while they take a lot of judgedaemon time.
+            'timelimit', 'correct' => null,
             // Wrong answers are interesting for the analysts, assign a high priority but below manual judging.
             'wrong-answer' => JudgeTask::PRIORITY_HIGH + 1,
             // Compile errors could be interesting to see what went wrong, assign a low priority.
