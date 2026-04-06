@@ -2112,40 +2112,6 @@
                 ]
               },
               {
-                "id": "PhpDuplicateMatchArmBodyInspection",
-                "shortDescription": {
-                  "text": "Duplicate arm in 'match' expression"
-                },
-                "fullDescription": {
-                  "text": "Reports duplicate bodies in 'match' arms. See Match expression (php.net) for details. Inspection ID: PhpDuplicateMatchArmBodyInspection",
-                  "markdown": "Reports duplicate bodies in `match` arms.\n\n\nSee [Match expression (php.net)](https://wiki.php.net/rfc/match_expression_v2) for details.\n\nInspection ID: PhpDuplicateMatchArmBodyInspection"
-                },
-                "defaultConfiguration": {
-                  "enabled": true,
-                  "level": "note",
-                  "parameters": {
-                    "suppressToolId": "PhpDuplicateMatchArmBodyInspection",
-                    "ideaSeverity": "WEAK WARNING",
-                    "qodanaSeverity": "Moderate",
-                    "codeQualityCategory": "Unspecified"
-                  }
-                },
-                "relationships": [
-                  {
-                    "target": {
-                      "id": "PHP/Probable bugs",
-                      "index": 11,
-                      "toolComponent": {
-                        "name": "QDPHP"
-                      }
-                    },
-                    "kinds": [
-                      "superset"
-                    ]
-                  }
-                ]
-              },
-              {
                 "id": "PhpMissingDocCommentInspection",
                 "shortDescription": {
                   "text": "Missing PHPDoc comment"
