@@ -4,7 +4,6 @@ bootstrap: |
   cd /data/project/webapp && composer install --no-interaction --ignore-platform-reqs --no-scripts
 exclude:
   - name: BadExpressionStatementJS
-  - name: CommaExpressionJS
   - name: JSConsecutiveCommasInArrayLiteral
   - name: JSDeprecatedSymbols
   - name: JSDuplicatedDeclaration
