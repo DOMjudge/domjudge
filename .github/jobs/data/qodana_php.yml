@@ -22,7 +22,6 @@ exclude:
   - name: PhpDuplicateMatchArmBodyInspection
   - name: PhpInternalEntityUsedInspection
   - name: PhpRedundantCatchClauseInspection
-  - name: PhpStrictComparisonWithOperandsOfDifferentTypesInspection
   - name: PhpUndefinedMethodInspection
   - name: PhpUndefinedVariableInspection
   - name: PhpUnusedSwitchBranchInspection
