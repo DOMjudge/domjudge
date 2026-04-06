@@ -46,6 +46,6 @@ jobs:
           upload-result: true
           post-pr-comment: false
           #pr-mode: true
-          args: --baseline,qodana.sarif.json
+          args: --baseline qodana.sarif.json
         env:
           QODANA_TOKEN: ${{ secrets[matrix.secret_name] }}
