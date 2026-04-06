@@ -1,16 +1,55 @@
 linter: jetbrains/qodana-cpp:2025.3-eap-clang18-privileged
 bootstrap: |
+  trace_on () {
+    set -x
+  }
+  trace_off () {
+    {
+      set +x
+    } 2>/dev/null
+  }
+  section_start_internal () {
+    echo "::group::$1"
+    trace_on
+  }
+  section_end_internal () {
+    echo "::endgroup::"
+    trace_on
+  }
+  section_start () {
+    if [ "$#" -ne 1 ]; then
+      echo "Only 1 argument is needed for GHA, 2 was needed for GitLab."
+      exit 1
+    fi
+    trace_off
+    section_start_internal "$1"
+  }
+  section_end () {
+    trace_off
+    section_end_internal
+  }
+
   set -x
-  apt-get update
-  apt-get install python3-pip libcgroup-dev clang-19 -y
-  pip3 install compiledb --break-system-packages
-  make configure
-  CPP="/usr/bin/clang-19 -E"
-  CC=/usr/bin/clang-19
-  CXX=/usr/bin/clang++-19
-  export CC
-  export CPP
-  export CXX
-  ./configure --with-domjudge-user=qodana
-  compiledb make judgehost
-  cat compile_commands.json 
+  section_start "Install extra packages"
+    apt-get update
+    apt-get install python3-pip libcgroup-dev clang-19 -y
+    pip3 install compiledb --break-system-packages
+  section_end
+  section_start "Setup simple configure script"
+    make configure
+  section_end
+  section_start "Configure with clang"
+    CPP="/usr/bin/clang-19 -E"
+    CC=/usr/bin/clang-19
+    CXX=/usr/bin/clang++-19
+    export CC
+    export CPP
+    export CXX
+    ./configure --with-domjudge-user=qodana
+  section_end
+  section_start "Capture the commands"
+    compiledb make judgehost
+  section_end
+  section_start "Show the resulting compilation commands"
+    cat compile_commands.json
+  section_end
