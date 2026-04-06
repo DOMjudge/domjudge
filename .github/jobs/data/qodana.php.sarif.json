@@ -6906,40 +6906,6 @@
                 ]
               },
               {
-                "id": "PhpWrongStringConcatenationInspection",
-                "shortDescription": {
-                  "text": "Wrong string concatenation"
-                },
-                "fullDescription": {
-                  "text": "Reports the attempts to concatenate strings by using the '+' operator instead of the dot ('.') concatenation operator. Such attempts are most likely a programming mistake. Inspection ID: PhpWrongStringConcatenationInspection",
-                  "markdown": "Reports the attempts to concatenate strings by using the `+` operator instead of the dot (`.`) concatenation operator. Such attempts are most likely a programming mistake.\n\nInspection ID: PhpWrongStringConcatenationInspection"
-                },
-                "defaultConfiguration": {
-                  "enabled": true,
-                  "level": "warning",
-                  "parameters": {
-                    "suppressToolId": "PhpWrongStringConcatenationInspection",
-                    "ideaSeverity": "WARNING",
-                    "qodanaSeverity": "High",
-                    "codeQualityCategory": "Unspecified"
-                  }
-                },
-                "relationships": [
-                  {
-                    "target": {
-                      "id": "PHP/Probable bugs",
-                      "index": 11,
-                      "toolComponent": {
-                        "name": "QDPHP"
-                      }
-                    },
-                    "kinds": [
-                      "superset"
-                    ]
-                  }
-                ]
-              },
-              {
                 "id": "PhpNonCanonicalElementsOrderInspection",
                 "shortDescription": {
                   "text": "Non-canonical order of elements"
