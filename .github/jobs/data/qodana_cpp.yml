@@ -2,7 +2,7 @@ linter: jetbrains/qodana-cpp:2025.3-eap-clang18-privileged
 bootstrap: |
   set -x
   apt-get update
-  apt-get install python3-pip -y
+  apt-get install python3-pip libcgroup-dev -y
   pip3 install compiledb --break-system-packages
   make configure
   ./configure --with-domjudge-user=jetbrains
