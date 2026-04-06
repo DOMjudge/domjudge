@@ -16,17 +16,17 @@ jobs:
       matrix:
         include:
           - language: php
-            secret: ${{ secrets.QODANA_TOKEN }}
+            secret: QODANA_TOKEN
           - language: python
-            secret: ${{ secrets.QODANA_PYTHON_TOKEN }}
+            secret: QODANA_PYTHON_TOKEN
           - language: js
-            secret: ${{ secrets.QODANA_PYTHON_TOKEN }}
+            secret: QODANA_PYTHON_TOKEN
           - language: clang
-            secret: ${{ secrets.QODANA_PYTHON_TOKEN }}
+            secret: QODANA_PYTHON_TOKEN
           - language: jvm
-            secret: ${{ secrets.QODANA_PYTHON_TOKEN }}
+            secret: QODANA_PYTHON_TOKEN
           - language: cpp
-            secret: ${{ secrets.QODANA_PYTHON_TOKEN }}
+            secret: QODANA_PYTHON_TOKEN
     permissions:
       contents: write
       pull-requests: write
@@ -48,4 +48,4 @@ jobs:
           #pr-mode: true
           args: --baseline,qodana.sarif.json
         env:
-          QODANA_TOKEN: ${{ matrix.secret }}
+          QODANA_TOKEN: ${{ secrets[matrix.secret_name] }}
