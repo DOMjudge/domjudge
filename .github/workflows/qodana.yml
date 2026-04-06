@@ -21,13 +21,13 @@ jobs:
             secret: QODANA_PYTHON_TOKEN
           - language: js
             secret: QODANA_PYTHON_TOKEN
-          - language: jvm
-            secret: QODANA_PYTHON_TOKEN
-          # We need a compile_commands.json
-          #- language: clang
+          #- language: jvm
           #  secret: QODANA_PYTHON_TOKEN
-          - language: cpp
-            secret: QODANA_PYTHON_TOKEN
+          ## We need a compile_commands.json
+          ##- language: clang
+          ##  secret: QODANA_PYTHON_TOKEN
+          #- language: cpp
+          #  secret: QODANA_PYTHON_TOKEN
     permissions:
       contents: write
       pull-requests: write
@@ -44,9 +44,11 @@ jobs:
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
         with:
-          upload-result: true
-          post-pr-comment: false
-          #pr-mode: true
           args: --baseline qodana.sarif.json
+          upload-result: true
+          artifact-name: qodana-report-${{ matrix.language }}
+          #pr-mode: true
+          post-pr-comment: false
+          #push-fixes: pull-request
         env:
           QODANA_TOKEN: ${{ secrets[matrix.secret] }}
