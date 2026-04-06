@@ -10,10 +10,23 @@ on:
   #    - '[0-9]+.[0-9]+'
 
 jobs:
-  # TODO: https://github.com/JetBrains/qodana-action
-  # We can open a PR with fixes to the found issues
   qodana:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - language: php
+            secret: ${{ secrets.QODANA_TOKEN }}
+          - language: python
+            secret: ${{ secrets.QODANA_PYTHON_TOKEN }}
+          - language: js
+            secret: ${{ secrets.QODANA_PYTHON_TOKEN }}
+          - language: clang
+            secret: ${{ secrets.QODANA_PYTHON_TOKEN }}
+          - language: jvm
+            secret: ${{ secrets.QODANA_PYTHON_TOKEN }}
+          - language: cpp
+            secret: ${{ secrets.QODANA_PYTHON_TOKEN }}
     permissions:
       contents: write
       pull-requests: write
@@ -23,12 +36,16 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
           fetch-depth: 0  # a full history is required for pull request analysis
+      - name: Gather right Qodana configuration files
+        run: |
+          mv .github/jobs/data/qodana_${{ matrix.language }}.yml qodana.yml
+          mv .github/jobs/data/qodana_${{ matrix.language }}.sarif.json qodana.sarif.json
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
         with:
           upload-result: true
           post-pr-comment: false
-          pr-mode: false # Change after the sarif file
+          #pr-mode: true
           args: --baseline,qodana.sarif.json
         env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }} # read the steps about it below
+          QODANA_TOKEN: ${{ matrix.secret }}
