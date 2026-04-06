@@ -2,9 +2,11 @@ linter: jetbrains/qodana-cpp:2025.3-eap-clang18-privileged
 bootstrap: |
   set -x
   apt-get update
-  apt-get install python3-pip libcgroup-dev -y
+  apt-get install python3-pip libcgroup-dev gcc g++ clang-19 -y
   pip3 install compiledb --break-system-packages
+  update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 100
+  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100
   make configure
-  ./configure --with-domjudge-user=jetbrains
+  ./configure --with-domjudge-user=qodana
   compiledb make judgehost
   cat compile_commands.json 
