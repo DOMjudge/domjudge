@@ -48,6 +48,8 @@ jobs:
           docker build -t domjudge/jetbrains-temp .
           cd ../../..
           docker images
+      - name: Build compiler instructions
+        run: |
           docker run  \
             -v "$(pwd):$(pwd)" -w "$(pwd)" \
             --entrypoint .github/jobs/data/qodana_${{ matrix.language }}_instructions.sh \
