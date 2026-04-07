@@ -18,19 +18,19 @@ bootstrap: |
     echo "::endgroup::"
     trace_on
   }
-  section_start () {
-    #if [ "$#" -ne 1 ]; then
-    #  echo "Only 1 argument is needed for GHA, 2 was needed for GitLab."
-    #  exit 1
-    #fi
-    #trace_off
-    #section_start_internal "$1"
-    true
-  }
-  section_end () {
-    trace_off
-    section_end_internal
-  }
+  #section_start () {
+  #  #if [ "$#" -ne 1 ]; then
+  #  #  echo "Only 1 argument is needed for GHA, 2 was needed for GitLab."
+  #  #  exit 1
+  #  #fi
+  #  #trace_off
+  #  #section_start_internal "$1"
+  #  true
+  #}
+  #section_end () {
+  #  trace_off
+  #  section_end_internal
+  #}
 
   set -x
   #section_start "Install extra packages"
