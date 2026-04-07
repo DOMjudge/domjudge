@@ -53,3 +53,9 @@ jobs:
           #push-fixes: pull-request
         env:
           QODANA_TOKEN: ${{ secrets[matrix.secret] }}
+      - name: Upload Qodana logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: qodana-logs-cpp
+          path: /home/runner/work/_temp/qodana/results
