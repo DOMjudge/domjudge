@@ -1,4 +1,3 @@
-linter: jetbrains/qodana-cpp:2025.3-eap-clang18-privileged
 bootstrap: |
   set -x
   echo $SHELL
