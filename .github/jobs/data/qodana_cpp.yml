@@ -29,6 +29,8 @@ bootstrap: |
 
   set -x
   echo "Real start" | tee -a logs/bootstrap
+  whoami
+  sudo whoami
   apt update
   section_start "Install extra packages"
     apt-get update | tee -a logs/bootstrap
