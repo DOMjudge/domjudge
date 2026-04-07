@@ -45,8 +45,9 @@ jobs:
         run: |
           cd .github/jobs/data/
           mv qodana_${{ matrix.language }}_container.yml Dockerfile
-          docker build -t domjudge/jetbrains-temp:tmp .
+          docker build -t domjudge/jetbrains-temp .
           cd ../../..
+          docker images
           docker run  \
             -v "$(pwd):$(pwd)" -w "$(pwd)" domjudge/jetbrains-temp \
             .github/jobs/data/qodana_${{ matrix.language }}_instructions.sh
