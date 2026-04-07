@@ -41,11 +41,20 @@ jobs:
         run: |
           mv .github/jobs/data/qodana_${{ matrix.language }}.yml qodana.yml || true
           mv .github/jobs/data/qodana_${{ matrix.language }}.sarif.json qodana.sarif.json || true
+      - name: Build intermediate container
+        run: |
+          cd .github/jobs/data/
+          mv qodana_${{ matrix.language }}_container.yml Dockerfile
+          docker build -t domjudge/jetbrains-temp:tmp .
+          cd ../../..
+          docker run  \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" domjudge/jetbrains-temp \
+            .github/jobs/data/qodana_${{ matrix.language }}_instructions.sh
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
         with:
           args: |
-            --baseline qodana.sarif.json --image jetbrains/qodana-cpp:2025.3-eap-clang18-privileged
+            --baseline qodana.sarif.json --image localhost/jetbrains-temp:tmp
           upload-result: true
           artifact-name: qodana-report-${{ matrix.language }}
           #pr-mode: true
