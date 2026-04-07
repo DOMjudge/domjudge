@@ -38,7 +38,7 @@ bootstrap: |
   section_start "Setup simple configure script"
     make configure | tee -a logs/bootstrap
   section_end
-  #section_start "Configure with clang"
+  section_start "Configure with clang"
     CPP="/usr/bin/clang-19 -E" | tee -a logs/bootstrap
     CC=/usr/bin/clang-19 | tee -a logs/bootstrap
     CXX=/usr/bin/clang++-19 | tee -a logs/bootstrap
@@ -46,10 +46,10 @@ bootstrap: |
     export CPP | tee -a logs/bootstrap
     export CXX | tee -a logs/bootstrap
     ./configure --with-domjudge-user=qodana | tee -a logs/bootstrap
-  #section_end
-  #section_start "Capture the commands"
+  section_end
+  section_start "Capture the commands"
     compiledb make judgehost | tee -a logs/bootstrap
-  #section_end
-  #section_start "Show the resulting compilation commands"
+  section_end
+  section_start "Show the resulting compilation commands"
     cat compile_commands.json | tee -a logs/bootstrap
-  #section_end
+  section_end
