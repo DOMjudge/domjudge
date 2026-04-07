@@ -49,8 +49,9 @@ jobs:
           cd ../../..
           docker images
           docker run  \
-            -v "$(pwd):$(pwd)" -w "$(pwd)" domjudge/jetbrains-temp \
-            .github/jobs/data/qodana_${{ matrix.language }}_instructions.sh
+            -v "$(pwd):$(pwd)" -w "$(pwd)" \
+            --entrypoint .github/jobs/data/qodana_${{ matrix.language }}_instructions.sh \
+            domjudge/jetbrains-temp
       #- name: 'Qodana Scan'
       #  uses: JetBrains/qodana-action@v2025.3
       #  with:
