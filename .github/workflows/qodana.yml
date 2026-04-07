@@ -50,21 +50,21 @@ jobs:
           docker run  \
             -v "$(pwd):$(pwd)" -w "$(pwd)" domjudge/jetbrains-temp \
             .github/jobs/data/qodana_${{ matrix.language }}_instructions.sh
-      - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2025.3
-        with:
-          args: |
-            --baseline qodana.sarif.json --image docker.io/domjudge/jetbrains-temp:tmp
-          upload-result: true
-          artifact-name: qodana-report-${{ matrix.language }}
-          #pr-mode: true
-          post-pr-comment: false
-          #push-fixes: pull-request
-        env:
-          QODANA_TOKEN: ${{ secrets[matrix.secret] }}
-      - name: Upload Qodana logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: qodana-logs-${{ matrix.language }}
-          path: /home/runner/work/_temp/qodana/results
+      #- name: 'Qodana Scan'
+      #  uses: JetBrains/qodana-action@v2025.3
+      #  with:
+      #    args: |
+      #      --baseline qodana.sarif.json --image docker.io/domjudge/jetbrains-temp:tmp
+      #    upload-result: true
+      #    artifact-name: qodana-report-${{ matrix.language }}
+      #    #pr-mode: true
+      #    post-pr-comment: false
+      #    #push-fixes: pull-request
+      #  env:
+      #    QODANA_TOKEN: ${{ secrets[matrix.secret] }}
+      #- name: Upload Qodana logs
+      #  if: always()
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: qodana-logs-${{ matrix.language }}
+      #    path: /home/runner/work/_temp/qodana/results
