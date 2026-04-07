@@ -30,6 +30,7 @@ bootstrap: |
   set -x
   echo "Real start" | tee -a logs/bootstrap
   whoami
+  pwd
   sudo whoami
   apt update
   section_start "Install extra packages"
