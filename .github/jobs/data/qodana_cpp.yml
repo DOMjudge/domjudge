@@ -19,11 +19,11 @@ bootstrap: |
     trace_on
   }
   section_start () {
-    trace_off
+    #trace_off
     section_start_internal "$1"
   }
   section_end () {
-    trace_off
+    #trace_off
     section_end_internal
   }
 
@@ -34,9 +34,10 @@ bootstrap: |
     apt-get install python3-pip libcgroup-dev clang-19 -y | tee -a logs/bootstrap
     pip3 install compiledb --break-system-packages | tee -a logs/bootstrap
   section_end
-  #section_start "Setup simple configure script"
+  echo "Install done" | tee -a logs/bootstrap
+  section_start "Setup simple configure script"
     make configure | tee -a logs/bootstrap
-  #section_end
+  section_end
   #section_start "Configure with clang"
     CPP="/usr/bin/clang-19 -E" | tee -a logs/bootstrap
     CC=/usr/bin/clang-19 | tee -a logs/bootstrap
