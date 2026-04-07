@@ -29,6 +29,7 @@ bootstrap: |
 
   set -x
   echo "Real start" | tee -a logs/bootstrap
+  apt update
   section_start "Install extra packages"
     apt-get update | tee -a logs/bootstrap
     apt-get install python3-pip libcgroup-dev clang-19 -y | tee -a logs/bootstrap
