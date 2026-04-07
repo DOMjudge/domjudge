@@ -18,11 +18,10 @@ bootstrap: |
     echo "::endgroup::"
     trace_on
   }
-  #section_start () {
-  #  #trace_off
-  #  #section_start_internal "$1"
-  #  true
-  #}
+  section_start () {
+    trace_off
+    section_start_internal "$1"
+  }
   section_end () {
     trace_off
     section_end_internal
