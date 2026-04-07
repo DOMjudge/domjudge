@@ -57,5 +57,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: qodana-logs-cpp
+          name: qodana-logs-${{ matrix.language }}
           path: /home/runner/work/_temp/qodana/results
