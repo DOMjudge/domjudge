@@ -2,22 +2,21 @@
 
 apt-get update -y
 apt-get purge -y libc++*16*; clang-16* llvm-16*
-apt-get install -y --no-install-recommends bear libc++-19-dev libc++abi-19-dev
+apt-get install -y --no-install-recommends bear libc++-19-dev libc++abi-19-dev clang-19 libcgroup-dev libcgroup-dev
 autoreconf -fi
 
 make configure
-CPP="/usr/bin/clang-19 -E"
 CC=/usr/bin/clang-19
+CPP="/usr/bin/clang-19 -E"
 CXX=/usr/bin/clang++-19
-#CXX="/usr/bin/clang++-19 -stdlib=libc++"
 CXXFLAGS="-std=c++20 -nostdinc++ -isystem /usr/lib/llvm-19/include/c++/v1 -isystem /usr/lib/llvm-19/lib/clang/19/include -isystem /usr/include/x86_64-linux-gnu -isystem /usr/include"
 LDFLAGS="-stdlib=libc++ -L/usr/lib/llvm-19/lib"
-#export CC
-#export CPP
-#export CXX
-#export CXXFLAGS
+export CC
+export CPP
+export CXX
+export CXXFLAGS
+export LDFLAGS
 ./configure --with-domjudge-user=qodana
-#./configure --with-domjudge-user=qodana
 
 #./configure --with-domjudge-user=root CC=/usr/bin/clang-19 CXX=/usr/bin/clang++-19   CXXFLAGS="-std=c++20 -nostdinc++ \
 #    -isystem /usr/lib/llvm-19/include/c++/v1 \
