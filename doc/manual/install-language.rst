@@ -37,6 +37,9 @@ packages for Ubuntu as that is the most used at the moment of writing.
    * - Fortran
      - `gfortran`
      -
+   * - Golang
+     - `golang`
+     -
    * - Haskell
      - `ghc`
      - After installing you need to move these files
