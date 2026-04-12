@@ -1980,8 +1980,18 @@ class JudgeDaemon
             if (CREATE_WRITABLE_TEMP_DIR) {
                 putenv("TMPDIR=$prefix/write_tmp");
                 if (!is_dir("$realWorkdir/write_tmp")) {
+                    $oldumask = umask(0);
                     if (!mkdir("$realWorkdir/write_tmp", 0777, true)) {
+                        umask($oldumask);
                         logmsg(LOG_WARNING, "Could not create '$realWorkdir/write_tmp'.");
+                        return Verdict::INTERNAL_ERROR;
+                    }
+                    umask($oldumask);
+                    $permissions = substr(sprintf('%o', fileperms("$realWorkdir/write_tmp")), -4);
+                    if ($permissions !== '0777') {
+                        $message = "Incorrect permissions of newly created folder '$realWorkdir/write_tmp', '$permissions' vs '0777'.";
+                        $this->disable('judgehost', 'hostname', $this->myhost, $message);
+                        logmsg(LOG_ERR, $message);
                         return Verdict::INTERNAL_ERROR;
                     }
                 }
