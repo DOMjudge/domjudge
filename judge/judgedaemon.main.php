@@ -1983,7 +1983,9 @@ class JudgeDaemon
                     $oldumask = umask(0);
                     if (!mkdir("$realWorkdir/write_tmp", 0777, true)) {
                         umask($oldumask);
-                        logmsg(LOG_WARNING, "Could not create '$realWorkdir/write_tmp'.");
+                        $message = "Could not create '$realWorkdir/write_tmp'.";
+                        $this->disable('judgehost', 'hostname', $this->myhost, $message);
+                        logmsg(LOG_ERR, $message);
                         return Verdict::INTERNAL_ERROR;
                     }
                     umask($oldumask);
