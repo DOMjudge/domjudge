@@ -72,6 +72,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <linux/prctl.h>
+#include <sys/prctl.h>
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
@@ -869,6 +871,9 @@ void setrestrictions()
 	}
 	/* Set user-id (must be root for this). */
 	if ( use_user ) {
+		if ( prctl(PR_SET_NO_NEW_PRIVS, 1L, 0L, 0L, 0L) ) {
+			die(errno, "cannot set no_new_privs attribute");
+		}
 		if ( setuid(runuid) ) die(errno,"cannot set user ID to `{}'",runuid);
 		logmsg(LOG_DEBUG, "using user ID `{}' for command",runuid);
 	} else {
