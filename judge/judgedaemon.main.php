@@ -1663,7 +1663,19 @@ class JudgeDaemon
             $compile_output .= "\n--------------------------------------------------------------------------------\n\n" .
                 "Internal errors reported:\n" . $internalError;
 
-            if (str_starts_with($internalError, 'compile script: ')) {
+            $diskSpacePattern = '/no space left on device/i';
+            $isDiskSpaceError = preg_match($diskSpacePattern, $internalError) ||
+                preg_match($diskSpacePattern, $compile_output);
+
+            if ($isDiskSpaceError) {
+                $free_space = disk_free_space(JUDGEDIR);
+                $free_abs = $free_space !== false
+                    ? sprintf("%01.2fGB", $free_space / (1024 * 1024 * 1024))
+                    : 'unknown';
+                $description = "Out of disk space during compilation on $this->myhost ($free_abs free). " .
+                    "Clean up or increase 'diskspace_error' threshold.";
+                $this->disable('judgehost', 'hostname', $this->myhost, $description, $judgeTask['judgetaskid'], $compile_output);
+            } elseif (str_starts_with($internalError, 'compile script: ')) {
                 $internalError = preg_replace('/^compile script: /', '', $internalError);
                 $description = "The compile script returned an error: $internalError";
                 $this->disable('compile_script', 'compile_script_id', $judgeTask['compile_script_id'], $description, $judgeTask['judgetaskid'], $compile_output);
