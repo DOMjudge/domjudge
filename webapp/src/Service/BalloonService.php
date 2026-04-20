@@ -106,7 +106,7 @@ readonly class BalloonService
             ->leftJoin('b.submission', 's')
             ->leftJoin('b.problem', 'p')
             ->leftJoin('b.contest', 'co')
-            ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
+            ->innerJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
             ->leftJoin('b.team', 't')
             ->leftJoin('t.categories', 'c', Join::WITH, 'BIT_AND(c.types, :scoring) = :scoring')
             ->leftJoin('t.affiliation', 'a')
@@ -130,9 +130,6 @@ readonly class BalloonService
         $balloonSummaryPerTeam = [];
 
         foreach ($balloons as $balloonsData) {
-            if ($balloonsData['color'] === null) {
-                continue;
-            }
             /** @var Balloon $balloon */
             $balloon = $balloonsData[0];
             $done = $balloon->getDone();
