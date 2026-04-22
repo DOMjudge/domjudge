@@ -20,12 +20,12 @@ ifeq (, $(shell command -v composer 2> /dev/null))
 endif
 # We use --no-scripts here because at this point the autoload.php file is
 # not generated yet, which is needed to run the post-install scripts.
-	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o -a --no-scripts --no-plugins
+	composer install $(QUIET_FLAG) --prefer-dist -o -a --no-scripts --no-plugins
 
 dependencies-dev: composer-dependencies-dev node-dependencies
 
 composer-dependencies-dev:
-	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
+	composer $(QUIET_FLAG) install --prefer-dist --no-scripts --no-plugins
 
 # Dump autoload dependencies (including plugins)
 # This is needed since symfony/runtime is a Composer plugin that runs while dumping
@@ -35,10 +35,10 @@ composer-dependencies-dev:
 composer-dump-autoload: vendor/autoload_runtime.php
 
 vendor/autoload_runtime.php:
-	composer $(subst 1,-q,$(QUIET)) dump-autoload -o -a
+	composer $(QUIET_FLAG) dump-autoload -o -a
 
 composer-dump-autoload-dev:
-	composer $(subst 1,-q,$(QUIET)) dump-autoload
+	composer $(QUIET_FLAG) dump-autoload
 
 node-dependencies:
 ifeq (, $(shell command -v yarn || command -v yarnpkg 2> /dev/null))
