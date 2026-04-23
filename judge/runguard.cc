@@ -689,6 +689,25 @@ int groupid(char *name)
 	return (int) grp->gr_gid;
 }
 
+char *username()
+{
+	int saved_errno = errno;
+	errno = 0; /* per the linux GETPWNAM(3) man-page */
+
+	struct passwd *pwd;
+	uid_t uid = getuid();
+	pwd = getpwuid(uid);
+
+	if ( pwd==nullptr || errno) {
+		logmsg(LOG_WARNING, "failed to get username");
+		static char uid_str[32];
+		snprintf(uid_str, sizeof(uid_str), "%u", uid);
+		errno = saved_errno;
+		return uid_str;
+	}
+
+	return pwd->pw_name;
+}
 
 long read_optarg_int(const char *desc, long minval, long maxval)
 {
@@ -1275,7 +1294,7 @@ int main(int argc, char **argv)
 
 		/* And execute child command. */
 		execvp(cmdname,cmdargs);
-		die(errno,"cannot start `{}' as user `{}'", cmdname, getuid());
+		die(errno,"cannot start `{}' as user `{}'", cmdname, username());
 
 	default: /* become watchdog */
 		logmsg(LOG_DEBUG, "child pid = {}", child_pid);
