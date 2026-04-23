@@ -82,7 +82,6 @@ Options:
                image.
   -p <url>     HTTP(S) Proxy URL to use during package install.
   -m <url>     Debian or Ubuntu mirror URL to be used for package installation.
-  -u <uids>    List of user ids of domjudge-run user (comma separated).
   -U           Copy domjudge run user ids from host.
   -y           Force overwriting the chroot dir and installing debootstrap.
   -f           Force the download of debootstrap even if it's already installed.
@@ -118,7 +117,7 @@ FORCEDOWNLOAD=0
 HOSTUSERID=0
 
 # Read command-line parameters:
-while getopts 'a:d:D:R:i:r:l:s:p:m:k:u:UHyfh' OPT ; do
+while getopts 'a:d:D:R:i:r:l:s:p:m:k:UHyfh' OPT ; do
     case $OPT in
         a) ARCH=$OPTARG ;;
         d) CHROOTDIR=$OPTARG ;;
@@ -132,7 +131,6 @@ while getopts 'a:d:D:R:i:r:l:s:p:m:k:u:UHyfh' OPT ; do
         m) DEBMIRROR=$OPTARG ;;
         k) KEYRING=$OPTARG ;;
         H) HOSTLISTS=1 ;;
-        u) USERIDS=$OPTARG ;;
         U) HOSTUSERID=1 ;;
         y) FORCEYES=1 ;;
         f) FORCEDOWNLOAD=1 ;;
