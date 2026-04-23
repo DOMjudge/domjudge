@@ -28,3 +28,4 @@ composer*
 ./m4
 ./webapp/tests/Unit/Fixtures
 ./webapp/config/reference.php
+./qodana.sarif.json

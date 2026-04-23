@@ -1,0 +1,74 @@
+name: Qodana
+on:
+  push:
+    branches:
+      - qodana_second_try
+  #merge_group:
+  #pull_request:
+  #  branches:
+  #    - main
+  #    - '[0-9]+.[0-9]+'
+
+jobs:
+  qodana:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          #- language: php
+          #  secret: QODANA_TOKEN
+          #- language: python
+          #  secret: QODANA_PYTHON_TOKEN
+          #- language: js
+          #  secret: QODANA_JS_TOKEN
+          #- language: jvm
+          #  secret: QODANA_JVM_TOKEN
+          - language: cpp
+            secret: QODANA_CPP_TOKEN
+          ## We need a compile_commands.json
+          ##- language: clang
+          ##  secret: QODANA_PYTHON_TOKEN
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
+          fetch-depth: 0  # a full history is required for pull request analysis
+      - name: Gather right Qodana configuration files
+        run: |
+          mv .github/jobs/data/qodana_${{ matrix.language }}.yml qodana.yml || true
+          mv .github/jobs/data/qodana_${{ matrix.language }}.sarif.json qodana.sarif.json || true
+      - name: Build intermediate container
+        run: |
+          cd .github/jobs/data/
+          mv qodana_${{ matrix.language }}_container.yml Dockerfile
+          docker build -t domjudge/jetbrains-temp .
+          cd ../../..
+          docker images
+      - name: Build compiler instructions
+        run: |
+          docker run  \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" \
+            --entrypoint .github/jobs/data/qodana_${{ matrix.language }}_instructions.sh \
+            domjudge/jetbrains-temp
+      #- name: 'Qodana Scan'
+      #  uses: JetBrains/qodana-action@v2025.3
+      #  with:
+      #    args: |
+      #      --baseline qodana.sarif.json --image docker.io/domjudge/jetbrains-temp:tmp
+      #    upload-result: true
+      #    artifact-name: qodana-report-${{ matrix.language }}
+      #    #pr-mode: true
+      #    post-pr-comment: false
+      #    #push-fixes: pull-request
+      #  env:
+      #    QODANA_TOKEN: ${{ secrets[matrix.secret] }}
+      #- name: Upload Qodana logs
+      #  if: always()
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: qodana-logs-${{ matrix.language }}
+      #    path: /home/runner/work/_temp/qodana/results
