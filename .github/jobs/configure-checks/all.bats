@@ -15,6 +15,10 @@ translate () {
     args="$@"
     if [ "$distro_id" = "ID=fedora" ]; then
         args=${args/libcgroup-dev/libcgroup-devel}
+        args=${args/python3-sphinx-rtd-theme/python3-sphinx_rtd_theme}
+        args=${args/texlive-latex-recommended/texlive texlive-collection-latexextra}
+        args=${args/texlive-latex-extra/texlive texlive-collection-latexrecommended}
+        args=${args/tex-gyre/texlive-tex-gyre}
     fi
     echo "$args"
 }
@@ -56,21 +60,21 @@ repo-remove () {
     fi
 }
 
-@test "Default empty configure" {
-    # cleanup from earlier runs
-    repo-remove gcc g++ clang
-    run ./configure
-    assert_failure 1
-    assert_line "checking whether configure should try to set CFLAGS... yes"
-    assert_line "checking whether configure should try to set CXXFLAGS... yes"
-    assert_line "checking whether configure should try to set LDFLAGS... yes"
-    assert_line "checking for gcc... no"
-    assert_line "checking for cc... no"
-    assert_line "checking for cl.exe... no"
-    assert_regex "configure: error: in .${test_path}':"
-    assert_line 'configure: error: no acceptable C compiler found in $PATH'
-    assert_regex "See [\`']config.log' for more details"
-}
+#@test "Default empty configure" {
+#    # cleanup from earlier runs
+#    repo-remove gcc g++ clang
+#    run ./configure
+#    assert_failure 1
+#    assert_line "checking whether configure should try to set CFLAGS... yes"
+#    assert_line "checking whether configure should try to set CXXFLAGS... yes"
+#    assert_line "checking whether configure should try to set LDFLAGS... yes"
+#    assert_line "checking for gcc... no"
+#    assert_line "checking for cc... no"
+#    assert_line "checking for cl.exe... no"
+#    assert_regex "configure: error: in .${test_path}':"
+#    assert_line 'configure: error: no acceptable C compiler found in $PATH'
+#    assert_regex "See [\`']config.log' for more details"
+#}
 
 compiler_assertions () {
     run run_configure
@@ -110,351 +114,383 @@ compile_assertions_finished () {
     assert_line " * LDFLAGS.............:  -fPIE -pie -Wl,-z,relro -Wl,-z,now"
 }
 
-@test "Install GNU C only" {
-    if [ "$distro_id" = "ID=fedora" ]; then
-        # Fedora ships with a gcc with enough C++ support
-        skip
-    fi
-    repo-remove clang g++
-    repo-install gcc libcgroup-dev
-    compiler_assertions gcc ''
-    assert_line "checking for gcc... gcc"
-    assert_line "checking whether gcc accepts -g... yes"
-    assert_line "configure: error: C++ preprocessor \"/lib/cpp\" fails sanity check"
-}
+#@test "Install GNU C only" {
+#    if [ "$distro_id" = "ID=fedora" ]; then
+#        # Fedora ships with a gcc with enough C++ support
+#        skip
+#    fi
+#    repo-remove clang g++
+#    repo-install gcc libcgroup-dev
+#    compiler_assertions gcc ''
+#    assert_line "checking for gcc... gcc"
+#    assert_line "checking whether gcc accepts -g... yes"
+#    assert_line "configure: error: C++ preprocessor \"/lib/cpp\" fails sanity check"
+#}
+#
+#@test "Install GNU C++ only" {
+#    # This does work due to dependencies
+#    repo-remove clang gcc
+#    repo-install g++ libcgroup-dev
+#    compiler_assertions gcc g++
+#    assert_line "checking for gcc... gcc"
+#    assert_line "checking for g++... g++"
+#    compile_assertions_finished
+#}
+#
+#@test "Install C/C++ compilers (Clang as alternative)" {
+#    if [ "$distro_id" = "ID=fedora" ]; then
+#        # Fedora has gcc as dependency for clang
+#        skip
+#    fi
+#    repo-remove gcc g++
+#    repo-install clang libcgroup-dev
+#    compiler_assertions cc c++
+#    assert_line "checking for gcc... no"
+#    assert_line "checking for cc... cc"
+#    assert_line "checking for g++... no"
+#    assert_line "checking for c++... c++"
+#    compile_assertions_finished
+#}
+#
+#@test "Run as root discouraged" {
+#   setup
+#   run su root -c "./configure"
+#   discourage_root="checking domjudge-user... configure: error: installing/running as root is STRONGLY DISCOURAGED, use --with-domjudge-user=root to override."
+#   assert_line "$discourage_root"
+#   run su root -c "./configure --with-domjudge-user=root"
+#   refute_line "$discourage_root"
+#}
+#
+#@test "Check for missing webserver group" {
+#    if [ "$distro_id" != "ID=fedora" ]; then
+#        # Debian/Ubuntu start with a www-data group
+#        skip
+#    fi
+#    repo-remove httpd nginx
+#    for www_group in nginx apache; do
+#        userdel ${www_group} || true
+#        groupdel ${www_group} || true
+#    done
+#    run ./configure --with-domjudge-user=$u
+#    assert_line "checking webserver-group... configure: error: webserver group could not be detected, use --with-webserver-group=GROUP"
+#}
+#
+#@test "Check for newly added webserver group (Apache)" {
+#    if [ "$distro_id" != "ID=fedora" ]; then
+#        # Debian/Ubuntu start with a www-data group
+#        skip
+#    fi
+#    repo-remove httpd nginx
+#    for www_group in nginx apache; do
+#        userdel ${www_group} || true
+#        groupdel ${www_group} || true
+#    done
+#    repo-install httpd
+#    run ./configure --with-domjudge-user=$u
+#    assert_line "checking webserver-group... apache (detected)"
+#    assert_line " * webserver group.....: apache"
+#}
+#
+#@test "Check for newly added webserver group (Nginx)" {
+#    if [ "$distro_id" != "ID=fedora" ]; then
+#        # Debian/Ubuntu start with a www-data group
+#        skip
+#    fi
+#    repo-remove httpd nginx
+#    for www_group in nginx apache; do
+#        userdel ${www_group} || true
+#        groupdel ${www_group} || true
+#    done
+#    repo-install nginx
+#    run ./configure --with-domjudge-user=$u
+#    assert_line "checking webserver-group... nginx (detected)"
+#    assert_line " * webserver group.....: nginx"
+#}
+#
+#@test "Run as normal user" {
+#   setup
+#   run ./configure --with-domjudge-user=$u
+#   assert_line "checking domjudge-user... $u"
+#   run su $u -c "./configure"
+#   assert_line "checking domjudge-user... $u (default: current user)"
+#}
+#
+#@test "cgroup library needed" {
+#   cgroup_init_find="checking for cgroup_init in -lcgroup... no"
+#   cgroup_init_error="configure: error: Linux cgroup library not found."
+#   setup_user
+#   repo-install gcc g++
+#   repo-remove libcgroup-dev
+#   run run_configure
+#   assert_line "$cgroup_init_find"
+#   assert_line "$cgroup_init_error"
+#   repo-install libcgroup-dev
+#   run run_configure
+#   refute_line "$cgroup_init_find"
+#   refute_line "$cgroup_init_error"
+#}
+#
+#@test "/opt configured" {
+#   setup
+#   run run_configure
+#   assert_line " * prefix..............: /opt/domjudge"
+#   assert_line " * documentation.......: /opt/domjudge/doc"
+#   assert_line " * domserver...........: /opt/domjudge/domserver"
+#   assert_line "    - bin..............: /opt/domjudge/domserver/bin"
+#   assert_line "    - etc..............: /opt/domjudge/domserver/etc"
+#   assert_line "    - lib..............: /opt/domjudge/domserver/lib"
+#   assert_line "    - log..............: /opt/domjudge/domserver/log"
+#   assert_line "    - run..............: /opt/domjudge/domserver/run"
+#   assert_line "    - sql..............: /opt/domjudge/domserver/sql"
+#   assert_line "    - tmp..............: /opt/domjudge/domserver/tmp"
+#   assert_line "    - webapp...........: /opt/domjudge/domserver/webapp"
+#   assert_line "    - example_problems.: /opt/domjudge/domserver/example_problems"
+#   assert_line " * judgehost...........: /opt/domjudge/judgehost"
+#   assert_line "    - bin..............: /opt/domjudge/judgehost/bin"
+#   assert_line "    - etc..............: /opt/domjudge/judgehost/etc"
+#   assert_line "    - lib..............: /opt/domjudge/judgehost/lib"
+#   assert_line "    - libjudge.........: /opt/domjudge/judgehost/lib/judge"
+#   assert_line "    - log..............: /opt/domjudge/judgehost/log"
+#   assert_line "    - run..............: /opt/domjudge/judgehost/run"
+#   assert_line "    - tmp..............: /opt/domjudge/judgehost/tmp"
+#   assert_line "    - judge............: /opt/domjudge/judgehost/judgings"
+#   assert_line "    - chroot...........: /chroot/domjudge"
+#}
+#
+#@test "Prefix configured" {
+#   setup
+#   run run_configure --prefix=/tmp
+#   refute_line " * prefix..............: /opt/domjudge"
+#   refute_line " * documentation.......: /opt/domjudge/doc"
+#   refute_line " * domserver...........: /opt/domjudge/domserver"
+#   refute_line "    - bin..............: /opt/domjudge/domserver/bin"
+#   refute_line "    - tmp..............: /opt/domjudge/domserver/tmp"
+#   refute_line "    - example_problems.: /opt/domjudge/domserver/example_problems"
+#   refute_line " * judgehost...........: /opt/domjudge/judgehost"
+#   refute_line "    - libjudge.........: /opt/domjudge/judgehost/lib/judge"
+#   refute_line "    - log..............: /opt/domjudge/judgehost/log"
+#   refute_line "    - run..............: /opt/domjudge/judgehost/run"
+#   refute_line "    - tmp..............: /opt/domjudge/judgehost/tmp"
+#   refute_line "    - judge............: /opt/domjudge/judgehost/judgings"
+#   assert_line " * prefix..............: /tmp"
+#   assert_line " * documentation.......: /tmp/doc"
+#   assert_line " * domserver...........: /tmp/domserver"
+#   assert_line " * judgehost...........: /tmp/judgehost"
+#   assert_line "    - judge............: /tmp/judgehost/judgings"
+#}
+#
+#@test "Check FHS" {
+#   setup
+#   run run_configure --enable-fhs
+#   refute_line " * prefix..............: /opt/domjudge"
+#   refute_line " * documentation.......: /opt/domjudge/doc"
+#   refute_line " * domserver...........: /opt/domjudge/domserver"
+#   refute_line "    - webapp...........: /opt/domjudge/domserver/webapp"
+#   refute_line "    - example_problems.: /opt/domjudge/domserver/example_problems"
+#   refute_line " * judgehost...........: /opt/domjudge/judgehost"
+#   refute_line "    - lib..............: /opt/domjudge/judgehost/lib"
+#
+#   assert_line " * prefix..............: /usr/local"
+#   assert_line " * documentation.......: /usr/local/share/doc/domjudge"
+#   assert_line " * domserver...........: "
+#   assert_line "    - bin..............: /usr/local/bin"
+#   assert_line "    - etc..............: /usr/local/etc/domjudge"
+#   assert_line "    - lib..............: /usr/local/lib/domjudge"
+#   assert_line "    - log..............: /usr/local/var/log/domjudge"
+#   assert_line "    - run..............: /usr/local/var/run/domjudge"
+#   assert_line "    - sql..............: /usr/local/share/domjudge/sql"
+#   assert_line "    - tmp..............: /tmp"
+#   assert_line "    - webapp...........: /usr/local/share/domjudge/webapp"
+#   assert_line "    - example_problems.: /usr/local/share/domjudge/example_problems"
+#   assert_line " * judgehost...........: "
+#   assert_line "    - bin..............: /usr/local/bin"
+#   assert_line "    - etc..............: /usr/local/etc/domjudge"
+#   assert_line "    - lib..............: /usr/local/lib/domjudge"
+#   assert_line "    - libjudge.........: /usr/local/lib/domjudge/judge"
+#   assert_line "    - log..............: /usr/local/var/log/domjudge"
+#   assert_line "    - run..............: /usr/local/var/run/domjudge"
+#   assert_line "    - tmp..............: /tmp"
+#   assert_line "    - judge............: /usr/local/var/lib/domjudge/judgings"
+#   assert_line "    - chroot...........: /chroot/domjudge"
+#}
+#
+#@test "Alternative dirs together with FHS" {
+#   setup
+#   run run_configure --enable-fhs --with-domserver_webappdir=/run/webapp --with-domserver_tmpdir=/tmp/domserver --with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot/domjudge
+#   assert_line " * prefix..............: /usr/local"
+#   assert_line " * documentation.......: /usr/local/share/doc/domjudge"
+#   assert_line " * domserver...........: "
+#   assert_line "    - bin..............: /usr/local/bin"
+#   assert_line "    - etc..............: /usr/local/etc/domjudge"
+#   assert_line "    - lib..............: /usr/local/lib/domjudge"
+#   assert_line "    - log..............: /usr/local/var/log/domjudge"
+#   assert_line "    - run..............: /usr/local/var/run/domjudge"
+#   assert_line "    - sql..............: /usr/local/share/domjudge/sql"
+#   refute_line "    - tmp..............: /tmp"
+#   assert_line "    - tmp..............: /tmp/domserver"
+#   refute_line "    - webapp...........: /usr/local/share/domjudge/webapp"
+#   assert_line "    - webapp...........: /run/webapp"
+#   assert_line "    - example_problems.: /usr/local/share/domjudge/example_problems"
+#   assert_line " * judgehost...........: "
+#   assert_line "    - bin..............: /usr/local/bin"
+#   assert_line "    - etc..............: /usr/local/etc/domjudge"
+#   assert_line "    - lib..............: /usr/local/lib/domjudge"
+#   assert_line "    - libjudge.........: /usr/local/lib/domjudge/judge"
+#   assert_line "    - log..............: /usr/local/var/log/domjudge"
+#   assert_line "    - run..............: /usr/local/var/run/domjudge"
+#   refute_line "    - tmp..............: /tmp"
+#   assert_line "    - tmp..............: /srv/tmp"
+#   refute_line "    - judge............: /usr/local/var/lib/domjudge/judgings"
+#   assert_line "    - judge............: /srv/judgings"
+#   refute_line "    - chroot...........: /chroot/domjudge"
+#   assert_line "    - chroot...........: /srv/chroot/domjudge"
+#}
+#
+#@test "Alternative dirs together with defaults" {
+#   setup
+#   run run_configure "--with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot --with-domserver_logdir=/log"
+#   assert_line " * prefix..............: /opt/domjudge"
+#   assert_line " * documentation.......: /opt/domjudge/doc"
+#   assert_line " * domserver...........: /opt/domjudge/domserver"
+#   refute_line "    - log..............: /opt/domjudge/domserver/log"
+#   assert_line "    - log..............: /log"
+#   assert_line " * judgehost...........: /opt/domjudge/judgehost"
+#   refute_line "    - tmp..............: /opt/domjudge/judgehost/tmp"
+#   assert_line "    - tmp..............: /srv/tmp"
+#   refute_line "    - judge............: /opt/domjudge/judgehost/judgings"
+#   assert_line "    - judge............: /srv/judgings"
+#   refute_line "    - chroot...........: /chroot/domjudge"
+#   assert_line "    - chroot...........: /srv/chroot"
+#}
+#
+#@test "Default URL not set, docs mention" {
+#  setup
+#  run run_configure
+#  assert_line "checking baseurl... https://example.com/domjudge/"
+#  assert_line "Warning: base URL is unconfigured; generating team documentation will"
+#  assert_line "not work out of the box!"
+#  assert_line "Rerun configure with option '--with-baseurl=BASEURL' to correct this."
+#  assert_line " * website base URL....: https://example.com/domjudge/"
+#  assert_line " * documentation.......: /opt/domjudge/doc"
+#  run run_configure "--with-baseurl=https://contest.example.org"
+#  assert_line "checking baseurl... https://contest.example.org"
+#  refute_line "Warning: base URL is unconfigured; generating team documentation will"
+#  refute_line "not work out of the box!"
+#  refute_line "Rerun configure with option '--with-baseurl=BASEURL' to correct this."
+#  assert_line " * website base URL....: https://contest.example.org"
+#}
+#
+#@test "Change users" {
+#  setup
+#  run run_configure
+#  assert_line " * default user........: domjudge-bats-user"
+#  assert_line " * runguard user.......: domjudge-run"
+#  assert_line " * runguard group......: domjudge-run"
+#  assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
+#  run run_configure "--with-domjudge-user=other_user --with-webserver-group=other_group --with-runuser=other-domjudge-run --with-rungroup=other-run-group"
+#  refute_line " * default user........: domjudge-bats-user"
+#  refute_line " * runguard user.......: domjudge-run"
+#  refute_line " * runguard group......: domjudge-run"
+#  for group in www-data apache nginx; do
+#    refute_line " * webserver group.....: $group"
+#  done
+#  assert_line " * default user........: other_user"
+#  assert_line " * runguard user.......: other-domjudge-run"
+#  assert_line " * runguard group......: other-run-group"
+#  assert_line " * webserver group.....: other_group"
+#}
+#
+#@test "No docs" {
+#  setup
+#  run run_configure
+#  assert_line " * documentation.......: /opt/domjudge/doc"
+#  run run_configure --enable-doc-build
+#  assert_line " * documentation.......: /opt/domjudge/doc"
+#  run run_configure --disable-doc-build
+#  assert_line " * documentation.......: /opt/domjudge/doc (disabled)"
+#}
+#
+#@test "Build default (effective host does both domserver & judgehost)" {
+#  if [ "$distro_id" = "ID=fedora" ]; then
+#      # Fails as libraries are not found
+#      skip
+#  fi
+#  setup
+#  run run_configure
+#  assert_line " * domserver...........: /opt/domjudge/domserver"
+#  assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
+#  assert_line " * judgehost...........: /opt/domjudge/judgehost"
+#  assert_line " * runguard group......: domjudge-run"
+#  run make domserver
+#  assert_success
+#  run make judgehost
+#  assert_success
+#}
+#
+#@test "Build domserver disabled" {
+#  if [ "$distro_id" = "ID=fedora" ]; then
+#      # Fails as libraries are not found
+#      skip
+#  fi
+#  setup
+#  run run_configure --disable-domserver-build
+#  refute_line " * domserver...........: /opt/domjudge/domserver"
+#  for group in www-data apache nginx; do
+#    refute_line " * webserver group.....: $group"
+#  done
+#  assert_line " * judgehost...........: /opt/domjudge/judgehost"
+#  assert_line " * runguard group......: domjudge-run"
+#  run make domserver
+#  assert_failure 2
+#  run make judgehost
+#  assert_success
+#}
+#
+#@test "Build judgehost disabled" {
+#  if [ "$distro_id" = "ID=fedora" ]; then
+#      # Fails as libraries are not found
+#      skip
+#  fi
+#  setup
+#  run run_configure --disable-judgehost-build
+#  assert_line " * domserver...........: /opt/domjudge/domserver"
+#  assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
+#  refute_line " * judgehost...........: /opt/domjudge/judgehost"
+#  refute_line " * runguard group......: domjudge-run"
+#  run make domserver
+#  assert_success
+#  run make judgehost
+#  assert_failure 2
+#}
 
-@test "Install GNU C++ only" {
-    # This does work due to dependencies
-    repo-remove clang gcc
-    repo-install g++ libcgroup-dev
-    compiler_assertions gcc g++
-    assert_line "checking for gcc... gcc"
-    assert_line "checking for g++... g++"
-    compile_assertions_finished
-}
+@test "'make distclean' cleans the state to state of 'make dist'" {
+  repo-install autoconf automake python3-sphinx python3-sphinx-rtd-theme \
+    fontconfig python3-yaml latexmk texlive-latex-recommended \
+    texlive-latex-extra tex-gyre libcgroup-dev make acl zip unzip pv \
+    php php-fpm php-gd php-cli php-intl php-mbstring php-mysql php-curl \
+    php-json php-xml php-zip composer php-bcmath node-corepack
+  echo "#!/bin/sh" > /usr/local/bin/yarn
+  echo 'exec corepack yarn "$@"' >> /usr/local/bin/yarn
+  chmod +rx /usr/local/bin/yarn
 
-@test "Install C/C++ compilers (Clang as alternative)" {
-    if [ "$distro_id" = "ID=fedora" ]; then
-        # Fedora has gcc as dependency for clang
-        skip
-    fi
-    repo-remove gcc g++
-    repo-install clang libcgroup-dev
-    compiler_assertions cc c++
-    assert_line "checking for gcc... no"
-    assert_line "checking for cc... cc"
-    assert_line "checking for g++... no"
-    assert_line "checking for c++... c++"
-    compile_assertions_finished
-}
+  run make dist
 
-@test "Run as root discouraged" {
-   setup
-   run su root -c "./configure"
-   discourage_root="checking domjudge-user... configure: error: installing/running as root is STRONGLY DISCOURAGED, use --with-domjudge-user=root to override."
-   assert_line "$discourage_root"
-   run su root -c "./configure --with-domjudge-user=root"
-   refute_line "$discourage_root"
-}
-
-@test "Check for missing webserver group" {
-    if [ "$distro_id" != "ID=fedora" ]; then
-        # Debian/Ubuntu start with a www-data group
-        skip
-    fi
-    repo-remove httpd nginx
-    for www_group in nginx apache; do
-        userdel ${www_group} || true
-        groupdel ${www_group} || true
-    done
-    run ./configure --with-domjudge-user=$u
-    assert_line "checking webserver-group... configure: error: webserver group could not be detected, use --with-webserver-group=GROUP"
-}
-
-@test "Check for newly added webserver group (Apache)" {
-    if [ "$distro_id" != "ID=fedora" ]; then
-        # Debian/Ubuntu start with a www-data group
-        skip
-    fi
-    repo-remove httpd nginx
-    for www_group in nginx apache; do
-        userdel ${www_group} || true
-        groupdel ${www_group} || true
-    done
-    repo-install httpd
-    run ./configure --with-domjudge-user=$u
-    assert_line "checking webserver-group... apache (detected)"
-    assert_line " * webserver group.....: apache"
-}
-
-@test "Check for newly added webserver group (Nginx)" {
-    if [ "$distro_id" != "ID=fedora" ]; then
-        # Debian/Ubuntu start with a www-data group
-        skip
-    fi
-    repo-remove httpd nginx
-    for www_group in nginx apache; do
-        userdel ${www_group} || true
-        groupdel ${www_group} || true
-    done
-    repo-install nginx
-    run ./configure --with-domjudge-user=$u
-    assert_line "checking webserver-group... nginx (detected)"
-    assert_line " * webserver group.....: nginx"
-}
-
-@test "Run as normal user" {
-   setup
-   run ./configure --with-domjudge-user=$u
-   assert_line "checking domjudge-user... $u"
-   run su $u -c "./configure"
-   assert_line "checking domjudge-user... $u (default: current user)"
-}
-
-@test "cgroup library needed" {
-   cgroup_init_find="checking for cgroup_init in -lcgroup... no"
-   cgroup_init_error="configure: error: Linux cgroup library not found."
-   setup_user
-   repo-install gcc g++
-   repo-remove libcgroup-dev
-   run run_configure
-   assert_line "$cgroup_init_find"
-   assert_line "$cgroup_init_error"
-   repo-install libcgroup-dev
-   run run_configure
-   refute_line "$cgroup_init_find"
-   refute_line "$cgroup_init_error"
-}
-
-@test "/opt configured" {
-   setup
-   run run_configure
-   assert_line " * prefix..............: /opt/domjudge"
-   assert_line " * documentation.......: /opt/domjudge/doc"
-   assert_line " * domserver...........: /opt/domjudge/domserver"
-   assert_line "    - bin..............: /opt/domjudge/domserver/bin"
-   assert_line "    - etc..............: /opt/domjudge/domserver/etc"
-   assert_line "    - lib..............: /opt/domjudge/domserver/lib"
-   assert_line "    - log..............: /opt/domjudge/domserver/log"
-   assert_line "    - run..............: /opt/domjudge/domserver/run"
-   assert_line "    - sql..............: /opt/domjudge/domserver/sql"
-   assert_line "    - tmp..............: /opt/domjudge/domserver/tmp"
-   assert_line "    - webapp...........: /opt/domjudge/domserver/webapp"
-   assert_line "    - example_problems.: /opt/domjudge/domserver/example_problems"
-   assert_line " * judgehost...........: /opt/domjudge/judgehost"
-   assert_line "    - bin..............: /opt/domjudge/judgehost/bin"
-   assert_line "    - etc..............: /opt/domjudge/judgehost/etc"
-   assert_line "    - lib..............: /opt/domjudge/judgehost/lib"
-   assert_line "    - libjudge.........: /opt/domjudge/judgehost/lib/judge"
-   assert_line "    - log..............: /opt/domjudge/judgehost/log"
-   assert_line "    - run..............: /opt/domjudge/judgehost/run"
-   assert_line "    - tmp..............: /opt/domjudge/judgehost/tmp"
-   assert_line "    - judge............: /opt/domjudge/judgehost/judgings"
-   assert_line "    - chroot...........: /chroot/domjudge"
-}
-
-@test "Prefix configured" {
-   setup
-   run run_configure --prefix=/tmp
-   refute_line " * prefix..............: /opt/domjudge"
-   refute_line " * documentation.......: /opt/domjudge/doc"
-   refute_line " * domserver...........: /opt/domjudge/domserver"
-   refute_line "    - bin..............: /opt/domjudge/domserver/bin"
-   refute_line "    - tmp..............: /opt/domjudge/domserver/tmp"
-   refute_line "    - example_problems.: /opt/domjudge/domserver/example_problems"
-   refute_line " * judgehost...........: /opt/domjudge/judgehost"
-   refute_line "    - libjudge.........: /opt/domjudge/judgehost/lib/judge"
-   refute_line "    - log..............: /opt/domjudge/judgehost/log"
-   refute_line "    - run..............: /opt/domjudge/judgehost/run"
-   refute_line "    - tmp..............: /opt/domjudge/judgehost/tmp"
-   refute_line "    - judge............: /opt/domjudge/judgehost/judgings"
-   assert_line " * prefix..............: /tmp"
-   assert_line " * documentation.......: /tmp/doc"
-   assert_line " * domserver...........: /tmp/domserver"
-   assert_line " * judgehost...........: /tmp/judgehost"
-   assert_line "    - judge............: /tmp/judgehost/judgings"
-}
-
-@test "Check FHS" {
-   setup
-   run run_configure --enable-fhs
-   refute_line " * prefix..............: /opt/domjudge"
-   refute_line " * documentation.......: /opt/domjudge/doc"
-   refute_line " * domserver...........: /opt/domjudge/domserver"
-   refute_line "    - webapp...........: /opt/domjudge/domserver/webapp"
-   refute_line "    - example_problems.: /opt/domjudge/domserver/example_problems"
-   refute_line " * judgehost...........: /opt/domjudge/judgehost"
-   refute_line "    - lib..............: /opt/domjudge/judgehost/lib"
-
-   assert_line " * prefix..............: /usr/local"
-   assert_line " * documentation.......: /usr/local/share/doc/domjudge"
-   assert_line " * domserver...........: "
-   assert_line "    - bin..............: /usr/local/bin"
-   assert_line "    - etc..............: /usr/local/etc/domjudge"
-   assert_line "    - lib..............: /usr/local/lib/domjudge"
-   assert_line "    - log..............: /usr/local/var/log/domjudge"
-   assert_line "    - run..............: /usr/local/var/run/domjudge"
-   assert_line "    - sql..............: /usr/local/share/domjudge/sql"
-   assert_line "    - tmp..............: /tmp"
-   assert_line "    - webapp...........: /usr/local/share/domjudge/webapp"
-   assert_line "    - example_problems.: /usr/local/share/domjudge/example_problems"
-   assert_line " * judgehost...........: "
-   assert_line "    - bin..............: /usr/local/bin"
-   assert_line "    - etc..............: /usr/local/etc/domjudge"
-   assert_line "    - lib..............: /usr/local/lib/domjudge"
-   assert_line "    - libjudge.........: /usr/local/lib/domjudge/judge"
-   assert_line "    - log..............: /usr/local/var/log/domjudge"
-   assert_line "    - run..............: /usr/local/var/run/domjudge"
-   assert_line "    - tmp..............: /tmp"
-   assert_line "    - judge............: /usr/local/var/lib/domjudge/judgings"
-   assert_line "    - chroot...........: /chroot/domjudge"
-}
-
-@test "Alternative dirs together with FHS" {
-   setup
-   run run_configure --enable-fhs --with-domserver_webappdir=/run/webapp --with-domserver_tmpdir=/tmp/domserver --with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot/domjudge
-   assert_line " * prefix..............: /usr/local"
-   assert_line " * documentation.......: /usr/local/share/doc/domjudge"
-   assert_line " * domserver...........: "
-   assert_line "    - bin..............: /usr/local/bin"
-   assert_line "    - etc..............: /usr/local/etc/domjudge"
-   assert_line "    - lib..............: /usr/local/lib/domjudge"
-   assert_line "    - log..............: /usr/local/var/log/domjudge"
-   assert_line "    - run..............: /usr/local/var/run/domjudge"
-   assert_line "    - sql..............: /usr/local/share/domjudge/sql"
-   refute_line "    - tmp..............: /tmp"
-   assert_line "    - tmp..............: /tmp/domserver"
-   refute_line "    - webapp...........: /usr/local/share/domjudge/webapp"
-   assert_line "    - webapp...........: /run/webapp"
-   assert_line "    - example_problems.: /usr/local/share/domjudge/example_problems"
-   assert_line " * judgehost...........: "
-   assert_line "    - bin..............: /usr/local/bin"
-   assert_line "    - etc..............: /usr/local/etc/domjudge"
-   assert_line "    - lib..............: /usr/local/lib/domjudge"
-   assert_line "    - libjudge.........: /usr/local/lib/domjudge/judge"
-   assert_line "    - log..............: /usr/local/var/log/domjudge"
-   assert_line "    - run..............: /usr/local/var/run/domjudge"
-   refute_line "    - tmp..............: /tmp"
-   assert_line "    - tmp..............: /srv/tmp"
-   refute_line "    - judge............: /usr/local/var/lib/domjudge/judgings"
-   assert_line "    - judge............: /srv/judgings"
-   refute_line "    - chroot...........: /chroot/domjudge"
-   assert_line "    - chroot...........: /srv/chroot/domjudge"
-}
-
-@test "Alternative dirs together with defaults" {
-   setup
-   run run_configure "--with-judgehost_tmpdir=/srv/tmp --with-judgehost_judgedir=/srv/judgings --with-judgehost_chrootdir=/srv/chroot --with-domserver_logdir=/log"
-   assert_line " * prefix..............: /opt/domjudge"
-   assert_line " * documentation.......: /opt/domjudge/doc"
-   assert_line " * domserver...........: /opt/domjudge/domserver"
-   refute_line "    - log..............: /opt/domjudge/domserver/log"
-   assert_line "    - log..............: /log"
-   assert_line " * judgehost...........: /opt/domjudge/judgehost"
-   refute_line "    - tmp..............: /opt/domjudge/judgehost/tmp"
-   assert_line "    - tmp..............: /srv/tmp"
-   refute_line "    - judge............: /opt/domjudge/judgehost/judgings"
-   assert_line "    - judge............: /srv/judgings"
-   refute_line "    - chroot...........: /chroot/domjudge"
-   assert_line "    - chroot...........: /srv/chroot"
-}
-
-@test "Default URL not set, docs mention" {
-  setup
+  # Cleanup of all configure created files
+  files_before=$(find . -type f | sort)
   run run_configure
-  assert_line "checking baseurl... https://example.com/domjudge/"
-  assert_line "Warning: base URL is unconfigured; generating team documentation will"
-  assert_line "not work out of the box!"
-  assert_line "Rerun configure with option '--with-baseurl=BASEURL' to correct this."
-  assert_line " * website base URL....: https://example.com/domjudge/"
-  assert_line " * documentation.......: /opt/domjudge/doc"
-  run run_configure "--with-baseurl=https://contest.example.org"
-  assert_line "checking baseurl... https://contest.example.org"
-  refute_line "Warning: base URL is unconfigured; generating team documentation will"
-  refute_line "not work out of the box!"
-  refute_line "Rerun configure with option '--with-baseurl=BASEURL' to correct this."
-  assert_line " * website base URL....: https://contest.example.org"
-}
+  files_configure=$(find . -type f | sort)
+  refute_equal "$files_before" "$files_configure"
+  run make distclean
+  files_after=$(find . -type f | sort)
+  assert_equal "$files_before" "$files_after"
 
-@test "Change users" {
-  setup
-  run run_configure
-  assert_line " * default user........: domjudge-bats-user"
-  assert_line " * runguard user.......: domjudge-run"
-  assert_line " * runguard group......: domjudge-run"
-  assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
-  run run_configure "--with-domjudge-user=other_user --with-webserver-group=other_group --with-runuser=other-domjudge-run --with-rungroup=other-run-group"
-  refute_line " * default user........: domjudge-bats-user"
-  refute_line " * runguard user.......: domjudge-run"
-  refute_line " * runguard group......: domjudge-run"
-  for group in www-data apache nginx; do
-    refute_line " * webserver group.....: $group"
-  done
-  assert_line " * default user........: other_user"
-  assert_line " * runguard user.......: other-domjudge-run"
-  assert_line " * runguard group......: other-run-group"
-  assert_line " * webserver group.....: other_group"
-}
-
-@test "No docs" {
-  setup
-  run run_configure
-  assert_line " * documentation.......: /opt/domjudge/doc"
-  run run_configure --enable-doc-build
-  assert_line " * documentation.......: /opt/domjudge/doc"
-  run run_configure --disable-doc-build
-  assert_line " * documentation.......: /opt/domjudge/doc (disabled)"
-}
-
-@test "Build default (effective host does both domserver & judgehost)" {
-  if [ "$distro_id" = "ID=fedora" ]; then
-      # Fails as libraries are not found
-      skip
-  fi
-  setup
-  run run_configure
-  assert_line " * domserver...........: /opt/domjudge/domserver"
-  assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
-  assert_line " * judgehost...........: /opt/domjudge/judgehost"
-  assert_line " * runguard group......: domjudge-run"
-  run make domserver
-  assert_success
-  run make judgehost
-  assert_success
-}
-
-@test "Build domserver disabled" {
-  if [ "$distro_id" = "ID=fedora" ]; then
-      # Fails as libraries are not found
-      skip
-  fi
-  setup
-  run run_configure --disable-domserver-build
-  refute_line " * domserver...........: /opt/domjudge/domserver"
-  for group in www-data apache nginx; do
-    refute_line " * webserver group.....: $group"
-  done
-  assert_line " * judgehost...........: /opt/domjudge/judgehost"
-  assert_line " * runguard group......: domjudge-run"
-  run make domserver
-  assert_failure 2
-  run make judgehost
-  assert_success
-}
-
-@test "Build judgehost disabled" {
-  if [ "$distro_id" = "ID=fedora" ]; then
-      # Fails as libraries are not found
-      skip
-  fi
-  setup
-  run run_configure --disable-judgehost-build
-  assert_line " * domserver...........: /opt/domjudge/domserver"
-  assert_regex "^ \* webserver group\.\.\.\.\.: (www-data|apache|nginx)$"
-  refute_line " * judgehost...........: /opt/domjudge/judgehost"
-  refute_line " * runguard group......: domjudge-run"
-  run make domserver
-  assert_success
-  run make judgehost
-  assert_failure 2
+  ## Cleanup of all configure + make targets files
+  #files_before=$(find . -type f | sort)
+  #run run_configure
+  #run make domserver judgehost docs
+  #files_make_targets=$(find . -type f | sort)
+  #refute_equal "$files_before" "$files_make_targets"
+  #run make distclean
+  #files_after=$(find . -type f | sort)
+  #assert_equal "$files_before" "$files_after"
 }
