@@ -1127,6 +1127,44 @@ class JudgeDaemon
     }
 
     /**
+     * @param string[] $gainroot
+     */
+    private function lockDirectory(string $directory, array $gainroot, string $realWorkdir, bool $chownOnly = false): ?Verdict
+    {
+        $user = posix_getpwuid(posix_geteuid())['name'];
+        if (!$this->runCommandSafe(
+            array_merge(
+                $gainroot,
+                [
+                    'chown',
+                    '-R',
+                    $user . ":",
+                    "$realWorkdir/$directory"
+                ]
+            )
+        )) {
+            logmsg(LOG_WARNING, "Could not chown '$directory' to '$user'.");
+            return Verdict::INTERNAL_ERROR;
+        }
+
+        if (!$chownOnly) {
+            // Cannot use chmod directly here for recursion.
+            if (!$this->runCommandSafe(
+                [
+                    'chmod',
+                    '-R',
+                    'go-w',
+                    $directory,
+                ]
+            )) {
+                logmsg(LOG_WARNING, "Could not chmod '$directory' to go-w.");
+                return Verdict::INTERNAL_ERROR;
+            }
+        }
+        return null;
+    }
+
+    /**
      * @param string[] $command_parts
      * @param int|DONT_CARE $retval
      */
@@ -2146,29 +2184,8 @@ class JudgeDaemon
                 $this->runCommandSafe($compare_args, $exitcode, log_nonzero_exitcode: false, stdin_source: "program.out", stdout_target: "compare.tmp", stderr_target: "compare.err");
             }
 
-            $this->runCommandSafe(
-                array_merge(
-                    $gainroot,
-                    [
-                        'chown',
-                        '-R',
-                        posix_getpwuid(posix_geteuid())['name'] . ":",
-                        "$realWorkdir/feedback"
-                    ]
-                )
-            );
-
-            // Cannot use chmod directly here for recursion.
-            if (!$this->runCommandSafe(
-                [
-                    'chmod',
-                    '-R',
-                    'go-w',
-                    'feedback',
-                ]
-            )) {
-                logmsg(LOG_WARNING, "Could not chmod 'feedback' to go-w.");
-                return Verdict::INTERNAL_ERROR;
+            if ($ret = $this->lockDirectory('feedback', $gainroot, $realWorkdir)) {
+                return $ret;
             }
 
             // Make sure that feedback file exists, since we assume this later.
