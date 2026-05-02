@@ -242,6 +242,7 @@ readonly class ScoreboardMergeCommand
                             ->setProblem($problemObj)
                             ->setColor($baseProblem['color'])
                             ->setShortName($label);
+                        $contest->addProblem($contestProblemObj);
                         $problems[$id] = $contestProblemObj;
                         $problemNameToIdMap[$name] = $id;
                         $firstSolve[$name] = null;
