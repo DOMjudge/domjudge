@@ -148,21 +148,22 @@ readonly class VerdictInput
 }
 
 /**
- * @phpstan-type JudgeTask array{submitid: ?string, contestid: ?string, judgetaskid: int, type: string, priority: int, jobid: ?string,
- *     uuid: ?string, compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string, testcase_id: ?string,
- *     testcase_hash: ?string, compile_config: ?string, run_config: ?string, compare_config: ?string, pass?: string
+ * @phpstan-type JudgeTask array{submitid: ?string, contestid: ?string, judgetaskid: int, type: string, priority: int,
+ *     jobid: ?string, uuid: ?string, testcase_id: ?string, testcase_hash: ?string, pass?: string
+ *     compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string,
+ *     compile_config: ?string, run_config: ?string, compare_config: ?string,
  * }
  * @phpstan-type JudgingRun array{runresult: string, start_time: string, end_time: string, runtime: string,
- *      output_run: string, output_error: string, output_system: string, metadata: string, output_diff: string,
- *      hostname: string, testcasedir: string, compare_metadata: string,
- *      team_message?: string, score?: string
+ *     output_run: string, output_error: string, output_system: string, metadata: string, output_diff: string,
+ *     hostname: string, testcasedir: string, compare_metadata: string,
+ *     team_message?: string, score?: string
  * }
  * @phpstan-type RunConfig array{time_limit: float, memory_limit: int, output_limit: int,
- *      process_limit: int, entry_point: ?string, pass_limit: int, hash: string, overshoot: int
+ *     process_limit: int, entry_point: ?string, pass_limit: int, hash: string, overshoot: int
  * }
  * @phpstan-type CompareConfig array{script_timelimit: int, script_memory_limit: int,
- *      script_filesize_limit: int, compare_args: string, combined_run_compare: bool,
- *      hash: string, is_scoring_problem: bool
+ *     script_filesize_limit: int, compare_args: string, combined_run_compare: bool,
+ *     hash: string, is_scoring_problem: bool
  * }
  * @phpstan-import-type MetaData_Compare from CompareMetaData
  * @phpstan-import-type MetaData_Program from ProgramMetaData
