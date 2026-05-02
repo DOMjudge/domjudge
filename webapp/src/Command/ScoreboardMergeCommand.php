@@ -248,7 +248,8 @@ readonly class ScoreboardMergeCommand
                     } else {
                         $id = $problemNameToIdMap[$name];
                     }
-                    $scoreCacheObj = (new scoreCache())
+                    $scoreCacheObj = (new ScoreCache())
+                        ->setContest($contest)
                         ->setProblem($problems[$id]->getProblem())
                         ->setTeam($team);
                     if (array_key_exists('time', $problem)) {
