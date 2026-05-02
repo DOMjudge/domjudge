@@ -150,8 +150,8 @@ readonly class VerdictInput
 /**
  * @phpstan-type JudgeTask array{submitid: ?string, contestid: ?string, judgetaskid: int, type: string, priority: int,
  *     jobid: ?string, uuid: ?string, testcase_id: ?string, testcase_hash: ?string, pass?: string
- *     compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string,
- *     compile_config: ?string, run_config: ?string, compare_config: ?string,
+ *     compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string, visualizer_script_id: ?string,
+ *     compile_config: ?string, run_config: ?string, compare_config: ?string, visualizer_config: ?string,
  * }
  * @phpstan-type JudgingRun array{runresult: string, start_time: string, end_time: string, runtime: string,
  *     output_run: string, output_error: string, output_system: string, metadata: string, output_diff: string,
