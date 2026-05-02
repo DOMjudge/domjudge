@@ -241,7 +241,7 @@ readonly class ScoreboardMergeCommand
                             ->setName($name);
                         $contestProblemObj = (new ContestProblem())
                             ->setProblem($problemObj)
-                            ->setColor($baseProblem['color'])
+                            ->setColor($baseProblem['rgb'])
                             ->setShortName($label);
                         $contest->addProblem($contestProblemObj);
                         $problems[$id] = $contestProblemObj;
