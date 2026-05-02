@@ -1138,7 +1138,7 @@ readonly class ImportProblemService
                     $problem->setCompareExecutable($executable);
                 }
             } elseif ($outputExecutableTag = 'visualizer') {
-                $problem->setVisualizerExecutable($executable);
+                $problem->setOutputVisualizerExecutable($executable);
             } else {
                 throw new ServiceUnavailableHttpException(
                     null, 'Encountered unknown output executable.'

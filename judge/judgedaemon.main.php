@@ -165,6 +165,9 @@ readonly class VerdictInput
  *     script_filesize_limit: int, compare_args: string, combined_run_compare: bool,
  *     hash: string, is_scoring_problem: bool
  * }
+ * @phpstan-type VisualizerConfig array{script_timelimit: int, script_memory_limit: int,
+ *    script_filesize_limit: int, visualizer_args: string, hash: string
+ * * }
  * @phpstan-import-type MetaData_Compare from CompareMetaData
  * @phpstan-import-type MetaData_Program from ProgramMetaData
  * This is called Generic, but is 1 on 1 connected with compile.meta
@@ -1763,6 +1766,7 @@ class JudgeDaemon
         $compile_config = dj_json_decode($judgeTask['compile_config']);
         $run_config = dj_json_decode($judgeTask['run_config']);
         $compare_config = dj_json_decode($judgeTask['compare_config']);
+        $visualizer_config = dj_json_decode($judgeTask['visualizer_config']);
 
         // Set configuration variables for shell scripts (compile.sh, build_executable.sh, etc.)
         // TODO: Consider folding compile.sh into judgedaemon (like compare script execution)
@@ -1805,7 +1809,7 @@ class JudgeDaemon
             return false;
         }
 
-        return $this->runTestcase($judgeTask, $workdir, $workdirpath, $run_config, $compare_config, $output_storage_limit, $overshoot, $startTime);
+        return $this->runTestcase($judgeTask, $workdir, $workdirpath, $run_config, $compare_config, $visualizer_config, $output_storage_limit, $overshoot, $startTime);
     }
 
     /**
@@ -2331,6 +2335,7 @@ class JudgeDaemon
      * @param JudgeTask $judgeTask
      * @param RunConfig $run_config
      * @param CompareConfig $compare_config
+     * @param VisualizerConfig $visualiser_config
      */
     private function runTestcase(
         array $judgeTask,
@@ -2338,6 +2343,7 @@ class JudgeDaemon
         string $workdirpath,
         array $run_config,
         array $compare_config,
+        array $visualiser_config,
         int $output_storage_limit,
         string $overshoot,
         float $startTime
