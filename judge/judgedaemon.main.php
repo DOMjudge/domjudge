@@ -131,6 +131,36 @@ readonly class CompareMetadata
 }
 
 /**
+ * Represents output visualizer script execution metadata with validated fields.
+ * @phpstan-type MetaData_Visualizer array{
+ *     exitcode: string, memory-bytes: string, time-used: string, bytes-transferred: string,
+ *     stdin-bytes: string, stdout-bytes: string, stderr-bytes: string, cpu-time: string,
+ *     sys-time: string, user-time: string, wall-time: string, total-duration-use: string,
+ *     time-result?: string, validator-exited-first?: string
+ * }
+ */
+readonly class VisualizerMetadata
+{
+    public function __construct(
+        public string $exitcode,
+        public bool   $validatorExitedFirst,
+    ) {
+    }
+
+    /**
+     * Create from raw metadata array with validation.
+     * @param MetaData_Visualizer $meta
+     */
+    public static function fromArray(array $meta): self
+    {
+        return new self(
+            exitcode: $meta['exitcode'],
+            validatorExitedFirst: ($meta['validator-exited-first'] ?? '') === 'true',
+        );
+    }
+}
+
+/**
  * Input data for verdict determination, extracted from metadata files.
  * Uses proper value objects instead of raw arrays for type safety and validation.
  */
@@ -2276,6 +2306,70 @@ class JudgeDaemon
             if ($verdict === Verdict::COMPARE_ERROR && !$compareTimedOut) {
                 logmsg(LOG_ERR, sprintf("Comparing failed with exitcode %d, compare script output:\n%s",
                     $exitcode, file_get_contents("$realWorkdir/feedback/judgemessage.txt")));
+            }
+
+            if ($visualizer_config !== [] && in_array($verdict, [Verdict::TIMELIMIT, Verdict::RUN_ERROR, Verdict::WRONG_ANSWER, VERDICT::OUTPUT_LIMIT])) {
+                // TODO: Perhaps we should change this in the database to be an array of args?
+                $orig_visualizer_args = [];
+                if ($visualizer_args !== null && strlen($visualizer_args) > 0) {
+                    $orig_visualizer_args = explode(' ', $visualizer_args);
+                }
+
+                $visualizer_args = array_merge(
+                    $gainroot,
+                    [BINDIR . "/runguard"],
+                    $cpuset,
+                    [
+                        "--user=$runuser",
+                        "--group=$rungroup",
+                        "-m", $scriptmemlimit,
+                        "-t", $scripttimelimit,
+                        "-f", $scriptfilelimit,
+                        "-s", $scriptfilelimit,
+                        "-M", "visualizer.meta",
+                        "--no-core",
+                        "--",
+                        $visualizer_runpath,
+                        "testdata.in",
+                        "testdata.out",
+                        "feedback/",
+                    ],
+                    $orig_visualizer_args,
+                );
+                $this->runCommandSafe($visualizer_args, $exitcode, log_nonzero_exitcode: false, stdin_source: "program.out", stdout_target: "visualizer.tmp", stderr_target: "visualizer.err");
+
+                logmsg(LOG_DEBUG, "checking visualizer script exit status: $exitcode");
+                $visualizer_tmp = is_readable("visualizer.tmp") ? file_get_contents("visualizer.tmp") : "";
+                $visualizer_meta_ini = $this->readMetadata('visualizer.meta');
+                $visualizerTimedOut = false;
+                if (isset($visualizer_meta_ini['internal-error'])) {
+                    $this->handleMetaInternalError($judgetaskid, $visualizer_meta_ini);
+                    return Verdict::INTERNAL_ERROR;
+                }
+                /** @var MetaData_Visualizer $visualizer_meta_ini */
+                logmsg(LOG_DEBUG, "parsed visualizer meta: " . var_export($visualizer_meta_ini, true));
+                if (($visualizer_meta_ini['time-result'] ?? null) === 'timelimit') {
+                    $visualizerTimedOut = true;
+                    logmsg(LOG_ERR, sprintf("Output visualization aborted after the script timelimit of %s seconds, visualizer script output:\n%s", $scripttimelimit, $visualizer_tmp));
+                }
+
+                //TODO: Discuss if this is the right place for this information
+                // Append output validator stdout
+                if ($visualizer_tmp !== '') {
+                    appendToFile("$realWorkdir/feedback/judgemessage.txt", "\n---------- output visualizer (stdout) messages ----------\n");
+                    appendToFile("$realWorkdir/feedback/judgemessage.txt", $visualizer_tmp);
+                }
+                $visualizer_err = is_readable("visualizer.err") ? file_get_contents("visualizer.err") : "";
+                if ($visualizer_err !== '') {
+                    appendToFile("$realWorkdir/feedback/judgemessage.txt", "\n---------- output visualizer (stderr) messages ----------\n");
+                    appendToFile("$realWorkdir/feedback/judgemessage.txt", $visualizer_err);
+                }
+            }
+
+            // TODO: Discuss if we like it more to explicit check for the Verdict as that's
+            // the indication we failed to lock
+            if ($ret = $this->lockDirectory('feedback', $gainroot, $realWorkdir)) {
+                return $ret;
             }
 
             return $verdict;
