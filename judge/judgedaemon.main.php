@@ -2632,6 +2632,21 @@ class JudgeDaemon
                 'compare_metadata' => $this->restEncodeFile($passdir . '/compare.meta', false),
             ];
 
+            $feedback_files = scandir($passdir . '/feedback/');
+            if (!$feedback_files) {
+                logmsg(LOG_WARNING, "Could not scan feedback directory '$passdir/feedback/'");
+            } else {
+                foreach (['visualization_judge' => 'judgeimage', 'visualization_team' => 'teamimage'] as $post_option => $visualization_name) {
+                    foreach ($feedback_files as $feedback_file) {
+                        if (mb_substr($feedback_file, 0, mb_strlen($visualization_name)) === $visualization_name) {
+                            $new_judging_run[$post_option] = $this->restEncodeFile($passdir . '/feedback/' . $feedback_file, false);
+                            $new_judging_run[$post_option . '_mime'] = mb_substr($feedback_file, mb_strlen($visualization_name) + 1);
+                            break;
+                        }
+                    }
+                }
+            }
+
             if ($passLimit > 1) {
                 $new_judging_run['pass'] = $passCnt;
             }
