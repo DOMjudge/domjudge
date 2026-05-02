@@ -107,6 +107,10 @@ class JudgeTask
     #[Serializer\Type('string')]
     private ?int $compare_script_id = null;
 
+    #[ORM\Column(nullable: true, options: ['comment' => 'Output visualizer script ID', 'unsigned' => true])]
+    #[Serializer\Type('string')]
+    private ?int $visualizer_script_id = null;
+
     #[ORM\Column(nullable: true, options: ['comment' => 'Pass number, used for multipass problems', 'unsigned' => true])]
     #[Serializer\Type('string')]
     private ?int $pass = null;
@@ -151,6 +155,17 @@ class JudgeTask
         ]
     )]
     protected ?string $compare_config = null;
+
+    #[ORM\Column(
+        type: 'text',
+        nullable: true,
+        options: [
+            'comment' => 'The output visualizer config as JSON-blob.',
+            'collation' => 'utf8mb4_bin',
+            'default' => null,
+        ]
+    )]
+    protected ?string $visualizer_config = null;
 
     #[ORM\Column(options: ['comment' => 'Only handed out if still valid.', 'default' => 1])]
     #[Serializer\Exclude]
@@ -287,6 +302,17 @@ class JudgeTask
         return $this->compare_script_id;
     }
 
+    public function setVisualizerScriptId(int $visualizer_script_id): JudgeTask
+    {
+        $this->visualizer_script_id = $visualizer_script_id;
+        return $this;
+    }
+
+    public function getVisualizerScriptId(): int
+    {
+        return $this->visualizer_script_id;
+    }
+
     public function setPass(int $pass): JudgeTask
     {
         $this->pass = $pass;
@@ -351,6 +377,17 @@ class JudgeTask
     public function getCompareConfig(): string
     {
         return $this->compare_config;
+    }
+
+    public function setVisualizerConfig(string $visualizer_config): JudgeTask
+    {
+        $this->visualizer_config = $visualizer_config;
+        return $this;
+    }
+
+    public function getVisualizerConfig(): string
+    {
+        return $this->visualizer_config;
     }
 
     public function setValid(bool $valid): JudgeTask
