@@ -1917,8 +1917,11 @@ class JudgeDaemon
         bool $combined_run_compare,
         string $compare_runpath,
         ?string $compare_args,
+        string $visualizer_runpath,
+        ?string $visualizer_args,
         array $run_config,
         array $compare_config,
+        array $visualizer_config,
         ?int $judgetaskid = null
     ) : Verdict {
         // Record some state so that we can properly reset it later in the finally block
@@ -2189,7 +2192,8 @@ class JudgeDaemon
                 $this->runCommandSafe($compare_args, $exitcode, log_nonzero_exitcode: false, stdin_source: "program.out", stdout_target: "compare.tmp", stderr_target: "compare.err");
             }
 
-            if ($ret = $this->lockDirectory('feedback', $gainroot, $realWorkdir)) {
+            // Don't lock the feedback directory yet in case there is a visualizer
+            if ($ret = $this->lockDirectory('feedback', $gainroot, $realWorkdir, $visualizer_config !== [])) {
                 return $ret;
             }
 
@@ -2335,7 +2339,7 @@ class JudgeDaemon
      * @param JudgeTask $judgeTask
      * @param RunConfig $run_config
      * @param CompareConfig $compare_config
-     * @param VisualizerConfig $visualiser_config
+     * @param VisualizerConfig $visualizer_config
      */
     private function runTestcase(
         array $judgeTask,
@@ -2343,7 +2347,7 @@ class JudgeDaemon
         string $workdirpath,
         array $run_config,
         array $compare_config,
-        array $visualiser_config,
+        array $visualizer_config,
         int $output_storage_limit,
         string $overshoot,
         float $startTime
@@ -2381,6 +2385,20 @@ class JudgeDaemon
                 $judgeTask['compare_script_id'],
                 $compare_config['hash'],
                 $judgeTask['judgetaskid']
+            );
+            if (isset($error)) {
+                return false;
+            }
+        }
+
+        $visualizer_runpath = '';
+        if ($judgeTask['visualizer_script_id']) {
+            [$visualizer_runpath, $error] = $this->fetchExecutable(
+                $workdirpath,
+                'visualizer',
+                $judgeTask['visualizer_script_id'],
+                $visualizer_config['hash'],
+                $judgeTask['judgetaskid'],
             );
             if (isset($error)) {
                 return false;
@@ -2456,8 +2474,11 @@ class JudgeDaemon
                 $combined_run_compare,
                 $compare_runpath,
                 $compare_config['compare_args'],
+                $visualizer_runpath,
+                $visualizer_config['visualizer_args'],
                 $run_config,
                 $compare_config,
+                $visualizer_config,
                 $judgeTask['judgetaskid']
             );
 
