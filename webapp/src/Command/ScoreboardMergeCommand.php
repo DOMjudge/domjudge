@@ -192,6 +192,7 @@ readonly class ScoreboardMergeCommand
                 $oldid = $team['id'];
                 $newid = $nextTeamId++;
                 $teamObj->setTeamid($newid);
+                $teamObj->setExternalid(strval($newid));
                 $teams[] = $teamObj;
                 $teamIdMap[$oldid] = $newid;
             }
