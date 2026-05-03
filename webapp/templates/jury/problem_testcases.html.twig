@@ -64,7 +64,7 @@
                     </tr>
                 {% else %}
                     {% set testcase = row.testcase %}
-                    <tr>
+                    <tr class="testcase-in-group">
                         {% if allowEdit %}
                             <td rowspan="2">
                                 <a href="{{  path('jury_testcase_delete', {'testcaseId': testcase.testcaseid}) }}"
@@ -115,7 +115,7 @@
                             {% endif %}
                         </td>
                     </tr>
-                    <tr>
+                    <tr class="testcase-in-group">
                         <td class="filename">
                             <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.externalid, 'rank': testcase.rank, 'type': 'output'}) }}">
                                 {{ testcase.downloadName | split('/') | last }}.{{ extensionMapping.output }}
