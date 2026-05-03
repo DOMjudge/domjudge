@@ -632,6 +632,9 @@ class ProblemController extends BaseController
                 }
 
                 $newDescription = $request->request->all('description')[$rank];
+                if ($newDescription === '') {
+                    $newDescription = null;
+                }
                 if ($newDescription !== $testcase->getDescription(true)) {
                     $testcase->setDescription($newDescription);
                     $messages[] = sprintf('Updated description of testcase %d ', $rank);
