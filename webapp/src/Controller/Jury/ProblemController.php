@@ -632,6 +632,10 @@ class ProblemController extends BaseController
                 }
 
                 $newDescription = $request->request->all('description')[$rank];
+                $newDescription = str_replace("\r\n", "\n", $newDescription);
+                if ($newDescription === '') {
+                    $newDescription = null;
+                }
                 if ($newDescription !== $testcase->getDescription(true)) {
                     $testcase->setDescription($newDescription);
                     $messages[] = sprintf('Updated description of testcase %d ', $rank);
@@ -746,12 +750,16 @@ class ProblemController extends BaseController
             if ($inputOrOutputSpecified && $allOk) {
                 $newTestcase        = new Testcase();
                 $newTestcaseContent = new TestcaseContent();
+                $newTestcaseDescription = $request->request->get('add_desc');
                 $newTestcase
                     ->setContent($newTestcaseContent)
                     ->setRank($maxrank)
                     ->setProblem($problem)
-                    ->setDescription($request->request->get('add_desc'))
                     ->setSample($request->request->has('add_sample'));
+                if (is_string($newTestcaseDescription) && $newTestcaseDescription !== '') {
+                    $newTestcaseDescription = str_replace("\r\n", "\n", $newTestcaseDescription);
+                    $newTestcase->setDescription($newTestcaseDescription);
+                }
                 foreach (['input', 'output'] as $type) {
                     $file          = $request->files->get('add_' . $type);
                     $content       = file_get_contents($file->getRealPath());
