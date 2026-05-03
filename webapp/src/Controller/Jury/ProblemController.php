@@ -634,6 +634,8 @@ class ProblemController extends BaseController
                 $newDescription = $request->request->all('description')[$rank];
                 if ($newDescription === '') {
                     $newDescription = null;
+                } elseif (str_contains($newDescription, "\r\n")) {
+                    $newDescription = str_replace("\r\n", "\n", $newDescription);
                 }
                 if ($newDescription !== $testcase->getDescription(true)) {
                     $testcase->setDescription($newDescription);
