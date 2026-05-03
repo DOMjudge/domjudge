@@ -51,6 +51,9 @@
                             {% if group.acceptScore is not null %}
                                 <span class="badge ms-2 scoring-accept-badge">Accept score: {{ (group.acceptScore + 0) }}</span>
                             {% endif %}
+                            {% if group.outputValidatorFlags %}
+                                <i class="fas fa-code-compare"></i><code>{{ group.outputValidatorFlags }}</code>
+                            {% endif %}
                         </td>
                     </tr>
                 {% elseif row.type == 'no_group' %}
