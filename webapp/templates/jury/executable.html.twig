@@ -51,6 +51,9 @@
                                 <a href="{{ path('jury_problem', {'probId': problem.externalid}) }}">
                                     {{ problem.externalid }} {{ problem | problemBadgeForContest }}
                                 </a>
+                                {% if problem.specialCompareArgs %}
+                                    (<code>{{ problem.specialCompareArgs }}</code>)
+                                {% endif %}
                                 {% set used = true %}
                             {% endfor %}
                         {% elseif executable.type == 'run' %}
