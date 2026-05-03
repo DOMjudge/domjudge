@@ -1,2 +1,2 @@
 on_reject: continue
-grader_flags: sum
+grader_flags: sum, ignore_sample
