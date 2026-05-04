@@ -1273,14 +1273,31 @@ class ProblemController extends BaseController
             $prev = $testcase->getOrigInputFilename();
         }
 
-        $formatString = sprintf('data/%%s/%%0%dd', ceil(log10(count($testcases) + 1)));
+        $formatString = sprintf('%%s/%%0%dd', ceil(log10(count($testcases) + 1)));
         $rankInGroup = 0;
+        $testcaseGroups = [];
         foreach ($testcases as $testcase) {
             $rankInGroup++;
+            $testcaseDirectory = sprintf("data/%s", $isSample ? 'sample' : 'secret');
+            $testcaseDirectoryNot = sprintf("data/%s", $isSample ? 'secret' : 'sample');
+            if ($testcase->getTestcaseGroup()) {
+                //TODO: We might have to handle testcases which are marked as sample but in group data/secret.
+                // There is no good solution here, so just pick any solution which might work.
+                $testcaseDirectory = str_replace($testcaseDirectoryNot, $testcaseDirectory, $testcase->getTestcaseGroup()->getName());
+                $testcaseGroup = $testcase->getTestcaseGroup();
+                $testcaseGroups[$testcaseDirectory] = $testcaseGroup;
+                if (!key_exists('data', $testcaseGroups)) {
+                    foreach($testcaseGroup->getLineage() as $lineage) {
+                        if ($lineage->getName() === 'data') {
+                            $testcaseGroups['data'] = $lineage;
+                        }
+                    }
+                }
+            }
             if ($isStillSorted) {
-                $filenamePrefix = sprintf("data/%s/%s", $isSample ? 'sample' : 'secret', $testcase->getOrigInputFilename());
+                $filenamePrefix = sprintf("%s/%s", $testcaseDirectory, $testcase->getOrigInputFilename());
             } else {
-                $filenamePrefix = sprintf($formatString, $isSample ? 'sample' : 'secret', $rankInGroup);
+                $filenamePrefix = sprintf($formatString, $testcaseDirectory, $rankInGroup);
             }
             $zip->addFromString($filenamePrefix . '.in', $testcase->getContent()->getInput());
             $zip->addFromString($filenamePrefix . '.ans', $testcase->getContent()->getOutput());
@@ -1297,6 +1314,25 @@ class ProblemController extends BaseController
                 $zip->addFromString($filenamePrefix . '.' . $testcase->getImageType(),
                                     $testcase->getContent()->getImage());
             }
+        }
+        foreach ($testcaseGroups as $testcaseDirectory => $testcaseGroup) {
+            $testdataConfig = [];
+            if ($testcaseGroup->getAcceptScore()) {
+                $testdataConfig['accept_score'] = $testcaseGroup->getAcceptScore();
+            }
+            if ($testcaseGroup->getAggregationType()) {
+                $testdataConfig['grader_flags'] = $testcaseGroup->getAggregationType()->name;
+            }
+            if ($testcaseGroup->getOutputValidatorFlags()) {
+                $testdataConfig['output_validator_flags'] = $testcaseGroup->getOutputValidatorFlags();
+            }
+            if ($testcaseGroup->getRangeLowerBound()) {
+                $testdataConfig['range'] = sprintf("range: %d %d", $testcaseGroup->getRangeLowerBound(), $testcaseGroup->getRangeUpperBound());
+            }
+            if ($testcaseGroup->isOnRejectContinue()) {
+                $testdataConfig['on_reject'] = 'continue';
+            }
+            $zip->addFromString($testcaseDirectory . '/testdata.yaml',  Yaml::dump($testdataConfig));
         }
     }
 
