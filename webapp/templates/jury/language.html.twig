@@ -150,7 +150,9 @@
             {%- if is_granted('ROLE_ADMIN') -%}
                 {{ button(path('jury_language_edit', {'langId': language.externalid}), 'Edit', 'primary', 'edit') }}
                 {{ button(path('jury_language_delete', {'langId': language.externalid}), 'Delete', 'danger', 'trash-alt', true) }}
-                {{ button(path('jury_language_request_remaining', {'langId': language.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
+                {% if current_contest %}
+                    {{ button(path('jury_language_request_remaining', {'langId': language.externalid}), 'Judge remaining testcases', 'secondary', 'gavel') }}
+                {% endif %}
             {% endif %}
             {% include 'jury/partials/rejudge_form.html.twig' with {table: 'language', id: language.externalid, buttonClass: 'btn-secondary'} %}
         </div>
