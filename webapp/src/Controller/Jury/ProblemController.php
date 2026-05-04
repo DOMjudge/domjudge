@@ -578,10 +578,15 @@ class ProblemController extends BaseController
 
         $rows        = [];
         $lastLineage = [];
+        $testcaseGroups = [];
         foreach ($testcaseData as $data) {
             /** @var Testcase $testcase */
             $testcase = $data[0];
             $lineage  = $testcase->getTestcaseGroup() ? $testcase->getTestcaseGroup()->getLineage() : [];
+
+            if ($testcase->getTestcaseGroup()) {
+                $testcaseGroups[$testcase->getTestcaseGroup()->getName()] = $testcase->getTestcaseGroup();
+            }
 
             $commonPrefixLength = 0;
             $foundDiff          = false;
@@ -800,6 +805,35 @@ class ProblemController extends BaseController
                         ->setimage($content);
                 }
 
+                if ($newTestcaseGroup = $request->request->get('add_testgroup') and $newTestcaseGroup !== '') {
+                    $testcaseGroup = $testcaseGroups[$newTestcaseGroup] ?? null;
+                    if (!$testcaseGroup) {
+                        $this->addFlash('danger', sprintf('Testcase group "%s" not found', $newTestcaseGroup));
+                        return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                    }
+                    $newTestcase->setTestcaseGroup($testcaseGroup);
+                    // Insert the testcase after the last testcase in the group.
+                    $last = null;
+                    $others = [];
+                    // TODO: This code would fail in case there is an empty group, we would never be able
+                    // to insert a testcase after the last (non-existing) testcase in the group.
+                    foreach ($testcases as $testcaseRank => $testcase) {
+                        if ($testcase->getTestcaseGroup() === $testcaseGroup) {
+                            $last = $testcase;
+                        } elseif ($last !== null) {
+                            // We found the last in our group, and another group for the next testcase
+                            $others[] = $testcase;
+                        }
+                    }
+
+                    foreach(array_reverse($others) as $higherRankTestcase) {
+                        $higherRankTestcase->setRank($higherRankTestcase->getRank() + 1);
+                        // TODO: This is slow but prevents us from doing a transaction
+                        $this->em->flush();
+                    }
+                    $newTestcase->setRank($last->getRank() + 1);
+                }
+
                 $this->em->persist($newTestcase);
                 $this->dj->auditlog('testcase', $problem->getExternalid(), 'added', sprintf("rank %d", $maxrank));
 
@@ -868,6 +902,7 @@ class ProblemController extends BaseController
             'problem' => $problem,
             'testcases' => $testcases,
             'testcaseData' => $testcaseData,
+            'testcaseGroups' => array_keys($testcaseGroups),
             'rows' => $rows,
             'extensionMapping' => Testcase::EXTENSION_MAPPING,
             'allowEdit' => $this->isGranted('ROLE_ADMIN') && empty($lockedContests),

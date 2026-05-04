@@ -204,6 +204,19 @@
             </div>
         </div>
 
+        {% if testcaseGroups != [] %}
+            <div class="row mb-2">
+                <label class="col-sm-2 col-form-label" for="add_testgroup">Testgroup</label>
+                <div class="col-sm-4">
+                    <select class="form-select" name="add_testgroup" id="add_testgroup">
+                        {% for testgroup in testcaseGroups %}
+                            <option value="{{ testgroup }}">{{ testgroup }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        {% endif %}
+
         <input type="submit" class="btn btn-primary mt-3" value="Submit all changes">
     {% endif %}
 
