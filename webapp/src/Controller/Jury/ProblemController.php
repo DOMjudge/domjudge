@@ -13,6 +13,7 @@ use App\Entity\ProblemAttachmentContent;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Testcase;
+use App\Entity\TestcaseAggregationType;
 use App\Entity\TestcaseContent;
 use App\Form\Type\ProblemAttachmentType;
 use App\Form\Type\ProblemType;
@@ -578,10 +579,15 @@ class ProblemController extends BaseController
 
         $rows        = [];
         $lastLineage = [];
+        $testcaseGroups = [];
         foreach ($testcaseData as $data) {
             /** @var Testcase $testcase */
             $testcase = $data[0];
             $lineage  = $testcase->getTestcaseGroup() ? $testcase->getTestcaseGroup()->getLineage() : [];
+
+            if ($testcase->getTestcaseGroup()) {
+                $testcaseGroups[$testcase->getTestcaseGroup()->getName()] = $testcase->getTestcaseGroup();
+            }
 
             $commonPrefixLength = 0;
             $foundDiff          = false;
@@ -630,8 +636,20 @@ class ProblemController extends BaseController
                     $testcase->setSample($newSample);
                     $messages[] = sprintf('Set testcase %d to %sbe a sample testcase', $rank, $newSample ? '' : 'not ');
                 }
+                if ($testcase->getTestcaseGroup()) {
+                    if ($testcase->getSample() && !Utils::startsWith($testcase->getTestcaseGroup()->getName(), 'data/sample')) {
+                        $this->addFlash('warning', "Testcase #" . $rank . " marked as sample but not in sample testgroup.");
+                    } elseif (!$testcase->getSample() && Utils::startsWith($testcase->getTestcaseGroup()->getName(), 'data/sample')) {
+                        $this->addFlash('warning', "Testcase #" . $rank . " not marked as sample but in sample testgroup.");
+                    }
+                }
 
                 $newDescription = $request->request->all('description')[$rank];
+                if ($newDescription === '') {
+                    $newDescription = null;
+                } elseif (str_contains($newDescription, "\r\n")) {
+                    $newDescription = str_replace("\r\n", "\n", $newDescription);
+                }
                 if ($newDescription !== $testcase->getDescription(true)) {
                     $testcase->setDescription($newDescription);
                     $messages[] = sprintf('Updated description of testcase %d ', $rank);
@@ -746,12 +764,15 @@ class ProblemController extends BaseController
             if ($inputOrOutputSpecified && $allOk) {
                 $newTestcase        = new Testcase();
                 $newTestcaseContent = new TestcaseContent();
+                $newTestcaseDescription = $request->request->get('add_desc');
                 $newTestcase
                     ->setContent($newTestcaseContent)
                     ->setRank($maxrank)
                     ->setProblem($problem)
-                    ->setDescription($request->request->get('add_desc'))
                     ->setSample($request->request->has('add_sample'));
+                if ($newTestcaseDescription !== '') {
+                    $newTestcase->setDescription($newTestcaseDescription);
+                }
                 foreach (['input', 'output'] as $type) {
                     $file          = $request->files->get('add_' . $type);
                     $content       = file_get_contents($file->getRealPath());
@@ -791,6 +812,36 @@ class ProblemController extends BaseController
                         ->setimage($content);
                 }
 
+                $newTestcaseGroup = $request->request->get('add_testgroup');
+                if ($newTestcaseGroup !== '') {
+                    $testcaseGroup = $testcaseGroups[$newTestcaseGroup] ?? null;
+                    if (!$testcaseGroup) {
+                        $this->addFlash('danger', sprintf('Testcase group "%s" not found', $newTestcaseGroup));
+                        return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                    }
+                    $newTestcase->setTestcaseGroup($testcaseGroup);
+                    // Insert the testcase after the last testcase in the group.
+                    $last = null;
+                    $others = [];
+                    // TODO: This code would fail in case there is an empty group, we would never be able
+                    // to insert a testcase after the last (non-existing) testcase in the group.
+                    foreach ($testcases as $testcaseRank => $testcase) {
+                        if ($testcase->getTestcaseGroup() === $testcaseGroup) {
+                            $last = $testcase;
+                        } elseif ($last !== null) {
+                            // We found the last in our group, and another group for the next testcase
+                            $others[] = $testcase;
+                        }
+                    }
+
+                    foreach(array_reverse($others) as $higherRankTestcase) {
+                        $higherRankTestcase->setRank($higherRankTestcase->getRank() + 1);
+                        // TODO: This is slow but prevents us from doing a transaction
+                        $this->em->flush();
+                    }
+                    $newTestcase->setRank($last->getRank() + 1);
+                }
+
                 $this->em->persist($newTestcase);
                 $this->dj->auditlog('testcase', $problem->getExternalid(), 'added', sprintf("rank %d", $maxrank));
 
@@ -801,6 +852,13 @@ class ProblemController extends BaseController
                     $inFile->getClientOriginalName(), Utils::printsize($inFile->getSize()),
                     $outFile->getClientOriginalName(), Utils::printsize($outFile->getSize())
                 );
+                if ($maxrank !== $newTestcase->getRank()) {
+                    $message = sprintf(
+                        'Inserted new testcase %d from files %s (%s) and %s (%s)', $newTestcase->getRank(),
+                        $inFile->getClientOriginalName(), Utils::printsize($inFile->getSize()),
+                        $outFile->getClientOriginalName(), Utils::printsize($outFile->getSize())
+                    );
+                }
 
                 if (strlen($newTestcaseContent->getOutput()) > $outputLimit * 1024) {
                     $message .= sprintf(
@@ -859,6 +917,7 @@ class ProblemController extends BaseController
             'problem' => $problem,
             'testcases' => $testcases,
             'testcaseData' => $testcaseData,
+            'testcaseGroups' => array_keys($testcaseGroups),
             'rows' => $rows,
             'extensionMapping' => Testcase::EXTENSION_MAPPING,
             'allowEdit' => $this->isGranted('ROLE_ADMIN') && empty($lockedContests),
@@ -1216,14 +1275,31 @@ class ProblemController extends BaseController
             $prev = $testcase->getOrigInputFilename();
         }
 
-        $formatString = sprintf('data/%%s/%%0%dd', ceil(log10(count($testcases) + 1)));
+        $formatString = sprintf('%%s/%%0%dd', ceil(log10(count($testcases) + 1)));
         $rankInGroup = 0;
+        $testcaseGroups = [];
         foreach ($testcases as $testcase) {
             $rankInGroup++;
+            $testcaseDirectory = sprintf("data/%s", $isSample ? 'sample' : 'secret');
+            $testcaseDirectoryNot = sprintf("data/%s", $isSample ? 'secret' : 'sample');
+            if ($testcase->getTestcaseGroup()) {
+                //TODO: We might have to handle testcases which are marked as sample but in group data/secret.
+                // There is no good solution here, so just pick any solution which might work.
+                $testcaseDirectory = str_replace($testcaseDirectoryNot, $testcaseDirectory, $testcase->getTestcaseGroup()->getName());
+                $testcaseGroup = $testcase->getTestcaseGroup();
+                $testcaseGroups[$testcaseDirectory] = $testcaseGroup;
+                if (!key_exists('data', $testcaseGroups)) {
+                    foreach($testcaseGroup->getLineage() as $lineage) {
+                        if ($lineage->getName() === 'data') {
+                            $testcaseGroups['data'] = $lineage;
+                        }
+                    }
+                }
+            }
             if ($isStillSorted) {
-                $filenamePrefix = sprintf("data/%s/%s", $isSample ? 'sample' : 'secret', $testcase->getOrigInputFilename());
+                $filenamePrefix = sprintf("%s/%s", $testcaseDirectory, $testcase->getOrigInputFilename());
             } else {
-                $filenamePrefix = sprintf($formatString, $isSample ? 'sample' : 'secret', $rankInGroup);
+                $filenamePrefix = sprintf($formatString, $testcaseDirectory, $rankInGroup);
             }
             $zip->addFromString($filenamePrefix . '.in', $testcase->getContent()->getInput());
             $zip->addFromString($filenamePrefix . '.ans', $testcase->getContent()->getOutput());
@@ -1240,6 +1316,25 @@ class ProblemController extends BaseController
                 $zip->addFromString($filenamePrefix . '.' . $testcase->getImageType(),
                                     $testcase->getContent()->getImage());
             }
+        }
+        foreach ($testcaseGroups as $testcaseDirectory => $testcaseGroup) {
+            $testdataConfig = [];
+            if ($testcaseGroup->getAcceptScore()) {
+                $testdataConfig['accept_score'] = $testcaseGroup->getAcceptScore();
+            }
+            if ($testcaseGroup->getAggregationType() !== TestcaseAggregationType::SUM) {
+                $testdataConfig['grader_flags'] = $testcaseGroup->getAggregationType()->name;
+            }
+            if ($testcaseGroup->getOutputValidatorFlags()) {
+                $testdataConfig['output_validator_flags'] = $testcaseGroup->getOutputValidatorFlags();
+            }
+            if ($testcaseGroup->getRangeLowerBound()) {
+                $testdataConfig['range'] = sprintf("range: %d %d", $testcaseGroup->getRangeLowerBound(), $testcaseGroup->getRangeUpperBound());
+            }
+            if ($testcaseGroup->isOnRejectContinue()) {
+                $testdataConfig['on_reject'] = 'continue';
+            }
+            $zip->addFromString($testcaseDirectory . '/testdata.yaml',  Yaml::dump($testdataConfig));
         }
     }
 

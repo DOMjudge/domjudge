@@ -395,6 +395,15 @@ readonly class ImportProblemService
                 }
             }
         }
+        if ($testCaseGroups !== []) {
+            foreach (['data/sample', 'data/secret'] as $default_dir) {
+                if (!key_exists($default_dir, $testCaseGroups)) {
+                    $testcaseGroup = new TestcaseGroup();
+                    $testcaseGroup->setName($default_dir);
+                    $testCaseGroups[$default_dir] = $testcaseGroup;
+                }
+            }
+        }
         foreach ($testCaseGroups as $dir => $testCaseGroup) {
             $parentDir = dirname($dir);
             if (isset($testCaseGroups[$parentDir])) {

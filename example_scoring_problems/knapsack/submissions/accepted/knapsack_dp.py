@@ -2,7 +2,7 @@
 # Optimal solution using dynamic programming
 # Achieves maximum possible value
 # @EXPECTED_RESULTS@: CORRECT
-# @EXPECTED_SCORE@: 100
+# @EXPECTED_SCORE@: 200
 
 def solve():
     capacity = int(input())
