@@ -1008,12 +1008,12 @@ blockquote {
     font-weight: bold;
 }
 
-.table-striped > tbody > tr.testcase-in-group:nth-child(2n+1 of .testcase-in-group) > * {
   /*--bs-table-bg-type: var(--bs-table-striped-bg);*/
+.table-striped > tbody > tr.testcase-in-group:nth-child(2n+1 of .testcase-in-group) > * {
   color: blue
 }
 
-.table-striped > tbody > tr.testcase-in-group:nth-child(2n of .testcase-in-group) > * {
   /*--bs-table-bg-type: var(--bs-table-bg);*/
+.table-striped > tbody > tr.testcase-in-group:nth-child(2n of .testcase-in-group) > * {
   color: red;
 }
