@@ -2,7 +2,7 @@
 # Greedy solution: pick items by value only (ignoring weight efficiency)
 # Achieves suboptimal results
 # @EXPECTED_RESULTS@: CORRECT
-# @EXPECTED_SCORE@: 88.37
+# @EXPECTED_SCORE@: 179.28
 
 def solve():
     capacity = int(input())
