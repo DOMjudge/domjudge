@@ -108,11 +108,11 @@
                             </td>
                         </tr>
                     {% endif %}
-                    {% if problem.visualizerExecutable is not empty %}
+                    {% if problem.outputVisualizerExecutable is not empty %}
                         <tr>
                             <th>Output visualizer script</th>
                             <td class="filename">
-                                <a href="{{ path('jury_executable', {'execId': problem.visualizerExecutable.execid}) }}">{{ problem.visualizerExecutable.execid }}</a>
+                                <a href="{{ path('jury_executable', {'execId': problem.outputVisualizerExecutable.execid}) }}">{{ problem.outputVisualizerExecutable.execid }}</a>
                             </td>
                         </tr>
                     {% endif %}

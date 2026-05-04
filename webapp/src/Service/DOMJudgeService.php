@@ -1673,7 +1673,6 @@ class DOMJudgeService
         );
     }
 
-
     public function getScoreboardZip(
         Request $request,
         RequestStack $requestStack,
