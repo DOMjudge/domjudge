@@ -67,6 +67,13 @@
                                 </a>
                                 {% set used = true %}
                             {% endfor %}
+                        {% elseif executable.type == 'visualizer' %}
+                            {% for problem in executable.problemsVisualizer %}
+                                <a href="{{ path('jury_problem', {'probId': problem.externalid}) }}">
+                                    {{ problem.externalid }} {{ problem | problemBadgeForContest }}
+                                </a>
+                                {% set used = true %}
+                            {% endfor %}
                         {% endif %}
                         {% if not used %}
                             <span class="nodata">none</span>

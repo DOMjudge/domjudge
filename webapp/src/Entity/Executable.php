@@ -211,7 +211,7 @@ class Executable
         if (in_array($this->execid, $configScripts, true)) {
             return true;
         }
-        if (count($this->problems_compare) || count($this->problems_run)) {
+        if (count($this->problems_compare) || count($this->problems_run) || count($this->problems_visualizer)) {
             return true;
         }
         foreach ($this->languages as $lang) {
