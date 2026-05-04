@@ -1007,13 +1007,3 @@ blockquote {
     color: #cb4b16; /* Solarized Orange */
     font-weight: bold;
 }
-
-  /*--bs-table-bg-type: var(--bs-table-striped-bg);*/
-.table-striped > tbody > tr.testcase-in-group:nth-child(2n+1 of .testcase-in-group) > * {
-  color: blue
-}
-
-  /*--bs-table-bg-type: var(--bs-table-bg);*/
-.table-striped > tbody > tr.testcase-in-group:nth-child(2n of .testcase-in-group) > * {
-  color: red;
-}
