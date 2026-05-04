@@ -13,6 +13,7 @@ use App\Entity\ProblemAttachmentContent;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Testcase;
+use App\Entity\TestcaseAggregationType;
 use App\Entity\TestcaseContent;
 use App\Form\Type\ProblemAttachmentType;
 use App\Form\Type\ProblemType;
@@ -811,7 +812,8 @@ class ProblemController extends BaseController
                         ->setimage($content);
                 }
 
-                if ($newTestcaseGroup = $request->request->get('add_testgroup') and $newTestcaseGroup !== '') {
+                $newTestcaseGroup = $request->request->get('add_testgroup');
+                if ($newTestcaseGroup !== '') {
                     $testcaseGroup = $testcaseGroups[$newTestcaseGroup] ?? null;
                     if (!$testcaseGroup) {
                         $this->addFlash('danger', sprintf('Testcase group "%s" not found', $newTestcaseGroup));
@@ -1320,7 +1322,7 @@ class ProblemController extends BaseController
             if ($testcaseGroup->getAcceptScore()) {
                 $testdataConfig['accept_score'] = $testcaseGroup->getAcceptScore();
             }
-            if ($testcaseGroup->getAggregationType()) {
+            if ($testcaseGroup->getAggregationType() !== TestcaseAggregationType::SUM) {
                 $testdataConfig['grader_flags'] = $testcaseGroup->getAggregationType()->name;
             }
             if ($testcaseGroup->getOutputValidatorFlags()) {
