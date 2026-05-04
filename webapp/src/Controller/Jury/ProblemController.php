@@ -756,16 +756,15 @@ class ProblemController extends BaseController
             if ($inputOrOutputSpecified && $allOk) {
                 $newTestcase        = new Testcase();
                 $newTestcaseContent = new TestcaseContent();
-                $newTestcaseDescription = $request->request->get('description');
-                if ($newTestcaseDescription === '') {
-                    $newTestcaseDescription = null;
-                }
+                $newTestcaseDescription = $request->request->get('add_desc');
                 $newTestcase
                     ->setContent($newTestcaseContent)
                     ->setRank($maxrank)
                     ->setProblem($problem)
-                    ->setDescription($newTestcaseDescription)
                     ->setSample($request->request->has('add_sample'));
+                if ($newTestcaseDescription !== '') {
+                    $newTestcase->setDescription($newTestcaseDescription);
+                }
                 foreach (['input', 'output'] as $type) {
                     $file          = $request->files->get('add_' . $type);
                     $content       = file_get_contents($file->getRealPath());
