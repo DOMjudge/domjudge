@@ -90,6 +90,7 @@ maintainer-clean-l:
 			rm -rf var/$$d/$$t ; \
 		done ; \
 	done
+	-rm -rf vendor node_modules LICENSES.txt .env.local
 
 .PHONY: composer-dump-autoload composer-dump-autoload-dev copy-bundle-assets \
         composer-dependencies composer-dependencies-dev node-dependencies
