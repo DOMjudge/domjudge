@@ -1,3 +1,2 @@
 on_reject: continue
 grader_flags: sum
-output_validator_flags: data_root
