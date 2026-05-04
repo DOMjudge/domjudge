@@ -843,6 +843,13 @@ class ProblemController extends BaseController
                     $inFile->getClientOriginalName(), Utils::printsize($inFile->getSize()),
                     $outFile->getClientOriginalName(), Utils::printsize($outFile->getSize())
                 );
+                if ($maxrank !== $newTestcase->getRank()) {
+                    $message = sprintf(
+                        'Inserted new testcase %d from files %s (%s) and %s (%s)', $newTestcase->getRank(),
+                        $inFile->getClientOriginalName(), Utils::printsize($inFile->getSize()),
+                        $outFile->getClientOriginalName(), Utils::printsize($outFile->getSize())
+                    );
+                }
 
                 if (strlen($newTestcaseContent->getOutput()) > $outputLimit * 1024) {
                     $message .= sprintf(
