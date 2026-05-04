@@ -635,6 +635,13 @@ class ProblemController extends BaseController
                     $testcase->setSample($newSample);
                     $messages[] = sprintf('Set testcase %d to %sbe a sample testcase', $rank, $newSample ? '' : 'not ');
                 }
+                if ($testcase->getTestcaseGroup()) {
+                    if ($testcase->getSample() && !Utils::startsWith($testcase->getTestcaseGroup()->getName(), 'data/sample')) {
+                        $this->addFlash('warning', "Testcase #" . $rank . " marked as sample but not in sample testgroup.");
+                    } elseif (!$testcase->getSample() && Utils::startsWith($testcase->getTestcaseGroup()->getName(), 'data/sample')) {
+                        $this->addFlash('warning', "Testcase #" . $rank . " not marked as sample but in sample testgroup.");
+                    }
+                }
 
                 $newDescription = $request->request->all('description')[$rank];
                 if ($newDescription === '') {
