@@ -1009,9 +1009,11 @@ blockquote {
 }
 
 .table-striped > tbody > tr.testcase-in-group:nth-child(2n+1 of .testcase-in-group) > * {
-  --bs-table-bg-type: var(--bs-table-striped-bg);
+  /*--bs-table-bg-type: var(--bs-table-striped-bg);*/
+  color: blue
 }
 
 .table-striped > tbody > tr.testcase-in-group:nth-child(2n of .testcase-in-group) > * {
-  --bs-table-bg-type: var(--bs-table-bg);
+  /*--bs-table-bg-type: var(--bs-table-bg);*/
+  color: red;
 }
