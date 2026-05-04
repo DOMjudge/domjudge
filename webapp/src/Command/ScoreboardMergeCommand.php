@@ -192,6 +192,7 @@ readonly class ScoreboardMergeCommand
                 $oldid = $team['id'];
                 $newid = $nextTeamId++;
                 $teamObj->setTeamid($newid);
+                $teamObj->setExternalid(strval($newid));
                 $teams[] = $teamObj;
                 $teamIdMap[$oldid] = $newid;
             }
@@ -240,15 +241,17 @@ readonly class ScoreboardMergeCommand
                             ->setName($name);
                         $contestProblemObj = (new ContestProblem())
                             ->setProblem($problemObj)
-                            ->setColor($baseProblem['color'])
+                            ->setColor($baseProblem['rgb'])
                             ->setShortName($label);
+                        $contest->addProblem($contestProblemObj);
                         $problems[$id] = $contestProblemObj;
                         $problemNameToIdMap[$name] = $id;
                         $firstSolve[$name] = null;
                     } else {
                         $id = $problemNameToIdMap[$name];
                     }
-                    $scoreCacheObj = (new scoreCache())
+                    $scoreCacheObj = (new ScoreCache())
+                        ->setContest($contest)
                         ->setProblem($problems[$id]->getProblem())
                         ->setTeam($team);
                     if (array_key_exists('time', $problem)) {
