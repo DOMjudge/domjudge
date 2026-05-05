@@ -298,7 +298,6 @@ install_examples()
 {
 	symfony_console domjudge:load-example-data
 	install_pass_fail_problems
-	install_scoring_problems
 }
 
 ### Script starts here ###
