@@ -990,7 +990,12 @@
                             <div class="collapse" id="collapseValMeta-{{ runIdx }}">
                                 <div class="card card-body output_text">{{ runsOutput[runIdx].validatorMetadata  }}</div>
                             </div>
+                        {% endif %}
 
+                        {% if runsOutput[runIdx].visualization is defined and runsOutput[runIdx].visualization is not empty %}
+                            <hr/>
+                            <h5>Output visualization</h5>
+                            <img src="{{ runsOutput[runIdx].visualization }}">
                         {% endif %}
                     {% endif %}
                 </div>

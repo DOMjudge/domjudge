@@ -160,6 +160,10 @@
                                 <p class="nodata">There was no stderr output.</p>
                             {% endif %}
                         {% endif %}
+                        {% if run.visualization is defined and run.visualization is not empty %}
+                            <h6>Output visualization</h6>
+                            <img src="{{ run.visualization }}">
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
             {% endif %} {# not runs is empty #}
