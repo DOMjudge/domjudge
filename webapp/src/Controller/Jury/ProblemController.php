@@ -316,7 +316,7 @@ class ProblemController extends BaseController
             $yaml['validator_flags'] = $problem->getSpecialCompareArgs();
         }
         if (!empty($problem->getSpecialVisualizerArgs())) {
-            $yaml['visualizer_flags'] = $problem->getVisualizerCompareArgs();
+            $yaml['visualizer_flags'] = $problem->getOutputVisualizerCompareArgs();
         }
         if (!empty($problem->getMemlimit())) {
             $yaml['limits']['memory'] = (int)round($problem->getMemlimit() / 1024);
@@ -350,7 +350,7 @@ class ProblemController extends BaseController
         } elseif ($problem->isInteractiveProblem()) {
             $compareExecutable = $problem->getRunExecutable();
         }
-        $visualizerExecutable = $problem->getVisualizerExecutable();
+        $visualizerExecutable = $problem->getOutputVisualizerExecutable();
         foreach(['validators' => $compareExecutable, 'visualizers' => $visualizerExecutable] as $type => $executable) {
             if ($executable) {
                 foreach ($executable->getImmutableExecutable()->getFiles() as $file) {
