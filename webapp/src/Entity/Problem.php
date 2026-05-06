@@ -89,6 +89,10 @@ class Problem extends BaseApiEntity implements
     #[Serializer\Exclude]
     private ?string $special_compare_args = null;
 
+    #[ORM\Column(nullable: true, options: ['comment' => 'Optional arguments to special_visualizer script'])]
+    #[Serializer\Exclude]
+    private ?string $special_visualizer_args = null;
+
     #[Assert\File]
     #[Serializer\Exclude]
     private ?UploadedFile $problemstatementFile = null;
@@ -165,6 +169,11 @@ class Problem extends BaseApiEntity implements
     #[ORM\JoinColumn(name: 'special_run', referencedColumnName: 'execid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Executable $run_executable = null;
+
+    #[ORM\ManyToOne(inversedBy: 'problems_visualizer')]
+    #[ORM\JoinColumn(name: 'visualizer', referencedColumnName: 'execid', onDelete: 'SET NULL')]
+    #[Serializer\Exclude]
+    private ?Executable $visualizer_executable = null;
 
     /**
      * @var Collection<int, Testcase>
@@ -310,6 +319,17 @@ class Problem extends BaseApiEntity implements
     public function getSpecialCompareArgs(): ?string
     {
         return $this->special_compare_args;
+    }
+
+    public function setSpecialVisualizerArgs(?string $specialVisualizerArgs): Problem
+    {
+        $this->special_visualizer_args = $specialVisualizerArgs;
+        return $this;
+    }
+
+    public function getSpecialVisualizerArgs(): ?string
+    {
+        return $this->special_visualizer_args;
     }
 
     /**
@@ -484,6 +504,17 @@ class Problem extends BaseApiEntity implements
     public function getRunExecutable(): ?Executable
     {
         return $this->run_executable;
+    }
+
+    public function setOutputVisualizerExecutable(?Executable $visualizerExecutable = null): Problem
+    {
+        $this->visualizer_executable = $visualizerExecutable;
+        return $this;
+    }
+
+    public function getOutputVisualizerExecutable(): ?Executable
+    {
+        return $this->visualizer_executable;
     }
 
     public function __construct()

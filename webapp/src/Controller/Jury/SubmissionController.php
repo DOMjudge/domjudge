@@ -446,7 +446,11 @@ class SubmissionController extends BaseController
                 ->join('t.content', 'tc')
                 ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
                 ->leftJoin('jr.output', 'jro')
-                ->select('t', 'jr', 'tc.image_thumb AS image_thumb', 'jro.metadata', 'jro.validatorMetadata', 'jr.pass')
+                ->select(
+                    't', 'jr',
+                    'tc.image_thumb AS image_thumb', 'jro.metadata', 'jro.validatorMetadata', 'jr.pass',
+                    'jro.visualization_judge AS visualization'
+                )
                 ->andWhere('t.problem = :problem')
                 ->setParameter('judging', $selectedJudging)
                 ->setParameter('problem', $submission->getProblem())
@@ -526,6 +530,12 @@ class SubmissionController extends BaseController
                 );
                 if ($firstJudgingRun) {
                     $runResult['testcasedir'] = $firstJudgingRun->getTestcaseDir();
+                }
+                if ($runResult['visualization']) {
+                    $runResult['visualization'] = $this->generateUrl(
+                        'jury_submission_visualize',
+                        ['contestId' => $contestId, 'submitId' => $submitId, 'testcaseId' => $testcase->getTestcaseid()],
+                    );
                 }
                 $runsOutput[] = $runResult;
             }
@@ -1413,6 +1423,118 @@ class SubmissionController extends BaseController
         $this->dj->unblockJudgeTasksForSubmission((string)$submission->getSubmitid());
         $this->addFlash('info', "Started judging for submission: $submitId");
         return $this->redirectToRoute('jury_submission', ['contestId' => $contestId, 'submitId' => $submitId]);
+    }
+
+    #[Route(path: '/contests/{contestId}/submissions/{submitId}/{testcaseId}/visualization', name: 'jury_submission_visualize')]
+    public function visualizationForSubmission(
+        Request $request,
+        string $contestId,
+        string $submitId,
+        string $testcaseId,
+        #[MapQueryParameter(name: 'jid')]
+        ?int $judgingId = null,
+        #[MapQueryParameter(name: 'rejudgingid')]
+        ?int $rejudgingId = null
+    ): StreamedResponse {
+        $contest = $this->dj->getContestByExternalId($contestId);
+
+        if (isset($judgingId, $rejudgingId)) {
+            throw new BadRequestHttpException("You cannot specify jid and rejudgingid at the same time.");
+        }
+
+        // If judging ID is not set but rejudging ID is, try to deduce the judging ID from the database.
+        if (!isset($judgingId) && isset($rejudgingId)) {
+            /** @var Judging|null $judging */
+            $judging = $this->em->createQueryBuilder()
+                ->from(Judging::class, 'j')
+                ->select('j')
+                ->innerJoin('j.submission', 's')
+                ->andWhere('j.rejudging = :rejudgingId')
+                ->andWhere('s.externalid = :submitId')
+                ->andWhere('s.contest = :contest')
+                ->setParameter('rejudgingId', $rejudgingId)
+                ->setParameter('submitId', $submitId)
+                ->setParameter('contest', $contest)
+                ->getQuery()
+                ->getOneOrNullResult();
+            if ($judging) {
+                $judgingId = $judging->getJudgingid();
+            }
+        }
+
+        /** @var Submission|null $submission */
+        $submission = $this->em->createQueryBuilder()
+            ->from(Submission::class, 's')
+            ->select('s')
+            ->andWhere('s.externalid = :submitid')
+            ->andWhere('s.contest = :contest')
+            ->setParameter('contest', $contest)
+            ->setParameter('submitid', $submitId)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if (!$submission) {
+            throw new NotFoundHttpException(sprintf('No submission found with ID %s', $submitId));
+        }
+
+        /** @var Judging|null $judging */
+        if ($judgingId) {
+            $judging = $this->em->getRepository(Judging::class)->find($judgingId);
+        } else {
+            $judging = $submission->getValidJudging();
+        }
+
+        if (!$judging) {
+            throw new NotFoundHttpException('No judging found');
+        }
+
+        /** @var JudgingRun|null $run */
+        $run = $this->em->createQueryBuilder()
+            ->from(JudgingRun::class, 'jr')
+            ->join('jr.testcase', 't')
+            ->select('jr')
+            ->andWhere('jr.judging = :judging')
+            ->andWhere('t.ranknumber = :rank')
+            ->setParameter('judging', $judging)
+            ->setParameter('rank', $testcaseId)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if (!$run || !$run->getOutput() || !$run->getOutput()->getVisualization()) {
+            throw new NotFoundHttpException('No visualization found for this testcase');
+        }
+
+        $visualization = $run->getOutput()->getVisualization();
+        $visualizationMime = $run->getOutput()->getVisualizationMime();
+        if (!$visualizationMime) {
+            $visualizationMime = Utils::getImageType($visualization, $error);
+            if ($visualizationMime === false) {
+                $visualizationMime = 'svg';
+            }
+        }
+
+        $filename = sprintf(
+            '%s.t%d.%s.run%d.%s.visualize.%s',
+            $submission->getProblem()->getExternalid(),
+            $run->getTestcase()->getRank(),
+            $submission->getContestProblem()->getShortname(),
+            $run->getRunid(),
+            $submission->getTeam()->getExternalid(),
+            $visualizationMime
+        );
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($visualization): void {
+            echo $visualization;
+        });
+        $response->headers->set('Content-Type', sprintf('%s; name="%s"', $this->dj::EXTENSION_TO_MIMETYPE[$visualizationMime], $filename));
+        $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', $filename));
+        $response->headers->set('Content-Length', (string)strlen($visualization));
+
+        return $response;
+
+
+        return Utils::streamAsBinaryFile($visualization, $filename, $imageType);
     }
 
     /**

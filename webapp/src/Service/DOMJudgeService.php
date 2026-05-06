@@ -1434,6 +1434,14 @@ class DOMJudgeService
         return $executable->getImmutableExecutable();
     }
 
+    public function getImmutableOutputVisualizerExecutable(ContestProblem $problem): ?ImmutableExecutable
+    {
+        return $problem
+            ->getProblem()
+            ->getOutputVisualizerExecutable()
+            ?->getImmutableExecutable();
+    }
+
     /**
      * @return Problem[]
      */
@@ -1646,6 +1654,25 @@ class DOMJudgeService
         );
     }
 
+    public function getOutputVisualizerConfig(ContestProblem $contestProblem, ?string $outputVisualizerFlags = null): string
+    {
+        $executable = $this->getImmutableOutputVisualizerExecutable($contestProblem);
+        if (!$executable) {
+            return '';
+        }
+        $problem = $contestProblem->getProblem();
+        $outputVisualizerFlags ??= $problem->getSpecialVisualizerArgs();
+        return Utils::jsonEncode(
+            [
+                'script_timelimit' => $this->config->get('script_timelimit'),
+                'script_memory_limit' => $this->config->get('script_memory_limit'),
+                'script_filesize_limit' => $this->config->get('script_filesize_limit'),
+                'visualizer_args' => $outputVisualizerFlags,
+                'hash' => $executable->getHash(),
+            ]
+        );
+    }
+
     public function getScoreboardZip(
         Request $request,
         RequestStack $requestStack,
@@ -1785,6 +1812,13 @@ class DOMJudgeService
             ':compile_config' => $this->getCompileConfig($submission),
             ':run_config' => $this->getRunConfig($problem, $submission, $overshoot),
         ];
+        if ($visualizerExecutable = $this->getImmutableOutputVisualizerExecutable($problem)?->getImmutableExecId()) {
+            $judgetaskInsertParams[':visualizer_script_id'] = $visualizerExecutable;
+            $judgetaskInsertParams[':visualizer_config'] = $this->getOutputVisualizerConfig($problem);
+        } else {
+            $judgetaskInsertParams[':visualizer_config'] = Utils::jsonEncode([]);
+        }
+
         $defaultCompareConfig = $this->getCompareConfig($problem);
 
         $judgetaskDefaultParamNames = array_keys($judgetaskInsertParams);

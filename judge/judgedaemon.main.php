@@ -131,6 +131,36 @@ readonly class CompareMetadata
 }
 
 /**
+ * Represents output visualizer script execution metadata with validated fields.
+ * @phpstan-type MetaData_Visualizer array{
+ *     exitcode: string, memory-bytes: string, time-used: string, bytes-transferred: string,
+ *     stdin-bytes: string, stdout-bytes: string, stderr-bytes: string, cpu-time: string,
+ *     sys-time: string, user-time: string, wall-time: string, total-duration-use: string,
+ *     time-result?: string, validator-exited-first?: string
+ * }
+ */
+readonly class VisualizerMetadata
+{
+    public function __construct(
+        public string $exitcode,
+        public bool   $validatorExitedFirst,
+    ) {
+    }
+
+    /**
+     * Create from raw metadata array with validation.
+     * @param MetaData_Visualizer $meta
+     */
+    public static function fromArray(array $meta): self
+    {
+        return new self(
+            exitcode: $meta['exitcode'],
+            validatorExitedFirst: ($meta['validator-exited-first'] ?? '') === 'true',
+        );
+    }
+}
+
+/**
  * Input data for verdict determination, extracted from metadata files.
  * Uses proper value objects instead of raw arrays for type safety and validation.
  */
@@ -148,22 +178,26 @@ readonly class VerdictInput
 }
 
 /**
- * @phpstan-type JudgeTask array{submitid: ?string, contestid: ?string, judgetaskid: int, type: string, priority: int, jobid: ?string,
- *     uuid: ?string, compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string, testcase_id: ?string,
- *     testcase_hash: ?string, compile_config: ?string, run_config: ?string, compare_config: ?string, pass?: string
+ * @phpstan-type JudgeTask array{submitid: ?string, contestid: ?string, judgetaskid: int, type: string, priority: int,
+ *     jobid: ?string, uuid: ?string, testcase_id: ?string, testcase_hash: ?string, pass?: string
+ *     compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string, visualizer_script_id: ?string,
+ *     compile_config: ?string, run_config: ?string, compare_config: ?string, visualizer_config: ?string,
  * }
  * @phpstan-type JudgingRun array{runresult: string, start_time: string, end_time: string, runtime: string,
- *      output_run: string, output_error: string, output_system: string, metadata: string, output_diff: string,
- *      hostname: string, testcasedir: string, compare_metadata: string,
- *      team_message?: string, score?: string
+ *     output_run: string, output_error: string, output_system: string, metadata: string, output_diff: string,
+ *     hostname: string, testcasedir: string, compare_metadata: string,
+ *     team_message?: string, score?: string
  * }
  * @phpstan-type RunConfig array{time_limit: float, memory_limit: int, output_limit: int,
- *      process_limit: int, entry_point: ?string, pass_limit: int, hash: string, overshoot: int
+ *     process_limit: int, entry_point: ?string, pass_limit: int, hash: string, overshoot: int
  * }
  * @phpstan-type CompareConfig array{script_timelimit: int, script_memory_limit: int,
- *      script_filesize_limit: int, compare_args: string, combined_run_compare: bool,
- *      hash: string, is_scoring_problem: bool
+ *     script_filesize_limit: int, compare_args: string, combined_run_compare: bool,
+ *     hash: string, is_scoring_problem: bool
  * }
+ * @phpstan-type VisualizerConfig array{script_timelimit: int, script_memory_limit: int,
+ *    script_filesize_limit: int, visualizer_args: string, hash: string
+ * * }
  * @phpstan-import-type MetaData_Compare from CompareMetaData
  * @phpstan-import-type MetaData_Program from ProgramMetaData
  * This is called Generic, but is 1 on 1 connected with compile.meta
@@ -1127,6 +1161,44 @@ class JudgeDaemon
     }
 
     /**
+     * @param string[] $gainroot
+     */
+    private function lockDirectory(string $directory, array $gainroot, string $realWorkdir, bool $chownOnly = false): ?Verdict
+    {
+        $user = posix_getpwuid(posix_geteuid())['name'];
+        if (!$this->runCommandSafe(
+            array_merge(
+                $gainroot,
+                [
+                    'chown',
+                    '-R',
+                    $user . ":",
+                    "$realWorkdir/$directory"
+                ]
+            )
+        )) {
+            logmsg(LOG_WARNING, "Could not chown '$directory' to '$user'.");
+            return Verdict::INTERNAL_ERROR;
+        }
+
+        if (!$chownOnly) {
+            // Cannot use chmod directly here for recursion.
+            if (!$this->runCommandSafe(
+                [
+                    'chmod',
+                    '-R',
+                    'go-w',
+                    $directory,
+                ]
+            )) {
+                logmsg(LOG_WARNING, "Could not chmod '$directory' to go-w.");
+                return Verdict::INTERNAL_ERROR;
+            }
+        }
+        return null;
+    }
+
+    /**
      * @param string[] $command_parts
      * @param int|DONT_CARE $retval
      */
@@ -1724,6 +1796,7 @@ class JudgeDaemon
         $compile_config = dj_json_decode($judgeTask['compile_config']);
         $run_config = dj_json_decode($judgeTask['run_config']);
         $compare_config = dj_json_decode($judgeTask['compare_config']);
+        $visualizer_config = dj_json_decode($judgeTask['visualizer_config']);
 
         // Set configuration variables for shell scripts (compile.sh, build_executable.sh, etc.)
         // TODO: Consider folding compile.sh into judgedaemon (like compare script execution)
@@ -1766,7 +1839,7 @@ class JudgeDaemon
             return false;
         }
 
-        return $this->runTestcase($judgeTask, $workdir, $workdirpath, $run_config, $compare_config, $output_storage_limit, $overshoot, $startTime);
+        return $this->runTestcase($judgeTask, $workdir, $workdirpath, $run_config, $compare_config, $visualizer_config, $output_storage_limit, $overshoot, $startTime);
     }
 
     /**
@@ -1874,8 +1947,11 @@ class JudgeDaemon
         bool $combined_run_compare,
         string $compare_runpath,
         ?string $compare_args,
+        string $visualizer_runpath,
+        ?string $visualizer_args,
         array $run_config,
         array $compare_config,
+        array $visualizer_config,
         ?int $judgetaskid = null
     ) : Verdict {
         // Record some state so that we can properly reset it later in the finally block
@@ -2146,29 +2222,9 @@ class JudgeDaemon
                 $this->runCommandSafe($compare_args, $exitcode, log_nonzero_exitcode: false, stdin_source: "program.out", stdout_target: "compare.tmp", stderr_target: "compare.err");
             }
 
-            $this->runCommandSafe(
-                array_merge(
-                    $gainroot,
-                    [
-                        'chown',
-                        '-R',
-                        posix_getpwuid(posix_geteuid())['name'] . ":",
-                        "$realWorkdir/feedback"
-                    ]
-                )
-            );
-
-            // Cannot use chmod directly here for recursion.
-            if (!$this->runCommandSafe(
-                [
-                    'chmod',
-                    '-R',
-                    'go-w',
-                    'feedback',
-                ]
-            )) {
-                logmsg(LOG_WARNING, "Could not chmod 'feedback' to go-w.");
-                return Verdict::INTERNAL_ERROR;
+            // Don't lock the feedback directory yet in case there is a visualizer
+            if ($ret = $this->lockDirectory('feedback', $gainroot, $realWorkdir, $visualizer_config !== [])) {
+                return $ret;
             }
 
             // Make sure that feedback file exists, since we assume this later.
@@ -2252,6 +2308,70 @@ class JudgeDaemon
                     $exitcode, file_get_contents("$realWorkdir/feedback/judgemessage.txt")));
             }
 
+            if ($visualizer_config !== [] && in_array($verdict, [Verdict::TIMELIMIT, Verdict::RUN_ERROR, Verdict::WRONG_ANSWER, VERDICT::OUTPUT_LIMIT])) {
+                // TODO: Perhaps we should change this in the database to be an array of args?
+                $orig_visualizer_args = [];
+                if ($visualizer_args !== null && strlen($visualizer_args) > 0) {
+                    $orig_visualizer_args = explode(' ', $visualizer_args);
+                }
+
+                $visualizer_args = array_merge(
+                    $gainroot,
+                    [BINDIR . "/runguard"],
+                    $cpuset,
+                    [
+                        "--user=$runuser",
+                        "--group=$rungroup",
+                        "-m", $scriptmemlimit,
+                        "-t", $scripttimelimit,
+                        "-f", $scriptfilelimit,
+                        "-s", $scriptfilelimit,
+                        "-M", "visualizer.meta",
+                        "--no-core",
+                        "--",
+                        $visualizer_runpath,
+                        "testdata.in",
+                        "testdata.out",
+                        "feedback/",
+                    ],
+                    $orig_visualizer_args,
+                );
+                $this->runCommandSafe($visualizer_args, $exitcode, log_nonzero_exitcode: false, stdin_source: "program.out", stdout_target: "visualizer.tmp", stderr_target: "visualizer.err");
+
+                logmsg(LOG_DEBUG, "checking visualizer script exit status: $exitcode");
+                $visualizer_tmp = is_readable("visualizer.tmp") ? file_get_contents("visualizer.tmp") : "";
+                $visualizer_meta_ini = $this->readMetadata('visualizer.meta');
+                $visualizerTimedOut = false;
+                if (isset($visualizer_meta_ini['internal-error'])) {
+                    $this->handleMetaInternalError($judgetaskid, $visualizer_meta_ini);
+                    return Verdict::INTERNAL_ERROR;
+                }
+                /** @var MetaData_Visualizer $visualizer_meta_ini */
+                logmsg(LOG_DEBUG, "parsed visualizer meta: " . var_export($visualizer_meta_ini, true));
+                if (($visualizer_meta_ini['time-result'] ?? null) === 'timelimit') {
+                    $visualizerTimedOut = true;
+                    logmsg(LOG_ERR, sprintf("Output visualization aborted after the script timelimit of %s seconds, visualizer script output:\n%s", $scripttimelimit, $visualizer_tmp));
+                }
+
+                //TODO: Discuss if this is the right place for this information
+                // Append output validator stdout
+                if ($visualizer_tmp !== '') {
+                    appendToFile("$realWorkdir/feedback/judgemessage.txt", "\n---------- output visualizer (stdout) messages ----------\n");
+                    appendToFile("$realWorkdir/feedback/judgemessage.txt", $visualizer_tmp);
+                }
+                $visualizer_err = is_readable("visualizer.err") ? file_get_contents("visualizer.err") : "";
+                if ($visualizer_err !== '') {
+                    appendToFile("$realWorkdir/feedback/judgemessage.txt", "\n---------- output visualizer (stderr) messages ----------\n");
+                    appendToFile("$realWorkdir/feedback/judgemessage.txt", $visualizer_err);
+                }
+            }
+
+            // TODO: Discuss if we like it more to explicit check for the Verdict as that's
+            // the indication we failed to lock
+            if ($ret = $this->lockDirectory('feedback', $gainroot, $realWorkdir)) {
+                return $ret;
+            }
+
             return $verdict;
         } finally {
             // Restore environment state safely, handling all error conditions
@@ -2313,6 +2433,7 @@ class JudgeDaemon
      * @param JudgeTask $judgeTask
      * @param RunConfig $run_config
      * @param CompareConfig $compare_config
+     * @param VisualizerConfig $visualizer_config
      */
     private function runTestcase(
         array $judgeTask,
@@ -2320,6 +2441,7 @@ class JudgeDaemon
         string $workdirpath,
         array $run_config,
         array $compare_config,
+        array $visualizer_config,
         int $output_storage_limit,
         string $overshoot,
         float $startTime
@@ -2357,6 +2479,20 @@ class JudgeDaemon
                 $judgeTask['compare_script_id'],
                 $compare_config['hash'],
                 $judgeTask['judgetaskid']
+            );
+            if (isset($error)) {
+                return false;
+            }
+        }
+
+        $visualizer_runpath = '';
+        if ($judgeTask['visualizer_script_id']) {
+            [$visualizer_runpath, $error] = $this->fetchExecutable(
+                $workdirpath,
+                'visualizer',
+                $judgeTask['visualizer_script_id'],
+                $visualizer_config['hash'],
+                $judgeTask['judgetaskid'],
             );
             if (isset($error)) {
                 return false;
@@ -2432,8 +2568,11 @@ class JudgeDaemon
                 $combined_run_compare,
                 $compare_runpath,
                 $compare_config['compare_args'],
+                $visualizer_runpath,
+                $visualizer_config['visualizer_args'],
                 $run_config,
                 $compare_config,
+                $visualizer_config,
                 $judgeTask['judgetaskid']
             );
 
@@ -2492,6 +2631,21 @@ class JudgeDaemon
                 'testcasedir' => $testcasedir,
                 'compare_metadata' => $this->restEncodeFile($passdir . '/compare.meta', false),
             ];
+
+            $feedback_files = scandir($passdir . '/feedback/');
+            if (!$feedback_files) {
+                logmsg(LOG_WARNING, "Could not scan feedback directory '$passdir/feedback/'");
+            } else {
+                foreach (['visualization_judge' => 'judgeimage', 'visualization_team' => 'teamimage'] as $post_option => $visualization_name) {
+                    foreach ($feedback_files as $feedback_file) {
+                        if (mb_substr($feedback_file, 0, mb_strlen($visualization_name)) === $visualization_name) {
+                            $new_judging_run[$post_option] = $this->restEncodeFile($passdir . '/feedback/' . $feedback_file, false);
+                            $new_judging_run[$post_option . '_mime'] = mb_substr($feedback_file, mb_strlen($visualization_name) + 1);
+                            break;
+                        }
+                    }
+                }
+            }
 
             if ($passLimit > 1) {
                 $new_judging_run['pass'] = $passCnt;

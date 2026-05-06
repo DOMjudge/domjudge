@@ -648,20 +648,24 @@ class JudgehostController extends AbstractFOSRestController
             }
         }
 
-        $runResult    = $request->request->get('runresult');
-        $startTime    = $request->request->get('start_time');
-        $endTime      = $request->request->get('end_time');
-        $runTime      = $request->request->get('runtime');
-        $outputRun    = $request->request->get('output_run');
-        $outputDiff   = $request->request->get('output_diff');
-        $outputError  = $request->request->get('output_error');
-        $outputSystem = $request->request->get('output_system');
-        $teamMessage  = $request->request->get('team_message');
-        $metadata     = $request->request->get('metadata');
-        $testcasedir  = $request->request->get('testcasedir');
-        $compareMeta  = $request->request->get('compare_metadata');
-        $score        = $request->request->get('score');
-        $pass         = $request->request->get('pass');
+        $runResult              = $request->request->get('runresult');
+        $startTime              = $request->request->get('start_time');
+        $endTime                = $request->request->get('end_time');
+        $runTime                = $request->request->get('runtime');
+        $outputRun              = $request->request->get('output_run');
+        $outputDiff             = $request->request->get('output_diff');
+        $outputError            = $request->request->get('output_error');
+        $outputSystem           = $request->request->get('output_system');
+        $teamMessage            = $request->request->get('team_message');
+        $metadata               = $request->request->get('metadata');
+        $testcasedir            = $request->request->get('testcasedir');
+        $compareMeta            = $request->request->get('compare_metadata');
+        $visualizationJudge     = $request->request->get('visualization_judge');
+        $visualizationTeam      = $request->request->get('visualization_team');
+        $visualizationJudgeMime = $request->request->get('visualization_judge_mime');
+        $visualizationTeamMime  = $request->request->get('visualization_team_mime');
+        $score                  = $request->request->get('score');
+        $pass                   = $request->request->get('pass');
 
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
@@ -669,7 +673,8 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime, $startTime, $endTime,
-            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta, $score, $pass);
+            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata, $testcasedir, $compareMeta,
+            $visualizationJudge, $visualizationTeam, $visualizationJudgeMime, $visualizationTeamMime, $score, $pass);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
@@ -943,6 +948,10 @@ class JudgehostController extends AbstractFOSRestController
         string  $metadata,
         ?string $testcasedir,
         ?string $compareMeta,
+        ?string $visualizationJudge,
+        ?string $visualizationTeam,
+        ?string $visualizationJudgeMime,
+        ?string $visualizationTeamMime,
         ?string $score = null,
         ?string $pass = null
     ): bool {
@@ -969,6 +978,10 @@ class JudgehostController extends AbstractFOSRestController
             $metadata,
             $testcasedir,
             $compareMeta,
+            $visualizationJudge,
+            $visualizationTeam,
+            $visualizationJudgeMime,
+            $visualizationTeamMime,
             $score,
             $pass
         ): void {
@@ -1003,6 +1016,16 @@ class JudgehostController extends AbstractFOSRestController
 
             if ($teamMessage) {
                 $judgingRunOutput->setTeamMessage(base64_decode($teamMessage));
+            }
+
+            if ($visualizationJudge) {
+                $judgingRunOutput->setVisualization(base64_decode($visualizationJudge));
+                $judgingRunOutput->setVisualizationMime($visualizationJudgeMime);
+            }
+
+            if ($visualizationTeam) {
+                $judgingRunOutput->setVisualizationTeam(base64_decode($visualizationTeam));
+                $judgingRunOutput->setVisualizationTeamMime($visualizationTeamMime);
             }
 
             if ($score) {
@@ -1308,7 +1331,7 @@ class JudgehostController extends AbstractFOSRestController
         return match ($type) {
             'source' => throw new BadRequestHttpException('Source files require contest ID. Use /get_files/source/{contestId}/{id}'),
             'testcase' => $this->getTestcaseFiles($id),
-            'compare', 'compile', 'debug', 'run' => $this->getExecutableFiles($id),
+            'compare', 'compile', 'debug', 'run', 'visualizer' => $this->getExecutableFiles($id),
             default => throw new BadRequestHttpException('Unknown type requested.'),
         };
     }

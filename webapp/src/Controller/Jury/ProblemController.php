@@ -315,6 +315,9 @@ class ProblemController extends BaseController
         if (!empty($problem->getSpecialCompareArgs())) {
             $yaml['validator_flags'] = $problem->getSpecialCompareArgs();
         }
+        if (!empty($problem->getSpecialVisualizerArgs())) {
+            $yaml['visualizer_flags'] = $problem->getOutputVisualizerCompareArgs();
+        }
         if (!empty($problem->getMemlimit())) {
             $yaml['limits']['memory'] = (int)round($problem->getMemlimit() / 1024);
         }
@@ -347,17 +350,20 @@ class ProblemController extends BaseController
         } elseif ($problem->isInteractiveProblem()) {
             $compareExecutable = $problem->getRunExecutable();
         }
-        if ($compareExecutable) {
-            foreach ($compareExecutable->getImmutableExecutable()->getFiles() as $file) {
-                $filename = sprintf('output_validators/%s/%s', $compareExecutable->getExecid(), $file->getFilename());
-                $zip->addFromString($filename, $file->getFileContent());
-                if ($file->isExecutable()) {
-                    // 100755 = regular file, executable
-                    $zip->setExternalAttributesName(
-                        $filename,
-                        ZipArchive::OPSYS_UNIX,
-                        octdec('100755') << 16
-                    );
+        $visualizerExecutable = $problem->getOutputVisualizerExecutable();
+        foreach(['validators' => $compareExecutable, 'visualizers' => $visualizerExecutable] as $type => $executable) {
+            if ($executable) {
+                foreach ($executable->getImmutableExecutable()->getFiles() as $file) {
+                    $filename = sprintf('output_%s/%s/%s', $type, $executable->getExecid(), $file->getFilename());
+                    $zip->addFromString($filename, $file->getFileContent());
+                    if ($file->isExecutable()) {
+                        // 100755 = regular file, executable
+                        $zip->setExternalAttributesName(
+                            $filename,
+                            ZipArchive::OPSYS_UNIX,
+                            octdec('100755') << 16
+                        );
+                    }
                 }
             }
         }

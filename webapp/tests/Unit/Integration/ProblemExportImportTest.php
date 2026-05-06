@@ -138,14 +138,16 @@ class ProblemExportImportTest extends BaseTestCase
                 continue;
             }
 
-            // Normalize output_validators/ directory names: on re-import the
+            // Normalize output_{validator,visualizer}s/ directory names: on re-import the
             // executable ID is derived from the zip filename, so the
             // subdirectory would change. Normalize to a hardcoded placeholder.
-            $filename = preg_replace(
-                '#^output_validators/[^/]+/#',
-                'output_validators/_normalized_/',
-                $filename
-            );
+            foreach (['validator', 'visualizer'] as $outputType) {
+                $filename = preg_replace(
+                    '#^output_' . $outputType . 's/[^/]+/#',
+                    'output_' . $outputType . 's/_normalized_/',
+                    $filename
+                );
+            }
 
             $normalized[$filename] = $content;
         }

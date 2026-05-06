@@ -90,17 +90,20 @@ class ExecutableController extends BaseController
                 ->join('cp.problem', 'p')
                 ->leftJoin('p.compare_executable', 'ecomp')
                 ->leftJoin('p.run_executable', 'erun')
-                ->andWhere('ecomp IS NOT NULL OR erun IS NOT NULL')
+                ->leftJoin('p.visualizer_executable', 'evis')
+                ->andWhere('ecomp IS NOT NULL OR erun IS NOT NULL OR evis IS NOT NULL')
                 ->getQuery()->getResult();
             $executablesWithContestProblems = $em->createQueryBuilder()
                 ->select('e')
                 ->from(Executable::class, 'e')
                 ->leftJoin('e.problems_compare', 'pcomp')
                 ->leftJoin('e.problems_run', 'prun')
-                ->where('pcomp IS NOT NULL OR prun IS NOT NULL')
+                ->leftJoin('e.problems_visualizer', 'pvis')
+                ->where('pcomp IS NOT NULL OR prun IS NOT NULL OR pvis IS NOT NULL')
                 ->leftJoin('pcomp.contest_problems', 'cpcomp')
                 ->leftJoin('prun.contest_problems', 'cprun')
-                ->andWhere('cprun.contest = :contest OR cpcomp.contest = :contest')
+                ->leftJoin('pvis.contest_problems', 'cpvis')
+                ->andWhere('cprun.contest = :contest OR cpcomp.contest = :contest OR cpvis.contest = :contest')
                 ->setParameter('contest', $this->dj->getCurrentContest())
                 ->getQuery()->getResult();
         }
@@ -108,7 +111,11 @@ class ExecutableController extends BaseController
         foreach ($executables as $e) {
             $badges = [];
             if (in_array($e, $executablesWithContestProblems)) {
-                foreach (array_merge($e->getProblemsRun()->toArray(), $e->getProblemsCompare()->toArray()) as $execProblem) {
+                foreach (array_merge(
+                    $e->getProblemsRun()->toArray(),
+                    $e->getProblemsCompare()->toArray(),
+                    $e->getProblemsVisualizer()->toArray()
+                ) as $execProblem) {
                     $execContestProblems = $execProblem->getContestProblems();
                     foreach ($contestProblemsWithExecutables as $cp) {
                         if ($execContestProblems->contains($cp)) {
@@ -134,6 +141,7 @@ class ExecutableController extends BaseController
                 'compile' => 'language',
                 'debug' => 'bug',
                 'run' => 'person-running',
+                'visualizer' => 'brush',
                 default => 'question',
             };
             $execdata['badges']['value'] = $badges;
