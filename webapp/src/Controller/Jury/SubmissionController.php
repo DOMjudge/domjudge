@@ -534,7 +534,7 @@ class SubmissionController extends BaseController
                 if ($runResult['visualization']) {
                     $runResult['visualization'] = $this->generateUrl(
                         'jury_submission_visualize',
-                        ['contestId' => $contestId, 'submitId' => $submitId, 'testcaseId' => $testcase->getTestcaseid()],
+                        ['contestId' => $contestId, 'submitId' => $submitId, 'testcaseId' => $testcase->getRank()],
                     );
                 }
                 $runsOutput[] = $runResult;
