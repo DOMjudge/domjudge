@@ -1532,9 +1532,6 @@ class SubmissionController extends BaseController
         $response->headers->set('Content-Length', (string)strlen($visualization));
 
         return $response;
-
-
-        return Utils::streamAsBinaryFile($visualization, $filename, $imageType);
     }
 
     /**

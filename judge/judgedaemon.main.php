@@ -179,9 +179,9 @@ readonly class VerdictInput
 
 /**
  * @phpstan-type JudgeTask array{submitid: ?string, contestid: ?string, judgetaskid: int, type: string, priority: int,
- *     jobid: ?string, uuid: ?string, testcase_id: ?string, testcase_hash: ?string, pass?: string
+ *     jobid: ?string, uuid: ?string, testcase_id: ?string, testcase_hash: ?string, pass?: string,
  *     compile_script_id: ?string, run_script_id: ?string, compare_script_id: ?string, visualizer_script_id: ?string,
- *     compile_config: ?string, run_config: ?string, compare_config: ?string, visualizer_config: ?string,
+ *     compile_config: ?string, run_config: ?string, compare_config: ?string, visualizer_config: ?string
  * }
  * @phpstan-type JudgingRun array{runresult: string, start_time: string, end_time: string, runtime: string,
  *     output_run: string, output_error: string, output_system: string, metadata: string, output_diff: string,
@@ -197,9 +197,10 @@ readonly class VerdictInput
  * }
  * @phpstan-type VisualizerConfig array{script_timelimit: int, script_memory_limit: int,
  *    script_filesize_limit: int, visualizer_args: string, hash: string
- * * }
+ * }|array{}
  * @phpstan-import-type MetaData_Compare from CompareMetaData
  * @phpstan-import-type MetaData_Program from ProgramMetaData
+ * @phpstan-import-type MetaData_Visualizer from VisualizerMetaData
  * This is called Generic, but is 1 on 1 connected with compile.meta
  * @phpstan-type MetaData_Generic array{
  *     exitcode: string, memory-bytes: string, time-used: string, time-result: string,
@@ -1937,6 +1938,7 @@ class JudgeDaemon
      * @param array{cpu: array{0: float, 1: float}, wall: array{0: float, 1: float}} $timelimit
      * @param RunConfig $run_config
      * @param CompareConfig $compare_config
+     * @param VisualizerConfig $visualizer_config
      */
     private function testcaseRunInternal(
         string $input,
@@ -2308,8 +2310,10 @@ class JudgeDaemon
                     $exitcode, file_get_contents("$realWorkdir/feedback/judgemessage.txt")));
             }
 
-            if ($visualizer_config !== [] && in_array($verdict, [Verdict::TIMELIMIT, Verdict::RUN_ERROR, Verdict::WRONG_ANSWER, VERDICT::OUTPUT_LIMIT])) {
+            if ($visualizer_config !== [] && in_array($verdict, [Verdict::TIMELIMIT, Verdict::RUN_ERROR, Verdict::WRONG_ANSWER, Verdict::OUTPUT_LIMIT])) {
                 // TODO: Perhaps we should change this in the database to be an array of args?
+                $scriptmemlimit = (string)$visualizer_config['script_memory_limit'];
+                $scriptfilelimit = (string)$visualizer_config['script_filesize_limit'];
                 $orig_visualizer_args = [];
                 if ($visualizer_args !== null && strlen($visualizer_args) > 0) {
                     $orig_visualizer_args = explode(' ', $visualizer_args);

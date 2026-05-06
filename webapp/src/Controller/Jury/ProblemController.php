@@ -316,7 +316,7 @@ class ProblemController extends BaseController
             $yaml['validator_flags'] = $problem->getSpecialCompareArgs();
         }
         if (!empty($problem->getSpecialVisualizerArgs())) {
-            $yaml['visualizer_flags'] = $problem->getOutputVisualizerCompareArgs();
+            $yaml['visualizer_flags'] = $problem->getSpecialVisualizerArgs();
         }
         if (!empty($problem->getMemlimit())) {
             $yaml['limits']['memory'] = (int)round($problem->getMemlimit() / 1024);
