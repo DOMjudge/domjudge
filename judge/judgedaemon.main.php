@@ -2573,7 +2573,7 @@ class JudgeDaemon
                 $compare_runpath,
                 $compare_config['compare_args'],
                 $visualizer_runpath,
-                $visualizer_config['visualizer_args'],
+                $visualizer_config['visualizer_args'] ?? null,
                 $run_config,
                 $compare_config,
                 $visualizer_config,
