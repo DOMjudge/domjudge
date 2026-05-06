@@ -351,7 +351,7 @@ class ProblemController extends BaseController
             $compareExecutable = $problem->getRunExecutable();
         }
         $visualizerExecutable = $problem->getOutputVisualizerExecutable();
-        foreach(['validators' => $compareExecutable, 'visualizers' => $visualizerExecutable] as $type => $executable) {
+        foreach (['validators' => $compareExecutable, 'visualizers' => $visualizerExecutable] as $type => $executable) {
             if ($executable) {
                 foreach ($executable->getImmutableExecutable()->getFiles() as $file) {
                     $filename = sprintf('output_%s/%s/%s', $type, $executable->getExecid(), $file->getFilename());
