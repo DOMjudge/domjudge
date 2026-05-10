@@ -54,6 +54,23 @@ dj_umount() {
 	set -e
 }
 
+CHROOTDIR_OPT=""
+while getopts "c:" opt; do
+  case $opt in
+    c)
+      CHROOTDIR="${CHROOTDIR//domjudge/$OPTARG}"
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      ;;
+    *)
+      echo "Invalid option specified." >&2
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+
 case "$1" in
 	check)
 		if [ ! -d "$CHROOTDIR" ]; then
@@ -133,6 +150,8 @@ case "$1" in
 
 	*)
 		echo "Unknown argument '$1' given."
+		echo "Valid arguments: check, start & stop."
+		echo "Valid options: -c <custom_chroot>."
 		exit 1
 esac
 
