@@ -1925,7 +1925,7 @@ class DOMJudgeService
             return false;
         }
 
-        preg_match("/\d.\d.\d/", $this->domjudgeVersion, $matches);
+        preg_match("/\d+.\d+.\d+/", $this->domjudgeVersion, $matches);
         $extractedLocalVersionString = $matches[0];
         if ($this->config->get('check_new_version', false) === UpdateStrategy::INCREMENTAL) {
             /* Steer towards the nearest highest patch release first
@@ -1937,9 +1937,11 @@ class DOMJudgeService
              * instead of going to the latest release:
              * DJ6.0.0 -> DJ9.1.2
              */
-            $patch = "/" . $localVersion[0] . "." . $localVersion[1] . ".\d/";
-            $minor = "/" . $localVersion[0] . ".\d.\d/";
-            $major = "/\d.\d.\d/";
+            $patch = "/" . $localVersion[0] . "." . $localVersion[1] . ".\d+/";
+            $minor = "/" . $localVersion[0] . ".\d+.\d+/";
+            $major = "/\d+.\d+.\d+/";
+            // Natural sort would let us find the lowest patch first
+            $versions = array_reverse($versions);
             foreach ([$patch, $minor, $major] as $regex) {
                 foreach ($versions as $release) {
                     if (preg_match($regex, $release)) {
