@@ -45,6 +45,7 @@ jobs:
         run: |
           cd .github/jobs/data/
           mv qodana/${{ matrix.language }}/container.yml Dockerfile
+          ls -atrl
           docker build -t domjudge/jetbrains-temp .
           cd ../../..
           docker images

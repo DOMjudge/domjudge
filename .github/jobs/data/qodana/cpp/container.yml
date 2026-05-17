@@ -1,6 +1,7 @@
 FROM jetbrains/qodana-cpp:2026.1
 
-COPY .github/jobs/data/qodana/cpp/trixie /etc/apt/sources.list.d/
+#COPY .github/jobs/data/qodana/cpp/trixie /etc/apt/sources.list.d/
+COPY qodana/cpp/trixie /etc/apt/sources.list.d/
 
 RUN apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
