@@ -3,11 +3,11 @@ on:
   push:
     branches:
       - qodana_second_try
-  merge_group:
-  pull_request:
-    branches:
-      - main
-      - '[0-9]+.[0-9]+'
+  #merge_group:
+  #pull_request:
+  #  branches:
+  #    - main
+  #    - '[0-9]+.[0-9]+'
 
 jobs:
   qodana:
@@ -15,19 +15,19 @@ jobs:
     strategy:
       matrix:
         include:
-          - language: php
-            secret: QODANA_TOKEN
-          - language: python
-            secret: QODANA_PYTHON_TOKEN
-          - language: js
-            secret: QODANA_JS_TOKEN
-          - language: jvm
-            secret: QODANA_JVM_TOKEN
+          #- language: php
+          #  secret: QODANA_TOKEN
+          #- language: python
+          #  secret: QODANA_PYTHON_TOKEN
+          #- language: js
+          #  secret: QODANA_JS_TOKEN
+          #- language: jvm
+          #  secret: QODANA_JVM_TOKEN
           - language: cpp
             secret: QODANA_CPP_TOKEN
-          # We need a compile_commands.json
-          - language: clang
-            secret: QODANA_CLANG_TOKEN
+          ## We need a compile_commands.json
+          ##- language: clang
+          ##  secret: QODANA_PYTHON_TOKEN
     permissions:
       contents: write
       pull-requests: write
@@ -61,9 +61,9 @@ jobs:
             --baseline qodana.sarif.json --image docker.io/domjudge/jetbrains-temp:tmp
           upload-result: true
           artifact-name: qodana-report-${{ matrix.language }}
-          pr-mode: true
+          #pr-mode: true
           post-pr-comment: false
-          push-fixes: pull-request
+          #push-fixes: pull-request
         env:
           QODANA_TOKEN: ${{ secrets[matrix.secret] }}
       - name: Upload Qodana logs
