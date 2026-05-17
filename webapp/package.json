@@ -1,4 +1,5 @@
 {
+  "license": "GPL-2.0+",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",
     "@melloware/coloris": "^0.25.0",
