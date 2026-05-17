@@ -25,9 +25,9 @@ jobs:
           #  secret: QODANA_JVM_TOKEN
           - language: cpp
             secret: QODANA_CPP_TOKEN
-          ## We need a compile_commands.json
-          ##- language: clang
-          ##  secret: QODANA_PYTHON_TOKEN
+          # We need a compile_commands.json
+          - language: clang
+            secret: QODANA_PYTHON_TOKEN
     permissions:
       contents: write
       pull-requests: write
@@ -39,7 +39,7 @@ jobs:
           fetch-depth: 0  # a full history is required for pull request analysis
       - name: Gather right Qodana configuration files
         run: |
-          mv .github/jobs/data/qodana_${{ matrix.language }}.yml qodana.yml || true
+          mv .github/jobs/data/qodana/${{ matrix.language }}/container.yml qodana.yml || true
           mv .github/jobs/data/qodana_${{ matrix.language }}.sarif.json qodana.sarif.json || true
       - name: Build intermediate container
         run: |
