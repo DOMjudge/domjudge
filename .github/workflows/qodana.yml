@@ -51,6 +51,7 @@ jobs:
           docker images
       - name: Build compiler instructions
         run: |
+          ls -atrl .github/jobs/data/qodana/${{ matrix.language }}/instructions.sh
           docker run  \
             -v "$(pwd):$(pwd)" -w "$(pwd)" \
             --entrypoint .github/jobs/data/qodana/${{ matrix.language }}/instructions.sh \
@@ -59,7 +60,7 @@ jobs:
         uses: JetBrains/qodana-action@v2025.3
         with:
           args: |
-            --baseline qodana.sarif.json --image docker.io/domjudge/jetbrains-temp:tmp
+            --baseline qodana.sarif.json --image localhost/domjudge/jetbrains-temp:latest
           upload-result: true
           artifact-name: qodana-report-${{ matrix.language }}
           #pr-mode: true
