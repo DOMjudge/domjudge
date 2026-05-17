@@ -45,8 +45,8 @@ ifeq (, $(shell command -v yarn || command -v yarnpkg 2> /dev/null))
 	$(error "neither 'yarnpkg' nor 'yarn' command found in $(PATH), install it via your package manager or https://yarnpkg.com/cli/node")
 endif
 	@YARN_CMD=$(shell command -v yarn || command -v yarnpkg); \
-	$$YARN_CMD install; \
-	$$YARN_CMD licenses generate-disclaimer > LICENSES.txt 2>/dev/null || \
+	$$YARN_CMD $(subst 1,-s,$(QUIET)) install; \
+	$$YARN_CMD $(subst 1,-s,$(QUIET)) licenses generate-disclaimer > LICENSES.txt 2>/dev/null || \
 		echo "Warning: 'yarn licenses' not available; skipping LICENSES.txt generation."
 
 # Run Symfony in dev mode (for maintainer-mode):
