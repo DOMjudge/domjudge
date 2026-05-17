@@ -1,8 +1,10 @@
-FROM jetbrains/qodana-cpp:2025.3-eap
+FROM jetbrains/qodana-cpp:2026.1
+
+COPY .github/jobs/data/qodana/cpp/trixie /etc/apt/sources.list.d/
 
 RUN apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
-	python3-pip libcgroup-dev clang-19 gcc g++ \
+	python3-pip libcgroup-dev gcc g++ \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install compiledb --break-system-packages
