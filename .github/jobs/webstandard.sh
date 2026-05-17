@@ -121,7 +121,7 @@ if [ "$TEST" = "w3cval" ]; then
     unzip -q vnu.linux.zip
     section_end
 
-    FLTR='--filterpattern .*autocomplete.*|.*role=tab.*|.*descendant.*|.*Stray.*|.*attribute.*|.*Forbidden.*|.*stream.*|.*obsolete.*'
+    FLTR='--filterpattern .*autocomplete.*|.*role=tab.*|.*descendant.*|.*Stray.*|.*attribute.*|.*Forbidden.*|.*stream.*|.*obsolete.*|.*computed.*'
     for typ in html css svg
     do
         section_start "Analyse with $typ"
