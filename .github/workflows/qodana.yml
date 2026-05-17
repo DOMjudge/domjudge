@@ -48,6 +48,7 @@ jobs:
           ls -atrl
           docker build -t domjudge/jetbrains-temp .
           cd ../../..
+          set -x
           docker images
           docker run -t domjudge/jetbrains-temp:latest /bin/true
           docker run -t docker.io/domjudge/jetbrains-temp:latest /bin/true
