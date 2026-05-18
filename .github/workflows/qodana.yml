@@ -50,9 +50,9 @@ jobs:
           cd ../../..
           set -x
           docker images
-          docker run -t domjudge/jetbrains-temp:latest --entrypoint /bin/true
-          docker run -t docker.io/domjudge/jetbrains-temp:latest --entrypoint /bin/true
-          docker run -t localhost/domjudge/jetbrains-temp:latest --entrypoint /bin/true
+          docker run -t --entrypoint /bin/true domjudge/jetbrains-temp:latest
+          docker run -t --entrypoint /bin/true docker.io/domjudge/jetbrains-temp:latest
+          docker run -t --entrypoint /bin/true localhost/domjudge/jetbrains-temp:latest
       - name: Build compiler instructions
         run: |
           ls -atrl .github/jobs/data/qodana/${{ matrix.language }}/instructions.sh
