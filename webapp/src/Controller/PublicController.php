@@ -269,11 +269,11 @@ class PublicController extends BaseController
     {
         $contest = $this->dj->getCurrentContest(onlyPublic: true);
         if (!$contest || !$contest->getFreezeData()->started()) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+            throw new NotFoundHttpException(sprintf('Problem %s not found or not available', $probId));
         }
         $contestProblem = $this->em->getRepository(ContestProblem::class)->findByProblemAndContest($contest, $probId);
         if (!$contestProblem) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+            throw new NotFoundHttpException(sprintf('Problem %s not found or not available', $probId));
         }
 
         return $response($probId, $contest, $contestProblem);
