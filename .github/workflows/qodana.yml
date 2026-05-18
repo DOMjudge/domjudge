@@ -52,7 +52,7 @@ jobs:
           docker images
           docker run -t --entrypoint /bin/true domjudge/jetbrains-temp:latest
           docker run -t --entrypoint /bin/true docker.io/domjudge/jetbrains-temp:latest
-          docker run -t --entrypoint /bin/true localhost/domjudge/jetbrains-temp:latest
+          #docker run -t --entrypoint /bin/true localhost/domjudge/jetbrains-temp:latest
       - name: Build compiler instructions
         run: |
           ls -atrl .github/jobs/data/qodana/${{ matrix.language }}/instructions.sh
@@ -60,6 +60,7 @@ jobs:
             -v "$(pwd):$(pwd)" -w "$(pwd)" \
             --entrypoint .github/jobs/data/qodana/${{ matrix.language }}/instructions.sh \
             domjudge/jetbrains-temp
+          find ./ -name "*compile*commands*"
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
         with:
