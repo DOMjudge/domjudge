@@ -61,6 +61,14 @@ jobs:
             --entrypoint .github/jobs/data/qodana/${{ matrix.language }}/instructions.sh \
             domjudge/jetbrains-temp
           find ./ -name "*compile*commands*"
+      - name: Show compiler instructions
+        run: |
+          echo "Created instructions"
+          cat compile_commands.json
+          echo "Current location"
+          pwd
+          echo "Other files here"
+          ls -atrl
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
         with:
