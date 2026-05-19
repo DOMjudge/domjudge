@@ -79,3 +79,9 @@ jobs:
         with:
           name: qodana-logs-${{ matrix.language }}
           path: /home/runner/work/_temp/qodana/results
+      - name: Upload full directory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-directory-${{ matrix.language }}
+          path: /home/runner/work
