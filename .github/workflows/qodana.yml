@@ -56,10 +56,10 @@ jobs:
             -v "$(pwd):/data/project" -w "/data/project" \
             --entrypoint .github/jobs/data/qodana/${{ matrix.language }}/instructions.sh \
             domjudge/jetbrains-temp
-          ls -atrl compile_commands.json
+          ls -atrl compile_commands.json | true
       - name: Show compiler instructions
         run: |
-          cat compile_commands.json
+          cat compile_commands.json | true
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
         with:
