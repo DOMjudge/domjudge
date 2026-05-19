@@ -57,7 +57,7 @@ jobs:
         run: |
           ls -atrl .github/jobs/data/qodana/${{ matrix.language }}/instructions.sh
           docker run  \
-            -v "$(pwd):$(pwd)" -w "$(pwd)" \
+            -v "$(pwd):/data/project" -w "/data/project" \
             --entrypoint .github/jobs/data/qodana/${{ matrix.language }}/instructions.sh \
             domjudge/jetbrains-temp
           find ./ -name "*compile*commands*"
@@ -95,4 +95,4 @@ jobs:
           path: /home/runner/work
       - name: Search for the report in case it is in the cache dir
         if: always()
-        run: find / -name report
+        run: find / -name report 2>/dev/zero
