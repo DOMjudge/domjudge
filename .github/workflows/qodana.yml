@@ -86,4 +86,5 @@ jobs:
           name: debug-directory-${{ matrix.language }}
           path: /home/runner/work
       - name: Search for the report in case it is in the cache dir
+        if: always()
         run: find / -name report
