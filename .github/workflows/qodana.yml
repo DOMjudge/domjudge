@@ -51,7 +51,7 @@ jobs:
           docker run -t --entrypoint /bin/true domjudge/jetbrains-temp:latest
           docker run -t --entrypoint /bin/true docker.io/domjudge/jetbrains-temp:latest
       - name: Build compiler instructions
-        if: matrix.language == 'cpp' or matrix.language == 'clang'
+        if: ${{ matrix.language == 'cpp' or matrix.language == 'clang' }}
         run: |
           docker run  \
             -v "$(pwd):/data/project" -w "/data/project" \
@@ -59,7 +59,7 @@ jobs:
             domjudge/jetbrains-temp
           ls -atrl compile_commands.json | true
       - name: Show compiler instructions
-        if: matrix.language == 'cpp' or matrix.language == 'clang'
+        if: ${{ matrix.language == 'cpp' or matrix.language == 'clang' }}
         run: |
           cat compile_commands.json | true
       - name: 'Qodana Scan'
