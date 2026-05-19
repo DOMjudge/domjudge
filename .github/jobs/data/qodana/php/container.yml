@@ -1,0 +1,1 @@
+FROM jetbrains/qodana-cpp:2026.1
