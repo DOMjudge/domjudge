@@ -73,22 +73,37 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
-      - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2025.3
-        with:
-          args: |
-            --skip-pull --within-docker true --image domjudge/jetbrains-temp:latest \
-            --baseline qodana.sarif.json --fail-threshold 1000 \
+      - name: Install Qodana CLI
+        run: |
+          curl -fsSL https://jb.gg/qodana-cli/install | bash
+
+      - name: Run Qodana without pulling
+        run: |
+          qodana scan \
+            --skip-pull \
+            --within-docker true \
+            --image myproject/jetbrains-temp:latest \
+            --baseline qodana.sarif.json \
+            --fail-threshold 1000 \
             --compile-commands ./compile_commands.json \
             --print-problems
-          upload-result: true
-          skip-pull: true
-          artifact-name: qodana-report-${{ matrix.language }}
-          #pr-mode: true
-          post-pr-comment: false
-          #push-fixes: pull-request
-        env:
-          QODANA_TOKEN: ${{ secrets[matrix.secret] }}
+
+      #- name: 'Qodana Scan'
+      #  uses: JetBrains/qodana-action@v2025.3
+      #  with:
+      #    args: |
+      #      --skip-pull --within-docker true --image domjudge/jetbrains-temp:latest \
+      #      --baseline qodana.sarif.json --fail-threshold 1000 \
+      #      --compile-commands ./compile_commands.json \
+      #      --print-problems
+      #    upload-result: true
+      #    skip-pull: true
+      #    artifact-name: qodana-report-${{ matrix.language }}
+      #    #pr-mode: true
+      #    post-pr-comment: false
+      #    #push-fixes: pull-request
+      #  env:
+      #    QODANA_TOKEN: ${{ secrets[matrix.secret] }}
       - name: Upload Qodana logs
         if: always()
         uses: actions/upload-artifact@v4
