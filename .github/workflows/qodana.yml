@@ -65,6 +65,8 @@ jobs:
         if: ${{ (matrix.language == 'cpp') || (matrix.language == 'clang') }}
         run: |
           cat compile_commands.json | true
+          mkdir build
+          cp compile_commands.json build/
       - name: Debug what is set
         run: echo "${{ github.token }}"
       - name: Login to Docker Hub
