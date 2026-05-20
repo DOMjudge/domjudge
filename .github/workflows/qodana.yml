@@ -11,11 +11,6 @@ on:
 
 jobs:
   qodana:
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -34,6 +29,9 @@ jobs:
           - language: clang
             secret: QODANA_CPP_TOKEN
     permissions:
+      packages: write
+      attestations: write
+      id-token: write
       contents: write
       pull-requests: write
       checks: write
