@@ -78,6 +78,8 @@ jobs:
           curl -fsSL https://jb.gg/qodana-cli/install | bash
 
       - name: Run Qodana without pulling
+        env:
+          QODANA_TOKEN: ${{ secrets[matrix.secret] }}
         run: |
           qodana scan \
             --skip-pull \
