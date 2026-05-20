@@ -82,7 +82,7 @@ jobs:
           qodana scan \
             --skip-pull \
             --within-docker true \
-            --image myproject/jetbrains-temp:latest \
+            --image domjudge/jetbrains-temp:latest \
             --baseline qodana.sarif.json \
             --fail-threshold 1000 \
             --compile-commands ./compile_commands.json \
