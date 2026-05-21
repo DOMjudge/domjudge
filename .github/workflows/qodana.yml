@@ -21,8 +21,6 @@ jobs:
           - language: cpp
             secret: QODANA_CPP_TOKEN
           # We need a compile_commands.json
-          - language: clang
-            secret: QODANA_CPP_TOKEN
     permissions:
       packages: write
       attestations: write
@@ -116,6 +114,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - language: clang
+            secret: QODANA_CPP_TOKEN
           - language: js
             secret: QODANA_JS_TOKEN
           - language: jvm

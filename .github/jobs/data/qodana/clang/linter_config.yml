@@ -1,0 +1,31 @@
+linter: jetbrains/qodana-clang:2026.1
+baseline:
+  cat > /etc/apt/sources.list.d/trixie.sources <<EOF
+  Types: deb
+  # http://snapshot.debian.org/archive/debian/20260406T000000Z
+  URIs: http://deb.debian.org/debian
+  Suites: bookworm bookworm-updates trixie trixie-updates
+  Components: main
+  Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+  Types: deb
+  # http://snapshot.debian.org/archive/debian-security/20260406T000000Z
+  URIs: http://deb.debian.org/debian-security
+  Suites: bookworm-security trixie-security
+  Components: main
+  Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+  EOF
+
+  apt-get update
+  apt-get install --no-install-recommends --no-install-suggests -y \
+    python3-pip libcgroup-dev gcc g++ \
+ 
+  pip3 install compiledb --break-system-packages
+
+  make configure
+
+  ./configure --with-domjudge-user=qodana
+
+  compiledb make inplace-config
+  mkdir build
+  cp compile_commands.json build/
