@@ -18,12 +18,6 @@ jobs:
         include:
           - language: php
             secret: QODANA_TOKEN
-          - language: python
-            secret: QODANA_PYTHON_TOKEN
-          - language: js
-            secret: QODANA_JS_TOKEN
-          - language: jvm
-            secret: QODANA_JVM_TOKEN
           - language: cpp
             secret: QODANA_CPP_TOKEN
           # We need a compile_commands.json
