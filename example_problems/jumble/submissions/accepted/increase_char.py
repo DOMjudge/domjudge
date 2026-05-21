@@ -3,9 +3,9 @@
 import sys
 
 
-def translate(word: str, direction: int) -> None:
+def translate(input_word: str, direction: int) -> None:
     final = ''
-    for c in list(word):
+    for c in list(input_word):
         cid = chr(ord('a') + (ord(c)-ord('a')+direction) % 26)
         final += cid
     print(final)
