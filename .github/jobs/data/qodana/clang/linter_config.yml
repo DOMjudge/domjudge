@@ -1,5 +1,5 @@
 linter: jetbrains/qodana-clang:2026.1
-baseline:
+bootstrap:
   sed -i s/bookworm/bookworm trixie/g /etc/apt/sources.list.d/trixie.sources
   apt-get update
   apt-get install --no-install-recommends --no-install-suggests -y python3-pip libcgroup-dev gcc g++
