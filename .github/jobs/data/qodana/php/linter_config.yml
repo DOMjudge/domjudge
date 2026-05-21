@@ -1,0 +1,6 @@
+linter: jetbrains/qodana-php:2026.1
+bootstrap:
+  rm /etc/apt/preferences.d/no-debian-php
+  apt-get update
+  apt-get install -y php-bcmath php-gd php-intl php-mysqli php-zip
+  cd /data/project/webapp && composer install --no-interaction --ignore-platform-reqs --no-scripts

@@ -2,7 +2,7 @@ FROM jetbrains/qodana-php:2026.1
 
 RUN rm /etc/apt/preferences.d/no-debian-php
 
-RUN apt-get update; apt-get install php-bcmath php-gd php-intl php-mysqli php-pcntl php-zip
+RUN apt-get update; apt-get install php-bcmath php-gd php-intl php-mysqli php-zip
 
 # cd /data/project/webapp && composer install --no-interaction --ignore-platform-reqs --no-scripts
 
