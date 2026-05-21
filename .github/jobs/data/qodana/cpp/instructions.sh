@@ -24,7 +24,7 @@ echo "Configure file created"
 #export LDFLAGS
 
 
-CC=/usr/bin/x86_64-linux-gnu-gcc-13 CXX=/usr/bin/x86_64-linux-gnu-g++-13 ./configure --with-domjudge-user=qodana
+CC=/usr/bin/gcc CXX=/usr/bin/g++ ./configure --with-domjudge-user=qodana
 
 echo "Configure of installation done"
 
