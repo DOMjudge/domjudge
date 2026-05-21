@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euxo pipefail
+
 #apt-get update -y
 #apt-get purge -y libc++*16*; clang-16* llvm-16*
 #apt-get install -y --no-install-recommends bear libc++-19-dev libc++abi-19-dev clang-19 libcgroup-dev libcgroup-dev
@@ -7,6 +9,8 @@
 
 unset CPLUS_INCLUDE_PATH
 make configure
+
+echo "Configure file created"
 
 #CC=/usr/bin/clang-19
 #CPP="/usr/bin/clang-19 -E"
@@ -18,7 +22,11 @@ make configure
 #export CXX
 #export CXXFLAGS
 #export LDFLAGS
+
+
 CC=/usr/bin/x86_64-linux-gnu-gcc-13 CXX=/usr/bin/x86_64-linux-gnu-g++-13 ./configure --with-domjudge-user=qodana
+
+echo "Configure of installation done"
 
 #    1  ls
 #    2  apt update; apt install gcc g++
