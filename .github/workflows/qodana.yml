@@ -134,8 +134,8 @@ jobs:
           fetch-depth: 0
       - name: Gather qodana baseline/config for linter
         run: |
-          cp .github/jobs/data/qodana/${{ matrix.language }}/linter_config.yml qodana.yml
-          cp .github/jobs/data/qodana/${{ matrix.language }}/sarif.json qodana.sarif.json
+          cp .github/jobs/data/qodana/${{ matrix.language }}/linter_config.yml qodana.yml || echo "Linter config for ${{ matrix.language }} is missing."
+          cp .github/jobs/data/qodana/${{ matrix.language }}/sarif.json qodana.sarif.json || echo "Baseline for ${{ matrix.language }} is missing."
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
         with:
