@@ -146,9 +146,8 @@ jobs:
             --apply-fixes
           upload-result: true
           artifact-name: qodana-report-${{ matrix.language }}
-          pr-mode: false #true
+          pr-mode: true
           post-pr-comment: false
-          push-fixes: pull-request
         env:
           QODANA_TOKEN: ${{ secrets[matrix.secret] }}
       - name: Upload Qodana logs
