@@ -16,7 +16,7 @@ def write_input_and_answer(word: str, testcase_number: int, output_dir: str) -> 
         f.write(f"{word}\n")
 
 
-if (len(sys.argv) not in [2, 3]):
+if len(sys.argv) not in [2, 3]:
     print(f"Usage: {__file__} <number_of_testcases> [example_word_file]")
     exit(1)
 
