@@ -146,7 +146,7 @@ jobs:
             --apply-fixes
           upload-result: true
           artifact-name: qodana-report-${{ matrix.language }}
-          pr-mode: true
+          pr-mode: false #true
           post-pr-comment: false
           push-fixes: pull-request
         env:
