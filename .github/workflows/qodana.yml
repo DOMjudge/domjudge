@@ -141,6 +141,7 @@ jobs:
         with:
           args: |
             --baseline qodana.sarif.json
+            --config qodana.yml
             --fail-threshold 1 \
             --print-problems \
             --apply-fixes
