@@ -44,12 +44,28 @@ run_configure () {
     su $u -c "./configure $*"
 }
 
+composer-install () {
+    repo-install curl
+    curl "https://getcomposer.org/download/latest-stable/composer.phar" -o /usr/local/bin/composer
+    chmod +x /usr/local/bin/composer
+}
+
 repo-install () {
     args=$(translate $@)
+    if [ "$distro_id" = "ID=debian" ] && [[ "$args" == *"composer"* ]]; then
+        args=${args/composer/}
+        if ! apt-get install -qq -y composer; then
+            composer-install
+        fi
+    fi
     ${cmd} install $args -y >/dev/null
 }
 repo-remove () {
     args=$(translate $@)
+    if [ "$distro_id" = "ID=debian" ] && [[ "$args" == *"composer"* ]]; then
+        args=${args/composer/}
+        apt-get remove -y composer; rm -rf /usr/local/bin/composer
+    fi
     ${cmd} remove $args -y #>/dev/null
     if [ "$distro_id" != "ID=fedora" ]; then
         apt-get autoremove -y 2>/dev/null
