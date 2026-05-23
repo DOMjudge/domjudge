@@ -72,58 +72,35 @@ repo-remove () {
     fi
 }
 
-@test "Default empty configure" {
-    # cleanup from earlier runs
-    repo-remove gcc g++ clang
+compiler_c_only_assertions () {
     run ./configure
-    assert_failure 1
-    assert_line "checking whether configure should try to set CFLAGS... yes"
+    assert_failure
     assert_line "checking whether configure should try to set CXXFLAGS... yes"
     assert_line "checking whether configure should try to set LDFLAGS... yes"
-    assert_line "checking for gcc... no"
-    assert_line "checking for cc... no"
+    assert_line "checking for g++... no"
+    assert_line "checking for c++... no"
+    assert_line "checking for gpp... no"
+    assert_line "checking for aCC... no"
+    assert_line "checking for CC... no"
+    assert_line "checking for cxx... no"
+    assert_line "checking for cc++... no"
     assert_line "checking for cl.exe... no"
+    assert_line "checking for FCC... no"
+    assert_line "checking for KCC... no"
+    assert_line "checking for RCC... no"
+    assert_line "checking for xlC_r... no"
+    assert_line "checking for xlC... no"
+    assert_line "checking for clang++... no"
+    assert_line "checking whether the C++ compiler works... no"
     assert_regex "configure: error: in .${test_path}':"
-    assert_line 'configure: error: no acceptable C compiler found in $PATH'
+    assert_line "configure: error: C++ compiler cannot create executables"
     assert_regex "See [\`']config.log' for more details"
 }
 
-compiler_assertions () {
-    run run_configure
-    # Depending on where we run this we might runas wrong user or lack libraries
-    # so we can't expect either success or failure.
-    assert_line "checking baseurl... https://example.com/domjudge/"
-    assert_line "checking whether configure should try to set CFLAGS... yes"
-    assert_line "checking whether configure should try to set CXXFLAGS... yes"
-    assert_line "checking whether configure should try to set LDFLAGS... yes"
-    assert_line "checking whether the C compiler works... yes"
-    assert_line "checking for C compiler default output file name... a.out"
-    assert_line "checking for suffix of executables... "
-    assert_line "checking whether we are cross compiling... no"
-    assert_line "checking for suffix of object files... o"
-    assert_regex "checking whether .*GNU C.*\.\.\. yes"
-    assert_line "checking whether C compiler accepts -Wall... yes"
-    assert_line "checking whether C compiler accepts -fstack-protector... yes"
-    assert_line "checking whether C compiler accepts -fPIE... yes"
-    assert_line "checking whether C compiler accepts -D_FORTIFY_SOURCE=2... yes"
-    assert_line "checking whether the linker accepts -fPIE... yes"
-    assert_line "checking whether the linker accepts -pie... yes"
-    assert_line "checking whether the linker accepts -Wl,-z,relro... yes"
-    assert_line "checking whether the linker accepts -Wl,-z,now... yes"
-    assert_line "checking whether $1 accepts -g... yes"
-    assert_regex "^checking for $1 option to (enable C11 features|enable C23 features|accept ISO C89)\.\.\. (none needed|-std=gnu23)$"
-    assert_line "checking whether $1 accepts -g... (cached) yes"
-    if [ -n "$2" ]; then
-        assert_line "checking whether $2 accepts -g... yes"
-        assert_regex "^checking how to run the C preprocessor... $1( -std=gnu23|) -E$"
-        assert_line "checking how to run the C++ preprocessor... $2 -E"
-    fi
-}
-
-compile_assertions_finished () {
-    assert_line " * CFLAGS..............: -g -O2 -Wall -Wformat -Wformat-security -pedantic -fstack-protector -fPIE -D_FORTIFY_SOURCE=2 -std=c11"
-    assert_line " * CXXFLAGS............: -g -O2 -Wall -Wformat -Wformat-security -pedantic -fstack-protector -fPIE -D_FORTIFY_SOURCE=2 -std=c++20"
-    assert_line " * LDFLAGS.............:  -fPIE -pie -Wl,-z,relro -Wl,-z,now"
+@test "Default empty configure" {
+    # cleanup from earlier runs
+    repo-remove gcc g++ clang
+    compiler_c_only_assertions
 }
 
 @test "Install GNU C only" {
@@ -133,10 +110,45 @@ compile_assertions_finished () {
     fi
     repo-remove clang g++
     repo-install gcc libcgroup-dev
-    compiler_assertions gcc ''
-    assert_line "checking for gcc... gcc"
-    assert_line "checking whether gcc accepts -g... yes"
-    assert_line "configure: error: C++ preprocessor \"/lib/cpp\" fails sanity check"
+    compiler_c_only_assertions
+}
+
+compiler_assertions () {
+    run run_configure
+    # Depending on where we run this we might runas wrong user or lack libraries
+    # so we can't expect either success or failure.
+    assert_line "checking baseurl... https://example.com/domjudge/"
+    assert_line "checking whether configure should try to set CXXFLAGS... yes"
+    assert_line "checking whether configure should try to set LDFLAGS... yes"
+    assert_line "checking for C++ compiler default output file name... a.out"
+    assert_line "checking whether we are cross compiling... no"
+    assert_line "checking for suffix of object files... o"
+    assert_line "checking whether the compiler supports GNU C++... yes"
+    assert_line "checking whether C++ compiler accepts -Wall... yes"
+    assert_line "checking whether C++ compiler accepts -Wformat... yes"
+    assert_line "checking whether C++ compiler accepts -Wformat-security... yes"
+    assert_line "checking whether C++ compiler accepts -pedantic... yes"
+    assert_line "checking whether C++ compiler accepts -fstack-protector... yes"
+    assert_line "checking whether C++ compiler accepts -fPIE... yes"
+    assert_line "checking whether C++ compiler accepts -D_FORTIFY_SOURCE=2... yes"
+    assert_regex "checking whether .*GNU C.*\.\.\. yes"
+    assert_line "checking whether the linker accepts -fPIE... yes"
+    assert_line "checking whether the linker accepts -pie... yes"
+    assert_line "checking whether the linker accepts -Wl,-z,relro... yes"
+    assert_line "checking whether the linker accepts -Wl,-z,now... yes"
+    assert_line "checking whether $1 accepts -g... yes"
+    assert_regex "^checking for $1 option to (enable C11 features|enable C23 features|accept ISO C89)\.\.\. (none needed|-std=gnu23)$"
+    if [ -n "$2" ]; then
+        assert_line "checking whether $2 accepts -g... yes"
+        assert_regex "^checking how to run the C preprocessor... $1( -std=gnu23|) -E$"
+        assert_line "checking how to run the C++ preprocessor... $2 -E"
+    fi
+}
+
+compile_assertions_finished () {
+    assert_line "checking whether the C++ compiler works... yes"
+    assert_line " * CXXFLAGS............: -g -O2 -Wall -Wformat -Wformat-security -pedantic -fstack-protector -fPIE -D_FORTIFY_SOURCE=2 -std=c++20"
+    assert_line " * LDFLAGS.............:  -fPIE -pie -Wl,-z,relro -Wl,-z,now"
 }
 
 @test "Install GNU C++ only" {
