@@ -4,6 +4,8 @@ RUN rm /etc/apt/preferences.d/no-debian-php
 
 RUN apt-get update; apt-get install -y php-bcmath php-gd php-intl php-mysqli php-zip
 
+RUN php --ini
+
 # cd /data/project/webapp && composer install --no-interaction --ignore-platform-reqs --no-scripts
 
 #RUN docker-php-ext-install bcmath gd intl mysqli pcntl zip \
