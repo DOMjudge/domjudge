@@ -1,6 +1,6 @@
 linter: jetbrains/qodana-php:2026.1
-bootstrap:
-  rm /etc/apt/preferences.d/no-debian-php
-  apt-get update
-  apt-get install -y php-bcmath php-gd php-intl php-mysqli php-zip
+bootstrap: |
+  curl -sSLf https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions | sudo tee /usr/local/bin/install-php-extension
+  chmod +x /usr/local/bin/install-php-extension
+  sudo install-php-extension bcmath gd intl mysqli zip
   cd /data/project/webapp && composer install --no-interaction --ignore-platform-reqs --no-scripts

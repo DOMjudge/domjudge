@@ -1,12 +1,11 @@
 FROM jetbrains/qodana-php:2026.1
 
-RUN rm /etc/apt/preferences.d/no-debian-php
-
-RUN apt-get update; apt-get install -y php-bcmath php-gd php-intl php-mysqli php-zip
+RUN ( curl -sSLf https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o - || echo 'return 1' ) | sh -s \
+      bcmath gd intl mysqli zip
 
 RUN php --ini
 
-# cd /data/project/webapp && composer install --no-interaction --ignore-platform-reqs --no-scripts
+#cd /data/project/webapp && composer install --no-interaction --ignore-platform-reqs --no-scripts
 
 #RUN docker-php-ext-install bcmath gd intl mysqli pcntl zip \
 #  && cd /data/project/webapp && composer install --no-interaction --ignore-platform-reqs --no-scripts
