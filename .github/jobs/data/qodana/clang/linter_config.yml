@@ -6,6 +6,6 @@ bootstrap: |
   sudo pip3 install compiledb --break-system-packages
   make configure
   ./configure --with-domjudge-user=qodana
-  compiledb make inplace-conf inplace-install
+  compiledb make judgehost
   mkdir build
   cp compile_commands.json build/
