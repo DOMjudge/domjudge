@@ -2,5 +2,5 @@ linter: jetbrains/qodana-php:2026.1
 bootstrap: |
   curl -sSLf https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions | sudo tee /usr/local/bin/install-php-extension
   chmod +x /usr/local/bin/install-php-extension
-  sudo install-php-extension bcmath gd intl mysqli zip
+  sudo install-php-extension bcmath gd intl mysqli zip pcntl
   cd /data/project/webapp && composer install --no-interaction --ignore-platform-reqs --no-scripts
