@@ -114,8 +114,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - language: clang
-            secret: QODANA_CPP_TOKEN
+          # All check are also done by the C++ one
+          #- language: clang
+          #  secret: QODANA_CPP_TOKEN
           - language: js
             secret: QODANA_JS_TOKEN
           - language: jvm

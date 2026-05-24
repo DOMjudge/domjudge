@@ -1,7 +1,7 @@
 FROM jetbrains/qodana-php:2026.1
 
 RUN ( curl -sSLf https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o - || echo 'return 1' ) | sh -s \
-      bcmath gd intl mysqli zip
+      bcmath gd intl mysqli zip pcntl
 
 RUN php --ini
 
