@@ -2,7 +2,7 @@ linter: jetbrains/qodana-clang:2026.1
 bootstrap: |
   sed -i s/bookworm\ /bookworm\ trixie\ /g /etc/apt/sources.list.d/debian.sources
   apt-get update
-  apt-get install --no-install-recommends --no-install-suggests -y python3-pip libcgroup-dev gcc g++
+  apt-get install --no-install-recommends --no-install-suggests -y python3-pip libcgroup-dev gcc g++ python3-pip
   pip3 install compiledb --break-system-packages
   make configure
   ./configure --with-domjudge-user=qodana
