@@ -318,6 +318,8 @@ AC_REPLACE_FUNCS([atexit dup2 getcwd gettimeofday memset mkdir realpath setenv \
                  [],[AC_MSG_ERROR([required C function is missing.])])
 fi
 
+AC_CHECK_PROG(BASH_CHECK, bash, yes)
+
 AC_CHECK_PROG(PHP_CHECK,php,yes)
 AS_IF([test x"$PHP_CHECK" != x"yes"],
       [phpversion=8.1],
@@ -397,6 +399,12 @@ if test "x$BASEURL_UNCONFIGURED" = x1 ; then
    echo "not work out of the box!"
    echo "Rerun configure with option '--with-baseurl=BASEURL' to correct this."
    echo ""
+fi
+if test "x$JUDGEHOST_BUILD_ENABLED" = xyes; then
+AS_IF([test x"$BASH_CHECK" != x"yes"], [AC_MSG_WARN([Bash is needed for running the judgehost with a chroot.])])
+fi
+if test "x$DOMSERVER_BUILD_ENABLED" = xyes; then
+AS_IF([test x"$BASH_CHECK" != x"yes"], [AC_MSG_WARN([Bash is missing. Bash is needed for database setup.])])
 fi
 fi # !QUIET
 # }}}
