@@ -40,12 +40,12 @@ def api_to_file(endpoint: str, filename: str):
 def download_submission(submission):
     d = f'submissions/{submission["id"]}'
     Path(d).mkdir(parents=True, exist_ok=True)
-    for f in submission['files']:
-        if f['mime'] == 'application/zip':
-            print(f"Downloading '{f['href']}'")
+    for submission_file in submission['files']:
+        if submission_file['mime'] == 'application/zip':
+            print(f"Downloading '{submission_file['href']}'")
             data = dj_utils.do_api_request(f['href'], decode=False)
-            with open(f'{d}/files.zip', 'wb') as f:
-                f.write(data)
+            with open(f'{d}/files.zip', 'wb') as zip_file:
+                zip_file.write(data)
 
 
 if len(sys.argv) == 1:
