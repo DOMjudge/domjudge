@@ -36,12 +36,12 @@ AC_SUBST(DOMJUDGE_VERSION, $PACKAGE_VERSION)
 AC_DEFINE_UNQUOTED(DOMJUDGE_VERSION, "$PACKAGE_VERSION",
 [DOMjudge version number (alias for PACKAGE_VERSION)])
 
-AC_SUBST(DOMSERVER_BUILD_ENABLED,yes)
+AC_SUBST(DOMSERVER_BUILD_ENABLED,no)
 AC_ARG_ENABLE([domserver-build],AS_HELP_STRING([--enable-domserver-build],
 [configure and build the domserver (default: yes).]),
 [if test "x$enableval" = xno ; then AC_SUBST(DOMSERVER_BUILD_ENABLED,no) fi])
 
-AC_SUBST(JUDGEHOST_BUILD_ENABLED,yes)
+AC_SUBST(JUDGEHOST_BUILD_ENABLED,no)
 AC_ARG_ENABLE([judgehost-build],AS_HELP_STRING([--enable-judgehost-build],
 [configure and build the judgehost (default: yes).]),
 [if test "x$enableval" = xno ; then AC_SUBST(JUDGEHOST_BUILD_ENABLED,no) fi])
@@ -396,6 +396,12 @@ if test "x$BASEURL_UNCONFIGURED" = x1 ; then
    echo "Warning: base URL is unconfigured; generating team documentation will"
    echo "not work out of the box!"
    echo "Rerun configure with option '--with-baseurl=BASEURL' to correct this."
+   echo ""
+fi
+if test "x$JUDGEHOST_BUILD_ENABLED" = xno && test "x$DOMSERVER_BUILD_ENABLED" = xno ; then
+   echo "Warning: neither --enable-domserver-build nor --enable-judgehost-build provided."
+   echo "You probably want to rerun with either one (or both). This behaviour has changed"
+   echo "in DOMjudge 9.0."
    echo ""
 fi
 fi # !QUIET
