@@ -11,7 +11,7 @@ n = int(input())
 # Simulate 32-bit signed integer overflow
 INT_MAX = 2147483647
 
-if n > 100 and n <= INT_MAX:
+if 100 < n <= INT_MAX:
     print(n + 1)
 else:
     print(n - 1)
