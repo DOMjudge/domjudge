@@ -10,7 +10,7 @@ from message import *
 
 class Hello:
     def __init__(self):
-        foo = Message();
-        foo.myPrint();
+        foo = Message()
+        foo.myPrint()
 
 Hello()
