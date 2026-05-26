@@ -11,6 +11,7 @@ use App\Service\AuthorizedUserService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Utils\SimplifiedVerdict;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
@@ -193,6 +194,9 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     {
         /** @var AbstractJudgement $judging */
         $judgementTypeId = $judging->getResult() ? $this->verdicts[$judging->getResult()] : null;
-        return new JudgingWrapper($judging, $judgementTypeId);
+        $simplifiedJudgementTypeId = $judgementTypeId === null
+            ? null
+            : SimplifiedVerdict::for($judgementTypeId)->value;
+        return new JudgingWrapper($judging, $judgementTypeId, $simplifiedJudgementTypeId);
     }
 }
