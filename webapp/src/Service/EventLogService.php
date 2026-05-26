@@ -867,7 +867,7 @@ class EventLogService
             $penaltyTime = $event['penalty_time'];
             $penaltyTimeIsRelative = is_string($penaltyTime) && Utils::isRelTime($penaltyTime);
             if ($ccsApiVersion->useRelTimes() && !$penaltyTimeIsRelative) {
-                $event['penalty_time'] = Utils::relTime($penaltyTime * 60, true);
+                $event['penalty_time'] = Utils::relTime($penaltyTime * 60, floored: true);
             } elseif (!$ccsApiVersion->useRelTimes() && $penaltyTimeIsRelative) {
                 $event['penalty_time'] = (int)floor(Utils::relTimeToSeconds($penaltyTime) / 60);
             }

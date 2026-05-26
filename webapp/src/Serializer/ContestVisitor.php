@@ -60,7 +60,7 @@ readonly class ContestVisitor implements EventSubscriberInterface
         $contest = $event->getObject();
 
         $property = new StaticPropertyMetadata(Contest::class, 'penalty_time', null);
-        $visitor->visitProperty($property, Utils::relTime($contest->getPenaltyTime() * 60, true));
+        $visitor->visitProperty($property, Utils::relTime($contest->getPenaltyTime() * 60, floored: true));
     }
 
     public function onPreSerialize(ObjectEvent $event): void

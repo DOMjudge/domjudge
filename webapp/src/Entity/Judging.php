@@ -2,6 +2,7 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController as ARC;
+use App\Utils\CcsApiVersion;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -288,8 +289,7 @@ class Judging extends AbstractJudgement
         return $this->valid;
     }
 
-    // Note: we can't use CCSApiVersion::Format_2025_DRAFT->value in PHP 8.1, only in 8.2+
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT, '2025-draft'])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2025_DRAFT->value])]
     #[Serializer\VirtualProperty]
     public function getCurrent(): bool
     {

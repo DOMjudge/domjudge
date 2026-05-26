@@ -94,11 +94,7 @@ class AccessController extends AbstractApiController
         }
         if ($this->authService->checkRole('team') && $this->authService->getUser()->getTeam()) {
             $capabilities[] = 'team_submit';
-            if ($ccsApiVersion->usePostClar()) {
-                $capabilities[] = 'post_clar';
-            } else {
-                $capabilities[] = 'team_clar';
-            }
+            $capabilities[] = $ccsApiVersion->clarCapability();
         }
         if ($this->authService->checkRole('api_writer')) {
             $capabilities[] = 'proxy_submit';
