@@ -95,7 +95,8 @@ class EventDenormalizerTest extends KernelTestCase
                         teamId: '1',
                         time: '456',
                         entryPoint: null,
-                        files: []
+                        files: [],
+                        accountId: null,
                     ),
                 ],
             ];
@@ -175,7 +176,8 @@ class EventDenormalizerTest extends KernelTestCase
                     teamId: '1',
                     time: '456',
                     entryPoint: null,
-                    files: []
+                    files: [],
+                    accountId: null,
                 ),
             ],
         ];
