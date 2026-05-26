@@ -69,6 +69,7 @@ class AccessController extends AbstractApiController
             'language_id',
             'problem_id',
             'team_id',
+            'account_id',
             'time',
             'contest_time',
             'entry_point',
