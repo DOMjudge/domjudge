@@ -171,9 +171,18 @@ class ClarificationController extends AbstractRestController
 
         $clarification->setSender($fromTeam);
 
+        // Resolve the recipient team id. CCS 2026-01+ uses to_team_ids (array, at most 1 entry);
+        // older versions use a single to_team_id. Prefer to_team_ids only when it carries a value,
+        // because some cross-version clients send both fields with an empty to_team_ids array.
+        if ($clarificationPost->toTeamIds !== null && count($clarificationPost->toTeamIds) > 1) {
+            throw new BadRequestHttpException('Only a single recipient team is supported.');
+        }
+        $toTeamId = $clarificationPost->toTeamIds[0]
+            ?? $clarificationPost->toTeamId;
+
         // By default, send to jury.
         $toTeam = null;
-        if ($toTeamId = $clarificationPost->toTeamId) {
+        if ($toTeamId) {
             // If the user is an admin or API writer, allow it to specify the team.
             if ($this->isGranted('ROLE_API_WRITER')) {
                 $toTeam = $this->dj->loadTeam($toTeamId, $contest);

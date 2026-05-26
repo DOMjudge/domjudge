@@ -720,8 +720,16 @@ class EventLogService
                 ]];
                 break;
             case 'clarifications':
+                // In 2026-01 the recipient is exposed as an array (to_team_ids); older versions
+                // use a single to_team_id. Support both so dependency checks work across versions.
+                $clarTeams = [$data['from_team_id'] ?? null];
+                if (isset($data['to_team_ids'])) {
+                    $clarTeams = [...$clarTeams, ...$data['to_team_ids']];
+                } elseif (array_key_exists('to_team_id', $data)) {
+                    $clarTeams[] = $data['to_team_id'];
+                }
                 $toCheck = array_merge($toCheck, [
-                    'teams' => [$data['from_team_id'], $data['to_team_id']],
+                    'teams' => $clarTeams,
                     'problems' => $data['problem_id'],
                 ]);
                 break;

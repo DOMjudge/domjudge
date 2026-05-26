@@ -2,12 +2,14 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\PendingSubmissionFixture;
 use App\DataFixtures\Test\SampleSubmissionsFixture;
 
 class MetricsControllerTest extends BaseTestCase
 {
     protected static array $fixtures = [
         SampleSubmissionsFixture::class,
+        PendingSubmissionFixture::class,
     ];
 
     /**
@@ -50,10 +52,10 @@ domjudge_submissions_perteam{contest="demo"} 1
 domjudge_submissions_queued{contest="demo"} 1
 # HELP domjudge_submissions_total Total number of all submissions
 # TYPE domjudge_submissions_total gauge
-domjudge_submissions_total{contest="demo"} 1
+domjudge_submissions_total{contest="demo"} 2
 # HELP domjudge_submissions_unverified Number of unverified submissions
 # TYPE domjudge_submissions_unverified gauge
-domjudge_submissions_unverified{contest="demo"} 0
+domjudge_submissions_unverified{contest="demo"} 1
 # HELP domjudge_teams Total number of teams
 # TYPE domjudge_teams gauge
 domjudge_teams{contest="demo"} 1
