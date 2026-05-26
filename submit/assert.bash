@@ -70,3 +70,18 @@ assert_failure() {
 	fi
 	return 0
 }
+
+assert_equal() {
+  if [[ $1 != "$2" ]]; then
+    echo "Values should be equal: '$1' vs '$2'"
+    return 1
+  fi
+}
+
+refute_equal() {
+  if [[ $1 = "$2" ]]; then
+    echo "Values should not be equal but got:"
+    diff <(printf "%s\n" $1) <(printf "%s\n" $2)
+    return 1
+  fi
+}
