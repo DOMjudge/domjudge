@@ -30,6 +30,7 @@ class SubmissionControllerTest extends BaseTestCase
             'problem_id'  => 'hello',
             'language_id' => 'cpp',
             'team_id'     => 'domjudge',
+            'account_id'  => null,
             'entry_point' => null,
             'time'        => '2021-01-01T12:34:56.000+00:00',
         ],
@@ -37,6 +38,7 @@ class SubmissionControllerTest extends BaseTestCase
             'problem_id'  => 'boolfind',
             'language_id' => 'java',
             'team_id'     => 'exteam',
+            'account_id'  => null,
             'entry_point' => 'Main',
             'time'        => '2021-03-04T12:00:00.000+00:00',
         ],
@@ -321,7 +323,25 @@ class SubmissionControllerTest extends BaseTestCase
         // Also load the submission from the API, to see it now gets returned.
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
-        $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$submissionId", 200, 'admin');
+        $fetched = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$submissionId", 200, 'admin');
+        static::assertArrayHasKey('account_id', $fetched, 'account_id must be present in 2026-01');
+        static::assertEquals($expectedUsername, $fetched['account_id'], 'account_id should match submitting user externalid');
+    }
+
+    public function testAccountIdAbsentInOlderApiVersionStrict(): void
+    {
+        $this->withChangedConfiguration('ccs_api_version', '2023-06', function (): void {
+            $contestId = $this->getDemoContestId();
+            $apiEndpoint = $this->apiEndpoint;
+            $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint?strict=1", 200);
+            foreach ($response as $submission) {
+                static::assertArrayNotHasKey(
+                    'account_id',
+                    $submission,
+                    'account_id must not appear in strict pre-2026-01 responses'
+                );
+            }
+        });
     }
 
     public static function provideAddSuccess(): Generator
