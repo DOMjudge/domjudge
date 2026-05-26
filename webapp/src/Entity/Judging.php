@@ -289,7 +289,7 @@ class Judging extends AbstractJudgement
         return $this->valid;
     }
 
-    #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2025_DRAFT->value])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2026_01->value])]
     #[Serializer\VirtualProperty]
     public function getCurrent(): bool
     {

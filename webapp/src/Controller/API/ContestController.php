@@ -917,7 +917,7 @@ class ContestController extends AbstractRestController
                             ];
                             break;
                         case CcsApiVersion::Format_2023_06:
-                        case CcsApiVersion::Format_2025_DRAFT:
+                        case CcsApiVersion::Format_2026_01:
                             if ($event->getAction() === EventLogService::ACTION_DELETE) {
                                 $data = null;
                             }

@@ -12,11 +12,11 @@ readonly class ContestProblemWrapper
     public function __construct(
         #[Serializer\Inline]
         protected ContestProblem $contestProblem,
-        #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2025_DRAFT->value])]
+        #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2026_01->value])]
         protected int $memoryLimit,
-        #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2025_DRAFT->value])]
+        #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2026_01->value])]
         protected int $outputLimit,
-        #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2025_DRAFT->value])]
+        #[Serializer\Groups([ARC::GROUP_NONSTRICT, CcsApiVersion::Format_2026_01->value])]
         protected int $codeLimit,
         #[Serializer\SerializedName('test_data_count')]
         protected int            $testDataCount

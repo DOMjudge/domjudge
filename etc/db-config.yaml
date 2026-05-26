@@ -381,7 +381,7 @@
             docdescription: See :ref:`printing` for more information.
         -   name: ccs_api_version
             type: enum
-            default_value: 2025-draft
+            default_value: 2026-01
             enum_class: App\Utils\CcsApiVersion
             public: false
             description: Version of the CCS API to use for the API and event feed. See [current draft](https://ccs-specs.icpc.io/draft/contest_api#event-feed) and [versions available](https://ccs-specs.icpc.io/).

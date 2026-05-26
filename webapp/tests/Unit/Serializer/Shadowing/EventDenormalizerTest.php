@@ -55,7 +55,7 @@ class EventDenormalizerTest extends KernelTestCase
 
     public static function provideDenormalize(): Generator
     {
-        foreach ([CcsApiVersion::Format_2023_06, CcsApiVersion::Format_2025_DRAFT] as $version) {
+        foreach ([CcsApiVersion::Format_2023_06, CcsApiVersion::Format_2026_01] as $version) {
             yield $version->value . ' format, create/update single' => [
                 [
                     'type' => 'submissions',

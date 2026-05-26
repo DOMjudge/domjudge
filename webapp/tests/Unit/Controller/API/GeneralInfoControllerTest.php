@@ -35,8 +35,8 @@ class GeneralInfoControllerTest extends BaseTestCase
 
             static::assertIsArray($response);
             static::assertCount(5, $response);
-            static::assertEquals('2025-draft', $response['version']);
-            static::assertEquals('https://ccs-specs.icpc.io/draft/contest_api', $response['version_url']);
+            static::assertEquals('2026-01', $response['version']);
+            static::assertEquals('https://ccs-specs.icpc.io/2026-01/contest_api', $response['version_url']);
             static::assertEquals('DOMjudge', $response['name']);
             static::assertMatchesRegularExpression('/^\d+\.\d+\.\d+/', $response['domjudge']['version']);
             static::assertEquals('test', $response['domjudge']['environment']);
