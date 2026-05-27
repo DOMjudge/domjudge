@@ -35,6 +35,23 @@ parameters:
         -
             message: "#Method .* return type has no value type specified in iterable type array#"
             path: webapp/src/DataFixtures/Test
+        -
+            message: '#^Offset 9 on array\{''ada''\|''awk''\|''bash''\|''c''\|''cpp''\|''csharp''\|''f95''\|''golang''\|''haskell''\|''java''\|''javascript''\|''kotlin''\|''lua''\|''ocaml''\|''pascal''\|''pl''\|''prolog''\|''python3''\|''r''\|''ruby''\|''rust''\|''scala''\|''sh''\|''swift'', ''Ada''\|''AWK''\|''Bash shell''\|''C''\|''C\#''\|''C\+\+''\|''Fortran''\|''Golang''\|''Haskell''\|''Java''\|''JavaScript''\|''Kotlin''\|''Lua''\|''OCaml''\|''Pascal''\|''Perl''\|''POSIX shell''\|''Prolog''\|''Python 3''\|''R''\|''Ruby''\|''Rust''\|''Scala''\|''Swift'', array\{''adb'', ''ads''\}\|array\{''awk''\}\|array\{''bash''\}\|array\{''c''\}\|array\{''cpp'', ''cc'', ''cxx'', ''c\+\+''\}\|array\{''csharp'', ''cs''\}\|array\{''f95'', ''f90''\}\|array\{''go''\}\|array\{''hs'', ''lhs''\}\|array\{''java''\}\|array\{''js'', ''mjs''\}\|array\{''kt''\}\|array\{''lua''\}\|array\{''ml''\}\|array\{''pas'', ''p''\}\|array\{''pl''\}\|array\{''plg''\}\|array\{''py''\}\|array\{''R''\}\|array\{''rb''\}\|array\{''rs''\}\|array\{''scala''\}\|array\{''sh''\}\|array\{''swift''\}, bool, ''Main class''\|''Main file''\|null, bool, true, 1, \.\.\.\} in empty\(\) always exists and is not falsy\.$#'
+            identifier: empty.offset
+            count: 1
+            path: webapp/src/DataFixtures/DefaultData/LanguageFixture.php
+
+        -
+            message: '#^Offset ''username'' on array\{id\?\: string, username\: string, name\?\: string, password\?\: string, externalid\?\: string, type\: string, team_id\?\: string, ip\?\: string\} in isset\(\) always exists and is not nullable\.$#'
+            identifier: isset.offset
+            count: 1
+            path: webapp/src/Service/ImportExportService.php
+
+        -
+            message: '#^Strict comparison using \!\=\= between null and null will always evaluate to false\.$#'
+            identifier: notIdentical.alwaysFalse
+            count: 1
+            path: webapp/src/Service/SubmissionService.php
     dynamicConstantNames:
         SYSLOG: int
 includes:
