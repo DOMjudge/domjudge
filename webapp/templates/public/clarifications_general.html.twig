@@ -1,0 +1,36 @@
+{% extends 'public/base.html.twig' %}
+
+{% import 'macros.html.twig' as macros %}
+
+{% block title %}View announcements for {{ contest.name }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.mathjax_head() }}
+    <style>
+        .data-table td a, .data-table td a:hover {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            padding: 3px 5px;
+        }
+
+        .data-table tr {
+            border-bottom: 1px solid silver;
+        }
+
+        .data-table tr:hover {
+            background: #ffffcc !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h2 class="text-center mt-4">General announcements for {{ contest.name }}</h2>
+
+    {% if global_clarifications is empty %}
+        <p class="nodata">No announcements.</p>
+    {% else %}
+        {% include 'partials/clarification_list.html.twig' with {clarifications: global_clarifications} %}
+    {% endif %}
+{% endblock %}
