@@ -1,4 +1,7 @@
-{% extends 'team/base.html.twig' %}
+{% extends app.request.attributes.get('_route') starts with 'team_'
+  ? 'team/base.html.twig'
+  : 'public/base.html.twig' %}
+
 {% import 'macros.html.twig' as macros %}
 
 {% block title %}View clarifications for problem {{ problem.name }}{% endblock %}
@@ -30,6 +33,6 @@
     {% if clarifications is empty %}
         <p class="nodata">No clarifications.</p>
     {% else %}
-        {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarifications, subject: false} %}
+        {% include 'partials/clarification_list.html.twig' with {clarifications: clarifications, subject: false} %}
     {% endif %}
 {% endblock %}

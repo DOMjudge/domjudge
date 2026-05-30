@@ -97,9 +97,9 @@ class ClarificationController extends BaseController
             'problem' => $problem,
         ];
         if ($request->isXmlHttpRequest()) {
-            return $this->render('team/clarifications_by_problem_modal.html.twig', $data);
+            return $this->render('clarifications_by_problem_modal.html.twig', $data);
         } else {
-            return $this->render('team/clarifications_by_problem.html.twig', $data);
+            return $this->render('clarifications_by_problem.html.twig', $data);
         }
     }
 
