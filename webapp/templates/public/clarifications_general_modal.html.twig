@@ -1,0 +1,11 @@
+{% extends "partials/modal.html.twig" %}
+
+{% block title %}View announcements for {{ contest.name }}{% endblock %}
+
+{% block content %}
+    {% if general_clarifications is empty %}
+        <p class="nodata">No announcements.</p>
+    {% else %}
+        {% include 'partials/clarification_list.html.twig' with {clarifications: general_clarifications} %}
+    {% endif %}
+{% endblock %}

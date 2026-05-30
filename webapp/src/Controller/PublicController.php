@@ -51,6 +51,23 @@ class PublicController extends BaseController
         parent::__construct($em, $eventLog, $dj, $kernel);
     }
 
+    /**
+     * @return Clarification[]
+     */
+    protected function getGlobalClarifications(?Contest $contest): array
+    {
+        if ($contest) {
+            /** @var Clarification[] $clarifications */
+            return $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
+                ->select('clar, p, c')
+                ->addOrderBy('clar.submittime', 'DESC')
+                ->addOrderBy('clar.clarid', 'DESC')
+                ->getQuery()
+                ->getResult();
+        }
+        return [];
+    }
+
     #[Route(path: '', name: 'public_index')]
     #[Route(path: '/scoreboard')]
     #[ReleaseSessionLock]
@@ -71,7 +88,6 @@ class PublicController extends BaseController
             return $this->redirectToRoute('register');
         }
 
-
         if ($static) {
             $refreshParams = [
                 'static' => 1,
@@ -91,6 +107,8 @@ class PublicController extends BaseController
 
         if ($static) {
             $data['hide_menu'] = true;
+        } else {
+            $data['global_clarifications'] = $this->getGlobalClarifications($contest);
         }
 
         $data['current_contest'] = $contest;
@@ -99,6 +117,29 @@ class PublicController extends BaseController
             return $this->render('partials/scoreboard.html.twig', $data, $response);
         }
         return $this->render('public/scoreboard.html.twig', $data, $response);
+    }
+
+    #[Route(path: '/clarifications', name: 'public_clarifications')]
+    public function clarificationsAction(
+        RequestStack $requestStack,
+        Request $request,
+        #[MapQueryParameter(name: 'contest')]
+        ?string $contestId = null
+    ): Response {
+        $contest = $this->getContestFromRequest($contestId) ?? $this->dj->getCurrentContest(onlyPublic: true);
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
+
+        $data = [
+            'contest' => $contest,
+            'global_clarifications' => $this->getGlobalClarifications($contest)
+        ];
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('public/clarifications_general_modal.html.twig', $data);
+        } else {
+            return $this->render('public/clarifications_general.html.twig', $data);
+        }
     }
 
     #[Route(path: '/scoreboard.zip', name: 'public_scoreboard_data_zip')]
@@ -197,6 +238,7 @@ class PublicController extends BaseController
             'team' => $team,
             'showFlags' => $showFlags,
             'showAffiliations' => $showAffiliations,
+            'global_clarifications' => $this->getGlobalClarifications($this->dj->getCurrentContest()),
         ];
 
         if ($request->isXmlHttpRequest()) {
@@ -342,17 +384,12 @@ class PublicController extends BaseController
         }
 
         /** @var Clarification[] $clarifications */
-        $clarifications = [];
-        if ($contest->getStartTimeObject()?->getTimestamp() <= time()) {
-            $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), problem: strval($problem->getProbid()))
-                ->select('clar', 'p')
-                ->andWhere('clar.sender IS NULL')
-                ->andWhere('clar.recipient IS NULL')
-                ->addOrderBy('clar.submittime', 'DESC')
-                ->addOrderBy('clar.clarid', 'DESC')
-                ->getQuery()
-                ->getResult();
-        }
+        $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid(), problem: strval($problem->getProbid()))
+            ->select('clar', 'p')
+            ->addOrderBy('clar.submittime', 'DESC')
+            ->addOrderBy('clar.clarid', 'DESC')
+            ->getQuery()
+            ->getResult();
 
         $data = [
             'clarifications' => $clarifications,
