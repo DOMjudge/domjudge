@@ -57,9 +57,6 @@
                             | raw
                             }}</i>
                     </a>
-                    <script>
-                        MathJax.typeset([document.getElementsByClassName('card-body')]);
-                    </script>
                 </td>
             </tr>
         {%- endfor %}
@@ -67,3 +64,6 @@
         </tbody>
     </table>
 </div>
+<script>
+    MathJax.typeset([document.getElementsByClassName('clarification-text')]);
+</script>
