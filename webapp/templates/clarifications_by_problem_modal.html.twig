@@ -6,6 +6,6 @@
     {% if clarifications is empty %}
         <p class="nodata">No clarifications.</p>
     {% else %}
-        {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarifications, subject: false} %}
+        {% include 'partials/clarification_list.html.twig' with {clarifications: clarifications, subject: false} %}
     {% endif %}
 {% endblock %}

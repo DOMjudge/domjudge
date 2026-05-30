@@ -1,5 +1,6 @@
 {# problem \App\Entity\ContestProblem #}
 
+{% set current_route = app.request.attributes.get('_route') %}
 {% set contest_problemset_add_cid = contest_problemset_add_cid | default(false) %}
 
 <h1 class="mt-4 text-center">
@@ -151,8 +152,9 @@
                                                 {% endfor %}
                                             {% endif %}
                                             {% if clarificationsCount > 0 %}
-                                                <a data-ajax-modal class="btn btn-secondary" role="button"
-                                                   href="{{ path('team_clarification_by_prob', {'probId': problem.externalId}) }}">
+                                                <a data-ajax-modal class="btn btn-secondary" role="button" href="
+                                                    {{ path( current_route starts with 'team_' ? 'team_clarification_by_prob' : 'public_clarification_by_prob', {'probId': problem.externalId}) }}
+                                                ">
                                                     <i class="fas fa-question-circle"></i>
                                                     {% if clarificationsCount > 0 %}
                                                         {% set badgeClass = 'text-bg-info' %}

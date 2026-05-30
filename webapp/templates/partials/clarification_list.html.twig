@@ -1,3 +1,4 @@
+{% set current_route = app.request.attributes.get('_route') %}
 {% set includeSubject = true %}
 {% if subject is defined and not subject %}
     {% set includeSubject = false %}
@@ -11,15 +12,17 @@
             {% if includeSubject %}
                 <th scope="col">subject</th>
             {% endif %}
-            <th scope="col">to</th>
+            {% if current_route starts with 'team_' %}
+                <th scope="col">to</th>
+            {% endif %}
             <th scope="col">text</th>
         </tr>
         </thead>
         <tbody>
         {%- for clarification in clarifications %}
-            {%- set link = path('team_clarification', {clarId: clarification.externalid}) %}
+            {%- set link = path( current_route starts with 'team_' ? 'team_clarification' : 'public_clarification', {clarId: clarification.externalid}) %}
 
-            <tr class="{% if team.unreadClarifications.contains(clarification) %}unseen{% endif %}">
+            <tr class="{% if team is defined and team.unreadClarifications.contains(clarification) %}unseen{% endif %}">
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}">
                         {{ clarification.submittime | printtime(null, clarification.contest) }}
@@ -40,13 +43,15 @@
                     </td>
                 {% endif %}
 
-                <td>
-                    {%- if clarification.sender is null and clarification.recipient is not null %}
-                        you
-                    {%- else %}
-                        all
-                    {%- endif -%}
-                </td>
+                {% if current_route starts with 'team_' %}
+                    <td>
+                        {%- if clarification.sender is null and clarification.recipient is not null %}
+                            you
+                        {%- else %}
+                            all
+                        {%- endif -%}
+                    </td>
+                {% endif %}
 
                 <td class="clarification-text">
                     <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}">
