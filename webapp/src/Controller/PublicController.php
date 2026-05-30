@@ -49,6 +49,32 @@ class PublicController extends BaseController
         parent::__construct($em, $eventLog, $dj, $kernel);
     }
 
+    /**
+     * @return Clarification[]
+     */
+    protected function getGlobalClarifications(?Contest $contest): array
+    {
+        if ($contest) {
+            return $this->em->createQueryBuilder()
+                ->from(Clarification::class, 'c')
+                ->leftJoin('c.problem', 'p')
+                ->leftJoin('c.sender', 's')
+                ->leftJoin('c.recipient', 'r')
+                ->select('c', 'p')
+                ->andWhere('c.contest = :contest')
+                ->andWhere('c.sender IS NULL')
+                ->andWhere('c.recipient IS NULL')
+                ->andWhere('c.submittime <= :time')
+                ->andWhere('c.problem IS NULL')
+                ->setParameter('contest', $contest)
+                ->setparameter('time', time())
+                ->addOrderBy('c.submittime', 'DESC')
+                ->addOrderBy('c.clarid', 'DESC')
+                ->getQuery()->getResult();
+        }
+        return [];
+    }
+
     #[Route(path: '', name: 'public_index')]
     #[Route(path: '/scoreboard')]
     public function scoreboardAction(
@@ -67,7 +93,6 @@ class PublicController extends BaseController
             // but since self registration is enabled, it's not a big deal.
             return $this->redirectToRoute('register');
         }
-
 
         if ($static) {
             $refreshParams = [
@@ -88,6 +113,8 @@ class PublicController extends BaseController
 
         if ($static) {
             $data['hide_menu'] = true;
+        } else {
+            $data['global_clarifications'] = $this->getGlobalClarifications($contest);
         }
 
         $data['current_contest'] = $contest;
@@ -96,6 +123,51 @@ class PublicController extends BaseController
             return $this->render('partials/scoreboard.html.twig', $data, $response);
         }
         return $this->render('public/scoreboard.html.twig', $data, $response);
+    }
+
+    #[Route(path: '/clarifications', name: 'public_clarifications')]
+    public function clarificationsAction(
+        RequestStack $requestStack,
+        Request $request,
+        #[MapQueryParameter(name: 'contest')]
+        ?string $contestId = null
+    ): Response {
+        $contest = $this->getContestFromRequest($contestId) ?? $this->dj->getCurrentContest(onlyPublic: true);
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
+
+        /** @var Clarification[] $clarifications */
+        $clarifications = [];
+        if ($contest->getStartTimeObject()?->getTimestamp() <= time()) {
+            $clarifications = $this->em->createQueryBuilder()
+                ->from(Clarification::class, 'c')
+                ->leftJoin('c.problem', 'p')
+                ->leftJoin('c.sender', 's')
+                ->leftJoin('c.recipient', 'r')
+                ->select('c', 'p')
+                ->andWhere('c.contest = :contest')
+                ->andWhere('c.sender IS NULL')
+                ->andWhere('c.recipient IS NULL')
+                ->andWhere('c.problem IS NULL')
+                ->andWhere('c.submittime <= :time')
+                ->setParameter('contest', $contest)
+                ->setParameter('time', time())
+                ->addOrderBy('c.submittime', 'DESC')
+                ->addOrderBy('c.clarid', 'DESC')
+                ->getQuery()
+                ->getResult();
+        }
+
+        $data = [
+            'contest' => $contest,
+            'global_clarifications' => $clarifications
+        ];
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('public/clarifications_general_modal.html.twig', $data);
+        } else {
+            return $this->render('public/clarifications_general.html.twig', $data);
+        }
     }
 
     #[Route(path: '/scoreboard.zip', name: 'public_scoreboard_data_zip')]
@@ -194,6 +266,7 @@ class PublicController extends BaseController
             'team' => $team,
             'showFlags' => $showFlags,
             'showAffiliations' => $showAffiliations,
+            'global_clarifications' => $this->getGlobalClarifications($this->dj->getCurrentContest()),
         ];
 
         if ($request->isXmlHttpRequest()) {
@@ -474,6 +547,10 @@ class PublicController extends BaseController
     {
         $categories = $this->config->get('clar_categories');
         $contest    = $this->dj->getCurrentContest();
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
+
         /** @var Clarification|null $clarification */
         $clarification = $this->em->createQueryBuilder()
             ->from(Clarification::class, 'c')
