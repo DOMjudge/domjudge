@@ -95,11 +95,11 @@ compiler_assertions () {
     assert_line "checking whether the linker accepts -Wl,-z,relro... yes"
     assert_line "checking whether the linker accepts -Wl,-z,now... yes"
     assert_line "checking whether $1 accepts -g... yes"
-    assert_regex "^checking for $1 option to (enable C11 features|accept ISO C89)\.\.\. none needed$"
+    assert_regex "^checking for $1 option to (enable C11 features|enable C23 features|accept ISO C89)\.\.\. (none needed|-std=gnu23)$"
     assert_line "checking whether $1 accepts -g... (cached) yes"
     if [ -n "$2" ]; then
         assert_line "checking whether $2 accepts -g... yes"
-        assert_line "checking how to run the C preprocessor... $1 -E"
+        assert_regex "^checking how to run the C preprocessor... $1( -std=gnu23|) -E$"
         assert_line "checking how to run the C++ preprocessor... $2 -E"
     fi
 }
