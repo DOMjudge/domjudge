@@ -409,4 +409,100 @@ class PublicController extends BaseController
             return $this->render('clarification.html.twig', $data);
         }
     }
+
+    #[Route(path: '/clarifications/by-problem/{probId}', name: 'public_clarification_by_prob')]
+    public function viewByProblemAction(Request $request, string $probId): Response
+    {
+        $contest = $this->dj->getCurrentContest();
+        if (!$contest) {
+            throw new NotFoundHttpException('No active contest');
+        }
+
+        $problem = $this->em->getRepository(Problem::class)->findByExternalId($probId);
+        if ($problem === null) {
+            throw new NotFoundHttpException(sprintf('Problem %s not found', $probId));
+        }
+        $contestProblem = $problem->getContestProblems();
+        $foundProblemInContest = false;
+        foreach ($contestProblem as $cp) {
+            if ($cp->getContest()->getCid() === $contest->getCid()) {
+                $foundProblemInContest = true;
+                break;
+            }
+        }
+        if (!$foundProblemInContest) {
+            throw new NotFoundHttpException(sprintf('Problem %s not in current contest', $probId));
+        }
+
+        /** @var Clarification[] $clarifications */
+        $clarifications = [];
+        if ($contest->getStartTimeObject()?->getTimestamp() <= time()) {
+            $clarifications = $this->em->createQueryBuilder()
+                ->from(Clarification::class, 'c')
+                ->leftJoin('c.problem', 'p')
+                ->leftJoin('c.sender', 's')
+                ->leftJoin('c.recipient', 'r')
+                ->select('c', 'p')
+                ->andWhere('c.contest = :contest')
+                ->andWhere('c.sender IS NULL')
+                ->andWhere('c.recipient IS NULL')
+                ->andWhere('c.problem = :problem')
+                ->setParameter('contest', $contest)
+                ->setParameter('problem', $problem)
+                ->addOrderBy('c.submittime', 'DESC')
+                ->addOrderBy('c.clarid', 'DESC')
+                ->getQuery()
+                ->getResult();
+        }
+
+        $data = [
+            'clarifications' => $clarifications,
+            'problem' => $problem,
+        ];
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('clarifications_by_problem_modal.html.twig', $data);
+        } else {
+            return $this->render('clarifications_by_problem.html.twig', $data);
+        }
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route(path: '/clarifications/{clarId}', name: 'public_clarification')]
+    public function viewAction(Request $request, string $clarId): Response
+    {
+        $categories = $this->config->get('clar_categories');
+        $contest    = $this->dj->getCurrentContest();
+        /** @var Clarification|null $clarification */
+        $clarification = $this->em->createQueryBuilder()
+            ->from(Clarification::class, 'c')
+            ->leftJoin('c.problem', 'p')
+            ->leftJoin('c.contest', 'co')
+            ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
+            ->select('c, p, co')
+            ->andWhere('c.contest = :contest')
+            ->andWhere('c.externalid = :clarId')
+            ->andWhere('c.sender IS NULL')
+            ->andWhere('c.recipient IS NULL')
+            ->setParameter('contest', $contest)
+            ->setParameter('clarId', $clarId)
+            ->getQuery()
+            ->getOneOrNullResult();
+    
+        if ($clarification === null) {
+            throw new NotFoundHttpException(sprintf('Clarification %s not found', $clarId));
+        }
+    
+        $data = [
+            'clarification' => $clarification,
+            'categories' => $categories,
+        ];
+    
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('clarification_modal.html.twig', $data);
+        } else {
+            return $this->render('clarification.html.twig', $data);
+        }
+    }
 }
