@@ -3,9 +3,7 @@ include:
   - name: YAMLSchemaDeprecation
   - name: YAMLDuplicatedKeys
   - name: YAMLRecursiveAlias
-  - name: YAMLIncompatibleTypes
   - name: YAMLUnresolvedAlias
-  - name: YAMLSchemaValidation
   - name: YAMLUnusedAnchor
   - name: RegExpAnonymousGroup
   - name: RegExpEscapedMetaCharacter
