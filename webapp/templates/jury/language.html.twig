@@ -57,6 +57,16 @@
                             {% endif %}
                         </td>
                     </tr>
+                    <tr>
+                        <th>Custom chroot</th>
+                        <td>
+                            {% if language.chrootDirectory %}
+                                <code>{{ language.chrootDirectory }}</code>
+                            {% else %}
+                                <p class="nodata">No custom chroot specified.</p>
+                            {% endif %}
+                        </td>
+                    </tr>
                     {{ _self.section_header('cogs', 'Compilation') }}
                     <tr>
                         <th>Compile script</th>
