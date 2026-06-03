@@ -616,6 +616,12 @@ class JudgeDaemon
         if ($lastWorkdir !== $workdir) {
             // create chroot environment
             logmsg(LOG_INFO, "  🔒 Executing chroot script: '" . self::CHROOT_SCRIPT . " start'");
+            // Reset the value to the default chroot, this should already be set by startup or cleanup at the end.
+            if ($this->current_chroot !== 'default') {
+                logmsg(LOG_INFO, "Found 'current_chroot' to not be the default, either setup or cleanup failed.");
+                $this->current_chroot = 'default';
+            }
+            logmsg(LOG_DEBUG, "Currently working from '" . getcwd() . "' directory.");
             if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'start'], $retval)) {
                 logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                 $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
