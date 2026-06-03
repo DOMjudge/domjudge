@@ -215,6 +215,12 @@ class JudgeDaemon
     /** @var array<string, string[]> */
     private array $langexts = [];
 
+    /** @var string[] */
+    private array $chroots_checked = [];
+
+    private string $chroot_old = 'default';
+    private string $chroot_current = 'default';
+
     /** @var ?resource */
     private $lockfile;
     /** @var array<int, string> */
@@ -412,6 +418,8 @@ class JudgeDaemon
         logmsg(LOG_INFO, "🔏 Executing chroot script: '" . self::CHROOT_SCRIPT . " check'");
         if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'check'])) {
             error("chroot validation check failed");
+        } else {
+            $this->chroots_checked = ['default'];
         }
 
         $this->registerJudgehost();
