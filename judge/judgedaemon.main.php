@@ -617,9 +617,9 @@ class JudgeDaemon
             // create chroot environment
             logmsg(LOG_INFO, "  🔒 Executing chroot script: '" . self::CHROOT_SCRIPT . " start'");
             // Reset the value to the default chroot, this should already be set by startup or cleanup at the end.
-            if ($this->current_chroot !== 'default') {
-                logmsg(LOG_INFO, "Found 'current_chroot' to not be the default, either setup or cleanup failed.");
-                $this->current_chroot = 'default';
+            if ($this->chroot_current !== 'default') {
+                logmsg(LOG_INFO, "Found 'chroot_current' to not be the default, either setup or cleanup failed.");
+                $this->chroot_current = 'default';
             }
             logmsg(LOG_DEBUG, "Currently working from '" . getcwd() . "' directory.");
             if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'start'], $retval)) {
@@ -1544,6 +1544,41 @@ class JudgeDaemon
             return true;
         }
 
+        $chroot_compile = $compile_config['chroot'] ?? 'default';
+        if ($chroot_compile !== $this->chroot_current) {
+            logmsg(LOG_INFO, "  🔏 Submission should be done in different chroot '" . $chroot_compile . "', leaving chroot '" . $this->chroot_current . "'");
+            logmsg(LOG_INFO, "  🔓 Executing chroot script: '" . self::CHROOT_SCRIPT . " stop'");
+            sleep(1);
+            if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'stop'], $retval)) {
+                logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
+                $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
+                return false;
+                // Leaving this here for the review, I think we can decide to leave here as we know we didn´t compile yet and we failed.
+                // rm: Just continue here: even though we might continue a current
+                // rm: compile/test-run cycle, we don't know whether we're in one here,
+                // rm: and worst case, the chroot script will fail the next time when
+                // rm: starting.
+            }
+            sleep(1);
+            if (!in_array($chroot_compile, $this->chroots_checked)) {
+                logmsg(LOG_INFO, " 🔏 Executing chroot script: '" . self::CHROOT_SCRIPT . " -c " . $chroot_compile . " check'");
+                if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, '-c', $chroot_compile, 'check'])) {
+                    error("chroot validation check failed");
+                } else {
+                    $this->chroots_checked[] = $chroot_compile;
+                }
+            }
+            sleep(1);
+            logmsg(LOG_INFO, "  🔒 Executing chroot script: '" . self::CHROOT_SCRIPT . " -c " . $chroot_compile . " start'");
+            if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, '-c', $chroot_compile, 'start'], $retval)) {
+                logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
+                $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
+                return false;
+            }
+            sleep(1);
+            $this->chroot_current = $chroot_compile;
+        }
+
         // Verify compile and runner versions.
         $judgeTaskId = $judgeTask['judgetaskid'];
         $version_verification = dj_json_decode($this->request('judgehosts/get_version_commands/' . $judgeTaskId, 'GET'));
@@ -2365,6 +2400,7 @@ class JudgeDaemon
             // compare script
             $compare_runpath = '';
         } else {
+            // Debug, are we actually in the chroot here? Test by breaking the underlying fetchExectuable code?
             [$compare_runpath, $error] = $this->fetchExecutable(
                 $workdirpath,
                 'compare',
