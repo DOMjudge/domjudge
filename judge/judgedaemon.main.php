@@ -158,11 +158,11 @@ readonly class VerdictInput
  *      team_message?: string, score?: string
  * }
  * @phpstan-type RunConfig array{time_limit: float, memory_limit: int, output_limit: int,
- *      process_limit: int, entry_point: ?string, pass_limit: int, hash: string, overshoot: int
+ *      process_limit: int, entry_point: ?string, pass_limit: int, hash: string, overshoot: int, chroot?: string
  * }
  * @phpstan-type CompareConfig array{script_timelimit: int, script_memory_limit: int,
  *      script_filesize_limit: int, compare_args: string, combined_run_compare: bool,
- *      hash: string, is_scoring_problem: bool
+ *      hash: string, is_scoring_problem: bool, chroot?: string
  * }
  * @phpstan-import-type MetaData_Compare from CompareMetaData
  * @phpstan-import-type MetaData_Program from ProgramMetaData
@@ -218,7 +218,6 @@ class JudgeDaemon
     /** @var string[] */
     private array $chroots_checked = [];
 
-    private string $chroot_old = 'default';
     private string $chroot_current = 'default';
 
     /** @var ?resource */
@@ -1529,7 +1528,7 @@ class JudgeDaemon
 
     /**
      * @param JudgeTask $judgeTask
-     * @param array{script_timelimit: int, script_memory_limit: int, language_extensions: array<string>, filter_compiler_files: bool, hash: string} $compile_config
+     * @param array{script_timelimit: int, script_memory_limit: int, language_extensions: array<string>, filter_compiler_files: bool, hash: string, chroot?: string} $compile_config
      */
     private function compile(
         array   $judgeTask,
@@ -1962,7 +1961,7 @@ class JudgeDaemon
                 if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'stop'], $retval)) {
                     logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                     $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
-                    return false;
+                    return Verdict::INTERNAL_ERROR;
                     // Leaving this here for the review, I think we can decide to leave here as we know we didn´t compile yet and we failed.
                     // rm: Just continue here: even though we might continue a current
                     // rm: compile/test-run cycle, we don't know whether we're in one here,
@@ -1983,7 +1982,7 @@ class JudgeDaemon
                 if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, '-c', $chroot_run, 'start'], $retval)) {
                     logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                     $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
-                    return false;
+                    return Verdict::INTERNAL_ERROR;
                 }
                 sleep(1);
             }
@@ -2212,7 +2211,7 @@ class JudgeDaemon
                     if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'stop'], $retval)) {
                         logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                         $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
-                        return false;
+                        return Verdict::INTERNAL_ERROR;
                         // Leaving this here for the review, I think we can decide to leave here as we know we didn´t compile yet and we failed.
                         // rm: Just continue here: even though we might continue a current
                         // rm: compile/test-run cycle, we don't know whether we're in one here,
@@ -2233,7 +2232,7 @@ class JudgeDaemon
                     if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, '-c', $chroot_compare, 'start'], $retval)) {
                         logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                         $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
-                        return false;
+                        return Verdict::INTERNAL_ERROR;
                     }
                     sleep(1);
                 }
