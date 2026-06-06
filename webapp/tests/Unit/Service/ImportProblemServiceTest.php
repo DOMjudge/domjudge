@@ -485,6 +485,49 @@ YAML;
         $this->assertStringContainsString("Invalid range '100'", $messages['danger'][0]);
     }
 
+    public function testParseTestCaseGroupMetaProblemSpecSpecifiedOutputValidatorFlagsAccepted(): void
+    {
+        $yaml = "output_validator_flags: --any arg -x should work";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
+    public function testParseTestCaseGroupMetaUnspecifiedOutputValidatorArgsAccepted(): void
+    {
+        $yaml = "output_validator_args: --any arg -x should work";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
+    public function testParseTestCaseGroupMetaProblemSpecSpecifiedOutputValidatorFlagsAndArgsSpecified(): void
+    {
+        $yaml = <<<YAML
+output_validator_flags: --any arg -x should work
+output_validator_args: --those args -must not work
+YAML;
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
+
     /**
      * Create a temporary zip file with the given contents.
      *
