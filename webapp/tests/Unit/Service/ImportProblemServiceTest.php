@@ -150,6 +150,41 @@ YAML;
         $this->assertEquals('float_tolerance 1E-6', $problem->getSpecialCompareArgs());
     }
 
+    public function testValidatorArgs(): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail
+validator_args: 'float_tolerance 1E-7'
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $this->assertEquals('float_tolerance 1E-7', $problem->getSpecialCompareArgs());
+    }
+
+    public function testValidatorFlagsAndArgs(): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail
+validator_flags: 'float_tolerance 1E-8'
+validator_args: 'float_tolerance 1E-9'
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $this->assertEquals('float_tolerance 1E-8', $problem->getSpecialCompareArgs());
+    }
+
     public function testCustomValidation(): void
     {
         foreach (['custom', 'custom interactive', 'custom multi-pass'] as $mode) {
@@ -525,6 +560,49 @@ YAML;
         $this->assertNotEmpty($messages['danger']);
         $this->assertStringContainsString("Invalid range '100'", $messages['danger'][0]);
     }
+
+    public function testParseTestCaseGroupMetaProblemSpecSpecifiedOutputValidatorFlagsAccepted(): void
+    {
+        $yaml = "output_validator_flags: --any arg -x should work";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
+    public function testParseTestCaseGroupMetaUnspecifiedOutputValidatorArgsAccepted(): void
+    {
+        $yaml = "output_validator_args: --any arg -x should work";
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
+    public function testParseTestCaseGroupMetaProblemSpecSpecifiedOutputValidatorFlagsAndArgsSpecified(): void
+    {
+        $yaml = <<<YAML
+output_validator_flags: --any arg -x should work
+output_validator_args: --those args -must not work
+YAML;
+        $messages = [];
+
+        $result = ImportProblemService::parseTestCaseGroupMeta($yaml, 'test-group', $messages);
+
+        $this->assertNotNull($result);
+        $danger_messages = $messages['danger'] ?? [];
+        $this->assertEmpty($danger_messages, "Failed with: " . implode(', ', $danger_messages));
+        $this->assertEquals('--any arg -x should work', $result->getOutputValidatorFlags());
+    }
+
 
     /**
      * Create a temporary zip file with the given contents.

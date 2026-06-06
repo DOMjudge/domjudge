@@ -1205,8 +1205,12 @@ readonly class ImportProblemService
                     join(', ', $unknown_flags), $name);
             }
         }
-        if (isset($yamlData['output_validator_flags'])) {
-            $testcaseGroup->setOutputValidatorFlags($yamlData['output_validator_flags']);
+        foreach(['flags', 'args'] as $postFix) {
+            $output_validator_flags_key = 'output_validator_' . $postFix;
+            if (isset($yamlData[$output_validator_flags_key])) {
+                $testcaseGroup->setOutputValidatorFlags($yamlData[$output_validator_flags_key]);
+                break;
+            }
         }
         if (isset($yamlData['on_reject'])) {
             $testcaseGroup->setOnRejectContinue($yamlData['on_reject'] === 'continue');
@@ -1292,8 +1296,12 @@ readonly class ImportProblemService
             $yamlProblemProperties['typesAsString'] = ['pass-fail'];
         }
 
-        if (isset($yamlData['validator_flags'])) {
-            $yamlProblemProperties['special_compare_args'] = $yamlData['validator_flags'];
+        foreach (['flags', 'args'] as $postFix) {
+            $validator_flags_key = 'validator_' . $postFix;
+            if (isset($yamlData[$validator_flags_key])) {
+                $yamlProblemProperties['special_compare_args'] = $yamlData[$validator_flags_key];
+                break;
+            }
         }
 
         if (isset($yamlData['validation'])
