@@ -145,6 +145,41 @@ YAML;
         $this->assertEquals('float_tolerance 1E-6', $problem->getSpecialCompareArgs());
     }
 
+    public function testValidatorArgs(): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail
+validator_args: 'float_tolerance 1E-7'
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $this->assertEquals('float_tolerance 1E-7', $problem->getSpecialCompareArgs());
+    }
+
+    public function testValidatorFlagsAndArgs(): void
+    {
+        $yaml = <<<YAML
+name: test
+type: pass-fail
+validator_flags: 'float_tolerance 1E-8'
+validator_args: 'float_tolerance 1E-9'
+YAML;
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertEmpty($messages);
+        $this->assertEquals('float_tolerance 1E-8', $problem->getSpecialCompareArgs());
+    }
+
     public function testCustomValidation(): void
     {
         foreach (['custom', 'custom interactive', 'custom multi-pass'] as $mode) {

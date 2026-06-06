@@ -1250,8 +1250,12 @@ readonly class ImportProblemService
             $yamlProblemProperties['typesAsString'] = ['pass-fail'];
         }
 
-        if (isset($yamlData['validator_flags'])) {
-            $yamlProblemProperties['special_compare_args'] = $yamlData['validator_flags'];
+        foreach (['flags', 'args'] as $postFix) {
+            $validator_flags_key = 'validator_' . $postFix;
+            if (isset($yamlData[$validator_flags_key])) {
+                $yamlProblemProperties['special_compare_args'] = $yamlData[$validator_flags_key];
+                break;
+            }
         }
 
         if (isset($yamlData['validation'])
