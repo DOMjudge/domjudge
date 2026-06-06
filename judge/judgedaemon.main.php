@@ -2028,7 +2028,7 @@ class JudgeDaemon
                 if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'stop'], $retval)) {
                     logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                     $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
-                    return Verdict::INTERNAL_ERROR;
+                    return false;
                     // Leaving this here for the review, I think we can decide to leave here as we know we didn´t compile yet and we failed.
                     // rm: Just continue here: even though we might continue a current
                     // rm: compile/test-run cycle, we don't know whether we're in one here,
@@ -2049,7 +2049,7 @@ class JudgeDaemon
                 if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, '-c', $chroot_run, 'start'], $retval)) {
                     logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                     $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
-                    return Verdict::INTERNAL_ERROR;
+                    return false;
                 }
                 sleep(1);
             }
@@ -2272,7 +2272,7 @@ class JudgeDaemon
                     if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, 'stop'], $retval)) {
                         logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                         $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
-                        return Verdict::INTERNAL_ERROR;
+                        return false;
                         // Leaving this here for the review, I think we can decide to leave here as we know we didn´t compile yet and we failed.
                         // rm: Just continue here: even though we might continue a current
                         // rm: compile/test-run cycle, we don't know whether we're in one here,
@@ -2293,7 +2293,7 @@ class JudgeDaemon
                     if (!$this->runCommandSafe([LIBJUDGEDIR . '/' . self::CHROOT_SCRIPT, '-c', $chroot_compare, 'start'], $retval)) {
                         logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
                         $this->disable('judgehost', 'hostname', $this->myhost, "chroot script exited with exitcode $retval on $this->myhost");
-                        return Verdict::INTERNAL_ERROR;
+                        return false;
                     }
                     sleep(1);
                 }
