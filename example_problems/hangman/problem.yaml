@@ -1,4 +1,5 @@
 name: Hangman
 validation: custom multi-pass
+validator_flags: --teammessage "There are more testcases besides those given in the problemstatement."
 limits:
   validation_passes: 26
