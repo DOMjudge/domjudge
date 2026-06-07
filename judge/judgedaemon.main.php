@@ -2119,7 +2119,7 @@ class JudgeDaemon
                 // TODO: Perhaps we should change this in the database to be an array of args?
                 $orig_compare_args = [];
                 if ($compare_args !== null && strlen($compare_args) > 0) {
-                    $orig_compare_args = explode(' ', $compare_args);
+                    $orig_compare_args = str_getcsv($compare_args, separator: ' ', escape: '');
                 }
 
                 $compare_args = array_merge(
