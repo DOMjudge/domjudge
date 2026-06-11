@@ -358,7 +358,7 @@ class JudgehostController extends AbstractFOSRestController
                 } elseif ($judging->getResult() === Judging::RESULT_COMPILER_ERROR) {
                     // The new result contradicts a former one, that's not good.
                     // Since the other judgehosts were not successful, but we were, assume that the other judgehosts
-                    // are broken and disable it.
+                    // are broken and disable them.
                     $disableHostnames = [];
                     /** @var JudgingRun $run */
                     foreach ($judging->getRuns() as $run) {
@@ -371,20 +371,13 @@ class JudgehostController extends AbstractFOSRestController
                     }
 
                     foreach ($disableHostnames as $disableHostname) {
-                        $disabled = [
-                            'kind' => 'judgehost',
-                            'hostname' => $disableHostname,
-                        ];
-                        $error = new InternalError();
-                        $error
-                            ->setJudging($judging)
-                            ->setContest($judging->getContest())
-                            ->setDescription('Compilation results are different for j' . $judging->getJudgingid())
-                            ->setJudgehostlog(base64_encode('New compilation output: ' . $output_compile))
-                            ->setTime(Utils::now())
-                            ->setDisabled($disabled);
-                        $this->em->persist($error);
+                        $this->disableJudgehostForContradiction(
+                            $judging,
+                            $disableHostname,
+                            (string)$judging->getOutputCompile(true)
+                        );
                     }
+                    $this->em->flush();
                 }
             } else {
                 $compileMetadata = $request->request->get('compile_metadata');
@@ -429,19 +422,13 @@ class JudgehostController extends AbstractFOSRestController
                         // The new result contradicts a former one, that's not good.
                         // Since at least one other judgehost was successful, but we were not, assume that the
                         // current judgehost is broken and disable it.
-                        $disabled = [
-                            'kind' => 'judgehost',
-                            'hostname' => $judgehost->getHostname(),
-                        ];
-                        $error = new InternalError();
-                        $error
-                            ->setJudging($judging)
-                            ->setContest($judging->getContest())
-                            ->setDescription('Compilation results are different for j' . $judging->getJudgingid())
-                            ->setJudgehostlog(base64_encode('New compilation output: ' . $output_compile))
-                            ->setTime(Utils::now())
-                            ->setDisabled($disabled);
-                        $this->em->persist($error);
+                        $this->disableJudgehostForContradiction(
+                            $judging,
+                            $judgehost->getHostname(),
+                            (string)$output_compile
+                        );
+
+                        $this->em->flush();
                     }
 
                     $judgingId = $judging->getJudgingid();
@@ -2042,5 +2029,36 @@ class JudgehostController extends AbstractFOSRestController
             return $this->serializeJudgeTasks($judgetasks, $judgehost);
         }
         return null;
+    }
+
+    private function disableJudgehostForContradiction(Judging $judging, string $hostname, string $outputCompile): void
+    {
+        $disabled = [
+            'kind' => 'judgehost',
+            'hostname' => $hostname,
+        ];
+
+        $error = new InternalError();
+        $error
+            ->setJudging($judging)
+            ->setContest($judging->getContest())
+            ->setDescription('Compilation results are different for j' . $judging->getJudgingid())
+            ->setJudgehostlog(base64_encode($outputCompile))
+            ->setTime(Utils::now())
+            ->setDisabled($disabled);
+        $this->em->persist($error);
+
+        // Link the error to the judging so the system knows
+        // this judging needs attention.
+        $judging->setInternalError($error);
+
+        $this->dj->setInternalError($disabled, $judging->getContest(), false);
+
+        // Re-route pending tasks from the disabled judgehost back to the queue
+        // so they are not stuck forever in an infinite processing loop.
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
+        if ($judgehost) {
+            $this->giveBackJudging($judging->getJudgingid(), $judgehost);
+        }
     }
 }
