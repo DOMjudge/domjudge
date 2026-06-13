@@ -9,6 +9,7 @@ use App\Entity\Problem;
 use App\Entity\Team;
 use App\Form\Type\TeamClarificationType;
 use App\Service\AuthorizedUserService;
+use App\Service\ClarificationService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -38,11 +39,12 @@ class ClarificationController extends BaseController
     public function __construct(
         protected readonly AuthorizedUserService $authService,
         DOMJudgeService $dj,
-        protected readonly ConfigurationService $config,
         EntityManagerInterface $em,
+        KernelInterface $kernel,
+        protected readonly ClarificationService $clarificationService,
+        protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService,
         protected readonly FormFactoryInterface $formFactory,
-        KernelInterface $kernel,
     ) {
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
@@ -111,7 +113,7 @@ class ClarificationController extends BaseController
     #[Route(path: '/clarifications/{clarId}', name: 'team_clarification')]
     public function viewAction(Request $request, string $clarId): Response
     {
-        $categories = $this->config->get('clar_categories');
+        $categories = $this->clarificationService->getClarificationCategories();
         $user       = $this->authService->getUser();
         $team       = $user->getTeam();
         $contest    = $this->dj->getCurrentContest($team->getTeamid());
@@ -192,7 +194,7 @@ class ClarificationController extends BaseController
     #[Route(path: '/clarifications/add', name: 'team_clarification_add', priority: 1)]
     public function addAction(Request $request): Response
     {
-        $categories = $this->config->get('clar_categories');
+        $categories = $this->clarificationService->getClarificationCategories();
         $user       = $this->authService->getUser();
         $team       = $user->getTeam();
         $contest    = $this->dj->getCurrentContest($team->getTeamid());
@@ -243,7 +245,7 @@ class ClarificationController extends BaseController
         } else {
             [, $problemId] = explode(Clarification::PROBLEM_BASED_SEPARATOR, $formData['subject']);
             $problem = $this->em->getRepository(Problem::class)->findByExternalId($problemId);
-            $queue = $this->config->get('clar_default_problem_queue');
+            $queue = $this->clarificationService->getClarificationDefaultProblemQueue();
             if ($queue === "") {
                 $queue = null;
             }

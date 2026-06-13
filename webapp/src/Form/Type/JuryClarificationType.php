@@ -6,7 +6,7 @@ use App\Entity\Clarification;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
 use App\Service\AuthorizedUserService;
-use App\Service\ConfigurationService;
+use App\Service\ClarificationService;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
@@ -30,7 +30,7 @@ class JuryClarificationType extends AbstractType
     public function __construct(
         private readonly AuthorizedUserService $authService,
         private readonly EntityManagerInterface $em,
-        private readonly ConfigurationService $config,
+        private readonly ClarificationService $clarificationService,
         private readonly DOMJudgeService $dj,
     ) {}
 
@@ -56,7 +56,7 @@ class JuryClarificationType extends AbstractType
         $subjectOptions = [];
         $subjectGroupBy = null;
 
-        $categories = $this->config->get('clar_categories');
+        $categories = $this->clarificationService->getClarificationCategories();
         $contest = $this->dj->getCurrentContest();
         $hasCurrentContest = $contest !== null;
         if ($hasCurrentContest) {
@@ -109,7 +109,7 @@ class JuryClarificationType extends AbstractType
             'group_by' => $subjectGroupBy,
         ]);
 
-        $maxLength = $this->config->get('clar_max_body_length');
+        $maxLength = $this->clarificationService->getClarificationMaximumBodyLength();
         $constraints = [];
         if ($maxLength > 0) {
             $constraints[] = new Length(max: $maxLength, maxMessage: 'Clarification body is too long: {{ value }} characters, maximum is {{ limit }}.');

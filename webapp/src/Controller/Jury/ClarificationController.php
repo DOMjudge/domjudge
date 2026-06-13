@@ -9,7 +9,7 @@ use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Form\Type\JuryClarificationType;
-use App\Service\ConfigurationService;
+use App\Service\ClarificationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
@@ -32,9 +32,9 @@ class ClarificationController extends BaseController
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
-        protected readonly ConfigurationService $config,
         EventLogService $eventLogService,
         KernelInterface $kernel,
+        protected readonly ClarificationService $clarificationService,
     ) {
         parent::__construct($em, $eventLogService, $dj, $kernel);
     }
@@ -63,7 +63,7 @@ class ClarificationController extends BaseController
         string $currentQueue = 'all',
     ): Response {
         $contest = $this->dj->getContestByExternalId($contestId);
-        $categories = $this->config->get('clar_categories');
+        $categories = $this->clarificationService->getClarificationCategories();
 
         if ($currentFilter === 'all') {
             $currentFilter = null;
@@ -114,7 +114,7 @@ class ClarificationController extends BaseController
             }
         }
 
-        $queues = $this->config->get('clar_queues');
+        $queues = $this->clarificationService->getClarificationQueues();
 
         return $this->render('jury/clarifications.html.twig', [
             'contestId' => $contestId,
@@ -212,8 +212,8 @@ class ClarificationController extends BaseController
             }
         }
         $parameters['subjects'] = $groupedCategories;
-        $queues = $this->config->get('clar_queues');
-        $clarificationAnswers = $this->config->get('clar_answers');
+        $queues = $this->clarificationService->getClarificationQueues();
+        $clarificationAnswers = $this->clarificationService->getClarificationDefaultAnswers();
 
         foreach ($clarificationList as $clar) {
             $data = ['clarid' => $clar->getClarid(), 'externalid' => $clar->getExternalid()];
@@ -481,7 +481,7 @@ class ClarificationController extends BaseController
         if ($inReplTo) {
             $queue = $inReplTo->getQueue();
         } else {
-            $queue = $this->config->get('clar_default_problem_queue');
+            $queue = $this->clarificationService->getClarificationDefaultProblemQueue();
             if ($queue === "") {
                 $queue = null;
             }

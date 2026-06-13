@@ -7,7 +7,13 @@ use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
+use App\Service\AuthorizedUserService;
+use App\Service\ClarificationService;
+use App\Service\ConfigurationService;
+use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Utils\Utils;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -34,6 +40,17 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
 class ClarificationController extends AbstractRestController
 {
+    public function __construct(
+        AuthorizedUserService $authService,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
+        ConfigurationService $config,
+        EventLogService $eventLogService,
+        protected readonly ClarificationService $clarificationService,
+    ) {
+        parent::__construct($authService, $em, $dj, $config, $eventLogService);
+    }
+
     /**
      * Get all the clarifications for this contest.
      *
@@ -115,7 +132,7 @@ class ClarificationController extends AbstractRestController
         Request $request,
         ?string $id
     ): Response {
-        $maxLength = $this->config->get('clar_max_body_length');
+        $maxLength = $this->clarificationService->getClarificationMaximumBodyLength();
         if ($maxLength > 0 && mb_strlen($clarificationPost->text) > $maxLength) {
             throw new BadRequestHttpException(
                 sprintf('Clarification body is too long: %d characters, maximum is %d.', mb_strlen($clarificationPost->text), $maxLength)
@@ -258,9 +275,9 @@ class ClarificationController extends AbstractRestController
 
         $clarification
             ->setExternalid($clarificationId)
-            ->setQueue($this->config->get('clar_default_problem_queue'));
+            ->setQueue($this->clarificationService->getClarificationDefaultProblemQueue());
 
-        if (!$clarification->getProblem() && $clarificationCategories = $this->config->get('clar_categories')) {
+        if (!$clarification->getProblem() && $clarificationCategories = $this->clarificationService->getClarificationCategories()) {
             $clarificationCategoryNames = array_keys($clarificationCategories);
             $clarification->setCategory(reset($clarificationCategoryNames));
         }
