@@ -7,6 +7,7 @@ use App\DataTransferObject\SubmissionRestriction;
 use App\Entity\Clarification;
 use App\Form\Type\PrintType;
 use App\Service\AuthorizedUserService;
+use App\Service\ClarificationService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -40,6 +41,7 @@ class MiscController extends BaseController
     public function __construct(
         protected readonly AuthorizedUserService $authService,
         DOMJudgeService $dj,
+        protected readonly ClarificationService $clarificationService,
         protected readonly ConfigurationService $config,
         EntityManagerInterface $em,
         protected readonly ScoreboardService $scoreboardService,
@@ -133,7 +135,7 @@ class MiscController extends BaseController
 
             $data['clarifications']        = $clarifications;
             $data['clarificationRequests'] = $clarificationRequests;
-            $data['categories']            = $this->config->get('clar_categories');
+            $data['categories']            = $this->clarificationService->getClarificationCategories();
             $data['allowDownload']         = (bool)$this->config->get('allow_team_submission_download');
             $data['showTooLateResult']     = $this->config->get('show_too_late_result');
         }

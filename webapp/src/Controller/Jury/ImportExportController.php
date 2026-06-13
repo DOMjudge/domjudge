@@ -16,6 +16,7 @@ use App\Form\Type\JsonImportType;
 use App\Form\Type\ProblemsImportType;
 use App\Form\Type\ProblemUploadType;
 use App\Form\Type\TsvImportType;
+use App\Service\ClarificationService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -57,6 +58,7 @@ class ImportExportController extends BaseController
         EntityManagerInterface $em,
         protected readonly ScoreboardService $scoreboardService,
         DOMJudgeService $dj,
+        protected readonly ClarificationService $clarificationService,
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService,
         protected readonly ImportProblemService $importProblemService,
@@ -522,13 +524,13 @@ class ImportExportController extends BaseController
             throw new BadRequestHttpException('No current contest');
         }
 
-        $queues              = (array)$this->config->get('clar_queues');
+        $queues              = (array)$this->clarificationService->getClarificationQueues();
         $clarificationQueues = ['' => 'Unassigned issues'];
         foreach ($queues as $key => $val) {
             $clarificationQueues[$key] = $val;
         }
 
-        $categories = (array)$this->config->get('clar_categories');
+        $categories = (array)$this->clarificationService->getClarificationCategories();
 
         $clarificationCategories = [];
         foreach ($categories as $key => $val) {
