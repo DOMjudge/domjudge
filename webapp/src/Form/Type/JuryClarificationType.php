@@ -147,11 +147,8 @@ class JuryClarificationType extends AbstractType
     public function checkJuryMember(mixed $value, ExecutionContextInterface $context, mixed $payload): void
     {
         if ($this->clarid) {
-            $juryMember = $this->em->createQueryBuilder()
+            $juryMember = $this->clarificationService->getQueryBuilder(externalClarificationId: $this->clarid)
                 ->select('clar.jury_member')
-                ->from(Clarification::class, 'clar')
-                ->where('clar.externalid = :clarid')
-                ->setParameter('clarid', $this->clarid)
                 ->getQuery()
                 ->getSingleResult()['jury_member'];
 

@@ -95,41 +95,27 @@ class MiscController extends BaseController
                 paginated: false
             )[0];
 
-            $qb = $this->em->createQueryBuilder()
-                ->from(Clarification::class, 'c')
-                ->leftJoin('c.problem', 'p')
-                ->leftJoin('c.sender', 's')
-                ->leftJoin('c.recipient', 'r')
-                ->select('c', 'p')
-                ->andWhere('c.contest = :contest')
-                ->andWhere('c.sender IS NULL')
-                ->andWhere('c.recipient = :teamId OR c.recipient IS NULL')
-                ->andWhere('c.submittime <= :time')
-                ->setParameter('contest', $contest)
-                ->setParameter('teamId', $teamId)
-                ->setparameter('time', time())
-                ->addOrderBy('c.submittime', 'DESC')
-                ->addOrderBy('c.clarid', 'DESC');
+            $qb = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
+                ->select('clar', 'p')
+                // Needed to filter out team clarification requests.
+                ->andWhere('clar.sender IS NULL')
+                ->addOrderBy('clar.submittime', 'DESC')
+                ->addOrderBy('clar.clarid', 'DESC');
             if ($contest->getStartTimeObject()?->getTimestamp() > time()) {
-                $qb->andWhere('c.problem IS NULL');
+                $qb->andWhere('clar.problem IS NULL');
             }
 
             /** @var Clarification[] $clarifications */
             $clarifications = $qb->getQuery()->getResult();
 
             /** @var Clarification[] $clarificationRequests */
-            $clarificationRequests = $this->em->createQueryBuilder()
-                ->from(Clarification::class, 'c')
-                ->leftJoin('c.problem', 'p')
-                ->leftJoin('c.sender', 's')
-                ->leftJoin('c.recipient', 'r')
-                ->select('c', 'p')
-                ->andWhere('c.contest = :contest')
-                ->andWhere('c.sender = :teamId')
-                ->setParameter('contest', $contest)
+            $clarificationRequests = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
+                ->select('clar', 'p')
+                // Where is needed to only retrieve clarification requests, not the responses.
+                ->andWhere('clar.sender = :teamId')
                 ->setParameter('teamId', $teamId)
-                ->addOrderBy('c.submittime', 'DESC')
-                ->addOrderBy('c.clarid', 'DESC')
+                ->addOrderBy('clar.submittime', 'DESC')
+                ->addOrderBy('clar.clarid', 'DESC')
                 ->getQuery()
                 ->getResult();
 
