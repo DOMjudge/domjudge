@@ -538,16 +538,12 @@ class ImportExportController extends BaseController
         }
 
         /** @var Clarification[] $clarifications */
-        $clarifications = $this->em->createQueryBuilder()
-            ->from(Clarification::class, 'c')
-            ->leftJoin('c.problem', 'p')
-            ->select('c')
-            ->andWhere('c.contest = :contest')
-            ->setParameter('contest', $contest)
-            ->addOrderBy('c.category')
+        $clarifications = $this->clarificationService->getQueryBuilder(externalContestId: $contest->getExternalid())
+            ->select('clar')
+            ->addOrderBy('clar.category')
             ->addOrderBy('p.probid')
-            ->addOrderBy('c.submittime')
-            ->addOrderBy('c.clarid')
+            ->addOrderBy('clar.submittime')
+            ->addOrderBy('clar.clarid')
             ->getQuery()
             ->getResult();
 

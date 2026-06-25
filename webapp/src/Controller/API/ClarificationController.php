@@ -206,18 +206,9 @@ class ClarificationController extends AbstractRestController
         }
 
         if ($replyToId = $clarificationPost->replyToId) {
-            $qb = $this->em->createQueryBuilder()
-                ->from(Clarification::class, 'c')
-                ->select('c')
-                ->andWhere('c.externalid = :clarification')
-                ->andWhere('c.contest = :contest')
-                ->setParameter('clarification', $replyToId)
-                ->setParameter('contest', $contestId);
-            if ($this->authService->checkRole('team')) {
-                $qb
-                    ->andWhere('c.sender = :team OR c.recipient = :team OR (c.sender IS NULL AND c.recipient IS NULL)')
-                    ->setParameter('team', $fromTeam);
-            }
+            $qb = $this->clarificationService->getQueryBuilder(internalContestId: $contestId, externalClarificationId: $replyToId)
+                ->select('clar');
+
             // Load the clarification.
             /** @var Clarification|null $replyTo */
             $replyTo = $qb->getQuery()->getOneOrNullResult();
@@ -256,13 +247,8 @@ class ClarificationController extends AbstractRestController
                 throw new BadRequestHttpException('ID does not match URI.');
             } elseif ($this->isGranted('ROLE_API_WRITER')) {
                 // Check if we already have a clarification with this ID
-                $existingClarification = $this->em->createQueryBuilder()
-                    ->from(Clarification::class, 'c')
-                    ->select('c')
-                    ->andWhere('(c.externalid IS NULL AND c.clarid = :clarid) OR c.externalid = :clarid')
-                    ->andWhere('c.contest = :contest')
-                    ->setParameter('clarid', $clarificationId)
-                    ->setParameter('contest', $contestId)
+                $existingClarification = $this->clarificationService->getQueryBuilder(internalContestId: $contestId, externalClarificationId: $clarificationId)
+                    ->select('clar')
                     ->getQuery()
                     ->getOneOrNullResult();
                 if ($existingClarification !== null) {
@@ -307,48 +293,11 @@ class ClarificationController extends AbstractRestController
 
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        $queryBuilder = $this->em->createQueryBuilder()
-            ->from(Clarification::class, 'clar')
-            ->join('clar.contest', 'c')
-            ->leftJoin('clar.in_reply_to', 'reply')
-            ->leftJoin('clar.sender', 's')
-            ->leftJoin('clar.recipient', 'r')
-            ->leftJoin('clar.problem', 'p')
-            ->innerJoin('c.problems', 'cp')
+        $contestId = $this->getContestId($request);
+        $problem = $request->query->get('problem');
+        return $this->clarificationService->getQueryBuilder(internalContestId: $contestId, problem: $problem)
             ->select('clar, c, r, reply, p')
-            ->andWhere('clar.contest = :cid')
-            ->andWhere('clar.problem IS NULL OR clar.problem = cp.problem')
-            ->setParameter('cid', $this->getContestId($request))
             ->orderBy('clar.clarid');
-
-        if (!$this->authService->checkRole('api_reader') &&
-            !$this->authService->checkRole('judgehost')) {
-            if ($this->authService->checkRole('team')) {
-                $queryBuilder
-                    ->andWhere('clar.sender = :team OR clar.recipient = :team OR (clar.sender IS NULL AND clar.recipient IS NULL)')
-                    ->setParameter('team', $this->authService->getUser()->getTeam());
-            } else {
-                $queryBuilder
-                    ->andWhere('clar.sender IS NULL')
-                    ->andWhere('clar.recipient IS NULL');
-            }
-        }
-
-        // For non-API-reader users, only expose the problems after the contest has started.
-        // `WF Access Policy` allows for clarifications before the contest, but not to disclose the problem
-        // so referencing them in clarifications would violate referential integrity.
-        if (!$this->authService->checkRole('api_reader')) {
-            $queryBuilder->andWhere('c.starttime < :now OR clar.problem IS NULL')
-                ->setParameter('now', Utils::now());
-        }
-
-        if ($request->query->has('problem')) {
-            $queryBuilder
-                ->andWhere('clar.problem = :problem')
-                ->setParameter('problem', $request->query->get('problem'));
-        }
-
-        return $queryBuilder;
     }
 
     protected function getIdField(): string

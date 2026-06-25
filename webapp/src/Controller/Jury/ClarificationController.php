@@ -69,31 +69,7 @@ class ClarificationController extends BaseController
             $currentFilter = null;
         }
 
-        $queryBuilder = $this->em->createQueryBuilder()
-            ->from(Clarification::class, 'clar')
-            ->leftJoin('clar.problem', 'p')
-            ->innerJoin('clar.contest', 'c')
-            ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = clar.contest')
-            ->select('clar', 'p', 'cp')
-            ->andWhere('c.externalid = :contestId')
-            ->setParameter('contestId', $contestId)
-            ->orderBy('clar.submittime', 'DESC')
-            ->addOrderBy('clar.clarid', 'DESC');
-
-        if ($currentQueue === "unassigned") {
-            $queryBuilder->andWhere($queryBuilder->expr()->orX(
-                $queryBuilder->expr()->isNull('clar.queue'),
-                $queryBuilder->expr()->eq('clar.queue', ':queue')
-            ))
-                ->setParameter('queue', $currentQueue);
-        } elseif ($currentQueue !== "all") {
-            $queryBuilder->andWhere('clar.queue = :queue')
-                ->setParameter('queue', $currentQueue);
-        }
-
-        $clarifications = $queryBuilder
-            ->getQuery()
-            ->getResult();
+        $clarifications = $this->clarificationService->getClarifications($contestId, $currentQueue);
 
         /** @var Clarification[] $newClarifications */
         $newClarifications = [];
@@ -269,11 +245,8 @@ class ClarificationController extends BaseController
 
         $parameters['queues'] = $queues;
         $parameters['answers'] = $clarificationAnswers;
-        $parameters['jurymember'] = $this->em->createQueryBuilder()
+        $parameters['jurymember'] = $this->clarificationService->getQueryBuilder(externalClarificationId: $clarification->getExternalid())
             ->select('clar.jury_member')
-            ->from(Clarification::class, 'clar')
-            ->where('clar.clarid = :clarid')
-            ->setParameter('clarid', $clarification->getClarid())
             ->getQuery()
             ->getSingleResult()['jury_member'];
 
