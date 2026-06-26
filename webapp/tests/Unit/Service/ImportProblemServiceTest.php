@@ -3,8 +3,10 @@
 namespace App\Tests\Unit\Service;
 
 use App\Entity\Problem;
+use App\Entity\ProblemStatementContent;
 use App\Service\ImportProblemService;
 use App\Tests\Unit\BaseTestCase;
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use ZipArchive;
@@ -657,6 +659,79 @@ YAML;
         $this->assertInstanceOf(Problem::class, $result);
         $this->assertEmpty($messages['danger']);
         $this->assertEquals(5, $result->getTimelimit());
+    }
+
+    public function testProblemStatementReplacementOnReimport(): void
+    {
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        /** @var ImportProblemService $service */
+        $service = static::getContainer()->get(ImportProblemService::class);
+
+        $problemId = 'statement-import';
+        $problem = (new Problem())
+            ->setExternalid($problemId)
+            ->setName('Statement import')
+            ->setTimelimit(1);
+        $statement = (new ProblemStatementContent())
+            ->setProblem($problem)
+            ->setContent("old statement\n");
+        $problem
+            ->setProblemStatementContent($statement)
+            ->setProblemstatementType('txt');
+        $em->persist($problem);
+        $em->flush();
+
+        $yaml = <<<YAML
+name: Statement import
+limits:
+  time_limit: 1
+YAML;
+        $newContent = "new statement from zip\n";
+        $zipFile = $this->createZipWithContents([
+            'problem.yaml' => $yaml,
+            'problem.txt' => $newContent,
+        ]);
+        $zip = new ZipArchive();
+        self::assertTrue($zip->open($zipFile));
+        /** @var array{info: string[], warning: string[], danger: string[]} $messages */
+        $messages = ['info' => [], 'warning' => [], 'danger' => []];
+        try {
+            $result = $service->importZippedProblem($zip, "$problemId.zip", $problem, null, $messages);
+        } finally {
+            $zip->close();
+            @unlink($zipFile);
+        }
+        self::assertInstanceOf(Problem::class, $result);
+        self::assertEmpty($messages['danger']);
+
+        $em->clear();
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
+        self::assertInstanceOf(Problem::class, $problem);
+        self::assertSame($newContent, $problem->getProblemstatement());
+        self::assertSame('txt', $problem->getProblemstatementType());
+        self::assertCount(1, $em->getRepository(ProblemStatementContent::class)->findBy(['problem' => $problem]));
+
+        // Re-importing without a statement keeps the existing reset semantics.
+        $zipFile = $this->createZipWithContents(['problem.yaml' => $yaml]);
+        $zip = new ZipArchive();
+        self::assertTrue($zip->open($zipFile));
+        $messages = ['info' => [], 'warning' => [], 'danger' => []];
+        try {
+            $result = $service->importZippedProblem($zip, "$problemId.zip", $problem, null, $messages);
+        } finally {
+            $zip->close();
+            @unlink($zipFile);
+        }
+        self::assertInstanceOf(Problem::class, $result);
+        self::assertEmpty($messages['danger']);
+
+        $em->clear();
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
+        self::assertInstanceOf(Problem::class, $problem);
+        self::assertNull($problem->getProblemStatementContent());
+        self::assertNull($problem->getProblemstatementType());
+        self::assertCount(0, $em->getRepository(ProblemStatementContent::class)->findBy(['problem' => $problem]));
     }
 
     public function testParseTestCaseGroupMetaInvalidRangeTooManyValuesRejected(): void
