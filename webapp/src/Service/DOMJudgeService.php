@@ -1693,6 +1693,13 @@ class DOMJudgeService
         $zip->addFromString('index.html', $contestPage);
 
         $submissionsDataRequest  = Request::create('/public/submissions-data.json', Request::METHOD_GET);
+        if ($contest !== null) {
+            $submissionsDataRequest->attributes->set('_domjudge_static_scoreboard_contest', $contest);
+        }
+        $submissionsDataRequest->attributes->set(
+            '_domjudge_static_scoreboard_force_unfrozen',
+            $forceUnfrozen
+        );
         $submissionsDataRequest->setSession($this->requestStack->getSession());
         /** @var JsonResponse $response */
         $response = $this->httpKernel->handle($submissionsDataRequest, HttpKernelInterface::SUB_REQUEST);

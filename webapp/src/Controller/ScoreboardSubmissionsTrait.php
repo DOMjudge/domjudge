@@ -50,9 +50,13 @@ trait ScoreboardSubmissionsTrait
         ]);
     }
 
-    protected function getSubmissionsDataResponse(Contest $contest, ?string $teamId, ?string $problemId): JsonResponse
-    {
-        $scoreboard = $this->scoreboardService->getScoreboard($contest);
+    protected function getSubmissionsDataResponse(
+        Contest $contest,
+        ?string $teamId,
+        ?string $problemId,
+        bool $forceUnfrozen = false
+    ): JsonResponse {
+        $scoreboard = $this->scoreboardService->getScoreboard($contest, forceUnfrozen: $forceUnfrozen);
 
         if ($scoreboard === null) {
             throw $this->createNotFoundException('No submission data found');
@@ -108,7 +112,12 @@ trait ScoreboardSubmissionsTrait
             $item = [
                 'time' => $this->twigExtension->printtime($submission->getSubmittime(), contest: $contest),
                 'language' => $submission->getLanguage()->getName(),
-                'verdict' => $this->submissionVerdict($submission, $contest, $verificationRequired),
+                'verdict' => $this->submissionVerdict(
+                    $submission,
+                    $contest,
+                    $verificationRequired,
+                    $forceUnfrozen
+                ),
             ];
             if ($contest->getScoreboardType() === ScoreboardType::SCORE) {
                 $item['score'] = $submission->getScore();
@@ -124,12 +133,13 @@ trait ScoreboardSubmissionsTrait
     protected function submissionVerdict(
         Submission $submission,
         Contest $contest,
-        bool $verificationRequired
+        bool $verificationRequired,
+        bool $forceUnfrozen = false
     ): string {
         if ($submission->getSubmittime() >= $contest->getEndtime()) {
             return $this->twigExtension->printResult('too-late');
         }
-        if ($contest->getFreezetime() && $submission->getSubmittime() >= $contest->getFreezetime() && !$contest->getFreezeData()->showFinal()) {
+        if (!$forceUnfrozen && $contest->getFreezetime() && $submission->getSubmittime() >= $contest->getFreezetime() && !$contest->getFreezeData()->showFinal()) {
             return $this->twigExtension->printResult('');
         }
         if ($contest->isExternalSourceUseJudgements()) {

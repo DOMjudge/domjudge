@@ -295,12 +295,19 @@ class PublicController extends BaseController
     #[Route(path: '/submissions-data/team/{teamId}/problem/{problemId}.json', name: 'public_submissions_data_cell')]
     public function submissionsDataAction(Request $request, ?string $teamId, ?string $problemId): JsonResponse
     {
-        $contest = $this->dj->getCurrentContest(onlyPublic: true);
+        /** @var Contest|null $contest */
+        $contest = $request->attributes->get('_domjudge_static_scoreboard_contest')
+            ?? $this->dj->getCurrentContest(onlyPublic: true);
 
         if (!$contest) {
             throw $this->createNotFoundException('No active contest found');
         }
 
-        return $this->getSubmissionsDataResponse($contest, $teamId, $problemId);
+        $forceUnfrozen = (bool)$request->attributes->get(
+            '_domjudge_static_scoreboard_force_unfrozen',
+            false
+        );
+
+        return $this->getSubmissionsDataResponse($contest, $teamId, $problemId, $forceUnfrozen);
     }
 }
