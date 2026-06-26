@@ -230,9 +230,7 @@ readonly class ImportProblemService
                 ->setSpecialCompareArgs('')
                 ->setRunExecutable()
                 ->setMemlimit(null)
-                ->setOutputlimit(null)
-                ->setProblemStatementContent(null)
-                ->setProblemstatementType(null);
+                ->setOutputlimit(null);
 
             $contestProblem
                 ?->setPoints(1)
@@ -303,20 +301,27 @@ readonly class ImportProblemService
         }
 
         // Add problem statement, also look in obsolete location.
+        $statementFound = false;
         foreach (['problem_statement/', ''] as $dir) {
             foreach (['pdf', 'html', 'txt'] as $type) {
                 $filename = sprintf('%sproblem.%s', $dir, $type);
                 $text     = $zip->getFromName($filename);
                 if ($text !== false) {
-                    $content = (new ProblemStatementContent())
-                        ->setContent($text);
+                    $content = $problem->getProblemStatementContent() ?? new ProblemStatementContent();
+                    $content->setContent($text);
                     $problem
                         ->setProblemStatementContent($content)
                         ->setProblemstatementType($type);
+                    $statementFound = true;
                     $messages['info'][] = "Added/updated problem statement from: $filename";
                     break 2;
                 }
             }
+        }
+        if (!$statementFound) {
+            $problem
+                ->setProblemStatementContent(null)
+                ->setProblemstatementType(null);
         }
 
         $this->em->persist($problem);
