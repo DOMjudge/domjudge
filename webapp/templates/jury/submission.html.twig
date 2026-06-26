@@ -687,7 +687,11 @@
                     {% if lastJudging is not null %}
                         <tr class="lasttcruns">
                             <td>
-                                {{ lastRuns | displayTestcaseResults(lastJudging.endtime is not empty) }}
+                                {{ lastRuns | displayTestcaseResults(
+                                    lastJudging.endtime is not empty,
+                                    false,
+                                    lastRunsByTestcaseId
+                                ) }}
                             </td>
                             <td>
                                 <a href="{{ lastSubmissionLink }}">previous {{ lastSubmission.externalid }}</a>

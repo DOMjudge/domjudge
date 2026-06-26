@@ -554,6 +554,8 @@ class SubmissionController extends BaseController
         $lastJudging = null;
         /** @var Testcase[] $lastRuns */
         $lastRuns = [];
+        /** @var array<int, JudgingRun> $lastRunsByTestcaseId */
+        $lastRunsByTestcaseId = [];
         if ($lastSubmission !== null) {
             $lastJudging = $this->em->createQueryBuilder()
                 ->from(Judging::class, 'j')
@@ -569,14 +571,22 @@ class SubmissionController extends BaseController
             if ($lastJudging !== null) {
                 $lastRuns = $this->em->createQueryBuilder()
                     ->from(Testcase::class, 't')
-                    ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
-                    ->select('t', 'jr')
+                    ->select('t')
                     ->andWhere('t.problem = :problem')
-                    ->setParameter('judging', $lastJudging)
                     ->setParameter('problem', $submission->getProblem())
                     ->orderBy('t.ranknumber')
                     ->getQuery()
                     ->getResult();
+
+                // Testcase entities may already have judging_runs hydrated for the current judging,
+                // so fetch previous runs separately and index them explicitly.
+                /** @var JudgingRun[] $previousRuns */
+                $previousRuns = $this->em->getRepository(JudgingRun::class)->findBy([
+                    'judging' => $lastJudging,
+                ]);
+                foreach ($previousRuns as $previousRun) {
+                    $lastRunsByTestcaseId[$previousRun->getTestcase()->getTestcaseid()] = $previousRun;
+                }
             }
         }
 
@@ -643,6 +653,7 @@ class SubmissionController extends BaseController
             'externalRuns' => $externalRuns,
             'runsOutput' => $runsOutput,
             'lastRuns' => $lastRuns,
+            'lastRunsByTestcaseId' => $lastRunsByTestcaseId,
             'unjudgableReasons' => $unjudgableReasons,
             'verificationRequired' => (bool)$this->config->get('verification_required'),
             'claimWarning' => $claimWarning,

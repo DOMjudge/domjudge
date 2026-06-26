@@ -404,10 +404,15 @@ class TwigExtension
     // TODO: this function shares a lot with the above one, unify them?
     /**
      * @param Testcase[] $testcases
+     * @param array<int, JudgingRun>|null $judgingRunsByTestcaseId
      */
     #[AsTwigFilter('displayTestcaseResults', isSafe: ['html'])]
-    public function displayTestcaseResults(array $testcases, bool $submissionDone, bool $isExternal = false): string
-    {
+    public function displayTestcaseResults(
+        array $testcases,
+        bool $submissionDone,
+        bool $isExternal = false,
+        ?array $judgingRunsByTestcaseId = null,
+    ): string {
         $results = '';
         $lastTypeSample = true;
         foreach ($testcases as $testcase) {
@@ -420,7 +425,13 @@ class TwigExtension
             $text      = '?';
             $isCorrect = false;
             /** @var JudgingRun|ExternalRun|null $run */
-            $run = $isExternal ? $testcase->getFirstExternalRun() : $testcase->getFirstJudgingRun();
+            if ($isExternal) {
+                $run = $testcase->getFirstExternalRun();
+            } elseif ($judgingRunsByTestcaseId !== null) {
+                $run = $judgingRunsByTestcaseId[$testcase->getTestcaseid()] ?? null;
+            } else {
+                $run = $testcase->getFirstJudgingRun();
+            }
             if ($isExternal) {
                 $runResult = $run?->getResult();
             } else {
