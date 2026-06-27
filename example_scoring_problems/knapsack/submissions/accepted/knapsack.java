@@ -1,5 +1,5 @@
 // @EXPECTED_RESULTS@: CORRECT
-// @EXPECTED_SCORE@: 100
+// @EXPECTED_SCORE@: 200
 import java.util.*;
 
 public class knapsack {

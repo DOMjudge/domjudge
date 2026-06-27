@@ -2,7 +2,7 @@
 # Simple first-fit: pick items in order until full
 # Achieves low partial score
 # @EXPECTED_RESULTS@: CORRECT
-# @EXPECTED_SCORE@: 74.42
+# @EXPECTED_SCORE@: 147.15
 
 def solve():
     capacity = int(input())
