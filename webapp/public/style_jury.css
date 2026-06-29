@@ -231,7 +231,13 @@ div.submission-summary > span {
     font-size: 0.8rem;
     margin-top: 0.15rem;
 }
-.contest-fields-table td .form-check { padding-left: 0; }
+/* Keep Bootstrap's .form-check padding for native checkboxes. Bootstrap pairs
+ * that padding with a negative margin on .form-check-input; removing only the
+ * padding moves non-toggle checkboxes out of their table cell. bootstrap-toggle
+ * wraps toggle checkboxes in a visible .toggle element, so align only that
+ * generated control with the table-cell edge.
+ */
+.contest-fields-table td .form-check > .toggle[data-toggle="toggle"] { margin-left: -1.5em; }
 .contest-form .page-header-bar {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border: 1px solid #dee2e6;
