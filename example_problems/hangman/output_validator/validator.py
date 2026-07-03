@@ -26,7 +26,7 @@ def write_generic_message(message: str, feedback_file: str) -> None:
     try:
         with open(message_file_path, 'r+') as message_file:
             if message not in message_file.read():
-                print(message, file=teammessage_file)
+                print(message, file=message_file)
     except FileNotFoundError:
         # Overwrite in case the file got created in between
         with open(message_file_path, 'w') as message_file:
