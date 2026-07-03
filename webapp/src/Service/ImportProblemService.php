@@ -1287,6 +1287,16 @@ readonly class ImportProblemService
             }
         }
 
+        if (isset($yamlData['problem_format_version'])) {
+            $version = $yamlData['problem_format_version'];
+            if (in_array($version, ['domjudge', 'icpc-legacy'])) {
+                $messages['warning'][] = sprintf('problemspec %s support still experimental.', $version);
+            } elseif (!in_array(['domjudge', 'legacy', 'icpc-legacy', '2025-09-draft', 'draft'])) {
+                $messages['danger'][] = sprintf('unknown problemspec %s', $version);
+            }
+            // TODO: We don´t have any differences in those specs yet.
+        }
+
         foreach ($yamlProblemProperties as $key => $value) {
             try {
                 $propertyAccessor->setValue($problem, $key, $value);

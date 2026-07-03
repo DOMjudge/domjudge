@@ -36,6 +36,8 @@ unknown_key: "doesn't break anything"
 # no explicit validation
 # no explicit limits
 # no validator flags
+# the default for the problem_format_version is `legacy`
+# See: https://www.kattis.com/problem-package-format/spec/legacy.html#problem-format-version
 YAML;
 
         $messages = [];
@@ -52,6 +54,56 @@ YAML;
         $this->assertEquals(null, $problem->getMemlimit());
         $this->assertEquals(null, $problem->getOutputlimit());
         $this->assertEquals(null, $problem->getSpecialCompareArgs());
+    }
+
+    public function testExplicitProblemSpecVersionYamlTest(): void
+    {
+        foreach (['domjudge', 'legacy', 'icpc-legacy', '2025-09-draft', 'draft'] as $version) {
+            $yaml = <<<YAML
+problem_format_version: $version
+name: test
+# the default for the problem_format_version is `legacy`
+# See: https://www.kattis.com/problem-package-format/spec/legacy.html#problem-format-version
+YAML;
+
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertEmpty($messages);
+            $this->assertEquals('test', $problem->getName());
+            $this->assertEquals('pass-fail', $problem->getTypesAsString());
+            $this->assertEquals('default', $validationMode);
+            $this->assertEquals(0, $problem->getTimelimit());
+            $this->assertEquals(null, $problem->getMemlimit());
+            $this->assertEquals(null, $problem->getOutputlimit());
+            $this->assertEquals(null, $problem->getSpecialCompareArgs());
+            if (!in_array($version, ['domjudge', 'icpc-legacy'])) {
+                $this->assertNotEmpty($messages['warning']);
+                $this->assertStringContainsString('problemspec ' . $version . ' support still experimental.', $messages['warning'][0]);
+            }
+        }
+    }
+
+    public function testUnknownProblemSpecVersionYamlTest(): void
+    {
+        $yaml = <<<YAML
+problem_format_version: 2014-01
+name: test
+# the default for the problem_format_version is `legacy`
+# See: https://www.kattis.com/problem-package-format/spec/legacy.html#problem-format-version
+YAML;
+
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        $this->assertNotEmpty($messages['danger']);
+        $this->assertStringContainsString('unknown problemspec ' . $version . '.', $messages['danger'][0]);
     }
 
     public function testTypesYamlTest(): void
