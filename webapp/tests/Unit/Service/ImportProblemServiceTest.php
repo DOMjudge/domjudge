@@ -72,7 +72,6 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
-            $this->assertEmpty($messages['danger']);
             $this->assertEquals('test', $problem->getName());
             $this->assertEquals('pass-fail', $problem->getTypesAsString());
             $this->assertEquals('default', $validationMode);
@@ -81,8 +80,11 @@ YAML;
             $this->assertEquals(null, $problem->getOutputlimit());
             $this->assertEquals(null, $problem->getSpecialCompareArgs());
             if (!in_array($version, ['domjudge', 'icpc-legacy'])) {
+                $this->assertEmpty($messages['danger']);
                 $this->assertNotEmpty($messages['warning']);
                 $this->assertStringContainsString('problemspec ' . $version . ' support still experimental.', $messages['warning'][0]);
+            } else {
+                $this->assertEmpty($messages);
             }
         }
     }
