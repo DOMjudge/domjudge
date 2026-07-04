@@ -1289,9 +1289,9 @@ readonly class ImportProblemService
 
         if (isset($yamlData['problem_format_version'])) {
             $version = $yamlData['problem_format_version'];
-            if (in_array($version, ['domjudge', 'icpc-legacy'])) {
+            if (in_array($version, ['legacy', '2025-09-draft', 'draft', '2023-07-draft'])) {
                 $messages['warning'][] = sprintf('problemspec %s support still experimental.', $version);
-            } elseif (!in_array($version, ['domjudge', 'legacy', 'icpc-legacy', '2025-09-draft', 'draft', '2023-07-draft'])) {
+            } elseif (!in_array($version, ['domjudge', 'icpc-legacy'])) {
                 // 2023-07-draft used in Unit tests
                 $messages['danger'][] = sprintf('Unknown problemspec %s.', $version);
             }
