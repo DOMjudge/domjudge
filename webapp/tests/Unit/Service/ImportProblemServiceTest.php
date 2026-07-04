@@ -104,7 +104,7 @@ YAML;
         $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
         $this->assertTrue($ret);
         $this->assertNotEmpty($messages['danger']);
-        $this->assertStringContainsString('unknown problemspec ' . $unknownVersion . '.', $messages['danger'][0]);
+        $this->assertStringContainsString('Unknown problemspec ' . $unknownVersion . '.', $messages['danger'][0]);
     }
 
     public function testTypesYamlTest(): void

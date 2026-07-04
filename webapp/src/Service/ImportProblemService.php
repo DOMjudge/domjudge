@@ -1293,7 +1293,7 @@ readonly class ImportProblemService
                 $messages['warning'][] = sprintf('problemspec %s support still experimental.', $version);
             } elseif (!in_array($version, ['domjudge', 'legacy', 'icpc-legacy', '2025-09-draft', 'draft', '2023-07-draft'])) {
                 // 2023-07-draft used in Unit tests
-                $messages['danger'][] = sprintf('unknown problemspec %s', $version);
+                $messages['danger'][] = sprintf('Unknown problemspec %s.', $version);
             }
             // TODO: We don´t have any differences in those specs yet.
         }
