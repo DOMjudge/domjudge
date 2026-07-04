@@ -1207,7 +1207,7 @@ readonly class ImportProblemService
     /**
      * Returns true iff the yaml could be parsed correctly.
      *
-     * @param array{danger?: string[], info?: string[]} $messages
+     * @param array{danger?: string[], warning?: string[], info?: string[]} $messages
      */
     public static function parseYaml(bool|string $problemYaml, array &$messages, string &$validationMode, PropertyAccessor $propertyAccessor, Problem $problem): bool
     {
