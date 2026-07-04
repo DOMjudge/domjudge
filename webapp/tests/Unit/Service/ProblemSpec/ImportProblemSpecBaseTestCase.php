@@ -90,7 +90,7 @@ YAML;
      * @param array<string, string> $restrictions
      * @return array<string[]>
      */
-    private function getCombinations(
+    private function getDraftCombinations(
         array $current, array $possible, array $restrictions
     ): array {
         $final = [];
@@ -110,12 +110,22 @@ YAML;
                     $new[] = $item;
                     $unsortedList = $new;
                     sort($new);
-                    var_dump($unsortedList, $new, $unsortedList === $new);
                     if ($unsortedList === $new) {
+                        // The 2025-09-draft allows for sequence of strings & single string
+                        // Assume the single string can be split on whitespace into multiple valid options
+                        $tmp = [];
+                        foreach ($new as $item) {
+                            $tmp[$item] = $item;
+                        }
+                        $final[] = $tmp;
                         $final[] = $new;
+                        $final[] = implode(" ", $new);
+                        if (count($new) > 1) {
+                            $final[] = implode("\t", $new);
+                        }
                         $final = array_merge(
                             $final,
-                            $this->getCombinations($new, $possible, $restrictions)
+                            $this->getDraftCombinations($new, $possible, $restrictions)
                         );
                     }
                 }
@@ -124,10 +134,13 @@ YAML;
         return $final;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testTypesYamlTest(): void
     {
         $typesStringLegacy = ['pass-fail', 'scoring'];
-        $typesStringDraft = $this->getCombinations(
+        $typesStringDraft = $this->getDraftCombinations(
             [],
             [
                 'pass-fail',
@@ -145,48 +158,15 @@ YAML;
             ]
         );
         print_r($typesStringDraft);
-        /*
-            'pass-fail',
-            'scoring',
-            'multi-pass',
-            'interactive',
-            'submit-answer',
-            'pass-fail multi-pass',
-            'pass-fail interactive',
-            'pass-fail submit-answer',
-            'scoring multi-pass',
-            'scoring interactive',
-            'scoring submit-answer',
-        ];
         $working_types = [];
         foreach ($this->problemSpecVersion as $version) {
             if (in_array(self::PROBLEMSPEC_VERSION, ['domjudge', 'legacy'])) {
                 $working_types = array_unique(array_merge($working_types, $typesStringLegacy));
             }
             if (in_array(self::PROBLEMSPEC_VERSION, ['domjudge', 'draft'])) {
-                $working_types = array_unique(array_merge($working_types, $typesString));
+                $working_types = array_unique(array_merge($working_types, $typesStringDraft));
             }
-
-                array_merge($working_types);
-                [] = 'domjudge';
-
-                case 'domjudge':
-                    break;
-
-            }
-            foreach ([
-                         'pass-fail',
-                         'scoring',
-                         'multi-pass',
-                         'interactive',
-                         'submit-answer',
-                         'pass-fail multi-pass',
-                         'pass-fail interactive',
-                         'pass-fail submit-answer',
-                         'scoring multi-pass',
-                         'scoring interactive',
-                         'scoring submit-answer',
-                     ] as $type) {
+            foreach($working_types as $type) {
                 $yaml = <<<YAML
 name: test
 problem_format_version: $version
@@ -208,7 +188,7 @@ YAML;
                 $typesString = str_replace(' ', ', ', $type);
                 $this->assertEquals($typesString, $problem->getTypesAsString());
             }
-        }*/
+        }
     }
 
     public function testUnknownProblemType(): void
