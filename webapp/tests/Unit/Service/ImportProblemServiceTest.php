@@ -89,8 +89,9 @@ YAML;
 
     public function testUnknownProblemSpecVersionYamlTest(): void
     {
+        $unknownVersion = '2014-01';
         $yaml = <<<YAML
-problem_format_version: 2014-01
+problem_format_version: $unknownVersion
 name: test
 # the default for the problem_format_version is `legacy`
 # See: https://www.kattis.com/problem-package-format/spec/legacy.html#problem-format-version
@@ -103,7 +104,7 @@ YAML;
         $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
         $this->assertTrue($ret);
         $this->assertNotEmpty($messages['danger']);
-        $this->assertStringContainsString('unknown problemspec ' . $version . '.', $messages['danger'][0]);
+        $this->assertStringContainsString('unknown problemspec ' . $unknownVersion . '.', $messages['danger'][0]);
     }
 
     public function testTypesYamlTest(): void

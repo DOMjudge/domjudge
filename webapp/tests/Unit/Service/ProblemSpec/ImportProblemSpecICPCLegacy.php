@@ -2,13 +2,7 @@
 
 namespace App\Tests\Unit\Service\ProblemSpec;
 
-use App\Entity\Problem;
-use App\Service\ImportProblemService;
-use App\Tests\Unit\BaseTestCase;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use ZipArchive;
-
-class ImportProblemSpecICPCLegacy extends BaseTestCase
+class ImportProblemSpecICPCLegacy extends ImportProblemSpecBaseTestCase
 {
-    private array $problemSpecVersion = ['icpc-legacy'];
+    protected array $problemSpecVersion = ['icpc-legacy'];
 }

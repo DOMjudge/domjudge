@@ -2,13 +2,7 @@
 
 namespace App\Tests\Unit\Service\ProblemSpec;
 
-use App\Entity\Problem;
-use App\Service\ImportProblemService;
-use App\Tests\Unit\BaseTestCase;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use ZipArchive;
-
-class ImportProblemSpecDOMjudge extends BaseTestCase
+class ImportProblemSpecDOMjudge extends ImportProblemSpecBaseTestCase
 {
-    private array $problemSpecVersion = ['domjudge'];
+    protected array $problemSpecVersion = ['domjudge'];
 }

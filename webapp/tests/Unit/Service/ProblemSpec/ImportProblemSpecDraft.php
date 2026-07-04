@@ -2,13 +2,7 @@
 
 namespace App\Tests\Unit\Service\ProblemSpec;
 
-use App\Entity\Problem;
-use App\Service\ImportProblemService;
-use App\Tests\Unit\BaseTestCase;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use ZipArchive;
-
-class ImportProblemSpecDraft extends BaseTestCase
+class ImportProblemSpecDraft extends ImportProblemSpecBaseTestCase
 {
-    private array $problemSpecVersion = ['draft', '2025-09-draft', '2025-09'];
+    protected array $problemSpecVersion = ['draft', '2025-09-draft', '2025-09'];
 }
