@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit\Service\ProblemSpec;
 
-class ImportProblemSpecLegacy extends ImportProblemSpecBaseTestCase
+class ImportProblemSpecLegacyTest extends ImportProblemSpecBaseTestCase
 {
     protected array $problemSpecVersion = ['legacy'];
 }

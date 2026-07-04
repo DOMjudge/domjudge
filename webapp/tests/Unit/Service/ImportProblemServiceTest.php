@@ -478,7 +478,7 @@ YAML;
         $this->assertEmpty($messages['info']);
         $this->assertEmpty($messages['danger']);
         $this->assertNotEmpty($messages['warning']);
-        $this->assertEquals(0, count($messages['warning']));
+        $this->assertCount(1, $messages['warning']);
         $this->assertStringContainsString('problemspec 2023-07-draft support still experimental.', $messages['warning'][0]);
     }
 

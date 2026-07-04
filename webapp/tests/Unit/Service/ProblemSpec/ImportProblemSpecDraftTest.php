@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit\Service\ProblemSpec;
 
-class ImportProblemSpecDraft extends ImportProblemSpecBaseTestCase
+class ImportProblemSpecDraftTest extends ImportProblemSpecBaseTestCase
 {
     protected array $problemSpecVersion = ['draft', '2025-09-draft', '2025-09'];
 }

@@ -17,6 +17,27 @@ abstract class ImportProblemSpecBaseTestCase extends BaseTestCase
         self::bootKernel();
     }
 
+    /**
+     * @param array{info?: string[], warning?: string[], danger?: string[]} $messages
+     * @param string[] $expected
+     */
+    private function assertProblemSpecWarning(string $version, array $messages, array $expected = ['warning']): void
+    {
+        if (!in_array($version, ['domjudge', 'icpc-legacy'])) {
+            foreach(['danger', 'info'] as $type) {
+                if (!in_array($type, $expected)) {
+                    if (isset($messages[$type])) {
+                        $this->assertEmpty($messages[$type]);
+                    }
+                }
+            }
+            $this->assertNotEmpty($messages['warning']);
+            $this->assertStringContainsString('problemspec ' . $version . ' support still experimental.', $messages['warning'][0]);
+        } else {
+            $this->assertEmpty($messages);
+        }
+    }
+
     public function testEmptyYaml(): void
     {
         foreach ($this->problemSpecVersion as $version) {
@@ -26,6 +47,7 @@ abstract class ImportProblemSpecBaseTestCase extends BaseTestCase
             $problem = new Problem();
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertProblemSpecWarning($version, $messages);
             $this->assertTrue($ret);
             $this->assertEquals('Unknown name', $problem->getName());
         }
@@ -50,6 +72,7 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages);
             $this->assertEquals('test', $problem->getName());
             $this->assertEquals('pass-fail', $problem->getTypesAsString());
             $this->assertEquals('default', $validationMode);
@@ -57,13 +80,6 @@ YAML;
             $this->assertEquals(null, $problem->getMemlimit());
             $this->assertEquals(null, $problem->getOutputlimit());
             $this->assertEquals(null, $problem->getSpecialCompareArgs());
-            if (!in_array($version, ['domjudge', 'icpc-legacy'])) {
-                $this->assertEmpty($messages['danger']);
-                $this->assertNotEmpty($messages['warning']);
-                $this->assertStringContainsString('problemspec ' . $version . ' support still experimental.', $messages['warning'][0]);
-            } else {
-                $this->assertEmpty($messages);
-            }
         }
     }
 
@@ -95,6 +111,7 @@ YAML;
 
                 $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
                 $messageString = var_export($messages, true);
+                $this->assertProblemSpecWarning($version, $messages);
                 $this->assertTrue($ret, 'Parsing failed for type: ' . $type . ', messages: ' . $messageString);
                 if (in_array($type, ['interactive', 'multi-pass', 'submit-answer'])) {
                     // Default to pass-fail if not explicitly set.
@@ -120,6 +137,7 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertFalse($ret);
+            $this->assertProblemSpecWarning($version, $messages, ['warning', 'danger']);
             $messagesString = var_export($messages, true);
             $this->assertStringContainsString('Unknown problem type', $messagesString);
         }
@@ -165,7 +183,7 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
-            $this->assertEmpty($messages);
+            $this->assertProblemSpecWarning($version, $messages);
             $this->assertEquals('float_tolerance 1E-6', $problem->getSpecialCompareArgs());
         }
     }
@@ -185,7 +203,7 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
-            $this->assertEmpty($messages);
+            $this->assertProblemSpecWarning($version, $messages);
             $this->assertEquals('float_tolerance 1E-7', $problem->getSpecialCompareArgs());
         }
     }
@@ -206,7 +224,7 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
-            $this->assertEmpty($messages);
+            $this->assertProblemSpecWarning($version, $messages);
             $this->assertEquals('float_tolerance 1E-8', $problem->getSpecialCompareArgs());
         }
     }
@@ -226,7 +244,7 @@ YAML;
 
                 $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
                 $this->assertTrue($ret);
-                $this->assertEmpty($messages);
+                $this->assertProblemSpecWarning($version, $messages);
                 $this->assertEquals($mode, $validationMode);
                 if ($mode === 'custom multi-pass') {
                     $this->assertEquals('pass-fail, multi-pass', $problem->getTypesAsString());
@@ -256,7 +274,7 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
-            $this->assertEmpty($messages);
+            $this->assertProblemSpecWarning($version, $messages);
             $this->assertEquals(5, $problem->getTimelimit());
         }
     }
@@ -277,7 +295,7 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
-            $this->assertEmpty($messages);
+            $this->assertProblemSpecWarning($version, $messages);
             $this->assertEquals(2.5, $problem->getTimelimit());
         }
     }
@@ -350,7 +368,7 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
-            $this->assertEmpty($messages);
+            $this->assertProblemSpecWarning($version, $messages);
             $this->assertEquals(1234 * 1024, $problem->getMemlimit());
         }
     }
@@ -371,7 +389,7 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
-            $this->assertEmpty($messages);
+            $this->assertProblemSpecWarning($version, $messages);
             $this->assertEquals(4223 * 1024, $problem->getOutputlimit());
         }
     }
@@ -392,7 +410,7 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
-            $this->assertEmpty($messages);
+            $this->assertProblemSpecWarning($version, $messages);
             $this->assertEquals(7, $problem->getMultipassLimit());
         }
     }
@@ -418,7 +436,7 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
-            $this->assertEmpty($messages);
+            $this->assertProblemSpecWarning($version, $messages);
             $this->assertEquals('pass-fail, multi-pass', $problem->getTypesAsString());
             $this->assertEquals('custom multi-pass', $validationMode);
             $this->assertEquals(7, $problem->getTimelimit());
@@ -444,8 +462,8 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
-            $this->assertEmpty($messages);
             $this->assertEquals('english', $problem->getName());
+            $this->assertProblemSpecWarning($version, $messages);
         }
     }
 
@@ -475,7 +493,7 @@ YAML;
 
         $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
         $this->assertTrue($ret);
-        $this->assertEmpty($messages);
+        $this->assertProblemSpecWarning($version, $messages);
         $this->assertEquals('Guess the Number', $problem->getName());
         $this->assertEquals('pass-fail, interactive', $problem->getTypesAsString());
         $this->assertEquals('custom interactive', $validationMode);

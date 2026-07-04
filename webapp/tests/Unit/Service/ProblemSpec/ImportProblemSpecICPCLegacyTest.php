@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit\Service\ProblemSpec;
 
-class ImportProblemSpecICPCLegacy extends ImportProblemSpecBaseTestCase
+class ImportProblemSpecICPCLegacyTest extends ImportProblemSpecBaseTestCase
 {
     protected array $problemSpecVersion = ['icpc-legacy'];
 }
