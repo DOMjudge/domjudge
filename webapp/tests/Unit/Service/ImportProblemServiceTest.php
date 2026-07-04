@@ -469,13 +469,17 @@ YAML;
 
         $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
         $this->assertTrue($ret);
-        $this->assertEmpty($messages);
         $this->assertEquals('Guess the Number', $problem->getName());
         $this->assertEquals('pass-fail, interactive', $problem->getTypesAsString());
         $this->assertEquals('custom interactive', $validationMode);
         $this->assertEquals(0, $problem->getTimelimit());
         $this->assertEquals(null, $problem->getMemlimit());
         $this->assertEquals(null, $problem->getOutputlimit());
+        $this->assertEmpty($messages['info']);
+        $this->assertEmpty($messages['danger']);
+        $this->assertNotEmpty($messages['warning']);
+        $this->assertEquals(0, size($messages['warning']));
+        $this->assertStringContainsString('problemspec 2023-07-draft support still experimental.', $messages['warning'][0]);
     }
 
     public function testParseTestCaseGroupMetaValidAcceptScore(): void
