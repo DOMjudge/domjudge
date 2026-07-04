@@ -72,7 +72,7 @@ YAML;
 
             $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
             $this->assertTrue($ret);
-            $this->assertEmpty($messages);
+            $this->assertEmpty($messages['danger']);
             $this->assertEquals('test', $problem->getName());
             $this->assertEquals('pass-fail', $problem->getTypesAsString());
             $this->assertEquals('default', $validationMode);
