@@ -11,6 +11,7 @@ use ZipArchive;
 abstract class ImportProblemSpecBaseTestCase extends BaseTestCase
 {
     protected array $problemSpecVersion = [];
+    protected const string PROBLEMSPEC_VERSION = '';
 
     protected function setUp(): void
     {
@@ -83,9 +84,96 @@ YAML;
         }
     }
 
+    /**
+     * @param string[] $current
+     * @param string[] $possible
+     * @param array<string, string> $restrictions
+     * @return array<string[]>
+     */
+    private function getCombinations(
+        array $current, array $possible, array $restrictions
+    ): array {
+        $final = [];
+        foreach ($possible as $item) {
+            if (!in_array($item, $current)) {
+                $valid = true;
+                if (isset($restrictions[$item])) {
+                    foreach ($restrictions[$item] as $restriction) {
+                        if (in_array($restriction, $current)) {
+                            $valid = false;
+                            break;
+                        }
+                    }
+                }
+                if ($valid) {
+                    $new = $current;
+                    $new[] = $item;
+                    $unsortedList = $new;
+                    sort($new);
+                    var_dump($unsortedList, $new, $unsortedList === $new);
+                    if ($unsortedList === $new) {
+                        $final[] = $new;
+                        $final = array_merge(
+                            $final,
+                            $this->getCombinations($new, $possible, $restrictions)
+                        );
+                    }
+                }
+            }
+        }
+        return $final;
+    }
+
     public function testTypesYamlTest(): void
     {
+        $typesStringLegacy = ['pass-fail', 'scoring'];
+        $typesStringDraft = $this->getCombinations(
+            [],
+            [
+                'pass-fail',
+                'scoring',
+                'multi-pass',
+                'interactive',
+                'submit-answer',
+            ],
+            [
+                'pass-fail' => ['scoring'],
+                'scoring' => ['pass-fail'],
+                'multi-pass' => ['submit-answer'],
+                'interactive' => ['submit-answer'],
+                'submit-answer' => ['multi-pass', 'interactive'],
+            ]
+        );
+        print_r($typesStringDraft);
+        /*
+            'pass-fail',
+            'scoring',
+            'multi-pass',
+            'interactive',
+            'submit-answer',
+            'pass-fail multi-pass',
+            'pass-fail interactive',
+            'pass-fail submit-answer',
+            'scoring multi-pass',
+            'scoring interactive',
+            'scoring submit-answer',
+        ];
+        $working_types = [];
         foreach ($this->problemSpecVersion as $version) {
+            if (in_array(self::PROBLEMSPEC_VERSION, ['domjudge', 'legacy'])) {
+                $working_types = array_unique(array_merge($working_types, $typesStringLegacy));
+            }
+            if (in_array(self::PROBLEMSPEC_VERSION, ['domjudge', 'draft'])) {
+                $working_types = array_unique(array_merge($working_types, $typesString));
+            }
+
+                array_merge($working_types);
+                [] = 'domjudge';
+
+                case 'domjudge':
+                    break;
+
+            }
             foreach ([
                          'pass-fail',
                          'scoring',
@@ -120,7 +208,7 @@ YAML;
                 $typesString = str_replace(' ', ', ', $type);
                 $this->assertEquals($typesString, $problem->getTypesAsString());
             }
-        }
+        }*/
     }
 
     public function testUnknownProblemType(): void

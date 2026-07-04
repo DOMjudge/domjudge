@@ -5,4 +5,5 @@ namespace App\Tests\Unit\Service\ProblemSpec;
 class ImportProblemSpecDOMjudgeTest extends ImportProblemSpecBaseTestCase
 {
     protected array $problemSpecVersion = ['domjudge'];
+    protected const string PROBLEMSPEC_VERSION = 'domjudge';
 }
