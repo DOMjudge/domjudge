@@ -345,6 +345,20 @@ class Problem extends BaseApiEntity implements
     }
 
     /**
+     * @return list<strin>
+     */
+    public function getTypesAsStringArray(): array
+    {
+        $ret = [];
+        foreach (array_keys($this->typesToString) as $type) {
+            if ($this->types & $type) {
+                $ret[] = $this->typesToString[$type];
+            }
+        }
+        return $ret;
+    }
+
+    /**
      * @return list<int>
      */
     public function getTypes(): array

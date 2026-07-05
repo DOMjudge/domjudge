@@ -1205,6 +1205,23 @@ readonly class ImportProblemService
     }
 
     /**
+     * @param string|array<mixed, mixed> $input
+     * @return string[]
+     */
+    public static function parseTypes(string|array $input): array
+    {
+        $final = [];
+        if (is_array($input)) {
+            foreach ($input as $possibleType) {
+                $final = array_merge($final, self::parseTypes($possibleType));
+            }
+        } else {
+            $final = array_merge($final, preg_split("/[\s,;]+/", $input));
+        }
+        return $final;
+    }
+
+    /**
      * Returns true iff the yaml could be parsed correctly.
      *
      * @param array{danger?: string[], warning?: string[], info?: string[]} $messages
@@ -1240,7 +1257,7 @@ readonly class ImportProblemService
 
         $validationMode = 'default';
         if (isset($yamlData['type'])) {
-            $types = explode(' ', $yamlData['type']);
+            $types = self::parseTypes($yamlData['type']);
             // Validation happens later when we set the properties.
             $yamlProblemProperties['typesAsString'] = $types;
             if (in_array('interactive', $types)) {
@@ -1289,7 +1306,7 @@ readonly class ImportProblemService
 
         if (isset($yamlData['problem_format_version'])) {
             $version = $yamlData['problem_format_version'];
-            if (in_array($version, ['legacy', '2025-09-draft', 'draft', '2023-07-draft'])) {
+            if (in_array($version, ['legacy', '2025-09-draft', 'draft', '2025-09', '2023-07-draft'])) {
                 $messages['warning'][] = sprintf('problemspec %s support still experimental.', $version);
             } elseif (!in_array($version, ['domjudge', 'icpc-legacy'])) {
                 // 2023-07-draft used in Unit tests

@@ -111,6 +111,9 @@ YAML;
 
     public function testTypesYamlTest(): void
     {
+        // TODO: Currently we don't reject newer syntax for older specs
+        // e.g. a icpc-legacy problem with type multi-pass is allowed.
+        // We should consider being more strict here.
         foreach ([
                      'pass-fail',
                      'scoring',
