@@ -1206,6 +1206,27 @@ readonly class ImportProblemService
     }
 
     /**
+     * Allow to import the types both as arrays and as strings. Due
+     * to the recursion to make parsing of the strings easier this now
+     * also works for arrays inside arrays.
+     *
+     * @param string|array<mixed, mixed> $input
+     * @return string[]
+     */
+    private static function parseTypes(string|array $input): array
+    {
+        $final = [];
+        if (is_array($input)) {
+            foreach ($input as $possibleType) {
+                $final = array_merge($final, self::parseTypes($possibleType));
+            }
+        } else {
+            $final = array_merge($final, preg_split("/[\s,;]+/", $input));
+        }
+        return $final;
+    }
+
+    /**
      * Returns true iff the yaml could be parsed correctly.
      *
      * @param array{danger?: string[], info?: string[]} $messages
@@ -1241,7 +1262,7 @@ readonly class ImportProblemService
 
         $validationMode = 'default';
         if (isset($yamlData['type'])) {
-            $types = explode(' ', $yamlData['type']);
+            $types = self::parseTypes($yamlData['type']);
             // Validation happens later when we set the properties.
             $yamlProblemProperties['typesAsString'] = $types;
             if (in_array('interactive', $types)) {

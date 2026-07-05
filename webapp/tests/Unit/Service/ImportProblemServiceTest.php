@@ -135,6 +135,53 @@ YAML;
         }
     }
 
+    #[DataProvider('provideAlternativeTypeNotations')]
+    public function testTypesStringWithAlternativeChars(string $separator): void
+    {
+        $expectedTypes = ['pass-fail', 'interactive'];
+        $typesAsString = implode($separator, $expectedTypes);
+        $specVersion = 'draft';
+        $yaml = <<<YAML
+name: test
+problem_format_version: $specVersion
+type: $typesAsString
+YAML;
+
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $messageString = var_export($messages, true);
+        $this->assertTrue($ret, 'Parsing failed for type: ' . $typesAsString . ', messages: ' . $messageString);
+        $problemTypes = $problem->getTypesAsStringArray();
+        $this->assertEquals(
+            $expectedTypes, $problemTypes,
+            'Found: "' . implode(' ', $problemTypes) . '" vs Expected: "' . implode(' ', $expectedTypes) . '"'
+        );
+    }
+
+    /**
+     * @param string[] $expectedTypes
+     */
+    #[DataProvider('provideAlternativeArrayNotations')]
+    public function testTypesSequenceStrings(string $yaml, array $expectedTypes): void
+    {
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+        $typesAsString = implode(', ', $expectedTypes);
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $messageString = var_export($messages, true);
+        $this->assertTrue($ret, 'Parsing failed for type: ' . $typesAsString . ', messages: ' . $messageString);
+        $problemTypes = $problem->getTypesAsStringArray();
+        $this->assertEquals(
+            $expectedTypes, $problemTypes,
+            'Found: "' . implode(' ', $problemTypes) . '" vs Expected: "' . implode(' ', $expectedTypes) . '"'
+        );
+    }
+
     public function testUnknownProblemType(): void
     {
         $yaml = <<<YAML
@@ -795,5 +842,52 @@ YAML;
         yield ['legacy'];
         yield ['icpc-legacy'];
         yield ['2025-09'];
+    }
+
+
+    public static function provideAlternativeTypeNotations(): Generator
+    {
+        yield ["\t"];
+        yield [", "];
+        yield ["; "];
+    }
+
+    public static function provideAlternativeArrayNotations(): Generator
+    {
+        $specVersion = 'draft';
+        $yamlBasic = <<<YAML
+name: test
+problem_format_version: $specVersion
+YAML;
+        $simpleArray = <<<YAML
+$yamlBasic
+type:
+  - pass-fail
+YAML;
+        $mappedArray = <<<YAML
+$yamlBasic
+type:
+  pass-fail: pass-fail
+YAML;
+        $oneLineArray = <<<YAML
+$yamlBasic
+type: [pass-fail]
+YAML;
+        $malformedArray = <<<YAML
+$yamlBasic
+type: [pass-fail, [multi-pass, interactive]]
+YAML;
+        $combinedStringArray = <<<YAML
+$yamlBasic
+type:
+ - pass-fail
+ - multi-pass, interactive
+YAML;
+
+        foreach ([$simpleArray, $mappedArray, $oneLineArray] as $yamlFile) {
+            yield [$yamlFile, ['pass-fail']];
+        }
+        yield [$malformedArray, ['pass-fail', 'multi-pass', 'interactive']];
+        yield [$combinedStringArray, ['pass-fail', 'multi-pass', 'interactive']];
     }
 }
