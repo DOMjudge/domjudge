@@ -1293,6 +1293,20 @@ readonly class ImportProblemService
             }
         }
 
+        if (isset($yamlData['problem_format_version'])) {
+            $version = $yamlData['problem_format_version'];
+            if (in_array($version, ['legacy', '2025-09-draft', 'draft', '2025-09', '2023-07-draft'])) {
+                $messages['info'][] = sprintf("Problem format version '%s' support still experimental.", $version);
+            } elseif ($version !== 'icpc-legacy') {
+                // 2023-07-draft used in Unit tests
+                $messages['warning'][] = sprintf("Unknown problem format version '%s'.", $version);
+                return false;
+            }
+            // TODO: At the moment we only warn the user about unknown problem specifications and the experimental support.
+            // In the future we should either be more strict on only allowing properties available in the spec or warn the
+            // user on properties/values outside of the specified specification.
+        }
+
         foreach ($yamlProblemProperties as $key => $value) {
             try {
                 $propertyAccessor->setValue($problem, $key, $value);
