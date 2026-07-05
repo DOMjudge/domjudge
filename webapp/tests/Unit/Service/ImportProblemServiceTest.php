@@ -7,6 +7,7 @@ use App\Entity\ProblemStatementContent;
 use App\Service\ImportProblemService;
 use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
+use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use ZipArchive;
@@ -55,6 +56,47 @@ YAML;
         $this->assertEquals(null, $problem->getMemlimit());
         $this->assertEquals(null, $problem->getOutputlimit());
         $this->assertEquals(null, $problem->getSpecialCompareArgs());
+    }
+
+    /**
+     * @param array{info?: string[], warning?: string[], danger?: string[]} $messages
+     * @param string[] $expected
+     */
+    private function assertProblemSpecWarning(string $version, array $messages, array $expected = ['info']): void
+    {
+        foreach (['danger', 'warning'] as $type) {
+            if (!in_array($type, $expected)) {
+                if (isset($messages[$type])) {
+                    $this->assertEmpty($messages[$type]);
+                }
+            }
+        }
+        $this->assertNotEmpty($messages['info']);
+        $this->assertStringContainsString(
+            sprintf("Problem format version '%s' support still experimental.", $version),
+            $messages['info'][0]
+        );
+    }
+
+    #[DataProvider('problemSpecVersionProvider')]
+    public function testProblemPackageFormatTest(string $problemSpecificationVersion): void
+    {
+        $yaml = <<<YAML
+problem_format_version: $problemSpecificationVersion
+name: test
+YAML;
+
+        $messages = [];
+        $validationMode = 'xxx';
+        $problem = new Problem();
+
+        $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+        $this->assertTrue($ret);
+        if ($problemSpecificationVersion === 'icpc-legacy') {
+            $this->assertEmpty($messages);
+        } else {
+            $this->assertProblemSpecWarning($problemSpecificationVersion, $messages);
+        }
     }
 
     public function testTypesYamlTest(): void
@@ -418,7 +460,7 @@ YAML;
 
         $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
         $this->assertTrue($ret);
-        $this->assertEmpty($messages);
+        $this->assertProblemSpecWarning('2023-07-draft', $messages);
         $this->assertEquals('Guess the Number', $problem->getName());
         $this->assertEquals('pass-fail, interactive', $problem->getTypesAsString());
         $this->assertEquals('custom interactive', $validationMode);
@@ -744,5 +786,14 @@ YAML;
         $this->assertNull($result);
         $this->assertNotEmpty($messages['danger']);
         $this->assertStringContainsString("Invalid range '100 101 102'", $messages['danger'][0]);
+    }
+
+    public static function problemSpecVersionProvider(): Generator
+    {
+        yield ['2025-09-draft'];
+        yield ['draft'];
+        yield ['legacy'];
+        yield ['icpc-legacy'];
+        yield ['2025-09'];
     }
 }
