@@ -1311,8 +1311,24 @@ readonly class ImportProblemService
             } elseif (!in_array($version, ['domjudge', 'icpc-legacy'])) {
                 // 2023-07-draft used in Unit tests
                 $messages['danger'][] = sprintf('Unknown problemspec %s.', $version);
+                return false;
             }
             // TODO: We don´t have any differences in those specs yet.
+        }
+
+        foreach(['uuid', 'author', 'version', 'credits', 'source', 'source_url', 'license',
+                 'rights_owner', 'embargo_until', 'keywords', 'constants'] as $ignoredField
+        ) {
+            if (isset($yamlData[$ignoredField])) {
+                $messages['info'][] = sprintf("'%s' field ignored.", $ignoredField);
+            }
+        }
+
+        foreach(['languages', 'allow_file_writing'] as $notImplementedField) {
+            if (isset($yamlData[$notImplementedField])) {
+                $messages['danger'][] = sprintf("'%s' option not implemented.", $notImplementedField);
+                return false;
+            }
         }
 
         foreach ($yamlProblemProperties as $key => $value) {

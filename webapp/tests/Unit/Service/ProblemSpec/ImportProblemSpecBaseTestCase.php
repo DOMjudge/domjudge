@@ -5,6 +5,9 @@ namespace App\Tests\Unit\Service\ProblemSpec;
 use App\Entity\Problem;
 use App\Service\ImportProblemService;
 use App\Tests\Unit\BaseTestCase;
+use Exception;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use ZipArchive;
 
@@ -135,7 +138,7 @@ YAML;
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testTypesYamlTest(): void
     {
@@ -243,6 +246,95 @@ YAML;
                 $messagesString = var_export($messages, true);
                 $this->assertStringContainsString('Invalid problem type', $messagesString);
             }
+        }
+    }
+
+    public function testEnglishLanguages(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+problem_format_version: $version
+name: english
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertEquals('english', $problem->getName());
+            $this->assertProblemSpecWarning($version, $messages);
+        }
+    }
+
+    public function testMultipleLanguages(): void
+    {
+        // TODO: We should check if the problemstatement exists
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+problem_format_version: $version
+name:
+    de: deutsch
+    en: english
+YAML;
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertEquals('english', $problem->getName());
+            $this->assertProblemSpecWarning($version, $messages);
+        }
+    }
+
+    #[DataProvider('getIgnoredFields')]
+    public function testIgnoredFieldTest(string $ignoredField, bool $problematic): void
+    {
+        // Most of those fields are used in the problem setting journey
+        // in the future we can display those, but they would only be textfields
+        // for DOMjudge.
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+problem_format_version: $version
+name: test
+$ignoredField: some-ignored_string
+YAML;
+
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            if ($problematic) {
+                $this->assertFalse($ret);
+                $this->assertProblemSpecWarning($version, $messages, ['danger', 'warning']);
+                $this->assertStringContainsString(sprintf("'%s' option not implemented.", $ignoredField), $messages['danger'][0]);
+            } else {
+                $this->assertTrue($ret);
+                $this->assertProblemSpecWarning($version, $messages, ['info', 'warning']);
+                $this->assertStringContainsString(sprintf("'%s' field ignored.", $ignoredField), $messages['info'][0]);
+            }
+        }
+    }
+
+    public function testProblemVersionIgnoredTest(): void
+    {
+        foreach ($this->problemSpecVersion as $version) {
+            $yaml = <<<YAML
+problem_format_version: $version
+name: test
+version: proofreading
+YAML;
+
+            $messages = [];
+            $validationMode = 'xxx';
+            $problem = new Problem();
+
+            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
+            $this->assertTrue($ret);
+            $this->assertProblemSpecWarning($version, $messages, ['info', 'warning']);
+            $this->assertStringContainsString("'version' field ignored.", $messages['info'][0]);
         }
     }
 
@@ -525,25 +617,6 @@ YAML;
         }
     }
 
-    public function testMultipleLanguages(): void
-    {
-        foreach ($this->problemSpecVersion as $version) {
-            $yaml = <<<YAML
-problem_format_version: $version
-name:
-    de: deutsch
-    en: english
-YAML;
-            $messages = [];
-            $validationMode = 'xxx';
-            $problem = new Problem();
-
-            $ret = ImportProblemService::parseYaml($yaml, $messages, $validationMode, PropertyAccess::createPropertyAccessor(), $problem);
-            $this->assertTrue($ret);
-            $this->assertEquals('english', $problem->getName());
-            $this->assertProblemSpecWarning($version, $messages);
-        }
-    }
 
     /*public function testKattisExample(): void
     {
@@ -880,4 +953,18 @@ YAML;
         $this->assertNotEmpty($messages['danger']);
         $this->assertStringContainsString("Invalid range '100 101 102'", $messages['danger'][0]);
     }*/
+    public function getIgnoredFields(): Generator
+    {
+        foreach ([
+            'uuid', 'author', 'version',
+            'credits', 'source', 'source_url',
+            'license', 'rights_owner', 'embargo_until',
+            'keywords', 'constants'
+        ] as $field) {
+            yield [$field, false];
+        }
+        foreach(['languages', 'allow_file_writing'] as $field) {
+            yield [$field, true];
+        }
+    }
 }
