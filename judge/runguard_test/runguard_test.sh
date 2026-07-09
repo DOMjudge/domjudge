@@ -86,8 +86,11 @@ test_cputime_limit() {
 	# Now also limiting wall time to 2s.
 	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS -C 3.1 -t 2 ./threads 2 3
 
-	# Some failing cases.
-	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -C 2.9 ./threads 2 3
+	# Some failing cases. The command is killed by the RLIMIT_CPU we set to
+	# the CPU-time limit rounded up, so stay a whole second below the ~3s it
+	# spends: at `-C 2.9' that limit is the 3s it takes, and whether it is
+	# killed comes down to which of the two gets there first.
+	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -C 1.9 ./threads 2 3
 	exec_check_fail sudo $RUNGUARD $RUNGUARD_OPTIONS -C 3.1 -t 1.4 ./threads 2 3
 }
 
