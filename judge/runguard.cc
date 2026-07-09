@@ -484,20 +484,31 @@ void check_remaining_procs()
 
 void output_cgroup_stats(double *cputime)
 {
-	struct cgroup *cg;
-	if ( (cg = cgroup_new_cgroup(cgroupname))==nullptr ) die(0,"cgroup_new_cgroup");
+	char *mountpoint;
+	int ret = cgroup_get_subsys_mount_point("memory", &mountpoint);
+	if ( ret!=0 ) die(ret,"getting cgroup mount point");
 
-	int ret;
-	if ((ret = cgroup_get_cgroup(cg)) != 0) die(ret,"get cgroup information");
+	char cgrouppath[1024], path[1024];
+	snprintf(cgrouppath, sizeof(cgrouppath), "%s/%s", mountpoint, cgroupname);
+	snprintf(path, sizeof(path), "%s/%s/memory.peak", mountpoint, cgroupname);
+	free(mountpoint);
 
-	struct cgroup_controller *cg_controller = cgroup_get_controller(cg, "memory");
-	int64_t max_usage = 0;
-	ret = cgroup_get_value_int64(cg_controller, "memory.peak", &max_usage);
-	if ( ret == ECGROUPVALUENOTEXIST ) {
-		die(ret, "kernel too old and does not support memory.peak");
-	} else if ( ret!=0 ) {
-		die(ret,"get cgroup value memory.peak");
+	/* Read memory.peak ourselves: cgroup_get_cgroup() would read every file
+	   of every controller of the cgroup to hand us this one value, among
+	   them memory.stat and memory.numa_stat, for which the kernel flushes
+	   its per-cpu statistics. */
+	FILE *file = fopen(path, "r");
+	if ( file==nullptr ) {
+		/* Only the file is missing, not the cgroup holding it. */
+		if ( errno==ENOENT && access(cgrouppath, F_OK)==0 ) {
+			die(0,"kernel too old and does not support memory.peak");
+		}
+		die(errno,"opening cgroups file `{}'", path);
 	}
+
+	int64_t max_usage = 0;
+	if ( fscanf(file,"%" SCNd64, &max_usage)!=1 ) die(errno,"reading from file `{}'", path);
+	if ( fclose(file)!=0 ) die(errno,"closing file `{}'", path);
 
 	// There is no need to check swap usage, as we limit it to 0.
 	logmsg(LOG_DEBUG, "total memory used: {} kB", max_usage/1024);
@@ -521,8 +532,6 @@ void output_cgroup_stats(double *cputime)
 	}
 	if ( ret!=ECGEOF ) die(ret,"get cgroup value cpu.stat");
 	cgroup_read_stats_end(&handle);
-
-	cgroup_free(&cg);
 }
 
 /* Temporary shorthand define for error handling. */
