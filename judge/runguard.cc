@@ -1432,7 +1432,10 @@ int main(int argc, char **argv)
 			pump_pipes(&readfds, data_read, data_passed);
 		}
 
-		/* Reset pipe filedescriptors to use blocking I/O. */
+		/* Set the pipe filedescriptors to non-blocking I/O: the loop below
+		   drains what is left in them, and must not wait for a process
+		   that still holds the write end, such as a child of the command
+		   that outlived it. */
 		FD_ZERO(&readfds);
 		for(int i=1; i<=2; i++) {
 			if ( child_pipefd[i][PIPE_OUT]>=0 ) {
@@ -1441,7 +1444,7 @@ int main(int argc, char **argv)
 				if (r == -1) {
 					die(errno, "fcntl, getting flags");
 				}
-				r = fcntl(child_pipefd[i][PIPE_OUT], F_SETFL, r ^ O_NONBLOCK);
+				r = fcntl(child_pipefd[i][PIPE_OUT], F_SETFL, r | O_NONBLOCK);
 				if (r == -1) {
 					die(errno, "fcntl, setting flags");
 				}
