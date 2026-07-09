@@ -266,6 +266,7 @@ test_nprocs() {
 test_meta() {
 	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS -t 2 -M "$META" sleep 1
 	expect_meta_between wall-time 1.0 1.3
+	expect_meta 'memory-bytes: [1-9][0-9]*'
 	expect_meta 'cpu-time: 0.0'
 	expect_meta 'sys-time: 0.0'
 	expect_meta 'time-used: wall-time'
