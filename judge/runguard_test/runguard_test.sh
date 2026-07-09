@@ -274,6 +274,14 @@ test_nprocs() {
 	expect_stderr "fork: retry: Resource temporarily unavailable"
 }
 
+test_leftover_procs() {
+	# The left-over `sleep' must be reported as a warning and then killed,
+	# not turn an otherwise successful run into an error.
+	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS ./leftover.sh
+	expect_stdout "spawned"
+	expect_stderr "left-over process"
+}
+
 test_meta() {
 	exec_check_success sudo $RUNGUARD $RUNGUARD_OPTIONS -t 2 -M "$META" sleep 1
 	expect_meta_between wall-time 1.0 1.3
