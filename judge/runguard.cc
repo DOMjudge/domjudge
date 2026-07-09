@@ -457,19 +457,28 @@ std::set<unsigned> read_cpuset(const char *path)
 
 void check_remaining_procs()
 {
-	char path[1024];
-	snprintf(path, 1023, "/sys/fs/cgroup/%s/cgroup.procs", cgroupname);
+	/* cgroup.procs is a kernfs seq_file and always reports a size of 0,
+	   so its length cannot be used to detect membership; enumerate the
+	   PIDs instead. */
+	char mem_controller[10] = "memory";
+	pid_t *pids;
+	int size;
 
-	FILE *file = fopen(path, "r");
-	if (file == nullptr) {
-		die(errno, "opening cgroups file `{}'", path);
+	int ret = cgroup_get_procs(cgroupname, mem_controller, &pids, &size);
+	if ( ret!=0 ) {
+		logmsg(LOG_WARNING, "cgroup_get_procs while checking for left-over processes: {}",
+		       cgroup_strerror(ret));
+		return;
 	}
 
-	fseek(file, 0L, SEEK_END);
-	if (ftell(file) > 0) {
-		die(0, "found left-over processes in cgroup controller, please check!");
+	if ( size>0 ) {
+		logmsg(LOG_WARNING, "found {} left-over process(es) in cgroup controller; "
+		       "they will be killed", size);
+		for(int i = 0; i < size; i++) {
+			logmsg(LOG_DEBUG, "left-over process: pid {}", pids[i]);
+		}
 	}
-	if (fclose(file) != 0) die(errno, "closing file `{}'", path);
+	free(pids);
 }
 
 
